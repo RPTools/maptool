@@ -1,0 +1,23 @@
+/*
+ *  This software copyright by various authors including the RPTools.net
+ *  development team, and licensed under the LGPL Version 3 or, at your
+ *  option, any later version.
+ *
+ *  Artwork that appears in this directory hierarchy is copyright by its
+ *  author and the above statement about the LGPL does not apply.  Such
+ *  artwork carries its own license, typically based on the Creative
+ *  Commons licensing model (see http://CreativeCommons.org), and such
+ *  license appears in a directory with the associated artwork.
+ *
+ *  Portions of this software were originally covered under the Apache
+ *  Software License, Version 1.1 or Version 2.0.
+ *
+ *  See the file LICENSE elsewhere in this distribution for license details.
+ */
+
+This directory may be deleted and recreated when updating MapTool.
+
+***  DO NOT ADD YOUR OWN IMAGES TO THIS DIRECTORY!!  ***
+
+Instead, use the appropriate File menu operation from within MapTool
+to add a location outside of this hierarchy of files.

@@ -1,0 +1,6 @@
+Command line syntax for various Maven processes:
+
+	mvn clean		- remove the ${base}/target/ directory
+	mvn compile	- compile from ${base}/src/main/java/ to ${base}/target/classes/
+	mvn test		- compile and execute junit tests
+	mvn install	- copy resulting JARs into ~/.m2/repository/

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<!--
+/*
+ *  This software copyright by various authors including the RPTools.net
+ *  development team, and licensed under the LGPL Version 3 or, at your
+ *  option, any later version.
+ *
+ *  Portions of this software were originally covered under the Apache
+ *  Software License, Version 1.1 or Version 2.0.
+ *
+ *  See the file LICENSE elsewhere in this distribution for license details.
+ */
+-->
+<properties>
+  <comment>Smilies</comment>
+  <entry key="\b([\:\=]\))\b">net/rptools/maptool/client/image/smiley/emsmile.png|:)</entry>
+  <entry key="\b([\:\=]\()\b">net/rptools/maptool/client/image/smiley/emfrown.png|:(</entry>
+  <entry key="\b([\:\=]\'\()\b">net/rptools/maptool/client/image/smiley/emcry.png|:'(</entry>
+  <entry key="\b([\:\=][sS])\b">net/rptools/maptool/client/image/smiley/emcurl.png|:s</entry>
+  <entry key="\b([\:\=][oO])\b">net/rptools/maptool/client/image/smiley/emgasp.png|:o</entry>
+  <entry key="\b([\:\=]D)\b">net/rptools/maptool/client/image/smiley/emgrin.png|:D</entry>
+  <entry key="\b(\;\))\b">net/rptools/maptool/client/image/smiley/emwink.png|;)</entry>
+  <entry key="\b([\:\=][pP])\b">net/rptools/maptool/client/image/smiley/emtongue.png|:P</entry>
+</properties>

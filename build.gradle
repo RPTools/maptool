@@ -1,3 +1,41 @@
+
 task wrapper(type: Wrapper) {
     gradleVersion='2.1'
 }
+
+/*
+ * Gets the version name from the latest Git tag
+ */
+def getVersionName = { ->
+    if (project.hasProperty('buildVersion')) {
+        return buildVersion
+    } else {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    }
+}
+
+
+allprojects {
+    group = 'net.rptools.maptool'
+    version = getVersionName()
+}
+
+
+subprojects {
+    repositories {
+        mavenCentral()
+        maven {
+            url = 'http://maptool.craigs-stuff.net/repo/'
+        }
+    }
+}
+
+task penv << {
+    println version;
+}
+
