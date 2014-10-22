@@ -35,7 +35,4 @@ subprojects {
     }
 }
 
-task penv << {
-    println version;
-}
 
