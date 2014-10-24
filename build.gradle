@@ -1,7 +1,14 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+import java.text.SimpleDateFormat
 
 task wrapper(type: Wrapper) {
     gradleVersion='2.1'
 }
+
+
+ext.compileDate = new Date();
+ext.yyyymmdd = (new SimpleDateFormat('yyyyMMDD')).format(ext.compileDate);
+
 
 
 gradle.taskGraph.whenReady {taskGraph ->
@@ -61,7 +68,28 @@ task showBuildVersion() << {
 }
 
 
+project(':launcher') {
+    mainClassName='net.rptools.maptool.launcher.MapToolLauncher'
+    ext.distSource = projectDir.getPath() + '/src/dist/'
 
+    dependencies {
+        testCompile group: 'junit', name: 'junit', version: '4.11'
+    }
+
+    jar {
+        manifest.attributes(
+                'Main-Class': mainClassName,
+        )
+    }
+
+    processResources {
+        filter(ReplaceTokens, tokens: [
+            'buildDate': rootProject.ext.yyyymmdd,  'buildNumber': getVersionName()])
+    }
+
+    task release(dependsOn: assemble) << {
+    }
+}
 
 project(':maptool') {
     mainClassName='net.rptools.maptool.client.LaunchInstructions'
@@ -126,6 +154,7 @@ project(':maptool') {
             )
         }
         assemble.dependsOn += copyLibs;
+
         task release(dependsOn: assemble) << {
         }
 
@@ -140,19 +169,21 @@ task clean(dependsOn: deleteBuild) {
 }
 
 
-task copyMapToolFiles(type: Sync) {
+task copySubProjectFiles(type: Sync) {
     from project(':maptool').jar.destinationDir.getPath()
     from project(':maptool').ext.distSource
+    from project(':launcher').jar.destinationDir.getPath()
+    from project(':launcher').ext.distSource
     into 'build/tmp/dist/'
     outputs.upToDateWhen {
         false
     }
 }
-copyMapToolFiles.mustRunAfter(':maptool:release')
+copySubProjectFiles.mustRunAfter(':maptool:release', ':launcher:release')
 
 
 
-task zipRelease(dependsOn: copyMapToolFiles, type: Zip) {
+task zipRelease(type: Zip) {
     from 'build/tmp/dist/'
     into  ''
     baseName = 'maptool-' + getVersionName()
@@ -161,11 +192,13 @@ task zipRelease(dependsOn: copyMapToolFiles, type: Zip) {
         false
     }
 }
+zipRelease.dependsOn += copySubProjectFiles
 
 
 task release() {
     println 'Creating Release'
+    println project(':launcher').jar.destinationDir.getPath()
+    println project(':launcher').ext.distSource
 }
 
-//release.dependsOn += copyMapToolFiles;
 release.dependsOn += zipRelease
