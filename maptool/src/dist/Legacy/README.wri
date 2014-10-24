@@ -1,0 +1,198 @@
+~~~~~~~~~~~~ ReadMe for RPTools.net family of RPG tools ~~~~~~~~~~~~
+
+This document contains the following sections:
+
+ * Overview
+ * List of tools in the RPTools series
+ * Requirements for running the tools
+ * Executing the tools
+ * Troubleshooting common problems
+
+Documentation for the various tools can be found at the link below.
+However, as the tools develop and change rapidly it's likely that the
+forum users will have the scoop on the most current tweaks and features.
+   http://www.rptools.net/?page=faq
+
+When reporting problems on the forum, please include the output of the
+tool called "SysInfo" which is linked to from this page:
+   http://www.rptools.net/?page=troubleshooting
+Note that MapTool has this tool built-in as the "Help > Gather System Info"
+menu option (and the getInfo("debug") macro command).
+
+Also be sure to watch the screencasts that demonstrate the various
+features of MapTool.  One of our forum users put together little
+snippets of video that describe various things that new users will need
+to know.  They are broken up into topics and organized by GM and Player,
+so you only need to view the ones that apply to you.  Visit our main
+site and click on the "Tutorials" link in the toolbar.
+
+Welcome to RPTools!
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+RPTools provides the following programs to enhance your gaming
+experience.  All of these are written in Java and are therefore
+portable, running on Windows, OS X, and Unix/Linux.
+
+ * DiceTool - Feature-rich dice-rolling application.
+ * MapTool - Virtual tabletop application.
+ * InitTool - Combat initiative manager
+ * TokenTool - Gaming token creation tool.
+ * CharTool - Character tracking tool.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			    <<< Requirements >>>
+
+All of the RPTools.net applications are programmed in Java and can
+be used on any platform supporting Java 6 or Java 7.  Specifics on
+where to find Java for your platform are provided on the main web
+site at http://www.rptools.net/
+
+Please note that some third-party libraries used by MapTool don't work
+100% with Java 7.  We are in the process of finding these pieces and
+updating or replacing them.  In the mean time, errors can be reported to
+us as described below.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			<<< Starting & Using the Tools >>>
+
+All of the tools can be started using the Java Web Start technology
+from the links on the RPTools downloads page at:
+   http://www.rptools.net/?page=launch
+
+The Web Start technique is completely self-contained.  Full instructions
+are given on the page linked above.
+
+Alternatively you can download the zip archive (Windows, OS X, Unix/Linux)
+and DMG file (Mac OS X) from here:
+   http://www.rptools.net/?page=download
+
+Visit the above link for details on executing the tools; a summary
+is provided here.  ZIP files are discussed first, then the DMG.
+
+			<<< ZIP Archive >>>
+
+Extract the zip archive to a folder of your choosing.  Be sure to
+preserve directories, since some of our tools expect to find their
+code in the "lib" subdirectory.  In the folder where you extract
+the archive will be a system-specific start program:
+
+    Windows:	MapToolLauncher.exe
+    OS X:	Launch MapTool.command
+    Linux/Unix:	Launch MapTool.sh
+
+On all Unix-based systems (OS X, Linux, Unix) you may need to add
+execute permission to the file listed above if your zip utility did
+not already set that permission for you.  Use your operating system
+tools to make this change (Google for "change permissions" if you
+need help).
+
+If you don't see a start program like those above, then you're system
+doesn't need one.  Simply execute the JAR file you see in the directory
+and the application will start.
+
+			<<< DMG Disk Image >>>
+
+This file is a disk image that can be installed easily on OS X.  Mac
+users may download the file and double-click to begin installation.
+After the disk image opens, drag the application to your desktop (or
+wherever you want the application kept).
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+			<<< Troubleshooting >>>
+		<<< Troubleshooting Download Version >>>
+
+PROGRAM FAILS TO START:  If your system-specific file (above) fails
+to start the application, verify that you have a Java Runtime
+Environment installed.  From a command prompt, type "java -version"
+(without the quotes) and press <Enter>. The Java version should be
+printed to the command prompt.  If you receive an error message,
+download and install the appropriate Java package for your operating
+system as described at the above URLs.
+
+MAP DOESN'T LOAD [MapTool only]:  Some larger maps may require more
+memory to initially load than the default Java Runtime Environment
+allocates.  Check the folder where you extracted the zip archive.
+As described above, each operating system has its own start file.
+For Windows, the EXE will ask for memory size parameters -- try
+increasing the maximum memory and running MapTool again (you can
+always delete or edit the text file 'mt.cfg' to change previous
+settings).  For OS X and Linux/Unix users, edit the corresponding
+script and modify the memory settings at the top of the file (if
+you're using a script).
+
+Mac Users:  If you installed from the DMG file, look inside the
+resulting app package for a file named "Info.plist" and edit it with a
+text editor.  Search for "VMOptions" and the line immediately
+below it will have the memory settings.  The "-Xss" option sets the
+stack size, the "-Xms" option sets the starting/minimum memory
+size, and the "-Xmx" option sets the maximum memory size.
+
+Our wiki has more information:  http://lmwcs.com/rptools/wiki/Stack_Size
+
+			<<< Troubleshooting >>>
+		<<< Troubleshooting WebStart Version >>>
+
+The Java Web Start feature will download the appropriate files from
+the RPTools web site and save them on your computer before executing
+the program.  You will be prompted to allow this to happen.  Once
+complete, the program will begin execution (you may be prompted for
+this to be allowed as well).  If you right-click on the Java Web
+Start link and save the downloaded Java Web Start file on your
+desktop, you can double-click it at any time in the future to execute
+the program from the copy saved on your system -- you won't need
+an Internet connection in the future.  (In fact, you can send the
+JNLP file to other players and they can double-click it as well!
+Just remember that the first time you run a particular version, you
+need an Internet connection in order to download the files for that
+version.)
+
+			<<< Troubleshooting >>>
+		<<< Troubleshooting Other Problems >>>
+
+MAPTOOL NETWORKING PROBLEM:  Networking is a big topic, so please
+visit our forum (link below) and check out the Networking FAQ in
+the MapTool -> HowTo subforum.  There you will find a document that
+describes what MapTool needs in order to work properly along with
+a step-by-step approach for diagnosing your networking problems.
+Solutions for common problems is included in the NFAQ.
+
+MapTool creates a log of errors in the ".maptool" folder under your
+home directory.  Also in there will be a bunch of subfolders that
+are used by MapTool internally to keep track of maps and other
+images.  If your problem is repeatable, i.e. can be reproduced over
+and over again, please remove the existing log file and then reproduce
+the error.  Then zip up the log file and attach it to a post in the
+MapTool forum.
+
+For Windows users you may want to periodically execute the "Backup"
+batch file in the top-level MapTool directory.  It will copy MapTool
+registry entries into a file named "mtsave.reg".  Java saves
+application preferences and global macros in the registry so this
+batch file is necessary if you want an easy way to back up those
+entries so they can be restored in case of a hard drive replacement or
+similar change.  Similarly, you can run the "Remove" script to delete
+all registry entries created by MapTool.
+
+Last, MapTool uses a third-party library known as TinyLAF (for Tiny Look
+And Feel) for rendering all of the standard graphics such as buttons,
+toolbars, progress bars, text fields, and so on.  If you would like to
+try out different themes for MapTool, visit the following URL:
+http://www.muntjak.de/hans/java/tinylaf/index.html  There you will find
+a binary distribution of TinyLAF that includes the "control panel"
+application that allows interactive editing of the theme.  It will be in
+a library called "tinycp.jar" and you will execute it by either
+double-clicking on it (in most GUIs) or running "java -jar tinycp.jar"
+from the command line.
+
+For any other issues, please come to http://forums.RPTools.net/ and
+check the forums.  In particular, use the error message as a search
+string to see if your question has been asked and answered previously.
+If not, post a message there describing the difficulties you are having.
+Most problems can be addressed quickly by one of the many helpful
+forum members or one of our team members.
+
+~~~~~~~~~~~~ ReadMe for RPTools.net family of RPG tools ~~~~~~~~~~~~

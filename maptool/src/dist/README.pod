@@ -1,0 +1,218 @@
+package RPTools::MapTool;
+
+=pod
+
+=head1 Welcome to RPTools!
+
+The L<RPTools|http://www.rptools.net/> family of RPG software
+products includes five applications.  Our goal is provide software
+that helps you enjoy interactive gaming with HUMANS instead of with
+COMPUTERS!
+
+Many of us grew up playing various games.  It might be B<Monopoly>
+or B<Risk>, maybe B<Pictionary> or B<Trivial Pursuit>, or perhaps
+a role-playing game like B<Dungeons and Dragons> or B<Traveller>.
+But as we got older our friends left the area and the games we played to
+socialize and entertain ourselves fell by the wayside as we got caught
+up in the rat race.
+
+No more!  We have software that will help you bring back those long-ago
+friendships and start having fun again!  A quick overview of all five
+applications appears below, but the rest of the document is focused on
+the one you've just downloaded:  B<MapTool>.
+
+=head2 Overview of RPTools Applications
+
+=over 4
+
+=item * MapTool - virtual tabletop gaming application
+
+B<MapTool> is an online, multiplayer, programmable, interactive, and
+cross-platform application that allows collaborative gaming such as
+role-playing games, boardgames, card games, dice games, and much more.
+
+It has been translated into many languages and new translations are
+submitted by our users all the time.  As of this writing the
+included languages are English (the primary one), Spanish, French,
+German, Italian, Japanese, Polish, Russian, and Chinese.
+
+=item * TokenTool - digital gaming token creation tool
+
+B<TokenTool> is a simple graphical program for creating "tokens", digital
+versions of miniatures that can be used with B<MapTool> or any other
+virtual tabletop application, such as B<Roll20> and B<d20Pro>.
+
+=item * CharacterTool - character management tool
+
+B<CharTool> is a character management tool.  It will manage all
+aspects of character creation and advancement for those game systems
+which have a template available.  Seasoned users can create their own
+templates to add to the available game systems or create their
+own unique system.
+
+=item * InitiativeTool - initiative tracker (mostly for combat encounters)
+
+B<InitTool> will manage the turn-by-turn sequencing that many game systems
+use.  Characters can be created in B<CharTool> and dragged into
+B<InitTool> when needed.
+
+=item * DiceTool - feature-rich dice-rolling application
+
+B<DiceTool> is a (not so) simple dice rolling application.  Users can
+develop their own custom dice rolling functions and implement any dice
+rolling scheme they can think up!  B<DiceTool> comes preloaded with a
+variety of game systems already implemented.
+
+=back
+
+=head2 Where to find more information
+
+One of our forum users, B<brad>, has put together a series of a
+dozen or so short screencast videos.  They are categorized first
+by who is most likely to use them, players or the game master.  A
+second level of categorization involves functionality:  what do you
+want to do?  The videos are generally short, none are more than 8-9
+minutes, and are narrated so that each part of the graphical interface
+is explained.  You can find them on the
+L<Tutorials|http://www.rptools.net/?page=tutorials> page on our
+main web site.
+
+We suggest you start on the L<FAQ|http://www.rptools.net/?page=faq>
+page of our web site for basic questions.  For more involved questions
+you may want to register on L<our forums|http://forums.rptools.net/>
+where you can search for others who have experienced the problem (and
+likely find your solution) or start a new thread with your own question.
+(Please do search though, as it helps us keep the forums from having
+many repetitive threads on the same topic!)
+
+If you choose to ask your question on our forum, please include the
+output generated when you use the B<Help> E<gt> B<Gather System Info...>
+option from the B<MapTool> menu.  There is information there that is
+important in helping us diagnose the problem you're having.  (Some
+people like to redact portions of the output.  Just be aware that some
+parts of it are important and removing portions of it might mean you
+won't get your problem solved.)
+
+=head2 Requirements
+
+All of the RPTools applications are programmed in Java and can be used
+on any platform supporting Java 6 or later.  Specifics on where to find
+Java for your platform are available at http://www.java.com/
+
+We have tried to remain as compatible as possible with Java 6; in
+fact, we believe B<MapTool 1.3.b90> works great in Java 6.  But there
+are no guarantees that B<MapTool> will work correctly in Java
+versions older than Java 7.  And as time goes on the RPTools team
+will continue to move applications to later versions.
+
+B<MapTool> requires at least 256MB of memory for itself.  This number is
+NOT the amount of physical memory in the machine, but is the amount of
+memory needed just by this application.  Larger memory sizes will allow
+for larger, more intricate maps.
+
+Because Java was initially developed for standalone applications, it
+requires that upper and lower memory limits be set when Java
+applications are executed.  We have provided a graphical configuration
+tool to help with this called B<MapTool Launcher>, or just B<MTL> for short.
+A full description of how to choose memory settings is beyond the scope
+of this document, but you can find more information on our forums in the
+L<MapTool|http://forums.rptools.net/viewforum.php?f=3> category.
+
+=head2 Starting the application
+
+There are two ways to start B<MapTool> (or any of the RPTools
+applications):
+
+=over 4
+
+=item 1 Java Web Start
+
+You can visit the L<Launch page|http://www.rptools.net/?page=launch> of
+our main web site and choose the application you want to run from the
+table.  Memory sizes can be set on that same page, if needed.
+
+This approach has two advantages.  First, after you click the
+link you will be downloading a configuration file called a B<JNLP> file.
+This contains references back to our web site as well as all of the
+configuration options you choose, if any.  You can email this file as an
+attachment to your friends and when they activate it they will get the
+same exact configuration for the application that you get.  This is the
+most reliable way to ensure all applications are configured the same.
+
+The second advantage is that you don't need to have Internet access when
+you want to run the programs in the future.  The first time you launch
+an application it will be downloaded to your machine and saved.
+Thereafter when you run the JNLP file it will execute the application
+out of the cache.
+
+This approach can optionally create a desktop icon for you to make it
+easier to launch the application in the future, but you can turn this
+off or delete the icon without harm; the application is still stored in
+the cache and will still execute from there.
+
+=item 1 Download an Archive
+
+You can also visit the
+L<Downloads page|http://www.rptools.net/?page=downloads>
+and download the ZIP (Windows and Linux) or DMG (Mac OS X) version
+of the application.  (Stay away from ones marked B<broken>.  Those
+were released and then later found to have one or more issues that
+make them unsuitable for most users.)
+
+=over 8
+
+=item 1 Windows and Linux
+
+For these operating systems you want to download the ZIP archive.
+
+Unpack the ZIP file somewhere on your computer -- do not try to run
+the application from inside the ZIP file because it won't work!
+When you extract the contents be sure to extract full directory names.
+Some files stored in the archive are in subdirectories and the
+application won't work correctly unless that structure is preserved.
+
+Once unpacked, you can navigate to that folder (a.k.a. "directory")
+and double-click the B<MapTool Launcher> file to start it.  As of the
+time of this writing, the file to activate would be
+B<launcher-130725.01.jar> (that version number gives the release
+date in YYMMDD format and the build number).
+
+The B<MapTool Launcher> has its own documentation.  Look in the B<doc>
+subdirectory for the HowTo guide.
+
+=item 1 Mac OS X
+
+If you're lucky enough to be using a Mac (!) then you may
+choose the DMG file instead.  It is a disk image designed to integrate
+into the OS X environment.  Just double-click it and then drag the
+application bundle where you want it installed on your computer.
+You can now double-click the application just like any other OS X
+application.  As described in the L<Windows and Linux> section, above,
+the documentation for the B<MapTool Launcher> is available as part of the
+bundle.  You will need to right-click the application and choose
+I<Show package contents> and then look inside B<Contents/MacOS/doc> for
+the HowTo guide.
+
+=back
+
+=back
+
+=head2 Using the Application
+
+The best place to find information on B<MapTool> is our web site.  Start at
+the L<Tutorial page|http://rptools.net/?page=tutorial> and check out the
+screencasts created by one of our forum users.  They are very helpful!
+Try out the things you see in the screencast while the video is playing
+and don't be afraid to pause the video or rewind it.  The author moves
+at a pretty good clip because he knows you can pause!
+
+You'll also find L<our forums|http://forums.rptools.net/> to be an
+excellent place to ask questions and receive answers.  We have a very
+large community of people willing to share their experiences on
+technical issues as well as big picture questions regarding how to use
+B<MapTool>.
+
+=head2 Summary
+
+That's it!  Thank you for joining us at RPTools and we hope you have a
+successful foray into the world of online virtual gaming!
