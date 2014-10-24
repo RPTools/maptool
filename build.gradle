@@ -140,25 +140,30 @@ project(':maptool') {
 
         testCompile group: 'junit', name: 'junit', version: '4.11'
 
-
-
-        task copyLibs(type: Sync) {
-            from configurations.compile
-            into jar.destinationDir.getPath() + '/lib'
-        }
-
-        jar {
-            manifest.attributes(
-                'Main-Class': mainClassName,
-                'Class-Path': configurations.runtime.files.collect { "lib/" + it.name }.join(' ')
-            )
-        }
-        assemble.dependsOn += copyLibs;
-
-        task release(dependsOn: assemble) << {
-        }
-
     }
+
+    processResources {
+        filter(ReplaceTokens, tokens: [
+            'buildDate': rootProject.ext.yyyymmdd,  'buildNumber': getVersionName()])
+    }
+
+
+    task copyLibs(type: Sync) {
+        from configurations.compile
+        into jar.destinationDir.getPath() + '/lib'
+    }
+
+    jar {
+        manifest.attributes(
+            'Main-Class': mainClassName,
+            'Class-Path': configurations.runtime.files.collect { "lib/" + it.name }.join(' ')
+        )
+    }
+    assemble.dependsOn += copyLibs;
+
+    task release(dependsOn: assemble) << {
+    }
+
 }
 
 task deleteBuild(type: Delete) {
@@ -197,8 +202,6 @@ zipRelease.dependsOn += copySubProjectFiles
 
 task release() {
     println 'Creating Release'
-    println project(':launcher').jar.destinationDir.getPath()
-    println project(':launcher').ext.distSource
 }
 
 release.dependsOn += zipRelease
