@@ -1,6 +1,6 @@
 MapTool
 =======
-Welcome to the MapTool 1.4 repository. The old version (1.3) still resides on SourceForge but should only be updated with major bug fixes.
+Welcome to the MapTool 1.4 repository. The old version (1.3) still resides on SourceForge [sourceforge link goes here] but should only be updated with major bug fixes.
 
 So what is MapTool? 
 
