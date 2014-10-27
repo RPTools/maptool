@@ -9,6 +9,6 @@ And we don't stop there! Not content with just emulating the tabletop, we seek t
 
 This version of MapTool requires Java 1.7+
 
-Website: http://rptools.net/
-Forums:  http://forums.rptools.net
-Wiki:    http://lmwcs.com/rptools/wiki/Main_Page
+Website: http://rptools.net/ <br>
+Forums:  http://forums.rptools.net <br>
+Wiki:    http://lmwcs.com/rptools/wiki/Main_Page <br>
