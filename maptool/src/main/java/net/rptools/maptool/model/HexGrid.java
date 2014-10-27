@@ -169,7 +169,7 @@ public abstract class HexGrid extends Grid {
 	/** Distance from centerpoint to middle of a face. Set to gridSize/2. */
 	private double minorRadius;
 	/**
-	 * Distance from centerpoint to vertex. Set to minorRadius/hexRatio (basically, uses 30¼ cosine to calculate
+	 * Distance from centerpoint to vertex. Set to minorRadius/hexRatio (basically, uses 30 degree cosine to calculate
 	 * sqrt(3)/2).
 	 */
 	private double edgeLength;

@@ -973,7 +973,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	 * <td>Rotate token right by facing amount (depends on grid)
 	 * <tr>
 	 * <td>Ctrl Shift Right
-	 * <td>Rotate token right by 5¼ increments
+	 * <td>Rotate token right by 5 degree increments
 	 * <tr>
 	 * <td>Left
 	 * <td>Move token left
@@ -982,7 +982,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	 * <td>Rotate token left by facing amount (depends on grid)
 	 * <tr>
 	 * <td>Ctrl Shift Left
-	 * <td>Rotate token left by 5¼ increments
+	 * <td>Rotate token left by 5 degree increments
 	 * </table>
 	 */
 	@Override
