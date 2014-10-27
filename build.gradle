@@ -1,13 +1,23 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 import java.text.SimpleDateFormat
 
+
+
 task wrapper(type: Wrapper) {
     gradleVersion='2.1'
 }
 
+configurations {
+    osxTools
+}
+
+dependencies {
+    osxTools 'com.oracle.appbundler:AppBundlerTask:1.0'
+}
 
 ext.compileDate = new Date();
 ext.yyyymmdd = (new SimpleDateFormat('yyyyMMDD')).format(ext.compileDate);
+
 
 
 
@@ -43,23 +53,42 @@ def getVersionName() {
 
 
 allprojects {
-    group = 'net.rptools.maptool'
-    ext.version = version
-}
-
-
-subprojects {
     repositories {
         mavenCentral()
         maven {
             url = 'http://maptool.craigs-stuff.net/repo/'
         }
     }
+
+    group = 'net.rptools.maptool'
+    ext.version = version
+}
+
+
+subprojects {
+
     apply plugin: 'java'
+    apply plugin: 'findbugs'
+    apply plugin: 'pmd'
     apply plugin:'application'
+
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
     version = getVersionName()
+
+    // Dont fail build if tests fail until tests are cleaned up
+    test.ignoreFailures = true
+
+    findbugs {
+        ignoreFailures = true
+        toolVersion = '3.0.0'
+        effort = 'max'
+    }
+
+    pmd {
+        ignoreFailures = true
+    }
+
 }
 
 
@@ -83,8 +112,14 @@ project(':launcher') {
     }
 
     processResources {
-        filter(ReplaceTokens, tokens: [
-            'buildDate': rootProject.ext.yyyymmdd,  'buildNumber': getVersionName()])
+        from(sourceSets.main.resources.srcDirs) {
+            include '**/*.properties'
+            filter(ReplaceTokens, tokens: [
+                'buildDate': rootProject.ext.yyyymmdd,  'buildNumber': getVersionName()])
+        }
+        from(sourceSets.main.resources.srcDirs) {
+            exclude '**/*.properties'
+        }
     }
 
     task release(dependsOn: assemble) << {
@@ -93,6 +128,7 @@ project(':launcher') {
 
 project(':maptool') {
     mainClassName='net.rptools.maptool.client.LaunchInstructions'
+
 
     ext.distSource = projectDir.getPath() + '/src/dist/'
 
@@ -143,8 +179,14 @@ project(':maptool') {
     }
 
     processResources {
-        filter(ReplaceTokens, tokens: [
-            'buildDate': rootProject.ext.yyyymmdd,  'buildNumber': getVersionName()])
+        from(sourceSets.main.resources.srcDirs) {
+            include '**/*.txt'
+            filter(ReplaceTokens, tokens: [
+                'buildDate': rootProject.ext.yyyymmdd,  'buildNumber': getVersionName()])
+        }
+        from(sourceSets.main.resources.srcDirs) {
+            exclude '**/*.txt'
+        }
     }
 
 
@@ -161,7 +203,7 @@ project(':maptool') {
     }
     assemble.dependsOn += copyLibs;
 
-    task release(dependsOn: assemble) << {
+    task release(dependsOn: build) << {
     }
 
 }
@@ -188,7 +230,7 @@ copySubProjectFiles.mustRunAfter(':maptool:release', ':launcher:release')
 
 
 
-task zipRelease(type: Zip) {
+task zipRelease(dependsOn: copySubProjectFiles, type: Zip) {
     from 'build/tmp/dist/'
     into  ''
     baseName = 'maptool-' + getVersionName()
@@ -197,11 +239,59 @@ task zipRelease(type: Zip) {
         false
     }
 }
-zipRelease.dependsOn += copySubProjectFiles
+
+
+task osxApp() << {
+    def baseDir = '.'
+    def buildVersion = rootProject.getVersionName()
+    def mainClassName = project(":maptool").mainClassName
+    def sourceDir = 'build/tmp/dist'
+    ant {
+        taskdef(
+            name: 'bundleapp',
+            classname: 'com.oracle.appbundler.AppBundlerTask',
+            classpath: configurations.osxTools.asPath
+        )
+        bundleapp(
+            outputdirectory: 'build/tmp/',
+            name: 'MapTool-' + buildVersion,,
+            displayname: 'MapTool-' + buildVersion,
+            identifier: 'net.rptools.maptool',
+            mainclassname: mainClassName,
+            signature: 'RPTM',
+            icon: 'build-resources/maptool-icon.icns'
+        ) {
+            classpath(dir: sourceDir) {
+                include(name: '*.jar')
+                include(name: '**/*.jar')
+            }
+            option(value: '-Dapple.laf-useScreenMenuBar=true')
+            option(value: '-Dfile.encoding=UTF-8')
+            option(value: '-Xmx768m')
+            option(value: '-Xss4m')
+            option(value: '-Dcom.apple.textantialiasing=true')
+            option(value: '-Dcom.apple.antialiasing=true')
+            option(value: '-Djava.library.path=$APP_ROOT/Contents/Java')
+        }
+    }
+}
+osxApp.mustRunAfter(copySubProjectFiles)
+
+task zipOSXApp(dependsOn: osxApp, type: Zip) {
+    from 'build/tmp/MapTool-' + getVersionName() + '.app'
+    into  'MapTool-' + getVersionName() + '.app'
+    baseName = 'maptool-' + getVersionName() + '-osx'
+    destinationDir new File(projectDir, 'build')
+    outputs.upToDateWhen {
+        false
+    }
+}
+
 
 
 task release() {
     println 'Creating Release'
 }
-
 release.dependsOn += zipRelease
+release.dependsOn += zipOSXApp
+
