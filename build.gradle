@@ -11,6 +11,7 @@ configurations {
     osxTools
 }
 
+
 dependencies {
     osxTools 'com.oracle.appbundler:AppBundlerTask:1.0'
 }
@@ -62,6 +63,7 @@ allprojects {
 
     group = 'net.rptools.maptool'
     ext.version = version
+
 }
 
 
@@ -83,10 +85,12 @@ subprojects {
         ignoreFailures = true
         toolVersion = '3.0.0'
         effort = 'max'
+        sourceSets = []  // Empty source set so it wont run during build/check
     }
 
     pmd {
         ignoreFailures = true
+        sourceSets = []  // Empty source set so it wont run during tebuild/check
     }
 
 }

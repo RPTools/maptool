@@ -30,9 +30,16 @@ To Create a release zip distribution of MapTool
 
 
 To Run unit tests
-./gradlew test
+./gradlew test      or      ./gradlew check
 
-    Not all unit tests pass yet :(
+    Also PMD and FindBugs do not currently run when you do a check
+    as they take a while and no one is looking at the results yet.
+
+To run FindBugs
+./gradlew findBugsMain
+
+To run PMD
+./gradlew pmdMain
 
 The first time that you perform a build it is likely to take quite
 a while as the gradle wrapper downloads any needed components for
