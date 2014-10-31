@@ -11,6 +11,8 @@ To run
 ./gradlew maptool:run
     The launcher can not be run in this way currently.
 
+To build (but not create the zip distributions)
+./gradle build
 
 To Create a release zip distribution of MapTool
 ./gradlew release
