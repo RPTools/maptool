@@ -1,10 +1,22 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 import java.text.SimpleDateFormat
+import org.ajoberstar.grgit.*
+
+ext.repo = Grgit.open(project.file('.'))
 
 
 
 task wrapper(type: Wrapper) {
     gradleVersion='2.1'
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.ajoberstar:gradle-git:0.11.2'
+    }
 }
 
 configurations {
@@ -22,32 +34,32 @@ ext.yyyymmdd = (new SimpleDateFormat('yyyyMMDD')).format(ext.compileDate);
 
 
 
-gradle.taskGraph.whenReady {taskGraph ->
-    if (taskGraph.hasTask(release)) {
-        version = getVersionName();
-    } else {
-        version = getVersionName();
-    }
-}
-
-
 
 /*
  * Gets the version name from the latest Git tag
  */
 
+
 def getVersionName() {
+
     if (project.hasProperty('buildVersion')) {
         return buildVersion
     } else {
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'describe', '--tags'
-            standardOutput = stdout
+        def repo =  Grgit.open(project.file('.'))
+        def tagName = repo.tag.list()[0].fullName.replace('refs/tags/', '')
+        def tagCommit = repo.tag.list()[0].commit.id
+        def headCommit = repo.head().id
+        def headAbbrvId = repo.head().abbreviatedId
+
+        if (tagCommit == headCommit) {
+            return tagName
+        } else {
+            return tagName + '-' + headAbbrvId
         }
-        return stdout.toString().trim();
     }
 }
+
+
 
 
 
@@ -62,7 +74,7 @@ allprojects {
     }
 
     group = 'net.rptools.maptool'
-    ext.version = version
+    version = getVersionName()
 
 }
 
@@ -76,7 +88,6 @@ subprojects {
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
-    version = getVersionName()
 
     // Dont fail build if tests fail until tests are cleaned up
     test.ignoreFailures = true
