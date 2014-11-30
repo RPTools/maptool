@@ -187,6 +187,14 @@ project(':maptool') {
         compile 'com.thoughtworks.xstream:xstream:1.4.1'
         compile 'yasb:yasb:0.2-21012007'
         compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
+        compile 'org.eclipse.jetty:jetty-server:9.3.0.M0'
+        compile 'org.eclipse.jetty:jetty-servlet:9.3.0.M0'
+        compile 'org.eclipse.jetty:jetty-webapp:9.3.0.M0'
+        compile 'org.eclipse.jetty:jetty-continuation:9.3.0.M1'
+        compile 'org.eclipse.jetty.websocket:websocket-server:9.3.0.M1'
+        compile 'org.eclipse.jetty.websocket:websocket-client:9.3.0.M1'
+        compile 'org.eclipse.jetty.websocket:websocket-servlet:9.3.0.M1'
+        compile 'org.eclipse.jetty.websocket:websocket-api:9.3.0.M1'
 
 
         testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -269,7 +277,7 @@ task osxApp() << {
         )
         bundleapp(
             outputdirectory: 'build/tmp/',
-            name: 'MapTool-' + buildVersion,,
+            name: 'MapTool-' + buildVersion,
             displayname: 'MapTool-' + buildVersion,
             identifier: 'net.rptools.maptool',
             mainclassname: mainClassName,

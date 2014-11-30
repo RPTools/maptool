@@ -11,51 +11,11 @@
 
 package net.rptools.maptool.client.macro;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.AbortFunction;
 import net.rptools.maptool.client.functions.AssertFunction;
-import net.rptools.maptool.client.macro.impl.AddTokenStateMacro;
-import net.rptools.maptool.client.macro.impl.AliasMacro;
-import net.rptools.maptool.client.macro.impl.ChangeColorMacro;
-import net.rptools.maptool.client.macro.impl.ClearAliasesMacro;
-import net.rptools.maptool.client.macro.impl.ClearMacro;
-import net.rptools.maptool.client.macro.impl.EmitMacro;
-import net.rptools.maptool.client.macro.impl.EmoteMacro;
-import net.rptools.maptool.client.macro.impl.EmotePluralMacro;
-import net.rptools.maptool.client.macro.impl.GotoMacro;
-import net.rptools.maptool.client.macro.impl.HelpMacro;
-import net.rptools.maptool.client.macro.impl.ImpersonateMacro;
-import net.rptools.maptool.client.macro.impl.LoadAliasesMacro;
-import net.rptools.maptool.client.macro.impl.LoadTokenStatesMacro;
-import net.rptools.maptool.client.macro.impl.LookupTableMacro;
-import net.rptools.maptool.client.macro.impl.OOCMacro;
-import net.rptools.maptool.client.macro.impl.RollAllMacro;
-import net.rptools.maptool.client.macro.impl.RollGMMacro;
-import net.rptools.maptool.client.macro.impl.RollMeMacro;
-import net.rptools.maptool.client.macro.impl.RollSecretMacro;
-import net.rptools.maptool.client.macro.impl.RunTokenMacroMacro;
-import net.rptools.maptool.client.macro.impl.RunTokenSpeechMacro;
-import net.rptools.maptool.client.macro.impl.SaveAliasesMacro;
-import net.rptools.maptool.client.macro.impl.SaveTokenStatesMacro;
-import net.rptools.maptool.client.macro.impl.SayMacro;
-import net.rptools.maptool.client.macro.impl.SelfMacro;
-import net.rptools.maptool.client.macro.impl.SetTokenPropertyMacro;
-import net.rptools.maptool.client.macro.impl.SetTokenStateMacro;
-import net.rptools.maptool.client.macro.impl.ToGMMacro;
-import net.rptools.maptool.client.macro.impl.UndefinedMacro;
-import net.rptools.maptool.client.macro.impl.WhisperMacro;
-import net.rptools.maptool.client.macro.impl.WhisperReplyMacro;
+import net.rptools.maptool.client.macro.impl.*;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -63,8 +23,11 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
-
 import org.apache.log4j.Logger;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author drice
@@ -115,6 +78,7 @@ public class MacroManager {
 		registerMacro(new ChangeColorMacro());
 		registerMacro(new WhisperReplyMacro());
 		registerMacro(new EmotePluralMacro());
+		registerMacro(new ExperimentsMacro());
 
 		registerMacro(UNDEFINED_MACRO);
 	}
