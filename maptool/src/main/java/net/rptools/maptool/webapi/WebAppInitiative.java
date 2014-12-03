@@ -16,6 +16,7 @@ package net.rptools.maptool.webapi;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
@@ -73,8 +74,6 @@ public class WebAppInitiative {
 
         @Override
         public void handleAppEvent(AppEvent appEvent) {
-            // This is overkill but unfortunately have to do it this way because the initiative panel does and
-            // creates a new initiative list when it does. FIXME: This needs to be fixed in both places.
             System.out.println("Here in handleAppEvent");
             setZone((Zone) appEvent.getNewValue());
             sendInitiative();
@@ -102,8 +101,6 @@ public class WebAppInitiative {
             public void run() {
                 MapTool.getEventDispatcher().addListener(initiativeListener, MapTool.ZoneEvent.Activated);
                 initiativeListener.updateListeners();
-                //MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList().addPropertyChangeListener(initiativeListener);
-                //MapTool.getFrame().getCurrentZoneRenderer().getZone().addModelChangeListener(initiativeListener);
                 System.out.println("Here...");
             }
         });
@@ -118,6 +115,7 @@ public class WebAppInitiative {
 
         JSONArray tokArray = new JSONArray();
         for (InitiativeList.TokenInitiative token : tokenInitList) {
+            // FIXME: need to filter out NPCs if required.
             JSONObject tokJSon = new JSONObject();
             tokJSon.put("id", token.getToken().getId().toString());
             tokJSon.put("name", token.getToken().getName());
@@ -129,6 +127,7 @@ public class WebAppInitiative {
         json.put("initiative", tokArray);
         json.put("current", initiativeList.getCurrent());
         json.put("round", initiativeList.getRound());
+        json.put("canAdvance", canAdvanceInitiative());
 
         return json;
     }
@@ -142,5 +141,54 @@ public class WebAppInitiative {
         MTWebClientManager.getInstance().sendToAllSessions("initiative", init);
     }
 
+    void processInitiativeMessage(JSONObject json) {
+        InitiativeList ilist = initiativeListener.initiativeList;
+        String currentInit = Integer.toString(ilist.getCurrent());
+        String currentRound = Integer.toString(ilist.getRound());
+
+        // If there is a mismatch between client and us don't perform the command. This can happen because multiple
+        // people can be updating the initiative at the same time and its possible that two people might update the
+        // initiative at the same time.
+        if (!currentInit.equals(json.getString("currentInitiative")) ||
+                !currentRound.equals(json.getString("currentRound"))) {
+            return; // FIXME: This needs to send a "can not do" message back to client.
+        }
+
+        String command = json.getString("command");
+        if ("nextInitiative".equals(command)) {
+            System.out.println("DEBUG: got next initiative call" + json.toString());
+            // FIXME: Need to update for player permissions
+            if (canAdvanceInitiative()) { // Trust a web client? You gotta be joking :)
+                ilist.nextInitiative();
+            }
+        } else if ("previousInitiative".equals(command)) {
+            if (canAdvanceInitiative()) { // Trust a web client? You gotta be joking :)
+                ilist.prevInitiative();
+            }
+        } else if ("sortInitiative".equals(command)) {
+            ilist.sort();
+        } else if ("toggleHoldInitiative".equals(command)) {
+            if (canAdvanceInitiative()) { // Trust a web client? You gotta be joking :)
+                InitiativeList.TokenInitiative ti = ilist.getTokenInitiative(ilist.getCurrent());
+                ti.setHolding(!ti.isHolding());
+            }
+        }
+    }
+
+    // TODO: When the whole of initiative functionality is fixed up then this needs to be rolled into that.
+    private boolean canAdvanceInitiative() {
+        InitiativePanel ipanel = MapTool.getFrame().getInitiativePanel();
+        if (ipanel.hasGMPermission()) {
+            return true;
+        }
+
+        InitiativeList ilist = initiativeListener.initiativeList;
+
+        if (ipanel.hasOwnerPermission(ilist.getTokenInitiative(ilist.getCurrent()).getToken())) {
+            return true;
+        }
+
+        return false;
+    }
 
 }

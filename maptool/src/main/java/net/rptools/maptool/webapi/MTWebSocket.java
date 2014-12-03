@@ -45,6 +45,16 @@ public class MTWebSocket extends WebSocketAdapter {
     @Override
     public void onWebSocketText(String message) {
         System.out.println("DEBUG: Got Message" + message);
+        // FIXME: need to test this is valid
+        try {
+            JSONObject json = JSONObject.fromObject(message);
+            if ("initiative".equals(json.get("messageType"))) {
+                System.out.println("DEBUG: Got an initiative message");
+                WebAppInitiative.getInstance().processInitiativeMessage(json.getJSONObject("data"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // FIXME: fix this to deal with error properly.
+        }
     }
 
     @Override
