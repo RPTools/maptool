@@ -13,6 +13,8 @@
 
 package net.rptools.maptool.webapi;
 
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import net.sf.json.JSONObject;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -27,6 +29,8 @@ import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -34,6 +38,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class MTWebAppServer {
+    public static final String WEBAPP_CONTEXT_PATH = "webapi";
     /**
      * The port to listen on.
      */
@@ -120,7 +125,7 @@ public class MTWebAppServer {
 
         WebAppContext webAppContext = new WebAppContext();
         webAppContext.setResourceBase(this.getClass().getResource("/net/rptools/maptool/webapp").toExternalForm());
-        webAppContext.setContextPath("/webapp");
+        webAppContext.setContextPath("/" + WEBAPP_CONTEXT_PATH);
         webAppContext.setLogger(new StdErrLog());
 
         HandlerList handlers = new HandlerList();
@@ -156,6 +161,7 @@ public class MTWebAppServer {
         started = true;
 
 
+        // Set up the heartbeat
         ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
 
         ses.scheduleAtFixedRate(new Runnable() {
@@ -165,6 +171,17 @@ public class MTWebAppServer {
                 MTWebClientManager.getInstance().sendToAllSessions("keepalive", data);
             }
         }, 1, 1, TimeUnit.MINUTES);
+
+
+        try {
+            String address = InetAddress.getLocalHost().getHostAddress();
+            String portString = Integer.toString(port);
+            MapTool.addLocalMessage(I18N.getText("webapp.serverStarted", address, portString, WEBAPP_CONTEXT_PATH));
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            // FIXME: log this error
+        }
+
     }
 
 
