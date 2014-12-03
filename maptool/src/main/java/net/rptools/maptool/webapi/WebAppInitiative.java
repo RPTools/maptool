@@ -17,10 +17,7 @@ import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
-import net.rptools.maptool.model.InitiativeList;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -115,13 +112,14 @@ public class WebAppInitiative {
 
         JSONArray tokArray = new JSONArray();
         for (InitiativeList.TokenInitiative token : tokenInitList) {
-            // FIXME: need to filter out NPCs if required.
-            JSONObject tokJSon = new JSONObject();
-            tokJSon.put("id", token.getToken().getId().toString());
-            tokJSon.put("name", token.getToken().getName());
-            tokJSon.put("holding", token.isHolding() ? "true" : "false");
-            tokJSon.put("initiative", token.getState());
-            tokArray.add(tokJSon);
+            if (InitiativeListModel.isTokenVisible(token.getToken(), initiativeList.isHideNPC())) {
+                JSONObject tokJSon = new JSONObject();
+                tokJSon.put("id", token.getToken().getId().toString());
+                tokJSon.put("name", token.getToken().getName());
+                tokJSon.put("holding", token.isHolding() ? "true" : "false");
+                tokJSon.put("initiative", token.getState());
+                tokArray.add(tokJSon);
+            }
         }
 
         json.put("initiative", tokArray);
@@ -152,12 +150,13 @@ public class WebAppInitiative {
         if (!currentInit.equals(json.getString("currentInitiative")) ||
                 !currentRound.equals(json.getString("currentRound"))) {
             return; // FIXME: This needs to send a "can not do" message back to client.
+
         }
 
         String command = json.getString("command");
         if ("nextInitiative".equals(command)) {
             System.out.println("DEBUG: got next initiative call" + json.toString());
-            // FIXME: Need to update for player permissions
+
             if (canAdvanceInitiative()) { // Trust a web client? You gotta be joking :)
                 ilist.nextInitiative();
             }
