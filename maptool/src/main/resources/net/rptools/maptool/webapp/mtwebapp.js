@@ -83,7 +83,7 @@ $(document).ready(function() {
         for (var i = 0; i < entries.length; i++) {
             console.log('name = ' + entries[i].name + ' => ' + entries[i].initiative);
             var initDivClass;
-            if (data.data.holding) {
+            if (entries[i].holding === 'true') {
                 initDivClass = 'initHolding';
             } else if (currentInitiative == i) {
                 initDivClass = 'initCurrent';
@@ -96,7 +96,9 @@ $(document).ready(function() {
             var vals = {
                 'tokenName': entries[i].name,
                 'initiative': entries[i].initiative,
-                'initDivClass': initDivClass
+                'initDivClass': initDivClass,
+                'tokenIndex': entries[i].tokenIndex,
+                'tokenId': entries[i].id
             };
 
             var html = template(vals);
@@ -123,6 +125,23 @@ $(document).ready(function() {
         console.log('Next Initiative clicked');
     });
 
+    $('#initList').delegate('.tokenInitButton', 'click', function() {
+        console.log($(this));
+        console.log($(this).data('tokenid'));
+        ws.send(JSON.stringify(
+            {
+                messageType: 'initiative',
+                data: {
+                    command: $(this).data('initcommand'),
+                    token: $(this).data('tokenid'),
+                    currentInitiative: currentInitiative,
+                    currentRound: currentRound,
+                    tokenIndex: $(this).data('tokenindex')
+                }
+            }
+        ));
+        console.log('Toggle hold clicked');
+    });
 
 
 

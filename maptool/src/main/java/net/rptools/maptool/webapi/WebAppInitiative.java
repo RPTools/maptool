@@ -111,6 +111,7 @@ public class WebAppInitiative {
         List<net.rptools.maptool.model.InitiativeList.TokenInitiative> tokenInitList = initiativeList.getTokens();
 
         JSONArray tokArray = new JSONArray();
+        int index = 0;
         for (InitiativeList.TokenInitiative token : tokenInitList) {
             if (InitiativeListModel.isTokenVisible(token.getToken(), initiativeList.isHideNPC())) {
                 JSONObject tokJSon = new JSONObject();
@@ -118,8 +119,10 @@ public class WebAppInitiative {
                 tokJSon.put("name", token.getToken().getName());
                 tokJSon.put("holding", token.isHolding() ? "true" : "false");
                 tokJSon.put("initiative", token.getState());
+                tokJSon.put("tokenIndex", index);
                 tokArray.add(tokJSon);
             }
+            index++;
         }
 
         json.put("initiative", tokArray);
@@ -167,10 +170,28 @@ public class WebAppInitiative {
         } else if ("sortInitiative".equals(command)) {
             ilist.sort();
         } else if ("toggleHoldInitiative".equals(command)) {
-            if (canAdvanceInitiative()) { // Trust a web client? You gotta be joking :)
-                InitiativeList.TokenInitiative ti = ilist.getTokenInitiative(ilist.getCurrent());
-                ti.setHolding(!ti.isHolding());
+            InitiativeList.TokenInitiative tokenInit = null;
+            GUID id = new GUID(json.getString("token"));
+            int tokenIndex = json.getInt("tokenIndex");
+            int index = 0;
+            for (InitiativeList.TokenInitiative ti : ilist.getTokens()) {
+                if (ti.getId().equals(id) && tokenIndex == index) {
+                    System.out.println("DEBUG: Here, index = " + index + ", id = " + ti.getId());
+                    tokenInit = ti;
+                    break;
+                }
+                index++;
             }
+
+            if (tokenInit == null) {
+                // FIXME: need to log this.
+            } else {
+                System.out.println("DEBUG: Here, changing holding on " + tokenInit.getToken().getName());
+                tokenInit.setHolding(!tokenInit.isHolding());
+            }
+
+        } else {
+            // FIXME: need to log this.
         }
     }
 
