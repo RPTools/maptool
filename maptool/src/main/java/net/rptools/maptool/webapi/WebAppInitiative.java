@@ -15,6 +15,7 @@ package net.rptools.maptool.webapi;
 
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.model.*;
@@ -120,6 +121,12 @@ public class WebAppInitiative {
                 tokJSon.put("holding", token.isHolding() ? "true" : "false");
                 tokJSon.put("initiative", token.getState());
                 tokJSon.put("tokenIndex", index);
+                if (AppUtil.playerOwns(token.getToken())) {
+                    tokJSon.put("playerOwns", "true");
+                } else {
+                    tokJSon.put("playerOwns", "false");
+                }
+                tokJSon.put("isOwner", "false");
                 tokArray.add(tokJSon);
             }
             index++;

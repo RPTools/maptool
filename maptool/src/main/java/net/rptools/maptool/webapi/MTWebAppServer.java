@@ -128,6 +128,8 @@ public class MTWebAppServer {
         webAppContext.setContextPath("/" + WEBAPP_CONTEXT_PATH);
         webAppContext.setLogger(new StdErrLog());
 
+
+
         HandlerList handlers = new HandlerList();
 
         handlers.addHandler(contextHandler);
@@ -150,7 +152,18 @@ public class MTWebAppServer {
         }
 
 
+
+
+        ContextHandler tokenInfoContext = new ContextHandler();
+        //tokenInfoContext
+        tokenInfoContext.setContextPath("/token");
+        tokenInfoContext.setLogger(new StdErrLog());
+        tokenInfoContext.setHandler(new TokenInfoHandler());
+
+        handlers.addHandler(tokenInfoContext);
+
         server.setHandler(handlers);
+
 
         try {
             server.start();

@@ -26,3 +26,43 @@
 .initDone {
     background-color: lightgrey;
 }
+
+.initTokenImage {
+    width: 64px;
+    height: 64px;
+}
+
+
+#initBox {
+    float: left;
+    width: 400px;
+}
+
+.tokenInitName {
+    display: inline-block;
+    vertical-align: top;
+    width: 100px;
+}
+
+.tokenInitValue {
+    display: inline-block;
+    vertical-align: top;
+    width: 100px;
+}
+
+.tokenHoldbutton {
+    display: inline-block;
+}
+
+.initHolding > .tokenInitValue {
+    text-decoration: line-through;
+}
+
+button.playerIsNotOwner {
+    display: none;
+}
+
+.tokenSheetButton {
+    float: right;
+}
+

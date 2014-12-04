@@ -80,6 +80,7 @@ $(document).ready(function() {
         var template = Handlebars.compile(source);
 
         var entries = data.data.initiative;
+        var toggle = 0;
         for (var i = 0; i < entries.length; i++) {
             console.log('name = ' + entries[i].name + ' => ' + entries[i].initiative);
             var initDivClass;
@@ -93,12 +94,30 @@ $(document).ready(function() {
                 initDivClass = 'initPending';
             }
 
+            var ownerClass;
+            if (entries[i].playerOwns === "true") {
+                ownerClass = 'playerIsOwner';
+            } else {
+                ownerClass = 'playerIsNotOwner';
+            }
+
+            /* FIXME: Remove this its just for testing.
+            if (toggle == 0) {
+                toggle = 1;
+                ownerClass = 'playerIsOwner';
+            } else {
+                toggle = 0;
+                ownerClass = 'playerIsNotOwner';
+            }*/
+
+
             var vals = {
                 'tokenName': entries[i].name,
                 'initiative': entries[i].initiative,
                 'initDivClass': initDivClass,
                 'tokenIndex': entries[i].tokenIndex,
-                'tokenId': entries[i].id
+                'tokenId': entries[i].id,
+                'tokenOwnerClass': ownerClass
             };
 
             var html = template(vals);
