@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class TokenInfoHandler extends AbstractHandler {
+public class TokenImageHandler extends AbstractHandler {
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
@@ -58,6 +58,7 @@ public class TokenInfoHandler extends AbstractHandler {
 
         baseRequest.setHandled(true);*/
     }
+
 
     private Token findToken(String tokenId) {
         final GUID id = new GUID(tokenId);

@@ -13,32 +13,32 @@
   -->
 
 <html>
-<head lang="en">
-    <meta charset="UTF-8">
+<head lang='en'>
+    <meta charset='UTF-8'>
     <title>MapTool Experimental Web App</title>
-    <link rel="stylesheet" type="text/css" href="mtwebapp.css">
-    <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
-    <script type="text/javascript" src="bower_components/handlebars/handlebars.js"></script>
-    <script type="text/javascript" src="mtwebapp.js"></script>
+    <link rel='stylesheet' type='text/css' href='mtwebapp.css'>
+    <script type='text/javascript' src='bower_components/jquery/dist/jquery.js'></script>
+    <script type='text/javascript' src='bower_components/handlebars/handlebars.js'></script>
+    <script type='text/javascript' src='mtwebapp.js'></script>
 </head>
 <body>
 
-    <template id="init-element">
-        <div class="{{initDivClass}} {{tokenOwnerClass}}">
-            <span><img src="/token/image/{{tokenId}}" class="initTokenImage" /></span>
-            <span class="tokenInitName"><p>{{tokenName}}</p></span>
-            <span class="tokenInitValue"><p>{{initiative}}</p></span>
-            <div class="tokenInitButtons">
-                <span class="tokenHoldbutton">
-                    <button class="tokenInitButton {{tokenOwnerClass}}"
+    <template id='init-element'>
+        <div class='{{initDivClass}} {{tokenOwnerClass}}'>
+            <span><img src='/token/image/{{tokenId}}' class='initTokenImage' /></span>
+            <span class='tokenInitName'><p>{{tokenName}}</p></span>
+            <span class='tokenInitValue'><p>{{initiative}}</p></span>
+            <div class='tokenInitButtons'>
+                <span class='tokenHoldbutton'>
+                    <button class='tokenInitButton {{tokenOwnerClass}}'
                             data-initcommand='toggleHoldInitiative'
                             data-tokenindex='{{tokenIndex}}'
-                            data-tokenid="{{tokenId}}">
+                            data-tokenid='{{tokenId}}'>
                         Hold
                     </button>
                 </span>
-                <span class="tokenSheetButton">
-                    <button class="tokenInitButton {{tokenOwnerClass}}">
+                <span class='tokenSheetButton'>
+                    <button class='tokenInitButton {{tokenOwnerClass}}'>
                         Sheet
                     </button>
                 </span>
@@ -46,7 +46,7 @@
         </div>
     </template>
 
-    <div id="initBox">
+    <div id='initBox'>
         <div id='initHeader'>
             <button class='initButton' data-initcommand='sortInitiative'>Sort</button>
             <button class='initButton' data-initcommand='nextInitiative'>Next</button>
@@ -54,6 +54,10 @@
             <span id='initRound'></span>
         </div>
         <div id='initList'></div>
+    </div>
+
+    <div id='sheetBox'>
+
     </div>
 
 </body>

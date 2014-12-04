@@ -38,6 +38,11 @@
     width: 400px;
 }
 
+#sheetBox {
+    float: right;
+}
+
+
 .tokenInitName {
     display: inline-block;
     vertical-align: top;
