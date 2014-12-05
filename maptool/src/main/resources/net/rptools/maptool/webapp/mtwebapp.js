@@ -11,6 +11,10 @@
  * along with this source Code.  If not, see <http://www.gnu.org/licenses/>
  */
 
+var MapToolAPI = {};
+
+var MapTool = {};
+
 
 $(document).ready(function() {
 
@@ -23,13 +27,13 @@ $(document).ready(function() {
     // Create the web socket for the information exchange.
     //
     ////////////////////////////////////////////////////////////////////////////
-    var ws = new WebSocket('ws:' + document.location.host + '/ws/');
+    MapTool.ws = new WebSocket('ws:' + document.location.host + '/ws/');
 
-    ws.onopen = function() {
+    MapTool.ws.onopen = function() {
         console.log("Opened");
     };
 
-    ws.onmessage = function(event) {
+    MapTool.ws.onmessage = function(event) {
         if (event.data === 'keep-alive') {
             console.log('Received keep alive');
         } else {
@@ -37,15 +41,17 @@ $(document).ready(function() {
             var msg = jQuery.parseJSON(event.data);
             if (msg.messageType === 'initiative') {
                 updateInitiative(msg);
+            } else if (msg.messageType === 'propertyTypes') {
+                updatePropertyTypes(msg);
             }
         }
     };
 
-    ws.onclose = function() {
+    MapTool.ws.onclose = function() {
         console.log("Closed");
     };
 
-    ws.onerror = function(err) {
+    MapTool.ws.onerror = function(err) {
         console.log("Error: " + err);
     };
 
@@ -53,8 +59,8 @@ $(document).ready(function() {
     // Make sure that we explicitly close the web socket before before browser disposed of page incase the
     // browser doesn't actually do it.
     window.onbeforeunload = function() {
-        ws.onclose = function () {}; // disable onclose handler first
-        ws.close()
+        MapTool.ws.onclose = function () {}; // disable onclose handler first
+        MapTool.ws.close()
     };
 
     ////////////////////////////////////////////////////////////////////////////
@@ -126,12 +132,25 @@ $(document).ready(function() {
         $('#initRound').html(currentRound);
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // Function used to update the property types for tokens.
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    function updatePropertyTypes(data) {
+        data.propertyTypes.forEach(function(ptype) {
+            var templateName = ptype.name.replace(' ', '-');
+            var template;
+            template = "<template id = '" + + "'>";
+            template = "</template>"
+        });
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     // Add call back to the initiative buttons.
     $('.initButton').on('click', function() {
         console.log($(this));
-        ws.send(JSON.stringify(
+        MapTool.ws.send(JSON.stringify(
             {
                 messageType: 'initiative',
                 data: {
@@ -147,7 +166,7 @@ $(document).ready(function() {
     $('#initList').delegate('.tokenInitButton', 'click', function() {
         console.log($(this));
         console.log($(this).data('tokenid'));
-        ws.send(JSON.stringify(
+        MapTool.ws.send(JSON.stringify(
             {
                 messageType: 'initiative',
                 data: {
