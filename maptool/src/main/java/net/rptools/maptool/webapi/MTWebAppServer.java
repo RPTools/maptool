@@ -154,13 +154,12 @@ public class MTWebAppServer {
 
 
 
-        ContextHandler tokenInfoContext = new ContextHandler();
-        //tokenInfoContext
-        tokenInfoContext.setContextPath("/token");
-        tokenInfoContext.setLogger(new StdErrLog());
-        tokenInfoContext.setHandler(new TokenInfoHandler());
+        ContextHandler tokenImageContext = new ContextHandler();
+        tokenImageContext.setContextPath("/token");
+        tokenImageContext.setLogger(new StdErrLog());
+        tokenImageContext.setHandler(new TokenImageHandler());
 
-        handlers.addHandler(tokenInfoContext);
+        handlers.addHandler(tokenImageContext);
 
         server.setHandler(handlers);
 
@@ -181,7 +180,7 @@ public class MTWebAppServer {
             @Override
             public void run() {
                 JSONObject data = new JSONObject();
-                MTWebClientManager.getInstance().sendToAllSessions("keepalive", data);
+                MTWebClientManager.getInstance().sendToAllSessions("keepalive", "message-1", data);
             }
         }, 1, 1, TimeUnit.MINUTES);
 

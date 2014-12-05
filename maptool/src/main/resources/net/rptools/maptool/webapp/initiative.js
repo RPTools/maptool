@@ -13,21 +13,37 @@
 
 
 
-var ws = new WebSocket('ws:' + document.location.host + '/ws/');
+$(document).ready(function() {
 
-ws.onopen = function() {
-    console.log("Opened");
-    //ws.send("getInitiative");
-};
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // Add call back to the initiative buttons.
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    $('.initButton').on('click', function() {
+        var initCommand = $(this).data('initcommand');
 
-ws.onmessage = function(event) {
-    console.log("Message: " + event.data);
-};
+        switch (initCommand) {
+            case 'nextInitiative':
+                MapToolAPI.initative.nextInitiative();
+                break;
+            case 'previousInitiative':
+                MapToolAPI.initative.previousInitiative();
+                break;
+            case 'sortInitiative':
+                MapToolAPI.initative.sortInitiative();
+                break;
+        }
+    });
 
-ws.onclose = function() {
-    console.log("Closed");
-};
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // Add call back to the initiative hold buttons.
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    $('#initList').delegate('.tokenInitButton', 'click', function() {
+        MapToolAPI.initative.toggleHold($(this).data('tokenid'), $(this).data('tokenindex'));
+    });
 
-ws.onerror = function(err) {
-    console.log("Error: " + err);
-};
+
+});

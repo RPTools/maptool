@@ -13,9 +13,9 @@
 
 package net.rptools.maptool.webapi;
 
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -25,8 +25,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class TokenImageHandler extends AbstractHandler {
@@ -60,35 +58,10 @@ public class TokenImageHandler extends AbstractHandler {
     }
 
 
-    private Token findToken(String tokenId) {
-        final GUID id = new GUID(tokenId);
-
-        final List<Token> tokenList = new ArrayList<>();
-
-        List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-        for (ZoneRenderer zr : zrenderers) {
-            tokenList.addAll(zr.getZone().getTokensFiltered(new Zone.Filter() {
-                public boolean matchToken(Token t) {
-                    return t.getId().equals(id);
-                }
-            }));
-
-            if (tokenList.size() > 0) {
-                System.out.println("DEBUG: Here (> 0)");
-                break;
-            }
-        }
-
-        if (tokenList.size() > 0) {
-            return tokenList.get(0);
-        } else {
-            return null;
-        }
-    }
 
     private boolean sendImage(HttpServletResponse response, String tokenId) throws IOException {
         System.out.println("DEBUG: Here (> 0) as well");
-        Token token = findToken(tokenId);
+        Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);
         if (token == null) {
             return false;
             // FIXME: log this error
@@ -114,7 +87,7 @@ public class TokenImageHandler extends AbstractHandler {
     private boolean sendPortrait(HttpServletResponse response,  String tokenId) throws IOException {
 
         System.out.println("DEBUG: Here (> 0) as well");
-        Token token = findToken(tokenId);
+        Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);
         if (token == null) {
             return false;
             // FIXME: log this error
@@ -141,7 +114,7 @@ public class TokenImageHandler extends AbstractHandler {
     private boolean sendPortraitOrImage(HttpServletResponse response,  String tokenId) throws IOException {
 
         System.out.println("DEBUG: Here (> 0) as well");
-        Token token = findToken(tokenId);
+        Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);
         if (token == null) {
             return false;
             // FIXME: log this error

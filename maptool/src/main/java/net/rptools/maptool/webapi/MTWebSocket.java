@@ -20,6 +20,9 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import java.io.IOException;
 
 public class MTWebSocket extends WebSocketAdapter {
+
+    public static String INITIATED_MESSAGE_ID = "initiated-message";
+
     /**
      * The Session of this socket.
      */
@@ -71,17 +74,22 @@ public class MTWebSocket extends WebSocketAdapter {
     }
 
 
+    void sendMessage(String messageType, JSONObject data) {
+        sendMessage(messageType, INITIATED_MESSAGE_ID, data);
+    }
+
     /**
      * Sends a message to the client.
      *
      * @param messageType The type of the message.
+     * @param inResponseTo The message this is a response to.
      * @param data The data in the message.
      */
-    void sendMessage(String messageType, JSONObject data) {
+    void sendMessage(String messageType, String inResponseTo, JSONObject data) {
         JSONObject message = new JSONObject();
         message.put("messageType", messageType);
         message.put("data", data);
-
+        message.put("messageId", inResponseTo);
         try {
             session.getRemote().sendString(message.toString());
             System.out.println("DEBUG: Wrote: " + message.toString());

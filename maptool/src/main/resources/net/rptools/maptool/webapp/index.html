@@ -20,6 +20,7 @@
     <script type='text/javascript' src='bower_components/jquery/dist/jquery.js'></script>
     <script type='text/javascript' src='bower_components/handlebars/handlebars.js'></script>
     <script type='text/javascript' src='mtwebapp.js'></script>
+    <script type='text/javascript' src='initiative.js'></script>
 </head>
 <body>
 
@@ -44,6 +45,15 @@
                 </span>
             </div>
         </div>
+    </template>
+
+    <template id='property-sheet'>
+        <table>
+        {{#each sheetProperties}}
+            <tr>{{name}}</tr>
+            <td>{{value}}</td>
+        {{/#each}}
+        </table>
     </template>
 
     <div id='initBox'>

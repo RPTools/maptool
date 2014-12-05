@@ -144,6 +144,10 @@ public class WebAppInitiative {
         mtws.sendMessage("initiative", getInitiativeDetails());
     }
 
+    void sendInitiative(MTWebSocket mtws, String inReponseTo) {
+        mtws.sendMessage("initiative", inReponseTo,  getInitiativeDetails());
+    }
+
     void sendInitiative() {
         JSONObject init = getInitiativeDetails();
         MTWebClientManager.getInstance().sendToAllSessions("initiative", init);
