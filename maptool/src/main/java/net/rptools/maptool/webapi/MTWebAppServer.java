@@ -180,7 +180,7 @@ public class MTWebAppServer {
             @Override
             public void run() {
                 JSONObject data = new JSONObject();
-                MTWebClientManager.getInstance().sendToAllSessions("keepalive", "message-1", data);
+                MTWebClientManager.getInstance().sendToAllSessions("keepalive", data);
             }
         }, 1, 1, TimeUnit.MINUTES);
 

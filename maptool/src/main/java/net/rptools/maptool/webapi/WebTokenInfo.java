@@ -19,7 +19,6 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import java.util.ArrayList;
@@ -68,7 +67,7 @@ public class WebTokenInfo {
     }
 
 
-    void sendTokenInfo(MTWebSocket mtws, JSONObject data) {
+    void sendTokenInfo(MTWebSocket mtws, String inResponseTo, JSONObject data) {
 
         String tokenId = data.getString("tokenId");
         Token token = findTokenFromId(tokenId);
@@ -80,26 +79,33 @@ public class WebTokenInfo {
         }
 
         JSONObject jobj = new JSONObject();
-        jobj.put("messageType", "tokenProperties");
         jobj.put("tokenId", tokenId);
+        jobj.put("name", token.getName());
+        jobj.put("label", token.getLabel());
+        jobj.put("notes", token.getNotes());
 
-        JSONArray jpropArray = new JSONArray();
+
+        JSONObject jprop = new JSONObject();
 
         for (TokenProperty tp : MapTool.getCampaign().getTokenPropertyList(token.getPropertyType())) {
-            JSONObject jprop = new JSONObject();
-            jprop.put("name", tp.getName());
+            JSONObject jp= new JSONObject();
+            jp.put("name", tp.getName());
             if (tp.getShortName() != null) {
-                jprop.put("shortName", tp.getShortName());
+                jp.put("shortName", tp.getShortName());
             }
             if (tp.getDefaultValue() != null) {
-                jprop.put("defaultValue", tp.getDefaultValue());
+                jp.put("defaultValue", tp.getDefaultValue());
             }
-            jprop.put("value", token.getProperty(tp.getName()));
-            jprop.put("showOnStatSheet", tp.isShowOnStatSheet() ? "true" : "false");
+            jp.put("value", token.getProperty(tp.getName()));
+            jp.put("showOnStatSheet", tp.isShowOnStatSheet());
 
-            jpropArray.add(jprop);
+            jprop.put(tp.getName(), jp);
         }
 
+        jobj.put("properties", jprop);
+
+
+        mtws.sendMessage("tokenInfo", inResponseTo, jobj);
 
     }
 }

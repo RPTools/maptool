@@ -118,14 +118,15 @@ public class WebAppInitiative {
                 JSONObject tokJSon = new JSONObject();
                 tokJSon.put("id", token.getToken().getId().toString());
                 tokJSon.put("name", token.getToken().getName());
-                tokJSon.put("holding", token.isHolding() ? "true" : "false");
+                tokJSon.put("holding", token.isHolding());
                 tokJSon.put("initiative", token.getState());
                 tokJSon.put("tokenIndex", index);
-                if (AppUtil.playerOwns(token.getToken())) {
+                /*if (AppUtil.playerOwns(token.getToken())) {
                     tokJSon.put("playerOwns", "true");
                 } else {
                     tokJSon.put("playerOwns", "false");
-                }
+                }*/
+                tokJSon.put("playerOwns", AppUtil.playerOwns(token.getToken()));
                 tokJSon.put("isOwner", "false");
                 tokArray.add(tokJSon);
             }

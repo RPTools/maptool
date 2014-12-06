@@ -21,7 +21,6 @@ import java.io.IOException;
 
 public class MTWebSocket extends WebSocketAdapter {
 
-    public static String INITIATED_MESSAGE_ID = "initiated-message";
 
     /**
      * The Session of this socket.
@@ -51,9 +50,15 @@ public class MTWebSocket extends WebSocketAdapter {
         // FIXME: need to test this is valid
         try {
             JSONObject json = JSONObject.fromObject(message);
-            if ("initiative".equals(json.get("messageType"))) {
+            String messageType = json.getString("messageType");
+            String messageId = json.getString("messageId");
+            JSONObject data = json.getJSONObject("data");
+
+            if ("initiative".equals(messageType)) {
                 System.out.println("DEBUG: Got an initiative message");
-                WebAppInitiative.getInstance().processInitiativeMessage(json.getJSONObject("data"));
+                WebAppInitiative.getInstance().processInitiativeMessage(data);
+            } else if ("tokenInfo".equals(messageType)) {
+                WebTokenInfo.getInstance().sendTokenInfo(this, messageId, data);
             }
         } catch (Exception e) {
             e.printStackTrace(); // FIXME: fix this to deal with error properly.
@@ -75,7 +80,7 @@ public class MTWebSocket extends WebSocketAdapter {
 
 
     void sendMessage(String messageType, JSONObject data) {
-        sendMessage(messageType, INITIATED_MESSAGE_ID, data);
+        sendMessage(messageType, null, data);
     }
 
     /**
@@ -89,7 +94,10 @@ public class MTWebSocket extends WebSocketAdapter {
         JSONObject message = new JSONObject();
         message.put("messageType", messageType);
         message.put("data", data);
-        message.put("messageId", inResponseTo);
+        if (inResponseTo != null) {
+            message.put("inResponseTo", inResponseTo);
+        }
+
         try {
             session.getRemote().sendString(message.toString());
             System.out.println("DEBUG: Wrote: " + message.toString());

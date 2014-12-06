@@ -63,7 +63,6 @@ var __MapTool = new (function __MapToolClient() {
     //
     ////////////////////////////////////////////////////////////////////////////
     var wsDespatchCallback = function(event) {
-        console.log(event);
         var msg = jQuery.parseJSON(event.data);
 
         if (msg.messageType === 'keepalive') {
@@ -72,17 +71,18 @@ var __MapTool = new (function __MapToolClient() {
 
         var callback;
 
-        if (hasCallback(msg.messageType, msg.messageId)) {
-            callback = getAndRemoveCallback(msg.messageType, msg.messageId);
+        if (msg.inResponseTo && hasCallback(msg.messageType, msg.inResponseTo)) {
+            callback = getAndRemoveCallback(msg.messageType, msg.inResponseTo);
         } else {
-            callback = getListener(msg.messageType, msg.messageId);
+            callback = getListener(msg.messageType);
         }
 
         if (typeof(callback) === 'function') {
             callback(msg.data);
         } else {
             console.log('Attempted a callback on something that is not a function, messageType = ' + msg.messageType);
-            console.log(data);
+            console.log(callback);
+            console.log(msg.data);
             // FIXME: something (but what) should happen here
         }
     }
@@ -244,10 +244,10 @@ var __MapTool = new (function __MapToolClient() {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Constructor for MapToolAPI object.
+// MapTool API object.
 //
 ////////////////////////////////////////////////////////////////////////////////
-var MapToolAPI = new (function() {
+var MapTool = new (function() {
 
     ////////////////////////////////////////////////////////////////////////////
     //
@@ -283,77 +283,43 @@ var MapToolAPI = new (function() {
         __MapTool.sendMessage(messageType, data, callback);
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // Initiative functions.
+    //
+    ////////////////////////////////////////////////////////////////////////////
     this.initative = new (function() {
 
         // Values used when we send initiative commands back.
         var currentInitiative;
         var currentRound;
 
+        var initiativeListener = null;
+
+
         ////////////////////////////////////////////////////////////////////////////
         //
-        // Function used to update the initiative values on the web page.
+        // Function that gets called when there is a change to the initiative
         //
         ////////////////////////////////////////////////////////////////////////////
         var updateInitiative = function(data) {
-            console.log('Received Initiative');
-            var initList =  $('#initList');
-            initList.empty();
-
-
             currentInitiative = data.current;
             currentRound = data.round;
 
-
-            var source = $('#init-element').html();
-            var template = Handlebars.compile(source);
-
-            var entries = data.initiative;
-            var toggle = 0;
-            for (var i = 0; i < entries.length; i++) {
-                console.log('name = ' + entries[i].name + ' => ' + entries[i].initiative);
-                var initDivClass;
-                if (entries[i].holding === 'true') {
-                    initDivClass = 'initHolding';
-                } else if (currentInitiative == i) {
-                    initDivClass = 'initCurrent';
-                } else if (i < data.current) {
-                    initDivClass = 'initDone';
-                } else {
-                    initDivClass = 'initPending';
-                }
-
-                var ownerClass;
-                if (entries[i].playerOwns === 'true') {
-                    ownerClass = 'playerIsOwner';
-                } else {
-                    ownerClass = 'playerIsNotOwner';
-                }
-
-                /* FIXME: Remove this its just for testing.
-                 if (toggle == 0) {
-                 toggle = 1;
-                 ownerClass = 'playerIsOwner';
-                 } else {
-                 toggle = 0;
-                 ownerClass = 'playerIsNotOwner';
-                 }*/
-
-
-                var vals = {
-                    'tokenName': entries[i].name,
-                    'initiative': entries[i].initiative,
-                    'initDivClass': initDivClass,
-                    'tokenIndex': entries[i].tokenIndex,
-                    'tokenId': entries[i].id,
-                    'tokenOwnerClass': ownerClass
-                };
-
-                var html = template(vals);
-                initList.append(html);
+            if (typeof(initiativeListener) === 'function') {
+                initiativeListener(data);
             }
-            $('#initRound').html(currentRound);
-        };
+        }
 
+
+        ////////////////////////////////////////////////////////////////////////////
+        //
+        // Gets the current initiative round.
+        //
+        ////////////////////////////////////////////////////////////////////////////
+        this.getCurrentRound = function() {
+            return currentRound;
+        }
 
         ////////////////////////////////////////////////////////////////////////////
         //
@@ -361,7 +327,7 @@ var MapToolAPI = new (function() {
         //
         ////////////////////////////////////////////////////////////////////////////
         this.registerInitativeListener = function(listener) {
-            __MapTool.regisetListener('initiative', listener);
+            initiativeListener = listener;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -376,7 +342,7 @@ var MapToolAPI = new (function() {
                 currentRound: currentRound
             };
 
-            MapToolAPI.sendMessage('initiative', data);
+            MapTool.sendMessage('initiative', data);
         }
 
 
@@ -392,7 +358,7 @@ var MapToolAPI = new (function() {
                 currentRound: currentRound
             };
 
-            MapToolAPI.sendMessage('initiative', data);
+            MapTool.sendMessage('initiative', data);
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -407,7 +373,7 @@ var MapToolAPI = new (function() {
                 currentRound: currentRound
             };
 
-            MapToolAPI.sendMessage('initiative', data);
+            MapTool.sendMessage('initiative', data);
         }
 
 
@@ -425,59 +391,37 @@ var MapToolAPI = new (function() {
                 tokenIndex: tokenIndex
             };
 
-            MapToolAPI.sendMessage('initiative', data);
+            MapTool.sendMessage('initiative', data);
         }
 
 
         // Register the default initiative listener.
-        this.registerInitativeListener(updateInitiative);
+        __MapTool.regisetListener("initiative", updateInitiative);
 
     })();
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // Token related functions
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    this.token = new (function() {
+
+        ////////////////////////////////////////////////////////////////////////////
+        //
+        // Get token properties.
+        //
+        ////////////////////////////////////////////////////////////////////////////
+        this.getTokenProperties = function(tokenId, callback) {
+            var data = {
+                command: 'tokenProperty',
+                tokenId: tokenId
+            };
+
+            MapTool.sendMessage('tokenInfo', data, callback);
+        }
+    })();
+
 })();
 
-
-
-/*$(document).ready(function() {
-
-    ////////////////////////////////////////////////////////////////////////////
-    //
-    // Function used to update the property types for tokens.
-    //
-    ////////////////////////////////////////////////////////////////////////////
-    function updatePropertyTypes(data) {
-        data.propertyTypes.forEach(function(ptype) {
-            var templateName = ptype.name.replace(' ', '-');
-            var template;
-            template = '<template id = "' + + '">';
-            template += '</template>'
-        });
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    //
-    // Add call back to the initiative buttons.
-    //
-    ////////////////////////////////////////////////////////////////////////////
-    $('.initButton').on('click', function() {
-        var initCommand = $(this).data('initcommand');
-
-        switch (initCommand) {
-            case 'nextInitiative':
-                MapToolAPI.initative.nextInitiative();
-                break;
-            case 'previousInitiative':
-                MapToolAPI.initative.previousInitiative();
-                break;
-            case 'sortInitiative':
-                MapToolAPI.initative.sortInitiative();
-                break;
-        }
-    });
-
-    $('#initList').delegate('.tokenInitButton', 'click', function() {
-        MapToolAPI.initative.toggleHold($(this).data('tokenid'), $(this).data('tokenindex'));
-    });
-
-
-});
-*/

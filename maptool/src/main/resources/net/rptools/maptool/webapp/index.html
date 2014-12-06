@@ -49,20 +49,24 @@
         </div>
     </template>
 
-    <template id='sheet-portrait'>
+    <script type='text/x-handlebars-template' id='sheet-portrait'>
         <span>
-            <img src='/token/portraitOrImage/{{tokenId}}' id='sheetPortrait' />
+            <img src='/token/portraitOrImage/{{tokenId}}' id='sheetPortrait'  />
         </span>
-    </template>
+        <span>
+            <table>
+                <tbody>
+                {{#each sheetProperties}}
+                <tr>
+                    <th>{{name}}</th>
+                    <td>{{value}}</td>
+                </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </span>
+    </script>
 
-    <template id='property-sheet'>
-        <table>
-        {{#each sheetProperties}}
-            <tr>{{name}}</tr>
-            <td>{{value}}</td>
-        {{/#each}}
-        </table>
-    </template>
 
     <div id='initBox'>
         <div id='initHeader'>

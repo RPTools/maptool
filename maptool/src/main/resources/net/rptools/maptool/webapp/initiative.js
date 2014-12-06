@@ -21,7 +21,6 @@ $(document).ready(function() {
     //
     ////////////////////////////////////////////////////////////////////////////
     var updateInitiative = function(data) {
-        console.log('Received Initiative');
         var initList =  $('#initList');
         initList.empty();
 
@@ -36,9 +35,8 @@ $(document).ready(function() {
         var entries = data.initiative;
         var toggle = 0;
         for (var i = 0; i < entries.length; i++) {
-            console.log('name = ' + entries[i].name + ' => ' + entries[i].initiative);
             var initDivClass;
-            if (entries[i].holding === 'true') {
+            if (entries[i].holding) {
                 initDivClass = 'initHolding';
             } else if (currentInitiative == i) {
                 initDivClass = 'initCurrent';
@@ -49,7 +47,7 @@ $(document).ready(function() {
             }
 
             var ownerClass;
-            if (entries[i].playerOwns === 'true') {
+            if (entries[i].playerOwns) {
                 ownerClass = 'playerIsOwner';
             } else {
                 ownerClass = 'playerIsNotOwner';
