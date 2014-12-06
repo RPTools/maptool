@@ -17,6 +17,72 @@ $(document).ready(function() {
 
     ////////////////////////////////////////////////////////////////////////////
     //
+    // Function used to update the initiative values on the web page.
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    var updateInitiative = function(data) {
+        console.log('Received Initiative');
+        var initList =  $('#initList');
+        initList.empty();
+
+
+        currentInitiative = data.current;
+        currentRound = data.round;
+
+
+        var source = $('#init-element').html();
+        var template = Handlebars.compile(source);
+
+        var entries = data.initiative;
+        var toggle = 0;
+        for (var i = 0; i < entries.length; i++) {
+            console.log('name = ' + entries[i].name + ' => ' + entries[i].initiative);
+            var initDivClass;
+            if (entries[i].holding === 'true') {
+                initDivClass = 'initHolding';
+            } else if (currentInitiative == i) {
+                initDivClass = 'initCurrent';
+            } else if (i < data.current) {
+                initDivClass = 'initDone';
+            } else {
+                initDivClass = 'initPending';
+            }
+
+            var ownerClass;
+            if (entries[i].playerOwns === 'true') {
+                ownerClass = 'playerIsOwner';
+            } else {
+                ownerClass = 'playerIsNotOwner';
+            }
+
+            /* FIXME: Remove this its just for testing.
+             if (toggle == 0) {
+             toggle = 1;
+             ownerClass = 'playerIsOwner';
+             } else {
+             toggle = 0;
+             ownerClass = 'playerIsNotOwner';
+             }*/
+
+
+            var vals = {
+                'tokenName': entries[i].name,
+                'initiative': entries[i].initiative,
+                'initDivClass': initDivClass,
+                'tokenIndex': entries[i].tokenIndex,
+                'tokenId': entries[i].id,
+                'tokenOwnerClass': ownerClass
+            };
+
+            var html = template(vals);
+            initList.append(html);
+        }
+        $('#initRound').html(currentRound);
+    };
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    //
     // Add call back to the initiative buttons.
     //
     ////////////////////////////////////////////////////////////////////////////
@@ -25,13 +91,13 @@ $(document).ready(function() {
 
         switch (initCommand) {
             case 'nextInitiative':
-                MapToolAPI.initative.nextInitiative();
+                MapTool.initative.nextInitiative();
                 break;
             case 'previousInitiative':
-                MapToolAPI.initative.previousInitiative();
+                MapTool.initative.previousInitiative();
                 break;
             case 'sortInitiative':
-                MapToolAPI.initative.sortInitiative();
+                MapTool.initative.sortInitiative();
                 break;
         }
     });
@@ -42,8 +108,11 @@ $(document).ready(function() {
     //
     ////////////////////////////////////////////////////////////////////////////
     $('#initList').delegate('.tokenInitButton', 'click', function() {
-        MapToolAPI.initative.toggleHold($(this).data('tokenid'), $(this).data('tokenindex'));
+        MapTool.initative.toggleHold($(this).data('tokenid'), $(this).data('tokenindex'));
     });
+
+
+    MapTool.initative.registerInitativeListener(updateInitiative);
 
 
 });

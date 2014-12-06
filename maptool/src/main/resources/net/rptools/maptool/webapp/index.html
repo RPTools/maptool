@@ -21,6 +21,7 @@
     <script type='text/javascript' src='bower_components/handlebars/handlebars.js'></script>
     <script type='text/javascript' src='mtwebapp.js'></script>
     <script type='text/javascript' src='initiative.js'></script>
+    <script type='text/javascript' src='tokensheet.js'></script>
 </head>
 <body>
 
@@ -38,13 +39,20 @@
                         Hold
                     </button>
                 </span>
-                <span class='tokenSheetButton'>
-                    <button class='tokenInitButton {{tokenOwnerClass}}'>
+                <span>
+                    <button class='tokenSheetButton {{tokenOwnerClass}}'
+                            data-tokenid='{{tokenId}}'>
                         Sheet
                     </button>
                 </span>
             </div>
         </div>
+    </template>
+
+    <template id='sheet-portrait'>
+        <span>
+            <img src='/token/portraitOrImage/{{tokenId}}' id='sheetPortrait' />
+        </span>
     </template>
 
     <template id='property-sheet'>
@@ -59,16 +67,14 @@
     <div id='initBox'>
         <div id='initHeader'>
             <button class='initButton' data-initcommand='sortInitiative'>Sort</button>
-            <button class='initButton' data-initcommand='nextInitiative'>Next</button>
             <button class='initButton' data-initcommand='previousInitiative'>Previous</button>
+            <button class='initButton' data-initcommand='nextInitiative'>Next</button>
             <span id='initRound'></span>
         </div>
         <div id='initList'></div>
     </div>
 
-    <div id='sheetBox'>
-
-    </div>
+    <div id='sheetBox' />
 
 </body>
 </html>
