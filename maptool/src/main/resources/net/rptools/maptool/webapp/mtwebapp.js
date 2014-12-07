@@ -294,8 +294,18 @@ var MapTool = new (function() {
         var currentInitiative;
         var currentRound;
 
-        var initiativeListener = null;
+        var initiativeListeners = {};
 
+        var nextListenerSeq = 0;
+
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Gets the next sequence number for the listener handles.
+        //
+        ////////////////////////////////////////////////////////////////////////
+        var getNextListenerSeq = function() {
+            return nextListenerSeq++;
+        }
 
         ////////////////////////////////////////////////////////////////////////
         //
@@ -306,8 +316,11 @@ var MapTool = new (function() {
             currentInitiative = data.current;
             currentRound = data.round;
 
-            if (typeof(initiativeListener) === 'function') {
-                initiativeListener(data);
+            for (var handle in initiativeListeners) {
+                var listener = initiativeListeners[handle];
+                if (typeof(listener) === 'function') {
+                    listener(data);
+                }
             }
         }
 
@@ -327,7 +340,21 @@ var MapTool = new (function() {
         //
         ////////////////////////////////////////////////////////////////////////
         this.registerInitativeListener = function(listener) {
-            initiativeListener = listener;
+            var handle = 'listener:' + getNextListenerSeq();
+
+            initiativeListeners[handle] = listener;
+
+            return handle;
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Removes a initiative change listener.
+        //
+        ////////////////////////////////////////////////////////////////////////
+        this.removeListener = function(handle) {
+            delete initiativeListeners[handle];
         }
 
         ////////////////////////////////////////////////////////////////////////

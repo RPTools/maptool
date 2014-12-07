@@ -110,7 +110,7 @@ $(document).ready(function() {
     });
 
 
-    MapTool.initative.registerInitativeListener(updateInitiative);
+    var listenerHandle = MapTool.initative.registerInitativeListener(updateInitiative);
 
 
 });
