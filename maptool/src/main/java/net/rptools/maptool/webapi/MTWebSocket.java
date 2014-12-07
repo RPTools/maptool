@@ -59,6 +59,8 @@ public class MTWebSocket extends WebSocketAdapter {
                 WebAppInitiative.getInstance().processInitiativeMessage(data);
             } else if ("tokenInfo".equals(messageType)) {
                 WebTokenInfo.getInstance().sendTokenInfo(this, messageId, data);
+            } else if ("macro".equals(messageType)) {
+                WebTokenInfo.getInstance().processMacro(data);
             }
         } catch (Exception e) {
             e.printStackTrace(); // FIXME: fix this to deal with error properly.

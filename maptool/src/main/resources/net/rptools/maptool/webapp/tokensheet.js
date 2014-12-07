@@ -21,6 +21,7 @@ $(document).ready(function() {
     ////////////////////////////////////////////////////////////////////////////
     $('#initList').delegate('.tokenSheetButton', 'click', function() {
         MapTool.token.getTokenProperties($(this).data('tokenid'), function(data) {
+
             var source = $('#sheet-portrait').html();
             var template = Handlebars.compile(source);
             var vals = {
@@ -43,8 +44,61 @@ $(document).ready(function() {
 
             var sheetBox =  $('#sheetBox');
             sheetBox.html(html);
+
+
+
+            // First group together the buttons
+            var groups = {};
+            data.macros.forEach(function(macro) {
+                var group = macro.displayGroup;
+                if (!group) {
+                    group = 'No Group';
+                }
+
+                if (typeof(groups[group]) === 'undefined') {
+                    groups[group] = [];
+                }
+
+                groups[group].push(macro);
+            });
+
+
+            vals = {};
+            for (var group in groups) {
+                vals[group] = {
+                    group: group,
+                    macros: []
+                }
+
+                groups[group].forEach(function(macro) {
+                    vals[group].macros.push({
+                        label: macro.label,
+                        index: macro.index,
+                        tokenId: data.tokenId
+                    });
+                });
+            }
+
+
+            source = $('#macro-buttons').html();
+            template = Handlebars.compile(source);
+            html = template(vals);
+            var macroList = $('#macroList');
+            macroList.html(html);
+
         });
 
+    });
+
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // Register call backs for macro buttons.
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    $('#macroList').delegate('.macroButton', 'click', function() {
+        MapTool.token.callMacro($(this).data('tokenid'), $(this).data('macro-index'));
     });
 
 });

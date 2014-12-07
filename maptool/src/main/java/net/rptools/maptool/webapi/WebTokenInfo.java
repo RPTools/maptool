@@ -15,10 +15,8 @@ package net.rptools.maptool.webapi;
 
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.TokenProperty;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import java.util.ArrayList;
@@ -104,8 +102,40 @@ public class WebTokenInfo {
 
         jobj.put("properties", jprop);
 
+        JSONArray jmacros = new JSONArray();
+
+        for (MacroButtonProperties macro : token.getMacroList(false)) {
+            JSONObject jmb = new JSONObject();
+            jmb.put("label", macro.getLabel());
+            jmb.put("tooltip", macro.getEvaluatedToolTip());
+            jmb.put("index", macro.getIndex());
+            jmb.put("fontColor", macro.getFontColorAsHtml());
+            jmb.put("displayGroup", macro.getGroupForDisplay());
+            jmb.put("group", macro.getGroup());
+            jmb.put("index", macro.getIndex());
+            jmb.put("autoExecute", macro.getAutoExecute());
+            jmb.put("maxWidth", macro.getMaxWidth());
+            jmb.put("minWidth", macro.getMinWidth());
+            jmb.put("applyToTokens", macro.getApplyToTokens());
+
+            jmacros.add(jmb);
+        }
+
+
+        jobj.put("macros", jmacros);
 
         mtws.sendMessage("tokenInfo", inResponseTo, jobj);
 
+    }
+
+
+    void processMacro(JSONObject data) {
+        // FIXME: need to check parameters
+        if ("callMacro".equalsIgnoreCase(data.getString("command"))) {
+            Token token = findTokenFromId(data.getString("tokenId"));
+
+            MacroButtonProperties macro = token.getMacro(data.getInt("macroIndex"), false);
+            macro.executeMacro(token.getId());
+        }
     }
 }

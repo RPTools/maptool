@@ -67,18 +67,46 @@
         </span>
     </script>
 
+    <script type='text/x-handlebars-template' id='macro-buttons'>
+        <table>
+            <tbody>
+            {{#each this}}
+            <tr>
+                <th>{{group}}</th>
+            </tr>
+            {{#each macros}}
+            <tr>
+                <td>
+                    <button name='macroButton-{{label}}'
+                            class='macroButton'
+                            data-macro-index='{{index}}'
+                            data-tokenid='{{tokenId}}'>
+                        {{label}}
+                    </button>
+                </td>
+            </tr>
+            {{/each}}
+            {{/each}}
+            </tbody>
+        </table>
+    </script>
 
-    <div id='initBox'>
-        <div id='initHeader'>
-            <button class='initButton' data-initcommand='sortInitiative'>Sort</button>
-            <button class='initButton' data-initcommand='previousInitiative'>Previous</button>
-            <button class='initButton' data-initcommand='nextInitiative'>Next</button>
-            <span id='initRound'></span>
+
+    <div>
+        <div id='initBox'>
+            <div id='initHeader'>
+                <button class='initButton' data-initcommand='sortInitiative'>Sort</button>
+                <button class='initButton' data-initcommand='previousInitiative'>Previous</button>
+                <button class='initButton' data-initcommand='nextInitiative'>Next</button>
+                <span id='initRound'></span>
+            </div>
+            <div id='initList'></div>
         </div>
-        <div id='initList'></div>
-    </div>
 
-    <div id='sheetBox' />
+        <div id='sheetBox' />
+    </div>
+    <div id = 'macroList' />
+
 
 </body>
 </html>
