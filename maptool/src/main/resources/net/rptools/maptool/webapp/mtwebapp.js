@@ -249,6 +249,56 @@ var __MapTool = new (function __MapToolClient() {
 ////////////////////////////////////////////////////////////////////////////////
 var MapTool = new (function() {
 
+
+
+    var ListenerSupport = function() {
+        var nextListenerSeq = 0;
+        var initiativeListeners  = {};
+
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Gets the next sequence number for the listener handles.
+        //
+        ////////////////////////////////////////////////////////////////////////
+        var getNextListenerSeq = function() {
+            return nextListenerSeq++;
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Register a listener for initiative changes.
+        //
+        ////////////////////////////////////////////////////////////////////////
+        this.registerListener = function(listener) {
+            var handle = 'listener:' + getNextListenerSeq();
+
+            initiativeListeners[handle] = listener;
+
+            return handle;
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Removes a initiative change listener.
+        //
+        ////////////////////////////////////////////////////////////////////////
+        this.removeListener = function(handle) {
+            delete initiativeListeners[handle];
+        }
+
+        this.updateListeners = function(data) {
+            for (var handle in initiativeListeners) {
+                var listener = initiativeListeners[handle];
+                if (typeof(listener) === 'function') {
+                    listener(data);
+                }
+            }
+        }
+
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     //
     // Gets the url for retrieving the image of the token.
@@ -294,18 +344,7 @@ var MapTool = new (function() {
         var currentInitiative;
         var currentRound;
 
-        var initiativeListeners = {};
-
-        var nextListenerSeq = 0;
-
-        ////////////////////////////////////////////////////////////////////////
-        //
-        // Gets the next sequence number for the listener handles.
-        //
-        ////////////////////////////////////////////////////////////////////////
-        var getNextListenerSeq = function() {
-            return nextListenerSeq++;
-        }
+        var listenerSupport = new ListenerSupport();
 
         ////////////////////////////////////////////////////////////////////////
         //
@@ -315,13 +354,26 @@ var MapTool = new (function() {
         var updateInitiative = function(data) {
             currentInitiative = data.current;
             currentRound = data.round;
+            listenerSupport.updateListeners(data);
+        }
 
-            for (var handle in initiativeListeners) {
-                var listener = initiativeListeners[handle];
-                if (typeof(listener) === 'function') {
-                    listener(data);
-                }
-            }
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Register a listener for initiative changes.
+        //
+        ////////////////////////////////////////////////////////////////////////
+        this.registerInitativeListener = function(listener) {
+            return listenerSupport.registerListener(listener);
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Removes a initiative change listener.
+        //
+        ////////////////////////////////////////////////////////////////////////
+        this.removeInitiativeListener = function(handle) {
+            listenerSupport.removeListener(handle);
         }
 
 
@@ -334,28 +386,6 @@ var MapTool = new (function() {
             return currentRound;
         }
 
-        ////////////////////////////////////////////////////////////////////////
-        //
-        // Register a listener for initiative changes.
-        //
-        ////////////////////////////////////////////////////////////////////////
-        this.registerInitativeListener = function(listener) {
-            var handle = 'listener:' + getNextListenerSeq();
-
-            initiativeListeners[handle] = listener;
-
-            return handle;
-        }
-
-
-        ////////////////////////////////////////////////////////////////////////
-        //
-        // Removes a initiative change listener.
-        //
-        ////////////////////////////////////////////////////////////////////////
-        this.removeListener = function(handle) {
-            delete initiativeListeners[handle];
-        }
 
         ////////////////////////////////////////////////////////////////////////
         //
@@ -433,6 +463,7 @@ var MapTool = new (function() {
     //
     ////////////////////////////////////////////////////////////////////////////
     this.token = new (function() {
+
 
         ////////////////////////////////////////////////////////////////////////
         //
