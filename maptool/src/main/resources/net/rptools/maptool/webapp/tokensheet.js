@@ -115,7 +115,7 @@ $(document).ready(function() {
     //
     ////////////////////////////////////////////////////////////////////////////
     MapTool.token.registerTokenChangeListener(function(data) {
-        if (data.tokensChanged && $.inArray(data.tokensChanged, displayedToken)) {
+        if (displayedToken && data.tokensChanged && $.inArray(data.tokensChanged, displayedToken)) {
             MapTool.token.getTokenProperties(displayedToken, updateSheet);
         }
     });

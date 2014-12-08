@@ -127,7 +127,6 @@ public class WebAppInitiative {
                     tokJSon.put("playerOwns", "false");
                 }*/
                 tokJSon.put("playerOwns", AppUtil.playerOwns(token.getToken()));
-                tokJSon.put("isOwner", "false");
                 tokArray.add(tokJSon);
             }
             index++;

@@ -109,6 +109,7 @@ public class WebTokenInfo {
 
 
     public Token findTokenFromId(String tokenId) {
+        System.out.println("DEBUG: tokenId = " + tokenId);
         final GUID id = new GUID(tokenId);
 
         final List<Token> tokenList = new ArrayList<>();
