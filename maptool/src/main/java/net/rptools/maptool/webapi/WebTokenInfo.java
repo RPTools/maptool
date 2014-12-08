@@ -13,6 +13,8 @@
 
 package net.rptools.maptool.webapi;
 
+import net.rptools.lib.AppEvent;
+import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.*;
@@ -21,6 +23,8 @@ import net.sf.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 
 public class WebTokenInfo {
@@ -28,7 +32,74 @@ public class WebTokenInfo {
     private static final WebTokenInfo instance = new WebTokenInfo();
 
 
-    private WebTokenInfo() {}
+    private final AppEventListener appEventListener;
+    private final Map<Zone, ModelChangeListener> modelChangeListeners = new WeakHashMap<>();
+
+
+
+    private WebTokenInfo() {
+        // Add listener for new zones.
+        appEventListener = new AppEventListener() {
+            @Override
+            public void handleAppEvent(AppEvent appEvent) {
+                if (appEvent.getId().equals(MapTool.ZoneEvent.Added)) {
+                    addTokenChangeListeners();
+                }
+            }
+        };
+
+        addTokenChangeListeners();
+    }
+
+
+    // TODO: This could be a single listener for all zones
+    private void addTokenChangeListeners() {
+        for (Zone zone : MapTool.getCampaign().getZones()) {
+            if (modelChangeListeners.containsKey(zone) == false) {
+                modelChangeListeners.put(zone, new ModelChangeListener() {
+                    @Override
+                    public void modelChanged(ModelChangeEvent event) {
+                        System.out.println("DEBUG: Event " + event.eventType);
+                        if (event.eventType == Zone.Event.TOKEN_CHANGED) {
+                            tokenChanged((Token)event.getArg());
+                        } else if (event.eventType == Zone.Event.TOKEN_ADDED) {
+                            tokenAdded((Token) event.getArg());
+                        } else if (event.eventType == Zone.Event.TOKEN_REMOVED) {
+                            tokenRemoved((Token) event.getArg());
+                        }
+                    }
+                });
+                zone.addModelChangeListener(modelChangeListeners.get(zone));
+            }
+        }
+    }
+
+    private void tokenChanged(Token token) {
+        JSONObject jobj = new JSONObject();
+        JSONArray tokenArray = new JSONArray();
+        tokenArray.add(token.getId().toString());
+        jobj.put("tokensChanged", tokenArray);
+
+        MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
+    }
+
+    private void tokenAdded(Token token) {
+        JSONObject jobj = new JSONObject();
+        JSONArray tokenArray = new JSONArray();
+        tokenArray.add(token.getId().toString());
+        jobj.put("tokensAdded", tokenArray);
+
+        MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
+    }
+
+    private void tokenRemoved(Token token) {
+        JSONObject jobj = new JSONObject();
+        JSONArray tokenArray = new JSONArray();
+        tokenArray.add(token.getId().toString());
+        jobj.put("tokensRemoved", tokenArray);
+
+        MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
+    }
 
 
 
@@ -130,7 +201,8 @@ public class WebTokenInfo {
 
 
     void processMacro(JSONObject data) {
-        // FIXME: need to check parameters
+        // FIXME: need to check parameters.
+        // FIXME: need to check permissions.
         if ("callMacro".equalsIgnoreCase(data.getString("command"))) {
             Token token = findTokenFromId(data.getString("tokenId"));
 

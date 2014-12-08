@@ -14,79 +14,86 @@
 
 $(document).ready(function() {
 
+    var displayedToken = null;
+
+
+    var updateSheet = function(data) {
+
+        var source = $('#sheet-portrait').html();
+        var template = Handlebars.compile(source);
+        var vals = {
+            tokenId: data.tokenId,
+            tokenName: data.name,
+            sheetProperties: []
+        };
+
+        for (var pname in data.properties) {
+            var prop = data.properties[pname];
+            if (prop) {
+                var value = prop.value;
+                if (value && prop.showOnStatSheet) {
+                    vals.sheetProperties.push({name: pname, value: value});
+                }
+            }
+        }
+
+        var html = template(vals);
+
+        var sheetBox =  $('#sheetBox');
+        sheetBox.html(html);
+
+
+
+        // First group together the buttons
+        var groups = {};
+        data.macros.forEach(function(macro) {
+            var group = macro.displayGroup;
+            if (!group) {
+                group = 'No Group';
+            }
+
+            if (typeof(groups[group]) === 'undefined') {
+                groups[group] = [];
+            }
+
+            groups[group].push(macro);
+        });
+
+
+        vals = {};
+        for (var group in groups) {
+            vals[group] = {
+                group: group,
+                macros: []
+            }
+
+            groups[group].forEach(function(macro) {
+                vals[group].macros.push({
+                    label: macro.label,
+                    index: macro.index,
+                    tokenId: data.tokenId
+                });
+            });
+        }
+
+
+        source = $('#macro-buttons').html();
+        template = Handlebars.compile(source);
+        html = template(vals);
+        var macroList = $('#macroList');
+        macroList.html(html);
+
+    };
+
     ////////////////////////////////////////////////////////////////////////////
     //
     // Add call back to the sheet buttons.
     //
     ////////////////////////////////////////////////////////////////////////////
     $('#initList').delegate('.tokenSheetButton', 'click', function() {
-        MapTool.token.getTokenProperties($(this).data('tokenid'), function(data) {
+        displayedToken = $(this).data('tokenid');
 
-            var source = $('#sheet-portrait').html();
-            var template = Handlebars.compile(source);
-            var vals = {
-                tokenId: data.tokenId,
-                tokenName: data.name,
-                sheetProperties: []
-            };
-
-            for (var pname in data.properties) {
-                var prop = data.properties[pname];
-                if (prop) {
-                    var value = prop.value;
-                    if (value && prop.showOnStatSheet) {
-                        vals.sheetProperties.push({name: pname, value: value});
-                    }
-                }
-            }
-
-            var html = template(vals);
-
-            var sheetBox =  $('#sheetBox');
-            sheetBox.html(html);
-
-
-
-            // First group together the buttons
-            var groups = {};
-            data.macros.forEach(function(macro) {
-                var group = macro.displayGroup;
-                if (!group) {
-                    group = 'No Group';
-                }
-
-                if (typeof(groups[group]) === 'undefined') {
-                    groups[group] = [];
-                }
-
-                groups[group].push(macro);
-            });
-
-
-            vals = {};
-            for (var group in groups) {
-                vals[group] = {
-                    group: group,
-                    macros: []
-                }
-
-                groups[group].forEach(function(macro) {
-                    vals[group].macros.push({
-                        label: macro.label,
-                        index: macro.index,
-                        tokenId: data.tokenId
-                    });
-                });
-            }
-
-
-            source = $('#macro-buttons').html();
-            template = Handlebars.compile(source);
-            html = template(vals);
-            var macroList = $('#macroList');
-            macroList.html(html);
-
-        });
+        MapTool.token.getTokenProperties(displayedToken, updateSheet);
 
     });
 
@@ -100,5 +107,20 @@ $(document).ready(function() {
     $('#macroList').delegate('.macroButton', 'click', function() {
         MapTool.token.callMacro($(this).data('tokenid'), $(this).data('macro-index'));
     });
+
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // Register call back for token changes.
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    MapTool.token.registerTokenChangeListener(function(data) {
+        console.log(data);
+        if (data.tokensChanged && $.inArray(data.tokensChanged, displayedToken)) {
+            MapTool.token.getTokenProperties(displayedToken, updateSheet);
+        }
+    });
+
 
 });

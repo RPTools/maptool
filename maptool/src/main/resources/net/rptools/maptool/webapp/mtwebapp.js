@@ -452,7 +452,7 @@ var MapTool = new (function() {
         }
 
 
-        // Register the default initiative listener.
+        // Register the initiative listener.
         __MapTool.regisetListener("initiative", updateInitiative);
 
     })();
@@ -463,6 +463,37 @@ var MapTool = new (function() {
     //
     ////////////////////////////////////////////////////////////////////////////
     this.token = new (function() {
+
+        var listenerSupport = new ListenerSupport();
+
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Function that gets called when there is a change to a token
+        //
+        ////////////////////////////////////////////////////////////////////////
+        var tokenChange = function(data) {
+            listenerSupport.updateListeners(data);
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Register a listener for initiative changes.
+        //
+        ////////////////////////////////////////////////////////////////////////
+        this.registerTokenChangeListener = function(listener) {
+            return listenerSupport.registerListener(listener);
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Removes a initiative change listener.
+        //
+        ////////////////////////////////////////////////////////////////////////
+        this.removeTokenChangeListener = function(handle) {
+            listenerSupport.removeListener(handle);
+        }
+
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -493,6 +524,56 @@ var MapTool = new (function() {
 
             MapTool.sendMessage('macro', data);
         }
+
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Get a token property
+        //
+        ////////////////////////////////////////////////////////////////////////
+        this.getProperties = function(tokenId, propertyNames, callback) {
+            var data = {
+                command: 'tokenProperty',
+                tokenId: tokenId,
+            };
+
+            if (typeof(propertyNames) === 'array') {
+                data.propertyNames = propertyNames;
+            } else {
+                data.propertyName = propertyName;
+            }
+
+            MapTool.sendMessage('tokenInfo', data, callback);
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        //
+        // Set a token property
+        //
+        ////////////////////////////////////////////////////////////////////////
+        this.setProperty = function(tokenId, propertyNames, values) {
+            var data = {
+                command: 'setProperty',
+                tokenId: tokenId
+            }
+
+            if (typeof(propertyNames) === 'array') {
+                data.propertyNames = propertyNames;
+            } else {
+                data.propertyName = propertyName;
+            }
+
+            if (typeof(values) === 'array') {
+                data.newValues = values;
+            } else {
+                data.newValue = values;
+            }
+
+            MapTool.sendMessage('setProperty', data);
+        }
+
+
+        // Register the initiative listener.
+        __MapTool.regisetListener("token-update", tokenChange);
 
     })();
 
