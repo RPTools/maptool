@@ -21,10 +21,9 @@ import net.rptools.maptool.model.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 
 public class WebTokenInfo {
@@ -123,7 +122,6 @@ public class WebTokenInfo {
             }));
 
             if (tokenList.size() > 0) {
-                System.out.println("DEBUG: Here (> 0)");
                 break;
             }
         }
@@ -135,9 +133,59 @@ public class WebTokenInfo {
         }
     }
 
+    private Zone findZoneTokenIsOn(Token token) {
+        List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+        for (ZoneRenderer zr : zrenderers) {
+            if (zr.getZone().getTokens().contains(token)) {
+                return zr.getZone();
+            }
+        }
+
+        return null;
+    }
+
 
     void sendTokenInfo(MTWebSocket mtws, String inResponseTo, JSONObject data) {
 
+
+        if (data.containsKey("propertyNames")) {
+            sendTokenProperties(mtws, inResponseTo, data);
+        } else {
+            sendTokenRegisterdProperties(mtws, inResponseTo, data);
+        }
+    }
+
+
+    void sendTokenProperties(MTWebSocket mtws, String inResponseTo, JSONObject data) {
+        String tokenId = data.getString("tokenId");
+        Token token = findTokenFromId(tokenId);
+
+        if (token == null) {
+            System.out.println("DEBUG: sendTokenInfo(): Unable to find token " + tokenId);
+            return;
+            // FIXME: log this error
+        }
+
+        JSONObject jobj = new JSONObject();
+        jobj.put("tokenId", tokenId);
+
+        JSONArray properties = new JSONArray();
+
+        JSONArray propToFetch = data.getJSONArray("propertyNames");
+        for (int i = 0; i < propToFetch.size(); i++) {
+            String pname = propToFetch.getString(i);
+            JSONObject jprop = new JSONObject();
+            jprop.put("name", pname);
+            jprop.put("value", token.getProperty(pname));
+            properties.add(jprop);
+        }
+
+        jobj.put("properties", properties);
+
+        mtws.sendMessage("tokenProperties", inResponseTo, jobj);
+    }
+
+    void sendTokenRegisterdProperties(MTWebSocket mtws, String inResponseTo, JSONObject data) {
         String tokenId = data.getString("tokenId");
         Token token = findTokenFromId(tokenId);
 
@@ -210,4 +258,32 @@ public class WebTokenInfo {
             macro.executeMacro(token.getId());
         }
     }
+
+
+    void processSetProperties(JSONObject data) {
+        final String tokenId = data.getString("tokenId");
+        final Token token = findTokenFromId(tokenId);
+        final Zone zone = findZoneTokenIsOn(token);
+
+        if (token == null) {
+            System.out.println("DEBUG: sendTokenInfo(): Unable to find token " + tokenId);
+            return;
+            // FIXME: log this error
+        }
+
+        final JSONObject props = data.getJSONObject("properties");
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                Set<String> pnames = props.keySet();
+                for (String pname : pnames) {
+                    String val =  props.getString(pname);
+                    token.setProperty(pname, val);
+                }
+
+                zone.putToken(token);
+            }
+        });
+    }
+
 }

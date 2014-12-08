@@ -533,16 +533,17 @@ var MapTool = new (function() {
         this.getProperties = function(tokenId, propertyNames, callback) {
             var data = {
                 command: 'tokenProperty',
-                tokenId: tokenId,
+                tokenId: tokenId
             };
 
-            if (typeof(propertyNames) === 'array') {
+            if ($.isArray(propertyNames)) {
                 data.propertyNames = propertyNames;
             } else {
-                data.propertyName = propertyName;
+                console.log(typeof(propertyNames))
+                data.propertyNames = [propertyNames];
             }
 
-            MapTool.sendMessage('tokenInfo', data, callback);
+            MapTool.sendMessage('tokenProperties', data, callback);
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -550,25 +551,14 @@ var MapTool = new (function() {
         // Set a token property
         //
         ////////////////////////////////////////////////////////////////////////
-        this.setProperty = function(tokenId, propertyNames, values) {
+        this.setProperties = function(tokenId, properties) {
             var data = {
                 command: 'setProperty',
-                tokenId: tokenId
+                tokenId: tokenId,
+                properties: properties
             }
 
-            if (typeof(propertyNames) === 'array') {
-                data.propertyNames = propertyNames;
-            } else {
-                data.propertyName = propertyName;
-            }
-
-            if (typeof(values) === 'array') {
-                data.newValues = values;
-            } else {
-                data.newValue = values;
-            }
-
-            MapTool.sendMessage('setProperty', data);
+            MapTool.sendMessage('setProperties', data);
         }
 
 

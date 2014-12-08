@@ -57,10 +57,12 @@ public class MTWebSocket extends WebSocketAdapter {
             if ("initiative".equals(messageType)) {
                 System.out.println("DEBUG: Got an initiative message");
                 WebAppInitiative.getInstance().processInitiativeMessage(data);
-            } else if ("tokenInfo".equals(messageType)) {
+            } else if ("tokenInfo".equals(messageType) || "tokenProperties".equals(messageType)) {
                 WebTokenInfo.getInstance().sendTokenInfo(this, messageId, data);
             } else if ("macro".equals(messageType)) {
                 WebTokenInfo.getInstance().processMacro(data);
+            } else if ("setProperties".equals(messageType)) {
+                WebTokenInfo.getInstance().processSetProperties(data);
             }
         } catch (Exception e) {
             e.printStackTrace(); // FIXME: fix this to deal with error properly.

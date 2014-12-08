@@ -94,7 +94,6 @@ $(document).ready(function() {
         displayedToken = $(this).data('tokenid');
 
         MapTool.token.getTokenProperties(displayedToken, updateSheet);
-
     });
 
 
@@ -116,7 +115,6 @@ $(document).ready(function() {
     //
     ////////////////////////////////////////////////////////////////////////////
     MapTool.token.registerTokenChangeListener(function(data) {
-        console.log(data);
         if (data.tokensChanged && $.inArray(data.tokensChanged, displayedToken)) {
             MapTool.token.getTokenProperties(displayedToken, updateSheet);
         }
