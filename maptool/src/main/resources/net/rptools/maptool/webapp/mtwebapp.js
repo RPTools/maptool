@@ -567,5 +567,94 @@ var MapTool = new (function() {
 
     })();
 
+    ////////////////////////////////////////////////////////////////////////////
+    this.misc = new (function() {
+        this.includeCss = function(href) {
+            var cssLink = $("<link rel='stylesheet' type='text/css' href='"+href+"'>");
+            $("head").append(cssLink);
+        }
+
+    })();
+
+    ////////////////////////////////////////////////////////////////////////////
+    this.r20sheet = new (function() {
+
+        ////////////////////////////////////////////////////////////////////////
+        var updateSheet = function(sheet) {
+            var propertyNames = [];
+            $(sheet).find("input[name^='attr_']").each(function() {
+                var propName = this.name.replace('attr_','');
+                // Translate character_name into request for token name
+                if (propName === 'character_name') {
+                    propName = ':name';
+                }
+                propertyNames.push(propName);
+
+                console.log(propName);
+            });
+
+            var tokenId = $(sheet).find('.__mt_r20sheet_tokenId').val();
+
+            console.log(propertyNames);
+
+            // FIXME: need to handle errors.
+            MapTool.token.getProperties(tokenId, propertyNames, function(data) {
+                for (var propName in data)
+                $(sheet).find("input[name^='attr_']").each(function() {
+                    var propName = this.name.replace('attr_', '');
+                    // Translate character_name into request for token name
+                    if (propName === 'character_name') {
+                        propName = ':name';
+                    }
+                    if (data.propertiesMap[propName]) {
+                        $(this).val(data.propertiesMap[propName]);
+                    }
+                });
+
+            });
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        var updateR20Sheet = function(sheet, dirname, sheetJson) {
+            console.log(sheet);
+            console.log(sheetJson);
+
+            $(sheet).html(JSON.stringify(sheetJson));
+            MapTool.misc.includeCss(dirname + sheetJson.css);
+            $(sheet).load(dirname + sheetJson.html, function(response, status, xhr) {
+                if (status != 'error') {
+                    $(sheet).append('<input type="hidden" class="__mt_r20sheet_tokenId" value="">');
+                }
+            });
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        this.setToken = function(sheet, tokenId) {
+            $(sheet).find('.__mt_r20sheet_tokenId').val(tokenId);
+            updateSheet(sheet);
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        this.includeR20Sheets = function() {
+            $('.r20Sheet').each(function(index) {
+                var sheet = $(this);
+                var sheetJsonUrl = $(sheet).data('sheetjson');
+                var dirname = sheetJsonUrl.match(/.*\//);
+                $.get(sheetJsonUrl, function(data) {
+                    updateR20Sheet(sheet, dirname, data);
+                });
+            });
+        }
+
+
+        $(document).ready(function() {
+            MapTool.r20sheet.includeR20Sheets();
+        });
+    })();
+
+
+
 })();
 

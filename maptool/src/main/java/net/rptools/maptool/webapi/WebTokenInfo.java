@@ -156,6 +156,17 @@ public class WebTokenInfo {
         }
     }
 
+    String getTokenValue(Token token, String name) {
+        if (":name".equalsIgnoreCase(name)) {
+            return token.getName();
+        } else if (":notes".equalsIgnoreCase(name)) {
+            return token.getNotes();
+        } else if (":label".equalsIgnoreCase(name)) {
+            return token.getLabel();
+        }
+
+        return "";
+    }
 
     void sendTokenProperties(MTWebSocket mtws, String inResponseTo, JSONObject data) {
         String tokenId = data.getString("tokenId");
@@ -171,17 +182,27 @@ public class WebTokenInfo {
         jobj.put("tokenId", tokenId);
 
         JSONArray properties = new JSONArray();
+        JSONObject propertiesMap = new JSONObject();
 
         JSONArray propToFetch = data.getJSONArray("propertyNames");
         for (int i = 0; i < propToFetch.size(); i++) {
             String pname = propToFetch.getString(i);
+            String val;
+            if (pname.startsWith(":")) {
+                val = getTokenValue(token, pname);
+            } else {
+
+                val = token.getProperty(pname) == null ? null : token.getProperty(pname).toString();
+            }
             JSONObject jprop = new JSONObject();
             jprop.put("name", pname);
-            jprop.put("value", token.getProperty(pname));
+            jprop.put("value", val);
             properties.add(jprop);
+            propertiesMap.put(pname, val);
         }
 
         jobj.put("properties", properties);
+        jobj.put("propertiesMap", propertiesMap);
 
         mtws.sendMessage("tokenProperties", inResponseTo, jobj);
     }

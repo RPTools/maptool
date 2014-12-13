@@ -34,12 +34,17 @@
 
 
 #initBox {
-    float: left;
+    position: absolute;
+    left: 0px;
     width: 300px;
 }
 
 #sheetBox {
-    float: right;
+    margin-left: 300px;
+}
+
+#macroList {
+    margin-left: 300px;
 }
 
 
@@ -68,7 +73,6 @@ button.playerIsNotOwner {
 }
 
 .tokenSheetButton {
-    float: right;
 }
 
 

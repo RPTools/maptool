@@ -94,6 +94,7 @@ $(document).ready(function() {
         displayedToken = $(this).data('tokenid');
 
         MapTool.token.getTokenProperties(displayedToken, updateSheet);
+        MapTool.r20sheet.setToken($('#r20sheetExample'), displayedToken);
     });
 
 

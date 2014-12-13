@@ -27,7 +27,7 @@
 
     <template id='init-element'>
         <div class='{{initDivClass}} {{tokenOwnerClass}}'>
-            <span><img src='/token/image/{{tokenId}}' class='initTokenImage' /></span>
+            <span><img src='/token/image/{{tokenId}}' class='initTokenImage'></span>
             <span class='tokenInitName'><p>{{tokenName}}</p></span>
             <span class='tokenInitValue'><p>{{initiative}}</p></span>
             <div class='tokenInitButtons'>
@@ -92,20 +92,23 @@
     </script>
 
 
+    <div id='r20sheetExample' class='r20Sheet' data-sheetjson='r20/kitchensink/sheet.json'></div>
     <div>
-        <div id='initBox'>
-            <div id='initHeader'>
-                <button class='initButton' data-initcommand='sortInitiative'>Sort</button>
-                <button class='initButton' data-initcommand='previousInitiative'>Previous</button>
-                <button class='initButton' data-initcommand='nextInitiative'>Next</button>
-                <span id='initRound'></span>
+        <div>
+            <div id='initBox'>
+                <div id='initHeader'>
+                    <button class='initButton' data-initcommand='sortInitiative'>Sort</button>
+                    <button class='initButton' data-initcommand='previousInitiative'>Previous</button>
+                    <button class='initButton' data-initcommand='nextInitiative'>Next</button>
+                    <span id='initRound'></span>
+                </div>
+                <div id='initList'></div>
             </div>
-            <div id='initList'></div>
-        </div>
 
-        <div id='sheetBox' />
+            <div id='sheetBox'></div>
+            <div id = 'macroList'></div>
+        </div>
     </div>
-    <div id = 'macroList' />
 
 
 </body>
