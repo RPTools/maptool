@@ -13,9 +13,11 @@ task wrapper(type: Wrapper) {
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath 'org.ajoberstar:gradle-git:0.11.2'
+        classpath "de.gliderpilot.gradle.jnlp:gradle-jnlp-plugin:0.0.5"
     }
 }
 
@@ -84,7 +86,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'findbugs'
     apply plugin: 'pmd'
-    apply plugin:'application'
+    apply plugin: 'application'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -142,6 +144,8 @@ project(':launcher') {
 }
 
 project(':maptool') {
+    apply plugin: 'de.gliderpilot.jnlp'
+
     mainClassName='net.rptools.maptool.client.LaunchInstructions'
 
 
@@ -227,6 +231,24 @@ project(':maptool') {
     assemble.dependsOn += copyLibs;
 
     task release(dependsOn: build) << {
+    }
+
+    jnlp {
+        withXml {
+            information {
+                title 'RPTools MapTool'
+                vendor project.group ?: project.name
+            }
+            security {
+                'all-permissions'()
+            }
+        }
+        signJarParams = [
+            storepass: 'rptools',
+            keystore: '../build-resources/rptools-keystore',
+            alias: 'rptools',
+            lazy: 'true'
+        ]
     }
 
 }
