@@ -11,17 +11,14 @@
 
 package net.rptools.maptool.client.ui.htmlframe;
 
-import java.awt.AWTEventMulticaster;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Enumeration;
-import java.util.Stack;
-import java.util.regex.Matcher;
+import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.client.ui.commandpanel.MessagePanel;
+import net.rptools.parser.ParserException;
+import org.apache.log4j.Logger;
 
-import javax.swing.JEditorPane;
-import javax.swing.ToolTipManager;
+import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.MutableAttributeSet;
@@ -29,14 +26,16 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
-
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.functions.MacroLinkFunction;
-import net.rptools.maptool.client.ui.commandpanel.MessagePanel;
-import net.rptools.parser.ParserException;
-
-import org.apache.log4j.Logger;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Stack;
+import java.util.regex.Matcher;
 
 @SuppressWarnings("serial")
 public class HTMLPane extends JEditorPane {
@@ -161,9 +160,16 @@ public class HTMLPane extends JEditorPane {
 		try {
 			super.setText("");
 			Enumeration<?> snames = style.getStyleNames();
+			List<String> styleNames = new ArrayList<String>();
+
 			while (snames.hasMoreElements()) {
-				style.removeStyle(snames.nextElement().toString());
+				styleNames.add(snames.toString());
 			}
+
+			for (String s : styleNames) {
+				style.removeStyle(s);
+			}
+
 			style.addRule("body { font-family: sans-serif; font-size: " + AppPreferences.getFontSize() + "pt; background: #ECE9D8}");
 			style.addRule("div {margin-bottom: 5px}");
 			style.addRule("span.roll {background:#efefef}");
