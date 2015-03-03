@@ -11,50 +11,11 @@
 
 package net.rptools.maptool.client;
 
-import java.awt.Color;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.Transparency;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-
-import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
-import javax.swing.ToolTipManager;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
-import javax.swing.plaf.FontUIResource;
-
+import com.jidesoft.plaf.LookAndFeelFactory;
+import com.jidesoft.plaf.UIDefaultsLookup;
+import com.jidesoft.plaf.basic.ThemePainter;
+import de.muntjak.tinylookandfeel.Theme;
+import de.muntjak.tinylookandfeel.util.SBReference;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.EventDispatcher;
@@ -77,34 +38,39 @@ import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignFactory;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.ObservableList;
-import net.rptools.maptool.model.Player;
-import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.UPnPUtil;
+import net.rptools.maptool.webapi.MTWebAppServer;
 import net.tsc.servicediscovery.ServiceAnnouncer;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
-import com.jidesoft.plaf.LookAndFeelFactory;
-import com.jidesoft.plaf.UIDefaultsLookup;
-import com.jidesoft.plaf.basic.ThemePainter;
-
-import de.muntjak.tinylookandfeel.Theme;
-import de.muntjak.tinylookandfeel.util.SBReference;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.List;
 
 /**
  */
@@ -181,6 +147,8 @@ public class MapTool {
 	private static EventDispatcher eventDispatcher;
 	private static MapToolLineParser parser = new MapToolLineParser();
 	private static String lastWhisperer;
+
+	private static final MTWebAppServer webAppServer = new MTWebAppServer();
 
 	/**
 	 * This method looks up the message key in the properties file and returns
@@ -1444,6 +1412,27 @@ public class MapTool {
 			return AppPreferences.getUseToolTipForInlineRoll();
 		} else {
 			return getServerPolicy().getUseToolTipsForDefaultRollFormat();
+		}
+	}
+
+	public static MTWebAppServer getWebAppServer() {
+		return webAppServer;
+	}
+
+	public static void startWebAppServer(final int port) {
+		try {
+			Thread webAppThread = new Thread() {
+				@Override
+				public void run() {
+					webAppServer.setPort(port);
+					webAppServer.startServer();
+				}
+			};
+
+			webAppThread.run();
+		} catch (Exception e) {  // TODO: This needs to be logged
+			System.out.println("Unable to start web server");
+			e.printStackTrace();
 		}
 	}
 

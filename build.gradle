@@ -13,9 +13,11 @@ task wrapper(type: Wrapper) {
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath 'org.ajoberstar:gradle-git:0.11.2'
+        classpath "de.gliderpilot.gradle.jnlp:gradle-jnlp-plugin:0.0.5"
     }
 }
 
@@ -84,7 +86,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'findbugs'
     apply plugin: 'pmd'
-    apply plugin:'application'
+    apply plugin: 'application'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
@@ -142,6 +144,8 @@ project(':launcher') {
 }
 
 project(':maptool') {
+    apply plugin: 'de.gliderpilot.jnlp'
+
     mainClassName='net.rptools.maptool.client.LaunchInstructions'
 
 
@@ -187,6 +191,14 @@ project(':maptool') {
         compile 'com.thoughtworks.xstream:xstream:1.4.1'
         compile 'yasb:yasb:0.2-21012007'
         compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
+        compile 'org.eclipse.jetty:jetty-server:9.3.0.M0'
+        compile 'org.eclipse.jetty:jetty-servlet:9.3.0.M0'
+        compile 'org.eclipse.jetty:jetty-webapp:9.3.0.M0'
+        compile 'org.eclipse.jetty:jetty-continuation:9.3.0.M1'
+        compile 'org.eclipse.jetty.websocket:websocket-server:9.3.0.M1'
+        compile 'org.eclipse.jetty.websocket:websocket-client:9.3.0.M1'
+        compile 'org.eclipse.jetty.websocket:websocket-servlet:9.3.0.M1'
+        compile 'org.eclipse.jetty.websocket:websocket-api:9.3.0.M1'
 
 
         testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -219,6 +231,24 @@ project(':maptool') {
     assemble.dependsOn += copyLibs;
 
     task release(dependsOn: build) << {
+    }
+
+    jnlp {
+        withXml {
+            information {
+                title 'RPTools MapTool'
+                vendor project.group ?: project.name
+            }
+            security {
+                'all-permissions'()
+            }
+        }
+        signJarParams = [
+            storepass: 'rptools',
+            keystore: '../build-resources/rptools-keystore',
+            alias: 'rptools',
+            lazy: 'true'
+        ]
     }
 
 }
@@ -269,7 +299,7 @@ task osxApp() << {
         )
         bundleapp(
             outputdirectory: 'build/tmp/',
-            name: 'MapTool-' + buildVersion,,
+            name: 'MapTool-' + buildVersion,
             displayname: 'MapTool-' + buildVersion,
             identifier: 'net.rptools.maptool',
             mainclassname: mainClassName,
