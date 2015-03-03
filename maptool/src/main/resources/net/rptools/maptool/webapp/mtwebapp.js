@@ -579,9 +579,35 @@ var MapTool = new (function() {
     ////////////////////////////////////////////////////////////////////////////
     this.r20sheet = new (function() {
 
+        var templateIdSequecnce = 0;
+        var r20sheetInfoSequence = 0;
+
+        var foundR20Sheet = false;
+
+        var fieldsetTemplate = {};
+
+        var getNextTemplateId = function() {
+           return templateIdSequecnce++;
+        }
+
+        var getNextR20SheetInfoId = function() {
+            return r20sheetInfoSequence++;
+        }
+
+        var r20SheetInfo = {};
+
         ////////////////////////////////////////////////////////////////////////
-        var updateSheet = function(sheet) {
-            var propertyNames = [];
+        var includeR20Support = function() {
+            console.log('In IncludeR20Support');
+            $('body').append('<div id="__MT_R20_support"></div>');
+            $('#__MT_R20_support').load('r20support/r20.html');
+            var cssLink = $("<link rel='stylesheet' type='text/css' href='r20support/r20.css'>");
+            $("head").append(cssLink);
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        var updateR20Sheet = function(sheet) {
+            /*var propertyNames = [];
             $(sheet).find("input[name^='attr_']").each(function() {
                 var propName = this.name.replace('attr_','');
                 // Translate character_name into request for token name
@@ -591,21 +617,26 @@ var MapTool = new (function() {
                 propertyNames.push(propName);
 
                 console.log(propName);
-            });
+            });*/
 
             var tokenId = $(sheet).find('.__mt_r20sheet_tokenId').val();
+            var sheetId = $(sheet).find('.__mt_r20sheet_id').val();
+            var propertyNames = r20SheetInfo[sheetId].properties;
 
-            console.log(propertyNames);
 
             // FIXME: need to handle errors.
             MapTool.token.getProperties(tokenId, propertyNames, function(data) {
-                for (var propName in data)
+                console.log(data);
+
+                //for (var propName in data)
                 $(sheet).find("input[name^='attr_']").each(function() {
                     var propName = this.name.replace('attr_', '');
                     // Translate character_name into request for token name
                     if (propName === 'character_name') {
                         propName = ':name';
                     }
+
+
                     if (data.propertiesMap[propName]) {
                         $(this).val(data.propertiesMap[propName]);
                     }
@@ -616,15 +647,91 @@ var MapTool = new (function() {
 
 
         ////////////////////////////////////////////////////////////////////////
-        var updateR20Sheet = function(sheet, dirname, sheetJson) {
-            console.log(sheet);
-            console.log(sheetJson);
+        var addFieldsetTemplate = function(templateId, source) {
+            fieldsetTemplate[templateId] = source;
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        var getFieldSetTemplate = function(templateId) {
+            return fieldsetTemplate[templateId];
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////
+        var prepareR20Sheet = function(sheet, dirname, sheetJson) {
 
             $(sheet).html(JSON.stringify(sheetJson));
             MapTool.misc.includeCss(dirname + sheetJson.css);
             $(sheet).load(dirname + sheetJson.html, function(response, status, xhr) {
                 if (status != 'error') {
+                    // Add the charsheet class expected by R20 character sheets.
+                    $(sheet).addClass('charsheet');
+
+                    // Add a hidden field that will contain the token id to show values of
                     $(sheet).append('<input type="hidden" class="__mt_r20sheet_tokenId" value="">');
+
+                    // Insert the r20 sheet id in a hidden field.
+                    var sheetId = 'r20Sheet:' + getNextR20SheetInfoId();
+                    $(sheet).append('<input type="hidden" class="__mt_r20sheet_id" value="' + sheetId + '">');
+
+                    var r20sheet = {
+                        properties: []
+                    };
+
+                    var propertiesForSheet = {};
+
+
+
+                    // Replace field sets with a template.
+                    $(sheet).find("fieldset[class^='repeating_']").each(function() {
+                        var innerHTML = $(this).html();
+
+                        //$(this).find()
+
+                        var templateId = 'r20fstemp_' + getNextTemplateId();
+                        addFieldsetTemplate(templateId, innerHTML);
+
+                        var source = $('#__MT_R20fieldsetTemplate').html();
+                        var template = Handlebars.compile(source);
+                        $(this).replaceWith(template({fieldsetName: templateId}));
+                        $('.' + templateId).addClass('__MT_R20_repeating');
+
+
+                        var propName;
+                        var classList = $(this).attr('class').split(/\s+/);
+                        $.each( classList, function(index, item){
+                            if (item.substring(0, 10) === 'repeating_') {
+                                propName = item.substring(10);
+                            }
+                        });
+
+                        if (propName) {
+                            propertiesForSheet[propName] = 1;
+                        }
+                    });
+
+
+                    // Get the property list for the R20 sheet.
+                    $(sheet).find("input[name^='attr_']").each(function() {
+                        var propName = this.name.replace('attr_', '');
+                        // Translate character_name into request for token name
+                        if (propName === 'character_name') {
+                            propName = ':name';
+                        }
+
+                        propertiesForSheet[propName] = 1;
+
+                    });
+
+
+
+                    for (var pname in propertiesForSheet) {
+                        r20sheet.properties.push(pname);
+                    }
+
+                    console.log(r20sheet);
+
+                    r20SheetInfo[sheetId] = r20sheet;
                 }
             });
         }
@@ -632,18 +739,23 @@ var MapTool = new (function() {
         ////////////////////////////////////////////////////////////////////////
         this.setToken = function(sheet, tokenId) {
             $(sheet).find('.__mt_r20sheet_tokenId').val(tokenId);
-            updateSheet(sheet);
+            updateR20Sheet(sheet);
         }
 
 
         ////////////////////////////////////////////////////////////////////////
         this.includeR20Sheets = function() {
             $('.r20Sheet').each(function(index) {
+                if (!foundR20Sheet) {
+                    includeR20Support();
+                    foundR20Sheet = true;
+                }
+
                 var sheet = $(this);
                 var sheetJsonUrl = $(sheet).data('sheetjson');
                 var dirname = sheetJsonUrl.match(/.*\//);
                 $.get(sheetJsonUrl, function(data) {
-                    updateR20Sheet(sheet, dirname, data);
+                    prepareR20Sheet(sheet, dirname, data);
                 });
             });
         }
