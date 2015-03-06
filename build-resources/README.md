@@ -15,7 +15,7 @@ To build (but not create the zip distributions)
 ./gradle build
 
 To Create a release zip distribution of MapTool
-./gradlew release
+./gradlew clean release
 
     This will also create a *-osx.zip file which contains a Mac OS X
     app. At the moment we dont create a dmg disk image as OSX gate 
