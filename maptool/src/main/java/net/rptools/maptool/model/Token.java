@@ -350,6 +350,14 @@ public class Token extends BaseModel {
 		this.height = height;
 	}
 
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+	
 	public boolean isMarker() {
 		return isStamp() && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
 	}
