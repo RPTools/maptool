@@ -45,6 +45,9 @@ public class AppStyle {
 	public static Color selectionBoxOutline = Color.black;
 	public static Color selectionBoxFill = Color.blue;
 
+	public static Color resizeBoxOutline = Color.red;
+	public static Color resizeBoxFill = Color.yellow;
+	
 	public static BufferedImage chatImage;
 	public static BufferedImage chatScrollImage;
 	public static BufferedImage chatScrollLockImage;

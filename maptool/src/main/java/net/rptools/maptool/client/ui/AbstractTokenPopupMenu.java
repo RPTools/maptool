@@ -11,6 +11,7 @@
 
 package net.rptools.maptool.client.ui;
 
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -823,6 +824,21 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					MapTool.serverCommand().removeToken(renderer.getZone().getId(), tokenGUID);
 				}
 			}
+		}
+	}
+	
+	public class AutoResizeAction extends AbstractAction {
+		public AutoResizeAction() {
+			super(I18N.getText("token.popup.menu.autoresize"));
+
+			if (selectedTokenSet.size() > 1) {
+				setEnabled(false);
+			}
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			renderer.setAutoResizeStamp(true);
+			renderer.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 		}
 	}
 }

@@ -1,0 +1,6 @@
+*.java   text diff=java
+*.html   text diff=html
+*.css    text
+*.js     text
+*.txt    text
+*.md     text
