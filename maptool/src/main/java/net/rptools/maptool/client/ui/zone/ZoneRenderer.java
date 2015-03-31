@@ -183,6 +183,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	private Set<GUID> visibleTokenSet;
 	private CodeTimer timer;
 
+	private boolean autoResizeStamp;
+
 	public static enum TokenMoveCompletion {
 		TRUE, FALSE, OTHER
 	}
@@ -231,6 +233,16 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		// fps.start();
 	}
 
+	public void setAutoResizeStamp(boolean value)
+	{
+		this.autoResizeStamp = value;
+	}
+
+	public boolean isAutoResizeStamp()
+	{
+		return autoResizeStamp;
+	}
+	
 	public void showPath(Token token, boolean show) {
 		if (show) {
 			showPathList.add(token);
