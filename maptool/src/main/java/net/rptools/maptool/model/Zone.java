@@ -619,6 +619,17 @@ public class Zone extends BaseModel {
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
 	}
 
+   public void clearExposedArea(Set<GUID> tokenSet) {
+      //Jamz: Clear FoW for set tokens only, for use by ExposeVisibleAreaOnlyAction Menu action and exposePCOnlyArea() macro
+      for (GUID tea : tokenSet) {
+         ExposedAreaMetaData meta = exposedAreaMeta.get(tea);
+         if (meta != null)
+            meta.clearExposedAreaHistory();
+      }
+      
+      fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+   }
+	   
 	public void exposeArea(Area area, Token tok) {
 		if (area == null || area.isEmpty()) {
 			return;

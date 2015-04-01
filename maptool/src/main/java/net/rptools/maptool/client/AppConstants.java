@@ -34,7 +34,8 @@ public class AppConstants {
 	public static final ImageBorder PURPLE_BORDER = new ImageBorder("net/rptools/maptool/client/image/border/purple");
 	public static final ImageBorder FOW_TOOLS_BORDER = new ImageBorder("net/rptools/maptool/client/image/border/fowtools");
 	public static final int NOTE_PORTRAIT_SIZE = 200;
-
+	public static final int ASSET_SEARCH_LIMIT = 1000;
+	
 	public static final FilenameFilter IMAGE_FILE_FILTER = new FilenameFilter() {
 		public boolean accept(File dir, String name) {
 			name = name.toLowerCase();
