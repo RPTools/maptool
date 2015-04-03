@@ -163,7 +163,7 @@ public class HTMLPane extends JEditorPane {
 			List<String> styleNames = new ArrayList<String>();
 
 			while (snames.hasMoreElements()) {
-				styleNames.add(snames.toString());
+				styleNames.add(snames.nextElement().toString());
 			}
 
 			for (String s : styleNames) {
