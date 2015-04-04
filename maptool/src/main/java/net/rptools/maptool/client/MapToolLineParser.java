@@ -76,6 +76,7 @@ import net.rptools.maptool.client.functions.TokenStateFunction;
 import net.rptools.maptool.client.functions.TokenVisibleFunction;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.functions.VBL_Functions;
+import net.rptools.maptool.client.functions.ZoomFunctions;
 import net.rptools.maptool.client.functions.getInfoFunction;
 import net.rptools.maptool.client.functions.isVisibleFunction;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
@@ -111,7 +112,8 @@ public class MapToolLineParser {
 			TokenInitHoldFunction.getInstance(), TokenLabelFunction.getInstance(), TokenLightFunctions.getInstance(), TokenLocationFunctions.getInstance(), TokenNameFunction.getInstance(),
 			TokenNoteFunctions.getInstance(), TokenPropertyFunctions.getInstance(), TokenRemoveFromInitiativeFunction.getInstance(), TokenSelectionFunctions.getInstance(),
 			TokenSightFunctions.getInstance(), TokenSpeechFunctions.getInstance(), TokenStateFunction.getInstance(), TokenVisibleFunction.getInstance(), UserDefinedMacroFunctions.getInstance(),
-			isVisibleFunction.getInstance(), getInfoFunction.getInstance(), TokenMoveFunctions.getInstance(), FogOfWarFunctions.getInstance(), VBL_Functions.getInstance() };
+			isVisibleFunction.getInstance(), getInfoFunction.getInstance(), TokenMoveFunctions.getInstance(), FogOfWarFunctions.getInstance(), VBL_Functions.getInstance(),
+			ZoomFunctions.getInstance()};
 
 	/** Name and Source or macros that come from chat. */
 	public static final String CHAT_INPUT = "chat";
