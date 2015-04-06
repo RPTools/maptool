@@ -40,6 +40,7 @@ import net.rptools.lib.swing.SelectionListener;
 import net.rptools.lib.swing.preference.SplitPanePreferences;
 import net.rptools.lib.swing.preference.TreePreferences;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 
 public class AssetPanel extends JComponent {
@@ -137,7 +138,7 @@ public class AssetPanel extends JComponent {
 		top.add(BorderLayout.CENTER, getFilterTextField());
 
 		panel.add(BorderLayout.NORTH, top);
-//		panel.add(BorderLayout.SOUTH, getGlobalSearchField());
+		panel.add(BorderLayout.SOUTH, getGlobalSearchField());
 
 		return panel;
 	}
@@ -179,23 +180,43 @@ public class AssetPanel extends JComponent {
 	}
 
 	/**
-	 * Returns a checkbox that indicates whether the filter field applies to <i>all</i> images in all libraries or just
-	 * the currently selected image directory. Currently not implemented.
+	 * Returns a checkbox that indicates whether the filter field applies to <i>all</i> images in all libraries or just the currently selected image directory.
+	 * Currently not implemented.
 	 * 
 	 * @return the checkbox component
 	 */
-	public JCheckBox getGlobalSearchField() {
-		if (globalSearchField == null) {
-			globalSearchField = new JCheckBox("Search across all directories?", false);
-			globalSearchField.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent ev) {
+	private JCheckBox getGlobalSearchField()
+	{
+		if (globalSearchField == null)
+		{
+			globalSearchField = new JCheckBox(I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir1"), false);
+			globalSearchField.addActionListener(new ActionListener()
+			{
+				public void actionPerformed(ActionEvent ev)
+				{
 					updateFilter();
 				}
 			});
 		}
 		return globalSearchField;
 	}
-
+	
+	public void updateGlobalSearchLabel(int listSize)
+	{
+		if(getGlobalSearchField().isSelected())
+		{
+			globalSearchField.setText(
+					I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir1") 
+					+ " (" + listSize + "/" + AppConstants.ASSET_SEARCH_LIMIT + " " 
+					+ I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir2") + ")");
+		} else {
+			globalSearchField.setText(I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir1"));
+		}
+		
+		imagePanel.revalidate();
+		imagePanel.repaint();
+	}
+	
 	private synchronized void updateFilter() {
 		if (updateFilterTimer == null) {
 			updateFilterTimer = new Timer(500, new ActionListener() {
@@ -204,7 +225,7 @@ public class AssetPanel extends JComponent {
 					if (model == null) {
 						return;
 					}
-//					model.setGlobalSearch(getGlobalSearchField().isSelected());
+					model.setGlobalSearch(getGlobalSearchField().isSelected());
 					model.setFilter(getFilterTextField().getText());
 					// TODO: This should be event based
 					imagePanel.revalidate();
@@ -220,6 +241,7 @@ public class AssetPanel extends JComponent {
 		}
 	}
 
+	
 	// TODO: Find a way around this, it's ugly
 	public Asset getAsset(int index) {
 		return ((ImageFileImagePanelModel) imagePanel.getModel()).getAsset(index);
