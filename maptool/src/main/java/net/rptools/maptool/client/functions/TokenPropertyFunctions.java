@@ -2,10 +2,10 @@
  * This software copyright by various authors including the RPTools.net
  * development team, and licensed under the LGPL Version 3 or, at your option,
  * any later version.
- * 
+ *
  * Portions of this software were originally covered under the Apache Software
  * License, Version 1.1 or Version 2.0.
- * 
+ *
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
@@ -49,7 +49,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		super(0, 4, "getPropertyNames", "getAllPropertyNames", "getPropertyNamesRaw", "hasProperty", "isNPC", "isPC", "setPC", "setNPC", "getLayer", "setLayer", "getSize", "setSize", "getOwners",
 				"isOwnedByAll", "isOwner", "resetProperty", "getProperty", "setProperty", "isPropertyEmpty", "getPropertyDefault", "sendToBack", "bringToFront", "getLibProperty", "setLibProperty",
 				"getLibPropertyNames", "setPropertyType", "getPropertyType", "getRawProperty", "getTokenFacing", "setTokenFacing", "removeTokenFacing", "getMatchingProperties",
-				"getMatchingLibProperties", "isSnapToGrid", "setOwner", "getTokenWidth", "getTokenHeight", "getTokenShape", "setTokenShape");
+				"getMatchingLibProperties", "isSnapToGrid", "setOwner", "getTokenWidth", "getTokenHeight", "setTokenWidth", "setTokenHeight", "getTokenShape", "setTokenShape");
 	}
 
 	public static TokenPropertyFunctions getInstance() {
@@ -402,7 +402,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
 		/*
 		 * pre 1.3.b64 only took a single parameter
-		 * 
+		 *
 		 * Number zeroOne = getPropertyDefault(String propName, String propType:
 		 * currentToken().getPropertyType())
 		 */
@@ -674,7 +674,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
 		/*
 		 * String newShape = getTokenShape(String tokenId: currentToken())
-		 * 
+		 *
 		 * See Token.TokenShape for return values. Currently "Top down",
 		 * "Circle", and "Square".
 		 */
@@ -698,7 +698,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		/*
 		 * String newShape = setTokenShape(String shape, String tokenId:
 		 * currentToken())
-		 * 
+		 *
 		 * See Token.TokenShape for shape values. Currently "Top down",
 		 * "Top_down", "Circle", and "Square".
 		 */
@@ -726,9 +726,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
 		/*
 		 * String newShape = getTokenWidth(String tokenId: currentToken())
-		 * 
+		 *
 		 * String newShape = getTokenHeight(String tokenId: currentToken())
-		 * 
+		 *
 		 * Returns pixel width/height for a given token. Useful for free size
 		 * tokens.
 		 */
@@ -755,12 +755,33 @@ public class TokenPropertyFunctions extends AbstractFunction {
 				return BigDecimal.valueOf(tokenBounds.height);
 		}
 
+		/*
+		 * Sets the width/height for a given token. Useful for free size tokens.
+		 */
+		if (functionName.equals("setTokenWidth") || functionName.equals("setTokenHeight")) {
+			checkNumberOfParameters(functionName, parameters, 1, 2);
+			double magnitude = getBigDecimalFromParam(functionName, parameters, 0).doubleValue();
+			Token token = getTokenFromParam((MapToolVariableResolver) parser.getVariableResolver(), functionName, parameters, 1);
+			Rectangle tokenBounds = token.getBounds(zone);
+			double oldWidth = tokenBounds.width;
+			double oldHeight = tokenBounds.height;
+			token.setSnapToScale(false);
+
+			if (functionName.equals("setTokenWidth")) {
+				token.setScaleX(magnitude/token.getWidth());
+				token.setScaleY(oldHeight/token.getHeight());
+			} else { // it wasn't 'setTokenWidth' which means functionName equals 'setTokenHeight'
+				token.setScaleX(oldWidth/token.getWidth());
+				token.setScaleY(magnitude/token.getHeight());
+			}
+			return "";
+		}
 		throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
 	}
 
 	/**
 	 * Gets the size of the token.
-	 * 
+	 *
 	 * @param token
 	 *            The token to get the size of.
 	 * @return the size of the token.
@@ -779,7 +800,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
 	/**
 	 * Sets the size of the token.
-	 * 
+	 *
 	 * @param token
 	 *            The token to set the size of.
 	 * @param size
@@ -813,7 +834,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
 	/**
 	 * Sets the layer of the token.
-	 * 
+	 *
 	 * @param token
 	 *            The token to move to a different layer.
 	 * @param layerName
@@ -862,7 +883,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
 	/**
 	 * Checks to see if the token has the specified property.
-	 * 
+	 *
 	 * @param token
 	 *            The token to check.
 	 * @param name
@@ -885,7 +906,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Gets all the property names for the specified type. If type is null then
 	 * all the property names for all types are returned.
-	 * 
+	 *
 	 * @param type
 	 *            The type of property.
 	 * @param delim
@@ -928,7 +949,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Creates a string list delimited by <b>delim</b> of the names of all the
 	 * properties for a given token. Returned strings are all lowercase.
-	 * 
+	 *
 	 * @param token
 	 *            The token to get the property names for.
 	 * @param delim
@@ -963,7 +984,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
 	/**
 	 * Gets the owners for the token.
-	 * 
+	 *
 	 * @param token
 	 *            The token to get the owners for.
 	 * @param delim
@@ -981,11 +1002,53 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	}
 
 	/**
+	 * Checks that the number of objects in the list <code>parameters</code>
+	 * is within given bounds (inclusive). Throws a <code>ParserException</code>
+	 * if the check fails.
+	 *
+	 * @param	functionName	this is used in the exception message
+	 * @param	parameters		a list of parameters
+	 * @param	min				the minimum amount of parameters (inclusive)
+	 * @param	max				the maximum amount of parameters (inclusive)
+	 * @throws	ParserException	if there were more or less parameters than allowed
+	 */
+	private void checkNumberOfParameters(String functionName, List<Object> parameters, int min, int max) throws ParserException {
+		int numberOfParameters = parameters.size();
+		if (numberOfParameters < min) {
+			throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, min, numberOfParameters));
+		} else if (numberOfParameters > max) {
+			throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, max, numberOfParameters));
+		}
+	}
+
+	/**
+	 * Checks if the object stored at the specified index is a BigDecimal
+	 * and returns it if that is the case. It is not safe to call this
+	 * method without first checking the list size (possibly by using
+	 * <code>checkNumberOfParameters</code>).
+	 *
+	 * @param	functionName	this is used in the exception message
+	 * @param	parameters		a list of parameters
+	 * @param	index			the index to find the BigDecimal at
+	 * @return	the BigDecimal
+	 * @throws	ParserException	if the parameter did not contain a BigDecimal
+	 * @see		checkNumberOfParameters
+	 */
+	private BigDecimal getBigDecimalFromParam(String functionName, List<Object> parameters, int index) throws ParserException {
+		Object param = parameters.get(index);
+		if (param instanceof BigDecimal) {
+			return (BigDecimal) param;
+		} else {
+			throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", functionName, index, param.toString()));
+		}
+	}
+
+	/**
 	 * Gets the token from the specified index or returns the token in context.
 	 * This method will check the list size before trying to retrieve the token
 	 * so it is safe to use for functions that have the token as a optional
 	 * argument.
-	 * 
+	 *
 	 * @param res
 	 *            The variable resolver.
 	 * @param functionName
