@@ -68,9 +68,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * String type = getPropertyType(String tokenId: currentToken())
 		 */
 		if (functionName.equals("getPropertyType")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			return token.getPropertyType();
 		}
@@ -80,15 +78,11 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * currentToken())
 		 */
 		if (functionName.equals("setPropertyType")) {
-			if (parameters.size() < 1)
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			token.setPropertyType(parameters.get(0).toString());
 			MapTool.serverCommand().putToken(zone.getId(), token);
-			zone.putToken(token); // FJE Should this be here?  Added because other places have it...?!
+			zone.putToken(token); //TODO: FJE Should this be here?  Added because other places have it...?!
 			return "";
 		}
 
@@ -97,9 +91,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * currentToken())
 		 */
 		if (functionName.equals("getPropertyNames") || functionName.equals("getPropertyNamesRaw")) {
-			if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
 			String pattern = ".*";
@@ -111,12 +103,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * ",", String tokenId: currentToken())
 		 */
 		if (functionName.equals("getMatchingProperties")) {
+			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 2);
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
 			String pattern = parameters.get(0).toString();
 			String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
 			return getPropertyNames(token, delim, pattern, false);
@@ -127,10 +115,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * ",")
 		 */
 		if (functionName.equals("getAllPropertyNames")) {
+			checkNumberOfParameters(functionName, parameters, 0, 2);
 			if (parameters.size() < 1) {
 				return getAllPropertyNames(null, ",");
-			} else if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
 			} else {
 				return getAllPropertyNames(parameters.get(0).toString(), parameters.size() > 1 ? parameters.get(1).toString() : ",");
 			}
@@ -141,11 +128,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * currentToken())
 		 */
 		if (functionName.equals("hasProperty")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			return hasProperty(token, parameters.get(0).toString()) ? BigDecimal.ONE : BigDecimal.ZERO;
 		}
@@ -154,9 +137,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * Number zeroOne = isNPC(String tokenId: currentToken())
 		 */
 		if (functionName.equals("isNPC")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			return token.getType() == Token.Type.NPC ? BigDecimal.ONE : BigDecimal.ZERO;
 		}
@@ -165,9 +146,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * Number zeroOne = isPC(String tokenId: currentToken())
 		 */
 		if (functionName.equals("isPC")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			return token.getType() == Token.Type.PC ? BigDecimal.ONE : BigDecimal.ZERO;
 		}
@@ -176,9 +155,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * String empty = setPC(String tokenId: currentToken())
 		 */
 		if (functionName.equals("setPC")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			token.setType(Token.Type.PC);
 			MapTool.serverCommand().putToken(zone.getId(), token);
@@ -192,9 +169,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * String empty = setNPC(String tokenId: currentToken())
 		 */
 		if (functionName.equals("setNPC")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			token.setType(Token.Type.NPC);
 			MapTool.serverCommand().putToken(zone.getId(), token);
@@ -208,9 +183,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * String layer = getLayer(String tokenId: currentToken())
 		 */
 		if (functionName.equals("getLayer")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			return token.getLayer().name();
 		}
@@ -221,11 +194,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 */
 		if (functionName.equals("setLayer")) {
 			boolean forceShape = true;
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 3) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 3, parameters.size()));
-			} else if (parameters.size() == 3) {
+			checkNumberOfParameters(functionName, parameters, 1, 3);
+			if (parameters.size() == 3) {
 				forceShape = !BigDecimal.ZERO.equals(parameters.get(2));
 			}
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
@@ -240,10 +210,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		/*
 		 * String size = getSize(String tokenId: currentToken())
 		 */
-		if (functionName.equalsIgnoreCase("getSize")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+		if (functionName.equals("getSize")) {
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			return getSize(token);
 		}
@@ -251,12 +219,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		/*
 		 * String size = setSize(String size, String tokenId: currentToken())
 		 */
-		if (functionName.equalsIgnoreCase("setSize")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+		if (functionName.equals("setSize")) {
+			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			return setSize(token, parameters.get(0).toString());
 		}
@@ -265,10 +229,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * String owners = getOwners(String delim: ",", String tokenId:
 		 * currentToken())
 		 */
-		if (functionName.equalsIgnoreCase("getOwners")) {
-			if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+		if (functionName.equals("getOwners")) {
+			checkNumberOfParameters(functionName, parameters, 0, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			return getOwners(token, parameters.size() > 0 ? parameters.get(0).toString() : ",");
 		}
@@ -277,9 +239,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * Number zeroOne = isOwnedByAll(String tokenId: currentToken())
 		 */
 		if (functionName.equals("isOwnedByAll")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			return token.isOwnedByAll() ? BigDecimal.ONE : BigDecimal.ZERO;
 		}
@@ -289,9 +249,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * currentToken())
 		 */
 		if (functionName.equals("isOwner")) {
-			if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			if (parameters.size() > 0) {
 				return token.isOwner(parameters.get(0).toString()) ? BigDecimal.ONE : BigDecimal.ZERO;
@@ -304,11 +262,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * currentToken())
 		 */
 		if (functionName.equals("resetProperty")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			token.resetProperty(parameters.get(0).toString());
 			MapTool.serverCommand().putToken(zone.getId(), token);
@@ -321,11 +275,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * tokenId: currentToken())
 		 */
 		if (functionName.equals("setProperty")) {
-			if (parameters.size() < 2) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 2, parameters.size()));
-			} else if (parameters.size() > 3) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 3, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 2, 3);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 2);
 			token.setProperty(parameters.get(0).toString(), parameters.get(1).toString());
 			MapTool.serverCommand().putToken(zone.getId(), token);
@@ -338,11 +288,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * tokenId: currentToken())
 		 */
 		if (functionName.equals("getRawProperty")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			Object val = token.getProperty(parameters.get(0).toString());
 			if (val == null) {
@@ -366,11 +312,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * currentToken())
 		 */
 		if (functionName.equals("getProperty")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			Object val = token.getEvaluatedProperty(parameters.get(0).toString());
 
@@ -391,11 +333,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * currentToken())
 		 */
 		if (functionName.equals("isPropertyEmpty")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			return token.getProperty(parameters.get(0).toString()) == null ? BigDecimal.ONE : BigDecimal.ZERO;
 		}
@@ -407,11 +345,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * currentToken().getPropertyType())
 		 */
 		if (functionName.equals("getPropertyDefault")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = resolver.getTokenInContext();
 			String name = parameters.get(0).toString();
 			String propType = parameters.size() > 1 ? parameters.get(1).toString() : token.getPropertyType();
@@ -446,9 +380,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * String empty = bringToFront(String tokenId: currentToken())
 		 */
 		if (functionName.equals("bringToFront")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Set<GUID> tokens = new HashSet<GUID>();
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			tokens.add(token.getId());
@@ -461,9 +393,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * String empty = sendToBack(String tokenId: currentToken())
 		 */
 		if (functionName.equals("sendToBack")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Set<GUID> tokens = new HashSet<GUID>();
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			tokens.add(token.getId());
@@ -477,11 +407,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * macroSource)
 		 */
 		if (functionName.equals("getLibProperty")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 1, 2);
 			String location;
 			if (parameters.size() > 1) {
 				location = parameters.get(1).toString();
@@ -505,11 +431,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * tokenId: macroSource)
 		 */
 		if (functionName.equals("setLibProperty")) {
-			if (parameters.size() < 2) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 2, parameters.size()));
-			} else if (parameters.size() > 3) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 3, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 2, 3);
 			String location;
 			if (parameters.size() > 2) {
 				location = parameters.get(2).toString();
@@ -529,9 +451,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * | "this"}, String delim: ",")
 		 */
 		if (functionName.equals("getLibPropertyNames")) {
-			if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 2);
 			String location;
 			if (parameters.size() > 0) {
 				location = parameters.get(0).toString();
@@ -554,11 +474,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * tokenId: {macroSource | "*" | "this"}, String delim: ",")
 		 */
 		if (functionName.equals("getMatchingLibProperties")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 3) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 3, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 1, 3);
 			String location;
 			String pattern = parameters.get(0).toString();
 			if (parameters.size() > 1) {
@@ -581,9 +497,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * Number facing = getTokenFacing(String tokenId: currentToken())
 		 */
 		if (functionName.equals("getTokenFacing")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			if (token.getFacing() == null) {
 				return ""; // XXX Should be -1 instead of a string?
@@ -596,16 +510,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * currentToken())
 		 */
 		if (functionName.equals("setTokenFacing")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			} else if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
-			if (!(parameters.get(0) instanceof BigDecimal)) {
-				throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", functionName, 1, parameters.get(0).toString()));
-			}
+			checkNumberOfParameters(functionName, parameters, 1, 2);
+			BigDecimal facing = getBigDecimalFromParam(functionName, parameters, 0);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
-			token.setFacing(((BigDecimal) parameters.get(0)).intValue());
+			token.setFacing(facing.intValue());
 			MapTool.serverCommand().putToken(zone.getId(), token);
 			zoneR.flushLight(); // FJE This isn't needed unless the token had a light source, right?  Should we check for that?
 			zone.putToken(token);
@@ -616,9 +524,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * String empty = removeTokenFacing(String tokenId: currentToken())
 		 */
 		if (functionName.equals("removeTokenFacing")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			token.setFacing(null);
 			MapTool.serverCommand().putToken(zone.getId(), token);
@@ -631,9 +537,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * Number zeroOne = isSnapToGrid(String tokenId: currentToken())
 		 */
 		if (functionName.equals("isSnapToGrid")) {
-			if (parameters.size() > 1) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			return token.isSnapToGrid() ? BigDecimal.ONE : BigDecimal.ZERO;
 		}
@@ -643,9 +547,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * String tokenId: currentToken())
 		 */
 		if (functionName.equals("setOwner")) {
-			if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
+			checkNumberOfParameters(functionName, parameters, 0, 2);
 			boolean trusted = MapTool.getParser().isMacroTrusted();
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			// Remove current owners, but if this macro is untrusted and the current player is an owner, keep the
@@ -679,10 +581,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * "Circle", and "Square".
 		 */
 		if (functionName.equals("getTokenShape")) {
-			Token token;
-			if (parameters.size() > 1)
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 
+			Token token;
+			//TODO: should just call getTokenFromParam? This doesn't check if the macro is trusted though...
 			if (parameters.isEmpty()) {
 				token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
 				if (token == null)
@@ -703,13 +605,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * "Top_down", "Circle", and "Square".
 		 */
 		if (functionName.equals("setTokenShape")) {
+			checkNumberOfParameters(functionName, parameters, 0, 2);
+
 			Token token;
-			if (parameters.size() > 2)
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-
-			if (parameters.isEmpty())
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, 0));
-
+			//TODO: should just call getTokenFromParam? This doesn't check if the macro is trusted though...
 			if (parameters.size() == 1) {
 				token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
 				if (token == null)
@@ -733,10 +632,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * tokens.
 		 */
 		if (functionName.equals("getTokenWidth") || functionName.equals("getTokenHeight")) {
-			Token token;
-			if (parameters.size() > 1)
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+			checkNumberOfParameters(functionName, parameters, 0, 1);
 
+			Token token;
+			//TODO: should just call getTokenFromParam? This doesn't check if the macro is trusted though...
 			if (parameters.isEmpty()) {
 				token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
 				if (token == null)
@@ -749,10 +648,11 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			// Get the pixel width or height of a given token
 			Rectangle tokenBounds = token.getBounds(zone);
 
-			if (functionName.equals("getTokenWidth"))
+			if (functionName.equals("getTokenWidth")) {
 				return BigDecimal.valueOf(tokenBounds.width);
-			else
+			} else { // it wasn't 'getTokenWidth' which means functionName equals 'getTokenHeight'
 				return BigDecimal.valueOf(tokenBounds.height);
+			}
 		}
 
 		/*
@@ -782,8 +682,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Gets the size of the token.
 	 *
-	 * @param token
-	 *            The token to get the size of.
+	 * @param token The token to get the size of.
 	 * @return the size of the token.
 	 */
 	private String getSize(Token token) {
@@ -801,13 +700,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Sets the size of the token.
 	 *
-	 * @param token
-	 *            The token to set the size of.
-	 * @param size
-	 *            The size to set the token to.
+	 * @param token The token to set the size of.
+	 * @param size The size to set the token to.
 	 * @return The new size of the token.
-	 * @throws ParserException
-	 *             if the size specified is an invalid size.
+	 * @throws ParserException if the size specified is an invalid size.
 	 */
 	private String setSize(Token token, String size) throws ParserException {
 		if (size.equalsIgnoreCase("native") || size.equalsIgnoreCase("free")) {
@@ -835,16 +731,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Sets the layer of the token.
 	 *
-	 * @param token
-	 *            The token to move to a different layer.
-	 * @param layerName
-	 *            the name of the layer to move the token to.
-	 * @param forceShape
-	 *            normally <code>true</code>, but can be optionally set to
-	 *            <code>false</code> by MTscript
+	 * @param token The token to move to a different layer.
+	 * @param layerName the name of the layer to move the token to.
+	 * @param forceShape normally <code>true</code>, but can be optionally set
+	 *            to <code>false</code> by MTscript
 	 * @return the name of the layer the token was moved to.
-	 * @throws ParserException
-	 *             if the layer name is invalid.
+	 * @throws ParserException if the layer name is invalid.
 	 */
 	public String setLayer(Token token, String layerName, boolean forceShape) throws ParserException {
 		Zone.Layer layer;
@@ -884,10 +776,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Checks to see if the token has the specified property.
 	 *
-	 * @param token
-	 *            The token to check.
-	 * @param name
-	 *            The name of the property to check.
+	 * @param token The token to check.
+	 * @param name The name of the property to check.
 	 * @return true if the token has the property.
 	 */
 	private boolean hasProperty(Token token, String name) {
@@ -907,10 +797,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	 * Gets all the property names for the specified type. If type is null then
 	 * all the property names for all types are returned.
 	 *
-	 * @param type
-	 *            The type of property.
-	 * @param delim
-	 *            The list delimiter.
+	 * @param type The type of property.
+	 * @param delim The list delimiter.
 	 * @return a string list containing the property names.
 	 * @throws ParserException
 	 */
@@ -985,10 +873,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Gets the owners for the token.
 	 *
-	 * @param token
-	 *            The token to get the owners for.
-	 * @param delim
-	 *            the delimiter for the list.
+	 * @param token The token to get the owners for.
+	 * @param delim the delimiter for the list.
 	 * @return a string list of the token owners.
 	 */
 	public String getOwners(Token token, String delim) {
@@ -1030,7 +916,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	 * @param	functionName	this is used in the exception message
 	 * @param	parameters		a list of parameters
 	 * @param	index			the index to find the BigDecimal at
-	 * @return	the BigDecimal
+	 * @return					the parameter cast to BigDecimal
 	 * @throws	ParserException	if the parameter did not contain a BigDecimal
 	 * @see		checkNumberOfParameters
 	 */
@@ -1049,19 +935,15 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	 * so it is safe to use for functions that have the token as a optional
 	 * argument.
 	 *
-	 * @param res
-	 *            The variable resolver.
-	 * @param functionName
-	 *            The function name (used for generating exception messages).
-	 * @param param
-	 *            The parameters for the function.
-	 * @param index
-	 *            The index to find the token at.
+	 * @param res the variable resolver
+	 * @param functionName The function name (used for generating exception
+	 *            messages).
+	 * @param param The parameters for the function.
+	 * @param index The index to find the token at.
 	 * @return the token.
-	 * @throws ParserException
-	 *             if a token is specified but the macro is not trusted, or the
-	 *             specified token can not be found, or if no token is specified
-	 *             and no token is impersonated.
+	 * @throws ParserException if a token is specified but the macro is not
+	 *             trusted, or the specified token can not be found, or if no
+	 *             token is specified and no token is impersonated.
 	 */
 	private Token getTokenFromParam(MapToolVariableResolver res, String functionName, List<Object> param, int index) throws ParserException {
 		Token token;
