@@ -188,6 +188,10 @@ public class MapPropertiesDialog extends JDialog {
 	public JRadioButton getNoGridRadio() {
 		return formPanel.getRadioButton("noGridRadio");
 	}
+	
+	public JRadioButton getIsometricRadio() {
+		return formPanel.getRadioButton("isoRadio");
+	}
 
 	public void setZone(Zone zone) {
 		this.zone = zone;
@@ -406,6 +410,9 @@ public class MapPropertiesDialog extends JDialog {
 		}
 		if (getSquareRadio().isSelected()) {
 			grid = GridFactory.createGrid(GridFactory.SQUARE, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+		}
+		if (getIsometricRadio().isSelected()) {
+			grid = GridFactory.createGrid(GridFactory.ISOMETRIC, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
 		}
 		if (getNoGridRadio().isSelected()) {
 			grid = GridFactory.createGrid(GridFactory.NONE);
