@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.util.List;
 import java.util.Map;
 
@@ -130,31 +131,23 @@ public class IsometricGrid extends Grid {
 	@Override
 	public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
 		double scale = renderer.getScale();
-		double isoWidth = getSize() * scale;
-		double isoHeight = getSize() / 2 * scale;
+		double gridSize = getSize() * scale;
 
-		System.out.println("Scale = "+ isoWidth +" by "+ isoHeight);
-		
 		g.setColor(new Color(getZone().getGridColor()));
 
-		int offX = (int) (renderer.getViewOffsetX() % isoHeight + getOffsetX() * scale);
-		int offY = (int) (renderer.getViewOffsetY() % isoWidth + getOffsetY() * scale);
+		int offX = (int) (renderer.getViewOffsetX() % gridSize + getOffsetX() * scale);
+		int offY = (int) (renderer.getViewOffsetY() % gridSize + getOffsetY() * scale);
 
-		int startCol = (int) ((int) (bounds.x / isoWidth) * isoWidth);
-		int startRow = (int) ((int) (bounds.y / isoHeight) * isoHeight);
-		
-		//g.drawLine(startCol+offX, bounds.y, startCol+offX+(bounds.height*2), bounds.y+bounds.height);
-		/**
+		int startCol = (int) ((int) (bounds.x / gridSize) * gridSize);
+		int startRow = (int) ((int) (bounds.y / gridSize) * gridSize);
+
 		for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
-			if (AppState.getGridSize() == 1) {
-				g.drawLine(bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY));
-			} else {
-				g.fillRect(bounds.x, (int) (row + offY - (AppState.getGridSize() / 2)), bounds.width, AppState.getGridSize());
+			//g.drawOval(bounds.x, (int) (row + offY), AppState.getGridSize(), AppState.getGridSize());
+			for (double col = startCol; col < bounds.x + bounds.width + gridSize; col += gridSize) {
+				//g.drawOval((int) (col + offX), bounds.y, AppState.getGridSize(), AppState.getGridSize());
+				//Ellipse2D.Double dot = new Ellipse2D.Double((col + offX), (row + offY), AppState.getGridSize(), AppState.getGridSize());
+				g.drawOval((int) (col + offX), (int) (row + offY), AppState.getGridSize(), AppState.getGridSize());
 			}
-		}
-		**/
-		for (double col = startCol; col < bounds.x + bounds.width + isoWidth; col += isoWidth) {
-			g.drawLine((int) (col + offX), bounds.y, (int) (col + offX + (bounds.height*2)), bounds.y + bounds.height);
 		}
 	}
 }
