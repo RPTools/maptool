@@ -19,6 +19,13 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 
 public class IsometricGrid extends Grid {
+	/**
+	*  An attempt at an isometric style map grid where each cell is a diamond
+	*  with the sides angled at 30 degrees.  Each cell is twice as wide as high
+	*
+	*  Grid size is used for cell height.  Therefore size 50 is 100 wide.
+	*
+	**/
 	private static final int[] ALL_ANGLES = new int[] { -135, -90, -45, 0, 45, 90, 135, 180 };
 	private static int[] FACING_ANGLES;
 	
@@ -65,6 +72,9 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	public CellPoint convert(ZonePoint zp) {
+		//map.x = (screen.x / TILE_WIDTH_HALF + screen.y / TILE_HEIGHT_HALF) /2;
+		//map.y = (screen.y / TILE_HEIGHT_HALF -(screen.x / TILE_WIDTH_HALF)) /2;
+		
 		double calcX = (zp.x - getOffsetX()) / (float) getSize();
 		double calcY = (zp.y - getOffsetY()) / (float) getSize();
 
@@ -146,7 +156,8 @@ public class IsometricGrid extends Grid {
 			for (double col = startCol; col < bounds.x + bounds.width + gridSize; col += gridSize) {
 				//g.drawOval((int) (col + offX), bounds.y, AppState.getGridSize(), AppState.getGridSize());
 				//Ellipse2D.Double dot = new Ellipse2D.Double((col + offX), (row + offY), AppState.getGridSize(), AppState.getGridSize());
-				g.drawOval((int) (col + offX), (int) (row + offY), AppState.getGridSize(), AppState.getGridSize());
+				//g.drawOval((int) (col + offX), (int) (row + offY), AppState.getGridSize(), AppState.getGridSize());
+				g.fillOval((int) (col + offX), (int) (row + offY), AppState.getGridSize(), AppState.getGridSize());
 			}
 		}
 	}
