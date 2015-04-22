@@ -72,8 +72,10 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	public CellPoint convert(ZonePoint zp) {
-		//map.x = (screen.x / TILE_WIDTH_HALF + screen.y / TILE_HEIGHT_HALF) /2;
-		//map.y = (screen.y / TILE_HEIGHT_HALF -(screen.x / TILE_WIDTH_HALF)) /2;
+		double tile_width_half = getSize();
+		double tile_height_half = getSize()/2;
+		double isoX = ((zp.x - getOffsetX()) / tile_width_half + (zp.y - getOffsetY()) / tile_height_half) /2;
+		double isoY = ((zp.y - getOffsetY()) / tile_height_half -((zp.x - getOffsetX()) / tile_width_half)) /2;
 		
 		double calcX = (zp.x - getOffsetX()) / (float) getSize();
 		double calcY = (zp.y - getOffsetY()) / (float) getSize();
@@ -90,6 +92,10 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	public ZonePoint convert(CellPoint cp) {
+		double tile_width_half = getSize();
+		double tile_height_half = getSize()/2;
+		double mapX = (cp.x - cp.y) * tile_width_half;
+		double mapY = (cp.x + cp.y) * tile_height_half;
 		return new ZonePoint((cp.x * getSize() + getOffsetX()), (cp.y * getSize() + getOffsetY()));
 	}
 
