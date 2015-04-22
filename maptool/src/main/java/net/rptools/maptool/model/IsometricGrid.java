@@ -74,6 +74,7 @@ public class IsometricGrid extends Grid {
 		int newX = (int) (zp.x < 0 && !exactCalcX ? calcX - 1 : calcX);
 		int newY = (int) (zp.y < 0 && !exactCalcY ? calcY - 1 : calcY);
 
+		System.out.format("%d - %d = %s\n", zp.x, zp.y, isoX);
 		//System.out.format("%d / %d => %f, %f => %d, %d\n", zp.x, getSize(), calcX, calcY, newX, newY);
 		return new CellPoint(newX, newY);
 	}
@@ -92,7 +93,7 @@ public class IsometricGrid extends Grid {
 	protected Area createCellShape(int size) {
 		Rectangle r = new Rectangle(0, 0, size, size);
 	    AffineTransform tx = new AffineTransform();
-	    tx.rotate(0.5);
+	    tx.rotate(0.25);
 	    Shape diamond = tx.createTransformedShape(r);
 		return new Area(diamond);
 	}
@@ -122,7 +123,7 @@ public class IsometricGrid extends Grid {
 		} else if (!faceEdges && faceVertices) {
 			FACING_ANGLES = new int[] { -90, 0, 90, 180 };
 		} else if (faceEdges && !faceVertices) {
-			FACING_ANGLES = new int[] { -135, -45, 45, 135 };
+			FACING_ANGLES = new int[] { -120, -30, 30, 120 };
 		} else {
 			FACING_ANGLES = new int[] { 90 };
 		}
@@ -132,21 +133,26 @@ public class IsometricGrid extends Grid {
 	public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
 		double scale = renderer.getScale();
 		double gridSize = getSize() * scale;
+		double isoHeight = getSize() * scale;
+		double isoWidth = getSize() * 2 * scale;
 
 		g.setColor(new Color(getZone().getGridColor()));
 
-		int offX = (int) (renderer.getViewOffsetX() % gridSize + getOffsetX() * scale);
+		int offX = (int) (renderer.getViewOffsetX() % isoWidth + getOffsetX() * scale);
 		int offY = (int) (renderer.getViewOffsetY() % gridSize + getOffsetY() * scale);
 
-		int startCol = (int) ((int) (bounds.x / gridSize) * gridSize);
+		int startCol = (int) ((int) (bounds.x / isoWidth) * isoWidth);
 		int startRow = (int) ((int) (bounds.y / gridSize) * gridSize);
 
 		for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
-			//g.drawOval(bounds.x, (int) (row + offY), AppState.getGridSize(), AppState.getGridSize());
-			for (double col = startCol; col < bounds.x + bounds.width + gridSize; col += gridSize) {
-				//g.drawOval((int) (col + offX), bounds.y, AppState.getGridSize(), AppState.getGridSize());
-				//Ellipse2D.Double dot = new Ellipse2D.Double((col + offX), (row + offY), AppState.getGridSize(), AppState.getGridSize());
-				g.drawOval((int) (col + offX), (int) (row + offY), AppState.getGridSize(), AppState.getGridSize());
+			for (double col = startCol; col < bounds.x + bounds.width + isoWidth; col += isoWidth) {
+				g.fillOval((int) (col + offX - AppState.getGridSize()), (int) (row + offY - AppState.getGridSize()), AppState.getGridSize()*2, AppState.getGridSize()*2);
+			}
+		}
+
+		for (double row = startRow-(isoHeight/2); row < bounds.y + bounds.height + gridSize; row += gridSize) {
+			for (double col = startCol-(isoWidth/2); col < bounds.x + bounds.width + isoWidth; col += isoWidth) {
+				g.fillOval((int) (col + offX - AppState.getGridSize()), (int) (row + offY - AppState.getGridSize()), AppState.getGridSize()*2, AppState.getGridSize()*2);
 			}
 		}
 	}
