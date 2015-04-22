@@ -1,12 +1,13 @@
 package net.rptools.maptool.model;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -15,12 +16,24 @@ import javax.swing.KeyStroke;
 
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.client.walker.ZoneWalker;
+import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
 
 public class IsometricGrid extends Grid {
-	private static final int[] ALL_ANGLES = new int[] { -135, -90, -45, 0, 45, 90, 135, 180 };
+	/**
+	*  An attempt at an isometric style map grid where each cell is a diamond
+	*  with the sides angled at 30 degrees.  Each cell is twice as wide as high
+	*
+	*  Grid size is used for cell height.  Therefore size 50 is 100 wide.
+	*
+	**/
+	private static final int[] ALL_ANGLES = new int[] { -120, -90, -30, 0, 30, 90, 120, 180 };
 	private static int[] FACING_ANGLES;
+	private static List<TokenFootprint> footprintList;
 	
 	public IsometricGrid() {
 		super();
@@ -59,29 +72,46 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	public List<TokenFootprint> getFootprints() {
-		// TODO Auto-generated method stub
-		return null;
+		if (footprintList == null) {
+			try {
+				footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
+			} catch (IOException ioe) {
+				MapTool.showError("SquareGrid.error.squareGridNotLoaded", ioe);
+			}
+		}
+		return footprintList;
 	}
 
 	@Override
 	public CellPoint convert(ZonePoint zp) {
-		double calcX = (zp.x - getOffsetX()) / (float) getSize();
-		double calcY = (zp.y - getOffsetY()) / (float) getSize();
-
-		boolean exactCalcX = (zp.x - getOffsetX()) % getSize() == 0;
-		boolean exactCalcY = (zp.y - getOffsetY()) % getSize() == 0;
-
-		int newX = (int) (zp.x < 0 && !exactCalcX ? calcX - 1 : calcX);
-		int newY = (int) (zp.y < 0 && !exactCalcY ? calcY - 1 : calcY);
-
-		System.out.format("%d - %d = %s\n", zp.x, zp.y, isoX);
-		//System.out.format("%d / %d => %f, %f => %d, %d\n", zp.x, getSize(), calcX, calcY, newX, newY);
+		double tile_width_half = getSize();
+		double tile_height_half = getSize()/2;
+		double isoX = ((zp.x - getOffsetX()) / tile_width_half + (zp.y - getOffsetY()) / tile_height_half) /2;
+		double isoY = ((zp.y - getOffsetY()) / tile_height_half -((zp.x - getOffsetX()) / tile_width_half)) /2;
+		int newX = (int) isoX;
+		int newY = (int) isoY;
 		return new CellPoint(newX, newY);
 	}
 
 	@Override
 	public ZonePoint convert(CellPoint cp) {
-		return new ZonePoint((cp.x * getSize() + getOffsetX()), (cp.y * getSize() + getOffsetY()));
+		double tile_width_half = getSize();
+		double tile_height_half = getSize()/2;
+		double mapX = (cp.x - cp.y) * tile_width_half;
+		double mapY = (cp.x + cp.y) * tile_height_half;
+		return new ZonePoint((int)(mapX), (int)(mapY));
+	}
+
+	@Override
+	public Rectangle getBounds(CellPoint cp) {
+		ZonePoint zp = convert(cp);
+		return new Rectangle(zp.x-getSize(), zp.y, getSize()*2, getSize());
+	}
+
+	@Override
+	public ZoneWalker createZoneWalker() {
+		WalkerMetric metric = MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : MapTool.getServerPolicy().getMovementMetric();
+		return new AStarSquareEuclideanWalker(getZone(), metric);
 	}
 
 	@Override
@@ -96,11 +126,6 @@ public class IsometricGrid extends Grid {
 	    tx.rotate(0.25);
 	    Shape diamond = tx.createTransformedShape(r);
 		return new Area(diamond);
-	}
-
-	@Override
-	public Rectangle getBounds(CellPoint cp) {
-		return new Rectangle(cp.x * getSize(), cp.y * getSize(), getSize(), getSize());
 	}
 
 	@Override
@@ -146,14 +171,22 @@ public class IsometricGrid extends Grid {
 
 		for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
 			for (double col = startCol; col < bounds.x + bounds.width + isoWidth; col += isoWidth) {
-				g.fillOval((int) (col + offX - AppState.getGridSize()), (int) (row + offY - AppState.getGridSize()), AppState.getGridSize()*2, AppState.getGridSize()*2);
+				drawHatch(renderer, g, (int) (col + offX), (int) (row + offY));
 			}
 		}
 
 		for (double row = startRow-(isoHeight/2); row < bounds.y + bounds.height + gridSize; row += gridSize) {
 			for (double col = startCol-(isoWidth/2); col < bounds.x + bounds.width + isoWidth; col += isoWidth) {
-				g.fillOval((int) (col + offX - AppState.getGridSize()), (int) (row + offY - AppState.getGridSize()), AppState.getGridSize()*2, AppState.getGridSize()*2);
+				drawHatch(renderer, g, (int) (col + offX), (int) (row + offY));
 			}
 		}
+	}
+	
+	private void drawHatch(ZoneRenderer renderer, Graphics2D g, int x, int y) {
+		double isoWidth = getSize() * renderer.getScale();
+		int hatchSize = isoWidth>10?(int)isoWidth/8:2;
+		g.setStroke(new BasicStroke(AppState.getGridSize()));
+		g.drawLine(x-(hatchSize*2), y-hatchSize, x+(hatchSize*2), y+hatchSize);
+		g.drawLine(x-(hatchSize*2), y+hatchSize, x+(hatchSize*2), y-hatchSize);
 	}
 }
