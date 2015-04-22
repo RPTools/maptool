@@ -115,7 +115,7 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	public Rectangle getBounds(CellPoint cp) {
-		return new Rectangle(cp.x * getSize(), cp.y * getSize(), getSize(), getSize());
+		return new Rectangle(cp.x * getSize(), cp.y * getSize(), getSize() * 2, getSize());
 	}
 
 	@Override
