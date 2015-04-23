@@ -123,6 +123,7 @@ public class SightType {
 		switch (getShape()) {
 		case CIRCLE:
 			if (zone.getGrid() instanceof IsometricGrid) {
+				visionRange = (visionRange == 0) ? visionDistance : getDistance() * zone.getGrid().getSize() * 2 / zone.getUnitsPerCell();
 				visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange/2, visionRange * 2, visionRange));
 				break;
 			}
