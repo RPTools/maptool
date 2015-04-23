@@ -11,6 +11,7 @@
 
 package net.rptools.maptool.model;
 
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
@@ -121,9 +122,19 @@ public class SightType {
 		//now calculate the shape and return the shaped Area to the caller
 		switch (getShape()) {
 		case CIRCLE:
+			if (zone.getGrid() instanceof IsometricGrid) {
+				visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange/2, visionRange * 2, visionRange));
+				break;
+			}
 			visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
 			break;
 		case SQUARE:
+			if (zone.getGrid() instanceof IsometricGrid) {
+				int x[] = {0, (int)visionRange*2, 0, (int)-visionRange*2};
+				int y[] = {(int)-visionRange, 0, (int)visionRange, 0};
+				visibleArea = new Area(new Polygon(x,y,4));
+				break;
+			}
 			visibleArea = new Area(new Rectangle2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
 			break;
 		case CONE:
