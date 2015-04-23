@@ -28,8 +28,6 @@ public class IsometricGrid extends Grid {
 	*  An attempt at an isometric style map grid where each cell is a diamond
 	*  with the sides angled at 30 degrees.  Each cell is twice as wide as high
 	*
-	*  Grid size is used for cell height.  Therefore size 50 is 100 wide.
-	*
 	**/
 	private static final int[] ALL_ANGLES = new int[] { -120, -90, -30, 0, 30, 90, 120, 180 };
 	private static int[] FACING_ANGLES;
@@ -42,6 +40,38 @@ public class IsometricGrid extends Grid {
 			boolean faceVertices = AppPreferences.getFaceVertex();
 			setFacings(faceEdges, faceVertices);
 		}
+	}
+	
+	public IsometricGrid(boolean faceEdges, boolean faceVertices) {
+		setFacings(faceEdges, faceVertices);
+	}	
+
+	/**
+	*  Cell Dimensions
+	*
+	*  I decided to use cell size provided by Map Properties (getSize()) 
+	*  for the cell height.  It might appear more logical for getSize() to
+	*  be the edge length.  However, using it for height means there is a
+	*  correlation between square grid points and isometric grid points.
+	*  This will make the creation of maps and tokens easier.
+	*
+	***/
+	@Override
+	public double getCellWidth() {
+		return getSize()*2;
+	}
+
+	@Override
+	public double getCellHeight() {
+		return getSize();
+	}
+	
+	public double getCellWidthHalf() {
+		return getSize();
+	}
+
+	public double getCellHeightHalf() {
+		return getSize()/2;
 	}
 	
 	private static final GridCapabilities GRID_CAPABILITIES = new GridCapabilities() {
@@ -65,10 +95,6 @@ public class IsometricGrid extends Grid {
 			return true;
 		}
 	};
-	
-	public IsometricGrid(boolean faceEdges, boolean faceVertices) {
-		setFacings(faceEdges, faceVertices);
-	}
 
 	@Override
 	public List<TokenFootprint> getFootprints() {
@@ -84,10 +110,8 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	public CellPoint convert(ZonePoint zp) {
-		double tile_width_half = getSize();
-		double tile_height_half = getSize()/2;
-		double isoX = ((zp.x - getOffsetX()) / tile_width_half + (zp.y - getOffsetY()) / tile_height_half) /2;
-		double isoY = ((zp.y - getOffsetY()) / tile_height_half -((zp.x - getOffsetX()) / tile_width_half)) /2;
+		double isoX = ((zp.x - getOffsetX()) / getCellWidthHalf() + (zp.y - getOffsetY()) / getCellHeightHalf()) /2;
+		double isoY = ((zp.y - getOffsetY()) / getCellHeightHalf() -((zp.x - getOffsetX()) / getCellWidthHalf())) /2;
 		int newX = (int) isoX;
 		int newY = (int) isoY;
 		return new CellPoint(newX, newY);
@@ -95,10 +119,8 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	public ZonePoint convert(CellPoint cp) {
-		double tile_width_half = getSize();
-		double tile_height_half = getSize()/2;
-		double mapX = (cp.x - cp.y) * tile_width_half;
-		double mapY = (cp.x + cp.y) * tile_height_half;
+		double mapX = (cp.x - cp.y) * getCellWidthHalf();
+		double mapY = (cp.x + cp.y) * getCellHeightHalf();
 		return new ZonePoint((int)(mapX), (int)(mapY));
 	}
 
