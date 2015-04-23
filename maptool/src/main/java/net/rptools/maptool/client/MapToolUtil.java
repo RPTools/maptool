@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.rptools.maptool.client.utilities.RandomSuffixFactory;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
@@ -31,10 +32,9 @@ import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.util.StringUtil;
 
 public class MapToolUtil {
+	private static final Random RAND = new SecureRandom();
 
-//    private static Random random = new Random ( System.currentTimeMillis() );
-	private static Random random = new SecureRandom();
-
+	private static RandomSuffixFactory randomSuffixFactory;
 	private static AtomicInteger nextTokenId = new AtomicInteger(1);
 
 	/**
@@ -74,16 +74,18 @@ public class MapToolUtil {
 		COLOR_MAP.put("purple", new Color(0x80, 0x00, 0x80));
 		COLOR_MAP.put("silver", new Color(0xC0, 0xC0, 0xC0));
 		COLOR_MAP.put("teal", new Color(0x00, 0x80, 0x80));
-		
+
 		// Additional Gray colors
 		COLOR_MAP.put("gray25", new Color(0x3F, 0x3F, 0x3F));
 		COLOR_MAP.put("gray50", new Color(0x6F, 0x7F, 0x7F));
 		COLOR_MAP.put("gray75", new Color(0xBF, 0xBF, 0xBF));
 
-		// These are valid HTML colors.  When getFontColor() is called, if one of these is
-		// selected then the name is returned.  When another value is selected, the Color
-		// is converted to the '#112233f' notation and returned instead -- even if it's a name
-		// in COLOR_MAP, above.
+		/*
+		 * These are valid HTML colors. When getFontColor() is called, if one of
+		 * these is selected then the name is returned. When another value is
+		 * selected, the Color is converted to the '#112233f' notation and
+		 * returned instead -- even if it's a name in COLOR_MAP, above.
+		 */
 		String[] html = { "black", "white", "fuchsia", "aqua", "silver", "red", "lime", "blue", "yellow", "gray", "purple", "maroon", "navy", "olive", "green", "teal" };
 		for (int i = 0; i < html.length; i++) {
 			Color c = COLOR_MAP.get(html[i]);
@@ -97,7 +99,7 @@ public class MapToolUtil {
 	}
 
 	public static int getRandomNumber(int min, int max) {
-		return (int) (((max - min) * random.nextDouble()) + min);
+		return RAND.nextInt(max - min + 1) + min;
 	}
 
 	public static float getRandomRealNumber(float max) {
@@ -105,28 +107,26 @@ public class MapToolUtil {
 	}
 
 	public static float getRandomRealNumber(float min, float max) {
-		return (float) ((max - min) * random.nextDouble()) + min;
+		return (max - min) * RAND.nextFloat() + min;
 	}
 
 	public static boolean percentageCheckAbove(int percentage) {
-		return (random.nextDouble() * 100) > percentage;
+		return RAND.nextDouble() * 100 > percentage;
 	}
 
 	public static boolean percentageCheckBelow(int percentage) {
-		double roll = random.nextDouble() * 100;
-		return roll < percentage;
+		return RAND.nextDouble() * 100 < percentage;
 	}
 
 	private static final Pattern NAME_PATTERN = Pattern.compile("^(.*)\\s+(\\d+)\\s*$");
 
 	/**
-	 * Determine what the name of the new token should be. This method tries to choose a token name which is (a) unique
-	 * and (b) adheres to a numeric sequence.
-	 * 
-	 * @param zone
-	 *            the map that the token is being placed onto
-	 * @param token
-	 *            the new token to be named
+	 * Determine what the name of the new token should be. This method tries to
+	 * choose a token name which is (a) unique and (b) adheres to a numeric
+	 * sequence.
+	 *
+	 * @param zone the map that the token is being placed onto
+	 * @param token the new token to be named
 	 * @return the new token's algorithmically generated name
 	 */
 	public static String nextTokenId(Zone zone, Token token, boolean force) {
@@ -151,8 +151,11 @@ public class MapToolUtil {
 				try {
 					newNum = Integer.parseInt(m.group(2));
 				} catch (NumberFormatException nfe) {
-					// This exception happens if the number is too big to fit inside an integer.
-					// In this case, we use the original name as the filename and assign a new number as the suffix.
+					/*
+					 * This exception happens if the number is too big to fit
+					 * inside an integer. In this case, we use the original name
+					 * as the filename and assign a new number as the suffix.
+					 */
 					newName = baseName;
 				}
 			} else {
@@ -164,36 +167,26 @@ public class MapToolUtil {
 		boolean addNumToName = !AppPreferences.getTokenNumberDisplay().equals(Token.NUM_ON_GM);
 
 		/*
-		 * If the token already has a number suffix, if the preferences indicate that token numbering should be random
-		 * and this token is on the Token layer, or if the token already exists somewhere on this map, then we need to
-		 * choose a new name.
+		 * If the token already has a number suffix, if the preferences indicate
+		 * that token numbering should be random and this token is on the Token
+		 * layer, or if the token already exists somewhere on this map, then we
+		 * need to choose a new name.
 		 */
 		if (newNum != null || random || zone.getTokenByName(newName) != null) {
-			// Figure out the proper number of digits and generate a random number.
-			int maxNum = 99;
+
 			if (random) {
-				if (zone.getTokenCount() >= 89)
-					maxNum = 999;
-				if (zone.getTokenCount() >= 900)
-					maxNum = 9999;
-				newNum = getRandomNumber(10, maxNum);
-				/*
-				 * If we're generating a random number suffix, check to see if the value we have is already taken and
-				 * pick a new one if so. The "Token Name" field is separate from the "GM Name" field.
-				 */
-				while (true) {
-					boolean repeat = false;
-					if (addNumToName)
-						repeat = repeat || (zone.getTokenByName(newName + " " + newNum) != null);
-					if (addNumToGM)
-						repeat = repeat || (zone.getTokenByGMName(Integer.toString(newNum)) != null);
-					if (!repeat)
-						break;
-					newNum = getRandomNumber(10, maxNum);
+				if (randomSuffixFactory == null) {
+					randomSuffixFactory = new RandomSuffixFactory();
 				}
+				do {
+					newNum = randomSuffixFactory.nextSuffixForToken(newName);
+				} while (zone.getTokenByName(newName + " " + newNum) != null
+						&& zone.getTokenByGMName(Integer.toString(newNum)) != null);
+
 			} else {
 				newNum = zone.findFreeNumber(addNumToName ? newName : null, addNumToGM);
 			}
+
 			if (addNumToName) {
 				newName += " ";
 				newName += newNum;
@@ -217,15 +210,19 @@ public class MapToolUtil {
 	}
 
 	/**
-	 * Returns a {@link Color} object if the parameter can be evaluated as a color. This includes a text search against
-	 * a list of known colors (case-insensitive; see {@link #COLOR_MAP}) and conversion of the string into a color using
-	 * {@link Color#decode(String)}. Invalid strings cause <code>COLOR_MAP.get("black")</code> to be returned. Calls
-	 * {@link #convertStringToColor(String)} if the parameter is not a recognized color name.
-	 * 
-	 * @param name
-	 *            a recognized color name or an integer color value in octal or hexadecimal form (such as
-	 *            <code>#123</code>, <code>0x112233</code>, or <code>0X111222333</code>)
-	 * @return the corresponding Color object or {@link Color#BLACK} if not in a recognized format
+	 * Returns a {@link Color} object if the parameter can be evaluated as a
+	 * color. This includes a text search against a list of known colors
+	 * (case-insensitive; see {@link #COLOR_MAP}) and conversion of the string
+	 * into a color using {@link Color#decode(String)}. Invalid strings cause
+	 * <code>COLOR_MAP.get("black")</code> to be returned. Calls
+	 * {@link #convertStringToColor(String)} if the parameter is not a
+	 * recognized color name.
+	 *
+	 * @param name a recognized color name or an integer color value in octal or
+	 *            hexadecimal form (such as <code>#123</code>,
+	 *            <code>0x112233</code>, or <code>0X111222333</code>)
+	 * @return the corresponding Color object or {@link Color#BLACK} if not in a
+	 *         recognized format
 	 */
 	public static Color getColor(String name) {
 		name = name.trim().toLowerCase();
@@ -237,12 +234,13 @@ public class MapToolUtil {
 	}
 
 	/**
-	 * Converts the incoming string value to a Color object and stores <code>val</code> and the Color as a key/value
-	 * pair in a cache. The incoming string may start with a <code>#</code> to indicate a numeric color value in CSS
-	 * format. Any errors cause {@link #COLOR_MAP}<code>.get("black")</code> to be returned.
-	 * 
-	 * @param val
-	 *            color value to interpret
+	 * Converts the incoming string value to a Color object and stores
+	 * <code>val</code> and the Color as a key/value pair in a cache. The
+	 * incoming string may start with a <code>#</code> to indicate a numeric
+	 * color value in CSS format. Any errors cause {@link #COLOR_MAP}
+	 * <code>.get("black")</code> to be returned.
+	 *
+	 * @param val color value to interpret
 	 * @return Color object
 	 */
 	private static Color convertStringToColor(String val) {
