@@ -29,7 +29,7 @@ public class IsometricGrid extends Grid {
 	*  with the sides angled at 30 degrees.  Each cell is twice as wide as high
 	*
 	**/
-	private static final int[] ALL_ANGLES = new int[] { -120, -90, -30, 0, 30, 90, 120, 180 };
+	private static final int[] ALL_ANGLES = new int[] { -153, -90, -27, 0, 27, 90, 153, 180 };
 	private static int[] FACING_ANGLES;
 	private static List<TokenFootprint> footprintList;
 	
@@ -72,6 +72,44 @@ public class IsometricGrid extends Grid {
 
 	public double getCellHeightHalf() {
 		return getSize()/2;
+	}
+	
+	public static double degreesFromIso(double facing) {
+		/**
+		 * Given a facing from an isometric map
+		 * turn it into plan map equivalent
+		 * i.e. 30 degree converts to 45 degree
+		 */
+		if (facing==0 || facing==90 || facing==-90 || facing==180)
+			return facing;
+		/**
+		if (facing==30)
+			return 45;
+		if (facing==150)
+			return 135;
+		if (facing==-30)
+			return -45;
+		if (facing==-150)
+			return -135; **/
+		double newfacing = (Math.toDegrees(Math.atan(Math.sin(Math.toRadians(facing))*2)));
+		System.out.println(facing+" to "+newfacing);
+		return newfacing;
+	}
+	
+	public static double degreesToIso(double facing) {
+		/**
+		 * Given a facing from a plan map turn it
+		 * into isometric map equivalent
+		 * i.e 45 degree converts to 30 degree 
+		 */
+		double iso = Math.asin((Math.sin(facing)/2)/Math.cos(facing));
+		System.out.println("in="+facing+" out="+iso);
+		return iso;
+	}
+
+	@Override
+	public int[] getFacingAngles() {
+		return FACING_ANGLES;
 	}
 	
 	private static final GridCapabilities GRID_CAPABILITIES = new GridCapabilities() {
@@ -170,7 +208,7 @@ public class IsometricGrid extends Grid {
 		} else if (!faceEdges && faceVertices) {
 			FACING_ANGLES = new int[] { -90, 0, 90, 180 };
 		} else if (faceEdges && !faceVertices) {
-			FACING_ANGLES = new int[] { -120, -30, 30, 120 };
+			FACING_ANGLES = new int[] { -153, -27, 27, 153 };
 		} else {
 			FACING_ANGLES = new int[] { 90 };
 		}

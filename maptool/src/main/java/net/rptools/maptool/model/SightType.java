@@ -144,12 +144,11 @@ public class SightType {
 			}
 			int offsetAngle = getOffset();
 			int arcAngle = getArc();
-			//TODO: confirm if we want the offset to be positive-counter-clockwise, negative-clockwise or vice versa
-			//simply a matter of changing the sign on offsetAngle
-			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2, 360.0 - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
-			// Rotate
-			tempvisibleArea = tempvisibleArea.createTransformedArea(AffineTransform.getRotateInstance(-Math.toRadians(token.getFacing())));
-
+			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2, token.getFacing() - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
+			if (zone.getGrid() instanceof IsometricGrid) {
+				visionRange = (visionRange == 0) ? visionDistance : getDistance() * zone.getGrid().getSize() * 2 / zone.getUnitsPerCell();
+				tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange/2, visionRange * 2, visionRange, IsometricGrid.degreesFromIso(token.getFacing()) - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
+			}
 			Rectangle footprint = token.getFootprint(zone.getGrid()).getBounds(zone.getGrid());
 			footprint.x = -footprint.width / 2;
 			footprint.y = -footprint.height / 2;
