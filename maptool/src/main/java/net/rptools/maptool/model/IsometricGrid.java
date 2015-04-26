@@ -29,6 +29,7 @@ public class IsometricGrid extends Grid {
 	*  with the sides angled at 30 degrees.  Each cell is twice as wide as high
 	*
 	**/
+	private static final int ISO_ANGLE = 27;
 	private static final int[] ALL_ANGLES = new int[] { -153, -90, -27, 0, 27, 90, 153, 180 };
 	private static int[] FACING_ANGLES;
 	private static List<TokenFootprint> footprintList;
@@ -78,22 +79,18 @@ public class IsometricGrid extends Grid {
 		/**
 		 * Given a facing from an isometric map
 		 * turn it into plan map equivalent
-		 * i.e. 30 degree converts to 45 degree
+		 * i.e. 27 degree converts to 45 degree
 		 */
-		if (facing==0 || facing==90 || facing==-90 || facing==180)
-			return facing;
-		/**
-		if (facing==30)
-			return 45;
-		if (facing==150)
-			return 135;
-		if (facing==-30)
-			return -45;
-		if (facing==-150)
-			return -135; **/
-		double newfacing = (Math.toDegrees(Math.atan(Math.sin(Math.toRadians(facing))*2)));
-		System.out.println(facing+" to "+newfacing);
-		return newfacing;
+		double newFacing = facing;
+		if (Math.cos(facing)!=0) {
+			double v1 = Math.sin(Math.toRadians(newFacing))*2;
+			double v2 = Math.cos(Math.toRadians(newFacing));
+			double v3 = Math.toDegrees(Math.atan(v1/v2));
+			if (facing>90 || facing<-90)
+				v3=180+v3;
+			newFacing = Math.floor(v3);
+		}
+		return newFacing;
 	}
 	
 	public static double degreesToIso(double facing) {
