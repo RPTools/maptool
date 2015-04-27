@@ -123,8 +123,8 @@ public class SightType {
 		switch (getShape()) {
 		case CIRCLE:
 			if (zone.getGrid() instanceof IsometricGrid) {
-				visionRange = (visionRange == 0) ? visionDistance : getDistance() * zone.getGrid().getSize() * 2 / zone.getUnitsPerCell();
-				visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange/2, visionRange * 2, visionRange));
+				visionRange = (float)Math.sin(Math.toRadians(45))*visionRange;
+				visibleArea = new Area(new Ellipse2D.Double(-visionRange*2, -visionRange, visionRange * 4, visionRange * 2));
 				break;
 			}
 			visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
@@ -146,8 +146,8 @@ public class SightType {
 			int arcAngle = getArc();
 			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2, token.getFacing() - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
 			if (zone.getGrid() instanceof IsometricGrid) {
-				visionRange = (visionRange == 0) ? visionDistance : getDistance() * zone.getGrid().getSize() * 2 / zone.getUnitsPerCell();
-				tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange/2, visionRange * 2, visionRange, IsometricGrid.degreesFromIso(token.getFacing()) - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
+				visionRange = (float)Math.sin(Math.toRadians(45))*visionRange;
+				tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2, IsometricGrid.degreesFromIso(token.getFacing()) - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
 			}
 			Rectangle footprint = token.getFootprint(zone.getGrid()).getBounds(zone.getGrid());
 			footprint.x = -footprint.width / 2;

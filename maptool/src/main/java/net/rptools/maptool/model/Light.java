@@ -127,8 +127,8 @@ public class Light {
 
 			Area area = new Area(new Arc2D.Double(-size, -size, size * 2, size * 2, token.getFacing() - (arcAngle / 2.0), arcAngle, Arc2D.PIE));
 			if (zone.getGrid() instanceof IsometricGrid) {
-				size = (size == 0) ? size : radius * zone.getGrid().getSize() * 2 / zone.getUnitsPerCell();
-				area = new Area(new Arc2D.Double(-size, -size/2, size * 2, size, IsometricGrid.degreesFromIso(token.getFacing()) - (arcAngle / 2.0), arcAngle, Arc2D.PIE));
+				size = (float)Math.sin(Math.toRadians(45))*size;
+				area = new Area(new Arc2D.Double(-size * 2, -size, size * 4, size * 2, IsometricGrid.degreesFromIso(token.getFacing()) - (arcAngle / 2.0), arcAngle, Arc2D.PIE));
 			}
 			//if (token.getFacing() != null) {
 			//	area = area.createTransformedArea(AffineTransform.getRotateInstance(-Math.toRadians(token.getFacing())));
@@ -139,8 +139,8 @@ public class Light {
 		default:
 		case CIRCLE:
 			if (zone.getGrid() instanceof IsometricGrid) {
-				size = (size == 0) ? size : radius * zone.getGrid().getSize() * 2 / zone.getUnitsPerCell();
-				return new Area(new Ellipse2D.Double(-size, -size/2, size * 2, size));
+				size = (float)Math.sin(Math.toRadians(45))*size;
+				return new Area(new Ellipse2D.Double(-size * 2, -size, size * 4, size * 2));
 			}
 			return new Area(new Ellipse2D.Double(-size, -size, size * 2, size * 2));
 		}
