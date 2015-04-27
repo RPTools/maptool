@@ -2,10 +2,10 @@
  * This software copyright by various authors including the RPTools.net
  * development team, and licensed under the LGPL Version 3 or, at your option,
  * any later version.
- * 
+ *
  * Portions of this software were originally covered under the Apache Software
  * License, Version 1.1 or Version 2.0.
- * 
+ *
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
@@ -505,7 +505,7 @@ public class Zone extends BaseModel {
 	 * of all owned tokens (with HasSight==true) and return intersection of
 	 * point with the combined area.
 	 * </ol>
-	 * 
+	 *
 	 * @param point
 	 * @param view
 	 * @return
@@ -553,7 +553,7 @@ public class Zone extends BaseModel {
 	 * <li>If the token's bounds intersect the exposed area for this map, return
 	 * <code>true</code>.
 	 * </ol>
-	 * 
+	 *
 	 * @param token
 	 * @return
 	 */
@@ -626,10 +626,10 @@ public class Zone extends BaseModel {
          if (meta != null)
             meta.clearExposedAreaHistory();
       }
-      
+
       fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
    }
-	   
+
 	public void exposeArea(Area area, Token tok) {
 		if (area == null || area.isEmpty()) {
 			return;
@@ -659,7 +659,7 @@ public class Zone extends BaseModel {
 	 * Retrieves the selected tokens and adds the passed in area to their
 	 * exposed area. (Why are we passing in a <code>Set&lt;GUID></code> when
 	 * <code>Set&lt;Token></code> would be much more efficient?)
-	 * 
+	 *
 	 * @param area
 	 * @param selectedToks
 	 */
@@ -706,7 +706,7 @@ public class Zone extends BaseModel {
 	 * Modifies the global exposed area (GEA) or token exposed by resetting it
 	 * and then setting it to the contents of the passed in Area and firing a
 	 * ModelChangeEvent.
-	 * 
+	 *
 	 * @param area
 	 * @param selectedToks
 	 */
@@ -794,7 +794,7 @@ public class Zone extends BaseModel {
 	 * value is the zone's global exposed fog area. If tokens are returned by
 	 * getTokens(), their exposed areas are added to the zone's global area and
 	 * the result is returned.
-	 * 
+	 *
 	 * @param view
 	 *            holds whether or not tokens are selected
 	 * @return
@@ -822,7 +822,7 @@ public class Zone extends BaseModel {
 	/**
 	 * This is the Global Exposed Area (GEA) discussed so much on the dev-team
 	 * mailing list. :)
-	 * 
+	 *
 	 * @return Area object representing exposed fog area visible to all tokens
 	 */
 	public Area getExposedArea() {
@@ -980,7 +980,7 @@ public class Zone extends BaseModel {
 	 * ordered list of tokens as well as firing the appropriate
 	 * <code>ModelChangeEvent</code> (either <code>Event.TOKEN_ADDED</code> or
 	 * <code>Event.TOKEN_CHANGED</code>).
-	 * 
+	 *
 	 * @param token
 	 *            the Token to be added to this zone
 	 */
@@ -1011,7 +1011,7 @@ public class Zone extends BaseModel {
 	 * Not currently invoked by other code, but event handling changes for
 	 * multiple tokens has been made. Marked as deprecated to prevent use until
 	 * the rest of the integration is completed.
-	 * 
+	 *
 	 * @param tokens
 	 *            List of Tokens to be added to this zone
 	 */
@@ -1071,7 +1071,7 @@ public class Zone extends BaseModel {
 	/**
 	 * Looks for the given identifier as a token name, token GM name, or GUID,
 	 * in that order.
-	 * 
+	 *
 	 * @param identifier
 	 * @return token that matches the identifier or <code>null</code>
 	 */
@@ -1176,6 +1176,7 @@ public class Zone extends BaseModel {
 	 */
 	public List<Token> getTokens() {
 		return getTokensFiltered(new Filter() {
+			@Override
 			public boolean matchToken(Token t) {
 				return !t.isStamp();
 			}
@@ -1184,6 +1185,7 @@ public class Zone extends BaseModel {
 
 	public List<Token> getStampTokens() {
 		return getTokensFiltered(new Filter() {
+			@Override
 			public boolean matchToken(Token t) {
 				return t.isObjectStamp();
 			}
@@ -1192,6 +1194,7 @@ public class Zone extends BaseModel {
 
 	public List<Token> getPlayerTokens() {
 		return getTokensFiltered(new Filter() {
+			@Override
 			public boolean matchToken(Token t) {
 				return t.getType() == Token.Type.PC;
 			}
@@ -1200,6 +1203,7 @@ public class Zone extends BaseModel {
 
 	public List<Token> getPlayerOwnedTokensWithSight(Player p) {
 		return getTokensFiltered(new Filter() {
+			@Override
 			public boolean matchToken(Token t) {
 				return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
 			}
@@ -1208,6 +1212,7 @@ public class Zone extends BaseModel {
 
 	public List<Token> getBackgroundStamps() {
 		return getTokensFiltered(new Filter() {
+			@Override
 			public boolean matchToken(Token t) {
 				return t.isBackgroundStamp();
 			}
@@ -1216,6 +1221,7 @@ public class Zone extends BaseModel {
 
 	public List<Token> getGMStamps() {
 		return getTokensFiltered(new Filter() {
+			@Override
 			public boolean matchToken(Token t) {
 				return t.isGMStamp();
 			}
@@ -1235,8 +1241,8 @@ public class Zone extends BaseModel {
 		} else {
 			lastUsed = _lastUsed;
 		}
-		boolean repeat = true;
-		while (repeat) {
+		boolean repeat;
+		do {
 			lastUsed++;
 			repeat = false;
 			if (checkDm) {
@@ -1252,7 +1258,7 @@ public class Zone extends BaseModel {
 					repeat = true;
 				}
 			}
-		}
+		} while (repeat);
 		tokenNumberCache.put(tokenBaseName, lastUsed);
 		return lastUsed;
 	}
@@ -1264,6 +1270,7 @@ public class Zone extends BaseModel {
 	public static final Comparator<Token> TOKEN_Z_ORDER_COMPARATOR = new TokenZOrderComparator();
 
 	public static class TokenZOrderComparator implements Comparator<Token> {
+		@Override
 		public int compare(Token o1, Token o2) {
 			int lval = o1.getZOrder();
 			int rval = o2.getZOrder();
@@ -1378,6 +1385,7 @@ public class Zone extends BaseModel {
 		// 1.3b47 -> 1.3b48
 		if (visionType == null) {
 			if (getTokensFiltered(new Filter() {
+				@Override
 				public boolean matchToken(Token token) {
 					return token.hasLightSources();
 				}
@@ -1425,7 +1433,7 @@ public class Zone extends BaseModel {
 
 	/**
 	 * Find the area of this map which has been exposed to the given token GUID.
-	 * 
+	 *
 	 * @param tokenExposedAreaGUID
 	 *            token whose exposed area should be returned
 	 * @return area of fog cleared away for/by this token
