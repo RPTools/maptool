@@ -49,7 +49,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		super(0, 4, "getPropertyNames", "getAllPropertyNames", "getPropertyNamesRaw", "hasProperty", "isNPC", "isPC", "setPC", "setNPC", "getLayer", "setLayer", "getSize", "setSize", "getOwners",
 				"isOwnedByAll", "isOwner", "resetProperty", "getProperty", "setProperty", "isPropertyEmpty", "getPropertyDefault", "sendToBack", "bringToFront", "getLibProperty", "setLibProperty",
 				"getLibPropertyNames", "setPropertyType", "getPropertyType", "getRawProperty", "getTokenFacing", "setTokenFacing", "removeTokenFacing", "getMatchingProperties",
-				"getMatchingLibProperties", "isSnapToGrid", "setOwner", "getTokenWidth", "getTokenHeight", "setTokenWidth", "setTokenHeight", "getTokenShape", "setTokenShape");
+				"getMatchingLibProperties", "isSnapToGrid", "setOwner", "getTokenWidth", "getTokenHeight", "setTokenWidth", "setTokenHeight", "getTokenShape", "setTokenShape",
+				"getGMNotes", "setGMNotes", "getNotes", "setNotes");
 	}
 
 	public static TokenPropertyFunctions getInstance() {
@@ -374,6 +375,46 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			} else {
 				return val;
 			}
+		}
+
+		/*
+		 * String notes = getGMNotes(String tokenId: currentToken())
+		 */
+		if (functionName.equals("getGMNotes")) {
+			checkNumberOfParameters(functionName, parameters, 0, 1);
+			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+			return token.getGMNotes();
+		}
+
+		/*
+		 * String notes = setGMNotes(String notes, String tokenId: currentToken())
+		 */
+		if (functionName.equals("setGMNotes")) {
+			checkNumberOfParameters(functionName, parameters, 1, 2);
+			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+			token.setGMNotes( parameters.get(0).toString());
+			zone.putToken(token);
+			return token.getGMNotes();
+		}
+
+		/*
+		 * String notes = getNotes(String tokenId: currentToken())
+		 */
+		if (functionName.equals("getNotes")) {
+			checkNumberOfParameters(functionName, parameters, 0, 1);
+			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+			return token.getNotes();
+		}
+
+		/*
+		 * String notes = setNotes(String notes, String tokenId: currentToken())
+		 */
+		if (functionName.equals("setNotes")) {
+			checkNumberOfParameters(functionName, parameters, 1, 2);
+			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+			token.setNotes( parameters.get(0).toString());
+			zone.putToken(token);
+			return token.getNotes();
 		}
 
 		/*
