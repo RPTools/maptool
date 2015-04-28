@@ -556,6 +556,7 @@ public class PreferencesDialog extends JDialog {
 		gridTypeModel.addElement(GridFactory.SQUARE);
 		gridTypeModel.addElement(GridFactory.HEX_HORI);
 		gridTypeModel.addElement(GridFactory.HEX_VERT);
+		gridTypeModel.addElement(GridFactory.ISOMETRIC);
 		gridTypeModel.setSelectedItem(AppPreferences.getDefaultGridType());
 		defaultGridTypeCombo.setModel(gridTypeModel);
 		defaultGridTypeCombo.addItemListener(new ItemListener() {

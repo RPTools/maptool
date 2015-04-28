@@ -3,6 +3,7 @@ package net.rptools.maptool.model;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -178,11 +179,9 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	protected Area createCellShape(int size) {
-		Rectangle r = new Rectangle(0, 0, size, size);
-	    AffineTransform tx = new AffineTransform();
-	    tx.rotate(0.25);
-	    Shape diamond = tx.createTransformedShape(r);
-		return new Area(diamond);
+		int x[] = {0, (int)size*2, 0, (int)-size*2};
+		int y[] = {(int)-size, 0, (int)size, 0};
+		return new Area(new Polygon(x,y,4));
 	}
 
 	@Override
