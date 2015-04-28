@@ -93,6 +93,7 @@ public class Token extends BaseModel {
 	}
 
 	public static final Comparator<Token> NAME_COMPARATOR = new Comparator<Token>() {
+		@Override
 		public int compare(Token o1, Token o2) {
 			return o1.getName().compareToIgnoreCase(o2.getName());
 		}
@@ -215,10 +216,13 @@ public class Token extends BaseModel {
 		y = token.y;
 		z = token.z;
 
-		// These properties shouldn't be transferred, they are more transient and relate to token history, not to new tokens
-		//		lastX = token.lastX;
-		//		lastY = token.lastY;
-		//		lastPath = token.lastPath;
+		/*
+		 * These properties shouldn't be transferred, they are more transient
+		 * and relate to token history, not to new tokens:
+		 * lastX = token.lastX;
+		 * lastY = token.lastY;
+		 * lastPath = token.lastPath;
+		 */
 
 		snapToScale = token.snapToScale;
 		width = token.width;
@@ -357,7 +361,7 @@ public class Token extends BaseModel {
 	public int getHeight() {
 		return height;
 	}
-	
+
 	public boolean isMarker() {
 		return isStamp() && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
 	}
@@ -490,9 +494,15 @@ public class Token extends BaseModel {
 	}
 
 	public void setFacing(Integer facing) {
-		while (facing != null && (facing > 180 || facing < -179)) {
-			facing += facing > 180 ? -360 : 0;
-			facing += facing < -179 ? 360 : 0;
+		/*
+		 * Only one or zero of these while loops will be executed each time the
+		 * method is called.
+		 */
+		while (facing < 0) {
+			facing += 360;
+		}
+		while (facing >= 360) {
+			facing -= 360;
 		}
 		this.facing = facing;
 	}
@@ -719,7 +729,7 @@ public class Token extends BaseModel {
 	 * this method: through repeated attempts to name a token they own to another name, they could determine which token
 	 * names the GM is already using. Fortunately, the showError() call makes this extremely unlikely due to the
 	 * interactive nature of a failure.
-	 * 
+	 *
 	 * @param name
 	 * @throws IOException
 	 */
@@ -962,7 +972,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Get a particular state property for this Token.
-	 * 
+	 *
 	 * @param property
 	 *            The name of the property being read.
 	 * @return Returns the current value of property.
@@ -973,7 +983,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Set the value of state for this Token.
-	 * 
+	 *
 	 * @param aState
 	 *            The property to set.
 	 * @param aValue
@@ -1049,7 +1059,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Returns all property names, all in lowercase.
-	 * 
+	 *
 	 * @return
 	 */
 	public Set<String> getPropertyNames() {
@@ -1058,7 +1068,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Returns all property names, preserving their case.
-	 * 
+	 *
 	 * @return
 	 */
 	public Set<String> getPropertyNamesRaw() {
@@ -1217,7 +1227,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Get a set containing the names of all set properties on this token.
-	 * 
+	 *
 	 * @return The set of state property names that have a value associated with them.
 	 */
 	public Set<String> getStatePropertyNames() {
@@ -1294,7 +1304,7 @@ public class Token extends BaseModel {
 	/**
 	 * Convert the token into a hash map. This is used to ship all of the properties for the token to other apps that do
 	 * need access to the <code>Token</code> class.
-	 * 
+	 *
 	 * @return A map containing the properties of the token.
 	 */
 	public TokenTransferData toTransferData() {
@@ -1338,7 +1348,7 @@ public class Token extends BaseModel {
 	/**
 	 * Constructor to create a new token from a transfer object containing its property values. This is used to read in
 	 * a new token from other apps that don't have access to the <code>Token</code> class.
-	 * 
+	 *
 	 * @param td
 	 *            Read the values from this transfer object.
 	 */
@@ -1421,7 +1431,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Get an integer value from the map or return the default value
-	 * 
+	 *
 	 * @param map
 	 *            Get the value from this map
 	 * @param propName
@@ -1439,7 +1449,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Get a boolean value from the map or return the default value
-	 * 
+	 *
 	 * @param map
 	 *            Get the value from this map
 	 * @param propName
@@ -1494,6 +1504,7 @@ public class Token extends BaseModel {
 	}
 
 	public static final Comparator<Token> COMPARE_BY_NAME = new Comparator<Token>() {
+		@Override
 		public int compare(Token o1, Token o2) {
 			if (o1 == null || o2 == null) {
 				return 0;
@@ -1502,6 +1513,7 @@ public class Token extends BaseModel {
 		}
 	};
 	public static final Comparator<Token> COMPARE_BY_ZORDER = new Comparator<Token>() {
+		@Override
 		public int compare(Token o1, Token o2) {
 			if (o1 == null || o2 == null) {
 				return 0;

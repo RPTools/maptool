@@ -46,10 +46,19 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	private static final TokenPropertyFunctions instance = new TokenPropertyFunctions();
 
 	private TokenPropertyFunctions() {
-		super(0, 4, "getPropertyNames", "getAllPropertyNames", "getPropertyNamesRaw", "hasProperty", "isNPC", "isPC", "setPC", "setNPC", "getLayer", "setLayer", "getSize", "setSize", "getOwners",
-				"isOwnedByAll", "isOwner", "resetProperty", "getProperty", "setProperty", "isPropertyEmpty", "getPropertyDefault", "sendToBack", "bringToFront", "getLibProperty", "setLibProperty",
-				"getLibPropertyNames", "setPropertyType", "getPropertyType", "getRawProperty", "getTokenFacing", "setTokenFacing", "removeTokenFacing", "getMatchingProperties",
-				"getMatchingLibProperties", "isSnapToGrid", "setOwner", "getTokenWidth", "getTokenHeight", "setTokenWidth", "setTokenHeight", "getTokenShape", "setTokenShape",
+		super(0, 4, "getPropertyNames", "getAllPropertyNames",
+				"getPropertyNamesRaw", "hasProperty", "isNPC", "isPC", "setPC",
+				"setNPC", "getLayer", "setLayer", "getSize", "setSize",
+				"getOwners", "isOwnedByAll", "isOwner", "resetProperty",
+				"getProperty", "setProperty", "isPropertyEmpty",
+				"getPropertyDefault", "sendToBack", "bringToFront",
+				"getLibProperty", "setLibProperty", "getLibPropertyNames",
+				"setPropertyType", "getPropertyType", "getRawProperty",
+				"getTokenFacing", "getTokenAngle", "setTokenFacing",
+				"removeTokenFacing", "getMatchingProperties",
+				"getMatchingLibProperties", "isSnapToGrid", "setOwner",
+				"getTokenWidth", "getTokenHeight", "setTokenWidth",
+				"setTokenHeight", "getTokenShape", "setTokenShape",
 				"getGMNotes", "setGMNotes", "getNotes", "setNotes");
 	}
 
@@ -534,16 +543,29 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			return getPropertyNames(token, delim, pattern, false);
 		}
 
+		if (functionName.equals("getTokenAngle")) {
+			checkNumberOfParameters(functionName, parameters, 0, 1);
+			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+			if (!token.hasFacing()) {
+				return "";
+			}
+			return new BigDecimal(token.getFacing());
+		}
+
 		/*
 		 * Number facing = getTokenFacing(String tokenId: currentToken())
 		 */
 		if (functionName.equals("getTokenFacing")) {
 			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
-			if (token.getFacing() == null) {
-				return ""; // XXX Should be -1 instead of a string?
+			if (!token.hasFacing()) {
+				return "";
 			}
-			return BigDecimal.valueOf(token.getFacing());
+			int facing = token.getFacing();
+			if (facing > 180) {
+				facing -= 360;
+			}
+			return new BigDecimal(facing);
 		}
 
 		/*
