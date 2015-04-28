@@ -66,7 +66,6 @@ import net.rptools.maptool.client.functions.TokenLightFunctions;
 import net.rptools.maptool.client.functions.TokenLocationFunctions;
 import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.functions.TokenNameFunction;
-import net.rptools.maptool.client.functions.TokenNoteFunctions;
 import net.rptools.maptool.client.functions.TokenPropertyFunctions;
 import net.rptools.maptool.client.functions.TokenRemoveFromInitiativeFunction;
 import net.rptools.maptool.client.functions.TokenSelectionFunctions;
@@ -110,7 +109,7 @@ public class MapToolLineParser {
 			StrListFunctions.getInstance(), StrPropFunctions.getInstance(), SwitchTokenFunction.getInstance(), TokenAddToInitiativeFunction.getInstance(), TokenBarFunction.getInstance(),
 			TokenCopyDeleteFunctions.getInstance(), TokenGMNameFunction.getInstance(), TokenHaloFunction.getInstance(), TokenImage.getInstance(), TokenInitFunction.getInstance(),
 			TokenInitHoldFunction.getInstance(), TokenLabelFunction.getInstance(), TokenLightFunctions.getInstance(), TokenLocationFunctions.getInstance(), TokenNameFunction.getInstance(),
-			TokenNoteFunctions.getInstance(), TokenPropertyFunctions.getInstance(), TokenRemoveFromInitiativeFunction.getInstance(), TokenSelectionFunctions.getInstance(),
+			TokenPropertyFunctions.getInstance(), TokenRemoveFromInitiativeFunction.getInstance(), TokenSelectionFunctions.getInstance(),
 			TokenSightFunctions.getInstance(), TokenSpeechFunctions.getInstance(), TokenStateFunction.getInstance(), TokenVisibleFunction.getInstance(), UserDefinedMacroFunctions.getInstance(),
 			isVisibleFunction.getInstance(), getInfoFunction.getInstance(), TokenMoveFunctions.getInstance(), FogOfWarFunctions.getInstance(), VBL_Functions.getInstance(),
 			ZoomFunctions.getInstance()};
