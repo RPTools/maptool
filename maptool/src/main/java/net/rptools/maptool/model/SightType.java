@@ -145,15 +145,21 @@ public class SightType {
 			int offsetAngle = getOffset();
 			int arcAngle = getArc();
 			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2, token.getFacing() - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
-			if (zone.getGrid() instanceof IsometricGrid) {
-				visionRange = (float)Math.sin(Math.toRadians(45))*visionRange;
-				tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2, IsometricGrid.degreesFromIso(token.getFacing()) - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
-			}
 			Rectangle footprint = token.getFootprint(zone.getGrid()).getBounds(zone.getGrid());
 			footprint.x = -footprint.width / 2;
 			footprint.y = -footprint.height / 2;
+			Area cellShape = new Area(footprint);
+			if (zone.getGrid() instanceof IsometricGrid) {
+				visionRange = (float)Math.sin(Math.toRadians(45))*visionRange;
+				tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2, IsometricGrid.degreesFromIso(token.getFacing()) - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
+				cellShape = zone.getGrid().createCellShape(footprint.height);
+			}
 			//footprint = footprint.createTransformedArea(AffineTransform.getTranslateInstance(-footprint.getBounds().getWidth() / 2, -footprint.getBounds().getHeight() / 2));
-			visibleArea.add(new Area(footprint));
+			cellShape = zone.getGrid().createCellShape(footprint.height);
+			AffineTransform mtx=new AffineTransform(); 
+			mtx.translate(-footprint.width / 2,-footprint.height / 2);
+			cellShape.transform(mtx);
+			visibleArea.add(cellShape);
 			visibleArea.add(tempvisibleArea);
 			break;
 		default:
