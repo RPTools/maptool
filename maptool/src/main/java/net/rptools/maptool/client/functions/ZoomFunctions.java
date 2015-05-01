@@ -1,10 +1,12 @@
 package net.rptools.maptool.client.functions;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.Grid;
+import net.rptools.maptool.model.ZonePoint;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -14,7 +16,7 @@ public class ZoomFunctions extends AbstractFunction {
 	private static final ZoomFunctions instance = new ZoomFunctions();
 	
 	private ZoomFunctions() {
-		super(0, 1, "getZoom", "setZoom");
+		super(0, 4, "getZoom", "setZoom", "setViewArea");
 	}
 	
 	public static ZoomFunctions getInstance() {
@@ -29,6 +31,9 @@ public class ZoomFunctions extends AbstractFunction {
 		if ("setZoom".equals(functionName)) {
 			return setZ(args);
 		}
+		if ("setViewArea".equals(functionName)) {
+			return setViewArea(args);
+		}
 		return null;
 	}
 	
@@ -40,11 +45,15 @@ public class ZoomFunctions extends AbstractFunction {
 	 * @throws ParserException
 	 */
 	private String setZ(List<Object> args) throws ParserException {
-		
-		if (!(args.get(0) instanceof BigDecimal)) {
+		if (args.size() != 1) {
+			throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", "setZoom", 1, args.size()));
+		}
+		double zoom = 1;
+		try {
+			zoom = Double.valueOf(args.get(0).toString());
+		} catch (NumberFormatException ne) {
 			throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", "moveToken", 1, args.get(0).toString()));
 		}
-		double zoom = ((BigDecimal) args.get(0)).doubleValue();
 		MapTool.getFrame().getCurrentZoneRenderer().setScale(zoom);
 		
 		return "";
@@ -59,6 +68,52 @@ public class ZoomFunctions extends AbstractFunction {
 	 */
 	private String getZ() throws ParserException {
 		return Double.valueOf(MapTool.getFrame().getCurrentZoneRenderer().getScale()).toString();
+	}
+	
+	/**
+	 * Given a grid cell of top left (x1, y1) and bottom right (x2, y2)
+	 * this function centres the screen over this area.
+	 * @param args should contain int x1, int y1, int x2, int y2
+	 * @return
+	 * @throws ParserException
+	 */
+	private String setViewArea(List<Object> args) throws ParserException {
+		if (args.size() < 4) {
+			throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", "setViewArea", 4, args.size()));
+		}
+		int x1=0;
+		int y1=0;
+		int x2=0;
+		int y2=0;
+		try {
+			x1 = Integer.valueOf(args.get(0).toString());
+		} catch (NumberFormatException ne) {
+			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", 1, args.get(0).toString()));
+		}
+		try {
+			y1 = Integer.valueOf(args.get(1).toString());
+		} catch (NumberFormatException ne) {
+			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", 2, args.get(1).toString()));
+		}
+		try {
+			x2 = Integer.valueOf(args.get(2).toString());
+		} catch (NumberFormatException ne) {
+			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", 3, args.get(2).toString()));
+		}
+		try {
+			y2 = Integer.valueOf(args.get(3).toString());
+		} catch (NumberFormatException ne) {
+			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", 4, args.get(3).toString()));
+		}
+		Grid mapGrid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
+		ZonePoint fromPoint = mapGrid.convert(new CellPoint(x1,y1));
+		ZonePoint toPoint = mapGrid.convert(new CellPoint(x2,y2));
+		int width = toPoint.x - fromPoint.x;
+		int height = toPoint.y - fromPoint.y;
+		int centreX = fromPoint.x + (width / 2);
+		int centreY = fromPoint.y + (height / 2);
+		MapTool.getFrame().getCurrentZoneRenderer().enforceView(centreX, centreY, 1, width, height);
+		return "";
 	}
 
 }
