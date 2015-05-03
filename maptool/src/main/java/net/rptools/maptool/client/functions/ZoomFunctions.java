@@ -1,12 +1,12 @@
 package net.rptools.maptool.client.functions;
 
+import java.awt.Rectangle;
 import java.util.List;
 
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -16,7 +16,7 @@ public class ZoomFunctions extends AbstractFunction {
 	private static final ZoomFunctions instance = new ZoomFunctions();
 	
 	private ZoomFunctions() {
-		super(0, 4, "getZoom", "setZoom", "setViewArea");
+		super(0, 5, "getZoom", "setZoom", "setViewArea");
 	}
 	
 	public static ZoomFunctions getInstance() {
@@ -85,6 +85,7 @@ public class ZoomFunctions extends AbstractFunction {
 		int y1=0;
 		int x2=0;
 		int y2=0;
+		boolean enforce = false;
 		try {
 			x1 = Integer.valueOf(args.get(0).toString());
 		} catch (NumberFormatException ne) {
@@ -105,14 +106,23 @@ public class ZoomFunctions extends AbstractFunction {
 		} catch (NumberFormatException ne) {
 			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", 4, args.get(3).toString()));
 		}
+		if (args.size() == 5) {
+			try {
+				enforce = AbstractTokenAccessorFunction.getBooleanValue(args.get(4));
+			} catch (NumberFormatException ne) {
+				// do nothing
+			}
+		}
 		Grid mapGrid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-		ZonePoint fromPoint = mapGrid.convert(new CellPoint(x1,y1));
-		ZonePoint toPoint = mapGrid.convert(new CellPoint(x2,y2));
-		int width = toPoint.x - fromPoint.x;
-		int height = toPoint.y - fromPoint.y;
-		int centreX = fromPoint.x + (width / 2);
-		int centreY = fromPoint.y + (height / 2);
+		Rectangle fromBounds = mapGrid.getBounds(new CellPoint(x1,y1));
+		Rectangle toBounds = mapGrid.getBounds(new CellPoint(x2,y2));
+		int width = (toBounds.x + toBounds.width) - fromBounds.x;
+		int height = (toBounds.y + toBounds.height) - fromBounds.y;
+		int centreX = fromBounds.x + (width / 2);
+		int centreY = fromBounds.y + (height / 2);
 		MapTool.getFrame().getCurrentZoneRenderer().enforceView(centreX, centreY, 1, width, height);
+		if (enforce  && MapTool.getParser().isMacroTrusted())
+			MapTool.getFrame().getCurrentZoneRenderer().forcePlayersView();
 		return "";
 	}
 
