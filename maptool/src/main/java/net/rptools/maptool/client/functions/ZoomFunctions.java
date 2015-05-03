@@ -16,7 +16,7 @@ public class ZoomFunctions extends AbstractFunction {
 	private static final ZoomFunctions instance = new ZoomFunctions();
 	
 	private ZoomFunctions() {
-		super(0, 5, "getZoom", "setZoom", "setViewArea");
+		super(0, 6, "getZoom", "setZoom", "setViewArea");
 	}
 	
 	public static ZoomFunctions getInstance() {
@@ -71,9 +71,9 @@ public class ZoomFunctions extends AbstractFunction {
 	}
 	
 	/**
-	 * Given a grid cell of top left (x1, y1) and bottom right (x2, y2)
+	 * Given a grid pixels or cell coordinates of top left (x1, y1) and bottom right (x2, y2)
 	 * this function centres the screen over this area.
-	 * @param args should contain int x1, int y1, int x2, int y2
+	 * @param args should contain int x1, int y1, int x2, int y2, boolean pixels, boolean enforceView
 	 * @return
 	 * @throws ParserException
 	 */
@@ -85,26 +85,33 @@ public class ZoomFunctions extends AbstractFunction {
 		int y1=0;
 		int x2=0;
 		int y2=0;
+		boolean pixels = true;
 		boolean enforce = false;
 		x1 = parseInteger(args, 0);
 		y1 = parseInteger(args, 1);
 		x2 = parseInteger(args, 2);
 		y2 = parseInteger(args, 3);
-		if (args.size() == 5) {
-			try {
-				enforce = AbstractTokenAccessorFunction.getBooleanValue(args.get(4));
-			} catch (NumberFormatException ne) {
-				// do nothing
-			}
+		if (args.size() >= 5)
+			pixels = parseBoolean(args, 4);
+		if (args.size() >= 6)
+			enforce = parseBoolean(args, 5);
+		// If x & y not in pixels, use grid cell coordinates and convert to pixels
+		if (!pixels) {
+			Grid mapGrid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
+			Rectangle fromBounds = mapGrid.getBounds(new CellPoint(x1,y1));
+			x1 = fromBounds.x;
+			y1 = fromBounds.y;
+			Rectangle toBounds = mapGrid.getBounds(new CellPoint(x2,y2));
+			x2 = toBounds.x + toBounds.width;
+			y2 = toBounds.y + toBounds.height;
 		}
-		Grid mapGrid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-		Rectangle fromBounds = mapGrid.getBounds(new CellPoint(x1,y1));
-		Rectangle toBounds = mapGrid.getBounds(new CellPoint(x2,y2));
-		int width = (toBounds.x + toBounds.width) - fromBounds.x;
-		int height = (toBounds.y + toBounds.height) - fromBounds.y;
-		int centreX = fromBounds.x + (width / 2);
-		int centreY = fromBounds.y + (height / 2);
+		// enforceView command uses point at centre of screen
+		int width = x2 - x1;
+		int height = y2 - y1;
+		int centreX = x1 + (width / 2);
+		int centreY = y1 + (height / 2);
 		MapTool.getFrame().getCurrentZoneRenderer().enforceView(centreX, centreY, 1, width, height);
+		// if requested, set all players to map and match view
 		if (enforce  && MapTool.getParser().isMacroTrusted()) {
 			MapTool.serverCommand().enforceZone(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId());
 			MapTool.getFrame().getCurrentZoneRenderer().forcePlayersView();
@@ -118,7 +125,14 @@ public class ZoomFunctions extends AbstractFunction {
 		} catch (NumberFormatException ne) {
 			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", param, args.get(param).toString()));
 		}
-		
+	}
+	
+	private boolean parseBoolean(List<Object> args, int param) throws ParserException {
+		try {
+			return AbstractTokenAccessorFunction.getBooleanValue(args.get(param));
+		} catch (NumberFormatException ne) {
+			throw new ParserException(I18N.getText("macro.function.general.argumentTypeInvalid", "setViewArea", param, args.get(param).toString()));
+		}
 	}
 
 }
