@@ -100,33 +100,7 @@ public class Light {
 	}
 
 	public Area getArea(Token token, Zone zone) {
-		double size = radius / zone.getUnitsPerCell() * zone.getGrid().getSize();
-		if (shape == null) {
-			shape = ShapeType.CIRCLE;
-		}
-		switch (shape) {
-		case SQUARE:
-			return new Area(new Rectangle2D.Double(-size, -size, size * 2, size * 2));
-
-		case CONE:
-			// Be sure we can always at least see our feet
-//			Lee: decoupling from dependence on grid and just use token-centric values. 
-//			Area footprint = new Area(token.getFootprint(zone.getGrid()).getBounds(zone.getGrid()));
-			double magnitude = (2.5 * token.getFootprint(zone.getGrid()).getScale()) / zone.getUnitsPerCell() * zone.getGrid().getSize();
-			Area footprint = new Area(new Ellipse2D.Double(-magnitude, -magnitude, magnitude * 2, magnitude * 2));
-//			footprint.transform(AffineTransform.getTranslateInstance(-footprint.getBounds().getWidth() / 2.0, -footprint.getBounds().getHeight() / 2.0));
-
-			Area area = new Area(new Arc2D.Double(-size, -size, size * 2, size * 2, 360.0 - (arcAngle / 2.0), arcAngle, Arc2D.PIE));
-			if (token.getFacing() != null) {
-				area = area.createTransformedArea(AffineTransform.getRotateInstance(-Math.toRadians(token.getFacing())));
-			}
-			area.add(footprint);
-			return area;
-
-		default:
-		case CIRCLE:
-			return new Area(new Ellipse2D.Double(-size, -size, size * 2, size * 2));
-		}
+		return zone.getGrid().getShapedArea(getShape(), token, getRadius(), getArcAngle(), (int)getFacingOffset());
 	}
 
 	public void setGM(boolean b) {
