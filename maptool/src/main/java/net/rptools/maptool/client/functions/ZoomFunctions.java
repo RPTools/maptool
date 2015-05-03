@@ -86,26 +86,10 @@ public class ZoomFunctions extends AbstractFunction {
 		int x2=0;
 		int y2=0;
 		boolean enforce = false;
-		try {
-			x1 = Integer.valueOf(args.get(0).toString());
-		} catch (NumberFormatException ne) {
-			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", 1, args.get(0).toString()));
-		}
-		try {
-			y1 = Integer.valueOf(args.get(1).toString());
-		} catch (NumberFormatException ne) {
-			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", 2, args.get(1).toString()));
-		}
-		try {
-			x2 = Integer.valueOf(args.get(2).toString());
-		} catch (NumberFormatException ne) {
-			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", 3, args.get(2).toString()));
-		}
-		try {
-			y2 = Integer.valueOf(args.get(3).toString());
-		} catch (NumberFormatException ne) {
-			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", 4, args.get(3).toString()));
-		}
+		x1 = parseInteger(args, 0);
+		y1 = parseInteger(args, 1);
+		x2 = parseInteger(args, 2);
+		y2 = parseInteger(args, 3);
 		if (args.size() == 5) {
 			try {
 				enforce = AbstractTokenAccessorFunction.getBooleanValue(args.get(4));
@@ -126,6 +110,15 @@ public class ZoomFunctions extends AbstractFunction {
 			MapTool.getFrame().getCurrentZoneRenderer().forcePlayersView();
 		}
 		return "";
+	}
+	
+	private int parseInteger(List<Object> args, int param) throws ParserException {
+		try {
+			return Integer.valueOf(args.get(param).toString());
+		} catch (NumberFormatException ne) {
+			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", param, args.get(param).toString()));
+		}
+		
 	}
 
 }
