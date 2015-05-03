@@ -121,8 +121,10 @@ public class ZoomFunctions extends AbstractFunction {
 		int centreX = fromBounds.x + (width / 2);
 		int centreY = fromBounds.y + (height / 2);
 		MapTool.getFrame().getCurrentZoneRenderer().enforceView(centreX, centreY, 1, width, height);
-		if (enforce  && MapTool.getParser().isMacroTrusted())
+		if (enforce  && MapTool.getParser().isMacroTrusted()) {
+			MapTool.serverCommand().enforceZone(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId());
 			MapTool.getFrame().getCurrentZoneRenderer().forcePlayersView();
+		}
 		return "";
 	}
 
