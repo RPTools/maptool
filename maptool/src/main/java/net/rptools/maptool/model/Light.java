@@ -102,58 +102,7 @@ public class Light {
 	}
 
 	public Area getArea(Token token, Zone zone) {
-		double size = radius / zone.getUnitsPerCell() * zone.getGrid().getSize();
-		if (shape == null) {
-			shape = ShapeType.CIRCLE;
-		}
-		switch (shape) {
-		case SQUARE:
-			if (zone.getGrid() instanceof IsometricGrid) {
-				int x[] = {0, (int)size*2, 0, (int)-size*2};
-				int y[] = {(int)-size, 0, (int)size, 0};
-				return new Area(new Polygon(x,y,4));
-			}
-			return new Area(new Rectangle2D.Double(-size, -size, size * 2, size * 2));
-
-		case CONE:
-			if (token.getFacing() == null) {
-				token.setFacing(0);
-			}
-			// Be sure we can always at least see our feet
-//			Lee: decoupling from dependence on grid and just use token-centric values. 
-//			Area footprint = new Area(token.getFootprint(zone.getGrid()).getBounds(zone.getGrid()));
-			//double magnitude = (2.5 * token.getFootprint(zone.getGrid()).getScale()) / zone.getUnitsPerCell() * zone.getGrid().getSize();
-			//Area footprint = new Area(new Ellipse2D.Double(-magnitude, -magnitude, magnitude * 2, magnitude * 2));
-			Rectangle footprint = token.getFootprint(zone.getGrid()).getBounds(zone.getGrid());
-			footprint.x = -footprint.width / 2;
-			footprint.y = -footprint.height / 2;
-			Area cellShape = new Area(footprint);
-//			footprint.transform(AffineTransform.getTranslateInstance(-footprint.getBounds().getWidth() / 2.0, -footprint.getBounds().getHeight() / 2.0));
-
-			Area area = new Area(new Arc2D.Double(-size, -size, size * 2, size * 2, token.getFacing() - (arcAngle / 2.0), arcAngle, Arc2D.PIE));
-			if (zone.getGrid() instanceof IsometricGrid) {
-				size = (float)Math.sin(Math.toRadians(45))*size;
-				area = new Area(new Arc2D.Double(-size * 2, -size, size * 4, size * 2, IsometricGrid.degreesFromIso(token.getFacing()) - (arcAngle / 2.0), arcAngle, Arc2D.PIE));
-				cellShape = zone.getGrid().createCellShape(footprint.height);
-			}
-			//if (token.getFacing() != null) {
-			//	area = area.createTransformedArea(AffineTransform.getRotateInstance(-Math.toRadians(token.getFacing())));
-			//}
-			cellShape = zone.getGrid().createCellShape(footprint.height);
-			AffineTransform mtx=new AffineTransform(); 
-			mtx.translate(-footprint.width / 2,-footprint.height / 2);
-			cellShape.transform(mtx);
-			area.add(cellShape);
-			return area;
-
-		default:
-		case CIRCLE:
-			if (zone.getGrid() instanceof IsometricGrid) {
-				size = (float)Math.sin(Math.toRadians(45))*size;
-				return new Area(new Ellipse2D.Double(-size * 2, -size, size * 4, size * 2));
-			}
-			return new Area(new Ellipse2D.Double(-size, -size, size * 2, size * 2));
-		}
+		return zone.getGrid().getShapedArea(getShape(), token, getRadius(), getArcAngle(), (int)getFacingOffset());
 	}
 
 	public void setGM(boolean b) {

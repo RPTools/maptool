@@ -112,60 +112,6 @@ public class SightType {
 	}
 
 	public Area getVisionShape(Token token, Zone zone) {
-		float visionRange = getDistance();
-		int visionDistance = zone.getTokenVisionInPixels();
-		Area visibleArea = new Area();
-
-		// FIXME This next formula is identical to the one in zone.getTokenVisionInPixels() called two lines above!!
-		visionRange = (visionRange == 0) ? visionDistance : visionRange * zone.getGrid().getSize() / zone.getUnitsPerCell();
-
-		//now calculate the shape and return the shaped Area to the caller
-		switch (getShape()) {
-		case CIRCLE:
-			if (zone.getGrid() instanceof IsometricGrid) {
-				visionRange = (float)Math.sin(Math.toRadians(45))*visionRange;
-				visibleArea = new Area(new Ellipse2D.Double(-visionRange*2, -visionRange, visionRange * 4, visionRange * 2));
-				break;
-			}
-			visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
-			break;
-		case SQUARE:
-			if (zone.getGrid() instanceof IsometricGrid) {
-				int x[] = {0, (int)visionRange*2, 0, (int)-visionRange*2};
-				int y[] = {(int)-visionRange, 0, (int)visionRange, 0};
-				visibleArea = new Area(new Polygon(x,y,4));
-				break;
-			}
-			visibleArea = new Area(new Rectangle2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
-			break;
-		case CONE:
-			if (token.getFacing() == null) {
-				token.setFacing(0);
-			}
-			int offsetAngle = getOffset();
-			int arcAngle = getArc();
-			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2, token.getFacing() - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
-			Rectangle footprint = token.getFootprint(zone.getGrid()).getBounds(zone.getGrid());
-			footprint.x = -footprint.width / 2;
-			footprint.y = -footprint.height / 2;
-			Area cellShape = new Area(footprint);
-			if (zone.getGrid() instanceof IsometricGrid) {
-				visionRange = (float)Math.sin(Math.toRadians(45))*visionRange;
-				tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2, IsometricGrid.degreesFromIso(token.getFacing()) - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
-				cellShape = zone.getGrid().createCellShape(footprint.height);
-			}
-			//footprint = footprint.createTransformedArea(AffineTransform.getTranslateInstance(-footprint.getBounds().getWidth() / 2, -footprint.getBounds().getHeight() / 2));
-			cellShape = zone.getGrid().createCellShape(footprint.height);
-			AffineTransform mtx=new AffineTransform(); 
-			mtx.translate(-footprint.width / 2,-footprint.height / 2);
-			cellShape.transform(mtx);
-			visibleArea.add(cellShape);
-			visibleArea.add(tempvisibleArea);
-			break;
-		default:
-			visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
-			break;
-		}
-		return visibleArea;
+		return zone.getGrid().getShapedArea(getShape(), token, getDistance(), getArc(), getOffset());
 	}
 }
