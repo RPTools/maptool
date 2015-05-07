@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.io.IOException;
 import java.util.List;
@@ -26,15 +24,15 @@ import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
 
 public class IsometricGrid extends Grid {
 	/**
-	*  An attempt at an isometric style map grid where each cell is a diamond
-	*  with the sides angled at 30 degrees.  Each cell is twice as wide as high
-	*
-	**/
+	 * An attempt at an isometric style map grid where each cell is a diamond with the sides angled at 30 degrees. Each
+	 * cell is twice as wide as high
+	 *
+	 **/
 	private static final int ISO_ANGLE = 27;
 	private static final int[] ALL_ANGLES = new int[] { -153, -90, -27, 0, 27, 90, 153, 180 };
 	private static int[] FACING_ANGLES;
 	private static List<TokenFootprint> footprintList;
-	
+
 	public IsometricGrid() {
 		super();
 		if (FACING_ANGLES == null) {
@@ -43,65 +41,59 @@ public class IsometricGrid extends Grid {
 			setFacings(faceEdges, faceVertices);
 		}
 	}
-	
+
 	public IsometricGrid(boolean faceEdges, boolean faceVertices) {
 		setFacings(faceEdges, faceVertices);
-	}	
+	}
 
 	/**
-	*  Cell Dimensions
-	*
-	*  I decided to use cell size provided by Map Properties (getSize()) 
-	*  for the cell height.  It might appear more logical for getSize() to
-	*  be the edge length.  However, using it for height means there is a
-	*  correlation between square grid points and isometric grid points.
-	*  This will make the creation of maps and tokens easier.
-	*
-	***/
+	 * Cell Dimensions
+	 *
+	 * I decided to use cell size provided by Map Properties (getSize()) for the cell height. It might appear more
+	 * logical for getSize() to be the edge length. However, using it for height means there is a correlation between
+	 * square grid points and isometric grid points. This will make the creation of maps and tokens easier.
+	 *
+	 ***/
 	@Override
 	public double getCellWidth() {
-		return getSize()*2;
+		return getSize() * 2;
 	}
 
 	@Override
 	public double getCellHeight() {
 		return getSize();
 	}
-	
+
 	public double getCellWidthHalf() {
 		return getSize();
 	}
 
 	public double getCellHeightHalf() {
-		return getSize()/2;
+		return getSize() / 2;
 	}
-	
+
 	public static double degreesFromIso(double facing) {
 		/**
-		 * Given a facing from an isometric map
-		 * turn it into plan map equivalent
-		 * i.e. 27 degree converts to 45 degree
+		 * Given a facing from an isometric map turn it into plan map equivalent i.e. 27 degree converts to 45 degree
 		 */
 		double newFacing = facing;
-		if (Math.cos(facing)!=0) {
-			double v1 = Math.sin(Math.toRadians(newFacing))*2;
+		if (Math.cos(facing) != 0) {
+			double v1 = Math.sin(Math.toRadians(newFacing)) * 2;
 			double v2 = Math.cos(Math.toRadians(newFacing));
-			double v3 = Math.toDegrees(Math.atan(v1/v2));
-			if (facing>90 || facing<-90)
-				v3=180+v3;
+			double v3 = Math.toDegrees(Math.atan(v1 / v2));
+			if (facing > 90 || facing < -90)
+				v3 = 180 + v3;
 			newFacing = Math.floor(v3);
 		}
 		return newFacing;
 	}
-	
+
 	public static double degreesToIso(double facing) {
 		/**
-		 * Given a facing from a plan map turn it
-		 * into isometric map equivalent
-		 * i.e 45 degree converts to 30 degree 
+		 * Given a facing from a plan map turn it into isometric map equivalent i.e 45 degree converts to 30 degree
 		 */
-		double iso = Math.asin((Math.sin(facing)/2)/Math.cos(facing));
-		System.out.println("in="+facing+" out="+iso);
+		double iso = Math.asin((Math.sin(facing) / 2) / Math.cos(facing));
+		System.out.println("in=" + facing + " out=" + iso);
 		return iso;
 	}
 
@@ -109,7 +101,7 @@ public class IsometricGrid extends Grid {
 	public int[] getFacingAngles() {
 		return FACING_ANGLES;
 	}
-	
+
 	private static final GridCapabilities GRID_CAPABILITIES = new GridCapabilities() {
 		public boolean isPathingSupported() {
 			return true;
@@ -146,8 +138,8 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	public CellPoint convert(ZonePoint zp) {
-		double isoX = ((zp.x - getOffsetX()) / getCellWidthHalf() + (zp.y - getOffsetY()) / getCellHeightHalf()) /2;
-		double isoY = ((zp.y - getOffsetY()) / getCellHeightHalf() -((zp.x - getOffsetX()) / getCellWidthHalf())) /2;
+		double isoX = ((zp.x - getOffsetX()) / getCellWidthHalf() + (zp.y - getOffsetY()) / getCellHeightHalf()) / 2;
+		double isoY = ((zp.y - getOffsetY()) / getCellHeightHalf() - ((zp.x - getOffsetX()) / getCellWidthHalf())) / 2;
 		int newX = (int) isoX;
 		int newY = (int) isoY;
 		return new CellPoint(newX, newY);
@@ -157,13 +149,13 @@ public class IsometricGrid extends Grid {
 	public ZonePoint convert(CellPoint cp) {
 		double mapX = (cp.x - cp.y) * getCellWidthHalf();
 		double mapY = (cp.x + cp.y) * getCellHeightHalf();
-		return new ZonePoint((int)(mapX), (int)(mapY));
+		return new ZonePoint((int) (mapX), (int) (mapY));
 	}
 
 	@Override
 	public Rectangle getBounds(CellPoint cp) {
 		ZonePoint zp = convert(cp);
-		return new Rectangle(zp.x-getSize(), zp.y, getSize()*2, getSize());
+		return new Rectangle(zp.x - getSize(), zp.y, getSize() * 2, getSize());
 	}
 
 	@Override
@@ -179,22 +171,21 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	protected Area createCellShape(int size) {
-		int x[] = {(int)size, (int)size*2, (int)size, 0};
-		int y[] = {0, (int)size/2, (int)size, (int)size/2};
-		return new Area(new Polygon(x,y,4));
+		int x[] = { (int) size, (int) size * 2, (int) size, 0 };
+		int y[] = { 0, (int) size / 2, (int) size, (int) size / 2 };
+		return new Area(new Polygon(x, y, 4));
 	}
 
 	@Override
-	public void installMovementKeys(PointerTool callback,
-			Map<KeyStroke, Action> actionMap) {
+	public void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void uninstallMovementKeys(Map<KeyStroke, Action> actionMap) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -209,7 +200,7 @@ public class IsometricGrid extends Grid {
 			FACING_ANGLES = new int[] { 90 };
 		}
 	}
-	
+
 	@Override
 	public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
 		double scale = renderer.getScale();
@@ -231,18 +222,18 @@ public class IsometricGrid extends Grid {
 			}
 		}
 
-		for (double row = startRow-(isoHeight/2); row < bounds.y + bounds.height + gridSize; row += gridSize) {
-			for (double col = startCol-(isoWidth/2); col < bounds.x + bounds.width + isoWidth; col += isoWidth) {
+		for (double row = startRow - (isoHeight / 2); row < bounds.y + bounds.height + gridSize; row += gridSize) {
+			for (double col = startCol - (isoWidth / 2); col < bounds.x + bounds.width + isoWidth; col += isoWidth) {
 				drawHatch(renderer, g, (int) (col + offX), (int) (row + offY));
 			}
 		}
 	}
-	
+
 	private void drawHatch(ZoneRenderer renderer, Graphics2D g, int x, int y) {
 		double isoWidth = getSize() * renderer.getScale();
-		int hatchSize = isoWidth>10?(int)isoWidth/8:2;
+		int hatchSize = isoWidth > 10 ? (int) isoWidth / 8 : 2;
 		g.setStroke(new BasicStroke(AppState.getGridSize()));
-		g.drawLine(x-(hatchSize*2), y-hatchSize, x+(hatchSize*2), y+hatchSize);
-		g.drawLine(x-(hatchSize*2), y+hatchSize, x+(hatchSize*2), y-hatchSize);
+		g.drawLine(x - (hatchSize * 2), y - hatchSize, x + (hatchSize * 2), y + hatchSize);
+		g.drawLine(x - (hatchSize * 2), y + hatchSize, x + (hatchSize * 2), y - hatchSize);
 	}
 }

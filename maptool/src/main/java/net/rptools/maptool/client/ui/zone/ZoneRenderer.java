@@ -1939,6 +1939,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				} else {
 					at.scale((double) scaledWidth / workImage.getWidth(), (double) scaledHeight / workImage.getHeight());
 				}
+				// TO DO - Isometric manipulation here?
 				g.drawImage(workImage, at, this);
 
 				// Other details
