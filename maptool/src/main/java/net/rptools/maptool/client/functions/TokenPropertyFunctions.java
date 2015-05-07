@@ -555,11 +555,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			}
 		}
 
+		/* Returns the facing in degrees between 0 and 359. */
 		if (functionName.equals("getTokenAngle")) {
 			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
 			if (token.hasFacing()) {
-				return new BigDecimal(token.getAngleInDegrees());
+				return new BigDecimal(token.getFacingInDegrees());
 			} else {
 				return "";
 			}

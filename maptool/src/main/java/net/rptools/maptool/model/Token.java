@@ -147,7 +147,11 @@ public class Token extends BaseModel {
 
 	private String propertyType = Campaign.DEFAULT_TOKEN_PROPERTY_TYPE;
 
-	private Integer facing = null;
+	/** When the token has no facing this constant is used. */
+	private static final float NO_FACING = Float.MIN_VALUE;
+
+	/** Facing is an angle 0 <= a < 360 degrees. */
+	private float facing = NO_FACING;
 
 	private Integer haloColorValue;
 	private transient Color haloColor;
@@ -219,8 +223,10 @@ public class Token extends BaseModel {
 
 		/*
 		 * These properties shouldn't be transferred, they are more transient
-		 * and relate to token history, not to new tokens: lastX = token.lastX;
-		 * lastY = token.lastY; lastPath = token.lastPath;
+		 * and relate to token history, not to new tokens:
+		 * lastX = token.lastX;
+		 * lastY = token.lastY;
+		 * lastPath = token.lastPath;
 		 */
 
 		snapToScale = token.snapToScale;
@@ -228,7 +234,13 @@ public class Token extends BaseModel {
 		height = token.height;
 		scaleX = token.scaleX;
 		scaleY = token.scaleY;
-		facing = token.facing;
+
+		/*
+		 * Copying the facing in this manner ensures that a token created in 1.3
+		 * will get updated to the new 1.4 Token class:
+		 */
+		this.setFacing(token.getFacing());
+
 		tokenShape = token.tokenShape;
 		tokenType = token.tokenType;
 		haloColorValue = token.haloColorValue;
@@ -498,22 +510,41 @@ public class Token extends BaseModel {
 		actualLayer = layer;
 	}
 
+	/**
+	 * Checks if the token has an angle set for it to use as facing. In general
+	 * it is a good idea to verify that the token has a facing before trying to
+	 * get the facing using either {@link #getFacingInDegrees()} or
+	 * {@link #getFacingInRadians()}.
+	 *
+	 * @return true if and only if the token has a facing
+	 */
 	public boolean hasFacing() {
-		return facing != null;
+		return facing != NO_FACING;
 	}
 
+	/**
+	 * @param facing
+	 * @deprecated Use {@link #setFacingInDegrees(float)} instead.
+	 */
+	@Deprecated
 	public void setFacing(Integer facing) {
-		/*
-		 * Only one or zero of these while loops will be executed each time the
-		 * method is called.
-		 */
-		while (facing > 180) {
-			facing -= 360;
+		if (facing == null) {
+			this.removeFacing();
+		} else {
+			this.setFacingInDegrees(facing);
 		}
-		while (facing <= -180) {
+	}
+
+	public void setFacingInDegrees(float facing) {
+		facing %= 360;
+		if (facing < 0) {
 			facing += 360;
 		}
 		this.facing = facing;
+	}
+
+	public void setFacingInRadians(float facing) {
+		this.setFacingInDegrees((float) Math.toDegrees(facing));
 	}
 
 	/**
@@ -521,9 +552,21 @@ public class Token extends BaseModel {
 	 * -180 degrees (exclusive) and 180 degrees (inclusive).
 	 *
 	 * @return an angle between -179 and 180 degrees
+	 * @deprecated This method is now deprecated. Use
+	 *             {@link #getFacingInDegrees()} or
+	 *             {@link #getFacingInRadians()} instead.
 	 */
+	@Deprecated
 	public Integer getFacing() {
-		return facing;
+		if (this.hasFacing() == false) {
+			return null;
+		}
+		int facing = Math.round(this.facing);
+		if (facing <= 180) {
+			return facing;
+		} else {
+			return facing - 360;
+		}
 	}
 
 	/**
@@ -533,20 +576,40 @@ public class Token extends BaseModel {
 	 * east, 90 degrees towards north, 180 degrees towards west and 270 degrees
 	 * towards south.
 	 *
-	 * @return an angle between 0 and 359 degrees
+	 * @return an angle 'a' so that 0 <= a < 360 degrees
 	 * @throws IllegalStateException if the token has no facing
 	 */
-	public int getAngleInDegrees() {
+	public float getFacingInDegrees() {
+		checkThatTokenHasFacing();
+		return this.facing;
+	}
+
+	/**
+	 * This method follows standard mathematical definitions using radians. In
+	 * other words the facing is always between 0 radians (inclusive) and 2PI
+	 * radians (exclusive). 0 radians indicate the token is facing towards the
+	 * east, PI/2 radians towards north, PI radians towards west and 3PI/2
+	 * radians towards south.
+	 *
+	 * @return an angle 'a' so that 0 <= a < 2PI radians
+	 * @throws IllegalStateException if the token has no facing
+	 */
+	public float getFacingInRadians() {
+		checkThatTokenHasFacing();
+		return (float) Math.toRadians(this.facing);
+	}
+
+	/** Checks if the token has a facing and throws an exception if not. */
+	private void checkThatTokenHasFacing() {
 		if (this.hasFacing() == false) {
 			throw new IllegalStateException("Token has no facing!");
 		}
-		if (facing >= 0) {
-			return facing;
-		} else {
-			return facing + 360;
-		}
 	}
 
+	/** Removes the facing from the token. */
+	public void removeFacing() {
+		this.facing = NO_FACING;
+	}
 	public boolean getHasSight() {
 		return hasSight;
 	}
@@ -1385,7 +1448,7 @@ public class Token extends BaseModel {
 		td.setPlayers(ownerList);
 		td.setVisible(isVisible);
 		td.setLocation(new Point(x, y));
-		td.setFacing(facing);
+		td.setFacing(this.getFacing());
 
 		// Set the properties
 		td.put(TokenTransferData.ID, id.toString());
@@ -1443,7 +1506,7 @@ public class Token extends BaseModel {
 		ownerList = td.getPlayers();
 		ownerType = getInt(td, TokenTransferData.OWNER_TYPE, ownerList == null ? OWNER_TYPE_ALL : OWNER_TYPE_LIST);
 		tokenShape = (String) td.get(TokenTransferData.TOKEN_TYPE);
-		facing = td.getFacing();
+		this.setFacing(td.getFacing());
 		notes = (String) td.get(TokenTransferData.NOTES);
 		gmNotes = (String) td.get(TokenTransferData.GM_NOTES);
 		gmName = (String) td.get(TokenTransferData.GM_NAME);
