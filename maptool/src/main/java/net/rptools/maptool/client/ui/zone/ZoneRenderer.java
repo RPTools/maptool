@@ -106,6 +106,7 @@ import net.rptools.maptool.model.ExposedAreaMetaData;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridCapabilities;
+import net.rptools.maptool.model.IsometricGrid;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.ModelChangeEvent;
@@ -2519,6 +2520,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 			if (token.isSnapToScale()) {
 				offsetx = (int) (imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 * getScale() : 0);
+				// For isometric grids we are going to adjust the image so it is necessary to adjust offsetx
+				if (zone.getGrid() instanceof IsometricGrid && (token.getShape() == Token.TokenShape.SQUARE || token.getShape() == Token.TokenShape.CIRCLE))
+					offsetx = offsetx - (int) (imgSize.width / 2 * getScale());
 				offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 * getScale() : 0);
 			}
 			double tx = location.x + offsetx;
@@ -2532,6 +2536,12 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				at.rotate(Math.toRadians(-token.getFacing() - 90), location.scaledWidth / 2 - (token.getAnchor().x * scale) - offsetx, location.scaledHeight / 2 - (token.getAnchor().y * scale)
 						- offsety);
 				// facing defaults to down, or -90 degrees
+			}
+			// For isometric grids, convert the token image to isometric format
+			if (zone.getGrid() instanceof IsometricGrid && (token.getShape() == Token.TokenShape.SQUARE || token.getShape() == Token.TokenShape.CIRCLE)) {
+				workImage = IsometricGrid.isoImage(workImage);
+				imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
+				SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 			}
 			// Draw the token
 			if (token.isSnapToScale()) {

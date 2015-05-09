@@ -9,6 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,9 @@ import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
 
 public class IsometricGrid extends Grid {
 	/**
-	 * An attempt at an isometric style map grid where each cell is a diamond with the sides angled at 30 degrees. Each
-	 * cell is twice as wide as high
+	 * An attempt at an isometric style map grid where each cell is a diamond with the sides angled at approx 30
+	 * degrees. However rather than being true isometric, each cell is twice as wide as high. This makes converting
+	 * images significantly easier for end-users.
 	 *
 	 **/
 	private static final int ISO_ANGLE = 27;
@@ -286,5 +288,45 @@ public class IsometricGrid extends Grid {
 		g.setStroke(new BasicStroke(AppState.getGridSize()));
 		g.drawLine(x - (hatchSize * 2), y - hatchSize, x + (hatchSize * 2), y + hatchSize);
 		g.drawLine(x - (hatchSize * 2), y + hatchSize, x + (hatchSize * 2), y - hatchSize);
+	}
+
+	/**
+	 * Take a rectangular image, rotate it 45 degrees then reduce its resulting height by half.
+	 * 
+	 * @param planImage
+	 * @return image in isometric format
+	 */
+	public static BufferedImage isoImage(BufferedImage planImage) {
+		return resize(rotate(planImage));
+	}
+
+	private static BufferedImage rotate(BufferedImage planImage) {
+		double sin = Math.abs(Math.sin(Math.toRadians(45)));
+		double cos = Math.abs(Math.cos(Math.toRadians(45)));
+
+		int w = planImage.getWidth(null), h = planImage.getHeight(null);
+
+		int neww = (int) Math.floor(w * cos + h * sin);
+		int newh = (int) Math.floor(h * cos + w * sin);
+		// Rotate image 45 degrees
+		BufferedImage rotateImage = new BufferedImage(neww, newh, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = rotateImage.createGraphics();
+		g.translate((neww - w) / 2, (newh - h) / 2);
+		g.rotate(Math.toRadians(45), w / 2, h / 2);
+		g.drawRenderedImage(planImage, null);
+		g.dispose();
+		// scale image to half height
+		return rotateImage;
+	}
+
+	private static BufferedImage resize(BufferedImage image) {
+		// Resize into a BufferedImage
+		int neww = image.getWidth() * 2;
+		int newh = image.getHeight();
+		BufferedImage bimg = new BufferedImage(neww, newh, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D bGr = bimg.createGraphics();
+		bGr.drawImage(image, 0, 0, neww, newh, null);
+		bGr.dispose();
+		return bimg;
 	}
 }
