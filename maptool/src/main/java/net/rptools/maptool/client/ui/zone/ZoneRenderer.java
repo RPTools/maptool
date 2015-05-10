@@ -2554,6 +2554,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 			timer.start("tokenlist-7");
 			clippedG.drawImage(workImage, at, this);
+			if (token.getShape()==Token.TokenShape.FIGURE)
+				g.drawImage(workImage, at, this);
 			timer.stop("tokenlist-7");
 
 			timer.start("tokenlist-8");
