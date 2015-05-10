@@ -74,7 +74,7 @@ public class Token extends BaseModel {
 	private GUID exposedAreaGUID;
 
 	public enum TokenShape {
-		TOP_DOWN("Top down"), CIRCLE("Circle"), SQUARE("Square");
+		TOP_DOWN("Top down"), CIRCLE("Circle"), SQUARE("Square"), FIGURE("Figure");
 
 		private String displayName;
 
@@ -891,6 +891,11 @@ public class Token extends BaseModel {
 		Grid grid = zone.getGrid();
 		TokenFootprint footprint = getFootprint(grid);
 		Rectangle footprintBounds = footprint.getBounds(grid, grid.convert(new ZonePoint(getX(), getY())));
+		if (getShape() == TokenShape.FIGURE) {
+			double th = this.height * Double.valueOf(footprintBounds.width) / this.width;
+			double ho = footprintBounds.height - th;
+			footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y + (int)ho, footprintBounds.width, (int)th);
+		}
 
 		double w = footprintBounds.width;
 		double h = footprintBounds.height;

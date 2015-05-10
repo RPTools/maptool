@@ -992,7 +992,7 @@ public class Zone extends BaseModel {
 		// LATER: optimize this
 		tokenOrderedList.remove(token);
 		tokenOrderedList.add(token);
-		Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
+		Collections.sort(tokenOrderedList, getZOrderComparator());
 
 		if (newToken) {
 			fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, token));
@@ -1032,7 +1032,7 @@ public class Zone extends BaseModel {
 		}
 		tokenOrderedList.removeAll(tokens);
 		tokenOrderedList.addAll(tokens);
-		Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
+		Collections.sort(tokenOrderedList, getZOrderComparator());
 
 		if (!addedTokens.isEmpty())
 			fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, addedTokens));
@@ -1267,11 +1267,16 @@ public class Zone extends BaseModel {
 		public boolean matchToken(Token t);
 	}
 
+	@Deprecated
 	public static final Comparator<Token> TOKEN_Z_ORDER_COMPARATOR = new TokenZOrderComparator();
 
 	public static class TokenZOrderComparator implements Comparator<Token> {
 		@Override
 		public int compare(Token o1, Token o2) {
+			if (o1.getShape()==Token.TokenShape.FIGURE || o2.getShape()==Token.TokenShape.FIGURE) {
+				if ((o1.getY() - o2.getY())!=0)
+					return o1.getY() - o2.getY();
+			}
 			int lval = o1.getZOrder();
 			int rval = o2.getZOrder();
 
@@ -1281,6 +1286,38 @@ public class Zone extends BaseModel {
 				return lval - rval;
 			}
 		}
+	}
+	
+	/**
+	 * Need to replace static TOKEN_Z_ORDER_COMPARATOR comparator with instantiated version so that grid is available
+	 * and can access token footprint
+	 **/
+	public Comparator<Token> getZOrderComparator() {
+		return new Comparator<Token>() {
+			@Override
+			public int compare(Token o1, Token o2) {
+				if (o1.getShape() == Token.TokenShape.FIGURE || o2.getShape() == Token.TokenShape.FIGURE) {
+					/**
+					 * if either token is a figure, get the footprint and find the lowest point but if the same, use
+					 * normal z order
+					 */
+					Rectangle b1 = o1.getFootprint(getGrid()).getBounds(getGrid());
+					Rectangle b2 = o2.getFootprint(getGrid()).getBounds(getGrid());
+					int v1 = o1.getY() + b1.y + b1.height;
+					int v2 = o2.getY() + b2.y + b2.height;
+					if ((v1 - v2) != 0)
+						return v1 - v2;
+				}
+				int lval = o1.getZOrder();
+				int rval = o2.getZOrder();
+
+				if (lval == rval) {
+					return o1.getId().compareTo(o2.getId());
+				} else {
+					return lval - rval;
+				}
+			}
+		};
 	}
 
 	/** @return Getter for initiativeList */
