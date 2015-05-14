@@ -118,6 +118,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
@@ -2512,7 +2513,13 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 			timer.start("tokenlist-6");
 			// Position
+			double ho = 0;
 			Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
+			if (token.getShape() == TokenShape.FIGURE) {
+				double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
+				ho = footprintBounds.height - th;
+				footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int)ho, footprintBounds.width, (int)th);
+			}
 			SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
 			int offsetx = 0;
@@ -2524,9 +2531,10 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				if (zone.getGrid() instanceof IsometricGrid && (token.getShape() == Token.TokenShape.SQUARE || token.getShape() == Token.TokenShape.CIRCLE))
 					offsetx = offsetx - (int) (imgSize.width / 2 * getScale());
 				offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 * getScale() : 0);
+				ho = ho * getScale();
 			}
 			double tx = location.x + offsetx;
-			double ty = location.y + offsety;
+			double ty = location.y + offsety + ho;
 
 			AffineTransform at = new AffineTransform();
 			at.translate(tx, ty);
@@ -2553,9 +2561,17 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			timer.stop("tokenlist-6");
 
 			timer.start("tokenlist-7");
-			clippedG.drawImage(workImage, at, this);
-			if (token.getShape()==Token.TokenShape.FIGURE)
-				g.drawImage(workImage, at, this);
+			// If the token is a figure and if its visible, draw all of it.
+			if (token.getShape()==Token.TokenShape.FIGURE) {
+				Area va = new Area(clippedG.getClipBounds());
+				va.intersect(zone.getGrid().getTokenCellArea(token));
+				if (!va.isEmpty())
+					g.drawImage(workImage, at, this);
+				//if (zone.isTokenFootprintVisible(token))
+					//g.drawImage(workImage, at, this);
+			} else {
+				clippedG.drawImage(workImage, at, this);
+			}
 			timer.stop("tokenlist-7");
 
 			timer.start("tokenlist-8");

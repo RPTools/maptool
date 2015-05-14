@@ -469,6 +469,17 @@ public abstract class Grid implements Cloneable {
 		// Everything is covered with fog.  Or at least, the three regions that we wanted to use to enter the destination area.
 		return false;
 	}
+	
+	/**
+	 * Returns an area based upon the token's cell footprint
+	 * @param token
+	 * @return
+	 */
+	public Area getTokenCellArea(Token token) {
+		// Get the cell footprint
+		Rectangle footprint = token.getFootprint(getZone().getGrid()).getBounds(getZone().getGrid());
+		return new Area(footprint);
+	}
 
 	/**
 	 * Check the middle region by subdividing into 3x3 and checking to see if at least 6 are open.
