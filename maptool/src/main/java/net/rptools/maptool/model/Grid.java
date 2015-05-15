@@ -14,7 +14,11 @@ package net.rptools.maptool.model;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
@@ -264,6 +268,55 @@ public abstract class Grid implements Cloneable {
 	 */
 	public int getSize() {
 		return size;
+	}
+	
+	/**
+	 * Called by SightType and Light class to return a vision area
+	 * based upon a specified distance
+	 * 
+	 * @param shape CIRCLE, SQUARE or CONE
+	 * @param token Used to position the shape and to provide footprint
+	 * @param range As specified in the vision or light definition
+	 * @param arcAngle Only used by cone
+	 * @param offsetAngle Arc distance from facing, only used by cone
+	 * @return Area
+	 */
+	public Area getShapedArea(ShapeType shape, Token token, double range, double arcAngle, int offsetAngle) {
+		if (shape == null) {
+			shape = ShapeType.CIRCLE;
+		}
+		int visionDistance = zone.getTokenVisionInPixels();
+		double visionRange = (range == 0) ? visionDistance : range * getSize() / zone.getUnitsPerCell();
+		Area visibleArea = new Area();
+		switch (shape) {
+		case CIRCLE:
+			visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
+			break;
+		case SQUARE:
+			visibleArea = new Area(new Rectangle2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
+			break;
+		case CONE:
+			if (token.getFacing() == null) {
+				token.setFacing(0);
+			}
+			//TODO: confirm if we want the offset to be positive-counter-clockwise, negative-clockwise or vice versa
+			//simply a matter of changing the sign on offsetAngle
+			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2, 360.0 - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
+			// Rotate
+			tempvisibleArea = tempvisibleArea.createTransformedArea(AffineTransform.getRotateInstance(-Math.toRadians(token.getFacing())));
+
+			Rectangle footprint = token.getFootprint(this).getBounds(this);
+			footprint.x = -footprint.width / 2;
+			footprint.y = -footprint.height / 2;
+			//footprint = footprint.createTransformedArea(AffineTransform.getTranslateInstance(-footprint.getBounds().getWidth() / 2, -footprint.getBounds().getHeight() / 2));
+			visibleArea.add(new Area(footprint));
+			visibleArea.add(tempvisibleArea);
+			break;
+		default:
+			visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
+			break;
+		}
+		return visibleArea;
 	}
 
 	private void fireGridChanged() {
