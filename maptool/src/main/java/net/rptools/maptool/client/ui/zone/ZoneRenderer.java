@@ -1140,10 +1140,19 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		renderLabels(g2d, view);
 
 		// (This method has it's own 'timer' calls)
-		if (zone.hasFog())
+		if (zone.hasFog()) 
 			renderFog(g2d, view);
 
 		if (Zone.Layer.TOKEN.isEnabled()) {
+			
+			// if here is fog or vision we may need to re-render figure type tokens
+			List<Token> tokens = zone.getTokens();
+			if (!tokens.isEmpty()) {
+				timer.start("tokens - figures");
+				renderTokens(g2d, tokens, view, true);
+				timer.stop("tokens - figures");
+			}
+			
 			timer.start("owned movement");
 			renderMoveSelectionSets(g2d, view, getOwnedMovementSet(view));
 			timer.stop("owned movement");
@@ -2286,6 +2295,10 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	protected void renderTokens(Graphics2D g, List<Token> tokenList, PlayerView view) {
+		renderTokens(g, tokenList, view, false);
+	}
+	
+	protected void renderTokens(Graphics2D g, List<Token> tokenList, PlayerView view, boolean figuresOnly) {
 		Graphics2D clippedG = g;
 		boolean isGMView = view.isGMView(); // speed things up
 
@@ -2323,6 +2336,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 		List<Token> tokenPostProcessing = new ArrayList<Token>(tokenList.size());
 		for (Token token : tokenList) {
+			if (figuresOnly && token.getShape()!=Token.TokenShape.FIGURE)
+				continue;
 			timer.start("tokenlist-1");
 			try {
 				if (token.isStamp() && isTokenMoving(token)) {
@@ -2567,6 +2582,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				va.intersect(zone.getGrid().getTokenCellArea(token));
 				if (!va.isEmpty())
 					g.drawImage(workImage, at, this);
+				else
+					clippedG.drawImage(workImage, at, this);
 				//if (zone.isTokenFootprintVisible(token))
 					//g.drawImage(workImage, at, this);
 			} else {
