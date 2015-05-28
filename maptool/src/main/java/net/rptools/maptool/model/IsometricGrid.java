@@ -278,16 +278,20 @@ public class IsometricGrid extends Grid {
 	}
 
 	@Override
-	public Area getTokenCellArea(Token token) {
+	public Area getTokenCellArea(Rectangle bounds) {
+		return getTokenCellArea(new Area(bounds));
+	}
+	@Override
+	public Area getTokenCellArea(Area bounds) {
 		// Get the cell footprint
-		Rectangle footprint = token.getFootprint(getZone().getGrid()).getBounds(getZone().getGrid());
+		Rectangle footprint = bounds.getBounds();
 		footprint.x = -footprint.width / 2;
 		footprint.y = -footprint.height / 2;
 		// convert the cell footprint to an area
 		Area cellShape = getZone().getGrid().createCellShape(footprint.height);
 		// convert the area to isometric view
 		AffineTransform mtx = new AffineTransform();
-		mtx.translate(token.getX()-(footprint.width / 2), token.getY()-(footprint.height / 2));
+		mtx.translate(bounds.getBounds().getX(), bounds.getBounds().getY());
 		cellShape.transform(mtx);
 		return cellShape;
 	}

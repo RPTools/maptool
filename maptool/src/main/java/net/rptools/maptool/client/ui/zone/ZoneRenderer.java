@@ -115,6 +115,7 @@ import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -2577,15 +2578,14 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 			timer.start("tokenlist-7");
 			// If the token is a figure and if its visible, draw all of it.
-			if (token.getShape()==Token.TokenShape.FIGURE) {
+
+			if (!isGMView && token.isToken() && zoneView.isUsingVision() && (token.getShape()==Token.TokenShape.FIGURE)) {
 				Area va = new Area(clippedG.getClipBounds());
-				va.intersect(zone.getGrid().getTokenCellArea(token));
-				if (!va.isEmpty())
+				Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
+				if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
 					g.drawImage(workImage, at, this);
-				else
-					clippedG.drawImage(workImage, at, this);
-				//if (zone.isTokenFootprintVisible(token))
-					//g.drawImage(workImage, at, this);
+					g.draw(cb); // debugging
+				}
 			} else {
 				clippedG.drawImage(workImage, at, this);
 			}

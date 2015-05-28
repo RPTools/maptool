@@ -475,10 +475,13 @@ public abstract class Grid implements Cloneable {
 	 * @param token
 	 * @return
 	 */
-	public Area getTokenCellArea(Token token) {
+	public Area getTokenCellArea(Rectangle bounds) {
 		// Get the cell footprint
-		Rectangle footprint = token.getFootprint(getZone().getGrid()).getBounds(getZone().getGrid());
-		return new Area(footprint);
+		return new Area(bounds);
+	}
+	public Area getTokenCellArea(Area bounds) {
+		// Get the cell footprint
+		return new Area(bounds);
 	}
 
 	/**

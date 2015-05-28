@@ -610,7 +610,7 @@ public class Zone extends BaseModel {
 		}
 		// Token is visible, and there is fog
 		Rectangle tokenSize = token.getBounds(this);
-		Area tokenFootprint = getGrid().getTokenCellArea(token);
+		Area tokenFootprint = getGrid().getTokenCellArea(tokenSize);
 		Area combined = new Area(exposedArea);
 		PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
 		if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != VisionType.OFF) {
