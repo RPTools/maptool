@@ -500,7 +500,7 @@ public abstract class Grid implements Cloneable {
 	 *            defines areas where fog is currently covering the background
 	 * @return
 	 */
-	private boolean checkCenterRegion(Rectangle regionToCheck, Area fog) {
+	public boolean checkCenterRegion(Rectangle regionToCheck, Area fog) {
 		Rectangle center = new Rectangle();
 		Rectangle bounds = new Rectangle();
 		oneThird(regionToCheck, 1, 1, center); // selects the CENTER piece

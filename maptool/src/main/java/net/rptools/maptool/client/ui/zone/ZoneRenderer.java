@@ -2580,11 +2580,21 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			// If the token is a figure and if its visible, draw all of it.
 
 			if (!isGMView && token.isToken() && zoneView.isUsingVision() && (token.getShape()==Token.TokenShape.FIGURE)) {
-				Area va = new Area(clippedG.getClipBounds());
 				Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
 				if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
-					g.drawImage(workImage, at, this);
-					g.draw(cb); // debugging
+					// the cell intersects visible area so
+					if (zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
+						// if we can see the centre, draw the whole token
+						g.drawImage(workImage, at, this);
+						g.draw(cb); // debugging
+					} else {
+						// else draw the clipped token
+						Graphics2D cellOnly = (Graphics2D)clippedG.create();
+						Area cellArea = new Area(visibleScreenArea);
+						cellArea.intersect(cb);
+						cellOnly.setClip(cellArea);
+						cellOnly.drawImage(workImage, at, this);
+					}
 				}
 			} else {
 				clippedG.drawImage(workImage, at, this);
