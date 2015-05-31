@@ -146,9 +146,9 @@ public class IsometricGrid extends Grid {
 	@Override
 	public CellPoint convert(ZonePoint zp) {
 		double isoX = ((zp.x - getOffsetX()) / getCellWidthHalf() + (zp.y - getOffsetY()) / getCellHeightHalf()) / 2;
-		double isoY = ((zp.y - getOffsetY()) / getCellHeightHalf() - ((zp.x - getOffsetX()) / getCellWidthHalf())) / 2;
-		int newX = (int) isoX;
-		int newY = (int) isoY;
+		double isoY = ((zp.y - getOffsetY()) / getCellHeightHalf() - (zp.x - getOffsetX()) / getCellWidthHalf()) / 2;
+		int newX = (int) Math.floor(isoX);
+		int newY = (int) Math.floor(isoY);
 		return new CellPoint(newX, newY);
 	}
 
@@ -157,6 +157,14 @@ public class IsometricGrid extends Grid {
 		double mapX = (cp.x - cp.y) * getCellWidthHalf();
 		double mapY = (cp.x + cp.y) * getCellHeightHalf();
 		return new ZonePoint((int) (mapX), (int) (mapY));
+	}
+
+	@Override
+	public ZonePoint getNearestVertex(ZonePoint point) {
+		double px = point.x - getOffsetX();
+		double py = point.y - getOffsetY() + getCellHeightHalf();
+		ZonePoint zp = new ZonePoint((int)px, (int)py);
+		return convert(convert(zp));
 	}
 
 	@Override

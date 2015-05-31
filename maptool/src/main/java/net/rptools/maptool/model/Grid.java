@@ -152,6 +152,13 @@ public abstract class Grid implements Cloneable {
 	 *         For HexGrids Use getCellOffset() to move ZonePoint from center to top right
 	 */
 	public abstract ZonePoint convert(CellPoint cp);
+	
+	public ZonePoint getNearestVertex(ZonePoint point) {
+		int gridx = (int) Math.round((point.x - getOffsetX()) / getCellWidth());
+		int gridy = (int) Math.round((point.y - getOffsetY()) / getCellHeight());
+
+		return new ZonePoint((int) (gridx * getCellWidth() + getOffsetX()), (int) (gridy * getCellHeight() + getOffsetY()));
+	}
 
 	public abstract GridCapabilities getCapabilities();
 
