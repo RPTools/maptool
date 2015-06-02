@@ -162,6 +162,8 @@ public class Token extends BaseModel {
 	private List<AttachedLightSource> lightSourceList;
 	private String sightType;
 	private boolean hasSight;
+	private boolean hasImageTable;
+	private String imageTableName;
 
 	private String label;
 
@@ -254,6 +256,8 @@ public class Token extends BaseModel {
 		sightType = token.sightType;
 		hasSight = token.hasSight;
 		propertyType = token.propertyType;
+		hasImageTable = token.hasImageTable;
+		imageTableName = token.imageTableName;
 
 		ownerType = token.ownerType;
 		if (token.ownerList != null) {
@@ -340,6 +344,14 @@ public class Token extends BaseModel {
 
 	public void setHasSight(boolean hasSight) {
 		this.hasSight = hasSight;
+	}
+	
+	public void setHasImageTable(boolean hasImageTable) {
+		this.hasImageTable = hasImageTable;
+	}
+	
+	public void setImageTableName(String imageTableName) {
+		this.imageTableName = imageTableName;
 	}
 
 	public void setWidth(int width) {
@@ -503,6 +515,14 @@ public class Token extends BaseModel {
 
 	public boolean getHasSight() {
 		return hasSight;
+	}
+	
+	public boolean getHasImageTable() {
+		return hasImageTable;
+	}
+	
+	public String getImageTableName() {
+		return imageTableName;
 	}
 
 	public void addLightSource(LightSource source, Direction direction) {

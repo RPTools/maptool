@@ -36,7 +36,7 @@ public class IsometricGrid extends Grid {
 	 *
 	 **/
 	private static final int ISO_ANGLE = 27;
-	private static final int[] ALL_ANGLES = new int[] { -153, -90, -27, 0, 27, 90, 153, 180 };
+	private static final int[] ALL_ANGLES = new int[] { -135, -90, -45, 0, 45, 90, 135, 180 };
 	private static int[] FACING_ANGLES;
 	private static List<TokenFootprint> footprintList;
 
@@ -231,7 +231,7 @@ public class IsometricGrid extends Grid {
 		} else if (!faceEdges && faceVertices) {
 			FACING_ANGLES = new int[] { -90, 0, 90, 180 };
 		} else if (faceEdges && !faceVertices) {
-			FACING_ANGLES = new int[] { -153, -27, 27, 153 };
+			FACING_ANGLES = new int[] { -135, -45, 45, 135 };
 		} else {
 			FACING_ANGLES = new int[] { 90 };
 		}
@@ -261,8 +261,8 @@ public class IsometricGrid extends Grid {
 			}
 			// Rotate the vision range by 45 degrees for isometric view
 			visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
-			// Get the cone, use degreesFromIso to convert the facing from isometric to plan
-			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2, IsometricGrid.degreesFromIso(token.getFacing()) - (arcAngle / 2.0)
+			// Get the cone, use degreesFromIso to convert the facing from isometric to plan 
+			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2, token.getFacing() - (arcAngle / 2.0)
 					+ (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
 			// Get the cell footprint
 			Rectangle footprint = token.getFootprint(getZone().getGrid()).getBounds(getZone().getGrid());

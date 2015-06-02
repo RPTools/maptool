@@ -109,12 +109,14 @@ import net.rptools.maptool.model.GridCapabilities;
 import net.rptools.maptool.model.IsometricGrid;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.LightSource;
+import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.LookupTable.LookupEntry;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
@@ -128,12 +130,15 @@ import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.TokenUtil;
+import net.rptools.parser.ParserException;
 
 import org.apache.log4j.Logger;
 
 /**
  */
 public class ZoneRenderer extends JComponent implements DropTargetListener, Comparable<ZoneRenderer> {
+
+	private static final Color TRANSLUCENT_YELLOW = new Color(Color.yellow.getRed(),Color.yellow.getGreen(),Color.yellow.getBlue(), 50);
 	private static final long serialVersionUID = 3832897780066104884L;
 
 	private static final Logger log = Logger.getLogger(ZoneRenderer.class);
@@ -2266,6 +2271,21 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	// TODO: I don't like this hardwiring
+	protected Shape getFigureFacingArrow(int angle, int size) {
+		int base = (int) (size * .75);
+		int width = (int) (size * .35);
+
+		facingArrow = new GeneralPath();
+		facingArrow.moveTo(base, -width);
+		facingArrow.lineTo(size, 0);
+		facingArrow.lineTo(base, width);
+		facingArrow.lineTo(base, -width);
+
+		GeneralPath gp = (GeneralPath) facingArrow.createTransformedShape(AffineTransform.getRotateInstance(-Math.toRadians(angle)));
+		return gp.createTransformedShape(AffineTransform.getScaleInstance(getScale(), getScale()/2));
+	}
+
+	// TODO: I don't like this hardwiring
 	protected Shape getCircleFacingArrow(int angle, int size) {
 		int base = (int) (size * .75);
 		int width = (int) (size * .35);
@@ -2371,6 +2391,21 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 			timer.start("tokenlist-1b");
 			BufferedImage image = ImageManager.getImage(token.getImageAssetId(), this);
+			if (token.getHasImageTable() && token.hasFacing()) {
+				if (token.getImageTableName()!=null) {
+					LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
+					if (lookupTable!=null) {
+						try {
+							LookupEntry result = lookupTable.getLookup(token.getFacing().toString());
+							if (result!=null) {
+								image = ImageManager.getImage(result.getImageId(), this);
+							}
+						} catch (ParserException p) {
+							// do nothing
+						}
+					}
+				}
+			}
 			timer.stop("tokenlist-1b");
 
 			timer.start("tokenlist-1c");
@@ -2529,12 +2564,13 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 			timer.start("tokenlist-6");
 			// Position
-			double ho = 0;
+			// For Isometric Grid we alter the height offset
+			double iso_ho = 0;
 			Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
 			if (token.getShape() == TokenShape.FIGURE) {
 				double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
-				ho = footprintBounds.height - th;
-				footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int)ho, footprintBounds.width, (int)th);
+				iso_ho = footprintBounds.height - th;
+				footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int)iso_ho, footprintBounds.width, (int)th);
 			}
 			SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
@@ -2547,10 +2583,10 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				if (zone.getGrid() instanceof IsometricGrid && (token.getShape() == Token.TokenShape.SQUARE || token.getShape() == Token.TokenShape.CIRCLE))
 					offsetx = offsetx - (int) (imgSize.width / 2 * getScale());
 				offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 * getScale() : 0);
-				ho = ho * getScale();
+				iso_ho = iso_ho * getScale();
 			}
 			double tx = location.x + offsetx;
-			double ty = location.y + offsety + ho;
+			double ty = location.y + offsety + iso_ho;
 
 			AffineTransform at = new AffineTransform();
 			at.translate(tx, ty);
@@ -2617,8 +2653,24 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			if (token.hasFacing()) {
 				Token.TokenShape tokenType = token.getShape();
 				switch (tokenType) {
+				case FIGURE:
+					Shape arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
+
+					double fx = location.x + location.scaledWidth / 2;
+					double fy = location.y + location.scaledHeight / 2;
+
+					clippedG.translate(fx, fy);
+					if (token.getFacing()<0)
+						clippedG.setColor(Color.yellow);
+					else 
+						clippedG.setColor(TRANSLUCENT_YELLOW);
+					clippedG.fill(arrow);
+					clippedG.setColor(Color.darkGray);
+					clippedG.draw(arrow);
+					clippedG.translate(-fx, -fy);
+					break;
 				case CIRCLE:
-					Shape arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
+					arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
 
 					double cx = location.x + location.scaledWidth / 2;
 					double cy = location.y + location.scaledHeight / 2;
