@@ -147,7 +147,7 @@ public class AppPreferences {
 	private static final boolean DEFAULT_SHOW_INIT_GAIN_MESSAGE = true;
 
 	private static final String KEY_FORCE_FACING_ARROW = "forceFacingArrow";
-	private static final boolean DEFAULT_FORCE_FACING_ARROW = true;
+	private static final boolean DEFAULT_FORCE_FACING_ARROW = false;
 
 	public static void setFillSelectionBox(boolean fill) {
 		prefs.putBoolean(KEY_FILL_SELECTION_BOX, fill);

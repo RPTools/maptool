@@ -1932,7 +1932,13 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					wig.dispose();
 				}
 				// Draw token
+				double iso_ho = 0;
 				Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
+				if (token.getShape() == TokenShape.FIGURE) {
+					double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
+					iso_ho = footprintBounds.height - th;
+					footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int)iso_ho, footprintBounds.width, (int)th);
+				}
 				SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
 				int offsetx = 0;
@@ -1940,9 +1946,10 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				if (token.isSnapToScale()) {
 					offsetx = (int) (imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 * getScale() : 0);
 					offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 * getScale() : 0);
+					iso_ho = iso_ho * getScale();
 				}
 				int tx = x + offsetx;
-				int ty = y + offsety;
+				int ty = y + offsety + (int)iso_ho;
 
 				AffineTransform at = new AffineTransform();
 				at.translate(tx, ty);
@@ -1956,7 +1963,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				} else {
 					at.scale((double) scaledWidth / workImage.getWidth(), (double) scaledHeight / workImage.getHeight());
 				}
-				// TO DO - Isometric manipulation here?
 				g.drawImage(workImage, at, this);
 
 				// Other details
@@ -2391,6 +2397,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 			timer.start("tokenlist-1b");
 			BufferedImage image = ImageManager.getImage(token.getImageAssetId(), this);
+			timer.stop("tokenlist-1b");
+			
+			timer.start("tokenlist-1b-imageTable");
 			if (token.getHasImageTable() && token.hasFacing()) {
 				if (token.getImageTableName()!=null) {
 					LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
@@ -2406,7 +2415,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					}
 				}
 			}
-			timer.stop("tokenlist-1b");
+			timer.stop("tokenlist-1b-imageTable");
 
 			timer.start("tokenlist-1c");
 			double scaledWidth = (footprintBounds.width * scale);
@@ -2622,7 +2631,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					if (zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
 						// if we can see the centre, draw the whole token
 						g.drawImage(workImage, at, this);
-						g.draw(cb); // debugging
+						//g.draw(cb); // debugging
 					} else {
 						// else draw the clipped token
 						Graphics2D cellOnly = (Graphics2D)clippedG.create();
