@@ -2654,7 +2654,12 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				Token.TokenShape tokenType = token.getShape();
 				switch (tokenType) {
 				case FIGURE:
+					if (token.getHasImageTable() && token.hasFacing() && AppPreferences.getForceFacingArrow()==false)
+						break;
 					Shape arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
+
+					if (!(zone.getGrid() instanceof IsometricGrid))
+						arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
 
 					double fx = location.x + location.scaledWidth / 2;
 					double fy = location.y + location.scaledHeight / 2;
@@ -2669,8 +2674,13 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					clippedG.draw(arrow);
 					clippedG.translate(-fx, -fy);
 					break;
+				case TOP_DOWN:
+					if (AppPreferences.getForceFacingArrow()==false)
+						break;
 				case CIRCLE:
 					arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
+					if (zone.getGrid() instanceof IsometricGrid)
+						arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
 
 					double cx = location.x + location.scaledWidth / 2;
 					double cy = location.y + location.scaledHeight / 2;
@@ -2683,35 +2693,42 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					clippedG.translate(-cx, -cy);
 					break;
 				case SQUARE:
-					int facing = token.getFacing();
-					while (facing < 0) {
-						facing += 360;
-					} // TODO: this should really be done in Token.setFacing() but I didn't want to take the chance of breaking something, so change this when it's safe to break stuff
-					facing %= 360;
-					arrow = getSquareFacingArrow(facing, footprintBounds.width / 2);
 
-					cx = location.x + location.scaledWidth / 2;
-					cy = location.y + location.scaledHeight / 2;
-
-					// Find the edge of the image
-					// TODO: Man, this is horrible, there's gotta be a better way to do this
-					double xp = location.scaledWidth / 2;
-					double yp = location.scaledHeight / 2;
-					if (facing >= 45 && facing <= 135 || facing >= 225 && facing <= 315) {
-						xp = (int) (yp / Math.tan(Math.toRadians(facing)));
-						if (facing > 180) {
-							xp = -xp;
-							yp = -yp;
-						}
+					if (zone.getGrid() instanceof IsometricGrid) {
+						arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
+						cx = location.x + location.scaledWidth / 2;
+						cy = location.y + location.scaledHeight / 2;
 					} else {
-						yp = (int) (xp * Math.tan(Math.toRadians(facing)));
-						if (facing > 90 && facing < 270) {
-							xp = -xp;
-							yp = -yp;
+						int facing = token.getFacing();
+						while (facing < 0) {
+							facing += 360;
+						} // TODO: this should really be done in Token.setFacing() but I didn't want to take the chance of breaking something, so change this when it's safe to break stuff
+						facing %= 360;
+						arrow = getSquareFacingArrow(facing, footprintBounds.width / 2);
+
+						cx = location.x + location.scaledWidth / 2;
+						cy = location.y + location.scaledHeight / 2;
+
+						// Find the edge of the image
+						// TODO: Man, this is horrible, there's gotta be a better way to do this
+						double xp = location.scaledWidth / 2;
+						double yp = location.scaledHeight / 2;
+						if (facing >= 45 && facing <= 135 || facing >= 225 && facing <= 315) {
+							xp = (int) (yp / Math.tan(Math.toRadians(facing)));
+							if (facing > 180) {
+								xp = -xp;
+								yp = -yp;
+							}
+						} else {
+							yp = (int) (xp * Math.tan(Math.toRadians(facing)));
+							if (facing > 90 && facing < 270) {
+								xp = -xp;
+								yp = -yp;
+							}
 						}
+						cx += xp;
+						cy -= yp;
 					}
-					cx += xp;
-					cy -= yp;
 
 					clippedG.translate(cx, cy);
 					clippedG.setColor(Color.yellow);

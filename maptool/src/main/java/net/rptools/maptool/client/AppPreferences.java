@@ -146,6 +146,9 @@ public class AppPreferences {
 	private static final String KEY_SHOW_INIT_GAIN_MESSAGE = "showInitGainMessage";
 	private static final boolean DEFAULT_SHOW_INIT_GAIN_MESSAGE = true;
 
+	private static final String KEY_FORCE_FACING_ARROW = "forceFacingArrow";
+	private static final boolean DEFAULT_FORCE_FACING_ARROW = true;
+
 	public static void setFillSelectionBox(boolean fill) {
 		prefs.putBoolean(KEY_FILL_SELECTION_BOX, fill);
 	}
@@ -704,6 +707,14 @@ public class AppPreferences {
 
 	public static void setShowStatSheet(boolean show) {
 		prefs.putBoolean(KEY_SHOW_STAT_SHEET, show);
+	}
+
+	public static boolean getForceFacingArrow() {
+		return prefs.getBoolean(KEY_FORCE_FACING_ARROW, DEFAULT_FORCE_FACING_ARROW);
+	}
+
+	public static void setForceFacingArrow(boolean show) {
+		prefs.putBoolean(KEY_FORCE_FACING_ARROW, show);
 	}
 
 	public static boolean getFitGMView() {
