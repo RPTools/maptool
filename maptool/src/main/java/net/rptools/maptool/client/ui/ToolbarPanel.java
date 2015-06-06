@@ -42,6 +42,7 @@ import net.rptools.maptool.client.tool.drawing.BurstTemplateTool;
 import net.rptools.maptool.client.tool.drawing.ConeTemplateTool;
 import net.rptools.maptool.client.tool.drawing.CrossTopologyTool;
 import net.rptools.maptool.client.tool.drawing.DiamondTool;
+import net.rptools.maptool.client.tool.drawing.DiamondTopologyTool;
 import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
 import net.rptools.maptool.client.tool.drawing.FreehandTool;
 import net.rptools.maptool.client.tool.drawing.HollowOvalTopologyTool;
@@ -193,6 +194,7 @@ public class ToolbarPanel extends JToolBar {
 		panel.add(PolygonTopologyTool.class);
 		panel.add(PolyLineTopologyTool.class);
 		panel.add(CrossTopologyTool.class);
+		panel.add(DiamondTopologyTool.class);
 
 		//		panel.add(FillTopologyTool.class);
 		return panel;

@@ -65,8 +65,8 @@ public class DiamondTool extends AbstractDrawingTool implements MouseMotionListe
 				pen.setBackgroundPaint(new DrawableColorPaint(Color.white));
 			}
 			paintTransformed(g, renderer, new ShapeDrawable(diamond, false), pen);
-			//ToolHelper.drawBoxedMeasurement(renderer, g, ScreenPoint.fromZonePoint(renderer, diamond.getBounds().x, diamond.getBounds().y),
-				//	ScreenPoint.fromZonePoint(renderer, diamond.getBounds().x + diamond.getBounds().width, diamond.getBounds().y + diamond.getBounds().height));
+			ToolHelper.drawBoxedMeasurement(renderer, g, ScreenPoint.fromZonePoint(renderer, diamond.getBounds().x, diamond.getBounds().y),
+					ScreenPoint.fromZonePoint(renderer, diamond.getBounds().x + diamond.getBounds().width, diamond.getBounds().y + diamond.getBounds().height));
 		}
 	}
 
