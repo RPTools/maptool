@@ -13,6 +13,9 @@ package net.rptools.maptool.client.tool;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.PathIterator;
 
 import javax.swing.SwingUtilities;
 
@@ -25,6 +28,50 @@ import net.rptools.maptool.util.GraphicsUtil;
  * @author trevor
  */
 public class ToolHelper {
+	public static void drawDiamondMeasurement(ZoneRenderer renderer, Graphics2D g, Shape diamond) {
+		double[] north=null;
+		double[] west=null;
+		double[] east=null;
+		PathIterator path = diamond.getPathIterator(getPaintTransform(renderer));
+		while (!path.isDone()) {
+			double[] coords=new double[2];
+			int segType=path.currentSegment(coords);
+			if (segType!=PathIterator.SEG_CLOSE) {
+				if (north==null)
+					north=coords;
+				if (west==null)
+					west=coords;
+				if (east==null)
+					east=coords;
+				if (coords[1]<north[1])
+					north=coords;
+				if (coords[0]<west[0])
+					west=coords;
+				if (coords[0]>east[0])
+					east=coords;
+			}
+			path.next();
+		}
+		// Measure
+		int nx = (int)north[0];
+		int ny = (int)north[1];
+		int ex = (int)east[0];
+		int ey = (int)east[1];
+		int wx = (int)west[0];
+		int wy = (int)west[1];
+		if (g!=null) {
+			g.setColor(Color.black);
+			g.drawLine(nx, ny - 20, nx, ny - 10);
+			g.drawLine(nx, ny - 15, ex, ey - 15);
+			g.drawLine(ex, ey - 20, ex, ey - 10);
+			g.drawLine(nx, ny - 15, wx, wy - 15);
+			g.drawLine(wx, wy - 20, wx, wy - 10);
+			String displayString = String.format("%1.1f", isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(ex, ey)));
+			GraphicsUtil.drawBoxedString(g, displayString, nx+25 , ny-25);
+			displayString = String.format("%1.1f", isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(wx, wy)));
+			GraphicsUtil.drawBoxedString(g, displayString, nx-25 , ny-25);
+		}
+	}
 	public static void drawBoxedMeasurement(ZoneRenderer renderer, Graphics2D g, ScreenPoint startPoint, ScreenPoint endPoint) {
 		if (!MapTool.getFrame().isPaintDrawingMeasurement())
 			return;
@@ -92,5 +139,16 @@ public class ToolHelper {
 		double b = p2.y - p1.y;
 
 		return Math.sqrt(a * a + b * b) * renderer.getZone().getUnitsPerCell() / renderer.getScaledGridSize();
+	}
+	private static double isometricDistance(ZoneRenderer renderer, ScreenPoint p1, ScreenPoint p2) {
+		double b = p2.y - p1.y;
+		//return b;
+		return 2 * b * renderer.getZone().getUnitsPerCell() / renderer.getScaledGridSize();
+	}
+	protected static AffineTransform getPaintTransform(ZoneRenderer renderer) {
+		AffineTransform transform = new AffineTransform();
+		transform.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
+		transform.scale(renderer.getScale(), renderer.getScale());
+		return transform;
 	}
 }
