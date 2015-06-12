@@ -155,6 +155,7 @@ public class Token extends BaseModel {
 
 	private boolean isFlippedX;
 	private boolean isFlippedY;
+	private boolean isFlippedIso;
 
 	private MD5Key charsheetImage;
 	private MD5Key portraitImage;
@@ -243,6 +244,7 @@ public class Token extends BaseModel {
 
 		isFlippedX = token.isFlippedX;
 		isFlippedY = token.isFlippedY;
+		isFlippedIso = token.isFlippedIso;
 
 		layer = token.layer;
 
@@ -1276,6 +1278,14 @@ public class Token extends BaseModel {
 
 	public void setFlippedX(boolean isFlippedX) {
 		this.isFlippedX = isFlippedX;
+	}
+
+	public boolean isFlippedIso() {
+		return isFlippedIso;
+	}
+
+	public void setFlippedIso(boolean isFlippedIso) {
+		this.isFlippedIso = isFlippedIso;
 	}
 
 	public Color getVisionOverlayColor() {

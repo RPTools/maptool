@@ -199,6 +199,24 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 				MapTool.getFrame().refresh();
 			}
 		});
+		flipMenu.add(new AbstractAction() {
+			{
+				putValue(NAME, "Isometric Plane");
+			}
+
+			public void actionPerformed(ActionEvent e) {
+				for (GUID tokenGUID : selectedTokenSet) {
+					Token token = renderer.getZone().getToken(tokenGUID);
+					if (token == null) {
+						continue;
+					}
+					token.setFlippedIso(!token.isFlippedIso());
+					renderer.flush(token);
+					MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+				}
+				MapTool.getFrame().refresh();
+			}
+		});
 		return flipMenu;
 	}
 
