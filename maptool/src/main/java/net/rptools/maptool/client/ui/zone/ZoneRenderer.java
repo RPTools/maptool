@@ -117,7 +117,6 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
-import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -168,6 +167,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	private final Map<GUID, BufferedImage> labelRenderingCache = new HashMap<GUID, BufferedImage>();
 	private final Map<Token, BufferedImage> replacementImageMap = new HashMap<Token, BufferedImage>();
 	private final Map<Token, BufferedImage> flipImageMap = new HashMap<Token, BufferedImage>();
+	private final Map<Token, BufferedImage> flipIsoImageMap = new HashMap<Token, BufferedImage>();
 	private Token tokenUnderMouse;
 
 	private ScreenPoint pointUnderMouse;
@@ -552,6 +552,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			tokenLocationCache.remove(token);
 		}
 		flipImageMap.remove(token);
+		flipIsoImageMap.remove(token);
 		replacementImageMap.remove(token);
 		labelRenderingCache.remove(token.getId());
 
@@ -588,6 +589,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		flushDrawableRenderer();
 		replacementImageMap.clear();
 		flipImageMap.clear();
+		flipIsoImageMap.clear();
 		fogBuffer = null;
 		renderedLightMap = null;
 		renderedAuraMap = null;
@@ -1886,7 +1888,26 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				Rectangle footprintBounds = token.getBounds(zone);
 				ScreenPoint newScreenPoint = ScreenPoint.fromZonePoint(this, footprintBounds.x + set.getOffsetX(), footprintBounds.y + set.getOffsetY());
 
-				BufferedImage image = ImageManager.getImage(token.getImageAssetId());
+				BufferedImage image = null;
+				// Get the basic image
+				if (token.getHasImageTable() && token.hasFacing()) {
+					if (token.getImageTableName()!=null) {
+						LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
+						if (lookupTable!=null) {
+							try {
+								LookupEntry result = lookupTable.getLookup(token.getFacing().toString());
+								if (result!=null) {
+									image = ImageManager.getImage(result.getImageId(), this);
+								}
+							} catch (ParserException p) {
+								// do nothing
+							}
+						}
+					} 
+				};
+				if (image==null) {
+					image = ImageManager.getImage(token.getImageAssetId());
+				}
 
 				int scaledWidth = (int) (footprintBounds.width * scale);
 				int scaledHeight = (int) (footprintBounds.height * scale);
@@ -1930,6 +1951,17 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					Graphics2D wig = workImage.createGraphics();
 					wig.drawImage(image, workX, workY, workW, workH, null);
 					wig.dispose();
+				}
+				// on the iso plane
+				if (token.isFlippedIso()) {
+					if (flipIsoImageMap.get(token) == null) {
+						workImage = IsometricGrid.isoImage(workImage);
+					} else {
+						workImage = flipIsoImageMap.get(token);
+					}
+					token.setHeight(workImage.getHeight());
+					token.setWidth(workImage.getWidth());
+					footprintBounds = token.getBounds(zone);
 				}
 				// Draw token
 				double iso_ho = 0;
@@ -2396,10 +2428,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			timer.stop("tokenlist-1a");
 
 			timer.start("tokenlist-1b");
-			BufferedImage image = ImageManager.getImage(token.getImageAssetId(), this);
-			timer.stop("tokenlist-1b");
-			
-			timer.start("tokenlist-1b-imageTable");
+			BufferedImage image = null;
 			if (token.getHasImageTable() && token.hasFacing()) {
 				if (token.getImageTableName()!=null) {
 					LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
@@ -2415,7 +2444,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					}
 				}
 			}
-			timer.stop("tokenlist-1b-imageTable");
+			if (image==null)
+				image = ImageManager.getImage(token.getImageAssetId(), this);
+			timer.stop("tokenlist-1b");
 
 			timer.start("tokenlist-1c");
 			double scaledWidth = (footprintBounds.width * scale);
@@ -2571,6 +2602,24 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			}
 			timer.stop("tokenlist-5");
 
+			timer.start("tokenlist-5a");
+			if (token.isFlippedIso()) {
+				if (flipIsoImageMap.get(token) == null) {
+					workImage = IsometricGrid.isoImage(workImage);
+					flipIsoImageMap.put(token, workImage);
+				} else {
+					workImage = flipIsoImageMap.get(token);
+				}
+				token.setHeight(workImage.getHeight());
+				token.setWidth(workImage.getWidth());
+				footprintBounds = token.getBounds(zone);
+			} else {
+				// necessary to reset images if they were once on the iso plane
+				token.setHeight(image.getHeight());
+				token.setWidth(image.getWidth());
+			}
+			timer.stop("tokenlist-5a");
+
 			timer.start("tokenlist-6");
 			// Position
 			// For Isometric Grid we alter the height offset
@@ -2589,8 +2638,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			if (token.isSnapToScale()) {
 				offsetx = (int) (imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 * getScale() : 0);
 				// For isometric grids we are going to adjust the image so it is necessary to adjust offsetx
-				if (zone.getGrid() instanceof IsometricGrid && (token.getShape() == Token.TokenShape.SQUARE || token.getShape() == Token.TokenShape.CIRCLE))
-					offsetx = offsetx - (int) (imgSize.width / 2 * getScale());
+				//if (zone.getGrid() instanceof IsometricGrid && (token.getShape() == Token.TokenShape.SQUARE || token.getShape() == Token.TokenShape.CIRCLE))
+				//	offsetx = offsetx - (int) (imgSize.width / 2 * getScale());
 				offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 * getScale() : 0);
 				iso_ho = iso_ho * getScale();
 			}
@@ -2607,11 +2656,12 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				// facing defaults to down, or -90 degrees
 			}
 			// For isometric grids, convert the token image to isometric format
+			/*
 			if (zone.getGrid() instanceof IsometricGrid && (token.getShape() == Token.TokenShape.SQUARE || token.getShape() == Token.TokenShape.CIRCLE)) {
 				workImage = IsometricGrid.isoImage(workImage);
 				imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
 				SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
-			}
+			} */
 			// Draw the token
 			if (token.isSnapToScale()) {
 				at.scale(((double) imgSize.width) / workImage.getWidth(), ((double) imgSize.height) / workImage.getHeight());

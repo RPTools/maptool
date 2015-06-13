@@ -347,7 +347,8 @@ public class IsometricGrid extends Grid {
 	 * @return image in isometric format
 	 */
 	public static BufferedImage isoImage(BufferedImage planImage) {
-		return resize(rotate(planImage));
+		int nSize = (planImage.getWidth() + planImage.getHeight());
+		return resize(rotate(planImage), nSize, nSize / 2);
 	}
 
 	private static BufferedImage rotate(BufferedImage planImage) {
@@ -358,6 +359,7 @@ public class IsometricGrid extends Grid {
 
 		int neww = (int) Math.floor(w * cos + h * sin);
 		int newh = (int) Math.floor(h * cos + w * sin);
+		
 		// Rotate image 45 degrees
 		BufferedImage rotateImage = new BufferedImage(neww, newh, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = rotateImage.createGraphics();
@@ -369,13 +371,11 @@ public class IsometricGrid extends Grid {
 		return rotateImage;
 	}
 
-	private static BufferedImage resize(BufferedImage image) {
+	private static BufferedImage resize(BufferedImage image, int newWidth, int newHeight) {
 		// Resize into a BufferedImage
-		int neww = image.getWidth() * 2;
-		int newh = image.getHeight();
-		BufferedImage bimg = new BufferedImage(neww, newh, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage bimg = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D bGr = bimg.createGraphics();
-		bGr.drawImage(image, 0, 0, neww, newh, null);
+		bGr.drawImage(image, 0, 0, newWidth, newHeight, null);
 		bGr.dispose();
 		return bimg;
 	}

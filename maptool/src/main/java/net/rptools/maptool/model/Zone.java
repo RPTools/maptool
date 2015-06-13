@@ -1307,10 +1307,6 @@ public class Zone extends BaseModel {
 	public static class TokenZOrderComparator implements Comparator<Token> {
 		@Override
 		public int compare(Token o1, Token o2) {
-			if (o1.getShape()==Token.TokenShape.FIGURE || o2.getShape()==Token.TokenShape.FIGURE) {
-				if ((o1.getY() - o2.getY())!=0)
-					return o1.getY() - o2.getY();
-			}
 			int lval = o1.getZOrder();
 			int rval = o2.getZOrder();
 
@@ -1332,8 +1328,8 @@ public class Zone extends BaseModel {
 			public int compare(Token o1, Token o2) {
 				if (o1.getShape() == Token.TokenShape.FIGURE || o2.getShape() == Token.TokenShape.FIGURE) {
 					/**
-					 * if either token is a figure, get the footprint and find the lowest point but if the same, use
-					 * normal z order
+					 * if either token is a figure, get the footprint and find the lowest point but if the same, 
+					 * return the smallest, else use normal z order
 					 */
 					Rectangle b1 = o1.getFootprint(getGrid()).getBounds(getGrid());
 					Rectangle b2 = o2.getFootprint(getGrid()).getBounds(getGrid());
@@ -1341,6 +1337,10 @@ public class Zone extends BaseModel {
 					int v2 = o2.getY() + b2.y + b2.height;
 					if ((v1 - v2) != 0)
 						return v1 - v2;
+					if (b1.getHeight()!=b2.getHeight()) {
+						// Larger tokens at the same position, go behind
+						return o2.getHeight() - o1.getHeight();
+					}
 				}
 				int lval = o1.getZOrder();
 				int rval = o2.getZOrder();
