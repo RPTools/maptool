@@ -1154,7 +1154,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		if (Zone.Layer.TOKEN.isEnabled()) {
 			
 			// if here is fog or vision we may need to re-render figure type tokens
-			List<Token> tokens = zone.getTokens();
+			List<Token> tokens = zone.getFigureTokens();
 			if (!tokens.isEmpty()) {
 				timer.start("tokens - figures");
 				renderTokens(g2d, tokens, view, true);
@@ -2637,9 +2637,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 			if (token.isSnapToScale()) {
 				offsetx = (int) (imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 * getScale() : 0);
-				// For isometric grids we are going to adjust the image so it is necessary to adjust offsetx
-				//if (zone.getGrid() instanceof IsometricGrid && (token.getShape() == Token.TokenShape.SQUARE || token.getShape() == Token.TokenShape.CIRCLE))
-				//	offsetx = offsetx - (int) (imgSize.width / 2 * getScale());
 				offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 * getScale() : 0);
 				iso_ho = iso_ho * getScale();
 			}
@@ -2655,13 +2652,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						- offsety);
 				// facing defaults to down, or -90 degrees
 			}
-			// For isometric grids, convert the token image to isometric format
-			/*
-			if (zone.getGrid() instanceof IsometricGrid && (token.getShape() == Token.TokenShape.SQUARE || token.getShape() == Token.TokenShape.CIRCLE)) {
-				workImage = IsometricGrid.isoImage(workImage);
-				imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
-				SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
-			} */
 			// Draw the token
 			if (token.isSnapToScale()) {
 				at.scale(((double) imgSize.width) / workImage.getWidth(), ((double) imgSize.height) / workImage.getHeight());
@@ -2674,7 +2664,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			timer.start("tokenlist-7");
 			// If the token is a figure and if its visible, draw all of it.
 
-			if (!isGMView && token.isToken() && zoneView.isUsingVision() && (token.getShape()==Token.TokenShape.FIGURE)) {
+			if (!isGMView && zoneView.isUsingVision() && (token.getShape()==Token.TokenShape.FIGURE)) {
 				Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
 				if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
 					// the cell intersects visible area so

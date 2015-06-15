@@ -1235,6 +1235,15 @@ public class Zone extends BaseModel {
 		});
 	}
 
+	public List<Token> getFigureTokens() {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				return t.getShape()==Token.TokenShape.FIGURE;
+			}
+		});
+	}
+
 	public List<Token> getPlayerOwnedTokensWithSight(Player p) {
 		return getTokensFiltered(new Filter() {
 			@Override
