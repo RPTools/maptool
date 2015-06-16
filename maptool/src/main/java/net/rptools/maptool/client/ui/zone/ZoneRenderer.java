@@ -2569,17 +2569,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			}
 			timer.stop("renderTokens:ShowPath");
 
-			timer.start("tokenlist-4");
-			// Halo (TOPDOWN, CIRCLE)
-			if (token.hasHalo() && (token.getShape() == Token.TokenShape.TOP_DOWN || token.getShape() == Token.TokenShape.CIRCLE)) {
-				Stroke oldStroke = clippedG.getStroke();
-				clippedG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
-				clippedG.setColor(token.getHaloColor());
-				clippedG.draw(location.bounds);
-				clippedG.setStroke(oldStroke);
-			}
-			timer.stop("tokenlist-4");
-
 			timer.start("tokenlist-5");
 			// handle flipping
 			BufferedImage workImage = image;
@@ -2689,13 +2678,25 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			timer.start("tokenlist-8");
 			// Halo (SQUARE)
 			// XXX Why are square halos drawn separately?!
+			/*
 			if (token.hasHalo() && token.getShape() == Token.TokenShape.SQUARE) {
 				Stroke oldStroke = g.getStroke();
 				clippedG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
 				clippedG.setColor(token.getHaloColor());
 				clippedG.draw(new Rectangle2D.Double(location.x, location.y, location.scaledWidth, location.scaledHeight));
 				clippedG.setStroke(oldStroke);
+			} */
+
+			timer.start("tokenlist-4");
+			// Halo 
+			if (token.hasHalo()) {
+				Stroke oldStroke = clippedG.getStroke();
+				clippedG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
+				clippedG.setColor(token.getHaloColor());
+				clippedG.draw(zone.getGrid().getTokenCellArea(tokenBounds));
+				clippedG.setStroke(oldStroke);
 			}
+			timer.stop("tokenlist-4");
 
 			// Facing ?
 			// TODO: Optimize this by doing it once per token per facing
