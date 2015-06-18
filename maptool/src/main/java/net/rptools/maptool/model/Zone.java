@@ -1346,6 +1346,10 @@ public class Zone extends BaseModel {
 					int v2 = o2.getY() + b2.y + b2.height;
 					if ((v1 - v2) != 0)
 						return v1 - v2;
+					if (o1.isStamp() && o2.isToken())
+						return -1;
+					if (o2.isStamp() && o1.isToken())
+						return +1;
 					if (b1.getHeight()!=b2.getHeight()) {
 						// Larger tokens at the same position, go behind
 						return o2.getHeight() - o1.getHeight();
