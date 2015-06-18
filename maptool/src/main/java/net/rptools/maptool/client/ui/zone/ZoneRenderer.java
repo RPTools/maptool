@@ -1888,26 +1888,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				Rectangle footprintBounds = token.getBounds(zone);
 				ScreenPoint newScreenPoint = ScreenPoint.fromZonePoint(this, footprintBounds.x + set.getOffsetX(), footprintBounds.y + set.getOffsetY());
 
-				BufferedImage image = null;
-				// Get the basic image
-				if (token.getHasImageTable() && token.hasFacing()) {
-					if (token.getImageTableName()!=null) {
-						LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
-						if (lookupTable!=null) {
-							try {
-								LookupEntry result = lookupTable.getLookup(token.getFacing().toString());
-								if (result!=null) {
-									image = ImageManager.getImage(result.getImageId(), this);
-								}
-							} catch (ParserException p) {
-								// do nothing
-							}
-						}
-					} 
-				};
-				if (image==null) {
-					image = ImageManager.getImage(token.getImageAssetId());
-				}
+				// get token image, using image table if present
+				BufferedImage image = getTokenImage(token);
 
 				int scaledWidth = (int) (footprintBounds.width * scale);
 				int scaledHeight = (int) (footprintBounds.height * scale);
@@ -2428,24 +2410,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			timer.stop("tokenlist-1a");
 
 			timer.start("tokenlist-1b");
-			BufferedImage image = null;
-			if (token.getHasImageTable() && token.hasFacing()) {
-				if (token.getImageTableName()!=null) {
-					LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
-					if (lookupTable!=null) {
-						try {
-							LookupEntry result = lookupTable.getLookup(token.getFacing().toString());
-							if (result!=null) {
-								image = ImageManager.getImage(result.getImageId(), this);
-							}
-						} catch (ParserException p) {
-							// do nothing
-						}
-					}
-				}
-			}
-			if (image==null)
-				image = ImageManager.getImage(token.getImageAssetId(), this);
+			// get token image, using image table if present
+			BufferedImage image = getTokenImage(token);
 			timer.stop("tokenlist-1b");
 
 			timer.start("tokenlist-1c");
@@ -2569,6 +2535,18 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			}
 			timer.stop("renderTokens:ShowPath");
 
+
+			timer.start("tokenlist-4");
+			// Halo 
+			if (token.hasHalo()) {
+				Stroke oldStroke = clippedG.getStroke();
+				clippedG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
+				clippedG.setColor(token.getHaloColor());
+				clippedG.draw(zone.getGrid().getTokenCellArea(tokenBounds));
+				clippedG.setStroke(oldStroke);
+			}
+			timer.stop("tokenlist-4");
+
 			timer.start("tokenlist-5");
 			// handle flipping
 			BufferedImage workImage = image;
@@ -2686,18 +2664,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				clippedG.draw(new Rectangle2D.Double(location.x, location.y, location.scaledWidth, location.scaledHeight));
 				clippedG.setStroke(oldStroke);
 			} */
-
-			timer.start("tokenlist-4");
-			// Halo 
-			if (token.hasHalo()) {
-				Stroke oldStroke = clippedG.getStroke();
-				clippedG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
-				clippedG.setColor(token.getHaloColor());
-				clippedG.draw(zone.getGrid().getTokenCellArea(tokenBounds));
-				clippedG.setStroke(oldStroke);
-			}
-			timer.stop("tokenlist-4");
-
+			
 			// Facing ?
 			// TODO: Optimize this by doing it once per token per facing
 			if (token.hasFacing()) {
@@ -3826,6 +3793,38 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		repaint();
 	}
 
+
+	/**
+	 * Checks to see if token has an image table and references that if the token has a facing
+	 * otherwise uses basic image
+	 * 
+	 * @param token
+	 * @return BufferedImage
+	 */
+	private BufferedImage getTokenImage(Token token) {
+		BufferedImage image = null;
+		// Get the basic image
+		if (token.getHasImageTable() && token.hasFacing()) {
+			if (token.getImageTableName()!=null) {
+				LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
+				if (lookupTable!=null) {
+					try {
+						LookupEntry result = lookupTable.getLookup(token.getFacing().toString());
+						if (result!=null) {
+							image = ImageManager.getImage(result.getImageId(), this);
+						}
+					} catch (ParserException p) {
+						// do nothing
+					}
+				}
+			} 
+		};
+		if (image==null) {
+			image = ImageManager.getImage(token.getImageAssetId());
+		}
+		return image;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

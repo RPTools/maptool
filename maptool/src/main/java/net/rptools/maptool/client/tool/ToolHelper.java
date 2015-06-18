@@ -11,6 +11,7 @@
 
 package net.rptools.maptool.client.tool;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -60,12 +61,21 @@ public class ToolHelper {
 		int wx = (int)west[0];
 		int wy = (int)west[1];
 		if (g!=null) {
-			g.setColor(Color.black);
+			g.setColor(Color.white);
+            g.setStroke(new BasicStroke(3));
 			g.drawLine(nx, ny - 20, nx, ny - 10);
 			g.drawLine(nx, ny - 15, ex, ey - 15);
 			g.drawLine(ex, ey - 20, ex, ey - 10);
 			g.drawLine(nx, ny - 15, wx, wy - 15);
 			g.drawLine(wx, wy - 20, wx, wy - 10);
+			g.setColor(Color.black);
+            g.setStroke(new BasicStroke(1));
+			g.drawLine(nx, ny - 20, nx, ny - 10);
+			g.drawLine(nx, ny - 15, ex, ey - 15);
+			g.drawLine(ex, ey - 20, ex, ey - 10);
+			g.drawLine(nx, ny - 15, wx, wy - 15);
+			g.drawLine(wx, wy - 20, wx, wy - 10);
+	        //g.setPaintMode();
 			String displayString = String.format("%1.1f", isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(ex, ey)));
 			GraphicsUtil.drawBoxedString(g, displayString, nx+25 , ny-25);
 			displayString = String.format("%1.1f", isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(wx, wy)));
@@ -82,22 +92,37 @@ public class ToolHelper {
 		int right = (int) Math.max(startPoint.x, endPoint.x);
 		int bottom = (int) Math.max(startPoint.y, endPoint.y);
 
+		// outline
+		g.setColor(Color.white);
+        g.setStroke(new BasicStroke(3));
 		// HORIZONTAL Measure
-		g.setColor(Color.black);
 		g.drawLine(left, top - 15, right, top - 15);
 		g.drawLine(left, top - 20, left, top - 10);
 		g.drawLine(right, top - 20, right, top - 10);
-
-		String displayString = String.format("%1.1f", euclideanDistance(renderer, new ScreenPoint(left, top), new ScreenPoint(right, top)));
-		GraphicsUtil.drawBoxedString(g, displayString, left + (right - left) / 2, top - 15);
-
+		// VETICAL Measure
+		g.drawLine(right + 15, top, right + 15, bottom);
+		g.drawLine(right + 10, top, right + 20, top);
+		g.drawLine(right + 10, bottom, right + 20, bottom);
+		// inner line
+		g.setColor(Color.black);
+        g.setStroke(new BasicStroke(1));
+		// HORIZONTAL Measure
+		g.drawLine(left, top - 15, right, top - 15);
+		g.drawLine(left, top - 20, left, top - 10);
+		g.drawLine(right, top - 20, right, top - 10);
 		// VETICAL Measure
 		g.drawLine(right + 15, top, right + 15, bottom);
 		g.drawLine(right + 10, top, right + 20, top);
 		g.drawLine(right + 10, bottom, right + 20, bottom);
 
+		// Horizontal number
+		String displayString = String.format("%1.1f", euclideanDistance(renderer, new ScreenPoint(left, top), new ScreenPoint(right, top)));
+		GraphicsUtil.drawBoxedString(g, displayString, left + (right - left) / 2, top - 15);
+		
+		// Verical number
 		displayString = String.format("%1.1f", euclideanDistance(renderer, new ScreenPoint(right, top), new ScreenPoint(right, bottom)));
 		GraphicsUtil.drawBoxedString(g, displayString, right + 18, bottom + (top - bottom) / 2);
+
 	}
 
 	public static void drawMeasurement(ZoneRenderer renderer, Graphics2D g, ScreenPoint startPoint, ScreenPoint endPoint) {
