@@ -2,6 +2,7 @@ package net.rptools.maptool.model;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -19,6 +20,7 @@ import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
@@ -39,6 +41,16 @@ public class IsometricGrid extends Grid {
 	private static final int[] ALL_ANGLES = new int[] { -135, -90, -45, 0, 45, 90, 135, 180 };
 	private static int[] FACING_ANGLES;
 	private static List<TokenFootprint> footprintList;
+	private static BufferedImage pathHighlight;
+
+	static {
+		try {
+			pathHighlight = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/isoBorder.png");
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+	}
+
 
 	public IsometricGrid() {
 		super();
@@ -104,6 +116,16 @@ public class IsometricGrid extends Grid {
 		return iso;
 	}
 
+	@Override
+	public BufferedImage getCellHighlight() {
+		return pathHighlight;
+	}
+
+	@Override
+	public Dimension getCellOffset() {
+		return new Dimension((int) -getCellWidthHalf(), 0);
+	}
+	
 	@Override
 	public int[] getFacingAngles() {
 		return FACING_ANGLES;
