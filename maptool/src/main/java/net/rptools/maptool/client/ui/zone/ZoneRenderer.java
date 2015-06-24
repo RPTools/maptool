@@ -2675,7 +2675,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						break;
 					Shape arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
 
-					if (!(zone.getGrid() instanceof IsometricGrid))
+					if (!zone.getGrid().isIsometric())
 						arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
 
 					double fx = location.x + location.scaledWidth / 2;
@@ -2696,7 +2696,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						break;
 				case CIRCLE:
 					arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
-					if (zone.getGrid() instanceof IsometricGrid)
+					if (zone.getGrid().isIsometric())
 						arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
 
 					double cx = location.x + location.scaledWidth / 2;
@@ -2711,7 +2711,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					break;
 				case SQUARE:
 
-					if (zone.getGrid() instanceof IsometricGrid) {
+					if (zone.getGrid().isIsometric()) {
 						arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
 						cx = location.x + location.scaledWidth / 2;
 						cy = location.y + location.scaledHeight / 2;

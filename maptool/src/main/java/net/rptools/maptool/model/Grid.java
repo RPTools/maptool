@@ -133,6 +133,10 @@ public abstract class Grid implements Cloneable {
 
 	public abstract List<TokenFootprint> getFootprints();
 
+	public boolean isIsometric() {
+		return false;
+	}
+	
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();

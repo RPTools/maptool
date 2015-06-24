@@ -64,6 +64,10 @@ public class IsometricGrid extends Grid {
 	public IsometricGrid(boolean faceEdges, boolean faceVertices) {
 		setFacings(faceEdges, faceVertices);
 	}
+	
+	public boolean isIsometric() {
+		return true;
+	}
 
 	/**
 	 * Cell Dimensions
