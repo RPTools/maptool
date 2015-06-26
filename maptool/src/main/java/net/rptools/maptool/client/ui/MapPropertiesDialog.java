@@ -59,6 +59,7 @@ import net.rptools.maptool.model.GridlessGrid;
 import net.rptools.maptool.model.HexGridHorizontal;
 import net.rptools.maptool.model.HexGridVertical;
 import net.rptools.maptool.model.IsometricGrid;
+import net.rptools.maptool.model.IsometricHexGrid;
 import net.rptools.maptool.model.SquareGrid;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -210,13 +211,15 @@ public class MapPropertiesDialog extends JDialog {
 		getDistanceTextField().setText(Integer.toString(zone.getUnitsPerCell()));
 		getPixelsPerCellTextField().setText(Integer.toString(zone.getGrid().getSize()));
 		getDefaultVisionTextField().setText(Integer.toString(zone.getTokenVisionDistance()));
-
+/*
 		if (zone.getGrid() instanceof HexGridVertical) {
 			if (((HexGridVertical)zone.getGrid()).isIsometric())
 				getIsometricHexRadio().setSelected(true);
 			else
 				getHexVerticalRadio().setSelected(true);
-		}
+		} */
+		getIsometricHexRadio().setSelected(zone.getGrid() instanceof HexGridVertical);
+		getIsometricHexRadio().setSelected(zone.getGrid() instanceof IsometricHexGrid);
 		getIsometricRadio().setSelected(zone.getGrid() instanceof IsometricGrid);
 		getHexHorizontalRadio().setSelected(zone.getGrid() instanceof HexGridHorizontal);
 		getSquareRadio().setSelected(zone.getGrid() instanceof SquareGrid);

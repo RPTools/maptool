@@ -43,7 +43,7 @@ public class GridFactory {
 			return new IsometricGrid(faceEdges, faceVertices);
 		}
 		if (isIsometricHex(type)) {
-			return new HexGridVertical(faceEdges, faceVertices, true);
+			return new IsometricHexGrid(faceEdges, faceVertices);
 		}
 		if (isNone(type)) {
 			return new GridlessGrid();
@@ -56,6 +56,9 @@ public class GridFactory {
 			if (((HexGridVertical) grid).isIsometric())
 				return ISOMETRIC_HEX;
 			return HEX_VERT;
+		}
+		if (grid instanceof IsometricHexGrid) {
+			return ISOMETRIC_HEX;
 		}
 		if (grid instanceof HexGridHorizontal) {
 			return HEX_HORI;

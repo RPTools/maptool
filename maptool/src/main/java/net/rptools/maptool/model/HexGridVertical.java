@@ -54,26 +54,10 @@ public class HexGridVertical extends HexGrid {
 			setFacings(faceEdges, faceVertices);
 		}
 	}
-	
-	public HexGridVertical(boolean isometric) {
-		super();
-		if (FACING_ANGLES == null) {
-			boolean faceEdges = AppPreferences.getFaceEdge();
-			boolean faceVertices = AppPreferences.getFaceVertex();
-			setFacings(faceEdges, faceVertices);
-		}
-		setIsometric(isometric);
-	}
 
 	public HexGridVertical(boolean faceEdges, boolean faceVertices) {
 		super();
 		setFacings(faceEdges, faceVertices);
-	}
-
-	public HexGridVertical(boolean faceEdges, boolean faceVertices, boolean isometric) {
-		super();
-		setFacings(faceEdges, faceVertices);
-		setIsometric(isometric);
 	}
 
 	@Override

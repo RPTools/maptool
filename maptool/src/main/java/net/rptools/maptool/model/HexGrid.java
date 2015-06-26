@@ -166,25 +166,38 @@ public abstract class HexGrid extends Grid {
 
 	/** One-half the length of an edge. Set to sqrt(edgeLength^2 - minorRadius^2), i.e. one side of a right triangle. */
 	private double edgeProjection;
+	
+	public double getEdgeProjection() {
+		return edgeProjection;
+	}
+
+	public void setEdgeProjection(double edgeProjection) {
+		this.edgeProjection = edgeProjection;
+	}
+
 	/** Distance from centerpoint to middle of a face. Set to gridSize/2. */
 	private double minorRadius;
+	
+	public double getMinorRadius() {
+		return minorRadius;
+	}
+
+	public void setMinorRadius(double minorRadius) {
+		this.minorRadius = minorRadius;
+	}
+
 	/**
 	 * Distance from centerpoint to vertex. Set to minorRadius/hexRatio (basically, uses 30 degree cosine to calculate
 	 * sqrt(3)/2).
 	 */
 	private double edgeLength;
 	
-	/**
-	 * Use different sizing rules if isometric
-	 */
-	private boolean isometric = false;
-
-	public boolean isIsometric() {
-		return isometric;
+	public double getEdgeLength() {
+		return edgeLength;
 	}
 
-	public void setIsometric(boolean isometric) {
-		this.isometric = isometric;
+	public void setEdgeLength(double edgeLength) {
+		this.edgeLength = edgeLength;
 	}
 
 	// Hex defining variables scaled for zoom
@@ -275,31 +288,24 @@ public abstract class HexGrid extends Grid {
 
 	@Override
 	public void setSize(int size) {
+		super.setSize(size);
+		
 		if (hexRatio == 0) {
 			hexRatio = REGULAR_HEX_RATIO;
 		}
 		// Using size as the edge-to-edge distance or 
 		// minor diameter of the hex.
 		size = constrainSize(size);
-
-		if (isIsometric()) {
-			//
-			minorRadius = (double) size / 2;
-			edgeLength = (double) size;
-			edgeProjection = (double) size / 2;
-			//
-		} else {
-			minorRadius = (double) size / 2;
-			edgeLength = minorRadius / hexRatio;
+		
+		minorRadius = (double) size / 2;
+		edgeLength = minorRadius / hexRatio;
 //		edgeProjection = Math.sqrt(edgeLength * edgeLength - minorRadius * minorRadius); // Pythagorus
-			edgeProjection = edgeLength / 2; // It's an isosceles triangle, after all!
-		}
+		edgeProjection = edgeLength / 2; // It's an isosceles triangle, after all!
+			
 		scaledHex = null;
 
 		// Cell offset gives the offset to apply to the cell zone coords to draw images/tokens
 		cellOffset = setCellOffset();
-
-		super.setSize(size);
 	}
 
 	protected void createShape(double scale) {
