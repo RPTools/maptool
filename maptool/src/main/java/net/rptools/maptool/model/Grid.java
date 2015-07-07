@@ -282,18 +282,14 @@ public abstract class Grid implements Cloneable {
 	}
 
 	/**
-	 * Called by SightType and Light class to return a vision area based upon a specified distance.
+	 * Called by SightType and Light class to return a vision area
+	 * based upon a specified distance
 	 * 
-	 * @param shape
-	 *            - CIRCLE, SQUARE or CONE
-	 * @param token
-	 *            - used to position the shape and to provide footprint
-	 * @param range
-	 *            - as specified in the vision or light definition
-	 * @param arcAngle
-	 *            - only used by cone
-	 * @param offsetAngle
-	 *            - arc distance from facing, only used by cone
+	 * @param shape CIRCLE, SQUARE or CONE
+	 * @param token Used to position the shape and to provide footprint
+	 * @param range As specified in the vision or light definition
+	 * @param arcAngle Only used by cone
+	 * @param offsetAngle Arc distance from facing, only used by cone
 	 * @return Area
 	 */
 	public Area getShapedArea(ShapeType shape, Token token, double range, double arcAngle, int offsetAngle) {
