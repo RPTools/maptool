@@ -59,7 +59,6 @@ import net.rptools.maptool.model.GridlessGrid;
 import net.rptools.maptool.model.HexGridHorizontal;
 import net.rptools.maptool.model.HexGridVertical;
 import net.rptools.maptool.model.IsometricGrid;
-//import net.rptools.maptool.model.IsometricHexGrid; Currently disabled
 import net.rptools.maptool.model.SquareGrid;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -129,7 +128,6 @@ public class MapPropertiesDialog extends JDialog {
 		initPixelsPerCellTextField();
 		initDefaultVisionTextField();
 		
-		//initIsometricHexRadio(); Currently disabled
 		initIsometricRadio();
 		initHexHoriRadio();
 		initHexVertRadio();
@@ -212,7 +210,6 @@ public class MapPropertiesDialog extends JDialog {
 		getPixelsPerCellTextField().setText(Integer.toString(zone.getGrid().getSize()));
 		getDefaultVisionTextField().setText(Integer.toString(zone.getTokenVisionDistance()));
 		getHexVerticalRadio().setSelected(zone.getGrid() instanceof HexGridVertical);
-		//getIsometricHexRadio().setSelected(zone.getGrid() instanceof IsometricHexGrid); Currently disabled
 		getIsometricRadio().setSelected(zone.getGrid() instanceof IsometricGrid);
 		getHexHorizontalRadio().setSelected(zone.getGrid() instanceof HexGridHorizontal);
 		getSquareRadio().setSelected(zone.getGrid() instanceof SquareGrid);
@@ -234,13 +231,11 @@ public class MapPropertiesDialog extends JDialog {
 		zone.setMapAsset(mapAsset != null ? mapAsset.getId() : null);
 		// TODO: Handle grid type changes
 	}
-
-	private void initIsometricHexRadio() {
-		getIsometricRadio().setSelected(GridFactory.isIsometricHex(AppPreferences.getDefaultGridType()));
-	}
+	
 	private void initIsometricRadio() {
 		getIsometricRadio().setSelected(GridFactory.isIsometric(AppPreferences.getDefaultGridType()));
 	}
+	
 	private void initHexHoriRadio() {
 		getHexHorizontalRadio().setSelected(GridFactory.isHexHorizontal(AppPreferences.getDefaultGridType()));
 	}
@@ -429,10 +424,6 @@ public class MapPropertiesDialog extends JDialog {
 		if (getIsometricRadio().isSelected()) {
 			grid = GridFactory.createGrid(GridFactory.ISOMETRIC, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
 		}
-		/* Currently disabled
-		if (getIsometricHexRadio().isSelected()) {
-			grid = GridFactory.createGrid(GridFactory.ISOMETRIC_HEX, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
-		} */
 		if (getNoGridRadio().isSelected()) {
 			grid = GridFactory.createGrid(GridFactory.NONE);
 		}
