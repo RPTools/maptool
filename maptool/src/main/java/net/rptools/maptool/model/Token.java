@@ -49,8 +49,9 @@ import net.rptools.parser.ParserException;
 import org.apache.log4j.Logger;
 
 /**
- * This object represents the placeable objects on a map. For example an icon that represents a character would exist as
- * an {@link Asset} (the image itself) and a location and scale.
+ * This object represents the placeable objects on a map. For example an icon
+ * that represents a character would exist as an {@link Asset} (the image
+ * itself) and a location and scale.
  */
 public class Token extends BaseModel {
 	private static final Logger log = Logger.getLogger(Token.class);
@@ -93,6 +94,7 @@ public class Token extends BaseModel {
 	}
 
 	public static final Comparator<Token> NAME_COMPARATOR = new Comparator<Token>() {
+		@Override
 		public int compare(Token o1, Token o2) {
 			return o1.getName().compareToIgnoreCase(o2.getName());
 		}
@@ -145,7 +147,11 @@ public class Token extends BaseModel {
 
 	private String propertyType = Campaign.DEFAULT_TOKEN_PROPERTY_TYPE;
 
-	private Integer facing = null;
+	/** When the token has no facing this constant is used. */
+	private static final float NO_FACING = Float.MIN_VALUE;
+
+	/** Facing is an angle 0 <= a < 360 degrees. */
+	private float facing = NO_FACING;
 
 	private Integer haloColorValue;
 	private transient Color haloColor;
@@ -182,10 +188,10 @@ public class Token extends BaseModel {
 	/**
 	 * Properties
 	 */
-	// I screwed up.  propertyMap was HashMap<String,Object> in pre-1.3b70 (?)
-	// and became a CaseInsensitiveHashMap<Object> thereafter.  So in order to
+	// I screwed up. propertyMap was HashMap<String,Object> in pre-1.3b70 (?)
+	// and became a CaseInsensitiveHashMap<Object> thereafter. So in order to
 	// be able to load old tokens, we need to read in the original data type and
-	// copy the elements into the new data type.  But because the name didn't
+	// copy the elements into the new data type. But because the name didn't
 	// change (that was the screw up) we have special code in readResolve() to
 	// help XStream move the data around.
 	private Map<String, Object> propertyMap; // 1.3b77 and earlier
@@ -215,17 +221,26 @@ public class Token extends BaseModel {
 		y = token.y;
 		z = token.z;
 
-		// These properties shouldn't be transferred, they are more transient and relate to token history, not to new tokens
-		//		lastX = token.lastX;
-		//		lastY = token.lastY;
-		//		lastPath = token.lastPath;
+		/*
+		 * These properties shouldn't be transferred, they are more transient
+		 * and relate to token history, not to new tokens:
+		 * lastX = token.lastX;
+		 * lastY = token.lastY;
+		 * lastPath = token.lastPath;
+		 */
 
 		snapToScale = token.snapToScale;
 		width = token.width;
 		height = token.height;
 		scaleX = token.scaleX;
 		scaleY = token.scaleY;
-		facing = token.facing;
+
+		/*
+		 * Copying the facing in this manner ensures that a token created in 1.3
+		 * will get updated to the new 1.4 Token class:
+		 */
+		this.setFacing(token.getFacing());
+
 		tokenShape = token.tokenShape;
 		tokenType = token.tokenType;
 		haloColorValue = token.haloColorValue;
@@ -261,7 +276,8 @@ public class Token extends BaseModel {
 			ownerList.addAll(token.ownerList);
 		}
 		if (token.lightSourceList != null) {
-			lightSourceList = new ArrayList<AttachedLightSource>(token.lightSourceList);
+			lightSourceList = new ArrayList<AttachedLightSource>(
+					token.lightSourceList);
 		}
 		if (token.state != null) {
 			state.putAll(token.state);
@@ -271,7 +287,8 @@ public class Token extends BaseModel {
 			getPropertyMap().putAll(token.propertyMapCI);
 		}
 		if (token.macroPropertiesMap != null) {
-			macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap);
+			macroPropertiesMap = new HashMap<Integer, Object>(
+					token.macroPropertiesMap);
 		}
 		// convert old-style macros
 		if (token.macroMap != null) {
@@ -313,12 +330,16 @@ public class Token extends BaseModel {
 	}
 
 	/**
-	 * This token object has just been imported on a map and needs to have most of its internal data wiped clean. This
-	 * prevents a token from being imported that makes use of the wrong property types, vision types, ownership, macros,
-	 * and so on. Basically anything related to the presentation of the token on-screen + the two notes fields is kept.
-	 * Note that the sightType is set to the campaign's default sight type, and the property type is not changed at all.
-	 * This will usually be correct since the default sight is what most tokens have and the property type is probably
-	 * specific to the campaign -- hopefully the properties were set up before the token/map was imported.
+	 * This token object has just been imported on a map and needs to have most
+	 * of its internal data wiped clean. This prevents a token from being
+	 * imported that makes use of the wrong property types, vision types,
+	 * ownership, macros, and so on. Basically anything related to the
+	 * presentation of the token on-screen + the two notes fields is kept. Note
+	 * that the sightType is set to the campaign's default sight type, and the
+	 * property type is not changed at all. This will usually be correct since
+	 * the default sight is what most tokens have and the property type is
+	 * probably specific to the campaign -- hopefully the properties were set up
+	 * before the token/map was imported.
 	 */
 	public void imported() {
 		// anchorX, anchorY?
@@ -329,12 +350,13 @@ public class Token extends BaseModel {
 		lastX = lastY = 0;
 		// lightSourceList?
 		macroMap = null;
-//		macroPropertiesMap = null;
+		// macroPropertiesMap = null;
 		ownerList = null;
-//		propertyMapCI = null;
-//		propertyType = "Basic";
-		sightType = MapTool.getCampaign().getCampaignProperties().getDefaultSightType();
-//		state = null;
+		// propertyMapCI = null;
+		// propertyType = "Basic";
+		sightType = MapTool.getCampaign().getCampaignProperties()
+				.getDefaultSightType();
+		// state = null;
 		visionList = null;
 	}
 
@@ -357,9 +379,10 @@ public class Token extends BaseModel {
 	public int getHeight() {
 		return height;
 	}
-	
+
 	public boolean isMarker() {
-		return isStamp() && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
+		return isStamp()
+				&& (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
 	}
 
 	public String getPropertyType() {
@@ -442,7 +465,8 @@ public class Token extends BaseModel {
 
 	public TokenShape getShape() {
 		try {
-			return tokenShape != null ? TokenShape.valueOf(tokenShape) : TokenShape.SQUARE; // TODO: make this a psf
+			return tokenShape != null ? TokenShape.valueOf(tokenShape)
+					: TokenShape.SQUARE; // TODO: make this a psf
 		} catch (IllegalArgumentException iae) {
 			return TokenShape.SQUARE;
 		}
@@ -472,7 +496,8 @@ public class Token extends BaseModel {
 	public Zone.Layer getLayer() {
 		try {
 			if (actualLayer == null) {
-				actualLayer = layer != null ? Zone.Layer.valueOf(layer) : Zone.Layer.TOKEN;
+				actualLayer = layer != null ? Zone.Layer.valueOf(layer)
+						: Zone.Layer.TOKEN;
 			}
 			return actualLayer;
 		} catch (IllegalArgumentException iae) {
@@ -485,22 +510,106 @@ public class Token extends BaseModel {
 		actualLayer = layer;
 	}
 
+	/**
+	 * Checks if the token has an angle set for it to use as facing. In general
+	 * it is a good idea to verify that the token has a facing before trying to
+	 * get the facing using either {@link #getFacingInDegrees()} or
+	 * {@link #getFacingInRadians()}.
+	 *
+	 * @return true if and only if the token has a facing
+	 */
 	public boolean hasFacing() {
-		return facing != null;
+		return facing != NO_FACING;
 	}
 
+	/**
+	 * @param facing
+	 * @deprecated Use {@link #setFacingInDegrees(float)} instead.
+	 */
+	@Deprecated
 	public void setFacing(Integer facing) {
-		while (facing != null && (facing > 180 || facing < -179)) {
-			facing += facing > 180 ? -360 : 0;
-			facing += facing < -179 ? 360 : 0;
+		if (facing == null) {
+			this.removeFacing();
+		} else {
+			this.setFacingInDegrees(facing);
+		}
+	}
+
+	public void setFacingInDegrees(float facing) {
+		facing %= 360;
+		if (facing < 0) {
+			facing += 360;
 		}
 		this.facing = facing;
 	}
 
-	public Integer getFacing() {
-		return facing;
+	public void setFacingInRadians(float facing) {
+		this.setFacingInDegrees((float) Math.toDegrees(facing));
 	}
 
+	/**
+	 * Returns the facing of the token expressed as degrees in the interval of
+	 * -180 degrees (exclusive) and 180 degrees (inclusive).
+	 *
+	 * @return an angle between -179 and 180 degrees
+	 * @deprecated This method is now deprecated. Use
+	 *             {@link #getFacingInDegrees()} or
+	 *             {@link #getFacingInRadians()} instead.
+	 */
+	@Deprecated
+	public Integer getFacing() {
+		if (this.hasFacing() == false) {
+			return null;
+		}
+		int facing = Math.round(this.facing);
+		if (facing <= 180) {
+			return facing;
+		} else {
+			return facing - 360;
+		}
+	}
+
+	/**
+	 * This method follows standard mathematical definitions using degrees. In
+	 * other words the facing is always between 0 degrees (inclusive) and 360
+	 * degrees (exclusive). 0 degrees indicate the token is facing towards the
+	 * east, 90 degrees towards north, 180 degrees towards west and 270 degrees
+	 * towards south.
+	 *
+	 * @return an angle 'a' so that 0 <= a < 360 degrees
+	 * @throws IllegalStateException if the token has no facing
+	 */
+	public float getFacingInDegrees() {
+		checkThatTokenHasFacing();
+		return this.facing;
+	}
+
+	/**
+	 * This method follows standard mathematical definitions using radians. In
+	 * other words the facing is always between 0 radians (inclusive) and 2PI
+	 * radians (exclusive). 0 radians indicate the token is facing towards the
+	 * east, PI/2 radians towards north, PI radians towards west and 3PI/2
+	 * radians towards south.
+	 *
+	 * @return an angle 'a' so that 0 <= a < 2PI radians
+	 * @throws IllegalStateException if the token has no facing
+	 */
+	public float getFacingInRadians() {
+		checkThatTokenHasFacing();
+		return (float) Math.toRadians(this.facing);
+	}
+
+	/** Checks if the token has a facing and throws an exception if not. */
+	private void checkThatTokenHasFacing() {
+		if (this.hasFacing() == false) {
+			throw new IllegalStateException("Token has no facing!");
+		}
+	}
+
+	/** Removes the facing from the token. */
+	public void removeFacing() {
+		this.facing = NO_FACING;
+	}
 	public boolean getHasSight() {
 		return hasSight;
 	}
@@ -614,7 +723,7 @@ public class Token extends BaseModel {
 		}
 	}
 
-	//My Addition
+	// My Addition
 	public void clearLightSources() {
 		if (lightSourceList == null) {
 			return;
@@ -622,7 +731,7 @@ public class Token extends BaseModel {
 		lightSourceList = null;
 	}
 
-	//End My Addition
+	// End My Addition
 
 	public boolean hasLightSource(LightSource source) {
 		if (lightSourceList == null) {
@@ -715,25 +824,32 @@ public class Token extends BaseModel {
 	}
 
 	/**
-	 * Set the name of this token to the provided string. There is a potential exposure of information to the player in
-	 * this method: through repeated attempts to name a token they own to another name, they could determine which token
-	 * names the GM is already using. Fortunately, the showError() call makes this extremely unlikely due to the
-	 * interactive nature of a failure.
-	 * 
+	 * Set the name of this token to the provided string. There is a potential
+	 * exposure of information to the player in this method: through repeated
+	 * attempts to name a token they own to another name, they could determine
+	 * which token names the GM is already using. Fortunately, the showError()
+	 * call makes this extremely unlikely due to the interactive nature of a
+	 * failure.
+	 *
 	 * @param name
 	 * @throws IOException
 	 */
 	public void setName(String name) throws IllegalArgumentException {
-		//Let's see if there is another Token with that name (only if Player is not GM)
-		if (!MapTool.getPlayer().isGM() && !MapTool.getParser().isMacroTrusted()) {
-			Zone curZone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+		// Let's see if there is another Token with that name (only if Player is
+		// not GM)
+		if (!MapTool.getPlayer().isGM()
+				&& !MapTool.getParser().isMacroTrusted()) {
+			Zone curZone = MapTool.getFrame().getCurrentZoneRenderer()
+					.getZone();
 			List<Token> tokensList = curZone.getTokens();
 
 			for (int i = 0; i < tokensList.size(); i++) {
 				String curTokenName = tokensList.get(i).getName();
 				if (curTokenName.equalsIgnoreCase(name)) {
-					MapTool.showError(I18N.getText("Token.error.unableToRename", name));
-					throw new IllegalArgumentException("Player dropped token with duplicate name");
+					MapTool.showError(I18N.getText(
+							"Token.error.unableToRename", name));
+					throw new IllegalArgumentException(
+							"Player dropped token with duplicate name");
 				}
 			}
 		}
@@ -807,7 +923,8 @@ public class Token extends BaseModel {
 		this.y = y;
 	}
 
-	public void applyMove(int xOffset, int yOffset, Path<? extends AbstractPoint> path) {
+	public void applyMove(int xOffset, int yOffset,
+			Path<? extends AbstractPoint> path) {
 		setX(x + xOffset);
 		setY(y + yOffset);
 		lastPath = path;
@@ -890,7 +1007,8 @@ public class Token extends BaseModel {
 	public Rectangle getBounds(Zone zone) {
 		Grid grid = zone.getGrid();
 		TokenFootprint footprint = getFootprint(grid);
-		Rectangle footprintBounds = footprint.getBounds(grid, grid.convert(new ZonePoint(getX(), getY())));
+		Rectangle footprintBounds = footprint.getBounds(grid,
+				grid.convert(new ZonePoint(getX(), getY())));
 
 		double w = footprintBounds.width;
 		double h = footprintBounds.height;
@@ -913,8 +1031,8 @@ public class Token extends BaseModel {
 				footprintBounds.x -= (w - footprintBounds.width) / 2;
 				footprintBounds.y -= (h - footprintBounds.height) / 2;
 			} else {
-//	        	footprintBounds.x -= zone.getGrid().getSize()/2;
-//	        	footprintBounds.y -= zone.getGrid().getSize()/2;
+				// footprintBounds.x -= zone.getGrid().getSize()/2;
+				// footprintBounds.y -= zone.getGrid().getSize()/2;
 			}
 		}
 		footprintBounds.width = (int) w; // perhaps make this a double
@@ -942,7 +1060,8 @@ public class Token extends BaseModel {
 	}
 
 	public TokenFootprint setFootprint(Grid grid, TokenFootprint footprint) {
-		return grid.getFootprint(getSizeMap().put(grid.getClass(), footprint.getId()));
+		return grid.getFootprint(getSizeMap().put(grid.getClass(),
+				footprint.getId()));
 	}
 
 	private Map<Class<? extends Grid>, GUID> getSizeMap() {
@@ -962,7 +1081,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Get a particular state property for this Token.
-	 * 
+	 *
 	 * @param property
 	 *            The name of the property being read.
 	 * @return Returns the current value of property.
@@ -973,7 +1092,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Set the value of state for this Token.
-	 * 
+	 *
 	 * @param aState
 	 *            The property to set.
 	 * @param aValue
@@ -997,14 +1116,16 @@ public class Token extends BaseModel {
 	public Object getProperty(String key) {
 		Object value = getPropertyMap().get(key);
 
-//		// Short name ?
-//		if (value == null) {
-//			for (EditTokenProperty property : MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(getPropertyType())) {
-//				if (property.getShortName().equals(key)) {
-//					value = getPropertyMap().get(property.getShortName().toUpperCase());
-//				}
-//			}
-//		}
+		// // Short name ?
+		// if (value == null) {
+		// for (EditTokenProperty property :
+		// MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(getPropertyType()))
+		// {
+		// if (property.getShortName().equals(key)) {
+		// value = getPropertyMap().get(property.getShortName().toUpperCase());
+		// }
+		// }
+		// }
 		return value;
 	}
 
@@ -1012,7 +1133,8 @@ public class Token extends BaseModel {
 		Object val = getProperty(key);
 		if (val == null) {
 			// Global default ?
-			List<TokenProperty> propertyList = MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(propertyType);
+			List<TokenProperty> propertyList = MapTool.getCampaign()
+					.getCampaignProperties().getTokenPropertyList(propertyType);
 			if (propertyList != null) {
 				for (TokenProperty property : propertyList) {
 					if (key.equalsIgnoreCase(property.getName())) {
@@ -1026,7 +1148,8 @@ public class Token extends BaseModel {
 			return "";
 		}
 		// First we try convert it to a JSON object.
-		if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
+		if (val.toString().trim().startsWith("[")
+				|| val.toString().trim().startsWith("{")) {
 			Object obj = JSONMacroFunctions.convertToJSON(val.toString());
 			if (obj != null) {
 				return obj;
@@ -1034,7 +1157,13 @@ public class Token extends BaseModel {
 		}
 		try {
 			if (log.isDebugEnabled()) {
-				log.debug("Evaluating property: '" + key + "' for token " + getName() + "(" + getId() + ")----------------------------------------------------------------------------------");
+				log.debug("Evaluating property: '"
+						+ key
+						+ "' for token "
+						+ getName()
+						+ "("
+						+ getId()
+						+ ")----------------------------------------------------------------------------------");
 			}
 			val = MapTool.getParser().parseLine(this, val.toString());
 		} catch (ParserException pe) {
@@ -1049,7 +1178,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Returns all property names, all in lowercase.
-	 * 
+	 *
 	 * @return
 	 */
 	public Set<String> getPropertyNames() {
@@ -1058,7 +1187,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Returns all property names, preserving their case.
-	 * 
+	 *
 	 * @return
 	 */
 	public Set<String> getPropertyNamesRaw() {
@@ -1087,7 +1216,8 @@ public class Token extends BaseModel {
 		}
 		macroMap = null;
 		if (log.isDebugEnabled())
-			log.debug("Token.loadOldMacros() set up " + macroPropertiesMap.size() + " new macros.");
+			log.debug("Token.loadOldMacros() set up "
+					+ macroPropertiesMap.size() + " new macros.");
 	}
 
 	public int getMacroNextIndex() {
@@ -1121,11 +1251,13 @@ public class Token extends BaseModel {
 		return (MacroButtonProperties) getMacroPropertiesMap(secure).get(index);
 	}
 
-	// avoid this; it loads the first macro with this label, but there could be more than one macro with that label
+	// avoid this; it loads the first macro with this label, but there could be
+	// more than one macro with that label
 	public MacroButtonProperties getMacro(String label, boolean secure) {
 		Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
 		for (int key : keys) {
-			MacroButtonProperties prop = (MacroButtonProperties) macroPropertiesMap.get(key);
+			MacroButtonProperties prop = (MacroButtonProperties) macroPropertiesMap
+					.get(key);
 			if (prop.getLabel().equals(label)) {
 				return prop;
 			}
@@ -1143,16 +1275,20 @@ public class Token extends BaseModel {
 	}
 
 	public void replaceMacroList(List<MacroButtonProperties> newMacroList) {
-		// used by the token edit dialog, which will handle resetting panels and putting token to zone
+		// used by the token edit dialog, which will handle resetting panels and
+		// putting token to zone
 		macroPropertiesMap.clear();
 		for (MacroButtonProperties macro : newMacroList) {
-			if (macro.getLabel() == null || macro.getLabel().trim().length() == 0 || macro.getCommand().trim().length() == 0) {
+			if (macro.getLabel() == null
+					|| macro.getLabel().trim().length() == 0
+					|| macro.getCommand().trim().length() == 0) {
 				continue;
 			}
 			macroPropertiesMap.put(macro.getIndex(), macro);
 
 			// Allows the token macro panels to update only if a macro changes
-			fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
+			fireModelChangeEvent(new ModelChangeEvent(this,
+					ChangeEvent.MACRO_CHANGED, id));
 		}
 	}
 
@@ -1160,7 +1296,8 @@ public class Token extends BaseModel {
 		Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
 		List<String> list = new ArrayList<String>();
 		for (int key : keys) {
-			MacroButtonProperties prop = (MacroButtonProperties) macroPropertiesMap.get(key);
+			MacroButtonProperties prop = (MacroButtonProperties) macroPropertiesMap
+					.get(key);
 			list.add(prop.getLabel());
 		}
 		return list;
@@ -1176,19 +1313,25 @@ public class Token extends BaseModel {
 	public void saveMacroButtonProperty(MacroButtonProperties prop) {
 		getMacroPropertiesMap(false).put(prop.getIndex(), prop);
 		MapTool.getFrame().resetTokenPanels();
-		MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+		MapTool.serverCommand().putToken(
+				MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(),
+				this);
 
 		// Lets the token macro panels update only if a macro changes
-		fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
+		fireModelChangeEvent(new ModelChangeEvent(this,
+				ChangeEvent.MACRO_CHANGED, id));
 	}
 
 	public void deleteMacroButtonProperty(MacroButtonProperties prop) {
 		getMacroPropertiesMap(false).remove(prop.getIndex());
 		MapTool.getFrame().resetTokenPanels();
-		MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+		MapTool.serverCommand().putToken(
+				MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(),
+				this);
 
 		// Lets the token macro panels update only if a macro changes
-		fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
+		fireModelChangeEvent(new ModelChangeEvent(this,
+				ChangeEvent.MACRO_CHANGED, id));
 	}
 
 	public void setSpeechMap(Map<String, String> map) {
@@ -1217,8 +1360,9 @@ public class Token extends BaseModel {
 
 	/**
 	 * Get a set containing the names of all set properties on this token.
-	 * 
-	 * @return The set of state property names that have a value associated with them.
+	 *
+	 * @return The set of state property names that have a value associated with
+	 *         them.
 	 */
 	public Set<String> getStatePropertyNames() {
 		return state.keySet();
@@ -1292,9 +1436,10 @@ public class Token extends BaseModel {
 	}
 
 	/**
-	 * Convert the token into a hash map. This is used to ship all of the properties for the token to other apps that do
-	 * need access to the <code>Token</code> class.
-	 * 
+	 * Convert the token into a hash map. This is used to ship all of the
+	 * properties for the token to other apps that do need access to the
+	 * <code>Token</code> class.
+	 *
 	 * @return A map containing the properties of the token.
 	 */
 	public TokenTransferData toTransferData() {
@@ -1303,7 +1448,7 @@ public class Token extends BaseModel {
 		td.setPlayers(ownerList);
 		td.setVisible(isVisible);
 		td.setLocation(new Point(x, y));
-		td.setFacing(facing);
+		td.setFacing(this.getFacing());
 
 		// Set the properties
 		td.put(TokenTransferData.ID, id.toString());
@@ -1331,14 +1476,16 @@ public class Token extends BaseModel {
 		// Create the image from the asset and add it to the map
 		Image image = ImageManager.getImageAndWait(imageAssetMap.get(null));
 		if (image != null)
-			td.setToken(new ImageIcon(image)); // Image icon makes it serializable.
+			td.setToken(new ImageIcon(image)); // Image icon makes it
+												// serializable.
 		return td;
 	}
 
 	/**
-	 * Constructor to create a new token from a transfer object containing its property values. This is used to read in
-	 * a new token from other apps that don't have access to the <code>Token</code> class.
-	 * 
+	 * Constructor to create a new token from a transfer object containing its
+	 * property values. This is used to read in a new token from other apps that
+	 * don't have access to the <code>Token</code> class.
+	 *
 	 * @param td
 	 *            Read the values from this transfer object.
 	 */
@@ -1359,7 +1506,7 @@ public class Token extends BaseModel {
 		ownerList = td.getPlayers();
 		ownerType = getInt(td, TokenTransferData.OWNER_TYPE, ownerList == null ? OWNER_TYPE_ALL : OWNER_TYPE_LIST);
 		tokenShape = (String) td.get(TokenTransferData.TOKEN_TYPE);
-		facing = td.getFacing();
+		this.setFacing(td.getFacing());
 		notes = (String) td.get(TokenTransferData.NOTES);
 		gmNotes = (String) td.get(TokenTransferData.GM_NOTES);
 		gmName = (String) td.get(TokenTransferData.GM_NAME);
@@ -1421,7 +1568,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Get an integer value from the map or return the default value
-	 * 
+	 *
 	 * @param map
 	 *            Get the value from this map
 	 * @param propName
@@ -1430,7 +1577,8 @@ public class Token extends BaseModel {
 	 *            The value for the property if it is not set in the map.
 	 * @return The value for the passed property
 	 */
-	private static int getInt(Map<String, Object> map, String propName, int defaultValue) {
+	private static int getInt(Map<String, Object> map, String propName,
+			int defaultValue) {
 		Integer integer = (Integer) map.get(propName);
 		if (integer == null)
 			return defaultValue;
@@ -1439,7 +1587,7 @@ public class Token extends BaseModel {
 
 	/**
 	 * Get a boolean value from the map or return the default value
-	 * 
+	 *
 	 * @param map
 	 *            Get the value from this map
 	 * @param propName
@@ -1448,7 +1596,8 @@ public class Token extends BaseModel {
 	 *            The value for the property if it is not set in the map.
 	 * @return The value for the passed property
 	 */
-	private static boolean getBoolean(Map<String, Object> map, String propName, boolean defaultValue) {
+	private static boolean getBoolean(Map<String, Object> map, String propName,
+			boolean defaultValue) {
 		Boolean bool = (Boolean) map.get(propName);
 		if (bool == null)
 			return defaultValue;
@@ -1456,12 +1605,15 @@ public class Token extends BaseModel {
 	}
 
 	public static boolean isTokenFile(String filename) {
-		return filename != null && filename.toLowerCase().endsWith(FILE_EXTENSION);
+		return filename != null
+				&& filename.toLowerCase().endsWith(FILE_EXTENSION);
 	}
 
 	public Icon getIcon(int width, int height) {
-		ImageIcon icon = new ImageIcon(ImageManager.getImageAndWait(getImageAssetId()));
-		Image image = icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT);
+		ImageIcon icon = new ImageIcon(
+				ImageManager.getImageAndWait(getImageAssetId()));
+		Image image = icon.getImage().getScaledInstance(width, height,
+				Image.SCALE_DEFAULT);
 		return new ImageIcon(image);
 	}
 
@@ -1474,26 +1626,33 @@ public class Token extends BaseModel {
 	}
 
 	public void deleteMacroGroup(String macroGroup, Boolean secure) {
-		List<MacroButtonProperties> tempMacros = new ArrayList<MacroButtonProperties>(getMacroList(true));
+		List<MacroButtonProperties> tempMacros = new ArrayList<MacroButtonProperties>(
+				getMacroList(true));
 		for (MacroButtonProperties nextProp : tempMacros) {
 			if (macroGroup.equals(nextProp.getGroup())) {
 				getMacroPropertiesMap(secure).remove(nextProp.getIndex());
 			}
 		}
 		MapTool.getFrame().resetTokenPanels();
-		MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+		MapTool.serverCommand().putToken(
+				MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(),
+				this);
 	}
 
 	public void deleteAllMacros(Boolean secure) {
-		List<MacroButtonProperties> tempMacros = new ArrayList<MacroButtonProperties>(getMacroList(true));
+		List<MacroButtonProperties> tempMacros = new ArrayList<MacroButtonProperties>(
+				getMacroList(true));
 		for (MacroButtonProperties nextProp : tempMacros) {
 			getMacroPropertiesMap(secure).remove(nextProp.getIndex());
 		}
 		MapTool.getFrame().resetTokenPanels();
-		MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+		MapTool.serverCommand().putToken(
+				MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(),
+				this);
 	}
 
 	public static final Comparator<Token> COMPARE_BY_NAME = new Comparator<Token>() {
+		@Override
 		public int compare(Token o1, Token o2) {
 			if (o1 == null || o2 == null) {
 				return 0;
@@ -1502,6 +1661,7 @@ public class Token extends BaseModel {
 		}
 	};
 	public static final Comparator<Token> COMPARE_BY_ZORDER = new Comparator<Token>() {
+		@Override
 		public int compare(Token o1, Token o2) {
 			if (o1 == null || o2 == null) {
 				return 0;
@@ -1514,9 +1674,10 @@ public class Token extends BaseModel {
 	protected Object readResolve() {
 		super.readResolve();
 		// FJE: If the propertyMap field has something in it, it could be:
-		//		a pre-1.3b66 token that contains a HashMap<?,?>, or
-		//		a pre-1.3b78 token that actually has the CaseInsensitiveHashMap<?>.
-		// Newer tokens will use propertyMapCI so we only need to make corrections
+		// a pre-1.3b66 token that contains a HashMap<?,?>, or
+		// a pre-1.3b78 token that actually has the CaseInsensitiveHashMap<?>.
+		// Newer tokens will use propertyMapCI so we only need to make
+		// corrections
 		// if the old field has data in it.
 		if (propertyMap != null) {
 			if (propertyMap instanceof CaseInsensitiveHashMap) {
@@ -1524,7 +1685,8 @@ public class Token extends BaseModel {
 			} else {
 				propertyMapCI = new CaseInsensitiveHashMap<Object>();
 				propertyMapCI.putAll(propertyMap);
-				propertyMap.clear(); // It'll never be written out, but we should free the memory.
+				propertyMap.clear(); // It'll never be written out, but we
+										// should free the memory.
 			}
 			propertyMap = null;
 		}
