@@ -155,7 +155,7 @@ public class Token extends BaseModel {
 
 	private boolean isFlippedX;
 	private boolean isFlippedY;
-	private boolean isFlippedIso;
+	private Boolean isFlippedIso;
 
 	private MD5Key charsheetImage;
 	private MD5Key portraitImage;
@@ -163,7 +163,7 @@ public class Token extends BaseModel {
 	private List<AttachedLightSource> lightSourceList;
 	private String sightType;
 	private boolean hasSight;
-	private boolean hasImageTable;
+	private Boolean hasImageTable;
 	private String imageTableName;
 
 	private String label;
@@ -349,7 +349,10 @@ public class Token extends BaseModel {
 	}
 	
 	public void setHasImageTable(boolean hasImageTable) {
-		this.hasImageTable = hasImageTable;
+		if (hasImageTable)
+			this.hasImageTable = true;
+		else
+			this.hasImageTable = null;
 	}
 	
 	public void setImageTableName(String imageTableName) {
@@ -520,7 +523,9 @@ public class Token extends BaseModel {
 	}
 	
 	public boolean getHasImageTable() {
-		return hasImageTable;
+		if (hasImageTable!=null)
+			return hasImageTable;
+		return false;
 	}
 	
 	public String getImageTableName() {
@@ -1281,11 +1286,16 @@ public class Token extends BaseModel {
 	}
 
 	public boolean isFlippedIso() {
-		return isFlippedIso;
+		if (isFlippedIso!=null)
+			return isFlippedIso;
+		return false;
 	}
 
 	public void setFlippedIso(boolean isFlippedIso) {
-		this.isFlippedIso = isFlippedIso;
+		if (isFlippedIso)
+			this.isFlippedIso = true;
+		else 
+			this.isFlippedIso = null;
 	}
 
 	public Color getVisionOverlayColor() {
