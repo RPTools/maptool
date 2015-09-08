@@ -34,9 +34,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
 
-import java.awt.EventQueue;
-
-
 import com.jeta.forms.components.image.ImageComponent;
 
 /**
@@ -74,40 +71,36 @@ public class NewTokenDialog extends AbeillePanel<Token> {
 	}
 
 	public void showDialog() {
-		EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                dialog = new GenericDialog("New Token", MapTool.getFrame(), NewTokenDialog.this) {
-                    @Override
-                    protected void positionInitialView() {
+		dialog = new GenericDialog("New Token", MapTool.getFrame(), this) {
+			@Override
+			protected void positionInitialView() {
 
-                        // Position over the drop spot
-                        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-                        Dimension size = getSize();
-                        int x = centerX - size.width / 2;
-                        int y = centerY - size.height / 2;
-                        if (x < 0) {
-                            x = 0;
-                        }
-                        if (y < 0) {
-                            y = 0;
-                        }
-                        if (x + size.width > screenSize.width) {
-                            x = screenSize.width - size.width;
-                        }
-                        if (y + size.height > screenSize.height) {
-                            y = screenSize.height - size.height;
-                        }
+				// Position over the drop spot
+				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+				Dimension size = getSize();
+				int x = centerX - size.width / 2;
+				int y = centerY - size.height / 2;
+				if (x < 0) {
+					x = 0;
+				}
+				if (y < 0) {
+					y = 0;
+				}
+				if (x + size.width > screenSize.width) {
+					x = screenSize.width - size.width;
+				}
+				if (y + size.height > screenSize.height) {
+					y = screenSize.height - size.height;
+				}
 
-                        setLocation(x, y);
-                    }
-                };
+				setLocation(x, y);
+			}
+		};
 
-                bind(token);
+		bind(token);
 
-                getRootPane().setDefaultButton(getOKButton());
-                dialog.showDialog();
-            }
-        });
+		getRootPane().setDefaultButton(getOKButton());
+		dialog.showDialog();
 	}
 
 	public ImageComponent getTokenIconPanel() {
