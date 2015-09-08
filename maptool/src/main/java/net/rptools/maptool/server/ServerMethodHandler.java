@@ -275,7 +275,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 				}
 			}
 			// Arrange
-			Collections.sort(tokenList, Zone.TOKEN_Z_ORDER_COMPARATOR);
+			Collections.sort(tokenList, zone.getZOrderComparator());
 
 			// Update
 			int z = zone.getLargestZOrder() + 1;
@@ -474,7 +474,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 				}
 			}
 			// Arrange
-			Collections.sort(tokenList, Zone.TOKEN_Z_ORDER_COMPARATOR);
+			Collections.sort(tokenList, zone.getZOrderComparator());
 
 			// Update
 			int z = zone.getSmallestZOrder() - 1;

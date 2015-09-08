@@ -149,6 +149,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
 		// SIGHT
 		updateSightTypeCombo();
+		
+		// Image Tables
+		updateImageTableCombo();
 
 		// STATES
 		Component barPanel = null;
@@ -211,6 +214,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		getCharSheetPanel().setImageId(token.getCharsheetImage());
 		getPortraitPanel().setImageId(token.getPortraitImage());
 		getTokenLayoutPanel().setToken(token);
+		getImageTableCombo().setSelectedItem(token.getImageTableName());
 
 		// we will disable the Owner only visible check box if the token is not
 		// visible to players to signify the relationship
@@ -337,6 +341,15 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		getSightTypeCombo().setModel(model);
 	}
 
+	private void updateImageTableCombo() {
+		List<String> typeList = new ArrayList<String>(MapTool.getCampaign().getLookupTables());
+		Collections.sort(typeList);
+
+		DefaultComboBoxModel model = new DefaultComboBoxModel(typeList.toArray());
+		getImageTableCombo().setModel(model);
+	}
+	
+
 	private void updatePropertiesTable(final String propertyType) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -357,6 +370,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
 	public JComboBox getSightTypeCombo() {
 		return (JComboBox) getComponent("sightTypeCombo");
+	}
+	
+	public JComboBox getImageTableCombo() {
+		return (JComboBox) getComponent("imageTableCombo");
 	}
 
 	public void initOKButton() {
@@ -397,6 +414,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		// Other
 		token.setPropertyType((String) getPropertyTypeCombo().getSelectedItem());
 		token.setSightType((String) getSightTypeCombo().getSelectedItem());
+		token.setImageTableName((String) getImageTableCombo().getSelectedItem());
 
 		// Get the states
 		Component[] stateComponents = getStatesPanel().getComponents();

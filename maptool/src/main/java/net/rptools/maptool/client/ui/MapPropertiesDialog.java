@@ -58,6 +58,7 @@ import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.GridlessGrid;
 import net.rptools.maptool.model.HexGridHorizontal;
 import net.rptools.maptool.model.HexGridVertical;
+import net.rptools.maptool.model.IsometricGrid;
 import net.rptools.maptool.model.SquareGrid;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -126,7 +127,8 @@ public class MapPropertiesDialog extends JDialog {
 		initDistanceTextField();
 		initPixelsPerCellTextField();
 		initDefaultVisionTextField();
-
+		
+		initIsometricRadio();
 		initHexHoriRadio();
 		initHexVertRadio();
 		initSquareRadio();
@@ -188,6 +190,14 @@ public class MapPropertiesDialog extends JDialog {
 	public JRadioButton getNoGridRadio() {
 		return formPanel.getRadioButton("noGridRadio");
 	}
+	
+	public JRadioButton getIsometricRadio() {
+		return formPanel.getRadioButton("isoRadio");
+	}
+	
+	public JRadioButton getIsometricHexRadio() {
+		return formPanel.getRadioButton("isoHexRadio");
+	}
 
 	public void setZone(Zone zone) {
 		this.zone = zone;
@@ -199,9 +209,9 @@ public class MapPropertiesDialog extends JDialog {
 		getDistanceTextField().setText(Integer.toString(zone.getUnitsPerCell()));
 		getPixelsPerCellTextField().setText(Integer.toString(zone.getGrid().getSize()));
 		getDefaultVisionTextField().setText(Integer.toString(zone.getTokenVisionDistance()));
-
-		getHexHorizontalRadio().setSelected(zone.getGrid() instanceof HexGridHorizontal);
 		getHexVerticalRadio().setSelected(zone.getGrid() instanceof HexGridVertical);
+		getIsometricRadio().setSelected(zone.getGrid() instanceof IsometricGrid);
+		getHexHorizontalRadio().setSelected(zone.getGrid() instanceof HexGridHorizontal);
 		getSquareRadio().setSelected(zone.getGrid() instanceof SquareGrid);
 		getNoGridRadio().setSelected(zone.getGrid() instanceof GridlessGrid);
 
@@ -221,7 +231,11 @@ public class MapPropertiesDialog extends JDialog {
 		zone.setMapAsset(mapAsset != null ? mapAsset.getId() : null);
 		// TODO: Handle grid type changes
 	}
-
+	
+	private void initIsometricRadio() {
+		getIsometricRadio().setSelected(GridFactory.isIsometric(AppPreferences.getDefaultGridType()));
+	}
+	
 	private void initHexHoriRadio() {
 		getHexHorizontalRadio().setSelected(GridFactory.isHexHorizontal(AppPreferences.getDefaultGridType()));
 	}
@@ -406,6 +420,9 @@ public class MapPropertiesDialog extends JDialog {
 		}
 		if (getSquareRadio().isSelected()) {
 			grid = GridFactory.createGrid(GridFactory.SQUARE, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+		}
+		if (getIsometricRadio().isSelected()) {
+			grid = GridFactory.createGrid(GridFactory.ISOMETRIC, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
 		}
 		if (getNoGridRadio().isSelected()) {
 			grid = GridFactory.createGrid(GridFactory.NONE);

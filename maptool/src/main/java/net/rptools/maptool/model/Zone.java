@@ -593,6 +593,45 @@ public class Zone extends BaseModel {
 		return combined.intersects(tokenSize);
 	}
 
+	public boolean isTokenFootprintVisible(Token token) {
+		if (token == null) {
+			return false;
+		}
+		// Base case, nothing is visible
+		if (!token.isVisible()) {
+			return false;
+		}
+		// Base case, everything is visible
+		if (!hasFog()) {
+			return true;
+		}
+		if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
+			return false;
+		}
+		// Token is visible, and there is fog
+		Rectangle tokenSize = token.getBounds(this);
+		Area tokenFootprint = getGrid().getTokenCellArea(tokenSize);
+		Area combined = new Area(exposedArea);
+		PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
+		if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != VisionType.OFF) {
+			List<Token> toks = view.getTokens();
+			if (toks != null && !toks.isEmpty()) {
+				// Should this use FindTokenFunctions.OwnedFilter and zone.getTokenList()?
+				for (Token tok : toks) {
+					if (!AppUtil.playerOwns(tok)) {
+						continue;
+					}
+					if (exposedAreaMeta.containsKey(tok.getExposedAreaGUID())) {
+						combined.add(exposedAreaMeta.get(tok.getExposedAreaGUID()).getExposedAreaHistory());
+					}
+				}
+			}
+		}
+		combined.intersect(tokenFootprint);
+		return !combined.isEmpty();
+		//return combined.intersects(tokenSize);
+	}
+	
 	public void clearTopology() {
 		topology = new Area();
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
@@ -779,13 +818,8 @@ public class Zone extends BaseModel {
 		return creationTime;
 	}
 
-	// FIXME This needs to take the current grid type into account, such as square or hex
 	public ZonePoint getNearestVertex(ZonePoint point) {
-		int gridx = (int) Math.round((point.x - grid.getOffsetX()) / grid.getCellWidth());
-		int gridy = (int) Math.round((point.y - grid.getOffsetY()) / grid.getCellHeight());
-
-//    	System.out.println("gx:" + gridx + " zx:" + (gridx * grid.getCellWidth() + grid.getOffsetX()));
-		return new ZonePoint((int) (gridx * grid.getCellWidth() + grid.getOffsetX()), (int) (gridy * grid.getCellHeight() + grid.getOffsetY()));
+		return grid.getNearestVertex(point);
 	}
 
 	/**
@@ -992,7 +1026,7 @@ public class Zone extends BaseModel {
 		// LATER: optimize this
 		tokenOrderedList.remove(token);
 		tokenOrderedList.add(token);
-		Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
+		Collections.sort(tokenOrderedList, getZOrderComparator());
 
 		if (newToken) {
 			fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, token));
@@ -1032,7 +1066,7 @@ public class Zone extends BaseModel {
 		}
 		tokenOrderedList.removeAll(tokens);
 		tokenOrderedList.addAll(tokens);
-		Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
+		Collections.sort(tokenOrderedList, getZOrderComparator());
 
 		if (!addedTokens.isEmpty())
 			fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, addedTokens));
@@ -1201,6 +1235,15 @@ public class Zone extends BaseModel {
 		});
 	}
 
+	public List<Token> getFigureTokens() {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				return t.getShape()==Token.TokenShape.FIGURE;
+			}
+		});
+	}
+
 	public List<Token> getPlayerOwnedTokensWithSight(Player p) {
 		return getTokensFiltered(new Filter() {
 			@Override
@@ -1267,6 +1310,7 @@ public class Zone extends BaseModel {
 		public boolean matchToken(Token t);
 	}
 
+	@Deprecated
 	public static final Comparator<Token> TOKEN_Z_ORDER_COMPARATOR = new TokenZOrderComparator();
 
 	public static class TokenZOrderComparator implements Comparator<Token> {
@@ -1281,6 +1325,46 @@ public class Zone extends BaseModel {
 				return lval - rval;
 			}
 		}
+	}
+	
+	/**
+	 * Need to replace static TOKEN_Z_ORDER_COMPARATOR comparator with instantiated version so that grid is available
+	 * and can access token footprint
+	 **/
+	public Comparator<Token> getZOrderComparator() {
+		return new Comparator<Token>() {
+			@Override
+			public int compare(Token o1, Token o2) {
+				if (o1.getShape() == Token.TokenShape.FIGURE || o2.getShape() == Token.TokenShape.FIGURE) {
+					/**
+					 * if either token is a figure, get the footprint and find the lowest point but if the same, 
+					 * return the smallest, else use normal z order
+					 */
+					Rectangle b1 = o1.getFootprint(getGrid()).getBounds(getGrid());
+					Rectangle b2 = o2.getFootprint(getGrid()).getBounds(getGrid());
+					int v1 = o1.getY() + b1.y + b1.height;
+					int v2 = o2.getY() + b2.y + b2.height;
+					if ((v1 - v2) != 0)
+						return v1 - v2;
+					if (o1.isStamp() && o2.isToken())
+						return -1;
+					if (o2.isStamp() && o1.isToken())
+						return +1;
+					if (b1.getHeight()!=b2.getHeight()) {
+						// Larger tokens at the same position, go behind
+						return o2.getHeight() - o1.getHeight();
+					}
+				}
+				int lval = o1.getZOrder();
+				int rval = o2.getZOrder();
+
+				if (lval == rval) {
+					return o1.getId().compareTo(o2.getId());
+				} else {
+					return lval - rval;
+				}
+			}
+		};
 	}
 
 	/** @return Getter for initiativeList */

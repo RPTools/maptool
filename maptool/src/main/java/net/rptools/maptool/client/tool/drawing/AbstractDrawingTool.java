@@ -11,11 +11,16 @@
 
 package net.rptools.maptool.client.tool.drawing;
 
+import java.awt.BasicStroke;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.Path2D;
 
 import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.SwingUtil;
@@ -63,6 +68,48 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 		int h = Math.max(originPoint.y, newPoint.y) - y;
 
 		return new Rectangle(x, y, w, h);
+	}
+	
+	protected Shape createDiamond(ZonePoint originPoint, ZonePoint newPoint) {
+		int ox = originPoint.x;
+		int oy = originPoint.y;
+		int nx = newPoint.x;
+		int ny = newPoint.y;
+		int x1 = ox - (ny - oy) + ((nx-ox)/2);
+		int y1 = ((oy+ny)/2)-((nx-ox)/4);
+		int x2 = ox + (ny - oy) + ((nx - ox)/2);
+		int y2 = ((oy+ny)/2)+((nx-ox)/4);
+		int x[] = {originPoint.x, x1, nx, x2};
+		int y[] = {originPoint.y, y1, ny, y2 };
+		return new Polygon(x, y, 4);
+	}
+
+	protected Shape createHollowDiamond(ZonePoint originPoint, ZonePoint newPoint, Pen pen) {
+		int ox = originPoint.x;
+		int oy = originPoint.y;
+		int nx = newPoint.x;
+		int ny = newPoint.y;
+		int x1 = ox - (ny - oy) + ((nx-ox)/2);
+		int y1 = ((oy+ny)/2)-((nx-ox)/4);
+		int x2 = ox + (ny - oy) + ((nx - ox)/2);
+		int y2 = ((oy+ny)/2)+((nx-ox)/4);
+		int x[] = {originPoint.x, x1, nx, x2, originPoint.x};
+		int y[] = {originPoint.y, y1, ny, y2, originPoint.y };
+
+		BasicStroke stroke = new BasicStroke(pen.getThickness(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+
+		Path2D path = new Path2D.Double();
+		
+		for (int l=0;l<5;l++) {
+			if (path.getCurrentPoint() == null) {
+				path.moveTo(x[l], y[l]);
+			} else {
+				path.lineTo(x[l], y[l]);
+			}
+		}
+
+		Area area = new Area(stroke.createStrokedShape(path));
+		return area;
 	}
 
 	protected AffineTransform getPaintTransform(ZoneRenderer renderer) {

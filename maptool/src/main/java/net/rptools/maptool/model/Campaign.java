@@ -228,6 +228,13 @@ public class Campaign {
 		return campaignProperties.getLookupTableMap();
 	}
 
+	public List<String> getLookupTables() {
+		List<String> list = new ArrayList<String>(getLookupTableMap().keySet());
+		Collections.sort(list);
+		return list;
+	}
+
+
 	/**
 	 * Convenience method that iterates through {@link #getLightSourcesMap()} and returns the value for the key
 	 * <code>lightSourceId</code>.

@@ -50,6 +50,7 @@ import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -199,6 +200,24 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 				MapTool.getFrame().refresh();
 			}
 		});
+		flipMenu.add(new AbstractAction() {
+			{
+				putValue(NAME, "Isometric Plane");
+			}
+
+			public void actionPerformed(ActionEvent e) {
+				for (GUID tokenGUID : selectedTokenSet) {
+					Token token = renderer.getZone().getToken(tokenGUID);
+					if (token == null) {
+						continue;
+					}
+					token.setFlippedIso(!token.isFlippedIso());
+					renderer.flush(token);
+					MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+				}
+				MapTool.getFrame().refresh();
+			}
+		});
 		return flipMenu;
 	}
 
@@ -335,14 +354,16 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 				switch (layer) {
 				case BACKGROUND:
 				case OBJECT:
-					token.setShape(Token.TokenShape.TOP_DOWN);
+					if (token.getShape() != TokenShape.FIGURE)
+						token.setShape(TokenShape.TOP_DOWN);
 					break;
 				case TOKEN:
 					Image image = ImageManager.getImage(token.getImageAssetId());
 					if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
 						token.setShape(Token.TokenShape.TOP_DOWN);
 					} else {
-						token.setShape(TokenUtil.guessTokenType(image));
+						if (token.getShape() != TokenShape.FIGURE)
+							token.setShape(TokenUtil.guessTokenType(image));
 					}
 					break;
 				}

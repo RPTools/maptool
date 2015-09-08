@@ -21,6 +21,8 @@ public class GridFactory {
 	public static final String HEX_VERT = "Vertical Hex";
 	public static final String HEX_HORI = "Horizontal Hex";
 	public static final String SQUARE = "Square";
+	public static final String ISOMETRIC = "Isometric";
+	public static final String ISOMETRIC_HEX = "Isometric Hex";
 	public static final String NONE = "None";
 
 	public static Grid createGrid(String type) {
@@ -37,6 +39,9 @@ public class GridFactory {
 		if (isSquare(type)) {
 			return new SquareGrid(faceEdges, faceVertices);
 		}
+		if (isIsometric(type)) {
+			return new IsometricGrid(faceEdges, faceVertices);
+		}
 		if (isNone(type)) {
 			return new GridlessGrid();
 		}
@@ -45,6 +50,8 @@ public class GridFactory {
 	
 	public static String getGridType(Grid grid) {
 		if (grid instanceof HexGridVertical) {
+			if (((HexGridVertical) grid).isIsometric())
+				return ISOMETRIC_HEX;
 			return HEX_VERT;
 		}
 		if (grid instanceof HexGridHorizontal) {
@@ -52,6 +59,9 @@ public class GridFactory {
 		}
 		if (grid instanceof SquareGrid) {
 			return SQUARE;
+		}
+		if (grid instanceof IsometricGrid) {
+			return ISOMETRIC;
 		}
 		if (grid instanceof GridlessGrid) {
 			return NONE;
@@ -73,5 +83,13 @@ public class GridFactory {
 	
 	public static boolean isHexHorizontal(String gridType) {
 		return HEX_HORI.equals(gridType);
+	}
+	
+	public static boolean isIsometric(String gridType) {
+		return ISOMETRIC.equals(gridType);
+	}
+	
+	public static boolean isIsometricHex(String gridType) {
+		return ISOMETRIC_HEX.equals(gridType);
 	}
 }

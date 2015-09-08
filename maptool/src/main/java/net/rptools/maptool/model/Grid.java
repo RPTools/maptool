@@ -133,6 +133,10 @@ public abstract class Grid implements Cloneable {
 
 	public abstract List<TokenFootprint> getFootprints();
 
+	public boolean isIsometric() {
+		return false;
+	}
+	
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
@@ -152,6 +156,13 @@ public abstract class Grid implements Cloneable {
 	 *         For HexGrids Use getCellOffset() to move ZonePoint from center to top right
 	 */
 	public abstract ZonePoint convert(CellPoint cp);
+	
+	public ZonePoint getNearestVertex(ZonePoint point) {
+		int gridx = (int) Math.round((point.x - getOffsetX()) / getCellWidth());
+		int gridy = (int) Math.round((point.y - getOffsetY()) / getCellHeight());
+
+		return new ZonePoint((int) (gridx * getCellWidth() + getOffsetX()), (int) (gridy * getCellHeight() + getOffsetY()));
+	}
 
 	public abstract GridCapabilities getCapabilities();
 
@@ -269,7 +280,7 @@ public abstract class Grid implements Cloneable {
 	public int getSize() {
 		return size;
 	}
-	
+
 	/**
 	 * Called by SightType and Light class to return a vision area
 	 * based upon a specified distance
@@ -465,6 +476,20 @@ public abstract class Grid implements Cloneable {
 		// Everything is covered with fog.  Or at least, the three regions that we wanted to use to enter the destination area.
 		return false;
 	}
+	
+	/**
+	 * Returns an area based upon the token's cell footprint
+	 * @param token
+	 * @return
+	 */
+	public Area getTokenCellArea(Rectangle bounds) {
+		// Get the cell footprint
+		return new Area(bounds);
+	}
+	public Area getTokenCellArea(Area bounds) {
+		// Get the cell footprint
+		return new Area(bounds);
+	}
 
 	/**
 	 * Check the middle region by subdividing into 3x3 and checking to see if at least 6 are open.
@@ -475,7 +500,7 @@ public abstract class Grid implements Cloneable {
 	 *            defines areas where fog is currently covering the background
 	 * @return
 	 */
-	private boolean checkCenterRegion(Rectangle regionToCheck, Area fog) {
+	public boolean checkCenterRegion(Rectangle regionToCheck, Area fog) {
 		Rectangle center = new Rectangle();
 		Rectangle bounds = new Rectangle();
 		oneThird(regionToCheck, 1, 1, center); // selects the CENTER piece

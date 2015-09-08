@@ -106,17 +106,21 @@ import net.rptools.maptool.model.ExposedAreaMetaData;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridCapabilities;
+import net.rptools.maptool.model.IsometricGrid;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.LightSource;
+import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.LookupTable.LookupEntry;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
@@ -125,12 +129,15 @@ import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.TokenUtil;
+import net.rptools.parser.ParserException;
 
 import org.apache.log4j.Logger;
 
 /**
  */
 public class ZoneRenderer extends JComponent implements DropTargetListener, Comparable<ZoneRenderer> {
+
+	private static final Color TRANSLUCENT_YELLOW = new Color(Color.yellow.getRed(),Color.yellow.getGreen(),Color.yellow.getBlue(), 50);
 	private static final long serialVersionUID = 3832897780066104884L;
 
 	private static final Logger log = Logger.getLogger(ZoneRenderer.class);
@@ -160,6 +167,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	private final Map<GUID, BufferedImage> labelRenderingCache = new HashMap<GUID, BufferedImage>();
 	private final Map<Token, BufferedImage> replacementImageMap = new HashMap<Token, BufferedImage>();
 	private final Map<Token, BufferedImage> flipImageMap = new HashMap<Token, BufferedImage>();
+	private final Map<Token, BufferedImage> flipIsoImageMap = new HashMap<Token, BufferedImage>();
 	private Token tokenUnderMouse;
 
 	private ScreenPoint pointUnderMouse;
@@ -544,6 +552,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			tokenLocationCache.remove(token);
 		}
 		flipImageMap.remove(token);
+		flipIsoImageMap.remove(token);
 		replacementImageMap.remove(token);
 		labelRenderingCache.remove(token.getId());
 
@@ -580,6 +589,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		flushDrawableRenderer();
 		replacementImageMap.clear();
 		flipImageMap.clear();
+		flipIsoImageMap.clear();
 		fogBuffer = null;
 		renderedLightMap = null;
 		renderedAuraMap = null;
@@ -1138,10 +1148,19 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		renderLabels(g2d, view);
 
 		// (This method has it's own 'timer' calls)
-		if (zone.hasFog())
+		if (zone.hasFog()) 
 			renderFog(g2d, view);
 
 		if (Zone.Layer.TOKEN.isEnabled()) {
+			
+			// if here is fog or vision we may need to re-render figure type tokens
+			List<Token> tokens = zone.getFigureTokens();
+			if (!tokens.isEmpty()) {
+				timer.start("tokens - figures");
+				renderTokens(g2d, tokens, view, true);
+				timer.stop("tokens - figures");
+			}
+			
 			timer.start("owned movement");
 			renderMoveSelectionSets(g2d, view, getOwnedMovementSet(view));
 			timer.stop("owned movement");
@@ -1869,7 +1888,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				Rectangle footprintBounds = token.getBounds(zone);
 				ScreenPoint newScreenPoint = ScreenPoint.fromZonePoint(this, footprintBounds.x + set.getOffsetX(), footprintBounds.y + set.getOffsetY());
 
-				BufferedImage image = ImageManager.getImage(token.getImageAssetId());
+				// get token image, using image table if present
+				BufferedImage image = getTokenImage(token);
 
 				int scaledWidth = (int) (footprintBounds.width * scale);
 				int scaledHeight = (int) (footprintBounds.height * scale);
@@ -1914,8 +1934,25 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					wig.drawImage(image, workX, workY, workW, workH, null);
 					wig.dispose();
 				}
+				// on the iso plane
+				if (token.isFlippedIso()) {
+					if (flipIsoImageMap.get(token) == null) {
+						workImage = IsometricGrid.isoImage(workImage);
+					} else {
+						workImage = flipIsoImageMap.get(token);
+					}
+					token.setHeight(workImage.getHeight());
+					token.setWidth(workImage.getWidth());
+					footprintBounds = token.getBounds(zone);
+				}
 				// Draw token
+				double iso_ho = 0;
 				Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
+				if (token.getShape() == TokenShape.FIGURE) {
+					double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
+					iso_ho = footprintBounds.height - th;
+					footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int)iso_ho, footprintBounds.width, (int)th);
+				}
 				SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
 				int offsetx = 0;
@@ -1923,9 +1960,10 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				if (token.isSnapToScale()) {
 					offsetx = (int) (imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 * getScale() : 0);
 					offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 * getScale() : 0);
+					iso_ho = iso_ho * getScale();
 				}
 				int tx = x + offsetx;
-				int ty = y + offsety;
+				int ty = y + offsety + (int)iso_ho;
 
 				AffineTransform at = new AffineTransform();
 				at.translate(tx, ty);
@@ -2253,6 +2291,21 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	// TODO: I don't like this hardwiring
+	protected Shape getFigureFacingArrow(int angle, int size) {
+		int base = (int) (size * .75);
+		int width = (int) (size * .35);
+
+		facingArrow = new GeneralPath();
+		facingArrow.moveTo(base, -width);
+		facingArrow.lineTo(size, 0);
+		facingArrow.lineTo(base, width);
+		facingArrow.lineTo(base, -width);
+
+		GeneralPath gp = (GeneralPath) facingArrow.createTransformedShape(AffineTransform.getRotateInstance(-Math.toRadians(angle)));
+		return gp.createTransformedShape(AffineTransform.getScaleInstance(getScale(), getScale()/2));
+	}
+
+	// TODO: I don't like this hardwiring
 	protected Shape getCircleFacingArrow(int angle, int size) {
 		int base = (int) (size * .75);
 		int width = (int) (size * .35);
@@ -2283,6 +2336,10 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	protected void renderTokens(Graphics2D g, List<Token> tokenList, PlayerView view) {
+		renderTokens(g, tokenList, view, false);
+	}
+	
+	protected void renderTokens(Graphics2D g, List<Token> tokenList, PlayerView view, boolean figuresOnly) {
 		Graphics2D clippedG = g;
 		boolean isGMView = view.isGMView(); // speed things up
 
@@ -2320,6 +2377,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 		List<Token> tokenPostProcessing = new ArrayList<Token>(tokenList.size());
 		for (Token token : tokenList) {
+			if (figuresOnly && token.getShape()!=Token.TokenShape.FIGURE)
+				continue;
 			timer.start("tokenlist-1");
 			try {
 				if (token.isStamp() && isTokenMoving(token)) {
@@ -2351,7 +2410,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			timer.stop("tokenlist-1a");
 
 			timer.start("tokenlist-1b");
-			BufferedImage image = ImageManager.getImage(token.getImageAssetId(), this);
+			// get token image, using image table if present
+			BufferedImage image = getTokenImage(token);
 			timer.stop("tokenlist-1b");
 
 			timer.start("tokenlist-1c");
@@ -2475,13 +2535,14 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			}
 			timer.stop("renderTokens:ShowPath");
 
+
 			timer.start("tokenlist-4");
-			// Halo (TOPDOWN, CIRCLE)
-			if (token.hasHalo() && (token.getShape() == Token.TokenShape.TOP_DOWN || token.getShape() == Token.TokenShape.CIRCLE)) {
+			// Halo 
+			if (token.hasHalo()) {
 				Stroke oldStroke = clippedG.getStroke();
 				clippedG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
 				clippedG.setColor(token.getHaloColor());
-				clippedG.draw(location.bounds);
+				clippedG.draw(zone.getGrid().getTokenCellArea(tokenBounds));
 				clippedG.setStroke(oldStroke);
 			}
 			timer.stop("tokenlist-4");
@@ -2508,9 +2569,34 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			}
 			timer.stop("tokenlist-5");
 
+			timer.start("tokenlist-5a");
+			if (token.isFlippedIso()) {
+				if (flipIsoImageMap.get(token) == null) {
+					workImage = IsometricGrid.isoImage(workImage);
+					flipIsoImageMap.put(token, workImage);
+				} else {
+					workImage = flipIsoImageMap.get(token);
+				}
+				token.setHeight(workImage.getHeight());
+				token.setWidth(workImage.getWidth());
+				footprintBounds = token.getBounds(zone);
+			} else {
+				// necessary to reset images if they were once on the iso plane
+				token.setHeight(image.getHeight());
+				token.setWidth(image.getWidth());
+			}
+			timer.stop("tokenlist-5a");
+
 			timer.start("tokenlist-6");
 			// Position
+			// For Isometric Grid we alter the height offset
+			double iso_ho = 0;
 			Dimension imgSize = new Dimension(workImage.getWidth(), workImage.getHeight());
+			if (token.getShape() == TokenShape.FIGURE) {
+				double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
+				iso_ho = footprintBounds.height - th;
+				footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int)iso_ho, footprintBounds.width, (int)th);
+			}
 			SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
 			int offsetx = 0;
@@ -2519,9 +2605,10 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			if (token.isSnapToScale()) {
 				offsetx = (int) (imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 * getScale() : 0);
 				offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 * getScale() : 0);
+				iso_ho = iso_ho * getScale();
 			}
 			double tx = location.x + offsetx;
-			double ty = location.y + offsety;
+			double ty = location.y + offsety + iso_ho;
 
 			AffineTransform at = new AffineTransform();
 			at.translate(tx, ty);
@@ -2542,27 +2629,75 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			timer.stop("tokenlist-6");
 
 			timer.start("tokenlist-7");
-			clippedG.drawImage(workImage, at, this);
+			// If the token is a figure and if its visible, draw all of it.
+
+			if (!isGMView && zoneView.isUsingVision() && (token.getShape()==Token.TokenShape.FIGURE)) {
+				Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
+				if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
+					// the cell intersects visible area so
+					if (zone.getGrid().checkCenterRegion(cb.getBounds(), visibleScreenArea)) {
+						// if we can see the centre, draw the whole token
+						g.drawImage(workImage, at, this);
+						//g.draw(cb); // debugging
+					} else {
+						// else draw the clipped token
+						Graphics2D cellOnly = (Graphics2D)clippedG.create();
+						Area cellArea = new Area(visibleScreenArea);
+						cellArea.intersect(cb);
+						cellOnly.setClip(cellArea);
+						cellOnly.drawImage(workImage, at, this);
+					}
+				}
+			} else {
+				clippedG.drawImage(workImage, at, this);
+			}
 			timer.stop("tokenlist-7");
 
 			timer.start("tokenlist-8");
 			// Halo (SQUARE)
 			// XXX Why are square halos drawn separately?!
+			/*
 			if (token.hasHalo() && token.getShape() == Token.TokenShape.SQUARE) {
 				Stroke oldStroke = g.getStroke();
 				clippedG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
 				clippedG.setColor(token.getHaloColor());
 				clippedG.draw(new Rectangle2D.Double(location.x, location.y, location.scaledWidth, location.scaledHeight));
 				clippedG.setStroke(oldStroke);
-			}
-
+			} */
+			
 			// Facing ?
 			// TODO: Optimize this by doing it once per token per facing
 			if (token.hasFacing()) {
 				Token.TokenShape tokenType = token.getShape();
 				switch (tokenType) {
+				case FIGURE:
+					if (token.getHasImageTable() && token.hasFacing() && AppPreferences.getForceFacingArrow()==false)
+						break;
+					Shape arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
+
+					if (!zone.getGrid().isIsometric())
+						arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
+
+					double fx = location.x + location.scaledWidth / 2;
+					double fy = location.y + location.scaledHeight / 2;
+
+					clippedG.translate(fx, fy);
+					if (token.getFacing()<0)
+						clippedG.setColor(Color.yellow);
+					else 
+						clippedG.setColor(TRANSLUCENT_YELLOW);
+					clippedG.fill(arrow);
+					clippedG.setColor(Color.darkGray);
+					clippedG.draw(arrow);
+					clippedG.translate(-fx, -fy);
+					break;
+				case TOP_DOWN:
+					if (AppPreferences.getForceFacingArrow()==false)
+						break;
 				case CIRCLE:
-					Shape arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
+					arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
+					if (zone.getGrid().isIsometric())
+						arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
 
 					double cx = location.x + location.scaledWidth / 2;
 					double cy = location.y + location.scaledHeight / 2;
@@ -2575,35 +2710,42 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					clippedG.translate(-cx, -cy);
 					break;
 				case SQUARE:
-					int facing = token.getFacing();
-					while (facing < 0) {
-						facing += 360;
-					} // TODO: this should really be done in Token.setFacing() but I didn't want to take the chance of breaking something, so change this when it's safe to break stuff
-					facing %= 360;
-					arrow = getSquareFacingArrow(facing, footprintBounds.width / 2);
 
-					cx = location.x + location.scaledWidth / 2;
-					cy = location.y + location.scaledHeight / 2;
-
-					// Find the edge of the image
-					// TODO: Man, this is horrible, there's gotta be a better way to do this
-					double xp = location.scaledWidth / 2;
-					double yp = location.scaledHeight / 2;
-					if (facing >= 45 && facing <= 135 || facing >= 225 && facing <= 315) {
-						xp = (int) (yp / Math.tan(Math.toRadians(facing)));
-						if (facing > 180) {
-							xp = -xp;
-							yp = -yp;
-						}
+					if (zone.getGrid().isIsometric()) {
+						arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
+						cx = location.x + location.scaledWidth / 2;
+						cy = location.y + location.scaledHeight / 2;
 					} else {
-						yp = (int) (xp * Math.tan(Math.toRadians(facing)));
-						if (facing > 90 && facing < 270) {
-							xp = -xp;
-							yp = -yp;
+						int facing = token.getFacing();
+						while (facing < 0) {
+							facing += 360;
+						} // TODO: this should really be done in Token.setFacing() but I didn't want to take the chance of breaking something, so change this when it's safe to break stuff
+						facing %= 360;
+						arrow = getSquareFacingArrow(facing, footprintBounds.width / 2);
+
+						cx = location.x + location.scaledWidth / 2;
+						cy = location.y + location.scaledHeight / 2;
+
+						// Find the edge of the image
+						// TODO: Man, this is horrible, there's gotta be a better way to do this
+						double xp = location.scaledWidth / 2;
+						double yp = location.scaledHeight / 2;
+						if (facing >= 45 && facing <= 135 || facing >= 225 && facing <= 315) {
+							xp = (int) (yp / Math.tan(Math.toRadians(facing)));
+							if (facing > 180) {
+								xp = -xp;
+								yp = -yp;
+							}
+						} else {
+							yp = (int) (xp * Math.tan(Math.toRadians(facing)));
+							if (facing > 90 && facing < 270) {
+								xp = -xp;
+								yp = -yp;
+							}
 						}
+						cx += xp;
+						cy -= yp;
 					}
-					cx += xp;
-					cy -= yp;
 
 					clippedG.translate(cx, cy);
 					clippedG.setColor(Color.yellow);
@@ -3651,6 +3793,38 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		repaint();
 	}
 
+
+	/**
+	 * Checks to see if token has an image table and references that if the token has a facing
+	 * otherwise uses basic image
+	 * 
+	 * @param token
+	 * @return BufferedImage
+	 */
+	private BufferedImage getTokenImage(Token token) {
+		BufferedImage image = null;
+		// Get the basic image
+		if (token.getHasImageTable() && token.hasFacing()) {
+			if (token.getImageTableName()!=null) {
+				LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
+				if (lookupTable!=null) {
+					try {
+						LookupEntry result = lookupTable.getLookup(token.getFacing().toString());
+						if (result!=null) {
+							image = ImageManager.getImage(result.getImageId(), this);
+						}
+					} catch (ParserException p) {
+						// do nothing
+					}
+				}
+			} 
+		};
+		if (image==null) {
+			image = ImageManager.getImage(token.getImageAssetId());
+		}
+		return image;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
