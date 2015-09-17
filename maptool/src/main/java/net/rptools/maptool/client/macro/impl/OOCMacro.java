@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.macro.impl;
@@ -35,7 +35,7 @@ public class OOCMacro extends AbstractMacro {
 		Color color = MapTool.getFrame().getCommandPanel().getTextColorWell().getColor();
 		if (color != null) {
 			sb.append("<span style='color:#").append(Integer.toHexString((color.getRGB() & 0xFFFFFF))).append("'>");
-//			sb.append("<span style='color:#").append(String.format("%06X", (color.getRGB() & 0xFFFFFF))).append("'>");
+			//			sb.append("<span style='color:#").append(String.format("%06X", (color.getRGB() & 0xFFFFFF))).append("'>");
 		}
 		sb.append("(( ").append(macro).append(" ))");
 		if (color != null) {

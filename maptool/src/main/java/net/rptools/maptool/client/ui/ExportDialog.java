@@ -148,14 +148,11 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 		// Format of enum declaration:
 		// [Abeille Forms Designer button name] (default checked, default enabled)
 		// Button Group 1 (not that it matters for this controller)
-		TYPE_CURRENT_VIEW,
-		TYPE_ENTIRE_MAP,
+		TYPE_CURRENT_VIEW, TYPE_ENTIRE_MAP,
 		// Button Group 2
-		VIEW_GM,
-		VIEW_PLAYER,
+		VIEW_GM, VIEW_PLAYER,
 		// Button Group 3
-		LAYERS_CURRENT,
-		LAYERS_AS_SELECTED;
+		LAYERS_CURRENT, LAYERS_AS_SELECTED;
 
 		private static FormPanel form;
 
@@ -249,13 +246,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	 */
 	private static enum ExportLayers {
 		// enum_val (fieldName as per Abeille Forms Designer, playerCanModify)
-		LAYER_TOKEN(true),
-		LAYER_HIDDEN(false),
-		LAYER_OBJECT(false),
-		LAYER_BACKGROUND(false),
-		LAYER_BOARD(false),
-		LAYER_FOG(false),
-		LAYER_VISIBILITY(true);
+		LAYER_TOKEN(true), LAYER_HIDDEN(false), LAYER_OBJECT(false), LAYER_BACKGROUND(false), LAYER_BOARD(false), LAYER_FOG(false), LAYER_VISIBILITY(true);
 
 		private static FormPanel form;
 
@@ -365,7 +356,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 			interactPanel.getLabel("LAYERS_LABEL").setEnabled(false);
 			ExportLayers.setDefaultChecked();
 			ExportLayers.setDisabled();
-		} else /* if (ExportRadioButtons.LAYERS_AS_SELECTED.isChecked()) */{
+		} else /* if (ExportRadioButtons.LAYERS_AS_SELECTED.isChecked()) */ {
 			interactPanel.getLabel("LAYERS_LABEL").setEnabled(true);
 			boolean isGM = ExportRadioButtons.VIEW_GM.isChecked();
 			final Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
@@ -404,7 +395,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 		// MCL: I figure it's better to save the 1MB for low-mem systems,
 		//      but it would be even better to HIDE it, and then dispose() it
 		//      when the user clicks on the memory meter to free memory
-//		setDefaultCloseOperation(HIDE_ON_CLOSE);
+		//		setDefaultCloseOperation(HIDE_ON_CLOSE);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		//
@@ -591,7 +582,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 						if (interactPanel.isSelected("METHOD_BUFFERED_IMAGE")) {
 							image = new BufferedImage(renderer.getWidth(), renderer.getHeight(), Transparency.OPAQUE);
 							final Graphics2D g = image.createGraphics();
-//							g.setClip(0, 0, renderer.getWidth(), renderer.getHeight());
+							//							g.setClip(0, 0, renderer.getWidth(), renderer.getHeight());
 							renderer.renderZone(g, view);
 							g.dispose();
 						} else {
@@ -782,7 +773,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	 * @return the image to be saved
 	 */
 	private PlayerView preScreenshot() throws Exception, OutOfMemoryError {
-		assert (!waitingForPostScreenshot) : "preScreenshot() called twice in a row!";
+		assert(!waitingForPostScreenshot) : "preScreenshot() called twice in a row!";
 
 		setupZoneLayers();
 		boolean viewAsPlayer = ExportRadioButtons.VIEW_PLAYER.isChecked();
@@ -868,17 +859,17 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	//
 
 	private void switchToWaitPanel() {
-//		remove(interactPanel);
-//		add(waitPanel);
-//		getRootPane().setDefaultButton(null);
-//		pack();
+		//		remove(interactPanel);
+		//		add(waitPanel);
+		//		getRootPane().setDefaultButton(null);
+		//		pack();
 	}
 
 	private void switchToInteractPanel() {
-//		remove(waitPanel);
-//		add(interactPanel);
-//		getRootPane().setDefaultButton((JButton) interactPanel.getButton("exportButton"));
-//		pack();
+		//		remove(waitPanel);
+		//		add(interactPanel);
+		//		getRootPane().setDefaultButton((JButton) interactPanel.getButton("exportButton"));
+		//		pack();
 	}
 
 	private void createWaitPanel() {

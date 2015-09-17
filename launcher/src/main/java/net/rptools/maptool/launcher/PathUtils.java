@@ -27,6 +27,7 @@ public class PathUtils {
 	public static final char WINDOWS_SEPARATOR = '\\';
 	public static final char SYSTEM_SEPARATOR = File.separatorChar;
 	public static final char OTHER_SEPARATOR;
+
 	static {
 		if (System.getProperty("os.name").contains("windows")) { //$NON-NLS-1$ //$NON-NLS-2$
 			OTHER_SEPARATOR = UNIX_SEPARATOR;

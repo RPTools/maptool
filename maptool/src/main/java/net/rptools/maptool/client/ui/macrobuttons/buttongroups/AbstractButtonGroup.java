@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.macrobuttons.buttongroups;
@@ -52,15 +52,15 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 	protected DropTarget dt;
 	private GUID tokenId;
 	private List<Token> tokenList;
-	private List<MacroButtonProperties> propertiesList; 
+	private List<MacroButtonProperties> propertiesList;
 	private AbstractMacroPanel panel;
 	private String panelClass = "";
 	private String groupLabel = "";
 	private String groupClass = "";
 	private String macroGroup = "";
-	private int spacerHeight=0;
+	private int spacerHeight = 0;
 	private AreaGroup area;
-	
+
 	public void dragEnter(DropTargetDragEvent event) {
 		//System.out.println("BG: drag enter");
 	}
@@ -82,22 +82,22 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 	}
 
 	public Token getToken() {
-		if (tokenId == null){
+		if (tokenId == null) {
 			return null;
 		} else {
 			return MapTool.getFrame().getCurrentZoneRenderer() != null ? MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId) : null;
 		}
 	}
 
-	public GUID getTokenId(){
+	public GUID getTokenId() {
 		return this.tokenId;
 	}
-	
-	public void setTokenId(GUID tokenId){
+
+	public void setTokenId(GUID tokenId) {
 		this.tokenId = tokenId;
 	}
 
-	public void setTokenId(Token token){
+	public void setTokenId(Token token) {
 		if (token == null) {
 			this.tokenId = null;
 		} else {
@@ -109,71 +109,71 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 		return tokenList;
 	}
 
-	public void setTokenList(List<Token> tokenList){
+	public void setTokenList(List<Token> tokenList) {
 		this.tokenList = tokenList;
 	}
-	
-	public String getGroupClass(){
+
+	public String getGroupClass() {
 		return groupClass;
 	}
-	
-	public void setGroupClass(String groupClass){
+
+	public void setGroupClass(String groupClass) {
 		this.groupClass = groupClass;
 	}
-	
-	public String getGroupLabel(){
+
+	public String getGroupLabel() {
 		return groupLabel;
 	}
-	
-	public void setGroupLabel(String label){
+
+	public void setGroupLabel(String label) {
 		this.groupLabel = label;
 	}
-	
-	public AbstractMacroPanel getPanel(){
+
+	public AbstractMacroPanel getPanel() {
 		return panel;
 	}
-	
-	public void setPanel(AbstractMacroPanel panel){
+
+	public void setPanel(AbstractMacroPanel panel) {
 		this.panel = panel;
 	}
-	
-	public String getPanelClass(){
+
+	public String getPanelClass() {
 		return panelClass;
 	}
-	
-	public void setPanelClass(String panelClass){
+
+	public void setPanelClass(String panelClass) {
 		this.panelClass = panelClass;
 	}
-	
-	public List<MacroButtonProperties> getPropertiesList(){
+
+	public List<MacroButtonProperties> getPropertiesList() {
 		return propertiesList;
 	}
-	
-	public void setPropertiesList(List<MacroButtonProperties> propertiesList){
+
+	public void setPropertiesList(List<MacroButtonProperties> propertiesList) {
 		MacroButtonProperties.fixOldMacroSetCompare(propertiesList);
 		this.propertiesList = propertiesList;
 	}
 
-	public String getMacroGroup(){
+	public String getMacroGroup() {
 		return macroGroup;
 	}
-	
-	public void setMacroGroup(String group){
-		this.macroGroup=group;
+
+	public void setMacroGroup(String group) {
+		this.macroGroup = group;
 	}
-	
-	public void setSpacerHeight (int height){
+
+	public void setSpacerHeight(int height) {
 		this.spacerHeight = height;
 	}
-	
+
 	public AreaGroup getArea() {
 		return area;
 	}
-	
+
 	public void setArea(AreaGroup newArea) {
 		area = newArea;
 	}
-	
+
 	protected String getTokenName(Token token) {
 		// if a token has a GM name, put that to button title too
 		if (token.getGMName() != null && token.getGMName().trim().length() > 0) {
@@ -190,17 +190,17 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 	public void mousePressed(MouseEvent event) {
 	}
 
-	public void mouseReleased(MouseEvent event)	{
+	public void mouseReleased(MouseEvent event) {
 		Token token = getToken();
 		if (SwingUtilities.isRightMouseButton(event)) {
-			if (getPanelClass()=="CampaignPanel" && !MapTool.getPlayer().isGM()) {
+			if (getPanelClass() == "CampaignPanel" && !MapTool.getPlayer().isGM()) {
 				return;
 			}
 			// open button group menu
-			new ButtonGroupPopupMenu(getPanelClass(),area,getMacroGroup(),token).show(this, event.getX(), event.getY());
+			new ButtonGroupPopupMenu(getPanelClass(), area, getMacroGroup(), token).show(this, event.getX(), event.getY());
 		}
 	}
-	
+
 	public void mouseEntered(MouseEvent event) {
 	}
 
@@ -208,7 +208,7 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 	}
 
 	protected ThumbnailedBorder createBorder(String label) {
-		if(getToken() != null) {
+		if (getToken() != null) {
 			ImageIcon i = new ImageIcon(ImageManager.getImageAndWait(getToken().getImageAssetId()));
 			Image icon = i.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
 			return new ThumbnailedBorder(icon, label);
@@ -218,31 +218,31 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 	}
 
 	protected class ThumbnailedBorder extends AbstractBorder {
-		
+
 		private Image image;
 		private String label;
 		private Rectangle imageBounds;
-		
+
 		//private final int X_OFFSET = 5;
-		
+
 		public ThumbnailedBorder(Image image, String label) {
 			this.image = image;
 			this.label = label;
-						
+
 			addMouseListener(new MouseHandler());
 		}
 
 		public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
 			//((Graphics2D) g).setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-			
+
 			//TODO: change magic numbers to final fields
 			// match line color to default titledborder line color
 			g.setColor(new Color(165, 163, 151));
-			
-			if (image==null && label==null){
-				g.drawRoundRect(2, 2, c.getWidth()-3, c.getHeight()-3, 6, 6);
+
+			if (image == null && label == null) {
+				g.drawRoundRect(2, 2, c.getWidth() - 3, c.getHeight() - 3, 6, 6);
 			} else {
-				g.drawRoundRect(2, 12, c.getWidth()-5, c.getHeight()-13, 6, 6);
+				g.drawRoundRect(2, 12, c.getWidth() - 5, c.getHeight() - 13, 6, 6);
 				// clear the left and right handside of the image to show space between border line and image
 				g.setColor(c.getBackground());
 				g.fillRect(8, 0, 24, 20);
@@ -264,9 +264,9 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 						g.drawImage(AppStyle.impersonatePanelImage, (int) imageBounds.getMaxX() + 5, 4, null);
 					}
 				}
-				
+
 				g.setColor(Color.BLACK);
-				g.drawString(label, strx+3, (20-stringHeight)/2+stringHeight-2);
+				g.drawString(label, strx + 3, (20 - stringHeight) / 2 + stringHeight - 2);
 			}
 		}
 
@@ -277,7 +277,7 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 		public boolean isBorderOpaque() {
 			return true;
 		}
-		
+
 		private class MouseHandler extends MouseAdapter {
 			public void mouseReleased(MouseEvent event) {
 				Token token = getToken();
@@ -308,7 +308,7 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 						} else {
 							MapTool.getFrame().getCommandPanel().quickCommit("/im " + tokenId, false);
 						}
-					}					
+					}
 				}
 			}
 		}
@@ -317,13 +317,13 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 			return new MouseHandler();
 		}
 	}
-	
+
 	public static void clearHotkeys(AbstractMacroPanel panel, String macroGroup) {
-		for(int areaGroupCount = 0; areaGroupCount < panel.getComponentCount(); areaGroupCount++) {
+		for (int areaGroupCount = 0; areaGroupCount < panel.getComponentCount(); areaGroupCount++) {
 			AreaGroup area = (AreaGroup) panel.getComponent(areaGroupCount);
-			for(ButtonGroup group : area.getButtonGroups()) {
-				if(macroGroup.equals(group.getMacroGroup())) {
-					for(MacroButton nextButton : group.getButtons()) {
+			for (ButtonGroup group : area.getButtonGroups()) {
+				if (macroGroup.equals(group.getMacroGroup())) {
+					for (MacroButton nextButton : group.getButtons()) {
 						nextButton.clearHotkey();
 					}
 				}

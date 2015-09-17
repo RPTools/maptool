@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui;
@@ -36,17 +36,17 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
  */
 public class ZoneImageGenerator extends BufferedImage {
 
-//	final JComponent largeComponent;
+	//	final JComponent largeComponent;
 	final ZoneRenderer renderer;
-	final PlayerView   view;
-	final Rectangle    origBounds;
+	final PlayerView view;
+	final Rectangle origBounds;
 
-	final int     maxCacheSize = 1024*1024; // probably 4MB for most systems
-	Raster        cachedRaster;
-	Rectangle     cachedRect;
-	Rectangle     prevCacheRect;
-	int           numMisses = 0;     // total number of cache misses, ever
-	int           recentHits = 0;    // hits since last cache miss
+	final int maxCacheSize = 1024 * 1024; // probably 4MB for most systems
+	Raster cachedRaster;
+	Rectangle cachedRect;
+	Rectangle prevCacheRect;
+	int numMisses = 0; // total number of cache misses, ever
+	int recentHits = 0; // hits since last cache miss
 
 	public ZoneImageGenerator(ZoneRenderer renderer, PlayerView view) {
 		// The BufferedImage raster made by super() is just a dummy.
@@ -54,8 +54,8 @@ public class ZoneImageGenerator extends BufferedImage {
 		super(32, 32, Transparency.OPAQUE);
 
 		this.renderer = renderer;
-		this.view     = view;
-		origBounds    = new Rectangle(renderer.getBounds());
+		this.view = view;
+		origBounds = new Rectangle(renderer.getBounds());
 	}
 
 	private boolean cacheMiss(Rectangle rect) {
@@ -86,7 +86,7 @@ public class ZoneImageGenerator extends BufferedImage {
 			prevCacheRect = cachedRect;
 			cachedRect = new Rectangle(rect.x, rect.y, sizeX, sizeY);
 			if (cacheMiss(rect)) {
-				assert false: "Ooops! Cache doesn't contain requested data: wanted " + rect + " but have: " + cachedRect;
+				assert false : "Ooops! Cache doesn't contain requested data: wanted " + rect + " but have: " + cachedRect;
 			}
 			fillCache();
 			numMisses++;
@@ -94,9 +94,9 @@ public class ZoneImageGenerator extends BufferedImage {
 		}
 		recentHits++;
 		return cachedRaster.createChild(
-				rect.x, rect.y,             // source upper-left X, Y
-				rect.width, rect.height,    // size
-				rect.x, rect.y,             // child upper-left X, Y (this is 'translated', not actual pixel coords.
+				rect.x, rect.y, // source upper-left X, Y
+				rect.width, rect.height, // size
+				rect.x, rect.y, // child upper-left X, Y (this is 'translated', not actual pixel coords.
 				// The returned raster is only as big as width * height
 				null);
 	}
@@ -105,11 +105,11 @@ public class ZoneImageGenerator extends BufferedImage {
 		Rectangle rect = cachedRect;
 
 		if ((recentHits == 0) && (numMisses > 0)) {
-			assert false: "Cache is being thrashed: " + prevCacheRect + cachedRect;
+			assert false : "Cache is being thrashed: " + prevCacheRect + cachedRect;
 		}
 
 		// preserve settings
-		Scale     origScale  = new Scale(renderer.getZoneScale());
+		Scale origScale = new Scale(renderer.getZoneScale());
 		Rectangle origBounds = new Rectangle(renderer.getBounds());
 
 		// set new temp vars
@@ -226,10 +226,9 @@ public class ZoneImageGenerator extends BufferedImage {
 
 	@Override
 	public Raster getData() {
-		assert false: "Can not get a raster for the whole CachedComponentImage!";
-	return null;
+		assert false : "Can not get a raster for the whole CachedComponentImage!";
+		return null;
 	}
-
 
 	/**
 	 *  This should not be needed... hopefully all ImageWriters use getData instead.
@@ -237,10 +236,9 @@ public class ZoneImageGenerator extends BufferedImage {
 	@Override
 	public WritableRaster copyData(WritableRaster outRaster) {
 		if (outRaster == null) {
-			assert false: "Someone tried to get a copy of the whole Raster in CachedComponentImage";
-		}
-		else {
-			assert false: "Class CachedComponentImage.copyData() called. This should probably be implemented. ";
+			assert false : "Someone tried to get a copy of the whole Raster in CachedComponentImage";
+		} else {
+			assert false : "Class CachedComponentImage.copyData() called. This should probably be implemented. ";
 		}
 		return null;
 	}

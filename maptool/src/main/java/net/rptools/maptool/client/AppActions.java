@@ -540,7 +540,8 @@ public class AppActions {
 		public void execute(ActionEvent e) {
 			Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 			String oldName = zone.getName();
-			if (oldName == null) oldName = "";
+			if (oldName == null)
+				oldName = "";
 			String msg = I18N.getText("msg.confirm.renameMap", oldName);
 			String name = JOptionPane.showInputDialog(MapTool.getFrame(), msg, oldName);
 			if (name != null) {
@@ -1086,8 +1087,8 @@ public class AppActions {
 			String mesg = "Failed to paste token(s) with duplicate name(s): " + failedPaste;
 			TextMessage msg = TextMessage.gm(null, mesg);
 			MapTool.addMessage(msg);
-//			msg.setChannel(Channel.ME);
-//			MapTool.addMessage(msg);
+			//			msg.setChannel(Channel.ME);
+			//			MapTool.addMessage(msg);
 		}
 	}
 
@@ -1851,7 +1852,8 @@ public class AppActions {
 					boolean useIF = serverProps.getUseIndividualViews() && serverProps.getUseIndividualFOW();
 					policy.setUseIndividualFOW(useIF);
 
-					ServerConfig config = new ServerConfig(serverProps.getUsername(), serverProps.getGMPassword(), serverProps.getPlayerPassword(), serverProps.getPort(), serverProps.getRPToolsName());
+					ServerConfig config = new ServerConfig(serverProps.getUsername(), serverProps.getGMPassword(), serverProps.getPlayerPassword(), serverProps.getPort(),
+							serverProps.getRPToolsName());
 
 					// Use the existing campaign
 					Campaign campaign = MapTool.getCampaign();
@@ -1867,7 +1869,7 @@ public class AppActions {
 						}
 						// Right now set this is set to whatever the last server settings were.  If we wanted to turn it on and
 						// leave it turned on, the line would change to:
-//						campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
+						//						campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
 						campaign.setHasUsedFogToolbar(useIF);
 
 						// Make a copy of the campaign since we don't coordinate local changes well ... yet
@@ -2094,8 +2096,8 @@ public class AppActions {
 						// Load
 						final PersistedCampaign campaign = PersistenceUtil.loadCampaign(campaignFile);
 						if (campaign != null) {
-//							current = MapTool.getFrame().getCurrentZoneRenderer();
-//							MapTool.getFrame().setCurrentZoneRenderer(null);
+							//							current = MapTool.getFrame().getCurrentZoneRenderer();
+							//							MapTool.getFrame().setCurrentZoneRenderer(null);
 							ImageManager.flush(); // Clear out the old campaign's images
 
 							AppState.setCampaignFile(campaignFile);
@@ -2106,16 +2108,16 @@ public class AppActions {
 							 * Bypass the serialization when we are hosting the
 							 * server.
 							 */
-//							if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
-//								/*
-//								 * TODO: This optimization doesn't work since
-//								 * the player name isn't the right thing to use
-//								 * to exclude this thread...
-//								 */
-//								String playerName = MapTool.getPlayer().getName();
-//								String command = ServerCommand.COMMAND.setCampaign.name();
-//								MapTool.getServer().getMethodHandler().handleMethod(playerName, command, new Object[] { campaign.campaign });
-//							} else
+							//							if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
+							//								/*
+							//								 * TODO: This optimization doesn't work since
+							//								 * the player name isn't the right thing to use
+							//								 * to exclude this thread...
+							//								 */
+							//								String playerName = MapTool.getPlayer().getName();
+							//								String command = ServerCommand.COMMAND.setCampaign.name();
+							//								MapTool.getServer().getMethodHandler().handleMethod(playerName, command, new Object[] { campaign.campaign });
+							//							} else
 							{
 								MapTool.serverCommand().setCampaign(campaign.campaign);
 							}
@@ -2337,7 +2339,7 @@ public class AppActions {
 
 		@Override
 		public boolean isAvailable() {
-//			return MapTool.isHostingServer() || MapTool.isPersonalServer();
+			//			return MapTool.isHostingServer() || MapTool.isPersonalServer();
 			// I'd like to be able to use this instead as it's less restrictive, but it's safer to disallow for now.
 			return MapTool.isHostingServer() || (MapTool.getPlayer() != null && MapTool.getPlayer().isGM());
 		}
@@ -2351,7 +2353,7 @@ public class AppActions {
 				isRemoteGM = true;
 				if (isRemoteGM) {
 					// Returns true if they select OK and false otherwise
-//					setSeenWarning(MapTool.confirm("action.loadMap.warning"));
+					//					setSeenWarning(MapTool.confirm("action.loadMap.warning"));
 					ImageIcon icon = null;
 					try {
 						Image img = ImageUtil.getImage("net/rptools/maptool/client/image/book_open.png");
@@ -2368,8 +2370,7 @@ public class AppActions {
 							I18N.getText("msg.title.messageDialogConfirm"),
 							JOptionPane.DEFAULT_OPTION,
 							JOptionPane.WARNING_MESSAGE, null,
-							options, options[2]
-							);
+							options, options[2]);
 					if (result == 1)
 						setSeenWarning(true); // Yes
 					else {
@@ -2634,7 +2635,7 @@ public class AppActions {
 					newMapDialog.setZone(zone);
 					newMapDialog.setVisible(true);
 					// Too many things can change to send them 1 by 1 to the client... just resend the zone
-//					MapTool.serverCommand().setBoard(zone.getId(), zone.getMapAssetId(), zone.getBoardX(), zone.getBoardY());
+					//					MapTool.serverCommand().setBoard(zone.getId(), zone.getMapAssetId(), zone.getBoardX(), zone.getBoardY());
 					MapTool.serverCommand().removeZone(zone.getId());
 					MapTool.serverCommand().putZone(zone);
 					MapTool.getFrame().getCurrentZoneRenderer().flush();

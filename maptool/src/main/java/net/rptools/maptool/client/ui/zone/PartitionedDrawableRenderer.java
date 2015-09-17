@@ -125,7 +125,7 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 				// Trim to the right size
 				if (chunkList.size() > maxChunks) {
 					int chunkSize = chunkList.size();
-//					chunkList.subList(maxChunks, chunkSize).clear();
+					//					chunkList.subList(maxChunks, chunkSize).clear();
 					while (chunkSize > maxChunks) {
 						chunkList.remove(--chunkSize);
 					}
@@ -167,7 +167,7 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 		lastScale = scale;
 
 		if (timer.isEnabled()) {
-//			System.out.println(timer);
+			//			System.out.println(timer);
 		}
 	}
 
@@ -247,8 +247,8 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
 			}
 
-//			g.setColor(Color.red);
-//			g.draw(drawnBounds);
+			//			g.setColor(Color.red);
+			//			g.draw(drawnBounds);
 
 			timer.start("createChunk:Draw");
 			drawable.draw(g, pen);

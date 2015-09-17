@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.tool.drawing;
@@ -31,7 +31,6 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
-
 
 /**
  * @author drice
@@ -75,7 +74,7 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
 
 			paintTransformed(g, renderer, new ShapeDrawable(new Ellipse2D.Float(oval.x, oval.y, oval.width, oval.height)), pen);
 
-			ToolHelper.drawBoxedMeasurement(renderer, g, ScreenPoint.fromZonePoint(renderer, oval.x, oval.y), ScreenPoint.fromZonePoint(renderer, oval.x + oval.width, oval.y+oval.height));
+			ToolHelper.drawBoxedMeasurement(renderer, g, ScreenPoint.fromZonePoint(renderer, oval.x, oval.y), ScreenPoint.fromZonePoint(renderer, oval.x + oval.width, oval.y + oval.height));
 		}
 	}
 
@@ -92,7 +91,7 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
 				oval = createRect(originPoint, zp);
 
 				// Draw from center if ALT is held down
-				if ( e.isAltDown() ) {
+				if (e.isAltDown()) {
 					if (zp.x > originPoint.x)
 						oval.x -= oval.width;
 
@@ -124,8 +123,8 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
 	/* (non-Javadoc)
 	 * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
 	 */
-	 @Override
-	 public void mouseMoved(MouseEvent e) {
+	@Override
+	public void mouseMoved(MouseEvent e) {
 		if (oval != null) {
 
 			ZonePoint sp = getPoint(e);
@@ -133,7 +132,7 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
 			oval = createRect(originPoint, sp);
 
 			// Draw from center if ALT is held down
-			if ( e.isAltDown()) {
+			if (e.isAltDown()) {
 				if (sp.x > originPoint.x)
 					oval.x -= oval.width;
 
@@ -146,19 +145,19 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
 
 			renderer.repaint();
 		}
-	 }
+	}
 
-	 /**
-	  * @see net.rptools.maptool.client.ui.Tool#resetTool()
-	  */
-	 @Override
-	 protected void resetTool() {
+	/**
+	 * @see net.rptools.maptool.client.ui.Tool#resetTool()
+	 */
+	@Override
+	protected void resetTool() {
 
-		 if (oval != null) {
-			 oval = null;
-			 renderer.repaint();
-		 } else {
-			 super.resetTool();
-		 }
-	 }
+		if (oval != null) {
+			oval = null;
+			renderer.repaint();
+		} else {
+			super.resetTool();
+		}
+	}
 }

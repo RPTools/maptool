@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.functions;
@@ -620,7 +620,7 @@ public class StrListFunctions extends AbstractFunction {
 	/** Checks number and types of parameters (pass null type to suppress typechecking for that slot). */
 	public void checkVaryingParameters(
 			String funcName, int minParams, int maxParams, List<Object> parameters, Class<?>[] expected)
-			throws ParameterException {
+					throws ParameterException {
 		if (parameters.size() < minParams || parameters.size() > maxParams) {
 			if (minParams == maxParams) {
 				throw new ParameterException(I18N.getText("macro.function.strLst.incorrectParamExact", funcName, minParams));

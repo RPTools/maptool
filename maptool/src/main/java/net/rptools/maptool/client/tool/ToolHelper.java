@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.tool;
@@ -30,58 +30,59 @@ import net.rptools.maptool.util.GraphicsUtil;
  */
 public class ToolHelper {
 	public static void drawDiamondMeasurement(ZoneRenderer renderer, Graphics2D g, Shape diamond) {
-		double[] north=null;
-		double[] west=null;
-		double[] east=null;
+		double[] north = null;
+		double[] west = null;
+		double[] east = null;
 		PathIterator path = diamond.getPathIterator(getPaintTransform(renderer));
 		while (!path.isDone()) {
-			double[] coords=new double[2];
-			int segType=path.currentSegment(coords);
-			if (segType!=PathIterator.SEG_CLOSE) {
-				if (north==null)
-					north=coords;
-				if (west==null)
-					west=coords;
-				if (east==null)
-					east=coords;
-				if (coords[1]<north[1])
-					north=coords;
-				if (coords[0]<west[0])
-					west=coords;
-				if (coords[0]>east[0])
-					east=coords;
+			double[] coords = new double[2];
+			int segType = path.currentSegment(coords);
+			if (segType != PathIterator.SEG_CLOSE) {
+				if (north == null)
+					north = coords;
+				if (west == null)
+					west = coords;
+				if (east == null)
+					east = coords;
+				if (coords[1] < north[1])
+					north = coords;
+				if (coords[0] < west[0])
+					west = coords;
+				if (coords[0] > east[0])
+					east = coords;
 			}
 			path.next();
 		}
 		// Measure
-		int nx = (int)north[0];
-		int ny = (int)north[1];
-		int ex = (int)east[0];
-		int ey = (int)east[1];
-		int wx = (int)west[0];
-		int wy = (int)west[1];
-		if (g!=null) {
+		int nx = (int) north[0];
+		int ny = (int) north[1];
+		int ex = (int) east[0];
+		int ey = (int) east[1];
+		int wx = (int) west[0];
+		int wy = (int) west[1];
+		if (g != null) {
 			g.setColor(Color.white);
-            g.setStroke(new BasicStroke(3));
+			g.setStroke(new BasicStroke(3));
 			g.drawLine(nx, ny - 20, nx, ny - 10);
 			g.drawLine(nx, ny - 15, ex, ey - 15);
 			g.drawLine(ex, ey - 20, ex, ey - 10);
 			g.drawLine(nx, ny - 15, wx, wy - 15);
 			g.drawLine(wx, wy - 20, wx, wy - 10);
 			g.setColor(Color.black);
-            g.setStroke(new BasicStroke(1));
+			g.setStroke(new BasicStroke(1));
 			g.drawLine(nx, ny - 20, nx, ny - 10);
 			g.drawLine(nx, ny - 15, ex, ey - 15);
 			g.drawLine(ex, ey - 20, ex, ey - 10);
 			g.drawLine(nx, ny - 15, wx, wy - 15);
 			g.drawLine(wx, wy - 20, wx, wy - 10);
-	        //g.setPaintMode();
+			//g.setPaintMode();
 			String displayString = String.format("%1.1f", isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(ex, ey)));
-			GraphicsUtil.drawBoxedString(g, displayString, nx+25 , ny-25);
+			GraphicsUtil.drawBoxedString(g, displayString, nx + 25, ny - 25);
 			displayString = String.format("%1.1f", isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(wx, wy)));
-			GraphicsUtil.drawBoxedString(g, displayString, nx-25 , ny-25);
+			GraphicsUtil.drawBoxedString(g, displayString, nx - 25, ny - 25);
 		}
 	}
+
 	public static void drawBoxedMeasurement(ZoneRenderer renderer, Graphics2D g, ScreenPoint startPoint, ScreenPoint endPoint) {
 		if (!MapTool.getFrame().isPaintDrawingMeasurement())
 			return;
@@ -94,7 +95,7 @@ public class ToolHelper {
 
 		// outline
 		g.setColor(Color.white);
-        g.setStroke(new BasicStroke(3));
+		g.setStroke(new BasicStroke(3));
 		// HORIZONTAL Measure
 		g.drawLine(left, top - 15, right, top - 15);
 		g.drawLine(left, top - 20, left, top - 10);
@@ -105,7 +106,7 @@ public class ToolHelper {
 		g.drawLine(right + 10, bottom, right + 20, bottom);
 		// inner line
 		g.setColor(Color.black);
-        g.setStroke(new BasicStroke(1));
+		g.setStroke(new BasicStroke(1));
 		// HORIZONTAL Measure
 		g.drawLine(left, top - 15, right, top - 15);
 		g.drawLine(left, top - 20, left, top - 10);
@@ -118,7 +119,7 @@ public class ToolHelper {
 		// Horizontal number
 		String displayString = String.format("%1.1f", euclideanDistance(renderer, new ScreenPoint(left, top), new ScreenPoint(right, top)));
 		GraphicsUtil.drawBoxedString(g, displayString, left + (right - left) / 2, top - 15);
-		
+
 		// Verical number
 		displayString = String.format("%1.1f", euclideanDistance(renderer, new ScreenPoint(right, top), new ScreenPoint(right, bottom)));
 		GraphicsUtil.drawBoxedString(g, displayString, right + 18, bottom + (top - bottom) / 2);
@@ -135,9 +136,9 @@ public class ToolHelper {
 		String displayString = String.format("%1.1f", euclideanDistance(renderer, startPoint, endPoint));
 
 		GraphicsUtil.drawBoxedString(g, displayString,
-									(int) endPoint.x + (dirLeft ? -15 : 10),
-									(int) endPoint.y + (dirUp ? 15 : -15),
-									dirLeft ? SwingUtilities.LEFT : SwingUtilities.RIGHT);
+				(int) endPoint.x + (dirLeft ? -15 : 10),
+				(int) endPoint.y + (dirUp ? 15 : -15),
+				dirLeft ? SwingUtilities.LEFT : SwingUtilities.RIGHT);
 	}
 
 	/**
@@ -165,11 +166,13 @@ public class ToolHelper {
 
 		return Math.sqrt(a * a + b * b) * renderer.getZone().getUnitsPerCell() / renderer.getScaledGridSize();
 	}
+
 	private static double isometricDistance(ZoneRenderer renderer, ScreenPoint p1, ScreenPoint p2) {
 		double b = p2.y - p1.y;
 		//return b;
 		return 2 * b * renderer.getZone().getUnitsPerCell() / renderer.getScaledGridSize();
 	}
+
 	protected static AffineTransform getPaintTransform(ZoneRenderer renderer) {
 		AffineTransform transform = new AffineTransform();
 		transform.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());

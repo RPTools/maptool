@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.transfer;
@@ -28,7 +28,7 @@ public class AssetProducer {
 	private File assetFile;
 	private long length;
 	private long currentPosition = 0;
-	
+
 	public AssetProducer(Serializable id, String name, File assetFile) {
 		if (!assetFile.exists() || assetFile.isDirectory()) {
 			throw new IllegalArgumentException(assetFile + " is an invalid asset path");
@@ -38,7 +38,7 @@ public class AssetProducer {
 		this.assetFile = assetFile;
 		length = assetFile.length();
 	}
-	
+
 	/**
 	 * Get the header needed to create the corresponding AssetConsumer
 	 * @throws IOException
@@ -54,15 +54,15 @@ public class AssetProducer {
 	 */
 	public AssetChunk nextChunk(int size) throws IOException {
 		if (currentPosition + size > length) {
-			size = (int)(length - currentPosition);
+			size = (int) (length - currentPosition);
 		}
 		byte[] data = new byte[size];
 		FileInputStream in = new FileInputStream(assetFile);
-		
+
 		in.skip(currentPosition);
 		in.read(data, 0, size);
 		in.close();
-		
+
 		currentPosition += size;
 		return new AssetChunk(id, data);
 	}

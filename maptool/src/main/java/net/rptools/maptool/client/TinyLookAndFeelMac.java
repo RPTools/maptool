@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client;
@@ -66,7 +66,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"meta RIGHT", DefaultEditorKit.endLineAction,
 				"meta KP_RIGHT", DefaultEditorKit.endLineAction,
 				// }
-				});
+		});
 
 		Object passwordInputMap = new UIDefaults.LazyInputMap(new Object[] {
 				"meta C", DefaultEditorKit.copyAction,
@@ -110,7 +110,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"meta RIGHT", DefaultEditorKit.endLineAction,
 				"meta KP_RIGHT", DefaultEditorKit.endLineAction,
 				// }
-				});
+		});
 
 		Object multilineInputMap = new UIDefaults.LazyInputMap(new Object[] {
 				"meta C", DefaultEditorKit.copyAction,
@@ -177,7 +177,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"meta RIGHT", DefaultEditorKit.endLineAction,
 				"meta KP_RIGHT", DefaultEditorKit.endLineAction,
 				// }
-				});
+		});
 
 		Object[] defaults = {
 				"TextField.focusInputMap", fieldInputMap,
@@ -233,7 +233,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 						"meta RIGHT", DefaultEditorKit.endLineAction,
 						"meta KP_RIGHT", DefaultEditorKit.endLineAction,
 						// }
-						}),
+				}),
 				"Button.focusInputMap", new UIDefaults.LazyInputMap(new Object[] {
 						"SPACE", "pressed",
 						"released SPACE", "released"

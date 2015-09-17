@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui;
@@ -36,10 +36,10 @@ import net.rptools.maptool.client.PlayerListModel;
  * </ul>
  */
 public class ClientConnectionPanel extends JList {
-	public ClientConnectionPanel () {
+	public ClientConnectionPanel() {
 		setModel(new PlayerListModel(MapTool.getPlayerList()));
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-//		setCellRenderer(new DefaultListCellRenderer());
+		//		setCellRenderer(new DefaultListCellRenderer());
 
 		addMouseListener(createPopupListener());
 	}
@@ -50,7 +50,7 @@ public class ClientConnectionPanel extends JList {
 	}
 
 	private JPopupMenu createPopupMenu() {
-		JPopupMenu menu = new JPopupMenu ();
+		JPopupMenu menu = new JPopupMenu();
 		menu.add(new JMenuItem(AppActions.BOOT_CONNECTED_PLAYER));
 		return menu;
 	}

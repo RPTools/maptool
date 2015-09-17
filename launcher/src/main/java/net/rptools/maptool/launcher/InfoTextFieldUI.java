@@ -23,7 +23,7 @@ import javax.swing.text.JTextComponent;
  * @author frank
  */
 public class InfoTextFieldUI extends BasicTextFieldUI implements FocusListener {
-//	private static final Logger log = Logger.getLogger(InfoTextFieldUI.class.getName());
+	//	private static final Logger log = Logger.getLogger(InfoTextFieldUI.class.getName());
 
 	private final String info;
 	private final boolean hideOnFocus;

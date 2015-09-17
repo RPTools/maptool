@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.zone;
@@ -140,32 +140,32 @@ public class AreaData {
 					break;
 				}
 					// NOT SUPPORTED
-//				case PathIterator.SEG_CUBICTO: coordCount = 3; break;
-//				case PathIterator.SEG_QUADTO: coordCount = 2;break;
+					//				case PathIterator.SEG_CUBICTO: coordCount = 3; break;
+					//				case PathIterator.SEG_QUADTO: coordCount = 2;break;
 				}
 			}
 		}
 
 		// Optimization, if any area is larger than the threshold, split it and go through the resolution
 		// cycle again
-//		if (GeometryUtil.countAreaPoints(areaMeta.area) > POINT_COUNT_THRESHOLD) {
-//
-//			Rectangle bounds = areaMeta.area.getBounds();
-//			
-//			int w = bounds.width > bounds.height ? bounds.width/2 : bounds.width;
-//			int h = bounds.width > bounds.height ? bounds.height : bounds.height/2;
-//			
-//			Area part1 = new Area(areaMeta.area);
-//			part1.intersect(new Area(new Rectangle(bounds.x, bounds.y, w, h)));
-//			areaQueue.add(part1);
-//			
-//			Area part2 = new Area(areaMeta.area);
-//			part2.intersect(new Area(new Rectangle((bounds.x+bounds.width)-w, (bounds.y+bounds.height)-h, w, h)));
-//			areaQueue.add(part2);
-//		}		
+		//		if (GeometryUtil.countAreaPoints(areaMeta.area) > POINT_COUNT_THRESHOLD) {
+		//
+		//			Rectangle bounds = areaMeta.area.getBounds();
+		//			
+		//			int w = bounds.width > bounds.height ? bounds.width/2 : bounds.width;
+		//			int h = bounds.width > bounds.height ? bounds.height : bounds.height/2;
+		//			
+		//			Area part1 = new Area(areaMeta.area);
+		//			part1.intersect(new Area(new Rectangle(bounds.x, bounds.y, w, h)));
+		//			areaQueue.add(part1);
+		//			
+		//			Area part2 = new Area(areaMeta.area);
+		//			part2.intersect(new Area(new Rectangle((bounds.x+bounds.width)-w, (bounds.y+bounds.height)-h, w, h)));
+		//			areaQueue.add(part2);
+		//		}		
 
 		// No longer needed
-//		System.out.println("Size: " + metaList.size());
+		//		System.out.println("Size: " + metaList.size());
 		area = null;
 	}
 }

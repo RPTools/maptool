@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.zone;
@@ -35,12 +35,12 @@ public class BackBufferDrawableRenderer implements DrawableRenderer {
 	private Rectangle lastViewport;
 	private double lastScale;
 	private int lastDrawableListSize;
-	
+
 	public void flush() {
 		backBuffer = null;
 		lastViewport = null;
 	}
-	
+
 	public void renderDrawables(Graphics g, List<DrawnElement> drawableList, Rectangle viewport, double scale) {
 
 		// NOTHING TO DO
@@ -50,14 +50,14 @@ public class BackBufferDrawableRenderer implements DrawableRenderer {
 		}
 
 		boolean newBackbuffer = false;
-		
+
 		// CREATE BACKBUFFER
 		if (backBuffer == null || (lastViewport == null || (lastViewport.width != viewport.width || lastViewport.height != viewport.height))) {
 
 			backBuffer = new BufferedImage(viewport.width, viewport.height, Transparency.TRANSLUCENT);
 			newBackbuffer = true;
 		}
-		
+
 		// SCENERY CHANGE
 		if (newBackbuffer || lastDrawableListSize != drawableList.size() || lastViewport.x != viewport.x || lastViewport.y != viewport.y || lastScale != scale) {
 			if (!newBackbuffer) {
@@ -65,10 +65,10 @@ public class BackBufferDrawableRenderer implements DrawableRenderer {
 			}
 			drawDrawables(drawableList, viewport, scale);
 		}
-		
+
 		// RENDER
 		g.drawImage(backBuffer, 0, 0, null);
-		
+
 		// REMEMBER
 		lastViewport = viewport;
 		lastScale = scale;
@@ -76,12 +76,12 @@ public class BackBufferDrawableRenderer implements DrawableRenderer {
 	}
 
 	private void clearBackbuffer() {
-        Graphics2D g2d = backBuffer.createGraphics();
-        g2d.setBackground(new Color(0, 0, 0, 0)	);
+		Graphics2D g2d = backBuffer.createGraphics();
+		g2d.setBackground(new Color(0, 0, 0, 0));
 		g2d.clearRect(0, 0, backBuffer.getWidth(), backBuffer.getHeight());
 		g2d.dispose();
 	}
-	
+
 	private void drawDrawables(List<DrawnElement> drawableList, Rectangle viewport, double scale) {
 
 		Graphics2D g = backBuffer.createGraphics();
@@ -90,19 +90,19 @@ public class BackBufferDrawableRenderer implements DrawableRenderer {
 
 		AffineTransform af = new AffineTransform();
 		af.scale(scale, scale);
-		af.translate(viewport.x/scale, viewport.y/scale);
+		af.translate(viewport.x / scale, viewport.y / scale);
 		g.setTransform(af);
 
 		Composite oldComposite = g.getComposite();
 		for (DrawnElement element : drawableList) {
-			
+
 			Drawable drawable = element.getDrawable();
-			
-//			if (!drawable.getBounds().intersects(viewport)) {
-//				// Not onscreen
-//				continue;
-//			}
-			
+
+			//			if (!drawable.getBounds().intersects(viewport)) {
+			//				// Not onscreen
+			//				continue;
+			//			}
+
 			Pen pen = element.getPen();
 			if (pen.getOpacity() != 1 && pen.getOpacity() != 0 /* handle legacy pens, besides, it doesn't make sense to have a non visible pen*/) {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
@@ -110,8 +110,8 @@ public class BackBufferDrawableRenderer implements DrawableRenderer {
 			drawable.draw(g, pen);
 			g.setComposite(oldComposite);
 		}
-		
+
 		g.dispose();
-		
+
 	}
 }

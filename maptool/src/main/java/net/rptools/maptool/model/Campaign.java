@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.model;
@@ -233,7 +233,6 @@ public class Campaign {
 		Collections.sort(list);
 		return list;
 	}
-
 
 	/**
 	 * Convenience method that iterates through {@link #getLightSourcesMap()} and returns the value for the key
@@ -514,9 +513,9 @@ public class Campaign {
 				return null;
 			}
 		}
-//		 TODO:  Ugh, what a kludge.  This needs to be refactored so that the settings are separate from the dialog
-//		 and easily accessible from elsewhere.  I want separate XML files in the .cmpgn file eventually so that
-//		 will be a good time to do this.
+		//		 TODO:  Ugh, what a kludge.  This needs to be refactored so that the settings are separate from the dialog
+		//		 and easily accessible from elsewhere.  I want separate XML files in the .cmpgn file eventually so that
+		//		 will be a good time to do this.
 		exportDialog.setExportSettings(exportSettings);
 		exportDialog.setExportLocation(exportLocation);
 		return exportDialog;

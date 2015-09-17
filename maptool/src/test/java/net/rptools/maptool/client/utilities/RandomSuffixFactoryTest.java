@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-
 /**
  * JUnit test suite for
  * {@link net.rptools.maptool.client.utilities.RandomSuffixFactory}.
@@ -71,7 +70,7 @@ public class RandomSuffixFactoryTest extends TestCase {
 			int suffix = rsf.nextSuffixForToken("Too many monsters!");
 			max = Math.max(suffix, max);
 		}
-		
+
 		assertTrue(max > 256);
 	}
 

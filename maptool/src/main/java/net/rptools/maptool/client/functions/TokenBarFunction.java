@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.functions;
@@ -35,7 +35,9 @@ public class TokenBarFunction extends AbstractFunction {
 	private final static TokenBarFunction instance = new TokenBarFunction();
 
 	/** @return singleton instance */
-	public static TokenBarFunction getInstance() { return instance; }
+	public static TokenBarFunction getInstance() {
+		return instance;
+	}
 
 	/**
 	 * @see net.rptools.parser.function.AbstractFunction#childEvaluate(net.rptools.parser.Parser, java.lang.String, java.util.List)
@@ -43,7 +45,7 @@ public class TokenBarFunction extends AbstractFunction {
 	@Override
 	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
 		Token token = AbstractTokenAccessorFunction.getTarget(parser, parameters, -1);
-		String bar = (String)parameters.get(0);
+		String bar = (String) parameters.get(0);
 		if (functionName.equals("getBar")) {
 			return getValue(token, bar);
 		} else if (functionName.equals("setBar")) {
@@ -101,7 +103,7 @@ public class TokenBarFunction extends AbstractFunction {
 	public static BigDecimal getBigDecimalValue(Object value) {
 		BigDecimal val = null;
 		if (value instanceof BigDecimal) {
-			val = (BigDecimal)value;
+			val = (BigDecimal) value;
 		} else if (value == null) {
 			val = BigDecimal.ZERO;
 		} else {

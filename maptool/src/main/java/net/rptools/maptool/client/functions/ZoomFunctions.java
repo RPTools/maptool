@@ -14,11 +14,11 @@ import net.rptools.parser.function.AbstractFunction;
 public class ZoomFunctions extends AbstractFunction {
 	/** Singleton for class **/
 	private static final ZoomFunctions instance = new ZoomFunctions();
-	
+
 	private ZoomFunctions() {
 		super(0, 6, "getZoom", "setZoom", "setViewArea");
 	}
-	
+
 	public static ZoomFunctions getInstance() {
 		return instance;
 	}
@@ -36,7 +36,7 @@ public class ZoomFunctions extends AbstractFunction {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Sets the scale or zoom distance on the current zone
 	 * where a value of 0.5 = 50%, 1 = 100% and 2 = 200%
@@ -55,11 +55,10 @@ public class ZoomFunctions extends AbstractFunction {
 			throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", "moveToken", 1, args.get(0).toString()));
 		}
 		MapTool.getFrame().getCurrentZoneRenderer().setScale(zoom);
-		
+
 		return "";
 	}
 
-	
 	/**
 	 * Returns the scale or zoom distance on the current zone
 	 * where a value of 0.5 = 50%, 1 = 100% and 2 = 200%
@@ -69,7 +68,7 @@ public class ZoomFunctions extends AbstractFunction {
 	private String getZ() throws ParserException {
 		return Double.valueOf(MapTool.getFrame().getCurrentZoneRenderer().getScale()).toString();
 	}
-	
+
 	/**
 	 * Given a grid pixels or cell coordinates of top left (x1, y1) and bottom right (x2, y2)
 	 * this function centres the screen over this area.
@@ -81,10 +80,10 @@ public class ZoomFunctions extends AbstractFunction {
 		if (args.size() < 4) {
 			throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", "setViewArea", 4, args.size()));
 		}
-		int x1=0;
-		int y1=0;
-		int x2=0;
-		int y2=0;
+		int x1 = 0;
+		int y1 = 0;
+		int x2 = 0;
+		int y2 = 0;
 		boolean pixels = true;
 		boolean enforce = false;
 		x1 = parseInteger(args, 0);
@@ -98,10 +97,10 @@ public class ZoomFunctions extends AbstractFunction {
 		// If x & y not in pixels, use grid cell coordinates and convert to pixels
 		if (!pixels) {
 			Grid mapGrid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-			Rectangle fromBounds = mapGrid.getBounds(new CellPoint(x1,y1));
+			Rectangle fromBounds = mapGrid.getBounds(new CellPoint(x1, y1));
 			x1 = fromBounds.x;
 			y1 = fromBounds.y;
-			Rectangle toBounds = mapGrid.getBounds(new CellPoint(x2,y2));
+			Rectangle toBounds = mapGrid.getBounds(new CellPoint(x2, y2));
 			x2 = toBounds.x + toBounds.width;
 			y2 = toBounds.y + toBounds.height;
 		}
@@ -112,13 +111,13 @@ public class ZoomFunctions extends AbstractFunction {
 		int centreY = y1 + (height / 2);
 		MapTool.getFrame().getCurrentZoneRenderer().enforceView(centreX, centreY, 1, width, height);
 		// if requested, set all players to map and match view
-		if (enforce  && MapTool.getParser().isMacroTrusted()) {
+		if (enforce && MapTool.getParser().isMacroTrusted()) {
 			MapTool.serverCommand().enforceZone(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId());
 			MapTool.getFrame().getCurrentZoneRenderer().forcePlayersView();
 		}
 		return "";
 	}
-	
+
 	private int parseInteger(List<Object> args, int param) throws ParserException {
 		try {
 			return Integer.valueOf(args.get(param).toString());
@@ -126,7 +125,7 @@ public class ZoomFunctions extends AbstractFunction {
 			throw new ParserException(I18N.getText("macro.function.general.argumentKeyType", "setViewArea", param, args.get(param).toString()));
 		}
 	}
-	
+
 	private boolean parseBoolean(List<Object> args, int param) throws ParserException {
 		try {
 			return AbstractTokenAccessorFunction.getBooleanValue(args.get(param));

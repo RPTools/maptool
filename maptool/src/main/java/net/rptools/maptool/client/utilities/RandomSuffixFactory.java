@@ -111,7 +111,7 @@ public class RandomSuffixFactory {
 		 */
 		private int nextSuffix() {
 			int unsignedByte = suffixes[index] & 0xFF;
-			
+
 			int suffix = unsignedByte + 1;
 			suffix += (256 * (offset));
 

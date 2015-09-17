@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.tool.drawing;
@@ -90,16 +90,16 @@ public class DrawnTextTool extends AbstractDrawingTool implements
 	 * Initialize the tool icon
 	 */
 	public DrawnTextTool() {
-//		try {
-//			setIcon(new ImageIcon(
-//					ImageIO
-//							.read(getClass()
-//									.getClassLoader()
-//									.getResourceAsStream(
-//											"net/rptools/maptool/client/image/Tool_Draw_Write.gif"))));
-//		} catch (IOException ioe) {
-//			ioe.printStackTrace();
-//		} // endtry
+		//		try {
+		//			setIcon(new ImageIcon(
+		//					ImageIO
+		//							.read(getClass()
+		//									.getClassLoader()
+		//									.getResourceAsStream(
+		//											"net/rptools/maptool/client/image/Tool_Draw_Write.gif"))));
+		//		} catch (IOException ioe) {
+		//			ioe.printStackTrace();
+		//		} // endtry
 	}
 
 	/*---------------------------------------------------------------------------------------------
@@ -295,8 +295,8 @@ public class DrawnTextTool extends AbstractDrawingTool implements
 		// Create a style for the component
 		Style style = textPane.addStyle("default", null);
 		TwoToneTextPane.setFont(style, Font.decode(font));
-//		style.addAttribute(StyleConstants.Foreground, new Color(pen.getColor()));
-//		style.addAttribute(StyleConstants.Background, new Color(pen.getBackgroundColor()));
+		//		style.addAttribute(StyleConstants.Foreground, new Color(pen.getColor()));
+		//		style.addAttribute(StyleConstants.Background, new Color(pen.getBackgroundColor()));
 		textPane.setLogicalStyle(style);
 		return textPane;
 	}

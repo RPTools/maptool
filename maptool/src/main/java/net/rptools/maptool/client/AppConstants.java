@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client;
@@ -35,7 +35,7 @@ public class AppConstants {
 	public static final ImageBorder FOW_TOOLS_BORDER = new ImageBorder("net/rptools/maptool/client/image/border/fowtools");
 	public static final int NOTE_PORTRAIT_SIZE = 200;
 	public static final int ASSET_SEARCH_LIMIT = 1000;
-	
+
 	public static final FilenameFilter IMAGE_FILE_FILTER = new FilenameFilter() {
 		public boolean accept(File dir, String name) {
 			name = name.toLowerCase();
@@ -43,9 +43,9 @@ public class AppConstants {
 			// added here? The question is really whether the Java2D libraries can read TIFF
 			// or my desktop GUI is converting the image during the drop operation... FJE
 			return name.endsWith(".bmp") ||
-			name.endsWith(".png") || name.endsWith(".gif") ||
-			name.endsWith(".jpg") || name.endsWith(".jpeg") ||
-			name.endsWith(Token.FILE_EXTENSION);			// RPTools Token format
+					name.endsWith(".png") || name.endsWith(".gif") ||
+					name.endsWith(".jpg") || name.endsWith(".jpeg") ||
+					name.endsWith(Token.FILE_EXTENSION); // RPTools Token format
 		}
 	};
 

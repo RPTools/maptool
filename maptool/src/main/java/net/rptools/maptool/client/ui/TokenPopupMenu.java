@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui;
@@ -104,10 +104,10 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 		}
 		if (MapTool.getPlayer().isGM() || MapTool.getServerPolicy().getPlayersCanRevealVision()) {
 			add(createExposeMenu());
-//			if (MapTool.getPlayer().isGM()) {
-//				addGMItem(createVisionMenu());
-//			}
-//			add(new JSeparator());
+			//			if (MapTool.getPlayer().isGM()) {
+			//				addGMItem(createVisionMenu());
+			//			}
+			//			add(new JSeparator());
 		}
 		addOwnedItem(createLightSourceMenu());
 		add(new JSeparator());
@@ -386,7 +386,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 			haloMenu.add(new JSeparator());
 
 			Set<String> colorNames = MapToolUtil.getColorNames();
-			for (String name: colorNames) {
+			for (String name : colorNames) {
 				Color bgColor = MapToolUtil.getColor(name);
 				Color fgColor = ColorComboBoxRenderer.selectForegroundColor(bgColor);
 				String displayName = I18N.getString("Color.".concat(name));
@@ -617,7 +617,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 		protected Set<GUID> tokenSet;
 		protected ZoneRenderer renderer;
 
-//		private final String title = "Choose Halo Color";
+		//		private final String title = "Choose Halo Color";
 
 		public SetColorChooserAction(ZoneRenderer renderer, Set<GUID> tokenSet, String name) {
 			this.tokenSet = tokenSet;
@@ -726,7 +726,8 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 			JPanel barPanel = new JPanel(new FormLayout("right:pref 2px pref", "pref"));
 			barPanel.add(labelPanel, new CellConstraints(1, 1));
 			barPanel.add(slider, new CellConstraints(3, 1));
-			if (JOptionPane.showOptionDialog(MapTool.getFrame(), barPanel, "Set " + name + " Value", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null) == JOptionPane.OK_OPTION) {
+			if (JOptionPane.showOptionDialog(MapTool.getFrame(), barPanel, "Set " + name + " Value", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null,
+					null) == JOptionPane.OK_OPTION) {
 				Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 				for (GUID tokenGUID : selectedTokenSet) {
 					Token token = zone.getToken(tokenGUID);

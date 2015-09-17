@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.functions;
@@ -29,7 +29,7 @@ public class IsTrustedFunction extends AbstractFunction {
 	private IsTrustedFunction() {
 		super(0, 1, "isTrusted", "isGM");
 	}
-	
+
 	public static IsTrustedFunction getInstance() {
 		return instance;
 	}
@@ -38,18 +38,18 @@ public class IsTrustedFunction extends AbstractFunction {
 	public Object childEvaluate(Parser parser, String functionName,
 			List<Object> parameters) throws ParserException {
 		if (functionName.equals("isTrusted")) {
-			return MapTool.getParser().isMacroTrusted() ? BigDecimal.ONE : BigDecimal.ZERO; 
+			return MapTool.getParser().isMacroTrusted() ? BigDecimal.ONE : BigDecimal.ZERO;
 		} else {
 			// functionName is isGM
-			if(parameters.isEmpty())
+			if (parameters.isEmpty())
 				return MapTool.getPlayer().isGM() ? BigDecimal.ONE : BigDecimal.ZERO;
 			else {
-				
-				return  getGMs().contains(parameters.get(0)) ? BigDecimal.ONE : BigDecimal.ZERO;
+
+				return getGMs().contains(parameters.get(0)) ? BigDecimal.ONE : BigDecimal.ZERO;
 			}
 		}
 	}
-	
+
 	/**
 	 * retrieves a list of GMs
 	 * @return

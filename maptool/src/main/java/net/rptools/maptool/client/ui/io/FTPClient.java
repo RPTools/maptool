@@ -258,7 +258,7 @@ public class FTPClient {
 				is = (ByteArrayInputStream) data.local;
 			} else if (data.local instanceof InputStream) {
 				is = (InputStream) data.local;
-//				System.err.println("is.available() = " + is.available());
+				//				System.err.println("is.available() = " + is.available());
 			} else if (data.local instanceof String) {
 				File file = new File((String) data.local);
 				try {
@@ -295,17 +295,17 @@ public class FTPClient {
 			/*
 			 * In this situation, "data.remote" is the OutputStream.
 			 */
-//			try {
+			//			try {
 			if (data.remoteDir != null) {
 				cconn.mkdir(data.remoteDir.getPath());
 				os = cconn.openUploadStream(data.remoteDir.getPath(), data.remote);
 			} else
 				os = cconn.openUploadStream(data.remote);
-//			} catch (IOException e) {
-//				File file = new File(data.remoteDir, data.remote);
-//				log.error("Attempting to FTP_PUT local asset " + file.getPath());
-//				e.printStackTrace();
-//			}
+			//			} catch (IOException e) {
+			//				File file = new File(data.remoteDir, data.remote);
+			//				log.error("Attempting to FTP_PUT local asset " + file.getPath());
+			//				e.printStackTrace();
+			//			}
 		} else {
 			/*
 			 * In this situation, "data.local" is the OutputStream.
@@ -394,7 +394,7 @@ public class FTPClient {
 
 		String[] uploadList = new String[] { "campaignItemList.xml", "mockup.jfpr", "standard.mtprops", "updateRepoDialog.xml", };
 		FTPClient ftp = new FTPClient("www.eeconsulting.net", "username", "password");
-//		ftp.setNumberOfThreads(3);
+		//		ftp.setNumberOfThreads(3);
 		File dir = new File("testdir");
 		for (int i = 0; i < uploadList.length; i++) {
 			FTPTransferObject fto = new FTPTransferObject(FTPTransferObject.Direction.FTP_PUT, uploadList[i], dir, uploadList[i]);

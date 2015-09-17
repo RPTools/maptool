@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui;
@@ -51,7 +51,7 @@ public class Toolbox {
 		try {
 			Constructor<? extends Tool> constructor = toolClass.getDeclaredConstructor(new Class[] {});
 			tool = constructor.newInstance(new Object[] {});
-//			tool = constructor.newInstance((Object) null);
+			//			tool = constructor.newInstance((Object) null);
 
 			buttonGroup.add(tool);
 			toolMap.put(toolClass, tool);
@@ -107,7 +107,7 @@ public class Toolbox {
 				if (currentTool != null) {
 					if (currentRenderer != null) {
 						currentTool.removeListeners(currentRenderer);
-//						currentTool.addGridBasedKeys(currentRenderer, false);
+						//						currentTool.addGridBasedKeys(currentRenderer, false);
 						currentTool.detachFrom(currentRenderer);
 
 						if (currentTool instanceof ZoneOverlay) {
@@ -122,7 +122,7 @@ public class Toolbox {
 					if (currentRenderer != null) {
 						// We have a renderer at this point so we can figure out the grid type and add its keystrokes
 						// to the PointerTool.
-//						currentTool.addGridBasedKeys(currentRenderer, true);
+						//						currentTool.addGridBasedKeys(currentRenderer, true);
 						currentTool.addListeners(currentRenderer);
 						currentTool.attachTo(currentRenderer);
 

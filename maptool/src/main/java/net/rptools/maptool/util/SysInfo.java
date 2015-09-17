@@ -1,8 +1,10 @@
 /*
- * This software copyright by various authors including the RPTools.net development team, and licensed under the LGPL
- * Version 3 or, at your option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  * 
- * Portions of this software were originally covered under the Apache Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  * 
  * See the file LICENSE elsewhere in this distribution for license details.
  */
@@ -82,7 +84,7 @@ public class SysInfo {
 
 		// maptool info
 		mt.put("version", MapTool.getVersion());
-//		mt.put("home", AppUtil.getAppHome()); // this  line crashes, I didnt figured out why
+		//		mt.put("home", AppUtil.getAppHome()); // this  line crashes, I didnt figured out why
 		mt.put("max mem avail", format.format(Runtime.getRuntime().maxMemory() / (1024 * 1024)));
 		mt.put("max mem used", format.format(MemoryStatusBar.getInstance().getLargestMemoryUsed()));
 		info.put("maptool", mt);
@@ -105,7 +107,7 @@ public class SysInfo {
 		os.put("name", p.getProperty("os.name"));
 		os.put("version", p.getProperty("os.version"));
 		os.put("arch", p.getProperty("os.arch"));
-//		os.put("path",  (env.get("PATH") != null ? env.get("PATH") : p.getProperty("java.library.path")));
+		//		os.put("path",  (env.get("PATH") != null ? env.get("PATH") : p.getProperty("java.library.path")));
 		info.put("os", os);
 
 		return info;
@@ -236,11 +238,11 @@ public class SysInfo {
 
 		appendInfo("==== Display Information ====");
 		appendInfo("Number of Displays: " + gs.length);
-// XXX Is there any way to report on the actual hardware?  nVidia and
-// ATI/AMD cards sometimes have bugs in their proprietary drivers that
-// cause headache for Java.  It would be nice to have that information.
-// For Windows it would be good to see DirectX module names and version
-// numbers, but can we obtain that from the JRE...?
+		// XXX Is there any way to report on the actual hardware?  nVidia and
+		// ATI/AMD cards sometimes have bugs in their proprietary drivers that
+		// cause headache for Java.  It would be nice to have that information.
+		// For Windows it would be good to see DirectX module names and version
+		// numbers, but can we obtain that from the JRE...?
 		int i = 0;
 		for (GraphicsDevice gd : gs) {
 			i++;
@@ -349,12 +351,12 @@ public class SysInfo {
 		try {
 			Image img = ImageUtil.getImage("net/rptools/maptool/client/image/maptool_icon.png");
 			frame.setIconImage(img);
-//			URL url = MapTool.class.getClassLoader().getResource("net/rptools/maptool/client/image/maptool_icon.png");
-//			Toolkit tk = Toolkit.getDefaultToolkit();
-//			if (url != null) {
-//				Image img = tk.createImage(url);
-//				frame.setIconImage(img);
-//			}
+			//			URL url = MapTool.class.getClassLoader().getResource("net/rptools/maptool/client/image/maptool_icon.png");
+			//			Toolkit tk = Toolkit.getDefaultToolkit();
+			//			if (url != null) {
+			//				Image img = tk.createImage(url);
+			//				frame.setIconImage(img);
+			//			}
 		} catch (Exception ex) {
 			MapTool.showError("While retrieving MapTool logo image?!", ex);
 		}

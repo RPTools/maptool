@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.tokenpanel;
@@ -25,34 +25,34 @@ import net.rptools.maptool.util.ImageManager;
 
 public class TokenListCellRenderer extends DefaultListCellRenderer {
 
-    private BufferedImage image;
-    private String name;
-    
-    @Override
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+	private BufferedImage image;
+	private String name;
 
-        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-        if (value instanceof Token) {
-            Token token = (Token) value;
-            image = ImageManager.getImage(token.getImageAssetId(), this);
-            name = token.getName();
-            
-            setText(" "); // hack to keep the row height the right size
-        }
-        return this;
-    }
-    
-    @Override
-    protected void paintComponent(Graphics g) {
+	@Override
+	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 
-        super.paintComponent(g);
-        
-        if (image != null) {
-            
-            Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
-            SwingUtil.constrainTo(imageSize, getSize().height);
-            g.drawImage(image, 0, 0, imageSize.width, imageSize.height, this);
-            g.drawString(name, imageSize.width + 2, g.getFontMetrics().getAscent());
-        }
-    }
+		super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+		if (value instanceof Token) {
+			Token token = (Token) value;
+			image = ImageManager.getImage(token.getImageAssetId(), this);
+			name = token.getName();
+
+			setText(" "); // hack to keep the row height the right size
+		}
+		return this;
+	}
+
+	@Override
+	protected void paintComponent(Graphics g) {
+
+		super.paintComponent(g);
+
+		if (image != null) {
+
+			Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
+			SwingUtil.constrainTo(imageSize, getSize().height);
+			g.drawImage(image, 0, 0, imageSize.width, imageSize.height, this);
+			g.drawString(name, imageSize.width + 2, g.getFontMetrics().getAscent());
+		}
+	}
 }

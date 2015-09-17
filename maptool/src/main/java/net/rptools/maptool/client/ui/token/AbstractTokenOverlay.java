@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.token;
@@ -26,214 +26,220 @@ import net.rptools.maptool.model.Token;
  */
 public abstract class AbstractTokenOverlay implements Cloneable {
 
-    /*---------------------------------------------------------------------------------------------
-     * Instance Variables
-     *-------------------------------------------------------------------------------------------*/
+	/*---------------------------------------------------------------------------------------------
+	 * Instance Variables
+	 *-------------------------------------------------------------------------------------------*/
 
-    /**
-     * The name of this overlay. Normally this is the name of a state.
-     */
-    protected String name;
+	/**
+	 * The name of this overlay. Normally this is the name of a state.
+	 */
+	protected String name;
 
-    /**
-     * Order of the states as displayed on the states menu.
-     */
-    private int order;
+	/**
+	 * Order of the states as displayed on the states menu.
+	 */
+	private int order;
 
-    /**
-     * The group that this token overlay belongs to. It may be <code>null</code>.
-     */
-    private String group;
+	/**
+	 * The group that this token overlay belongs to. It may be <code>null</code>.
+	 */
+	private String group;
 
-    /**
-     * Flag indicating that this token overlay is only displayed on mouseover
-     */
-    private boolean mouseover;
+	/**
+	 * Flag indicating that this token overlay is only displayed on mouseover
+	 */
+	private boolean mouseover;
 
-    /**
-     * The opacity of the painting. Must be a value between 0 & 100
-     */
-    private int opacity = 100;
+	/**
+	 * The opacity of the painting. Must be a value between 0 & 100
+	 */
+	private int opacity = 100;
 
-    /**
-     * Flag indicating that this token overlay is displayed to the user.
-     */
-    private boolean showGM;
-    
-    /**
-     * Flag indicating that this token overlay is displayed to the owner.
-     */
-    private boolean showOwner;
-    
-    /**
-     * Flag indicating that this token overlay is displayed to the everybody else.
-     */
-    private boolean showOthers;
-    
-    /*---------------------------------------------------------------------------------------------
-     * Class Variables
-     *-------------------------------------------------------------------------------------------*/
+	/**
+	 * Flag indicating that this token overlay is displayed to the user.
+	 */
+	private boolean showGM;
 
-    /**
-     * A default state name used in default constructors.
-     */
-    public static final String DEFAULT_STATE_NAME = "defaultStateName";
+	/**
+	 * Flag indicating that this token overlay is displayed to the owner.
+	 */
+	private boolean showOwner;
 
-    /**
-     * This comparator is used to order the states.
-     */
-    public static final Comparator<AbstractTokenOverlay> COMPARATOR = new Comparator<AbstractTokenOverlay>() {
-        public int compare(AbstractTokenOverlay o1, AbstractTokenOverlay o2) {
-            return o1.getOrder() - o2.getOrder();
-        }
-    };
+	/**
+	 * Flag indicating that this token overlay is displayed to the everybody else.
+	 */
+	private boolean showOthers;
 
-    /*---------------------------------------------------------------------------------------------
-     * Constructors
-     *-------------------------------------------------------------------------------------------*/
+	/*---------------------------------------------------------------------------------------------
+	 * Class Variables
+	 *-------------------------------------------------------------------------------------------*/
 
-    /**
-     * Create an overlay with the passed name.
-     * 
-     * @param aName Name of the new overlay.
-     */
-    protected AbstractTokenOverlay(String aName) {
-      assert aName != null : "A name is required but null was passed.";
-      name = aName;
-    }
+	/**
+	 * A default state name used in default constructors.
+	 */
+	public static final String DEFAULT_STATE_NAME = "defaultStateName";
 
-    /*---------------------------------------------------------------------------------------------
-     * Instance Methods
-     *-------------------------------------------------------------------------------------------*/
+	/**
+	 * This comparator is used to order the states.
+	 */
+	public static final Comparator<AbstractTokenOverlay> COMPARATOR = new Comparator<AbstractTokenOverlay>() {
+		public int compare(AbstractTokenOverlay o1, AbstractTokenOverlay o2) {
+			return o1.getOrder() - o2.getOrder();
+		}
+	};
 
-    /**
-     * Get the name for this AbstractTokenOverlay.
-     *
-     * @return Returns the current value of name.
-     */
-    public String getName() {
-        return name;
-    }
+	/*---------------------------------------------------------------------------------------------
+	 * Constructors
+	 *-------------------------------------------------------------------------------------------*/
 
-    /**
-     * Set the value of name for this AbstractTokenOverlay.
-     *
-     * @param aName The name to set.
-     */
-    public void setName(String aName) {
-        name = aName;
-    }
+	/**
+	 * Create an overlay with the passed name.
+	 * 
+	 * @param aName Name of the new overlay.
+	 */
+	protected AbstractTokenOverlay(String aName) {
+		assert aName != null : "A name is required but null was passed.";
+		name = aName;
+	}
 
-    /** @return Getter for order */
-    public int getOrder() {
-        return order;
-    }
+	/*---------------------------------------------------------------------------------------------
+	 * Instance Methods
+	 *-------------------------------------------------------------------------------------------*/
 
-    /** @param order Setter for the order to set */
-    public void setOrder(int order) {
-        this.order = order;
-    }
+	/**
+	 * Get the name for this AbstractTokenOverlay.
+	 *
+	 * @return Returns the current value of name.
+	 */
+	public String getName() {
+		return name;
+	}
 
-    /** @return Getter for group */
-    public String getGroup() {
-        return group;
-    }
+	/**
+	 * Set the value of name for this AbstractTokenOverlay.
+	 *
+	 * @param aName The name to set.
+	 */
+	public void setName(String aName) {
+		name = aName;
+	}
 
-    /** @param group Setter for group */
-    public void setGroup(String group) {
-        this.group = group;
-    }
+	/** @return Getter for order */
+	public int getOrder() {
+		return order;
+	}
 
-    /** @return Getter for mouseover */
-    public boolean isMouseover() {
-        return mouseover;
-    }
+	/** @param order Setter for the order to set */
+	public void setOrder(int order) {
+		this.order = order;
+	}
 
-    /** @param mouseover Setter for mouseover */
-    public void setMouseover(boolean mouseover) {
-        this.mouseover = mouseover;
-    }
+	/** @return Getter for group */
+	public String getGroup() {
+		return group;
+	}
 
-    /** @return Getter for opacity */
-    public int getOpacity() {
-        if (opacity == 0)
-            opacity = 100;
-        return opacity;
-    }
+	/** @param group Setter for group */
+	public void setGroup(String group) {
+		this.group = group;
+	}
 
-    /** @param opacity Setter for opacity */
-    public void setOpacity(int opacity) {
-        this.opacity = opacity;
-    }
+	/** @return Getter for mouseover */
+	public boolean isMouseover() {
+		return mouseover;
+	}
 
-    /** @return Getter for showGM */
-    public boolean isShowGM() {
-        if (!showGM && !showOwner && !showOthers) showGM = showOwner = showOthers = true;
-        return showGM;
-    }
+	/** @param mouseover Setter for mouseover */
+	public void setMouseover(boolean mouseover) {
+		this.mouseover = mouseover;
+	}
 
-    /** @param showGM Setter for showGM */
-    public void setShowGM(boolean showGM) {
-        this.showGM = showGM;
-    }
+	/** @return Getter for opacity */
+	public int getOpacity() {
+		if (opacity == 0)
+			opacity = 100;
+		return opacity;
+	}
 
-    /** @return Getter for showOwner */
-    public boolean isShowOwner() {
-        if (!showGM && !showOwner && !showOthers) showGM = showOwner = showOthers = true;
-        return showOwner;
-    }
+	/** @param opacity Setter for opacity */
+	public void setOpacity(int opacity) {
+		this.opacity = opacity;
+	}
 
-    /** @param showOwner Setter for showOwner */
-    public void setShowOwner(boolean showOwner) {
-        this.showOwner = showOwner;
-    }
+	/** @return Getter for showGM */
+	public boolean isShowGM() {
+		if (!showGM && !showOwner && !showOthers)
+			showGM = showOwner = showOthers = true;
+		return showGM;
+	}
 
-    /** @return Getter for showOthers */
-    public boolean isShowOthers() {
-        if (!showGM && !showOwner && !showOthers) showGM = showOwner = showOthers = true;
-        return showOthers;
-    }
+	/** @param showGM Setter for showGM */
+	public void setShowGM(boolean showGM) {
+		this.showGM = showGM;
+	}
 
-    /** @param showOthers Setter for showOthers */
-    public void setShowOthers(boolean showOthers) {
-        this.showOthers = showOthers;
-    }
+	/** @return Getter for showOwner */
+	public boolean isShowOwner() {
+		if (!showGM && !showOwner && !showOthers)
+			showGM = showOwner = showOthers = true;
+		return showOwner;
+	}
 
-    /**
-     * Determine if the current overly should be displayed to a player for a given token
-     * 
-     * @param token Check owner of this token
-     * @param player Check to see if this player can see this overlay.
-     * @return The value <code>true</code> if the passed player can see this overlay on the token.
-     */
-    public boolean showPlayer(Token token, Player player) {
-        if (isShowGM() && player.isGM()) return true;
-        boolean owner = token.isOwner(player.getName());
-        if (isShowOwner() && owner) return true;
-        if (isShowOthers() && !player.isGM() && !owner) return true;
-        return false;
-    }
-    
-    /*---------------------------------------------------------------------------------------------
-     * Abstract Methods
-     *-------------------------------------------------------------------------------------------*/
+	/** @param showOwner Setter for showOwner */
+	public void setShowOwner(boolean showOwner) {
+		this.showOwner = showOwner;
+	}
 
-    /**
-     * Paint the overlay for the passed token.
-     * 
-     * @param g Graphics used to paint. It is already translated so that 0,0 is
-     * the upper left corner of the token. It is also clipped so that the overlay can not
-     * draw out of the token's bounding box.
-     * @param token The token being painted.
-     * @param bounds The bounds of the actual token. This will be different than the clip
-     * since the clip also has to take into account the edge of the window. If you draw 
-     * based on the clip it will be off for partial token painting.
-     * @param value The value for the token state.
-     */
-    public abstract void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value);
-    
-    /**
-     * @see java.lang.Object#clone()
-     */
-    public abstract Object clone();
+	/** @return Getter for showOthers */
+	public boolean isShowOthers() {
+		if (!showGM && !showOwner && !showOthers)
+			showGM = showOwner = showOthers = true;
+		return showOthers;
+	}
+
+	/** @param showOthers Setter for showOthers */
+	public void setShowOthers(boolean showOthers) {
+		this.showOthers = showOthers;
+	}
+
+	/**
+	 * Determine if the current overly should be displayed to a player for a given token
+	 * 
+	 * @param token Check owner of this token
+	 * @param player Check to see if this player can see this overlay.
+	 * @return The value <code>true</code> if the passed player can see this overlay on the token.
+	 */
+	public boolean showPlayer(Token token, Player player) {
+		if (isShowGM() && player.isGM())
+			return true;
+		boolean owner = token.isOwner(player.getName());
+		if (isShowOwner() && owner)
+			return true;
+		if (isShowOthers() && !player.isGM() && !owner)
+			return true;
+		return false;
+	}
+
+	/*---------------------------------------------------------------------------------------------
+	 * Abstract Methods
+	 *-------------------------------------------------------------------------------------------*/
+
+	/**
+	 * Paint the overlay for the passed token.
+	 * 
+	 * @param g Graphics used to paint. It is already translated so that 0,0 is
+	 * the upper left corner of the token. It is also clipped so that the overlay can not
+	 * draw out of the token's bounding box.
+	 * @param token The token being painted.
+	 * @param bounds The bounds of the actual token. This will be different than the clip
+	 * since the clip also has to take into account the edge of the window. If you draw 
+	 * based on the clip it will be off for partial token painting.
+	 * @param value The value for the token state.
+	 */
+	public abstract void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value);
+
+	/**
+	 * @see java.lang.Object#clone()
+	 */
+	public abstract Object clone();
 }

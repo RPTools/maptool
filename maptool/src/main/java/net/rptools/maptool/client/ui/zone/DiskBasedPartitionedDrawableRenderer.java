@@ -117,27 +117,27 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 					chunkMap.put(key, chunk);
 				}
 				if (chunk != null && chunk != NO_IMAGE) {
-//					System.out.println("Drawing: " + key);
+					//					System.out.println("Drawing: " + key);
 					count++;
 					g.drawImage(chunk, x, y, null);
 				}
 				chunkCache.remove(key);
 
-//				if (col%2 == 0) {
-//					if (row%2 == 0) {
-//						g.setColor(Color.white);
-//					} else {
-//						g.setColor(Color.green);
-//					}
-//				} else {
-//					if (row%2 == 0) {
-//						g.setColor(Color.green);
-//					} else {
-//						g.setColor(Color.white);
-//					}
-//				}
-//				g.drawRect(x, y, CHUNK_SIZE-1, CHUNK_SIZE-1);
-//				g.drawString(key, x + CHUNK_SIZE/2, y + CHUNK_SIZE/2);
+				//				if (col%2 == 0) {
+				//					if (row%2 == 0) {
+				//						g.setColor(Color.white);
+				//					} else {
+				//						g.setColor(Color.green);
+				//					}
+				//				} else {
+				//					if (row%2 == 0) {
+				//						g.setColor(Color.green);
+				//					} else {
+				//						g.setColor(Color.white);
+				//					}
+				//				}
+				//				g.drawRect(x, y, CHUNK_SIZE-1, CHUNK_SIZE-1);
+				//				g.drawString(key, x + CHUNK_SIZE/2, y + CHUNK_SIZE/2);
 			}
 		}
 		for (String key : chunkCache) {
@@ -146,7 +146,7 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 				chunkMap.remove(key);
 			}
 		}
-//		System.out.println("Chunks: " + count);
+		//		System.out.println("Chunks: " + count);
 
 		// REMEMBER
 		lastViewport = viewport;
@@ -160,13 +160,13 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 		if (chunkFile.exists()) {
 			try {
 				BufferedImage image = ImageIO.read(chunkFile);
-//				System.out.println("Using cache: " + gridx + ", " + gridy);
+				//				System.out.println("Using cache: " + gridx + ", " + gridy);
 				return image;
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
 			}
 		}
-//		System.out.println("Creating " + gridx + ", " + gridy);
+		//		System.out.println("Creating " + gridx + ", " + gridy);
 
 		int x = gridx * CHUNK_SIZE;
 		int y = gridy * CHUNK_SIZE;
@@ -180,10 +180,10 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 
 			Rectangle2D drawnBounds = drawable.getBounds();
 			Rectangle2D chunkBounds = new Rectangle((int) (gridx * (CHUNK_SIZE / scale)), (int) (gridy * (CHUNK_SIZE / scale)), (int) (CHUNK_SIZE / scale), (int) (CHUNK_SIZE / scale));
-//			if (gridx == 0 && gridy == 1) {
-//				System.out.println(drawnBounds.intersects(chunkBounds));
-//				System.out.println(drawnBounds + " - " + chunkBounds);
-//			}
+			//			if (gridx == 0 && gridy == 1) {
+			//				System.out.println(drawnBounds.intersects(chunkBounds));
+			//				System.out.println(drawnBounds + " - " + chunkBounds);
+			//			}
 
 			// TODO: handle pen size
 			if (!drawnBounds.intersects(chunkBounds)) {
@@ -207,9 +207,9 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 			if (pen.getOpacity() != 1 && pen.getOpacity() != 0) {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
 			}
-//			if (gridx == 0 && gridy == 1) {
-//				System.out.println("draw");
-//			}
+			//			if (gridx == 0 && gridy == 1) {
+			//				System.out.println("draw");
+			//			}
 			drawable.draw(g, pen);
 			g.setComposite(oldComposite);
 		}
@@ -217,10 +217,10 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 		if (g != null) {
 			g.dispose();
 		}
-//		if (image != null && isEmpty(image)) {
-//			releaseChunk(image);
-//			image = null;
-//		}
+		//		if (image != null && isEmpty(image)) {
+		//			releaseChunk(image);
+		//			image = null;
+		//		}
 		if (image == null) {
 			image = NO_IMAGE;
 		} else {

@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.tool.drawing;
@@ -69,18 +69,18 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 
 		return new Rectangle(x, y, w, h);
 	}
-	
+
 	protected Shape createDiamond(ZonePoint originPoint, ZonePoint newPoint) {
 		int ox = originPoint.x;
 		int oy = originPoint.y;
 		int nx = newPoint.x;
 		int ny = newPoint.y;
-		int x1 = ox - (ny - oy) + ((nx-ox)/2);
-		int y1 = ((oy+ny)/2)-((nx-ox)/4);
-		int x2 = ox + (ny - oy) + ((nx - ox)/2);
-		int y2 = ((oy+ny)/2)+((nx-ox)/4);
-		int x[] = {originPoint.x, x1, nx, x2};
-		int y[] = {originPoint.y, y1, ny, y2 };
+		int x1 = ox - (ny - oy) + ((nx - ox) / 2);
+		int y1 = ((oy + ny) / 2) - ((nx - ox) / 4);
+		int x2 = ox + (ny - oy) + ((nx - ox) / 2);
+		int y2 = ((oy + ny) / 2) + ((nx - ox) / 4);
+		int x[] = { originPoint.x, x1, nx, x2 };
+		int y[] = { originPoint.y, y1, ny, y2 };
 		return new Polygon(x, y, 4);
 	}
 
@@ -89,18 +89,18 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 		int oy = originPoint.y;
 		int nx = newPoint.x;
 		int ny = newPoint.y;
-		int x1 = ox - (ny - oy) + ((nx-ox)/2);
-		int y1 = ((oy+ny)/2)-((nx-ox)/4);
-		int x2 = ox + (ny - oy) + ((nx - ox)/2);
-		int y2 = ((oy+ny)/2)+((nx-ox)/4);
-		int x[] = {originPoint.x, x1, nx, x2, originPoint.x};
-		int y[] = {originPoint.y, y1, ny, y2, originPoint.y };
+		int x1 = ox - (ny - oy) + ((nx - ox) / 2);
+		int y1 = ((oy + ny) / 2) - ((nx - ox) / 4);
+		int x2 = ox + (ny - oy) + ((nx - ox) / 2);
+		int y2 = ((oy + ny) / 2) + ((nx - ox) / 4);
+		int x[] = { originPoint.x, x1, nx, x2, originPoint.x };
+		int y[] = { originPoint.y, y1, ny, y2, originPoint.y };
 
 		BasicStroke stroke = new BasicStroke(pen.getThickness(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
 		Path2D path = new Path2D.Double();
-		
-		for (int l=0;l<5;l++) {
+
+		for (int l = 0; l < 5; l++) {
 			if (path.getCurrentPoint() == null) {
 				path.moveTo(x[l], y[l]);
 			} else {

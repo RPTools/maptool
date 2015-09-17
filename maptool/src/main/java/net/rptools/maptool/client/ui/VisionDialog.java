@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui;
@@ -114,7 +114,7 @@ public class VisionDialog extends JDialog {
 		JButton button = (JButton) panel.getButton("deleteButton");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-//				token.removeVision(vision);
+				//				token.removeVision(vision);
 				close();
 			}
 		});
@@ -148,7 +148,7 @@ public class VisionDialog extends JDialog {
 		vision.setEnabled(enabledCheckBox.isSelected());
 		vision.setDistance(distance);
 
-//		token.addVision(vision);
+		//		token.addVision(vision);
 		MapTool.serverCommand().putToken(zone.getId(), token);
 		return true;
 	}

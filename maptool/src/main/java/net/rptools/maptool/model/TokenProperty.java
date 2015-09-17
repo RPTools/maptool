@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.model;
@@ -36,6 +36,7 @@ public class TokenProperty implements Serializable {
 	public TokenProperty(String name, boolean highPriority, boolean isOwnerOnly, boolean isGMOnly) {
 		this(name, null, highPriority, isOwnerOnly, isGMOnly);
 	}
+
 	public TokenProperty(String name, String shortName, boolean highPriority, boolean isOwnerOnly, boolean isGMOnly) {
 		this.name = name;
 		this.shortName = shortName;
@@ -43,13 +44,14 @@ public class TokenProperty implements Serializable {
 		this.ownerOnly = isOwnerOnly;
 		this.gmOnly = isGMOnly;
 	}
+
 	public TokenProperty(String name, String shortName, boolean highPriority, boolean isOwnerOnly, boolean isGMOnly, String defaultValue) {
 		this.name = name;
 		this.shortName = shortName;
 		this.highPriority = highPriority;
 		this.ownerOnly = isOwnerOnly;
 		this.gmOnly = isGMOnly;
-		this.defaultValue= defaultValue;
+		this.defaultValue = defaultValue;
 	}
 
 	public boolean isOwnerOnly() {
@@ -63,12 +65,15 @@ public class TokenProperty implements Serializable {
 	public boolean isShowOnStatSheet() {
 		return highPriority;
 	}
+
 	public void setShowOnStatSheet(boolean showOnStatSheet) {
 		this.highPriority = showOnStatSheet;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -89,13 +94,11 @@ public class TokenProperty implements Serializable {
 		this.gmOnly = gmOnly;
 	}
 
-	public String getDefaultValue()
-	{
+	public String getDefaultValue() {
 		return this.defaultValue;
 	}
 
-	public void setDefaultValue(String defaultValue)
-	{
+	public void setDefaultValue(String defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 }

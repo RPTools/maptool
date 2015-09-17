@@ -280,7 +280,7 @@ public class MapToolLauncher extends JFrame {
 		if (startConsole) {
 			if (IS_WINDOWS) {
 				cmdArgs = getLaunchCommand(invocationCommands[1], mapToolJarDir);
-//				log = null; // Windows doesn't like having multiple tasks opening the same file for writing all at once
+				//				log = null; // Windows doesn't like having multiple tasks opening the same file for writing all at once
 			} else if (IS_MAC) {
 				cmdArgs = getLaunchCommand(invocationCommands[0], mapToolJarDir);
 				pb = new ProcessBuilder(new String[] { "open", "-a", "Console", log.toString() });
@@ -299,8 +299,8 @@ public class MapToolLauncher extends JFrame {
 			pb.directory(mapToolJarDir);
 			// This is a great idea, but .redirectOutput() requires Java 1.7+ so it won't build for
 			// J6 and hence users with the Java provided by Apple can't use the launcher. :(
-//			if (log != null)
-//				pb.redirectOutput(log).redirectErrorStream(true);
+			//			if (log != null)
+			//				pb.redirectOutput(log).redirectErrorStream(true);
 			pb.start();
 		} catch (final IOException ex) {
 			logMsg(Level.SEVERE, "Error starting MapTool instance; dir={0}, cmd={1}\n{2}", "msg.error.startingMapTool", mapToolJarDir, cmdArgs, ex);
@@ -497,7 +497,7 @@ public class MapToolLauncher extends JFrame {
 				mapToolLocale = e.getActionCommand();
 				// Setting the language won't work without reinitalizing the interface.
 				// Instead, we just save it and use it for MapTool.
-//				CopiedFromOtherJars.setLanguage(mapToolLocale);
+				//				CopiedFromOtherJars.setLanguage(mapToolLocale);
 				updateCommand();
 			}
 		};
@@ -579,7 +579,7 @@ public class MapToolLauncher extends JFrame {
 				updateCommand();
 			}
 		});
-//		jcbRelativePath.setSelected(false); // since initComponents() is called after reading the config, don't do this here
+		//		jcbRelativePath.setSelected(false); // since initComponents() is called after reading the config, don't do this here
 
 		jcbConsole.setText(CopiedFromOtherJars.getText("msg.info.launchWithConsole")); //$NON-NLS-1$
 		jcbConsole.setToolTipText(CopiedFromOtherJars.getText("msg.tooltip.launchWithConsole")); //$NON-NLS-1$
@@ -810,7 +810,7 @@ public class MapToolLauncher extends JFrame {
 		});
 		Dimension d = new Dimension(advancedPanel.getPreferredSize().width, 25);
 		jtfArgs.setPreferredSize(d);
-//		mtlOptions.setPreferredSize(new Dimension(350, getPreferredSize().height));
+		//		mtlOptions.setPreferredSize(new Dimension(350, getPreferredSize().height));
 		d.width = -1;
 		d.height = -1;
 		JLabel tabLabel = null;
@@ -1539,12 +1539,12 @@ public class MapToolLauncher extends JFrame {
 
 		// Force trailing separators so relative path can be constructed properly
 		baseDir = currentDir.getAbsolutePath() + File.separator;
-//		baseDir = "E:\\MapTool\\MapTool V1-3b89\\"; // For testing the relative pathing routines
+		//		baseDir = "E:\\MapTool\\MapTool V1-3b89\\"; // For testing the relative pathing routines
 
 		relDir = mapToolJarDir.getAbsolutePath();
 		if (jcbRelativePath.isSelected()) {
 			targetDir = relDir + File.separator;
-//			targetDir = "E:\\MapTool\\MapTool V1-3b89\\";
+			//			targetDir = "E:\\MapTool\\MapTool V1-3b89\\";
 			try {
 				relDir = PathUtils.getRelativePath(targetDir, baseDir);
 			} catch (final PathResolutionException e) {

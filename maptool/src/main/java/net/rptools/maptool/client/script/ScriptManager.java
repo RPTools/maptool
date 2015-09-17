@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.script;
@@ -36,6 +36,7 @@ public class ScriptManager {
 	};
 
 	static boolean useDynamicSCope = false;
+
 	static {
 		ContextFactory.initGlobal(new MapToolContextFactory());
 	}
@@ -99,28 +100,28 @@ public class ScriptManager {
 			Matcher m = registerPattern.matcher(line);
 			if (m.matches()) {
 				JSONObject o = JSONObject.fromObject(m.group(1));
-//                System.out.println(m.group(1));
-//                System.out.println(o);
+				//                System.out.println(m.group(1));
+				//                System.out.println(o);
 			}
 		}
 	}
 
-//	public Object evaluate(Script script) throws IOException {
-//		return this.evaluate(Collections.emptyMap(), script);
-//	}
+	//	public Object evaluate(Script script) throws IOException {
+	//		return this.evaluate(Collections.emptyMap(), script);
+	//	}
 
 	private static class MapToolContextFactory extends ContextFactory {
 		@Override
 		protected void observeInstructionCount(Context cx, int instructionCount) {
-//			if (System.currentTimeMillis() - lastCancelPromptTime > RUNNING_TOO_LONG_MS) {
-//				int opt = JOptionPane.showConfirmDialog(MapTool.getFrame(),
-//						"The macro has been running too long\n would you like to cancel?", "Macro Running too long",
-//						JOptionPane.YES_NO_OPTION);
-//				lastCancelPromptTime = System.currentTimeMillis();
-//				if (opt == 0) {
-//					throw new Error("Script running too long.");
-//				}
-//			}
+			//			if (System.currentTimeMillis() - lastCancelPromptTime > RUNNING_TOO_LONG_MS) {
+			//				int opt = JOptionPane.showConfirmDialog(MapTool.getFrame(),
+			//						"The macro has been running too long\n would you like to cancel?", "Macro Running too long",
+			//						JOptionPane.YES_NO_OPTION);
+			//				lastCancelPromptTime = System.currentTimeMillis();
+			//				if (opt == 0) {
+			//					throw new Error("Script running too long.");
+			//				}
+			//			}
 		}
 
 		@Override

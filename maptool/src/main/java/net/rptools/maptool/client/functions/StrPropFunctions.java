@@ -100,7 +100,7 @@ public class StrPropFunctions extends AbstractFunction {
 					// so this flag will prevent that.
 					lastEntry = true;
 				}
-//				private static final String keyValuePatt = "([\\w .]+)=(.*)";
+				//				private static final String keyValuePatt = "([\\w .]+)=(.*)";
 				Matcher keyValueMatcher = keyValueParser.matcher(entry);
 				if (keyValueMatcher.find()) {
 					String propKey = keyValueMatcher.group(1).trim();
@@ -174,7 +174,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 */
 	public Object getStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
 			List<String> oldKeys, List<String> oldKeysNormalized)
-			throws ParserException {
+					throws ParserException {
 		Object retval = "";
 		String delim = ";";
 		String userKey;
@@ -210,7 +210,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 */
 	public Object setStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
 			List<String> oldKeys, List<String> oldKeysNormalized)
-			throws ParserException {
+					throws ParserException {
 		Object retval = "";
 		String delim = ";";
 		String userKey, userValue;
@@ -256,7 +256,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 */
 	public Object deleteStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
 			List<String> oldKeys, List<String> oldKeysNormalized)
-			throws ParserException {
+					throws ParserException {
 		Object retval = "";
 		String delim = ";";
 		String userKey;
@@ -336,7 +336,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 */
 	public Object varsFromStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
 			List<String> oldKeys, List<String> oldKeysNormalized, Parser parser)
-			throws ParserException {
+					throws ParserException {
 		Object retval = "";
 		String delim = ";";
 		int option; // 0-none, 1-suffixed, 2-unsuffixed
@@ -411,7 +411,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 */
 	public Object strPropFromVars(List<Object> parameters, String lastParam, String props, Map<String, String> map,
 			List<String> oldKeys, List<String> oldKeysNormalized, Parser parser)
-			throws ParserException {
+					throws ParserException {
 		Object retval = null;
 		String delim = ";";
 
@@ -452,7 +452,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 */
 	public Object countStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
 			List<String> oldKeys, List<String> oldKeysNormalized)
-			throws ParserException {
+					throws ParserException {
 		Object retval = "";
 		String delim = ";";
 
@@ -477,7 +477,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 */
 	public Object indexKeyStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
 			List<String> oldKeys, List<String> oldKeysNormalized)
-			throws ParserException {
+					throws ParserException {
 		Object retval = "";
 		String delim = ";";
 
@@ -508,7 +508,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 */
 	public Object indexValueStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
 			List<String> oldKeys, List<String> oldKeysNormalized)
-			throws ParserException {
+					throws ParserException {
 		String value = "";
 		Object retval = null;
 		String delim = ";";
@@ -556,7 +556,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 */
 	public Object formatStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
 			List<String> oldKeys, List<String> oldKeysNormalized)
-			throws ParserException {
+					throws ParserException {
 		Object retval = null;
 		String delim = ";";
 
@@ -618,7 +618,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 */
 	public void checkVaryingParameters(
 			String funcName, int minParams, int maxParams, List<Object> parameters, Class<?>[] expected)
-			throws ParameterException {
+					throws ParameterException {
 		if (parameters.size() < minParams || parameters.size() > maxParams) {
 			if (minParams == maxParams) {
 				throw new ParameterException(I18N.getText("macro.function.strLst.incorrectParamExact", funcName, minParams));

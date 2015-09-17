@@ -285,7 +285,7 @@ public class I18N {
 					k = KeyStroke.getKeyStroke(k.getKeyChar(), modifiers);
 			}
 			action.putValue(Action.ACCELERATOR_KEY, k);
-//			System.err.println("I18N.setAction(\"" + key + "\") = " + k);
+			//			System.err.println("I18N.setAction(\"" + key + "\") = " + k);
 		}
 		String description = getDescription(key);
 		if (description != null)

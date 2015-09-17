@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.swing;
@@ -28,7 +28,7 @@ public class ScrollablePanel extends JPanel implements Scrollable {
 	public ScrollablePanel(JComponent component, int unitIncrement, int blockIncrement) {
 		setLayout(new GridLayout());
 		add(component);
-		
+
 		this.unitIncrement = unitIncrement;
 		this.blockIncrement = blockIncrement;
 	}
@@ -40,28 +40,32 @@ public class ScrollablePanel extends JPanel implements Scrollable {
 	public ScrollablePanel(JComponent component) {
 		this(component, 20);
 	}
-	
+
 	public static JScrollPane wrap(JComponent component) {
-		
+
 		JScrollPane pane = new JScrollPane(new ScrollablePanel(component), JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		return pane;
 	}
-	
+
 	////
 	// SCROLLABLE
 	public Dimension getPreferredScrollableViewportSize() {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
 		return blockIncrement;
 	}
+
 	public boolean getScrollableTracksViewportHeight() {
 		return false;
 	}
+
 	public boolean getScrollableTracksViewportWidth() {
 		return true;
 	}
+
 	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
 		return unitIncrement;
 	}

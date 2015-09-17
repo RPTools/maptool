@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.assetpanel;
@@ -185,38 +185,32 @@ public class AssetPanel extends JComponent {
 	 * 
 	 * @return the checkbox component
 	 */
-	private JCheckBox getGlobalSearchField()
-	{
-		if (globalSearchField == null)
-		{
+	private JCheckBox getGlobalSearchField() {
+		if (globalSearchField == null) {
 			globalSearchField = new JCheckBox(I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir1"), false);
-			globalSearchField.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent ev)
-				{
+			globalSearchField.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ev) {
 					updateFilter();
 				}
 			});
 		}
 		return globalSearchField;
 	}
-	
-	public void updateGlobalSearchLabel(int listSize)
-	{
-		if(getGlobalSearchField().isSelected())
-		{
+
+	public void updateGlobalSearchLabel(int listSize) {
+		if (getGlobalSearchField().isSelected()) {
 			globalSearchField.setText(
-					I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir1") 
-					+ " (" + listSize + "/" + AppConstants.ASSET_SEARCH_LIMIT + " " 
-					+ I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir2") + ")");
+					I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir1")
+							+ " (" + listSize + "/" + AppConstants.ASSET_SEARCH_LIMIT + " "
+							+ I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir2") + ")");
 		} else {
 			globalSearchField.setText(I18N.getText("panel.Asset.ImageModel.checkbox.searchSubDir1"));
 		}
-		
+
 		imagePanel.revalidate();
 		imagePanel.repaint();
 	}
-	
+
 	private synchronized void updateFilter() {
 		if (updateFilterTimer == null) {
 			updateFilterTimer = new Timer(500, new ActionListener() {
@@ -241,7 +235,6 @@ public class AssetPanel extends JComponent {
 		}
 	}
 
-	
 	// TODO: Find a way around this, it's ugly
 	public Asset getAsset(int index) {
 		return ((ImageFileImagePanelModel) imagePanel.getModel()).getAsset(index);

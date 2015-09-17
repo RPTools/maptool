@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.server;
@@ -89,10 +89,10 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
 			server.getConnection().callMethod(conn.getId(), ClientCommand.COMMAND.playerConnected.name(), playerMap.get(id));
 		}
 		server.getConnection().broadcastCallMethod(ClientCommand.COMMAND.playerConnected.name(), player);
-//     if (!server.isHostId(player.getName())) {
+		//     if (!server.isHostId(player.getName())) {
 		// Don't bother sending the campaign file if we're hosting it ourselves
 		server.getConnection().callMethod(conn.getId(), ClientCommand.COMMAND.setCampaign.name(), server.getCampaign());
-//     }
+		//     }
 	}
 
 	public void connectionRemoved(net.rptools.clientserver.simple.client.ClientConnection conn) {

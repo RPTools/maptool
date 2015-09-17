@@ -281,7 +281,7 @@ public class AssetLoader {
 					if (split >= 0) {
 						ref = ref.substring(split + 1);
 					}
-//					System.out.println("Got " + id + " from " + repo);
+					//					System.out.println("Got " + id + " from " + repo);
 					ref = FileUtil.getNameWithoutExtension(ref);
 					AssetManager.putAsset(new Asset(ref, data));
 
@@ -289,7 +289,7 @@ public class AssetLoader {
 					return;
 				} catch (IOException ioe) {
 					// Well, try a different repo
-//					ioe.printStackTrace();
+					//					ioe.printStackTrace();
 					continue;
 				} catch (Throwable t) {
 					t.printStackTrace();
@@ -299,7 +299,7 @@ public class AssetLoader {
 			// Last resort, ask the MT server
 			// We can drop off the end of this runnable because it'll background load the 
 			// image from the server
-//			System.out.println("Got " + id + " from MT");
+			//			System.out.println("Got " + id + " from MT");
 			MapTool.serverCommand().getAsset(id);
 		}
 	}

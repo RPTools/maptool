@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.model;
@@ -25,39 +25,39 @@ import net.rptools.parser.ParserException;
 public class LookupTable {
 
 	private static ExpressionParser expressionParser = new ExpressionParser();
-	
+
 	private List<LookupEntry> entryList;
 	private String name;
 	private String defaultRoll;
 	private MD5Key tableImage;
 	private Boolean visible;
 	private Boolean allowLookup;
-	
+
 	public LookupTable() {
 	}
-	
+
 	public LookupTable(LookupTable table) {
 		name = table.name;
 		defaultRoll = table.defaultRoll;
 		tableImage = table.tableImage;
-		
+
 		if (table.entryList != null) {
 			getInternalEntryList().addAll(table.entryList);
 		}
 	}
-	
+
 	public void setRoll(String roll) {
 		defaultRoll = roll;
 	}
-	
+
 	public void clearEntries() {
 		getInternalEntryList().clear();
 	}
-	
+
 	public void addEntry(int min, int max, String result, MD5Key imageId) {
 		getInternalEntryList().add(new LookupEntry(min, max, result, imageId));
 	}
-	
+
 	public LookupEntry getLookup() throws ParserException {
 		return getLookup(null);
 	}
@@ -65,21 +65,21 @@ public class LookupTable {
 	public String getRoll() {
 		return getDefaultRoll();
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public LookupEntry getLookup(String roll) throws ParserException {
 
 		if (roll == null) {
 			roll = getDefaultRoll();
 		}
-		
+
 		int tableResult = 0;
 		try {
 			Result result = expressionParser.evaluate(roll);
@@ -87,25 +87,33 @@ public class LookupTable {
 
 			Integer minmin = Integer.MAX_VALUE;
 			Integer maxmax = Integer.MIN_VALUE;
-			
+
 			for (LookupEntry entry : getInternalEntryList()) {
-				if(entry.min < minmin) { minmin = entry.min; }
-				if(entry.max > maxmax) { maxmax = entry.max; }
+				if (entry.min < minmin) {
+					minmin = entry.min;
+				}
+				if (entry.max > maxmax) {
+					maxmax = entry.max;
+				}
 			}
-			if(tableResult > maxmax) { tableResult = maxmax; }
-			if(tableResult < minmin) { tableResult = minmin; }
-			
+			if (tableResult > maxmax) {
+				tableResult = maxmax;
+			}
+			if (tableResult < minmin) {
+				tableResult = minmin;
+			}
+
 			for (LookupEntry entry : getInternalEntryList()) {
 				if (tableResult >= entry.min && tableResult <= entry.max) {
 					// Support for "/" commands
 					return entry;
 				}
 			}
-			
+
 		} catch (NumberFormatException nfe) {
-			throw new ParserException("Error lookup up value: " + tableResult); 
+			throw new ParserException("Error lookup up value: " + tableResult);
 		}
-		
+
 		throw new ParserException("Unknown table lookup: " + tableResult);
 	}
 
@@ -113,11 +121,11 @@ public class LookupTable {
 		if (defaultRoll != null && defaultRoll.length() > 0) {
 			return defaultRoll;
 		}
-		
+
 		// Find the min and max range
 		Integer min = null;
 		Integer max = null;
-		
+
 		for (LookupEntry entry : getInternalEntryList()) {
 			if (min == null || entry.min < min) {
 				min = entry.min;
@@ -126,10 +134,10 @@ public class LookupTable {
 				max = entry.max;
 			}
 		}
-		
-		return min != null ? "d" + (max - min + 1) + (min - 1 != 0 ? "+" + (min-1) : "") : "";
+
+		return min != null ? "d" + (max - min + 1) + (min - 1 != 0 ? "+" + (min - 1) : "") : "";
 	}
-	
+
 	private List<LookupEntry> getInternalEntryList() {
 		if (entryList == null) {
 			entryList = new ArrayList<LookupEntry>();
@@ -140,7 +148,7 @@ public class LookupTable {
 	public List<LookupEntry> getEntryList() {
 		return Collections.unmodifiableList(getInternalEntryList());
 	}
-	
+
 	public MD5Key getTableImage() {
 		return tableImage;
 	}
@@ -151,9 +159,9 @@ public class LookupTable {
 
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		
+
 		for (LookupEntry entry : getInternalEntryList()) {
-			
+
 			if (entry.min == entry.max) {
 				builder.append(entry.min);
 			} else {
@@ -161,24 +169,24 @@ public class LookupTable {
 			}
 			builder.append("=").append(entry.value).append("\n");
 		}
-		
+
 		return builder.toString();
 	}
-	
+
 	public static class LookupEntry {
-		
+
 		private int min;
 		private int max;
-		
+
 		private String value;
-		
+
 		private MD5Key imageId;
-		
+
 		/**
 		 * @Deprecated here to prevent xstream from breaking b24-b25
 		 */
 		private String result;
-		
+
 		public LookupEntry(int min, int max, String result, MD5Key imageId) {
 			this.min = min;
 			this.max = max;
@@ -206,8 +214,7 @@ public class LookupTable {
 			}
 			return value;
 		}
-		
-		
+
 	}
 
 	public Set<MD5Key> getAllAssetIds() {
@@ -223,29 +230,28 @@ public class LookupTable {
 		}
 		return assetSet;
 	}
-	
-	
+
 	/**Retrieves the visible flag for the LookupTable.
 	 * @return Boolean -- True indicates that the table will be
 	 * visible to players.  False indicates that the table will
 	 * be hidden from players.
 	 */
 	public Boolean getVisible() {
-		if(visible == null) {
+		if (visible == null) {
 			visible = new Boolean(true);
 		}
 		return visible;
 	}
-	
+
 	/**Sets the visible flag for the LookupTable.
 	 * @param value(Boolean) -- True specifies that the table will
 	 * be visible to players.  False indicates that the table will
 	 * be hidden from players.
 	 */
 	public void setVisible(Boolean value) {
-			visible = value;
+		visible = value;
 	}
-	
+
 	/**Retrieves the allowLookup flag for the LookupTable.
 	 * @return Boolean -- True indicates that players can call
 	 * for values from this table.  False indicates that players
@@ -253,12 +259,12 @@ public class LookupTable {
 	 * GM's can ALWAYS perform lookups against a table.
 	 */
 	public Boolean getAllowLookup() {
-		if(allowLookup == null) {
+		if (allowLookup == null) {
 			allowLookup = true;
 		}
 		return allowLookup;
 	}
-	
+
 	/**Sets the allowLookup flag for the LookupTable.
 	 * @param value(Boolean) -- True indicates that players can call
 	 * for values from this table.  False indicates that players

@@ -96,7 +96,7 @@ public class AppMenuBar extends JMenuBar {
 		menu.addSeparator();
 
 		menu.add(new JMenuItem(AppActions.EXPORT_CAMPAIGN_REPO));
-//		menu.add(new JMenuItem(AppActions.UPDATE_CAMPAIGN_REPO));
+		//		menu.add(new JMenuItem(AppActions.UPDATE_CAMPAIGN_REPO));
 
 		return menu;
 	}
@@ -159,8 +159,8 @@ public class AppMenuBar extends JMenuBar {
 		JMenu menu = I18N.createMenu("menu.edit");
 		menu.add(new JMenuItem(AppActions.UNDO_PER_MAP));
 		menu.add(new JMenuItem(AppActions.REDO_PER_MAP));
-//		menu.add(new JMenuItem(AppActions.UNDO_DRAWING));
-//		menu.add(new JMenuItem(AppActions.REDO_DRAWING));
+		//		menu.add(new JMenuItem(AppActions.UNDO_DRAWING));
+		//		menu.add(new JMenuItem(AppActions.REDO_DRAWING));
 		menu.add(new JMenuItem(AppActions.CLEAR_DRAWING));
 
 		menu.addSeparator();

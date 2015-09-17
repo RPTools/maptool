@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.functions;
@@ -26,12 +26,11 @@ public class StateImageFunction extends AbstractFunction {
 
 	/** The singleton instance. */
 	private final static StateImageFunction instance = new StateImageFunction();
-	
+
 	private StateImageFunction() {
 		super(1, 2, "getStateImage");
 	}
-	
-	
+
 	/** 
 	 * Gets the StateImage instance.
 	 * @return the instance.
@@ -39,30 +38,29 @@ public class StateImageFunction extends AbstractFunction {
 	public static StateImageFunction getInstance() {
 		return instance;
 	}
-	
-	
+
 	@Override
 	public Object childEvaluate(Parser parser, String functionName, List<Object> args) throws ParserException {
 		String stateName;
 		BigDecimal size = null;
-		
+
 		stateName = args.get(0).toString();
 		if (args.size() > 1) {
 			if (args.get(1) instanceof BigDecimal) {
 				size = (BigDecimal) args.get(1);
-			}	
+			}
 		}
 		BooleanTokenOverlay over = MapTool.getCampaign().getTokenStatesMap().get(stateName);
 		if (over == null) {
-			throw new ParserException(I18N.getText("macro.function.stateImage.unknownState", "getStateImage()", stateName ));
+			throw new ParserException(I18N.getText("macro.function.stateImage.unknownState", "getStateImage()", stateName));
 		}
 		if (over instanceof ImageTokenOverlay) {
 			StringBuilder assetId = new StringBuilder("asset://");
-			assetId.append(((ImageTokenOverlay)over).getAssetId().toString());
+			assetId.append(((ImageTokenOverlay) over).getAssetId().toString());
 			if (size != null) {
 				assetId.append("-");
 				// Constrain it slightly, so its between 1 and 500 :)
-				int i = Math.max(Math.min(size.intValue(), 500),1);
+				int i = Math.max(Math.min(size.intValue(), 500), 1);
 				assetId.append(i);
 			}
 			return assetId.toString();
@@ -71,5 +69,4 @@ public class StateImageFunction extends AbstractFunction {
 		}
 	}
 
-	
 }

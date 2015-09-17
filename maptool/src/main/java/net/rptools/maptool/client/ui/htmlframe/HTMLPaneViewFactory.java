@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.htmlframe;
@@ -51,8 +51,8 @@ public class HTMLPaneViewFactory extends HTMLFactory {
 	 */
 	@Override
 	public View create(Element element) {
-		HTML.Tag tagType = (HTML.Tag)element.getAttributes().getAttribute(StyleConstants.NameAttribute);
-		View view;		// For debugging purposes (no easy way to see a return value in Eclipse)
+		HTML.Tag tagType = (HTML.Tag) element.getAttributes().getAttribute(StyleConstants.NameAttribute);
+		View view; // For debugging purposes (no easy way to see a return value in Eclipse)
 
 		if (tagType == HTML.Tag.INPUT || tagType == HTML.Tag.SELECT ||
 				tagType == HTML.Tag.TEXTAREA) {

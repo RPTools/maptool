@@ -90,7 +90,7 @@ public class BoardTool extends DefaultTool {
 		}
 		// Create the control panel
 		controlPanel = new FormPanel("net/rptools/maptool/client/ui/forms/adjustBoardControlPanel.xml");
-//		controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+		//		controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
 		boardPositionXTextField = controlPanel.getTextField("offsetX");
 		boardPositionXTextField.addKeyListener(new UpdateBoardListener());

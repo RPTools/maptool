@@ -318,14 +318,14 @@ public class GraphicsUtil {
 		g2.setClip(newClip);
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF); // Faster without antialiasing, and looks just as good
 
-//        float alpha = (float)initialAlpha / width / 6;
+		//        float alpha = (float)initialAlpha / width / 6;
 		float alpha = .04f;
 		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 		for (int i = 1; i < width; i += 2) {
-//        	if (alpha * i < .2) {
-//        		// Too faded to see anyway, don't waste cycles on it
-//        		continue;
-//        	}
+			//        	if (alpha * i < .2) {
+			//        		// Too faded to see anyway, don't waste cycles on it
+			//        		continue;
+			//        	}
 			g2.setStroke(new BasicStroke(i));
 			g2.draw(shape);
 		}
@@ -347,13 +347,13 @@ public class GraphicsUtil {
 
 			double bottomAngle = (angle + delta / 2) % 360;
 			double topAngle = bottomAngle + 180;
-//			System.out.println(angle + " - " + delta + " - " + bottomAngle + " - " + topAngle);
+			//			System.out.println(angle + " - " + delta + " - " + bottomAngle + " - " + topAngle);
 
 			bottomList.add(getPoint(points[i], bottomAngle, width));
 			topList.add(getPoint(points[i], topAngle, width));
 		}
-//    	System.out.println(bottomList);
-//    	System.out.println(topList);
+		//    	System.out.println(bottomList);
+		//    	System.out.println(topList);
 		Collections.reverse(topList);
 
 		GeneralPath path = new GeneralPath();
@@ -374,13 +374,13 @@ public class GraphicsUtil {
 		double x = point.getX() + length * Math.cos(Math.toRadians(angle));
 		double y = point.getY() - length * Math.sin(Math.toRadians(angle));
 
-//		System.out.println(point + " - " + angle + " - " + x + "x" + y + " - " + Math.cos(Math.toRadians(angle)) + " - " + Math.sin(Math.toRadians(angle)) + " - " + Math.toRadians(angle));
+		//		System.out.println(point + " - " + angle + " - " + x + "x" + y + " - " + Math.cos(Math.toRadians(angle)) + " - " + Math.sin(Math.toRadians(angle)) + " - " + Math.toRadians(angle));
 		return new Point2D.Double(x, y);
 	}
 
 	public static void main(String[] args) {
 		final Point2D[] points = new Point2D[] { new Point(20, 20), new Point(50, 50), new Point(80, 20), new Point(100, 100) };
-//		final Point2D[] points = new Point2D[]{new Point(50, 50), new Point(20, 20), new Point(20, 100), new Point(50,75)};
+		//		final Point2D[] points = new Point2D[]{new Point(50, 50), new Point(20, 20), new Point(20, 100), new Point(50,75)};
 		final Area line = createLine(10, points);
 
 		JFrame f = new JFrame();
@@ -405,6 +405,6 @@ public class GraphicsUtil {
 		};
 		f.add(p);
 		f.setVisible(true);
-//		System.out.println(area.equals(area2));
+		//		System.out.println(area.equals(area2));
 	}
 }

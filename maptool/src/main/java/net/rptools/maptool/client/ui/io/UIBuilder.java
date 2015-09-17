@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.io;
@@ -127,10 +127,12 @@ public class UIBuilder extends JDialog {
 				last_dir = dir;
 				last_start = start;
 				String[] elems = dir.split("/");
-				OuterLoop: for (int i = 0; i < elems.length; i++) {
+				OuterLoop:
+				for (int i = 0; i < elems.length; i++) {
 					_Searching(start);
 					Enumeration children = start.children();
-					InnerLoop: while (children.hasMoreElements()) {
+					InnerLoop:
+					while (children.hasMoreElements()) {
 						DefaultMutableTreeNode next = (DefaultMutableTreeNode) children.nextElement();
 						_Checking(next);
 						MaptoolNode tmp = (MaptoolNode) next.getUserObject();
@@ -196,7 +198,8 @@ public class UIBuilder extends JDialog {
 			if (start == null || dir.charAt(0) == '/')
 				start = (MutableTreeNode) this.root;
 			String[] elems = dir.split("/");
-			OuterLoop: for (int i = 0; i < elems.length; i++) {
+			OuterLoop:
+			for (int i = 0; i < elems.length; i++) {
 				if (elems[i].length() == 0) // Skip empty elements, such as "//" or leading "/"
 					continue;
 				if (MapTool.isDevelopment())
@@ -242,7 +245,7 @@ public class UIBuilder extends JDialog {
 		tree = (CheckBoxTree) form.getTree("mainTree");
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode(new MaptoolNode("Root"));
 		dtm = new TreeModel(root);
-//		buildTree();
+		//		buildTree();
 
 		tree.setModel(dtm);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -252,7 +255,7 @@ public class UIBuilder extends JDialog {
 		tree.getCheckBoxTreeSelectionModel().addSelectionPath(new TreePath(root.getPath()));
 
 		// This is how to turn OFF the checkbox for a particular node
-//		tree.getCheckBoxTreeSelectionModel().removeSelectionPath(new TreePath(root.getPath()));
+		//		tree.getCheckBoxTreeSelectionModel().removeSelectionPath(new TreePath(root.getPath()));
 
 		Dimension size;
 		JScrollPane jsp = (JScrollPane) tree.getParent().getParent();

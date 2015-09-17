@@ -231,7 +231,7 @@ public class LineTemplate extends AbstractTemplate {
 				} else if (Math.floor(yValue) == y) {
 					path.add(getPointFromPool(x + 1, y));
 				} else {
-//					System.err.println("I can't do math: dx=" + dx + " dy=" + dy + " m=" + m + " x=" + x + " xValue=" + xValue + " y=" + y + " yValue=" + yValue);
+					//					System.err.println("I can't do math: dx=" + dx + " dy=" + dy + " m=" + m + " x=" + x + " xValue=" + xValue + " y=" + y + " yValue=" + yValue);
 					return path;
 				} // endif
 				p = path.get(path.size() - 1);

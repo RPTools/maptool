@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.zone;
@@ -35,10 +35,9 @@ import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.ImageManager;
 
-
 /**
  */
-public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener  {
+public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener {
 
 	private static final int SIZE_WIDTH = 125;
 	private static final int SIZE_HEIGHT = 100;
@@ -78,16 +77,16 @@ public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener  {
 				img = ImageManager.TRANSFERING_IMAGE;
 
 				// Let's wake up when the image arrives
-//	            ImageManager.addObservers(renderer.getZone().getBackgroundAssetId(), this);
+				//	            ImageManager.addObservers(renderer.getZone().getBackgroundAssetId(), this);
 			}
 
 			ImageBorder border = AppStyle.miniMapBorder;
 
 			Dimension size = new Dimension(img.getWidth(), img.getHeight());
-			SwingUtil.constrainTo(size, mySize.width-border.getLeftMargin()-border.getRightMargin(), mySize.height-border.getTopMargin()-border.getBottomMargin());
+			SwingUtil.constrainTo(size, mySize.width - border.getLeftMargin() - border.getRightMargin(), mySize.height - border.getTopMargin() - border.getBottomMargin());
 
-			int x = border.getLeftMargin() + (mySize.width-size.width-border.getLeftMargin()-border.getRightMargin())/2;
-			int y = border.getTopMargin() + (mySize.height-size.height-border.getTopMargin()-border.getBottomMargin())/2;
+			int x = border.getLeftMargin() + (mySize.width - size.width - border.getLeftMargin() - border.getRightMargin()) / 2;
+			int y = border.getTopMargin() + (mySize.height - size.height - border.getTopMargin() - border.getBottomMargin()) / 2;
 			int w = size.width;
 			int h = size.height;
 
@@ -121,7 +120,7 @@ public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener  {
 			img = ImageManager.TRANSFERING_IMAGE;
 
 			// Let's wake up when the image arrives
-//            ImageManager.addObservers(renderer.getZone().getBackgroundAssetId(), this);
+			//            ImageManager.addObservers(renderer.getZone().getBackgroundAssetId(), this);
 		}
 
 		ImageBorder border = AppStyle.miniMapBorder;
@@ -161,7 +160,7 @@ public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener  {
 		flush();
 		resize();
 
-//    	getParent().doLayout();
+		//    	getParent().doLayout();
 		repaint();
 	}
 
@@ -197,13 +196,13 @@ public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener  {
 
 				// Minimap interaction
 				// TODO: Make this work for unbounded
-//    			int miniX = e.getX() - bounds.x;
-//    			int miniY = e.getY() - bounds.y;
-//
-//    			int mapX = (int)(renderer.getZone().getWidth() * (miniX / (double)bounds.width));
-//    			int mapY = (int)(renderer.getZone().getHeight() * (miniY / (double)bounds.height));
-//
-//    			renderer.centerOn(new ZonePoint(mapX, mapY));
+				//    			int miniX = e.getX() - bounds.x;
+				//    			int miniY = e.getY() - bounds.y;
+				//
+				//    			int mapX = (int)(renderer.getZone().getWidth() * (miniX / (double)bounds.width));
+				//    			int mapY = (int)(renderer.getZone().getHeight() * (miniY / (double)bounds.height));
+				//
+				//    			renderer.centerOn(new ZonePoint(mapX, mapY));
 			}
 		}
 	}

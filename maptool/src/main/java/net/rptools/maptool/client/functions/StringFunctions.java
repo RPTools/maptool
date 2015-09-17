@@ -299,7 +299,7 @@ public class StringFunctions extends AbstractFunction {
 				m.appendReplacement(sb, resolver.getVariable(m.group(1)).toString());
 			} catch (NullPointerException npe) {
 				// FJE Added catch block so that NPE leaves original format intact in the output string
-//				m.appendReplacement(sb, m.group(1).toString());
+				//				m.appendReplacement(sb, m.group(1).toString());
 			}
 		}
 		m.appendTail(sb);

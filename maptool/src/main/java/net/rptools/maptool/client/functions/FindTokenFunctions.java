@@ -322,8 +322,8 @@ public class FindTokenFunctions extends AbstractFunction {
 			} else if ("area".equalsIgnoreCase(searchType)) {
 				// We will do this as one of the last steps as it's one of the most expensive so we want to do it on as few tokens as possible
 				area = jobj.getJSONObject(searchType);
-//			} else if ("unsetStates".equalsIgnoreCase(searchType)) {
-//				// ignore
+				//			} else if ("unsetStates".equalsIgnoreCase(searchType)) {
+				//				// ignore
 			} else {
 				if (booleanCheck(jobj, searchType)) {
 					List<Token> lst = null;
@@ -365,12 +365,12 @@ public class FindTokenFunctions extends AbstractFunction {
 					inverseList.removeAll(getTokenList(parser, FindType.STATE, st.toString()));
 					tokenList.retainAll(inverseList);
 				}
-//			} else if ("setStates".equalsIgnoreCase(searchType)) {
-//				// ignore
-//			} else if ("range".equalsIgnoreCase(searchType)) {
-//				// ignore
-//			} else if ("area".equalsIgnoreCase(searchType)) {
-//				// ignore
+				//			} else if ("setStates".equalsIgnoreCase(searchType)) {
+				//				// ignore
+				//			} else if ("range".equalsIgnoreCase(searchType)) {
+				//				// ignore
+				//			} else if ("area".equalsIgnoreCase(searchType)) {
+				//				// ignore
 			} else {
 				if (!booleanCheck(jobj, searchType)) {
 					inverseList.clear();

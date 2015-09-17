@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.swing;
@@ -44,7 +44,8 @@ import javax.swing.text.html.InlineView;
 import javax.swing.text.html.StyleSheet;
 
 // //
-// THIS STARTED LIFE AS A COMPLETE COPY OF IMAGEVIEW BECAUSE THE SUN API DEVELOPER FOR IT SUCKS EGGS
+// THIS STARTED LIFE AS A COMPLETE COPY OF IMAGEVIEW BECAUSE THE SUN API
+// DEVELOPER FOR IT SUCKS EGGS
 public class MessagePanelImageView extends View {
 
 	private final ImageLoaderCache imageCache;
@@ -658,7 +659,7 @@ public class MessagePanelImageView extends View {
 			}
 
 			// Maintain aspect ratio if only one of width or height is defined.
-			switch(newState & (WIDTH_FLAG | HEIGHT_FLAG)) {
+			switch (newState & (WIDTH_FLAG | HEIGHT_FLAG)) {
 			case WIDTH_FLAG:
 				newHeight = (int) ((double) newWidth / (double) newImage.getWidth(imageObserver) * newHeight);
 				break;

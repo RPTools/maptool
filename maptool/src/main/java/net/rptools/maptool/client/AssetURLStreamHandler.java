@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client;
@@ -68,11 +68,11 @@ public class AssetURLStreamHandler extends URLStreamHandler {
 					String value;
 					int delim2 = query.indexOf('&', delim);
 					if (delim2 < 0) {
-						value = query.substring(delim+1);
+						value = query.substring(delim + 1);
 						query = null;
 					} else {
-						value = query.substring(delim+1, delim2);
-						query = query.substring(delim2+1);
+						value = query.substring(delim + 1, delim2);
+						query = query.substring(delim2 + 1);
 					}
 					var.put(name, value);
 				} else
@@ -85,29 +85,37 @@ public class AssetURLStreamHandler extends URLStreamHandler {
 
 			// Need to make sure the image is available
 			// TODO: Create a AssetManager.getAssetAndWait(id) and put this block in it
-//			final CountDownLatch latch = new CountDownLatch(1);
-//			AssetManager.getAssetAsynchronously(assetId, new AssetAvailableListener() {
-//				public void assetAvailable(MD5Key key) {
-//					if (key.equals(assetId)) {
-//						latch.countDown();
-//					}
-//				}
-//			});
+			//			final CountDownLatch latch = new CountDownLatch(1);
+			//			AssetManager.getAssetAsynchronously(assetId, new AssetAvailableListener() {
+			//				public void assetAvailable(MD5Key key) {
+			//					if (key.equals(assetId)) {
+			//						latch.countDown();
+			//					}
+			//				}
+			//			});
 
 			byte[] data = null;
-//			latch.await();
+			//			latch.await();
 			BufferedImage img = ImageManager.getImageAndWait(assetId);
 
 			Asset asset = AssetManager.getAsset(assetId);
 			if (asset != null && asset.getImage() != null) {
 				if (scaleW > 0 || scaleH > 0) {
 					switch (scaleW) {
-					case -1 : scaleW = img.getWidth(); break;
-					case  0: scaleW = img.getWidth() * scaleH / img.getHeight(); break;
+					case -1:
+						scaleW = img.getWidth();
+						break;
+					case 0:
+						scaleW = img.getWidth() * scaleH / img.getHeight();
+						break;
 					}
 					switch (scaleH) {
-					case -1 : scaleH = img.getHeight(); break;
-					case  0: scaleH = img.getHeight() * scaleW / img.getWidth(); break;
+					case -1:
+						scaleH = img.getHeight();
+						break;
+					case 0:
+						scaleH = img.getHeight() * scaleW / img.getWidth();
+						break;
 					}
 					BufferedImage bimg = new BufferedImage(scaleW, scaleH, BufferedImage.TRANSLUCENT);
 					Graphics2D g = bimg.createGraphics();
@@ -118,7 +126,7 @@ public class AssetURLStreamHandler extends URLStreamHandler {
 					data = asset.getImage();
 			} else {
 				log.error("Could not find asset: " + assetId);
-				data = new byte[]{};
+				data = new byte[] {};
 			}
 			return new ByteArrayInputStream(data);
 		}

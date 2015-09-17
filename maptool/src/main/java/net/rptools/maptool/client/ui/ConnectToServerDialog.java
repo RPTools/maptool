@@ -55,8 +55,9 @@ import yasb.Binder;
 /**
  * @author trevor
  */
-public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPreferences> implements AnnouncementListener {
+public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPreferences>implements AnnouncementListener {
 	private static ServiceFinder finder;
+
 	static {
 		finder = new ServiceFinder(AppConstants.SERVICE_GROUP);
 	}
@@ -277,7 +278,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 		} catch (Exception e) {
 			// Oh well, might not be connected
 		}
-//		System.out.println("External address is: " + externalAddress);
+		//		System.out.println("External address is: " + externalAddress);
 
 		JComponent selectedPanel = (JComponent) getTabPane().getSelectedComponent();
 		if (SwingUtil.hasComponent(selectedPanel, "lanPanel")) {

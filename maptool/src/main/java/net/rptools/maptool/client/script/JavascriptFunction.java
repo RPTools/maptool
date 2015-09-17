@@ -63,7 +63,7 @@ public class JavascriptFunction extends AbstractFunction {
 			first = false;
 		}
 		sb.append("); rptools.scope = null; return funcresult; })();");
-//		System.out.println(sb.toString());
+		//		System.out.println(sb.toString());
 		try {
 			Object result = ScriptManager.evaluate(globals, sb.toString());
 

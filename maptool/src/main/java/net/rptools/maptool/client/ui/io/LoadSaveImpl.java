@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.io;
@@ -39,7 +39,7 @@ public class LoadSaveImpl {
 	private Campaign cmpgn;
 	private UIBuilder.TreeModel model;
 	private static Map<String, DataTemplate> registry;
-	
+
 	static {
 		registry = new HashMap<String, DataTemplate>();
 	}
@@ -66,9 +66,12 @@ public class LoadSaveImpl {
 		UIBuilder form = new UIBuilder(MapTool.getFrame());
 		model = form.getTreeModel();
 		addToRegistry(new DataTemplate() {
-			public String getSubsystemName() { return "built-in"; }
+			public String getSubsystemName() {
+				return "built-in";
+			}
+
 			public void prepareForDisplay() {
-				addDataObjects("Campaign/Properties/Token Properties",	 cmpgn.getTokenTypeMap());
+				addDataObjects("Campaign/Properties/Token Properties", cmpgn.getTokenTypeMap());
 				addDataObjects("Campaign/Properties/Repositories", cmpgn.getRemoteRepositoryList());
 				addDataObjects("Campaign/Properties/Sights", cmpgn.getSightTypeMap());
 				addDataObjects("Campaign/Properties/Lights", cmpgn.getLightSourcesMap());
@@ -91,6 +94,7 @@ public class LoadSaveImpl {
 			// Clicked OK to perform a load/save operation.
 		}
 	}
+
 	private void addMacros(UIBuilder.TreeModel model) {
 		List<MacroButtonProperties> macros = cmpgn.getMacroButtonPropertiesArray();
 		Map<String, MacroButtonProperties> global = new HashMap<String, MacroButtonProperties>();
@@ -112,6 +116,7 @@ public class LoadSaveImpl {
 		oneMacroCategory("Campaign/Properties/Macros/Campaign", campaign, model);
 		oneMacroCategory("Campaign/Properties/Macros/Other", other, model);
 	}
+
 	private void oneMacroCategory(String where, Map<String, MacroButtonProperties> map, UIBuilder.TreeModel model) {
 		Set<String> set = map.keySet();
 		String[] names = new String[set.size()];

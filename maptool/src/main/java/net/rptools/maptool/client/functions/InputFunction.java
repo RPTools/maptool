@@ -162,7 +162,7 @@ public class InputFunction extends AbstractFunction {
 		// @formatter: off
 		TEXT(false, false, "WIDTH=16;SPAN=FALSE;"), LIST(true, false, "VALUE=NUMBER;TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SELECT=0;SPAN=FALSE;"), CHECK(false, false, "SPAN=FALSE;"), RADIO(true, false,
 				"ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;"), LABEL(false, false, "TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SPAN=FALSE;"), PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;"), TAB(false, true,
-				"SELECT=FALSE;");
+						"SELECT=FALSE;");
 		// @formatter: on
 
 		public final OptionMap defaultOptions; // maps option name to default value
@@ -510,11 +510,11 @@ public class InputFunction extends AbstractFunction {
 
 		/** Sets the focus to the control that last had it. */
 		public void restoreFocus() {
-//			// debugging
-//			String s = (onShowFocus instanceof JTextField) ?
-//				" (" + ((JTextField)onShowFocus).getText() + ")" : "";
-//			String c = (onShowFocus == null) ? "null" : onShowFocus.getClass().getName();
-//			System.out.println("  Shown: onShowFocus is " + c + s);
+			//			// debugging
+			//			String s = (onShowFocus instanceof JTextField) ?
+			//				" (" + ((JTextField)onShowFocus).getText() + ")" : "";
+			//			String c = (onShowFocus == null) ? "null" : onShowFocus.getClass().getName();
+			//			System.out.println("  Shown: onShowFocus is " + c + s);
 
 			if (onShowFocus != null) {
 				onShowFocus.requestFocusInWindow();
@@ -537,10 +537,10 @@ public class InputFunction extends AbstractFunction {
 					lastFocus = src;
 					if (src instanceof JTextField)
 						((JTextField) src).selectAll();
-//						// debugging
-//						String s = (src instanceof JTextField) ?
-//							" (" + ((JTextField)src).getText() + ")" : "";
-//						System.out.println("  Got focus " + src.getClass().getName() + s);
+					//						// debugging
+					//						String s = (src instanceof JTextField) ?
+					//							" (" + ((JTextField)src).getText() + ")" : "";
+					//						System.out.println("  Got focus " + src.getClass().getName() + s);
 				}
 
 				public void focusLost(FocusEvent arg0) {
@@ -572,17 +572,17 @@ public class InputFunction extends AbstractFunction {
 					for (int i = 0; i < list.length; i++)
 						if (list[i] instanceof TinyComboBoxButton)
 							list[i].setFocusable(false); // HACK!
-//				} else if (c instanceof JTextField) {
-//					// Select all text when the text field gains focus
-//					final JTextField textFieldFinal = (JTextField) c;
-//					textFieldFinal.addFocusListener(new FocusListener() {
-//						public void focusGained(FocusEvent fe) {
-//							textFieldFinal.selectAll();
-//						}
-//
-//						public void focusLost(FocusEvent fe) {
-//						}
-//					});
+					//				} else if (c instanceof JTextField) {
+					//					// Select all text when the text field gains focus
+					//					final JTextField textFieldFinal = (JTextField) c;
+					//					textFieldFinal.addFocusListener(new FocusListener() {
+					//						public void focusGained(FocusEvent fe) {
+					//							textFieldFinal.selectAll();
+					//						}
+					//
+					//						public void focusLost(FocusEvent fe) {
+					//						}
+					//					});
 				} else if (c instanceof ColumnPanel) {
 					ColumnPanel cp = (ColumnPanel) c;
 					cp.runtimeFixup();
@@ -986,12 +986,12 @@ public class InputFunction extends AbstractFunction {
 						ColumnPanel cp = columnPanels.get(newTabIndex);
 						cp.onShowFocus = cp.lastFocus;
 
-//						// debugging
-//						JComponent foc = cp.onShowFocus;
-//						String s = (foc instanceof JTextField) ?
-//							" (" + ((JTextField)foc).getText() + ")" : "";
-//						String c = (foc!=null) ? foc.getClass().getName() : "";
-//						System.out.println("tabpane foc = " + c + s);
+						//						// debugging
+						//						JComponent foc = cp.onShowFocus;
+						//						String s = (foc instanceof JTextField) ?
+						//							" (" + ((JTextField)foc).getText() + ")" : "";
+						//						String c = (foc!=null) ? foc.getClass().getName() : "";
+						//						System.out.println("tabpane foc = " + c + s);
 					}
 				});
 			}
@@ -1279,7 +1279,7 @@ public class InputFunction extends AbstractFunction {
 			this.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-//					System.out.println(macroLink);
+					//					System.out.println(macroLink);
 				}
 			});
 		}
@@ -1333,39 +1333,39 @@ public class InputFunction extends AbstractFunction {
 	}
 
 	// Dumps out the parsed input specifications for debugging purposes
-//	private String debugOutput(ArrayList<VarSpec> varSpecs) {
-//		StringBuilder builder = new StringBuilder();
-//		builder.append("<br><table border='1' padding='2px 2px'>");
-//		builder.append(
-//				"<tr style='font-weight:bold'><td>Name</td><td>Value</td><td>Prompt</td><td>Input Type</td><td>Options</td></tr>"
-//				);
-//		for (VarSpec vs : varSpecs) {
-//			builder.append("<tr>");
-//			builder.append("<td>");
-//			builder.append(vs.name);
-//			builder.append("</td><td>");
-//			if (vs.inputType == InputType.LIST) {
-//				builder.append("(( ");
-//				for (String s : vs.valueList) {
-//					builder.append(s);
-//					builder.append(",");
-//				}
-//				builder.append(" ))");
-//			} else {
-//				builder.append(vs.value);
-//			}
-//			builder.append("</td><td>");
-//			builder.append(vs.prompt);
-//			builder.append("</td><td>");
-//			builder.append(vs.inputType);
-//			builder.append("</td><td>");
-//			for (Map.Entry<String, String> entry : vs.optionValues.entrySet())
-//				builder.append(entry.getKey() + "=" + entry.getValue() + "<br>");
-//			builder.append("</td></tr>");
-//		}
-//		builder.append("</table>");
-//		return builder.toString();
-//	}
+	//	private String debugOutput(ArrayList<VarSpec> varSpecs) {
+	//		StringBuilder builder = new StringBuilder();
+	//		builder.append("<br><table border='1' padding='2px 2px'>");
+	//		builder.append(
+	//				"<tr style='font-weight:bold'><td>Name</td><td>Value</td><td>Prompt</td><td>Input Type</td><td>Options</td></tr>"
+	//				);
+	//		for (VarSpec vs : varSpecs) {
+	//			builder.append("<tr>");
+	//			builder.append("<td>");
+	//			builder.append(vs.name);
+	//			builder.append("</td><td>");
+	//			if (vs.inputType == InputType.LIST) {
+	//				builder.append("(( ");
+	//				for (String s : vs.valueList) {
+	//					builder.append(s);
+	//					builder.append(",");
+	//				}
+	//				builder.append(" ))");
+	//			} else {
+	//				builder.append(vs.value);
+	//			}
+	//			builder.append("</td><td>");
+	//			builder.append(vs.prompt);
+	//			builder.append("</td><td>");
+	//			builder.append(vs.inputType);
+	//			builder.append("</td><td>");
+	//			for (Map.Entry<String, String> entry : vs.optionValues.entrySet())
+	//				builder.append(entry.getKey() + "=" + entry.getValue() + "<br>");
+	//			builder.append("</td></tr>");
+	//		}
+	//		builder.append("</table>");
+	//		return builder.toString();
+	//	}
 }
 
 // A sample for the TAB control

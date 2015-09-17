@@ -1,14 +1,14 @@
 /*
- * This software Copyright by the RPTools.net development team, and
- * licensed under the GPL Version 3 or, at your option, any later version.
+ * This software Copyright by the RPTools.net development team, and licensed
+ * under the GPL Version 3 or, at your option, any later version.
  *
- * MapTool 2 Source Code is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * MapTool 2 Source Code is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this source Code.  If not, see <http://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU General Public License along with
+ * this source Code. If not, see <http://www.gnu.org/licenses/>
  */
 
 package net.rptools.maptool.webapi;
@@ -38,167 +38,155 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class MTWebAppServer {
-    public static final String WEBAPP_CONTEXT_PATH = "webapi";
-    /**
-     * The port to listen on.
-     */
-    private int port = 8000;
+	public static final String WEBAPP_CONTEXT_PATH = "webapi";
+	/**
+	 * The port to listen on.
+	 */
+	private int port = 8000;
 
-    /**
-     * The embedded Jetty server we will use.
-     */
-    private Server server = null;
+	/**
+	 * The embedded Jetty server we will use.
+	 */
+	private Server server = null;
 
+	/**
+	 * Has the server been started.
+	 */
+	private boolean started = false;
 
-    /**
-     * Has the server been started.
-     */
-    private boolean started = false;
+	/**
+	 * Extra resource directories.
+	 */
+	private Map<String, String> resourceDirs = new HashMap<>();
 
+	public synchronized void addResourceDir(String contextPath, String dirname) {
+		if (started) {
+			System.err.println("Can not add a resource directory to a running Webapp server.");
+			throw new IllegalArgumentException("Can not add a resource directory to a running Webapp server.");
+		}
+		resourceDirs.put(contextPath, dirname);
 
-    /**
-     * Extra resource directories.
-     */
-    private Map<String, String> resourceDirs = new HashMap<>();
+	}
 
-    public synchronized void addResourceDir(String contextPath, String dirname) {
-        if (started) {
-            System.err.println("Can not add a resource directory to a running Webapp server.");
-            throw new IllegalArgumentException("Can not add a resource directory to a running Webapp server.");
-        }
-        resourceDirs.put(contextPath, dirname);
+	/**
+	 * Sets the port
+	 *
+	 * @param port
+	 */
+	public synchronized void setPort(int port) {
+		if (started) {
+			System.err.println("Can not change port of running Webapp server.");
+			throw new IllegalArgumentException("Can not change port of running Webapp server.");
+		}
+		this.port = port;
+	}
 
-    }
+	/**
+	 * Starts the server at the specified port.
+	 */
+	public synchronized void startServer() {
+		if (started) {
+			return; // Do nothing as its already running.
+		}
 
-    /**
-     * Sets the port
-     *
-     * @param port
-     */
-    public synchronized void setPort(int port) {
-        if (started) {
-            System.err.println("Can not change port of running Webapp server.");
-            throw new IllegalArgumentException("Can not change port of running Webapp server.");
-        }
-        this.port = port;
-    }
+		System.out.println("DEBUG: Starting server on port " + this.port + "...");
+		server = new org.eclipse.jetty.server.Server(this.port);
 
-    /**
-     * Starts the server at the specified port.
-     */
-    public synchronized void startServer() {
-        if (started) {
-            return; // Do nothing as its already running.
-        }
+		// set up the web socket handler
+		ContextHandler contextHandler = new ContextHandler();
+		contextHandler.setContextPath("/ws");
+		contextHandler.setHandler(new WebSocketHandler() {
 
-        System.out.println("DEBUG: Starting server on port " + this.port + "...");
-        server = new org.eclipse.jetty.server.Server(this.port);
+			@Override
+			public void configure(WebSocketServletFactory factory) {
+				factory.setCreator(new WebSocketCreator() {
 
-        // set up the web socket handler
-        ContextHandler contextHandler = new ContextHandler();
-        contextHandler.setContextPath("/ws");
-        contextHandler.setHandler(new WebSocketHandler() {
+					@Override
+					public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
+						String query = req.getRequestURI().toString();
+						if ((query == null) || (query.length() <= 0)) {
+							try {
+								resp.sendForbidden("DEBUG: Unspecified query");
+							} catch (IOException e) {
 
-            @Override
-            public void configure(WebSocketServletFactory factory) {
-                factory.setCreator(new WebSocketCreator() {
+							}
 
-                    @Override
-                    public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
-                        String query = req.getRequestURI().toString();
-                        if ((query == null) || (query.length() <= 0)) {
-                            try {
-                                resp.sendForbidden("DEBUG: Unspecified query");
-                            } catch (IOException e) {
+							return null;
+						}
 
-                            }
+						return new MTWebSocket();
+					}
+				});
+			}
 
-                            return null;
-                        }
+		});
 
-                        return new MTWebSocket();
-                    }
-                });
-            }
+		WebAppContext webAppContext = new WebAppContext();
+		webAppContext.setResourceBase(this.getClass().getResource("/net/rptools/maptool/webapp").toExternalForm());
+		webAppContext.setContextPath("/" + WEBAPP_CONTEXT_PATH);
+		webAppContext.setLogger(new StdErrLog());
 
-        });
+		HandlerList handlers = new HandlerList();
 
-        WebAppContext webAppContext = new WebAppContext();
-        webAppContext.setResourceBase(this.getClass().getResource("/net/rptools/maptool/webapp").toExternalForm());
-        webAppContext.setContextPath("/" + WEBAPP_CONTEXT_PATH);
-        webAppContext.setLogger(new StdErrLog());
+		handlers.addHandler(contextHandler);
+		handlers.addHandler(webAppContext);
 
+		for (Map.Entry<String, String> res : resourceDirs.entrySet()) {
+			ContextHandler context = new ContextHandler();
+			context.setWelcomeFiles(new String[] { "index.html" });
+			context.setContextPath(res.getKey());
 
+			ResourceHandler resourceHandler = new ResourceHandler();
+			resourceHandler.setDirectoriesListed(true);
+			resourceHandler.setWelcomeFiles(new String[] { "index.html" });
+			resourceHandler.setResourceBase(res.getValue());
 
-        HandlerList handlers = new HandlerList();
+			context.setHandler(resourceHandler);
+			handlers.addHandler(context);
 
-        handlers.addHandler(contextHandler);
-        handlers.addHandler(webAppContext);
+			System.err.println("DEBUG: name=" + res.getKey() + ": value=" + res.getValue());
+		}
 
-        for (Map.Entry<String, String> res : resourceDirs.entrySet()) {
-            ContextHandler context = new ContextHandler();
-            context.setWelcomeFiles(new String[] {"index.html"});
-            context.setContextPath(res.getKey());
+		ContextHandler tokenImageContext = new ContextHandler();
+		tokenImageContext.setContextPath("/token");
+		tokenImageContext.setLogger(new StdErrLog());
+		tokenImageContext.setHandler(new TokenImageHandler());
 
-            ResourceHandler resourceHandler = new ResourceHandler();
-            resourceHandler.setDirectoriesListed(true);
-            resourceHandler.setWelcomeFiles(new String[] {"index.html"});
-            resourceHandler.setResourceBase(res.getValue());
+		handlers.addHandler(tokenImageContext);
 
-            context.setHandler(resourceHandler);
-            handlers.addHandler(context);
+		server.setHandler(handlers);
 
-            System.err.println("DEBUG: name=" + res.getKey() + ": value=" + res.getValue());
-        }
+		try {
+			server.start();
+		} catch (Exception e) {
 
+		}
+		System.out.println("DEBUG: Started.");
+		started = true;
 
+		// Set up the heartbeat
+		ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
 
+		ses.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				JSONObject data = new JSONObject();
+				MTWebClientManager.getInstance().sendToAllSessions("keepalive", data);
+			}
+		}, 1, 1, TimeUnit.MINUTES);
 
-        ContextHandler tokenImageContext = new ContextHandler();
-        tokenImageContext.setContextPath("/token");
-        tokenImageContext.setLogger(new StdErrLog());
-        tokenImageContext.setHandler(new TokenImageHandler());
+		try {
+			String address = InetAddress.getLocalHost().getHostAddress();
+			String portString = Integer.toString(port);
+			MapTool.addLocalMessage(I18N.getText("webapp.serverStarted", address, portString, WEBAPP_CONTEXT_PATH));
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			// FIXME: log this error
+		}
 
-        handlers.addHandler(tokenImageContext);
+	}
 
-        server.setHandler(handlers);
-
-
-        try {
-            server.start();
-        } catch (Exception e) {
-
-        }
-        System.out.println("DEBUG: Started.");
-        started = true;
-
-
-        // Set up the heartbeat
-        ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
-
-        ses.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                JSONObject data = new JSONObject();
-                MTWebClientManager.getInstance().sendToAllSessions("keepalive", data);
-            }
-        }, 1, 1, TimeUnit.MINUTES);
-
-
-        try {
-            String address = InetAddress.getLocalHost().getHostAddress();
-            String portString = Integer.toString(port);
-            MapTool.addLocalMessage(I18N.getText("webapp.serverStarted", address, portString, WEBAPP_CONTEXT_PATH));
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            // FIXME: log this error
-        }
-
-    }
-
-
-
-    public boolean hasStarted() {
-        return started;
-    }
+	public boolean hasStarted() {
+		return started;
+	}
 }

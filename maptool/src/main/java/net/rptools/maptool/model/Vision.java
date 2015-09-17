@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.model;
@@ -15,16 +15,16 @@ import java.awt.geom.Area;
 
 public abstract class Vision {
 	public enum Anchor {
-		CORNER,
-		CENTER
+		CORNER, CENTER
 	}
+
 	protected String name;
 	protected int distance;
 	private int angle; // degrees
 	private boolean enabled = true;
 	private int lastGridSize;
 	private transient Area area;
-	
+
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -32,26 +32,26 @@ public abstract class Vision {
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
-	
+
 	/**
 	 * The Vision's name
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	/**
 	 * The Vision's name
 	 */
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * The Vision's menu label
-	 */	
+	 */
 	public String getLabel() {
-		return "<html>"  + (name != null ? name : "") + " <font size=-2>(" + this + "-" + Integer.toString(distance) + ")</font></html>";
+		return "<html>" + (name != null ? name : "") + " <font size=-2>(" + this + "-" + Integer.toString(distance) + ")</font></html>";
 	}
 
 	/**
@@ -68,7 +68,7 @@ public abstract class Vision {
 		this.angle = angle;
 		flush();
 	}
-	
+
 	/**
 	 * Distance in zone points
 	 */
@@ -100,7 +100,7 @@ public abstract class Vision {
 	 * Specific vision types must be able to create the shape they represent
 	 */
 	protected abstract Area createArea(Zone zone, Token token);
-	
+
 	// This won't be abstract when anchor points are fleshed out, but rather a field on this class
 	public abstract Anchor getAnchor();
 
@@ -110,8 +110,8 @@ public abstract class Vision {
 	protected void flush() {
 		area = null;
 	}
-	
+
 	protected int getZonePointsPerCell(Zone zone) {
-		return (int)(zone.getGrid().getSize() / zone.getUnitsPerCell());
+		return (int) (zone.getGrid().getSize() / zone.getUnitsPerCell());
 	}
 }

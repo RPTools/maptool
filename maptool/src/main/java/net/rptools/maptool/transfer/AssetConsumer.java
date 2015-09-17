@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.transfer;
@@ -24,7 +24,7 @@ public class AssetConsumer {
 	private File destinationDir;
 	private AssetHeader header;
 	private long currentPosition;
-	
+
 	/**
 	 * Create a new asset consumer, it will prepare a place to receive the incoming
 	 * data chunks.  When complete the resulting file can be found at getFilename()
@@ -50,18 +50,18 @@ public class AssetConsumer {
 			getFilename().delete();
 		}
 	}
-	
+
 	/**
 	 * Get the ID of the incoming asset
 	 */
 	public Serializable getId() {
 		return header.getId();
 	}
-	
+
 	public String getName() {
 		return header.getName();
 	}
-	
+
 	/**
 	 * Add the next chunk of data to this consumer
 	 * @param chunk produced from the corresponding AssetProducer
@@ -69,13 +69,13 @@ public class AssetConsumer {
 	 */
 	public void update(AssetChunk chunk) throws IOException {
 		File file = getFilename();
-		FileOutputStream out = new FileOutputStream (file, true);
+		FileOutputStream out = new FileOutputStream(file, true);
 		byte[] data = chunk.getData();
 		out.write(data);
 		out.close();
 		currentPosition += data.length;
 	}
-	
+
 	/**
 	 * Whether all the data has been transferred 
 	 * @return
@@ -85,13 +85,13 @@ public class AssetConsumer {
 	}
 
 	public double getPercentComplete() {
-		return currentPosition / (double)header.getSize();
+		return currentPosition / (double) header.getSize();
 	}
-	
+
 	public long getSize() {
 		return header.getSize();
 	}
-	
+
 	/**
 	 * When complete this will point to the file containing the data
 	 * @return

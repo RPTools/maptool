@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.model;
@@ -58,7 +58,7 @@ public class AssetGroup {
 						Method getReaderFileSuffixes = imageIO.getDeclaredMethod("getReaderFileSuffixes", (Class[]) null);
 						Object result = getReaderFileSuffixes.invoke(null, (Object[]) null);
 						extensions = (String[]) result;
-//						extensions = ImageIO.getReaderFileSuffixes();
+						//						extensions = ImageIO.getReaderFileSuffixes();
 					} catch (Exception e) {
 						// NoSuchMethodException
 						// ClassNotFoundException
@@ -126,14 +126,14 @@ public class AssetGroup {
 	}
 
 	/**
-     */
+	 */
 	public List<AssetGroup> getChildGroups() {
 		loadGroupData();
 		return Collections.unmodifiableList(assetGroupList);
 	}
 
 	/**
-     */
+	 */
 	public List<Asset> getAssets() {
 		loadFileData();
 		return Collections.unmodifiableList(assetList);

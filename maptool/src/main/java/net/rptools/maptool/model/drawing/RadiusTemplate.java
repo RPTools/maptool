@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.model.drawing;
@@ -85,8 +85,8 @@ public class RadiusTemplate extends AbstractTemplate {
 		// At the center?
 		// FIXME This is wrong because it draws the filled rectangle at CellPoint(0,0) and it should be at the
 		// origin of the radius template.  Perhaps the transform is missing a call to translate()?
-//		if (x == 0 && y == 0)
-//			g.fillRect(getVertex().x + xOff - 4, getVertex().y + yOff - 4, 7, 7);
+		//		if (x == 0 && y == 0)
+		//			g.fillRect(getVertex().x + xOff - 4, getVertex().y + yOff - 4, 7, 7);
 	}
 
 	/**

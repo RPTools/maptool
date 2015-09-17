@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client;
@@ -72,33 +72,33 @@ public class MapToolRegistry {
 	}
 
 	public static void main(String[] args) throws Exception {
-//		long delay = 0;
-//
-//		Thread.sleep(delay);
-//		System.out.println("Register");
-//		registerInstance("my test", 4444);
-//
-//		Thread.sleep(delay);
-//		System.out.println("Heartbeat");
-//
-//		heartBeat(4444);
-//
-//		Thread.sleep(delay);
-//		System.out.println("Find: " + findInstance("my test"));
-//
-//		Thread.sleep(delay);
-//		System.out.println("RERegister");
-//		registerInstance("my test", 4444);
-//
-//		Thread.sleep(delay);
-//		System.out.println("Find: " + findInstance("my test"));
-//
-//		Thread.sleep(delay);
-//		System.out.println("Find: " + findInstance("my test"));
-//
-//		Thread.sleep(delay);
-//		System.out.println("UnRegister");
-//		unregisterInstance(4444);
+		//		long delay = 0;
+		//
+		//		Thread.sleep(delay);
+		//		System.out.println("Register");
+		//		registerInstance("my test", 4444);
+		//
+		//		Thread.sleep(delay);
+		//		System.out.println("Heartbeat");
+		//
+		//		heartBeat(4444);
+		//
+		//		Thread.sleep(delay);
+		//		System.out.println("Find: " + findInstance("my test"));
+		//
+		//		Thread.sleep(delay);
+		//		System.out.println("RERegister");
+		//		registerInstance("my test", 4444);
+		//
+		//		Thread.sleep(delay);
+		//		System.out.println("Find: " + findInstance("my test"));
+		//
+		//		Thread.sleep(delay);
+		//		System.out.println("Find: " + findInstance("my test"));
+		//
+		//		Thread.sleep(delay);
+		//		System.out.println("UnRegister");
+		//		unregisterInstance(4444);
 
 		System.out.println("Test: " + testConnection(51234));
 		System.out.println("All instances: " + findAllInstances());

@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.zone;
@@ -57,12 +57,10 @@ import net.rptools.maptool.model.ZonePoint;
 
 import org.apache.log4j.Logger;
 
-public class FogUtil
-{
+public class FogUtil {
 	private static final Logger log = Logger.getLogger(FogUtil.class);
 
-	public static Area calculateVisibility(int x, int y, Area vision, AreaTree topology)
-	{
+	public static Area calculateVisibility(int x, int y, Area vision, AreaTree topology) {
 		CodeTimer timer = new CodeTimer("calculateVisibility");
 
 		vision = new Area(vision);
@@ -75,8 +73,7 @@ public class FogUtil
 		Point origin = new Point(x, y);
 
 		AreaOcean ocean = topology.getOceanAt(origin);
-		if (ocean == null)
-		{
+		if (ocean == null) {
 			return null;
 		}
 		int skippedAreas = 0;
@@ -85,13 +82,11 @@ public class FogUtil
 		Collections.sort(segmentList);
 
 		List<Area> clearedAreaList = new LinkedList<Area>();
-		nextSegment: for (VisibleAreaSegment segment : segmentList)
-		{
+		nextSegment:
+		for (VisibleAreaSegment segment : segmentList) {
 			Rectangle r = segment.getPath().getBounds();
-			for (Area clearedArea : clearedAreaList)
-			{
-				if (clearedArea.contains(r))
-				{
+			for (Area clearedArea : clearedAreaList) {
+				if (clearedArea.contains(r)) {
 					skippedAreas++;
 					continue nextSegment;
 				}
@@ -100,11 +95,9 @@ public class FogUtil
 
 			timer.start("combine");
 			Area intersectedArea = null;
-			for (ListIterator<Area> iter = clearedAreaList.listIterator(); iter.hasNext();)
-			{
+			for (ListIterator<Area> iter = clearedAreaList.listIterator(); iter.hasNext();) {
 				Area clearedArea = iter.next();
-				if (clearedArea.intersects(r))
-				{
+				if (clearedArea.intersects(r)) {
 					clearedArea.add(area);
 					iter.remove(); // we'll put it on the back of the list to prevent crazy growth at the front
 					intersectedArea = clearedArea;
@@ -118,8 +111,7 @@ public class FogUtil
 		//		blockCount = segmentList.size();
 		//		int metaBlockCount = clearedAreaList.size();
 
-		while (clearedAreaList.size() > 1)
-		{
+		while (clearedAreaList.size() > 1) {
 			Area a1 = clearedAreaList.remove(0);
 			Area a2 = clearedAreaList.remove(0);
 
@@ -127,8 +119,7 @@ public class FogUtil
 			clearedAreaList.add(a1);
 		}
 
-		if (clearedAreaList.size() > 0)
-		{
+		if (clearedAreaList.size() > 0) {
 			vision.subtract(clearedAreaList.get(0));
 		}
 		//		System.out.println("Blocks: " + blockCount + " Skipped: " + skippedAreas + " metaBlocks: " + metaBlockCount );
@@ -170,29 +161,23 @@ public class FogUtil
 */
 	//  @formatter:on
 
-	public static void exposeVisibleArea(ZoneRenderer renderer, Set<GUID> tokenSet)
-	{
+	public static void exposeVisibleArea(ZoneRenderer renderer, Set<GUID> tokenSet) {
 		Zone zone = renderer.getZone();
 
-		for (GUID tokenGUID : tokenSet)
-		{
+		for (GUID tokenGUID : tokenSet) {
 			Token token = zone.getToken(tokenGUID);
-			if (token == null)
-			{
+			if (token == null) {
 				continue;
 			}
-			if (!token.getHasSight())
-			{
+			if (!token.getHasSight()) {
 				continue;
 			}
-			if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token))
-			{
+			if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
 				continue;
 			}
 			renderer.flush(token);
 			Area tokenVision = renderer.getVisibleArea(token);
-			if (tokenVision != null)
-			{
+			if (tokenVision != null) {
 				Set<GUID> filteredToks = new HashSet<GUID>();
 				filteredToks.add(token.getId());
 				zone.exposeArea(tokenVision, filteredToks);
@@ -201,22 +186,18 @@ public class FogUtil
 		}
 	}
 
-	public static void exposePCArea(ZoneRenderer renderer)
-	{
+	public static void exposePCArea(ZoneRenderer renderer) {
 		Set<GUID> tokenSet = new HashSet<GUID>();
 		List<Token> tokList = renderer.getZone().getPlayerTokens();
 		String playerName = MapTool.getPlayer().getName();
 		boolean isGM = MapTool.getPlayer().getRole() == Role.GM;
 
-		for (Token token : tokList)
-		{
-			if (!token.getHasSight())
-			{
+		for (Token token : tokList) {
+			if (!token.getHasSight()) {
 				continue;
 			}
 			boolean owner = token.isOwner(playerName) || isGM;
-			if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner)
-			{
+			if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner) {
 				continue;
 			}
 			tokenSet.add(token.getId());
@@ -225,39 +206,32 @@ public class FogUtil
 		exposeVisibleArea(renderer, tokenSet);
 	}
 
-	public static void exposeLastPath(ZoneRenderer renderer, Set<GUID> tokenSet)
-	{
+	public static void exposeLastPath(ZoneRenderer renderer, Set<GUID> tokenSet) {
 		Zone zone = renderer.getZone();
 		Grid grid = zone.getGrid();
 		GridCapabilities caps = grid.getCapabilities();
 		ZoneView zoneView = renderer.getZoneView();
 
-		if (!caps.isPathingSupported() || !caps.isSnapToGridSupported())
-		{
+		if (!caps.isPathingSupported() || !caps.isSnapToGridSupported()) {
 			return;
 		}
 		Set<GUID> filteredToks = new HashSet<GUID>(2);
-		for (GUID tokenGUID : tokenSet)
-		{
+		for (GUID tokenGUID : tokenSet) {
 			Token token = zone.getToken(tokenGUID);
-			if (token == null)
-			{
+			if (token == null) {
 				continue;
 			}
-			if (!token.getHasSight())
-			{
+			if (!token.getHasSight()) {
 				continue;
 			}
-			if (!token.isSnapToGrid())
-			{
+			if (!token.isSnapToGrid()) {
 				// We don't support this currently
 				log.warn("Exposing a token's path is not supported for non-SnapToGrid tokens and maps");
 				continue;
 			}
 			@SuppressWarnings("unchecked")
 			Path<CellPoint> lastPath = (Path<CellPoint>) token.getLastPath();
-			if (lastPath == null)
-			{
+			if (lastPath == null) {
 				continue;
 			}
 			Area visionArea = new Area();
@@ -266,8 +240,7 @@ public class FogUtil
 			GUID exposedGUID = token.getExposedAreaGUID();
 			ExposedAreaMetaData meta = fullMeta.get(exposedGUID);
 
-			if (meta == null)
-			{
+			if (meta == null) {
 				meta = new ExposedAreaMetaData();
 				fullMeta.put(exposedGUID, meta);
 			}
@@ -278,21 +251,18 @@ public class FogUtil
 			   Well, they don't, not in the context of a snapped to grid follower following an unsnapped key 
 				token. Commenting out and replacing...*/
 			//			for (CellPoint cell : lastPath.getCellPath()) {
-			for (Object cell : lastPath.getCellPath())
-			{
+			for (Object cell : lastPath.getCellPath()) {
 
 				/*Lee: quick fix for a bug that happens when a snapped PC token with vision is following an 
 				 unsnapped key token.*/
-				if (cell instanceof CellPoint)
-				{
+				if (cell instanceof CellPoint) {
 					ZonePoint zp = grid.convert((CellPoint) cell);
 					tokenClone.setX(zp.x);
 					tokenClone.setY(zp.y);
 				}
 
 				Area currVisionArea = zoneView.getVisibleArea(tokenClone);
-				if (currVisionArea != null)
-				{
+				if (currVisionArea != null) {
 					visionArea.add(currVisionArea);
 					meta.addToExposedAreaHistory(currVisionArea);
 				}
@@ -315,18 +285,14 @@ public class FogUtil
 	 * Find the center point of a vision TODO: This is a horrible horrible method. the API is just plain disgusting. But
 	 * it'll work to consolidate all the places this has to be done until we can encapsulate it into the vision itself
 	 */
-	public static Point calculateVisionCenter(Token token, Zone zone)
-	{
+	public static Point calculateVisionCenter(Token token, Zone zone) {
 		Grid grid = zone.getGrid();
 		int x = 0, y = 0;
 
 		Rectangle bounds = null;
-		if (token.isSnapToGrid())
-		{
+		if (token.isSnapToGrid()) {
 			bounds = token.getFootprint(grid).getBounds(grid, grid.convert(new ZonePoint(token.getX(), token.getY())));
-		}
-		else
-		{
+		} else {
 			bounds = token.getBounds(zone);
 		}
 
@@ -336,14 +302,12 @@ public class FogUtil
 		return new Point(x, y);
 	}
 
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) {
 		System.out.println("Creating topology");
 		final int topSize = 10000;
 		final Area topology = new Area();
 		Random r = new Random(12345);
-		for (int i = 0; i < 500; i++)
-		{
+		for (int i = 0; i < 500; i++) {
 			int x = r.nextInt(topSize);
 			int y = r.nextInt(topSize);
 			int w = r.nextInt(500) + 50;
@@ -357,8 +321,7 @@ public class FogUtil
 		final Area vision = new Area(new Rectangle(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE));
 
 		int pointCount = 0;
-		for (PathIterator iter = topology.getPathIterator(null); !iter.isDone(); iter.next())
-		{
+		for (PathIterator iter = topology.getPathIterator(null); !iter.isDone(); iter.next()) {
 			pointCount++;
 		}
 		System.out.println("Starting test " + pointCount + " points");
@@ -370,8 +333,7 @@ public class FogUtil
 		calculateVisibility(topSize / 2, topSize / 2, vision, tree);
 
 		Area area1 = new Area();
-		for (int i = 0; i < 1; i++)
-		{
+		for (int i = 0; i < 1; i++) {
 			// Return value isn't used except for debugging
 			area1 = calculateVisibility(topSize / 2, topSize / 2, vision, tree);
 		}
@@ -381,16 +343,14 @@ public class FogUtil
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setBounds(0, 0, 400, 200);
 		f.setLayout(new GridLayout());
-		f.add(new JPanel()
-		{
+		f.add(new JPanel() {
 			BufferedImage topImage = null;
 			Area theArea = null;
+
 			{
-				addMouseMotionListener(new MouseMotionAdapter()
-				{
+				addMouseMotionListener(new MouseMotionAdapter() {
 					@Override
-					public void mouseDragged(MouseEvent e)
-					{
+					public void mouseDragged(MouseEvent e) {
 						final long start = System.currentTimeMillis();
 						Dimension size = getSize();
 						int x = (int) ((e.getX() - (size.width / 2)) / (size.width / 2.0 / topSize));
@@ -400,11 +360,9 @@ public class FogUtil
 						repaint();
 					}
 				});
-				addMouseListener(new MouseAdapter()
-				{
+				addMouseListener(new MouseAdapter() {
 					@Override
-					public void mousePressed(MouseEvent e)
-					{
+					public void mousePressed(MouseEvent e) {
 						final long start = System.currentTimeMillis();
 						Dimension size = getSize();
 						int x = (int) ((e.getX() - (size.width / 2)) / (size.width / 2.0 / topSize));
@@ -417,8 +375,7 @@ public class FogUtil
 			}
 
 			@Override
-			protected void paintComponent(Graphics g)
-			{
+			protected void paintComponent(Graphics g) {
 				Dimension size = getSize();
 				g.setColor(Color.white);
 				g.fillRect(0, 0, size.width, size.height);
@@ -426,8 +383,7 @@ public class FogUtil
 				Graphics2D g2d = (Graphics2D) g;
 
 				AffineTransform at = AffineTransform.getScaleInstance((size.width / 2) / (double) topSize, (size.height) / (double) topSize);
-				if (topImage == null)
-				{
+				if (topImage == null) {
 					Area top = topology.createTransformedArea(at);
 					topImage = new BufferedImage(size.width / 2, size.height, BufferedImage.OPAQUE);
 
@@ -454,12 +410,10 @@ public class FogUtil
 				g.setColor(Color.green);
 				g2d.drawImage(topImage, 0, 0, this);
 				g.setColor(Color.gray);
-				if (theArea != null)
-				{
+				if (theArea != null) {
 					g2d.fill(theArea.createTransformedArea(at));
 				}
-				for (AreaMeta areaMeta : data.getAreaList(new Point(0, 0)))
-				{
+				for (AreaMeta areaMeta : data.getAreaList(new Point(0, 0))) {
 					g.setColor(Color.red);
 					g2d.draw(areaMeta.area.createTransformedArea(at));
 				}

@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.tool;
@@ -596,8 +596,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		}
 		super.mouseMoved(e);
 
-//		mouseX = e.getX(); // done by super.mouseMoved()
-//		mouseY = e.getY();
+		//		mouseX = e.getX(); // done by super.mouseMoved()
+		//		mouseY = e.getY();
 		if (isShowingPointer) {
 			ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
 			Pointer pointer = MapTool.getFrame().getPointerOverlay().getPointer(MapTool.getPlayer().getName());
@@ -1069,7 +1069,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0), new MovementKey(this, 0, -size));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), new MovementKey(this, size, -size));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), new MovementKey(this, -size, 0));
-//		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(this, 0, 0));
+		//		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(this, 0, 0));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), new MovementKey(this, size, 0));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, 0), new MovementKey(this, -size, size));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, 0), new MovementKey(this, 0, size));
@@ -1499,10 +1499,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			}
 
 			// Background
-//			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .5f));
-//			g.setColor(Color.black);
-//			g.fillRect(location.x, location.y, size.width, size.height);
-//			g.setComposite(composite);
+			//			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .5f));
+			//			g.setColor(Color.black);
+			//			g.fillRect(location.x, location.y, size.width, size.height);
+			//			g.setComposite(composite);
 			g.setPaint(new TexturePaint(AppStyle.panelTexture, new Rectangle(0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
 			g.fillRect(location.x, location.y, size.width, size.height);
 

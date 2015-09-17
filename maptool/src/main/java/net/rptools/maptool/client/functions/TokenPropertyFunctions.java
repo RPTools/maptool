@@ -393,7 +393,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		if (functionName.equals("setGMNotes")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
-			token.setGMNotes( parameters.get(0).toString());
+			token.setGMNotes(parameters.get(0).toString());
 			zone.putToken(token);
 			return token.getGMNotes();
 		}
@@ -414,7 +414,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		if (functionName.equals("setNotes")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
-			token.setNotes( parameters.get(0).toString());
+			token.setNotes(parameters.get(0).toString());
 			zone.putToken(token);
 			return token.getNotes();
 		}
@@ -711,11 +711,11 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			token.setSnapToScale(false);
 
 			if (functionName.equals("setTokenWidth")) {
-				token.setScaleX(magnitude/token.getWidth());
-				token.setScaleY(oldHeight/token.getHeight());
+				token.setScaleX(magnitude / token.getWidth());
+				token.setScaleY(oldHeight / token.getHeight());
 			} else { // it wasn't 'setTokenWidth' which means functionName equals 'setTokenHeight'
-				token.setScaleX(oldWidth/token.getWidth());
-				token.setScaleY(magnitude/token.getHeight());
+				token.setScaleX(oldWidth / token.getWidth());
+				token.setScaleY(magnitude / token.getHeight());
 			}
 			return "";
 		}

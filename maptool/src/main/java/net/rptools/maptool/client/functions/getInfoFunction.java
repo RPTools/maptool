@@ -262,10 +262,10 @@ public class getInfoFunction extends AbstractFunction {
 				linfo.put("name", ls.getName());
 				linfo.put("max range", ls.getMaxRange());
 				linfo.put("type", ls.getType());
-//				List<Light> lights = new ArrayList<Light>();
-//				for (Light light : ls.getLightList()) {
-//					lights.add(light);
-//				}
+				//				List<Light> lights = new ArrayList<Light>();
+				//				for (Light light : ls.getLightList()) {
+				//					lights.add(light);
+				//				}
 				linfo.put("light segments", ls.getLightList());
 				ltinfo.add(linfo);
 			}

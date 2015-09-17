@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.functions;
@@ -27,11 +27,9 @@ public class DefineMacroFunction extends AbstractFunction {
 		super(0, UNLIMITED_PARAMETERS, "defineFunction", "isFunctionDefined", "oldFunction");
 	}
 
-
 	public static DefineMacroFunction getInstance() {
 		return instance;
 	}
-
 
 	@Override
 	public Object childEvaluate(Parser parser, String functionName,
@@ -42,7 +40,7 @@ public class DefineMacroFunction extends AbstractFunction {
 			}
 
 			if (parameters.size() < 2) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam",functionName, 2, parameters.size()));
+				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 2, parameters.size()));
 			}
 
 			String macro = parameters.get(1).toString();
@@ -64,7 +62,6 @@ public class DefineMacroFunction extends AbstractFunction {
 				}
 				newVariableContext = !BigDecimal.ZERO.equals(parameters.get(3));
 			}
-
 
 			UserDefinedMacroFunctions.getInstance().defineFunction(parser, parameters.get(0).toString(), macro, ignoreOutput, newVariableContext);
 			return I18N.getText("macro.function.defineFunction.functionDefined", parameters.get(0).toString());

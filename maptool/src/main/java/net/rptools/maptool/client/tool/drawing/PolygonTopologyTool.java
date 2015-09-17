@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.tool.drawing;
@@ -88,24 +88,23 @@ public class PolygonTopologyTool extends LineTool implements MouseMotionListener
 	@Override
 	protected void completeDrawable(GUID zoneGUID, Pen pen, Drawable drawable) {
 		Area area = new Area();
-	
-		if (drawable instanceof LineSegment) {	
+
+		if (drawable instanceof LineSegment) {
 			LineSegment line = (LineSegment) drawable;
 			BasicStroke stroke = new BasicStroke(pen.getThickness(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
 			Path2D path = new Path2D.Double();
 			Point lastPoint = null;
-			
+
 			for (Point point : line.getPoints()) {
-				if (path.getCurrentPoint() == null)
-				{
+				if (path.getCurrentPoint() == null) {
 					path.moveTo(point.x, point.y);
 				} else if (!point.equals(lastPoint)) {
 					path.lineTo(point.x, point.y);
 					lastPoint = point;
 				}
 			}
-		
+
 			area.add(new Area(stroke.createStrokedShape(path)));
 		} else {
 			area = new Area(((ShapeDrawable) drawable).getShape());

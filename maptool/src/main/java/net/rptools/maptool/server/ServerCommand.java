@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.server;
@@ -35,55 +35,10 @@ import net.rptools.maptool.model.drawing.Pen;
 
 public interface ServerCommand {
 	public static enum COMMAND {
-		bootPlayer,
-		setCampaign,
-		getZone,
-		putZone,
-		removeZone,
-		putAsset,
-		getAsset,
-		removeAsset,
-		putToken,
-		removeToken,
-		draw,
-		clearAllDrawings,
-		setZoneGridSize,
-		message,
-		undoDraw,
-		showPointer,
-		movePointer,
-		hidePointer,
-		startTokenMove,
-		stopTokenMove,
-		toggleTokenMoveWaypoint,
-		updateTokenMove,
-		setZoneVisibility,
-		enforceZoneView,
-		setZoneHasFoW,
-		exposeFoW,
-		hideFoW,
-		setFoW,
-		putLabel,
-		removeLabel,
-		sendTokensToBack,
-		bringTokensToFront,
-		enforceZone,
-		setServerPolicy,
-		addTopology,
-		removeTopology,
-		renameZone,
-		heartbeat,
-		updateCampaign,
-		updateInitiative,
-		updateTokenInitiative,
-		setVisionType,
-		updateCampaignMacros,
-		setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be depended on for general purpose token movement
+		bootPlayer, setCampaign, getZone, putZone, removeZone, putAsset, getAsset, removeAsset, putToken, removeToken, draw, clearAllDrawings, setZoneGridSize, message, undoDraw, showPointer, movePointer, hidePointer, startTokenMove, stopTokenMove, toggleTokenMoveWaypoint, updateTokenMove, setZoneVisibility, enforceZoneView, setZoneHasFoW, exposeFoW, hideFoW, setFoW, putLabel, removeLabel, sendTokensToBack, bringTokensToFront, enforceZone, setServerPolicy, addTopology, removeTopology, renameZone, heartbeat, updateCampaign, updateInitiative, updateTokenInitiative, setVisionType, updateCampaignMacros, setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be depended on for general purpose token movement
 		setLiveTypingLabel, // Experimental
 		enforceNotification, // Override toggle button to show typing notifications
-		exposePCArea,
-		setBoard,
-		updateExposedAreaMeta
+		exposePCArea, setBoard, updateExposedAreaMeta
 	};
 
 	public void bootPlayer(String player);

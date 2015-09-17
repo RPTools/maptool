@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.zone.vbl;
@@ -42,7 +42,7 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 	}
 
 	public double getDistanceFromOrigin() {
-//		return GeometryUtil.getDistance(getCenterPoint(), origin);
+		//		return GeometryUtil.getDistance(getCenterPoint(), origin);
 		return getCenterPoint().distance(origin);
 	}
 
@@ -97,7 +97,7 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 			pathPoints.add(face.getP2());
 			pathPoints.add(0, GraphicsUtil.getProjectedPoint(origin, face.getP2(), Integer.MAX_VALUE / 2));
 		}
-//		System.out.println("Skipped: " + skipCount);
+		//		System.out.println("Skipped: " + skipCount);
 
 		GeneralPath path = null;
 		for (Point2D p : pathPoints) {
@@ -118,8 +118,8 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 			double odist = o.getDistanceFromOrigin();
 			double val = getDistanceFromOrigin() - odist; // separate variable for debugging
 			return (int) val;
-//			return val < EPSILON && val > -EPSILON ? 0 : (int) val; // Should we use an EPSILON value?
-//			return getDistanceFromOrigin() < odist ? -1 : getDistanceFromOrigin() > odist ? 1 : 0;
+			//			return val < EPSILON && val > -EPSILON ? 0 : (int) val; // Should we use an EPSILON value?
+			//			return getDistanceFromOrigin() < odist ? -1 : getDistanceFromOrigin() > odist ? 1 : 0;
 		}
 		return 0;
 	}

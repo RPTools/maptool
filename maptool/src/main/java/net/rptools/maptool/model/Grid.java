@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.model;
@@ -136,12 +136,12 @@ public abstract class Grid implements Cloneable {
 	public boolean isIsometric() {
 		return false;
 	}
-	
+
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
-//		Grid newGrid = (Grid) super.clone();
-//		return newGrid;
+		//		Grid newGrid = (Grid) super.clone();
+		//		return newGrid;
 	}
 
 	/**
@@ -156,7 +156,7 @@ public abstract class Grid implements Cloneable {
 	 *         For HexGrids Use getCellOffset() to move ZonePoint from center to top right
 	 */
 	public abstract ZonePoint convert(CellPoint cp);
-	
+
 	public ZonePoint getNearestVertex(ZonePoint point) {
 		int gridx = (int) Math.round((point.x - getOffsetX()) / getCellWidth());
 		int gridy = (int) Math.round((point.y - getOffsetY()) / getCellHeight());
@@ -476,7 +476,7 @@ public abstract class Grid implements Cloneable {
 		// Everything is covered with fog.  Or at least, the three regions that we wanted to use to enter the destination area.
 		return false;
 	}
-	
+
 	/**
 	 * Returns an area based upon the token's cell footprint
 	 * @param token
@@ -486,6 +486,7 @@ public abstract class Grid implements Cloneable {
 		// Get the cell footprint
 		return new Area(bounds);
 	}
+
 	public Area getTokenCellArea(Area bounds) {
 		// Get the cell footprint
 		return new Area(bounds);

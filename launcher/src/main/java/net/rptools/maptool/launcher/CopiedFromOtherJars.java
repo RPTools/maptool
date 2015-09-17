@@ -184,7 +184,7 @@ public class CopiedFromOtherJars {
 			return def;
 		}
 		def = nf.parse(text).intValue();
-//		System.out.println("Integer:  Input string is >>" + text + "<< and parsing produces " + newValue);
+		//		System.out.println("Integer:  Input string is >>" + text + "<< and parsing produces " + newValue);
 		return def;
 	}
 

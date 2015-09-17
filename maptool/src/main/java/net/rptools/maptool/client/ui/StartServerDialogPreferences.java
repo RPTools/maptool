@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui;
@@ -42,7 +42,7 @@ public class StartServerDialogPreferences {
 
 	private static Boolean useToolTipsForUnformattedRolls = null;
 
-	public Player.Role getRole () {
+	public Player.Role getRole() {
 		return Player.Role.valueOf(prefs.get(KEY_ROLE, Player.Role.GM.name()));
 	}
 
@@ -89,14 +89,16 @@ public class StartServerDialogPreferences {
 	public void setUseStrictTokenOwnership(boolean use) {
 		prefs.putBoolean(KEY_STRICT_TOKEN_OWNERSHIP, use);
 	}
+
 	// my addition
 	public boolean getRestrictedImpersonation() {
 		return prefs.getBoolean(KEY_RESTRICTED_IMPERSONATION, true);
 	}
 
-	public void setRestrictedImpersonation (boolean impersonation) {
+	public void setRestrictedImpersonation(boolean impersonation) {
 		prefs.putBoolean(KEY_RESTRICTED_IMPERSONATION, impersonation);
 	}
+
 	public boolean registerServer() {
 		return prefs.getBoolean(KEY_REGISTER_SERVER, false);
 	}
@@ -163,7 +165,7 @@ public class StartServerDialogPreferences {
 		return useToolTipsForUnformattedRolls;
 	}
 
-	public void setUseToolTipsForUnformattedRolls(boolean flag)  {
+	public void setUseToolTipsForUnformattedRolls(boolean flag) {
 		useToolTipsForUnformattedRolls = flag;
 	}
 
@@ -183,7 +185,7 @@ public class StartServerDialogPreferences {
 	public void setUseIndividualFOW(boolean flag) {
 		prefs.putBoolean(KEY_USE_INDIVIDUAL_FOW, flag);
 	}
-	
+
 	public boolean isAutoRevealOnMovement() {
 		return prefs.getBoolean(KEY_AUTO_REVEAL_ON_MOVE, false);
 	}

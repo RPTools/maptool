@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.token;
@@ -149,7 +149,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
 		// SIGHT
 		updateSightTypeCombo();
-		
+
 		// Image Tables
 		updateImageTableCombo();
 
@@ -201,9 +201,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 			}
 		});
 
-//		Player player = MapTool.getPlayer();
-//		boolean editable = player.isGM() || !MapTool.getServerPolicy().useStrictTokenManagement() || token.isOwner(player.getName());
-//		getAllPlayersCheckBox().setSelected(token.isOwnedByAll());
+		//		Player player = MapTool.getPlayer();
+		//		boolean editable = player.isGM() || !MapTool.getServerPolicy().useStrictTokenManagement() || token.isOwner(player.getName());
+		//		getAllPlayersCheckBox().setSelected(token.isOwnedByAll());
 
 		// OTHER
 		getShapeCombo().setSelectedItem(token.getShape());
@@ -229,20 +229,20 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		getVisibleCheckBox().addActionListener(tokenVisibleActionListener);
 
 		// Character Sheets
-//		controller = null;
-//		String form = MapTool.getCampaign().getCharacterSheets().get(token.getPropertyType());
-//		if (form == null)
-//			return;
-//		URL formUrl = getClass().getClassLoader().getResource(form);
-//		if (formUrl == null)
-//			return;
-//		controller = new CharSheetController(formUrl, null);
-//		HashMap<String, Object> properties = new HashMap<String, Object>();
-//		for (String prop : token.getPropertyNames())
-//			properties.put(prop, token.getProperty(prop));
-//		controller.setData(properties);
-//		controller.getPanel().setName("characterSheet");
-//		replaceComponent("sheetPanel", "characterSheet", controller.getPanel());
+		//		controller = null;
+		//		String form = MapTool.getCampaign().getCharacterSheets().get(token.getPropertyType());
+		//		if (form == null)
+		//			return;
+		//		URL formUrl = getClass().getClassLoader().getResource(form);
+		//		if (formUrl == null)
+		//			return;
+		//		controller = new CharSheetController(formUrl, null);
+		//		HashMap<String, Object> properties = new HashMap<String, Object>();
+		//		for (String prop : token.getPropertyNames())
+		//			properties.put(prop, token.getProperty(prop));
+		//		controller.setData(properties);
+		//		controller.getPanel().setName("characterSheet");
+		//		replaceComponent("sheetPanel", "characterSheet", controller.getPanel());
 
 		super.bind(token);
 	}
@@ -348,7 +348,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		DefaultComboBoxModel model = new DefaultComboBoxModel(typeList.toArray());
 		getImageTableCombo().setModel(model);
 	}
-	
 
 	private void updatePropertiesTable(final String propertyType) {
 		EventQueue.invokeLater(new Runnable() {
@@ -371,7 +370,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 	public JComboBox getSightTypeCombo() {
 		return (JComboBox) getComponent("sightTypeCombo");
 	}
-	
+
 	public JComboBox getImageTableCombo() {
 		return (JComboBox) getComponent("imageTableCombo");
 	}
@@ -513,9 +512,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		tokenSaved = true;
 
 		// Character Sheet
-//		Map<String, Object> properties = controller.getData();
-//		for (String prop : token.getPropertyNames())
-//			token.setProperty(prop, properties.get(prop));
+		//		Map<String, Object> properties = controller.getData();
+		//		for (String prop : token.getPropertyNames())
+		//			token.setProperty(prop, properties.get(prop));
 
 		// Update UI
 		MapTool.getFrame().updateTokenTree();
@@ -745,38 +744,38 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		propertyTable.setName("propertiesTable");
 
 		PropertyPane pane = new PropertyPane(propertyTable);
-//		pane.setPreferredSize(new Dimension(100, 300));
+		//		pane.setPreferredSize(new Dimension(100, 300));
 
 		replaceComponent("propertiesPanel", "propertiesTable", pane);
 	}
 
-//	/**
-//	 * Set the currently displayed token.
-//	 * 
-//	 * @param aToken
-//	 *            The token to be displayed
-//	 */
-//	public void setToken(Token aToken) {
-//		if (aToken == token)
-//			return;
-//		if (token != null) {
-//			token.removeModelChangeListener(this);
-//		}
-//		token = aToken;
-//
-//		if (token != null) {
-//			token.addModelChangeListener(this);
-//
-//			List<String> typeList = new ArrayList<String>();
-//			typeList.addAll(MapTool.getCampaign().getTokenTypes());
-//			Collections.sort(typeList);
-//			getPropertyTypeCombo().setModel(new DefaultComboBoxModel(typeList.toArray()));
-//
-//			setFields();
-//			updateView();
-//		}
-//		getTabbedPane().setSelectedIndex(0);
-//	}
+	//	/**
+	//	 * Set the currently displayed token.
+	//	 * 
+	//	 * @param aToken
+	//	 *            The token to be displayed
+	//	 */
+	//	public void setToken(Token aToken) {
+	//		if (aToken == token)
+	//			return;
+	//		if (token != null) {
+	//			token.removeModelChangeListener(this);
+	//		}
+	//		token = aToken;
+	//
+	//		if (token != null) {
+	//			token.addModelChangeListener(this);
+	//
+	//			List<String> typeList = new ArrayList<String>();
+	//			typeList.addAll(MapTool.getCampaign().getTokenTypes());
+	//			Collections.sort(typeList);
+	//			getPropertyTypeCombo().setModel(new DefaultComboBoxModel(typeList.toArray()));
+	//
+	//			setFields();
+	//			updateView();
+	//		}
+	//		getTabbedPane().setSelectedIndex(0);
+	//	}
 
 	/** @return Getter for tokenSaved */
 	public boolean isTokenSaved() {

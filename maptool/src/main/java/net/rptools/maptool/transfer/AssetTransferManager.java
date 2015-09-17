@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.transfer;
@@ -24,7 +24,7 @@ public class AssetTransferManager {
 	private Map<Serializable, AssetConsumer> consumerMap = new HashMap<Serializable, AssetConsumer>();
 	private List<ConsumerListener> consumerListenerList = new CopyOnWriteArrayList<ConsumerListener>();
 	private List<AssetProducer> producerList = new LinkedList<AssetProducer>();
-	
+
 	/**
 	 * Clear out all existing consumers and producers
 	 */
@@ -32,7 +32,7 @@ public class AssetTransferManager {
 		consumerMap.clear();
 		producerList.clear();
 	}
-	
+
 	/**
 	 * Add a new producer to the chunk queue.  Assumes that the header has already been transferred
 	 * to the consumer.  Producer chunks can then be retrieved via nextChunk()
@@ -57,7 +57,7 @@ public class AssetTransferManager {
 		}
 		return chunk;
 	}
-	
+
 	/**
 	 * Add the corresponding consumer that is expecting to receive chunks.
 	 * Add a ConsumerListener to know when the asset is complete
@@ -94,14 +94,14 @@ public class AssetTransferManager {
 			}
 		}
 	}
-	
+
 	/**
 	 * Get a list of current asset consumers, this is a good way to know what's going on in the system
 	 */
 	public synchronized List<AssetConsumer> getAssetConsumers() {
 		return new ArrayList<AssetConsumer>(consumerMap.values());
 	}
-	
+
 	public void addConsumerListener(ConsumerListener listener) {
 		consumerListenerList.add(listener);
 	}

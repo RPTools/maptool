@@ -222,14 +222,14 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 		}
 
 		if (tokenMoved) {
-//			System.err.println(newVals + " @ (" + x + ", " + y + ")");
+			//			System.err.println(newVals + " @ (" + x + ", " + y + ")");
 			TokenLocationFunctions.getInstance().moveToken(token, x, y, useDistance);
 		}
 
 		// Facing
 		if (newVals.containsKey("facing")) {
 			token.setFacing(newVals.getInt("facing"));
-//			MapTool.getFrame().getCurrentZoneRenderer().flushLight();	// FJE Already part of copyToken()
+			//			MapTool.getFrame().getCurrentZoneRenderer().flushLight();	// FJE Already part of copyToken()
 		}
 
 		// Size

@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui;
@@ -639,7 +639,7 @@ public class PreferencesDialog extends JDialog {
 	 * anything and avoids having to track what grid types are being used.
 	 */
 	private void updateFacings() {
-//		List<Zone> zlist = MapTool.getServer().getCampaign().getZones();	// generated NPE http://forums.rptools.net/viewtopic.php?f=3&t=17334
+		//		List<Zone> zlist = MapTool.getServer().getCampaign().getZones();	// generated NPE http://forums.rptools.net/viewtopic.php?f=3&t=17334
 		List<Zone> zlist = MapTool.getCampaign().getZones();
 		boolean faceEdges = AppPreferences.getFaceEdge();
 		boolean faceVertices = AppPreferences.getFaceVertex();

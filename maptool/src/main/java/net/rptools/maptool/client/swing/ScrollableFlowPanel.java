@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.swing;
@@ -32,34 +32,34 @@ import javax.swing.SwingConstants;
  * @author trevor
  */
 public class ScrollableFlowPanel extends JPanel implements Scrollable {
-	
+
 	public ScrollableFlowPanel() {
 		// Default
 	}
-	
+
 	public ScrollableFlowPanel(int alignment) {
 		setLayout(new FlowLayout(alignment));
 	}
-	
-	public void setBounds( int x, int y, int width, int height ) {
-		super.setBounds( x, y, getParent().getWidth(), height );
+
+	public void setBounds(int x, int y, int width, int height) {
+		super.setBounds(x, y, getParent().getWidth(), height);
 	}
 
 	public Dimension getPreferredSize() {
-		return new Dimension( getWidth(), getPreferredHeight() );
+		return new Dimension(getWidth(), getPreferredHeight());
 	}
-	
+
 	public Dimension getPreferredScrollableViewportSize() {
 		return super.getPreferredSize();
 	}
 
-	public int getScrollableUnitIncrement( Rectangle visibleRect, int orientation, int direction ) {
-		int hundredth = ( orientation ==  SwingConstants.VERTICAL
-				? getParent().getHeight() : getParent().getWidth() ) / 100;
-		return ( hundredth == 0 ? 1 : hundredth ); 
+	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+		int hundredth = (orientation == SwingConstants.VERTICAL
+				? getParent().getHeight() : getParent().getWidth()) / 100;
+		return (hundredth == 0 ? 1 : hundredth);
 	}
 
-	public int getScrollableBlockIncrement( Rectangle visibleRect, int orientation, int direction ) {
+	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
 		return orientation == SwingConstants.VERTICAL ? getParent().getHeight() : getParent().getWidth();
 	}
 
@@ -73,14 +73,14 @@ public class ScrollableFlowPanel extends JPanel implements Scrollable {
 
 	private int getPreferredHeight() {
 		int rv = 0;
-		for ( int k = 0, count = getComponentCount(); k < count; k++ ) {
-			Component comp = getComponent( k );
+		for (int k = 0, count = getComponentCount(); k < count; k++) {
+			Component comp = getComponent(k);
 			Rectangle r = comp.getBounds();
 			int height = r.y + r.height;
-			if ( height > rv )
+			if (height > rv)
 				rv = height;
 		}
-		rv += ( (FlowLayout) getLayout() ).getVgap();
+		rv += ((FlowLayout) getLayout()).getVgap();
 		return rv;
 	}
 }

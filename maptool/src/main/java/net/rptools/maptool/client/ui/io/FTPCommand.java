@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.io;
@@ -21,19 +21,23 @@ import org.apache.commons.net.ftp.FTPClientConfig;
 
 /**
  * <p>
- * This class extends the Apache Commons {@link Net.FtpClient} class to ease future modification.
+ * This class extends the Apache Commons {@link Net.FtpClient} class to ease
+ * future modification.
  * </p>
  * <p>
- * This class creates its own connection to the specified host and does not try to reuse an existing connection. This
- * has significant downsides, not the least of which is the need to provide login information (username and password),
- * but also the server seeing multiple incoming connections might think that some kind of DOS attack is being attempted
- * and lock the account!
+ * This class creates its own connection to the specified host and does not try
+ * to reuse an existing connection. This has significant downsides, not the
+ * least of which is the need to provide login information (username and
+ * password), but also the server seeing multiple incoming connections might
+ * think that some kind of DOS attack is being attempted and lock the account!
  * </p>
  * <p>
- * Currently the only added command is <code>MKDIR</code>. This command may be implemented differently on different
- * servers (<code>MKDIR</code>, <code>MKD</code>, <code>XMKD</code>, etc) so the first time the application tries to
- * create a directory for a given host we loop through the possibilities that we know of until one works. That command
- * string is then saved for later use.
+ * Currently the only added command is <code>MKDIR</code>. This command may be
+ * implemented differently on different servers (<code>MKDIR</code>,
+ * <code>MKD</code>, <code>XMKD</code>, etc) so the first time the application
+ * tries to create a directory for a given host we loop through the
+ * possibilities that we know of until one works. That command string is then
+ * saved for later use.
  * </p>
  * 
  * @author crash

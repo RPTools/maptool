@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.io;
@@ -71,7 +71,7 @@ public class ProgressBarList extends JDialog implements ChangeListener {
 		int thrds = ftp.getNumberOfThreads();
 		bars = new HashMap<FTPTransferObject, JProgressBar>(thrds);
 
-		grid = new GridLayout(0, 1, 2, 6);	// Always just a single column
+		grid = new GridLayout(0, 1, 2, 6); // Always just a single column
 		progressBars = new JPanel(grid);
 		add(progressBars, BorderLayout.CENTER);
 
@@ -145,7 +145,7 @@ public class ProgressBarList extends JDialog implements ChangeListener {
 				// New FTO that's not being shown yet...
 				bar = new JProgressBar();
 				bar.setStringPainted(true);
-//				bar.setString(fto.remoteDir + fto.remote);
+				//				bar.setString(fto.remoteDir + fto.remote);
 				bar.setMaximum(fto.maximumPosition);
 				bars.put(fto, bar);
 				progressBars.add(bar);

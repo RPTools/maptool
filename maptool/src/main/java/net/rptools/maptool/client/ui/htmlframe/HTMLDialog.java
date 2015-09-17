@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.htmlframe;
@@ -133,7 +133,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
 	 * @return The dialog.
 	 */
 	static HTMLDialog showDialog(String name, String title, int width, int height, boolean frame,
-				boolean input, boolean temp, boolean closeButton, String html) {
+			boolean input, boolean temp, boolean closeButton, String html) {
 		HTMLDialog dialog;
 		if (dialogs.containsKey(name)) {
 			dialog = dialogs.get(name);
@@ -143,7 +143,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
 			dialogs.put(name, dialog);
 			dialog.updateContents(html, temp, closeButton, input);
 		}
-//		dialog.canResize = false;
+		//		dialog.canResize = false;
 		if (!dialog.isVisible()) {
 			dialog.setVisible(true);
 		}
@@ -268,8 +268,8 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
 				closeButton = val;
 				panel.updateContents(closeButton);
 			} else if (mtae.getName().equalsIgnoreCase("onChangeToken") ||
-						mtae.getName().equalsIgnoreCase("onChangeSelection") ||
-						mtae.getName().equalsIgnoreCase("onChangeImpersonated")) {
+					mtae.getName().equalsIgnoreCase("onChangeSelection") ||
+					mtae.getName().equalsIgnoreCase("onChangeImpersonated")) {
 				macroCallbacks.put(mtae.getName(), mtae.getContent());
 			} else if (mtae.getName().equalsIgnoreCase("width")) {
 				if (canResize) {

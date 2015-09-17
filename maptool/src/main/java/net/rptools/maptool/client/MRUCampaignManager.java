@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client;
@@ -55,11 +55,11 @@ public class MRUCampaignManager {
 			mruCampaigns.add(newCampaign);
 		} else {
 			// This code would be much simpler, but too late in the 1.3 cycle for this change.
-//			LinkedList<File> newMruList = new LinkedList<File>(mruCampaigns);
-//			newMruList.removeFirstOccurrence(newCampaign);
-//			newMruList.addFirst(newCampaign);
-//			while (newMruList.size() > DEFAULT_MAX_MRU)
-//				newMruList.removeLast();
+			//			LinkedList<File> newMruList = new LinkedList<File>(mruCampaigns);
+			//			newMruList.removeFirstOccurrence(newCampaign);
+			//			newMruList.addFirst(newCampaign);
+			//			while (newMruList.size() > DEFAULT_MAX_MRU)
+			//				newMruList.removeLast();
 			ArrayList<File> newMruList = new ArrayList<File>(DEFAULT_MAX_MRU + 1);
 			newMruList.add(newCampaign);
 			for (ListIterator<File> iter = mruCampaigns.listIterator(); iter.hasNext();) {

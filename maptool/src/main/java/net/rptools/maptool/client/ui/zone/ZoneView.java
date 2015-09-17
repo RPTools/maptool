@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.zone;
@@ -65,8 +65,8 @@ public class ZoneView implements ModelChangeListener {
 	public Area getVisibleArea(PlayerView view) {
 		calculateVisibleArea(view);
 		ZoneView.VisibleAreaMeta visible = visibleAreaMap.get(view);
-//		if (visible == null)
-//			System.out.println("ZoneView: visible == null.  Please report this on our forum @ forum.rptools.net.  Thank you!");
+		//		if (visible == null)
+		//			System.out.println("ZoneView: visible == null.  Please report this on our forum @ forum.rptools.net.  Thank you!");
 		return visible != null ? visible.visibleArea : new Area();
 	}
 
@@ -391,7 +391,7 @@ public class ZoneView implements ModelChangeListener {
 			visibleAreaMap.clear();
 		}
 		// TODO: This fixes a bug with changing vision type, I don't like it though, it needs to be optimized back out
-//		lightSourceCache.clear();
+		//		lightSourceCache.clear();
 	}
 
 	private void calculateVisibleArea(PlayerView view) {
@@ -422,7 +422,7 @@ public class ZoneView implements ModelChangeListener {
 			} else {
 				// If we're viewing the map as a player and the token is not a PC or we're not the GM, then skip it.
 				// This used to be the code:
-//				if ((token.getType() != Token.Type.PC && !view.isGMView() || (!view.isGMView() && MapTool.getPlayer().getRole() == Role.GM))) {
+				//				if ((token.getType() != Token.Type.PC && !view.isGMView() || (!view.isGMView() && MapTool.getPlayer().getRole() == Role.GM))) {
 				if (!isGMview && (token.getType() != Token.Type.PC || MapTool.getPlayer().isGM())) {
 					continue;
 				}

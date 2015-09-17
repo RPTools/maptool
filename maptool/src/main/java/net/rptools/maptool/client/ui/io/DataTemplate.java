@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.io;
@@ -65,7 +65,7 @@ import org.apache.log4j.Logger;
 abstract public class DataTemplate {
 
 	private static final Logger log = Logger.getLogger(DataTemplate.class);
-	
+
 	/**
 	 * <p>
 	 * This method returns the string used to position the data within the tree displayed
@@ -93,7 +93,7 @@ abstract public class DataTemplate {
 		// The default string makes it clear that some software is misconfigured.
 		return "Misconfigured subsystem: getTreePath()";
 	}
-	
+
 	abstract public String getSubsystemName();
 
 	private UIBuilder.TreeModel model;

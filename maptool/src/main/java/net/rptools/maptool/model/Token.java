@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.model;
@@ -335,26 +335,26 @@ public class Token extends BaseModel {
 		lastX = lastY = 0;
 		// lightSourceList?
 		macroMap = null;
-//		macroPropertiesMap = null;
+		//		macroPropertiesMap = null;
 		ownerList = null;
-//		propertyMapCI = null;
-//		propertyType = "Basic";
+		//		propertyMapCI = null;
+		//		propertyType = "Basic";
 		sightType = MapTool.getCampaign().getCampaignProperties().getDefaultSightType();
-//		state = null;
+		//		state = null;
 		visionList = null;
 	}
 
 	public void setHasSight(boolean hasSight) {
 		this.hasSight = hasSight;
 	}
-	
+
 	public void setHasImageTable(boolean hasImageTable) {
 		if (hasImageTable)
 			this.hasImageTable = true;
 		else
 			this.hasImageTable = null;
 	}
-	
+
 	public void setImageTableName(String imageTableName) {
 		this.imageTableName = imageTableName;
 	}
@@ -374,7 +374,7 @@ public class Token extends BaseModel {
 	public int getHeight() {
 		return height;
 	}
-	
+
 	public boolean isMarker() {
 		return isStamp() && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
 	}
@@ -521,13 +521,13 @@ public class Token extends BaseModel {
 	public boolean getHasSight() {
 		return hasSight;
 	}
-	
+
 	public boolean getHasImageTable() {
-		if (hasImageTable!=null)
+		if (hasImageTable != null)
 			return hasImageTable;
 		return false;
 	}
-	
+
 	public String getImageTableName() {
 		return imageTableName;
 	}
@@ -945,8 +945,8 @@ public class Token extends BaseModel {
 				footprintBounds.x -= (w - footprintBounds.width) / 2;
 				footprintBounds.y -= (h - footprintBounds.height) / 2;
 			} else {
-//	        	footprintBounds.x -= zone.getGrid().getSize()/2;
-//	        	footprintBounds.y -= zone.getGrid().getSize()/2;
+				//	        	footprintBounds.x -= zone.getGrid().getSize()/2;
+				//	        	footprintBounds.y -= zone.getGrid().getSize()/2;
 			}
 		}
 		footprintBounds.width = (int) w; // perhaps make this a double
@@ -1029,14 +1029,14 @@ public class Token extends BaseModel {
 	public Object getProperty(String key) {
 		Object value = getPropertyMap().get(key);
 
-//		// Short name ?
-//		if (value == null) {
-//			for (EditTokenProperty property : MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(getPropertyType())) {
-//				if (property.getShortName().equals(key)) {
-//					value = getPropertyMap().get(property.getShortName().toUpperCase());
-//				}
-//			}
-//		}
+		//		// Short name ?
+		//		if (value == null) {
+		//			for (EditTokenProperty property : MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(getPropertyType())) {
+		//				if (property.getShortName().equals(key)) {
+		//					value = getPropertyMap().get(property.getShortName().toUpperCase());
+		//				}
+		//			}
+		//		}
 		return value;
 	}
 
@@ -1286,7 +1286,7 @@ public class Token extends BaseModel {
 	}
 
 	public boolean isFlippedIso() {
-		if (isFlippedIso!=null)
+		if (isFlippedIso != null)
 			return isFlippedIso;
 		return false;
 	}
@@ -1294,7 +1294,7 @@ public class Token extends BaseModel {
 	public void setFlippedIso(boolean isFlippedIso) {
 		if (isFlippedIso)
 			this.isFlippedIso = true;
-		else 
+		else
 			this.isFlippedIso = null;
 	}
 

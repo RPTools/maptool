@@ -112,7 +112,7 @@ public class MapToolLineParser {
 			TokenPropertyFunctions.getInstance(), TokenRemoveFromInitiativeFunction.getInstance(), TokenSelectionFunctions.getInstance(),
 			TokenSightFunctions.getInstance(), TokenSpeechFunctions.getInstance(), TokenStateFunction.getInstance(), TokenVisibleFunction.getInstance(), UserDefinedMacroFunctions.getInstance(),
 			isVisibleFunction.getInstance(), getInfoFunction.getInstance(), TokenMoveFunctions.getInstance(), FogOfWarFunctions.getInstance(), VBL_Functions.getInstance(),
-			ZoomFunctions.getInstance()};
+			ZoomFunctions.getInstance() };
 
 	/** Name and Source or macros that come from chat. */
 	public static final String CHAT_INPUT = "chat";
@@ -1470,7 +1470,7 @@ public class MapToolLineParser {
 			}
 			return macroOutput;
 		} finally {
-//			exitContext();
+			//			exitContext();
 			macroRecurseDepth--;
 		}
 	}

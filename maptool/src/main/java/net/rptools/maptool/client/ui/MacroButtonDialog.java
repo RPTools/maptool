@@ -94,14 +94,14 @@ public class MacroButtonDialog extends JDialog {
 	private void installFontColorCombo() {
 		JComboBox combo = panel.getComboBox("fontColorComboBox");
 		combo.setModel(new DefaultComboBoxModel(MacroButtonProperties.getFontColors()));
-//		combo.insertItemAt("default", 0);
+		//		combo.insertItemAt("default", 0);
 		combo.setSelectedItem("black");
 		combo.setRenderer(new ColorComboBoxRenderer());
 	}
 
 	private void installFontSizeCombo() {
 		String[] fontSizes = { "0.75em", "0.80em", "0.85em", "0.90em", "0.95em", "1.00em", "1.05em", "1.10em", "1.15em", "1.20em", "1.25em" };
-//		String[] fontSizes = { "6pt", "7pt", "8pt", "9pt", "10pt", "11pt", "12pt", "13pt", "14pt", "15pt", "16pt" };
+		//		String[] fontSizes = { "6pt", "7pt", "8pt", "9pt", "10pt", "11pt", "12pt", "13pt", "14pt", "15pt", "16pt" };
 		JComboBox combo = panel.getComboBox("fontSizeComboBox");
 		combo.setModel(new DefaultComboBoxModel(fontSizes));
 	}
@@ -305,12 +305,12 @@ public class MacroButtonDialog extends JDialog {
 			MapTool.getFrame().getCampaignPanel().reset();
 		}
 		setVisible(false);
-//		dispose();
+		//		dispose();
 	}
 
 	private void cancel() {
 		setVisible(false);
-//		dispose();
+		//		dispose();
 	}
 
 	private JCheckBox getAutoExecuteCheckBox() {

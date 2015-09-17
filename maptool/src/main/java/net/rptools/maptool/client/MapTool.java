@@ -345,10 +345,10 @@ public class MapTool {
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean confirm(String message, Object... params) {
-//		String msg = I18N.getText(message, params);
-//		log.debug(message);
+		//		String msg = I18N.getText(message, params);
+		//		log.debug(message);
 		String title = I18N.getText("msg.title.messageDialogConfirm");
-//		return JOptionPane.showConfirmDialog(clientFrame, msg, title, JOptionPane.OK_OPTION) == JOptionPane.OK_OPTION;
+		//		return JOptionPane.showConfirmDialog(clientFrame, msg, title, JOptionPane.OK_OPTION) == JOptionPane.OK_OPTION;
 		return confirmImpl(title, JOptionPane.OK_OPTION, message, params) == JOptionPane.OK_OPTION;
 	}
 
@@ -1175,10 +1175,10 @@ public class MapTool {
 				macOSXicon();
 			}
 			// If running on Windows based OS, CJK font is broken when using TinyLAF.
-//			else if (WINDOWS) {
-//				UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-//				menuBar = new AppMenuBar();
-//			}
+			//			else if (WINDOWS) {
+			//				UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+			//				menuBar = new AppMenuBar();
+			//			}
 			else {
 				lafname = "de.muntjak.tinylookandfeel.TinyLookAndFeel";
 				UIManager.setLookAndFeel(lafname);
@@ -1430,7 +1430,7 @@ public class MapTool {
 			};
 
 			webAppThread.run();
-		} catch (Exception e) {  // TODO: This needs to be logged
+		} catch (Exception e) { // TODO: This needs to be logged
 			System.out.println("Unable to start web server");
 			e.printStackTrace();
 		}

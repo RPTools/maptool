@@ -167,7 +167,7 @@ public class Zone extends BaseModel {
 	 */
 	public Zone() {
 		// TODO: Was this needed?
-//		setGrid(new SquareGrid());
+		//		setGrid(new SquareGrid());
 		undo = new UndoPerZone(this); // registers as ModelChangeListener for drawables...
 		addModelChangeListener(undo);
 	}
@@ -397,7 +397,7 @@ public class Zone extends BaseModel {
 	public void setGrid(Grid grid) {
 		this.grid = grid;
 		grid.setZone(this);
-//		tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE * grid.getSize() / unitsPerCell;
+		//		tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE * grid.getSize() / unitsPerCell;
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.GRID_CHANGED));
 	}
 
@@ -631,7 +631,7 @@ public class Zone extends BaseModel {
 		return !combined.isEmpty();
 		//return combined.intersects(tokenSize);
 	}
-	
+
 	public void clearTopology() {
 		topology = new Area();
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
@@ -658,16 +658,16 @@ public class Zone extends BaseModel {
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
 	}
 
-   public void clearExposedArea(Set<GUID> tokenSet) {
-      //Jamz: Clear FoW for set tokens only, for use by ExposeVisibleAreaOnlyAction Menu action and exposePCOnlyArea() macro
-      for (GUID tea : tokenSet) {
-         ExposedAreaMetaData meta = exposedAreaMeta.get(tea);
-         if (meta != null)
-            meta.clearExposedAreaHistory();
-      }
+	public void clearExposedArea(Set<GUID> tokenSet) {
+		//Jamz: Clear FoW for set tokens only, for use by ExposeVisibleAreaOnlyAction Menu action and exposePCOnlyArea() macro
+		for (GUID tea : tokenSet) {
+			ExposedAreaMetaData meta = exposedAreaMeta.get(tea);
+			if (meta != null)
+				meta.clearExposedAreaHistory();
+		}
 
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
-   }
+		fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+	}
 
 	public void exposeArea(Area area, Token tok) {
 		if (area == null || area.isEmpty()) {
@@ -843,9 +843,9 @@ public class Zone extends BaseModel {
 		}
 		for (Token tok : toks) {
 			// Don't need this IF statement; see net.rptools.maptool.client.ui.zone.ZoneRenderer.getPlayerView(Role)
-//			if (!tok.getHasSight() || !AppUtil.playerOwns(tok)) {
-//				continue;
-//			}
+			//			if (!tok.getHasSight() || !AppUtil.playerOwns(tok)) {
+			//				continue;
+			//			}
 			ExposedAreaMetaData meta = exposedAreaMeta.get(tok.getExposedAreaGUID());
 			if (meta != null)
 				combined.add(meta.getExposedAreaHistory());
@@ -1051,7 +1051,7 @@ public class Zone extends BaseModel {
 	 */
 	@Deprecated
 	public void putTokens(List<Token> tokens) {
-//		System.out.println("putToken() called with list of " + tokens.size() + " tokens.");
+		//		System.out.println("putToken() called with list of " + tokens.size() + " tokens.");
 
 		Collection<Token> values = tokenMap.values();
 
@@ -1239,7 +1239,7 @@ public class Zone extends BaseModel {
 		return getTokensFiltered(new Filter() {
 			@Override
 			public boolean matchToken(Token t) {
-				return t.getShape()==Token.TokenShape.FIGURE;
+				return t.getShape() == Token.TokenShape.FIGURE;
 			}
 		});
 	}
@@ -1326,7 +1326,7 @@ public class Zone extends BaseModel {
 			}
 		}
 	}
-	
+
 	/**
 	 * Need to replace static TOKEN_Z_ORDER_COMPARATOR comparator with instantiated version so that grid is available
 	 * and can access token footprint
@@ -1350,7 +1350,7 @@ public class Zone extends BaseModel {
 						return -1;
 					if (o2.isStamp() && o1.isToken())
 						return +1;
-					if (b1.getHeight()!=b2.getHeight()) {
+					if (b1.getHeight() != b2.getHeight()) {
 						// Larger tokens at the same position, go behind
 						return o2.getHeight() - o1.getHeight();
 					}

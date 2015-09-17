@@ -78,7 +78,7 @@ public class AbeillePanel<T> extends JPanel {
 					return null;
 				}
 
-//				System.out.println("Name:" + name);
+				//				System.out.println("Name:" + name);
 				name = name.substring(1).trim(); // cut the "@"
 				int point = name.indexOf(".");
 				if (point >= 0)
@@ -194,7 +194,7 @@ public class AbeillePanel<T> extends JPanel {
 			try {
 				return getValue();
 			} catch (Exception e) {
-//				YLogger.logException(e);
+				//				YLogger.logException(e);
 				return null;
 			}
 		}
@@ -226,7 +226,7 @@ public class AbeillePanel<T> extends JPanel {
 
 		@Override
 		public void bind(Property property, Component view, UpdateTime updateTime) {
-//			System.out.println("bind:" + view.getName() + " - " + view);
+			//			System.out.println("bind:" + view.getName() + " - " + view);
 			if (view instanceof JRadioButton) {
 				button = (JRadioButton) view;
 				super.bind(property, view, updateTime);

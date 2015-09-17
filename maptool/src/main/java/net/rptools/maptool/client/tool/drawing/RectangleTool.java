@@ -100,7 +100,7 @@ public class RectangleTool extends AbstractDrawingTool implements MouseMotionLis
 					rectangle.width *= 2;
 					rectangle.height *= 2;
 				}
-//				System.out.println("Adding Rectangle to zone: " + rectangle);
+				//				System.out.println("Adding Rectangle to zone: " + rectangle);
 				completeDrawable(renderer.getZone().getId(), getPen(), new ShapeDrawable(rectangle, false));
 				rectangle = null;
 			}

@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.io;
@@ -80,7 +80,7 @@ public class UpdateRepoDialog extends JDialog {
 					URL url = null;
 					try {
 						url = new URL(o.toString());
-//						System.out.println("URL object contains: " + url);
+						//						System.out.println("URL object contains: " + url);
 						hostname.setText(url.getHost());
 					} catch (MalformedURLException e1) {
 						e1.printStackTrace();
@@ -173,7 +173,7 @@ public class UpdateRepoDialog extends JDialog {
 		List<String> repoList = new ArrayList<String>(objects.length);
 		for (int i = 0; i < objects.length; i++) {
 			Object s = objects[i];
-//			System.out.println("repoList[" + i + "] = " + s.toString() + ", type = " + s.getClass().getCanonicalName());
+			//			System.out.println("repoList[" + i + "] = " + s.toString() + ", type = " + s.getClass().getCanonicalName());
 			repoList.add(s.toString());
 		}
 		return repoList;

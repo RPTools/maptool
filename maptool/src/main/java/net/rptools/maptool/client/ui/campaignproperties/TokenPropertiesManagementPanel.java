@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui.campaignproperties;
@@ -68,8 +68,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
 	public JList getTokenTypeList() {
 		JList list = (JList) getComponent("tokenTypeList");
-		if (list == null)
-		{
+		if (list == null) {
 			list = new JList();
 		}
 		return list;
@@ -140,7 +139,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 				if (getTokenTypeList().getSelectedValue() == null) {
 					reset();
 				} else {
-					bind((String)getTokenTypeList().getSelectedValue());
+					bind((String) getTokenTypeList().getSelectedValue());
 				}
 			}
 		});
@@ -175,7 +174,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
 	private void reset() {
 
-		bind((String)null);
+		bind((String) null);
 	}
 
 	private void updateTypeList() {
@@ -206,8 +205,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 			if (property.getShortName() != null) {
 				builder.append(" (").append(property.getShortName()).append(")");
 			}
-			if (property.getDefaultValue() !=null)
-			{
+			if (property.getDefaultValue() != null) {
 				builder.append(":").append(property.getDefaultValue());
 			}
 			builder.append("\n");
@@ -268,7 +266,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 				// in a single property line
 				int indexDefault = line.indexOf(":");
 				if (indexDefault > 0) {
-					String defaultVal = line.substring(indexDefault+1).trim();
+					String defaultVal = line.substring(indexDefault + 1).trim();
 					if (defaultVal.length() > 0) {
 						property.setDefaultValue(defaultVal);
 					}
@@ -280,7 +278,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 				// (Really should handle nested parens here)
 				int index = line.indexOf("(");
 				if (index > 0) {
-					String shortName = line.substring(index+1, line.lastIndexOf(")")).trim();
+					String shortName = line.substring(index + 1, line.lastIndexOf(")")).trim();
 					if (shortName.length() > 0) {
 						property.setShortName(shortName);
 					}
@@ -294,9 +292,9 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 					// Perhaps these properties should produce warnings at all, but what it someone
 					// is actually <b>using them as property names!</b>
 					if (old.startsWith("---"))
-						errlog.add( I18N.getText("msg.error.mtprops.properties.duplicateComment", original, old) );
+						errlog.add(I18N.getText("msg.error.mtprops.properties.duplicateComment", original, old));
 					else
-						errlog.add( I18N.getText("msg.error.mtprops.properties.duplicate", original, old) );
+						errlog.add(I18N.getText("msg.error.mtprops.properties.duplicate", original, old));
 				} else {
 					propertyList.add(property);
 					caseCheck.put(line, original);
@@ -310,10 +308,10 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 		caseCheck.clear();
 		if (!errlog.isEmpty()) {
 			errlog.add(0, I18N.getText("msg.error.mtprops.properties.title", editingType));
-			errlog.add(    I18N.getText("msg.error.mtprops.properties.ending"));
+			errlog.add(I18N.getText("msg.error.mtprops.properties.ending"));
 			MapTool.showFeedback(errlog.toArray());
 			errlog.clear();
-			throw new IllegalArgumentException();	// Don't save the properties...
+			throw new IllegalArgumentException(); // Don't save the properties...
 		}
 		return propertyList;
 	}

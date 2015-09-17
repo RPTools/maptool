@@ -31,7 +31,7 @@ import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
 
 public class DiamondTool extends AbstractDrawingTool implements MouseMotionListener {
-	
+
 	private static final long serialVersionUID = 8239333601131612106L;
 	protected Shape diamond;
 	protected ZonePoint originPoint;

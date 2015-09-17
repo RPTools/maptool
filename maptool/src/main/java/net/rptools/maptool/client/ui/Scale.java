@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui;
@@ -38,7 +38,7 @@ public class Scale implements Serializable {
 	private boolean initialized;
 
 	// LEGACY for 1.3b31 and earlier
-	transient private int              scaleIndex;		// 'transient' prevents serialization; prep for 1.4
+	transient private int scaleIndex; // 'transient' prevents serialization; prep for 1.4
 
 	public Scale() {
 		this(0, 0);
@@ -50,15 +50,15 @@ public class Scale implements Serializable {
 	}
 
 	public Scale(Scale copy) {
-		this.width       = copy.width;
-		this.height      = copy.height;
-		this.offsetX     = copy.offsetX;
-		this.offsetY     = copy.offsetY;
-		this.zoomLevel   = copy.zoomLevel;
+		this.width = copy.width;
+		this.height = copy.height;
+		this.offsetX = copy.offsetX;
+		this.offsetY = copy.offsetY;
+		this.zoomLevel = copy.zoomLevel;
 		this.initialized = copy.initialized;
-		this.scale       = copy.scale;
-//     this.oneToOneScale = copy.oneToOneScale;
-//     this.scaleIncrement = copy.scaleIncrement;
+		this.scale = copy.scale;
+		//     this.oneToOneScale = copy.oneToOneScale;
+		//     this.scaleIncrement = copy.scaleIncrement;
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -106,7 +106,7 @@ public class Scale implements Serializable {
 		}
 
 		// Determine zoomLevel appropriate for given scale
-		zoomLevel = (int)Math.round(Math.log(scale/oneToOneScale)/Math.log(1+scaleIncrement));
+		zoomLevel = (int) Math.round(Math.log(scale / oneToOneScale) / Math.log(1 + scaleIncrement));
 
 		setScaleNoZoomLevel(scale);
 	}
@@ -133,13 +133,13 @@ public class Scale implements Serializable {
 
 	public double scaleUp() {
 		zoomLevel++;
-		setScaleNoZoomLevel(oneToOneScale * Math.pow(1+scaleIncrement, zoomLevel));
+		setScaleNoZoomLevel(oneToOneScale * Math.pow(1 + scaleIncrement, zoomLevel));
 		return scale;
 	}
 
 	public double scaleDown() {
 		zoomLevel--;
-		setScaleNoZoomLevel(oneToOneScale * Math.pow(1+scaleIncrement, zoomLevel));
+		setScaleNoZoomLevel(oneToOneScale * Math.pow(1 + scaleIncrement, zoomLevel));
 		return scale;
 	}
 
@@ -197,8 +197,8 @@ public class Scale implements Serializable {
 
 	public void centerIn(int width, int height) {
 
-		int currWidth = (int)(this.width * getScale());
-		int currHeight = (int)(this.height * getScale());
+		int currWidth = (int) (this.width * getScale());
+		int currHeight = (int) (this.height * getScale());
 
 		int x = (width - currWidth) / 2;
 		int y = (height - currHeight) / 2;
@@ -216,8 +216,8 @@ public class Scale implements Serializable {
 		int newX = (int) Math.round((x * scale) / oldScale);
 		int newY = (int) Math.round((y * scale) / oldScale);
 
-		offsetX = offsetX-(newX - x);
-		offsetY = offsetY-(newY - y);
+		offsetX = offsetX - (newX - x);
+		offsetY = offsetY - (newY - y);
 	}
 
 }

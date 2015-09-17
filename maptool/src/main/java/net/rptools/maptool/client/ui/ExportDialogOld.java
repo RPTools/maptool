@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui;
@@ -61,7 +61,7 @@ import com.jeta.forms.components.panel.FormPanel;
 public class ExportDialogOld extends JDialog {
 
 	private static FormPanel formPanel;
-	private static Location  exportLocation;
+	private static Location exportLocation;
 
 	//
 	// TODO: Abeille should auto-generate most of this code:
@@ -82,14 +82,11 @@ public class ExportDialogOld extends JDialog {
 		// Format of enum declaration:
 		// [Abeille Forms Designer button name] (default checked, default enabled)
 		// Button Group 1 (not that it matters for this controller)
-		TYPE_CURRENT_VIEW,
-		TYPE_ENTIRE_MAP,
+		TYPE_CURRENT_VIEW, TYPE_ENTIRE_MAP,
 		// Button Group 2
-		VIEW_GM,
-		VIEW_PLAYER,
+		VIEW_GM, VIEW_PLAYER,
 		// Button Group 3
-		LAYERS_CURRENT,
-		LAYERS_AS_SELECTED;
+		LAYERS_CURRENT, LAYERS_AS_SELECTED;
 
 		private static FormPanel form;
 
@@ -106,11 +103,10 @@ public class ExportDialogOld extends JDialog {
 					}
 					button.addActionListener(
 							new ActionListener() {
-								public void actionPerformed(ActionEvent evt ) {
+								public void actionPerformed(ActionEvent evt) {
 									enforceButtonRules();
 								}
-							}
-					);
+							});
 				} catch (Exception ex) {
 					MapTool.showError(I18N.getString("dialog.screenshot.radio.button.uiImplementationError"), ex);
 				}
@@ -136,7 +132,7 @@ public class ExportDialogOld extends JDialog {
 		/**
 		 * Shortcut to allow clean code and type-checking of invocations of specific buttons
 		 */
-		public void addActionListener (ActionListener listener) {
+		public void addActionListener(ActionListener listener) {
 			form.getRadioButton(this.toString()).addActionListener(listener);
 		}
 
@@ -184,13 +180,7 @@ public class ExportDialogOld extends JDialog {
 	 */
 	private static enum ExportLayers {
 		// enum_val (fieldName as per Abeille Forms Designer, playerCanModify)
-		LAYER_TOKEN      (true),
-		LAYER_HIDDEN     (false),
-		LAYER_OBJECT     (false),
-		LAYER_BACKGROUND (false),
-		LAYER_BOARD      (false),
-		LAYER_FOG        (false),
-		LAYER_VISIBILITY (true);
+		LAYER_TOKEN(true), LAYER_HIDDEN(false), LAYER_OBJECT(false), LAYER_BACKGROUND(false), LAYER_BOARD(false), LAYER_FOG(false), LAYER_VISIBILITY(true);
 
 		private static FormPanel form;
 
@@ -200,7 +190,7 @@ public class ExportDialogOld extends JDialog {
 		 * Constructor, sets rules for export of this layer.
 		 * 'Player' is in reference to the Role type (Player vs. GM).
 		 */
-		ExportLayers (boolean playerCanModify) {
+		ExportLayers(boolean playerCanModify) {
 			this.playerCanModify = playerCanModify;
 		}
 
@@ -333,7 +323,7 @@ public class ExportDialogOld extends JDialog {
 		// MCL: I figure it's better to save the 1MB for low-mem systems,
 		//      but it would be even better to HIDE it, and then dispose() it
 		//      when the user clicks on the memory meter to free memory
-//		setDefaultCloseOperation(HIDE_ON_CLOSE);
+		//		setDefaultCloseOperation(HIDE_ON_CLOSE);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		//
@@ -353,24 +343,21 @@ public class ExportDialogOld extends JDialog {
 					public void actionPerformed(ActionEvent evt) {
 						exportButtonAction();
 					}
-				}
-		);
+				});
 
 		formPanel.getButton("cancelButton").addActionListener(
 				new ActionListener() {
 					public void actionPerformed(ActionEvent evt) {
 						dispose();
 					}
-				}
-		);
+				});
 
 		formPanel.getButton("browseButton").addActionListener(
 				new ActionListener() {
 					public void actionPerformed(ActionEvent evt) {
 						browseButtonAction();
 					}
-				}
-		);
+				});
 
 		// Run this once to make sure the dialog is in a good starting state.
 		ExportLayers.setDefaultChecked();
@@ -416,8 +403,8 @@ public class ExportDialogOld extends JDialog {
 		case 1:
 			String username = formPanel.getText("username");
 			String password = formPanel.getText("password");
-			String host     = formPanel.getText("host");
-			String path     = formPanel.getText("path");
+			String host = formPanel.getText("host");
+			String path = formPanel.getText("path");
 
 			// PNG only supported for now
 			if (!path.toLowerCase().endsWith(".png")) {
@@ -485,12 +472,11 @@ public class ExportDialogOld extends JDialog {
 			ByteArrayOutputStream imageOut = new ByteArrayOutputStream();
 			try {
 				ImageIO.write(screenCap, "png", imageOut);
-				screenCap = null;		// Free up the memory as soon as possible
+				screenCap = null; // Free up the memory as soon as possible
 
 				MapTool.getFrame().setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaving"));
 				exportLocation.putContent(new BufferedInputStream(new ByteArrayInputStream(imageOut.toByteArray())));
-			}
-			finally {
+			} finally {
 				if (imageOut != null) {
 					imageOut.close();
 				}
@@ -525,14 +511,14 @@ public class ExportDialogOld extends JDialog {
 		// Preserve settings
 		//
 		// psuedo-layers
-		final Zone.VisionType savedVision     = zone.getVisionType();
-		final boolean         savedFog        = zone.hasFog();
-		final boolean         savedBoard      = zone.drawBoard();
+		final Zone.VisionType savedVision = zone.getVisionType();
+		final boolean savedFog = zone.hasFog();
+		final boolean savedBoard = zone.drawBoard();
 		// real layers
-		final boolean         savedToken      = Zone.Layer.TOKEN.isEnabled();
-		final boolean         savedHidden     = Zone.Layer.GM.isEnabled();
-		final boolean         savedObject     = Zone.Layer.OBJECT.isEnabled();
-		final boolean         savedBackground = Zone.Layer.BACKGROUND.isEnabled();
+		final boolean savedToken = Zone.Layer.TOKEN.isEnabled();
+		final boolean savedHidden = Zone.Layer.GM.isEnabled();
+		final boolean savedObject = Zone.Layer.OBJECT.isEnabled();
+		final boolean savedBackground = Zone.Layer.BACKGROUND.isEnabled();
 
 		//
 		// set according to dialog options
@@ -557,8 +543,7 @@ public class ExportDialogOld extends JDialog {
 		BufferedImage image = null;
 		try {
 			image = takeEntireMapScreenShot();
-		}
-		finally {
+		} finally {
 			//
 			// Restore settings
 			//
@@ -569,7 +554,7 @@ public class ExportDialogOld extends JDialog {
 			Zone.Layer.GM.setEnabled(savedHidden);
 			Zone.Layer.OBJECT.setEnabled(savedObject);
 			Zone.Layer.BACKGROUND.setEnabled(savedBackground);
-//			MapTool.getFrame().getCurrentZoneRenderer().invalidateCurrentViewCache();
+			//			MapTool.getFrame().getCurrentZoneRenderer().invalidateCurrentViewCache();
 		}
 
 		return image;
@@ -591,7 +576,7 @@ public class ExportDialogOld extends JDialog {
 	private static BufferedImage takeEntireMapScreenShot() throws Exception, OutOfMemoryError {
 		final ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
 		if (renderer == null) {
-			throw(new Exception("renderer = NULL"));
+			throw (new Exception("renderer = NULL"));
 		}
 
 		boolean viewAsPlayer = ExportRadioButtons.VIEW_PLAYER.isChecked();
@@ -611,17 +596,17 @@ public class ExportDialogOld extends JDialog {
 			if (viewAsPlayer) {
 				Rectangle fogE = renderer.fogExtents();
 				// MapTool.showError(fogE.x + " " + fogE.y + " " + fogE.width + " " + fogE.height);
-				if ((fogE.width < 0) || (fogE.height< 0)) {
+				if ((fogE.width < 0) || (fogE.height < 0)) {
 					MapTool.showError(I18N.getString("dialog.screenshot.error.negativeFogExtents")); // Image is not clipped to show only fog-revealed areas!"));
 				} else {
 					extents = extents.intersection(fogE);
 				}
 			}
 		} catch (Exception ex) {
-			throw(new Exception(I18N.getString("dialog.screenshot.error.noArea"), ex));
+			throw (new Exception(I18N.getString("dialog.screenshot.error.noArea"), ex));
 		}
 		if ((extents == null) || (extents.width == 0) || (extents.height == 0)) {
-			throw(new Exception(I18N.getString("dialog.screenshot.error.noArea")));
+			throw (new Exception(I18N.getString("dialog.screenshot.error.noArea")));
 		}
 
 		// If output includes the tiling 'board' texture, move the upper-left corner
@@ -641,7 +626,7 @@ public class ExportDialogOld extends JDialog {
 				tileY = bgTexture.getHeight(null);
 				Integer x = ((int) Math.floor((float) extents.x / tileX)) * tileX;
 				Integer y = ((int) Math.floor((float) extents.y / tileY)) * tileY;
-				extents.width  = extents.width  + (extents.x - x);
+				extents.width = extents.width + (extents.x - x);
 				extents.height = extents.height + (extents.y - y);
 				extents.x = x;
 				extents.y = y;
@@ -653,8 +638,8 @@ public class ExportDialogOld extends JDialog {
 		// set up the renderer to encompass the whole extents of the map.
 
 		Rectangle origBounds = renderer.getBounds();
-		Scale     origScale  = renderer.getZoneScale();
-		Dimension origSize   = renderer.getSize();
+		Scale origScale = renderer.getZoneScale();
+		Dimension origSize = renderer.getSize();
 
 		BufferedImage image = null;
 		try {
@@ -666,7 +651,7 @@ public class ExportDialogOld extends JDialog {
 		}
 
 		final Graphics2D g = image.createGraphics();
-		g.setClip(0,0,extents.width,extents.height);
+		g.setClip(0, 0, extents.width, extents.height);
 		Scale s = new Scale();
 		s.setOffset(-extents.x, -extents.y);
 

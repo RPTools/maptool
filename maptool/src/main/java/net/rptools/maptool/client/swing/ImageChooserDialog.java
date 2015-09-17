@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.swing;
@@ -35,7 +35,7 @@ public class ImageChooserDialog extends JDialog {
 
 	private MD5Key imageId = null;
 	private AssetPanel imageChooser = new AssetPanel("imageAssetPanel", MapTool.getFrame().getAssetPanel().getModel());
-	
+
 	public ImageChooserDialog(JFrame owner) {
 		super(owner, "Choose Image", true);
 		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
@@ -50,39 +50,39 @@ public class ImageChooserDialog extends JDialog {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(BorderLayout.CENTER, imageChooser);
 		panel.add(BorderLayout.SOUTH, createButtonPanel());
-		
+
 		setContentPane(panel);
 		setSize(400, 500);
 		SwingUtil.centerOver(this, getOwner());
-		
+
 		imageChooser.addImageSelectionListener(new SelectionListener() {
 			public void selectionPerformed(List<Object> selected) {
-				if (selected.size() < 0 || (Integer)selected.get(0) < 0) {
+				if (selected.size() < 0 || (Integer) selected.get(0) < 0) {
 					return;
 				}
-				
-				Asset asset = imageChooser.getAsset((Integer)selected.get(0)); 
+
+				Asset asset = imageChooser.getAsset((Integer) selected.get(0));
 				imageId = asset.getId();
-				
+
 				// Put the asset into the asset manager since we have the asset handy here
 				AssetManager.putAsset(asset);
 			}
 		});
 	}
-	
+
 	public MD5Key getImageId() {
 		return imageId;
 	}
-	
+
 	private JPanel createButtonPanel() {
 		JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		
+
 		panel.add(createOKButton());
 		panel.add(createCancelButton());
-		
+
 		return panel;
 	}
-	
+
 	private JButton createOKButton() {
 		JButton button = new JButton("OK");
 		button.addActionListener(new ActionListener() {
@@ -90,10 +90,10 @@ public class ImageChooserDialog extends JDialog {
 				setVisible(false);
 			}
 		});
-		
+
 		return button;
 	}
-	
+
 	private JButton createCancelButton() {
 		JButton button = new JButton("Cancel");
 		button.addActionListener(new ActionListener() {
@@ -102,7 +102,7 @@ public class ImageChooserDialog extends JDialog {
 				setVisible(false);
 			}
 		});
-		
+
 		return button;
 	}
 }

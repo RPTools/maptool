@@ -51,7 +51,6 @@ public class IsometricGrid extends Grid {
 		}
 	}
 
-
 	public IsometricGrid() {
 		super();
 		if (FACING_ANGLES == null) {
@@ -64,7 +63,7 @@ public class IsometricGrid extends Grid {
 	public IsometricGrid(boolean faceEdges, boolean faceVertices) {
 		setFacings(faceEdges, faceVertices);
 	}
-	
+
 	public boolean isIsometric() {
 		return true;
 	}
@@ -129,7 +128,7 @@ public class IsometricGrid extends Grid {
 	public Dimension getCellOffset() {
 		return new Dimension((int) -getCellWidthHalf(), 0);
 	}
-	
+
 	@Override
 	public int[] getFacingAngles() {
 		return FACING_ANGLES;
@@ -189,7 +188,7 @@ public class IsometricGrid extends Grid {
 	public ZonePoint getNearestVertex(ZonePoint point) {
 		double px = point.x - getOffsetX();
 		double py = point.y - getOffsetY() + getCellHeightHalf();
-		ZonePoint zp = new ZonePoint((int)px, (int)py);
+		ZonePoint zp = new ZonePoint((int) px, (int) py);
 		return convert(convert(zp));
 	}
 
@@ -315,6 +314,7 @@ public class IsometricGrid extends Grid {
 	public Area getTokenCellArea(Rectangle bounds) {
 		return getTokenCellArea(new Area(bounds));
 	}
+
 	@Override
 	public Area getTokenCellArea(Area bounds) {
 		// Get the cell footprint
@@ -385,7 +385,7 @@ public class IsometricGrid extends Grid {
 
 		int neww = (int) Math.floor(w * cos + h * sin);
 		int newh = (int) Math.floor(h * cos + w * sin);
-		
+
 		// Rotate image 45 degrees
 		BufferedImage rotateImage = new BufferedImage(neww, newh, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = rotateImage.createGraphics();

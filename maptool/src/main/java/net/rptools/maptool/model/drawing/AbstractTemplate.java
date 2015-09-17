@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.model.drawing;
@@ -81,20 +81,13 @@ public abstract class AbstractTemplate extends AbstractDrawing {
 
 		// Draw a cone in the indicated direction. Order is important!
 		/** Draw a cone directly to the west (left) of the selection point. */
-		WEST,
-		/** Draw a cone directly to the north west (upper left quadrant) of the selection point. */
-		NORTH_WEST,
-		/** Draw a cone directly to the north (up) of the selection point. */
-		NORTH,
-		/** Draw a cone directly to the north east (upper right quadrant) of the selection point. */
-		NORTH_EAST,
-		/** Draw a cone directly to the east (right) of the selection point. */
-		EAST,
-		/** Draw a cone directly to the south east (lower right quadrant) of the selection point. */
-		SOUTH_EAST,
-		/** Draw a cone directly to the south (down) of the selection point. */
-		SOUTH,
-		/** Draw a cone directly to the south west (lower left quadrant) of the selection point. */
+		WEST, /** Draw a cone directly to the north west (upper left quadrant) of the selection point. */
+		NORTH_WEST, /** Draw a cone directly to the north (up) of the selection point. */
+		NORTH, /** Draw a cone directly to the north east (upper right quadrant) of the selection point. */
+		NORTH_EAST, /** Draw a cone directly to the east (right) of the selection point. */
+		EAST, /** Draw a cone directly to the south east (lower right quadrant) of the selection point. */
+		SOUTH_EAST, /** Draw a cone directly to the south (down) of the selection point. */
+		SOUTH, /** Draw a cone directly to the south west (lower left quadrant) of the selection point. */
 		SOUTH_WEST;
 
 		/**
@@ -121,18 +114,15 @@ public abstract class AbstractTemplate extends AbstractDrawing {
 			return values()[((value + 1) / 2) + 1];
 		}
 	}
- 
+
 	/**
 	 * The quadrants for drawing.
 	 */
 	public static enum Quadrant {
 		/** Draw in the north east (upper right) quadrant. */
-		NORTH_EAST,
-		/** Draw in the north west (upper left) quadrant. */
-		NORTH_WEST,
-		/** Draw in the south east (lower right) quadrant. */
-		SOUTH_EAST,
-		/** Draw in the south west (lower left) quadrant. */
+		NORTH_EAST, /** Draw in the north west (upper left) quadrant. */
+		NORTH_WEST, /** Draw in the south east (lower right) quadrant. */
+		SOUTH_EAST, /** Draw in the south west (lower left) quadrant. */
 		SOUTH_WEST
 	}
 

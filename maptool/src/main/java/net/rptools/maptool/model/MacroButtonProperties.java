@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.model;
@@ -43,8 +43,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
 	private static final Logger log = Logger.getLogger(MacroButtonProperties.class);
 
-//	private transient static final List<String> HTMLColors = Arrays.asList("aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "purple", "red", "silver", "teal",
-//			"white", "yellow");
+	//	private transient static final List<String> HTMLColors = Arrays.asList("aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "purple", "red", "silver", "teal",
+	//			"white", "yellow");
 	private transient MacroButton button;
 	private transient GUID tokenId;
 	private String saveLocation;
@@ -550,7 +550,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 	}
 
 	public static String[] getFontColors() {
-//		return (String[]) HTMLColors.toArray();
+		//		return (String[]) HTMLColors.toArray();
 		String[] array = MapToolUtil.getColorNames().toArray(new String[0]);
 		return array;
 	}

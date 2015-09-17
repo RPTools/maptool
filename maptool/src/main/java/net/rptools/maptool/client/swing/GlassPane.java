@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.swing;
@@ -59,26 +59,25 @@ public class GlassPane extends JPanel {
 			// Shade it
 			g.setColor(new Color(1, 1, 1, .5f));
 			g.fillRect(0, 0, size.width, size.height);
-			
+
 			g.dispose();
-			
+
 			// Consume all actions
-			addMouseMotionListener(new MouseMotionAdapter(){});
-			addMouseListener(new MouseAdapter(){});
+			addMouseMotionListener(new MouseMotionAdapter() {});
+			addMouseListener(new MouseAdapter() {});
 		} else {
-			for(MouseMotionListener listener : getMouseMotionListeners()) {
+			for (MouseMotionListener listener : getMouseMotionListeners()) {
 				removeMouseMotionListener(listener);
 			}
-			for(MouseListener listener : getMouseListeners()) {
+			for (MouseListener listener : getMouseListeners()) {
 				removeMouseListener(listener);
 			}
 		}
-		
 
 		setOpaque(modal);
 
 		super.setVisible(aFlag);
-		
+
 		if (getComponents().length > 0) {
 			getComponents()[0].requestFocus();
 		}

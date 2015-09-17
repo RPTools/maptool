@@ -189,11 +189,11 @@ public class UPnPUtil {
 			try {
 				ActionResponse actResp = gd.getSpecificPortMappingEntry(null, port, "TCP");
 				if (actResp != null && "MapTool".equals(actResp.getOutActionArgumentValue("NewPortMappingDescription"))) {
-//					NewInternalPort=51234
-//					NewEnabled=1
-//					NewInternalClient=192.168.0.30
-//					NewLeaseDuration=0
-//					NewPortMappingDescription=MapTool
+					//					NewInternalPort=51234
+					//					NewEnabled=1
+					//					NewInternalClient=192.168.0.30
+					//					NewLeaseDuration=0
+					//					NewPortMappingDescription=MapTool
 					boolean unmapped = gd.deletePortMapping(null, port, "TCP");
 					if (unmapped) {
 						iter.remove();

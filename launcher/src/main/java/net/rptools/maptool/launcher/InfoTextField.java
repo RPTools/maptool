@@ -27,6 +27,7 @@ public class InfoTextField extends JTextField implements FocusListener {
 
 	private static Font focusedFont;
 	private static Font unfocusedFont;
+
 	static {
 		focusedFont = new Font("SanSerif", Font.BOLD, 12); //$NON-NLS-1$
 		unfocusedFont = new Font("SanSerif", Font.ITALIC | Font.BOLD, 12); //$NON-NLS-1$

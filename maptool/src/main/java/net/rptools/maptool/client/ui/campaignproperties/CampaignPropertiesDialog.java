@@ -79,12 +79,12 @@ public class CampaignPropertiesDialog extends JDialog {
 	public CampaignPropertiesDialog(JFrame owner) {
 		super(owner, "Campaign Properties", true);
 		setMinimumSize(new Dimension(450, 450)); // These sizes mess up my custom LAF settings. :(
-//		setPreferredSize(new Dimension(450, 450));	// If the dialog were packed() would they be needed?
+		//		setPreferredSize(new Dimension(450, 450));	// If the dialog were packed() would they be needed?
 
 		initialize();
 		pack(); // FJE
 
-//		setSize(635, 605);
+		//		setSize(635, 605);
 	}
 
 	public Status getStatus() {
@@ -217,7 +217,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
 		tokenStatesController.copyCampaignToUI(campaignProperties);
 		tokenBarController.copyCampaignToUI(campaignProperties);
-//		updateTableList();
+		//		updateTableList();
 	}
 
 	private String updateSightPanel(Map<String, SightType> sightTypeMap) {
@@ -300,13 +300,13 @@ public class CampaignPropertiesDialog extends JDialog {
 							shape = light.getShape().toString().toLowerCase();
 							break;
 						case CONE:
-//							if (light.getArcAngle() != 0 && light.getArcAngle() != 90 && light.getArcAngle() != lastArc)
+						//							if (light.getArcAngle() != 0 && light.getArcAngle() != 90 && light.getArcAngle() != lastArc)
 						{
 							lastArc = light.getArcAngle();
 							shape = "cone arc=" + StringUtil.formatDecimal(lastArc);
 						}
-//							else
-//								shape = "cone";
+							//							else
+							//								shape = "cone";
 							break;
 						}
 						if (!lastShape.equals(shape))
