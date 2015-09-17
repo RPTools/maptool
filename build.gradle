@@ -26,7 +26,13 @@ buildscript {
 }
 
 configurations {
-    osxTools=
+    osxTools
+}
+
+configurations.all {
+    resolutionStrategy {
+        cacheChangingModulesFor 0, 'seconds'
+    }
 }
 
 
@@ -77,6 +83,7 @@ allprojects {
         maven {
             url = 'http://maptool.craigs-stuff.net/repo/'
         }
+        mavenLocal()
     }
 
     group = 'net.rptools.maptool'
@@ -175,7 +182,7 @@ project(':maptool') {
         compile 'commons-logging:commons-logging:1.1.1'
         compile 'commons-net:commons-net:3.2'
         compile 'net.rptools.decktool:decktool:1.0.b1'
-        compile 'net.rptools.dicelib:dicelib:1.0.b18'
+        compile 'net.rptools.dicelib:dicelib:1.4.+'
         compile 'net.sf.ezmorph:ezmorph:1.0.5'
         compile 'com.caucho.hessian:hessian:3.1.6'
         compile 'jide-common:jide-common:3.2.3'
