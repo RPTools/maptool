@@ -383,7 +383,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		if (functionName.equals("getGMNotes")) {
 			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
-			return token.getGMNotes();
+			String notes = token.getGMNotes();
+			return notes != null ? notes : "";
 		}
 
 		/*
@@ -403,7 +404,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		if (functionName.equals("getNotes")) {
 			checkNumberOfParameters(functionName, parameters, 0, 1);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
-			return token.getNotes();
+			String notes = token.getNotes();
+			return notes != null ? notes : "";
 		}
 
 		/*
