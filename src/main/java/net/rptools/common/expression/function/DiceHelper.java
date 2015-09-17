@@ -1,15 +1,15 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License. 
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package net.rptools.common.expression.function;
 
@@ -19,169 +19,165 @@ import net.rptools.common.expression.RunData;
 import net.rptools.parser.function.*;
 
 public class DiceHelper {
-    public static int rollDice(int times, int sides) {
-        int result = 0;
+	public static int rollDice(int times, int sides) {
+		int result = 0;
 
-        RunData runData = RunData.getCurrent();
+		RunData runData = RunData.getCurrent();
 
-        for (int i = 0; i < times; i++) {
-            result += runData.randomInt(sides);
-        }
+		for (int i = 0; i < times; i++) {
+			result += runData.randomInt(sides);
+		}
 
-        return result;
-    }
-	
-    public static String explodingSuccessDice(int times, int sides, int target) throws EvaluationException
-    {
-      String rolls = "Dice: ";
-      int successes = 0;
+		return result;
+	}
 
-      for(int i = 0; i < times; i++)
-      {
-        int currentRoll = explodeDice(1, sides);
-        rolls += currentRoll + ", ";
-        if(currentRoll >= target)
-            successes++;
-      }
-      return rolls + "Successes: " + successes;
-    }
+	public static String explodingSuccessDice(int times, int sides, int target) throws EvaluationException {
+		String rolls = "Dice: ";
+		int successes = 0;
 
-    public static String openTestDice(int times, int sides) throws EvaluationException
-    {
-      String rolls = "Dice: ";
-      int max = 0;
+		for (int i = 0; i < times; i++) {
+			int currentRoll = explodeDice(1, sides);
+			rolls += currentRoll + ", ";
+			if (currentRoll >= target)
+				successes++;
+		}
+		return rolls + "Successes: " + successes;
+	}
 
-      for(int i = 0; i < times; i++)
-      {
-        int currentRoll = explodeDice(1, sides);
-        rolls += currentRoll + ", ";
-        if(currentRoll > max)
-            max = currentRoll;
-      }
-      return rolls + "Maximum: " + max;
-    }
+	public static String openTestDice(int times, int sides) throws EvaluationException {
+		String rolls = "Dice: ";
+		int max = 0;
 
-    public static int fudgeDice(int times) {
-        return rollDice(times, 3) - (2 * times);
-    }
+		for (int i = 0; i < times; i++) {
+			int currentRoll = explodeDice(1, sides);
+			rolls += currentRoll + ", ";
+			if (currentRoll > max)
+				max = currentRoll;
+		}
+		return rolls + "Maximum: " + max;
+	}
 
-    public static int ubiquityDice(int times) {
-        return rollDice(times, 2) - times;
-    }
+	public static int fudgeDice(int times) {
+		return rollDice(times, 3) - (2 * times);
+	}
 
-    public static int keepDice(int times, int sides, int keep) throws EvaluationException {
-        return dropDice(times, sides, times - keep);
-    }
+	public static int ubiquityDice(int times) {
+		return rollDice(times, 2) - times;
+	}
 
-    public static int dropDice(int times, int sides, int drop) throws EvaluationException {
-        if (times - drop <= 0)
-            throw new EvaluationException("You cannot drop more dice than you roll");
+	public static int keepDice(int times, int sides, int keep) throws EvaluationException {
+		return dropDice(times, sides, times - keep);
+	}
 
-        RunData runData = RunData.getCurrent();
+	public static int dropDice(int times, int sides, int drop) throws EvaluationException {
+		if (times - drop <= 0)
+			throw new EvaluationException("You cannot drop more dice than you roll");
 
-        int[] values = runData.randomInts(times, sides);
+		RunData runData = RunData.getCurrent();
 
-        Arrays.sort(values);
+		int[] values = runData.randomInts(times, sides);
 
-        int result = 0;
-        for (int i = drop; i < times; i++) {
-            result += values[i];
-        }
+		Arrays.sort(values);
 
-        return result;
-    }
+		int result = 0;
+		for (int i = drop; i < times; i++) {
+			result += values[i];
+		}
 
-    public static int rerollDice(int times, int sides, int lowerBound) throws EvaluationException {
-        RunData runData = RunData.getCurrent();
+		return result;
+	}
 
-        if (lowerBound > sides)
-            throw new EvaluationException(
-                    "When rerolling, the lowerbound must be smaller than the number of sides on the rolling dice.");
+	public static int rerollDice(int times, int sides, int lowerBound) throws EvaluationException {
+		RunData runData = RunData.getCurrent();
 
-        int[] values = new int[times];
+		if (lowerBound > sides)
+			throw new EvaluationException(
+					"When rerolling, the lowerbound must be smaller than the number of sides on the rolling dice.");
 
-        for (int i = 0; i < values.length; i++) {
-            int roll;
-            while ((roll = runData.randomInt(sides)) < lowerBound)
-                ;
+		int[] values = new int[times];
 
-            values[i] = roll;
-        }
+		for (int i = 0; i < values.length; i++) {
+			int roll;
+			while ((roll = runData.randomInt(sides)) < lowerBound)
+				;
 
-        int result = 0;
-        for (int i = 0; i < values.length; i++) {
-            result += values[i];
-        }
+			values[i] = roll;
+		}
 
-        return result;
-    }
+		int result = 0;
+		for (int i = 0; i < values.length; i++) {
+			result += values[i];
+		}
 
-    public static int explodeDice(int times, int sides) throws EvaluationException {
-        int result = 0;
+		return result;
+	}
 
-        if (sides == 0 || sides == 1)
-            throw new EvaluationException("Number of sides must be > 1");
+	public static int explodeDice(int times, int sides) throws EvaluationException {
+		int result = 0;
 
-        RunData runData = RunData.getCurrent();
+		if (sides == 0 || sides == 1)
+			throw new EvaluationException("Number of sides must be > 1");
 
-        for (int i = 0; i < times; i++) {
-            int roll = runData.randomInt(sides);
-            if (roll == sides)
-                times++;
-            result += roll;
-        }
+		RunData runData = RunData.getCurrent();
 
-        return result;
-    }
+		for (int i = 0; i < times; i++) {
+			int roll = runData.randomInt(sides);
+			if (roll == sides)
+				times++;
+			result += roll;
+		}
 
-    public static int countSuccessDice(int times, int sides, int success) {
-        RunData runData = RunData.getCurrent();
+		return result;
+	}
 
-        int result = 0;
-        for (int value : runData.randomInts(times, sides)) {
-            if (value >= success)
-                result++;
-        }
+	public static int countSuccessDice(int times, int sides, int success) {
+		RunData runData = RunData.getCurrent();
 
-        return result;
-    }
-    
-    public static String countShadowRun4(int times, int gremlins, boolean explode) {
-        RunData runData = RunData.getCurrent();
+		int result = 0;
+		for (int value : runData.randomInts(times, sides)) {
+			if (value >= success)
+				result++;
+		}
 
-        int hitCount = 0;
-        int oneCount = 0;
-        int sides = 6;
-        int success = 5;
-        String actual = "";
-        String glitch = "";
-        
-        for (int i = 0; i < times; i++) {
-            int value = runData.randomInt(sides);
-            
-            if (value >= success)
-                hitCount++;
-            
-            if (value == 1)
-                oneCount++;
-            
-            if (value == 6 && explode)
-                times++;
-            
-            actual = actual + value + " ";
-        }
-        
-        // Check for Glitchs
-        if (oneCount != 0) {
-            if ((hitCount == 0) && ((double) times / 2 - gremlins) <= (double) oneCount) {
-                glitch = " *Critical Glitch*";
-            } else if ((double) (times / 2 - gremlins) <= (double) oneCount) {
-                glitch = " *Glitch*";
-            }
-        }
+		return result;
+	}
 
-        String result = "Hits: " + hitCount + " Ones: " + oneCount + glitch + "  Results: " + actual;
-        
-        return result;
-    }
+	public static String countShadowRun4(int times, int gremlins, boolean explode) {
+		RunData runData = RunData.getCurrent();
+
+		int hitCount = 0;
+		int oneCount = 0;
+		int sides = 6;
+		int success = 5;
+		String actual = "";
+		String glitch = "";
+
+		for (int i = 0; i < times; i++) {
+			int value = runData.randomInt(sides);
+
+			if (value >= success)
+				hitCount++;
+
+			if (value == 1)
+				oneCount++;
+
+			if (value == 6 && explode)
+				times++;
+
+			actual = actual + value + " ";
+		}
+
+		// Check for Glitchs
+		if (oneCount != 0) {
+			if ((hitCount == 0) && ((double) times / 2 - gremlins) <= (double) oneCount) {
+				glitch = " *Critical Glitch*";
+			} else if ((double) (times / 2 - gremlins) <= (double) oneCount) {
+				glitch = " *Glitch*";
+			}
+		}
+
+		String result = "Hits: " + hitCount + " Ones: " + oneCount + glitch + "  Results: " + actual;
+
+		return result;
+	}
 }
