@@ -23,3 +23,33 @@ Resources
  - **Website:** http://rptools.net/ 
  - **Forums:**  http://forums.rptools.net 
  - **Wiki:**    http://lmwcs.com/rptools/wiki/Main_Page 
+
+
+Building Maptool
+----------------
+
+```Shell
+./gradlew build  
+```
+
+For Windows, remember to flip the slash:
+
+```Shell
+.\gradlew build  
+```
+
+Building the Distributable Zip
+------------------------------
+
+```Shell
+./gradlew clean release
+```
+
+For Windows, remember to flip the slash:
+
+```Shell
+.\gradlew clean release 
+```
+
+This will create a `.zip` file for use on all systems as well as a zipped `.app` for Mac OS X in the `maptool/build/` directory. The build number will be based on the latest tag and latest commit.
+
