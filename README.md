@@ -28,6 +28,9 @@ Resources
 Building Maptool
 ----------------
 
+[Gradle](http://gradle.org/) is used to build MapTool 1.4. You do not need Gradle installed to perform the build as the repository has a small wrapper that will download and install it in a subdirectory for you. This means that the first time you do a build you will need to be connected to the internet and it will take a while
+as it downloads everything it needs.
+
 ```Shell
 ./gradlew build  
 ```
