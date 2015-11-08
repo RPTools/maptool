@@ -15,7 +15,8 @@ And we don't stop there! Not content with just emulating the tabletop, we seek t
 Requirements
 ------------
 
-This version of MapTool requires [Java 1.7+](https://java.com/en/download/)
+- MapTool 1.4 requires [Java 1.7+](https://java.com/en/download/)
+- Building MapTool requires the Java Development Kit (JDK): [How To Install JDK](doc/How_To_Install_JDK.md)
 
 Resources
 ---------
@@ -27,6 +28,8 @@ Resources
 
 Building Maptool
 ----------------
+
+First, [install the JDK](doc/How_To_Install_JDK.md).
 
 [Gradle](http://gradle.org/) is used to build MapTool 1.4. You do not need Gradle installed to perform the build as the repository has a small wrapper that will download and install it in a subdirectory for you. This means that the first time you do a build you will need to be connected to the internet and it will take a while
 as it downloads everything it needs.
