@@ -16,3 +16,9 @@ This version of MapTool requires Java 1.7+
 Website: http://rptools.net/ <br>
 Forums:  http://forums.rptools.net <br>
 Wiki:    http://lmwcs.com/rptools/wiki/Main_Page <br>
+
+
+Optional
+--------
+
+- [How To Setup User Interface (UI) Tools for Maptool](doc/How_To_Setup_UI_Tools.md)
