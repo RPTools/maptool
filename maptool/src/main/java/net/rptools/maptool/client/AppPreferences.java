@@ -388,6 +388,9 @@ public class AppPreferences {
 	private static final String KEY_TYPING_NOTIFICATION_DURATION = "typingNotificationDuration";
 	private static final int DEFAULT_TYPING_NOTIFICATION_DURATION = 5000;
 
+	private static final String KEY_UPNP_DISCOVERY_TIMEOUT = "upnpDiscoveryTimeout";
+	private static final int DEFAULT_UPNP_DISCOVERY_TIMEOUT = 5000;
+
 	public static void setTypingNotificationDuration(int ms) {
 		prefs.putInt(KEY_TYPING_NOTIFICATION_DURATION, ms);
 		MapTool.getFrame().setChatNotifyDuration(ms);
@@ -727,6 +730,14 @@ public class AppPreferences {
 
 	public static void setMovementMetric(WalkerMetric metric) {
 		prefs.put(KEY_MOVEMENT_METRIC, metric.toString());
+	}
+
+	public static void setUpnpDiscoveryTimeout(int timeout) {
+		prefs.putInt(KEY_UPNP_DISCOVERY_TIMEOUT, timeout);
+	}
+
+	public static int getUpnpDiscoveryTimeout() {
+		return prefs.getInt(KEY_UPNP_DISCOVERY_TIMEOUT, DEFAULT_UPNP_DISCOVERY_TIMEOUT);
 	}
 
 	public static WalkerMetric getMovementMetric() {
