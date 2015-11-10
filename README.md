@@ -16,3 +16,8 @@ This version of MapTool requires Java 1.7+
 Website: http://rptools.net/ <br>
 Forums:  http://forums.rptools.net <br>
 Wiki:    http://lmwcs.com/rptools/wiki/Main_Page <br>
+
+Developers
+----------
+
+Please follow our [Code Style and Guidelines](doc/Code_Style_and_Guidelines.md) when submitting patches and pull requests.
