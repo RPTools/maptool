@@ -17,7 +17,14 @@ Website: http://rptools.net/ <br>
 Forums:  http://forums.rptools.net <br>
 Wiki:    http://lmwcs.com/rptools/wiki/Main_Page <br>
 
+
 Developers
 ----------
 
 Please follow our [Code Style and Guidelines](doc/Code_Style_and_Guidelines.md) when submitting patches and pull requests.
+
+
+Optional
+--------
+
+- [How To Setup Eclipse for MapTool](doc/How_To_Setup_Eclipse.md)

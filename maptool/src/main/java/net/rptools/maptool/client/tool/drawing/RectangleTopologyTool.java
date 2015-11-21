@@ -33,8 +33,6 @@ import net.rptools.maptool.model.drawing.Rectangle;
 /**
  * @author drice
  * 
- *         TODO To change the template for this generated type comment go to Window - Preferences - Java - Code Style -
- *         Code Templates
  */
 public class RectangleTopologyTool extends AbstractDrawingTool implements MouseMotionListener {
 	private static final long serialVersionUID = 3258413928311830323L;
