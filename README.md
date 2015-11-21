@@ -25,7 +25,6 @@ Resources
  - **Forums:**  http://forums.rptools.net 
  - **Wiki:**    http://lmwcs.com/rptools/wiki/Main_Page 
 
-
 Building Maptool
 ----------------
 
@@ -59,3 +58,7 @@ For Windows, remember to flip the slash:
 
 This will create a `.zip` file for use on all systems as well as a zipped `.app` for Mac OS X in the `maptool/build/` directory. The build number will be based on the latest tag and latest commit.
 
+Optional
+--------
+
+- [How To Setup Eclipse for MapTool](doc/How_To_Setup_Eclipse.md)
