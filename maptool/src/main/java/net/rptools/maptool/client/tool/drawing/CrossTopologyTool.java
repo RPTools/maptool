@@ -35,8 +35,6 @@ import net.rptools.maptool.util.GraphicsUtil;
 /**
  * @author CoveredInFish
  * 
- *         TODO To change the template for this generated type comment go to
- *         Window - Preferences - Java - Code Style - Code Templates
  */
 public class CrossTopologyTool extends AbstractDrawingTool implements MouseMotionListener {
 	private static final long serialVersionUID = 3258413928311830323L;

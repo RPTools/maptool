@@ -22,3 +22,4 @@ Optional
 --------
 
 - [How To Setup User Interface (UI) Tools for Maptool](doc/How_To_Setup_UI_Tools.md)
+- [How To Setup Eclipse for MapTool](doc/How_To_Setup_Eclipse.md)
