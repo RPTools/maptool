@@ -447,6 +447,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		// @formatter:off
 		CONNECTIONS("Connections"),
 		TOKEN_TREE("MapExplorer"),
+		DRAW_TREE("DrawExplorer"),
 		INITIATIVE("Initiative"),
 		IMAGE_EXPLORER("Library"),
 		CHAT("Chat"),
@@ -490,6 +491,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		getDockingManager().addFrame(getFrame(MTFrame.TOKEN_TREE));
 		getDockingManager().addFrame(getFrame(MTFrame.INITIATIVE));
 		getDockingManager().addFrame(getFrame(MTFrame.IMAGE_EXPLORER));
+		getDockingManager().addFrame(getFrame(MTFrame.DRAW_TREE));
 		getDockingManager().addFrame(getFrame(MTFrame.CHAT));
 		getDockingManager().addFrame(getFrame(MTFrame.LOOKUP_TABLES));
 		getDockingManager().addFrame(getFrame(MTFrame.GLOBAL));
@@ -517,6 +519,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		frameMap.put(MTFrame.CONNECTIONS, createDockingFrame(MTFrame.CONNECTIONS, new JScrollPane(connectionPanel), new ImageIcon(AppStyle.connectionsImage)));
 		frameMap.put(MTFrame.TOKEN_TREE, createDockingFrame(MTFrame.TOKEN_TREE, new JScrollPane(createTokenTreePanel()), new ImageIcon(AppStyle.mapExplorerImage)));
 		frameMap.put(MTFrame.IMAGE_EXPLORER, createDockingFrame(MTFrame.IMAGE_EXPLORER, assetPanel, new ImageIcon(AppStyle.resourceLibraryImage)));
+		frameMap.put(MTFrame.DRAW_TREE, createDockingFrame(MTFrame.DRAW_TREE, new JScrollPane(createDrawTreePanel()), new ImageIcon(AppStyle.mapExplorerImage)));
 		frameMap.put(MTFrame.CHAT, createDockingFrame(MTFrame.CHAT, commandPanel, new ImageIcon(AppStyle.chatPanelImage)));
 		frameMap.put(MTFrame.LOOKUP_TABLES, createDockingFrame(MTFrame.LOOKUP_TABLES, getLookupTablePanel(), new ImageIcon(AppStyle.tablesPanelImage)));
 		frameMap.put(MTFrame.INITIATIVE, createDockingFrame(MTFrame.INITIATIVE, initiativePanel, new ImageIcon(AppStyle.initiativePanelImage)));
@@ -819,6 +822,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		for (File file : assetRootList) {
 			addAssetRoot(file);
 		}
+	}
+	
+	private JComponent createDrawTreePanel() {
+		final JTree tree = new JTree();
+		return tree;
 	}
 
 	private JComponent createTokenTreePanel() {
