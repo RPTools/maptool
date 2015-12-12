@@ -101,6 +101,8 @@ import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
+import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
+import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.CampaignPanel;
@@ -192,6 +194,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	private final GlassPane glassPane;
 	private TokenPanelTreeModel tokenPanelTreeModel;
+	private DrawPanelTreeModel drawPanelTreeModel;
 	private final TextureChooserPanel textureChooserPanel;
 	private LookupTablePanel lookupTablePanel;
 
@@ -826,6 +829,15 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	
 	private JComponent createDrawTreePanel() {
 		final JTree tree = new JTree();
+		drawPanelTreeModel = new DrawPanelTreeModel(tree);
+		tree.setModel(drawPanelTreeModel);
+		tree.setCellRenderer(new DrawPanelTreeCellRenderer());
+		// Add Zone Change event
+		MapTool.getEventDispatcher().addListener(new AppEventListener() {
+			public void handleAppEvent(AppEvent event) {
+				drawPanelTreeModel.setZone((Zone) event.getNewValue());
+			}
+		}, MapTool.ZoneEvent.Activated);
 		return tree;
 	}
 
