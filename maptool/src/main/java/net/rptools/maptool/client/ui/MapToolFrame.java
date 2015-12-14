@@ -101,6 +101,7 @@ import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
+import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
@@ -126,6 +127,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.ImageManager;
 
@@ -832,6 +834,50 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		drawPanelTreeModel = new DrawPanelTreeModel(tree);
 		tree.setModel(drawPanelTreeModel);
 		tree.setCellRenderer(new DrawPanelTreeCellRenderer());
+		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+		// Add mouse Event for right click menu
+		tree.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+				if (path == null) {
+					return;
+				}
+				Object row = path.getLastPathComponent();
+				int rowIndex = tree.getRowForLocation(e.getX(), e.getY());
+				if (SwingUtilities.isRightMouseButton(e)) {
+					if (!isRowSelected(tree.getSelectionRows(), rowIndex) && !SwingUtil.isShiftDown(e)) {
+						tree.clearSelection();
+						tree.addSelectionInterval(rowIndex, rowIndex);
+					}
+					final int x = e.getX();
+					final int y = e.getY();
+					EventQueue.invokeLater(new Runnable() {
+						public void run() {
+							DrawnElement firstElement = null;
+							Set<GUID> selectedDrawSet = new HashSet<GUID>();
+							for (TreePath path : tree.getSelectionPaths()) {
+								if (path.getLastPathComponent() instanceof DrawnElement) {
+									DrawnElement de = (DrawnElement) path.getLastPathComponent();
+									if (firstElement == null) {
+										firstElement = de;
+									}
+									selectedDrawSet.add(de.getDrawable().getId());
+								}
+							}
+							if (!selectedDrawSet.isEmpty()) {
+								try {
+									new DrawPanelPopupMenu(selectedDrawSet, x, y, getCurrentZoneRenderer(), firstElement).showPopup(tree);
+								} catch (IllegalComponentStateException icse) {
+									log.info(tree.toString(), icse);
+								}
+							}
+						}
+					});
+				}
+			}
+			
+		});
 		// Add Zone Change event
 		MapTool.getEventDispatcher().addListener(new AppEventListener() {
 			public void handleAppEvent(AppEvent event) {

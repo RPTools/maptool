@@ -14,12 +14,14 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeModel.View;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
+import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.DrawnElement;
 
 public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
@@ -160,27 +162,36 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 	private void updateInternal() {
 		currentViewList.clear();
 		viewMap.clear();
-		List<DrawnElement> drawableList  = new ArrayList<DrawnElement>();
+		List<DrawnElement> drawableList = new ArrayList<DrawnElement>();
 		if (zone != null) {
-			drawableList  = zone.getBackgroundDrawnElements();
-			if (drawableList.size()>0) {
-				viewMap.put(View.BACKGROUND_DRAWINGS, drawableList);
-				currentViewList.add(View.BACKGROUND_DRAWINGS);
-			}
-			drawableList  = zone.getGMDrawnElements();
-			if (drawableList.size()>0) {
-				viewMap.put(View.GM_DRAWINGS, drawableList);
-				currentViewList.add(View.GM_DRAWINGS);
-			}
-			drawableList  = zone.getObjectDrawnElements();
-			if (drawableList.size()>0) {
-				viewMap.put(View.OBJECT_DRAWINGS, drawableList);
-				currentViewList.add(View.OBJECT_DRAWINGS);
-			}
-			drawableList  = zone.getDrawnElements(Layer.TOKEN);
-			if (drawableList.size()>0) {
-				viewMap.put(View.TOKEN_DRAWINGS, drawableList);
-				currentViewList.add(View.TOKEN_DRAWINGS);
+			if (MapTool.getPlayer().isGM()) {
+				// GM Sees all drawings
+				for (View v : View.values()) {
+					drawableList  = zone.getDrawnElements(v.getLayer());
+					if (drawableList.size()>0) {
+						// Reverse the list so that the element drawn last, is shown at the top of the tree
+						// Be careful to clone the list so you don't damage the map
+						List<DrawnElement> reverseList = new ArrayList<DrawnElement>(drawableList);
+						Collections.reverse(reverseList);
+						viewMap.put(v, reverseList);
+						currentViewList.add(v);
+					}
+				}
+			} else {
+				// Players can only see templates on the token layer
+				drawableList  = zone.getDrawnElements(Zone.Layer.TOKEN);
+				if (drawableList.size()>0) {
+					// Reverse the list so that the element drawn last, is shown at the top of the tree
+					// Be careful to clone the list so you don't damage the map
+					List<DrawnElement> reverseList = new ArrayList<DrawnElement>(drawableList);
+					for (DrawnElement de : reverseList) {
+						if (!(de.getDrawable() instanceof AbstractTemplate))
+							reverseList.remove(de);
+					}
+					Collections.reverse(reverseList);
+					viewMap.put(View.TOKEN_DRAWINGS, reverseList);
+					currentViewList.add(View.TOKEN_DRAWINGS);
+				}
 			}
 		}
 
