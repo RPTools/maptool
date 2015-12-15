@@ -924,6 +924,25 @@ public class Zone extends BaseModel {
 		}
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
 	}
+	
+	public void addDrawableRear(DrawnElement drawnElement) {
+		// Since the list is drawn in order
+		// items that are drawn first are at the "back"
+		switch (drawnElement.getDrawable().getLayer()) {
+		case OBJECT:
+			((LinkedList<DrawnElement>)objectDrawables).addFirst(drawnElement);
+			break;
+		case BACKGROUND:
+			((LinkedList<DrawnElement>)backgroundDrawables).addFirst(drawnElement);
+			break;
+		case GM:
+			((LinkedList<DrawnElement>)gmDrawables).addFirst(drawnElement);
+			break;
+		default:
+			((LinkedList<DrawnElement>)drawables).addFirst(drawnElement);
+		}
+		fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
+	}
 
 	public List<DrawnElement> getDrawnElements() {
 		return getDrawnElements(Zone.Layer.TOKEN);

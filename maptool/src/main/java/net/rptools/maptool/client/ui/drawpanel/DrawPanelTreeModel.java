@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +59,7 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 	
 	public DrawPanelTreeModel(JTree tree) {
 		this.tree = tree;
+		update();
 	}
 	
 	@Override
@@ -184,9 +186,11 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 					// Reverse the list so that the element drawn last, is shown at the top of the tree
 					// Be careful to clone the list so you don't damage the map
 					List<DrawnElement> reverseList = new ArrayList<DrawnElement>(drawableList);
-					for (DrawnElement de : reverseList) {
+					Iterator<DrawnElement> iter = reverseList.iterator();
+					while (iter.hasNext()) {
+						DrawnElement de = iter.next();
 						if (!(de.getDrawable() instanceof AbstractTemplate))
-							reverseList.remove(de);
+							iter.remove();
 					}
 					Collections.reverse(reverseList);
 					viewMap.put(View.TOKEN_DRAWINGS, reverseList);

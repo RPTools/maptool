@@ -3,8 +3,12 @@ package net.rptools.maptool.client.ui.drawpanel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -20,6 +24,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 	private static final long serialVersionUID = 499441097273543074L;
 	private int row;
 	private int rowWidth;
+	private BufferedImage image;
 
     public Component getTreeCellRendererComponent(JTree tree, Object value,
                                                   boolean sel,
@@ -41,16 +46,21 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 				//text = sd.getClass().getSimpleName() + " " + sd.getShape().getClass().getSimpleName();
 				key = String.format("panel.DrawExplorer.%s.%s", sd.getClass().getSimpleName(), sd.getShape().getClass().getSimpleName());
 				text = I18N.getText(key);
+				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			} else if (de.getDrawable() instanceof LineSegment) {
 				LineSegment ls = (LineSegment)de.getDrawable();
 				key = String.format("panel.DrawExplorer.%s.Line", ls.getClass().getSimpleName());
 				text = I18N.getText(key, ls.getPoints().size());
+				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			} else if (de.getDrawable() instanceof AbstractTemplate) {
-				key = String.format("panel.DrawExplorer.Template.%s", de.getDrawable().getClass().getSimpleName());
-				text = I18N.getText(key);
+				AbstractTemplate at = (AbstractTemplate)de.getDrawable();
+				key = String.format("panel.DrawExplorer.Template.%s", at.getClass().getSimpleName());
+				text = I18N.getText(key, at.getRadius());
+				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			}
 			if (de.getPen().isEraser())
 				text = "CUT: "+text;
+			text = text + de.hashCode();
 		} else if (value instanceof DrawPanelTreeModel.View) {
 			DrawPanelTreeModel.View view = (DrawPanelTreeModel.View) value;
 			text = view.getLayer().name();
@@ -63,6 +73,48 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 		rowWidth = (icon != null ? icon.getIconWidth() + 2 : 0) + SwingUtilities.computeStringWidth(getFontMetrics(getFont()), text);
 		
 		return this;
+    }
+    
+    private Icon setDrawPanelIcon(String key, boolean eraser) {
+    	try {
+    		switch(key) {
+    		case "panel.DrawExplorer.ShapeDrawable.Polygon":
+    			if (eraser)
+    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly-erase.png")));
+    			else
+    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly.png")));
+    		case "panel.DrawExplorer.ShapeDrawable.Float":
+    			if (eraser)
+    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-ellipse-erase.png")));
+    			else
+    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-ellipse.png")));
+    		case "panel.DrawExplorer.ShapeDrawable.Rectangle":
+    			if (eraser)
+    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-rectangle-erase.png")));
+    			else
+    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-rectangle.png")));
+    		case "panel.DrawExplorer.LineSegment.Line":
+    			if (eraser)
+    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-line-erase.png")));
+    			else
+    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-line.png")));
+    		case "panel.DrawExplorer.Template.RadiusTemplate":
+				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue.png")));
+    		case "panel.DrawExplorer.Template.ConeTemplate":
+				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue-cone.png")));
+    		case "panel.DrawExplorer.Template.LineTemplate":
+				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue-line.png")));
+    		case "panel.DrawExplorer.Template.BurstTemplate":
+				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue-burst.png")));
+    		case "panel.DrawExplorer.Template.BlastTemplate":
+				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue-square.png")));
+    		case "panel.DrawExplorer.Template.WallTemplate":
+				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue-wall.png")));
+    		}
+    	} catch (IOException e) {
+    		return null;
+    	}
+    	return null;
     }
 
 	@Override

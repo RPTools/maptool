@@ -886,6 +886,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		}, MapTool.ZoneEvent.Activated);
 		return tree;
 	}
+	// Used to redraw the Draw Tree Panel after actions have been called
+	public void updateDrawTree() {
+		if (drawPanelTreeModel != null) {
+			drawPanelTreeModel.update();
+		}
+	}
 
 	private JComponent createTokenTreePanel() {
 		final JTree tree = new JTree();

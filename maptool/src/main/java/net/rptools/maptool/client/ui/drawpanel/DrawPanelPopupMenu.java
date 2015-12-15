@@ -1,6 +1,9 @@
 package net.rptools.maptool.client.ui.drawpanel;
 
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.AbstractAction;
@@ -11,9 +14,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawnElement;
 
@@ -27,10 +32,11 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 	
 	public DrawPanelPopupMenu(Set<GUID> selectedDrawSet, int x, int y, ZoneRenderer renderer, DrawnElement elementUnderMouse) {
 		super();
-		this.renderer = renderer;
-		this.elementUnderMouse = elementUnderMouse;
+		this.selectedDrawSet = selectedDrawSet;
 		this.x = x;
 		this.y = y;
+		this.renderer = renderer;
+		this.elementUnderMouse = elementUnderMouse;
 
 		addGMItem(createChangeToMenu(Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
 		addGMItem(createArrangeMenu());
@@ -43,7 +49,22 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			super("Delete");
 		}
 		public void actionPerformed(ActionEvent e) {
-			
+			// check to see if this is the required action
+			if (!MapTool.confirmTokenDelete()) {
+				return;
+			}
+			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
+			Iterator<DrawnElement> iter = drawableList.iterator();
+			while (iter.hasNext()) {
+				DrawnElement de = iter.next();
+				if (selectedDrawSet.contains(de.getDrawable().getId())) {
+					renderer.getZone().removeDrawable(de.getDrawable().getId());
+					MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
+				}
+			}
+			renderer.repaint();
+			MapTool.getFrame().updateDrawTree();
+			MapTool.getFrame().refresh();
 		}
 	}
 
@@ -73,6 +94,20 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		}
 
 		public void actionPerformed(ActionEvent e) {
+			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
+			Iterator<DrawnElement> iter = drawableList.iterator();
+			while (iter.hasNext()) {
+				DrawnElement de = iter.next();
+				if (de.getDrawable().getLayer()!=this.layer && selectedDrawSet.contains(de.getDrawable().getId())) {
+					renderer.getZone().removeDrawable(de.getDrawable().getId());
+					MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
+					de.getDrawable().setLayer(this.layer);
+					renderer.getZone().addDrawable(de);
+					MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
+				}
+			}
+			MapTool.getFrame().updateDrawTree();
+			MapTool.getFrame().refresh();
 		}
 	}
 
@@ -92,15 +127,40 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 	public class BringToFrontAction extends AbstractAction {
 		public void actionPerformed(ActionEvent e) {
-			//MapTool.serverCommand().bringTokensToFront(renderer.getZone().getId(), selectedTokenSet);
-			//MapTool.getFrame().refresh();
+			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
+			Iterator<DrawnElement> iter = drawableList.iterator();
+			while (iter.hasNext()) {
+				DrawnElement de = iter.next();
+				if (selectedDrawSet.contains(de.getDrawable().getId())) {
+					renderer.getZone().removeDrawable(de.getDrawable().getId());
+					MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
+					renderer.getZone().addDrawable(new DrawnElement(de.getDrawable(), de.getPen()));
+					MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
+				}
+			}
+			MapTool.getFrame().updateDrawTree();
+			MapTool.getFrame().refresh();
 		}
 	}
 
 	public class SendToBackAction extends AbstractAction {
 		public void actionPerformed(ActionEvent e) {
-			//MapTool.serverCommand().sendTokensToBack(renderer.getZone().getId(), selectedTokenSet);
-			//MapTool.getFrame().refresh();
+			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
+			Iterator<DrawnElement> iter = drawableList.iterator();
+			while (iter.hasNext()) {
+				DrawnElement de = iter.next();
+				if (selectedDrawSet.contains(de.getDrawable().getId())) {
+					renderer.getZone().removeDrawable(de.getDrawable().getId());
+					renderer.getZone().addDrawableRear(de);
+				}
+			}
+			// horrid kludge needed to redraw zone :(
+			for (DrawnElement de: renderer.getZone().getAllDrawnElements()) {
+				MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
+				MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
+			}
+			MapTool.getFrame().updateDrawTree();
+			MapTool.getFrame().refresh();
 		}
 	}
 
