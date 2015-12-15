@@ -402,6 +402,30 @@ public class MapTool {
 		// Assume 'No' response
 		return false;
 	}
+	
+	public static boolean confirmDrawDelete() {
+		if (!AppPreferences.getDrawWarnWhenDeleted()) {
+			return true;
+		}
+
+		String msg = I18N.getText("msg.confirm.deleteDraw");
+		log.debug(msg);
+		Object[] options = { I18N.getText("msg.title.messageDialog.yes"), I18N.getText("msg.title.messageDialog.no"), I18N.getText("msg.title.messageDialog.dontAskAgain") };
+		String title = I18N.getText("msg.title.messageDialogConfirm");
+		int val = JOptionPane.showOptionDialog(clientFrame, msg, title, JOptionPane.NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+
+		// "Yes, don't show again" Button
+		if (val == 2) {
+			showInformation("msg.confirm.deleteDraw.removed");
+			AppPreferences.setDrawWarnWhenDeleted(false);
+		}
+		// Any version of 'Yes'...
+		if (val == JOptionPane.YES_OPTION || val == 2) {
+			return true;
+		}
+		// Assume 'No' response
+		return false;
+	}
 
 	private MapTool() {
 		// Not to be instantiated

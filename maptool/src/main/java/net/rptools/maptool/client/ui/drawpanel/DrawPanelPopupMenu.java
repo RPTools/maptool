@@ -50,7 +50,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		}
 		public void actionPerformed(ActionEvent e) {
 			// check to see if this is the required action
-			if (!MapTool.confirmTokenDelete()) {
+			if (!MapTool.confirmDrawDelete()) {
 				return;
 			}
 			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
