@@ -845,6 +845,18 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 				}
 				Object row = path.getLastPathComponent();
 				int rowIndex = tree.getRowForLocation(e.getX(), e.getY());
+				if (SwingUtilities.isLeftMouseButton(e)) {
+					if (!SwingUtil.isShiftDown(e)) {
+						tree.clearSelection();
+					}
+					tree.addSelectionInterval(rowIndex, rowIndex);
+					if (row instanceof DrawnElement) {
+						if (e.getClickCount() == 2) {
+							DrawnElement de = (DrawnElement) row;
+							getCurrentZoneRenderer().centerOn(new ZonePoint((int)de.getDrawable().getBounds().getCenterX(), (int)de.getDrawable().getBounds().getCenterY()));
+						}
+					}
+				}
 				if (SwingUtilities.isRightMouseButton(e)) {
 					if (!isRowSelected(tree.getSelectionRows(), rowIndex) && !SwingUtil.isShiftDown(e)) {
 						tree.clearSelection();

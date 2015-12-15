@@ -45,12 +45,12 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 				ShapeDrawable sd = (ShapeDrawable)de.getDrawable();
 				//text = sd.getClass().getSimpleName() + " " + sd.getShape().getClass().getSimpleName();
 				key = String.format("panel.DrawExplorer.%s.%s", sd.getClass().getSimpleName(), sd.getShape().getClass().getSimpleName());
-				text = I18N.getText(key);
+				text = I18N.getText(key, sd.getBounds().width, sd.getBounds().height);
 				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			} else if (de.getDrawable() instanceof LineSegment) {
 				LineSegment ls = (LineSegment)de.getDrawable();
 				key = String.format("panel.DrawExplorer.%s.Line", ls.getClass().getSimpleName());
-				text = I18N.getText(key, ls.getPoints().size());
+				text = I18N.getText(key, ls.getPoints().size()-1, de.getPen().getThickness());
 				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			} else if (de.getDrawable() instanceof AbstractTemplate) {
 				AbstractTemplate at = (AbstractTemplate)de.getDrawable();
@@ -60,7 +60,6 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 			}
 			if (de.getPen().isEraser())
 				text = "CUT: "+text;
-			text = text + de.hashCode();
 		} else if (value instanceof DrawPanelTreeModel.View) {
 			DrawPanelTreeModel.View view = (DrawPanelTreeModel.View) value;
 			text = view.getLayer().name();
