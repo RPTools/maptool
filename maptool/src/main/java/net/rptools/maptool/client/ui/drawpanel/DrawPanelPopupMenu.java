@@ -40,8 +40,19 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 		addGMItem(createChangeToMenu(Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
 		addGMItem(createArrangeMenu());
-		add(new JSeparator());
+		addGMItem(new JSeparator());
 		add(new DeleteDrawingAction());
+		add(new JSeparator());
+		add(new DrawingPropertiesAction());
+	}
+	
+	public class DrawingPropertiesAction extends AbstractAction {
+		public DrawingPropertiesAction() {
+			super("Properties");
+		}
+		public void actionPerformed(ActionEvent e) {
+			
+		}		
 	}
 	
 	public class DeleteDrawingAction extends AbstractAction {
@@ -75,6 +86,14 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		if (MapTool.getPlayer().isGM()) {
 			add(menu);
 		}
+	}
+
+	protected void addGMItem(JSeparator separator) {
+		if (separator == null) {
+			return;
+		}
+		if (MapTool.getPlayer().isGM())
+			add(separator);
 	}
 
 	protected JMenu createChangeToMenu(Zone.Layer... types) {
