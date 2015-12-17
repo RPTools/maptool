@@ -14,13 +14,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
-import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
+import net.rptools.maptool.model.drawing.Pen;
 
 public class DrawPanelPopupMenu extends JPopupMenu {
 	
@@ -40,6 +40,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 		addGMItem(createChangeToMenu(Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
 		addGMItem(createArrangeMenu());
+		add(new GroupDrawingsAction());
 		addGMItem(new JSeparator());
 		add(new DeleteDrawingAction());
 		add(new JSeparator());
@@ -53,6 +54,50 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		public void actionPerformed(ActionEvent e) {
 			
 		}		
+	}
+
+	protected void addGMItem(JMenu menu) {
+		if (menu == null) {
+			return;
+		}
+		if (MapTool.getPlayer().isGM()) {
+			add(menu);
+		}
+	}
+	
+	public class GroupDrawingsAction extends AbstractAction {
+		public GroupDrawingsAction() {
+			super("Group Drawings");
+		}
+		public void actionPerformed(ActionEvent e) {
+			if (selectedDrawSet.size()>1 && elementUnderMouse!=null) {
+				// only bother doing stuff if more than one selected
+				List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
+				List<DrawnElement> groupList = new ArrayList<DrawnElement>();
+				Iterator<DrawnElement> iter = drawableList.iterator();
+				Pen pen = new Pen(elementUnderMouse.getPen());
+				pen.setEraser(false);
+				while (iter.hasNext()) {
+					DrawnElement de = iter.next();
+					if (selectedDrawSet.contains(de.getDrawable().getId())) {
+						renderer.getZone().removeDrawable(de.getDrawable().getId());
+						MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
+						de.getDrawable().setLayer(elementUnderMouse.getDrawable().getLayer());
+						groupList.add(de);
+						if (de.getPen().getThickness()>pen.getThickness()) {
+							pen = new Pen(de.getPen());
+							pen.setEraser(false);
+						}
+					}
+				}
+				DrawablesGroup dg = new DrawablesGroup(groupList);
+				DrawnElement de = new DrawnElement(dg, pen);
+				renderer.getZone().addDrawable(de);
+				MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
+				MapTool.getFrame().updateDrawTree();
+				MapTool.getFrame().refresh();
+			}
+		}
 	}
 	
 	public class DeleteDrawingAction extends AbstractAction {

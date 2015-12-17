@@ -15,6 +15,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
+import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.LineSegment;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
@@ -41,7 +42,10 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 			String key = "panel.DrawExplorer.Unknown.Shape";
 			DrawnElement de = (DrawnElement) value;
 			text = de.getDrawable().toString();
-			if (de.getDrawable() instanceof ShapeDrawable) {
+			if (de.getDrawable() instanceof DrawablesGroup) {
+				text = "Group";
+				setLeafIcon(getOpenIcon());
+			} else if (de.getDrawable() instanceof ShapeDrawable) {
 				ShapeDrawable sd = (ShapeDrawable)de.getDrawable();
 				//text = sd.getClass().getSimpleName() + " " + sd.getShape().getClass().getSimpleName();
 				key = String.format("panel.DrawExplorer.%s.%s", sd.getClass().getSimpleName(), sd.getShape().getClass().getSimpleName());
