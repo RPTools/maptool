@@ -64,7 +64,8 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 				List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
 				List<DrawnElement> groupList = new ArrayList<DrawnElement>();
 				Iterator<DrawnElement> iter = drawableList.iterator();
-				Pen pen = elementUnderMouse.getPen();
+				Pen pen = new Pen(elementUnderMouse.getPen());
+				pen.setEraser(false);
 				while (iter.hasNext()) {
 					DrawnElement de = iter.next();
 					if (selectedDrawSet.contains(de.getDrawable().getId())) {
@@ -72,8 +73,10 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 						MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
 						de.getDrawable().setLayer(elementUnderMouse.getDrawable().getLayer());
 						groupList.add(de);
-						if (de.getPen().getThickness()>pen.getThickness())
-							pen = de.getPen();
+						if (de.getPen().getThickness()>pen.getThickness()) {
+							pen = new Pen(de.getPen());
+							pen.setEraser(false);
+						}
 					}
 				}
 				DrawablesGroup dg = new DrawablesGroup(groupList);

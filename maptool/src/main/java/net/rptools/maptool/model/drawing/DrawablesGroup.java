@@ -13,7 +13,10 @@ package net.rptools.maptool.model.drawing;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Transparency;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 /**
@@ -56,16 +59,28 @@ public class DrawablesGroup extends AbstractDrawing {
 
 	@Override
 	protected void draw(Graphics2D g) {
-		Graphics2D newG = (Graphics2D) g.create();
+		BufferedImage image = new BufferedImage(getBounds().width, getBounds().height, Transparency.BITMASK);
+		Graphics2D newG = image.createGraphics();
+		AffineTransform af = new AffineTransform();
+		af.translate(-getBounds().x, -getBounds().y);
+		newG.setTransform(af);
 		for (DrawnElement element : drawableList) {
 			element.getDrawable().draw(newG, element.getPen());
 		}
+		g.drawImage(image, 0, 0, getBounds().width, getBounds().height, null);
 		newG.dispose();
 	}
 
 	@Override
 	protected void drawBackground(Graphics2D g) {
-		// Do nothing
+		/*
+		Graphics2D newG = (Graphics2D) g.create();
+		for (DrawnElement element : drawableList) {
+			if (element.getDrawable() instanceof AbstractDrawing)
+				((AbstractDrawing)element.getDrawable()).drawBackground(newG);
+		}
+		newG.dispose();
+		*/
 	}
 
 }
