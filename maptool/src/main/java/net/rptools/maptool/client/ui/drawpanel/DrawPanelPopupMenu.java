@@ -81,9 +81,8 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 						}
 					}
 				}
-				DrawablesGroup dg = new DrawablesGroup(groupList);
-				DrawnElement de = new DrawnElement(dg, pen);
-				renderer.getZone().addDrawable(de);
+				DrawnElement de = new DrawnElement(new DrawablesGroup(groupList), pen);
+				de.getDrawable().setLayer(elementUnderMouse.getDrawable().getLayer());
 				MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
 				MapTool.getFrame().updateDrawTree();
 				MapTool.getFrame().refresh();
