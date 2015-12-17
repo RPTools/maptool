@@ -31,6 +31,7 @@ import java.util.Set;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.model.drawing.Drawable;
+import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 
@@ -251,7 +252,14 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 			//			g.draw(drawnBounds);
 
 			timer.start("createChunk:Draw");
-			drawable.draw(g, pen);
+			if (drawable instanceof DrawablesGroup) {
+				DrawablesGroup dg = (DrawablesGroup) drawable;
+				BufferedImage groupImage = createChunk(dg.getDrawableList(), gridx, gridy, scale);
+				Graphics2D g2 = image.createGraphics();
+				g2.drawImage(groupImage, 0, 0, CHUNK_SIZE, CHUNK_SIZE, null);
+				g2.dispose();
+			} else 
+				drawable.draw(g, pen);
 			g.setComposite(oldComposite);
 			timer.stop("createChunk:Draw");
 		}

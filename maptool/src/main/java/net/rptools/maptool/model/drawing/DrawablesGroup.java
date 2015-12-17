@@ -32,15 +32,24 @@ public class DrawablesGroup extends AbstractDrawing {
 	public DrawablesGroup(List<DrawnElement> drawableList) {
 		this.drawableList = drawableList;
 	}
+
+	public List<DrawnElement> getDrawableList() {
+		return drawableList;
+	}
 	
 	@Override
 	public Rectangle getBounds() {
 		Rectangle bounds = null;
 		for (DrawnElement element : drawableList) {
+			Rectangle drawnBounds = element.getDrawable().getBounds();
+			// Handle pen size
+			Pen pen = element.getPen();
+			int penSize = (int) (pen.getThickness() / 2 + 1);
+			drawnBounds.setRect(drawnBounds.getX() - penSize, drawnBounds.getY() - penSize, drawnBounds.getWidth() + pen.getThickness(), drawnBounds.getHeight() + pen.getThickness());
 			if (bounds==null)
-				bounds = element.getDrawable().getBounds();
+				bounds = drawnBounds;
 			else
-				bounds.add(element.getDrawable().getBounds());
+				bounds.add(drawnBounds);
 		}
 		return bounds;
 	}
@@ -59,28 +68,15 @@ public class DrawablesGroup extends AbstractDrawing {
 
 	@Override
 	protected void draw(Graphics2D g) {
-		BufferedImage image = new BufferedImage(getBounds().width, getBounds().height, Transparency.BITMASK);
-		Graphics2D newG = image.createGraphics();
-		AffineTransform af = new AffineTransform();
-		af.translate(-getBounds().x, -getBounds().y);
-		newG.setTransform(af);
+		// This should never be called
 		for (DrawnElement element : drawableList) {
-			element.getDrawable().draw(newG, element.getPen());
+			element.getDrawable().draw(g, element.getPen());
 		}
-		g.drawImage(image, 0, 0, getBounds().width, getBounds().height, null);
-		newG.dispose();
 	}
 
 	@Override
 	protected void drawBackground(Graphics2D g) {
-		/*
-		Graphics2D newG = (Graphics2D) g.create();
-		for (DrawnElement element : drawableList) {
-			if (element.getDrawable() instanceof AbstractDrawing)
-				((AbstractDrawing)element.getDrawable()).drawBackground(newG);
-		}
-		newG.dispose();
-		*/
+		// This should never be called
 	}
 
 }

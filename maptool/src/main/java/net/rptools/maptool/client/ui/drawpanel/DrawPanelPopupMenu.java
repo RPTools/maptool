@@ -55,15 +55,6 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			
 		}		
 	}
-
-	protected void addGMItem(JMenu menu) {
-		if (menu == null) {
-			return;
-		}
-		if (MapTool.getPlayer().isGM()) {
-			add(menu);
-		}
-	}
 	
 	public class GroupDrawingsAction extends AbstractAction {
 		public GroupDrawingsAction() {
