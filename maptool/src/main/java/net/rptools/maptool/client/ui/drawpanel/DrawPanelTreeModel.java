@@ -23,6 +23,7 @@ import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
+import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 
 public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
@@ -80,6 +81,12 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 		if (parent instanceof View) {
 			return getViewList((View) parent).get(index);
 		}
+		if (parent instanceof DrawnElement) {
+			if (((DrawnElement)parent).getDrawable() instanceof DrawablesGroup) {
+				DrawablesGroup dg = (DrawablesGroup)((DrawnElement)parent).getDrawable();
+				return dg.getDrawableList().get(index);
+			}
+		}
 		return null;
 	}
 
@@ -90,6 +97,12 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 		}
 		if (parent instanceof View) {
 			return getViewList((View) parent).size();
+		}
+		if (parent instanceof DrawnElement) {
+			if (((DrawnElement)parent).getDrawable() instanceof DrawablesGroup) {
+				DrawablesGroup dg = (DrawablesGroup)((DrawnElement)parent).getDrawable();
+				return dg.getDrawableList().size();
+			}
 		}
 		return 0;
 	}
@@ -119,6 +132,12 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 		}
 		if (parent instanceof View) {
 			getViewList((View) parent).indexOf(child);
+		}
+		if (parent instanceof DrawnElement) {
+			if (((DrawnElement)parent).getDrawable() instanceof DrawablesGroup) {
+				DrawablesGroup dg = (DrawablesGroup)((DrawnElement)parent).getDrawable();
+				return dg.getDrawableList().indexOf(child);
+			}
 		}
 		return -1;
 	}

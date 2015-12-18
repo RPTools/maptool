@@ -44,7 +44,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 			text = de.getDrawable().toString();
 			if (de.getDrawable() instanceof DrawablesGroup) {
 				text = "Group";
-				setLeafIcon(getOpenIcon());
+				//setLeafIcon(getOpenIcon());
 			} else if (de.getDrawable() instanceof ShapeDrawable) {
 				ShapeDrawable sd = (ShapeDrawable)de.getDrawable();
 				//text = sd.getClass().getSimpleName() + " " + sd.getShape().getClass().getSimpleName();
