@@ -18,6 +18,7 @@ import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.LineSegment;
+import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
 
 public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
@@ -44,10 +45,8 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 			text = de.getDrawable().toString();
 			if (de.getDrawable() instanceof DrawablesGroup) {
 				text = "Group";
-				//setLeafIcon(getOpenIcon());
 			} else if (de.getDrawable() instanceof ShapeDrawable) {
 				ShapeDrawable sd = (ShapeDrawable)de.getDrawable();
-				//text = sd.getClass().getSimpleName() + " " + sd.getShape().getClass().getSimpleName();
 				key = String.format("panel.DrawExplorer.%s.%s", sd.getClass().getSimpleName(), sd.getShape().getClass().getSimpleName());
 				text = I18N.getText(key, sd.getBounds().width, sd.getBounds().height);
 				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
@@ -62,10 +61,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 				text = I18N.getText(key, at.getRadius());
 				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			}
-			if (de.getPen().isEraser())
-				text = "CUT: "+text;
-			if (de.getPen().getOpacity()<1)
-				text = text + " opacity " +de.getPen().getOpacity();
+			text = addPenText(de.getPen(), text);
 		} else if (value instanceof DrawPanelTreeModel.View) {
 			DrawPanelTreeModel.View view = (DrawPanelTreeModel.View) value;
 			text = view.getLayer().name();
@@ -78,6 +74,19 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 		rowWidth = (icon != null ? icon.getIconWidth() + 2 : 0) + SwingUtilities.computeStringWidth(getFontMetrics(getFont()), text);
 		
 		return this;
+    }
+    
+    private String addPenText(Pen pen, String text) {
+    	if (pen==null)
+    		return text;
+    	String result=text;
+		if (pen.isEraser())
+			result = "CUT: "+result;
+		if (pen.getOpacity()<1) {
+			int perc = (int)pen.getOpacity()*100;
+			result = result + String.format(" opacity %s%%", perc);
+		}
+    	return result;
     }
     
     private Icon setDrawPanelIcon(String key, boolean eraser) {
@@ -125,6 +134,8 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 	@Override
 	public Dimension getPreferredSize() {
 		// hides the unnecessary root row
+		// not sure why this method is used rather than tree.setRootVisible(false)
+		// but keep for consistency with other panels
 		int height = row > 0 ? getFontMetrics(getFont()).getHeight() + 4 : 0;
 		return new Dimension(super.getPreferredSize().width, height);
 	}

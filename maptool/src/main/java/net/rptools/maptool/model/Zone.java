@@ -1175,6 +1175,24 @@ public class Zone extends BaseModel {
 
 		return list;
 	}
+	
+	public DrawnElement getDrawnElement(GUID id) {
+		DrawnElement result = findDrawnElement(getAllDrawnElements(), id);
+		return result;
+	}
+	
+	private DrawnElement findDrawnElement(List<DrawnElement> list, GUID id) {
+		for (DrawnElement de: list) {
+			if (de.getDrawable().getId() == id)
+				return de;
+			if (de.getDrawable() instanceof DrawablesGroup) {
+				DrawnElement result = findDrawnElement(((DrawablesGroup)de.getDrawable()).getDrawableList(),id);
+				if (result!=null)
+					return result;
+			}
+		}
+		return null;
+	}
 
 	public int getTokenCount() {
 		return tokenOrderedList.size();
