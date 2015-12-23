@@ -43,6 +43,7 @@ import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.StringUtil;
@@ -991,6 +992,10 @@ public class Zone extends BaseModel {
 				i.remove();
 				fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_REMOVED, drawable));
 				return;
+			}
+			if (drawable.getDrawable() instanceof DrawablesGroup) {
+				DrawablesGroup dg = (DrawablesGroup)drawable.getDrawable();
+				removeDrawable(dg.getDrawableList(), drawableId);
 			}
 		}
 	}

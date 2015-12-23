@@ -64,6 +64,8 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 			}
 			if (de.getPen().isEraser())
 				text = "CUT: "+text;
+			if (de.getPen().getOpacity()<1)
+				text = text + " opacity " +de.getPen().getOpacity();
 		} else if (value instanceof DrawPanelTreeModel.View) {
 			DrawPanelTreeModel.View view = (DrawPanelTreeModel.View) value;
 			text = view.getLayer().name();

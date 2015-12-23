@@ -40,11 +40,20 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 		addGMItem(createChangeToMenu(Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
 		addGMItem(createArrangeMenu());
-		add(new GroupDrawingsAction());
+		if (isDrawnElementGroup(elementUnderMouse))
+			add(new UngroupDrawingsAction());
+		else
+			add(new GroupDrawingsAction());
 		addGMItem(new JSeparator());
 		add(new DeleteDrawingAction());
 		add(new JSeparator());
 		add(new DrawingPropertiesAction());
+	}
+
+	private boolean isDrawnElementGroup(Object object) {
+		if (object instanceof DrawnElement)
+			return ((DrawnElement)object).getDrawable() instanceof DrawablesGroup;
+		return false;
 	}
 	
 	public class DrawingPropertiesAction extends AbstractAction {
@@ -56,9 +65,24 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		}		
 	}
 	
+	public class UngroupDrawingsAction extends AbstractAction {
+		public UngroupDrawingsAction() {
+			super("Ungroup");
+			enabled=selectedDrawSet.size()==1 && isDrawnElementGroup(elementUnderMouse);
+		}
+		public void actionPerformed(ActionEvent e) {
+			MapTool.serverCommand().undoDraw(renderer.getZone().getId(), elementUnderMouse.getDrawable().getId());
+			DrawablesGroup dg = (DrawablesGroup)((DrawnElement)elementUnderMouse).getDrawable();
+			for (DrawnElement de : dg.getDrawableList()) {
+				MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
+			}
+		}		
+	}
+	
 	public class GroupDrawingsAction extends AbstractAction {
 		public GroupDrawingsAction() {
 			super("Group Drawings");
+			enabled=selectedDrawSet.size()>1;
 		}
 		public void actionPerformed(ActionEvent e) {
 			if (selectedDrawSet.size()>1 && elementUnderMouse!=null) {
@@ -68,6 +92,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 				Iterator<DrawnElement> iter = drawableList.iterator();
 				Pen pen = new Pen(elementUnderMouse.getPen());
 				pen.setEraser(false);
+				pen.setOpacity(1);
 				while (iter.hasNext()) {
 					DrawnElement de = iter.next();
 					if (selectedDrawSet.contains(de.getDrawable().getId())) {
@@ -78,6 +103,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 						if (de.getPen().getThickness()>pen.getThickness()) {
 							pen = new Pen(de.getPen());
 							pen.setEraser(false);
+							pen.setOpacity(1);
 						}
 					}
 				}
@@ -99,15 +125,19 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			if (!MapTool.confirmDrawDelete()) {
 				return;
 			}
+			for (GUID id : selectedDrawSet) {
+				MapTool.serverCommand().undoDraw(renderer.getZone().getId(), id);
+			}
+			/*
 			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
 			Iterator<DrawnElement> iter = drawableList.iterator();
 			while (iter.hasNext()) {
 				DrawnElement de = iter.next();
 				if (selectedDrawSet.contains(de.getDrawable().getId())) {
-					renderer.getZone().removeDrawable(de.getDrawable().getId());
+					//renderer.getZone().removeDrawable(de.getDrawable().getId());
 					MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
 				}
-			}
+			} */
 			renderer.repaint();
 			MapTool.getFrame().updateDrawTree();
 			MapTool.getFrame().refresh();

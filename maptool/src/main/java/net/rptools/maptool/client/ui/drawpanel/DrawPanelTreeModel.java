@@ -81,13 +81,17 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 		if (parent instanceof View) {
 			return getViewList((View) parent).get(index);
 		}
-		if (parent instanceof DrawnElement) {
-			if (((DrawnElement)parent).getDrawable() instanceof DrawablesGroup) {
-				DrawablesGroup dg = (DrawablesGroup)((DrawnElement)parent).getDrawable();
-				return dg.getDrawableList().get(index);
-			}
+		if (isDrawnElementGroup(parent)) {
+			DrawablesGroup dg = (DrawablesGroup)((DrawnElement)parent).getDrawable();
+			return dg.getDrawableList().get(dg.getDrawableList().size()-index-1);
 		}
 		return null;
+	}
+	
+	private boolean isDrawnElementGroup(Object object) {
+		if (object instanceof DrawnElement)
+			return ((DrawnElement)object).getDrawable() instanceof DrawablesGroup;
+		return false;
 	}
 
 	@Override
@@ -98,11 +102,9 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 		if (parent instanceof View) {
 			return getViewList((View) parent).size();
 		}
-		if (parent instanceof DrawnElement) {
-			if (((DrawnElement)parent).getDrawable() instanceof DrawablesGroup) {
-				DrawablesGroup dg = (DrawablesGroup)((DrawnElement)parent).getDrawable();
-				return dg.getDrawableList().size();
-			}
+		if (isDrawnElementGroup(parent)) {
+			DrawablesGroup dg = (DrawablesGroup)((DrawnElement)parent).getDrawable();
+			return dg.getDrawableList().size();
 		}
 		return 0;
 	}
@@ -117,7 +119,13 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 
 	@Override
 	public boolean isLeaf(Object node) {
-		return node instanceof DrawnElement;
+		if (node instanceof DrawnElement) {
+			if (((DrawnElement)node).getDrawable() instanceof DrawablesGroup)
+				return false;
+			else
+				return true;
+		}			
+		return false;
 	}
 
 	@Override
@@ -136,7 +144,7 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 		if (parent instanceof DrawnElement) {
 			if (((DrawnElement)parent).getDrawable() instanceof DrawablesGroup) {
 				DrawablesGroup dg = (DrawablesGroup)((DrawnElement)parent).getDrawable();
-				return dg.getDrawableList().indexOf(child);
+				return dg.getDrawableList().size()-dg.getDrawableList().indexOf(child)-1;
 			}
 		}
 		return -1;

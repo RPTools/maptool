@@ -51,7 +51,9 @@ public class DrawablesGroup extends AbstractDrawing {
 			else
 				bounds.add(drawnBounds);
 		}
-		return bounds;
+		if (bounds!=null)
+			return bounds;
+		return new Rectangle(0, 0, -1, -1);
 	}
 
 	@Override
