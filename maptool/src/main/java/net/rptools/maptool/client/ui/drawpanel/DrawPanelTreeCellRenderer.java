@@ -83,7 +83,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 		if (pen.isEraser())
 			result = "CUT: "+result;
 		if (pen.getOpacity()<1) {
-			int perc = (int)pen.getOpacity()*100;
+			int perc = (int)(pen.getOpacity()*100);
 			result = result + String.format(" opacity %s%%", perc);
 		}
     	return result;

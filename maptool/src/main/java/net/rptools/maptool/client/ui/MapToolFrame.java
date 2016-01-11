@@ -58,6 +58,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -104,6 +105,7 @@ import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
+import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.CampaignPanel;
@@ -831,10 +833,18 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	
 	private JComponent createDrawTreePanel() {
 		final JTree tree = new JTree();
+		final DrawablesPanel drawablesPanel = new DrawablesPanel();
 		drawPanelTreeModel = new DrawPanelTreeModel(tree);
 		tree.setModel(drawPanelTreeModel);
 		tree.setCellRenderer(new DrawPanelTreeCellRenderer());
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		splitPane.setContinuousLayout(true);
+
+		splitPane.setTopComponent(new JScrollPane(tree));
+		splitPane.setBottomComponent(drawablesPanel);
+		splitPane.setDividerLocation(100);
 		// Add mouse Event for right click menu
 		tree.addMouseListener(new MouseAdapter() {
 			@Override
@@ -848,6 +858,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 				if (SwingUtilities.isLeftMouseButton(e)) {
 					if (!SwingUtil.isShiftDown(e)) {
 						tree.clearSelection();
+						drawablesPanel.clearSelectedIds();
 					}
 					tree.addSelectionInterval(rowIndex, rowIndex);
 					if (row instanceof DrawnElement) {
@@ -856,11 +867,18 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 							getCurrentZoneRenderer().centerOn(new ZonePoint((int)de.getDrawable().getBounds().getCenterX(), (int)de.getDrawable().getBounds().getCenterY()));
 						}
 					}
+					for (TreePath p : tree.getSelectionPaths()) {
+						if (p.getLastPathComponent() instanceof DrawnElement) {
+							DrawnElement de = (DrawnElement) p.getLastPathComponent();
+							drawablesPanel.addSelectedId(de.getDrawable().getId());
+						}
+					}
 				}
 				if (SwingUtilities.isRightMouseButton(e)) {
 					if (!isRowSelected(tree.getSelectionRows(), rowIndex) && !SwingUtil.isShiftDown(e)) {
 						tree.clearSelection();
 						tree.addSelectionInterval(rowIndex, rowIndex);
+						drawablesPanel.clearSelectedIds();
 					}
 					final int x = e.getX();
 					final int y = e.getY();
@@ -896,7 +914,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 				drawPanelTreeModel.setZone((Zone) event.getNewValue());
 			}
 		}, MapTool.ZoneEvent.Activated);
-		return tree;
+		return splitPane;
 	}
 	// Used to redraw the Draw Tree Panel after actions have been called
 	public void updateDrawTree() {
