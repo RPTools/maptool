@@ -67,15 +67,14 @@ public class DrawablesPanel extends JComponent {
 						double scale = (double)Math.min(MAX_PANEL_SIZE,getSize().width) / (double)bounds.width;
 						if((bounds.height*scale)>MAX_PANEL_SIZE)
 							scale = (double)Math.min(MAX_PANEL_SIZE,getSize().height) / (double)bounds.height;
-						g.drawImage(drawDrawables(g2d, drawableList, bounds, scale), 0, 0, null);
+						g.drawImage(drawDrawables( drawableList, bounds, scale), 0, 0, null);
 					}
 				}
 			}
 		}
 	}
 
-
-	private BufferedImage drawDrawables(Graphics2D gx, List<DrawnElement> drawableList, Rectangle viewport, double scale) {
+	private BufferedImage drawDrawables(List<DrawnElement> drawableList, Rectangle viewport, double scale) {
 		BufferedImage backBuffer = new BufferedImage((int)(viewport.width*scale), (int)(viewport.height*scale), Transparency.TRANSLUCENT);
 		Graphics2D g = backBuffer.createGraphics();
 		g.setClip(0, 0, backBuffer.getWidth(), backBuffer.getHeight());
@@ -93,7 +92,7 @@ public class DrawablesPanel extends JComponent {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
 			}
 			if (drawable instanceof DrawablesGroup) {
-				g.drawImage(drawDrawables(g, ((DrawablesGroup)drawable).getDrawableList(), new Rectangle(0,0,(int)(viewport.width/scale),(int)(viewport.height/scale)), 1), 0, 0, null);
+				g.drawImage(drawDrawables( ((DrawablesGroup)drawable).getDrawableList(),new Rectangle(viewport), 1), viewport.x, viewport.y, null);
 			} else 
 				drawable.draw(g, pen);
 			g.setComposite(oldComposite);
@@ -119,6 +118,5 @@ public class DrawablesPanel extends JComponent {
 			return bounds;
 		return new Rectangle(0, 0, -1, -1);
 	}
-
 
 }

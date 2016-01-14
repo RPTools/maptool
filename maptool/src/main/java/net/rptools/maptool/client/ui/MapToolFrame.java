@@ -858,7 +858,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 				if (SwingUtilities.isLeftMouseButton(e)) {
 					if (!SwingUtil.isShiftDown(e)&&!SwingUtil.isControlDown(e)) {
 						tree.clearSelection();
-						drawablesPanel.clearSelectedIds();
 					}
 					tree.addSelectionInterval(rowIndex, rowIndex);
 					if (row instanceof DrawnElement) {
@@ -867,7 +866,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 							getCurrentZoneRenderer().centerOn(new ZonePoint((int)de.getDrawable().getBounds().getCenterX(), (int)de.getDrawable().getBounds().getCenterY()));
 						}
 					}
-					for (TreePath p : tree.getSelectionPaths()) {
+
+					int[]treeRows = tree.getSelectionRows();
+					java.util.Arrays.sort(treeRows);
+					drawablesPanel.clearSelectedIds();
+					for (int i = 0; i < treeRows.length; i++) {
+						TreePath p = tree.getPathForRow(treeRows[i]);
 						if (p.getLastPathComponent() instanceof DrawnElement) {
 							DrawnElement de = (DrawnElement) p.getLastPathComponent();
 							drawablesPanel.addSelectedId(de.getDrawable().getId());
