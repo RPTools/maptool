@@ -856,7 +856,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 				Object row = path.getLastPathComponent();
 				int rowIndex = tree.getRowForLocation(e.getX(), e.getY());
 				if (SwingUtilities.isLeftMouseButton(e)) {
-					if (!SwingUtil.isShiftDown(e)) {
+					if (!SwingUtil.isShiftDown(e)&&!SwingUtil.isControlDown(e)) {
 						tree.clearSelection();
 						drawablesPanel.clearSelectedIds();
 					}
@@ -941,7 +941,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 				Object row = path.getLastPathComponent();
 				int rowIndex = tree.getRowForLocation(e.getX(), e.getY());
 				if (SwingUtilities.isLeftMouseButton(e)) {
-					if (!SwingUtil.isShiftDown(e)) {
+					if (!SwingUtil.isShiftDown(e)&&!SwingUtil.isControlDown(e)) {
 						tree.clearSelection();
 					}
 					tree.addSelectionInterval(rowIndex, rowIndex);

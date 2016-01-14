@@ -64,8 +64,9 @@ public class DrawablesPanel extends JComponent {
 					if (drawableList.size()>0) {
 						Collections.reverse(drawableList);
 						Rectangle bounds = getBounds(drawableList);
-						double scale = (double)getSize().width / (double)bounds.width;
-						//double scale = (double)200 / (double)bounds.width;
+						double scale = (double)Math.min(MAX_PANEL_SIZE,getSize().width) / (double)bounds.width;
+						if((bounds.height*scale)>MAX_PANEL_SIZE)
+							scale = (double)Math.min(MAX_PANEL_SIZE,getSize().height) / (double)bounds.height;
 						g.drawImage(drawDrawables(g2d, drawableList, bounds, scale), 0, 0, null);
 					}
 				}
@@ -75,7 +76,7 @@ public class DrawablesPanel extends JComponent {
 
 
 	private BufferedImage drawDrawables(Graphics2D gx, List<DrawnElement> drawableList, Rectangle viewport, double scale) {
-		BufferedImage backBuffer = new BufferedImage(viewport.width, viewport.height, Transparency.TRANSLUCENT);
+		BufferedImage backBuffer = new BufferedImage((int)(viewport.width*scale), (int)(viewport.height*scale), Transparency.TRANSLUCENT);
 		Graphics2D g = backBuffer.createGraphics();
 		g.setClip(0, 0, backBuffer.getWidth(), backBuffer.getHeight());
 		Composite oldComposite = g.getComposite();
@@ -108,7 +109,7 @@ public class DrawablesPanel extends JComponent {
 			// Handle pen size
 			Pen pen = element.getPen();
 			int penSize = (int) (pen.getThickness() / 2 + 1);
-			drawnBounds.setRect(drawnBounds.getX() - penSize, drawnBounds.getY() - penSize, drawnBounds.getWidth() + pen.getThickness(), drawnBounds.getHeight() + pen.getThickness());
+			drawnBounds.setRect(drawnBounds.getX() - penSize, drawnBounds.getY() - penSize, drawnBounds.getWidth() + (penSize*2), drawnBounds.getHeight() + (penSize*2));
 			if (bounds==null)
 				bounds = drawnBounds;
 			else
