@@ -105,6 +105,7 @@ import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
+import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel.View;
 import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
@@ -199,6 +200,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	private final GlassPane glassPane;
 	private TokenPanelTreeModel tokenPanelTreeModel;
 	private DrawPanelTreeModel drawPanelTreeModel;
+	private DrawablesPanel drawablesPanel;
 	private final TextureChooserPanel textureChooserPanel;
 	private LookupTablePanel lookupTablePanel;
 
@@ -833,7 +835,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	
 	private JComponent createDrawTreePanel() {
 		final JTree tree = new JTree();
-		final DrawablesPanel drawablesPanel = new DrawablesPanel();
+		drawablesPanel = new DrawablesPanel();
 		drawPanelTreeModel = new DrawPanelTreeModel(tree);
 		tree.setModel(drawPanelTreeModel);
 		tree.setCellRenderer(new DrawPanelTreeCellRenderer());
@@ -924,6 +926,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	public void updateDrawTree() {
 		if (drawPanelTreeModel != null) {
 			drawPanelTreeModel.update();
+			drawablesPanel.clearSelectedIds();
 		}
 	}
 
@@ -1171,6 +1174,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	public AssetPanel getAssetPanel() {
 		return assetPanel;
+	}
+	
+	public DrawablesPanel getDrawablesPanel() {
+		return drawablesPanel;
 	}
 
 	public void addAssetRoot(File rootDir) {

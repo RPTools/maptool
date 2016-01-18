@@ -1,6 +1,7 @@
 package net.rptools.maptool.client.ui.drawpanel;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -19,6 +20,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.Drawable;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -52,14 +54,18 @@ public class DrawablesPanel extends JComponent {
 	@Override
 	protected void paintComponent(Graphics g) {
 		if (selectedIDList.size()>0) {
-			Graphics2D g2d = (Graphics2D)g;
 			if (MapTool.getFrame().getCurrentZoneRenderer()!=null) {
 				Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 				if (zone != null) {
 					List<DrawnElement> drawableList = new ArrayList<DrawnElement>();
+					boolean onlyCuts = true;
 					for (GUID id : selectedIDList) {
-						if (zone.getDrawnElement(id)!=null)
-								drawableList.add(zone.getDrawnElement(id));
+						DrawnElement de = zone.getDrawnElement(id);
+						if (de!=null) {
+								drawableList.add(de);
+								if (!de.getPen().isEraser())
+									onlyCuts = false;
+						}
 					}
 					if (drawableList.size()>0) {
 						Collections.reverse(drawableList);
@@ -67,14 +73,14 @@ public class DrawablesPanel extends JComponent {
 						double scale = (double)Math.min(MAX_PANEL_SIZE,getSize().width) / (double)bounds.width;
 						if((bounds.height*scale)>MAX_PANEL_SIZE)
 							scale = (double)Math.min(MAX_PANEL_SIZE,getSize().height) / (double)bounds.height;
-						g.drawImage(drawDrawables( drawableList, bounds, scale), 0, 0, null);
+						g.drawImage(drawDrawables( drawableList, bounds, scale, onlyCuts), 0, 0, null);
 					}
 				}
 			}
 		}
 	}
 
-	private BufferedImage drawDrawables(List<DrawnElement> drawableList, Rectangle viewport, double scale) {
+	private BufferedImage drawDrawables(List<DrawnElement> drawableList, Rectangle viewport, double scale, boolean showEraser) {
 		BufferedImage backBuffer = new BufferedImage((int)(viewport.width*scale), (int)(viewport.height*scale), Transparency.TRANSLUCENT);
 		Graphics2D g = backBuffer.createGraphics();
 		g.setClip(0, 0, backBuffer.getWidth(), backBuffer.getHeight());
@@ -91,8 +97,15 @@ public class DrawablesPanel extends JComponent {
 			if (pen.getOpacity() != 1 && pen.getOpacity() != 0 /* handle legacy pens, besides, it doesn't make sense to have a non visible pen*/) {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
 			}
+			// If we are only drawing cuts, make the pen visible
+			if (showEraser && pen.isEraser()) { 
+				pen = new Pen(pen); 
+				pen.setEraser(false); 
+				pen.setPaint(new DrawableColorPaint(Color.white)); 
+				pen.setBackgroundPaint(new DrawableColorPaint(Color.white)); 
+				} 
 			if (drawable instanceof DrawablesGroup) {
-				g.drawImage(drawDrawables( ((DrawablesGroup)drawable).getDrawableList(),new Rectangle(viewport), 1), viewport.x, viewport.y, null);
+				g.drawImage(drawDrawables( ((DrawablesGroup)drawable).getDrawableList(),new Rectangle(viewport), 1, false), viewport.x, viewport.y, null);
 			} else 
 				drawable.draw(g, pen);
 			g.setComposite(oldComposite);
@@ -118,5 +131,4 @@ public class DrawablesPanel extends JComponent {
 			return bounds;
 		return new Rectangle(0, 0, -1, -1);
 	}
-
 }

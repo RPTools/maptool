@@ -46,8 +46,9 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			add(new GroupDrawingsAction());
 		addGMItem(new JSeparator());
 		add(new DeleteDrawingAction());
-		add(new JSeparator());
-		add(new DrawingPropertiesAction());
+		// TODO add properties action as stage two
+		//add(new JSeparator());
+		//add(new DrawingPropertiesAction());
 	}
 
 	private boolean isDrawnElementGroup(Object object) {
@@ -83,6 +84,16 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		public GroupDrawingsAction() {
 			super("Group Drawings");
 			enabled=selectedDrawSet.size()>1;
+			if (enabled) {
+				List<DrawnElement> zoneList = renderer.getZone().getDrawnElements(elementUnderMouse.getDrawable().getLayer());
+				for (GUID id: selectedDrawSet) {
+					DrawnElement de = renderer.getZone().getDrawnElement(id);
+					if (!zoneList.contains(de)) {
+						enabled=false;
+						break;
+					}
+				}
+			}
 		}
 		public void actionPerformed(ActionEvent e) {
 			if (selectedDrawSet.size()>1 && elementUnderMouse!=null) {
@@ -128,16 +139,6 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			for (GUID id : selectedDrawSet) {
 				MapTool.serverCommand().undoDraw(renderer.getZone().getId(), id);
 			}
-			/*
-			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
-			Iterator<DrawnElement> iter = drawableList.iterator();
-			while (iter.hasNext()) {
-				DrawnElement de = iter.next();
-				if (selectedDrawSet.contains(de.getDrawable().getId())) {
-					//renderer.getZone().removeDrawable(de.getDrawable().getId());
-					MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
-				}
-			} */
 			renderer.repaint();
 			MapTool.getFrame().updateDrawTree();
 			MapTool.getFrame().refresh();
