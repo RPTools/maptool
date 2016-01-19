@@ -101,8 +101,8 @@ public class DrawablesPanel extends JComponent {
 			if (showEraser && pen.isEraser()) { 
 				pen = new Pen(pen); 
 				pen.setEraser(false); 
-				pen.setPaint(new DrawableColorPaint(Color.white)); 
-				pen.setBackgroundPaint(new DrawableColorPaint(Color.white)); 
+				pen.setPaint(new DrawableColorPaint(Color.red)); 
+				pen.setBackgroundPaint(new DrawableColorPaint(Color.red)); 
 				} 
 			if (drawable instanceof DrawablesGroup) {
 				g.drawImage(drawDrawables( ((DrawablesGroup)drawable).getDrawableList(),new Rectangle(viewport), 1, false), viewport.x, viewport.y, null);
