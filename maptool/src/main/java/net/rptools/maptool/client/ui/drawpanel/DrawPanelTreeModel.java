@@ -16,12 +16,10 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeModel.View;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;

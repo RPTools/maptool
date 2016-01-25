@@ -3,7 +3,6 @@ package net.rptools.maptool.client.ui.drawpanel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -26,7 +25,6 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 	private static final long serialVersionUID = 499441097273543074L;
 	private int row;
 	private int rowWidth;
-	private BufferedImage image;
 
     public Component getTreeCellRendererComponent(JTree tree, Object value,
                                                   boolean sel,
