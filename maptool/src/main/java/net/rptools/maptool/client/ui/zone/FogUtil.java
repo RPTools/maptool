@@ -202,7 +202,7 @@ public class FogUtil {
 			}
 			tokenSet.add(token.getId());
 		}
-		renderer.getZone().clearExposedArea(tokenSet);
+		renderer.getZone().clearExposedArea(); // Was clearExposedArea(tokenSet)
 		exposeVisibleArea(renderer, tokenSet);
 	}
 

@@ -658,6 +658,10 @@ public class Zone extends BaseModel {
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
 	}
 
+	/* Back out this function
+	 * Possible cause of FOW issues
+	 * See http://forums.rptools.net/viewtopic.php?f=86&t=26469
+	 * 
 	public void clearExposedArea(Set<GUID> tokenSet) {
 		//Jamz: Clear FoW for set tokens only, for use by ExposeVisibleAreaOnlyAction Menu action and exposePCOnlyArea() macro
 		for (GUID tea : tokenSet) {
@@ -667,7 +671,7 @@ public class Zone extends BaseModel {
 		}
 
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
-	}
+	} */
 
 	public void exposeArea(Area area, Token tok) {
 		if (area == null || area.isEmpty()) {
