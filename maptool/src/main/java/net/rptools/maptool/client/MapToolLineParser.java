@@ -139,6 +139,7 @@ public class MapToolLineParser {
 	private int macroRecurseDepth = 0;
 
 	private static final int MAX_LOOPS = 1000; // Max number of loop iterations
+	private MapToolLUAParser luaparser = new MapToolLUAParser();
 
 	private enum Output { // Mutually exclusive output formats
 		NONE, RESULT, TOOLTIP, EXPANDED, UNFORMATTED,
@@ -642,6 +643,9 @@ public class MapToolLineParser {
 		line = line.trim();
 		if (line.length() == 0) {
 			return "";
+		}
+		if (line.startsWith(MapToolLUAParser.LUA_HEADER)) {
+			return luaparser.parseLine(res, tokenInContext, line, context);
 		}
 		Stack<Token> contextTokenStack = new Stack<Token>();
 		enterContext(context);
