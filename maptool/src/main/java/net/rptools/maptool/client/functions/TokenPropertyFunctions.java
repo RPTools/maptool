@@ -734,26 +734,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
 
 			Object param = parameters.get(0);
-			String snapToGridString;
-			if (param instanceof String) {
-				snapToGridString = (String) param;
-			} else {
-				//TODO: should use the correct I18N string
-				throw new ParserException(I18N.getText("macro.function.general.xxx", functionName, 0, param.toString()));
-			}
-
-			boolean snapToGrid;
-			if (snapToGridString.equalsIgnoreCase("true")) {
-				snapToGrid = true;
-			} else if (snapToGridString.equalsIgnoreCase("false")) {
-				snapToGrid = false;
-			} else {
-				//TODO: should use the correct I18N string
-				throw new ParserException(I18N.getText("macro.function.general.xxx", functionName, 0, param.toString()));
-			}
-
 			Token token = getTokenFromParam((MapToolVariableResolver) parser.getVariableResolver(), functionName, parameters, 1);
-			token.setSnapToGrid(snapToGrid);
+			token.setSnapToGrid(AbstractTokenAccessorFunction.getBooleanValue(param));
 			return "";
 		}
 		throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
