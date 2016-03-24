@@ -58,6 +58,12 @@ For Windows, remember to flip the slash:
 
 This will create a `.zip` file for use on all systems as well as a zipped `.app` for Mac OS X in the `maptool/build/` directory. The build number will be based on the latest tag and latest commit.
 
+Developers
+----------
+
+Please follow our [Code Style and Guidelines](doc/Code_Style_and_Guidelines.md) when submitting patches and pull requests.
+
+
 Optional
 --------
 
