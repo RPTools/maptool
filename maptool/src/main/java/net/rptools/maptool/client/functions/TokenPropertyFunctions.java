@@ -732,15 +732,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
 
 			Object param = parameters.get(0);
-			String snapToGridString;
-			if (param instanceof String) {
-				snapToGridString = (String) param;
-			} else {
-				//TODO: should use the correct I18N string
-				throw new ParserException(I18N.getText("macro.function.general.xxx", functionName, 0, param.toString()));
-			}
 			Token token = getTokenFromParam((MapToolVariableResolver) parser.getVariableResolver(), functionName, parameters, 1);
-			token.setSnapToGrid(boolVal(snapToGridString));
+			token.setSnapToGrid(AbstractTokenAccessorFunction.getBooleanValue(param));
 			return "";
 		}
 		throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -1029,32 +1022,5 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			}
 		}
 		return token;
-	}
-
-	/**
-	 * Calculates the boolean value based in an input string.
-	 * 
-	 * @param val
-	 *            The input string.
-	 * @return the boolean value of the input string.
-	 */
-	private boolean boolVal(String val) {
-		if ("true".equalsIgnoreCase(val)) {
-			return true;
-		}
-
-		if ("false".equalsIgnoreCase(val)) {
-			return false;
-		}
-
-		try {
-			if (Integer.parseInt(val) == 0) {
-				return false;
-			} else {
-				return true;
-			}
-		} catch (NumberFormatException e) {
-			return true;
-		}
 	}
 }
