@@ -107,6 +107,9 @@ public class AppPreferences {
 	private static final String KEY_TOKENS_WARN_WHEN_DELETED = "tokensWarnWhenDeleted";
 	private static final boolean DEFAULT_TOKENS_WARN_WHEN_DELETED = true;
 
+	private static final String KEY_DRAW_WARN_WHEN_DELETED = "drawWarnWhenDeleted";
+	private static final boolean DEFAULT_DRAW_WARN_WHEN_DELETED = true;
+
 	private static final String KEY_TOKENS_START_SNAP_TO_GRID = "newTokensStartSnapToGrid";
 	private static final boolean DEFAULT_TOKENS_START_SNAP_TO_GRID = true;
 
@@ -646,6 +649,14 @@ public class AppPreferences {
 
 	public static boolean getTokensWarnWhenDeleted() {
 		return prefs.getBoolean(KEY_TOKENS_WARN_WHEN_DELETED, DEFAULT_TOKENS_WARN_WHEN_DELETED);
+	}
+
+	public static void setDrawWarnWhenDeleted(boolean flag) {
+		prefs.putBoolean(KEY_DRAW_WARN_WHEN_DELETED, flag);
+	}
+
+	public static boolean getDrawWarnWhenDeleted() {
+		return prefs.getBoolean(KEY_DRAW_WARN_WHEN_DELETED, DEFAULT_DRAW_WARN_WHEN_DELETED);
 	}
 
 	public static void setTokensStartSnapToGrid(boolean flag) {

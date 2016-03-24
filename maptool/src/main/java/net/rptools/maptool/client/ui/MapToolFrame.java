@@ -58,6 +58,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -101,6 +102,11 @@ import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
+import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
+import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
+import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
+import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel.View;
+import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.CampaignPanel;
@@ -124,6 +130,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.ImageManager;
 
@@ -192,6 +199,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	private final GlassPane glassPane;
 	private TokenPanelTreeModel tokenPanelTreeModel;
+	private DrawPanelTreeModel drawPanelTreeModel;
+	private DrawablesPanel drawablesPanel;
 	private final TextureChooserPanel textureChooserPanel;
 	private LookupTablePanel lookupTablePanel;
 
@@ -447,6 +456,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		// @formatter:off
 		CONNECTIONS("Connections"),
 		TOKEN_TREE("MapExplorer"),
+		DRAW_TREE("DrawExplorer"),
 		INITIATIVE("Initiative"),
 		IMAGE_EXPLORER("Library"),
 		CHAT("Chat"),
@@ -490,6 +500,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		getDockingManager().addFrame(getFrame(MTFrame.TOKEN_TREE));
 		getDockingManager().addFrame(getFrame(MTFrame.INITIATIVE));
 		getDockingManager().addFrame(getFrame(MTFrame.IMAGE_EXPLORER));
+		getDockingManager().addFrame(getFrame(MTFrame.DRAW_TREE));
 		getDockingManager().addFrame(getFrame(MTFrame.CHAT));
 		getDockingManager().addFrame(getFrame(MTFrame.LOOKUP_TABLES));
 		getDockingManager().addFrame(getFrame(MTFrame.GLOBAL));
@@ -517,6 +528,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		frameMap.put(MTFrame.CONNECTIONS, createDockingFrame(MTFrame.CONNECTIONS, new JScrollPane(connectionPanel), new ImageIcon(AppStyle.connectionsImage)));
 		frameMap.put(MTFrame.TOKEN_TREE, createDockingFrame(MTFrame.TOKEN_TREE, new JScrollPane(createTokenTreePanel()), new ImageIcon(AppStyle.mapExplorerImage)));
 		frameMap.put(MTFrame.IMAGE_EXPLORER, createDockingFrame(MTFrame.IMAGE_EXPLORER, assetPanel, new ImageIcon(AppStyle.resourceLibraryImage)));
+		frameMap.put(MTFrame.DRAW_TREE, createDockingFrame(MTFrame.DRAW_TREE, new JScrollPane(createDrawTreePanel()), new ImageIcon(AppStyle.mapExplorerImage)));
 		frameMap.put(MTFrame.CHAT, createDockingFrame(MTFrame.CHAT, commandPanel, new ImageIcon(AppStyle.chatPanelImage)));
 		frameMap.put(MTFrame.LOOKUP_TABLES, createDockingFrame(MTFrame.LOOKUP_TABLES, getLookupTablePanel(), new ImageIcon(AppStyle.tablesPanelImage)));
 		frameMap.put(MTFrame.INITIATIVE, createDockingFrame(MTFrame.INITIATIVE, initiativePanel, new ImageIcon(AppStyle.initiativePanelImage)));
@@ -820,6 +832,103 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 			addAssetRoot(file);
 		}
 	}
+	
+	private JComponent createDrawTreePanel() {
+		final JTree tree = new JTree();
+		drawablesPanel = new DrawablesPanel();
+		drawPanelTreeModel = new DrawPanelTreeModel(tree);
+		tree.setModel(drawPanelTreeModel);
+		tree.setCellRenderer(new DrawPanelTreeCellRenderer());
+		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		splitPane.setContinuousLayout(true);
+
+		splitPane.setTopComponent(new JScrollPane(tree));
+		splitPane.setBottomComponent(drawablesPanel);
+		splitPane.setDividerLocation(100);
+		// Add mouse Event for right click menu
+		tree.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+				if (path == null) {
+					return;
+				}
+				Object row = path.getLastPathComponent();
+				int rowIndex = tree.getRowForLocation(e.getX(), e.getY());
+				if (SwingUtilities.isLeftMouseButton(e)) {
+					if (!SwingUtil.isShiftDown(e)&&!SwingUtil.isControlDown(e)) {
+						tree.clearSelection();
+					}
+					tree.addSelectionInterval(rowIndex, rowIndex);
+					if (row instanceof DrawnElement) {
+						if (e.getClickCount() == 2) {
+							DrawnElement de = (DrawnElement) row;
+							getCurrentZoneRenderer().centerOn(new ZonePoint((int)de.getDrawable().getBounds().getCenterX(), (int)de.getDrawable().getBounds().getCenterY()));
+						}
+					}
+
+					int[]treeRows = tree.getSelectionRows();
+					java.util.Arrays.sort(treeRows);
+					drawablesPanel.clearSelectedIds();
+					for (int i = 0; i < treeRows.length; i++) {
+						TreePath p = tree.getPathForRow(treeRows[i]);
+						if (p.getLastPathComponent() instanceof DrawnElement) {
+							DrawnElement de = (DrawnElement) p.getLastPathComponent();
+							drawablesPanel.addSelectedId(de.getDrawable().getId());
+						}
+					}
+				}
+				if (SwingUtilities.isRightMouseButton(e)) {
+					if (!isRowSelected(tree.getSelectionRows(), rowIndex) && !SwingUtil.isShiftDown(e)) {
+						tree.clearSelection();
+						tree.addSelectionInterval(rowIndex, rowIndex);
+						drawablesPanel.clearSelectedIds();
+					}
+					final int x = e.getX();
+					final int y = e.getY();
+					EventQueue.invokeLater(new Runnable() {
+						public void run() {
+							DrawnElement firstElement = null;
+							Set<GUID> selectedDrawSet = new HashSet<GUID>();
+							for (TreePath path : tree.getSelectionPaths()) {
+								if (path.getLastPathComponent() instanceof DrawnElement) {
+									DrawnElement de = (DrawnElement) path.getLastPathComponent();
+									if (firstElement == null) {
+										firstElement = de;
+									}
+									selectedDrawSet.add(de.getDrawable().getId());
+								}
+							}
+							if (!selectedDrawSet.isEmpty()) {
+								try {
+									new DrawPanelPopupMenu(selectedDrawSet, x, y, getCurrentZoneRenderer(), firstElement).showPopup(tree);
+								} catch (IllegalComponentStateException icse) {
+									log.info(tree.toString(), icse);
+								}
+							}
+						}
+					});
+				}
+			}
+			
+		});
+		// Add Zone Change event
+		MapTool.getEventDispatcher().addListener(new AppEventListener() {
+			public void handleAppEvent(AppEvent event) {
+				drawPanelTreeModel.setZone((Zone) event.getNewValue());
+			}
+		}, MapTool.ZoneEvent.Activated);
+		return splitPane;
+	}
+	// Used to redraw the Draw Tree Panel after actions have been called
+	public void updateDrawTree() {
+		if (drawPanelTreeModel != null) {
+			drawPanelTreeModel.update();
+			drawablesPanel.clearSelectedIds();
+		}
+	}
 
 	private JComponent createTokenTreePanel() {
 		final JTree tree = new JTree();
@@ -839,7 +948,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 				Object row = path.getLastPathComponent();
 				int rowIndex = tree.getRowForLocation(e.getX(), e.getY());
 				if (SwingUtilities.isLeftMouseButton(e)) {
-					if (!SwingUtil.isShiftDown(e)) {
+					if (!SwingUtil.isShiftDown(e)&&!SwingUtil.isControlDown(e)) {
 						tree.clearSelection();
 					}
 					tree.addSelectionInterval(rowIndex, rowIndex);
@@ -1065,6 +1174,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	public AssetPanel getAssetPanel() {
 		return assetPanel;
+	}
+	
+	public DrawablesPanel getDrawablesPanel() {
+		return drawablesPanel;
 	}
 
 	public void addAssetRoot(File rootDir) {
