@@ -171,6 +171,7 @@ public class PreferencesDialog extends JDialog {
 	private final JCheckBox ownerPermissions;
 	private final JCheckBox lockMovement;
 	private final JCheckBox showInitGainMessage;
+	private final JTextField upnpDiscoveryTimeoutTextField;
 
 	public PreferencesDialog() {
 		super(MapTool.getFrame(), "Preferences", true);
@@ -249,6 +250,7 @@ public class PreferencesDialog extends JDialog {
 		ownerPermissions = panel.getCheckBox("ownerPermission");
 		lockMovement = panel.getCheckBox("lockMovement");
 		showInitGainMessage = panel.getCheckBox("showInitGainMessage");
+		upnpDiscoveryTimeoutTextField = panel.getTextField("upnpDiscoveryTimeoutTextField");
 		typingNotificationDuration = panel.getSpinner("typingNotificationDuration");
 		setInitialState();
 
@@ -553,6 +555,12 @@ public class PreferencesDialog extends JDialog {
 				AppPreferences.setShowInitGainMessage(showInitGainMessage.isSelected());
 			}
 		});
+		upnpDiscoveryTimeoutTextField.getDocument().addDocumentListener(new DocumentListenerProxy(upnpDiscoveryTimeoutTextField) {
+			@Override
+			protected void storeNumericValue(int value) {
+				AppPreferences.setUpnpDiscoveryTimeout(value);
+			}
+		});
 		chatNotificationShowBackground.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AppPreferences.setChatNotificationShowBackground(chatNotificationShowBackground.isSelected());
@@ -702,6 +710,7 @@ public class PreferencesDialog extends JDialog {
 		ownerPermissions.setSelected(AppPreferences.getInitOwnerPermissions());
 		lockMovement.setSelected(AppPreferences.getInitLockMovement());
 		showInitGainMessage.setSelected(AppPreferences.isShowInitGainMessage());
+		upnpDiscoveryTimeoutTextField.setText(Integer.toString(AppPreferences.getUpnpDiscoveryTimeout()));
 		Integer rawVal = AppPreferences.getTypingNotificationDuration();
 		Integer typingVal = null;
 		if (rawVal != null && rawVal > 99) { // backward compatibility -- used to be stored in ms, now in seconds
