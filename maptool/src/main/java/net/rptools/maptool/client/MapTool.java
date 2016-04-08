@@ -402,7 +402,7 @@ public class MapTool {
 		// Assume 'No' response
 		return false;
 	}
-	
+
 	public static boolean confirmDrawDelete() {
 		if (!AppPreferences.getDrawWarnWhenDeleted()) {
 			return true;

@@ -33,17 +33,16 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 	private final List<View> currentViewList = new ArrayList<View>();
 	private volatile boolean updatePending = false;
 	private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();
-	
+
 	public enum View {
-		TOKEN_DRAWINGS("panel.DrawExplorer.View.TOKEN", Zone.Layer.TOKEN),
-		GM_DRAWINGS("panel.DrawExplorer.View.GM", Zone.Layer.GM),
-		OBJECT_DRAWINGS("panel.DrawExplorer.View.OBJECT", Zone.Layer.OBJECT),
-		BACKGROUND_DRAWINGS("panel.DrawExplorer.View.BACKGROUND", Zone.Layer.BACKGROUND);
-		
+		TOKEN_DRAWINGS("panel.DrawExplorer.View.TOKEN", Zone.Layer.TOKEN), GM_DRAWINGS("panel.DrawExplorer.View.GM", Zone.Layer.GM), OBJECT_DRAWINGS("panel.DrawExplorer.View.OBJECT",
+				Zone.Layer.OBJECT), BACKGROUND_DRAWINGS("panel.DrawExplorer.View.BACKGROUND", Zone.Layer.BACKGROUND);
+
 		private View(String key, Zone.Layer layer) {
 			this.displayName = I18N.getText(key);
 			this.layer = layer;
 		}
+
 		String displayName;
 		Zone.Layer layer;
 
@@ -55,12 +54,12 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 			return layer;
 		}
 	}
-	
+
 	public DrawPanelTreeModel(JTree tree) {
 		this.tree = tree;
 		update();
 	}
-	
+
 	@Override
 	public void modelChanged(ModelChangeEvent event) {
 		update();
@@ -80,15 +79,15 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 			return getViewList((View) parent).get(index);
 		}
 		if (isDrawnElementGroup(parent)) {
-			DrawablesGroup dg = (DrawablesGroup)((DrawnElement)parent).getDrawable();
-			return dg.getDrawableList().get(dg.getDrawableList().size()-index-1);
+			DrawablesGroup dg = (DrawablesGroup) ((DrawnElement) parent).getDrawable();
+			return dg.getDrawableList().get(dg.getDrawableList().size() - index - 1);
 		}
 		return null;
 	}
-	
+
 	private boolean isDrawnElementGroup(Object object) {
 		if (object instanceof DrawnElement)
-			return ((DrawnElement)object).getDrawable() instanceof DrawablesGroup;
+			return ((DrawnElement) object).getDrawable() instanceof DrawablesGroup;
 		return false;
 	}
 
@@ -101,7 +100,7 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 			return getViewList((View) parent).size();
 		}
 		if (isDrawnElementGroup(parent)) {
-			DrawablesGroup dg = (DrawablesGroup)((DrawnElement)parent).getDrawable();
+			DrawablesGroup dg = (DrawablesGroup) ((DrawnElement) parent).getDrawable();
 			return dg.getDrawableList().size();
 		}
 		return 0;
@@ -118,11 +117,11 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 	@Override
 	public boolean isLeaf(Object node) {
 		if (node instanceof DrawnElement) {
-			if (((DrawnElement)node).getDrawable() instanceof DrawablesGroup)
+			if (((DrawnElement) node).getDrawable() instanceof DrawablesGroup)
 				return false;
 			else
 				return true;
-		}			
+		}
 		return false;
 	}
 
@@ -140,9 +139,9 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 			getViewList((View) parent).indexOf(child);
 		}
 		if (parent instanceof DrawnElement) {
-			if (((DrawnElement)parent).getDrawable() instanceof DrawablesGroup) {
-				DrawablesGroup dg = (DrawablesGroup)((DrawnElement)parent).getDrawable();
-				return dg.getDrawableList().size()-dg.getDrawableList().indexOf(child)-1;
+			if (((DrawnElement) parent).getDrawable() instanceof DrawablesGroup) {
+				DrawablesGroup dg = (DrawablesGroup) ((DrawnElement) parent).getDrawable();
+				return dg.getDrawableList().size() - dg.getDrawableList().indexOf(child) - 1;
 			}
 		}
 		return -1;
@@ -157,7 +156,7 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 	public void removeTreeModelListener(TreeModelListener l) {
 		listenerList.remove(l);
 	}
-	
+
 	// Called by zone change event
 	public void setZone(Zone zone) {
 		if (zone != null) {
@@ -194,8 +193,8 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 			if (MapTool.getPlayer().isGM()) {
 				// GM Sees all drawings
 				for (View v : View.values()) {
-					drawableList  = zone.getDrawnElements(v.getLayer());
-					if (drawableList.size()>0) {
+					drawableList = zone.getDrawnElements(v.getLayer());
+					if (drawableList.size() > 0) {
 						// Reverse the list so that the element drawn last, is shown at the top of the tree
 						// Be careful to clone the list so you don't damage the map
 						List<DrawnElement> reverseList = new ArrayList<DrawnElement>(drawableList);
@@ -206,8 +205,8 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 				}
 			} else {
 				// Players can only see templates on the token layer
-				drawableList  = zone.getDrawnElements(Zone.Layer.TOKEN);
-				if (drawableList.size()>0) {
+				drawableList = zone.getDrawnElements(Zone.Layer.TOKEN);
+				if (drawableList.size() > 0) {
 					// Reverse the list so that the element drawn last, is shown at the top of the tree
 					// Be careful to clone the list so you don't damage the map
 					List<DrawnElement> reverseList = new ArrayList<DrawnElement>(drawableList);
@@ -230,9 +229,7 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 				new TreeModelEvent(this,
 						new Object[] { getRoot() },
 						new int[] { currentViewList.size() - 1 },
-						new Object[] { View.BACKGROUND_DRAWINGS }
-				)
-		);
+						new Object[] { View.BACKGROUND_DRAWINGS }));
 		while (expandedPaths != null && expandedPaths.hasMoreElements()) {
 			tree.expandPath(expandedPaths.nextElement());
 		}

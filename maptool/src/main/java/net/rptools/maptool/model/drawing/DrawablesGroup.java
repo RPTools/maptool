@@ -1,12 +1,12 @@
 /*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
+ * This software copyright by various authors including the RPTools.net
+ * development team, and licensed under the LGPL Version 3 or, at your option,
+ * any later version.
  *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
+ * Portions of this software were originally covered under the Apache Software
+ * License, Version 1.1 or Version 2.0.
  *
- *  See the file LICENSE elsewhere in this distribution for license details.
+ * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.model.drawing;
@@ -33,7 +33,7 @@ public class DrawablesGroup extends AbstractDrawing {
 	public List<DrawnElement> getDrawableList() {
 		return drawableList;
 	}
-	
+
 	@Override
 	public Rectangle getBounds() {
 		Rectangle bounds = null;
@@ -43,12 +43,12 @@ public class DrawablesGroup extends AbstractDrawing {
 			Pen pen = element.getPen();
 			int penSize = (int) (pen.getThickness() / 2 + 1);
 			drawnBounds.setRect(drawnBounds.getX() - penSize, drawnBounds.getY() - penSize, drawnBounds.getWidth() + pen.getThickness(), drawnBounds.getHeight() + pen.getThickness());
-			if (bounds==null)
+			if (bounds == null)
 				bounds = drawnBounds;
 			else
 				bounds.add(drawnBounds);
 		}
-		if (bounds!=null)
+		if (bounds != null)
 			return bounds;
 		return new Rectangle(0, 0, -1, -1);
 	}
@@ -57,10 +57,11 @@ public class DrawablesGroup extends AbstractDrawing {
 	public Area getArea() {
 		Area area = null;
 		for (DrawnElement element : drawableList) {
-			if (area==null)
+			if (area == null)
 				area = element.getDrawable().getArea();
 			else
-				area.add(element.getDrawable().getArea());;
+				area.add(element.getDrawable().getArea());
+			;
 		}
 		return area;
 	}

@@ -51,29 +51,30 @@ public class DrawablesPanel extends JComponent {
 		this.selectedIDList.clear();
 		repaint();
 	}
+
 	@Override
 	protected void paintComponent(Graphics g) {
-		if (selectedIDList.size()>0) {
-			if (MapTool.getFrame().getCurrentZoneRenderer()!=null) {
+		if (selectedIDList.size() > 0) {
+			if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
 				Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 				if (zone != null) {
 					List<DrawnElement> drawableList = new ArrayList<DrawnElement>();
 					boolean onlyCuts = true;
 					for (GUID id : selectedIDList) {
 						DrawnElement de = zone.getDrawnElement(id);
-						if (de!=null) {
-								drawableList.add(de);
-								if (!de.getPen().isEraser())
-									onlyCuts = false;
+						if (de != null) {
+							drawableList.add(de);
+							if (!de.getPen().isEraser())
+								onlyCuts = false;
 						}
 					}
-					if (drawableList.size()>0) {
+					if (drawableList.size() > 0) {
 						Collections.reverse(drawableList);
 						Rectangle bounds = getBounds(drawableList);
-						double scale = (double)Math.min(MAX_PANEL_SIZE,getSize().width) / (double)bounds.width;
-						if((bounds.height*scale)>MAX_PANEL_SIZE)
-							scale = (double)Math.min(MAX_PANEL_SIZE,getSize().height) / (double)bounds.height;
-						g.drawImage(drawDrawables( drawableList, bounds, scale, onlyCuts), 0, 0, null);
+						double scale = (double) Math.min(MAX_PANEL_SIZE, getSize().width) / (double) bounds.width;
+						if ((bounds.height * scale) > MAX_PANEL_SIZE)
+							scale = (double) Math.min(MAX_PANEL_SIZE, getSize().height) / (double) bounds.height;
+						g.drawImage(drawDrawables(drawableList, bounds, scale, onlyCuts), 0, 0, null);
 					}
 				}
 			}
@@ -81,14 +82,14 @@ public class DrawablesPanel extends JComponent {
 	}
 
 	private BufferedImage drawDrawables(List<DrawnElement> drawableList, Rectangle viewport, double scale, boolean showEraser) {
-		BufferedImage backBuffer = new BufferedImage((int)(viewport.width*scale), (int)(viewport.height*scale), Transparency.TRANSLUCENT);
+		BufferedImage backBuffer = new BufferedImage((int) (viewport.width * scale), (int) (viewport.height * scale), Transparency.TRANSLUCENT);
 		Graphics2D g = backBuffer.createGraphics();
 		g.setClip(0, 0, backBuffer.getWidth(), backBuffer.getHeight());
 		Composite oldComposite = g.getComposite();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
 		AffineTransform tf = new AffineTransform();
-		tf.translate(-(viewport.x*scale), -(viewport.y*scale));
+		tf.translate(-(viewport.x * scale), -(viewport.y * scale));
 		tf.scale(scale, scale);
 		g.transform(tf);
 		for (DrawnElement element : drawableList) {
@@ -98,15 +99,15 @@ public class DrawablesPanel extends JComponent {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
 			}
 			// If we are only drawing cuts, make the pen visible
-			if (showEraser && pen.isEraser()) { 
-				pen = new Pen(pen); 
-				pen.setEraser(false); 
-				pen.setPaint(new DrawableColorPaint(Color.red)); 
-				pen.setBackgroundPaint(new DrawableColorPaint(Color.red)); 
-				} 
+			if (showEraser && pen.isEraser()) {
+				pen = new Pen(pen);
+				pen.setEraser(false);
+				pen.setPaint(new DrawableColorPaint(Color.red));
+				pen.setBackgroundPaint(new DrawableColorPaint(Color.red));
+			}
 			if (drawable instanceof DrawablesGroup) {
-				g.drawImage(drawDrawables( ((DrawablesGroup)drawable).getDrawableList(),new Rectangle(viewport), 1, false), viewport.x, viewport.y, null);
-			} else 
+				g.drawImage(drawDrawables(((DrawablesGroup) drawable).getDrawableList(), new Rectangle(viewport), 1, false), viewport.x, viewport.y, null);
+			} else
 				drawable.draw(g, pen);
 			g.setComposite(oldComposite);
 		}
@@ -121,13 +122,13 @@ public class DrawablesPanel extends JComponent {
 			// Handle pen size
 			Pen pen = element.getPen();
 			int penSize = (int) (pen.getThickness() / 2 + 1);
-			drawnBounds.setRect(drawnBounds.getX() - penSize, drawnBounds.getY() - penSize, drawnBounds.getWidth() + (penSize*2), drawnBounds.getHeight() + (penSize*2));
-			if (bounds==null)
+			drawnBounds.setRect(drawnBounds.getX() - penSize, drawnBounds.getY() - penSize, drawnBounds.getWidth() + (penSize * 2), drawnBounds.getHeight() + (penSize * 2));
+			if (bounds == null)
 				bounds = drawnBounds;
 			else
 				bounds.add(drawnBounds);
 		}
-		if (bounds!=null)
+		if (bounds != null)
 			return bounds;
 		return new Rectangle(0, 0, -1, -1);
 	}

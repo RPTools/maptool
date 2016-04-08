@@ -23,13 +23,13 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 
 public class DrawPanelPopupMenu extends JPopupMenu {
-	
+
 	private static final long serialVersionUID = 8889082158114727461L;
 	private final ZoneRenderer renderer;
 	private final DrawnElement elementUnderMouse;
 	int x, y;
 	Set<GUID> selectedDrawSet;
-	
+
 	public DrawPanelPopupMenu(Set<GUID> selectedDrawSet, int x, int y, ZoneRenderer renderer, DrawnElement elementUnderMouse) {
 		super();
 		this.selectedDrawSet = selectedDrawSet;
@@ -53,50 +53,53 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 	private boolean isDrawnElementGroup(Object object) {
 		if (object instanceof DrawnElement)
-			return ((DrawnElement)object).getDrawable() instanceof DrawablesGroup;
+			return ((DrawnElement) object).getDrawable() instanceof DrawablesGroup;
 		return false;
 	}
-	
+
 	public class DrawingPropertiesAction extends AbstractAction {
 		public DrawingPropertiesAction() {
 			super("Properties");
 		}
+
 		public void actionPerformed(ActionEvent e) {
-			
-		}		
+
+		}
 	}
-	
+
 	public class UngroupDrawingsAction extends AbstractAction {
 		public UngroupDrawingsAction() {
 			super("Ungroup");
-			enabled=selectedDrawSet.size()==1 && isDrawnElementGroup(elementUnderMouse);
+			enabled = selectedDrawSet.size() == 1 && isDrawnElementGroup(elementUnderMouse);
 		}
+
 		public void actionPerformed(ActionEvent e) {
 			MapTool.serverCommand().undoDraw(renderer.getZone().getId(), elementUnderMouse.getDrawable().getId());
-			DrawablesGroup dg = (DrawablesGroup)((DrawnElement)elementUnderMouse).getDrawable();
+			DrawablesGroup dg = (DrawablesGroup) ((DrawnElement) elementUnderMouse).getDrawable();
 			for (DrawnElement de : dg.getDrawableList()) {
 				MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
 			}
-		}		
+		}
 	}
-	
+
 	public class GroupDrawingsAction extends AbstractAction {
 		public GroupDrawingsAction() {
 			super("Group Drawings");
-			enabled=selectedDrawSet.size()>1;
+			enabled = selectedDrawSet.size() > 1;
 			if (enabled) {
 				List<DrawnElement> zoneList = renderer.getZone().getDrawnElements(elementUnderMouse.getDrawable().getLayer());
-				for (GUID id: selectedDrawSet) {
+				for (GUID id : selectedDrawSet) {
 					DrawnElement de = renderer.getZone().getDrawnElement(id);
 					if (!zoneList.contains(de)) {
-						enabled=false;
+						enabled = false;
 						break;
 					}
 				}
 			}
 		}
+
 		public void actionPerformed(ActionEvent e) {
-			if (selectedDrawSet.size()>1 && elementUnderMouse!=null) {
+			if (selectedDrawSet.size() > 1 && elementUnderMouse != null) {
 				// only bother doing stuff if more than one selected
 				List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
 				List<DrawnElement> groupList = new ArrayList<DrawnElement>();
@@ -111,7 +114,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 						MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
 						de.getDrawable().setLayer(elementUnderMouse.getDrawable().getLayer());
 						groupList.add(de);
-						if (de.getPen().getThickness()>pen.getThickness()) {
+						if (de.getPen().getThickness() > pen.getThickness()) {
 							pen = new Pen(de.getPen());
 							pen.setEraser(false);
 							pen.setOpacity(1);
@@ -126,11 +129,12 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			}
 		}
 	}
-	
+
 	public class DeleteDrawingAction extends AbstractAction {
 		public DeleteDrawingAction() {
 			super("Delete");
 		}
+
 		public void actionPerformed(ActionEvent e) {
 			// check to see if this is the required action
 			if (!MapTool.confirmDrawDelete()) {
@@ -183,7 +187,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			Iterator<DrawnElement> iter = drawableList.iterator();
 			while (iter.hasNext()) {
 				DrawnElement de = iter.next();
-				if (de.getDrawable().getLayer()!=this.layer && selectedDrawSet.contains(de.getDrawable().getId())) {
+				if (de.getDrawable().getLayer() != this.layer && selectedDrawSet.contains(de.getDrawable().getId())) {
 					renderer.getZone().removeDrawable(de.getDrawable().getId());
 					MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
 					de.getDrawable().setLayer(this.layer);
@@ -240,7 +244,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 				}
 			}
 			// horrid kludge needed to redraw zone :(
-			for (DrawnElement de: renderer.getZone().getAllDrawnElements()) {
+			for (DrawnElement de : renderer.getZone().getAllDrawnElements()) {
 				MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
 				MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
 			}

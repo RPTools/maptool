@@ -26,11 +26,11 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 	private int row;
 	private int rowWidth;
 
-    public Component getTreeCellRendererComponent(JTree tree, Object value,
-                                                  boolean sel,
-                                                  boolean expanded,
-                                                  boolean leaf, int row,
-                                                  boolean hasFocus) {
+	public Component getTreeCellRendererComponent(JTree tree, Object value,
+			boolean sel,
+			boolean expanded,
+			boolean leaf, int row,
+			boolean hasFocus) {
 
 		setBorder(null);
 		setBackgroundNonSelectionColor(Color.white);
@@ -44,17 +44,17 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 			if (de.getDrawable() instanceof DrawablesGroup) {
 				text = "Group";
 			} else if (de.getDrawable() instanceof ShapeDrawable) {
-				ShapeDrawable sd = (ShapeDrawable)de.getDrawable();
+				ShapeDrawable sd = (ShapeDrawable) de.getDrawable();
 				key = String.format("panel.DrawExplorer.%s.%s", sd.getClass().getSimpleName(), sd.getShape().getClass().getSimpleName());
 				text = I18N.getText(key, sd.getBounds().width, sd.getBounds().height);
 				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			} else if (de.getDrawable() instanceof LineSegment) {
-				LineSegment ls = (LineSegment)de.getDrawable();
+				LineSegment ls = (LineSegment) de.getDrawable();
 				key = String.format("panel.DrawExplorer.%s.Line", ls.getClass().getSimpleName());
-				text = I18N.getText(key, ls.getPoints().size()-1, de.getPen().getThickness());
+				text = I18N.getText(key, ls.getPoints().size() - 1, de.getPen().getThickness());
 				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			} else if (de.getDrawable() instanceof AbstractTemplate) {
-				AbstractTemplate at = (AbstractTemplate)de.getDrawable();
+				AbstractTemplate at = (AbstractTemplate) de.getDrawable();
 				key = String.format("panel.DrawExplorer.Template.%s", at.getClass().getSimpleName());
 				text = I18N.getText(key, at.getRadius());
 				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
@@ -70,64 +70,64 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 		super.getTreeCellRendererComponent(tree, text, sel, expanded, leaf, row, hasFocus);
 		Icon icon = getIcon();
 		rowWidth = (icon != null ? icon.getIconWidth() + 2 : 0) + SwingUtilities.computeStringWidth(getFontMetrics(getFont()), text);
-		
+
 		return this;
-    }
-    
-    private String addPenText(Pen pen, String text) {
-    	if (pen==null)
-    		return text;
-    	String result=text;
+	}
+
+	private String addPenText(Pen pen, String text) {
+		if (pen == null)
+			return text;
+		String result = text;
 		if (pen.isEraser())
-			result = "CUT: "+result;
-		if (pen.getOpacity()<1) {
-			int perc = (int)(pen.getOpacity()*100);
+			result = "CUT: " + result;
+		if (pen.getOpacity() < 1) {
+			int perc = (int) (pen.getOpacity() * 100);
 			result = result + String.format(" opacity %s%%", perc);
 		}
-    	return result;
-    }
-    
-    private Icon setDrawPanelIcon(String key, boolean eraser) {
-    	try {
-    		switch(key) {
-    		case "panel.DrawExplorer.ShapeDrawable.Polygon":
-    			if (eraser)
-    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly-erase.png")));
-    			else
-    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly.png")));
-    		case "panel.DrawExplorer.ShapeDrawable.Float":
-    			if (eraser)
-    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-ellipse-erase.png")));
-    			else
-    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-ellipse.png")));
-    		case "panel.DrawExplorer.ShapeDrawable.Rectangle":
-    			if (eraser)
-    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-rectangle-erase.png")));
-    			else
-    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-rectangle.png")));
-    		case "panel.DrawExplorer.LineSegment.Line":
-    			if (eraser)
-    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-line-erase.png")));
-    			else
-    				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-line.png")));
-    		case "panel.DrawExplorer.Template.RadiusTemplate":
+		return result;
+	}
+
+	private Icon setDrawPanelIcon(String key, boolean eraser) {
+		try {
+			switch (key) {
+			case "panel.DrawExplorer.ShapeDrawable.Polygon":
+				if (eraser)
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly-erase.png")));
+				else
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly.png")));
+			case "panel.DrawExplorer.ShapeDrawable.Float":
+				if (eraser)
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-ellipse-erase.png")));
+				else
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-ellipse.png")));
+			case "panel.DrawExplorer.ShapeDrawable.Rectangle":
+				if (eraser)
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-rectangle-erase.png")));
+				else
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-rectangle.png")));
+			case "panel.DrawExplorer.LineSegment.Line":
+				if (eraser)
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-line-erase.png")));
+				else
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-line.png")));
+			case "panel.DrawExplorer.Template.RadiusTemplate":
 				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue.png")));
-    		case "panel.DrawExplorer.Template.ConeTemplate":
+			case "panel.DrawExplorer.Template.ConeTemplate":
 				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue-cone.png")));
-    		case "panel.DrawExplorer.Template.LineTemplate":
+			case "panel.DrawExplorer.Template.LineTemplate":
 				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue-line.png")));
-    		case "panel.DrawExplorer.Template.BurstTemplate":
+			case "panel.DrawExplorer.Template.BurstTemplate":
 				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue-burst.png")));
-    		case "panel.DrawExplorer.Template.BlastTemplate":
+			case "panel.DrawExplorer.Template.BlastTemplate":
 				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue-square.png")));
-    		case "panel.DrawExplorer.Template.WallTemplate":
+			case "panel.DrawExplorer.Template.WallTemplate":
 				return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-temp-blue-wall.png")));
-    		}
-    	} catch (IOException e) {
-    		return null;
-    	}
-    	return null;
-    }
+			}
+		} catch (IOException e) {
+			return null;
+		}
+		return null;
+	}
 
 	@Override
 	public Dimension getPreferredSize() {

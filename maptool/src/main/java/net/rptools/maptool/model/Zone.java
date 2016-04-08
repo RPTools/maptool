@@ -670,7 +670,7 @@ public class Zone extends BaseModel {
 			if (meta != null)
 				meta.clearExposedAreaHistory();
 		}
-
+	
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
 	} */
 
@@ -929,22 +929,22 @@ public class Zone extends BaseModel {
 		}
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
 	}
-	
+
 	public void addDrawableRear(DrawnElement drawnElement) {
 		// Since the list is drawn in order
 		// items that are drawn first are at the "back"
 		switch (drawnElement.getDrawable().getLayer()) {
 		case OBJECT:
-			((LinkedList<DrawnElement>)objectDrawables).addFirst(drawnElement);
+			((LinkedList<DrawnElement>) objectDrawables).addFirst(drawnElement);
 			break;
 		case BACKGROUND:
-			((LinkedList<DrawnElement>)backgroundDrawables).addFirst(drawnElement);
+			((LinkedList<DrawnElement>) backgroundDrawables).addFirst(drawnElement);
 			break;
 		case GM:
-			((LinkedList<DrawnElement>)gmDrawables).addFirst(drawnElement);
+			((LinkedList<DrawnElement>) gmDrawables).addFirst(drawnElement);
 			break;
 		default:
-			((LinkedList<DrawnElement>)drawables).addFirst(drawnElement);
+			((LinkedList<DrawnElement>) drawables).addFirst(drawnElement);
 		}
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
 	}
@@ -998,7 +998,7 @@ public class Zone extends BaseModel {
 				return;
 			}
 			if (drawable.getDrawable() instanceof DrawablesGroup) {
-				DrawablesGroup dg = (DrawablesGroup)drawable.getDrawable();
+				DrawablesGroup dg = (DrawablesGroup) drawable.getDrawable();
 				removeDrawable(dg.getDrawableList(), drawableId);
 			}
 		}
@@ -1179,19 +1179,19 @@ public class Zone extends BaseModel {
 
 		return list;
 	}
-	
+
 	public DrawnElement getDrawnElement(GUID id) {
 		DrawnElement result = findDrawnElement(getAllDrawnElements(), id);
 		return result;
 	}
-	
+
 	private DrawnElement findDrawnElement(List<DrawnElement> list, GUID id) {
-		for (DrawnElement de: list) {
+		for (DrawnElement de : list) {
 			if (de.getDrawable().getId() == id)
 				return de;
 			if (de.getDrawable() instanceof DrawablesGroup) {
-				DrawnElement result = findDrawnElement(((DrawablesGroup)de.getDrawable()).getDrawableList(),id);
-				if (result!=null)
+				DrawnElement result = findDrawnElement(((DrawablesGroup) de.getDrawable()).getDrawableList(), id);
+				if (result != null)
 					return result;
 			}
 		}

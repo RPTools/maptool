@@ -258,7 +258,7 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 				Graphics2D g2 = image.createGraphics();
 				g2.drawImage(groupImage, 0, 0, CHUNK_SIZE, CHUNK_SIZE, null);
 				g2.dispose();
-			} else 
+			} else
 				drawable.draw(g, pen);
 			g.setComposite(oldComposite);
 			timer.stop("createChunk:Draw");

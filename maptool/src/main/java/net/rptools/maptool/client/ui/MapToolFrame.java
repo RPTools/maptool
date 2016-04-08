@@ -832,7 +832,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 			addAssetRoot(file);
 		}
 	}
-	
+
 	private JComponent createDrawTreePanel() {
 		final JTree tree = new JTree();
 		drawablesPanel = new DrawablesPanel();
@@ -858,18 +858,18 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 				Object row = path.getLastPathComponent();
 				int rowIndex = tree.getRowForLocation(e.getX(), e.getY());
 				if (SwingUtilities.isLeftMouseButton(e)) {
-					if (!SwingUtil.isShiftDown(e)&&!SwingUtil.isControlDown(e)) {
+					if (!SwingUtil.isShiftDown(e) && !SwingUtil.isControlDown(e)) {
 						tree.clearSelection();
 					}
 					tree.addSelectionInterval(rowIndex, rowIndex);
 					if (row instanceof DrawnElement) {
 						if (e.getClickCount() == 2) {
 							DrawnElement de = (DrawnElement) row;
-							getCurrentZoneRenderer().centerOn(new ZonePoint((int)de.getDrawable().getBounds().getCenterX(), (int)de.getDrawable().getBounds().getCenterY()));
+							getCurrentZoneRenderer().centerOn(new ZonePoint((int) de.getDrawable().getBounds().getCenterX(), (int) de.getDrawable().getBounds().getCenterY()));
 						}
 					}
 
-					int[]treeRows = tree.getSelectionRows();
+					int[] treeRows = tree.getSelectionRows();
 					java.util.Arrays.sort(treeRows);
 					drawablesPanel.clearSelectedIds();
 					for (int i = 0; i < treeRows.length; i++) {
@@ -912,7 +912,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 					});
 				}
 			}
-			
+
 		});
 		// Add Zone Change event
 		MapTool.getEventDispatcher().addListener(new AppEventListener() {
@@ -922,6 +922,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		}, MapTool.ZoneEvent.Activated);
 		return splitPane;
 	}
+
 	// Used to redraw the Draw Tree Panel after actions have been called
 	public void updateDrawTree() {
 		if (drawPanelTreeModel != null) {
@@ -948,7 +949,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 				Object row = path.getLastPathComponent();
 				int rowIndex = tree.getRowForLocation(e.getX(), e.getY());
 				if (SwingUtilities.isLeftMouseButton(e)) {
-					if (!SwingUtil.isShiftDown(e)&&!SwingUtil.isControlDown(e)) {
+					if (!SwingUtil.isShiftDown(e) && !SwingUtil.isControlDown(e)) {
 						tree.clearSelection();
 					}
 					tree.addSelectionInterval(rowIndex, rowIndex);
@@ -1175,7 +1176,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	public AssetPanel getAssetPanel() {
 		return assetPanel;
 	}
-	
+
 	public DrawablesPanel getDrawablesPanel() {
 		return drawablesPanel;
 	}
