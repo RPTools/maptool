@@ -33,7 +33,8 @@ public class LookupTableFunction extends AbstractFunction {
 		super(0, 5, "tbl", "table", "tblImage", "tableImage", 
 				"getTableNames", "getTableRoll", "setTableRoll", "clearTable",
 				"addTableEntry", "deleteTableEntry", "createTable", "deleteTable", 
-				"getTableVisible", "setTableVisible", "getTableAccess", "setTableAccess");
+				"getTableVisible", "setTableVisible", "getTableAccess", "setTableAccess",
+				"getTableImage", "setTableImage");
 	}
 
 	/** The singleton instance. */
@@ -194,6 +195,25 @@ public class LookupTableFunction extends AbstractFunction {
 				MapTool.getCampaign().getLookupTableMap().remove(name);
 				MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
 			}
+			return "";
+			
+		} else if ("getTableImage".equalsIgnoreCase(function)) {
+
+			checkTrusted(function);
+			checkNumberOfParameters("getTableImage", params, 1, 1);
+			String name = params.get(0).toString();
+			LookupTable lookupTable = getMaptoolTable(name, function);
+			return lookupTable.getTableImage();
+			
+		} else if ("setTableImage".equalsIgnoreCase(function)) {
+
+			checkTrusted(function);
+			checkNumberOfParameters("setTableImage", params, 2, 2);
+			String name = params.get(0).toString();
+			MD5Key asset = new MD5Key(params.get(1).toString());
+			LookupTable lookupTable = getMaptoolTable(name, function);
+			lookupTable.setTableImage(asset);
+			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
 			return "";
 			
 		} else {
