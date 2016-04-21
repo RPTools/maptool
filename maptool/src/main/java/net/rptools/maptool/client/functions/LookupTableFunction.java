@@ -34,7 +34,7 @@ public class LookupTableFunction extends AbstractFunction {
 				"getTableNames", "getTableRoll", "setTableRoll", "clearTable",
 				"addTableEntry", "deleteTableEntry", "createTable", "deleteTable", 
 				"getTableVisible", "setTableVisible", "getTableAccess", "setTableAccess",
-				"getTableImage", "setTableImage");
+				"getTableImage", "setTableImage", "copyTable");
 	}
 
 	/** The singleton instance. */
@@ -214,6 +214,21 @@ public class LookupTableFunction extends AbstractFunction {
 			LookupTable lookupTable = getMaptoolTable(name, function);
 			lookupTable.setTableImage(asset);
 			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
+			return "";
+			
+		} else if ("copyTable".equalsIgnoreCase(function)) {
+
+			checkTrusted(function);
+			checkNumberOfParameters("copyTable", params, 2, 2);
+			String oldName = params.get(0).toString();
+			String newName = params.get(1).toString();
+			LookupTable oldTable = getMaptoolTable(oldName, function);
+			if (oldTable!=null) {
+				LookupTable newTable = new LookupTable(oldTable);
+				newTable.setName(newName);
+				MapTool.getCampaign().getLookupTableMap().put(newName, newTable);
+				MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
+			}
 			return "";
 			
 		} else {
