@@ -30,11 +30,11 @@ import net.sf.json.JSONArray;
 public class LookupTableFunction extends AbstractFunction {
 
 	public LookupTableFunction() {
-		super(0, 5, "tbl", "table", "tblImage", "tableImage", 
+		super(0, 5, "tbl", "table", "tblImage", "tableImage",
 				"getTableNames", "getTableRoll", "setTableRoll", "clearTable",
-				"addTableEntry", "deleteTableEntry", "createTable", "deleteTable", 
+				"addTableEntry", "deleteTableEntry", "createTable", "deleteTable",
 				"getTableVisible", "setTableVisible", "getTableAccess", "setTableAccess",
-				"getTableImage", "setTableImage", "copyTable");
+				"getTableImage", "setTableImage", "copyTable", "setTableEntry");
 	}
 
 	/** The singleton instance. */
@@ -47,12 +47,12 @@ public class LookupTableFunction extends AbstractFunction {
 	public static LookupTableFunction getInstance() {
 		return instance;
 	}
-	
+
 	@Override
 	public Object childEvaluate(Parser parser, String function, List<Object> params) throws ParserException {
-		
+
 		if ("getTableNames".equalsIgnoreCase(function)) {
-			
+
 			checkNumberOfParameters("getTableNames", params, 0, 1);
 			String delim = ",";
 			if (params.size() > 0) {
@@ -60,17 +60,17 @@ public class LookupTableFunction extends AbstractFunction {
 			}
 			if ("json".equalsIgnoreCase(delim))
 				return JSONArray.fromObject(getTableList(MapTool.getPlayer().isGM()));
-			
+
 			return StringUtils.join(getTableList(MapTool.getPlayer().isGM()), delim);
-			
+
 		} else if ("getTableVisible".equalsIgnoreCase(function)) {
-			
+
 			checkTrusted(function);
 			checkNumberOfParameters("getTableVisible", params, 1, 1);
 			String name = params.get(0).toString();
 			LookupTable lookupTable = getMaptoolTable(name, function);
-			return lookupTable.getVisible()?"1":"0";
-			
+			return lookupTable.getVisible() ? "1" : "0";
+
 		} else if ("setTableVisible".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
@@ -80,16 +80,16 @@ public class LookupTableFunction extends AbstractFunction {
 			LookupTable lookupTable = getMaptoolTable(name, function);
 			lookupTable.setVisible(AbstractTokenAccessorFunction.getBooleanValue(visible));
 			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-			return lookupTable.getVisible()?"1":"0";
-			
+			return lookupTable.getVisible() ? "1" : "0";
+
 		} else if ("getTableAccess".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
 			checkNumberOfParameters("getTableAccess", params, 1, 1);
 			String name = params.get(0).toString();
 			LookupTable lookupTable = getMaptoolTable(name, function);
-			return lookupTable.getAllowLookup()?"1":"0";
-			
+			return lookupTable.getAllowLookup() ? "1" : "0";
+
 		} else if ("setTableAccess".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
@@ -99,15 +99,15 @@ public class LookupTableFunction extends AbstractFunction {
 			LookupTable lookupTable = getMaptoolTable(name, function);
 			lookupTable.setAllowLookup(AbstractTokenAccessorFunction.getBooleanValue(access));
 			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-			return lookupTable.getAllowLookup()?"1":"0";
-			
+			return lookupTable.getAllowLookup() ? "1" : "0";
+
 		} else if ("getTableRoll".equalsIgnoreCase(function)) {
-			
+
 			checkNumberOfParameters("getTableRoll", params, 1, 1);
 			String name = params.get(0).toString();
 			LookupTable lookupTable = getMaptoolTable(name, function);
 			return lookupTable.getRoll();
-			
+
 		} else if ("setTableRoll".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
@@ -118,7 +118,7 @@ public class LookupTableFunction extends AbstractFunction {
 			lookupTable.setRoll(roll);
 			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
 			return lookupTable.getRoll();
-			
+
 		} else if ("clearTable".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
@@ -128,7 +128,7 @@ public class LookupTableFunction extends AbstractFunction {
 			lookupTable.clearEntries();
 			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
 			return "";
-			
+
 		} else if ("addTableEntry".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
@@ -145,7 +145,7 @@ public class LookupTableFunction extends AbstractFunction {
 			lookupTable.addEntry(Integer.valueOf(min), Integer.valueOf(max), value, asset);
 			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
 			return "";
-			
+
 		} else if ("deleteTableEntry".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
@@ -158,12 +158,12 @@ public class LookupTableFunction extends AbstractFunction {
 				List<LookupEntry> oldlist = new ArrayList<LookupEntry>(lookupTable.getEntryList());
 				lookupTable.clearEntries();
 				for (LookupEntry e : oldlist)
-					if (e!=entry)
+					if (e != entry)
 						lookupTable.addEntry(e.getMin(), e.getMax(), e.getValue(), e.getImageId());
 			}
 			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
 			return "";
-			
+
 		} else if ("createTable".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
@@ -179,24 +179,24 @@ public class LookupTableFunction extends AbstractFunction {
 			lookupTable.setName(name);
 			lookupTable.setVisible(AbstractTokenAccessorFunction.getBooleanValue(visible));
 			lookupTable.setAllowLookup(AbstractTokenAccessorFunction.getBooleanValue(lookups));
-			if (asset!=null)
+			if (asset != null)
 				lookupTable.setTableImage(asset);
 			MapTool.getCampaign().getLookupTableMap().put(name, lookupTable);
 			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
 			return "";
-			
+
 		} else if ("deleteTable".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
 			checkNumberOfParameters("deleteTable", params, 1, 1);
 			String name = params.get(0).toString();
 			LookupTable lookupTable = getMaptoolTable(name, function);
-			if (lookupTable!=null) {
+			if (lookupTable != null) {
 				MapTool.getCampaign().getLookupTableMap().remove(name);
 				MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
 			}
 			return "";
-			
+
 		} else if ("getTableImage".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
@@ -204,7 +204,7 @@ public class LookupTableFunction extends AbstractFunction {
 			String name = params.get(0).toString();
 			LookupTable lookupTable = getMaptoolTable(name, function);
 			return lookupTable.getTableImage();
-			
+
 		} else if ("setTableImage".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
@@ -215,7 +215,7 @@ public class LookupTableFunction extends AbstractFunction {
 			lookupTable.setTableImage(asset);
 			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
 			return "";
-			
+
 		} else if ("copyTable".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
@@ -223,14 +223,38 @@ public class LookupTableFunction extends AbstractFunction {
 			String oldName = params.get(0).toString();
 			String newName = params.get(1).toString();
 			LookupTable oldTable = getMaptoolTable(oldName, function);
-			if (oldTable!=null) {
+			if (oldTable != null) {
 				LookupTable newTable = new LookupTable(oldTable);
 				newTable.setName(newName);
 				MapTool.getCampaign().getLookupTableMap().put(newName, newTable);
 				MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
 			}
 			return "";
-			
+
+		} else if ("setTableEntry".equalsIgnoreCase(function)) {
+
+			checkTrusted(function);
+			checkNumberOfParameters("setTableEntry", params, 3, 3);
+			String name = params.get(0).toString();
+			String roll = params.get(1).toString();
+			String result = params.get(2).toString();
+			LookupTable lookupTable = getMaptoolTable(name, function);
+			LookupEntry entry = lookupTable.getLookup(roll);
+			if (entry == null)
+				return 0; // no entry was found
+			int rollInt = Integer.valueOf(roll);
+			if (rollInt < entry.getMin() || rollInt > entry.getMax())
+				return 0; // entry was found but doesn't match
+			List<LookupEntry> oldlist = new ArrayList<LookupEntry>(lookupTable.getEntryList());
+			lookupTable.clearEntries();
+			for (LookupEntry e : oldlist)
+				if (e != entry)
+					lookupTable.addEntry(e.getMin(), e.getMax(), e.getValue(), e.getImageId());
+				else
+					lookupTable.addEntry(e.getMin(), e.getMax(), result, e.getImageId());
+			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
+			return 1;
+
 		} else {
 			checkNumberOfParameters(function, params, 1, 2);
 			String name = params.get(0).toString();
@@ -289,7 +313,6 @@ public class LookupTableFunction extends AbstractFunction {
 		}
 	}
 
-
 	/**
 	 * Checks that the number of objects in the list <code>parameters</code>
 	 * is within given bounds (inclusive). Throws a <code>ParserException</code>
@@ -309,7 +332,7 @@ public class LookupTableFunction extends AbstractFunction {
 			throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, max, numberOfParameters));
 		}
 	}
-	
+
 	/**
 	 * Checks whether or not the function is trusted
 	 * 
@@ -333,8 +356,8 @@ public class LookupTableFunction extends AbstractFunction {
 		List<String> tables = new ArrayList<String>();
 		if (isGm)
 			tables.addAll(MapTool.getCampaign().getLookupTableMap().keySet());
-		else 
-			for (LookupTable lt :MapTool.getCampaign().getLookupTableMap().values()) {
+		else
+			for (LookupTable lt : MapTool.getCampaign().getLookupTableMap().values()) {
 				if (lt.getVisible())
 					tables.add(lt.getName());
 			}
@@ -365,5 +388,5 @@ public class LookupTableFunction extends AbstractFunction {
 		}
 		return lookupTable;
 	}
-	
+
 }
