@@ -88,7 +88,7 @@ public class MapFunctions extends AbstractFunction {
 			Zone zone = getNamedMap(functionName, oldMapName).getZone();
 			zone.setName(newMapName);
 			MapTool.serverCommand().renameZone(zone.getId(), newMapName);
-			if (zone==MapTool.getFrame().getCurrentZoneRenderer().getZone())
+			if (zone == MapTool.getFrame().getCurrentZoneRenderer().getZone())
 				MapTool.getFrame().setCurrentZoneRenderer(MapTool.getFrame().getCurrentZoneRenderer());
 			return zone.getName();
 
