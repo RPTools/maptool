@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapTool.ZoneEvent;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
@@ -28,7 +29,7 @@ public class MapFunctions extends AbstractFunction {
 
 	private MapFunctions() {
 		super(0, 2, "getAllMapNames", "getCurrentMapName", "getVisibleMapNames", "setCurrentMap",
-				"getMapVisible", "setMapVisible", "setMapName");
+				"getMapVisible", "setMapVisible", "setMapName", "copyMap");
 	}
 
 	public static MapFunctions getInstance() {
@@ -41,6 +42,7 @@ public class MapFunctions extends AbstractFunction {
 			checkNumberOfParameters(functionName, parameters, 0, 0);
 			return MapTool.getFrame().getCurrentZoneRenderer().getZone().getName();
 		} else if (functionName.equals("setCurrentMap")) {
+			checkTrusted(functionName);
 			checkNumberOfParameters(functionName, parameters, 1, 1);
 			String mapName = parameters.get(0).toString();
 			ZoneRenderer zr = getNamedMap(functionName, mapName);
@@ -88,13 +90,25 @@ public class MapFunctions extends AbstractFunction {
 				MapTool.getFrame().setCurrentZoneRenderer(MapTool.getFrame().getCurrentZoneRenderer());
 			return zone.getName();
 
+		} else if ("copyMap".equalsIgnoreCase(functionName)) {
+			checkTrusted(functionName);
+			checkNumberOfParameters(functionName, parameters, 2, 2);
+			String oldName = parameters.get(0).toString();
+			String newName = parameters.get(1).toString();
+			Zone oldMap = getNamedMap(functionName, oldName).getZone();
+			Zone newMap = new Zone(oldMap);
+			newMap.setName(newName);
+			MapTool.addZone(newMap, false);
+			MapTool.serverCommand().putZone(newMap);
+			return newMap.getName();
+
 		} else {
 			checkNumberOfParameters(functionName, parameters, 0, 1);
 			boolean allMaps = functionName.equals("getAllMapNames");
 
-			if (allMaps && !MapTool.getParser().isMacroTrusted()) {
-				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-			}
+			if (allMaps)
+				checkTrusted(functionName);
+
 			List<String> mapNames = new LinkedList<String>();
 			for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
 				if (allMaps || zr.getZone().isVisible()) {

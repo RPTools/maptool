@@ -972,6 +972,10 @@ public class MapTool {
 	}
 
 	public static void addZone(Zone zone) {
+		addZone(zone, true);
+	}
+
+	public static void addZone(Zone zone, boolean changeZone) {
 		if (getCampaign().getZones().size() == 1) {
 			// Remove the default map
 			Zone singleZone = getCampaign().getZones().get(0);
@@ -984,7 +988,11 @@ public class MapTool {
 		eventDispatcher.fireEvent(ZoneEvent.Added, getCampaign(), null, zone);
 
 		// Show the new zone
-		clientFrame.setCurrentZoneRenderer(ZoneRendererFactory.newRenderer(zone));
+		if (changeZone)
+			clientFrame.setCurrentZoneRenderer(ZoneRendererFactory.newRenderer(zone));
+		else {
+			getFrame().getZoneRenderers().add(ZoneRendererFactory.newRenderer(zone));
+		}
 	}
 
 	public static Player getPlayer() {
