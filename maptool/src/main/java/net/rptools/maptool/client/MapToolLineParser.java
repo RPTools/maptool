@@ -1261,6 +1261,9 @@ public class MapToolLineParser {
 			// do nothing; this exception will never generate any output
 			// throw doError("macroExecutionAssert", opts == null ? "" : opts, roll == null ? line : roll);
 			throw e;
+		} catch (ParserException e) {
+			// do nothing, jut pass message back up
+			throw e;
 		} catch (Exception e) {
 			log.info(line, e);
 			throw doError("lineParser.errorBodyRoll", opts == null ? "" : opts, roll == null ? line : roll);
