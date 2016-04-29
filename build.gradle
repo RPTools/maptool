@@ -53,22 +53,12 @@ ext.yyyymmdd = (new SimpleDateFormat('yyyyMMDD')).format(ext.compileDate);
 
 
 def getVersionName() {
-
-    if (project.hasProperty('buildVersion')) {
-        return buildVersion
-    } else {
-        def repo =  Grgit.open(project.file('.'))
-        def tagName = repo.tag.list()[0].fullName.replace('refs/tags/', '')
-        def tagCommit = repo.tag.list()[0].commit.id
-        def headCommit = repo.head().id
-        def headAbbrvId = repo.head().abbreviatedId
-
-        if (tagCommit == headCommit) {
-            return tagName
-        } else {
-            return tagName + '-' + headAbbrvId
-        }
-    }
+	if (project.hasProperty('buildVersion')) {
+		return buildVersion
+	} else {
+		String vtxtVersionNo = file('build-resources/version.txt').text.trim()
+		return vtxtVersionNo
+	}
 }
 
 
