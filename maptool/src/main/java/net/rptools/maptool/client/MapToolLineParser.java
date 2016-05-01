@@ -93,7 +93,7 @@ public class MapToolLineParser {
 	private int maxRecursionDepth = DEFAULT_MAX_RECURSIVE_DEPTH;
 
 	/** The default maximum loop iterations. */
-	private static final int DEFAULT_MAX_LOOP_ITERATIONS = 1000;
+	private static final int DEFAULT_MAX_LOOP_ITERATIONS = 10000;
 
 	/** The maximum amount of loop iterations. */
 	private int maxLoopIterations = DEFAULT_MAX_LOOP_ITERATIONS;
