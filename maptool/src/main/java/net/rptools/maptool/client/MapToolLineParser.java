@@ -23,61 +23,9 @@ import java.util.regex.Pattern;
 
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.common.expression.Result;
-import net.rptools.maptool.client.functions.AbortFunction;
+import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
-import net.rptools.maptool.client.functions.AddAllToInitiativeFunction;
-import net.rptools.maptool.client.functions.AssertFunction;
 import net.rptools.maptool.client.functions.AssertFunction.AssertFunctionException;
-import net.rptools.maptool.client.functions.ChatFunction;
-import net.rptools.maptool.client.functions.CurrentInitiativeFunction;
-import net.rptools.maptool.client.functions.DefineMacroFunction;
-import net.rptools.maptool.client.functions.EvalMacroFunctions;
-import net.rptools.maptool.client.functions.FindTokenFunctions;
-import net.rptools.maptool.client.functions.FogOfWarFunctions;
-import net.rptools.maptool.client.functions.HasImpersonated;
-import net.rptools.maptool.client.functions.InitiativeRoundFunction;
-import net.rptools.maptool.client.functions.InputFunction;
-import net.rptools.maptool.client.functions.IsTrustedFunction;
-import net.rptools.maptool.client.functions.JSONMacroFunctions;
-import net.rptools.maptool.client.functions.LookupTableFunction;
-import net.rptools.maptool.client.functions.MacroArgsFunctions;
-import net.rptools.maptool.client.functions.MacroDialogFunctions;
-import net.rptools.maptool.client.functions.MacroFunctions;
-import net.rptools.maptool.client.functions.MacroLinkFunction;
-import net.rptools.maptool.client.functions.MapFunctions;
-import net.rptools.maptool.client.functions.MiscInitiativeFunction;
-import net.rptools.maptool.client.functions.PlayerFunctions;
-import net.rptools.maptool.client.functions.RemoveAllFromInitiativeFunction;
-import net.rptools.maptool.client.functions.StateImageFunction;
-import net.rptools.maptool.client.functions.StrListFunctions;
-import net.rptools.maptool.client.functions.StrPropFunctions;
-import net.rptools.maptool.client.functions.StringFunctions;
-import net.rptools.maptool.client.functions.SwitchTokenFunction;
-import net.rptools.maptool.client.functions.TokenAddToInitiativeFunction;
-import net.rptools.maptool.client.functions.TokenBarFunction;
-import net.rptools.maptool.client.functions.TokenCopyDeleteFunctions;
-import net.rptools.maptool.client.functions.TokenGMNameFunction;
-import net.rptools.maptool.client.functions.TokenHaloFunction;
-import net.rptools.maptool.client.functions.TokenImage;
-import net.rptools.maptool.client.functions.TokenInitFunction;
-import net.rptools.maptool.client.functions.TokenInitHoldFunction;
-import net.rptools.maptool.client.functions.TokenLabelFunction;
-import net.rptools.maptool.client.functions.TokenLightFunctions;
-import net.rptools.maptool.client.functions.TokenLocationFunctions;
-import net.rptools.maptool.client.functions.TokenMoveFunctions;
-import net.rptools.maptool.client.functions.TokenNameFunction;
-import net.rptools.maptool.client.functions.TokenPropertyFunctions;
-import net.rptools.maptool.client.functions.TokenRemoveFromInitiativeFunction;
-import net.rptools.maptool.client.functions.TokenSelectionFunctions;
-import net.rptools.maptool.client.functions.TokenSightFunctions;
-import net.rptools.maptool.client.functions.TokenSpeechFunctions;
-import net.rptools.maptool.client.functions.TokenStateFunction;
-import net.rptools.maptool.client.functions.TokenVisibleFunction;
-import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
-import net.rptools.maptool.client.functions.VBL_Functions;
-import net.rptools.maptool.client.functions.ZoomFunctions;
-import net.rptools.maptool.client.functions.getInfoFunction;
-import net.rptools.maptool.client.functions.isVisibleFunction;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -112,7 +60,7 @@ public class MapToolLineParser {
 			TokenPropertyFunctions.getInstance(), TokenRemoveFromInitiativeFunction.getInstance(), TokenSelectionFunctions.getInstance(),
 			TokenSightFunctions.getInstance(), TokenSpeechFunctions.getInstance(), TokenStateFunction.getInstance(), TokenVisibleFunction.getInstance(), UserDefinedMacroFunctions.getInstance(),
 			isVisibleFunction.getInstance(), getInfoFunction.getInstance(), TokenMoveFunctions.getInstance(), FogOfWarFunctions.getInstance(), VBL_Functions.getInstance(),
-			ZoomFunctions.getInstance() };
+			ZoomFunctions.getInstance(), ParserPropertyFunctions.getInstance() };
 
 	/** Name and Source or macros that come from chat. */
 	public static final String CHAT_INPUT = "chat";
@@ -132,13 +80,23 @@ public class MapToolLineParser {
 	 */
 	private volatile int macroButtonIndex = -1;
 
-	private static final int PARSER_MAX_RECURSE = 100;
-	private int parserRecurseDepth;
+	/** The default value for maximum macro recursion. */
+	private static final int DEFAULT_MAX_RECURSIVE_DEPTH = 150;
 
-	private static final int MACRO_MAX_RECURSE = 100; // Max number of recursive macro calls
+	/** The current parser recursion depth. */
+	private int parserRecurseDepth = 0;
+
+	/** The current macro recursive depth. */
 	private int macroRecurseDepth = 0;
 
-	private static final int MAX_LOOPS = 1000; // Max number of loop iterations
+	/** The maximum parser and macro recursive depth. */
+	private int maxRecursionDepth = DEFAULT_MAX_RECURSIVE_DEPTH;
+
+	/** The default maximum loop iterations. */
+	private static final int DEFAULT_MAX_LOOP_ITERATIONS = 1000;
+
+	/** The maximum amount of loop iterations. */
+	private int maxLoopIterations = DEFAULT_MAX_LOOP_ITERATIONS;
 
 	private enum Output { // Mutually exclusive output formats
 		NONE, RESULT, TOOLTIP, EXPANDED, UNFORMATTED,
@@ -950,7 +908,7 @@ public class MapToolLineParser {
 						Object branchConditionParsed = null;
 
 						// Process loop settings
-						if (iteration > MAX_LOOPS) {
+						if (iteration > maxLoopIterations) {
 							throw doError("lineParser.tooManyLoops", opts, roll);
 						}
 
@@ -1291,7 +1249,9 @@ public class MapToolLineParser {
 	}
 
 	public Result parseExpression(VariableResolver resolver, Token tokenInContext, String expression) throws ParserException {
-		if (parserRecurseDepth > PARSER_MAX_RECURSE) {
+		if (parserRecurseDepth > maxRecursionDepth) {
+			parserRecurseDepth = 0;
+			macroRecurseDepth = 0;
 			throw new ParserException(I18N.getText("lineParser.maxRecursion"));
 		}
 		try {
@@ -1457,7 +1417,9 @@ public class MapToolLineParser {
 
 		// Call the macro
 		macroRecurseDepth++;
-		if (macroRecurseDepth > MACRO_MAX_RECURSE) {
+		if (macroRecurseDepth > maxRecursionDepth) {
+			parserRecurseDepth = 0;
+			macroRecurseDepth = 0;
 			throw new ParserException(I18N.getText("lineParser.maxRecursion"));
 		}
 		try {
@@ -1558,9 +1520,7 @@ public class MapToolLineParser {
 
 	/**
 	 * Searches all maps for a token and returns the the requested lib: macro.
-	 * 
-	 * @param macro
-	 *            The name of the macro to fetch.
+	 *
 	 * @return The token which holds the library.
 	 * @throws ParserException
 	 *             if the token name is illegal, the token appears multiple
@@ -1603,8 +1563,6 @@ public class MapToolLineParser {
 	 * Searches all maps for a token and returns the zone that the lib: macro is
 	 * in.
 	 * 
-	 * @param macro
-	 *            The name of the macro to fetch.
 	 * @return The zone which holds the library.
 	 * @throws ParserException
 	 *             if the token name is illegal, the token appears multiple
@@ -1804,7 +1762,7 @@ public class MapToolLineParser {
 	 * @return The name of the source for where the macro resides.
 	 */
 	public String getMacroSource() {
-		return contextStack.peek().getSouce();
+		return contextStack.peek().getSource();
 	}
 
 	/**
@@ -1909,4 +1867,53 @@ public class MapToolLineParser {
 	public int getMacroButtonIndex() {
 		return macroButtonIndex;
 	}
+
+	/**
+	 * Gets the maximum number of iterations for a loop in a loop.
+	 * @return the maximum number of macro loop iterations.
+	 */
+	public int getMaxLoopIterations() {
+		return maxLoopIterations;
+	}
+
+	/**
+	 * Sets the maximum number of iterations allowed in a macro.
+	 * Note: this will not set the value smaller than the initial starting value.
+	 *
+	 * @param loopIterations The maximum number of iterations allowed.
+	 */
+	public void setMaxLoopIterations(int loopIterations) {
+		maxLoopIterations = Math.max(loopIterations, DEFAULT_MAX_LOOP_ITERATIONS);
+	}
+
+	/**
+	 * Gets the maximum recursive depth allowed for macros.
+	 * @return The maxiumum recursive depth allowed for macros.
+	 */
+	public int getMaxRecursionDepth() {
+		return maxRecursionDepth;
+	}
+
+	/**
+	 * Sets the maximum recursive depth for macros.
+	 * Note: this will not set the value smaller than the initial starting value.
+	 *
+	 * @param recursionDepth The maximum recursive depth allowed.
+	 */
+	public void setMaxRecursionDepth(int recursionDepth) {
+		maxRecursionDepth = Math.max(recursionDepth, DEFAULT_MAX_RECURSIVE_DEPTH);
+	}
+
+	/**
+	 * Gets the current recursive depth. This will be the macro or parser recursive depth which ever is greater.
+	 * @return the current recursive depth.
+	 */
+	public int getRecursionDepth() {
+		return Math.max(parserRecurseDepth, macroRecurseDepth);
+	}
+
+	public int getContextStackSize() {
+		return contextStack.size();
+	}
+
 }

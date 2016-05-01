@@ -28,7 +28,7 @@ public class ToGMMacro extends AbstractRollMacro {
 
 		if (executionContext != null && MapTool.getParser().isMacroPathTrusted() && !MapTool.getPlayer().isGM()) {
 			sb.append("<span class='trustedPrefix' ").append("title='").append(executionContext.getName());
-			sb.append("@").append(executionContext.getSouce()).append("'>");
+			sb.append("@").append(executionContext.getSource()).append("'>");
 			sb.append(I18N.getText("togm.saysToGM", MapTool.getPlayer().getName())).append("</span> ").append(macro);
 		} else {
 			sb.append(I18N.getText("togm.saysToGM", MapTool.getPlayer().getName())).append(" ").append(macro);
