@@ -60,7 +60,7 @@ public class MapToolMacroContext {
 	 * Gets the source location of the macro context.
 	 * @return the source location of the macro context.
 	 */
-	public String getSouce() {
+	public String getSource() {
 		return source;
 	}
 

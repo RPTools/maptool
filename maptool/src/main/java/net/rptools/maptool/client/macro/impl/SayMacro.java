@@ -52,7 +52,7 @@ public class SayMacro extends AbstractMacro {
 		sb.append("<td valign=top style=\"margin-right: 5px\">");
 		if (executionContext != null && MapTool.getParser().isMacroPathTrusted() && !MapTool.getPlayer().isGM()) {
 			sb.append("<span class='trustedPrefix' ").append("title='").append(executionContext.getName());
-			sb.append("@").append(executionContext.getSouce()).append("'>");
+			sb.append("@").append(executionContext.getSource()).append("'>");
 		}
 		sb.append(identity).append(": ");
 		if (executionContext != null && MapTool.getParser().isMacroPathTrusted() && !MapTool.getPlayer().isGM()) {

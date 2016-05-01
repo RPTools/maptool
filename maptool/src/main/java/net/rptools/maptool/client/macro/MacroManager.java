@@ -158,7 +158,7 @@ public class MacroManager {
 				MacroDefinition def = macro.getClass().getAnnotation(MacroDefinition.class);
 
 				boolean trustedPath = macroExecutionContext == null ? false : macroExecutionContext.isTrusted();
-				String macroButtonName = macroExecutionContext == null ? "<chat>" : macroExecutionContext.getName() + "@" + macroExecutionContext.getSouce();
+				String macroButtonName = macroExecutionContext == null ? "<chat>" : macroExecutionContext.getName() + "@" + macroExecutionContext.getSource();
 
 				// Preprocess line if required.
 				if (def == null || def.expandRolls()) {

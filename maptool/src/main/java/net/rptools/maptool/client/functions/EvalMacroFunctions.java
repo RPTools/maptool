@@ -82,7 +82,7 @@ public class EvalMacroFunctions extends AbstractFunction {
 	public static Object evalMacro(MapToolVariableResolver res, Token tokenInContext, String line) throws ParserException {
 		res = res == null ? new MapToolVariableResolver(tokenInContext) : res;
 
-		MapToolMacroContext context = new MapToolMacroContext("<dynamic>", MapTool.getParser().getContext().getSouce(), true);
+		MapToolMacroContext context = new MapToolMacroContext("<dynamic>", MapTool.getParser().getContext().getSource(), true);
 		String ret = MapTool.getParser().parseLine(res, tokenInContext, line, context);
 
 		// Try to convert to a number
