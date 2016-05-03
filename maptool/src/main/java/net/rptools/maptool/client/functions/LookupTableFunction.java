@@ -256,7 +256,7 @@ public class LookupTableFunction extends AbstractFunction {
 			return 1;
 
 		} else {
-			checkNumberOfParameters(function, params, 1, 2);
+			checkNumberOfParameters(function, params, 1, 3);
 			String name = params.get(0).toString();
 
 			String roll = null;
