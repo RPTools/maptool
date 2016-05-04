@@ -1,0 +1,47 @@
+<jwrapper>
+<BuildOutputFolder>D:/Development/git/JamzTheMan/maptool/build-resources/jWrapper\JWrapperBuild</BuildOutputFolder>
+<BundleName>MapTool</BundleName>
+<SplashPNG>D:/Development/git/JamzTheMan/maptool/build-resources/jWrapper\maptool_installing_splash_template.png</SplashPNG>
+<BundleLogoPNG>D:/Development/git/JamzTheMan/maptool/build-resources/jWrapper\RPTools_Logo_256.png</BundleLogoPNG>
+<InstallType>CurrentUser</InstallType>
+<App>
+  <Name>MapTool Launcher</Name>
+  <LogoPNG>D:/Development/git/JamzTheMan/maptool/build-resources/jWrapper\MapTool_Launcher.png</LogoPNG>
+  <MainClass>net.rptools.maptool.launcher.MapToolLauncher</MainClass>
+  <Param>-force_prompt</Param>
+</App>
+<App>
+  <Name>MapTool</Name>
+  <LogoPNG>D:/Development/git/JamzTheMan/maptool/build-resources/jWrapper\MapTool.png</LogoPNG>
+  <MainClass>net.rptools.maptool.launcher.MapToolLauncher</MainClass>
+  <Param>-skip_prompt</Param>
+</App>
+<SupportedLanguages>en</SupportedLanguages>
+<Windows32JRE>D:/Development/Java_JRE/java-1.8.92/jre-8u92-windows-i586</Windows32JRE>
+<Windows64JRE>D:/Development/Java_JRE/java-1.8.92/jre-8u92-windows-x64</Windows64JRE>
+<Linux32JRE>D:/Development/Java_JRE/java-1.8.92/jre-8u92-linux-i586</Linux32JRE>
+<Linux64JRE>D:/Development/Java_JRE/java-1.8.92/jre-8u92-linux-x64</Linux64JRE>
+<Mac64JRE>D:/Development/Java_JRE/java-1.8.60/jre-8u60-macosx-x64/jre1.8.0_60.jre</Mac64JRE>
+<NoStripJREs>true</NoStripJREs>
+<WindowsElevation>None</WindowsElevation>
+<WindowsElevationUiAccess>true</WindowsElevationUiAccess>
+<File classpath='yes'>D:\Development\git\JamzTheMan\maptool\launcher\build\libs\MapTool-Launcher-1.4.0.2-fat.jar</File>
+<File classpath='yes'>D:\Development\git\JamzTheMan\maptool\maptool\build\libs\MapTool-1.4.0.2-fat.jar</File>
+<File>D:\Development\git\JamzTheMan\maptool\launcher\src\dist\doc</File>
+<File>D:\Development\git\JamzTheMan\maptool\launcher\src\dist\logging</File>
+<File>D:\Development\git\JamzTheMan\maptool\jWrapper\mt.cfg</File>
+<!--
+<JvmOptions>
+<JvmOption>-Dsun.java2d.d3d=false</JvmOption>
+<JvmOption>-Dsun.java2d.opengl=True</JvmOption>
+<JvmOption>-Djavafx.macosx.embedded=true</JvmOption>
+</JvmOptions>
+-->
+<!-- Disable packing during debug with 0... -->
+<Pack200Effort>1</Pack200Effort>
+<!-- IMPORTANT place custom content BELOW this comment for compatibility with JW App -->
+<!-- 
+	Auto-built via template on: 201605123
+	buildVersion: 1.4.0.2
+-->
+</jwrapper>
