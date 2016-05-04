@@ -37,3 +37,4 @@ out/
 
 # Keystore
 build-resources/rptools-keystore
+/gradle.properties

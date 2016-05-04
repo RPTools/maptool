@@ -1,0 +1,47 @@
+<jwrapper>
+<BuildOutputFolder>@jWrapperDir@\JWrapperBuild</BuildOutputFolder>
+<BundleName>MapTool</BundleName>
+<SplashPNG>@jWrapperDir@\maptool_installing_splash_template.png</SplashPNG>
+<BundleLogoPNG>@jWrapperDir@\RPTools_Logo_256.png</BundleLogoPNG>
+<InstallType>CurrentUser</InstallType>
+<App>
+  <Name>MapTool Launcher</Name>
+  <LogoPNG>@jWrapperDir@\MapTool_Launcher.png</LogoPNG>
+  <MainClass>net.rptools.maptool.launcher.MapToolLauncher</MainClass>
+  <Param>-force_prompt</Param>
+</App>
+<App>
+  <Name>MapTool</Name>
+  <LogoPNG>@jWrapperDir@\MapTool.png</LogoPNG>
+  <MainClass>net.rptools.maptool.launcher.MapToolLauncher</MainClass>
+  <Param>-skip_prompt</Param>
+</App>
+<SupportedLanguages>en</SupportedLanguages>
+<Windows32JRE>@Windows32JRE@</Windows32JRE>
+<Windows64JRE>@Windows64JRE@</Windows64JRE>
+<Linux32JRE>@Linux32JRE@</Linux32JRE>
+<Linux64JRE>@Linux64JRE@</Linux64JRE>
+<Mac64JRE>@Mac64JRE@</Mac64JRE>
+<NoStripJREs>true</NoStripJREs>
+<WindowsElevation>None</WindowsElevation>
+<WindowsElevationUiAccess>true</WindowsElevationUiAccess>
+<File classpath='yes'>@rootDir@\launcher\build\libs\MapTool-Launcher-@buildVersion@-fat.jar</File>
+<File classpath='yes'>@rootDir@\maptool\build\libs\MapTool-@buildVersion@-fat.jar</File>
+<File>@rootDir@\launcher\src\dist\doc</File>
+<File>@rootDir@\launcher\src\dist\logging</File>
+<File>@rootDir@\jWrapper\mt.cfg</File>
+<!--
+<JvmOptions>
+<JvmOption>-Dsun.java2d.d3d=false</JvmOption>
+<JvmOption>-Dsun.java2d.opengl=True</JvmOption>
+<JvmOption>-Djavafx.macosx.embedded=true</JvmOption>
+</JvmOptions>
+-->
+<!-- Disable packing during debug with 0... -->
+<Pack200Effort>1</Pack200Effort>
+<!-- IMPORTANT place custom content BELOW this comment for compatibility with JW App -->
+<!-- 
+	Auto-built via template on: @buildDate@
+	buildVersion: @buildVersion@
+-->
+</jwrapper>
