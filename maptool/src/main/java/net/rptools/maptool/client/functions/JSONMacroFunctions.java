@@ -12,15 +12,7 @@
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
@@ -41,7 +33,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 	private JSONMacroFunctions() {
 		super(1, UNLIMITED_PARAMETERS, "json.get", "json.type", "json.fields", "json.length", "json.fromList", "json.set", "json.fromStrProp", "json.toStrProp", "json.toList", "json.append",
 				"json.remove", "json.indent", "json.contains", "json.sort", "json.shuffle", "json.reverse", "json.evaluate", "json.isEmpty", "json.equals", "json.count", "json.indexOf", "json.merge",
-				"json.unique", "json.removeAll", "json.union", "json.intersection", "json.difference", "json.isSubset");
+				"json.unique", "json.removeAll", "json.union", "json.intersection", "json.difference", "json.isSubset", "json.removeFirst");
 	}
 
 	public static JSONMacroFunctions getInstance() {
@@ -296,6 +288,13 @@ public class JSONMacroFunctions extends AbstractFunction {
 			return JSONRemoveAll(parameters);
 		}
 
+		if (functionName.equals("json.removeFirst")) {
+			if (parameters.size() < 2) {
+				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 2, parameters.size()));
+			}
+			return JSONRemoveFirst(parameters);
+		}
+
 		if (functionName.equals("json.union")) {
 			if (parameters.size() < 2) {
 				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 2, parameters.size()));
@@ -368,6 +367,48 @@ public class JSONMacroFunctions extends AbstractFunction {
 	}
 
 	/**
+	 * Remove the first occurrence of each element in the second array from the first array.
+	 *
+	 * @param parameters
+	 *            The arguments to the function.
+	 * @return a JSON array containing the difference of all the arguments.
+	 * @throws ParserException
+	 */
+	private Object JSONRemoveFirst(List<Object> parameters) throws ParserException {
+
+		List<Object> result = new LinkedList<>();
+
+		Object o = asJSON(parameters.get(0).toString());
+		if (o instanceof JSONArray) {
+			result.addAll((JSONArray) o);
+		} else {
+			throw new ParserException(I18N.getText("macro.function.json.onlyArray", o == null ? "NULL" : o.toString(), "json.removeFirst"));
+		}
+
+		o = asJSON(parameters.get(1).toString());
+		List<Object> toRemove = new ArrayList<>();
+		if (o instanceof JSONArray) {
+			toRemove.addAll((JSONArray) o);
+		} else {
+			throw new ParserException(I18N.getText("macro.function.json.onlyArray", o == null ? "NULL" : o.toString(), "json.removeFirst"));
+		}
+
+		for (Object val : toRemove) {
+			Iterator iter = result.iterator();
+			while (iter.hasNext()) {
+				Object obj = iter.next();
+				if (obj.equals(val)) {
+					iter.remove();
+					break;
+				}
+			}
+		}
+
+		return JSONArray.fromObject(result);
+	}
+
+	/**
+	 *
 	 * Perform a difference of all of the JSON objects or arrays.
 	 * 
 	 * @param parameters
