@@ -23,7 +23,9 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
@@ -48,7 +50,7 @@ public class ZoneView implements ModelChangeListener {
 	// VISION
 	private final Map<GUID, Area> tokenVisibleAreaCache = new HashMap<GUID, Area>();
 	private final Map<GUID, Area> tokenVisionCache = new HashMap<GUID, Area>();
-	private final Map<GUID, Map<String, Area>> lightSourceCache = new HashMap<GUID, Map<String, Area>>();
+	private final Map<GUID, Map<String, TreeMap<Double, Area>>> lightSourceCache = new HashMap<GUID, Map<String, TreeMap<Double, Area>>>();
 	private final Map<LightSource.Type, Set<GUID>> lightSourceMap = new HashMap<LightSource.Type, Set<GUID>>();
 	private final Map<GUID, Map<String, Set<DrawableLight>>> drawableLightCache = new HashMap<GUID, Map<String, Set<DrawableLight>>>();
 	private final Map<GUID, Map<String, Set<Area>>> brightLightCache = new Hashtable<GUID, Map<String, Set<Area>>>();
@@ -89,20 +91,21 @@ public class ZoneView implements ModelChangeListener {
 		return topologyAreaData;
 	}
 
-	public Area getLightSourceArea(Token token, Token lightSourceToken) {
-		// Cached ?
-		Map<String, Area> areaBySightMap = lightSourceCache.get(lightSourceToken.getId());
+	private TreeMap<Double, Area> getLightSourceArea(Token token, Token lightSourceToken) {
+		Map<String, TreeMap<Double, Area>> areaBySightMap = lightSourceCache.get(lightSourceToken.getId());
 		if (areaBySightMap != null) {
-			Area lightSourceArea = areaBySightMap.get(token.getSightType());
+			TreeMap<Double, Area> lightSourceArea = areaBySightMap.get(token.getSightType());
 			if (lightSourceArea != null) {
 				return lightSourceArea;
 			}
 		} else {
-			areaBySightMap = new HashMap<String, Area>();
+			areaBySightMap = new HashMap<String, TreeMap<Double, Area>>();
 			lightSourceCache.put(lightSourceToken.getId(), areaBySightMap);
 		}
+
 		// Calculate
-		Area area = new Area();
+		TreeMap<Double, Area> lightSourceAreaMap = new TreeMap<Double, Area>();
+
 		for (AttachedLightSource attachedLightSource : lightSourceToken.getLightSources()) {
 			LightSource lightSource = MapTool.getCampaign().getLightSource(attachedLightSource.getLightSourceId());
 			if (lightSource == null) {
@@ -111,15 +114,21 @@ public class ZoneView implements ModelChangeListener {
 			SightType sight = MapTool.getCampaign().getSightType(token.getSightType());
 			Area visibleArea = calculateLightSourceArea(lightSource, lightSourceToken, sight, attachedLightSource.getDirection());
 
-			// I don't like the NORMAL check here, it doesn't feel right, the API needs to change to support
-			// getting arbitrary light source types, but that's not a simple change
 			if (visibleArea != null && lightSource.getType() == LightSource.Type.NORMAL) {
-				area.add(visibleArea);
+				double lumens = lightSource.getLumens();
+				if (lumens < 0)
+					lumens = Math.abs(lumens) + .5;
+
+				if (lightSourceAreaMap.containsKey(lumens)) {
+					visibleArea.add(lightSourceAreaMap.get(lumens));
+				}
+				lightSourceAreaMap.put(lumens, visibleArea);
 			}
 		}
+
 		// Cache
-		areaBySightMap.put(token.getSightType(), area);
-		return area;
+		areaBySightMap.put(token.getSightType(), lightSourceAreaMap);
+		return lightSourceAreaMap;
 	}
 
 	private Area calculatePersonalLightSourceArea(LightSource lightSource, Token lightSourceToken, SightType sight, Direction direction) {
@@ -138,8 +147,8 @@ public class ZoneView implements ModelChangeListener {
 		Area lightSourceArea = lightSource.getArea(lightSourceToken, zone, direction);
 
 		// Calculate exposed area
-		// TODO: This won't work with directed light, need to add an anchor or something
-		if (sight.getMultiplier() != 1) {
+		// LFF: OK, let not have lowlight vision type multiply darkness radius so test lumens
+		if (sight.getMultiplier() != 1 && lightSource.getLumens() >= 0) {
 			lightSourceArea.transform(AffineTransform.getScaleInstance(sight.getMultiplier(), sight.getMultiplier()));
 		}
 		Area visibleArea = FogUtil.calculateVisibility(p.x, p.y, lightSourceArea, getTopology());
@@ -147,6 +156,7 @@ public class ZoneView implements ModelChangeListener {
 		if (visibleArea == null) {
 			return null;
 		}
+		// Jamz TODO: remove this if block? not in my Nerps build...need to test
 		if (lightSource.getType() != LightSource.Type.NORMAL) {
 			return visibleArea;
 		}
@@ -221,12 +231,17 @@ public class ZoneView implements ModelChangeListener {
 			tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
 		}
 		// Combine in the visible light areas
+		// Jamz TODO: add condition for daylight and darkness! Currently no darkness in daylight
 		if (tokenVisibleArea != null && zone.getVisionType() == Zone.VisionType.NIGHT) {
 			Rectangle2D origBounds = tokenVisibleArea.getBounds();
 
 			// Combine all light sources that might intersect our vision
 			List<Area> intersects = new LinkedList<Area>();
+
+			Area peronalLightArea = new Area(); // Jamz TODO: is this necessary? check
 			List<Token> lightSourceTokens = new ArrayList<Token>();
+
+			TreeMap<Double, Area> allLightAreaMap = new TreeMap<Double, Area>();
 
 			if (lightSourceMap.get(LightSource.Type.NORMAL) != null) {
 				for (GUID lightSourceTokenId : lightSourceMap.get(LightSource.Type.NORMAL)) {
@@ -236,38 +251,91 @@ public class ZoneView implements ModelChangeListener {
 					}
 				}
 			}
+
 			if (token.hasLightSources() && !lightSourceTokens.contains(token)) {
 				// This accounts for temporary tokens (such as during an Expose Last Path)
 				lightSourceTokens.add(token);
 			}
-			for (Token lightSourceToken : lightSourceTokens) {
-				Area lightArea = getLightSourceArea(token, lightSourceToken);
 
-				if (origBounds.intersects(lightArea.getBounds2D())) {
-					Area intersection = new Area(tokenVisibleArea);
-					intersection.intersect(lightArea);
-					intersects.add(intersection);
+			// LFF: Iterate through all tokens and combine light areas by lumens
+			for (Token lightSourceToken : lightSourceTokens) {
+
+				// Jamz TODO: why did I remove this? check
+//				Area lightArea = getLightSourceArea(token, lightSourceToken);
+//
+//				if (origBounds.intersects(lightArea.getBounds2D())) {
+//					Area intersection = new Area(tokenVisibleArea);
+//					intersection.intersect(lightArea);
+//					intersects.add(intersection);
+//				}
+				TreeMap<Double, Area> lightArea = getLightSourceArea(token, lightSourceToken);
+
+				for (Entry<Double, Area> light : lightArea.entrySet()) {
+					Area tempArea = light.getValue();
+
+					if (allLightAreaMap.containsKey(light.getKey()))
+						tempArea.add(allLightAreaMap.get(light.getKey()));
+
+					allLightAreaMap.put(light.getKey(), tempArea);
 				}
 			}
-			// Check for personal vision
+
+			// Check for personal vision and add to overall light map
 			if (sight.hasPersonalLightSource()) {
 				Area lightArea = calculatePersonalLightSourceArea(sight.getPersonalLightSource(), token, sight, Direction.CENTER);
 				if (lightArea != null) {
-					Area intersection = new Area(tokenVisibleArea);
-					intersection.intersect(lightArea);
-					intersects.add(intersection);
+//					Area intersection = new Area(tokenVisibleArea);
+//					intersection.intersect(lightArea);
+//					intersects.add(intersection);
+
+					peronalLightArea = new Area(tokenVisibleArea);
+					peronalLightArea.intersect(lightArea);
+					// allLightArea.add(peronalLightArea);
+					allLightAreaMap.put((double) 100, lightArea);
 				}
 			}
-			while (intersects.size() > 1) {
-				Area a1 = intersects.remove(0);
-				Area a2 = intersects.remove(0);
+//			while (intersects.size() > 1) {
+//				Area a1 = intersects.remove(0);
+//				Area a2 = intersects.remove(0);
+//
+//				a1.add(a2);
+//				intersects.add(a1);
+//			}
+//			tokenVisibleArea = !intersects.isEmpty() ? intersects.get(0) : new Area();
+//		}
+//		tokenVisionCache.put(token.getId(), tokenVisibleArea);
+//		return tokenVisibleArea;
+//	}
 
-				a1.add(a2);
-				intersects.add(a1);
+			// LFF: OK, we should have ALL light areas in one map sorted by lumens. Lets apply it to the map
+			Area allLightArea = new Area();
+			for (Entry<Double, Area> light : allLightAreaMap.entrySet()) {
+				boolean isDarkness = false;
+				// LFF: negative lumens were converted to absolute value + .5 to sort lights 
+				// in tree map, so non-integers == darkness and lights are draw/removed in order 
+				// of lumens and darkness with equal lumens are drawn second due to the added .5
+				if (light.getKey().intValue() != light.getKey())
+					isDarkness = true;
+
+				if (origBounds.intersects(light.getValue().getBounds2D())) {
+					Area intersection = new Area(tokenVisibleArea);
+					intersection.intersect(light.getValue());
+					if (isDarkness) {
+						// System.out.println("---Removing light" +
+						// light.getKey());
+						allLightArea.subtract(intersection);
+					} else {
+						// System.out.println("+++Adding light" +
+						// light.getKey());
+						allLightArea.add(intersection);
+					}
+				}
 			}
-			tokenVisibleArea = !intersects.isEmpty() ? intersects.get(0) : new Area();
+
+			tokenVisibleArea = allLightArea;
 		}
 		tokenVisionCache.put(token.getId(), tokenVisibleArea);
+		// System.out.println("---getVisibleArea finished");
 		return tokenVisibleArea;
 	}
 

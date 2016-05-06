@@ -2266,8 +2266,20 @@ public class AppActions {
 			if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
 				return;
 			}
-			if (campaignFile.getName().indexOf(".") < 0) {
-				campaignFile = new File(campaignFile.getAbsolutePath() + AppConstants.CAMPAIGN_FILE_EXTENSION);
+
+			// Jamz: new "Save as" to allow campaigns to save without objects to make them backwards
+			// compatible. ie striping "lumens" field to allow campaign to load in older 1.4.0.x format
+			boolean saveAsCompatible = chooser.getFileFilter().getDescription().equals(I18N.getText("file.ext.cmpgn.b89"));
+			// System.out.println("Saving backwards to version b89 = " +
+			// saveAsCompatible);
+			String _extension = AppConstants.CAMPAIGN_FILE_EXTENSION;
+			if (saveAsCompatible)
+				_extension = AppConstants.CAMPAIGN_COMPATIBLE_FILE_EXTENSION;
+
+			campaign.setSaveAsCompatible(saveAsCompatible);
+
+			if (!campaignFile.getName().toLowerCase().endsWith(_extension)) {
+				campaignFile = new File(campaignFile.getAbsolutePath() + _extension);
 			}
 			doSaveCampaign(campaign, campaignFile, callback);
 
@@ -2298,7 +2310,9 @@ public class AppActions {
 			if (chooser.showSaveDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
 				try {
 					File mapFile = chooser.getSelectedFile();
-					if (mapFile.getName().indexOf(".") < 0) {
+					// Jamz: Bug fix, would not add extension if map name had a . in it...
+					// Lets do a better job and actually check the end of the file name for the extension
+					if (!mapFile.getName().toLowerCase().endsWith(AppConstants.MAP_FILE_EXTENSION)) {
 						mapFile = new File(mapFile.getAbsolutePath() + AppConstants.MAP_FILE_EXTENSION);
 					}
 					PersistenceUtil.saveMap(zr.getZone(), mapFile);

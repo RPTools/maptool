@@ -55,7 +55,7 @@ import yasb.Binder;
 /**
  * @author trevor
  */
-public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPreferences>implements AnnouncementListener {
+public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPreferences> implements AnnouncementListener {
 	private static ServiceFinder finder;
 
 	static {

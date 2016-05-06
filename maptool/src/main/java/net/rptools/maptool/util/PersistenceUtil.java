@@ -11,7 +11,9 @@
 
 package net.rptools.maptool.util;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -21,6 +23,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,6 +36,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import net.rptools.lib.CodeTimer;
@@ -53,6 +57,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
@@ -80,12 +85,15 @@ public class PersistenceUtil {
 	private static final String PROP_CAMPAIGN_VERSION = "campaignVersion"; //$NON-NLS-1$
 	private static final String ASSET_DIR = "assets/"; //$NON-NLS-1$
 
-	private static final String CAMPAIGN_VERSION = "1.3.85";
+	private static final String CAMPAIGN_VERSION = "1.4.1";
+	private static final String CAMPAIGN_VERSION_COMPATIBLE = "1.4.0";
+	private static final String MAPTOOL_VERSION_COMPATIBLE = "1.4.0.0";
 	// Please add a single note regarding why the campaign version number has been updated:
 	// 1.3.70	ownerOnly added to model.Light (not backward compatible)
 	// 1.3.75	model.Token.visibleOnlyToOwner (actually added to b74 but I didn't catch it before release)
 	// 1.3.83	ExposedAreaData added to tokens in b78 but again not caught until b82 :(
 	// 1.3.85	Added CampaignProperties.hasUsedFogToolbar (old versions could ignore this field, but how to implement?)
+	// 1.4.0 	Added lumens to LightSource class, old versions will not load unless saved as b89 compatible
 
 	private static final ModelVersionManager campaignVersionManager = new ModelVersionManager();
 	private static final ModelVersionManager assetnameVersionManager = new ModelVersionManager();
@@ -280,11 +288,22 @@ public class PersistenceUtil {
 
 			try {
 				saveTimer.start("Set content");
-				pakFile.setContent(persistedCampaign);
-				pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
-				pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
-				saveTimer.stop("Set content");
 
+				// Jamz: This is the "Save as compatible" code. Right now we're just
+				// stripping out "lumens" but to make it 1.4.0.0 compatible but
+				// probably should be it's own class/method to call and store what needs
+				// to be stripped for each campaign version as we go forward.
+				if (persistedCampaign.campaign.isSaveAsCompatible()) {
+					pakFile.setContent(persistedCampaign, LightSource.class, "lumens"); // Class.field to omit.
+					pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION_COMPATIBLE);
+					pakFile.setProperty(PROP_VERSION, MAPTOOL_VERSION_COMPATIBLE);
+				} else {
+					pakFile.setContent(persistedCampaign);
+					pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
+					pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
+				}
+
+				saveTimer.stop("Set content");
 				saveTimer.start("Save");
 				pakFile.save();
 				saveTimer.stop("Save");
@@ -324,25 +343,29 @@ public class PersistenceUtil {
 			pakFile = null;
 		}
 
-		// Copy to the new location
-		// Not the fastest solution in the world if renameTo() fails, but worth the safety net it provides
+		/*
+		 * Copy to the new location. Not the fastest solution in the world if
+		 * renameTo() fails, but worth the safety net it provides. 
+		 * Jamz: So, renameTo() is causing more issues than it is worth. It has a tendency
+		 * to lock a file under Google Drive/Drop box causing the save to fail.
+		 * Removed the for final save location...
+		 */
 		saveTimer.start("Backup");
 		File bakFile = new File(tmpDir.getAbsolutePath(), campaignFile.getName() + ".bak");
-		bakFile.delete();
+
+		bakFile.delete(); // Delete the last backup file...
+
 		if (campaignFile.exists()) {
-			if (!campaignFile.renameTo(bakFile)) {
-				saveTimer.start("Backup campaignFile");
-				FileUtil.copyFile(campaignFile, bakFile);
-				campaignFile.delete();
-				saveTimer.stop("Backup campaignFile");
-			}
+			saveTimer.start("Backup campaignFile");
+			FileUtil.copyFile(campaignFile, bakFile);
+			//campaignFile.delete();
+			saveTimer.stop("Backup campaignFile");
 		}
-		if (!tmpFile.renameTo(campaignFile)) {
-			saveTimer.start("Backup tmpFile");
-			FileUtil.copyFile(tmpFile, campaignFile);
-			tmpFile.delete();
-			saveTimer.stop("Backup tmpFile");
-		}
+
+		saveTimer.start("Backup tmpFile");
+		FileUtil.copyFile(tmpFile, campaignFile);
+		tmpFile.delete();
+		saveTimer.stop("Backup tmpFile");
 		if (bakFile.exists())
 			bakFile.delete();
 		saveTimer.stop("Backup");
@@ -430,6 +453,13 @@ public class PersistenceUtil {
 				for (Zone zone : persistedCampaign.campaign.getZones()) {
 					zone.optimize();
 				}
+
+				for (Entry<String, Map<GUID, LightSource>> entry : persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
+					for (Entry<GUID, LightSource> entryLs : entry.getValue().entrySet()) {
+						System.out.println(entryLs.getValue().getName() + " :: " + entryLs.getValue().getType() + " :: " + entryLs.getValue().getLumens());
+					}
+				}
+
 				return persistedCampaign;
 			}
 		} catch (OutOfMemoryError oom) {
@@ -445,6 +475,7 @@ public class PersistenceUtil {
 			if (pakFile != null)
 				pakFile.close();
 		}
+
 		log.warn("Could not load campaign in the current format...  trying the legacy format.");
 		persistedCampaign = loadLegacyCampaign(campaignFile);
 		if (persistedCampaign == null)
@@ -499,12 +530,18 @@ public class PersistenceUtil {
 	public static BufferedImage getTokenThumbnail(File file) throws Exception {
 		PackedFile pakFile = new PackedFile(file);
 		BufferedImage thumb;
+		String thumbFileName = Token.FILE_THUMBNAIL;
+
+		// Jamz: Lets use the Large thumbnail if needed
+		if ((MapTool.getThumbnailSize().width > 50 || MapTool.getThumbnailSize().height > 50) && pakFile.hasFile(Token.FILE_THUMBNAIL_LARGE))
+			thumbFileName = Token.FILE_THUMBNAIL_LARGE;
+
 		try {
 			thumb = null;
-			if (pakFile.hasFile(Token.FILE_THUMBNAIL)) {
+			if (pakFile.hasFile(thumbFileName)) {
 				InputStream is = null;
 				try {
-					is = pakFile.getFileAsInputStream(Token.FILE_THUMBNAIL);
+					is = pakFile.getFileAsInputStream(thumbFileName);
 					thumb = ImageIO.read(is);
 				} finally {
 					IOUtils.closeQuietly(is);
@@ -521,7 +558,7 @@ public class PersistenceUtil {
 	}
 
 	public static void saveToken(Token token, File file, boolean doWait) throws IOException {
-		// Thumbnail
+		// Jamz: Added a "Large Thumbnail" to support larger image grid previews
 		BufferedImage image = null;
 		if (doWait)
 			image = ImageManager.getImageAndWait(token.getImageAssetId());
@@ -530,8 +567,19 @@ public class PersistenceUtil {
 
 		Dimension sz = new Dimension(image.getWidth(), image.getHeight());
 		SwingUtil.constrainTo(sz, 50);
+
 		BufferedImage thumb = new BufferedImage(sz.width, sz.height, BufferedImage.TRANSLUCENT);
 		Graphics2D g = thumb.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g.drawImage(image, 0, 0, sz.width, sz.height, null);
+		g.dispose();
+
+		// Create large thumbnail using current ThumbnailSize or Image size,
+		// which ever is smallest.
+		sz = new Dimension(Math.min(image.getWidth(), MapTool.getThumbnailSize().width), Math.min(image.getHeight(), MapTool.getThumbnailSize().height));
+		BufferedImage thumbLarge = new BufferedImage(sz.width, sz.height, BufferedImage.TRANSLUCENT);
+		g = thumbLarge.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		g.drawImage(image, 0, 0, sz.width, sz.height, null);
@@ -542,6 +590,7 @@ public class PersistenceUtil {
 			pakFile = new PackedFile(file);
 			saveAssets(token.getAllImageAssets(), pakFile);
 			pakFile.putFile(Token.FILE_THUMBNAIL, ImageUtil.imageToBytes(thumb, "png"));
+			pakFile.putFile(Token.FILE_THUMBNAIL_LARGE, ImageUtil.imageToBytes(thumbLarge, "png"));
 			pakFile.setContent(token);
 			pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
 			pakFile.save();
@@ -998,6 +1047,26 @@ public class PersistenceUtil {
 		} finally {
 			if (pakFile != null)
 				pakFile.close();
+		}
+	}
+
+	public static void saveTokenImage(MD5Key assetID, File tokenSaveFile) {
+		Asset asset = AssetManager.getAsset(assetID);
+
+		if (asset == null) {
+			log.error("AssetId " + assetID + " not found while saving?!");
+			return;
+		}
+
+		FileOutputStream out = null;
+		try {
+			tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + "." + asset.getImageExtension());
+			BufferedImage image = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()));
+            ImageIO.write(image,  asset.getImageExtension(), tokenSaveFile);
+			image.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }

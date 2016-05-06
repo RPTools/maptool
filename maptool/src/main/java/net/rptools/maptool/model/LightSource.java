@@ -34,6 +34,7 @@ public class LightSource implements Comparable<LightSource> {
 	private GUID id;
 	private Type type;
 	private ShapeType shapeType;
+	private int lumens = 0;
 
 	public LightSource() {
 		// for serialization
@@ -110,6 +111,14 @@ public class LightSource implements Comparable<LightSource> {
 
 	public ShapeType getShapeType() {
 		return shapeType != null ? shapeType : ShapeType.CIRCLE;
+	}
+
+	public void setLumens(int lumens) {
+		this.lumens = lumens;
+	}
+
+	public int getLumens() {
+		return lumens;
 	}
 
 	/**
