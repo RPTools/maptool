@@ -658,7 +658,7 @@ public class MapTool {
 			version = "DEVELOPMENT";
 			try {
 				if (MapTool.class.getClassLoader().getResource(VERSION_TXT) != null) {
-					version = new String(FileUtil.loadResource(VERSION_TXT));
+					version = new String(FileUtil.loadResource(VERSION_TXT)).trim();
 				}
 			} catch (IOException ioe) {
 				String msg = I18N.getText("msg.info.versionFile", VERSION_TXT);
