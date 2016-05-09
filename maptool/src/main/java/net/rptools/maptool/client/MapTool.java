@@ -111,6 +111,8 @@ public class MapTool {
 	 */
 	public static Double JAVA_VERSION;
 
+	private static String clientId = AppUtil.readClientId();
+
 	public static enum ZoneEvent {
 		Added, Removed, Activated, Deactivated
 	}
@@ -658,7 +660,7 @@ public class MapTool {
 			version = "DEVELOPMENT";
 			try {
 				if (MapTool.class.getClassLoader().getResource(VERSION_TXT) != null) {
-					version = new String(FileUtil.loadResource(VERSION_TXT));
+					version = new String(FileUtil.loadResource(VERSION_TXT)).trim();
 				}
 			} catch (IOException ioe) {
 				String msg = I18N.getText("msg.info.versionFile", VERSION_TXT);
@@ -1466,6 +1468,10 @@ public class MapTool {
 			System.out.println("Unable to start web server");
 			e.printStackTrace();
 		}
+	}
+
+	public static String getClientId() {
+		return clientId;
 	}
 
 	private static class ServerHeartBeatThread extends Thread {
