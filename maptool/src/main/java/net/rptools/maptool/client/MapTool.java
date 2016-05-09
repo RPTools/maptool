@@ -111,6 +111,8 @@ public class MapTool {
 	 */
 	public static Double JAVA_VERSION;
 
+	private static String clientId = AppUtil.readClientId();
+
 	public static enum ZoneEvent {
 		Added, Removed, Activated, Deactivated
 	}
@@ -1466,6 +1468,10 @@ public class MapTool {
 			System.out.println("Unable to start web server");
 			e.printStackTrace();
 		}
+	}
+
+	public static String getClientId() {
+		return clientId;
 	}
 
 	private static class ServerHeartBeatThread extends Thread {
