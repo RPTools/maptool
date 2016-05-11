@@ -84,6 +84,7 @@ import net.rptools.maptool.client.ui.io.LoadSaveImpl;
 import net.rptools.maptool.client.ui.io.ProgressBarList;
 import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
+import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
@@ -1116,6 +1117,26 @@ public class AppActions {
 		}
 	};
 
+	// Jamz: Force a directory to rsscan
+	public static final Action RESCAN_NODE = new DefaultClientAction() {
+		{
+			init("action.rescanNode");
+		}
+
+		@Override
+		public void execute(ActionEvent e) {
+			AssetPanel assetPanel = MapTool.getFrame().getAssetPanel();
+			Directory dir = assetPanel.getSelectedAssetRoot();
+
+			if (dir == null) {
+				MapTool.showError("msg.error.mustSelectAssetGroupFirst");
+				return;
+			}
+
+			assetPanel.rescanImagePanelDir(dir);
+		}
+	};
+
 	public static final Action BOOT_CONNECTED_PLAYER = new DefaultClientAction() {
 		{
 			init("action.bootConnectedPlayer");
@@ -1565,6 +1586,45 @@ public class AppActions {
 			MapTool.serverCommand().setZoneHasFoW(zone.getId(), zone.hasFog());
 
 			renderer.repaint();
+		}
+	};
+
+	// Lee: this sets the revealing of FoW only at waypoints.
+	public static final Action TOGGLE_WAYPOINT_FOG_REVEAL = new ZoneAdminClientAction() {
+		{
+			init("action.revealFogAtWaypoints");
+		}
+
+		@Override
+		public boolean isAvailable() {
+			return ((ZoneAdminClientAction) TOGGLE_FOG).isSelected();
+		}
+
+		@Override
+		public boolean isSelected() {
+			if (isAvailable())
+				return MapTool.getFrame().getCurrentZoneRenderer().getZone().getWaypointExposureToggle();
+			return false;
+		}
+
+		@Override
+		public void execute(ActionEvent e) {
+			MapTool.getFrame().getCurrentZoneRenderer().getZone().setWaypointExposureToggle(!this.isSelected());
+		}
+	};
+
+	public static final Action RESTORE_FOG = new ZoneAdminClientAction() {
+		{
+			init("action.restoreFogOfWar");
+		}
+
+		@Override
+		public void execute(ActionEvent e) {
+			if (!MapTool.confirm("msg.confirm.restoreFoW")) {
+				return;
+			}
+
+			FogUtil.restoreFoW(MapTool.getFrame().getCurrentZoneRenderer());
 		}
 	};
 

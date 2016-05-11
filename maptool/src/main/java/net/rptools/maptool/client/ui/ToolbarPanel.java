@@ -64,9 +64,11 @@ import net.rptools.maptool.client.tool.drawing.RectangleTopologyTool;
 import net.rptools.maptool.client.tool.drawing.WallTemplateTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
+import net.rptools.maptool.model.Zone.TokenSelection;
 
 public class ToolbarPanel extends JToolBar {
 	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private final ButtonGroup tokenSelectionbuttonGroup = new ButtonGroup();
 	private final JPanel optionPanel;
 	private final Toolbox toolbox;
 
@@ -93,8 +95,7 @@ public class ToolbarPanel extends JToolBar {
 
 		add(pointerGroupButton);
 		add(createButton("net/rptools/maptool/client/image/tool/draw-blue.png", "net/rptools/maptool/client/image/tool/draw-blue-off.png", createDrawPanel(), I18N.getText("tools.drawing.tooltip")));
-		add(createButton("net/rptools/maptool/client/image/tool/temp-blue.png", "net/rptools/maptool/client/image/tool/temp-blue-off.png", createTemplatePanel(),
-				I18N.getText("tools.template.tooltip")));
+		add(createButton("net/rptools/maptool/client/image/tool/temp-blue.png", "net/rptools/maptool/client/image/tool/temp-blue-off.png", createTemplatePanel(),I18N.getText("tools.template.tooltip")));
 		add(createButton("net/rptools/maptool/client/image/tool/fog-blue.png", "net/rptools/maptool/client/image/tool/fog-blue-off.png", createFogPanel(), I18N.getText("tools.fog.tooltip")));
 		add(createButton("net/rptools/maptool/client/image/tool/eye-blue.png", "net/rptools/maptool/client/image/tool/eye-blue-off.png", createTopologyPanel(), I18N.getText("tools.topo.tooltip")));
 		add(vertSplit);
@@ -103,6 +104,38 @@ public class ToolbarPanel extends JToolBar {
 		add(horizontalSpacer);
 		add(optionPanel);
 		add(Box.createGlue());
+
+		add(Box.createHorizontalStrut(10));
+		add(new JSeparator(JSeparator.VERTICAL));
+		add(Box.createHorizontalStrut(10));
+
+		// Jamz: Adding new Token Selection option buttons
+		// Default selected button created with reference to set selection true
+		final JToggleButton tokenSelectionButtonAll = createTokenSelectionButton(
+				"net/rptools/maptool/client/image/tool/select-all-blue.png",
+				"net/rptools/maptool/client/image/tool/select-all-blue-off.png",
+				I18N.getText("tools.token.fow.all.tooltip"), TokenSelection.ALL);
+
+		add(createTokenSelectionButton(
+				"net/rptools/maptool/client/image/tool/select-gm-blue.png",
+				"net/rptools/maptool/client/image/tool/select-gm-blue-off.png",
+				I18N.getText("tools.token.fow.all.tooltip"), TokenSelection.GM));
+		add(tokenSelectionButtonAll);
+		add(createTokenSelectionButton("net/rptools/maptool/client/image/tool/select-pc-blue.png",
+				"net/rptools/maptool/client/image/tool/select-pc-blue-off.png",
+				I18N.getText("tools.token.fow.pc.tooltip"), TokenSelection.PC));
+		add(createTokenSelectionButton("net/rptools/maptool/client/image/tool/select-npc-blue.png",
+				"net/rptools/maptool/client/image/tool/select-npc-blue-off.png",
+				I18N.getText("tools.token.fow.npc.tooltip"), TokenSelection.NPC));
+
+		add(Box.createHorizontalStrut(10));
+		add(new JSeparator(JSeparator.VERTICAL));
+		add(Box.createHorizontalStrut(10));
+
+		tokenSelectionButtonAll.setSelected(true);
+		// Jamz: End panel
+
+		// the "Select Map" button
 		add(createZoneSelectionButton());
 
 		// Non visible tools
@@ -223,6 +256,28 @@ public class ToolbarPanel extends JToolBar {
 		}
 		optionPanel.add(panel, icon);
 		buttonGroup.add(button);
+		return button;
+	}
+
+	private JToggleButton createTokenSelectionButton(final String icon, final String offIcon, String tooltip,
+			TokenSelection tokenSelection) {
+		final JToggleButton button = new JToggleButton();
+		button.setToolTipText(tooltip);
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (button.isSelected()) {
+					MapTool.getFrame().getCurrentZoneRenderer().getZone().setTokenSelection(tokenSelection);
+					MapTool.getFrame().refresh();
+				}
+			}
+		});
+		try {
+			button.setIcon(new ImageIcon(ImageUtil.getImage(offIcon)));
+			button.setSelectedIcon(new ImageIcon(ImageUtil.getImage(icon)));
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+		tokenSelectionbuttonGroup.add(button);
 		return button;
 	}
 

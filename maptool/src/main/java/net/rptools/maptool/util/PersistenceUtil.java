@@ -454,11 +454,11 @@ public class PersistenceUtil {
 					zone.optimize();
 				}
 
-				for (Entry<String, Map<GUID, LightSource>> entry : persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
-					for (Entry<GUID, LightSource> entryLs : entry.getValue().entrySet()) {
-						System.out.println(entryLs.getValue().getName() + " :: " + entryLs.getValue().getType() + " :: " + entryLs.getValue().getLumens());
-					}
-				}
+				//for (Entry<String, Map<GUID, LightSource>> entry : persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
+				//	for (Entry<GUID, LightSource> entryLs : entry.getValue().entrySet()) {
+				//		System.out.println(entryLs.getValue().getName() + " :: " + entryLs.getValue().getType() + " :: " + entryLs.getValue().getLumens());
+				//	}
+				//}
 
 				return persistedCampaign;
 			}

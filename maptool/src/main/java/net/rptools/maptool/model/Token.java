@@ -135,6 +135,7 @@ public class Token extends BaseModel implements Cloneable {
 
 	private boolean isVisible = true;
 	private boolean visibleOnlyToOwner = false;
+	private boolean visionBlocker = false;
 
 	private String name;
 	private Set<String> ownerList;
@@ -242,6 +243,8 @@ public class Token extends BaseModel implements Cloneable {
 		snapToGrid = token.snapToGrid;
 		isVisible = token.isVisible;
 		visibleOnlyToOwner = token.visibleOnlyToOwner;
+		visionBlocker = token.visionBlocker;
+
 		name = token.name;
 		notes = token.notes;
 		gmName = token.gmName;
@@ -959,6 +962,14 @@ public class Token extends BaseModel implements Cloneable {
 	 */
 	public void setVisibleOnlyToOwner(boolean visibleOnlyToOwner) {
 		this.visibleOnlyToOwner = visibleOnlyToOwner;
+	}
+
+	public boolean isVisionBlocker() {
+		return visionBlocker;
+	}
+
+	public void setVisionBlocker(boolean visionBlocker) {
+		this.visionBlocker = visionBlocker;
 	}
 
 	public String getName() {
