@@ -90,6 +90,11 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 	private Icon setDrawPanelIcon(String key, boolean eraser) {
 		try {
 			switch (key) {
+			case "panel.DrawExplorer.ShapeDrawable.Area":
+				if (eraser)
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly-erase.png")));
+				else
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly.png")));
 			case "panel.DrawExplorer.ShapeDrawable.Polygon":
 				if (eraser)
 					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly-erase.png")));
