@@ -275,7 +275,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			if (zone.getWaypointExposureToggle())
 				FogUtil.exposeVisibleArea(renderer, exposeSet, false);
 			else
-			FogUtil.exposeLastPath(renderer, exposeSet);
+				FogUtil.exposeLastPath(renderer, exposeSet);
 		}
 	}
 
@@ -1153,11 +1153,11 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				//  Only let the GM's do this
 				if (MapTool.getPlayer().isGM()) {
 					FogUtil.exposePCArea(renderer);
-						// Jamz: This doesn't seem to be needed 
-						//MapTool.serverCommand().exposePCArea(renderer.getZone().getId());
-						}
-					}
-				});
+					// Jamz: This doesn't seem to be needed 
+					//MapTool.serverCommand().exposePCArea(renderer.getZone().getId());
+				}
+			}
+		});
 		actionMap.put(
 				KeyStroke.getKeyStroke(KeyEvent.VK_F,
 						AppActions.menuShortcut | InputEvent.SHIFT_DOWN_MASK),
@@ -1168,9 +1168,9 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 						// Only let the GM's do this
 						if (MapTool.getPlayer().isGM()) {
 							FogUtil.exposeAllOwnedArea(renderer);
-				}
-			}
-		});
+						}
+					}
+				});
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, AppActions.menuShortcut), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
@@ -1502,8 +1502,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		}
 		// Jamz: Statsheet was still showing on drag, added other tests to hide statsheet as well
 		if (statSheet != null && !isDraggingToken && !mouseButtonDown) {
-				g.drawImage(statSheet, 5, viewSize.height - statSheet.getHeight() - 5, this);
-			}
+			g.drawImage(statSheet, 5, viewSize.height - statSheet.getHeight() - 5, this);
+		}
 
 		// Hovers
 		if (isShowingHover) {

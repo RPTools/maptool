@@ -149,7 +149,7 @@ subprojects {
 	}
 
 	spotless {
-		java { eclipseFormatFile '../build-resources/eclipse.prefs.formatter.new.xml' }
+		java { eclipseFormatFile '../build-resources/eclipse.prefs.formatter.xml' }
 		format 'misc', {
 			target '**/*.gradle', '**/*.md', '**/.gitignore'
 	

@@ -261,13 +261,13 @@ public class ZoneView implements ModelChangeListener {
 			for (Token lightSourceToken : lightSourceTokens) {
 
 				// Jamz TODO: why did I remove this? check
-//				Area lightArea = getLightSourceArea(token, lightSourceToken);
-//
-//				if (origBounds.intersects(lightArea.getBounds2D())) {
-//					Area intersection = new Area(tokenVisibleArea);
-//					intersection.intersect(lightArea);
-//					intersects.add(intersection);
-//				}
+				//				Area lightArea = getLightSourceArea(token, lightSourceToken);
+				//
+				//				if (origBounds.intersects(lightArea.getBounds2D())) {
+				//					Area intersection = new Area(tokenVisibleArea);
+				//					intersection.intersect(lightArea);
+				//					intersects.add(intersection);
+				//				}
 				TreeMap<Double, Area> lightArea = getLightSourceArea(token, lightSourceToken);
 
 				for (Entry<Double, Area> light : lightArea.entrySet()) {
@@ -284,9 +284,9 @@ public class ZoneView implements ModelChangeListener {
 			if (sight.hasPersonalLightSource()) {
 				Area lightArea = calculatePersonalLightSourceArea(sight.getPersonalLightSource(), token, sight, Direction.CENTER);
 				if (lightArea != null) {
-//					Area intersection = new Area(tokenVisibleArea);
-//					intersection.intersect(lightArea);
-//					intersects.add(intersection);
+					//					Area intersection = new Area(tokenVisibleArea);
+					//					intersection.intersect(lightArea);
+					//					intersects.add(intersection);
 
 					peronalLightArea = new Area(tokenVisibleArea);
 					peronalLightArea.intersect(lightArea);
@@ -294,18 +294,18 @@ public class ZoneView implements ModelChangeListener {
 					allLightAreaMap.put((double) 100, lightArea);
 				}
 			}
-//			while (intersects.size() > 1) {
-//				Area a1 = intersects.remove(0);
-//				Area a2 = intersects.remove(0);
-//
-//				a1.add(a2);
-//				intersects.add(a1);
-//			}
-//			tokenVisibleArea = !intersects.isEmpty() ? intersects.get(0) : new Area();
-//		}
-//		tokenVisionCache.put(token.getId(), tokenVisibleArea);
-//		return tokenVisibleArea;
-//	}
+			//			while (intersects.size() > 1) {
+			//				Area a1 = intersects.remove(0);
+			//				Area a2 = intersects.remove(0);
+			//
+			//				a1.add(a2);
+			//				intersects.add(a1);
+			//			}
+			//			tokenVisibleArea = !intersects.isEmpty() ? intersects.get(0) : new Area();
+			//		}
+			//		tokenVisionCache.put(token.getId(), tokenVisibleArea);
+			//		return tokenVisibleArea;
+			//	}
 
 			// LFF: OK, we should have ALL light areas in one map sorted by lumens. Lets apply it to the map
 			Area allLightArea = new Area();

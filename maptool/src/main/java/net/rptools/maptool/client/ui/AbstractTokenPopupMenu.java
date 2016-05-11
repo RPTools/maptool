@@ -498,8 +498,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 				final String tokenNameGM;
 				if (token.getGMName() == null)
 					tokenNameGM = tokenName;
-				else
-					if (token.getGMName().trim().isEmpty())
+				else if (token.getGMName().trim().isEmpty())
 					tokenNameGM = tokenName;
 				else
 					tokenNameGM = token.getGMName();
@@ -524,7 +523,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 							if (chooser.getFileFilter() == tokenFilterGM) {
 								chooser.setSelectedFile(defaultFileGM);
 							} else {
-			chooser.setSelectedFile(defaultFile);
+								chooser.setSelectedFile(defaultFile);
 							}
 						}
 					}
@@ -543,7 +542,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					if (saveDirectory == null) {
 						chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 						if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION)
-				return;
+							return;
 						if (chooser.getFileFilter() == tokenFilterGM)
 							saveAsGmName = true;
 						saveDirectory = chooser.getSelectedFile();
@@ -562,12 +561,12 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					} else {
 						tokenSaveFile = new File(saveDirectory.getAbsolutePath() + "\\" + FileUtil.stripInvalidCharacters(tokenName));
 					}
-			}
+				}
 
-			// Auto-extension
+				// Auto-extension
 				if (!saveAsImage && !tokenSaveFile.getName().toLowerCase().endsWith("." + Token.FILE_EXTENSION)) {
 					tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + "." + Token.FILE_EXTENSION);
-			}
+				}
 
 				if (tokenSaveFile.exists() && saveMultipleTokens && showOverwriteDialog) {
 					JPanel messageObj = new JPanel();
@@ -597,10 +596,10 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 				if (tokenSaveFile.exists() && !overWriteFile)
 					continue;
 
-			if (!MapTool.getPlayer().isGM()) {
-				token.setGMNotes("");
-			}
-			try {
+				if (!MapTool.getPlayer().isGM()) {
+					token.setGMNotes("");
+				}
+				try {
 					if (saveAsImage && !saveAsPortrait) {
 						PersistenceUtil.saveTokenImage(token.getImageAssetId(), tokenSaveFile);
 					} else if (saveAsPortrait) {
@@ -608,12 +607,12 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					} else {
 						PersistenceUtil.saveToken(token, tokenSaveFile);
 					}
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-				MapTool.showError("Could not save token: " + ioe);
+				} catch (IOException ioe) {
+					ioe.printStackTrace();
+					MapTool.showError("Could not save token: " + ioe);
+				}
 			}
 		}
-	}
 	}
 
 	public class SetFacingAction extends AbstractAction {
@@ -947,7 +946,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 			// Jamz: Bug fix, we don't support editing multiple tokens here.
 			if (selectedTokenSet.size() > 1) {
 				setEnabled(false);
-		}
+			}
 		}
 
 		public void actionPerformed(ActionEvent e) {

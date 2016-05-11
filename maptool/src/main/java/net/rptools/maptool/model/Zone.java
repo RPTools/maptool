@@ -1320,7 +1320,7 @@ public class Zone extends BaseModel {
 			}
 		});
 	}
-	
+
 	/**
 	 * This method is called when no tokens are selected and it determines which tokens FoW to show.
 	 * New buttons were added to select what type of tokens, by ownership, should be shown and driven
@@ -1366,7 +1366,7 @@ public class Zone extends BaseModel {
 			}
 		});
 	}
-	
+
 	// Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by All", 
 	// or "Owned" by the current player; in theory, NPC tokens the Player control.
 	public List<Token> getTokensOwnedByAllWithSight() {
@@ -1389,7 +1389,7 @@ public class Zone extends BaseModel {
 			}
 		});
 	}
-	
+
 	public List<Token> getPlayerOwnedTokensWithSight(Player p) {
 		return getTokensFiltered(new Filter() {
 			@Override

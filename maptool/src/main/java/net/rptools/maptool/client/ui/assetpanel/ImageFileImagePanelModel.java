@@ -80,7 +80,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 		this.dir = dir;
 		refresh();
 	}
-	
+
 	public void setFilter(String filter) {
 		ImageFileImagePanelModel.filter = filter.toUpperCase();
 		refresh();

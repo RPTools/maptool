@@ -232,7 +232,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 						"meta KP_LEFT", DefaultEditorKit.beginLineAction,
 						"meta RIGHT", DefaultEditorKit.endLineAction,
 						"meta KP_RIGHT", DefaultEditorKit.endLineAction,
-						// }
+				// }
 				}),
 				"Button.focusInputMap", new UIDefaults.LazyInputMap(new Object[] {
 						"SPACE", "pressed",
