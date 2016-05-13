@@ -1209,6 +1209,15 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				timer.stop("tokens - figures");
 			}
 
+			// if here is fog or vision we may need to re-render vision-blocking type tokens
+			// For example. this allows a "door" stamp to block vision but still allow you to see the door.
+			List<Token> tokens2 = zone.getVblTokens();
+			if (!tokens2.isEmpty()) {
+				timer.start("tokens - vision blockers");
+				renderTokens(g2d, tokens2, view, true);
+				timer.stop("tokens - vision blockers");
+			}
+
 			timer.start("owned movement");
 			renderMoveSelectionSets(g2d, view, getOwnedMovementSet(view));
 			timer.stop("owned movement");
@@ -2428,7 +2437,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 		List<Token> tokenPostProcessing = new ArrayList<Token>(tokenList.size());
 		for (Token token : tokenList) {
-			if (figuresOnly && token.getShape() != Token.TokenShape.FIGURE)
+			if ((figuresOnly && token.getShape() != Token.TokenShape.FIGURE) && figuresOnly && !token.isVisionBlocker())
 				continue;
 			timer.start("tokenlist-1");
 			try {
@@ -2512,6 +2521,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			}
 			// Markers
 			timer.start("renderTokens:Markers");
+			//System.out.println("Token " + token.getName() + " is a marker? " + token.isMarker());
 			if (token.isMarker() && canSeeMarker(token)) {
 				markerLocationList.add(location);
 			}

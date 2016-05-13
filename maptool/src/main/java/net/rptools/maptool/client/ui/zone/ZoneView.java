@@ -24,7 +24,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.SwingWorker;
+
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.rptools.maptool.client.AppState;
@@ -55,6 +65,8 @@ public class ZoneView implements ModelChangeListener {
 	private final Map<GUID, Map<String, Set<DrawableLight>>> drawableLightCache = new HashMap<GUID, Map<String, Set<DrawableLight>>>();
 	private final Map<GUID, Map<String, Set<Area>>> brightLightCache = new Hashtable<GUID, Map<String, Set<Area>>>();
 	private final Map<PlayerView, VisibleAreaMeta> visibleAreaMap = new HashMap<PlayerView, VisibleAreaMeta>();
+	private final SortedMap<Double, Area> allLightAreaMap = new ConcurrentSkipListMap<Double, Area>(); // Hold all of our lights combined by lumens
+
 	private AreaData topologyAreaData;
 	private AreaTree topology;
 
@@ -91,10 +103,10 @@ public class ZoneView implements ModelChangeListener {
 		return topologyAreaData;
 	}
 
-	private TreeMap<Double, Area> getLightSourceArea(Token token, Token lightSourceToken) {
+	private TreeMap<Double, Area> getLightSourceArea(Token baseToken, Token lightSourceToken) {
 		Map<String, TreeMap<Double, Area>> areaBySightMap = lightSourceCache.get(lightSourceToken.getId());
 		if (areaBySightMap != null) {
-			TreeMap<Double, Area> lightSourceArea = areaBySightMap.get(token.getSightType());
+			TreeMap<Double, Area> lightSourceArea = areaBySightMap.get(baseToken.getSightType());
 			if (lightSourceArea != null) {
 				return lightSourceArea;
 			}
@@ -111,7 +123,7 @@ public class ZoneView implements ModelChangeListener {
 			if (lightSource == null) {
 				continue;
 			}
-			SightType sight = MapTool.getCampaign().getSightType(token.getSightType());
+			SightType sight = MapTool.getCampaign().getSightType(baseToken.getSightType());
 			Area visibleArea = calculateLightSourceArea(lightSource, lightSourceToken, sight, attachedLightSource.getDirection());
 
 			if (visibleArea != null && lightSource.getType() == LightSource.Type.NORMAL) {
@@ -119,6 +131,7 @@ public class ZoneView implements ModelChangeListener {
 				if (lumens < 0)
 					lumens = Math.abs(lumens) + .5;
 
+				// Group all the light area's by lumens so there is only one area per lumen value
 				if (lightSourceAreaMap.containsKey(lumens)) {
 					visibleArea.add(lightSourceAreaMap.get(lumens));
 				}
@@ -127,7 +140,7 @@ public class ZoneView implements ModelChangeListener {
 		}
 
 		// Cache
-		areaBySightMap.put(token.getSightType(), lightSourceAreaMap);
+		areaBySightMap.put(baseToken.getSightType(), lightSourceAreaMap);
 		return lightSourceAreaMap;
 	}
 
@@ -147,7 +160,7 @@ public class ZoneView implements ModelChangeListener {
 		Area lightSourceArea = lightSource.getArea(lightSourceToken, zone, direction);
 
 		// Calculate exposed area
-		// LFF: OK, let not have lowlight vision type multiply darkness radius so test lumens
+		// Jamz: OK, let not have lowlight vision type multiply darkness radius so test lumens
 		if (sight.getMultiplier() != 1 && lightSource.getLumens() >= 0) {
 			lightSourceArea.transform(AffineTransform.getScaleInstance(sight.getMultiplier(), sight.getMultiplier()));
 		}
@@ -156,7 +169,7 @@ public class ZoneView implements ModelChangeListener {
 		if (visibleArea == null) {
 			return null;
 		}
-		// Jamz TODO: remove this if block? not in my Nerps build...need to test
+
 		if (lightSource.getType() != LightSource.Type.NORMAL) {
 			return visibleArea;
 		}
@@ -212,15 +225,18 @@ public class ZoneView implements ModelChangeListener {
 		}
 		// Cache ?
 		Area tokenVisibleArea = tokenVisionCache.get(token.getId());
-		if (tokenVisibleArea != null) {
+		//System.out.println("tokenVisionCache size? " + tokenVisionCache.size());
+
+		if (tokenVisibleArea != null)
 			return tokenVisibleArea;
-		}
+
 		SightType sight = MapTool.getCampaign().getSightType(token.getSightType());
 		// More sanity checks; maybe sight type removed from campaign after token set?
 		if (sight == null) {
 			// TODO Should we turn off the token's HasSight flag?  Would speed things up for later...
 			return null;
 		}
+
 		// Combine the player visible area with the available light sources
 		tokenVisibleArea = tokenVisibleAreaCache.get(token.getId());
 		if (tokenVisibleArea == null) {
@@ -230,18 +246,13 @@ public class ZoneView implements ModelChangeListener {
 
 			tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
 		}
+
 		// Combine in the visible light areas
 		// Jamz TODO: add condition for daylight and darkness! Currently no darkness in daylight
 		if (tokenVisibleArea != null && zone.getVisionType() == Zone.VisionType.NIGHT) {
 			Rectangle2D origBounds = tokenVisibleArea.getBounds();
-
-			// Combine all light sources that might intersect our vision
-			List<Area> intersects = new LinkedList<Area>();
-
-			Area peronalLightArea = new Area(); // Jamz TODO: is this necessary? check
+			Area peronalLightArea = new Area();
 			List<Token> lightSourceTokens = new ArrayList<Token>();
-
-			TreeMap<Double, Area> allLightAreaMap = new TreeMap<Double, Area>();
 
 			if (lightSourceMap.get(LightSource.Type.NORMAL) != null) {
 				for (GUID lightSourceTokenId : lightSourceMap.get(LightSource.Type.NORMAL)) {
@@ -257,61 +268,35 @@ public class ZoneView implements ModelChangeListener {
 				lightSourceTokens.add(token);
 			}
 
-			// LFF: Iterate through all tokens and combine light areas by lumens
-			for (Token lightSourceToken : lightSourceTokens) {
-
-				// Jamz TODO: why did I remove this? check
-				//				Area lightArea = getLightSourceArea(token, lightSourceToken);
-				//
-				//				if (origBounds.intersects(lightArea.getBounds2D())) {
-				//					Area intersection = new Area(tokenVisibleArea);
-				//					intersection.intersect(lightArea);
-				//					intersects.add(intersection);
-				//				}
-				TreeMap<Double, Area> lightArea = getLightSourceArea(token, lightSourceToken);
-
-				for (Entry<Double, Area> light : lightArea.entrySet()) {
-					Area tempArea = light.getValue();
-
-					if (allLightAreaMap.containsKey(light.getKey()))
-						tempArea.add(allLightAreaMap.get(light.getKey()));
-
-					allLightAreaMap.put(light.getKey(), tempArea);
-				}
+			// Jamz: Iterate through all tokens and combine light areas by lumens
+			CombineLightsSwingWorker workerThread = new CombineLightsSwingWorker(token, lightSourceTokens);
+			workerThread.execute();
+			try {
+				workerThread.get(); // Jamz: We need to wait for this thread (which spawns more threads) to finish before we go on
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
 			// Check for personal vision and add to overall light map
 			if (sight.hasPersonalLightSource()) {
 				Area lightArea = calculatePersonalLightSourceArea(sight.getPersonalLightSource(), token, sight, Direction.CENTER);
 				if (lightArea != null) {
-					//					Area intersection = new Area(tokenVisibleArea);
-					//					intersection.intersect(lightArea);
-					//					intersects.add(intersection);
-
 					peronalLightArea = new Area(tokenVisibleArea);
 					peronalLightArea.intersect(lightArea);
-					// allLightArea.add(peronalLightArea);
+
 					allLightAreaMap.put((double) 100, lightArea);
 				}
 			}
-			//			while (intersects.size() > 1) {
-			//				Area a1 = intersects.remove(0);
-			//				Area a2 = intersects.remove(0);
-			//
-			//				a1.add(a2);
-			//				intersects.add(a1);
-			//			}
-			//			tokenVisibleArea = !intersects.isEmpty() ? intersects.get(0) : new Area();
-			//		}
-			//		tokenVisionCache.put(token.getId(), tokenVisibleArea);
-			//		return tokenVisibleArea;
-			//	}
 
-			// LFF: OK, we should have ALL light areas in one map sorted by lumens. Lets apply it to the map
+			// Jamz: OK, we should have ALL light areas in one map sorted by lumens. Lets apply it to the map
 			Area allLightArea = new Area();
 			for (Entry<Double, Area> light : allLightAreaMap.entrySet()) {
 				boolean isDarkness = false;
-				// LFF: negative lumens were converted to absolute value + .5 to sort lights 
+				// Jamz: negative lumens were converted to absolute value + .5 to sort lights 
 				// in tree map, so non-integers == darkness and lights are draw/removed in order 
 				// of lumens and darkness with equal lumens are drawn second due to the added .5
 				if (light.getKey().intValue() != light.getKey())
@@ -321,12 +306,8 @@ public class ZoneView implements ModelChangeListener {
 					Area intersection = new Area(tokenVisibleArea);
 					intersection.intersect(light.getValue());
 					if (isDarkness) {
-						// System.out.println("---Removing light" +
-						// light.getKey());
 						allLightArea.subtract(intersection);
 					} else {
-						// System.out.println("+++Adding light" +
-						// light.getKey());
 						allLightArea.add(intersection);
 					}
 				}
@@ -334,9 +315,79 @@ public class ZoneView implements ModelChangeListener {
 
 			tokenVisibleArea = allLightArea;
 		}
+
+		allLightAreaMap.clear(); // Dispose of object, only needed for the scope of this method
 		tokenVisionCache.put(token.getId(), tokenVisibleArea);
-		// System.out.println("---getVisibleArea finished");
 		return tokenVisibleArea;
+	}
+
+	private class CombineLightsSwingWorker extends SwingWorker<Void, List<Token>> {
+		private final Token baseToken;
+		private final List<Token> lightSourceTokens;
+		private final ExecutorService lightsThreadPool;
+		private final long startTime = System.currentTimeMillis();
+
+		private CombineLightsSwingWorker(Token baseToken, List<Token> lightSourceTokens) {
+			this.baseToken = baseToken;
+			this.lightSourceTokens = lightSourceTokens;
+			lightsThreadPool = Executors.newCachedThreadPool();
+		}
+
+		@Override
+		protected Void doInBackground() throws Exception {
+			for (Token lightSourceToken : lightSourceTokens) {
+				CombineLightsTask task = new CombineLightsTask(baseToken, lightSourceToken);
+				lightsThreadPool.submit(task);
+			}
+
+			lightsThreadPool.shutdown();
+			lightsThreadPool.awaitTermination(3, TimeUnit.MINUTES);
+
+			return null;
+		}
+
+		@Override
+		public void done() {
+			lightsThreadPool.shutdown(); //always reclaim resources just in case?
+			System.out.println("Time to calculated lights for token: " + baseToken.getName() + ", " + (System.currentTimeMillis() - startTime) + "ms");
+
+			return;
+		}
+	}
+
+	/**
+	 * 
+	 * @author Jamz
+	 * 
+	 * A Callable task add to the ExecutorCompletionService so we can track as Futures.
+	 *
+	 */
+	private final class CombineLightsTask implements Callable<TreeMap<Double, Area>> {
+		private final Token baseToken;
+		private final Token lightSourceToken;
+
+		private CombineLightsTask(Token baseToken, Token lightSourceToken) {
+			this.baseToken = baseToken;
+			this.lightSourceToken = lightSourceToken;
+		}
+
+		@Override
+		public TreeMap<Double, Area> call() throws Exception {
+			TreeMap<Double, Area> lightArea = getLightSourceArea(baseToken, lightSourceToken);
+
+			for (Entry<Double, Area> light : lightArea.entrySet()) {
+				Area tempArea = light.getValue();
+
+				synchronized (allLightAreaMap) {
+					if (allLightAreaMap.containsKey(light.getKey()))
+						tempArea.add(allLightAreaMap.get(light.getKey()));
+
+					allLightAreaMap.put(light.getKey(), tempArea);
+				}
+			}
+
+			return lightArea;
+		}
 	}
 
 	public List<DrawableLight> getLights(LightSource.Type type) {
@@ -463,6 +514,8 @@ public class ZoneView implements ModelChangeListener {
 	}
 
 	private void calculateVisibleArea(PlayerView view) {
+		long startTime = System.currentTimeMillis();
+
 		if (visibleAreaMap.get(view) != null && visibleAreaMap.get(view).visibleArea.getBounds().getCenterX() != 0.0d) {
 			return;
 		}
@@ -480,6 +533,7 @@ public class ZoneView implements ModelChangeListener {
 				return t.isToken() && t.getHasSight() && (isGMview || t.isVisible());
 			}
 		});
+
 		for (Token token : tokenList) {
 			boolean weOwnIt = AppUtil.playerOwns(token);
 			// Permission
@@ -504,6 +558,8 @@ public class ZoneView implements ModelChangeListener {
 				meta.visibleArea.add(tokenVision);
 			}
 		}
+
+		System.out.println("calculateVisibleArea: " + (System.currentTimeMillis() - startTime) + "ms");
 	}
 
 	////
@@ -512,6 +568,7 @@ public class ZoneView implements ModelChangeListener {
 		Object evt = event.getEvent();
 		if (event.getModel() instanceof Zone) {
 			if (evt == Zone.Event.TOPOLOGY_CHANGED) {
+				System.out.println("### tokenVisionCache is cleared!");
 				tokenVisionCache.clear();
 				lightSourceCache.clear();
 				visibleAreaMap.clear();

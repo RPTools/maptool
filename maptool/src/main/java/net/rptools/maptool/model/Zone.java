@@ -1321,6 +1321,15 @@ public class Zone extends BaseModel {
 		});
 	}
 
+	public List<Token> getVblTokens() {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				return t.isVisionBlocker();
+			}
+		});
+	}
+
 	/**
 	 * This method is called when no tokens are selected and it determines which tokens FoW to show.
 	 * New buttons were added to select what type of tokens, by ownership, should be shown and driven

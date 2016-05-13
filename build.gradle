@@ -149,7 +149,11 @@ subprojects {
 	}
 
 	spotless {
-		java { eclipseFormatFile '../build-resources/eclipse.prefs.formatter.xml' }
+		java { 
+			//licenseHeaderFile	'../spotless.license.java'
+			eclipseFormatFile	'../build-resources/eclipse.prefs.formatter.xml' 
+		}
+		
 		format 'misc', {
 			target '**/*.gradle', '**/*.md', '**/.gitignore'
 	
