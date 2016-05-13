@@ -182,6 +182,7 @@ public class getInfoFunction extends AbstractFunction {
 				cinfo.put("library tokens", libInfo);
 			}
 			cinfo.put("user defined functions", JSONArray.fromObject(UserDefinedMacroFunctions.getInstance().getAliases()));
+			cinfo.put("client id", MapTool.getClientId());
 		}
 		return JSONObject.fromObject(cinfo);
 	}
