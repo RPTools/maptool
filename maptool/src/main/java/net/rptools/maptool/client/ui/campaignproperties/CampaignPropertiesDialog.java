@@ -319,6 +319,9 @@ public class CampaignPropertiesDialog extends JDialog {
 						builder.append(toHex(color));
 					}
 				}
+				if (lightSource.getLumens() != 0) {
+					builder.append(" lumens=" + lightSource.getLumens());
+				}
 				builder.append('\n');
 			}
 			builder.append('\n');
@@ -564,6 +567,18 @@ public class CampaignPropertiesDialog extends JDialog {
 						gmOnly = false;
 						owner = true;
 						continue;
+					}
+					// Lumens designation
+					if (arg.toUpperCase().startsWith("LUMENS=")) {
+						try {
+							lightSource.setLumens(
+									Integer.parseInt(arg.substring(7)));
+							continue;
+						} catch (NullPointerException noe) {
+							errlog.add(I18N.getText(
+									"msg.error.mtprops.light.lumens",
+									reader.getLineNumber(), arg));
+						}
 					}
 					// Shape designation ?
 					try {

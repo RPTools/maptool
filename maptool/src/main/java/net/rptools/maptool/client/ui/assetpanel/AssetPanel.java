@@ -211,6 +211,16 @@ public class AssetPanel extends JComponent {
 		imagePanel.repaint();
 	}
 
+	public void rescanImagePanelDir(Directory dir) {
+		((ImageFileImagePanelModel) imagePanel.getModel()).rescan(dir);
+		updateImagePanel();
+	}
+
+	public void updateImagePanel() {
+		imagePanel.revalidate();
+		imagePanel.repaint();
+	}
+
 	private synchronized void updateFilter() {
 		if (updateFilterTimer == null) {
 			updateFilterTimer = new Timer(500, new ActionListener() {

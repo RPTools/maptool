@@ -287,13 +287,13 @@ public class CampaignProperties {
 
 	// @formatter:off
 	private static final Object[][] starter = new Object[][] {
-			// Sight Type Name						Dist		Mult		Arc	LtSrc		Shape
-			{ "Normal",									0.0,		1.0,		0,		null,		null },
-			{ "Lowlight",									0.0,		2.0,		0,		null,		null },
-			{ "Square Vision",							0.0,		1.0,		0,		null,		ShapeType.SQUARE },
+			// Sight Type Name					Dist		Mult		Arc		LtSrc		Shape
+			{ "Normal",							0.0,		1.0,		0,		null,		null },
+			{ "Lowlight",						0.0,		2.0,		0,		null,		null },
+			{ "Square Vision",					0.0,		1.0,		0,		null,		ShapeType.SQUARE },
 			{ "Normal Vision - Short Range",	12.5,		1.0,		0,		null,		ShapeType.CIRCLE },
-			{ "Conic Vision",							0.0,		1.0,		120,	null,		ShapeType.CONE },
-			{ "Darkvision",								62.5,		1.0,		0,		null,		null },
+			{ "Conic Vision",					0.0,		1.0,		120,	null,		ShapeType.CONE },
+			{ "Darkvision",						62.5,		1.0,		0,		null,		null },
 	};
 	// @formatter:on
 

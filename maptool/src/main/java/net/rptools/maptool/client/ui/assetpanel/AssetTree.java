@@ -38,7 +38,7 @@ public class AssetTree extends JTree implements TreeSelectionListener {
 		setCellRenderer(new AssetTreeCellRenderer());
 
 		addMouseListener(createPopupListener());
-		addTreeSelectionListener(this);
+		//addTreeSelectionListener(this); // Jamz: Why? This listener is added below causing valueChanged to be called twice
 
 		getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		getSelectionModel().addTreeSelectionListener(this);
@@ -64,7 +64,7 @@ public class AssetTree extends JTree implements TreeSelectionListener {
 
 		JPopupMenu menu = new JPopupMenu();
 		menu.add(new JMenuItem(AppActions.REMOVE_ASSET_ROOT));
-
+		menu.add(new JMenuItem(AppActions.RESCAN_NODE));
 		return menu;
 	}
 

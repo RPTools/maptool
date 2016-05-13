@@ -773,7 +773,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	 * @return the image to be saved
 	 */
 	private PlayerView preScreenshot() throws Exception, OutOfMemoryError {
-		assert(!waitingForPostScreenshot) : "preScreenshot() called twice in a row!";
+		assert (!waitingForPostScreenshot) : "preScreenshot() called twice in a row!";
 
 		setupZoneLayers();
 		boolean viewAsPlayer = ExportRadioButtons.VIEW_PLAYER.isChecked();

@@ -25,7 +25,7 @@ public class NaiveWalker extends AbstractZoneWalker {
 	private int distance;
 
 	@Override
-	protected List<CellPoint> calculatePath(CellPoint start, CellPoint end) {
+	public List<CellPoint> calculatePath(CellPoint start, CellPoint end) {
 		List<CellPoint> list = new ArrayList<CellPoint>();
 
 		int x = start.x;

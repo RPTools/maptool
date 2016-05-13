@@ -1,9 +1,9 @@
 buildVersion=1.4.1.0
-ftpServer=ftp.nerps.net
+ftpServer=ftp.myserver.net
 ftpPort=21
-ftpUserID=nerps
-ftpPassword=Weather7363!
-ftpRemoteDir=/public_html/maptool/prod_updates
+ftpUserID=myid
+ftpPassword=mypassword
+ftpRemoteDir=/www/maptool/prod_updates
 
 // Local jWrapper directory to build from/to
 jWrapperDir=D:/Development/git/JamzTheMan/maptool/build-resources/jWrapper

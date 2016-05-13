@@ -88,9 +88,12 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerDisconnectHandler;
+import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
+import net.rptools.maptool.client.swing.AssetCacheStatusBar;
 import net.rptools.maptool.client.swing.CoordinateStatusBar;
 import net.rptools.maptool.client.swing.DragImageGlassPane;
 import net.rptools.maptool.client.swing.GlassPane;
+import net.rptools.maptool.client.swing.ImageCacheStatusBar;
 import net.rptools.maptool.client.swing.ImageChooserDialog;
 import net.rptools.maptool.client.swing.MemoryStatusBar;
 import net.rptools.maptool.client.swing.ProgressStatusBar;
@@ -187,6 +190,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	private final ProgressStatusBar progressBar = new ProgressStatusBar();
 	private final ConnectionStatusPanel connectionStatusPanel = new ConnectionStatusPanel();
 	private CoordinateStatusBar coordinateStatusBar;
+	private AssetCacheStatusBar assetCacheStatusBar;
+	private ImageCacheStatusBar imageCacheStatusBar;
+	private AppHomeDiskSpaceStatusBar appHomeDiskSpaceStatusBar;
 	private ZoomStatusBar zoomStatusBar;
 	private JLabel chatActionLabel;
 
@@ -327,6 +333,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		aboutDialog.setSize(354, 400);
 
 		statusPanel = new StatusPanel();
+
+		statusPanel.addPanel(getAssetCacheStatusBar());
+		statusPanel.addPanel(getImageCacheStatusBar());
+		statusPanel.addPanel(getAppHomeDiskSpaceStatusBar());
 		statusPanel.addPanel(getCoordinateStatusBar());
 		statusPanel.addPanel(getZoomStatusBar());
 		statusPanel.addPanel(MemoryStatusBar.getInstance());
@@ -704,6 +714,27 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 			zoomStatusBar = new ZoomStatusBar();
 		}
 		return zoomStatusBar;
+	}
+
+	public AssetCacheStatusBar getAssetCacheStatusBar() {
+		if (assetCacheStatusBar == null) {
+			assetCacheStatusBar = new AssetCacheStatusBar();
+		}
+		return assetCacheStatusBar;
+	}
+
+	public ImageCacheStatusBar getImageCacheStatusBar() {
+		if (imageCacheStatusBar == null) {
+			imageCacheStatusBar = new ImageCacheStatusBar();
+		}
+		return imageCacheStatusBar;
+	}
+
+	public AppHomeDiskSpaceStatusBar getAppHomeDiskSpaceStatusBar() {
+		if (appHomeDiskSpaceStatusBar == null) {
+			appHomeDiskSpaceStatusBar = new AppHomeDiskSpaceStatusBar();
+		}
+		return appHomeDiskSpaceStatusBar;
 	}
 
 	public CoordinateStatusBar getCoordinateStatusBar() {

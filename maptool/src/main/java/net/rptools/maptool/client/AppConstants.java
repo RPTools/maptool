@@ -50,6 +50,7 @@ public class AppConstants {
 	};
 
 	public static final String CAMPAIGN_FILE_EXTENSION = ".cmpgn";
+	public static final String CAMPAIGN_COMPATIBLE_FILE_EXTENSION = ".1.4.0.x.cmpgn";
 	public static final String CAMPAIGN_PROPERTIES_FILE_EXTENSION = ".mtprops";
 	public static final String MAP_FILE_EXTENSION = ".rpmap";
 	public static final String MACRO_FILE_EXTENSION = ".mtmacro";

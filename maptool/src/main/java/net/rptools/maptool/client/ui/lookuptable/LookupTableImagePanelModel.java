@@ -88,7 +88,7 @@ public class LookupTableImagePanelModel implements ImagePanelModel {
 
 		return table.getName();
 	}
-	
+
 	public Paint getBackground(int arg0) {
 		return null;
 	}
