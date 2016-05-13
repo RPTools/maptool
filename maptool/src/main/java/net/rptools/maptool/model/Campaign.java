@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
@@ -80,7 +82,10 @@ public class Campaign {
 	private Map<String, LookupTable> lookupTableMap;
 
 	// DEPRECATED: as of 1.3b19 here to support old serialized versions
-	private Map<GUID, LightSource> lightSourceMap;
+	// private Map<GUID, LightSource> lightSourceMap;
+
+	@XStreamOmitField
+	private transient boolean saveAsCompatible = false; // To trigger backwards compatibility.
 
 	/**
 	 * This flag indicates whether the manual fog tools have been used in this campaign while a server is not running.
@@ -525,5 +530,13 @@ public class Campaign {
 		exportDialog = d;
 		exportSettings = d.getExportSettings();
 		exportLocation = d.getExportLocation();
+	}
+
+	public boolean isSaveAsCompatible() {
+		return saveAsCompatible;
+	}
+
+	public void setSaveAsCompatible(boolean saveAsCompatible) {
+		this.saveAsCompatible = saveAsCompatible;
 	}
 }

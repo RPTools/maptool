@@ -14,7 +14,7 @@ buildscript {
 	dependencies {
 		classpath 'org.ajoberstar:gradle-git:0.11.2'
 		classpath "de.gliderpilot.gradle.jnlp:gradle-jnlp-plugin:0.0.5"
-		classpath "com.diffplug.gradle.spotless:spotless:1.3.0-SNAPSHOT"
+		classpath "com.diffplug.gradle.spotless:spotless:1.3.3"
 	}
 }
 
@@ -149,7 +149,11 @@ subprojects {
 	}
 
 	spotless {
-		java { eclipseFormatFile '../build-resources/eclipse.prefs.formatter.xml' }
+		java { 
+			//licenseHeaderFile	'../spotless.license.java'
+			eclipseFormatFile	'../build-resources/eclipse.prefs.formatter.xml' 
+		}
+		
 		format 'misc', {
 			target '**/*.gradle', '**/*.md', '**/.gitignore'
 	

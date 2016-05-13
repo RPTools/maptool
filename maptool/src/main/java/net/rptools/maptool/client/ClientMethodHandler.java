@@ -567,6 +567,13 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 					MapTool.getFrame().getCommandPanel().disableNotifyButton(enforce);
 					return;
 
+				case clearExposedArea:
+					zoneGUID = (GUID) parameters[0];
+					zone = MapTool.getCampaign().getZone(zoneGUID);
+					zone.clearExposedArea();
+					System.out.print("clearExposedArea called for " + MapTool.getConnection().getId());
+					return;
+
 				case updateExposedAreaMeta:
 					zoneGUID = (GUID) parameters[0];
 					tokenGUID = (GUID) parameters[1];

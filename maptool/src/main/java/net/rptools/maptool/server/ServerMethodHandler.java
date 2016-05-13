@@ -213,6 +213,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 			case updateExposedAreaMeta:
 				updateExposedAreaMeta(context.getGUID(0), context.getGUID(1), (ExposedAreaMetaData) context.get(2));
 				break;
+			case clearExposedArea:
+				clearExposedArea(context.getGUID(0));
+				break;
 			}
 		} finally {
 			RPCContext.setCurrent(null);
@@ -603,6 +606,17 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 	 */
 	public void updateExposedAreaMeta(GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
 		forwardToClients();
+	}
+
+	public void clearExposedArea(GUID zoneGUID) {
+		Zone zone = MapTool.getCampaign().getZone(zoneGUID);
+		zone.clearExposedArea();
+		forwardToAllClients();
+
+		// same as forwardToClients?
+		//server.getConnection().broadcastCallMethod(
+		//		ClientCommand.COMMAND.clearExposedArea.name(),
+		//		RPCContext.getCurrent().parameters);
 	}
 
 	////

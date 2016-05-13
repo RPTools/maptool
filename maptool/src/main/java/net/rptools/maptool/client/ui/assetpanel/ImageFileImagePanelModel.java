@@ -65,13 +65,18 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 		}
 	}
 
-	private final Directory dir;
+	private Directory dir;
 	private static String filter;
 	private boolean global;
 	private static List<File> fileList;
 	private List<Directory> subDirList;
 
 	public ImageFileImagePanelModel(Directory dir) {
+		this.dir = dir;
+		refresh();
+	}
+
+	public void rescan(Directory dir) {
 		this.dir = dir;
 		refresh();
 	}

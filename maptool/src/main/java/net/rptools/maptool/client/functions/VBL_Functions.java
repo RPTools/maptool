@@ -326,7 +326,7 @@ public class VBL_Functions extends AbstractFunction {
 
 				if (path.getCurrentPoint() == null) {
 					path.moveTo(x, y);
-				} else if (lastX != x && lastY != y) {
+				} else if (!(lastX == x && lastY == y)) {
 					path.lineTo(x, y);
 					lastX = x;
 					lastY = y;
