@@ -11,10 +11,15 @@
 
 package net.rptools.maptool.client.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.awt.geom.Area;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,15 +31,23 @@ import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.JTextComponent;
 
+import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -43,6 +56,7 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Direction;
 import net.rptools.maptool.model.GUID;
@@ -446,43 +460,157 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 	}
 
 	public class SaveAction extends AbstractAction {
+		boolean saveMultipleTokens = false;
+
 		public SaveAction() {
 			super("Save ...");
 
 			if (selectedTokenSet.size() > 1) {
-				setEnabled(false);
+				saveMultipleTokens = true;
 			}
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			File defaultFile = new File(tokenUnderMouse.getName());
-			JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
-			chooser.setSelectedFile(defaultFile);
+			final boolean showSaveDialog;
+			boolean showOverwriteDialog = true;
+			boolean overWriteFile = false;
+			boolean saveAsGmName = false;
+			boolean saveAsImage = false;
+			boolean saveAsPortrait = false;
+			File saveDirectory = null;
+			final FileFilter tokenFilter = new FileNameExtensionFilter("Token", Token.FILE_EXTENSION);
+			final FileFilter tokenFilterGM = new FileNameExtensionFilter("Token (GM Name)", Token.FILE_EXTENSION);
+			final FileFilter tokenFilterImage = new FileNameExtensionFilter("Token Image", "png");
+			final FileFilter tokenFilterPortrait = new FileNameExtensionFilter("Token Portrait", "png");
 
-			if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-				return;
+			if (saveMultipleTokens) {
+				showSaveDialog = MapTool.confirm("You have selected multiple tokens.\n"
+						+ "Do you want to show the Save As Dialog prompt for each token?");
+			} else {
+				showSaveDialog = true;
 			}
-			File file = chooser.getSelectedFile();
 
-			// Auto-extension
-			if (!file.getName().endsWith(Token.FILE_EXTENSION)) {
-				file = new File(file.getAbsolutePath() + "." + Token.FILE_EXTENSION);
-			}
-			// Confirm
-			if (file.exists()) {
-				if (!MapTool.confirm("File exists, would you like to overwrite?")) {
-					return;
+			for (GUID tokenGUID : selectedTokenSet) {
+				Token token = renderer.getZone().getToken(tokenGUID);
+				File tokenSaveFile;
+
+				final String tokenName = token.getName();
+				final String tokenNameGM;
+				if (token.getGMName() == null)
+					tokenNameGM = tokenName;
+				else if (token.getGMName().trim().isEmpty())
+					tokenNameGM = tokenName;
+				else
+					tokenNameGM = token.getGMName();
+
+				final File defaultFile = new File(FileUtil.stripInvalidCharacters(tokenName));
+				final File defaultFileGM = new File(FileUtil.stripInvalidCharacters(tokenNameGM));
+
+				final JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
+				chooser.resetChoosableFileFilters();
+				chooser.setAcceptAllFileFilterUsed(false);
+				chooser.addChoosableFileFilter(tokenFilter);
+				chooser.addChoosableFileFilter(tokenFilterGM);
+				chooser.addChoosableFileFilter(tokenFilterImage);
+				chooser.addChoosableFileFilter(tokenFilterPortrait);
+
+				chooser.setSelectedFile(defaultFile);
+				//System.out.println("setSelectedFile: " + chooser.getSelectedFile());
+				//System.out.println("defaultFile: " + defaultFile);
+				chooser.addPropertyChangeListener(new PropertyChangeListener() {
+					public void propertyChange(PropertyChangeEvent evt) {
+						if (evt.getPropertyName() == JFileChooser.FILE_FILTER_CHANGED_PROPERTY && showSaveDialog) {
+							if (chooser.getFileFilter() == tokenFilterGM) {
+								chooser.setSelectedFile(defaultFileGM);
+							} else {
+								chooser.setSelectedFile(defaultFile);
+							}
+						}
+					}
+				});
+
+				if (showSaveDialog) {
+					chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+					if (chooser.showSaveDialog(
+							MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+						return;
+					}
+
+					tokenSaveFile = chooser.getSelectedFile();
+				} else {
+					if (saveDirectory == null) {
+						chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+						if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION)
+							return;
+						if (chooser.getFileFilter() == tokenFilterGM)
+							saveAsGmName = true;
+						saveDirectory = chooser.getSelectedFile();
+
+						if (chooser.getFileFilter() == tokenFilterImage) {
+							saveAsImage = true;
+						} else if (chooser.getFileFilter() == tokenFilterPortrait) {
+							saveAsImage = true;
+							saveAsPortrait = true;
+						}
+
+					}
+
+					if (saveAsGmName) {
+						tokenSaveFile = new File(saveDirectory.getAbsolutePath() + "\\" + FileUtil.stripInvalidCharacters(tokenNameGM));
+					} else {
+						tokenSaveFile = new File(saveDirectory.getAbsolutePath() + "\\" + FileUtil.stripInvalidCharacters(tokenName));
+					}
 				}
-			}
-			Token token = new Token(tokenUnderMouse);
-			if (!MapTool.getPlayer().isGM()) {
-				token.setGMNotes("");
-			}
-			try {
-				PersistenceUtil.saveToken(token, file);
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-				MapTool.showError("Could not save token: " + ioe);
+
+				// Auto-extension
+				if (!saveAsImage && !tokenSaveFile.getName().toLowerCase().endsWith("." + Token.FILE_EXTENSION)) {
+					tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + "." + Token.FILE_EXTENSION);
+				}
+
+				if (tokenSaveFile.exists() && saveMultipleTokens && showOverwriteDialog) {
+					JPanel messageObj = new JPanel();
+					JLabel message = new JLabel("File exists, would you like to overwrite?\n");
+					JCheckBox dontAskAgainCb = new JCheckBox("Don't ask me this again.");
+
+					dontAskAgainCb.setHorizontalAlignment(SwingConstants.LEFT);
+					dontAskAgainCb.setVerticalAlignment(SwingConstants.BOTTOM);
+					dontAskAgainCb.setFont(new Font("Tahoma", Font.PLAIN, 9));
+
+					message.setHorizontalAlignment(SwingConstants.LEFT);
+					message.setVerticalTextPosition(SwingConstants.TOP);
+
+					messageObj.setLayout(new BorderLayout(0, 10));
+					messageObj.add(message, BorderLayout.NORTH);
+					messageObj.add(dontAskAgainCb, BorderLayout.SOUTH);
+
+					overWriteFile = JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(MapTool.getFrame(), messageObj, "Confirmation", JOptionPane.YES_OPTION);
+					showOverwriteDialog = !dontAskAgainCb.isSelected();
+					System.out.println("overWriteFile: " + overWriteFile);
+					System.out.println("dontAskAgainCb: " + dontAskAgainCb.isSelected());
+
+				} else if (tokenSaveFile.exists() && showOverwriteDialog) {
+					overWriteFile = MapTool.confirm("File exists, would you like to overwrite?");
+				}
+
+				if (tokenSaveFile.exists() && !overWriteFile)
+					continue;
+
+				if (!MapTool.getPlayer().isGM()) {
+					token.setGMNotes("");
+				}
+				try {
+					if (saveAsImage && !saveAsPortrait) {
+						PersistenceUtil.saveTokenImage(token.getImageAssetId(), tokenSaveFile);
+					} else if (saveAsPortrait) {
+						PersistenceUtil.saveTokenImage(token.getPortraitImage(), tokenSaveFile);
+					} else {
+						PersistenceUtil.saveToken(token, tokenSaveFile);
+					}
+				} catch (IOException ioe) {
+					ioe.printStackTrace();
+					MapTool.showError("Could not save token: " + ioe);
+				}
 			}
 		}
 	}
@@ -814,6 +942,11 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 	public class ShowPropertiesDialogAction extends AbstractAction {
 		public ShowPropertiesDialogAction() {
 			putValue(Action.NAME, "Edit ...");
+
+			// Jamz: Bug fix, we don't support editing multiple tokens here.
+			if (selectedTokenSet.size() > 1) {
+				setEnabled(false);
+			}
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -860,7 +993,46 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
 		public void actionPerformed(ActionEvent e) {
 			renderer.setAutoResizeStamp(true);
-			renderer.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+			renderer.setCursor(
+					Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+		}
+	}
+
+	/**
+	 * Menu option to turn token into a Vision Blocking Token
+	 * 
+	 * @author Jamz
+	 * @since 1.4.1.0
+	 */
+	public class BlockVisionAction extends AbstractAction {
+		private final ZoneRenderer renderer;
+
+		public BlockVisionAction(boolean blockVision, ZoneRenderer renderer) {
+			//super(I18N.getText("token.popup.menu.blockvision"));
+			super("Block Vision");
+			this.renderer = renderer;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			for (GUID guid : selectedTokenSet) {
+				Zone zone = renderer.getZone();
+				Token token = zone.getToken(guid);
+				if (token == null) {
+					continue;
+				}
+
+				TokenVBL tvbl = new TokenVBL(token);
+
+				//if (token.hasTokenVBL()) {
+				//	tvbl.doWork(token.getTokenVBL(), renderer);
+				//} else {
+				Area b = tvbl.buildVBL();
+				//token.setTokenVBL(b);
+				tvbl.doWork(b, renderer);
+				//}
+
+				//tvbl.doWork(renderer);
+			}
 		}
 	}
 }

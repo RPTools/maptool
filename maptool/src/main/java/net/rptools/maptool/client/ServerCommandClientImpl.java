@@ -243,6 +243,11 @@ public class ServerCommandClientImpl implements ServerCommand {
 		makeServerCall(COMMAND.updateCampaignMacros, properties);
 	}
 
+	public void clearExposedArea(GUID zoneGUID) {
+		//System.out.println("in ServerCommandClientImpl");
+		makeServerCall(COMMAND.clearExposedArea, zoneGUID);
+	}
+
 	private static void makeServerCall(ServerCommand.COMMAND command, Object... params) {
 		if (MapTool.getConnection() != null) {
 			MapTool.getConnection().callMethod(command.name(), params);

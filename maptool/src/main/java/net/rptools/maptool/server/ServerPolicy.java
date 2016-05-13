@@ -27,6 +27,7 @@ public class ServerPolicy {
 	private boolean useToolTipsForDefaultRollFormat;
 	private boolean useIndividualFOW;
 	private boolean isAutoRevealOnMovement;
+	private boolean includeOwnedNPCs = true; // Include Owned NPC Tokens in FoW views
 	private WalkerMetric movementMetric;
 
 	public ServerPolicy() {
@@ -148,5 +149,19 @@ public class ServerPolicy {
 
 	public void setUseIndividualFOW(boolean flag) {
 		useIndividualFOW = flag;
+	}
+
+	/**
+	 * @return the includeOwnedNPCs
+	 */
+	public boolean isIncludeOwnedNPCs() {
+		return includeOwnedNPCs;
+	}
+
+	/**
+	 * @param includeOwnedNPCs the includeOwnedNPCs to set
+	 */
+	public void setIncludeOwnedNPCs(boolean includeOwnedNPCs) {
+		this.includeOwnedNPCs = includeOwnedNPCs;
 	}
 }

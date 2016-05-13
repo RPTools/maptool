@@ -370,7 +370,7 @@ public class MapToolLauncher extends JFrame {
 
 		jlMTLogo.setIcon(CopiedFromOtherJars.resizeImage(mapToolIcon, 128, 128));
 		logoPanel.add(jlMTLogo);
-		 
+
 		logoPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		logoPanel.setToolTipText(CopiedFromOtherJars.getText("msg.logoPanel.tooltip"));
 		logoPanel.addMouseListener(new MouseListener() {

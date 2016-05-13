@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
@@ -127,6 +128,10 @@ public class AssetDirectory extends Directory {
 					thumbnail = PersistenceUtil.getTokenThumbnail(imageFile);
 				} else {
 					thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
+
+					// Update disk usage in the status bar after we add a new thumbnail...
+					MapTool.getFrame().getImageCacheStatusBar().update(AppUtil.getDiskSpaceUsed(MapTool.getThumbnailManager().getThumbnailLocation()));
+					MapTool.getFrame().getAppHomeDiskSpaceStatusBar().update();
 				}
 			} catch (Throwable t) {
 				t.printStackTrace();

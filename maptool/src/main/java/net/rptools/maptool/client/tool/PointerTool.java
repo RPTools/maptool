@@ -116,6 +116,9 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	private Area hoverTokenBounds;
 	private String hoverTokenNotes;
 
+	// Track token interactions to hide statsheets when doing other stuff
+	private boolean mouseButtonDown = false;
+
 	private Token tokenBeingDragged;
 	private Token tokenUnderMouse;
 	private Token markerUnderMouse;
@@ -261,11 +264,18 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				if (token == null) {
 					continue;
 				}
-				if (token.getType() == Token.Type.PC) {
+				// Jamz: Changed to allow NPC FoW
+				//if (token.getType() == Token.Type.PC) {
+				if (MapTool.getPlayer().isGM() || token.isOwner(MapTool.getPlayer().getName())) {
 					exposeSet.add(tokenGUID);
 				}
 			}
-			FogUtil.exposeLastPath(renderer, exposeSet);
+
+			// Lee: fog exposure according to reveal type
+			if (zone.getWaypointExposureToggle())
+				FogUtil.exposeVisibleArea(renderer, exposeSet, false);
+			else
+				FogUtil.exposeLastPath(renderer, exposeSet);
 		}
 	}
 
@@ -400,6 +410,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	public void mousePressed(MouseEvent e) {
 		super.mousePressed(e);
 
+		mouseButtonDown = true;
+
 		if (isShowingHover) {
 			isShowingHover = false;
 			hoverTokenBounds = null;
@@ -429,6 +441,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
 		// Properties
 		if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+			mouseButtonDown = false;
 			List<Token> tokenList = renderer.getTokenStackAt(mouseX, mouseY);
 			if (tokenList != null) {
 				// Stack
@@ -500,6 +513,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		mouseButtonDown = false;
+
 		if (isShowingTokenStackPopup) {
 			if (tokenStackPanel.contains(e.getX(), e.getY())) {
 				tokenStackPanel.handleMouseReleased(e);
@@ -1138,10 +1153,24 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				//  Only let the GM's do this
 				if (MapTool.getPlayer().isGM()) {
 					FogUtil.exposePCArea(renderer);
-					MapTool.serverCommand().exposePCArea(renderer.getZone().getId());
+					// Jamz: This doesn't seem to be needed 
+					//MapTool.serverCommand().exposePCArea(renderer.getZone().getId());
 				}
 			}
 		});
+		actionMap.put(
+				KeyStroke.getKeyStroke(KeyEvent.VK_F,
+						AppActions.menuShortcut | InputEvent.SHIFT_DOWN_MASK),
+				new AbstractAction() {
+					private static final long serialVersionUID = 1L;
+
+					public void actionPerformed(ActionEvent e) {
+						// Only let the GM's do this
+						if (MapTool.getPlayer().isGM()) {
+							FogUtil.exposeAllOwnedArea(renderer);
+						}
+					}
+				});
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, AppActions.menuShortcut), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
@@ -1469,9 +1498,11 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 					statsG.dispose();
 				}
 			}
-			if (statSheet != null) {
-				g.drawImage(statSheet, 5, viewSize.height - statSheet.getHeight() - 5, this);
-			}
+
+		}
+		// Jamz: Statsheet was still showing on drag, added other tests to hide statsheet as well
+		if (statSheet != null && !isDraggingToken && !mouseButtonDown) {
+			g.drawImage(statSheet, 5, viewSize.height - statSheet.getHeight() - 5, this);
 		}
 
 		// Hovers
