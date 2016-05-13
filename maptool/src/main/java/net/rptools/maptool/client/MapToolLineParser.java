@@ -60,7 +60,7 @@ public class MapToolLineParser {
 			TokenPropertyFunctions.getInstance(), TokenRemoveFromInitiativeFunction.getInstance(), TokenSelectionFunctions.getInstance(),
 			TokenSightFunctions.getInstance(), TokenSpeechFunctions.getInstance(), TokenStateFunction.getInstance(), TokenVisibleFunction.getInstance(), UserDefinedMacroFunctions.getInstance(),
 			isVisibleFunction.getInstance(), getInfoFunction.getInstance(), TokenMoveFunctions.getInstance(), FogOfWarFunctions.getInstance(), VBL_Functions.getInstance(),
-			ZoomFunctions.getInstance(), ParserPropertyFunctions.getInstance() };
+			ZoomFunctions.getInstance(), ParserPropertyFunctions.getInstance(), MathFunctions.getInstance() };
 
 	/** Name and Source or macros that come from chat. */
 	public static final String CHAT_INPUT = "chat";
@@ -1311,8 +1311,11 @@ public class MapToolLineParser {
 		} catch (AssertFunctionException afe) {
 			throw afe;
 		} catch (ParserException e) {
+			throw e;
+		} catch (Exception e) {
 			return I18N.getText("lineParser.invalidExpr", roll);
 		}
+
 	}
 
 	public String runMacro(MapToolVariableResolver resolver, Token tokenInContext, String qMacroName, String args) throws ParserException {
