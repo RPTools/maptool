@@ -16,10 +16,16 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
+import net.rptools.lib.swing.ColorPicker;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.drawing.AbstractDrawing;
+import net.rptools.maptool.model.drawing.Drawable;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
+import net.rptools.maptool.model.drawing.DrawablePaint;
+import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -52,7 +58,8 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		add(new DeleteDrawingAction());
 		// TODO add properties action as stage two
 		//add(new JSeparator());
-		//add(new DrawingPropertiesAction());
+		add(new GetPropertiesAction());
+		add(new SetPropertiesAction());
 	}
 
 	private boolean isDrawnElementGroup(Object object) {
@@ -61,15 +68,44 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		return false;
 	}
 
-	public class DrawingPropertiesAction extends AbstractAction {
-		public DrawingPropertiesAction() {
-			super("Properties");
+	public class GetPropertiesAction extends AbstractAction {
+		public GetPropertiesAction() {
+			super("Get Properties");
 		}
 
 		public void actionPerformed(ActionEvent e) {
-
+			ColorPicker cp = MapTool.getFrame().getColorPicker();
+			Pen p = elementUnderMouse.getPen();
+			Drawable d = elementUnderMouse.getDrawable();
+			if (d instanceof AbstractDrawing) {
+				AbstractDrawing ad = (AbstractDrawing)d;
+				cp.setForegroundPaint(p.getPaint().getPaint(ad));
+				cp.setBackgroundPaint(p.getBackgroundPaint().getPaint(ad));
+				cp.setPenWidth((int)p.getThickness());
+				cp.setTranslucency((int)p.getOpacity()*100);
+				cp.setEraseSelected(p.isEraser());
+			}
 		}
 	}
+
+	public class SetPropertiesAction extends AbstractAction {
+		public SetPropertiesAction() {
+			super("Set Properties");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			ColorPicker cp = MapTool.getFrame().getColorPicker();
+			Pen p = elementUnderMouse.getPen();
+			p.setPaint(DrawablePaint.convertPaint(cp.getForegroundPaint()));
+			p.setBackgroundPaint(DrawablePaint.convertPaint(cp.getBackgroundPaint()));
+			p.setThickness(cp.getStrokeWidth());
+			p.setOpacity(cp.getOpacity());
+			p.setThickness(cp.getStrokeWidth());
+			MapTool.getFrame().updateDrawTree();
+			MapTool.getFrame().refresh();
+		}
+	}
+	
 
 	public class UngroupDrawingsAction extends AbstractAction {
 		public UngroupDrawingsAction() {
