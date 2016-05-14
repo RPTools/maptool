@@ -1198,24 +1198,23 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		// (This method has it's own 'timer' calls)
 		if (zone.hasFog())
 			renderFog(g2d, view);
-
+		
 		if (Zone.Layer.TOKEN.isEnabled()) {
-
-			// if here is fog or vision we may need to re-render figure type tokens
+			// Jamz: If there is fog or vision we may need to re-render vision-blocking type tokens
+			// For example. this allows a "door" stamp to block vision but still allow you to see the door.
+			List<Token> vblTokens = zone.getVblTokens();
+			if (!vblTokens.isEmpty()) {
+				timer.start("tokens - vision blockers");
+				renderTokens(g2d, vblTokens, view, true);
+				timer.stop("tokens - vision blockers");
+			}
+			
+			// if there is fog or vision we may need to re-render figure type tokens
 			List<Token> tokens = zone.getFigureTokens();
 			if (!tokens.isEmpty()) {
 				timer.start("tokens - figures");
 				renderTokens(g2d, tokens, view, true);
 				timer.stop("tokens - figures");
-			}
-
-			// if here is fog or vision we may need to re-render vision-blocking type tokens
-			// For example. this allows a "door" stamp to block vision but still allow you to see the door.
-			List<Token> tokens2 = zone.getVblTokens();
-			if (!tokens2.isEmpty()) {
-				timer.start("tokens - vision blockers");
-				renderTokens(g2d, tokens2, view, true);
-				timer.stop("tokens - vision blockers");
 			}
 
 			timer.start("owned movement");
@@ -1717,6 +1716,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						myCombined.add(new Area(exposedArea));
 					}
 					buffG.fill(myCombined);
+					
 					renderFogArea(buffG, view, myCombined, visibleArea);
 					renderFogOutline(buffG, view, myCombined);
 				}
@@ -2704,6 +2704,24 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						//g.draw(cb); // debugging
 					} else {
 						// else draw the clipped token
+						Graphics2D cellOnly = (Graphics2D) clippedG.create();
+						Area cellArea = new Area(visibleScreenArea);
+						cellArea.intersect(cb);
+						cellOnly.setClip(cellArea);
+						cellOnly.drawImage(workImage, at, this);
+					}
+				}
+			} else if (!isGMView && zoneView.isUsingVision() && token.isVisionBlocker()) {
+				// Jamz: Vision Blocking tokens will get rendered again here to place on top of FoW
+				Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
+				if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
+					// the cell intersects visible area so
+					if (zone.getGrid().checkRegion(cb.getBounds(), visibleScreenArea)) {
+						// if we can see 2/9 of the stamp/token, draw the whole thing
+						g.drawImage(workImage, at, this);
+						//g.draw(cb); // debugging
+					} else {
+						// else draw the clipped stamp/token
 						Graphics2D cellOnly = (Graphics2D) clippedG.create();
 						Area cellArea = new Area(visibleScreenArea);
 						cellArea.intersect(cb);
