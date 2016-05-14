@@ -334,7 +334,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 
 		if (functionName.equals("json.objrolls")) {
 			if (parameters.size() != 3) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 2, parameters.size()));
+				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 3, parameters.size()));
 			}
 
 			return JSONObjRolls(parameters);
@@ -1633,21 +1633,24 @@ public class JSONMacroFunctions extends AbstractFunction {
 			throw new ParserException(I18N.getText("macro.function.json.onlyArray", o == null ? "NULL" : o.toString(), "json.objrolls"));
 		}
 
-		if (param.get(2) instanceof String) {
+		if (param.get(2).toString().trim().startsWith("[")) {
+			o = asJSON(param.get(2));
+			if (o instanceof JSONArray) {
+				rolls = ((JSONArray) o).toArray();
+				if (rolls.length != stats.length) {
+					throw new ParserException(I18N.getText("macro.function.json.matchingArrayOrRoll"));
+				}
+			} else {
+				throw new ParserException(I18N.getText("macro.function.json.matchingArrayOrRoll"));
+			}
+		} else if (param.get(2) instanceof String) {
 			String roll = (String) param.get(2);
 			rolls = new String[stats.length];
 			for (int i = 0; i < rolls.length; i++) {
 				rolls[i] = roll;
 			}
 		} else {
-			o = asJSON(param.get(2));
-			if (o instanceof JSONArray) {
-				rolls = ((JSONArray) o).toArray();
-				if (rolls.length != stats.length) {
-				}
-			} else {
-				throw new ParserException(I18N.getText("macro.function.json.matchingArrayOrRoll"));
-			}
+			throw new ParserException(I18N.getText("macro.function.json.matchingArrayOrRoll"));
 		}
 
 		ExpressionParser parser = new ExpressionParser(new MapToolVariableResolver(null));
