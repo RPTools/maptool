@@ -103,28 +103,22 @@ public class MathFunctions extends AbstractFunction {
 			return BigDecimal.valueOf(Math.tan(nparam.get(0).doubleValue()));
 		} else if ("math.acos".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.toRadians(Math.acos(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.toDegrees(Math.acos(nparam.get(0).doubleValue())));
 		} else if ("math.acos_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.acos(nparam.get(0).doubleValue()));
 		} else if ("math.asin".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.toRadians(Math.asin(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.toDegrees(Math.asin(nparam.get(0).doubleValue())));
 		} else if ("math.asin_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.asin(nparam.get(0).doubleValue()));
 		} else if ("math.atan".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.toRadians(Math.atan(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.toDegrees(Math.atan(nparam.get(0).doubleValue())));
 		} else if ("math.atan_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.atan(nparam.get(0).doubleValue()));
-		} else if ("math.atan".equals(functionName)) {
-			List<BigDecimal> nparam = getNumericParams(param, 2, 2, functionName);
-			return BigDecimal.valueOf(Math.toRadians(Math.atan2(nparam.get(0).doubleValue(), nparam.get(1).doubleValue())));
-		} else if ("math.atan_r".equals(functionName)) {
-			List<BigDecimal> nparam = getNumericParams(param, 2, 2, functionName);
-			return BigDecimal.valueOf(Math.atan2(nparam.get(0).doubleValue(), nparam.get(1).doubleValue()));
 		} else if ("math.cbrt".equals(functionName) || "math.cuberoot".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.cbrt(nparam.get(0).doubleValue()));
