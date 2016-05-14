@@ -85,43 +85,43 @@ public class MathFunctions extends AbstractFunction {
 			return BigDecimal.valueOf(Math.floor(nparam.get(0).doubleValue()));
 		} else if ("math.cos".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.cos(Math.toDegrees(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.cos(Math.toRadians(nparam.get(0).doubleValue())));
 		} else if ("math.cos_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.cos(nparam.get(0).doubleValue()));
 		} else if ("math.sin".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.sin(Math.toDegrees(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.sin(Math.toRadians(nparam.get(0).doubleValue())));
 		} else if ("math.sin_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.sin(nparam.get(0).doubleValue()));
 		} else if ("math.tan".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.tan(Math.toDegrees(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.tan(Math.toRadians(nparam.get(0).doubleValue())));
 		} else if ("math.tan_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.tan(nparam.get(0).doubleValue()));
 		} else if ("math.acos".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.toDegrees(Math.acos(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.toRadians(Math.acos(nparam.get(0).doubleValue())));
 		} else if ("math.acos_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.acos(nparam.get(0).doubleValue()));
 		} else if ("math.asin".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.toDegrees(Math.asin(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.toRadians(Math.asin(nparam.get(0).doubleValue())));
 		} else if ("math.asin_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.asin(nparam.get(0).doubleValue()));
 		} else if ("math.atan".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.toDegrees(Math.atan(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.toRadians(Math.atan(nparam.get(0).doubleValue())));
 		} else if ("math.atan_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.atan(nparam.get(0).doubleValue()));
 		} else if ("math.atan".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 2, 2, functionName);
-			return BigDecimal.valueOf(Math.toDegrees(Math.atan2(nparam.get(0).doubleValue(), nparam.get(1).doubleValue())));
+			return BigDecimal.valueOf(Math.toRadians(Math.atan2(nparam.get(0).doubleValue(), nparam.get(1).doubleValue())));
 		} else if ("math.atan_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 2, 2, functionName);
 			return BigDecimal.valueOf(Math.atan2(nparam.get(0).doubleValue(), nparam.get(1).doubleValue()));
