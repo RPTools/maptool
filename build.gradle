@@ -192,7 +192,7 @@ project(':maptool') {
         compile 'net.rptools.parser:parser:1.1.b24'
         //compile 'net.rptools.parser:parser:1.4.0.+'
         compile 'ca.odell.renderpack:renderpack:1.2004'
-        compile 'net.rptools.rplib:rplib:1.4.0.+'
+        compile 'net.rptools.rplib:rplib:1.4.0.1'
         compile 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
         compile 'org.swinglabs:swing-worker:1.1'
         compile 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
