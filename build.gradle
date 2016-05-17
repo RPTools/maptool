@@ -398,19 +398,19 @@ task createFatJars(dependsOn: ['maptool:deleteBuild', 'launcher:deleteBuild', 'l
 	}
 }
 
-task deleteJwrapperConfig(type: Delete) << {
+task deleteJwrapperConfig(type: Delete) {
 	description = "Delete the generated jwrapper.xml file"
 	println "Deleting ${rootDir}/build-resources/jWrapper/jwrapper.xml"
 	delete "${rootDir}/build-resources/jWrapper/jwrapper.xml"
 }
 
-task deleteMtConfig(type: Delete) << {
+task deleteMtConfig(type: Delete) {
 	description = "Delete the generated mt.cfg file"
 	println "Deleting ${rootDir}/build-resources/jWrapper/mt.cfg"
 	delete "${rootDir}/build-resources/jWrapper/mt.cfg"
 }
 
-task createJwrapperConfig(dependsOn:deleteJwrapperConfig, type: Copy) << {
+task createJwrapperConfig(dependsOn:deleteJwrapperConfig, type: Copy) {
 	description = "Generates jWrapper XML config from template"
 	group = "Distribution"
 	println 'Setting jWrapper directory to: ' + "${rootDir}/build-resources/jWrapper"
@@ -434,7 +434,7 @@ task createJwrapperConfig(dependsOn:deleteJwrapperConfig, type: Copy) << {
 	}
 }
 
-task createMTcfgFile(dependsOn:deleteMtConfig, type: Copy) << {
+task createMTcfgFile(dependsOn:deleteMtConfig, type: Copy) {
 	description = "Generates a MapTool default mt.cfg for package release using jWrapper"
 	group = "Distribution"
 	from ('build-resources/jWrapper') {

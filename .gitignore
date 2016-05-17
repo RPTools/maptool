@@ -2,6 +2,7 @@
 build/
 /bin/
 
+
 # OS generated files
 ################################################################################
 .DS_Store
@@ -23,6 +24,7 @@ build/
 out/
 
 
+
 # IDEs
 ################################################################################
 *.iml
@@ -38,3 +40,8 @@ out/
 # Keystore
 build-resources/rptools-keystore
 /gradle.properties
+
+
+# Generated
+build-resources/jWrapper/JWrapperLaunchTemp
+build-resources/jWrapper/jwrapper.xml
