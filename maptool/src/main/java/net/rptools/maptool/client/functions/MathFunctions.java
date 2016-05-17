@@ -119,6 +119,12 @@ public class MathFunctions extends AbstractFunction {
 		} else if ("math.atan_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.atan(nparam.get(0).doubleValue()));
+		} else if ("math.atan2".equals(functionName)) {
+			List<BigDecimal> nparam = getNumericParams(param, 2, 2, functionName);
+			return BigDecimal.valueOf(Math.toDegrees(Math.atan2(nparam.get(0).doubleValue(), nparam.get(1).doubleValue())));
+		} else if ("math.atan2_r".equals(functionName)) {
+			List<BigDecimal> nparam = getNumericParams(param, 2, 2, functionName);
+			return BigDecimal.valueOf(Math.atan2(nparam.get(0).doubleValue(), nparam.get(1).doubleValue()));
 		} else if ("math.cbrt".equals(functionName) || "math.cuberoot".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.cbrt(nparam.get(0).doubleValue()));
