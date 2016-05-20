@@ -537,7 +537,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 		mouseX = e.getX();
 		mouseY = e.getY();
 
-		if (renderer.isAutoResizeStamp()) {
+		if (renderer.isAutoResizeStamp() && SwingUtilities.isLeftMouseButton(e)) {
 			int x1 = dragStartX;
 			int y1 = dragStartY;
 
