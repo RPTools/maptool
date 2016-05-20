@@ -14,6 +14,7 @@ package net.rptools.maptool.client.script.javascript;
 
 import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import org.apache.log4j.Logger;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -21,8 +22,9 @@ import javax.script.ScriptException;
 public class JSScriptEngine {
 
 	private static JSScriptEngine jsScriptEngine = new JSScriptEngine();
-	private ScriptEngine engine;
+	private static final Logger log = Logger.getLogger(JSScriptEngine.class);
 
+	private ScriptEngine engine;
 
 	public class JSClassFilter implements ClassFilter {
 
@@ -94,15 +96,22 @@ public class JSScriptEngine {
 			if (jclass.startsWith("java.util.")) {
 				return true;
 			}
+			if (jclass.startsWith("net.rptools.maptool.client.script.javascript.api.")) {
+				return true;
+			}
 
 			return false;
 		}
 	}
 
-
-
 	private JSScriptEngine() {
 		engine = new NashornScriptEngineFactory().getScriptEngine(new JSClassFilter());
+		try {
+			engine.eval("var MTScript = {}");
+			engine.eval("MTScript.Variables = Java.type('net.rptools.maptool.client.script.javascript.api.VariableResolverBridge')");
+		} catch (ScriptException e) {
+			log.error("Could not initialize JavaScript Engine.", e);
+		}
 	}
 
 	public static JSScriptEngine getJSScriptEngine() {
@@ -110,6 +119,7 @@ public class JSScriptEngine {
 	}
 
 	public Object evalAnonymous(String script) throws ScriptException {
+
 		StringBuilder wrapped = new StringBuilder();
 		wrapped.append("(function() {").append(script).append("})();");
 		return engine.eval(wrapped.toString());
