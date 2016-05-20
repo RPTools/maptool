@@ -13,12 +13,16 @@
 package net.rptools.maptool.client.script.javascript;
 
 import jdk.nashorn.api.scripting.ClassFilter;
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 public class JSScriptEngine {
+
+	private static JSScriptEngine jsScriptEngine = new JSScriptEngine();
+	private ScriptEngine engine;
+
 
 	public class JSClassFilter implements ClassFilter {
 
@@ -95,10 +99,10 @@ public class JSScriptEngine {
 		}
 	}
 
-	private static JSScriptEngine jsScriptEngine = new JSScriptEngine();
-	private final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+
 
 	private JSScriptEngine() {
+		engine = new NashornScriptEngineFactory().getScriptEngine(new JSClassFilter());
 	}
 
 
