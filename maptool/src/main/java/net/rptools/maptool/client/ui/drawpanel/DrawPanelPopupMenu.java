@@ -1,5 +1,19 @@
+/*
+* This software Copyright by the RPTools.net development team, and licensed
+* under the GPL Version 3 or, at your option, any later version.
+*
+* MapTool 2 Source Code is distributed in the hope that it will be useful, but
+* WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+* details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this source Code. If not, see <http://www.gnu.org/licenses/>
+*/
+
 package net.rptools.maptool.client.ui.drawpanel;
 
+import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Area;
@@ -18,6 +32,7 @@ import javax.swing.JSeparator;
 
 import net.rptools.lib.swing.ColorPicker;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.AssetPaint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -77,15 +92,27 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			ColorPicker cp = MapTool.getFrame().getColorPicker();
 			Pen p = elementUnderMouse.getPen();
 			Drawable d = elementUnderMouse.getDrawable();
+
 			if (d instanceof AbstractDrawing) {
-				AbstractDrawing ad = (AbstractDrawing)d;
-				cp.setForegroundPaint(p.getPaint().getPaint(ad));
-				cp.setBackgroundPaint(p.getBackgroundPaint().getPaint(ad));
-				cp.setPenWidth((int)p.getThickness());
-				cp.setTranslucency((int)p.getOpacity()*100);
+				AbstractDrawing ad = (AbstractDrawing) d;
+				cp.setForegroundPaint(getPaint(p.getPaint(), ad));
+				cp.setBackgroundPaint(getPaint(p.getBackgroundPaint(), ad));
+				cp.setPenWidth((int) p.getThickness());
+				cp.setTranslucency((int) (p.getOpacity() * 100));
 				cp.setEraseSelected(p.isEraser());
 			}
 		}
+	}
+
+	private Paint getPaint(DrawablePaint paint, AbstractDrawing ad) {
+		if (paint instanceof DrawableColorPaint) {
+			return paint.getPaint(ad);
+		}
+		if (paint instanceof DrawableTexturePaint) {
+			DrawableTexturePaint dtp = (DrawableTexturePaint) paint;
+			return new AssetPaint(dtp.getAsset());
+		}
+		return null;
 	}
 
 	public class SetPropertiesAction extends AbstractAction {
@@ -96,16 +123,28 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		public void actionPerformed(ActionEvent e) {
 			ColorPicker cp = MapTool.getFrame().getColorPicker();
 			Pen p = elementUnderMouse.getPen();
-			p.setPaint(DrawablePaint.convertPaint(cp.getForegroundPaint()));
-			p.setBackgroundPaint(DrawablePaint.convertPaint(cp.getBackgroundPaint()));
+			if (cp.getForegroundPaint() != null) {
+				p.setPaint(DrawablePaint.convertPaint(cp.getForegroundPaint()));
+				p.setForegroundMode(0);
+			} else {
+				p.setPaint(null);
+				p.setForegroundMode(1);
+			}
+			if (cp.getBackgroundPaint() != null) {
+				p.setBackgroundPaint(DrawablePaint.convertPaint(cp.getBackgroundPaint()));
+				p.setBackgroundMode(0);
+			} else {
+				p.setBackgroundPaint(null);
+				p.setBackgroundMode(1);
+			}
 			p.setThickness(cp.getStrokeWidth());
 			p.setOpacity(cp.getOpacity());
 			p.setThickness(cp.getStrokeWidth());
+			p.setEraser(cp.isEraseSelected());
 			MapTool.getFrame().updateDrawTree();
-			MapTool.getFrame().refresh();
+			MapTool.serverCommand().updateDrawing(renderer.getZone().getId(), p, elementUnderMouse);
 		}
 	}
-	
 
 	public class UngroupDrawingsAction extends AbstractAction {
 		public UngroupDrawingsAction() {
@@ -185,6 +224,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 				}
 			}
 		}
+
 		public void actionPerformed(ActionEvent e) {
 			if (selectedDrawSet.size() > 1 && elementUnderMouse != null) {
 				// only bother doing stuff if more than one selected
@@ -202,7 +242,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 							a.add(de.getDrawable().getArea());
 					}
 				}
-				Shape s = (Shape)a;
+				Shape s = (Shape) a;
 				DrawnElement de = new DrawnElement(new ShapeDrawable(s), elementUnderMouse.getPen());
 				de.getDrawable().setLayer(elementUnderMouse.getDrawable().getLayer());
 				MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
@@ -211,7 +251,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			}
 		}
 	}
-	
+
 	public class DeleteDrawingAction extends AbstractAction {
 		public DeleteDrawingAction() {
 			super("Delete");

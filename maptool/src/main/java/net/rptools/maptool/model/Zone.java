@@ -930,6 +930,28 @@ public class Zone extends BaseModel {
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
 	}
 
+	public void updateDrawable(DrawnElement drawnElement, Pen pen) {
+		if (drawnElement.getDrawable().getLayer() == Layer.OBJECT) {
+			updatePen(objectDrawables, drawnElement, pen);
+		} else if (drawnElement.getDrawable().getLayer() == Layer.BACKGROUND) {
+			updatePen(backgroundDrawables, drawnElement, pen);
+		} else if (drawnElement.getDrawable().getLayer() == Layer.GM) {
+			updatePen(gmDrawables, drawnElement, pen);
+		} else {
+			updatePen(drawables, drawnElement, pen);
+		}
+		fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
+	}
+
+	private void updatePen(List<DrawnElement> elementList, DrawnElement drawnElement, Pen pen) {
+		for (DrawnElement de : elementList) {
+			if (de.getDrawable().getId().equals(drawnElement.getDrawable().getId())) {
+				de.setPen(new Pen(pen));
+				break;
+			}
+		}
+	}
+
 	public void addDrawableRear(DrawnElement drawnElement) {
 		// Since the list is drawn in order
 		// items that are drawn first are at the "back"

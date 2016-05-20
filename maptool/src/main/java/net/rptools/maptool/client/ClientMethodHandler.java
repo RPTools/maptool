@@ -35,6 +35,7 @@ import net.rptools.maptool.model.ExposedAreaMetaData;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.InitiativeList;
+import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -43,6 +44,7 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.Event;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -127,8 +129,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 					zoneGUID = (GUID) parameters[0];
 					Zone.Layer layer = (Zone.Layer) parameters[1];
 					zone = MapTool.getCampaign().getZone(zoneGUID);
-					zone.getDrawnElements(layer).clear();
-
+					zone.clearDrawables(zone.getDrawnElements(layer));
 					MapTool.getFrame().refresh();
 					return;
 
@@ -271,6 +272,16 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 
 					zone = MapTool.getCampaign().getZone(zoneGUID);
 					zone.addDrawable(new DrawnElement(drawable, pen));
+					MapTool.getFrame().refresh();
+					return;
+
+				case updateDrawing:
+					zoneGUID = (GUID) parameters[0];
+					Pen p = (Pen) parameters[1];
+					DrawnElement de = (DrawnElement) parameters[2];
+
+					zone = MapTool.getCampaign().getZone(zoneGUID);
+					zone.updateDrawable(de, p);
 					MapTool.getFrame().refresh();
 					return;
 

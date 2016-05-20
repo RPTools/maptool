@@ -33,6 +33,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
+import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerPolicy;
@@ -130,6 +131,10 @@ public class ServerCommandClientImpl implements ServerCommand {
 
 	public void draw(GUID zoneGUID, Pen pen, Drawable drawable) {
 		makeServerCall(COMMAND.draw, zoneGUID, pen, drawable);
+	}
+
+	public void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement) {
+		makeServerCall(COMMAND.updateDrawing, zoneGUID, pen, drawnElement);
 	}
 
 	public void clearAllDrawings(GUID zoneGUID, Zone.Layer layer) {
