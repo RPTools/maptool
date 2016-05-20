@@ -9,7 +9,7 @@
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
-package net.rptools.maptool.client.script;
+package net.rptools.maptool.client.script_deprecated;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.rptools.maptool.client.script.api.TokenApi;
+import net.rptools.maptool.client.script_deprecated.api.TokenApi;
 import net.sf.json.JSONObject;
 
 import org.mozilla.javascript.Context;

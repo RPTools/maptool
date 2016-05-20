@@ -23,10 +23,10 @@ import java.util.List;
  */
 public class MathFunctions extends AbstractFunction {
 
-	private MathFunctions instance = new MathFunctions();
+	private static MathFunctions instance = new MathFunctions();
 
 	private MathFunctions() {
-		super(1, UNLIMITED_PARAMETERS, "math.abs", "math.ceil", "math.floor", "math.cos", "math.cos_r", "math.sin",
+		super(0, UNLIMITED_PARAMETERS, "math.abs", "math.ceil", "math.floor", "math.cos", "math.cos_r", "math.sin",
 				"math.sin_r", "math.tan", "math.tan_r", "math.acos", "math.acos_r", "math.asin", "math.asin_r",
 				"math.atan", "math.atan_r", "math.atan2", "math.atan2_r", "math.cbrt", "math.cuberoot", "math.hypot",
 				"math.hypotenuse", "math.log", "math.log10", "math.min", "math.max", "math.mod", "math.pow", "math.sqrt",
@@ -34,8 +34,12 @@ public class MathFunctions extends AbstractFunction {
 				"math.isInt");
 	}
 
+	public static MathFunctions getInstance() {
+		return instance;
+	}
+
 	private List<BigDecimal> getNumericParams(List<Object> param, int minParams, int maxParams, String functionName) throws ParserException {
-		if (minParams == minParams) {
+		if (minParams == maxParams) {
 			if (param.size() != minParams) {
 				throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, minParams, param.size()));
 			}
@@ -81,19 +85,19 @@ public class MathFunctions extends AbstractFunction {
 			return BigDecimal.valueOf(Math.floor(nparam.get(0).doubleValue()));
 		} else if ("math.cos".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.cos(Math.toDegrees(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.cos(Math.toRadians(nparam.get(0).doubleValue())));
 		} else if ("math.cos_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.cos(nparam.get(0).doubleValue()));
 		} else if ("math.sin".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.sin(Math.toDegrees(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.sin(Math.toRadians(nparam.get(0).doubleValue())));
 		} else if ("math.sin_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.sin(nparam.get(0).doubleValue()));
 		} else if ("math.tan".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
-			return BigDecimal.valueOf(Math.tan(Math.toDegrees(nparam.get(0).doubleValue())));
+			return BigDecimal.valueOf(Math.tan(Math.toRadians(nparam.get(0).doubleValue())));
 		} else if ("math.tan_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.tan(nparam.get(0).doubleValue()));
@@ -115,10 +119,10 @@ public class MathFunctions extends AbstractFunction {
 		} else if ("math.atan_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 1, 1, functionName);
 			return BigDecimal.valueOf(Math.atan(nparam.get(0).doubleValue()));
-		} else if ("math.atan".equals(functionName)) {
+		} else if ("math.atan2".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 2, 2, functionName);
 			return BigDecimal.valueOf(Math.toDegrees(Math.atan2(nparam.get(0).doubleValue(), nparam.get(1).doubleValue())));
-		} else if ("math.atan_r".equals(functionName)) {
+		} else if ("math.atan2_r".equals(functionName)) {
 			List<BigDecimal> nparam = getNumericParams(param, 2, 2, functionName);
 			return BigDecimal.valueOf(Math.atan2(nparam.get(0).doubleValue(), nparam.get(1).doubleValue()));
 		} else if ("math.cbrt".equals(functionName) || "math.cuberoot".equals(functionName)) {

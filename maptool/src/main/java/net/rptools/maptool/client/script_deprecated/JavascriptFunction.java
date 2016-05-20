@@ -9,7 +9,7 @@
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
-package net.rptools.maptool.client.script;
+package net.rptools.maptool.client.script_deprecated;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.rptools.maptool.client.script.api.proxy.ParserProxy;
+import net.rptools.maptool.client.script_deprecated.api.proxy.ParserProxy;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
