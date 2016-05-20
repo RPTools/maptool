@@ -13,6 +13,7 @@
 package net.rptools.maptool.client.functions;
 
 import jdk.nashorn.api.scripting.JSObject;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
@@ -32,6 +33,8 @@ public class MacroJavaScriptBridge extends AbstractFunction {
 
 	private static final MacroJavaScriptBridge instance = new MacroJavaScriptBridge();
 
+	private MapToolVariableResolver variableResolver;
+
 	private MacroJavaScriptBridge() {
 		super(1, 1, "js.eval");
 	}
@@ -42,32 +45,11 @@ public class MacroJavaScriptBridge extends AbstractFunction {
 
 	@Override
 	public Object childEvaluate(Parser parser, String functionName, List<Object> args) throws ParserException {
+		variableResolver = (MapToolVariableResolver) parser.getVariableResolver();
 		if ("js.eval".equals(functionName)) {
 			String script = args.get(0).toString();
 			try {
-				Object retval = JSScriptEngine.getJSScriptEngine().evalAnonymous(script);
-				if (retval instanceof Integer) {
-					return BigDecimal.valueOf(((Integer) retval).intValue());
-				} else if (retval instanceof Long) {
-					return BigDecimal.valueOf(((Long) retval).longValue());
-				} else if (retval instanceof Double) {
-					return BigDecimal.valueOf(((Double) retval).doubleValue());
-				} else if (retval instanceof JSObject) {
-					JSObject jsObject = (JSObject) retval;
-					if (jsObject.isArray()) {
-						List<Object> arr = new ArrayList<>();
-						arr.addAll(jsObject.values());
-						return JSONArray.fromObject(arr.toArray());
-					} else {
-						Map<String, Object> obj = new HashMap<>();
-						for (String key : jsObject.keySet()) {
-							obj.put(key, jsObject.getMember(key));
-						}
-						return JSONObject.fromObject(obj);
-					}
-				} else {
-					return retval;
-				}
+				return JavaScriptToMTScriptType(JSScriptEngine.getJSScriptEngine().evalAnonymous(script));
 			} catch (ScriptException e) {
 				throw new ParserException(e);
 			}
@@ -75,4 +57,38 @@ public class MacroJavaScriptBridge extends AbstractFunction {
 
 		throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
 	}
+
+	public Object JavaScriptToMTScriptType(Object val) {
+		if (val instanceof Integer) {
+			return BigDecimal.valueOf(((Integer) val).intValue());
+		} else if (val instanceof Long) {
+			return BigDecimal.valueOf(((Long) val).longValue());
+		} else if (val instanceof Double) {
+			return BigDecimal.valueOf(((Double) val).doubleValue());
+		} else if (val instanceof JSObject) {
+			JSObject jsObject = (JSObject) val;
+			if (jsObject.isArray()) {
+				List<Object> arr = new ArrayList<>();
+				arr.addAll(jsObject.values());
+				return JSONArray.fromObject(arr.toArray());
+			} else {
+				Map<String, Object> obj = new HashMap<>();
+				for (String key : jsObject.keySet()) {
+					obj.put(key, jsObject.getMember(key));
+				}
+				return JSONObject.fromObject(obj);
+			}
+		} else {
+			return val;
+		}
+	}
+
+	public Object getMTScriptVariable(String name) throws ParserException {
+		return variableResolver.getVariable(name);
+	}
+
+	public void setMTScriptVariable(String name, Object value) throws ParserException {
+		variableResolver.setVariable(name, JavaScriptToMTScriptType(value));
+	}
+
 }
