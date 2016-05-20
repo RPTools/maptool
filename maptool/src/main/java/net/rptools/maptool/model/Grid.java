@@ -559,7 +559,7 @@ public abstract class Grid implements Cloneable {
 			log.info("Center region of size " + regionToCheck.getSize() + " contains neither 4+ closed spaces nor 6+ open spaces?!");
 		return openSpace >= closedSpace;
 	}
-	
+
 	/**
 	 * Divides the specified region into one of nine parts, where the column and row range from 0..2. The destination
 	 * Rectangle must already exist (no check for this is made) and it must not be a reference to the same object as the

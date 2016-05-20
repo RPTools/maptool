@@ -222,7 +222,7 @@ public class AppUtil {
 	 */
 	public static String getFreeDiskSpace(File directory) {
 		return FileUtils.byteCountToDisplaySize(directory.getFreeSpace()) + " ";
-    }
+	}
 
 	public static String readClientId() {
 		Path clientFile = Paths.get(getAppHome().getAbsolutePath(), CLIENT_ID_FILE);
