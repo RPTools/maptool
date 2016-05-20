@@ -9,7 +9,7 @@
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
-package net.rptools.maptool.client.script;
+package net.rptools.maptool.client.script_deprecated;
 
 import org.mozilla.javascript.ClassShutter;
 

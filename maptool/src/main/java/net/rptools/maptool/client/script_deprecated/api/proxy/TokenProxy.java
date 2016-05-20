@@ -9,7 +9,7 @@
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
-package net.rptools.maptool.client.script.api.proxy;
+package net.rptools.maptool.client.script_deprecated.api.proxy;
 
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.TokenBarFunction;

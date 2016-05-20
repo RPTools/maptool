@@ -9,10 +9,10 @@
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
-package net.rptools.maptool.client.script.api;
+package net.rptools.maptool.client.script_deprecated.api;
 
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.script.api.proxy.TokenProxy;
+import net.rptools.maptool.client.script_deprecated.api.proxy.TokenProxy;
 import net.rptools.maptool.model.Token;
 
 public class TokenApi {
