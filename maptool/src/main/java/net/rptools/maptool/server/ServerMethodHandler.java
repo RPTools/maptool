@@ -45,6 +45,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.server.ServerCommand.COMMAND;
 import net.rptools.maptool.transfer.AssetProducer;
 
 /**
@@ -74,6 +75,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 				break;
 			case draw:
 				draw(context.getGUID(0), (Pen) context.get(1), (Drawable) context.get(2));
+				break;
+			case updateDrawing:
+				updateDrawing(context.getGUID(0), (Pen) context.get(1), (DrawnElement) context.get(2));
 				break;
 			case enforceZoneView:
 				enforceZoneView(context.getGUID(0), context.getInt(1), context.getInt(2), context.getDouble(3), context.getInt(4), context.getInt(5));
@@ -303,6 +307,12 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 		server.getConnection().broadcastCallMethod(ClientCommand.COMMAND.draw.name(), RPCContext.getCurrent().parameters);
 		Zone zone = server.getCampaign().getZone(zoneGUID);
 		zone.addDrawable(new DrawnElement(drawable, pen));
+	}
+
+	public void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement) {
+		server.getConnection().broadcastCallMethod(ClientCommand.COMMAND.updateDrawing.name(), RPCContext.getCurrent().parameters);
+		Zone zone = server.getCampaign().getZone(zoneGUID);
+		zone.updateDrawable(drawnElement, pen);
 	}
 
 	public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height) {

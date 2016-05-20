@@ -1,3 +1,16 @@
+/*
+* This software Copyright by the RPTools.net development team, and licensed
+* under the GPL Version 3 or, at your option, any later version.
+*
+* MapTool 2 Source Code is distributed in the hope that it will be useful, but
+* WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+* details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this source Code. If not, see <http://www.gnu.org/licenses/>
+*/
+
 package net.rptools.maptool.client.ui.drawpanel;
 
 import java.awt.Color;
@@ -90,6 +103,11 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 	private Icon setDrawPanelIcon(String key, boolean eraser) {
 		try {
 			switch (key) {
+			case "panel.DrawExplorer.ShapeDrawable.Area":
+				if (eraser)
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly-erase.png")));
+				else
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly.png")));
 			case "panel.DrawExplorer.ShapeDrawable.Polygon":
 				if (eraser)
 					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly-erase.png")));
