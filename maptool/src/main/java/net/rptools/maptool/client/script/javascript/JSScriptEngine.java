@@ -105,7 +105,6 @@ public class JSScriptEngine {
 		engine = new NashornScriptEngineFactory().getScriptEngine(new JSClassFilter());
 	}
 
-
 	public static JSScriptEngine getJSScriptEngine() {
 		return jsScriptEngine;
 	}
