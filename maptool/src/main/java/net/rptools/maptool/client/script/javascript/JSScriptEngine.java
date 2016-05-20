@@ -108,7 +108,7 @@ public class JSScriptEngine {
 		engine = new NashornScriptEngineFactory().getScriptEngine(new JSClassFilter());
 		try {
 			engine.eval("var MTScript = {}");
-			engine.eval("MTScript.Variables = Java.type('net.rptools.maptool.client.script.javascript.api.VariableResolverBridge')");
+			engine.eval("MTScript = Java.type('net.rptools.maptool.client.script.javascript.api.MTScript')");
 		} catch (ScriptException e) {
 			log.error("Could not initialize JavaScript Engine.", e);
 		}

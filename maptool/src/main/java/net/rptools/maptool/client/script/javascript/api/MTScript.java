@@ -15,7 +15,7 @@ package net.rptools.maptool.client.script.javascript.api;
 import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
 import net.rptools.parser.ParserException;
 
-public class VariableResolverBridge {
+public class MTScript {
 	public static Object getVariable(String name) throws ParserException {
 		return MacroJavaScriptBridge.getInstance().getMTScriptVariable(name);
 	}
