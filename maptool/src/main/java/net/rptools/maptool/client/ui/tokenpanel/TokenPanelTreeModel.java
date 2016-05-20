@@ -48,16 +48,16 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
 	private static final String _LIGHT_SOURCES = "panel.MapExplorer.View.LIGHT_SOURCES";
 
 	public enum View {
-// @formatter:off
-		// I18N key										Zone.Layer							Req'd?	isAdmin?
-		TOKENS(_TOKENS,								Zone.Layer.TOKEN,				false,	false),
-		PLAYERS(_PLAYERS,							Zone.Layer.TOKEN,				false,	false),
-		GROUPS(_GROUPS,							Zone.Layer.TOKEN,				false,	false),
-		GM(_GM,											Zone.Layer.GM,						false,	true),
-		OBJECTS(_OBJECTS,							Zone.Layer.OBJECT,				false,	true),
-		BACKGROUND(_BACKGROUND,			Zone.Layer.BACKGROUND,	false,	true),
-		CLIPBOARD(_CLIPBOARD,					Zone.Layer.TOKEN,				false,	true),
-		LIGHT_SOURCES(_LIGHT_SOURCES,	null,										false,	false);
+		// @formatter:off
+		// I18N key						Zone.Layer					Req'd?	isAdmin?
+		TOKENS(_TOKENS,					Zone.Layer.TOKEN,			false,	false),
+		PLAYERS(_PLAYERS,				Zone.Layer.TOKEN,			false,	false),
+		GROUPS(_GROUPS,					Zone.Layer.TOKEN,			false,	false),
+		GM(_GM,							Zone.Layer.GM,				false,	true),
+		OBJECTS(_OBJECTS,				Zone.Layer.OBJECT,			false,	true),
+		BACKGROUND(_BACKGROUND,			Zone.Layer.BACKGROUND,		false,	true),
+		CLIPBOARD(_CLIPBOARD,			Zone.Layer.TOKEN,			false,	true),
+		LIGHT_SOURCES(_LIGHT_SOURCES,	null,						false,	false);
 		// @formatter:on
 
 		String displayName;

@@ -13,6 +13,7 @@ package net.rptools.maptool.launcher;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -20,32 +21,34 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 
+import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
-public class CopiedFromOtherJars {
-	private static final String EMPTY = ""; //$NON-NLS-1$
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
 
-	private static File bundlePackage = new File("translations"); //$NON-NLS-1$
-	private static final String bundleName = "i18n"; //$NON-NLS-1$
-	private static final ResourceBundle VERSION = ResourceBundle.getBundle("net.rptools.maptool.launcher.build"); //$NON-NLS-1$
+public class CopiedFromOtherJars {
+	private static final String EMPTY = "";
+
+	private static String bundlePackage = "net.rptools.maptool.launcher.language.i18n";
+	private static String languageProperties = "net/rptools/maptool/launcher/language/languages.properties";
+	private static final ResourceBundle VERSION = ResourceBundle.getBundle("net.rptools.maptool.launcher.build");
 	private static ResourceBundle BUNDLE = null;
 
 	/**
@@ -56,12 +59,7 @@ public class CopiedFromOtherJars {
 
 	private static ResourceBundle getBundle() {
 		if (BUNDLE == null) {
-			try {
-				URL[] urls = { bundlePackage.toURI().toURL() };
-				ClassLoader loader = new URLClassLoader(urls);
-				BUNDLE = ResourceBundle.getBundle(bundleName, Locale.getDefault(), loader);
-			} catch (MalformedURLException e) {
-			}
+			BUNDLE = ResourceBundle.getBundle(bundlePackage);
 		}
 		return BUNDLE;
 	}
@@ -75,58 +73,40 @@ public class CopiedFromOtherJars {
 	 * that literally starts with <b><code># LANGUAGE=</code></b> and then using
 	 * the remaining text on that line.
 	 * 
+	 * Created this method to support property files stored in the jar vs
+	 * external source.
+	 * 
+	 * @author Jamz
+	 * @since 1.4.0.1
+	 * 
 	 * @return a Map of &lt;key,value&gt; pairs
 	 */
-	public static Map<String, String> getListOfLanguages(File fromDir) {
-		bundlePackage = fromDir;
+	public static Map<String, String> getListOfLanguages() {
 
-		File[] files = fromDir.listFiles(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				return name.matches("^" + bundleName + "(_\\w{2}(_\\w{2})?)?\\.properties$");
-			}
-		});
 		Map<String, String> languages = new HashMap<String, String>();
-		for (File file : files) {
-			String name = file.getName();
-			String lang = file.getName().replaceAll("^" + bundleName + "(_)?|\\.properties$", "");
-			String desc = name + " (unavailable)";
-			BufferedReader br = null;
-			try {
-				br = new BufferedReader(new FileReader(file));
-				while (true) {
-					String line = br.readLine();
-					if (line != null) {
-						line = line.trim();
-						if (line.startsWith("# LANGUAGE=")) {
-							desc = line.substring(11).trim();
-							break;
-						}
-					}
-				}
-			} catch (FileNotFoundException e) {
-				desc = name + " (cannot open)";
-			} catch (IOException e) {
-				desc = name + " (unreadable)";
-			} finally {
-				closeQuietly(br);
+
+		try {
+			Configuration configuration = new PropertiesConfiguration(languageProperties);
+			Iterator<String> keys = configuration.getKeys();
+			while (keys.hasNext()) {
+				String key = keys.next();
+				languages.put(key, configuration.getString(key));
 			}
-			languages.put(lang, desc);
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
 		return languages;
 	}
 
 	public static boolean setLanguage(String name) {
 		boolean result = false;
-		try {
-			Locale loc = new Locale(name);
-			URL[] urls = { bundlePackage.toURI().toURL() };
-			ClassLoader loader = new URLClassLoader(urls);
-			BUNDLE = ResourceBundle.getBundle(bundleName, loc, loader);
-			result = true;
-			ResourceBundle.clearCache();
-			Locale.setDefault(loc);
-		} catch (MalformedURLException e) {
-		}
+		Locale loc = new Locale(name);
+		BUNDLE = ResourceBundle.getBundle(bundlePackage);
+		result = true;
+		ResourceBundle.clearCache();
+		Locale.setDefault(loc);
 		return result;
 	}
 
@@ -184,7 +164,6 @@ public class CopiedFromOtherJars {
 			return def;
 		}
 		def = nf.parse(text).intValue();
-		//		System.out.println("Integer:  Input string is >>" + text + "<< and parsing produces " + newValue);
 		return def;
 	}
 
@@ -250,11 +229,11 @@ public class CopiedFromOtherJars {
 	 *            dialog; no properties file lookup is performed!
 	 */
 	public static void showFeedback(int msgType, Object[] messages) {
-		final String title = getText("msg.title.messageDialogFeedback"); //$NON-NLS-1$
+		final String title = getText("msg.title.messageDialogFeedback");
 		for (final Object msg : messages) {
 			MapToolLauncher.log.log(Level.WARNING, msg.toString());
 		}
-		final JList list = new JList(messages);
+		final JList<?> list = new JList<Object>(messages);
 		JOptionPane.showMessageDialog(null, list, title, msgType);
 	}
 
@@ -267,8 +246,8 @@ public class CopiedFromOtherJars {
 	 */
 	public static String getVersion() {
 		try {
-			String buildDate = VERSION.getString("app.buildDate"); //$NON-NLS-1$
-			String buildNumber = VERSION.getString("app.buildNumber"); //$NON-NLS-1$
+			String buildDate = VERSION.getString("app.buildDate");
+			String buildNumber = VERSION.getString("app.buildNumber");
 			return buildDate + "." + buildNumber;
 		} catch (final MissingResourceException e) {
 			return null;
@@ -303,11 +282,11 @@ public class CopiedFromOtherJars {
 	public static String getText(String key) {
 		final String value = getString(key);
 		if (value == null) {
-			final String msg = MessageFormat.format("Cannot find key ''{0}'' in properties file.", key); //$NON-NLS-1$
+			final String msg = MessageFormat.format("Cannot find key ''{0}'' in properties file.", key);
 			MapToolLauncher.log.log(Level.INFO, msg);
 			return key;
 		}
-		return value.replaceAll("\\&", EMPTY); //$NON-NLS-1$
+		return value.replaceAll("\\&", EMPTY);
 	}
 
 	/**
@@ -408,5 +387,9 @@ public class CopiedFromOtherJars {
 			closeQuietly(in);
 		}
 		return true;
+	}
+
+	public static ImageIcon resizeImage(ImageIcon imageIcon, int w, int h) {
+		return new ImageIcon(imageIcon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH));
 	}
 }

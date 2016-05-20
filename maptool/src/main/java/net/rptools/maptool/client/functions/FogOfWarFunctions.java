@@ -14,6 +14,8 @@ package net.rptools.maptool.client.functions;
 import java.util.List;
 import java.util.Set;
 
+import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.AppActions.ZoneAdminClientAction;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -26,12 +28,14 @@ import net.rptools.parser.function.AbstractFunction;
 /**
  * @author jfrazierjr
  * 
+ *         modified by: Lee, Jamz
  */
 public class FogOfWarFunctions extends AbstractFunction {
 	private static final FogOfWarFunctions instance = new FogOfWarFunctions();
 
 	private FogOfWarFunctions() {
-		super(0, 2, "exposePCOnlyArea", "exposeFOW");
+		super(0, 2, "exposePCOnlyArea", "exposeFogAtWaypoints", "toggleFoW",
+				"exposeFOW", "exposeAllOwnedArea", "restoreFoW");
 	}
 
 	public static FogOfWarFunctions getInstance() {
@@ -53,14 +57,58 @@ public class FogOfWarFunctions extends AbstractFunction {
 		 */
 		if (functionName.equals("exposePCOnlyArea")) {
 			FogUtil.exposePCArea(zoneRenderer);
-			return "";
+			return "<!---->";
+		}
+		/*
+		 * String empty = exposePCOnlyArea(optional String mapName)
+		 */
+		if (functionName.equals("exposeAllOwnedArea")) {
+			FogUtil.exposeAllOwnedArea(zoneRenderer);
+			return "<!---->";
 		}
 		/*
 		 * String empty = exposeFOW(optional String mapName)
 		 */
-		if (functionName.equals("exposeFOW")) {
-			FogUtil.exposeVisibleArea(zoneRenderer, getTokenSelectedSet(zoneRenderer));
-			return "";
+		if (functionName.equals("exposeFOW") || functionName.equals("exposeFoW")) {
+			FogUtil.exposeVisibleArea(zoneRenderer,
+					getTokenSelectedSet(zoneRenderer), true);
+			return "<!---->";
+		}
+		/*
+		 * String empty = exposeFOW(optional String mapName)
+		 */
+		if (functionName.equals("restoreFOW") || functionName.equals("restoreFoW")) {
+			FogUtil.restoreFoW(zoneRenderer);
+			return "<!---->";
+		}
+		/*
+		 * Lee: String empty = toggleFoW()
+		 */
+		if (functionName.equals("toggleFoW")) {
+			((ZoneAdminClientAction) AppActions.TOGGLE_FOG).execute(null);
+			return ((ZoneAdminClientAction) AppActions.TOGGLE_FOG).isSelected()
+					? I18N.getText("msg.info.action.enableFoW")
+					: I18N.getText("msg.info.action.disableFoW");
+		}
+		/*
+		 * Lee: String empty = exposeFogAtWaypoints()
+		 */
+		if (functionName.equals("exposeFogAtWaypoints")) {
+
+			if (((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL)
+					.isAvailable()) {
+				((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL)
+						.execute(null);
+
+				return ((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL)
+						.isSelected()
+								? I18N.getText(
+										"msg.info.action.enableRevealFogAtWaypoints")
+								: I18N.getText(
+										"msg.info.action.disableRevealFogAtWaypoints");
+			} else {
+				return I18N.getText("msg.info.action.FoWDisabled");
+			}
 		}
 		throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
 	}

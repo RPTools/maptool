@@ -27,6 +27,7 @@ import javax.swing.border.TitledBorder;
 import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.client.MapTool;
 
 /*
  * A File chooser with an image preview panel
@@ -59,6 +60,8 @@ public class PreviewPanelFileChooser extends JFileChooser {
 			} else {
 				getPreviewPanel().setImage(null);
 			}
+			MapTool.getFrame().getImageCacheStatusBar().update(AppUtil.getDiskSpaceUsed(MapTool.getThumbnailManager().getThumbnailLocation()));
+			MapTool.getFrame().getAppHomeDiskSpaceStatusBar().update();
 		}
 	}
 

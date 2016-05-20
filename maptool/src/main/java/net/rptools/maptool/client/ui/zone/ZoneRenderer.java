@@ -191,7 +191,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	private Set<GUID> visibleTokenSet;
 	private CodeTimer timer;
 
-	private boolean autoResizeStamp;
+	private boolean autoResizeStamp = false;
 
 	public static enum TokenMoveCompletion {
 		TRUE, FALSE, OTHER
@@ -402,86 +402,136 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		if (set == null) {
 			return;
 		}
-		CodeTimer moveTimer = new CodeTimer("ZoneRenderer.commitMoveSelectionSet");
-		moveTimer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
-		moveTimer.setThreshold(1);
-
-		moveTimer.start("setup");
 		Token keyToken = zone.getToken(keyTokenId);
-		CellPoint originPoint = zone.getGrid().convert(new ZonePoint(keyToken.getX(), keyToken.getY()));
-		Path<? extends AbstractPoint> path = set.getWalker() != null ? set.getWalker().getPath() : set.gridlessPath;
 
+		/*
+		 * Lee: if the lead token is snapped-to-grid and has not moved, every
+		 * follower should return to where they were. Flag set at PointerTool
+		 * and StampTool's stopTokenDrag() Handling the rest here.
+		 */
 		Set<GUID> selectionSet = set.getTokens();
-		List<GUID> filteredTokens = new ArrayList<GUID>();
-		BigDecimal tmc = null;
-		moveTimer.stop("setup");
 
-		moveTimer.start("eachtoken");
-		for (GUID tokenGUID : selectionSet) {
-			Token token = zone.getToken(tokenGUID);
-			// If the token has been deleted, the GUID will still be in the set but getToken() will return null.
-			if (token == null)
-				continue;
-			CellPoint tokenCell = zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
+		boolean stg = false;
+		if (set.getWalker() != null) {
+			if (set.getWalker().getDistance() >= 0)
+				stg = true;
+		} else
+			stg = true;
 
-			int cellOffX = originPoint.x - tokenCell.x;
-			int cellOffY = originPoint.y - tokenCell.y;
+		// Lee: check only matters for snap-to-grid
+		if (stg) {
+			CodeTimer moveTimer = new CodeTimer("ZoneRenderer.commitMoveSelectionSet");
+			moveTimer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
+			moveTimer.setThreshold(1);
 
-			token.applyMove(set.getOffsetX(), set.getOffsetY(), path != null ? path.derive(cellOffX, cellOffY) : null);
+			moveTimer.start("setup");
 
-			flush(token);
-			MapTool.serverCommand().putToken(zone.getId(), token);
-			zone.putToken(token);
-			// No longer need this version
-			replacementImageMap.remove(token);
+			// Lee: the 1st of evils. changing it to handle proper computation
+			// for a key token's snapped state
+			AbstractPoint originPoint, tokenCell;
+			if (keyToken.isSnapToGrid())
+				originPoint = zone.getGrid().convert(new ZonePoint(keyToken.getX(), keyToken.getY()));
+			else
+				originPoint = new ZonePoint(keyToken.getX(), keyToken.getY());
 
-			// Only add certain tokens to the list to process in the move
-			// Macro function(s).
-			if (token.isToken() && token.isVisible()) {
-				filteredTokens.add(tokenGUID);
-			}
-		}
-		moveTimer.stop("eachtoken");
+			Path<? extends AbstractPoint> path = set.getWalker() != null ? set.getWalker().getPath() : set.gridlessPath;
+			List<GUID> filteredTokens = new ArrayList<GUID>();
+			BigDecimal tmc = null;
+			moveTimer.stop("setup");
 
-		moveTimer.start("onTokenMove");
-		if (!filteredTokens.isEmpty()) {
-			// run tokenMoved() for each token in the filtered selection list, canceling if it returns 1.0
-			for (GUID tokenGUID : filteredTokens) {
+			moveTimer.start("eachtoken");
+			for (GUID tokenGUID : selectionSet) {
 				Token token = zone.getToken(tokenGUID);
-				tmc = TokenMoveFunctions.tokenMoved(token, path, filteredTokens);
+				// If the token has been deleted, the GUID will still be in the
+				// set but getToken() will return null.
+				if (token == null)
+					continue;
 
-				if (tmc != null && tmc == BigDecimal.ONE) {
-					denyMovement(token);
+				// Lee: get offsets based on key token's snapped state
+				if (token.isSnapToGrid())
+					tokenCell = zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
+				else
+					tokenCell = new ZonePoint(token.getX(), token.getY());
+
+				int cellOffX = originPoint.x - tokenCell.x;
+				int cellOffY = originPoint.y - tokenCell.y;
+
+				/*
+				 * Lee: the problem now is to keep the precise coordinate
+				 * computations for unsnapped tokens following a snapped key
+				 * token. The derived path in the following section contains
+				 * rounded down values because the integer cell values were
+				 * passed. If these were double in nature, the precision would
+				 * be kept, but that would be too difficult to change at this
+				 * stage...
+				 */
+
+				token.applyMove(set, path, set.getOffsetX(), set.getOffsetY(), keyToken, cellOffX, cellOffY);
+
+				// Lee: setting originPoint to landing point
+				token.setOriginPoint(new ZonePoint(token.getX(), token.getY()));
+
+				flush(token);
+				MapTool.serverCommand().putToken(zone.getId(), token);
+				zone.putToken(token);
+
+				// No longer need this version
+				// Lee: redundant flush() already did this above
+				// replacementImageMap.remove(token);
+
+				// Only add certain tokens to the list to process in the move
+				// Macro function(s).
+				if (token.isToken() && token.isVisible()) {
+					filteredTokens.add(tokenGUID);
 				}
 			}
-		}
-		moveTimer.stop("onTokenMove");
+			moveTimer.stop("eachtoken");
 
-		moveTimer.start("onMultipleTokensMove");
-		// Multiple tokens, the list of tokens and call onMultipleTokensMove() macro function.
-		if (filteredTokens != null && filteredTokens.size() > 1) {
-			tmc = TokenMoveFunctions.multipleTokensMoved(filteredTokens);
-			// now determine if the macro returned false and if so
-			// revert each token's move to the last path.
-			if (tmc != null && tmc == BigDecimal.ONE) {
+			moveTimer.start("onTokenMove");
+			if (!filteredTokens.isEmpty()) {
+				// run tokenMoved() for each token in the filtered selection
+				// list, canceling if it returns 1.0
 				for (GUID tokenGUID : filteredTokens) {
 					Token token = zone.getToken(tokenGUID);
-					denyMovement(token);
+					tmc = TokenMoveFunctions.tokenMoved(token, path, filteredTokens);
+
+					if (tmc != null && tmc == BigDecimal.ONE) {
+						denyMovement(token);
+					}
 				}
 			}
-		}
-		moveTimer.stop("onMultipleTokensMove");
+			moveTimer.stop("onTokenMove");
 
-		moveTimer.start("updateTokenTree");
-		MapTool.getFrame().updateTokenTree();
-		moveTimer.stop("updateTokenTree");
+			moveTimer.start("onMultipleTokensMove");
+			// Multiple tokens, the list of tokens and call
+			// onMultipleTokensMove() macro function.
+			if (filteredTokens != null && filteredTokens.size() > 1) {
+				tmc = TokenMoveFunctions.multipleTokensMoved(filteredTokens);
+				// now determine if the macro returned false and if so
+				// revert each token's move to the last path.
+				if (tmc != null && tmc == BigDecimal.ONE) {
+					for (GUID tokenGUID : filteredTokens) {
+						Token token = zone.getToken(tokenGUID);
+						denyMovement(token);
+					}
+				}
+			}
+			moveTimer.stop("onMultipleTokensMove");
 
-		if (moveTimer.isEnabled()) {
-			String results = moveTimer.toString();
-			MapTool.getProfilingNoteFrame().addText(results);
-			if (log.isDebugEnabled())
-				log.debug(results);
-			moveTimer.clear();
+			moveTimer.start("updateTokenTree");
+			MapTool.getFrame().updateTokenTree();
+			moveTimer.stop("updateTokenTree");
+
+			if (moveTimer.isEnabled()) {
+				String results = moveTimer.toString();
+				MapTool.getProfilingNoteFrame().addText(results);
+				if (log.isDebugEnabled())
+					log.debug(results);
+				moveTimer.clear();
+			}
+		} else {
+			for (GUID tokenGUID : selectionSet)
+				denyMovement(zone.getToken(tokenGUID));
 		}
 	}
 
@@ -747,9 +797,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				}
 			}
 			if (selectedTokens.isEmpty())
-				selectedTokens = zone.getPlayerOwnedTokensWithSight(MapTool.getPlayer());
+				selectedTokens = zone.getOwnedTokensWithSight(MapTool.getPlayer());
 		} else {
-			selectedTokens = zone.getPlayerOwnedTokensWithSight(MapTool.getPlayer());
+			selectedTokens = zone.getOwnedTokensWithSight(MapTool.getPlayer());
 		}
 		return new PlayerView(role, selectedTokens);
 	}
@@ -1148,10 +1198,18 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		// (This method has it's own 'timer' calls)
 		if (zone.hasFog())
 			renderFog(g2d, view);
-
+		
 		if (Zone.Layer.TOKEN.isEnabled()) {
-
-			// if here is fog or vision we may need to re-render figure type tokens
+			// Jamz: If there is fog or vision we may need to re-render vision-blocking type tokens
+			// For example. this allows a "door" stamp to block vision but still allow you to see the door.
+			List<Token> vblTokens = zone.getVblTokens();
+			if (!vblTokens.isEmpty()) {
+				timer.start("tokens - vision blockers");
+				renderTokens(g2d, vblTokens, view, true);
+				timer.stop("tokens - vision blockers");
+			}
+			
+			// if there is fog or vision we may need to re-render figure type tokens
 			List<Token> tokens = zone.getFigureTokens();
 			if (!tokens.isEmpty()) {
 				timer.start("tokens - figures");
@@ -1260,6 +1318,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			Map<Paint, List<Area>> colorMap = new HashMap<Paint, List<Area>>();
 			List<DrawableLight> otherLightList = new LinkedList<DrawableLight>();
 			for (DrawableLight light : zoneView.getDrawableLights()) {
+				// Jamz TODO: Fix, doesn't work in Day light, probably need to hack this up
 				if (light.getType() == LightSource.Type.NORMAL) {
 					if (zone.getVisionType() == Zone.VisionType.NIGHT && light.getPaint() != null) {
 						List<Area> areaList = colorMap.get(light.getPaint().getPaint());
@@ -1279,6 +1338,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			timer.start("lights-4");
 			// Combine same colors to avoid ugly overlap
 			// Avoid combining _all_ of the lights as the area adds are very expensive, just combine those that overlap
+			// Jamz TODO: Check this and make sure proper order is happening
 			for (List<Area> areaList : colorMap.values()) {
 				List<Area> sourceList = new LinkedList<Area>(areaList);
 				areaList.clear();
@@ -1573,15 +1633,16 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				timer.start("renderFog-clearOldImage");
 				//				Composite oldComposite = buffG.getComposite();
 				buffG.setComposite(AlphaComposite.Clear);
-				buffG.fillRect(0, 0, size.width, size.height);
-				//				buffG.setComposite(oldComposite);
+				// buffG.fillRect(0, 0, size.width, size.height);  // Jamz: Removed as it's called again below
+				// buffG.setComposite(oldComposite);
 				timer.stop("renderFog-clearOldImage");
 			}
 			timer.start("renderFog-fill");
 			// Fill
 			double scale = getScale();
 			buffG.setPaint(zone.getFogPaint().getPaint(fogX, fogY, scale));
-			buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, view.isGMView() ? .6f : 1f)); // JFJ this fixes the GM exposed area view.
+			buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, view.isGMView() ? .6f : 1f)); // JFJ this fixes the GM
+																											// exposed area view.
 			buffG.fillRect(0, 0, size.width, size.height);
 			timer.stop("renderFog-fill");
 
@@ -1655,6 +1716,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						myCombined.add(new Area(exposedArea));
 					}
 					buffG.fill(myCombined);
+					
 					renderFogArea(buffG, view, myCombined, visibleArea);
 					renderFogOutline(buffG, view, myCombined);
 				}
@@ -2375,7 +2437,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 		List<Token> tokenPostProcessing = new ArrayList<Token>(tokenList.size());
 		for (Token token : tokenList) {
-			if (figuresOnly && token.getShape() != Token.TokenShape.FIGURE)
+			if ((figuresOnly && token.getShape() != Token.TokenShape.FIGURE) && figuresOnly && !token.isVisionBlocker())
 				continue;
 			timer.start("tokenlist-1");
 			try {
@@ -2459,6 +2521,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			}
 			// Markers
 			timer.start("renderTokens:Markers");
+			//System.out.println("Token " + token.getName() + " is a marker? " + token.isMarker());
 			if (token.isMarker() && canSeeMarker(token)) {
 				markerLocationList.add(location);
 			}
@@ -2476,6 +2539,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					if (location.boundsCache.contains(currLocation.boundsCache)) {
 						if (tokenStackSet == null) {
 							tokenStackSet = new HashSet<Token>();
+							// Sometimes got NPE here
+							if (tokenStackMap == null)
+								tokenStackMap = new HashMap<Token, Set<Token>>();
 							tokenStackMap.put(token, tokenStackSet);
 							tokenStackSet.add(token);
 						}
@@ -2638,6 +2704,24 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						//g.draw(cb); // debugging
 					} else {
 						// else draw the clipped token
+						Graphics2D cellOnly = (Graphics2D) clippedG.create();
+						Area cellArea = new Area(visibleScreenArea);
+						cellArea.intersect(cb);
+						cellOnly.setClip(cellArea);
+						cellOnly.drawImage(workImage, at, this);
+					}
+				}
+			} else if (!isGMView && zoneView.isUsingVision() && token.isVisionBlocker()) {
+				// Jamz: Vision Blocking tokens will get rendered again here to place on top of FoW
+				Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
+				if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
+					// the cell intersects visible area so
+					if (zone.getGrid().checkRegion(cb.getBounds(), visibleScreenArea)) {
+						// if we can see 2/9 of the stamp/token, draw the whole thing
+						g.drawImage(workImage, at, this);
+						//g.draw(cb); // debugging
+					} else {
+						// else draw the clipped stamp/token
 						Graphics2D cellOnly = (Graphics2D) clippedG.create();
 						Area cellArea = new Area(visibleScreenArea);
 						cellArea.intersect(cb);
@@ -3422,7 +3506,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	/**
 	 * Represents a movement set
 	 */
-	private class SelectionSet {
+	public class SelectionSet {
 		private final HashSet<GUID> selectionSet = new HashSet<GUID>();
 		private final GUID keyToken;
 		private final String playerId;
@@ -3453,6 +3537,11 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			}
 		}
 
+		// Lee: adding getter for path computation
+		public Path<ZonePoint> getGridlessPath() {
+			return gridlessPath;
+		}
+
 		public ZoneWalker getWalker() {
 			return walker;
 		}
@@ -3476,7 +3565,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			ZonePoint zp = new ZonePoint(token.getX() + x, token.getY() + y);
 			if (ZoneRenderer.this.zone.getGrid().getCapabilities().isPathingSupported() && token.isSnapToGrid()) {
 				CellPoint point = zone.getGrid().convert(zp);
-
 				walker.replaceLastWaypoint(point);
 			} else {
 				if (gridlessPath.getCellPath().size() > 1) {

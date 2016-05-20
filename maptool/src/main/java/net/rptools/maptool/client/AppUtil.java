@@ -24,6 +24,7 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -165,6 +166,22 @@ public class AppUtil {
 	 * Returns true if the token is visible in the zone. If the view is the GM view then this function always returns
 	 * true.
 	 * 
+	 * @param token
+	 * @return true if the GM "owns" the token
+	 */
+	public static boolean gmOwns(Token token) {
+		Player player = MapTool.getPlayer();
+
+		if (!MapTool.getServerPolicy().useStrictTokenManagement()) {
+			return true;
+		}
+		return (token.isOwner(player.getName()) && !token.isOwnedByAll()) || !token.hasOwners();
+	}
+
+	/**
+	 * Returns true if the token is visible in the zone. If the view is the GM
+	 * view then this function always returns true.
+	 * 
 	 * @param zone
 	 *            to check for visibility
 	 * @param token
@@ -179,6 +196,33 @@ public class AppUtil {
 		}
 		return zone.isTokenVisible(token);
 	}
+
+	/**
+	 * Returns the disk spaced used in a given directory in a human readable format automatically
+	 * adjusting to kb/mb/gb etc.
+	 * 
+	 * @author Jamz
+	 * @since 1.4.0.1
+	 * 
+	 * @return String of disk usage info
+	 */
+	public static String getDiskSpaceUsed(File directory) {
+		return FileUtils.byteCountToDisplaySize(FileUtils.sizeOfDirectory(directory)) + " ";
+	}
+
+	/**
+	 * Returns the free disk spaced for a given directory in a human readable format automatically
+	 * adjusting to kb/mb/gb etc.
+	 * 
+	 * @author Jamz
+	 * @since 1.4.0.1
+	 * 
+	 * @param directory
+	 * @return String of free disk space
+	 */
+	public static String getFreeDiskSpace(File directory) {
+		return FileUtils.byteCountToDisplaySize(directory.getFreeSpace()) + " ";
+    }
 
 	public static String readClientId() {
 		Path clientFile = Paths.get(getAppHome().getAbsolutePath(), CLIENT_ID_FILE);
@@ -198,6 +242,5 @@ public class AppUtil {
 			}
 		}
 		return clientId;
-
 	}
 }

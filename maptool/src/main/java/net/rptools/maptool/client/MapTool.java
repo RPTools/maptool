@@ -14,10 +14,12 @@ package net.rptools.maptool.client;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
+
 import de.muntjak.tinylookandfeel.Theme;
 import de.muntjak.tinylookandfeel.util.SBReference;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
+import net.rptools.lib.DebugStream;
 import net.rptools.lib.EventDispatcher;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.TaskBarFlasher;
@@ -47,14 +49,21 @@ import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.webapi.MTWebAppServer;
 import net.tsc.servicediscovery.ServiceAnnouncer;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
+
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -121,7 +130,10 @@ public class MapTool {
 		Changed
 	}
 
-	private static final Dimension THUMBNAIL_SIZE = new Dimension(100, 100);
+	// Jamz: This sets the thumbnail size that is cached for imageThumbs
+	// Set it to 500 (from 100) for now to support larger asset window previews
+	// TODO: Add preferences option as well as add auto-purge after x days preferences
+	private static final Dimension THUMBNAIL_SIZE = new Dimension(500, 500);
 
 	private static ThumbnailManager thumbnailManager;
 	private static String version;
@@ -151,6 +163,19 @@ public class MapTool {
 	private static String lastWhisperer;
 
 	private static final MTWebAppServer webAppServer = new MTWebAppServer();
+
+	// Jamz: To support new command line parameters for multi-monitor support & enhanced PrintStream
+	private static boolean debug = false;
+	private static int graphicsMonitor = -1;
+	private static boolean useFullScreen = false;
+	private static int windowWidth = -1;
+	private static int windowHeight = -1;
+	private static int windowX = -1;
+	private static int windowY = -1;
+
+	public static Dimension getThumbnailSize() {
+		return THUMBNAIL_SIZE;
+	}
 
 	/**
 	 * This method looks up the message key in the properties file and returns
@@ -580,6 +605,52 @@ public class MapTool {
 	 */
 	private static void setClientFrame(MapToolFrame frame) {
 		clientFrame = frame;
+
+		if (graphicsMonitor > -1) {
+			moveToMonitor(clientFrame, graphicsMonitor, useFullScreen);
+		}
+	}
+
+	/**
+	 * For Multi-monitor support, allows you to move the frame to a specific
+	 * monitor. It will also set the height, width and x, y position of the
+	 * frame.
+	 * 
+	 * @author Jamz
+	 * @since 1.4.1.0
+	 * 
+	 * @param frame
+	 *            The JFrame to move
+	 * @param monitor
+	 *            The monitor number as an int. Note the first monitor start at
+	 *            0, not 1.
+	 * @param maximize
+	 *            set to true if you want to maximize the frame to that monitor.
+	 */
+	private static void moveToMonitor(JFrame frame, int monitor, boolean maximize) {
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[] gd = ge.getScreenDevices();
+
+		if (monitor > -1 && monitor < gd.length) {
+			if (windowWidth > -1 && windowHeight > -1) {
+				frame.setSize(windowWidth, windowHeight);
+			}
+
+			if (windowX > -1 && windowY > -1) {
+				frame.setLocation(windowX + gd[monitor].getDefaultConfiguration().getBounds().x,
+						windowY + gd[monitor].getDefaultConfiguration().getBounds().y);
+
+			} else {
+				frame.setLocation(gd[monitor].getDefaultConfiguration().getBounds().x, frame.getY());
+			}
+		} else if (gd.length > 0) {
+			frame.setLocation(gd[0].getDefaultConfiguration().getBounds().x, frame.getY());
+		} else {
+			throw new RuntimeException("No Screens Found");
+		}
+
+		if (maximize)
+			frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	}
 
 	private static void initialize() {
@@ -1149,7 +1220,135 @@ public class MapTool {
 		uiDefaultsCustomizer.customize(UIManager.getDefaults());
 	}
 
+	/**
+	 * Search for command line arguments for options. Expecting arguments
+	 * specified as -parameter=value pair and returns a string.
+	 * 
+	 * Examples: -version=1.4.0.1 -user=Jamz
+	 * 
+	 * @author Jamz
+	 * @since 1.4.0.1
+	 * 
+	 * @param options
+	 *            {@link org.apache.commons.cli.Options}
+	 * @param searchValue
+	 *            Option string to search for, ie -version
+	 * @param defaultValue
+	 *            A default value to return if option is not found
+	 * @param args
+	 *            String array of passed in args
+	 * @return Option value found as a String, or defaultValue if not found
+	 */
+	private static String getCommandLineOption(Options options, String searchValue, String defaultValue, String[] args) {
+		CommandLineParser parser = new DefaultParser();
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+
+			if (cmd.hasOption(searchValue)) {
+				return cmd.getOptionValue(searchValue);
+			}
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return defaultValue;
+	}
+
+	/**
+	 * Search for command line arguments for options. Expecting arguments
+	 * formatted as a switch
+	 * 
+	 * Examples: -x or -fullscreen
+	 * 
+	 * @author Jamz
+	 * @since 1.4.0.1
+	 * 
+	 * @param options
+	 *            {@link org.apache.commons.cli.Options}
+	 * @param searchValue
+	 *            Option string to search for, ie -version
+	 * @param args
+	 *            String array of passed in args
+	 * @return A boolean value of true if option parameter found
+	 */
+	private static boolean getCommandLineOption(Options options, String searchValue, String[] args) {
+		CommandLineParser parser = new DefaultParser();
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+			if (cmd.hasOption(searchValue)) {
+				return true;
+			}
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return false;
+	}
+
+	/**
+	 * Search for command line arguments for options. Expecting arguments
+	 * specified as -parameter=value pair and returns a string.
+	 * 
+	 * Examples: -monitor=1 -x=0 -y=0 -w=1200 -h=960
+	 * 
+	 * @author Jamz
+	 * @since 1.4.0.1
+	 * 
+	 * @param options
+	 *            {@link org.apache.commons.cli.Options}
+	 * @param searchValue
+	 *            Option string to search for, ie -version
+	 * @param defaultValue
+	 *            A default value to return if option is not found
+	 * @param args
+	 *            String array of passed in args
+	 * @return Int value of the matching option parameter if found
+	 */
+	private static int getCommandLineOption(Options options, String searchValue, int defaultValue, String[] args) {
+		CommandLineParser parser = new DefaultParser();
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+			if (cmd.hasOption(searchValue)) {
+				return Integer.parseInt(cmd.getOptionValue(searchValue));
+			}
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return -1;
+	}
+
 	public static void main(String[] args) {
+		// Jamz: Overwrite version for testing if passed as command line argument using -v or -version
+		Options cmdOptions = new Options();
+		cmdOptions.addOption("d", "debug", false, "turn on System.out enhanced debug output");
+		cmdOptions.addOption("v", "version", true, "override MapTool version");
+		cmdOptions.addOption("m", "monitor", true, "sets which monitor to use");
+		cmdOptions.addOption("f", "fullscreen", false, "set to maximize window");
+		cmdOptions.addOption("w", "width", true, "override MapTool window width");
+		cmdOptions.addOption("h", "height", true, "override MapTool window height");
+		cmdOptions.addOption("x", "xpos", true, "override MapTool window starting x coordinate");
+		cmdOptions.addOption("y", "ypos", true, "override MapTool window starting y coordinate");
+
+		debug = getCommandLineOption(cmdOptions, "debug", args);
+		version = getCommandLineOption(cmdOptions, "version", version, args);
+		graphicsMonitor = getCommandLineOption(cmdOptions, "monitor", graphicsMonitor, args);
+		useFullScreen = getCommandLineOption(cmdOptions, "fullscreen", args);
+
+		windowWidth = getCommandLineOption(cmdOptions, "width", windowWidth, args);
+		windowHeight = getCommandLineOption(cmdOptions, "height", windowHeight, args);
+		windowX = getCommandLineOption(cmdOptions, "xpos", windowX, args);
+		windowY = getCommandLineOption(cmdOptions, "ypos", windowY, args);
+
+		// Jamz: Just a little console log formatter for system.out to hyperlink messages to source.
+		if (debug)
+			DebugStream.activate();
+		else
+			DebugStream.deactivate();
+
 		if (MAC_OS_X) {
 			// On OSX the menu bar at the top of the screen can be enabled at any time, but the
 			// title (ie. name of the application) has to be set before the GUI is initialized (by

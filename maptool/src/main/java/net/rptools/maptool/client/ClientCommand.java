@@ -17,6 +17,6 @@ public class ClientCommand {
 		startAssetTransfer, updateAssetTransfer, bootPlayer, setCampaign, putZone, removeZone, putAsset, getAsset, removeAsset, putToken, removeToken, draw, clearAllDrawings, setZoneGridSize, setZoneVisibility, playerConnected, playerDisconnected, message, undoDraw, showPointer, hidePointer, movePointer, startTokenMove, stopTokenMove, toggleTokenMoveWaypoint, updateTokenMove, enforceZoneView, setZoneHasFoW, exposeFoW, hideFoW, setFoW, putLabel, removeLabel, enforceZone, setServerPolicy, addTopology, removeTopology, renameZone, updateCampaign, updateInitiative, updateTokenInitiative, setUseVision, updateCampaignMacros, setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be depended on for general purpose token movement
 		setLiveTypingLabel, // Experimental chat notification
 		enforceNotification, // enforces notification of typing in the chat window
-		exposePCArea, setBoard, updateExposedAreaMeta
+		exposePCArea, setBoard, updateExposedAreaMeta, clearExposedArea
 	};
 }
