@@ -101,7 +101,6 @@ public class JSScriptEngine {
 	private JSScriptEngine() {
 	}
 
-
 	public static JSScriptEngine getJSScriptEngine() {
 		return jsScriptEngine;
 	}
