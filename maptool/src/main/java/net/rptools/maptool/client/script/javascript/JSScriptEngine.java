@@ -14,6 +14,9 @@ package net.rptools.maptool.client.script.javascript;
 
 import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import net.rptools.maptool.client.script.javascript.api.MTScript;
+import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIDefinition;
+import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
 import org.apache.log4j.Logger;
 
 import javax.script.ScriptContext;
@@ -107,13 +110,19 @@ public class JSScriptEngine {
 		}
 	}
 
+	private void registerAPIClass(ScriptContext context, Class apiClass) throws ScriptException {
+		MapToolJSAPIDefinition def = apiClass.getClass().getAnnotation(MapToolJSAPIDefinition.class);
+		engine.eval("var " + def.javaScriptVariableName() + " = Java.type (" + def.getClass().getName() + ")", context);
+	}
+
 	private JSScriptEngine() {
 		engine = new NashornScriptEngineFactory().getScriptEngine(new JSClassFilter());
 		anonymousContext = new SimpleScriptContext();
 		anonymousContext.setBindings(engine.createBindings(), ScriptContext.ENGINE_SCOPE);
 		try {
-			engine.eval("var MTScript = {}", anonymousContext);
-			engine.eval("MTScript = Java.type('net.rptools.maptool.client.script.javascript.api.MTScript')", anonymousContext);
+			//engine.eval("var MTScript = {}", anonymousContext);
+			//engine.eval("MTScript = Java.type('net.rptools.maptool.client.script.javascript.api.MTScript')", anonymousContext);
+			registerAPIClass(anonymousContext, MTScript.class);
 		} catch (ScriptException e) {
 			log.error("Could not initialize JavaScript Engine.", e);
 		}

@@ -19,6 +19,9 @@ import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
 
+@MapToolJSAPIDefinition(
+		javaScriptVariableName = "MTScript"
+)
 public class MTScript {
 	public static Object getVariable(String name) throws ParserException {
 		return MacroJavaScriptBridge.getInstance().getMTScriptVariable(name);
