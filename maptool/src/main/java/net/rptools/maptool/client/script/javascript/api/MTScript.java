@@ -12,7 +12,11 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
+import net.rptools.maptool.client.functions.AbortFunction;
+import net.rptools.maptool.client.functions.AssertFunction;
+import net.rptools.maptool.client.functions.EvalMacroFunctions;
 import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
+import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
 
 public class MTScript {
@@ -22,5 +26,30 @@ public class MTScript {
 
 	public static void setVariable(String name, Object value) throws ParserException {
 		MacroJavaScriptBridge.getInstance().setMTScriptVariable(name, value);
+	}
+
+	public static void raiseError(String msg) throws ParserException {
+		throw new ParserException(msg);
+	}
+
+	public static void abort() throws ParserException {
+		throw new AbortFunction.AbortFunctionException(I18N.getText("macro.function.abortFunction.message", "MTScript.abort()"));
+	}
+
+	public static void mtsAssert(boolean check, String message) throws AssertFunction.AssertFunctionException {
+		if (!check) {
+			throw new AssertFunction.AssertFunctionException(message);
+		}
+	}
+
+	public static Object execMacro(String macro) throws ParserException {
+		return EvalMacroFunctions.getInstance().execMacro(MacroJavaScriptBridge.getInstance().getTokenInContext(), macro);
+	}
+
+	public static Object evalMacro(String macro) throws ParserException {
+		return EvalMacroFunctions.getInstance().evalMacro(
+				MacroJavaScriptBridge.getInstance().getVariableResolver(),
+				MacroJavaScriptBridge.getInstance().getTokenInContext(),
+				macro);
 	}
 }

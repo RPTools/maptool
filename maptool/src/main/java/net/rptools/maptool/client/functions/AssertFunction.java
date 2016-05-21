@@ -64,7 +64,7 @@ public class AssertFunction extends AbstractFunction {
 	}
 
 	/** Exception type thrown by assert() function, allowing a user-defined error message. */
-	public class AssertFunctionException extends ParameterException {
+	public static class AssertFunctionException extends ParameterException {
 		public AssertFunctionException(String msg) {
 			super(msg);
 		}

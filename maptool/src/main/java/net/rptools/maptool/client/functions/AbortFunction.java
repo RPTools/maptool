@@ -51,7 +51,7 @@ public class AbortFunction extends AbstractNumberFunction {
 	}
 
 	/** Exception type thrown by abort() function. Semantics are to silently halt the current execution. */
-	public class AbortFunctionException extends ParserException {
+	public static class AbortFunctionException extends ParserException {
 		public AbortFunctionException(Throwable cause) {
 			super(cause);
 		}
