@@ -13,9 +13,11 @@
 package net.rptools.maptool.client.functions;
 
 import jdk.nashorn.api.scripting.JSObject;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -47,6 +49,9 @@ public class MacroJavaScriptBridge extends AbstractFunction {
 	public Object childEvaluate(Parser parser, String functionName, List<Object> args) throws ParserException {
 		variableResolver = (MapToolVariableResolver) parser.getVariableResolver();
 		if ("js.eval".equals(functionName)) {
+			if (!MapTool.getParser().isMacroTrusted()) {
+				throw new ParserException(I18N.getText("macro.function.general.noPerm", "broadcast"));
+			}
 			String script = args.get(0).toString();
 			try {
 				return JavaScriptToMTScriptType(JSScriptEngine.getJSScriptEngine().evalAnonymous(script));
@@ -59,7 +64,10 @@ public class MacroJavaScriptBridge extends AbstractFunction {
 	}
 
 	public Object JavaScriptToMTScriptType(Object val) {
-		if (val instanceof Integer) {
+		if (val == null) {
+			// MTScript doesnt have a null, only emty string
+			return "";
+		} else if (val instanceof Integer) {
 			return BigDecimal.valueOf(((Integer) val).intValue());
 		} else if (val instanceof Long) {
 			return BigDecimal.valueOf(((Long) val).longValue());
@@ -91,4 +99,11 @@ public class MacroJavaScriptBridge extends AbstractFunction {
 		variableResolver.setVariable(name, JavaScriptToMTScriptType(value));
 	}
 
+	public Token getTokenInContext() {
+		return variableResolver.getTokenInContext();
+	}
+
+	public MapToolVariableResolver getVariableResolver() {
+		return variableResolver;
+	}
 }

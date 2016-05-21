@@ -16,8 +16,10 @@ import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.apache.log4j.Logger;
 
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
 
 public class JSScriptEngine {
 
@@ -25,6 +27,7 @@ public class JSScriptEngine {
 	private static final Logger log = Logger.getLogger(JSScriptEngine.class);
 
 	private ScriptEngine engine;
+	private ScriptContext anonymousContext;
 
 	public class JSClassFilter implements ClassFilter {
 
@@ -106,9 +109,11 @@ public class JSScriptEngine {
 
 	private JSScriptEngine() {
 		engine = new NashornScriptEngineFactory().getScriptEngine(new JSClassFilter());
+		anonymousContext = new SimpleScriptContext();
+		anonymousContext.setBindings(engine.createBindings(), ScriptContext.ENGINE_SCOPE);
 		try {
-			engine.eval("var MTScript = {}");
-			engine.eval("MTScript.Variables = Java.type('net.rptools.maptool.client.script.javascript.api.VariableResolverBridge')");
+			engine.eval("var MTScript = {}", anonymousContext);
+			engine.eval("MTScript = Java.type('net.rptools.maptool.client.script.javascript.api.MTScript')", anonymousContext);
 		} catch (ScriptException e) {
 			log.error("Could not initialize JavaScript Engine.", e);
 		}
@@ -122,6 +127,6 @@ public class JSScriptEngine {
 
 		StringBuilder wrapped = new StringBuilder();
 		wrapped.append("(function() {").append(script).append("})();");
-		return engine.eval(wrapped.toString());
+		return engine.eval(wrapped.toString(), anonymousContext);
 	}
 }
