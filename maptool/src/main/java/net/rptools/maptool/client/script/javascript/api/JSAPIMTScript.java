@@ -19,37 +19,39 @@ import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
 
-@MapToolJSAPIDefinition(
-		javaScriptVariableName = "MTScript"
-)
-public class MTScript {
-	public static Object getVariable(String name) throws ParserException {
+@MapToolJSAPIDefinition(javaScriptVariableName = "MTScript")
+/**
+ * Class used to provide an API to interact with MapTool custom scripting language.
+ */
+public class JSAPIMTScript implements MapToolJSAPIInterface {
+
+	public Object getVariable(String name) throws ParserException {
 		return MacroJavaScriptBridge.getInstance().getMTScriptVariable(name);
 	}
 
-	public static void setVariable(String name, Object value) throws ParserException {
+	public void setVariable(String name, Object value) throws ParserException {
 		MacroJavaScriptBridge.getInstance().setMTScriptVariable(name, value);
 	}
 
-	public static void raiseError(String msg) throws ParserException {
+	public void raiseError(String msg) throws ParserException {
 		throw new ParserException(msg);
 	}
 
-	public static void abort() throws ParserException {
+	public void abort() throws ParserException {
 		throw new AbortFunction.AbortFunctionException(I18N.getText("macro.function.abortFunction.message", "MTScript.abort()"));
 	}
 
-	public static void mtsAssert(boolean check, String message) throws AssertFunction.AssertFunctionException {
+	public void mtsAssert(boolean check, String message) throws AssertFunction.AssertFunctionException {
 		if (!check) {
 			throw new AssertFunction.AssertFunctionException(message);
 		}
 	}
 
-	public static Object execMacro(String macro) throws ParserException {
+	public Object execMacro(String macro) throws ParserException {
 		return EvalMacroFunctions.getInstance().execMacro(MacroJavaScriptBridge.getInstance().getTokenInContext(), macro);
 	}
 
-	public static Object evalMacro(String macro) throws ParserException {
+	public Object evalMacro(String macro) throws ParserException {
 		return EvalMacroFunctions.getInstance().evalMacro(
 				MacroJavaScriptBridge.getInstance().getVariableResolver(),
 				MacroJavaScriptBridge.getInstance().getTokenInContext(),
