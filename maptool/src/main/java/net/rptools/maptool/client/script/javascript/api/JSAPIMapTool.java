@@ -13,7 +13,7 @@
 package net.rptools.maptool.client.script.javascript.api;
 
 @MapToolJSAPIDefinition(javaScriptVariableName = "MapTool")
-public class JASPIMapTool implements MapToolJSAPIInterface {
+public class JSAPIMapTool implements MapToolJSAPIInterface {
 	private final JSAPIClientInfo JSAPIClientInfo = new JSAPIClientInfo();
 
 	private final JSAPIChat JSAPIChat = new JSAPIChat();
