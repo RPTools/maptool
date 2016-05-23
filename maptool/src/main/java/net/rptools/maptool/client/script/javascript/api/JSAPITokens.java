@@ -12,23 +12,18 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
-@MapToolJSAPIDefinition(javaScriptVariableName = "MapTool")
-public class JSAPIMapTool implements MapToolJSAPIInterface {
-	private final JSAPIClientInfo clientInfo = new JSAPIClientInfo();
+import net.rptools.maptool.client.MapTool;
 
-	private final JSAPIChat chat = new JSAPIChat();
+import java.util.ArrayList;
+import java.util.List;
 
-	private final JSAPITokens tokens = new JSAPITokens();
+public class JSAPITokens {
+	public List<JSAPIToken> getMapTokens() {
+		final List<JSAPIToken> tokens = new ArrayList<>();
 
-	public JSAPIClientInfo getClientInfo() {
-		return clientInfo;
-	}
-
-	public JSAPIChat getChat() {
-		return chat;
-	}
-
-	public JSAPITokens getTokens() {
+		MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokens().forEach(
+				t -> tokens.add(new JSAPIToken(t)));
 		return tokens;
 	}
+
 }
