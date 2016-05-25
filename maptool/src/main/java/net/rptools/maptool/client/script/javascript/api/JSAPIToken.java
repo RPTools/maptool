@@ -37,8 +37,6 @@ public class JSAPIToken {
 		token.setHasSight(sight);
 	}
 
-
-
 	public String toString() {
 		return "Token(id=" + token.getId() + ")";
 	}
