@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.Area;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -971,6 +972,18 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 			if (!MapTool.confirmTokenDelete()) {
 				return;
 			}
+			boolean unhideImpersonated = false;
+			boolean unhideSelected = false;
+			if (renderer.getSelectedTokenSet().size() > 10) {
+				if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.IMPERSONATED).isHidden() == false) {
+					unhideImpersonated = true;
+					MapTool.getFrame().getDockingManager().hideFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
+				}
+				if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.SELECTION).isHidden() == false) {
+					unhideSelected = true;
+					MapTool.getFrame().getDockingManager().hideFrame(MapToolFrame.MTFrame.SELECTION.name());
+				}
+			}
 			for (GUID tokenGUID : selectedTokenSet) {
 				Token token = renderer.getZone().getToken(tokenGUID);
 
@@ -978,6 +991,13 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					renderer.getZone().removeToken(tokenGUID);
 					MapTool.serverCommand().removeToken(renderer.getZone().getId(), tokenGUID);
 				}
+			}
+			if (unhideImpersonated) {
+				MapTool.getFrame().getDockingManager().showFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
+			}
+
+			if (unhideSelected) {
+				MapTool.getFrame().getDockingManager().showFrame(MapToolFrame.MTFrame.SELECTION.name());
 			}
 		}
 	}

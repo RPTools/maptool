@@ -14,12 +14,13 @@ package net.rptools.maptool.client.script.javascript;
 
 import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIDefinition;
+import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
 import org.apache.log4j.Logger;
+import org.reflections.Reflections;
 
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
-import javax.script.SimpleScriptContext;
+import javax.script.*;
+import java.util.Set;
 
 public class JSScriptEngine {
 
@@ -107,15 +108,29 @@ public class JSScriptEngine {
 		}
 	}
 
+	private void registerAPIObject(ScriptContext context, MapToolJSAPIInterface apiObj) throws ScriptException {
+		MapToolJSAPIDefinition def = apiObj.getClass().getAnnotation(MapToolJSAPIDefinition.class);
+		Bindings bindings = context.getBindings(ScriptContext.ENGINE_SCOPE);
+		bindings.put(def.javaScriptVariableName(), apiObj);
+	}
+
 	private JSScriptEngine() {
 		engine = new NashornScriptEngineFactory().getScriptEngine(new JSClassFilter());
 		anonymousContext = new SimpleScriptContext();
 		anonymousContext.setBindings(engine.createBindings(), ScriptContext.ENGINE_SCOPE);
-		try {
-			engine.eval("var MTScript = {}", anonymousContext);
-			engine.eval("MTScript = Java.type('net.rptools.maptool.client.script.javascript.api.MTScript')", anonymousContext);
-		} catch (ScriptException e) {
-			log.error("Could not initialize JavaScript Engine.", e);
+		Reflections reflections = new Reflections("net.rptools.maptool.client.script.javascript.api");
+		Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(MapToolJSAPIDefinition.class);
+
+		for (Class<?> apiClass : annotated) {
+			try {
+				if (MapToolJSAPIInterface.class.isAssignableFrom(apiClass)) {
+					registerAPIObject(anonymousContext, (MapToolJSAPIInterface) apiClass.newInstance());
+				} else {
+					log.error("Could not add API object " + apiClass.getName() + " (missing interface)");
+				}
+			} catch (Exception e) {
+				log.error("Could not add API object " + apiClass.getName(), e);
+			}
 		}
 	}
 
