@@ -35,6 +35,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
+import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -64,11 +65,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
-import net.rptools.maptool.client.ui.StampPopupMenu;
-import net.rptools.maptool.client.ui.TokenLocation;
-import net.rptools.maptool.client.ui.TokenPopupMenu;
-import net.rptools.maptool.client.ui.Tool;
-import net.rptools.maptool.client.ui.Toolbox;
+import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
@@ -1035,6 +1032,18 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				if (!MapTool.confirmTokenDelete()) {
 					return;
 				}
+				boolean unhideImpersonated = false;
+				boolean unhideSelected = false;
+				if (renderer.getSelectedTokenSet().size() > 10) {
+					if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.IMPERSONATED).isHidden() == false) {
+						unhideImpersonated = true;
+						MapTool.getFrame().getDockingManager().hideFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
+					}
+					if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.SELECTION).isHidden() == false) {
+						unhideSelected = true;
+						MapTool.getFrame().getDockingManager().hideFrame(MapToolFrame.MTFrame.SELECTION.name());
+					}
+				}
 				Set<GUID> selectedTokenSet = renderer.getSelectedTokenSet();
 
 				for (GUID tokenGUID : selectedTokenSet) {
@@ -1045,7 +1054,13 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 						MapTool.serverCommand().removeToken(renderer.getZone().getId(), tokenGUID);
 					}
 				}
-				renderer.clearSelectedTokens();
+				if (unhideImpersonated) {
+					MapTool.getFrame().getDockingManager().showFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
+				}
+
+				if (unhideSelected) {
+					MapTool.getFrame().getDockingManager().showFrame(MapToolFrame.MTFrame.SELECTION.name());
+				}
 			}
 		});
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true), new StopPointerActionListener());
