@@ -29,7 +29,6 @@
 <File classpath='yes'>@rootDir@\maptool\build\libs\MapTool-@buildVersion@-fat.jar</File>
 <File>@rootDir@\launcher\src\dist\doc</File>
 <File>@rootDir@\launcher\src\dist\logging</File>
-<File>@rootDir@\jWrapper\mt.cfg</File>
 <!--
 <JvmOptions>
 <JvmOption>-Dsun.java2d.d3d=false</JvmOption>

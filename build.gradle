@@ -227,8 +227,7 @@ project(':maptool') {
 
 	dependencies {
 		compile 'net.java.abeille:abeille-formsrt:2.0'
-		compile 'net.rptools.clientserver:clientserver:1.0.b17'
-		//compile 'net.rptools.clientserver:clientserver:1.4.0.+'
+		compile 'net.rptools.clientserver:clientserver:1.4.0.+'
 		compile 'org.hibernate:antlr:2.7.5H3'
 		compile 'commons-beanutils:commons-beanutils-core:1.8.3'
 		compile 'org.ow2.util.bundles:commons-collections-3.2.1:1.0.0'
@@ -255,8 +254,7 @@ project(':maptool') {
 		compile 'net.sf.json-lib:json-lib:2.4:jdk15'
 		compile 'log4j:log4j:1.2.16'
 		compile 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
-		compile 'net.rptools.parser:parser:1.1.b24'
-		//compile 'net.rptools.parser:parser:1.4.0.+'
+		compile 'net.rptools.parser:parser:1.4.0.+'
 		compile 'ca.odell.renderpack:renderpack:1.2004'
 		compile 'net.rptools.rplib:rplib:1.4.0.+'
 		compile 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
@@ -400,23 +398,28 @@ task createFatJars(dependsOn: ['maptool:deleteBuild', 'launcher:deleteBuild', 'l
 	}
 }
 
-task deleteJwrapperConfig(type: Delete) << {
+task deleteJwrapperConfig(type: Delete) {
 	description = "Delete the generated jwrapper.xml file"
-	println "Deleting ${rootDir}/build-resources/jWrapper/jwrapper.xml"
 	delete "${rootDir}/build-resources/jWrapper/jwrapper.xml"
+
+	doLast {
+		println "Deleting ${rootDir}/build-resources/jWrapper/jwrapper.xml"
+	}
 }
 
-task deleteMtConfig(type: Delete) << {
+task deleteMtConfig(type: Delete) {
 	description = "Delete the generated mt.cfg file"
-	println "Deleting ${rootDir}/build-resources/jWrapper/mt.cfg"
-	delete "${rootDir}/build-resources/jWrapper/mt.cfg"
+	delete "${rootDir}/launcher/src/main/resources/net/rptools/maptool/launcher/config/mt.cfg"
+	
+	doLast {
+		println "Deleting ${rootDir}/launcher/src/main/resources/net/rptools/maptool/launcher/config/mt.cfg"
+	}
 }
 
-task createJwrapperConfig(dependsOn:deleteJwrapperConfig, type: Copy) << {
+task createJwrapperConfig(dependsOn:deleteJwrapperConfig, type: Copy) {
 	description = "Generates jWrapper XML config from template"
 	group = "Distribution"
-	println 'Setting jWrapper directory to: ' + "${rootDir}/build-resources/jWrapper"
-
+	
 	from ('build-resources/jWrapper') {
 		include 'jwrapper-template.xml'
 		filter(ReplaceTokens, tokens: [
@@ -434,23 +437,28 @@ task createJwrapperConfig(dependsOn:deleteJwrapperConfig, type: Copy) << {
 	rename { String fileName ->
 		fileName.replace('-template', '')
 	}
+	
+	doLast {
+		println 'Setting jWrapper directory to: ' + "${rootDir}/build-resources/jWrapper"
+	}
 }
 
-task createMTcfgFile(dependsOn:deleteMtConfig, type: Copy) << {
+task createLaunchPropertiesFile(dependsOn:deleteMtConfig, type: Copy) {
 	description = "Generates a MapTool default mt.cfg for package release using jWrapper"
 	group = "Distribution"
+	
 	from ('build-resources/jWrapper') {
-		include 'mt-template.cfg'
+		include 'launch-template.properties'
 		filter(ReplaceTokens, tokens: [
 			'buildDate': rootProject.ext.yyyymmdd,  'buildVersion': getVersionName()])
 	}
-	into 'build-resources/jWrapper'
+	into 'launcher/src/main/resources/net/rptools/maptool/launcher/config'
 	rename { String fileName ->
 		fileName.replace('-template', '')
 	}
 }
 
-task createJwrapperRelease(dependsOn: ['createFatJars', 'createJwrapperConfig', 'createMTcfgFile'], type:JavaExec) {
+task createJwrapperRelease(dependsOn: ['createLaunchPropertiesFile', 'createFatJars', 'createJwrapperConfig'], type:JavaExec) {
 	description = "Generates a MapTool release using jWrapper"
 	group = "Distribution"
 	workingDir = 'build-resources/jWrapper'
