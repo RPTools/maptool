@@ -46,11 +46,14 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.LineNumberReader;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
@@ -61,6 +64,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -103,7 +107,7 @@ import net.rptools.maptool.launcher.PathUtils.PathResolutionException;
  * Generic launcher for MapTool.
  * 
  * Prompts user for the various memory settings to use when starting MapTool and
- * then launches it with those settings preserving them in the mt.cfg file for
+ * then launches it with those settings preserving them in the launch.properties file for
  * use later.
  * 
  * @authors Phergus, Lee, Azhrei
@@ -124,10 +128,13 @@ public class MapToolLauncher extends JFrame {
 	private static final String LOCALE_LANGUAGE_OPTION = "-Duser.language="; //$NON-NLS-1$
 	private static final String LOCALE_COUNTRY_OPTION = "-Duser.country="; //$NON-NLS-1$
 	private static final String JAVA2D_D3D_OPTION = "-Dsun.java2d.d3d=false"; //$NON-NLS-1$
-	private static final String JAVA2D_OPENGL_OPTION = "-Dsun.java2d.opengl=True"; //Jamz: capital T in true sets verbose on//$NON-NLS-1$
+	private static final String JAVA2D_OPENGL_OPTION = "-Dsun.java2d.opengl=True"; // Jamz: capital T in true sets verbose on//$NON-NLS-1$
 	private static final String MACOSX_EMBEDDED_OPTION = "-Djavafx.macosx.embedded=true"; //$NON-NLS-1$
 
-	private static final int DEFAULT_MAXMEM = 512;
+	private static final String LAUNCH_CONFIG = "launch.properties"; // Jamz: the new home for launch.properties
+	private static final String LAUNCH_RESOURCE = "/net/rptools/maptool/launcher/config/launch.properties"; // Jamz: default config for current release
+
+	private static final int DEFAULT_MAXMEM = 1024;
 	private static final int DEFAULT_MINMEM = 64;
 	private static final int DEFAULT_STACKSIZE = 2;
 
@@ -167,7 +174,8 @@ public class MapToolLauncher extends JFrame {
 	private static String mapToolDataDir = EMPTY;
 	private static File mapToolJarDir;
 	private static String mapToolLocale = EMPTY;
-
+	private static String launcherVersion = "";
+	
 	private static List<LoggingConfig> logConfigs = null;
 	private static Map<String, String> originalSettings;
 	private static Map<String, String> locales;
@@ -189,6 +197,7 @@ public class MapToolLauncher extends JFrame {
 		"LOGGING", //$NON-NLS-1$
 		"LOCALE", //$NON-NLS-1$
 		"JAVA_DIRECTORY", //$NON-NLS-1$
+		"MAPTOOL_VERSION"
 	};
 	private static final String[][] invocationCommands = new String[][] {
 		new String[] { }, // empty array means nothing to add as a command line prefix when Console option enabled
@@ -198,7 +207,7 @@ public class MapToolLauncher extends JFrame {
 	};
 	// @formatter:on
 
-	private File cfgFile = null;
+	private File launchConfigFile = null;
 
 	private static ImageIcon mapToolIcon;
 	private static ImageIcon launchIcon;
@@ -242,6 +251,8 @@ public class MapToolLauncher extends JFrame {
 	 * @throws IOException
 	 */
 	public MapToolLauncher() throws IOException, URISyntaxException {
+		launcherVersion = CopiedFromOtherJars.getVersion();
+		
 		final File dir = new File(MapToolLauncher.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 		currentDir = mapToolJarDir = dir.getParentFile();
 
@@ -251,7 +262,8 @@ public class MapToolLauncher extends JFrame {
 		launchIcon = new ImageIcon(getClass().getResource("MapTool_Launcher_256x256.png")); //$NON-NLS-1$
 		launchArrowIcon = new ImageIcon(getClass().getResource("Launch_Arrow_256x256.png")); //$NON-NLS-1$
 		// This must be done before calling any methods of CopiedFromOtherJars or the LOCALE setting won't work.
-		//readCfgFile();
+
+		findDataDir();
 
 		final File dataDirPath = new File(mapToolDataDir);
 		if (!dataDirPath.exists()) {
@@ -259,22 +271,21 @@ public class MapToolLauncher extends JFrame {
 			skipPrompt = false;
 		}
 
-		findDataDir();
-
-		// Lets test if the config is in the dataDir. We're storing it here so it persists across jWrapper installations
-		cfgFile = new File(mapToolDataDir + "/config", "mt.cfg"); //$NON-NLS-1$
-		if (cfgFile.exists()) {
-			System.out.println("Found config in maptool data directory.");
+		// Lets test the current directory first, lets lets a local JAR copy to run independently of config stored in .maptool directory, .eg to run multiple versions of MT
+		launchConfigFile = new File(currentDir, LAUNCH_CONFIG); //$NON-NLS-1$
+		if (launchConfigFile.exists()) {
 			readCfgFile();
 		} else {
-			// ,maptool data directory doesn't exist so we're not storing the config there...yet. Lets read from the
-			// current directory. jWrapper comes with a default config so there SHOULD be one.
-			cfgFile = new File(currentDir, "mt.cfg"); //$NON-NLS-1$
-			readCfgFile();
+			// OK, no config in current dir. Lets see if the config is in the .maptool dataDir. We're storing it there so it persists across jWrapper installations
+			launchConfigFile = new File(mapToolDataDir + "/config", LAUNCH_CONFIG); //$NON-NLS-1$
+			if (launchConfigFile.exists()) {
+				readCfgFile();
+			} else {
+				// OK so the config doesn't exist, probably a new install, lets load from resource bundle and copy it over...
+				copyResource(LAUNCH_RESOURCE, launchConfigFile);
+				readCfgFile();
+			}
 		}
-		// ok, we've now read a config file, lets set the path to were we want to save it, which copies
-		// what jWrapper supplied, over to the dataDirectory...
-		cfgFile = new File(mapToolDataDir + "/config", "mt.cfg"); //$NON-NLS-1$		
 
 		if ((promptUser && !skipPrompt) || forcePrompt) {
 			setVisible(true);
@@ -298,11 +309,62 @@ public class MapToolLauncher extends JFrame {
 
 			// Make a list of all XML files in the current directory.  We're going to copy new ones
 			// to the data directory when the Launch button is activated.
-			copyXmlFiles(logConfigs, dataDirPath);
+			//copyXmlFiles(logConfigs, dataDirPath);
 
 			setVisible(false);
 			launchMapTool();
 			System.exit(0);
+		}
+	}
+
+	/**
+	 * Returns a given property from a resource
+	 * 
+	 * @author Jamz
+	 * @since 1.4.1.0
+	 * 
+	 * @param resource
+	 * @param propKey
+	 * @return String property
+	 */
+	private String getResourceProperty(String resource, String propKey) {
+		Properties prop = new Properties();
+		InputStream in = getClass().getResourceAsStream(resource);
+		try {
+			prop.load(in);
+			in.close();
+			return prop.getProperty(propKey);
+		} catch (IOException e) {
+			logMsg(Level.SEVERE, "Error loading property from resource {0}", "msg.error.loggingUnwritable", propKey, e);
+		}
+
+		return EMPTY;
+	}
+
+	/**
+	 * Copies default resources over to users .maptool/config directory
+	 * 
+	 * @author Jamz
+	 * @throws IOException 
+	 * @since 1.4.1.0
+	 *
+	 */
+	private void copyResource(String resource, File fileDestination) {
+		try {
+			InputStream in = getClass().getResourceAsStream(resource);
+			OutputStream out = new FileOutputStream(fileDestination);
+
+			byte[] buffer = new byte[1024];
+			int len = in.read(buffer);
+			while (len != -1) {
+				out.write(buffer, 0, len);
+				len = in.read(buffer);
+			}
+
+			in.close();
+			out.close();
+		} catch (IOException e) {
+			logMsg(Level.SEVERE, "Error copying xml logging resource {0}", "msg.error.loggingUnwritable", fileDestination, e);
 		}
 	}
 
@@ -337,6 +399,8 @@ public class MapToolLauncher extends JFrame {
 			// Lee: launch normally
 			cmdArgs = getLaunchCommand(invocationCommands[0], mapToolJarDir);
 		}
+
+		System.out.println("command: " + cmdArgs.toString());
 		pb = new ProcessBuilder(cmdArgs);
 		logMsg(Level.INFO, "Setting current directory to: {0}.  Command line is {1}.", null, new Object[] { mapToolJarDir, cmdArgs.toString() });
 		try {
@@ -862,9 +926,8 @@ public class MapToolLauncher extends JFrame {
 	 * components.
 	 */
 	private void initComponents() {
-		// Lee: for aesthetics and Linux won't display window controls on an untitled window.
-		final String version = CopiedFromOtherJars.getVersion();
-		setTitle(CopiedFromOtherJars.getText("msg.title.mainWindow", version)); //$NON-NLS-1$
+		// Lee: for esthetics and Linux won't display window controls on an untitled window.
+		setTitle(CopiedFromOtherJars.getText("msg.title.mainWindow", launcherVersion)); //$NON-NLS-1$
 
 		if (jbPathText == null)
 			jbPathText = CopiedFromOtherJars.getText("msg.info.setJavaVersion"); //$NON-NLS-1$
@@ -1133,6 +1196,11 @@ public class MapToolLauncher extends JFrame {
 		} else {
 			lc.add(javaDir + File.separator + "java"); //$NON-NLS-1$
 		}
+
+		// Jamz: Console launch was breaking, it's expecting -jar command as first arg
+		lc.add(jarCommand);
+		lc.add(mapToolJarName); // mapToolJarDir not needed, since it's set when building the ProcessBuilder
+
 		lc.add(minMemStr);
 		lc.add(maxMemStr);
 		lc.add(stackSizeStr);
@@ -1159,8 +1227,6 @@ public class MapToolLauncher extends JFrame {
 		if (!mapToolLocale.isEmpty())
 			lc.add(localeToOptions(mapToolLocale));
 
-		lc.add(jarCommand);
-		lc.add(mapToolJarName); // mapToolJarDir not needed, since it's set when building the ProcessBuilder
 		lc.add(mtArg);
 		return lc;
 	}
@@ -1367,7 +1433,7 @@ public class MapToolLauncher extends JFrame {
 		}
 	}
 
-	// For new home of mt.cfg we need to establish maptool's datadir earlier now...
+	// For new home of launch.properties we need to establish maptool's datadir earlier now...
 	private void findDataDir() {
 		String dir = null;
 		File f;
@@ -1395,7 +1461,7 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	/**
-	 * Reads from a file named mt.cfg in the same directory to get the following
+	 * Reads from a file named launch.properties in the same directory to get the following
 	 * options. Each option is placed on a single line followed by an equal sign
 	 * ('=') and then the appropriate value. The default values are coded below.
 	 * 
@@ -1413,14 +1479,14 @@ public class MapToolLauncher extends JFrame {
 		values.put("MINMEM", Integer.toString(minMemVal)); //$NON-NLS-1$
 		values.put("STACKSIZE", Integer.toString(stackSizeVal)); //$NON-NLS-1$
 		values.put("PROMPT", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		values.put("MAPTOOL_VERSION", launcherVersion); //$NON-NLS-1$
 
 		final List<String> errors = new ArrayList<String>();
-		if (cfgFile.isFile() && cfgFile.length() > 0) {
+		if (launchConfigFile.isFile() && launchConfigFile.length() > 0) {
 			rv = true; // Assume that something was found.
-
 			LineNumberReader lnbr = null;
 			try {
-				lnbr = new LineNumberReader(new BufferedReader(new FileReader(cfgFile)));
+				lnbr = new LineNumberReader(new BufferedReader(new FileReader(launchConfigFile)));
 				try {
 					String line = lnbr.readLine();
 					while (line != null) {
@@ -1430,28 +1496,29 @@ public class MapToolLauncher extends JFrame {
 							if (arg.length == 2) {
 								values.put(arg[0].toUpperCase().trim(), arg[1].trim());
 							} else {
-								errors.add(CopiedFromOtherJars.getText("msg.error.configBadFormat", cfgFile, lnbr.getLineNumber(), line)); //$NON-NLS-1$
+								errors.add(CopiedFromOtherJars.getText("msg.error.configBadFormat", launchConfigFile, lnbr.getLineNumber(), line)); //$NON-NLS-1$
 							}
 						}
 						line = lnbr.readLine();
 					}
 				} catch (final IOException ex) {
-					logMsg(Level.SEVERE, "Error reading configuration file: {0}", "msg.error.configIOError", cfgFile); //$NON-NLS-1$ $NON-NLS-2$
+					logMsg(Level.SEVERE, "Error reading configuration file: {0}", "msg.error.configIOError", launchConfigFile); //$NON-NLS-1$ $NON-NLS-2$
 				}
 			} catch (final FileNotFoundException ex) {
 				// This shouldn't happen since we specifically used cfgFile.isFIle(), above, and that can't be true
 				// unless the file actually exists.
-				logMsg(Level.SEVERE, "Configuration file {0} not found.", "msg.error.configFileNotFound", cfgFile); //$NON-NLS-1$ $NON-NLS-2$
+				logMsg(Level.SEVERE, "Configuration file {0} not found.", "msg.error.configFileNotFound", launchConfigFile); //$NON-NLS-1$ $NON-NLS-2$
 			} finally {
 				try {
 					lnbr.close();
 				} catch (final IOException ex) {
-					logMsg(Level.SEVERE, "Error closing configuration file {0}.", "msg.error.configClosing", cfgFile); //$NON-NLS-1$ $NON-NLS-2$
+					logMsg(Level.SEVERE, "Error closing configuration file {0}.", "msg.error.configClosing", launchConfigFile); //$NON-NLS-1$ $NON-NLS-2$
 				}
 			}
 		} else {
-			logMsg(Level.INFO, "Configuration file not found; using built-in defaults", "msg.error.configNotFound", cfgFile); //$NON-NLS-1$ $NON-NLS-2$
+			logMsg(Level.INFO, "Configuration file not found; using built-in defaults", "msg.error.configNotFound", launchConfigFile); //$NON-NLS-1$ $NON-NLS-2$
 		}
+		// Build a list of all XML files found in the .maptool/logging directory, if it exists, otherwise
 		// Build a list of all XML files in the same directory as the launcher.  This list of
 		// filenames will be used to validate the LOGGING parameter from the configuration file.
 		File logging = new File(mapToolDataDir, "logging"); //$NON-NLS-1$
@@ -1459,6 +1526,50 @@ public class MapToolLauncher extends JFrame {
 			logging = currentDir;
 		}
 		logConfigs = buildLoggingFileList(logging);
+
+		if (logConfigs.isEmpty()) {
+			// No logging files found in currentDirectory or in the .maptool/logging directory
+			// Probably a new installation so lets copy some defaults over...
+			logging = new File(mapToolDataDir, "logging");
+			if (!logging.mkdirs() && !logging.exists()) {
+				logMsg(Level.SEVERE, "Failed to create MAPTOOL_LOGGING DIR: " + logging, null);
+			} else {
+				copyResource("/net/rptools/maptool/launcher/logging/fileio-logging.xml", new File(logging, "fileio-logging.xml"));
+				copyResource("/net/rptools/maptool/launcher/logging/general.xml", new File(logging, "general.xml"));
+				copyResource("/net/rptools/maptool/launcher/logging/imageio-logging.xml", new File(logging, "imageio-logging.xml"));
+				copyResource("/net/rptools/maptool/launcher/logging/macros-logging.xml", new File(logging, "macros-logging.xml"));
+				copyResource("/net/rptools/maptool/launcher/logging/parser-logging.xml", new File(logging, "parser-logging.xml"));
+
+				logConfigs = buildLoggingFileList(logging);
+			}
+		}
+
+		// Check if version changed
+		if (!launcherVersion.equals(values.get("MAPTOOL_VERSION"))) {
+			// We have a version change...
+			values.put("MAPTOOL_VERSION", getResourceProperty(LAUNCH_RESOURCE, "MAPTOOL_VERSION"));
+			values.put("MAPTOOL_DIRECTORY", getResourceProperty(LAUNCH_RESOURCE, "MAPTOOL_DIRECTORY"));
+			values.put("EXECUTABLE", getResourceProperty(LAUNCH_RESOURCE, "EXECUTABLE"));
+
+			// Lets see if the jWrapper JRE changed. If we detect a non-jWrapper JRE then skip it, the user manually set the JRE
+			try {
+				String currentJRE = values.get("JAVA_DIRECTORY");
+				if (currentJRE != null) {
+					if (currentJRE.contains("JWrapper-MapTool")) {
+						String dir = JWSystem.getMyJreHome().getAbsolutePath();
+						dir += File.separator + "bin";
+
+						if (!dir.equals(currentJRE)) {
+							// We have a JRE version change
+							values.put("JAVA_DIRECTORY", dir);
+						}
+					}
+				}
+			} catch (Exception e) {
+				logMsg(Level.SEVERE, "Error obtaining the jWrapper JRE value.", "msg.error.jWrapperJREunavailable", EMPTY, e);
+				e.printStackTrace();
+			}
+		}
 
 		// Now process the records just read in (or the defaults).  Errors are accumulated into 'errors'.
 		parseCfgValues(values, errors);
@@ -1575,9 +1686,10 @@ public class MapToolLauncher extends JFrame {
 		final List<String> notCopied = new LinkedList<String>();
 		for (final LoggingConfig config : fileList) {
 			final File srcFile = config.fname;
+			System.out.println(srcFile.toString());
 			final File destFile = new File(toDir, srcFile.getName());
 			final long srcTime = srcFile.lastModified();
-			if (!destFile.exists() || srcTime > destFile.lastModified() || srcTime > cfgFile.lastModified()) {
+			if (!destFile.exists() || srcTime > destFile.lastModified() || srcTime > launchConfigFile.lastModified()) {
 				if (!CopiedFromOtherJars.copyFile(srcFile, destFile)) {
 					notCopied.add(CopiedFromOtherJars.getText("msg.info.notCopiedTo", srcFile.getName(), toDir.getPath())); //$NON-NLS-1$
 				}
@@ -1606,17 +1718,22 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	private void createLogConfig() {
-		final File logconf = new File(mapToolDataDir, "logging.xml"); //$NON-NLS-1$
-		logconf.delete();
-
 		String loggingNow = getLoggingString();
 		String val = originalSettings.get("LOGGING");
+
+		// Settings did not change, existing logging.xml file will be used
+		// Jamz: Not sure I like this logic, originally it deleted the file first but did not recreate it
+		// unless settings changed. I moved the delete below this check but there's no guarantee that 
+		// the file hasn't been changed/deleted outside this program....
 		if (val == null)
 			val = EMPTY;
 		if (val.equalsIgnoreCase(loggingNow))
 			return;
 
+		final File logconf = new File(mapToolDataDir, "logging.xml"); //$NON-NLS-1$
+		logconf.delete();
 		BufferedWriter bw;
+
 		try {
 			bw = new BufferedWriter(new FileWriter(logconf));
 		} catch (final IOException e) {
@@ -1624,8 +1741,10 @@ public class MapToolLauncher extends JFrame {
 			return;
 		}
 		try {
+			System.out.println("logConfigs size: " + logConfigs.size());
 			for (final LoggingConfig config : logConfigs) {
 				if (config.chkbox.isSelected()) {
+					System.out.println("config.chkbox: " + config.chkbox.getText() + " is checked");
 					appendFileToWriter(config.fname, bw);
 				}
 			}
@@ -1742,7 +1861,8 @@ public class MapToolLauncher extends JFrame {
 		values.put("MAPTOOL_DIRECTORY", relDir); //$NON-NLS-1$
 
 		values.put("EXECUTABLE", mapToolJarName); //$NON-NLS-1$
-
+		values.put("MAPTOOL_VERSION", launcherVersion); //$NON-NLS-1$
+		
 		baseDir = mapToolJarDir.getAbsolutePath() + File.separator;
 		if (mapToolDataDir != null && !mapToolDataDir.isEmpty()) {
 			relDir = mapToolDataDir;
@@ -1801,7 +1921,7 @@ public class MapToolLauncher extends JFrame {
 		BufferedWriter br = null;
 		Exception ex = null;
 		try {
-			br = new BufferedWriter(new FileWriter(cfgFile));
+			br = new BufferedWriter(new FileWriter(launchConfigFile));
 			br.write(CopiedFromOtherJars.getText("msg.info.comment.01")); //$NON-NLS-1$
 			br.write(CopiedFromOtherJars.getText("msg.info.comment.02")); //$NON-NLS-1$
 			br.write(CopiedFromOtherJars.getText("msg.info.comment.03")); //$NON-NLS-1$
@@ -1832,7 +1952,7 @@ public class MapToolLauncher extends JFrame {
 				ex = e;
 			}
 			if (ex != null) {
-				logMsg(Level.SEVERE, "Configuration file {0} is unwritable", "msg.error.configUnwritable", cfgFile, ex);
+				logMsg(Level.SEVERE, "Configuration file {0} is unwritable", "msg.error.configUnwritable", launchConfigFile, ex);
 			}
 		}
 		if (!values.isEmpty())
@@ -1906,7 +2026,7 @@ public class MapToolLauncher extends JFrame {
 	 * @param options
 	 *            {@link org.apache.commons.cli.Options}
 	 * @param searchValue
-	 *            Option string to search for, ie -version
+	 *            Option string to search for, ie -force_prompt
 	 * @param args
 	 *            String array of passed in args
 	 * @return A boolean value of true if option parameter found
@@ -1932,6 +2052,7 @@ public class MapToolLauncher extends JFrame {
 	 */
 	public static void main(String args[]) {
 		log.setLevel(Level.WARNING);
+
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {

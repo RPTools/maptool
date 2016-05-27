@@ -99,7 +99,7 @@ public class CopiedFromOtherJars {
 
 		return languages;
 	}
-
+	
 	public static boolean setLanguage(String name) {
 		boolean result = false;
 		Locale loc = new Locale(name);
@@ -246,9 +246,11 @@ public class CopiedFromOtherJars {
 	 */
 	public static String getVersion() {
 		try {
-			String buildDate = VERSION.getString("app.buildDate");
+			// Jamz: Do we really need the buildDate in the title?
+			//String buildDate = VERSION.getString("app.buildDate");
 			String buildNumber = VERSION.getString("app.buildNumber");
-			return buildDate + "." + buildNumber;
+			//return buildDate + "." + buildNumber;
+			return buildNumber;
 		} catch (final MissingResourceException e) {
 			return null;
 		}

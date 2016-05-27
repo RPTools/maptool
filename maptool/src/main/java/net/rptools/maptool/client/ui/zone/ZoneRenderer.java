@@ -1198,7 +1198,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		// (This method has it's own 'timer' calls)
 		if (zone.hasFog())
 			renderFog(g2d, view);
-
+		
 		if (Zone.Layer.TOKEN.isEnabled()) {
 			// Jamz: If there is fog or vision we may need to re-render vision-blocking type tokens
 			// For example. this allows a "door" stamp to block vision but still allow you to see the door.
@@ -1716,7 +1716,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						myCombined.add(new Area(exposedArea));
 					}
 					buffG.fill(myCombined);
-
 					renderFogArea(buffG, view, myCombined, visibleArea);
 					renderFogOutline(buffG, view, myCombined);
 				}
