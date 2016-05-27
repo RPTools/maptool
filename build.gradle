@@ -402,21 +402,26 @@ task createFatJars(dependsOn: ['maptool:deleteBuild', 'launcher:deleteBuild', 'l
 
 task deleteJwrapperConfig(type: Delete) {
 	description = "Delete the generated jwrapper.xml file"
-	println "Deleting ${rootDir}/build-resources/jWrapper/jwrapper.xml"
 	delete "${rootDir}/build-resources/jWrapper/jwrapper.xml"
+
+	doLast {
+		println "Deleting ${rootDir}/build-resources/jWrapper/jwrapper.xml"
+	}
 }
 
 task deleteMtConfig(type: Delete) {
 	description = "Delete the generated mt.cfg file"
-	println "Deleting ${rootDir}/build-resources/jWrapper/mt.cfg"
-	delete "${rootDir}/build-resources/jWrapper/mt.cfg"
+	delete "${rootDir}/launcher/src/main/resources/net/rptools/maptool/launcher/config/mt.cfg"
+	
+	doLast {
+		println "Deleting ${rootDir}/launcher/src/main/resources/net/rptools/maptool/launcher/config/mt.cfg"
+	}
 }
 
 task createJwrapperConfig(dependsOn:deleteJwrapperConfig, type: Copy) {
 	description = "Generates jWrapper XML config from template"
 	group = "Distribution"
-	println 'Setting jWrapper directory to: ' + "${rootDir}/build-resources/jWrapper"
-
+	
 	from ('build-resources/jWrapper') {
 		include 'jwrapper-template.xml'
 		filter(ReplaceTokens, tokens: [
@@ -434,23 +439,28 @@ task createJwrapperConfig(dependsOn:deleteJwrapperConfig, type: Copy) {
 	rename { String fileName ->
 		fileName.replace('-template', '')
 	}
+	
+	doLast {
+		println 'Setting jWrapper directory to: ' + "${rootDir}/build-resources/jWrapper"
+	}
 }
 
-task createMTcfgFile(dependsOn:deleteMtConfig, type: Copy) {
+task createLaunchPropertiesFile(dependsOn:deleteMtConfig, type: Copy) {
 	description = "Generates a MapTool default mt.cfg for package release using jWrapper"
 	group = "Distribution"
+	
 	from ('build-resources/jWrapper') {
-		include 'mt-template.cfg'
+		include 'launch-template.properties'
 		filter(ReplaceTokens, tokens: [
 			'buildDate': rootProject.ext.yyyymmdd,  'buildVersion': getVersionName()])
 	}
-	into 'build-resources/jWrapper'
+	into 'launcher/src/main/resources/net/rptools/maptool/launcher/config'
 	rename { String fileName ->
 		fileName.replace('-template', '')
 	}
 }
 
-task createJwrapperRelease(dependsOn: ['createFatJars', 'createJwrapperConfig', 'createMTcfgFile'], type:JavaExec) {
+task createJwrapperRelease(dependsOn: ['createLaunchPropertiesFile', 'createFatJars', 'createJwrapperConfig'], type:JavaExec) {
 	description = "Generates a MapTool release using jWrapper"
 	group = "Distribution"
 	workingDir = 'build-resources/jWrapper'
