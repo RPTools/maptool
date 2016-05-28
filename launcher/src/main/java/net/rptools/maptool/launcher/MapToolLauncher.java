@@ -175,7 +175,7 @@ public class MapToolLauncher extends JFrame {
 	private static File mapToolJarDir;
 	private static String mapToolLocale = EMPTY;
 	private static String launcherVersion = "";
-	
+
 	private static List<LoggingConfig> logConfigs = null;
 	private static Map<String, String> originalSettings;
 	private static Map<String, String> locales;
@@ -252,7 +252,7 @@ public class MapToolLauncher extends JFrame {
 	 */
 	public MapToolLauncher() throws IOException, URISyntaxException {
 		launcherVersion = CopiedFromOtherJars.getVersion();
-		
+
 		final File dir = new File(MapToolLauncher.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 		currentDir = mapToolJarDir = dir.getParentFile();
 
@@ -1860,7 +1860,7 @@ public class MapToolLauncher extends JFrame {
 
 		values.put("EXECUTABLE", mapToolJarName); //$NON-NLS-1$
 		values.put("MAPTOOL_VERSION", launcherVersion); //$NON-NLS-1$
-		
+
 		baseDir = mapToolJarDir.getAbsolutePath() + File.separator;
 		if (mapToolDataDir != null && !mapToolDataDir.isEmpty()) {
 			relDir = mapToolDataDir;
@@ -2050,7 +2050,7 @@ public class MapToolLauncher extends JFrame {
 	 */
 	public static void main(String args[]) {
 		log.setLevel(Level.WARNING);
-		
+
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -2084,11 +2084,12 @@ public class MapToolLauncher extends JFrame {
 			}
 		}
 	}
-	
+
 	static double getJavaVersion() {
-	    String version = System.getProperty("java.version");
-	    int pos = version.indexOf('.');
-	    pos = version.indexOf('.', pos+1);
-	    return Double.parseDouble (version.substring (0, pos));
+		String version = System.getProperty("java.version");
+		int pos = version.indexOf('.');
+		pos = version.indexOf('.', pos + 1);
+		return Double.parseDouble(version.substring(0, pos));
+
 	}
 }
