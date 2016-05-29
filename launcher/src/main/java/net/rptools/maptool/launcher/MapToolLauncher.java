@@ -124,7 +124,7 @@ public class MapToolLauncher extends JFrame {
 	private static final String EMPTY = ""; //$NON-NLS-1$
 	private static final String ASSERTIONS_OPTION = "-ea"; //$NON-NLS-1$
 	private static final String DATADIR_OPTION = "-DMAPTOOL_DATADIR="; //$NON-NLS-1$
-	private static final String MAC_TITLE_FIX = "-Xdock:name=MapTool"; // $NON-NLS-1$
+	private static final String MAC_TITLE_FIX = "-Xdock:name=\"MapTool"; // $NON-NLS-1$
 	private static final String LOCALE_LANGUAGE_OPTION = "-Duser.language="; //$NON-NLS-1$
 	private static final String LOCALE_COUNTRY_OPTION = "-Duser.country="; //$NON-NLS-1$
 	private static final String JAVA2D_D3D_OPTION = "-Dsun.java2d.d3d=false"; //$NON-NLS-1$
@@ -175,7 +175,7 @@ public class MapToolLauncher extends JFrame {
 	private static File mapToolJarDir;
 	private static String mapToolLocale = EMPTY;
 	private static String launcherVersion = "";
-	
+
 	private static List<LoggingConfig> logConfigs = null;
 	private static Map<String, String> originalSettings;
 	private static Map<String, String> locales;
@@ -252,7 +252,7 @@ public class MapToolLauncher extends JFrame {
 	 */
 	public MapToolLauncher() throws IOException, URISyntaxException {
 		launcherVersion = CopiedFromOtherJars.getVersion();
-		
+
 		final File dir = new File(MapToolLauncher.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 		currentDir = mapToolJarDir = dir.getParentFile();
 
@@ -407,8 +407,9 @@ public class MapToolLauncher extends JFrame {
 			pb.directory(mapToolJarDir);
 			// This is a great idea, but .redirectOutput() requires Java 1.7+ so it won't build for
 			// J6 and hence users with the Java provided by Apple can't use the launcher. :(
-			//			if (log != null)
-			//				pb.redirectOutput(log).redirectErrorStream(true);
+			// Jamz: We're using Java 1.8+ now so this should be safe...lets check anyway...
+			if (log != null && getJavaVersion() >= 1.7)
+				pb.redirectOutput(log).redirectErrorStream(true);
 			pb.start();
 		} catch (final IOException ex) {
 			logMsg(Level.SEVERE, "Error starting MapTool instance; dir={0}, cmd={1}\n{2}", "msg.error.startingMapTool", mapToolJarDir, cmdArgs, ex);
@@ -1179,7 +1180,7 @@ public class MapToolLauncher extends JFrame {
 			minMemStr, maxMemStr, stackSizeStr,
 			extraArgs,
 			path != null ? DATADIR_OPTION + path : EMPTY,
-			IS_MAC ? MAC_TITLE_FIX+mapToolVersion : EMPTY,
+			IS_MAC ? MAC_TITLE_FIX+mapToolVersion+"\"" : EMPTY,
 			localeToOptions(mapToolLocale),
 			jarCommand, mapToolJarName, mtArg
 		};
@@ -1196,11 +1197,6 @@ public class MapToolLauncher extends JFrame {
 		} else {
 			lc.add(javaDir + File.separator + "java"); //$NON-NLS-1$
 		}
-
-		// Jamz: Console launch was breaking, it's expecting -jar command as first arg
-		lc.add(jarCommand);
-		lc.add(mapToolJarName); // mapToolJarDir not needed, since it's set when building the ProcessBuilder
-
 		lc.add(minMemStr);
 		lc.add(maxMemStr);
 		lc.add(stackSizeStr);
@@ -1222,11 +1218,13 @@ public class MapToolLauncher extends JFrame {
 		}
 
 		if (IS_MAC) {
-			lc.add(MAC_TITLE_FIX + mapToolVersion);
+			lc.add(MAC_TITLE_FIX + mapToolVersion + "\"");
 		}
 		if (!mapToolLocale.isEmpty())
 			lc.add(localeToOptions(mapToolLocale));
 
+		lc.add(jarCommand);
+		lc.add(mapToolJarName); // mapToolJarDir not needed, since it's set when building the ProcessBuilder
 		lc.add(mtArg);
 		return lc;
 	}
@@ -1862,7 +1860,7 @@ public class MapToolLauncher extends JFrame {
 
 		values.put("EXECUTABLE", mapToolJarName); //$NON-NLS-1$
 		values.put("MAPTOOL_VERSION", launcherVersion); //$NON-NLS-1$
-		
+
 		baseDir = mapToolJarDir.getAbsolutePath() + File.separator;
 		if (mapToolDataDir != null && !mapToolDataDir.isEmpty()) {
 			relDir = mapToolDataDir;
@@ -2085,5 +2083,13 @@ public class MapToolLauncher extends JFrame {
 				e.consume();
 			}
 		}
+	}
+
+	static double getJavaVersion() {
+		String version = System.getProperty("java.version");
+		int pos = version.indexOf('.');
+		pos = version.indexOf('.', pos + 1);
+		return Double.parseDouble(version.substring(0, pos));
+
 	}
 }
