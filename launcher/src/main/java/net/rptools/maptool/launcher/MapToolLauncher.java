@@ -124,7 +124,7 @@ public class MapToolLauncher extends JFrame {
 	private static final String EMPTY = ""; //$NON-NLS-1$
 	private static final String ASSERTIONS_OPTION = "-ea"; //$NON-NLS-1$
 	private static final String DATADIR_OPTION = "-DMAPTOOL_DATADIR="; //$NON-NLS-1$
-	private static final String MAC_TITLE_FIX = "-Xdock:name=\"MapTool"; // $NON-NLS-1$
+	private static final String MAC_TITLE_FIX = "-Xdock:name=MapTool"; // $NON-NLS-1$
 	private static final String LOCALE_LANGUAGE_OPTION = "-Duser.language="; //$NON-NLS-1$
 	private static final String LOCALE_COUNTRY_OPTION = "-Duser.country="; //$NON-NLS-1$
 	private static final String JAVA2D_D3D_OPTION = "-Dsun.java2d.d3d=false"; //$NON-NLS-1$
@@ -1180,7 +1180,7 @@ public class MapToolLauncher extends JFrame {
 			minMemStr, maxMemStr, stackSizeStr,
 			extraArgs,
 			path != null ? DATADIR_OPTION + path : EMPTY,
-			IS_MAC ? MAC_TITLE_FIX+mapToolVersion+"\"" : EMPTY,
+			IS_MAC ? (MAC_TITLE_FIX+mapToolVersion).replaceAll(" ", "") : EMPTY,
 			localeToOptions(mapToolLocale),
 			jarCommand, mapToolJarName, mtArg
 		};
@@ -1218,7 +1218,7 @@ public class MapToolLauncher extends JFrame {
 		}
 
 		if (IS_MAC) {
-			lc.add(MAC_TITLE_FIX + mapToolVersion + "\"");
+			lc.add(MAC_TITLE_FIX + mapToolVersion);
 		}
 		if (!mapToolLocale.isEmpty())
 			lc.add(localeToOptions(mapToolLocale));
