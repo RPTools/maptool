@@ -99,7 +99,7 @@ public class CopiedFromOtherJars {
 
 		return languages;
 	}
-	
+
 	public static boolean setLanguage(String name) {
 		boolean result = false;
 		Locale loc = new Locale(name);
