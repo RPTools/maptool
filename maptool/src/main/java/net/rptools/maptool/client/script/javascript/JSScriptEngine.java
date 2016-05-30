@@ -20,7 +20,9 @@ import org.apache.log4j.Logger;
 import org.reflections.Reflections;
 
 import javax.script.*;
+import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 public class JSScriptEngine {
 
@@ -141,7 +143,7 @@ public class JSScriptEngine {
 	public Object evalAnonymous(String script) throws ScriptException {
 
 		StringBuilder wrapped = new StringBuilder();
-		wrapped.append("(function() {").append(script).append("})();");
+		wrapped.append("(function() { var args = MTScript.getMTScriptCallingArgs(); ").append(script).append("})();");
 		return engine.eval(wrapped.toString(), anonymousContext);
 	}
 }
