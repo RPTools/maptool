@@ -17,6 +17,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -26,10 +27,7 @@ import net.sf.json.JSONObject;
 
 import javax.script.ScriptException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MacroJavaScriptBridge extends AbstractFunction {
 
@@ -37,8 +35,10 @@ public class MacroJavaScriptBridge extends AbstractFunction {
 
 	private MapToolVariableResolver variableResolver;
 
+	private Stack<List<Object>> callingArgsStack = new Stack<>();
+
 	private MacroJavaScriptBridge() {
-		super(1, 1, "js.eval");
+		super(1, UNLIMITED_PARAMETERS, "js.eval", "js.evala");
 	}
 
 	public static MacroJavaScriptBridge getInstance() {
@@ -50,13 +50,24 @@ public class MacroJavaScriptBridge extends AbstractFunction {
 		variableResolver = (MapToolVariableResolver) parser.getVariableResolver();
 		if ("js.eval".equals(functionName)) {
 			if (!MapTool.getParser().isMacroTrusted()) {
-				throw new ParserException(I18N.getText("macro.function.general.noPerm", "broadcast"));
+				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 			}
 			String script = args.get(0).toString();
+			List<Object> scriptArgs = new ArrayList<>();
+
+			if (args.size() > 1) {
+				for (int i = 1; i < args.size(); i++) {
+					scriptArgs.add(args.get(i));
+				}
+			}
+
+			callingArgsStack.push(scriptArgs);
 			try {
 				return JavaScriptToMTScriptType(JSScriptEngine.getJSScriptEngine().evalAnonymous(script));
 			} catch (ScriptException e) {
 				throw new ParserException(e);
+			} finally {
+				callingArgsStack.pop();
 			}
 		}
 
@@ -65,7 +76,7 @@ public class MacroJavaScriptBridge extends AbstractFunction {
 
 	public Object JavaScriptToMTScriptType(Object val) {
 		if (val == null) {
-			// MTScript doesnt have a null, only emty string
+			// MTScript doesnt have a null, only empty string
 			return "";
 		} else if (val instanceof Integer) {
 			return BigDecimal.valueOf(((Integer) val).intValue());
@@ -105,5 +116,13 @@ public class MacroJavaScriptBridge extends AbstractFunction {
 
 	public MapToolVariableResolver getVariableResolver() {
 		return variableResolver;
+	}
+
+	public List<Object> getCallingArgs() {
+		if (callingArgsStack.empty()) {
+			return new ArrayList<>();
+		} else {
+			return callingArgsStack.peek();
+		}
 	}
 }
