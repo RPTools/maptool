@@ -19,6 +19,8 @@ import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
 
+import java.util.List;
+
 @MapToolJSAPIDefinition(javaScriptVariableName = "MTScript")
 /**
  * Class used to provide an API to interact with MapTool custom scripting language.
@@ -56,5 +58,9 @@ public class JSAPIMTScript implements MapToolJSAPIInterface {
 				MacroJavaScriptBridge.getInstance().getVariableResolver(),
 				MacroJavaScriptBridge.getInstance().getTokenInContext(),
 				macro);
+	}
+
+	public List<Object> getMTScriptCallingArgs() {
+		return MacroJavaScriptBridge.getInstance().getCallingArgs();
 	}
 }
