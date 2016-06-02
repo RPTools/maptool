@@ -349,6 +349,21 @@ project(':maptool') {
 	
 	task deleteBuild(type: Delete) { delete 'build/' }
 	
+	// Add access rule to classpath for nashorn api
+	// Note: This appends the following node to the JRE container classpathentry but only for Java 1.8 in case you are testing some other Java version
+	// <accessrules><accessrule kind="accessible" pattern="jdk/nashorn/api/**"/></accessrules>
+	eclipse.classpath.file {
+		whenMerged {
+			withXml { classpathXml ->
+				def classpathXmlNode = classpathXml.asNode()
+				Node classpathJreNode = node.find {it.@kind == 'con' && it.@path.contains('JRE_CONTAINER') && it.@path.contains('JavaSE-1.8')}
+				// Only append if node is not null, eg it found the proper node entry.
+				if(classpathJreNode) {
+					classpathJreNode.appendNode('accessrules').appendNode('accessrule', [kind: 'accessible', pattern: 'jdk/nashorn/api/**'])
+				}
+			}
+		}
+	}
 }
 
 
