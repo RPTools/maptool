@@ -2577,10 +2577,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				token.setHeight(workImage.getHeight());
 				token.setWidth(workImage.getWidth());
 				footprintBounds = token.getBounds(zone);
-			} else {
-				// necessary to reset images if they were once on the iso plane
-				token.setHeight(image.getHeight());
-				token.setWidth(image.getWidth());
 			}
 			timer.stop("tokenlist-5a");
 
