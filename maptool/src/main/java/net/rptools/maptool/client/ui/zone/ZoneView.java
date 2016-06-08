@@ -349,7 +349,7 @@ public class ZoneView implements ModelChangeListener {
 		@Override
 		public void done() {
 			lightsThreadPool.shutdown(); //always reclaim resources just in case?
-			System.out.println("Time to calculated lights for token: " + baseToken.getName() + ", " + (System.currentTimeMillis() - startTime) + "ms");
+			//System.out.println("Time to calculated lights for token: " + baseToken.getName() + ", " + (System.currentTimeMillis() - startTime) + "ms");
 
 			return;
 		}
@@ -559,7 +559,7 @@ public class ZoneView implements ModelChangeListener {
 			}
 		}
 
-		System.out.println("calculateVisibleArea: " + (System.currentTimeMillis() - startTime) + "ms");
+		//System.out.println("calculateVisibleArea: " + (System.currentTimeMillis() - startTime) + "ms");
 	}
 
 	////
@@ -568,7 +568,6 @@ public class ZoneView implements ModelChangeListener {
 		Object evt = event.getEvent();
 		if (event.getModel() instanceof Zone) {
 			if (evt == Zone.Event.TOPOLOGY_CHANGED) {
-				System.out.println("### tokenVisionCache is cleared!");
 				tokenVisionCache.clear();
 				lightSourceCache.clear();
 				visibleAreaMap.clear();
