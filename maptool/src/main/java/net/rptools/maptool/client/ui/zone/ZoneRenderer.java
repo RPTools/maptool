@@ -154,6 +154,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	private final List<ZoneOverlay> overlayList = new ArrayList<ZoneOverlay>();
 	private final Map<Zone.Layer, List<TokenLocation>> tokenLocationMap = new HashMap<Zone.Layer, List<TokenLocation>>();
 	private Set<GUID> selectedTokenSet = new LinkedHashSet<GUID>();
+	private boolean keepSelectedTokenSet = false;
 	private final List<Set<GUID>> selectedTokenSetHistory = new ArrayList<Set<GUID>>();
 	private final List<LabelLocation> labelLocationList = new LinkedList<LabelLocation>();
 	private Map<Token, Set<Token>> tokenStackMap;
@@ -263,9 +264,14 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		}
 
 		centerOn(new ZonePoint(token.getX(), token.getY()));
-
 		MapTool.getFrame().getToolbox().setSelectedTool(token.isToken() ? PointerTool.class : StampTool.class);
 		setActiveLayer(token.getLayer());
+
+		// Jamz: even though the layer was being activated the dialog list was not updating...
+		Tool currentTool = MapTool.getFrame().getToolbox().getSelectedTool();
+		if (currentTool instanceof StampTool)
+			((StampTool) currentTool).updateLayerSelectionView();
+
 		selectToken(token.getId());
 		requestFocusInWindow();
 	}
@@ -2332,7 +2338,12 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 	public void setActiveLayer(Zone.Layer layer) {
 		activeLayer = layer;
-		selectedTokenSet.clear();
+
+		if (!keepSelectedTokenSet)
+			selectedTokenSet.clear();
+		else
+			keepSelectedTokenSet = false; // Always reset it back, temp boolean only
+
 		repaint();
 	}
 
@@ -3033,6 +3044,10 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 	public Set<GUID> getSelectedTokenSet() {
 		return selectedTokenSet;
+	}
+
+	public void setKeepSelectedTokenSet(boolean keep) {
+		this.keepSelectedTokenSet = keep;
 	}
 
 	/**

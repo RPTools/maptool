@@ -153,6 +153,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			public void layerSelected(Layer layer) {
 				if (renderer != null) {
 					renderer.setActiveLayer(layer);
+					MapTool.getFrame().setLastSelectedLayer(layer);
+
 					if (layer != Zone.Layer.TOKEN) {
 						MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
 					}
@@ -165,14 +167,15 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	protected void attachTo(ZoneRenderer renderer) {
 		super.attachTo(renderer);
 
-		// XXX Can we simply remove this?  Would that leave the layer the same when the PointerTool is made active after using another tool?
-		renderer.setActiveLayer(Zone.Layer.TOKEN);
-
 		if (MapTool.getPlayer().isGM()) {
 			MapTool.getFrame().showControlPanel(layerSelectionDialog);
 		}
 		htmlRenderer.attach(renderer);
 		layerSelectionDialog.updateViewList();
+
+		if (MapTool.getFrame().getLastSelectedLayer() != Zone.Layer.TOKEN) {
+			MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
+		}
 	}
 
 	/**
