@@ -2654,6 +2654,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
 				iso_ho = footprintBounds.height - th;
 				footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int) iso_ho, footprintBounds.width, (int) th);
+				iso_ho = iso_ho * getScale();
 			}
 			SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
@@ -2663,7 +2664,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			if (token.isSnapToScale()) {
 				offsetx = (int) (imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 * getScale() : 0);
 				offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 * getScale() : 0);
-				iso_ho = iso_ho * getScale();
 			}
 			double tx = location.x + offsetx;
 			double ty = location.y + offsety + iso_ho;
