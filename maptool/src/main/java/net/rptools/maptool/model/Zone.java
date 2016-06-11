@@ -1416,6 +1416,7 @@ public class Zone extends BaseModel {
 	private Zone getZone() {
 		return this;
 	}
+
 	/** @return Getter for initiativeList */
 	public InitiativeList getInitiativeList() {
 		return initiativeList;
