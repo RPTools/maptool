@@ -1386,10 +1386,10 @@ public class Zone extends BaseModel {
 					 * if either token is a figure, get the footprint and find the lowest point but if the same, 
 					 * return the smallest, else use normal z order
 					 */
-					Rectangle b1 = o1.getFootprint(getGrid()).getBounds(getGrid());
-					Rectangle b2 = o2.getFootprint(getGrid()).getBounds(getGrid());
-					int v1 = o1.getY() + b1.y + b1.height;
-					int v2 = o2.getY() + b2.y + b2.height;
+					Rectangle b1 = o1.getBounds(getZone());
+					Rectangle b2 = o2.getBounds(getZone());
+					int v1 = o1.getY() + b1.height;
+					int v2 = o2.getY() + b2.height;
 					if ((v1 - v2) != 0)
 						return v1 - v2;
 					if (o1.isStamp() && o2.isToken())
@@ -1411,6 +1411,10 @@ public class Zone extends BaseModel {
 				}
 			}
 		};
+	}
+
+	private Zone getZone() {
+		return this;
 	}
 
 	/** @return Getter for initiativeList */
