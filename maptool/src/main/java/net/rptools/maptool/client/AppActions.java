@@ -65,6 +65,7 @@ import net.rptools.maptool.client.ui.ConnectToServerDialog;
 import net.rptools.maptool.client.ui.ConnectToServerDialogPreferences;
 import net.rptools.maptool.client.ui.ConnectionInfoDialog;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
+import net.rptools.maptool.client.ui.CampaignExportDialog;
 import net.rptools.maptool.client.ui.ExportDialog;
 import net.rptools.maptool.client.ui.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.MapToolFrame;
@@ -219,6 +220,21 @@ public class AppActions {
 				} catch (Exception ex) {
 					MapTool.showError("msg.error.failedExportingImage", ex);
 				}
+			}
+		}
+	};
+
+	public static final Action EXPORT_CAMPAIGN_AS = new AdminClientAction() {
+		{
+			init("action.exportCampaignAs");
+		}
+
+		@Override
+		public void execute(ActionEvent e) {
+			try {
+				doCampaignExport();
+			} catch (Exception ex) {
+				MapTool.showError("Cannot create the ExportCampaignDialog object", ex);
 			}
 		}
 	};
@@ -2263,6 +2279,10 @@ public class AppActions {
 	};
 
 	private static void doSaveCampaign(final Campaign campaign, final File file, final Observer callback) {
+		doSaveCampaign(campaign, file, callback, null);
+	}
+
+	private static void doSaveCampaign(final Campaign campaign, final File file, final Observer callback, final String campaignVersion) {
 		MapTool.getFrame().showFilledGlassPane(new StaticMessageDialog(I18N.getText("msg.info.campaignSaving")));
 		new SwingWorker<Object, Object>() {
 			@Override
@@ -2275,7 +2295,7 @@ public class AppActions {
 					MapTool.getAutoSaveManager().pause();
 
 					long start = System.currentTimeMillis();
-					PersistenceUtil.saveCampaign(campaign, file);
+					PersistenceUtil.saveCampaign(campaign, file, campaignVersion);
 					AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
 					MapTool.getFrame().setStatusMessage(I18N.getString("msg.info.campaignSaved"));
 
@@ -2327,21 +2347,35 @@ public class AppActions {
 				return;
 			}
 
-			// Jamz: new "Save as" to allow campaigns to save without objects to make them backwards
-			// compatible. ie striping "lumens" field to allow campaign to load in older 1.4.0.x format
-			boolean saveAsCompatible = chooser.getFileFilter().getDescription().equals(I18N.getText("file.ext.cmpgn.b89"));
-			// System.out.println("Saving backwards to version b89 = " +
-			// saveAsCompatible);
 			String _extension = AppConstants.CAMPAIGN_FILE_EXTENSION;
-			if (saveAsCompatible)
-				_extension = AppConstants.CAMPAIGN_COMPATIBLE_FILE_EXTENSION;
-
-			campaign.setSaveAsCompatible(saveAsCompatible);
 
 			if (!campaignFile.getName().toLowerCase().endsWith(_extension)) {
 				campaignFile = new File(campaignFile.getAbsolutePath() + _extension);
 			}
+
 			doSaveCampaign(campaign, campaignFile, callback);
+
+			AppState.setCampaignFile(campaignFile);
+			AppPreferences.setSaveDir(campaignFile.getParentFile());
+			AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
+			MapTool.getFrame().setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
+		}
+	}
+
+	public static void doCampaignExport() {
+		CampaignExportDialog dialog = MapTool.getCampaign().getExportCampaignDialog();
+		dialog.setVisible(true);
+		MapTool.getCampaign().setExportCampaignDialog(dialog);
+
+		if (dialog.getSaveStatus() == JFileChooser.APPROVE_OPTION) {
+			Campaign campaign = MapTool.getCampaign();
+			File campaignFile = dialog.getCampaignFile();
+
+			if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
+				return;
+			}
+
+			doSaveCampaign(campaign, campaignFile, null, dialog.getVersionText());
 
 			AppState.setCampaignFile(campaignFile);
 			AppPreferences.setSaveDir(campaignFile.getParentFile());

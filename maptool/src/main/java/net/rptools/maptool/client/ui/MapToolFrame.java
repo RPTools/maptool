@@ -108,7 +108,6 @@ import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
-import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel.View;
 import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
@@ -130,6 +129,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
@@ -216,6 +216,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	private JFileChooser saveCmpgnFileChooser;
 	private JFileChooser savePropsFileChooser;
 	private JFileChooser saveFileChooser;
+
+	// Remember the last layer selected
+	private Layer lastSelectedLayer = Zone.Layer.TOKEN;
 
 	private final FileFilter campaignFilter = new MTFileFilter("cmpgn", I18N.getText("file.ext.cmpgn"));
 	private final FileFilter mapFilter = new MTFileFilter("rpmap", I18N.getText("file.ext.rpmap"));
@@ -744,6 +747,14 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		return coordinateStatusBar;
 	}
 
+	public Layer getLastSelectedLayer() {
+		return lastSelectedLayer;
+	}
+
+	public void setLastSelectedLayer(Layer lastSelectedLayer) {
+		this.lastSelectedLayer = lastSelectedLayer;
+	}
+
 	public void hideControlPanel() {
 		if (visibleControlPanel != null) {
 			if (zoneRendererPanel != null) {
@@ -989,13 +1000,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 						if (e.getClickCount() == 2) {
 							Token token = (Token) row;
 							getCurrentZoneRenderer().clearSelectedTokens();
-							getCurrentZoneRenderer().centerOn(new ZonePoint(token.getX(), token.getY()));
-
 							// Pick an appropriate tool
-							getToolbox().setSelectedTool(token.isToken() ? PointerTool.class : StampTool.class);
-							getCurrentZoneRenderer().setActiveLayer(token.getLayer());
-							getCurrentZoneRenderer().selectToken(token.getId());
-							getCurrentZoneRenderer().requestFocusInWindow();
+							// Jamz: why not just call .centerOn(Token token), now we have one place to fix...
+							getCurrentZoneRenderer().centerOn(token);
 						}
 					}
 				}

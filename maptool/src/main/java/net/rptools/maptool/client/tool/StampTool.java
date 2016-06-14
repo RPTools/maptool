@@ -34,6 +34,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -122,6 +123,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 					public void layerSelected(Layer layer) {
 						if (renderer != null) {
 							renderer.setActiveLayer(layer);
+							MapTool.getFrame().setLastSelectedLayer(layer);
+
 							if (layer == Zone.Layer.TOKEN) {
 								MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
 							}
@@ -133,6 +136,10 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
+	}
+
+	public void updateLayerSelectionView() {
+		layerSelectionDialog.updateViewList();
 	}
 
 	@Override
@@ -150,6 +157,11 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 	protected void attachTo(ZoneRenderer renderer) {
 		MapTool.getFrame().showControlPanel(layerSelectionDialog);
 		super.attachTo(renderer);
+
+		// Jamz: Lets remember token selections during Tool class switches which causes setActiveLayer(layer) to be called which normally calls selectedTokenSet.clear()
+		if (renderer.getSelectedTokenSet().size() > 0) {
+			renderer.setKeepSelectedTokenSet(true);
+		}
 
 		layerSelectionDialog.updateViewList();
 	}

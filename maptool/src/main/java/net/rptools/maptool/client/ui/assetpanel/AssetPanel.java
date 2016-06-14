@@ -18,6 +18,8 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -28,15 +30,21 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.plaf.metal.MetalSliderUI;
 
 import net.rptools.lib.swing.ImagePanel;
 import net.rptools.lib.swing.ImagePanel.SelectionMode;
 import net.rptools.lib.swing.SelectionListener;
+import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.SplitPanePreferences;
 import net.rptools.lib.swing.preference.TreePreferences;
 import net.rptools.maptool.client.AppConstants;
@@ -50,6 +58,7 @@ public class AssetPanel extends JComponent {
 	private ImagePanel imagePanel;
 	private JTextField filterTextField;
 	private JCheckBox globalSearchField;
+	private JSlider thumbnailPreviewSlider;
 	private final AssetPanelModel assetPanelModel;
 	private Timer updateFilterTimer;
 
@@ -108,6 +117,19 @@ public class AssetPanel extends JComponent {
 		imagePanel.setShowCaptions(true);
 		imagePanel.setSelectionMode(SelectionMode.SINGLE);
 		imagePanel.setFont(new Font("Helvetica", 0, 10)); // XXX Overrides TinyLAF?
+
+		imagePanel.addMouseWheelListener(new MouseWheelListener() {
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				if (SwingUtil.isControlDown(e) || e.isMetaDown()) {
+					e.consume();
+					int steps = e.getWheelRotation();
+					imagePanel.setGridSize(imagePanel.getGridSize() + steps);
+					thumbnailPreviewSlider.setValue(imagePanel.getGridSize());
+				} else {
+					imagePanel.getParent().dispatchEvent(e);
+				}
+			}
+		});
 	}
 
 	public void setThumbSize(int size) {
@@ -118,6 +140,8 @@ public class AssetPanel extends JComponent {
 		JPanel panel = new JPanel(new BorderLayout());
 
 		panel.add(BorderLayout.NORTH, createFilterPanel());
+		panel.add(BorderLayout.NORTH, createFilterPanel());
+		panel.add(BorderLayout.WEST, getThumbnailPreviewSlider());
 		panel.add(BorderLayout.CENTER, new JScrollPane(imagePanel));
 
 		return panel;
@@ -138,7 +162,7 @@ public class AssetPanel extends JComponent {
 		top.add(BorderLayout.CENTER, getFilterTextField());
 
 		panel.add(BorderLayout.NORTH, top);
-		panel.add(BorderLayout.SOUTH, getGlobalSearchField());
+		panel.add(BorderLayout.CENTER, getGlobalSearchField());
 
 		return panel;
 	}
@@ -181,7 +205,6 @@ public class AssetPanel extends JComponent {
 
 	/**
 	 * Returns a checkbox that indicates whether the filter field applies to <i>all</i> images in all libraries or just the currently selected image directory.
-	 * Currently not implemented.
 	 * 
 	 * @return the checkbox component
 	 */
@@ -209,6 +232,45 @@ public class AssetPanel extends JComponent {
 
 		imagePanel.revalidate();
 		imagePanel.repaint();
+	}
+
+	/**
+	 * Returns a slider that controls the thumbnail size of image previews
+	 * 
+	 * @return the JSlider component
+	 */
+	private JSlider getThumbnailPreviewSlider() {
+		if (thumbnailPreviewSlider == null) {
+			thumbnailPreviewSlider = new JSlider(25, 500, imagePanel.getGridSize());
+			thumbnailPreviewSlider.setInverted(true);
+			thumbnailPreviewSlider.setName("Icon Size");
+			thumbnailPreviewSlider.setMinorTickSpacing(25);
+			thumbnailPreviewSlider.setMajorTickSpacing(100);
+			thumbnailPreviewSlider.setOrientation(SwingConstants.VERTICAL);
+			thumbnailPreviewSlider.setToolTipText(I18N.getString("panel.Asset.ImageModel.slider.toolTip"));
+
+			thumbnailPreviewSlider.setUI(new MetalSliderUI() {
+				protected void scrollDueToClickInTrack(int direction) {
+					int value = thumbnailPreviewSlider.getValue();
+
+					if (thumbnailPreviewSlider.getOrientation() == JSlider.HORIZONTAL) {
+						value = this.valueForXPosition(thumbnailPreviewSlider.getMousePosition().x);
+					} else if (slider.getOrientation() == JSlider.VERTICAL) {
+						value = this.valueForYPosition(thumbnailPreviewSlider.getMousePosition().y);
+					}
+					thumbnailPreviewSlider.setValue(value);
+				}
+			});
+
+			thumbnailPreviewSlider.addChangeListener(new ChangeListener() {
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					setThumbSize(thumbnailPreviewSlider.getValue());
+				}
+			});
+		}
+
+		return thumbnailPreviewSlider;
 	}
 
 	public void rescanImagePanelDir(Directory dir) {
