@@ -11,10 +11,7 @@
 
 package net.rptools.maptool.util;
 
-import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
-
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -36,7 +33,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import net.rptools.lib.CodeTimer;
@@ -57,7 +53,6 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
@@ -81,13 +76,12 @@ import com.thoughtworks.xstream.converters.ConversionException;
 public class PersistenceUtil {
 	private static final Logger log = Logger.getLogger(PersistenceUtil.class);
 
-	private static final String PROP_VERSION = "version"; //$NON-NLS-1$
-	private static final String PROP_CAMPAIGN_VERSION = "campaignVersion"; //$NON-NLS-1$
+	public static final String PROP_VERSION = "version"; //$NON-NLS-1$
+	public static final String PROP_CAMPAIGN_VERSION = "campaignVersion"; //$NON-NLS-1$
 	private static final String ASSET_DIR = "assets/"; //$NON-NLS-1$
 
 	private static final String CAMPAIGN_VERSION = "1.4.1";
-	private static final String CAMPAIGN_VERSION_COMPATIBLE = "1.4.0";
-	private static final String MAPTOOL_VERSION_COMPATIBLE = "1.4.0.0";
+
 	// Please add a single note regarding why the campaign version number has been updated:
 	// 1.3.70	ownerOnly added to model.Light (not backward compatible)
 	// 1.3.75	model.Token.visibleOnlyToOwner (actually added to b74 but I didn't catch it before release)
@@ -245,7 +239,7 @@ public class PersistenceUtil {
 		return n;
 	}
 
-	public static void saveCampaign(Campaign campaign, File campaignFile) throws IOException {
+	public static void saveCampaign(Campaign campaign, File campaignFile, String campaignVersion) throws IOException {
 		CodeTimer saveTimer; // FJE Previously this was 'private static' -- why?
 		saveTimer = new CodeTimer("CampaignSave");
 		saveTimer.setThreshold(5);
@@ -289,14 +283,9 @@ public class PersistenceUtil {
 			try {
 				saveTimer.start("Set content");
 
-				// Jamz: This is the "Save as compatible" code. Right now we're just
-				// stripping out "lumens" but to make it 1.4.0.0 compatible but
-				// probably should be it's own class/method to call and store what needs
-				// to be stripped for each campaign version as we go forward.
-				if (persistedCampaign.campaign.isSaveAsCompatible()) {
-					pakFile.setContent(persistedCampaign, LightSource.class, "lumens"); // Class.field to omit.
-					pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION_COMPATIBLE);
-					pakFile.setProperty(PROP_VERSION, MAPTOOL_VERSION_COMPATIBLE);
+				// If we are exporting the campaign, we will strip classes/fields that were added since the specified campaignVersion
+				if (campaignVersion != null) {
+					pakFile = CampaignExport.stripContent(pakFile, persistedCampaign, campaignVersion);
 				} else {
 					pakFile.setContent(persistedCampaign);
 					pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);

@@ -97,6 +97,7 @@ public class AppMenuBar extends JMenuBar {
 
 		menu.addSeparator();
 
+		menu.add(new JMenuItem(AppActions.EXPORT_CAMPAIGN_AS));
 		menu.add(new JMenuItem(AppActions.EXPORT_CAMPAIGN_REPO));
 		//		menu.add(new JMenuItem(AppActions.UPDATE_CAMPAIGN_REPO));
 
