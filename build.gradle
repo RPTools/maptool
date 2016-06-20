@@ -433,7 +433,7 @@ task deleteMtConfig(type: Delete) {
 	}
 }
 
-task createJwrapperConfig(dependsOn:deleteJwrapperConfig, type: Copy) {
+task createJwrapperConfig(type: Copy) {
 	description = "Generates jWrapper XML config from template"
 	group = "Distribution"
 	
@@ -454,13 +454,16 @@ task createJwrapperConfig(dependsOn:deleteJwrapperConfig, type: Copy) {
 	rename { String fileName ->
 		fileName.replace('-template', '')
 	}
+    outputs.upToDateWhen {
+		false
+	}
 	
 	doLast {
 		println 'Setting jWrapper directory to: ' + "${rootDir}/build-resources/jWrapper"
 	}
 }
 
-task createLaunchPropertiesFile(dependsOn:deleteMtConfig, type: Copy) {
+task createLaunchPropertiesFile(type: Copy) {
 	description = "Generates a MapTool default mt.cfg for package release using jWrapper"
 	group = "Distribution"
 	
