@@ -473,6 +473,9 @@ task createLaunchPropertiesFile(dependsOn:deleteMtConfig, type: Copy) {
 	rename { String fileName ->
 		fileName.replace('-template', '')
 	}
+	outputs.upToDateWhen {
+		false
+	}
 }
 
 task createJwrapperRelease(dependsOn: ['createLaunchPropertiesFile', 'createFatJars', 'createJwrapperConfig'], type:JavaExec) {
