@@ -1025,47 +1025,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		});
 
 		// TODO: Optimize this by making it non anonymous
-		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), new AbstractAction() {
-			private static final long serialVersionUID = 1L;
-
-			public void actionPerformed(java.awt.event.ActionEvent e) {
-				ZoneRenderer renderer = (ZoneRenderer) e.getSource();
-
-				// Check to see if this is the required action
-				if (!MapTool.confirmTokenDelete()) {
-					return;
-				}
-				boolean unhideImpersonated = false;
-				boolean unhideSelected = false;
-				if (renderer.getSelectedTokenSet().size() > 10) {
-					if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.IMPERSONATED).isHidden() == false) {
-						unhideImpersonated = true;
-						MapTool.getFrame().getDockingManager().hideFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
-					}
-					if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.SELECTION).isHidden() == false) {
-						unhideSelected = true;
-						MapTool.getFrame().getDockingManager().hideFrame(MapToolFrame.MTFrame.SELECTION.name());
-					}
-				}
-				Set<GUID> selectedTokenSet = renderer.getSelectedTokenSet();
-
-				for (GUID tokenGUID : selectedTokenSet) {
-					Token token = renderer.getZone().getToken(tokenGUID);
-
-					if (AppUtil.playerOwns(token)) {
-						renderer.getZone().removeToken(tokenGUID);
-						MapTool.serverCommand().removeToken(renderer.getZone().getId(), tokenGUID);
-					}
-				}
-				if (unhideImpersonated) {
-					MapTool.getFrame().getDockingManager().showFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
-				}
-
-				if (unhideSelected) {
-					MapTool.getFrame().getDockingManager().showFrame(MapToolFrame.MTFrame.SELECTION.name());
-				}
-			}
-		});
+		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), ToolHelper.getDeleteTokenAction());
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true), new StopPointerActionListener());
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.CTRL_MASK, true), new StopPointerActionListener());
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.SHIFT_MASK, true), new StopPointerActionListener());

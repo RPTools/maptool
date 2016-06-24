@@ -35,7 +35,7 @@ out/
 .settings/
 .classpath
 .history
-
+workbench.xmi
 
 # Keystore
 build-resources/rptools-keystore
