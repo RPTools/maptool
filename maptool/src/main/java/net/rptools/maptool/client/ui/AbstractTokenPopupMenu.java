@@ -547,14 +547,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 						if (chooser.getFileFilter() == tokenFilterGM)
 							saveAsGmName = true;
 						saveDirectory = chooser.getSelectedFile();
-
-						if (chooser.getFileFilter() == tokenFilterImage) {
-							saveAsImage = true;
-						} else if (chooser.getFileFilter() == tokenFilterPortrait) {
-							saveAsImage = true;
-							saveAsPortrait = true;
-						}
-
 					}
 
 					if (saveAsGmName) {
@@ -562,6 +554,13 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					} else {
 						tokenSaveFile = new File(saveDirectory.getAbsolutePath() + "\\" + FileUtil.stripInvalidCharacters(tokenName));
 					}
+				}
+
+				if (chooser.getFileFilter() == tokenFilterImage) {
+					saveAsImage = true;
+				} else if (chooser.getFileFilter() == tokenFilterPortrait) {
+					saveAsImage = true;
+					saveAsPortrait = true;
 				}
 
 				// Auto-extension
@@ -587,9 +586,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
 					overWriteFile = JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(MapTool.getFrame(), messageObj, "Confirmation", JOptionPane.YES_OPTION);
 					showOverwriteDialog = !dontAskAgainCb.isSelected();
-					System.out.println("overWriteFile: " + overWriteFile);
-					System.out.println("dontAskAgainCb: " + dontAskAgainCb.isSelected());
-
 				} else if (tokenSaveFile.exists() && showOverwriteDialog) {
 					overWriteFile = MapTool.confirm("File exists, would you like to overwrite?");
 				}
@@ -601,6 +597,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					token.setGMNotes("");
 				}
 				try {
+					System.out.println("saveAsImage " + saveAsImage);
 					if (saveAsImage && !saveAsPortrait) {
 						PersistenceUtil.saveTokenImage(token.getImageAssetId(), tokenSaveFile);
 					} else if (saveAsPortrait) {
