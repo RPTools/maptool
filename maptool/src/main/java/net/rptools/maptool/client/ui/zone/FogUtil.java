@@ -77,6 +77,10 @@ public class FogUtil {
 		}
 		int skippedAreas = 0;
 
+		// Jamz: I got a couple of "Comparison method violates its general contract!" exceptions here although we are using a default sort comparator?
+		// I found this and currently running with JVM option to see if issue goes away: -Djava.util.Arrays.useLegacyMergeSort=true
+		// http://dertompson.com/2012/11/23/sort-algorithm-changes-in-java-7/
+		// http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7075600
 		List<VisibleAreaSegment> segmentList = new ArrayList<VisibleAreaSegment>(ocean.getVisibleAreaSegments(origin));
 		Collections.sort(segmentList);
 

@@ -12,11 +12,14 @@
 package net.rptools.maptool.model;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Transparency;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
@@ -37,6 +40,7 @@ import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -125,6 +129,8 @@ public class Token extends BaseModel implements Cloneable {
 	// These are the original image width and height
 	private int width;
 	private int height;
+	private int isoWidth;
+	private int isoHeight;
 
 	private double scaleX = 1;
 	private double scaleY = 1;
@@ -135,7 +141,11 @@ public class Token extends BaseModel implements Cloneable {
 
 	private boolean isVisible = true;
 	private boolean visibleOnlyToOwner = false;
-	private boolean visionBlocker = false;
+
+	private int vblAlphaSensitivity = -1;
+	private int alwaysVisibleTolerance = 2; // Default for # of regions (out of 9) that must be seen before token is shown over FoW
+	private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
+	private Area vbl;
 
 	private String name;
 	private Set<String> ownerList;
@@ -233,6 +243,8 @@ public class Token extends BaseModel implements Cloneable {
 		snapToScale = token.snapToScale;
 		width = token.width;
 		height = token.height;
+		isoWidth = token.isoWidth;
+		isoHeight = token.isoHeight;
 		scaleX = token.scaleX;
 		scaleY = token.scaleY;
 		facing = token.facing;
@@ -243,7 +255,11 @@ public class Token extends BaseModel implements Cloneable {
 		snapToGrid = token.snapToGrid;
 		isVisible = token.isVisible;
 		visibleOnlyToOwner = token.visibleOnlyToOwner;
-		visionBlocker = token.visionBlocker;
+
+		vblAlphaSensitivity = token.vblAlphaSensitivity;
+		alwaysVisibleTolerance = token.alwaysVisibleTolerance;
+		isAlwaysVisible = token.isAlwaysVisible;
+		vbl = token.vbl;
 
 		name = token.name;
 		notes = token.notes;
@@ -269,6 +285,12 @@ public class Token extends BaseModel implements Cloneable {
 		propertyType = token.propertyType;
 		hasImageTable = token.hasImageTable;
 		imageTableName = token.imageTableName;
+
+		if (isoWidth == 0)
+			isoWidth = width;
+
+		if (isoHeight == 0)
+			isoHeight = height;
 
 		ownerType = token.ownerType;
 		if (token.ownerList != null) {
@@ -394,19 +416,31 @@ public class Token extends BaseModel implements Cloneable {
 	}
 
 	public void setWidth(int width) {
-		this.width = width;
+		if (isFlippedIso())
+			isoWidth = width;
+		else
+			this.width = width;
 	}
 
 	public void setHeight(int height) {
-		this.height = height;
+		if (isFlippedIso())
+			isoHeight = height;
+		else
+			this.height = height;
 	}
 
 	public int getWidth() {
-		return width;
+		if (isFlippedIso() && isoWidth != 0)
+			return isoWidth;
+		else
+			return width;
 	}
 
 	public int getHeight() {
-		return height;
+		if (isFlippedIso() && isoHeight != 0)
+			return isoHeight;
+		else
+			return height;
 	}
 
 	public boolean isMarker() {
@@ -552,6 +586,13 @@ public class Token extends BaseModel implements Cloneable {
 
 	public Integer getFacing() {
 		return facing;
+	}
+
+	public Integer getFacingInDegrees() {
+		if (facing == null)
+			return 0;
+		else
+			return -(facing + 90);
 	}
 
 	public boolean getHasSight() {
@@ -964,12 +1005,140 @@ public class Token extends BaseModel implements Cloneable {
 		this.visibleOnlyToOwner = visibleOnlyToOwner;
 	}
 
-	public boolean isVisionBlocker() {
-		return visionBlocker;
+	public boolean isAlwaysVisible() {
+		return isAlwaysVisible;
 	}
 
-	public void setVisionBlocker(boolean visionBlocker) {
-		this.visionBlocker = visionBlocker;
+	public void setAlwaysVisibleTolerance(int tolerance) {
+		if (tolerance < 1)
+			tolerance = 1;
+
+		if (tolerance > 9)
+			tolerance = 9;
+
+		alwaysVisibleTolerance = tolerance;
+	}
+
+	public int getAlwaysVisibleTolerance() {
+		if (alwaysVisibleTolerance <= 0)
+			return 2;
+		else
+			return alwaysVisibleTolerance;
+	}
+
+	public void setAlphaSensitivity(int tolerance) {
+		vblAlphaSensitivity = tolerance;
+	}
+
+	public int getAlphaSensitivity() {
+		return vblAlphaSensitivity;
+	}
+
+	public void setVBL(Area vbl) {
+		this.vbl = vbl;
+		if (vbl == null)
+			vblAlphaSensitivity = -1;
+	}
+
+	public Area getVBL() {
+		return vbl;
+	}
+
+	public Area getTransformedVBL() {
+		return getTransformedVBL(vbl);
+	}
+
+	/**
+	 * This method returns the vbl stored on the token with AffineTransformations applied
+	 * for scale, position, rotation, & flipping.
+	 * 
+	 * @author Jamz
+	 * @since 1.4.1.5
+	 * 
+	 * @return
+	 */
+	public Area getTransformedVBL(Area areaToTransform) {
+		Rectangle footprintBounds = getBounds(MapTool.getFrame().getCurrentZoneRenderer().getZone());
+		Dimension imgSize = new Dimension(getWidth(), getHeight());
+		SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
+
+		// Lets account for ISO images
+		double iso_ho = 0;
+		if (getShape() == TokenShape.FIGURE) {
+			double th = getHeight() * Double.valueOf(footprintBounds.width) / getWidth();
+			iso_ho = footprintBounds.height - th;
+			footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int) iso_ho, footprintBounds.width, (int) th);
+		}
+
+		// Lets figure in offset if image is not free size/native size aka snapToScale
+		int offsetx = 0;
+		int offsety = 0;
+		if (isSnapToScale()) {
+			offsetx = (int) (imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 : 0);
+			offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 : 0);
+		}
+		double tx = footprintBounds.x + offsetx;
+		double ty = footprintBounds.y + offsety + iso_ho;
+
+		// Apply the coordinate translation
+		AffineTransform atArea = AffineTransform.getTranslateInstance(tx, ty);
+
+		int rx, ry;
+		if (isSnapToScale()) {
+			// Find the center x,y coords of the rectangle
+			rx = (int) ((anchorX + (getWidth() / 2)));
+			ry = (int) ((anchorY + (getHeight() / 2)));
+
+			// Apply the scale transformation
+			atArea.concatenate(AffineTransform.getScaleInstance(((double) imgSize.width) / getWidth(), ((double) imgSize.height) / getHeight()));
+
+			// Apply the rotation transformation...
+			if (getShape() == Token.TokenShape.TOP_DOWN)
+				atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
+		} else {
+			// Find the center x,y coords of the rectangle
+			rx = (int) ((anchorX + (getWidth() / 2)) * scaleX);
+			ry = (int) ((anchorY + (getHeight() / 2)) * scaleY);
+
+			// Apply the rotation transformation...
+			if (getShape() == Token.TokenShape.TOP_DOWN)
+				atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
+
+			// Apply the scale transformation
+			atArea.concatenate(AffineTransform.getScaleInstance(scaleX, scaleY));
+		}
+
+		// Lets account for flipped images...
+		if (isFlippedX) {
+			atArea.concatenate(AffineTransform.getScaleInstance(-1.0, 1.0));
+			atArea.concatenate(AffineTransform.getTranslateInstance(-getWidth(), 0));
+		}
+
+		if (isFlippedY) {
+			atArea.concatenate(AffineTransform.getScaleInstance(1.0, -1.0));
+			atArea.concatenate(AffineTransform.getTranslateInstance(0, -getHeight()));
+		}
+
+		if (isFlippedIso()) {
+			return new Area(atArea.createTransformedShape(IsometricGrid.isoArea(areaToTransform)));
+		}
+
+		return new Area(atArea.createTransformedShape(areaToTransform));
+	}
+
+	public boolean hasVBL() {
+		if (vbl != null)
+			return true;
+		else
+			return false;
+	}
+
+	public void setIsAlwaysVisible(boolean isAlwaysVisible) {
+		this.isAlwaysVisible = isAlwaysVisible;
+	}
+
+	public void toggleIsAlwaysVisible() {
+		isAlwaysVisible = !isAlwaysVisible;
 	}
 
 	public String getName() {
@@ -991,8 +1160,8 @@ public class Token extends BaseModel implements Cloneable {
 
 		// Sizing
 		if (!isSnapToScale()) {
-			w = this.width * getScaleX();
-			h = this.height * getScaleY();
+			w = getWidth() * getScaleX();
+			h = getHeight() * getScaleY();
 		} else {
 			w = footprintBounds.width * footprint.getScale() * sizeScale;
 			h = footprintBounds.height * footprint.getScale() * sizeScale;

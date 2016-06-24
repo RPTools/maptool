@@ -11,7 +11,6 @@
 
 package net.rptools.maptool.client.ui;
 
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,18 +18,12 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 
-import javax.imageio.ImageWriter;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.text.JTextComponent;
-
-import net.rptools.lib.net.LocalLocation;
-import net.rptools.lib.net.Location;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -144,7 +137,6 @@ public class CampaignExportDialog extends JDialog {
 		try {
 			JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
 			saveStatus = chooser.showSaveDialog(MapTool.getFrame());
-			System.out.println("export save status: " + saveStatus);
 			campaignFile = chooser.getSelectedFile();
 		} catch (Exception ex) {
 			MapTool.showError(I18N.getString("dialog.campaignexport.error.failedExporting"), ex);

@@ -1019,17 +1019,16 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 	}
 
 	/**
-	 * Menu option to turn token into a Vision Blocking Token
+	 * Menu option to toggle token visibility to always shown (over VBL/FoW)
 	 * 
 	 * @author Jamz
-	 * @since 1.4.1.0
+	 * @since 1.4.1.5
 	 */
-	public class BlockVisionAction extends AbstractAction {
+	public class AlwaysVisibleAction extends AbstractAction {
 		private final ZoneRenderer renderer;
 
-		public BlockVisionAction(boolean blockVision, ZoneRenderer renderer) {
-			//super(I18N.getText("token.popup.menu.blockvision"));
-			super("Block Vision");
+		public AlwaysVisibleAction(boolean alwaysShow, ZoneRenderer renderer) {
+			super(I18N.getText("token.popup.menu.always.visible"));
 			this.renderer = renderer;
 		}
 
@@ -1037,21 +1036,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 			for (GUID guid : selectedTokenSet) {
 				Zone zone = renderer.getZone();
 				Token token = zone.getToken(guid);
-				if (token == null) {
-					continue;
-				}
-
-				TokenVBL tvbl = new TokenVBL(token);
-
-				//if (token.hasTokenVBL()) {
-				//	tvbl.doWork(token.getTokenVBL(), renderer);
-				//} else {
-				Area b = tvbl.buildVBL();
-				//token.setTokenVBL(b);
-				tvbl.doWork(b, renderer);
-				//}
-
-				//tvbl.doWork(renderer);
+				if (token != null)
+					token.toggleIsAlwaysVisible();
 			}
 		}
 	}

@@ -16,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Area;
 import java.io.IOException;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -24,6 +25,7 @@ import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
@@ -80,6 +82,9 @@ public class RectangleTopologyTool extends AbstractDrawingTool implements MouseM
 			Graphics2D g2 = (Graphics2D) g.create();
 			g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
 			g2.scale(renderer.getScale(), renderer.getScale());
+
+			g2.setColor(AppStyle.tokenTopologyColor);
+			g2.fill(getTokenTopology());
 
 			g2.setColor(AppStyle.topologyColor);
 			g2.fill(topology);

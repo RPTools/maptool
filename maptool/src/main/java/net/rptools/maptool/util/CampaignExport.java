@@ -59,11 +59,16 @@ public class CampaignExport {
 
 		// Check Major version for sanity's sake...
 		if (VERSION_MAJOR == 1 && VERSION_MINOR <= 4) {
-			// Lumens & visionBlocker, & tokenSelection was introduced in 1.4.1.x
+			// Lumens, tokenSelection, & several Token class fields were introduced in 1.4.1.x
 			if (VERSION_RELEASE == 0) {
 				pakFile.getXStream().omitField(LightSource.class, "lumens");
-				pakFile.getXStream().omitField(Token.class, "visionBlocker");
 				pakFile.getXStream().omitField(Zone.class, "tokenSelection");
+				pakFile.getXStream().omitField(Token.class, "vbl");
+				pakFile.getXStream().omitField(Token.class, "isoWidth");
+				pakFile.getXStream().omitField(Token.class, "isoHeight");
+				pakFile.getXStream().omitField(Token.class, "vblAlphaSensitivity");
+				pakFile.getXStream().omitField(Token.class, "isAlwaysVisible");
+				pakFile.getXStream().omitField(Token.class, "alwaysVisibleTolerance");
 
 				// DrawnElement was added in 1.4.0.1
 				// FIXME: Stripping the class still leaves an empty XML tag so unable to export to 1.4.0.0 at this time :(

@@ -39,7 +39,6 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
-import net.rptools.maptool.model.Zone.Filter;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -673,6 +672,10 @@ public class Zone extends BaseModel {
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
 	}
 
+	public void tokenTopologyChanged() {
+		fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+	}
+
 	public Area getTopology() {
 		return topology;
 	}
@@ -745,7 +748,8 @@ public class Zone extends BaseModel {
 		if (getVisionType() == VisionType.OFF) {
 			// Why is this done here and then again below???
 			// And just because Vision==Off doesn't mean we aren't doing IF...
-			// Jamz: removed because why? exposedArea.add(area);
+			// Jamz: if this exposedArea isn't done then it breaks getExposedTokens when vision is off...
+			exposedArea.add(area);
 		}
 		if (selectedToks != null && !selectedToks.isEmpty() && (MapTool.getServerPolicy().isUseIndividualFOW() || MapTool.isPersonalServer())) {
 			boolean isAllowed = MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().useStrictTokenManagement();
@@ -1343,11 +1347,20 @@ public class Zone extends BaseModel {
 		});
 	}
 
-	public List<Token> getVblTokens() {
+	public List<Token> getTokensAlwaysVisible() {
 		return getTokensFiltered(new Filter() {
 			@Override
 			public boolean matchToken(Token t) {
-				return t.isVisionBlocker();
+				return t.isAlwaysVisible();
+			}
+		});
+	}
+
+	public List<Token> getTokensWithVBL() {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				return t.hasVBL();
 			}
 		});
 	}

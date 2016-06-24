@@ -80,6 +80,9 @@ public class HollowDiamondTopologyTool extends AbstractDrawingTool implements Mo
 			g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
 			g2.scale(renderer.getScale(), renderer.getScale());
 
+			g2.setColor(AppStyle.tokenTopologyColor);
+			g2.fill(getTokenTopology());
+
 			g2.setColor(AppStyle.topologyColor);
 			g2.fill(topology);
 
