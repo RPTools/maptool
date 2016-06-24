@@ -811,24 +811,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 			}
 		});
 		// TODO: Optimize this by making it non anonymous
-		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), new AbstractAction() {
-			public void actionPerformed(java.awt.event.ActionEvent e) {
-				ZoneRenderer renderer = (ZoneRenderer) e.getSource();
-
-				Set<GUID> selectedTokenSet = renderer.getSelectedTokenSet();
-
-				for (GUID tokenGUID : selectedTokenSet) {
-					Token token = renderer.getZone().getToken(tokenGUID);
-
-					if (AppUtil.playerOwns(token)) {
-						renderer.getZone().removeToken(tokenGUID);
-						MapTool.serverCommand().removeToken(renderer.getZone().getId(), tokenGUID);
-					}
-				}
-				renderer.clearSelectedTokens();
-			}
-		});
-
+		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), ToolHelper.getDeleteTokenAction());
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, 0), new AbstractAction() {
 			public void actionPerformed(ActionEvent e) {
 				if (!isDraggingToken) {
