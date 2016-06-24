@@ -534,9 +534,10 @@ public abstract class Grid implements Cloneable {
 	 *            rectangular region to check for hard fog
 	 * @param fog
 	 *            defines areas where fog is currently covering the background
+	 * @param tolerance 
 	 * @return
 	 */
-	public boolean checkRegion(Rectangle regionToCheck, Area fog) {
+	public boolean checkRegion(Rectangle regionToCheck, Area fog, int tolerance) {
 		Rectangle bounds = new Rectangle();
 
 		int closedSpace = 0;
@@ -547,16 +548,17 @@ public abstract class Grid implements Cloneable {
 				if (bounds.width < 1 || bounds.height < 1)
 					continue;
 				if (!fog.intersects(bounds)) {
-					if (++closedSpace > 7)
+					if (++closedSpace > (9 - tolerance))
 						return false;
 				} else {
-					if (++openSpace > 2)
+					if (++openSpace > tolerance)
 						return true;
 				}
 			}
 		}
+
 		if (log.isInfoEnabled())
-			log.info("Center region of size " + regionToCheck.getSize() + " contains neither 4+ closed spaces nor 6+ open spaces?!");
+			log.info("Center region of size " + regionToCheck.getSize() + " contains neither " + (9 - tolerance) + "+ closed spaces nor " + tolerance + "+ open spaces?!");
 		return openSpace >= closedSpace;
 	}
 

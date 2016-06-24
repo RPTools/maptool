@@ -52,6 +52,7 @@ import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.Event;
 import net.rptools.maptool.model.Zone.Filter;
 
 public class ZoneView implements ModelChangeListener {
@@ -67,8 +68,9 @@ public class ZoneView implements ModelChangeListener {
 	private final Map<PlayerView, VisibleAreaMeta> visibleAreaMap = new HashMap<PlayerView, VisibleAreaMeta>();
 	private final SortedMap<Double, Area> allLightAreaMap = new ConcurrentSkipListMap<Double, Area>(); // Hold all of our lights combined by lumens
 
-	private AreaData topologyAreaData;
-	private AreaTree topology;
+	//private AreaData topologyAreaData;
+	private AreaTree topologyTree;
+	private Area tokenTopolgy;
 
 	public ZoneView(Zone zone) {
 		this.zone = zone;
@@ -88,20 +90,35 @@ public class ZoneView implements ModelChangeListener {
 		return zone.getVisionType() != Zone.VisionType.OFF;
 	}
 
-	public AreaTree getTopology() {
-		if (topology == null) {
-			topology = new AreaTree(zone.getTopology());
-		}
-		return topology;
+	public synchronized AreaTree getTopology() {
+		return getTopology(true);
 	}
 
-	public AreaData getTopologyAreaData() {
-		if (topologyAreaData == null) {
-			topologyAreaData = new AreaData(zone.getTopology());
-			topologyAreaData.digest();
+	public synchronized AreaTree getTopology(boolean useTokenVBL) {
+		if (tokenTopolgy == null && useTokenVBL) {
+			tokenTopolgy = new Area(zone.getTopology());
+			List<Token> vblTokens = MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithVBL();
+
+			for (Token vblToken : vblTokens) {
+				tokenTopolgy.add(vblToken.getTransformedVBL());
+			}
+
+			topologyTree = new AreaTree(tokenTopolgy);
+		} else if (topologyTree == null) {
+			topologyTree = new AreaTree(zone.getTopology());
 		}
-		return topologyAreaData;
+
+		return topologyTree;
 	}
+
+	// Jamz: This function and such "AreaData" never seems to get used...either old or future code?
+	//	public AreaData getTopologyAreaData() {
+	//		if (topologyAreaData == null) {
+	//			topologyAreaData = new AreaData(zone.getTopology());
+	//			topologyAreaData.digest();
+	//		}
+	//		return topologyAreaData;
+	//	}
 
 	private TreeMap<Double, Area> getLightSourceArea(Token baseToken, Token lightSourceToken) {
 		Map<String, TreeMap<Double, Area>> areaBySightMap = lightSourceCache.get(lightSourceToken.getId());
@@ -160,7 +177,7 @@ public class ZoneView implements ModelChangeListener {
 		Area lightSourceArea = lightSource.getArea(lightSourceToken, zone, direction);
 
 		// Calculate exposed area
-		// Jamz: OK, let not have lowlight vision type multiply darkness radius so test lumens
+		// Jamz: OK, let not have lowlight vision type multiply darkness radius
 		if (sight.getMultiplier() != 1 && lightSource.getLumens() >= 0) {
 			lightSourceArea.transform(AffineTransform.getScaleInstance(sight.getMultiplier(), sight.getMultiplier()));
 		}
@@ -567,25 +584,25 @@ public class ZoneView implements ModelChangeListener {
 	public void modelChanged(ModelChangeEvent event) {
 		Object evt = event.getEvent();
 		if (event.getModel() instanceof Zone) {
-			if (evt == Zone.Event.TOPOLOGY_CHANGED) {
-				tokenVisionCache.clear();
-				lightSourceCache.clear();
-				visibleAreaMap.clear();
-				topologyAreaData = null;
-				topology = null;
-				tokenVisibleAreaCache.clear();
-			}
+			boolean tokenChangedVBL = false;
+
 			if (evt == Zone.Event.TOKEN_CHANGED || evt == Zone.Event.TOKEN_REMOVED) {
 				if (event.getArg() instanceof List<?>) {
 					@SuppressWarnings("unchecked")
 					List<Token> list = (List<Token>) (event.getArg());
 					for (Token token : list) {
+						if (token.hasVBL())
+							tokenChangedVBL = true;
 						flush(token);
 					}
 				} else {
-					flush((Token) event.getArg());
+					final Token token = (Token) event.getArg();
+					if (token.hasVBL())
+						tokenChangedVBL = true;
+					flush(token);
 				}
 			}
+
 			if (evt == Zone.Event.TOKEN_ADDED || evt == Zone.Event.TOKEN_CHANGED) {
 				Object o = event.getArg();
 				List<Token> tokens = null;
@@ -595,10 +612,15 @@ public class ZoneView implements ModelChangeListener {
 				} else {
 					tokens = (List<Token>) o;
 				}
-				processTokenAddChangeEvent(tokens);
+
+				tokenChangedVBL = processTokenAddChangeEvent(tokens);
 			}
+
 			if (evt == Zone.Event.TOKEN_REMOVED) {
 				Token token = (Token) event.getArg();
+				if (token.hasVBL())
+					tokenChangedVBL = true;
+
 				for (AttachedLightSource als : token.getLightSources()) {
 					LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
 					if (lightSource == null) {
@@ -610,18 +632,36 @@ public class ZoneView implements ModelChangeListener {
 					}
 				}
 			}
+
+			// Moved this event to the bottom so we can check the other events
+			// since if a token that has VBL is added/removed/edited (rotated/moved/etc)
+			// it should also trip a Topology change
+			if (evt == Zone.Event.TOPOLOGY_CHANGED || tokenChangedVBL) {
+				tokenVisionCache.clear();
+				lightSourceCache.clear();
+				visibleAreaMap.clear();
+				topologyTree = null;
+				tokenTopolgy = null;
+				tokenVisibleAreaCache.clear();
+				//topologyAreaData = null;  // Jamz: This isn't used, probably never completed code.
+			}
+
 		}
 	}
 
 	/**
+	 * @return 
 	 * 
 	 */
-	private void processTokenAddChangeEvent(List<Token> tokens) {
+	private boolean processTokenAddChangeEvent(List<Token> tokens) {
 		boolean hasSight = false;
+		boolean hasVBL = false;
 		Campaign c = MapTool.getCampaign();
 
 		for (Token token : tokens) {
 			boolean hasLightSource = token.hasLightSources() && (token.isVisible() || (MapTool.getPlayer().isGM() && !AppState.isShowAsPlayer()));
+			if (token.hasVBL())
+				hasVBL = true;
 			for (AttachedLightSource als : token.getLightSources()) {
 				LightSource lightSource = c.getLightSource(als.getLightSourceId());
 				if (lightSource != null) {
@@ -638,8 +678,11 @@ public class ZoneView implements ModelChangeListener {
 			}
 			hasSight |= token.getHasSight();
 		}
+
 		if (hasSight)
 			visibleAreaMap.clear();
+
+		return hasVBL;
 	}
 
 	private static class VisibleAreaMeta {

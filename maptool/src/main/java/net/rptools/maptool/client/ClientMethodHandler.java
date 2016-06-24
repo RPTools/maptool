@@ -389,7 +389,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 				case setTokenLocation:
 					// Only the table should process this
 					if (MapTool.getPlayer().getName().equalsIgnoreCase("Table")) {
-						//						System.out.println("Inside ClientMethodHandler.handleMethod().setTokenLocation");
 						zoneGUID = (GUID) parameters[0];
 						keyToken = (GUID) parameters[1];
 
@@ -582,7 +581,6 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 					zoneGUID = (GUID) parameters[0];
 					zone = MapTool.getCampaign().getZone(zoneGUID);
 					zone.clearExposedArea();
-					System.out.print("clearExposedArea called for " + MapTool.getConnection().getId());
 					return;
 
 				case updateExposedAreaMeta:

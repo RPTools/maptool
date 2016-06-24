@@ -48,7 +48,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.AbstractTokenAccessorFunction;
 import net.rptools.maptool.client.functions.TokenBarFunction;
-import net.rptools.maptool.client.ui.AbstractTokenPopupMenu.BlockVisionAction;
+import net.rptools.maptool.client.ui.AbstractTokenPopupMenu.AlwaysVisibleAction;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
 import net.rptools.maptool.client.ui.zone.FogUtil;
@@ -116,7 +116,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 		addToggledItem(new ShowPathsAction(), renderer.isPathShowing(tokenUnderMouse));
 		addToggledItem(new SnapToGridAction(tokenUnderMouse.isSnapToGrid(), renderer), tokenUnderMouse.isSnapToGrid());
 		addToggledGMItem(new VisibilityAction(), tokenUnderMouse.isVisible());
-		addToggledGMItem(new BlockVisionAction(tokenUnderMouse.isVisionBlocker(), renderer), tokenUnderMouse.isVisionBlocker());
+		addToggledGMItem(new AlwaysVisibleAction(tokenUnderMouse.isAlwaysVisible(), renderer), tokenUnderMouse.isAlwaysVisible());
 
 		add(new JSeparator());
 

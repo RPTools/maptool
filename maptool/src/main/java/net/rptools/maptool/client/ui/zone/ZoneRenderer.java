@@ -47,6 +47,8 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -409,6 +411,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			return;
 		}
 		Token keyToken = zone.getToken(keyTokenId);
+		boolean vblTokenMoved = false; // If any token has VBL we need to reset FoW
 
 		/*
 		 * Lee: if the lead token is snapped-to-grid and has not moved, every
@@ -490,6 +493,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				if (token.isToken() && token.isVisible()) {
 					filteredTokens.add(tokenGUID);
 				}
+
+				if (token.hasVBL())
+					vblTokenMoved = true;
 			}
 			moveTimer.stop("eachtoken");
 
@@ -539,6 +545,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			for (GUID tokenGUID : selectionSet)
 				denyMovement(zone.getToken(tokenGUID));
 		}
+
+		if (vblTokenMoved)
+			zone.tokenTopologyChanged();
 	}
 
 	/**
@@ -1208,11 +1217,11 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		if (Zone.Layer.TOKEN.isEnabled()) {
 			// Jamz: If there is fog or vision we may need to re-render vision-blocking type tokens
 			// For example. this allows a "door" stamp to block vision but still allow you to see the door.
-			List<Token> vblTokens = zone.getVblTokens();
+			List<Token> vblTokens = zone.getTokensAlwaysVisible();
 			if (!vblTokens.isEmpty()) {
-				timer.start("tokens - vision blockers");
+				timer.start("tokens - always visible");
 				renderTokens(g2d, vblTokens, view, true);
-				timer.stop("tokens - vision blockers");
+				timer.stop("tokens - always visible");
 			}
 
 			// if there is fog or vision we may need to re-render figure type tokens
@@ -2447,7 +2456,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 		List<Token> tokenPostProcessing = new ArrayList<Token>(tokenList.size());
 		for (Token token : tokenList) {
-			if ((figuresOnly && token.getShape() != Token.TokenShape.FIGURE) && figuresOnly && !token.isVisionBlocker())
+			if ((figuresOnly && token.getShape() != Token.TokenShape.FIGURE) && figuresOnly && !token.isAlwaysVisible())
 				continue;
 			timer.start("tokenlist-1");
 			try {
@@ -2665,7 +2674,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
 				iso_ho = footprintBounds.height - th;
 				footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int) iso_ho, footprintBounds.width, (int) th);
-				iso_ho = iso_ho * getScale();
 			}
 			SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
@@ -2717,17 +2725,17 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						cellOnly.drawImage(workImage, at, this);
 					}
 				}
-			} else if (!isGMView && zoneView.isUsingVision() && token.isVisionBlocker()) {
-				// Jamz: Vision Blocking tokens will get rendered again here to place on top of FoW
+			} else if (!isGMView && zoneView.isUsingVision() && token.isAlwaysVisible()) {
+				// Jamz: Always Visible tokens will get rendered again here to place on top of FoW
 				Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
 				if (GraphicsUtil.intersects(visibleScreenArea, cb)) {
-					// the cell intersects visible area so
-					if (zone.getGrid().checkRegion(cb.getBounds(), visibleScreenArea)) {
-						// if we can see 2/9 of the stamp/token, draw the whole thing
+					// if we can see a portion of the stamp/token, draw the whole thing, defaults to 2/9ths
+					if (zone.getGrid().checkRegion(cb.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
 						g.drawImage(workImage, at, this);
-						//g.draw(cb); // debugging
 					} else {
 						// else draw the clipped stamp/token
+						// This will only show the part of the token that does not have VBL on it
+						// as any VBL on the token will block LOS, affecting the clipping.
 						Graphics2D cellOnly = (Graphics2D) clippedG.create();
 						Area cellArea = new Area(visibleScreenArea);
 						cellArea.intersect(cb);
@@ -3034,6 +3042,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			clippedG.dispose();
 		}
 		timer.stop("tokenlist-13");
+
+		if (figuresOnly)
+			tempVisTokens.addAll(visibleTokenSet);
 
 		visibleTokenSet = Collections.unmodifiableSet(tempVisTokens);
 	}

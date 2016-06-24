@@ -547,14 +547,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 						if (chooser.getFileFilter() == tokenFilterGM)
 							saveAsGmName = true;
 						saveDirectory = chooser.getSelectedFile();
-
-						if (chooser.getFileFilter() == tokenFilterImage) {
-							saveAsImage = true;
-						} else if (chooser.getFileFilter() == tokenFilterPortrait) {
-							saveAsImage = true;
-							saveAsPortrait = true;
-						}
-
 					}
 
 					if (saveAsGmName) {
@@ -562,6 +554,13 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					} else {
 						tokenSaveFile = new File(saveDirectory.getAbsolutePath() + "\\" + FileUtil.stripInvalidCharacters(tokenName));
 					}
+				}
+
+				if (chooser.getFileFilter() == tokenFilterImage) {
+					saveAsImage = true;
+				} else if (chooser.getFileFilter() == tokenFilterPortrait) {
+					saveAsImage = true;
+					saveAsPortrait = true;
 				}
 
 				// Auto-extension
@@ -587,9 +586,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
 					overWriteFile = JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(MapTool.getFrame(), messageObj, "Confirmation", JOptionPane.YES_OPTION);
 					showOverwriteDialog = !dontAskAgainCb.isSelected();
-					System.out.println("overWriteFile: " + overWriteFile);
-					System.out.println("dontAskAgainCb: " + dontAskAgainCb.isSelected());
-
 				} else if (tokenSaveFile.exists() && showOverwriteDialog) {
 					overWriteFile = MapTool.confirm("File exists, would you like to overwrite?");
 				}
@@ -601,6 +597,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					token.setGMNotes("");
 				}
 				try {
+					System.out.println("saveAsImage " + saveAsImage);
 					if (saveAsImage && !saveAsPortrait) {
 						PersistenceUtil.saveTokenImage(token.getImageAssetId(), tokenSaveFile);
 					} else if (saveAsPortrait) {
@@ -1019,17 +1016,16 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 	}
 
 	/**
-	 * Menu option to turn token into a Vision Blocking Token
+	 * Menu option to toggle token visibility to always shown (over VBL/FoW)
 	 * 
 	 * @author Jamz
-	 * @since 1.4.1.0
+	 * @since 1.4.1.5
 	 */
-	public class BlockVisionAction extends AbstractAction {
+	public class AlwaysVisibleAction extends AbstractAction {
 		private final ZoneRenderer renderer;
 
-		public BlockVisionAction(boolean blockVision, ZoneRenderer renderer) {
-			//super(I18N.getText("token.popup.menu.blockvision"));
-			super("Block Vision");
+		public AlwaysVisibleAction(boolean alwaysShow, ZoneRenderer renderer) {
+			super(I18N.getText("token.popup.menu.always.visible"));
 			this.renderer = renderer;
 		}
 
@@ -1037,21 +1033,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 			for (GUID guid : selectedTokenSet) {
 				Zone zone = renderer.getZone();
 				Token token = zone.getToken(guid);
-				if (token == null) {
-					continue;
-				}
-
-				TokenVBL tvbl = new TokenVBL(token);
-
-				//if (token.hasTokenVBL()) {
-				//	tvbl.doWork(token.getTokenVBL(), renderer);
-				//} else {
-				Area b = tvbl.buildVBL();
-				//token.setTokenVBL(b);
-				tvbl.doWork(b, renderer);
-				//}
-
-				//tvbl.doWork(renderer);
+				if (token != null)
+					token.toggleIsAlwaysVisible();
 			}
 		}
 	}
