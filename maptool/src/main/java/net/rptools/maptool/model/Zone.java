@@ -827,7 +827,7 @@ public class Zone extends BaseModel {
 		if (getVisionType() == VisionType.OFF) {
 			exposedArea.subtract(area);
 		}
-		if (selectedToks != null && !selectedToks.isEmpty() && MapTool.getServerPolicy().isUseIndividualFOW()) {
+		if (selectedToks != null && !selectedToks.isEmpty() && (MapTool.getServerPolicy().isUseIndividualFOW() || MapTool.isPersonalServer())) {
 			List<Token> allToks = new ArrayList<Token>();
 
 			for (GUID guid : selectedToks) {
