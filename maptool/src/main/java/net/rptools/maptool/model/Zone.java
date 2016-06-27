@@ -1532,7 +1532,6 @@ public class Zone extends BaseModel {
 				if (o1.getShape() == Token.TokenShape.FIGURE || o2.getShape() == Token.TokenShape.FIGURE) {
 					int v1 = getFigureZOrder(o1);
 					int v2 = getFigureZOrder(o2);
-					System.out.println(v1+" vs "+v2);
 					if ((v1 - v2) != 0)
 						return v1 - v2;
 					if (o1.isStamp() && o2.isToken())
@@ -1555,21 +1554,21 @@ public class Zone extends BaseModel {
 			}
 		};
 	}
-	
+
 	private int getFigureZOrder(Token t) {
 		/**
 		 * If set size return the footprint, otherwise return bounding box.
 		 * Figure tokens are designed for set sizes so we need to approximate free size tokens 
 		 */
-		Rectangle b1 = t.isSnapToScale()?t.getFootprint(getGrid()).getBounds(getGrid()):t.getBounds(getZone());
+		Rectangle b1 = t.isSnapToScale() ? t.getFootprint(getGrid()).getBounds(getGrid()) : t.getBounds(getZone());
 		/**
 		 * This is an awful approximation of centre of token footprint.
 		 * The bounding box (b1 & b2) are usually centred on token x & y
 		 * So token y + bounding y give you the bottom of the box
 		 * Then subtract portion of height to get the centre point of the base.
 		 */
-		int bottom = (t.isSnapToScale()?t.getY() + b1.y:b1.y) + b1.height;
-		int centre = t.isSnapToScale()?b1.height/2:b1.width/4;
+		int bottom = (t.isSnapToScale() ? t.getY() + b1.y : b1.y) + b1.height;
+		int centre = t.isSnapToScale() ? b1.height / 2 : b1.width / 4;
 		return bottom - centre;
 	}
 
