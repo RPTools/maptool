@@ -292,12 +292,14 @@ public class VBL_Functions extends AbstractFunction {
 				Rectangle footprintBounds = token.getBounds(renderer.getZone());
 				Area newTokenVBL = new Area(footprintBounds);
 
-				newTokenVBL.intersect(renderer.getZone().getTopology());
-				double adjustX = newTokenVBL.getBounds().getX() - ((footprintBounds.getWidth() - newTokenVBL.getBounds().getWidth()) / 2) - 1;
-				double adjustY = newTokenVBL.getBounds().getY() - ((footprintBounds.getHeight() - newTokenVBL.getBounds().getHeight()) / 2) - 1;
-				AffineTransform at = AffineTransform.getTranslateInstance(-adjustX, -adjustY);
+				double adjustX = -newTokenVBL.getBounds().getX();
+				double adjustY = -newTokenVBL.getBounds().getY();
 
-				token.setVBL(new Area(at.createTransformedShape(newTokenVBL)));
+				newTokenVBL.intersect(renderer.getZone().getTopology());
+				AffineTransform atArea = AffineTransform.getTranslateInstance(adjustX, adjustY);
+
+				token.setVBL(new Area(atArea.createTransformedShape(newTokenVBL)));
+
 			}
 		}
 
