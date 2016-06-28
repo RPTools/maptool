@@ -269,8 +269,14 @@ public class MapToolLauncher extends JFrame {
 		if (!dataDirPath.exists()) {
 			promptUser = true;
 			skipPrompt = false;
+			dataDirPath.mkdirs();
 		}
 
+		final File configDirPath = new File(mapToolDataDir, "config");
+		if (!configDirPath.exists()) {
+			configDirPath.mkdirs();
+		}
+		
 		// Lets test the current directory first, lets lets a local JAR copy to run independently of config stored in .maptool directory, .eg to run multiple versions of MT
 		launchConfigFile = new File(currentDir, LAUNCH_CONFIG); //$NON-NLS-1$
 		if (launchConfigFile.exists()) {
