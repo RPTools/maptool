@@ -38,6 +38,7 @@ public class DrawingFunctions extends AbstractFunction {
 
 	@Override
 	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
+		checkTrusted(functionName);
 		if ("getDrawingLayer".equalsIgnoreCase(functionName)) {
 			checkNumberOfParameters(functionName, parameters, 2, 2);
 			String mapName = parameters.get(0).toString();
@@ -151,6 +152,18 @@ public class DrawingFunctions extends AbstractFunction {
 			throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, min, numberOfParameters));
 		} else if (numberOfParameters > max) {
 			throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, max, numberOfParameters));
+		}
+	}
+
+	/**
+	 * Checks whether or not the function is trusted
+	 * 
+	 * @param functionName     Name of the macro function
+	 * @throws ParserException Returns trust error message and function name 
+	 */
+	private void checkTrusted(String functionName) throws ParserException {
+		if (!MapTool.getParser().isMacroTrusted()) {
+			throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 		}
 	}
 
