@@ -326,11 +326,13 @@ public class VBL_Functions extends AbstractFunction {
 					if (token.getShape() == Token.TokenShape.TOP_DOWN)
 						atArea.concatenate(AffineTransform.getRotateInstance(-Math.toRadians(token.getFacingInDegrees()), rx, ry));
 				}
-				
+
 				atArea.concatenate(AffineTransform.getTranslateInstance(tx, ty));
+				// Jamz, FIXME: There is a known issue when tokens are rotated, the VBL is clipped
+				// due to the fact that the capture intersection is not rotated...
 				newTokenVBL.intersect(renderer.getZone().getTopology());
 				newTokenVBL = new Area(atArea.createTransformedShape(newTokenVBL));
-				
+
 				// Lets account for flipped images...
 				atArea = new AffineTransform();
 				if (token.isFlippedX()) {
@@ -342,7 +344,7 @@ public class VBL_Functions extends AbstractFunction {
 					atArea.concatenate(AffineTransform.getScaleInstance(1.0, -1.0));
 					atArea.concatenate(AffineTransform.getTranslateInstance(0, -token.getHeight()));
 				}
-				
+
 				token.setVBL(new Area(atArea.createTransformedShape(newTokenVBL)));
 			}
 		}
