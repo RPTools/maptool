@@ -1525,22 +1525,20 @@ public class Zone extends BaseModel {
 		return new Comparator<Token>() {
 			@Override
 			public int compare(Token o1, Token o2) {
+				/**
+				 * If either token is a figure, get the footprint and find the lowest point but if the same, 
+				 * return the smallest, else use normal z order
+				 */
 				if (o1.getShape() == Token.TokenShape.FIGURE || o2.getShape() == Token.TokenShape.FIGURE) {
-					/**
-					 * if either token is a figure, get the footprint and find the lowest point but if the same, 
-					 * return the smallest, else use normal z order
-					 */
-					Rectangle b1 = o1.getBounds(getZone());
-					Rectangle b2 = o2.getBounds(getZone());
-					int v1 = o1.getY() + b1.height;
-					int v2 = o2.getY() + b2.height;
+					int v1 = getFigureZOrder(o1);
+					int v2 = getFigureZOrder(o2);
 					if ((v1 - v2) != 0)
 						return v1 - v2;
 					if (o1.isStamp() && o2.isToken())
 						return -1;
 					if (o2.isStamp() && o1.isToken())
 						return +1;
-					if (b1.getHeight() != b2.getHeight()) {
+					if (o1.getHeight() != o2.getHeight()) {
 						// Larger tokens at the same position, go behind
 						return o2.getHeight() - o1.getHeight();
 					}
@@ -1555,6 +1553,23 @@ public class Zone extends BaseModel {
 				}
 			}
 		};
+	}
+
+	private int getFigureZOrder(Token t) {
+		/**
+		 * If set size return the footprint, otherwise return bounding box.
+		 * Figure tokens are designed for set sizes so we need to approximate free size tokens 
+		 */
+		Rectangle b1 = t.isSnapToScale() ? t.getFootprint(getGrid()).getBounds(getGrid()) : t.getBounds(getZone());
+		/**
+		 * This is an awful approximation of centre of token footprint.
+		 * The bounding box (b1 & b2) are usually centred on token x & y
+		 * So token y + bounding y give you the bottom of the box
+		 * Then subtract portion of height to get the centre point of the base.
+		 */
+		int bottom = (t.isSnapToScale() ? t.getY() + b1.y : b1.y) + b1.height;
+		int centre = t.isSnapToScale() ? b1.height / 2 : b1.width / 4;
+		return bottom - centre;
 	}
 
 	private Zone getZone() {
