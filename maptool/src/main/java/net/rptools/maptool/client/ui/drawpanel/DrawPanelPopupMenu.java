@@ -32,9 +32,11 @@ import javax.swing.JSeparator;
 
 import net.rptools.lib.swing.ColorPicker;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.ui.AssetPaint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.AbstractDrawing;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -75,12 +77,26 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		//add(new JSeparator());
 		add(new GetPropertiesAction());
 		add(new SetPropertiesAction());
+		add(new GetDrawingId());
 	}
 
 	private boolean isDrawnElementGroup(Object object) {
 		if (object instanceof DrawnElement)
 			return ((DrawnElement) object).getDrawable() instanceof DrawablesGroup;
 		return false;
+	}
+
+	public class GetDrawingId extends AbstractAction {
+		public GetDrawingId() {
+			super("Get Drawing Id");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			String id = elementUnderMouse.getDrawable().getId().toString();
+			MacroContext context = new MacroContext();
+			MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), id));
+		}
+
 	}
 
 	public class GetPropertiesAction extends AbstractAction {
