@@ -2026,6 +2026,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
 					iso_ho = footprintBounds.height - th;
 					footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int) iso_ho, footprintBounds.width, (int) th);
+					iso_ho = iso_ho * getScale();
 				}
 				SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
@@ -2034,7 +2035,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				if (token.isSnapToScale()) {
 					offsetx = (int) (imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 * getScale() : 0);
 					offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 * getScale() : 0);
-					iso_ho = iso_ho * getScale();
 				}
 				int tx = x + offsetx;
 				int ty = y + offsety + (int) iso_ho;
@@ -2049,7 +2049,11 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					at.scale((double) imgSize.width / workImage.getWidth(), (double) imgSize.height / workImage.getHeight());
 					at.scale(getScale(), getScale());
 				} else {
-					at.scale((double) scaledWidth / workImage.getWidth(), (double) scaledHeight / workImage.getHeight());
+					if (token.getShape() == TokenShape.FIGURE) {
+						at.scale((double) scaledWidth / workImage.getWidth(), (double) scaledWidth / workImage.getWidth());
+					} else {
+						at.scale((double) scaledWidth / workImage.getWidth(), (double) scaledHeight / workImage.getHeight());
+					}
 				}
 				g.drawImage(workImage, at, this);
 
@@ -2674,6 +2678,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				double th = token.getHeight() * Double.valueOf(footprintBounds.width) / token.getWidth();
 				iso_ho = footprintBounds.height - th;
 				footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int) iso_ho, footprintBounds.width, (int) th);
+				iso_ho = iso_ho * getScale();
 			}
 			SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
@@ -2701,7 +2706,11 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				at.scale(((double) imgSize.width) / workImage.getWidth(), ((double) imgSize.height) / workImage.getHeight());
 				at.scale(getScale(), getScale());
 			} else {
-				at.scale((scaledWidth) / workImage.getWidth(), (scaledHeight) / workImage.getHeight());
+				if (token.getShape() == TokenShape.FIGURE) {
+					at.scale((double) scaledWidth / workImage.getWidth(), (double) scaledWidth / workImage.getWidth());
+				} else {
+					at.scale((double) scaledWidth / workImage.getWidth(), (double) scaledHeight / workImage.getHeight());
+				}
 			}
 			timer.stop("tokenlist-6");
 

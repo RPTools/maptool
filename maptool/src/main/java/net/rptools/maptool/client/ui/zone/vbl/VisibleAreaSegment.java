@@ -41,16 +41,18 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 		faceList.add(0, face);
 	}
 
-	public double getDistanceFromOrigin() {
-		//		return GeometryUtil.getDistance(getCenterPoint(), origin);
-		return getCenterPoint().distance(origin);
+	public long getDistanceFromOrigin() {
+		//	return GeometryUtil.getDistance(getCenterPoint(), origin);
+		return (long) (getCenterPoint().distance(origin) * 1000);
 	}
 
 	public Point2D getCenterPoint() {
 		if (centerPoint == null) {
 			Area path = getPath();
 			Rectangle2D bounds = path.getBounds2D();
-			centerPoint = new Point2D.Double(bounds.getX() + bounds.getWidth() / 2.0, bounds.getY() + bounds.getHeight() / 2.0);
+			// Jamz: getCenter points now available from class 
+			// centerPoint = new Point2D.Double(bounds.getX() + bounds.getWidth() / 2.0, bounds.getY() + bounds.getHeight() / 2.0);
+			centerPoint = new Point2D.Double(bounds.getCenterX(), bounds.getCenterY());
 		}
 		return centerPoint;
 	}
@@ -115,8 +117,10 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 	// COMPARABLE
 	public int compareTo(VisibleAreaSegment o) {
 		if (o != this) {
-			double odist = o.getDistanceFromOrigin();
-			double val = getDistanceFromOrigin() - odist; // separate variable for debugging
+			// Jamz: We're getting the following exception from this compare: java.lang.IllegalArgumentException: Comparison method violates its general contract!
+			// So we changed getDistanceFromOrigin() to return a long after multiplying by 1000 for precision
+			long odist = o.getDistanceFromOrigin();
+			long val = getDistanceFromOrigin() - odist; // separate variable for debugging
 			return (int) val;
 			//			return val < EPSILON && val > -EPSILON ? 0 : (int) val; // Should we use an EPSILON value?
 			//			return getDistanceFromOrigin() < odist ? -1 : getDistanceFromOrigin() > odist ? 1 : 0;
