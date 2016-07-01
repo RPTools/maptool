@@ -60,7 +60,7 @@ public class MapToolLineParser {
 			TokenPropertyFunctions.getInstance(), TokenRemoveFromInitiativeFunction.getInstance(), TokenSelectionFunctions.getInstance(),
 			TokenSightFunctions.getInstance(), TokenSpeechFunctions.getInstance(), TokenStateFunction.getInstance(), TokenVisibleFunction.getInstance(), UserDefinedMacroFunctions.getInstance(),
 			isVisibleFunction.getInstance(), getInfoFunction.getInstance(), TokenMoveFunctions.getInstance(), FogOfWarFunctions.getInstance(), VBL_Functions.getInstance(),
-			ZoomFunctions.getInstance(), ParserPropertyFunctions.getInstance(), MathFunctions.getInstance(), MacroJavaScriptBridge.getInstance() };
+			ZoomFunctions.getInstance(), ParserPropertyFunctions.getInstance(), MathFunctions.getInstance(), MacroJavaScriptBridge.getInstance(), DrawingFunctions.getInstance() };
 
 	/** Name and Source or macros that come from chat. */
 	public static final String CHAT_INPUT = "chat";
