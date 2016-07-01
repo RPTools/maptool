@@ -1083,11 +1083,11 @@ public class Token extends BaseModel implements Cloneable {
 		// Apply the coordinate translation
 		AffineTransform atArea = AffineTransform.getTranslateInstance(tx, ty);
 
-		int rx, ry;
+		double rx, ry;
 		if (isSnapToScale()) {
 			// Find the center x,y coords of the rectangle
-			rx = (int) ((anchorX + (getWidth() / 2)));
-			ry = (int) ((anchorY + (getHeight() / 2)));
+			rx = (getWidth() / 2) - (getAnchor().getX() / 2);
+			ry = (getHeight() / 2) - (getAnchor().getY() / 2);
 
 			// Apply the scale transformation
 			atArea.concatenate(AffineTransform.getScaleInstance(((double) imgSize.width) / getWidth(), ((double) imgSize.height) / getHeight()));
@@ -1097,8 +1097,8 @@ public class Token extends BaseModel implements Cloneable {
 				atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
 		} else {
 			// Find the center x,y coords of the rectangle
-			rx = (int) ((anchorX + (getWidth() / 2)) * scaleX);
-			ry = (int) ((anchorY + (getHeight() / 2)) * scaleY);
+			rx = ((getWidth() / 2) - (getAnchor().getX() / scaleX)) * scaleX;
+			ry = ((getHeight() / 2) - (getAnchor().getY() / scaleY)) * scaleY;
 
 			// Apply the rotation transformation...
 			if (getShape() == Token.TokenShape.TOP_DOWN)
