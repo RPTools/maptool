@@ -24,9 +24,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -48,6 +56,7 @@ import net.rptools.maptool.client.TransferableToken;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.ExtractImagesFromPDF;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.PersistenceUtil;
 
@@ -68,22 +77,43 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	private Directory dir;
 	private static String filter;
 	private boolean global;
-	private static List<File> fileList;
+	private static List<File> fileList = new ArrayList<File>();;
 	private List<Directory> subDirList;
+
+	private static int pagesProcessed = 0;
+	private static PdfExtractor extractorSwingWorker;
+	private static boolean pdfExtractIsRunning = false;
+	private static ScheduledExecutorService extractThreadPool;
 
 	public ImageFileImagePanelModel(Directory dir) {
 		this.dir = dir;
-		refresh();
+
+		if (dir.isPDF()) {
+			refreshPDF(false);
+		} else {
+			refresh();
+		}
 	}
 
 	public void rescan(Directory dir) {
 		this.dir = dir;
-		refresh();
+
+		if (dir.isPDF()) {
+			refreshPDF(true);
+		} else {
+			refresh();
+		}
 	}
 
 	public void setFilter(String filter) {
 		ImageFileImagePanelModel.filter = filter.toUpperCase();
-		refresh();
+		if (dir.isPDF()) {
+			if (!pdfExtractIsRunning) {
+				refreshPDF(false);
+			}
+		} else {
+			refresh();
+		}
 	}
 
 	public void setGlobalSearch(boolean yes) {
@@ -111,6 +141,10 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
 			image = ((AssetDirectory) dir).getImageFor(fileList.get(index));
 		}
+		if (dir instanceof PdfAsDirectory) {
+			//System.out.println("Here I am for: " + dir.hashCode());
+			image = ((PdfAsDirectory) dir).getImageFor(fileList.get(index));
+		}
 
 		return image != null ? image : ImageManager.TRANSFERING_IMAGE;
 	}
@@ -131,7 +165,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 			}
 		}
 
-		if (dir instanceof AssetDirectory) {
+		if (dir instanceof AssetDirectory || dir instanceof PdfAsDirectory) {
 			asset = getAsset(index);
 
 			if (asset == null) {
@@ -253,10 +287,178 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	}
 
 	/**
-	 * Determines which images to display based on the setting of the Global vs. Local flag (<code>global</code> ==
-	 * <b>true</b> means to search subdirectories as well as parent directory) and the filter text.
+	 * We need to display the contents of the PDF instead of a directory and
+	 * need to cache results. Since extracted files could result in a lot of
+	 * images where most are not needed long term, we'll cache them in the
+	 * .maptool temp directory and delete on exit. If the delete fails, the temp
+	 * directory automatically cleans up anything older than 2 days on startup.
+	 * 
+	 * First we'll spawn a SwingWorker so we can get back to the GUI while all
+	 * the magic happens. The SwingWorker will then spawn a multi-threaded
+	 * ExecutorService/CompletionService to extract out the images, 1 threaded
+	 * task per page. This results in VERY fast extraction and allows up to
+	 * update the image panel after each thread.
+	 * @param forceRescan 
+	 */
+	private void refreshPDF(boolean forceRescan) {
+		cancelPdfExtract(); // If there is a current extract going on, lets cancel it...
+		fileList.clear();
+		extractorSwingWorker = new PdfExtractor(forceRescan);
+		extractorSwingWorker.execute();
+
+	}
+
+	private void cancelPdfExtract() {
+		if (pdfExtractIsRunning) {
+			try {
+				if (extractorSwingWorker != null) {
+					extractorSwingWorker.cancel(true);
+				}
+
+				if (extractThreadPool != null) {
+					extractThreadPool.shutdownNow();
+					extractThreadPool.awaitTermination(1, TimeUnit.MINUTES);
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private class PdfExtractor extends SwingWorker<Void, Boolean> {
+		private ExtractImagesFromPDF extractor;
+		private final int pageCount;
+		private final int numThreads = 6;
+
+		private final boolean forceRescan;
+
+		private PdfExtractor(boolean forceRescan) {
+			pdfExtractIsRunning = true;
+			this.forceRescan = forceRescan;
+
+			try {
+				extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan);
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			pageCount = extractor.getPageCount();
+			extractThreadPool = Executors.newScheduledThreadPool(numThreads);
+			MapTool.getFrame().getAssetPanel().setImagePanelProgressMax(pageCount);
+		}
+
+		@Override
+		protected Void doInBackground() throws Exception {
+			try {
+				// 0 page count means it's already been processed (or PDF if empty)
+				if (pageCount > 0 || forceRescan) {
+					MapTool.getFrame().getAssetPanel().showImagePanelProgress(true);
+
+					for (int pageNumber = 1; pageNumber < pageCount + 1; pageNumber++) {
+						ExtractImagesTask task = new ExtractImagesTask(pageNumber, pageCount, dir, forceRescan);
+						// When the PDF get to the larger modules (50-100 pages) it can overload the pool...
+						extractThreadPool.schedule(task, 100 * pageNumber, TimeUnit.MILLISECONDS);
+					}
+
+					extractThreadPool.shutdown();
+					extractThreadPool.awaitTermination(3, TimeUnit.MINUTES);
+				} else {
+					dir = new PdfAsDirectory(extractor.getTempDir(), AppConstants.IMAGE_FILE_FILTER);
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			return null;
+		}
+
+		@Override
+		public void done() {
+			extractThreadPool.shutdown();
+			extractor.markComplete(isCancelled()); // If swing worker was cancelled, tell PdfExtractor to close resources but don't mark as completed
+			extractor.close();
+			updatePdfProgress(0, extractor.getTempDir());
+			pdfExtractIsRunning = false;
+		}
+	}
+
+	/**
+	 * 
+	 * @author Jamz
+	 * 
+	 * A Callable task add to the ExecutorCompletionService so
+	 * we can track as Futures.
+	 *
+	 */
+	private final class ExtractImagesTask implements Callable<Void> {
+		private final int pageNumber;
+		private final ExtractImagesFromPDF extractor;
+
+		public ExtractImagesTask(int pageNumber, int pageCount, Directory dir, boolean forceRescan) throws IOException {
+			this.pageNumber = pageNumber;
+			this.extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan);
+		}
+
+		@Override
+		public Void call() throws Exception {
+			try {
+				fileList.addAll(extractor.extractPage(pageNumber));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				extractor.close();
+				updatePdfProgress(pageNumber, null);
+			}
+
+			return null;
+		}
+	}
+
+	private void updatePdfProgress(int progress, File tempFile) {
+		if (progress == 0) {
+			pagesProcessed = 0;
+			fileListCleanup(new PdfAsDirectory(tempFile, AppConstants.IMAGE_FILE_FILTER));
+			MapTool.getFrame().getAssetPanel().showImagePanelProgress(false);
+		} else {
+			fileListCleanup();
+		}
+
+		MapTool.getFrame().getAssetPanel().setImagePanelProgress(pagesProcessed++);
+		MapTool.getFrame().getAssetPanel().updateImagePanel();
+	}
+
+	private void fileListCleanup(Directory dir) {
+		fileList.clear();
+		try {
+			fileList.addAll(dir.getFiles());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		fileListCleanup();
+	}
+
+	private void fileListCleanup() {
+		Set<File> tempSet = new HashSet<File>();
+		tempSet.addAll(fileList);
+		fileList.clear();
+		fileList.addAll(tempSet);
+		Collections.sort(fileList, filenameComparator);
+	}
+
+	/**
+	 * Determines which images to display based on the setting of the Global vs.
+	 * Local flag (<code>global</code> == <b>true</b> means to search
+	 * subdirectories as well as parent directory) and the filter text.
 	 */
 	private void refresh() {
+		cancelPdfExtract(); // In case we interrupted the extract by changing directories before it finished...
+
 		fileList = new ArrayList<File>();
 		subDirList = new ArrayList<Directory>();
 

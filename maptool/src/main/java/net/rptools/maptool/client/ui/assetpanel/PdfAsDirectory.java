@@ -33,22 +33,23 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
 
-public class AssetDirectory extends Directory {
+public class PdfAsDirectory extends Directory {
 
 	public static final String PROPERTY_IMAGE_LOADED = "imageLoaded";
-	private static final Image PDF_IMAGE = new ImageIcon(
-			AssetDirectory.class.getClassLoader().getResource("net/rptools/maptool/client/image/pdf_icon.png")).getImage();
 
 	private final Map<File, FutureTask<Image>> imageMap = new HashMap<File, FutureTask<Image>>();
 
-	private static final Image INVALID_IMAGE = new BufferedImage(1, 1, Transparency.OPAQUE);
+	private static final Image INVALID_IMAGE = new BufferedImage(1, 1,
+			Transparency.OPAQUE);
 
-	private static ExecutorService largeImageLoaderService = Executors.newFixedThreadPool(1);
-	private static ExecutorService smallImageLoaderService = Executors.newFixedThreadPool(2);
+	private static ExecutorService largeImageLoaderService = Executors
+			.newFixedThreadPool(1);
+	private static ExecutorService smallImageLoaderService = Executors
+			.newFixedThreadPool(2);
 
 	private AtomicBoolean continueProcessing = new AtomicBoolean(true);
 
-	public AssetDirectory(File directory, FilenameFilter fileFilter) {
+	public PdfAsDirectory(File directory, FilenameFilter fileFilter) {
 		super(directory, fileFilter);
 	}
 
@@ -70,7 +71,8 @@ public class AssetDirectory extends Directory {
 	}
 
 	/**
-	 * Returns the asset associated with this file, or null if the file has not yet been loaded as an asset
+	 * Returns the asset associated with this file, or null if the file has not
+	 * yet been loaded as an asset
 	 * 
 	 * @param imageFile
 	 * @return
@@ -96,7 +98,9 @@ public class AssetDirectory extends Directory {
 		future = new FutureTask<Image>(new ImageLoader(imageFile)) {
 			@Override
 			protected void done() {
-				firePropertyChangeEvent(new PropertyChangeEvent(AssetDirectory.this, PROPERTY_IMAGE_LOADED, false, true));
+				firePropertyChangeEvent(
+						new PropertyChangeEvent(PdfAsDirectory.this,
+								PROPERTY_IMAGE_LOADED, false, true));
 			}
 		};
 		if (imageFile.length() < 30 * 1024) {
@@ -109,8 +113,9 @@ public class AssetDirectory extends Directory {
 	}
 
 	@Override
-	protected Directory newDirectory(File directory, FilenameFilter fileFilter) {
-		return new AssetDirectory(directory, fileFilter);
+	protected Directory newDirectory(File directory,
+			FilenameFilter fileFilter) {
+		return new PdfAsDirectory(directory, fileFilter);
 	}
 
 	private class ImageLoader implements Callable<Image> {
@@ -132,7 +137,8 @@ public class AssetDirectory extends Directory {
 					thumbnail = PersistenceUtil.getTokenThumbnail(imageFile);
 				} else if (imageFile.getName().toLowerCase().endsWith(".pdf")) {
 					// Jamz: Added to mark all PDF assets with proper image, TODO: Move image asset to proper location
-					thumbnail = PDF_IMAGE;
+					System.out.println("PDF Thumb: " + imageFile.getAbsolutePath());
+					thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
 				} else {
 					thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
 

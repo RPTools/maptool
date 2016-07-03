@@ -516,8 +516,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 				chooser.addChoosableFileFilter(tokenFilterPortrait);
 
 				chooser.setSelectedFile(defaultFile);
-				//System.out.println("setSelectedFile: " + chooser.getSelectedFile());
-				//System.out.println("defaultFile: " + defaultFile);
 				chooser.addPropertyChangeListener(new PropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent evt) {
 						if (evt.getPropertyName() == JFileChooser.FILE_FILTER_CHANGED_PROPERTY && showSaveDialog) {
@@ -597,7 +595,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					token.setGMNotes("");
 				}
 				try {
-					System.out.println("saveAsImage " + saveAsImage);
 					if (saveAsImage && !saveAsPortrait) {
 						PersistenceUtil.saveTokenImage(token.getImageAssetId(), tokenSaveFile);
 					} else if (saveAsPortrait) {

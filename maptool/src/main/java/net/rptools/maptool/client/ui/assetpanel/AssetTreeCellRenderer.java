@@ -12,25 +12,33 @@
 package net.rptools.maptool.client.ui.assetpanel;
 
 import java.awt.Component;
-
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 /**
  */
 public class AssetTreeCellRenderer extends DefaultTreeCellRenderer {
+	// Jamz: Lets add PDF's as a "Leaf" and show the extracted images in the asset window...
+	final private static Icon PDF_ICON = new ImageIcon(
+			AssetTreeCellRenderer.class.getClassLoader().getResource("net/rptools/maptool/client/image/pdf_folder_small.png"));
 
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row,
 			boolean hasFocus) {
 
 		setBorder(null);
-
+		//System.out.println("expanded: " + expanded);
 		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
 		if (value instanceof Directory) {
 			setText(((Directory) value).getPath().getName());
+			if (((Directory) value).isPDF()) {
+				setIcon(PDF_ICON);
+			}
 		}
 
+		// Root node...
 		if (row == 0) {
 			setIcon(null);
 		}

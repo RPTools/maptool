@@ -36,7 +36,7 @@ public class TokenVBL {
 		// Area area = new Area();
 		// Polygon poly = makePolyFromImage(image, 6, 15, alphaSensitivity);
 		// area = new Area(poly);
-		
+
 		return createVblArea(image, alphaSensitivity);
 	}
 
@@ -98,7 +98,7 @@ public class TokenVBL {
 		vertex_x[0] = 0;
 		vertex_y[0] = 0;
 		vertex_k[0] = 1;
-		
+
 		for (tx = 0; tx < w; tx += detail)
 			for (ty = 0; ty < h; ty += 1)
 				if ((image.getRGB(tx, ty) >> 24) != 0x00) {
@@ -112,7 +112,7 @@ public class TokenVBL {
 					ly = ty;
 					break;
 				}
-		
+
 		for (ty = 0; ty < h; ty += detail)
 			for (tx = w - 1; tx >= 0; tx -= 1)
 				if ((image.getRGB(tx, ty) >> 24) != 0x00 && ty > ly) {
@@ -124,7 +124,7 @@ public class TokenVBL {
 					ly = ty;
 					break;
 				}
-		
+
 		for (tx = w - 1; tx >= 0; tx -= detail)
 			for (ty = h - 1; ty >= 0; ty -= 1)
 				if ((image.getRGB(tx, ty) >> 24) != 0x00 && tx < lx) {
@@ -136,7 +136,7 @@ public class TokenVBL {
 					ly = ty;
 					break;
 				}
-		
+
 		for (ty = h - 1; ty >= 0; ty -= detail)
 			for (tx = 0; tx < w; tx += 1)
 				if ((image.getRGB(tx, ty) >> 24) != 0x00 && ty < ly && ty > fy) {
@@ -148,41 +148,41 @@ public class TokenVBL {
 					ly = ty;
 					break;
 				}
-		
+
 		double ang1, ang2;
-		
+
 		for (int i = 0; i < numPoints - 2; i++) {
 			ang1 = PointDirection(vertex_x[i], vertex_y[i], vertex_x[i + 1], vertex_y[i + 1]);
 			ang2 = PointDirection(vertex_x[i + 1], vertex_y[i + 1], vertex_x[i + 2], vertex_y[i + 2]);
 			if (Math.abs(ang1 - ang2) <= angle)
 				vertex_k[i + 1] = 0;
 		}
-		
+
 		ang1 = PointDirection(vertex_x[numPoints - 2], vertex_y[numPoints - 2], vertex_x[numPoints - 1], vertex_y[numPoints - 1]);
 		ang2 = PointDirection(vertex_x[numPoints - 1], vertex_y[numPoints - 1], vertex_x[0], vertex_y[0]);
-		
+
 		if (Math.abs(ang1 - ang2) <= angle)
 			vertex_k[numPoints - 1] = 0;
-		
+
 		ang1 = PointDirection(vertex_x[numPoints - 1], vertex_y[numPoints - 1], vertex_x[0], vertex_y[0]);
 		ang2 = PointDirection(vertex_x[0], vertex_y[0], vertex_x[1], vertex_y[1]);
-		
+
 		if (Math.abs(ang1 - ang2) <= angle)
 			vertex_k[0] = 0;
-		
+
 		int n = 0;
 		for (int i = 0; i < numPoints; i++)
 			if (vertex_k[i] == 1)
 				n++;
-		
+
 		Polygon poly = new Polygon();
-		
+
 		for (int i = 0; i < numPoints; i++)
 			if (vertex_k[i] == 1) {
 				poly.addPoint(vertex_x[i], h - vertex_y[i]);
 				n++;
 			}
-		
+
 		return poly;
 	}
 

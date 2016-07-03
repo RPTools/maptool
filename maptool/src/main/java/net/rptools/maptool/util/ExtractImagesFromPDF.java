@@ -65,9 +65,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
 
 /**
- * Extracts the images from a PDF file.
+ * Extract all images from a PDF using Apache's PdfBox 2.0
+ * This will also walk through all annotations and extract those images as well
+ * which is key, some interactive PDF's, such as from Paizo, store different versions
+ * of maps as button icons, which will not normally extract using other methods.
+ * 
+ * @author Jamz
  *
- * @author Ben Litchfield
  */
 public final class ExtractImagesFromPDF {
 	private static final List<String> JPEG = Arrays.asList(
@@ -75,8 +79,8 @@ public final class ExtractImagesFromPDF {
 			COSName.DCT_DECODE_ABBREVIATION.getName());
 
 	private static final boolean DIRECT_JPEG = false; // Forces the direct extraction of JPEG images regardless of colorspace.
-	private String prefix; // "gianstlayer_maps";
-	private String outDir; // "D:/Development/Workspace - RPTools 1.4.x/PDFbox-Test-2.0/test_pdfs/" + prefix + "/";
+	private String prefix;
+	private String outDir;
 
 	private static final File tmpDir = AppUtil.getTmpDir(); //new File(System.getProperty("java.io.tmpdir"));
 	private File finalTempDir;
@@ -90,8 +94,8 @@ public final class ExtractImagesFromPDF {
 	private PDDocument document = null;
 
 	public ExtractImagesFromPDF(File pdfFile, boolean forceRescan) throws IOException {
-		//System.out.println("***************************************************************************");
-		//System.out.println("ExtractImagesFromPDF called...");
+		//		System.out.println("***************************************************************************");
+		//		System.out.println("ExtractImagesFromPDF called...");
 
 		prefix = FileUtil.getNameWithoutExtension(pdfFile.getName());
 		outDir = tmpDir + "/" + prefix + "/";
@@ -123,18 +127,21 @@ public final class ExtractImagesFromPDF {
 		}
 	}
 
-	public void markComplete() {
+	public void markComplete(boolean isInterupted) {
 		imageCounter = 0;
 		imageTracker.clear();
-		FileOutputStream out;
 
-		try {
-			out = new FileOutputStream(pdfFileHash);
-			out.flush();
-			out.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (!isInterupted) {
+			FileOutputStream out;
+
+			try {
+				out = new FileOutputStream(pdfFileHash);
+				out.flush();
+				out.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(finalTempDir)));
@@ -429,7 +436,7 @@ public final class ExtractImagesFromPDF {
 		try {
 			fileCheck = new File(filename);
 			if (fileCheck.exists()) {
-				System.out.println("*** Found Duplicate file [" + filename + "]");
+				//System.out.println("*** Found Duplicate file [" + filename + "]");
 				filename += md5Key.toString() + "." + fileSuffix;
 				return;
 			}

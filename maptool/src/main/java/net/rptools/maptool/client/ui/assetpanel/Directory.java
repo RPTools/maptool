@@ -24,8 +24,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.io.filefilter.MagicNumberFileFilter;
+
 public class Directory {
 	private static final FileFilter DIRECTORY_FILTER = new DirectoryFileFilter();
+	private static final MagicNumberFileFilter pdfFileFilter = new MagicNumberFileFilter("%PDF");
+
 	private final List<PropertyChangeListener> listenerList = new CopyOnWriteArrayList<PropertyChangeListener>();
 	private final File directory;
 
@@ -42,8 +46,9 @@ public class Directory {
 		if (!directory.exists()) {
 			throw new IllegalArgumentException(directory + " does not exist");
 		}
-		if (!directory.isDirectory()) {
-			throw new IllegalArgumentException(directory + " is not a directory");
+		if (!directory.isDirectory() && !pdfFileFilter.accept(directory)) {
+			throw new IllegalArgumentException(
+					directory + " is not a directory or pdf file");
 		}
 		this.directory = directory;
 		this.fileFilter = fileFilter;
@@ -90,6 +95,10 @@ public class Directory {
 		return parent;
 	}
 
+	public boolean isPDF() {
+		return pdfFileFilter.accept(directory);
+	}
+
 	private void load() throws FileNotFoundException {
 		if (files == null && subdirs == null) {
 			if (!directory.exists() || !directory.isDirectory()) {
@@ -121,7 +130,7 @@ public class Directory {
 
 	private static class DirectoryFileFilter implements FileFilter {
 		public boolean accept(File pathname) {
-			return pathname.isDirectory();
+			return pathname.isDirectory() || pdfFileFilter.accept(pathname);
 		}
 	}
 

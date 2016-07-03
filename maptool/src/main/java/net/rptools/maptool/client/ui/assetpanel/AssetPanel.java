@@ -29,6 +29,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
@@ -61,6 +62,7 @@ public class AssetPanel extends JComponent {
 	private JSlider thumbnailPreviewSlider;
 	private final AssetPanelModel assetPanelModel;
 	private Timer updateFilterTimer;
+	private JProgressBar imagePanelProgressBar;
 
 	public AssetPanel(String controlName) {
 		this(controlName, new AssetPanelModel());
@@ -136,13 +138,31 @@ public class AssetPanel extends JComponent {
 		imagePanel.setGridSize(size);
 	}
 
+	public void setImagePanelProgress(int progress) {
+		imagePanelProgressBar.setValue(progress);
+	}
+
+	public void setImagePanelProgressMax(int max) {
+		imagePanelProgressBar.setMaximum(max);
+	}
+
+	public void showImagePanelProgress(boolean isVisble) {
+		imagePanelProgressBar.setVisible(isVisble);
+	}
+
 	private JPanel createSouthPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
+		imagePanelProgressBar = new JProgressBar(0, 100);
+		imagePanelProgressBar.setValue(0);
+		imagePanelProgressBar.setStringPainted(true);
+		imagePanelProgressBar.setIndeterminate(false);
+		imagePanelProgressBar.setVisible(false);
 
 		panel.add(BorderLayout.NORTH, createFilterPanel());
 		panel.add(BorderLayout.NORTH, createFilterPanel());
 		panel.add(BorderLayout.WEST, getThumbnailPreviewSlider());
 		panel.add(BorderLayout.CENTER, new JScrollPane(imagePanel));
+		panel.add(BorderLayout.SOUTH, imagePanelProgressBar);
 
 		return panel;
 	}
