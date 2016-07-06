@@ -1308,23 +1308,77 @@ public class Zone extends BaseModel {
 		return Collections.unmodifiableList(copy);
 	}
 
+	public List<Token> removeTokens(List<Token> tokensToKeep, List<Token> tokensToRemove) {
+		ArrayList<Token> originalList = new ArrayList<Token>(tokensToKeep);
+		originalList.removeAll(tokensToRemove);
+
+		return Collections.unmodifiableList(originalList);
+	}
+
 	/**
 	 * This is the list of non-stamp tokens, both pc and npc
+	 * 
 	 */
 	public List<Token> getTokens() {
+		return getTokens(true);
+	}
+
+	public List<Token> getTokens(boolean getAlwaysVisible) {
 		return getTokensFiltered(new Filter() {
 			@Override
 			public boolean matchToken(Token t) {
-				return !t.isStamp();
+				if (getAlwaysVisible)
+					return !t.isStamp();
+				else
+					return !t.isStamp() && !t.isAlwaysVisible();
+			}
+		});
+	}
+
+	public List<Token> getGMStamps() {
+		return getGMStamps(true);
+	}
+
+	public List<Token> getGMStamps(boolean getAlwaysVisible) {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				if (getAlwaysVisible)
+					return t.isGMStamp();
+				else
+					return t.isGMStamp() && !t.isAlwaysVisible();
 			}
 		});
 	}
 
 	public List<Token> getStampTokens() {
+		return getStampTokens(true);
+	}
+
+	public List<Token> getStampTokens(boolean getAlwaysVisible) {
 		return getTokensFiltered(new Filter() {
 			@Override
 			public boolean matchToken(Token t) {
-				return t.isObjectStamp();
+				if (getAlwaysVisible)
+					return t.isObjectStamp();
+				else
+					return t.isObjectStamp() && !t.isAlwaysVisible();
+			}
+		});
+	}
+
+	public List<Token> getBackgroundStamps() {
+		return getBackgroundStamps(true);
+	}
+
+	public List<Token> getBackgroundStamps(boolean getAlwaysVisible) {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				if (getAlwaysVisible)
+					return t.isBackgroundStamp();
+				else
+					return t.isBackgroundStamp() && !t.isAlwaysVisible();
 			}
 		});
 	}
@@ -1439,24 +1493,6 @@ public class Zone extends BaseModel {
 			@Override
 			public boolean matchToken(Token t) {
 				return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
-			}
-		});
-	}
-
-	public List<Token> getBackgroundStamps() {
-		return getTokensFiltered(new Filter() {
-			@Override
-			public boolean matchToken(Token t) {
-				return t.isBackgroundStamp();
-			}
-		});
-	}
-
-	public List<Token> getGMStamps() {
-		return getTokensFiltered(new Filter() {
-			@Override
-			public boolean matchToken(Token t) {
-				return t.isGMStamp();
 			}
 		});
 	}
