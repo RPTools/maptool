@@ -18,6 +18,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -290,14 +291,37 @@ public abstract class Grid implements Cloneable {
 	 * @param range As specified in the vision or light definition
 	 * @param arcAngle Only used by cone
 	 * @param offsetAngle Arc distance from facing, only used by cone
+	 * @param scaleWithToken used to increase the area based on token footprint
 	 * @return Area
 	 */
-	public Area getShapedArea(ShapeType shape, Token token, double range, double arcAngle, int offsetAngle) {
+	public Area getShapedArea(ShapeType shape, Token token, double range, double arcAngle, int offsetAngle, boolean scaleWithToken) {
 		if (shape == null) {
 			shape = ShapeType.CIRCLE;
 		}
 		int visionDistance = zone.getTokenVisionInPixels();
 		double visionRange = (range == 0) ? visionDistance : range * getSize() / zone.getUnitsPerCell();
+
+		//System.out.println("1 visionRange " + visionRange);
+		if (scaleWithToken) {
+			double footprintWidth = token.getFootprint(this).getBounds(this).getWidth() / 2;
+
+			// Test for gridless maps
+			if (cellShape == null) {
+				double tokenBoundsWidth = token.getBounds(getZone()).getWidth() / 2;
+				visionRange += (footprintWidth > tokenBoundsWidth) ? tokenBoundsWidth : tokenBoundsWidth;
+			} else {
+				// For grids, this will be the same, but for Hex's we'll use the smaller side depending on which Hex type you choose
+				double footprintHeight = token.getFootprint(this).getBounds(this).getHeight() / 2;
+				visionRange += (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
+			}
+			//System.out.println(token.getName() + " footprint.getWidth() " + footprint.getWidth());
+			//System.out.println(token.getName() + " footprint.getHeight() " + footprint.getHeight());
+			//System.out.println("grid getSize() " + getSize());
+		}
+		//		System.out.println("this.cellShape " + this.cellShape);
+		//		System.out.println("token.getWidth() " + token.getWidth());
+		//		System.out.println("token.getBounds(getZone()) " + token.getBounds(getZone()));
+
 		Area visibleArea = new Area();
 		switch (shape) {
 		case CIRCLE:
@@ -323,11 +347,43 @@ public abstract class Grid implements Cloneable {
 			visibleArea.add(new Area(footprint));
 			visibleArea.add(tempvisibleArea);
 			break;
+		case HEX:
+			footprint = token.getFootprint(this).getBounds(this);
+			double x = footprint.getCenterX();
+			double y = footprint.getCenterY();
+			double rotation = Math.toRadians(30);
+
+			double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
+			double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
+			double adjustment = (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
+			x -= adjustment / 2;
+			y -= adjustment / 2;
+			System.out.println("adjustment " + adjustment);
+			visibleArea = createHex(x, y, visionRange, 0);
+			break;
 		default:
 			visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
 			break;
 		}
 		return visibleArea;
+	}
+
+	private Area createHex(double x, double y, double radius, double rotation) {
+		GeneralPath hexPath = new GeneralPath();
+
+		for (int i = 0; i < 6; i++) {
+			if (i == 0)
+				hexPath.moveTo(x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
+			else
+				hexPath.lineTo(x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
+		}
+
+		if (rotation != 0) {
+			AffineTransform atArea = AffineTransform.getRotateInstance(rotation);
+			return new Area(atArea.createTransformedShape(hexPath));
+		} else {
+			return new Area(hexPath);
+		}
 	}
 
 	private void fireGridChanged() {

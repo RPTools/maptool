@@ -21,6 +21,7 @@ public class SightType {
 	private int arc = 0;
 	private float distance = 0;
 	private int offset = 0;
+	private boolean scaleWithToken = false;
 
 	public int getOffset() {
 		return this.offset;
@@ -46,6 +47,14 @@ public class SightType {
 		this.shape = shape;
 	}
 
+	public void setScaleWithToken(boolean scaleWithToken) {
+		this.scaleWithToken = scaleWithToken;
+	}
+
+	public boolean isScaleWithToken() {
+		return scaleWithToken;
+	}
+
 	public SightType() {
 		// For serialization
 	}
@@ -61,12 +70,13 @@ public class SightType {
 		this.shape = shape;
 	}
 
-	public SightType(String name, double multiplier, LightSource personalLightSource, ShapeType shape, int arc) {
+	public SightType(String name, double multiplier, LightSource personalLightSource, ShapeType shape, int arc, boolean scaleWithToken) {
 		this.name = name;
 		this.multiplier = multiplier;
 		this.personalLightSource = personalLightSource;
 		this.shape = shape;
 		this.arc = arc;
+		this.scaleWithToken = scaleWithToken;
 	}
 
 	public String getName() {
@@ -106,6 +116,6 @@ public class SightType {
 	}
 
 	public Area getVisionShape(Token token, Zone zone) {
-		return zone.getGrid().getShapedArea(getShape(), token, getDistance(), getArc(), getOffset());
+		return zone.getGrid().getShapedArea(getShape(), token, getDistance(), getArc(), getOffset(), scaleWithToken);
 	}
 }

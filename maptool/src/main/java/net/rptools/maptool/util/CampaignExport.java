@@ -17,6 +17,7 @@ import net.rptools.lib.io.PackedFile;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.LightSource;
+import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
@@ -62,6 +63,8 @@ public class CampaignExport {
 			// Lumens, tokenSelection, & several Token class fields were introduced in 1.4.1.x
 			if (VERSION_RELEASE == 0) {
 				pakFile.getXStream().omitField(LightSource.class, "lumens");
+				pakFile.getXStream().omitField(LightSource.class, "scaleWithToken");
+				pakFile.getXStream().omitField(SightType.class, "scaleWithToken");
 				pakFile.getXStream().omitField(Zone.class, "tokenSelection");
 				pakFile.getXStream().omitField(Token.class, "vbl");
 				pakFile.getXStream().omitField(Token.class, "isoWidth");

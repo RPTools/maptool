@@ -236,6 +236,11 @@ public class CampaignPropertiesDialog extends JDialog {
 				if (sight.getDistance() != 0)
 					builder.append("distance=").append(StringUtil.formatDecimal(sight.getDistance())).append(' ');
 				break;
+			case HEX:
+				builder.append("hex ");
+				if (sight.getDistance() != 0)
+					builder.append("distance=").append(StringUtil.formatDecimal(sight.getDistance())).append(' ');
+				break;
 			case CONE:
 				builder.append("cone ");
 				if (sight.getArc() != 0)
@@ -247,6 +252,10 @@ public class CampaignPropertiesDialog extends JDialog {
 				break;
 			default:
 				throw new IllegalArgumentException("Invalid shape?!");
+			}
+			// Scale with Token
+			if (sight.isScaleWithToken()) {
+				builder.append("scale ");
 			}
 			// Multiplier
 			if (sight.getMultiplier() != 1 && sight.getMultiplier() != 0) {
@@ -276,6 +285,10 @@ public class CampaignPropertiesDialog extends JDialog {
 				if (lightSource.getType() != LightSource.Type.NORMAL) {
 					builder.append(' ').append(lightSource.getType().name().toLowerCase());
 				}
+				if (lightSource.isScaleWithToken()) {
+					builder.append(" scale");
+				}
+
 				String lastShape = ""; // this forces 'circle' to be printed
 				double lastArc = 90;
 				boolean lastGM = false;
@@ -312,6 +325,7 @@ public class CampaignPropertiesDialog extends JDialog {
 						if (!lastShape.equals(shape))
 							builder.append(' ').append(shape);
 						lastShape = shape;
+
 					}
 					builder.append(' ').append(StringUtil.formatDecimal(light.getRadius()));
 					if (light.getPaint() instanceof DrawableColorPaint) {
@@ -412,6 +426,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
 				String[] args = value.split("\\s+");
 				ShapeType shape = ShapeType.CIRCLE;
+				boolean scaleWithToken = false;
 				int arc = 90;
 				float range = 0;
 				int offset = 0;
@@ -424,6 +439,11 @@ public class CampaignPropertiesDialog extends JDialog {
 						continue;
 					} catch (IllegalArgumentException iae) {
 						// Expected when not defining a shape
+					}
+					// Scale with Token
+					if (arg.toUpperCase().equals("SCALE")) {
+						scaleWithToken = true;
+						continue;
 					}
 					try {
 						if (arg.startsWith("x")) {
@@ -459,8 +479,9 @@ public class CampaignPropertiesDialog extends JDialog {
 				if (pLightRange > 0) {
 					personalLight = new LightSource();
 					personalLight.add(new Light(shape, 0, pLightRange, arc, null));
+					personalLight.setScaleWithToken(scaleWithToken);
 				}
-				SightType sight = new SightType(label, magnifier, personalLight, shape, arc);
+				SightType sight = new SightType(label, magnifier, personalLight, shape, arc, scaleWithToken);
 				sight.setDistance(range);
 				sight.setOffset(offset);
 
@@ -566,6 +587,11 @@ public class CampaignPropertiesDialog extends JDialog {
 					if (arg.equalsIgnoreCase("OWNER")) {
 						gmOnly = false;
 						owner = true;
+						continue;
+					}
+					// Scale with token designation
+					if (arg.equalsIgnoreCase("SCALE")) {
+						lightSource.setScaleWithToken(true);
 						continue;
 					}
 					// Lumens designation

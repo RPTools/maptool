@@ -95,8 +95,8 @@ public class Light {
 		this.shape = shape;
 	}
 
-	public Area getArea(Token token, Zone zone) {
-		return zone.getGrid().getShapedArea(getShape(), token, getRadius(), getArcAngle(), (int) getFacingOffset());
+	public Area getArea(Token token, Zone zone, boolean scaleWithToken) {
+		return zone.getGrid().getShapedArea(getShape(), token, getRadius(), getArcAngle(), (int) getFacingOffset(), scaleWithToken);
 	}
 
 	public void setGM(boolean b) {

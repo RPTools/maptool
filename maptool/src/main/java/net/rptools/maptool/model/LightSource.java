@@ -34,7 +34,8 @@ public class LightSource implements Comparable<LightSource> {
 	private GUID id;
 	private Type type;
 	private ShapeType shapeType;
-	private int lumens = 1;
+	private int lumens = 0;
+	private boolean scaleWithToken = false;
 
 	public LightSource() {
 		// for serialization
@@ -121,16 +122,24 @@ public class LightSource implements Comparable<LightSource> {
 		return lumens;
 	}
 
+	public void setScaleWithToken(boolean scaleWithToken) {
+		this.scaleWithToken = scaleWithToken;
+	}
+
+	public boolean isScaleWithToken() {
+		return scaleWithToken;
+	}
+
 	/**
 	 * Area for a single light, subtracting any previous lights
 	 */
 	public Area getArea(Token token, Zone zone, Direction position, Light light) {
-		Area area = light.getArea(token, zone);
+		Area area = light.getArea(token, zone, scaleWithToken);
 		// TODO: This seems horribly inefficient
 		// Subtract out the lights that are previously defined
 		for (int i = getLightList().indexOf(light) - 1; i >= 0; i--) {
 			Light lessLight = getLightList().get(i);
-			area.subtract(getArea(token, zone, position, lessLight.getArea(token, zone)));
+			area.subtract(getArea(token, zone, position, lessLight.getArea(token, zone, scaleWithToken)));
 		}
 		return getArea(token, zone, position, area);
 	}
@@ -140,8 +149,9 @@ public class LightSource implements Comparable<LightSource> {
 	 */
 	public Area getArea(Token token, Zone zone, Direction position) {
 		Area area = new Area();
+
 		for (Light light : getLightList()) {
-			area.add(light.getArea(token, zone));
+			area.add(light.getArea(token, zone, isScaleWithToken()));
 		}
 		return getArea(token, zone, position, area);
 	}

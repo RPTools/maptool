@@ -263,12 +263,22 @@ public class IsometricGrid extends Grid {
 	}
 
 	@Override
-	public Area getShapedArea(ShapeType shape, Token token, double range, double arcAngle, int offsetAngle) {
+	public Area getShapedArea(ShapeType shape, Token token, double range, double arcAngle, int offsetAngle, boolean scaleWithToken) {
 		if (shape == null) {
 			shape = ShapeType.CIRCLE;
 		}
 		int visionDistance = getZone().getTokenVisionInPixels();
 		double visionRange = (range == 0) ? visionDistance : range * getSize() / getZone().getUnitsPerCell();
+
+		if (scaleWithToken) {
+			Rectangle footprint = token.getFootprint(this).getBounds(this);
+			visionRange += footprint.getHeight() / 2;
+			System.out.println(token.getName() + " footprint.getWidth() " + footprint.getWidth());
+			System.out.println(token.getName() + " footprint.getHeight() " + footprint.getHeight());
+		}
+		System.out.println("this.getDefaultFootprint() " + this.getDefaultFootprint());
+		System.out.println("token.getWidth() " + token.getWidth());
+
 		Area visibleArea = new Area();
 		switch (shape) {
 		case CIRCLE:

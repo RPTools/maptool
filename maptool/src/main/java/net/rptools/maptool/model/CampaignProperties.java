@@ -287,20 +287,20 @@ public class CampaignProperties {
 
 	// @formatter:off
 	private static final Object[][] starter = new Object[][] {
-			// Sight Type Name					Dist		Mult		Arc		LtSrc		Shape
-			{ "Normal",							0.0,		1.0,		0,		null,		null },
-			{ "Lowlight",						0.0,		2.0,		0,		null,		null },
-			{ "Square Vision",					0.0,		1.0,		0,		null,		ShapeType.SQUARE },
-			{ "Normal Vision - Short Range",	12.5,		1.0,		0,		null,		ShapeType.CIRCLE },
-			{ "Conic Vision",					0.0,		1.0,		120,	null,		ShapeType.CONE },
-			{ "Darkvision",						62.5,		1.0,		0,		null,		null },
+			// Sight Type Name					Dist		Mult		Arc		LtSrc		Shape				Scale
+			{ "Normal",							0.0,		1.0,		0,		null,		null,				true },
+			{ "Lowlight",						0.0,		2.0,		0,		null,		null,				true },
+			{ "Square Vision",					0.0,		1.0,		0,		null,		ShapeType.SQUARE,	true },
+			{ "Normal Vision - Short Range",	10.0,		1.0,		0,		null,		ShapeType.CIRCLE,	true },
+			{ "Conic Vision",					0.0,		1.0,		120,	null,		ShapeType.CONE,		true },
+			{ "Darkvision",						60.0,		1.0,		0,		null,		null,				true },
 	};
 	// @formatter:on
 
 	private void initSightTypeMap() {
 		sightTypeMap = new HashMap<String, SightType>();
 		for (Object[] row : starter) {
-			SightType st = new SightType((String) row[0], (Double) row[2], (LightSource) row[4], (ShapeType) row[5], (Integer) row[3]);
+			SightType st = new SightType((String) row[0], (Double) row[2], (LightSource) row[4], (ShapeType) row[5], (Integer) row[3], (boolean) row[6]);
 			st.setDistance(((Double) row[1]).floatValue());
 			sightTypeMap.put((String) row[0], st);
 		}
