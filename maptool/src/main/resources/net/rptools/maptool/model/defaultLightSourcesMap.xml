@@ -31,6 +31,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>Candle - 5</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCYyXCvh0BAAAAAKgCIQ==</baGUID>
         </id>
@@ -52,6 +53,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>Lamp - 15</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCY3PCvh0CAAAAAKgCYw==</baGUID>
         </id>
@@ -73,6 +75,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>Torch - 20</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCY3PCvh0DAAAAAKgCYw==</baGUID>
         </id>
@@ -94,6 +97,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>Everburning - 20</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCY3PCvh0EAAAAAKgCYw==</baGUID>
         </id>
@@ -115,6 +119,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>Lantern, Hooded - 30</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCY3PCvh0FAAAAAKgCYw==</baGUID>
         </id>
@@ -136,6 +141,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>Sunrod - 30</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCY3PCvh0GAAAAAKgCYw==</baGUID>
         </id>
@@ -154,6 +160,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>5</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCY4PCvh0HAAAAAKgCAw==</baGUID>
         </id>
@@ -167,6 +174,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>15</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCY4PCvh0IAAAAAKgCAw==</baGUID>
         </id>
@@ -180,6 +188,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>20</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCY4PCvh0JAAAAAKgCAw==</baGUID>
         </id>
@@ -193,6 +202,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>30</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCY4PCvh0KAAAAAKgCAw==</baGUID>
         </id>
@@ -206,6 +216,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>40</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCY4PCvh0LAAAAAKgCAw==</baGUID>
         </id>
@@ -219,6 +230,7 @@
           </net.rptools.maptool.model.Light>
         </lightList>
         <name>60</name>
+        <lumens>0</lumens>
         <id>
           <baGUID>wKgCY4PCvh0MAAAAAKgCAw==</baGUID>
         </id>
