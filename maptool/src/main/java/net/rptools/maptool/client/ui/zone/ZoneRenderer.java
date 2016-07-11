@@ -1094,7 +1094,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				renderDrawableOverlay(g2d, backgroundDrawableRenderer, view, drawables);
 				timer.stop("drawableBackground");
 			}
-			List<Token> background = zone.getBackgroundStamps();
+			List<Token> background = zone.getBackgroundStamps(false);
 			if (!background.isEmpty()) {
 				timer.start("tokensBackground");
 				renderTokens(g2d, background, view);
@@ -1116,7 +1116,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 
 		if (Zone.Layer.OBJECT.isEnabled()) {
 			// ... Images on the object layer are always ABOVE the grid.
-			List<Token> stamps = zone.getStampTokens();
+			List<Token> stamps = zone.getStampTokens(false);
 			if (!stamps.isEmpty()) {
 				timer.start("tokensStamp");
 				renderTokens(g2d, stamps, view);
@@ -1170,7 +1170,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
 						timer.stop("drawableGM");
 					}
-					List<Token> stamps = zone.getGMStamps();
+					List<Token> stamps = zone.getGMStamps(false);
 					if (!stamps.isEmpty()) {
 						timer.start("tokensGM");
 						renderTokens(g2d, stamps, view);
@@ -1178,7 +1178,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					}
 				}
 			}
-			List<Token> tokens = zone.getTokens();
+			List<Token> tokens = zone.getTokens(false);
 			if (!tokens.isEmpty()) {
 				timer.start("tokens");
 				renderTokens(g2d, tokens, view);
@@ -2735,6 +2735,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					}
 				}
 			} else if (!isGMView && zoneView.isUsingVision() && token.isAlwaysVisible()) {
+				// Lets skip tokens on the Hidden layer
+				if (token.isGMStamp())
+					continue;
 				// Jamz: Always Visible tokens will get rendered again here to place on top of FoW
 				Area cb = zone.getGrid().getTokenCellArea(tokenBounds);
 				if (GraphicsUtil.intersects(visibleScreenArea, cb)) {

@@ -34,7 +34,7 @@ public class LightSource implements Comparable<LightSource> {
 	private GUID id;
 	private Type type;
 	private ShapeType shapeType;
-	private int lumens = 1;
+	private int lumens = 0;
 
 	public LightSource() {
 		// for serialization
