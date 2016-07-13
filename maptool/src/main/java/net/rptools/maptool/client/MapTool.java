@@ -87,11 +87,6 @@ public class MapTool {
 	private static final Logger log = Logger.getLogger(MapTool.class);
 
 	/**
-	 * The splash image that comes up during application initialization.
-	 */
-	private static final String SPLASH_IMAGE = "net/rptools/maptool/client/image/maptool_splash.png";
-
-	/**
 	 * Contains just the version number of MapTool, such as <code>1.3.b49</code>
 	 * .
 	 */
@@ -1381,8 +1376,7 @@ public class MapTool {
 		System.setProperty("swing.aatext", "true");
 		// System.setProperty("sun.java2d.opengl", "true");
 
-		final SplashScreen splash = new SplashScreen(SPLASH_IMAGE, getVersion());
-		splash.showSplashScreen();
+		final SplashScreen splash = new SplashScreen(getVersion());
 
 		// Protocol handlers
 		// cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)

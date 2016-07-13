@@ -37,14 +37,14 @@ import javafx.scene.effect.Glow;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import net.rptools.maptool.client.swing.SplashScreen;
 
 public class CreateVersionedInstallSplash extends Application {
-	private static String resourceImage = "net/rptools/maptool/client/image/maptool_splash_template.png";
-	private static String imageOutputFilename = "../build-resources/jWrapper/maptool_installing.png";
+	private static String resourceImage = "net/rptools/maptool/client/image/maptool_splash_template_nerps.png";
+	private static String imageOutputFilename = "../build-resources/jWrapper/maptool_installing_splash.png";
 	private static String versionText = "Dev-Build";
 	private static final String FONT_RESOURCE = "/net/rptools/maptool/client/fonts/Horta.ttf";
 	private static Font versionFont;
@@ -55,6 +55,7 @@ public class CreateVersionedInstallSplash extends Application {
 		cmdOptions.addOption("o", "output", true, "Output /path/image to write to.");
 		cmdOptions.addOption("v", "version", true, "Version text to add to image.");
 
+		// Parameters that can be overridden via command line options...
 		resourceImage = getCommandLineOption(cmdOptions, "source", resourceImage, args);
 		imageOutputFilename = getCommandLineOption(cmdOptions, "output", imageOutputFilename, args);
 		versionText = getCommandLineOption(cmdOptions, "version", versionText, args);
@@ -64,17 +65,32 @@ public class CreateVersionedInstallSplash extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		final ImageIcon splashIcon = new ImageIcon(CreateVersionedInstallSplash.class.getClassLoader().getResource(resourceImage));
 		final File splashFile = new File(imageOutputFilename);
+		BufferedImage buffImage = createLaunchSplash("Installing... v" + versionText);
+
+		try {
+			System.out.println("Version: " + versionText);
+			System.out.println("Source: " + resourceImage);
+			System.out.println("Output: " + splashFile.getCanonicalPath());
+
+			ImageIO.write(buffImage, "png", splashFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		System.exit(0);
+	}
+
+	public static BufferedImage createLaunchSplash(String versionText) {
+		final ImageIcon splashIcon = new ImageIcon(SplashScreen.class.getClassLoader().getResource(resourceImage));
 		final Color versionColor = Color.rgb(3, 78, 149, 1); // Color.rgb(27, 85, 139, 1)
 
 		final int imgWidth = 490;
 		final int imgHeight = 290;
-		final int versionTextX = 48; // 190
-		final int versionTextY = 37; // 37
+		final int versionTextX = 48;
+		final int versionTextY = 37;
 
-		versionText = "Installing... v" + versionText;
-		InputStream is = CreateVersionedInstallSplash.class.getResourceAsStream(FONT_RESOURCE);
+		InputStream is = SplashScreen.class.getResourceAsStream(FONT_RESOURCE);
 		versionFont = Font.loadFont(is, 28);
 
 		BufferedImage buffImage = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_INT_ARGB);
@@ -91,20 +107,10 @@ public class CreateVersionedInstallSplash extends Application {
 		g2d.drawImage(textToImage(versionText, versionColor, 28, false), versionTextX, versionTextY, null);
 		g2d.dispose();
 
-		try {
-			System.out.println("Version: " + versionText);
-			System.out.println("Source: " + resourceImage);
-			System.out.println("Output: " + splashFile.getCanonicalPath());
-
-			ImageIO.write(buffImage, "png", splashFile);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		System.exit(0);
+		return buffImage;
 	}
 
-	private BufferedImage textToImage(String text, Color fontColor, int fontSize, boolean addGlow) {
+	private static BufferedImage textToImage(String text, Color fontColor, int fontSize, boolean addGlow) {
 		Text versionText = new Text(0, 0, text);
 		versionText.setFill(fontColor);
 		versionText.setFont(versionFont);
