@@ -14,18 +14,23 @@ package net.rptools.maptool.client.swing;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Toolkit;
-
+import java.io.IOException;
+import java.io.InputStream;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import net.rptools.maptool.util.CreateVersionedInstallSplash;
+
 public class SplashScreen extends JFrame {
 	private Image splashImage;
-
 	private int imgWidth, imgHeight;
+	private static final String FONT_RESOURCE = "/net/rptools/maptool/client/fonts/Horta.ttf";
+	private static Font versionFont;
 
 	public SplashScreen(String imgName, final String versionText) {
 		this(imgName, versionText, 195, 60, new Color(27, 85, 139));
@@ -38,13 +43,26 @@ public class SplashScreen extends JFrame {
 	public SplashScreen(String imgName, final String versionText, final int versionTextX, final int versionTextY, final Color versionColor) {
 		setUndecorated(true);
 		loadSplashImage(imgName);
+		InputStream is = CreateVersionedInstallSplash.class.getResourceAsStream(FONT_RESOURCE);
+
+		try {
+			versionFont = Font.createFont(Font.TRUETYPE_FONT, is);
+			versionFont = versionFont.deriveFont(28F);
+		} catch (FontFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		setContentPane(new JPanel() {
 			@Override
 			public void paintComponent(Graphics g) {
 				g.drawImage(splashImage, 0, 0, this);
 				g.setColor(versionColor);
-				g.setFont(new Font("SansSerif", Font.BOLD, 18));
+				//g.setFont(new Font("SansSerif", Font.BOLD, 18));
+				g.setFont(versionFont);
 				g.drawString("v" + versionText, versionTextX, versionTextY);
 			}
 		});
@@ -82,6 +100,14 @@ public class SplashScreen extends JFrame {
 		}
 
 		setVisible(true);
+
+		try {
+			Thread.sleep(10000);
+			System.exit(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void hideSplashScreen() {
