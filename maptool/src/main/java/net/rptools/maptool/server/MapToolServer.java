@@ -18,17 +18,23 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import javax.swing.SwingUtilities;
+
+import org.apache.log4j.Logger;
+
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
+import net.rptools.maptool.client.ui.ConnectionInfoDialog;
 import net.rptools.maptool.common.MapToolConstants;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
+import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetProducer;
 import net.rptools.maptool.transfer.AssetTransferManager;
-
-import org.apache.log4j.Logger;
 
 /**
  * @author drice
@@ -85,7 +91,7 @@ public class MapToolServer {
 
 	/**
 	 * Forceably disconnects a client and cleans up references to it
-	 * 
+	 *
 	 * @param id
 	 *            the connection ID
 	 */
@@ -168,7 +174,7 @@ public class MapToolServer {
 			}
 		} catch (IOException e) {
 			// Not too concerned about this
-			e.printStackTrace();
+			log.info("Couldn't close connection", e);
 		}
 	}
 
@@ -179,17 +185,71 @@ public class MapToolServer {
 		private static final int HEARTBEAT_DELAY = 7 * 60 * 1000; // 7 minutes
 		private static final int HEARTBEAT_FLUX = 20 * 1000; // 20 seconds
 
+		private boolean ever_had_an_error = false;
+
 		@Override
 		public void run() {
+			int WARNING_TIME = 2; // number of heartbeats before popup warning
+			int errors = 0;
+			String IP_addr = ConnectionInfoDialog.getExternalAddress();
+			int port = getConfig().getPort();
+
 			while (!stop) {
 				try {
 					Thread.sleep(HEARTBEAT_DELAY + (int) (HEARTBEAT_FLUX * random.nextFloat()));
+					// Pulse
+					MapToolRegistry.heartBeat(config.getPort());
+					// If the heartbeat worked, reset the counter if the last one failed
+					if (errors != 0) {
+						String msg = I18N.getText("msg.info.heartbeat.registrySuccess", errors);
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								// Write to the GM's console.  (Code taken from client.functions.ChatFunction)
+								MapTool.serverCommand().message(TextMessage.gm(null, msg));
+								// Write to our console.  (Code taken from client.functions.ChatFunction)
+								MapTool.addServerMessage(TextMessage.me(null, msg));
+							}
+						});
+						errors = 0;
+						WARNING_TIME = 2;
+					}
 				} catch (InterruptedException ie) {
-					// This means stop
+					// This means we are being stopped from the outside, between heartbeats
 					break;
+				} catch (Exception e) {
+					// Any other exception is a problem with the Hessian protocol and/or a network issue
+					// Regardless, we will count the number of consecutive errors and display a dialog
+					// at appropriate times, but otherwise ignore it.  The purpose of the heartbeat is
+					// to let the website registry know this server is still running so that clients can
+					// easily connect.  If it breaks in the middle of a game, the clients are already connected
+					// so it's not *that* terrible.  However, our dialog to the user should tell them where
+					// the connection info can be found so they can give it to a client, if needed.
+					errors++;
+					if ((errors % WARNING_TIME) == 0) {
+						WARNING_TIME = Math.min(WARNING_TIME * 3, 10);
+						// It's been X heartbeats since we last talked to the registry successfully.  Let
+						// the user know we'll keep trying, but there may be an unrecoverable problem.
+						// We use a linear backoff so we don't inundate the user with popups!
+
+						String msg = I18N.getText("msg.info.heartbeat.registryFailure", IP_addr, port, errors);
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								// Write to the GM's console.  (Code taken from client.functions.ChatFunction)
+								MapTool.serverCommand().message(TextMessage.gm(null, msg));
+								// Write to our console.  (Code taken from client.functions.ChatFunction)
+								MapTool.addServerMessage(TextMessage.me(null, msg));
+
+								// This is the first time the heartbeat has failed in this stretch of time.
+								// Only writes to the log on the first error.  Should it always add an entry?
+								if (!ever_had_an_error) {
+									ever_had_an_error = true;
+									// Uses a popup to tell the user what's going on.  Includes a 'Logger.warn()' message.
+									MapTool.showWarning(msg, e);
+								}
+							}
+						});
+					}
 				}
-				// Pulse
-				MapToolRegistry.heartBeat(config.getPort());
 			}
 		}
 
@@ -207,9 +267,11 @@ public class MapToolServer {
 		@Override
 		public void run() {
 			while (!stop) {
+				Entry<String, AssetTransferManager> entryForException = null;
 				try {
 					boolean lookForMore = false;
 					for (Entry<String, AssetTransferManager> entry : assetManagerMap.entrySet()) {
+						entryForException = entry;
 						AssetChunk chunk = entry.getValue().nextChunk(ASSET_CHUNK_SIZE);
 						if (chunk != null) {
 							lookForMore = true;
@@ -224,7 +286,7 @@ public class MapToolServer {
 						Thread.sleep(500);
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					log.info("Couldn't retrieve AssetChunk for " + entryForException.getKey(), e);
 					// keep on going
 				}
 			}
