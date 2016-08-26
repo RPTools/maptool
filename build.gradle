@@ -1,3 +1,4 @@
+// vi:set ts=4:
 import org.apache.tools.ant.filters.ReplaceTokens
 import java.text.SimpleDateFormat
 import org.ajoberstar.grgit.*
@@ -8,7 +9,7 @@ buildscript {
 		mavenCentral()
 		jcenter()
 		maven {
-			url "https://plugins.gradle.org/m2/" 
+			url "https://plugins.gradle.org/m2/"
 		}
 	}
 	dependencies {
@@ -32,10 +33,11 @@ configurations.all {
 
 dependencies {
 	osxTools 'com.oracle.appbundler:AppBundlerTask:1.0'
-	
-	ftpAntTask("org.apache.ant:ant-commons-net:1.9.4")
-	{
-		module("commons-net:commons-net:1.4.1") { dependencies "oro:oro:2.0.8:jar" }
+
+	ftpAntTask("org.apache.ant:ant-commons-net:1.9.4") {
+		module("commons-net:commons-net:1.4.1") {
+			dependencies "oro:oro:2.0.8:jar"
+		}
 	}
 }
 
@@ -54,8 +56,9 @@ def getVersionName() {
 	}
 }
 
-// Look for various properties and return defaults if not defined.
-// (You should define the various local directories in your gradle.properties)
+// Look for various properties and return defaults if not defined.  (You
+// should define the various local directories in your
+// gradle.properties)
 def getLocalProperty(property) {
 	def result
 	switch (property) {
@@ -105,7 +108,7 @@ def getLocalProperty(property) {
 			result = ''
 			break
 	}
-	
+
 	return result
 }
 
@@ -133,7 +136,7 @@ subprojects {
 	sourceCompatibility = 1.8
 	targetCompatibility = 1.8
 
-	// Dont fail build if tests fail until tests are cleaned up
+	// Don't fail build if tests fail until tests are cleaned up
 	test.ignoreFailures = true
 
 	findbugs {
@@ -145,24 +148,24 @@ subprojects {
 
 	pmd {
 		ignoreFailures = true
-		sourceSets = []  // Empty source set so it wont run during tebuild/check
+		sourceSets = []  // Empty source set so it wont run during build/check
 	}
 
 	spotless {
-		java { 
+		java {
 			//licenseHeaderFile	'../spotless.license.java'
-			eclipseFormatFile	'../build-resources/eclipse.prefs.formatter.xml' 
+			eclipseFormatFile	'../build-resources/eclipse.prefs.formatter.xml'
 		}
-		
+
 		format 'misc', {
 			target '**/*.gradle', '**/*.md', '**/.gitignore'
-	
-			// spotless has built-in rules for the most basic formatting tasks
+
+			// spotless has built-in rules for most basic formatting tasks
 			trimTrailingWhitespace()
-			indentWithTabs() // or spaces. Takes an integer argument if you don't like 4
+			// or spaces. Takes an integer argument if you don't like 4
+			indentWithTabs()
 		}
 	}
-
 }
 
 
@@ -180,15 +183,17 @@ project(':launcher') {
 
 	jar {
 		manifest.attributes(
-				'Main-Class': mainClassName,
-				)
+			'Main-Class': mainClassName,
+		)
 	}
 
 	processResources {
 		from(sourceSets.main.resources.srcDirs) {
 			include '**/*.properties'
 			filter(ReplaceTokens, tokens: [
-				'buildDate': rootProject.ext.yyyymmdd,  'buildNumber': getVersionName()])
+				'buildDate': rootProject.ext.yyyymmdd,
+				'buildNumber': getVersionName()
+			])
 		}
 		from(sourceSets.main.resources.srcDirs) {
 			exclude '**/*.properties'
@@ -211,9 +216,12 @@ project(':launcher') {
 			'Target-Compatibility': project.targetCompatibility,
 			'Main-Class': project.mainClassName
 		}
-
 		baseName = 'MapTool-Launcher'
-		from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+		from {
+			configurations.compile.collect {
+				it.isDirectory() ? it : zipTree(it)
+			}
+		}
 		with jar
 	}
 
@@ -276,7 +284,6 @@ project(':maptool') {
 		compile 'org.eclipse.jetty.websocket:websocket-api:9.3.0.M1'
 		compile 'org.reflections:reflections:0.9.10'
 
-
 		testCompile group: 'junit', name: 'junit', version: '4.11'
 	}
 
@@ -284,13 +291,14 @@ project(':maptool') {
 		from(sourceSets.main.resources.srcDirs) {
 			include '**/*.txt'
 			filter(ReplaceTokens, tokens: [
-				'buildDate': rootProject.ext.yyyymmdd,  'buildNumber': getVersionName()])
+				'buildDate': rootProject.ext.yyyymmdd,
+				'buildNumber': getVersionName()
+			])
 		}
 		from(sourceSets.main.resources.srcDirs) {
 			exclude '**/*.txt'
 		}
 	}
-
 
 	task copyLibs(type: Sync) {
 		description = "Copy the library files over to /lib"
@@ -303,7 +311,9 @@ project(':maptool') {
 	jar {
 		manifest.attributes(
 			'Main-Class': mainClassName,
-			'Class-Path': configurations.runtime.files.collect { "lib/" + it.name }.join(' ')
+			'Class-Path': configurations.runtime.files.collect {
+				"lib/" + it.name
+			}.join(' ')
 		)
 	}
 	assemble.dependsOn += copyLibs;
@@ -343,30 +353,44 @@ project(':maptool') {
 			'Main-Class': project.mainClassName
 		}
 		baseName = 'MapTool'
-		from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+		from {
+			configurations.compile.collect {
+				it.isDirectory() ? it : zipTree(it)
+			}
+		}
 		with jar
 	}
-	
+
 	task deleteBuild(type: Delete) { delete 'build/' }
-	
+
 	// Add access rule to classpath for nashorn api
 	// Note: This appends the following node to the JRE container classpathentry but only for Java 1.8 in case you are testing some other Java version
-	// <accessrules><accessrule kind="accessible" pattern="jdk/nashorn/api/**"/></accessrules>
+	// <accessrules>
+	//   <accessrule kind="accessible" pattern="jdk/nashorn/api/**"/>
+	// </accessrules>
 	eclipse.classpath.file {
 		whenMerged {
 			withXml { classpathXml ->
 				def classpathXmlNode = classpathXml.asNode()
-				Node classpathJreNode = node.find {it.@kind == 'con' && it.@path.contains('JRE_CONTAINER') && it.@path.contains('JavaSE-1.8')}
-				// Only append if node is not null, eg it found the proper node entry.
-				if(classpathJreNode) {
-					classpathJreNode.appendNode('accessrules').appendNode('accessrule', [kind: 'accessible', pattern: 'jdk/nashorn/api/**'])
+				Node classpathJreNode = node.find {
+					t.@kind == 'con' &&
+					it.@path.contains('JRE_CONTAINER') &&
+					it.@path.contains('JavaSE-1.8')
+				}
+				// Only append if node is not null, eg
+				// if it found the proper node entry.
+				if (classpathJreNode) {
+					classpathJreNode
+						.appendNode('accessrules')
+						.appendNode('accessrule', [
+							kind: 'accessible',
+							pattern: 'jdk/nashorn/api/**'
+						])
 				}
 			}
 		}
 	}
 }
-
-
 
 /*
  * Global Gradle Tasks
@@ -402,16 +426,16 @@ copySubProjectFiles.mustRunAfter(':maptool:release', ':launcher:release')
 
 /**
  * The following tasks are used to create the Fat Jar distribution as well as
- * creating the jWrapper XML & mt.cfg from templates.
- * 
+ * creating the jWrapper XML &amp; launch.properties from templates.
+ *
  * Task: publishRelease will create fresh jars and jWrapper build, then FTP
- * to server (currently for nerps.net.
+ * to server (currently for nerps.net).
  */
 task createFatJars(dependsOn: ['maptool:deleteBuild', 'launcher:deleteBuild', 'launcher:fatJar', 'maptool:fatJar']) {
-	description = "Generates a MapTool Fat Jars for distribution."
+	description = "Generates MapTool and Launcher Fat Jars for distribution."
 	group = "Distribution"
 	doLast {
-		println 'Creating MapTool Fat Jars...'
+		println 'Creating MapTool and Launcher Fat Jars...'
 	}
 }
 
@@ -424,22 +448,24 @@ task deleteJwrapperConfig(type: Delete) {
 	}
 }
 
-task deleteMtConfig(type: Delete) {
-	description = "Delete the generated mt.cfg file"
-	delete "${rootDir}/launcher/src/main/resources/net/rptools/maptool/launcher/config/mt.cfg"
-	
+task deleteLaunchProperties(type: Delete) {
+	description = "Delete the generated launch.properties file"
+	delete "${rootDir}/launcher/src/main/resources/net/rptools/maptool/launcher/config/launch.properties"
+
 	doLast {
-		println "Deleting ${rootDir}/launcher/src/main/resources/net/rptools/maptool/launcher/config/mt.cfg"
+		println "Deleting ${rootDir}/launcher/src/main/resources/net/rptools/maptool/launcher/config/launch.properties"
 	}
 }
 
 task createJwrapperConfig(type: Copy) {
 	description = "Generates jWrapper XML config from template"
 	group = "Distribution"
-	
+	def mainClassName = 'net.rptools.maptool.launcher.MapToolLauncher'
+
 	from ('build-resources/jWrapper') {
 		include 'jwrapper-template.xml'
 		filter(ReplaceTokens, tokens: [
+			'mainClass': mainClassName,
 			'buildDate': rootProject.ext.yyyymmdd,
 			'buildVersion': getVersionName(),
 			'jWrapperDir': getLocalProperty('jWrapperDir'),
@@ -457,7 +483,7 @@ task createJwrapperConfig(type: Copy) {
     outputs.upToDateWhen {
 		false
 	}
-	
+
 	doLast {
 		println 'Setting jWrapper directory to: ' + "${rootDir}/build-resources/jWrapper"
 	}
@@ -466,11 +492,13 @@ task createJwrapperConfig(type: Copy) {
 task createLaunchPropertiesFile(type: Copy) {
 	description = "Generates a MapTool default mt.cfg for package release using jWrapper"
 	group = "Distribution"
-	
+
 	from ('build-resources/jWrapper') {
 		include 'launch-template.properties'
 		filter(ReplaceTokens, tokens: [
-			'buildDate': rootProject.ext.yyyymmdd,  'buildVersion': getVersionName()])
+			'buildDate': rootProject.ext.yyyymmdd,
+			'buildVersion': getVersionName()]
+		)
 	}
 	into 'launcher/src/main/resources/net/rptools/maptool/launcher/config'
 	rename { String fileName ->
@@ -485,11 +513,11 @@ task createJwrapperRelease(dependsOn: ['createLaunchPropertiesFile', 'createFatJ
 	description = "Generates a MapTool release using jWrapper"
 	group = "Distribution"
 	workingDir = 'build-resources/jWrapper'
-	
+
 	main  = 'jwrapper.launch.JWCompiler'
 	classpath = files("build-resources/jWrapper/jwrapper-00041197800.jar")
 	args('jwrapper.xml')
-	
+
 	doLast {
 		println 'Creating MapTool jWrapper Release in: ' + workingDir
 	}
@@ -503,13 +531,20 @@ task ftpUpdateRelease {
 		println "Uploading via FTP..."
 		println "To remote server: " + ftpServer
 		println "Remote directory: " + ftpRemoteDir
-	
+
 		ant {
 			taskdef(name: 'ftp',
-			classname: 'org.apache.tools.ant.taskdefs.optional.net.FTP',
-			classpath: configurations.ftpAntTask.asPath)
-			ftp(server: ftpServer, port: ftpPort, userid: ftpUserID, password: ftpPassword, remoteDir: ftpRemoteDir, passive: 'yes', verbose: true)
-			{ fileset(file: "build-resources/jWrapper/JWrapperBuild/MapTool-*") }
+				classname: 'org.apache.tools.ant.taskdefs.optional.net.FTP',
+				classpath: configurations.ftpAntTask.asPath)
+			ftp(server: ftpServer,
+				port: ftpPort,
+				userid: ftpUserID,
+				password: ftpPassword,
+				remoteDir: ftpRemoteDir,
+				passive: 'yes',
+				verbose: true) {
+					fileset(file: "build-resources/jWrapper/JWrapperBuild/MapTool-*")
+				}
 		}
 	}
 }
@@ -559,7 +594,7 @@ task osxApp() << {
 				include(name: '*.jar')
 				include(name: '**/*.jar')
 			}
-			option(value: '-Dapple.laf-useScreenMenuBar=true')
+			option(value: '-Dapple.laf.useScreenMenuBar=true')
 			option(value: '-Dfile.encoding=UTF-8')
 			option(value: '-Xmx768m')
 			option(value: '-Xss4m')
