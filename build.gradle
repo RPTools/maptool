@@ -198,6 +198,23 @@ project(':launcher') {
 		from(sourceSets.main.resources.srcDirs) {
 			exclude '**/*.properties'
 		}
+		from ('build-resources/jWrapper') {
+			include 'launch-template.properties'
+			filter(ReplaceTokens, tokens: [
+				'buildDate': rootProject.ext.yyyymmdd,
+				'buildVersion': getVersionName()]
+			)
+		}
+		into 'launcher/src/main/resources/net/rptools/maptool/launcher/config'
+		rename { String fileName ->
+			fileName.replace('-template', '')
+		}
+		outputs.upToDateWhen {
+			false
+		}
+		doLast {
+			println 'Put new "launch.properties" into source tree...'
+		}
 	}
 
 	task release(dependsOn: assemble) << {
@@ -210,7 +227,7 @@ project(':launcher') {
 		// to learn how to do that.  I know it's a Good Thing tho,
 		// since the output from gradle tells me that it notices the
 		// change to the file and reruns that other task again.
-		dependsOn ':createLaunchPropertiesFile'
+		//dependsOn ':createLaunchPropertiesFile'
 		classifier 'fat'
 		manifest {
 			attributes 'Implementation-Title': 'MapTool-Launcher',
