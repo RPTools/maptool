@@ -1,6 +1,0 @@
-<!-- DESC: General debugging -->
-<!-- TTIP: Code that implements logging but isn't covered by other options. -->
-<logger name="net.rptools.maptool.client.AppState">
-    <level value="DEBUG" />
-    <appender-ref ref="console"/>
-</logger>
