@@ -43,7 +43,7 @@ dependencies {
 
 //Functions & Variables
 ext.compileDate = new Date();
-ext.yyyymmdd = (new SimpleDateFormat('yyyyMMDD')).format(ext.compileDate);
+ext.yyyymmdd = (new SimpleDateFormat('yyyyMMdd')).format(ext.compileDate);
 ext.repo = Grgit.open(project.file('.'))
 
 //Gets the version name from the build file or gradle properties
@@ -170,7 +170,7 @@ subprojects {
 
 
 project(':launcher') {
-	mainClassName='net.rptools.maptool.launcher.MapToolLauncher'
+	mainClassName = 'net.rptools.maptool.launcher.MapToolLauncher'
 	ext.distSource = projectDir.getPath() + '/src/dist/'
 
 	dependencies {
@@ -205,6 +205,12 @@ project(':launcher') {
 
 	// create a single Jar with all dependencies
 	task fatJar(type: Jar) {
+		// This is wrong.  Calling this task should be done in the
+		// 'processResources' task of this project, but I still need
+		// to learn how to do that.  I know it's a Good Thing tho,
+		// since the output from gradle tells me that it notices the
+		// change to the file and reruns that other task again.
+		dependsOn ':createLaunchPropertiesFile'
 		classifier 'fat'
 		manifest {
 			attributes 'Implementation-Title': 'MapTool-Launcher',
@@ -226,6 +232,26 @@ project(':launcher') {
 	}
 
 	task deleteBuild(type: Delete) { delete 'build/' }
+}
+
+task createLaunchPropertiesFile(type: Copy) {
+	description = "Generates a default launch.properties for package release using jWrapper"
+	group = "Distribution"
+
+	from ('build-resources/jWrapper') {
+		include 'launch-template.properties'
+		filter(ReplaceTokens, tokens: [
+			'buildDate': rootProject.ext.yyyymmdd,
+			'buildVersion': getVersionName()]
+		)
+	}
+	into 'launcher/src/main/resources/net/rptools/maptool/launcher/config'
+	rename { String fileName ->
+		fileName.replace('-template', '')
+	}
+	outputs.upToDateWhen {
+		false
+	}
 }
 
 project(':maptool') {
@@ -489,26 +515,6 @@ task createJwrapperConfig(type: Copy) {
 	}
 }
 
-task createLaunchPropertiesFile(type: Copy) {
-	description = "Generates a MapTool default mt.cfg for package release using jWrapper"
-	group = "Distribution"
-
-	from ('build-resources/jWrapper') {
-		include 'launch-template.properties'
-		filter(ReplaceTokens, tokens: [
-			'buildDate': rootProject.ext.yyyymmdd,
-			'buildVersion': getVersionName()]
-		)
-	}
-	into 'launcher/src/main/resources/net/rptools/maptool/launcher/config'
-	rename { String fileName ->
-		fileName.replace('-template', '')
-	}
-	outputs.upToDateWhen {
-		false
-	}
-}
-
 task createJwrapperRelease(dependsOn: ['createLaunchPropertiesFile', 'createFatJars', 'createJwrapperConfig'], type:JavaExec) {
 	description = "Generates a MapTool release using jWrapper"
 	group = "Distribution"
@@ -564,7 +570,7 @@ task zipRelease(dependsOn: copySubProjectFiles, type: Zip) {
 	from 'build/tmp/dist/'
 	into  ''
 	baseName = 'maptool-' + getVersionName()
-	destinationDir new File(projectDir, 'build')
+	destinationDir = new File(projectDir, 'build')
 	outputs.upToDateWhen {
 		false
 	}
@@ -607,9 +613,10 @@ task osxApp() << {
 osxApp.mustRunAfter(copySubProjectFiles)
 
 task zipOSXApp(dependsOn: osxApp, type: Zip) {
-	from 'build/tmp/MapTool-' + getVersionName() + '.app'
-	into  'MapTool-' + getVersionName() + '.app'
-	baseName = 'maptool-' + getVersionName() + '-osx'
+	def buildVersion = rootProject.getVersionName()
+	from 'build/tmp/MapTool-' + buildVersion + '.app'
+	into  'MapTool-' + buildVersion + '.app'
+	baseName = 'maptool-' + buildVersion + '-osx'
 	destinationDir new File(projectDir, 'build')
 	outputs.upToDateWhen {
 		false
