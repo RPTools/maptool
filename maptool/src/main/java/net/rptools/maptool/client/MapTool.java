@@ -2,14 +2,70 @@
  * This software copyright by various authors including the RPTools.net
  * development team, and licensed under the LGPL Version 3 or, at your option,
  * any later version.
- * 
+ *
  * Portions of this software were originally covered under the Apache Software
  * License, Version 1.1 or Version 2.0.
- * 
+ *
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client;
+
+import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.Transparency;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
+import javax.swing.plaf.FontUIResource;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
 
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
@@ -40,7 +96,15 @@ import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool.model.Campaign;
+import net.rptools.maptool.model.CampaignFactory;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.ObservableList;
+import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
@@ -49,37 +113,6 @@ import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.webapi.MTWebAppServer;
 import net.tsc.servicediscovery.ServiceAnnouncer;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.plaf.FontUIResource;
-
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.List;
 
 /**
  */
@@ -115,8 +148,8 @@ public class MapTool {
 	public static boolean WINDOWS = (System.getProperty("os.name").toLowerCase().startsWith("windows"));
 
 	/**
-	 * Version of Java being used. Note that this is the
-	 * "specification version", so expect numbers like 1.4, 1.5, and 1.6.
+	 * Version of Java being used. Note that this is the "specification version"
+	 * , so expect numbers like 1.4, 1.5, and 1.6.
 	 */
 	public static Double JAVA_VERSION;
 
@@ -181,7 +214,7 @@ public class MapTool {
 	 * This method looks up the message key in the properties file and returns
 	 * the resultant text with the detail message from the
 	 * <code>Throwable</code> appended to the end.
-	 * 
+	 *
 	 * @param msgKey
 	 *            the string to use when calling {@link I18N#getText(String)}
 	 * @param t
@@ -205,7 +238,7 @@ public class MapTool {
 	 * that might be an error, a warning, or just an information message. Do not
 	 * use this method if the desired result is a simple confirmation box (use
 	 * {@link #confirm(String, Object...)} instead).
-	 * 
+	 *
 	 * @param message
 	 *            the key in the properties file to put in the body of the
 	 *            dialog (formatted using <code>params</code>)
@@ -228,7 +261,7 @@ public class MapTool {
 	 * <code>messages</code> is stored into a JList and that component is then
 	 * used as the content of the dialog box. This allows multiple strings to be
 	 * displayed in a manner consistent with other message dialogs.
-	 * 
+	 *
 	 * @param messages
 	 *            the Objects (normally strings) to put in the body of the
 	 *            dialog; no properties file lookup is performed!
@@ -254,7 +287,7 @@ public class MapTool {
 	 * {@link #showMessage(Object[], String, int, Object...)} and passing
 	 * <code>"msg.title.messageDialogFeedback"</code> and
 	 * <code>JOptionPane.ERROR_MESSAGE</code> as parameters.
-	 * 
+	 *
 	 * @param messages
 	 *            the Objects (normally strings) to put in the body of the
 	 *            dialog; no properties file lookup is performed!
@@ -266,7 +299,7 @@ public class MapTool {
 	/**
 	 * Displays a dialog box by calling {@link #showError(String, Throwable)}
 	 * and passing <code>null</code> for the second parameter.
-	 * 
+	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
 	 */
@@ -282,7 +315,7 @@ public class MapTool {
 	 * <p>
 	 * The title is the property key <code>"msg.title.messageDialogError"</code>
 	 * , and the dialog type is <code>JOptionPane.ERROR_MESSAGE</code>.
-	 * 
+	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
 	 * @param t
@@ -297,7 +330,7 @@ public class MapTool {
 	/**
 	 * Displays a dialog box by calling {@link #showWarning(String, Throwable)}
 	 * and passing <code>null</code> for the second parameter.
-	 * 
+	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
 	 */
@@ -314,7 +347,7 @@ public class MapTool {
 	 * The title is the property key
 	 * <code>"msg.title.messageDialogWarning"</code>, and the dialog type is
 	 * <code>JOptionPane.WARNING_MESSAGE</code>.
-	 * 
+	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
 	 * @param t
@@ -330,7 +363,7 @@ public class MapTool {
 	 * Displays a dialog box by calling
 	 * {@link #showInformation(String, Throwable)} and passing <code>null</code>
 	 * for the second parameter.
-	 * 
+	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
 	 */
@@ -346,7 +379,7 @@ public class MapTool {
 	 * <p>
 	 * The title is the property key <code>"msg.title.messageDialogInfo"</code>,
 	 * and the dialog type is <code>JOptionPane.INFORMATION_MESSAGE</code>.
-	 * 
+	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
 	 * @param t
@@ -362,7 +395,7 @@ public class MapTool {
 	 * Displays a confirmation dialog that uses the message as a key to the
 	 * properties file, and the additional values as parameters to the
 	 * formatting of the key lookup.
-	 * 
+	 *
 	 * @param message
 	 *            key from the properties file (preferred) or hard-coded string
 	 *            to display
@@ -383,7 +416,7 @@ public class MapTool {
 	 * Displays a confirmation dialog that uses the message as a key to the
 	 * properties file, and the additional values as parameters to the
 	 * formatting of the key lookup.
-	 * 
+	 *
 	 * @param title
 	 * @param buttons
 	 * @param message
@@ -403,7 +436,7 @@ public class MapTool {
 	/**
 	 * This method is specific to deleting a token, but it can be used as a
 	 * basis for any other method which wants to be turned off via a property.
-	 * 
+	 *
 	 * @return true if the token should be deleted.
 	 */
 	public static boolean confirmTokenDelete() {
@@ -474,7 +507,7 @@ public class MapTool {
 	 * Launch the platform's web browser and ask it to open the given URL. Note
 	 * that this should not be called from any uncontrolled macros as there are
 	 * both security and denial-of-service attacks possible.
-	 * 
+	 *
 	 * @param url
 	 */
 	public static void showDocument(String url) {
@@ -600,7 +633,7 @@ public class MapTool {
 	/**
 	 * This was added to make it easier to set a breakpoint and locate when the
 	 * frame was initialized.
-	 * 
+	 *
 	 * @param frame
 	 */
 	private static void setClientFrame(MapToolFrame frame) {
@@ -615,10 +648,10 @@ public class MapTool {
 	 * For Multi-monitor support, allows you to move the frame to a specific
 	 * monitor. It will also set the height, width and x, y position of the
 	 * frame.
-	 * 
+	 *
 	 * @author Jamz
 	 * @since 1.4.1.0
-	 * 
+	 *
 	 * @param frame
 	 *            The JFrame to move
 	 * @param monitor
@@ -637,8 +670,7 @@ public class MapTool {
 			}
 
 			if (windowX > -1 && windowY > -1) {
-				frame.setLocation(windowX + gd[monitor].getDefaultConfiguration().getBounds().x,
-						windowY + gd[monitor].getDefaultConfiguration().getBounds().y);
+				frame.setLocation(windowX + gd[monitor].getDefaultConfiguration().getBounds().x, windowY + gd[monitor].getDefaultConfiguration().getBounds().y);
 
 			} else {
 				frame.setLocation(gd[monitor].getDefaultConfiguration().getBounds().x, frame.getY());
@@ -743,7 +775,7 @@ public class MapTool {
 	}
 
 	public static boolean isDevelopment() {
-		return "DEVELOPMENT".equals(version);
+		return "DEVELOPMENT".equals(version) || "@buildNumber@".equals(version);
 	}
 
 	public static ServerPolicy getServerPolicy() {
@@ -840,7 +872,7 @@ public class MapTool {
 	/**
 	 * Add a message only this client can see. This is a shortcut for
 	 * addMessage(ME, ...)
-	 * 
+	 *
 	 * @param message
 	 */
 	public static void addLocalMessage(String message) {
@@ -850,7 +882,7 @@ public class MapTool {
 	/**
 	 * Add a message all clients can see. This is a shortcut for addMessage(SAY,
 	 * ...)
-	 * 
+	 *
 	 * @param message
 	 */
 	public static void addGlobalMessage(String message) {
@@ -862,7 +894,7 @@ public class MapTool {
 	 * addMessage(WHISPER, ...) and addMessage(GM, ...). The
 	 * <code>targets</code> is expected do be in a string list built with
 	 * <code>separator</code>.
-	 * 
+	 *
 	 * @param message
 	 *            message to be sent
 	 * @param targets
@@ -881,7 +913,7 @@ public class MapTool {
 	/**
 	 * Add a message all specified clients will see. This is a shortcut for
 	 * addMessage(WHISPER, ...) and addMessage(GM, ...).
-	 * 
+	 *
 	 * @param message
 	 *            message to be sent
 	 * @param targets
@@ -1223,12 +1255,12 @@ public class MapTool {
 	/**
 	 * Search for command line arguments for options. Expecting arguments
 	 * specified as -parameter=value pair and returns a string.
-	 * 
+	 *
 	 * Examples: -version=1.4.0.1 -user=Jamz
-	 * 
+	 *
 	 * @author Jamz
 	 * @since 1.4.0.1
-	 * 
+	 *
 	 * @param options
 	 *            {@link org.apache.commons.cli.Options}
 	 * @param searchValue
@@ -1258,12 +1290,12 @@ public class MapTool {
 	/**
 	 * Search for command line arguments for options. Expecting arguments
 	 * formatted as a switch
-	 * 
+	 *
 	 * Examples: -x or -fullscreen
-	 * 
+	 *
 	 * @author Jamz
 	 * @since 1.4.0.1
-	 * 
+	 *
 	 * @param options
 	 *            {@link org.apache.commons.cli.Options}
 	 * @param searchValue
@@ -1290,12 +1322,12 @@ public class MapTool {
 	/**
 	 * Search for command line arguments for options. Expecting arguments
 	 * specified as -parameter=value pair and returns a string.
-	 * 
+	 *
 	 * Examples: -monitor=1 -x=0 -y=0 -w=1200 -h=960
-	 * 
+	 *
 	 * @author Jamz
 	 * @since 1.4.0.1
-	 * 
+	 *
 	 * @param options
 	 *            {@link org.apache.commons.cli.Options}
 	 * @param searchValue
@@ -1468,11 +1500,11 @@ public class MapTool {
 		/**
 		 * This is a tweak that makes the Chinese version work better.
 		 * <p>
-		 * Consider reviewing <a
-		 * href="http://en.wikipedia.org/wiki/CJK_characters"
-		 * >http://en.wikipedia.org/wiki/CJK_characters</a> before making
-		 * changes. And http://www.scarfboy.com/coding/unicode-tool is also a
-		 * really cool site.
+		 * Consider reviewing
+		 * <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en.
+		 * wikipedia.org/wiki/CJK_characters</a> before making changes. And
+		 * http://www.scarfboy.com/coding/unicode-tool is also a really cool
+		 * site.
 		 */
 		if (Locale.CHINA.equals(Locale.getDefault())) {
 			// The following font name appears to be "Sim Sun".  It can be downloaded
@@ -1577,7 +1609,7 @@ public class MapTool {
 		 * on anything but a Mac. Too bad because there's no problem at runtime
 		 * since this code wouldn't be executed an any machine *except* a Mac.
 		 * Sigh.
-		 * 
+		 *
 		 * com.apple.eawt.Application appl =
 		 * com.apple.eawt.Application.getApplication();
 		 */

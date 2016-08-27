@@ -1,6 +1,0 @@
-<!-- DESC: Packed File IO -->
-<!-- TTIP: Compressed ZIP files such as campaigns and tokens; not images -->
-<logger name="net.rptools.lib.io.PackedFile">
-    <level value="DEBUG" />
-    <appender-ref ref="console"/>
-</logger>

@@ -2,40 +2,46 @@
  * This software copyright by various authors including the RPTools.net
  * development team, and licensed under the LGPL Version 3 or, at your option,
  * any later version.
- * 
+ *
  * Portions of this software were originally covered under the Apache Software
  * License, Version 1.1 or Version 2.0.
- * 
+ *
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.client.ui;
 
-import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
+import org.apache.log4j.Logger;
+
+import com.jeta.forms.components.panel.FormPanel;
 
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.server.MapToolServer;
 
-import org.apache.log4j.Logger;
-
-import com.jeta.forms.components.panel.FormPanel;
-
 public class ConnectionInfoDialog extends JDialog {
+	private static String externalAddress = "Unknown"; // Used to be "Discovering ..." -- note that this is a UX change
+	private static JTextField externalAddressLabel;
+
 	private static final Logger log = Logger.getLogger(ConnectionInfoDialog.class);
-	private final JTextField externalAddressLabel;
 
 	/**
 	 * This is the default constructor
@@ -68,12 +74,11 @@ public class ConnectionInfoDialog extends JDialog {
 		} catch (UnknownHostException e) {
 			log.warn("Can't resolve 'www.rptools.net' or our own IP address!?", e);
 		}
-		String externalAddress = "Discovering ...";
 		String port = MapTool.isPersonalServer() ? "---" : Integer.toString(server.getConfig().getPort());
 
 		nameLabel.setText(name);
 		localAddressLabel.setText(localAddress);
-		externalAddressLabel.setText(externalAddress);
+		externalAddressLabel.setText("Discovering...");
 		portLabel.setText(port);
 
 		JButton okButton = (JButton) panel.getButton("okButton");
@@ -83,7 +88,7 @@ public class ConnectionInfoDialog extends JDialog {
 		((JComponent) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		add(panel);
 
-		new Thread(new ExternalAddressFinder()).start();
+		(new Thread(new ExternalAddressFinder(externalAddressLabel))).start();
 	}
 
 	@Override
@@ -94,9 +99,29 @@ public class ConnectionInfoDialog extends JDialog {
 		super.setVisible(b);
 	}
 
+	private static FutureTask<String> getExternalAddressFinderResult() {
+		ExternalAddressFinder finder = new ExternalAddressFinder(externalAddressLabel);
+		FutureTask<String> future = new FutureTask<>(finder);
+		Executor executor = Executors.newSingleThreadExecutor();
+		executor.execute(future);
+		return future;
+	}
+
+	public static String getExternalAddress() {
+		if (externalAddress.equals("Unknown")) {
+			FutureTask<String> future = getExternalAddressFinderResult();
+			try {
+				externalAddress = future.get();
+			} catch (Exception e) {
+				// if there's an exception, we just keep the string 'Unknown'
+			}
+		}
+		return externalAddress;
+	}
+
 	/**
 	 * This method initializes okButton
-	 * 
+	 *
 	 * @return javax.swing.JButton
 	 */
 	private void bindOKButtonActions(JButton okButton) {
@@ -107,18 +132,30 @@ public class ConnectionInfoDialog extends JDialog {
 		});
 	}
 
-	private class ExternalAddressFinder implements Runnable {
-		public void run() {
+	private static class ExternalAddressFinder implements Callable<String>, Runnable {
+		private final JTextField myLabel;
+
+		public ExternalAddressFinder(JTextField label) {
+			myLabel = label;
+		}
+
+		@Override
+		public String call() {
 			String address = "Unknown";
 			try {
 				address = MapToolRegistry.getAddress();
 			} catch (Exception e) {
 				// Oh well, might not be connected
 			}
-			final String addy = address;
-			EventQueue.invokeLater(new Runnable() {
+			return address;
+		}
+
+		@Override
+		public void run() {
+			String result = call();
+			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
-					externalAddressLabel.setText(addy);
+					myLabel.setText(result);
 				}
 			});
 		}
