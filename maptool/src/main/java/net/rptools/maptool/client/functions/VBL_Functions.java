@@ -12,6 +12,7 @@
 package net.rptools.maptool.client.functions;
 
 import java.awt.BasicStroke;
+import java.awt.Dimension;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -23,11 +24,13 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.IsometricGrid;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
@@ -291,13 +294,71 @@ public class VBL_Functions extends AbstractFunction {
 			} else {
 				Rectangle footprintBounds = token.getBounds(renderer.getZone());
 				Area newTokenVBL = new Area(footprintBounds);
+				Dimension imgSize = new Dimension(token.getWidth(), token.getHeight());
+				SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
+				AffineTransform atArea = new AffineTransform();
 
-				newTokenVBL.intersect(renderer.getZone().getTopology());
-				double adjustX = newTokenVBL.getBounds().getX() - ((footprintBounds.getWidth() - newTokenVBL.getBounds().getWidth()) / 2) - 1;
-				double adjustY = newTokenVBL.getBounds().getY() - ((footprintBounds.getHeight() - newTokenVBL.getBounds().getHeight()) / 2) - 1;
-				AffineTransform at = AffineTransform.getTranslateInstance(-adjustX, -adjustY);
+				double tx, ty, sx, sy;
 
-				token.setVBL(new Area(at.createTransformedShape(newTokenVBL)));
+				// Prepare to reverse all the current token transformations so we can store a
+				// raw untransformed version on the Token
+				if (token.isSnapToScale()) {
+					tx = -newTokenVBL.getBounds().getX() - (int) ((footprintBounds.getWidth() - imgSize.getWidth()) / 2);
+					ty = -newTokenVBL.getBounds().getY() - (int) ((footprintBounds.getHeight() - imgSize.getHeight()) / 2);
+					sx = 1 / (imgSize.getWidth() / token.getWidth());
+					sy = 1 / (imgSize.getHeight() / token.getHeight());
+
+					atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
+				} else {
+					tx = -newTokenVBL.getBounds().getX();
+					ty = -newTokenVBL.getBounds().getY();
+					sx = 1 / token.getScaleX();
+					sy = 1 / token.getScaleY();
+
+					atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
+				}
+
+				if (token.getShape() == Token.TokenShape.TOP_DOWN && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
+					// Get the center of the token bounds
+					double rx = newTokenVBL.getBounds2D().getCenterX();
+					double ry = newTokenVBL.getBounds2D().getCenterY();
+
+					// Rotate the area to match the token facing
+					AffineTransform captureArea = AffineTransform.getRotateInstance(Math.toRadians(token.getFacingInDegrees()), rx, ry);
+					newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
+
+					// Capture the VBL via intersection
+					newTokenVBL.intersect(renderer.getZone().getTopology());
+
+					// Rotate the area back to prep to store on Token
+					captureArea = AffineTransform.getRotateInstance(-Math.toRadians(token.getFacingInDegrees()), rx, ry);
+					newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
+				} else {
+					// Token will not be rotated so lets just capture the VBL
+					newTokenVBL.intersect(renderer.getZone().getTopology());
+				}
+
+				// Translate the capture to zero out the x,y to store on the Token
+				atArea.concatenate(AffineTransform.getTranslateInstance(tx, ty));
+				newTokenVBL = new Area(atArea.createTransformedShape(newTokenVBL));
+
+				// Lets account for flipped images...
+				atArea = new AffineTransform();
+				if (token.isFlippedX()) {
+					atArea.concatenate(AffineTransform.getScaleInstance(-1.0, 1.0));
+					atArea.concatenate(AffineTransform.getTranslateInstance(-token.getWidth(), 0));
+				}
+
+				if (token.isFlippedY()) {
+					atArea.concatenate(AffineTransform.getScaleInstance(1.0, -1.0));
+					atArea.concatenate(AffineTransform.getTranslateInstance(0, -token.getHeight()));
+				}
+
+				// Do any final transformations for flipped images
+				newTokenVBL = new Area(atArea.createTransformedShape(newTokenVBL));
+
+				// Transform the VBL capture and store on the Token
+				token.setVBL(newTokenVBL);
 			}
 		}
 

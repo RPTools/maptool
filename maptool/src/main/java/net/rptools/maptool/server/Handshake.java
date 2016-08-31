@@ -14,12 +14,12 @@ package net.rptools.maptool.server;
 import java.io.IOException;
 import java.net.Socket;
 
+import com.caucho.hessian.io.HessianInput;
+import com.caucho.hessian.io.HessianOutput;
+
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
-
-import com.caucho.hessian.io.HessianInput;
-import com.caucho.hessian.io.HessianOutput;
 
 /**
  * @author trevor
@@ -59,7 +59,7 @@ public class Handshake {
 			// UNIQUE NAME
 			response.code = Code.ERROR;
 			response.message = I18N.getString("Handshake.msg.duplicateName");
-		} else if (!MapTool.isDevelopment() && !MapTool.getVersion().equals(request.version) && !"DEVELOPMENT".equals(request.version)) {
+		} else if (!MapTool.isDevelopment() && !MapTool.getVersion().equals(request.version) && !"DEVELOPMENT".equals(request.version) && !"@buildNumber@".equals(request.version)) {
 			// Allows a version running without a 'version.txt' to act as client or server to any other version
 
 			// CORRECT VERSION

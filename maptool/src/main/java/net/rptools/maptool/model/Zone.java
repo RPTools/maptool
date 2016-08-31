@@ -827,7 +827,7 @@ public class Zone extends BaseModel {
 		if (getVisionType() == VisionType.OFF) {
 			exposedArea.subtract(area);
 		}
-		if (selectedToks != null && !selectedToks.isEmpty() && MapTool.getServerPolicy().isUseIndividualFOW()) {
+		if (selectedToks != null && !selectedToks.isEmpty() && (MapTool.getServerPolicy().isUseIndividualFOW() || MapTool.isPersonalServer())) {
 			List<Token> allToks = new ArrayList<Token>();
 
 			for (GUID guid : selectedToks) {
@@ -1308,23 +1308,77 @@ public class Zone extends BaseModel {
 		return Collections.unmodifiableList(copy);
 	}
 
+	public List<Token> removeTokens(List<Token> tokensToKeep, List<Token> tokensToRemove) {
+		ArrayList<Token> originalList = new ArrayList<Token>(tokensToKeep);
+		originalList.removeAll(tokensToRemove);
+
+		return Collections.unmodifiableList(originalList);
+	}
+
 	/**
 	 * This is the list of non-stamp tokens, both pc and npc
+	 * 
 	 */
 	public List<Token> getTokens() {
+		return getTokens(true);
+	}
+
+	public List<Token> getTokens(boolean getAlwaysVisible) {
 		return getTokensFiltered(new Filter() {
 			@Override
 			public boolean matchToken(Token t) {
-				return !t.isStamp();
+				if (getAlwaysVisible)
+					return !t.isStamp();
+				else
+					return !t.isStamp() && !t.isAlwaysVisible();
+			}
+		});
+	}
+
+	public List<Token> getGMStamps() {
+		return getGMStamps(true);
+	}
+
+	public List<Token> getGMStamps(boolean getAlwaysVisible) {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				if (getAlwaysVisible)
+					return t.isGMStamp();
+				else
+					return t.isGMStamp() && !t.isAlwaysVisible();
 			}
 		});
 	}
 
 	public List<Token> getStampTokens() {
+		return getStampTokens(true);
+	}
+
+	public List<Token> getStampTokens(boolean getAlwaysVisible) {
 		return getTokensFiltered(new Filter() {
 			@Override
 			public boolean matchToken(Token t) {
-				return t.isObjectStamp();
+				if (getAlwaysVisible)
+					return t.isObjectStamp();
+				else
+					return t.isObjectStamp() && !t.isAlwaysVisible();
+			}
+		});
+	}
+
+	public List<Token> getBackgroundStamps() {
+		return getBackgroundStamps(true);
+	}
+
+	public List<Token> getBackgroundStamps(boolean getAlwaysVisible) {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				if (getAlwaysVisible)
+					return t.isBackgroundStamp();
+				else
+					return t.isBackgroundStamp() && !t.isAlwaysVisible();
 			}
 		});
 	}
@@ -1443,24 +1497,6 @@ public class Zone extends BaseModel {
 		});
 	}
 
-	public List<Token> getBackgroundStamps() {
-		return getTokensFiltered(new Filter() {
-			@Override
-			public boolean matchToken(Token t) {
-				return t.isBackgroundStamp();
-			}
-		});
-	}
-
-	public List<Token> getGMStamps() {
-		return getTokensFiltered(new Filter() {
-			@Override
-			public boolean matchToken(Token t) {
-				return t.isGMStamp();
-			}
-		});
-	}
-
 	public int findFreeNumber(String tokenBaseName, boolean checkDm) {
 		if (tokenNumberCache == null) {
 			tokenNumberCache = new HashMap<String, Integer>();
@@ -1525,22 +1561,20 @@ public class Zone extends BaseModel {
 		return new Comparator<Token>() {
 			@Override
 			public int compare(Token o1, Token o2) {
+				/**
+				 * If either token is a figure, get the footprint and find the lowest point but if the same, 
+				 * return the smallest, else use normal z order
+				 */
 				if (o1.getShape() == Token.TokenShape.FIGURE || o2.getShape() == Token.TokenShape.FIGURE) {
-					/**
-					 * if either token is a figure, get the footprint and find the lowest point but if the same, 
-					 * return the smallest, else use normal z order
-					 */
-					Rectangle b1 = o1.getFootprint(getGrid()).getBounds(getGrid());
-					Rectangle b2 = o2.getFootprint(getGrid()).getBounds(getGrid());
-					int v1 = o1.getY() + b1.y + b1.height;
-					int v2 = o2.getY() + b2.y + b2.height;
+					int v1 = getFigureZOrder(o1);
+					int v2 = getFigureZOrder(o2);
 					if ((v1 - v2) != 0)
 						return v1 - v2;
 					if (o1.isStamp() && o2.isToken())
 						return -1;
 					if (o2.isStamp() && o1.isToken())
 						return +1;
-					if (b1.getHeight() != b2.getHeight()) {
+					if (o1.getHeight() != o2.getHeight()) {
 						// Larger tokens at the same position, go behind
 						return o2.getHeight() - o1.getHeight();
 					}
@@ -1555,6 +1589,27 @@ public class Zone extends BaseModel {
 				}
 			}
 		};
+	}
+
+	private int getFigureZOrder(Token t) {
+		/**
+		 * If set size return the footprint, otherwise return bounding box.
+		 * Figure tokens are designed for set sizes so we need to approximate free size tokens 
+		 */
+		Rectangle b1 = t.isSnapToScale() ? t.getFootprint(getGrid()).getBounds(getGrid()) : t.getBounds(getZone());
+		/**
+		 * This is an awful approximation of centre of token footprint.
+		 * The bounding box (b1 & b2) are usually centred on token x & y
+		 * So token y + bounding y give you the bottom of the box
+		 * Then subtract portion of height to get the centre point of the base.
+		 */
+		int bottom = (t.isSnapToScale() ? t.getY() + b1.y : b1.y) + b1.height;
+		int centre = t.isSnapToScale() ? b1.height / 2 : b1.width / 4;
+		return bottom - centre;
+	}
+
+	private Zone getZone() {
+		return this;
 	}
 
 	/** @return Getter for initiativeList */
