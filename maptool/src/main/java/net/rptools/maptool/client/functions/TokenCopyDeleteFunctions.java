@@ -55,7 +55,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 
 		MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
 		if (functionName.equals(COPY_FUNC)) {
-			return copyTokens(res, parameters);
+			return copyTokens(res, parameters, false);
 		}
 
 		if (functionName.equals(REMOVE_FUNC)) {
@@ -65,7 +65,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 		throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
 	}
 
-	private String deleteToken(MapToolVariableResolver res, List<Object> parameters) throws ParserException {
+	private static String deleteToken(MapToolVariableResolver res, List<Object> parameters) throws ParserException {
 		Token token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
 
 		if (token == null) {
@@ -82,7 +82,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 	 * tokenId, Number numCopies, String fromMap: (""|currentMap()), JSONObject
 	 * updates: null)
 	 */
-	private Object copyTokens(MapToolVariableResolver res, List<Object> param) throws ParserException {
+	public static Object copyTokens(MapToolVariableResolver res, List<Object> param, boolean returnObjects) throws ParserException {
 		Token token = null;
 		int numberCopies = 1;
 		String zoneName = null;
@@ -112,6 +112,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 			}
 			Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 			List<String> newTokens = new ArrayList<String>(numberCopies);
+			List<Token> resultTokens = new ArrayList<Token>(numberCopies);
 			List<Token> allTokens = zone.getTokens();
 			for (int i = 0; i < numberCopies; i++) {
 				Token t = new Token(token);
@@ -129,8 +130,12 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 
 				MapTool.serverCommand().putToken(zone.getId(), t);
 				newTokens.add(t.getId().toString());
+				resultTokens.add(t);
 			}
 			MapTool.getFrame().getCurrentZoneRenderer().flushLight();
+			if (returnObjects) {
+				return resultTokens;
+			}
 			if (numberCopies == 1) {
 				return newTokens.get(0);
 			} else {
@@ -141,7 +146,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 		}
 	}
 
-	private void setTokenValues(Token token, JSONObject vals, Zone zone, MapToolVariableResolver res) throws ParserException {
+	private static void setTokenValues(Token token, JSONObject vals, Zone zone, MapToolVariableResolver res) throws ParserException {
 		JSONObject newVals = JSONObject.fromObject(vals);
 		newVals = (JSONObject) JSONMacroFunctions.getInstance().JSONEvaluate(res, newVals);
 

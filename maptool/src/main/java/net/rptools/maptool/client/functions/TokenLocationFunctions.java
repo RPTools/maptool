@@ -502,7 +502,7 @@ public class TokenLocationFunctions extends AbstractFunction {
 	 * @param units
 	 *            whether the (x,y) coordinate is a <code>ZonePoint</code> (true) or <code>CellPoint</code> (false)
 	 */
-	public void moveToken(Token token, int x, int y, boolean units) {
+	public static void moveToken(Token token, int x, int y, boolean units) {
 		Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
 
 		if (units) {

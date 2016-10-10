@@ -1097,7 +1097,7 @@ public class Token extends BaseModel {
 		return getPropertyMap().keySetRaw();
 	}
 
-	private CaseInsensitiveHashMap<Object> getPropertyMap() {
+	public CaseInsensitiveHashMap<Object> getPropertyMap() {
 		if (propertyMapCI == null) {
 			propertyMapCI = new CaseInsensitiveHashMap<Object>();
 		}

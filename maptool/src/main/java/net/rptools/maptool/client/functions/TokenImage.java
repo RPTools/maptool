@@ -35,7 +35,7 @@ public class TokenImage extends AbstractFunction {
 
 	private final static Pattern assetRE = Pattern.compile("asset://([^-]+)");
 
-	enum imageType {
+	public enum imageType {
 		TOKEN_IMAGE(0), TOKEN_PORTRAIT(1), TOKEN_HANDOUT(2);
 
 		int value;
@@ -186,7 +186,7 @@ public class TokenImage extends AbstractFunction {
 		return assetId.toString();
 	}
 
-	private static void assignImage(Token token, String assetName, imageType type, String func) throws ParserException {
+	public static void assignImage(Token token, String assetName, imageType type, String func) throws ParserException {
 		Matcher m = assetRE.matcher(assetName);
 
 		String assetId;

@@ -45,7 +45,7 @@ public class FindTokenFunctions extends AbstractFunction {
 	/**
 	 * Filter for all tokens.
 	 */
-	private class AllFilter implements Zone.Filter {
+	public static class AllFilter implements Zone.Filter {
 		public boolean matchToken(Token t) {
 			// Filter out the utility lib: and image: tokens
 			if (t.getName().toLowerCase().startsWith("image:") || t.getName().toLowerCase().startsWith("lib:")) {
@@ -58,7 +58,7 @@ public class FindTokenFunctions extends AbstractFunction {
 	/**
 	 * Filter for NPC tokens.
 	 */
-	private class NPCFilter implements Zone.Filter {
+	public static class NPCFilter implements Zone.Filter {
 		public boolean matchToken(Token t) {
 			// Filter out the utility lib: and image: tokens
 			if (t.getName().toLowerCase().startsWith("image:") || t.getName().toLowerCase().startsWith("lib:")) {
@@ -71,7 +71,7 @@ public class FindTokenFunctions extends AbstractFunction {
 	/**
 	 * Filter for PC tokens.
 	 */
-	private class PCFilter implements Zone.Filter {
+	public static class PCFilter implements Zone.Filter {
 		public boolean matchToken(Token t) {
 			// Filter out the utility lib: and image: tokens
 			if (t.getName().toLowerCase().startsWith("image:") || t.getName().toLowerCase().startsWith("lib:")) {
@@ -84,7 +84,7 @@ public class FindTokenFunctions extends AbstractFunction {
 	/**
 	 * Filter for player exposed tokens.
 	 */
-	private class ExposedFilter implements Zone.Filter {
+	public static class ExposedFilter implements Zone.Filter {
 		private final Zone zone;
 
 		public ExposedFilter(Zone zone) {
@@ -103,7 +103,7 @@ public class FindTokenFunctions extends AbstractFunction {
 	/**
 	 * Filter for finding tokens by set state.
 	 */
-	private class StateFilter implements Zone.Filter {
+	public static class StateFilter implements Zone.Filter {
 		private final String stateName;
 
 		public StateFilter(String stateName) {
@@ -136,7 +136,7 @@ public class FindTokenFunctions extends AbstractFunction {
 	/**
 	 * Filter for finding tokens by owner.
 	 */
-	private class OwnedFilter implements Zone.Filter {
+	public static class OwnedFilter implements Zone.Filter {
 		private final String name;
 
 		public OwnedFilter(String name) {
@@ -156,7 +156,7 @@ public class FindTokenFunctions extends AbstractFunction {
 	 * Filter by the layer the token is on (allows selecting tokens on the
 	 * Object and Background layers).
 	 */
-	private class LayerFilter implements Zone.Filter {
+	public static class LayerFilter implements Zone.Filter {
 		private final JSONArray layers;
 
 		public LayerFilter(JSONArray layers) {
@@ -273,9 +273,7 @@ public class FindTokenFunctions extends AbstractFunction {
 	 * @return
 	 * @throws ParserException
 	 */
-	private Object getTokenList(Parser parser, boolean nameOnly, String delim, String jsonString) throws ParserException {
-		JSONObject jobj = JSONObject.fromObject(jsonString);
-
+	public static List<Token> getTokens(Token tokenInContext, JSONObject jobj) throws ParserException {
 		// First get a list of all our tokens.  By default this is limited to the TOKEN and GM layers.
 		List<Token> allTokens = null;
 		JSONArray layers = null;
@@ -313,7 +311,7 @@ public class FindTokenFunctions extends AbstractFunction {
 				}
 				// Looking for tokens with all of these states set
 				for (Object item : ary) {
-					List<Token> lst = getTokenList(parser, FindType.STATE, item.toString());
+					List<Token> lst = getTokenList(tokenInContext, FindType.STATE, item.toString());
 					tokenList.retainAll(lst);
 				}
 			} else if ("range".equalsIgnoreCase(searchType)) {
@@ -328,19 +326,19 @@ public class FindTokenFunctions extends AbstractFunction {
 				if (booleanCheck(jobj, searchType)) {
 					List<Token> lst = null;
 					if ("npc".equalsIgnoreCase(searchType)) {
-						lst = getTokenList(parser, FindType.NPC, "");
+						lst = getTokenList(tokenInContext, FindType.NPC, "");
 					} else if ("pc".equalsIgnoreCase(searchType)) {
-						lst = getTokenList(parser, FindType.PC, "");
+						lst = getTokenList(tokenInContext, FindType.PC, "");
 					} else if ("selected".equalsIgnoreCase(searchType)) {
-						lst = getTokenList(parser, FindType.SELECTED, "");
+						lst = getTokenList(tokenInContext, FindType.SELECTED, "");
 					} else if ("visible".equalsIgnoreCase(searchType)) {
-						lst = getTokenList(parser, FindType.VISIBLE, "");
+						lst = getTokenList(tokenInContext, FindType.VISIBLE, "");
 					} else if ("owned".equalsIgnoreCase(searchType)) {
-						lst = getTokenList(parser, FindType.OWNED, MapTool.getPlayer().getName());
+						lst = getTokenList(tokenInContext, FindType.OWNED, MapTool.getPlayer().getName());
 					} else if ("current".equalsIgnoreCase(searchType)) {
-						lst = getTokenList(parser, FindType.CURRENT, "");
+						lst = getTokenList(tokenInContext, FindType.CURRENT, "");
 					} else if ("impersonated".equalsIgnoreCase(searchType)) {
-						lst = getTokenList(parser, FindType.IMPERSONATED, "");
+						lst = getTokenList(tokenInContext, FindType.IMPERSONATED, "");
 					}
 					if (lst != null)
 						tokenList.retainAll(lst);
@@ -362,7 +360,7 @@ public class FindTokenFunctions extends AbstractFunction {
 				for (Object st : states) {
 					inverseList.clear();
 					inverseList.addAll(allTokens);
-					inverseList.removeAll(getTokenList(parser, FindType.STATE, st.toString()));
+					inverseList.removeAll(getTokenList(tokenInContext, FindType.STATE, st.toString()));
 					tokenList.retainAll(inverseList);
 				}
 				//			} else if ("setStates".equalsIgnoreCase(searchType)) {
@@ -376,19 +374,19 @@ public class FindTokenFunctions extends AbstractFunction {
 					inverseList.clear();
 					inverseList.addAll(allTokens);
 					if ("npc".equalsIgnoreCase(searchType)) {
-						inverseList.removeAll(getTokenList(parser, FindType.NPC, ""));
+						inverseList.removeAll(getTokenList(tokenInContext, FindType.NPC, ""));
 					} else if ("pc".equalsIgnoreCase(searchType)) {
-						inverseList.removeAll(getTokenList(parser, FindType.PC, ""));
+						inverseList.removeAll(getTokenList(tokenInContext, FindType.PC, ""));
 					} else if ("selected".equalsIgnoreCase(searchType)) {
-						inverseList.removeAll(getTokenList(parser, FindType.SELECTED, ""));
+						inverseList.removeAll(getTokenList(tokenInContext, FindType.SELECTED, ""));
 					} else if ("visible".equalsIgnoreCase(searchType)) {
-						inverseList.removeAll(getTokenList(parser, FindType.VISIBLE, ""));
+						inverseList.removeAll(getTokenList(tokenInContext, FindType.VISIBLE, ""));
 					} else if ("owned".equalsIgnoreCase(searchType)) {
-						inverseList.removeAll(getTokenList(parser, FindType.OWNED, MapTool.getPlayer().getName()));
+						inverseList.removeAll(getTokenList(tokenInContext, FindType.OWNED, MapTool.getPlayer().getName()));
 					} else if ("current".equalsIgnoreCase(searchType)) {
-						inverseList.removeAll(getTokenList(parser, FindType.CURRENT, ""));
+						inverseList.removeAll(getTokenList(tokenInContext, FindType.CURRENT, ""));
 					} else if ("impersonated".equalsIgnoreCase(searchType)) {
-						inverseList.removeAll(getTokenList(parser, FindType.IMPERSONATED, ""));
+						inverseList.removeAll(getTokenList(tokenInContext, FindType.IMPERSONATED, ""));
 					}
 					if (inverseList != null)
 						tokenList.retainAll(inverseList);
@@ -494,7 +492,11 @@ public class FindTokenFunctions extends AbstractFunction {
 			}
 			tokenList.retainAll(matching);
 		}
-
+		return tokenList;
+	}
+	
+	private static Object getTokenList(Parser parser, boolean nameOnly, String delim, String jsonString) throws ParserException {
+		List<Token> tokenList = getTokens(((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext(), JSONObject.fromObject(jsonString));
 		ArrayList<String> values = new ArrayList<String>();
 		for (Token token : tokenList) {
 			if (nameOnly) {
@@ -510,7 +512,7 @@ public class FindTokenFunctions extends AbstractFunction {
 		}
 	}
 
-	private boolean booleanCheck(JSONObject jobj, String searchType) {
+	private static boolean booleanCheck(JSONObject jobj, String searchType) {
 		Object val = jobj.get(searchType);
 		if (val instanceof Boolean) {
 			if (Boolean.TRUE.equals(val)) {
@@ -529,7 +531,7 @@ public class FindTokenFunctions extends AbstractFunction {
 		}
 	}
 
-	private List<Token> getTokenList(Parser parser, FindType findType, String findArgs) throws ParserException {
+	private static List<Token> getTokenList(Token tokenInContext, FindType findType, String findArgs) throws ParserException {
 		List<Token> tokenList = new LinkedList<Token>();
 		ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
 		Zone zone = zoneRenderer.getZone();
@@ -547,9 +549,9 @@ public class FindTokenFunctions extends AbstractFunction {
 			tokenList = zoneRenderer.getSelectedTokensList();
 			break;
 		case CURRENT:
-			Token token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
-			if (token != null) {
-				tokenList.add(token);
+//			Token token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
+			if (tokenInContext != null) {
+				tokenList.add(tokenInContext);
 			}
 			break;
 		case IMPERSONATED:
@@ -604,7 +606,7 @@ public class FindTokenFunctions extends AbstractFunction {
 	 */
 	private String getTokens(Parser parser, FindType findType, boolean nameOnly, String delim, String findArgs) throws ParserException {
 		ArrayList<String> values = new ArrayList<String>();
-		List<Token> tokens = getTokenList(parser, findType, findArgs);
+		List<Token> tokens = getTokenList(((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext(), findType, findArgs);
 
 		if (tokens != null && !tokens.isEmpty()) {
 			for (Token token : tokens) {

@@ -61,7 +61,7 @@ public class TokenVisibleFunction extends AbstractFunction {
 	 * @throws ParserException
 	 *             if the player does not have permissions to check.
 	 */
-	public Object getVisible(Token token) throws ParserException {
+	public BigDecimal getVisible(Token token) throws ParserException {
 		return getBooleanVisible(token) ? BigDecimal.ONE : BigDecimal.ZERO;
 	}
 

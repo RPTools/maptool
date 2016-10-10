@@ -70,6 +70,7 @@ public class TokenNameFunction extends AbstractFunction {
 	 */
 	public void setName(Token token, String name) {
 		token.setName(name);
+		MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token);
 	}
 
 	/**

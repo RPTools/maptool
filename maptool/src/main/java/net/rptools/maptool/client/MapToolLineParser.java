@@ -644,9 +644,7 @@ public class MapToolLineParser {
 		if (line.length() == 0) {
 			return "";
 		}
-		if (line.startsWith(MapToolLUAParser.LUA_HEADER)) {
-			return luaparser.parseLine(res, tokenInContext, line, context);
-		}
+		
 		Stack<Token> contextTokenStack = new Stack<Token>();
 		enterContext(context);
 		MapToolVariableResolver resolver = null;
@@ -658,6 +656,13 @@ public class MapToolLineParser {
 			resolver = (res == null) ? new MapToolVariableResolver(tokenInContext) : res;
 			resolverInitialized = resolver.initialize();
 			StringBuilder builder = new StringBuilder();
+			if (line.startsWith(MapToolLUAParser.LUA_HEADER)) {
+				String result = luaparser.parseLine(resolver, tokenInContext, line, context);
+				if (contextTokenStack.size() > 0) {
+					resolver.setTokenIncontext(contextTokenStack.pop());
+				}
+				return result;
+			}
 			int start = 0;
 			List<InlineRollMatch> matches = this.locateInlineRolls(line);
 
@@ -1264,6 +1269,8 @@ public class MapToolLineParser {
 		} catch (AssertFunctionException e) {
 			// do nothing; this exception will never generate any output
 			// throw doError("macroExecutionAssert", opts == null ? "" : opts, roll == null ? line : roll);
+			throw e;
+		} catch (ParserException e) {
 			throw e;
 		} catch (Exception e) {
 			log.info(line, e);

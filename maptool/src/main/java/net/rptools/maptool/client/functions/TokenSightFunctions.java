@@ -42,7 +42,7 @@ public class TokenSightFunctions extends AbstractFunction {
 		return instance;
 	}
 
-	private enum TokenLocations {
+	public static enum TokenLocations {
 		TOP_LEFT, BOTTOM_LEFT, TOP_RIGHT, BOTTOM_RIGHT, CENTER
 	}
 

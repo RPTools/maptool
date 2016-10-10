@@ -122,7 +122,7 @@ public class TokenLightFunctions extends AbstractFunction {
 	 * @return 0 If the light was not found, otherwise 1;
 	 * @throws ParserException
 	 */
-	private BigDecimal setLight(Token token, String category, String name, BigDecimal val) throws ParserException {
+	public static BigDecimal setLight(Token token, String category, String name, BigDecimal val) throws ParserException {
 		boolean found = false;
 
 		for (LightSource ls : MapTool.getCampaign().getLightSourcesMap().get(category).values()) {
@@ -157,7 +157,7 @@ public class TokenLightFunctions extends AbstractFunction {
 	 *         for that category. If there are two parameters the token is checked to see if it has a light source with
 	 *         the name in the second parameter from the category in the first parameter.
 	 */
-	private boolean hasLightSource(Token token, List<Object> parameters) {
+	public static boolean hasLightSource(Token token, List<Object> parameters) {
 		if (parameters.size() < 1) {
 			return token.hasLightSources();
 		}

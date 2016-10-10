@@ -728,7 +728,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	 * @param token The token to get the size of.
 	 * @return the size of the token.
 	 */
-	private String getSize(Token token) {
+	public static String getSize(Token token) {
 		Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
 		if (token.isSnapToScale()) {
 			for (TokenFootprint footprint : grid.getFootprints()) {
@@ -748,7 +748,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	 * @return The new size of the token.
 	 * @throws ParserException if the size specified is an invalid size.
 	 */
-	private String setSize(Token token, String size) throws ParserException {
+	public static String setSize(Token token, String size) throws ParserException {
 		if (size.equalsIgnoreCase("native") || size.equalsIgnoreCase("free")) {
 			token.setSnapToScale(false);
 			return getSize(token);
@@ -781,7 +781,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	 * @return the name of the layer the token was moved to.
 	 * @throws ParserException if the layer name is invalid.
 	 */
-	public String setLayer(Token token, String layerName, boolean forceShape) throws ParserException {
+	public static String setLayer(Token token, String layerName, boolean forceShape) throws ParserException {
 		Zone.Layer layer;
 
 		if (layerName.equalsIgnoreCase(Zone.Layer.TOKEN.toString())) {
@@ -876,20 +876,18 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			}
 		}
 	}
-
 	/**
-	 * Creates a string list delimited by <b>delim</b> of the names of all the
-	 * properties for a given token. Returned strings are all lowercase.
+	 * Creates a list of the names of all the
+	 * properties for a given token.
 	 *
 	 * @param token
 	 *            The token to get the property names for.
-	 * @param delim
-	 *            The delimiter for the list.
 	 * @param pattern
 	 *            The regexp pattern to match.
-	 * @return the string list of property names.
+	 *            
+	 * @return the list of property names.
 	 */
-	private String getPropertyNames(Token token, String delim, String pattern, boolean raw) {
+	public static List<String> getPropertyNames(Token token, String pattern, boolean raw) {
 		List<String> namesList = new ArrayList<String>();
 		Pattern pat = Pattern.compile(pattern);
 		Set<String> propSet = (raw ? token.getPropertyNamesRaw() : token.getPropertyNames());
@@ -903,6 +901,23 @@ public class TokenPropertyFunctions extends AbstractFunction {
 				namesList.add(name);
 			}
 		}
+		return namesList;
+	}
+	
+	/**
+	 * Creates a string list delimited by <b>delim</b> of the names of all the
+	 * properties for a given token. Returned strings are all lowercase.
+	 *
+	 * @param token
+	 *            The token to get the property names for.
+	 * @param delim
+	 *            The delimiter for the list.
+	 * @param pattern
+	 *            The regexp pattern to match.
+	 * @return the string list of property names.
+	 */
+	private String getPropertyNames(Token token, String delim, String pattern, boolean raw) {
+		List<String> namesList = getPropertyNames(token, pattern, raw);
 
 		String[] names = new String[namesList.size()];
 		namesList.toArray(names);
