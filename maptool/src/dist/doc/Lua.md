@@ -170,7 +170,7 @@ Lua uses normal integer and floating point values for its numbers, while the Mac
 ## How do I do in LUA?
 ### Macro-Functions
 #### Macro-Function abort()
-```
+```lua
 --{abort(0)} LUA--
 macro.abort(isGM()) -- abort when not GM (boolean is false)
 local enemiesLeft=1;
@@ -179,15 +179,15 @@ macro.abort()
 ```
 #### Macro-Functions abs() and absolutevalue()
 abs() is part of the defualt [Lua Math library](https://www.lua.org/pil/18.html)
-```
+```lua
 --{abort(0)} LUA--
 local value = -13
 print(math.abs(value))
 ```
 
-### Macro Function add()
+#### Macro Function add()
 Lua supports + and .. to add numbers and concatinate strings respektively, however there is no dedicated sum() function. It can be very easily implemented however:
-```
+```lua
 --{abort(0)} LUA--
 function sum(...) -- for variable args
    result = 0;
