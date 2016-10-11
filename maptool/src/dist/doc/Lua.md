@@ -143,6 +143,9 @@ Using return is the more readable and preferred version
 
 When calling other macros, macro.return is not filled in.
 
+### Case-Sensitive
+Lua is case-sensitive, that means for example the functions toJson and toJSON are different functions (if toJson is defined at all). There are parts however that try to work around this, like the token-Object for example.
+
 ### BigDecimal
 Lua uses normal integer and floating point values for its numbers, while the Macro-language always uses abritary precision BigDecimal-numbers. Normally this should not make a difference, but this is something to keep in mind when working with huge values.
 ## Globals
@@ -223,7 +226,68 @@ println(sumArray(array))
 println(concat(table.unpack(array))) -- Convert array to var-args
 println(table.concat(array)) -- table library has a string-concat for tables
 ```
+#### addAllNPCsToInitiative(), addAllPCsToInitiative() and addAllToInitiative()
+These functions are in the tokens library-object
+```lua
+--{abort(0)} LUA--
+tokens.addAllNPCsToInitiative()
+tokens.addAllPCsToInitiative(false) --don't add again (same as no argument)
+tokens.addAllToInitiative(false) --add again, even if already in initiative
+```
 
+#### addToInitiative()
+addToInitiative() is now a method for token-objects, that means they can be called on the current token.
+```lua
+--{abort(0)} LUA--
+token.addToInitiative(false, 20) --Global token Object
+```
+Or on other tokens (Trusted-Macro or Ownership required)
+```lua
+--{abort(0)} LUA--
+for index, tok in ipairs(tokens.visible()) do
+  tok.addToInitiative(false, index)
+end
+```
+
+#### arg() and argCount()
+These are in the macro library and like macro.args convert the arguments into lua-datastructures should they be JSON
+```lua
+--{abort(0)} LUA--
+for i = 1, macro.argCount() do
+  println("Arg ", i, " = ", macro.arg(i))
+end
+```
+
+#### assert()
+Lua has its own assert statement with almost exactly the same functionality
+```lua
+--{abort(0)} LUA--
+assert(isGM(), "Player not GM")
+println("Welcome back, Sire")
+```
+
+### avg() and average()
+There is no direct function to do this, but it can be easily implemented in lua
+```lua
+--{abort(0)} LUA--
+function avg(...) -- for variable args
+   result = 0;
+   count = 0;
+   for k, v in ipairs({...}) do
+        result = result + v
+        count = count + 1
+    end 
+  if count > 0 then
+    return result / count
+  else
+    return 0
+  end
+end
+
+println(avg(1,2,3,4))
+local array = {2,3,4,5,6}
+println(avg(table.unpack(array))) -- Convert array to var-args
+```
 
 ### Roll-Options
 

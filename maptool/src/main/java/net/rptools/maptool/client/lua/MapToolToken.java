@@ -19,6 +19,7 @@ import net.rptools.maptool.client.functions.TokenLabelFunction;
 import net.rptools.maptool.client.functions.TokenNameFunction;
 import net.rptools.maptool.client.functions.TokenPropertyFunctions;
 import net.rptools.maptool.client.functions.TokenVisibleFunction;
+import net.rptools.maptool.client.lua.token.AddToInitative;
 import net.rptools.maptool.client.lua.token.BringToFront;
 import net.rptools.maptool.client.lua.token.CanSee;
 import net.rptools.maptool.client.lua.token.ClearLights;
@@ -106,6 +107,7 @@ public class MapToolToken extends LuaTable {
 	private static final String F_HANDOUT = "gethandout";
 	private static final String F_PORTRAIT = "getportrait";
 	private static final String F_MOVE = "move";
+	private static final String F_ADDTOINITIATIVE = "addtoinitiative";
 	//TODO trusted Macro und so
 	private boolean isSelf = false; 
 	private Token token;
@@ -600,6 +602,8 @@ public class MapToolToken extends LuaTable {
 						throw new ParserException(I18N.getText("macro.function.general.noPerm", "token.getType"));
 					}
 					return valOf(token.getType());
+				case F_ADDTOINITIATIVE:
+					return new AddToInitative(this);
 				case F_BRINGTOFRONT:
 					return new BringToFront(this);
 				case F_SENDTOBACK:

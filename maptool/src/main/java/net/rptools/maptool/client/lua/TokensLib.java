@@ -16,7 +16,9 @@ import net.rptools.maptool.client.functions.TokenImage;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONArray;
@@ -176,6 +178,26 @@ public class TokensLib extends TwoArgFunction {
 		}
 		
 	}
+	
+	public static LuaValue addAllToInitiative(Boolean pc, LuaValue duplicates) {
+		if (!MapTool.getParser().isMacroTrusted()) {
+			if (!MapTool.getFrame().getInitiativePanel().hasGMPermission())
+				throw new LuaError(new ParserException(I18N.getText("macro.function.initiative.mustBeGM", "addAll" + (pc!=null? (pc.booleanValue() ? "PCs":"NPCs") :"")+"ToInitiative")));
+		}
+		InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
+		boolean allowDuplicates = false;
+		if (duplicates.isboolean()) {
+			allowDuplicates = duplicates.toboolean();
+		} 
+		List<Token> tokens = new ArrayList<Token>();
+		for (Token token : list.getZone().getTokens())
+			if ((pc == null || token.getType() == Type.PC && pc.booleanValue() || token.getType() == Type.NPC && !pc.booleanValue())
+					&& (allowDuplicates || list.indexOf(token).isEmpty())) {
+				tokens.add(token);
+			} 
+		list.insertTokens(tokens);
+		return LuaValue.valueOf(tokens.size());
+	}
 
 	public static final class Tokens0 extends OneArgFunction {
 		public LuaValue call(LuaValue arg) {
@@ -212,6 +234,12 @@ public class TokensLib extends TwoArgFunction {
 				return resolve(arg);
 			case 5:
 				return find(arg);
+			case 6:
+				return addAllToInitiative(null, arg);
+			case 7:
+				return addAllToInitiative(true, arg);
+			case 8:
+				return addAllToInitiative(false, arg);
 			}
 			return NIL;
 		}
@@ -227,12 +255,15 @@ public class TokensLib extends TwoArgFunction {
 		}
 	}
 
+	
+	
+	
 	Globals globals;
 
 	@Override
 	public LuaValue call(LuaValue modname, LuaValue env) {
 		LuaTable t = new LuaTable();
-		bind(t, Tokens1.class, new String[] { "withState", "ownedBy", "visible", "inLayers", "resolve", "find",});
+		bind(t, Tokens1.class, new String[] { "withState", "ownedBy", "visible", "inLayers", "resolve", "find", "addAllToInitiative", "addAllPCsToInitiative", "addAllNPCsToInitiative"});
 		bind(t, Tokens0.class, new String[] { "exposed", "all", "pc", "npc", "selected", "impersonated", });
 		bind(t, Tokens2.class, new String[] { "image" });
 		env.set("tokens", t);

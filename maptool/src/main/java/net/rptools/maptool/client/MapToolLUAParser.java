@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import net.rptools.maptool.client.lua.FromJson;
+import net.rptools.maptool.client.lua.IsGM;
+import net.rptools.maptool.client.lua.IsTrusted;
 import net.rptools.maptool.client.lua.LuaConverters;
 import net.rptools.maptool.client.lua.MapToolBaseLib;
 import net.rptools.maptool.client.lua.MapToolGlobals;
@@ -79,12 +81,14 @@ public class MapToolLUAParser {
 		user_globals.set("deselectTokens", new SelectToken(true));
 		user_globals.set("tokenProperties", LuaValue.NIL);
 		user_globals.set("macro", new MapToolMacro(res));
+		user_globals.set("isGM", new IsGM());
+		user_globals.set("isTrusted", new IsTrusted());
 		
 		
 		ByteArrayOutputStream bo = new ByteArrayOutputStream();
 		user_globals.STDOUT = new PrintStream(bo);
 		try {
-			LuaValue chunk = globals.load(new ByteArrayInputStream(line.getBytes()) , "main", "t", user_globals);
+			LuaValue chunk = globals.load(new ByteArrayInputStream(line.getBytes()) , (context != null ? context.getName() + "@" +context.getSouce():"Chat") + (tokenInContext != null? " (" + tokenInContext.getName() + ":" + tokenInContext.getId() + ")":""), "t", user_globals);
 			LuaValue macroReturn = chunk.call();
 			if (macroReturn.isnoneornil(1)) {
 				res.setVariable("macro.return", null);

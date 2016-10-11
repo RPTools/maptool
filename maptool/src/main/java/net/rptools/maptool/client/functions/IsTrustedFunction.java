@@ -56,7 +56,7 @@ public class IsTrustedFunction extends AbstractFunction {
 	 * 
 	 * copied from MacroLinkFunctions since its private there
 	 */
-	private List<String> getGMs() {
+	public static List<String> getGMs() {
 		List<String> gms = new ArrayList<String>();
 
 		Iterator<Player> pliter = MapTool.getPlayerList().iterator();

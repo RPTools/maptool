@@ -5,6 +5,8 @@ package net.rptools.maptool.client.lua;
 
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.lua.misc.Abort;
+import net.rptools.maptool.client.lua.misc.Arg;
+import net.rptools.maptool.client.lua.misc.ArgCount;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableModifiers;
 
@@ -29,6 +31,8 @@ public class MapToolMacro extends LuaTable {
 		}
 		super.rawset(LuaValue.valueOf("args"), args == null ? LuaValue.NIL : LuaConverters.fromJson(ObjectUtils.toString(args)));
 		super.rawset(LuaValue.valueOf("abort"), new Abort());
+		super.rawset(LuaValue.valueOf("arg"), new Arg(resolver));
+		super.rawset(LuaValue.valueOf("argCount"), new ArgCount(resolver));
 		this.resolver = resolver;
 	}
 	public LuaValue setmetatable(LuaValue metatable) { return error("table is read-only"); }
