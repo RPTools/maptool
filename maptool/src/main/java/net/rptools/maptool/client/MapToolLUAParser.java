@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import net.rptools.maptool.client.lua.FromJson;
+import net.rptools.maptool.client.lua.LuaConverters;
 import net.rptools.maptool.client.lua.MapToolBaseLib;
 import net.rptools.maptool.client.lua.MapToolGlobals;
+import net.rptools.maptool.client.lua.MapToolMacro;
 import net.rptools.maptool.client.lua.MapToolToken;
 import net.rptools.maptool.client.lua.Print;
 import net.rptools.maptool.client.lua.Println;
@@ -76,6 +78,7 @@ public class MapToolLUAParser {
 		user_globals.set("selectTokens", new SelectToken(false));
 		user_globals.set("deselectTokens", new SelectToken(true));
 		user_globals.set("tokenProperties", LuaValue.NIL);
+		user_globals.set("macro", new MapToolMacro(res));
 		
 		
 		ByteArrayOutputStream bo = new ByteArrayOutputStream();
@@ -83,7 +86,14 @@ public class MapToolLUAParser {
 		try {
 			LuaValue chunk = globals.load(new ByteArrayInputStream(line.getBytes()) , "main", "t", user_globals);
 			LuaValue macroReturn = chunk.call();
+			if (macroReturn.isnoneornil(1)) {
+				res.setVariable("macro.return", null);
+			} else {
+				res.setVariable("macro.return", LuaConverters.toJson(macroReturn));
+			}
+			
 			if (macroReturn instanceof LuaFunction) {
+				
 				//TODO
 	//			Varargs args = LuaValue.varargsOf(null)
 	//			macroReturn = chunk.invoke(args);
