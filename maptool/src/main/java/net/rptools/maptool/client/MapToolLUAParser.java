@@ -12,6 +12,7 @@ import net.rptools.maptool.client.lua.LuaConverters;
 import net.rptools.maptool.client.lua.MapToolBaseLib;
 import net.rptools.maptool.client.lua.MapToolGlobals;
 import net.rptools.maptool.client.lua.MapToolMacro;
+import net.rptools.maptool.client.lua.MapToolMaps;
 import net.rptools.maptool.client.lua.MapToolToken;
 import net.rptools.maptool.client.lua.Print;
 import net.rptools.maptool.client.lua.Println;
@@ -85,6 +86,7 @@ public class MapToolLUAParser {
 		user_globals.set("isGM", new IsGM());
 		user_globals.set("isTrusted", new IsTrusted());
 		user_globals.set("broadcast", new Broadcast());
+		user_globals.set("maps", new MapToolMaps());
 		
 		
 		ByteArrayOutputStream bo = new ByteArrayOutputStream();

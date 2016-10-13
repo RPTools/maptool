@@ -165,6 +165,8 @@ Lua uses normal integer and floating point values for its numbers, while the Mac
 ### deselectTokens
 ### tokenProperties
 ### tokens
+### maps
+### broadcast
 
 
 ## Objects
