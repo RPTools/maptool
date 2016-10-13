@@ -17,6 +17,7 @@ import net.rptools.maptool.client.lua.Print;
 import net.rptools.maptool.client.lua.Println;
 import net.rptools.maptool.client.lua.ToJson;
 import net.rptools.maptool.client.lua.TokensLib;
+import net.rptools.maptool.client.lua.misc.Broadcast;
 import net.rptools.maptool.client.lua.token.CopyToken;
 import net.rptools.maptool.client.lua.token.SelectToken;
 import net.rptools.maptool.model.Token;
@@ -83,6 +84,7 @@ public class MapToolLUAParser {
 		user_globals.set("macro", new MapToolMacro(res));
 		user_globals.set("isGM", new IsGM());
 		user_globals.set("isTrusted", new IsTrusted());
+		user_globals.set("broadcast", new Broadcast());
 		
 		
 		ByteArrayOutputStream bo = new ByteArrayOutputStream();

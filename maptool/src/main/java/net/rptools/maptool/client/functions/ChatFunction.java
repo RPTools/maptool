@@ -119,7 +119,7 @@ public class ChatFunction extends AbstractFunction {
 	 * @param message
 	 * @return message
 	 */
-	private String checkForCheating(String message) {
+	public static String checkForCheating(String message) {
 		// Detect whether the person is attempting to fake rolls.
 		Pattern cheater_pattern = CommandPanel.CHEATER_PATTERN;
 

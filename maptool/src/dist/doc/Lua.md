@@ -226,7 +226,7 @@ println(sumArray(array))
 println(concat(table.unpack(array))) -- Convert array to var-args
 println(table.concat(array)) -- table library has a string-concat for tables
 ```
-#### addAllNPCsToInitiative(), addAllPCsToInitiative() and addAllToInitiative()
+#### Marco Functions addAllNPCsToInitiative(), addAllPCsToInitiative() and addAllToInitiative()
 These functions are in the tokens library-object
 ```lua
 --{abort(0)} LUA--
@@ -235,7 +235,7 @@ tokens.addAllPCsToInitiative(false) --don't add again (same as no argument)
 tokens.addAllToInitiative(false) --add again, even if already in initiative
 ```
 
-#### addToInitiative()
+#### Marco Function addToInitiative()
 addToInitiative() is now a method for token-objects, that means they can be called on the current token.
 ```lua
 --{abort(0)} LUA--
@@ -249,7 +249,7 @@ for index, tok in ipairs(tokens.visible()) do
 end
 ```
 
-#### arg() and argCount()
+#### Marco Functions arg() and argCount()
 These are in the macro library and like macro.args convert the arguments into lua-datastructures should they be JSON
 ```lua
 --{abort(0)} LUA--
@@ -258,7 +258,7 @@ for i = 1, macro.argCount() do
 end
 ```
 
-#### assert()
+#### Marco Function assert()
 Lua has its own assert statement with almost exactly the same functionality
 ```lua
 --{abort(0)} LUA--
@@ -266,7 +266,7 @@ assert(isGM(), "Player not GM")
 println("Welcome back, Sire")
 ```
 
-### avg() and average()
+#### Marco Functions avg() and average()
 There is no direct function to do this, but it can be easily implemented in lua
 ```lua
 --{abort(0)} LUA--
@@ -287,6 +287,55 @@ end
 println(avg(1,2,3,4))
 local array = {2,3,4,5,6}
 println(avg(table.unpack(array))) -- Convert array to var-args
+```
+#### Marco Functions band() and bitwiseand()
+[bit32](https://www.lua.org/manual/5.2/manual.html#6.7) is the Lua Library for bit-manipulation (Currently sadly limited to 32 bits)
+```lua
+--{abort(0)} LUA--
+print(bit32.band(5,9))
+```
+
+#### Marco Functions bnot() and bitwisenot()
+[bit32](https://www.lua.org/manual/5.2/manual.html#6.7) is the Lua Library for bit-manipulation (Currently sadly limited to 32 bits)
+```lua
+--{abort(0)} LUA--
+print(bit32.bnot(5))
+```
+
+#### Marco Functions bor() and bitwiseor()
+[bit32](https://www.lua.org/manual/5.2/manual.html#6.7) is the Lua Library for bit-manipulation (Currently sadly limited to 32 bits)
+```lua
+--{abort(0)} LUA--
+print(bit32.bor(5,9))
+```
+
+#### Marco Functions bxor() and bitwisexor()
+[bit32](https://www.lua.org/manual/5.2/manual.html#6.7) is the Lua Library for bit-manipulation (Currently sadly limited to 32 bits)
+```lua
+--{abort(0)} LUA--
+print(bit32.bxor(5,9))
+```
+
+#### Marco Function bringToFront()
+The function bringToFront() can be called on any token.
+```lua
+--{abort(0)} LUA--
+token.bringToFront() -- Current Token
+```
+On other tokens (Trusted-Macro or Ownership required):
+```lua
+--{abort(0)} LUA--
+for index, tok in ipairs(tokens.visible()) do
+  tok.bringToFront()
+end
+```
+
+#### Marco Function broadcast()
+The function broadcast() is in the global namespace.
+```lua
+--{abort(0)} LUA--
+broadcast("Hi, my name is " .. token.name); --All
+broadcast("Actually I am " .. token.gm_name, "gm") --All GMs
 ```
 
 ### Roll-Options
