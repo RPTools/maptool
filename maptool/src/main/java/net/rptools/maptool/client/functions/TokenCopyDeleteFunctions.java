@@ -146,7 +146,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 		}
 	}
 
-	private static void setTokenValues(Token token, JSONObject vals, Zone zone, MapToolVariableResolver res) throws ParserException {
+	public static void setTokenValues(Token token, JSONObject vals, Zone zone, MapToolVariableResolver res) throws ParserException {
 		JSONObject newVals = JSONObject.fromObject(vals);
 		newVals = (JSONObject) JSONMacroFunctions.getInstance().JSONEvaluate(res, newVals);
 

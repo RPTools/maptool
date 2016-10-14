@@ -122,8 +122,12 @@ public class TokensLib extends TwoArgFunction {
 		ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
 		Zone zone = zoneRenderer.getZone();
 		JSONArray layers = new JSONArray();
-		for (LuaValue v : arrayIterate(val.checktable())) {
-			layers.add(v.checkjstring());
+		if (val.istable()) {
+			for (LuaValue v : arrayIterate(val.checktable())) {
+				layers.add(v.checkjstring());
+			}
+		} else {
+			layers.add(val.checkstring());
 		}
 		return toLua(zone.getTokensFiltered(new FindTokenFunctions.LayerFilter(
 				layers)));

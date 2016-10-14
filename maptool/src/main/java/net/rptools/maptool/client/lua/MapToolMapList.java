@@ -4,6 +4,7 @@
 package net.rptools.maptool.client.lua;
 
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
@@ -22,8 +23,10 @@ import org.luaj.vm2.Varargs;
 
 public class MapToolMapList extends LuaTable {
 	private boolean visible = true;
-	public MapToolMapList(boolean visibleOnly) {
+	private MapToolVariableResolver resolver;
+	public MapToolMapList(boolean visibleOnly, MapToolVariableResolver resolver) {
 		visible = visibleOnly;
+		this.resolver = resolver;
 	}
 	public LuaValue setmetatable(LuaValue metatable) { return error("table is read-only"); }
 	public void set(int key, LuaValue value) { error("table is read-only"); }
@@ -42,7 +45,7 @@ public class MapToolMapList extends LuaTable {
 			for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()){
 				if (zr != null && zr.getZone() != null && key.tojstring().equals(zr.getZone().getName())) {
 					if (!visible || zr.getZone().isVisible()) {
-						return new MapToolMap(zr.getZone());
+						return new MapToolMap(zr.getZone(), resolver);
 					} else {
 						return NIL;
 					}
@@ -104,7 +107,7 @@ public class MapToolMapList extends LuaTable {
 				continue;
 			} 
 			if (found && !ObjectUtils.equals(name, zr.getZone().getName())) {
-				return varargsOf(valueOf(zr.getZone().getName()), new MapToolMap(zr.getZone()));
+				return varargsOf(valueOf(zr.getZone().getName()), new MapToolMap(zr.getZone(), resolver));
 			}
 			if (!found && name.equals(zr.getZone().getName())) {
 				found = true;

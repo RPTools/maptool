@@ -4,6 +4,8 @@
 package net.rptools.maptool.client.lua;
 
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.lua.token.CopyToken;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
@@ -20,10 +22,12 @@ import org.luaj.vm2.LuaValue;
 
 public class MapToolMap extends LuaTable {
 	private final Zone zone;
-	public MapToolMap(Zone zone) {
+	private MapToolVariableResolver resolver;
+	public MapToolMap(Zone zone, MapToolVariableResolver resolver) {
 		this.zone = zone;
-		super.rawset("name", LuaValue.valueOf(zone.getName()));
-		super.rawset("visible", LuaValue.valueOf(zone.isVisible()));
+		this.resolver = resolver;
+		super.rawset(valueOf("name"), LuaValue.valueOf(zone.getName()));
+		super.rawset(valueOf("visible"), LuaValue.valueOf(zone.isVisible()));
 	}
 	public LuaValue setmetatable(LuaValue metatable) { return error("table is read-only"); }
 	public void set(int key, LuaValue value) { error("table is read-only"); }
@@ -60,6 +64,8 @@ public class MapToolMap extends LuaTable {
 				return LuaValue.valueOf(zone.getName());
 			} else if (key.checkjstring().equals("visible")) {
 				return LuaValue.valueOf(zone.isVisible());
+			} else if (key.checkjstring().equals("copyToken")) {
+				return new CopyToken(resolver, this);
 			}
 		}
 		return NIL;

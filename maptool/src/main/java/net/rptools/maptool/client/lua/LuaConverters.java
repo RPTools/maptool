@@ -275,7 +275,7 @@ public class LuaConverters {
 			@Override
 			public Iterator<LuaValue> iterator() {
 				return new Iterator<LuaValue>() {
-					Varargs m_next = table.inext(LuaValue.NIL);
+					Varargs m_next = table.inext(LuaValue.valueOf(0));
 					@Override
 					public boolean hasNext() {
 						return !m_next.isnil(1);
@@ -296,7 +296,7 @@ public class LuaConverters {
 			@Override
 			public Iterator<LuaValue> iterator() {
 				return new Iterator<LuaValue>() {
-					Varargs m_next = table.inext(LuaValue.NIL);
+					Varargs m_next = table.next(LuaValue.NIL);
 					@Override
 					public boolean hasNext() {
 						return !m_next.isnil(1);
@@ -304,7 +304,7 @@ public class LuaConverters {
 					@Override
 					public LuaValue next() {
 						LuaValue val = m_next.arg(1);
-						m_next = table.inext(m_next.arg1());
+						m_next = table.next(m_next.arg1());
 						return val;
 					}
 					

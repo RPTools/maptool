@@ -13,6 +13,7 @@ import net.rptools.maptool.client.lua.MapToolBaseLib;
 import net.rptools.maptool.client.lua.MapToolGlobals;
 import net.rptools.maptool.client.lua.MapToolMacro;
 import net.rptools.maptool.client.lua.MapToolMaps;
+import net.rptools.maptool.client.lua.MapToolTables;
 import net.rptools.maptool.client.lua.MapToolToken;
 import net.rptools.maptool.client.lua.Print;
 import net.rptools.maptool.client.lua.Println;
@@ -78,7 +79,7 @@ public class MapToolLUAParser {
 		user_globals.set("fromJSON", new FromJson());
 		user_globals.set("toJSON", new ToJson());
 		user_globals.set("token", new MapToolToken(tokenInContext, true));
-		user_globals.set("copyToken", new CopyToken(res));
+//		user_globals.set("copyToken", new CopyToken(res));
 		user_globals.set("selectTokens", new SelectToken(false));
 		user_globals.set("deselectTokens", new SelectToken(true));
 		user_globals.set("tokenProperties", LuaValue.NIL);
@@ -86,8 +87,8 @@ public class MapToolLUAParser {
 		user_globals.set("isGM", new IsGM());
 		user_globals.set("isTrusted", new IsTrusted());
 		user_globals.set("broadcast", new Broadcast());
-		user_globals.set("maps", new MapToolMaps());
-		
+		user_globals.set("maps", new MapToolMaps(res));
+		user_globals.set("tables", new MapToolTables());
 		
 		ByteArrayOutputStream bo = new ByteArrayOutputStream();
 		user_globals.STDOUT = new PrintStream(bo);
@@ -122,3 +123,4 @@ public class MapToolLUAParser {
 		return bo.toString();
 	}
 }
+

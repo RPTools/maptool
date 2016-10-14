@@ -4,6 +4,7 @@
 package net.rptools.maptool.client.lua;
 
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Zone;
 
@@ -17,10 +18,12 @@ import org.luaj.vm2.LuaValue;
  */
 
 public class MapToolMaps extends LuaTable {
-	public MapToolMaps() {
+	private MapToolVariableResolver resolver;
+	public MapToolMaps(MapToolVariableResolver resolver) {
+		this.resolver = resolver;
 		super.rawset(valueOf("current"), NIL);
-		super.rawset(valueOf("all"), new MapToolMapList(false));
-		super.rawset(valueOf("visible"), new MapToolMapList(true));
+		super.rawset(valueOf("all"), new MapToolMapList(false, resolver));
+		super.rawset(valueOf("visible"), new MapToolMapList(true, resolver));
 	}
 	public LuaValue setmetatable(LuaValue metatable) { return error("table is read-only"); }
 	public void set(int key, LuaValue value) { error("table is read-only"); }
@@ -49,7 +52,7 @@ public class MapToolMaps extends LuaTable {
 	public LuaValue rawget(LuaValue key) {
 		if (key.isstring()) {
 			if (key.checkjstring().equals("current")) {
-				return new MapToolMap(MapTool.getFrame().getCurrentZoneRenderer().getZone());
+				return new MapToolMap(MapTool.getFrame().getCurrentZoneRenderer().getZone(), resolver);
 			}
 		}
 		return super.rawget(key);

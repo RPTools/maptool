@@ -209,7 +209,7 @@ public class MacroFunctions extends AbstractFunction {
 				mbp.setIncludeLabel(boolVal(value));
 			} else if ("sortBy".equalsIgnoreCase(key)) {
 				mbp.setSortby(value);
-			} else if ("index".equalsIgnoreCase(key)) {
+			} else if ("index".equalsIgnoreCase(key)) { //This does not seem smart...
 				mbp.setIndex(Integer.parseInt(value));
 			} else if ("label".equalsIgnoreCase(key)) {
 				mbp.setLabel(value);
@@ -805,7 +805,7 @@ public class MacroFunctions extends AbstractFunction {
 	 * argument in param is the token to remove the button from, if the token is not specified then the token in context
 	 * is used.
 	 * 
-	 * @param resolver
+	 * @param table
 	 *            The variable resolver.
 	 * @param parameters
 	 *            The arguments.

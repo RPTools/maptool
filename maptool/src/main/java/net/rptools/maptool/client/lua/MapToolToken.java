@@ -78,6 +78,7 @@ public class MapToolToken extends LuaTable {
 	private static final String PC = "pc";
 	private static final String NPC = "npc";
 	private static final String TYPE = "type";
+	private static final String MACROS = "macros";
 //	private static final String DRAW_ORDER2 = "z";
 //	private static final String X = "x";
 //	private static final String Y = "y";
@@ -602,6 +603,11 @@ public class MapToolToken extends LuaTable {
 						throw new ParserException(I18N.getText("macro.function.general.noPerm", "token.getType"));
 					}
 					return valOf(token.getType());
+				case MACROS:
+					if (!isSelf && !MapTool.getParser().isMacroTrusted()) {
+						throw new ParserException(I18N.getText("macro.function.general.noPerm", "token.getMacros"));
+					}
+					return new MapToolMacroIndexes(this);
 				case F_ADDTOINITIATIVE:
 					return new AddToInitative(this);
 				case F_BRINGTOFRONT:
