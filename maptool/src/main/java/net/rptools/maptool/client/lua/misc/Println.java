@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.rptools.maptool.client.lua;
+package net.rptools.maptool.client.lua.misc;
 
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaString;
@@ -17,14 +17,16 @@ import org.luaj.vm2.lib.VarArgFunction;
 public class Println extends VarArgFunction {
 	final BaseLib baselib;
 	final Globals globals;
+
 	public Println(BaseLib baselib, Globals globals) {
 		this.baselib = baselib;
 		this.globals = globals;
 	}
+
 	public Varargs invoke(Varargs args) {
-		LuaValue tostring = globals.get("tostring"); 
-		for ( int i=1, n=args.narg(); i<=n; i++ ) {
-			LuaString s = tostring.call( args.arg(i) ).strvalue();
+		LuaValue tostring = globals.get("tostring");
+		for (int i = 1, n = args.narg(); i <= n; i++) {
+			LuaString s = tostring.call(args.arg(i)).strvalue();
 			globals.STDOUT.print(s.tojstring());
 		}
 		globals.STDOUT.println("<br>\n");

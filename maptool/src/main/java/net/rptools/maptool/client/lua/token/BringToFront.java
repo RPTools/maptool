@@ -22,6 +22,7 @@ import org.luaj.vm2.lib.ZeroArgFunction;
  */
 public class BringToFront extends ZeroArgFunction {
 	MapToolToken token;
+
 	public BringToFront(MapToolToken token) {
 		this.token = token;
 	}

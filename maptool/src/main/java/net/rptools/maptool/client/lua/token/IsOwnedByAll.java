@@ -16,9 +16,11 @@ import org.luaj.vm2.lib.ZeroArgFunction;
  */
 public class IsOwnedByAll extends ZeroArgFunction {
 	MapToolToken token;
+
 	public IsOwnedByAll(MapToolToken token) {
 		this.token = token;
 	}
+
 	/* (non-Javadoc)
 	 * @see org.luaj.vm2.lib.ZeroArgFunction#call()
 	 */

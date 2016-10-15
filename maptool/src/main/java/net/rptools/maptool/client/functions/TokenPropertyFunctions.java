@@ -876,6 +876,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			}
 		}
 	}
+
 	/**
 	 * Creates a list of the names of all the
 	 * properties for a given token.
@@ -903,7 +904,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 		return namesList;
 	}
-	
+
 	/**
 	 * Creates a string list delimited by <b>delim</b> of the names of all the
 	 * properties for a given token. Returned strings are all lowercase.

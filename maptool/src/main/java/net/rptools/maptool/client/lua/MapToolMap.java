@@ -20,23 +20,34 @@ import org.luaj.vm2.LuaValue;
  *
  */
 
-public class MapToolMap extends LuaTable {
+public class MapToolMap extends LuaTable implements IRepresent {
 	private final Zone zone;
 	private MapToolVariableResolver resolver;
+
 	public MapToolMap(Zone zone, MapToolVariableResolver resolver) {
 		this.zone = zone;
 		this.resolver = resolver;
 		super.rawset(valueOf("name"), LuaValue.valueOf(zone.getName()));
 		super.rawset(valueOf("visible"), LuaValue.valueOf(zone.isVisible()));
 	}
-	public LuaValue setmetatable(LuaValue metatable) { return error("table is read-only"); }
-	public void set(int key, LuaValue value) { error("table is read-only"); }
-	public void rawset(int key, LuaValue value) { error("table is read-only"); }
-	public void rawset(LuaValue key, LuaValue value) { 
+
+	public LuaValue setmetatable(LuaValue metatable) {
+		return error("table is read-only");
+	}
+
+	public void set(int key, LuaValue value) {
+		error("table is read-only");
+	}
+
+	public void rawset(int key, LuaValue value) {
+		error("table is read-only");
+	}
+
+	public void rawset(LuaValue key, LuaValue value) {
 		if (key.isstring()) {
 			if (key.checkjstring().equals("name")) {
 				if (!MapTool.getParser().isMacroTrusted()) {
-					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "maps.setMapName"))); 
+					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "maps.setMapName")));
 				}
 				String name = value.checkjstring();
 				zone.setName(name);
@@ -44,19 +55,22 @@ public class MapToolMap extends LuaTable {
 				return;
 			} else if (key.checkjstring().equals("visible")) {
 				if (!MapTool.getParser().isMacroTrusted()) {
-					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "maps.setMapVisible"))); 
+					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "maps.setMapVisible")));
 				}
 				zone.setVisible(value.checkboolean());
 				MapTool.serverCommand().setZoneVisibility(zone.getId(), value.checkboolean());
 				MapTool.getFrame().getZoneMiniMapPanel().flush();
 				MapTool.getFrame().refresh();
 				return;
-			}		
+			}
 		}
-		error("table is read-only, except for name and visible"); 
+		error("table is read-only, except for name and visible");
 	}
-	public LuaValue remove(int pos) { return error("table is read-only"); }
-	
+
+	public LuaValue remove(int pos) {
+		return error("table is read-only");
+	}
+
 	@Override
 	public LuaValue rawget(LuaValue key) {
 		if (key.isstring()) {
@@ -70,25 +84,33 @@ public class MapToolMap extends LuaTable {
 		}
 		return NIL;
 	}
-	
+
 	public String tojstring() {
 		return "Map " + zone.getName();
 	}
-	
+
 	@Override
 	public LuaValue tostring() {
 		return LuaValue.valueOf(tojstring());
 	}
+
 	@Override
 	public LuaString checkstring() {
 		return LuaValue.valueOf(tojstring());
 	}
+
 	@Override
 	public String toString() {
 		return tojstring();
 	}
+
 	public Zone getZone() {
 		return zone;
 	}
-	
+
+	@Override
+	public Object export() {
+		return zone.getName();
+	}
+
 }

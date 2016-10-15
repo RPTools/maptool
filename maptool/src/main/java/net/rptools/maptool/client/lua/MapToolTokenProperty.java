@@ -25,6 +25,7 @@ import org.luaj.vm2.LuaValue;
 public class MapToolTokenProperty extends LuaTable {
 	private MapToolToken token;
 	private String property;
+
 	public MapToolTokenProperty(MapToolToken token, String property, List<TokenProperty> defaultprops) {
 		if (defaultprops != null) {
 			for (TokenProperty propy : defaultprops) {
@@ -38,61 +39,82 @@ public class MapToolTokenProperty extends LuaTable {
 		}
 		super.rawset(LuaValue.valueOf("raw"), LuaValue.valueOf(""));
 		super.rawset(LuaValue.valueOf("value"), LuaValue.valueOf(""));
+		super.rawset(LuaValue.valueOf("converted"), LuaValue.valueOf(""));
 		super.rawset(LuaValue.valueOf("reset"), new ResetProperty(token, property));
 		this.token = token;
 		this.property = property;
 	}
-	public LuaValue setmetatable(LuaValue metatable) { return error("table is read-only"); }
-	public void set(int key, LuaValue value) { error("table is read-only"); }
-	public void rawset(int key, LuaValue value) { error("table is read-only"); }
-	public void rawset(LuaValue key, LuaValue value) { 
+
+	public LuaValue setmetatable(LuaValue metatable) {
+		return error("table is read-only");
+	}
+
+	public void set(int key, LuaValue value) {
+		error("table is read-only");
+	}
+
+	public void rawset(int key, LuaValue value) {
+		error("table is read-only");
+	}
+
+	public void rawset(LuaValue key, LuaValue value) {
 		if (key.isstring()) {
 			if (key.checkjstring().equals("value")) {
 				if (!token.isSelfOrTrusted()) {
-					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.setProperty"))); 
+					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.setProperty")));
 				}
 				Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-				token.getToken().setProperty(property, LuaConverters.toObj(value));
+				token.getToken().setProperty(property, LuaConverters.toJson(value));
 				MapTool.serverCommand().putToken(zone.getId(), token.getToken());
 				zone.putToken(token.getToken());
 				return;
-			}				
+			}
 		}
-		error("table is read-only, except for value"); 
+		error("table is read-only, except for value");
 	}
-	public LuaValue remove(int pos) { return error("table is read-only"); }
-	
+
+	public LuaValue remove(int pos) {
+		return error("table is read-only");
+	}
+
 	@Override
 	public LuaValue rawget(LuaValue key) {
 		if (key.isstring()) {
 			switch (key.tojstring()) {
 			case "raw":
 				if (!token.isSelfOrTrusted()) {
-					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getPropertyRaw"))); 
+					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getPropertyRaw")));
 				}
 				return LuaConverters.fromObj(token.getToken().getProperty(property));
 			case "value":
 				if (!token.isSelfOrTrusted()) {
-					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty"))); 
+					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
 				}
 				return LuaConverters.fromObj(token.getToken().getEvaluatedProperty(property));
+			case "converted":
+				if (!token.isSelfOrTrusted()) {
+					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
+				}
+				return LuaConverters.fromJson(token.getToken().getEvaluatedProperty(property));
 			}
 		}
 		return super.rawget(key);
 	}
-	
+
 	public String tojstring() {
-		return "Property : "+ property +" for " + token.toString();
+		return "Property : " + property + " for " + token.toString();
 	}
-	
+
 	@Override
 	public LuaValue tostring() {
 		return LuaValue.valueOf(tojstring());
 	}
+
 	@Override
 	public LuaString checkstring() {
 		return LuaValue.valueOf(tojstring());
 	}
+
 	@Override
 	public String toString() {
 		return tojstring();

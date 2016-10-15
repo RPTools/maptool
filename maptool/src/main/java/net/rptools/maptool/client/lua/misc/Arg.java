@@ -21,9 +21,11 @@ import org.luaj.vm2.lib.OneArgFunction;
  */
 public class Arg extends OneArgFunction {
 	MapToolVariableResolver resolver;
+
 	public Arg(MapToolVariableResolver resolver) {
 		this.resolver = resolver;
 	}
+
 	@Override
 	public LuaValue call(LuaValue arg) {
 		Object numArgs = 0;
@@ -37,15 +39,15 @@ public class Arg extends OneArgFunction {
 			if (argCount == 0 && argNo == 0) {
 				return LuaConverters.fromJson(resolver.getVariable("macro.args"));
 			}
-	
+
 			if (argNo < 0 || argNo >= argCount) {
 				throw new LuaError(new ParserException(I18N.getText("macro.function.args.outOfRange", "arg", argNo, argCount - 1)));
 			}
-	
+
 			return LuaConverters.fromJson(resolver.getVariable("macro.args." + argNo));
 		} catch (ParserException e) {
 			throw new LuaError(e);
 		}
 	}
-	
+
 }

@@ -27,6 +27,7 @@ import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.VarArgFunction;
+
 /**
  * @author Maluku
  *
@@ -34,16 +35,18 @@ import org.luaj.vm2.lib.VarArgFunction;
 public class CopyToken extends VarArgFunction {
 	private MapToolVariableResolver resolver;
 	private MapToolMap map;
+
 	public CopyToken(MapToolVariableResolver resolver, MapToolMap map) {
 		this.resolver = resolver;
 		this.map = map;
 	}
+
 	@Override
 	public Varargs invoke(Varargs args) {
 		if (!MapTool.getParser().isMacroTrusted()) {
 			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "map.copyToken")));
 		}
-		
+
 		Token token = null;
 		int numberCopies = 1;
 		Zone zone = map.getZone();
@@ -101,41 +104,40 @@ public class CopyToken extends VarArgFunction {
 			return new MapToolToken(resultTokens.get(0));
 		} else {
 			LuaTable result = new LuaTable();
-			for (Token t: resultTokens) {
+			for (Token t : resultTokens) {
 				result.insert(0, new MapToolToken(t));
 			}
 			return result;
 		}
-//		List<Object> arg = new ArrayList<Object>();
-//		if (!args.isnil(1)) {
-//			if (args.arg1() instanceof MapToolToken || args.arg1().isstring()) {
-//				arg.add(args.arg1().tojstring());
-//			}
-//			else {
-//				arg.add(toObj(args.arg1()));
-//			}
-//			if (args.isnumber(2)) {
-//				arg.add(toObj(args.checknumber(2)));
-//				if (args.isstring(3)) {
-//					arg.add(toObj(args.checkstring(3)));
-//					if (args.istable(4)) arg.add(toJson(args.checktable(4)));
-//					else if (args.isstring(4)) arg.add(toObj(args.checkstring(3)));
-//				}
-//			}
-//		}
-//		try {
-//			@SuppressWarnings("unchecked")
-//			List<Token> tokens = (List<Token>) TokenCopyDeleteFunctions.copyTokens(resolver, arg, true);
-//			LuaTable result = new LuaTable();
-//			for (Token t: tokens) {
-//				result.insert(0, new MapToolToken(t));
-//			}
-//			return result;
-//		} catch (ParserException e) {
-//			throw new LuaError(e);
-//		}
-		
+		//		List<Object> arg = new ArrayList<Object>();
+		//		if (!args.isnil(1)) {
+		//			if (args.arg1() instanceof MapToolToken || args.arg1().isstring()) {
+		//				arg.add(args.arg1().tojstring());
+		//			}
+		//			else {
+		//				arg.add(toObj(args.arg1()));
+		//			}
+		//			if (args.isnumber(2)) {
+		//				arg.add(toObj(args.checknumber(2)));
+		//				if (args.isstring(3)) {
+		//					arg.add(toObj(args.checkstring(3)));
+		//					if (args.istable(4)) arg.add(toJson(args.checktable(4)));
+		//					else if (args.isstring(4)) arg.add(toObj(args.checkstring(3)));
+		//				}
+		//			}
+		//		}
+		//		try {
+		//			@SuppressWarnings("unchecked")
+		//			List<Token> tokens = (List<Token>) TokenCopyDeleteFunctions.copyTokens(resolver, arg, true);
+		//			LuaTable result = new LuaTable();
+		//			for (Token t: tokens) {
+		//				result.insert(0, new MapToolToken(t));
+		//			}
+		//			return result;
+		//		} catch (ParserException e) {
+		//			throw new LuaError(e);
+		//		}
+
 	}
-	
 
 }

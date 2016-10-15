@@ -23,5 +23,5 @@ public class Abort extends OneArgFunction {
 		}
 		return arg;
 	}
-	
+
 }

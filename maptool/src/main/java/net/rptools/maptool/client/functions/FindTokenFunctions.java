@@ -494,7 +494,7 @@ public class FindTokenFunctions extends AbstractFunction {
 		}
 		return tokenList;
 	}
-	
+
 	private static Object getTokenList(Parser parser, boolean nameOnly, String delim, String jsonString) throws ParserException {
 		List<Token> tokenList = getTokens(((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext(), JSONObject.fromObject(jsonString));
 		ArrayList<String> values = new ArrayList<String>();
@@ -549,7 +549,7 @@ public class FindTokenFunctions extends AbstractFunction {
 			tokenList = zoneRenderer.getSelectedTokensList();
 			break;
 		case CURRENT:
-//			Token token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
+			//			Token token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
 			if (tokenInContext != null) {
 				tokenList.add(tokenInContext);
 			}

@@ -18,6 +18,7 @@ public class ImageFunc extends OneArgFunction {
 
 	private MapToolToken sourceToken;
 	private imageType type;
+
 	public ImageFunc(MapToolToken source, imageType type) {
 		sourceToken = source;
 		this.type = type;

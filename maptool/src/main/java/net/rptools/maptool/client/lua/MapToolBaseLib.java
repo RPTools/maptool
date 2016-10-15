@@ -19,8 +19,10 @@ import org.luaj.vm2.lib.BaseLib;
  */
 public class MapToolBaseLib extends BaseLib {
 	Globals globals;
+
 	public MapToolBaseLib(MapToolVariableResolver res, Token tokenInContext, MapToolMacroContext context) {
 	}
+
 	@Override
 	public LuaValue call(LuaValue modname, LuaValue env) {
 		super.call(modname, env);
@@ -28,6 +30,7 @@ public class MapToolBaseLib extends BaseLib {
 		globals.STDIN = System.in;
 		return env;
 	}
+
 	@Override
 	public InputStream findResource(String macroname) {
 		throw new RuntimeException("File not found");

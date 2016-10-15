@@ -30,6 +30,7 @@ import org.luaj.vm2.lib.OneArgFunction;
 public class CanSee extends OneArgFunction {
 
 	private MapToolToken sourceToken;
+
 	public CanSee(MapToolToken source) {
 		sourceToken = source;
 	}
@@ -56,11 +57,11 @@ public class CanSee extends OneArgFunction {
 			}
 			Zone zone = renderer.getZone();
 			Grid grid = zone.getGrid();
-	
+
 			Rectangle bounds = target.getFootprint(grid).getBounds(grid, grid.convert(new ZonePoint(target.getX(), target.getY())));
 			if (!target.isSnapToGrid())
 				bounds = target.getBounds(zone);
-	
+
 			int x = (int) bounds.getX();
 			int y = (int) bounds.getY();
 			int w = (int) bounds.getWidth();

@@ -19,6 +19,7 @@ import org.luaj.vm2.lib.ThreeArgFunction;
  */
 public class Move extends ThreeArgFunction {
 	MapToolToken token;
+
 	public Move(MapToolToken token) {
 		this.token = token;
 	}

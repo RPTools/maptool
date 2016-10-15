@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.rptools.maptool.client.lua;
+package net.rptools.maptool.client.lua.misc;
 
 import net.rptools.maptool.client.MapTool;
 

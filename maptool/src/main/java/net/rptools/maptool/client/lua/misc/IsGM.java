@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.rptools.maptool.client.lua;
+package net.rptools.maptool.client.lua.misc;
 
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.IsTrustedFunction;
@@ -22,5 +22,5 @@ public class IsGM extends OneArgFunction {
 			return LuaValue.valueOf(IsTrustedFunction.getGMs().contains(arg.checkjstring()));
 		}
 	}
-	
+
 }

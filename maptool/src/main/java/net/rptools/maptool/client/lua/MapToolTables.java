@@ -21,13 +21,26 @@ import org.luaj.vm2.Varargs;
  */
 
 public class MapToolTables extends LuaTable {
-	public LuaValue setmetatable(LuaValue metatable) { return error("table is read-only"); }
-	public void set(int key, LuaValue value) { error("table is read-only"); }
-	public void rawset(int key, LuaValue value) { error("table is read-only"); }
-	public void rawset(LuaValue key, LuaValue value) { 
-		error("table is read-only"); 
+	public LuaValue setmetatable(LuaValue metatable) {
+		return error("table is read-only");
 	}
-	public LuaValue remove(int pos) { return error("table is read-only"); }
+
+	public void set(int key, LuaValue value) {
+		error("table is read-only");
+	}
+
+	public void rawset(int key, LuaValue value) {
+		error("table is read-only");
+	}
+
+	public void rawset(LuaValue key, LuaValue value) {
+		error("table is read-only");
+	}
+
+	public LuaValue remove(int pos) {
+		return error("table is read-only");
+	}
+
 	@Override
 	public LuaValue rawget(LuaValue key) {
 		if (key.isstring()) {
@@ -35,55 +48,59 @@ public class MapToolTables extends LuaTable {
 				LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(key.tojstring());
 				if (Boolean.TRUE.equals(lookupTable.getVisible())) {
 					return new MapToolTable(lookupTable);
-				} else if(!MapTool.getPlayer().isGM()) {
-					throw new LuaError(new ParserException(I18N.getText("msg.error.tableUnknown"))); 
+				} else if (!MapTool.getPlayer().isGM()) {
+					throw new LuaError(new ParserException(I18N.getText("msg.error.tableUnknown")));
 				}
 			}
 		}
 		return NIL;
 	}
-	
+
 	public String tojstring() {
 		return "Tables";
 	}
+
 	@Override
 	public LuaValue tostring() {
 		return LuaValue.valueOf(tojstring());
 	}
+
 	@Override
 	public LuaString checkstring() {
 		return LuaValue.valueOf(tojstring());
 	}
+
 	@Override
 	public String toString() {
 		return tojstring();
 	}
-	
+
 	@Override
 	public int length() {
 		if (!MapTool.getPlayer().isGM()) {
 			int count = 0;
-			for (LookupTable tb : MapTool.getCampaign().getLookupTableMap().values()){
-				if (Boolean.TRUE.equals(tb.getVisible())) count++;
+			for (LookupTable tb : MapTool.getCampaign().getLookupTableMap().values()) {
+				if (Boolean.TRUE.equals(tb.getVisible()))
+					count++;
 			}
 			return count;
 		}
 		return MapTool.getCampaign().getLookupTableMap().size();
 	}
+
 	@Override
 	public Varargs next(LuaValue key) {
 		boolean found = false;
-		String name=null;
+		String name = null;
 		if (key.isnil()) {
 			found = true;
-		}
-		else {
+		} else {
 			name = key.checkjstring();
 		}
 		for (java.util.Map.Entry<String, LookupTable> e : MapTool.getCampaign().getLookupTableMap().entrySet()) {
 			if (!MapTool.getPlayer().isGM() && !Boolean.TRUE.equals(e.getValue().getVisible())) {
 				continue;
-			} 
+			}
 			if (found && !ObjectUtils.equals(name, e.getKey())) {
 				return varargsOf(valueOf(e.getKey()), new MapToolTable(e.getValue()));
 			}

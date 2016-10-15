@@ -20,6 +20,7 @@ import org.luaj.vm2.lib.ZeroArgFunction;
 public class ResetProperty extends ZeroArgFunction {
 	private MapToolToken token;
 	private String property;
+
 	public ResetProperty(MapToolToken token, String property) {
 		this.token = token;
 		this.property = property;
@@ -31,7 +32,7 @@ public class ResetProperty extends ZeroArgFunction {
 	@Override
 	public LuaValue call() {
 		if (!token.isSelfOrTrusted()) {
-			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty"))); 
+			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
 		}
 		Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 		token.getToken().resetProperty(property);

@@ -27,7 +27,7 @@ Writing to the default Lua output stream has the same effect, however the Lua io
 Lua allows for objects, and under with this in mind, many of the functions and special variables have been grouped in to Objects like [token](#token) for a single token, or the [campaign](#campaign) global for the campaign properties
 
 ### String-Lists, String-Property-Lists und JSON-Variables
-These should not be used in LUA, there are functions like [toJSON](#tojson), [fromJSON](#fromjson), TODO that provide an interface to normal macros, However, all functions that can be called from lue use Lua-objects (specifically Luatable). These have direct support in Lua, and can be nested without any hassle. 
+These should not be used in LUA, there are functions like [toJSON](#tojson), [fromJSON](#fromjson), [toStr](#tostr) and [fromStr](#fromstr) that provide an interface to normal macros, However, all functions that can be called from lue use Lua-objects (specifically Luatable). These have direct support in Lua, and can be nested without any hassle. 
 
 In fact JSON-Objects and Arrays are always treated as Text in Lua and use their specialness they have in the normal macro language, making them slower to use in Lua.
 
@@ -146,6 +146,38 @@ When calling other macros, macro.return is not filled in.
 ### Case-Sensitive
 Lua is case-sensitive, that means for example the functions toJson and toJSON are different functions (if toJson is defined at all). There are parts however that try to work around this, like the token-Object for example.
 
+### Variables
+All variables written by Lua are local to Lua, if there is an unknown variable, the MapTool-Variables will be queried.
+```lua
+--{abort(0)} LUA--
+println(Strength) --token property or input
+```
+Writing those Variables back, will not change the token or the MapTool-Variables (used in eval() and such)
+```lua
+--{abort(0)} LUA--
+println(Strength) --token property or input
+Strength = 10
+println(Strength) --Now only accessing the Lua-Variables
+println(token.properties.Strength.value) --Unchanged (if it was a token property)
+```
+If the Maptool-Variables need to be changes, we can use [export](#export) for that.
+```lua
+--{abort(0)} LUA--
+println(Strength) --token property or input
+export("Strength", 10) --export as Strength
+println(Strength) --Since no other Strength, back to token property or MapTool-Variable
+println(token.properties.Strength.value) --Changed (if it was a token property)
+```
+To get the original value back, the current one has to be set to NIL
+```lua
+--{abort(0)} LUA--
+println(Strength) --token property or input
+Strength = 1000
+println(Strength) --Now only accessing the Lua-Variables, but what was the original?
+Strength = nil --Set to nil
+println(Strength) --now again token property or input
+```
+
 ### BigDecimal
 Lua uses normal integer and floating point values for its numbers, while the Macro-language always uses abritary precision BigDecimal-numbers. Normally this should not make a difference, but this is something to keep in mind when working with huge values.
 ## Globals
@@ -159,8 +191,13 @@ Lua uses normal integer and floating point values for its numbers, while the Mac
 ### println
 ### fromJSON
 ### toJSON
+### fromStr
+### toStr
+### encode
+### decode
+### export
 ### token
-### copyToken
+### dice
 ### selectTokens
 ### deselectTokens
 ### tokenProperties
@@ -190,7 +227,7 @@ local value = -13
 print(math.abs(value))
 ```
 
-#### Macro Function add()
+#### Macro Functions add() and concat()
 Lua supports + and .. to add numbers and concatinate strings respektively, however there is no dedicated sum() function. It can be very easily implemented however:
 ```lua
 --{abort(0)} LUA--
@@ -338,6 +375,95 @@ The function broadcast() is in the global namespace.
 --{abort(0)} LUA--
 broadcast("Hi, my name is " .. token.name); --All
 broadcast("Actually I am " .. token.gm_name, "gm") --All GMs
+```
+
+#### Macro Function canSeeToken()
+The function canSee() can be called on any token.
+```lua
+--{abort(0)} LUA--
+for index, tok in ipairs(tokens.visible()) do
+  println("I can See: ", tok.name, " at ", table.concat(token.canSee(tok), ", "))
+end
+```
+#### Macro Functions ceil() and ceiling()
+The [Lua Math library](https://www.lua.org/pil/18.html) has a ceil() function
+```lua
+--{abort(0)} LUA--
+println(math.ceil(10.2))
+```
+#### Macro Function clearLights()
+The function clearLights() can be called on any token.
+```lua
+--{abort(0)} LUA--
+token.clearLights();
+```
+
+#### Macro Function closeFrame()
+The Frame functions are in the UI-Package
+```lua
+--{abort(0)} LUA--
+UI.frame("Test", "<html>Hello World</html>","temporary:1")
+println(UI.isFrameVisible("Test"))
+UI.resetFrame("Test")
+UI.closeFrame("Test")
+println(UI.isFrameVisible("Test"))
+```
+
+#### Macro Function closeDialog()
+The Dialog functions are in the UI-Package
+```lua
+--{abort(0)} LUA--
+UI.dialog("Test", "<html>Hello World</html>","width=400")
+println(UI.isDialogVisible("Test"))
+UI.closeDialog("Test")
+println(UI.isDialogVisible("Test"))
+```
+
+#### Macro Function copyToken()
+This function can be called on any map. It accepts token names, ids or objects as sources
+```
+--{abort(0)} LUA--
+local list = maps.current.copyToken(token, 2, {name="New Name"})
+println(list[1].name)
+println(list[2])
+local ids = table.map(list, function(t)  --As copyToken returns Tokens, we have to get the ids ourselves if we want them
+  return t.id --table.map calls this function once for every element in the list and creates a new list with the result
+end)
+println(ids[1])
+println(ids[2])
+```
+#### Macro Function countStrProp()
+Lua has no dedicated String Property and String List function, they have to be converted with [fromStr](#fromstr) to an acutal Lua-Table
+```lua
+--{abort(0)} LUA--
+println(table.length(fromStr("a=blah; b=doh; c=meh")));
+println(table.length(fromStr("a=blah, b=doh, c=meh")));
+println(table.length(fromStr("a=blah, b=doh, c=meh", nil, ","))); --Change seperator to ","
+```
+#### Macro Functions countsuccess() and success()
+The dice library has all dice roll functions
+```lua
+--{abort(0)} LUA--
+println(dice.success(4,10,8)) --4d10s8
+```
+
+#### Macro Function createMacro()
+This function can be called on any token
+```lua
+--{abort(0)} LUA--
+token.createMacro({label = "World 3", command = _MAPTOOL_LUA_HEADER.."\nprint(\"Hello, World\")", group="Auto"})
+
+token.createMacro("World 2",{command = "--{abort(0)} LUA--\nprint(\"Hello, World\")", group="Auto"})
+
+local m = token.createMacro("World","--{abort(0)} LUA--\nprint(\"Hello, World\")",{group="Auto"})
+local index = m.index -- Macro index, as createMacro returns macro-objects
+```
+
+#### Macro Function currentToken()
+The current token is always the token Object
+```lua
+/me --{abort(0)} LUA--
+println("says: \"Hi, my name is ", token.name,"\"")
 ```
 
 ### Roll-Options

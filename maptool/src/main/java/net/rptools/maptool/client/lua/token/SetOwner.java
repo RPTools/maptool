@@ -24,9 +24,11 @@ import org.luaj.vm2.lib.OneArgFunction;
  */
 public class SetOwner extends OneArgFunction {
 	MapToolToken token;
+
 	public SetOwner(MapToolToken token) {
 		this.token = token;
 	}
+
 	/* (non-Javadoc)
 	 * @see org.luaj.vm2.lib.ZeroArgFunction#call()
 	 */
@@ -39,7 +41,7 @@ public class SetOwner extends OneArgFunction {
 		String myself = MapTool.getPlayer().getName();
 		token.getToken().clearAllOwners();
 		List<String> newowners = new ArrayList<String>();
-		
+
 		if (owners.isstring() && !StringUtil.isEmpty(owners.tojstring())) {
 			newowners.add(owners.tojstring());
 		} else {
@@ -52,7 +54,7 @@ public class SetOwner extends OneArgFunction {
 		if (newowners.isEmpty()) {
 			// Do nothing when trusted, since all ownership should be turned off for an empty string used in such a macro.
 		} else {
-			for (String owner: newowners) {
+			for (String owner : newowners) {
 				token.getToken().addOwner(owner);
 			}
 		}

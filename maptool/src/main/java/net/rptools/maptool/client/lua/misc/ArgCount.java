@@ -19,9 +19,11 @@ import org.luaj.vm2.lib.ZeroArgFunction;
  */
 public class ArgCount extends ZeroArgFunction {
 	MapToolVariableResolver resolver;
+
 	public ArgCount(MapToolVariableResolver resolver) {
 		this.resolver = resolver;
 	}
+
 	@Override
 	public LuaValue call() {
 		Object numArgs = 0;
@@ -35,5 +37,5 @@ public class ArgCount extends ZeroArgFunction {
 			throw new LuaError(e);
 		}
 	}
-	
+
 }

@@ -27,8 +27,8 @@ public class Broadcast extends TwoArgFunction {
 	public LuaValue call(LuaValue arg, LuaValue targets) {
 		List<String> list = new ArrayList<String>();
 		if (targets.istable()) {
-			for (LuaValue v: LuaConverters.arrayIterate(targets.checktable())) {
-				 list.add(v.checkjstring());
+			for (LuaValue v : LuaConverters.arrayIterate(targets.checktable())) {
+				list.add(v.checkjstring());
 			}
 		}
 		String message = checkForCheating(arg.checkjstring());

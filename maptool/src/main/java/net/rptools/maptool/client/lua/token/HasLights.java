@@ -20,9 +20,11 @@ import org.luaj.vm2.lib.TwoArgFunction;
  */
 public class HasLights extends TwoArgFunction {
 	MapToolToken token;
+
 	public HasLights(MapToolToken token) {
 		this.token = token;
 	}
+
 	/* (non-Javadoc)
 	 * @see org.luaj.vm2.lib.TwoArgFunction#call(org.luaj.vm2.LuaValue, org.luaj.vm2.LuaValue)
 	 */

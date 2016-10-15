@@ -17,9 +17,11 @@ import org.luaj.vm2.lib.ZeroArgFunction;
  */
 public class ClearLights extends ZeroArgFunction {
 	MapToolToken token;
+
 	public ClearLights(MapToolToken token) {
 		this.token = token;
 	}
+
 	/* (non-Javadoc)
 	 * @see org.luaj.vm2.lib.ZeroArgFunction#call()
 	 */

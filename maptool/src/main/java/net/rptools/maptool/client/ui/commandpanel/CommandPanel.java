@@ -119,11 +119,11 @@ public class CommandPanel extends JPanel implements Observer {
 	}
 
 	private void initializeSmilies() {
-//		SmileyChatTranslationRuleGroup smileyRuleGroup = new SmileyChatTranslationRuleGroup();
-//		emotePopup = smileyRuleGroup.getEmotePopup();
+		//		SmileyChatTranslationRuleGroup smileyRuleGroup = new SmileyChatTranslationRuleGroup();
+		//		emotePopup = smileyRuleGroup.getEmotePopup();
 
 		chatProcessor = new ChatProcessor();
-//		chatProcessor.install(smileyRuleGroup);
+		//		chatProcessor.install(smileyRuleGroup);
 	}
 
 	/**

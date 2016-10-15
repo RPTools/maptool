@@ -22,6 +22,7 @@ import org.luaj.vm2.lib.ZeroArgFunction;
  */
 public class SendToBack extends ZeroArgFunction {
 	MapToolToken token;
+
 	public SendToBack(MapToolToken token) {
 		this.token = token;
 	}

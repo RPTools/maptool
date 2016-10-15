@@ -24,19 +24,22 @@ import static net.rptools.maptool.client.lua.LuaConverters.iterate;
 public class SelectToken extends VarArgFunction {
 	private boolean deselect = false;
 	private GUID guid;
+
 	public SelectToken(boolean deselect) {
 		this(deselect, null);
 	}
+
 	public SelectToken(boolean deselect, GUID guid) {
 		this.deselect = deselect;
 		this.guid = guid;
 	}
+
 	private List<GUID> getID(LuaValue val, Zone zone) {
 		List<GUID> result = new ArrayList<GUID>();
 		if (val instanceof MapToolToken) {
 			result.add(((MapToolToken) val).getToken().getId());
 		} else if (val.istable()) {
-			for (LuaValue o: iterate(val.checktable())) {
+			for (LuaValue o : iterate(val.checktable())) {
 				result.addAll(getID(o, zone));
 			}
 		} else {
@@ -44,12 +47,15 @@ public class SelectToken extends VarArgFunction {
 		}
 		return result;
 	}
+
 	@Override
 	public Varargs invoke(Varargs args) {
 		ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
 		if (guid != null) {
-			if (deselect) zr.deselectToken(guid);
-			else zr.selectToken(guid);
+			if (deselect)
+				zr.deselectToken(guid);
+			else
+				zr.selectToken(guid);
 			return LuaValue.NIL;
 		}
 		int count = args.narg();
@@ -57,11 +63,11 @@ public class SelectToken extends VarArgFunction {
 		for (int i = 1; i <= count; i++) {
 			LuaValue val = args.arg(i);
 			if (deselect) {
-				for (GUID gid: getID(val, zone)) {
+				for (GUID gid : getID(val, zone)) {
 					zr.deselectToken(gid);
 				}
-			}
-			else zr.selectTokens(getID(val, zone));
+			} else
+				zr.selectTokens(getID(val, zone));
 		}
 		return LuaValue.NIL;
 	}

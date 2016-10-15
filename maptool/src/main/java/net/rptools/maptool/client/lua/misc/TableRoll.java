@@ -20,9 +20,11 @@ import org.luaj.vm2.lib.OneArgFunction;
  */
 public class TableRoll extends OneArgFunction {
 	LookupTable lookupTable;
+
 	public TableRoll(LookupTable table) {
 		this.lookupTable = table;
 	}
+
 	@Override
 	public LuaValue call(LuaValue roll) {
 		try {
@@ -42,5 +44,5 @@ public class TableRoll extends OneArgFunction {
 			throw new LuaError(e);
 		}
 	}
-	
+
 }

@@ -632,15 +632,15 @@ public class MapTool {
 	public static String getVersion() {
 		if (version == null) {
 			version = "DEVELOPMENT";
-//			try {
-//				if (MapTool.class.getClassLoader().getResource(VERSION_TXT) != null) {
-//					version = new String(FileUtil.loadResource(VERSION_TXT));
-//				}
-//			} catch (IOException ioe) {
-//				String msg = I18N.getText("msg.info.versionFile", VERSION_TXT);
-//				version = msg;
-//				MapTool.showError("msg.error.versionFileMissing");
-//			}
+			//			try {
+			//				if (MapTool.class.getClassLoader().getResource(VERSION_TXT) != null) {
+			//					version = new String(FileUtil.loadResource(VERSION_TXT));
+			//				}
+			//			} catch (IOException ioe) {
+			//				String msg = I18N.getText("msg.info.versionFile", VERSION_TXT);
+			//				version = msg;
+			//				MapTool.showError("msg.error.versionFileMissing");
+			//			}
 		}
 		return version;
 	}

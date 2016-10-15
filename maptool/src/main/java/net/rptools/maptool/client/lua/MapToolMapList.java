@@ -24,25 +24,39 @@ import org.luaj.vm2.Varargs;
 public class MapToolMapList extends LuaTable {
 	private boolean visible = true;
 	private MapToolVariableResolver resolver;
+
 	public MapToolMapList(boolean visibleOnly, MapToolVariableResolver resolver) {
 		visible = visibleOnly;
 		this.resolver = resolver;
 	}
-	public LuaValue setmetatable(LuaValue metatable) { return error("table is read-only"); }
-	public void set(int key, LuaValue value) { error("table is read-only"); }
-	public void rawset(int key, LuaValue value) { error("table is read-only"); }
-	public void rawset(LuaValue key, LuaValue value) { 
-		error("table is read-only, except for value"); 
+
+	public LuaValue setmetatable(LuaValue metatable) {
+		return error("table is read-only");
 	}
-	public LuaValue remove(int pos) { return error("table is read-only"); }
-	
+
+	public void set(int key, LuaValue value) {
+		error("table is read-only");
+	}
+
+	public void rawset(int key, LuaValue value) {
+		error("table is read-only");
+	}
+
+	public void rawset(LuaValue key, LuaValue value) {
+		error("table is read-only, except for value");
+	}
+
+	public LuaValue remove(int pos) {
+		return error("table is read-only");
+	}
+
 	@Override
 	public LuaValue rawget(LuaValue key) {
 		if (!visible && !MapTool.getParser().isMacroTrusted()) {
-			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "maps.getAllMapNames"))); 
+			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "maps.getAllMapNames")));
 		}
 		if (key.isstring()) {
-			for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()){
+			for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
 				if (zr != null && zr.getZone() != null && key.tojstring().equals(zr.getZone().getName())) {
 					if (!visible || zr.getZone().isVisible()) {
 						return new MapToolMap(zr.getZone(), resolver);
@@ -54,49 +68,52 @@ public class MapToolMapList extends LuaTable {
 		}
 		return NIL;
 	}
-	
+
 	public String tojstring() {
 		return visible ? "Visible Maps" : "Maps";
 	}
+
 	@Override
 	public LuaValue tostring() {
 		return LuaValue.valueOf(tojstring());
 	}
+
 	@Override
 	public LuaString checkstring() {
 		return LuaValue.valueOf(tojstring());
 	}
+
 	@Override
 	public String toString() {
 		return tojstring();
 	}
-	
+
 	@Override
 	public int length() {
 		if (!visible && !MapTool.getParser().isMacroTrusted()) {
-			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "maps.getAllMapNames"))); 
+			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "maps.getAllMapNames")));
 		}
 		if (visible) {
 			int count = 0;
-			for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()){
-				if (zr.isVisible()) count++;
+			for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
+				if (zr.isVisible())
+					count++;
 			}
 			return count;
 		}
 		return MapTool.getFrame().getZoneRenderers().size();
 	}
-	
+
 	@Override
 	public Varargs next(LuaValue key) {
 		if (!visible && !MapTool.getParser().isMacroTrusted()) {
-			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "maps.getAllMapNames"))); 
+			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "maps.getAllMapNames")));
 		}
 		boolean found = false;
-		String name=null;
+		String name = null;
 		if (key.isnil()) {
 			found = true;
-		}
-		else {
+		} else {
 			name = key.checkjstring();
 		}
 		for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
@@ -105,7 +122,7 @@ public class MapToolMapList extends LuaTable {
 			}
 			if (visible && !zr.getZone().isVisible()) {
 				continue;
-			} 
+			}
 			if (found && !ObjectUtils.equals(name, zr.getZone().getName())) {
 				return varargsOf(valueOf(zr.getZone().getName()), new MapToolMap(zr.getZone(), resolver));
 			}

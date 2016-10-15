@@ -22,6 +22,7 @@ import org.luaj.vm2.lib.TwoArgFunction;
  */
 public class AddToInitative extends TwoArgFunction {
 	MapToolToken token;
+
 	public AddToInitative(MapToolToken token) {
 		this.token = token;
 	}
@@ -31,7 +32,7 @@ public class AddToInitative extends TwoArgFunction {
 	 */
 	@Override
 	public LuaValue call(LuaValue duplicates, LuaValue value) {
-		
+
 		InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
 		Token token = this.token.getToken();
 		if (!MapTool.getParser().isMacroTrusted()) {
@@ -47,9 +48,9 @@ public class AddToInitative extends TwoArgFunction {
 			allowDuplicates = duplicates.checkboolean();
 		}
 		String state = null;
-		if(!value.isnil()) {
+		if (!value.isnil()) {
 			state = value.checkjstring();
-		} 
+		}
 		TokenInitiative ti = null;
 		if (allowDuplicates || list.indexOf(token).isEmpty()) {
 			ti = list.insertToken(-1, token);

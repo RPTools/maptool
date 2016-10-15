@@ -19,9 +19,11 @@ import org.luaj.vm2.lib.TwoArgFunction;
  */
 public class TableRollImage extends TwoArgFunction {
 	LookupTable lookupTable;
+
 	public TableRollImage(LookupTable table) {
 		this.lookupTable = table;
 	}
+
 	@Override
 	public LuaValue call(LuaValue roll, LuaValue size) {
 		try {
@@ -39,7 +41,7 @@ public class TableRollImage extends TwoArgFunction {
 			if (result.getImageId() == null) {
 				throw new ParserException(I18N.getText("macro.function.LookupTableFunctions.noImage", "table.image", lookupTable.getName()));
 			}
-			
+
 			StringBuilder assetId = new StringBuilder("asset://");
 			assetId.append(result.getImageId().toString());
 			if (!size.isnil()) {
@@ -52,5 +54,5 @@ public class TableRollImage extends TwoArgFunction {
 			throw new LuaError(e);
 		}
 	}
-	
+
 }

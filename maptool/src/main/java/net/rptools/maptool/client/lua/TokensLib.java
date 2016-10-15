@@ -37,7 +37,7 @@ import org.luaj.vm2.lib.TwoArgFunction;
  */
 public class TokensLib extends TwoArgFunction {
 	public static MapToolVariableResolver resolver;
-		
+
 	public static LuaValue exposed() {
 		checkTrusted("exposed");
 		Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
@@ -141,7 +141,7 @@ public class TokensLib extends TwoArgFunction {
 		}
 		return LuaValue.NIL;
 	}
-	
+
 	public static LuaValue image(LuaValue val, LuaValue size) {
 		try {
 			Token t = TokenImage.findImageToken(val.checkjstring(), "tokens.getImage");
@@ -160,7 +160,7 @@ public class TokensLib extends TwoArgFunction {
 			throw new LuaError(e);
 		}
 	}
-	
+
 	public static LuaValue find(LuaValue val) {
 		checkTrusted("getTokens");
 		Token t = null;
@@ -173,32 +173,32 @@ public class TokensLib extends TwoArgFunction {
 				return toLua(FindTokenFunctions.getTokens(t, new JSONObject()));
 			}
 			if (json instanceof JSONObject) {
-				return toLua(FindTokenFunctions.getTokens(t, (JSONObject)json));
+				return toLua(FindTokenFunctions.getTokens(t, (JSONObject) json));
 			} else {
 				throw new ParserException("Not a table: " + val.toString());
 			}
 		} catch (ParserException e) {
 			throw new LuaError(e);
 		}
-		
+
 	}
-	
+
 	public static LuaValue addAllToInitiative(Boolean pc, LuaValue duplicates) {
 		if (!MapTool.getParser().isMacroTrusted()) {
 			if (!MapTool.getFrame().getInitiativePanel().hasGMPermission())
-				throw new LuaError(new ParserException(I18N.getText("macro.function.initiative.mustBeGM", "addAll" + (pc!=null? (pc.booleanValue() ? "PCs":"NPCs") :"")+"ToInitiative")));
+				throw new LuaError(new ParserException(I18N.getText("macro.function.initiative.mustBeGM", "addAll" + (pc != null ? (pc.booleanValue() ? "PCs" : "NPCs") : "") + "ToInitiative")));
 		}
 		InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
 		boolean allowDuplicates = false;
 		if (duplicates.isboolean()) {
 			allowDuplicates = duplicates.toboolean();
-		} 
+		}
 		List<Token> tokens = new ArrayList<Token>();
 		for (Token token : list.getZone().getTokens())
 			if ((pc == null || token.getType() == Type.PC && pc.booleanValue() || token.getType() == Type.NPC && !pc.booleanValue())
 					&& (allowDuplicates || list.indexOf(token).isEmpty())) {
 				tokens.add(token);
-			} 
+			}
 		list.insertTokens(tokens);
 		return LuaValue.valueOf(tokens.size());
 	}
@@ -248,7 +248,7 @@ public class TokensLib extends TwoArgFunction {
 			return NIL;
 		}
 	}
-	
+
 	public static final class Tokens2 extends TwoArgFunction {
 		public LuaValue call(LuaValue arg, LuaValue arg2) {
 			switch (opcode) {
@@ -259,15 +259,12 @@ public class TokensLib extends TwoArgFunction {
 		}
 	}
 
-	
-	
-	
 	Globals globals;
 
 	@Override
 	public LuaValue call(LuaValue modname, LuaValue env) {
 		LuaTable t = new LuaTable();
-		bind(t, Tokens1.class, new String[] { "withState", "ownedBy", "visible", "inLayers", "resolve", "find", "addAllToInitiative", "addAllPCsToInitiative", "addAllNPCsToInitiative"});
+		bind(t, Tokens1.class, new String[] { "withState", "ownedBy", "visible", "inLayers", "resolve", "find", "addAllToInitiative", "addAllPCsToInitiative", "addAllNPCsToInitiative" });
 		bind(t, Tokens0.class, new String[] { "exposed", "all", "pc", "npc", "selected", "impersonated", });
 		bind(t, Tokens2.class, new String[] { "image" });
 		env.set("tokens", t);
@@ -288,8 +285,10 @@ public class TokensLib extends TwoArgFunction {
 	private static LuaValue toLua(Collection<? extends Token> tokens) {
 		LuaTable result = new LuaTable();
 		for (Token t : tokens) {
-			if (resolver != null && t == resolver.getTokenInContext()) result.insert(0, new MapToolToken(t, true));
-			else result.insert(0, new MapToolToken(t));
+			if (resolver != null && t == resolver.getTokenInContext())
+				result.insert(0, new MapToolToken(t, true));
+			else
+				result.insert(0, new MapToolToken(t));
 		}
 		return result;
 	}

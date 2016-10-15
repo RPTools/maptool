@@ -17,9 +17,11 @@ import org.luaj.vm2.lib.OneArgFunction;
  */
 public class IsOwner extends OneArgFunction {
 	MapToolToken token;
+
 	public IsOwner(MapToolToken token) {
 		this.token = token;
 	}
+
 	/* (non-Javadoc)
 	 * @see org.luaj.vm2.lib.ZeroArgFunction#call()
 	 */

@@ -644,7 +644,7 @@ public class MapToolLineParser {
 		if (line.length() == 0) {
 			return "";
 		}
-		
+
 		Stack<Token> contextTokenStack = new Stack<Token>();
 		enterContext(context);
 		MapToolVariableResolver resolver = null;

@@ -18,9 +18,11 @@ import org.luaj.vm2.lib.TwoArgFunction;
  */
 public class MatchingProperties extends TwoArgFunction {
 	MapToolToken token;
+
 	public MatchingProperties(MapToolToken token) {
 		this.token = token;
 	}
+
 	/* (non-Javadoc)
 	 * @see org.luaj.vm2.lib.OneArgFunction#call(org.luaj.vm2.LuaValue)
 	 */
@@ -30,7 +32,7 @@ public class MatchingProperties extends TwoArgFunction {
 			throw new LuaError(I18N.getText("macro.function.general.noPerm", "getMatchingProperties"));
 		}
 		LuaTable result = new LuaTable();
-		
+
 		String pat = ".*";
 		if (pattern.isstring()) {
 			pat = pattern.tojstring();
@@ -39,7 +41,7 @@ public class MatchingProperties extends TwoArgFunction {
 		if (raw.isboolean()) {
 			r = raw.checkboolean();
 		}
-		for (String prop: TokenPropertyFunctions.getPropertyNames(token.getToken(), pat, r)) {
+		for (String prop : TokenPropertyFunctions.getPropertyNames(token.getToken(), pat, r)) {
 			result.insert(0, LuaValue.valueOf(prop));
 		}
 		return result;

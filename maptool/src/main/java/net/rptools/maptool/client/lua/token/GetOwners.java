@@ -17,9 +17,11 @@ import org.luaj.vm2.lib.ZeroArgFunction;
  */
 public class GetOwners extends ZeroArgFunction {
 	MapToolToken token;
+
 	public GetOwners(MapToolToken token) {
 		this.token = token;
 	}
+
 	/* (non-Javadoc)
 	 * @see org.luaj.vm2.lib.ZeroArgFunction#call()
 	 */
@@ -29,7 +31,7 @@ public class GetOwners extends ZeroArgFunction {
 			throw new LuaError(I18N.getText("macro.function.general.noPerm", "getOwners"));
 		}
 		LuaTable owners = new LuaTable();
-		for (String owner: token.getToken().getOwners()) {
+		for (String owner : token.getToken().getOwners()) {
 			owners.insert(0, LuaValue.valueOf(owner));
 		}
 		return owners;

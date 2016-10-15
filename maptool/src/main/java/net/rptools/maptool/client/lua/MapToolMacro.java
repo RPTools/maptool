@@ -23,6 +23,7 @@ import org.luaj.vm2.LuaValue;
 
 public class MapToolMacro extends LuaTable {
 	private MapToolVariableResolver resolver;
+
 	public MapToolMacro(MapToolVariableResolver resolver) {
 		Object args = null;
 		try {
@@ -35,10 +36,20 @@ public class MapToolMacro extends LuaTable {
 		super.rawset(LuaValue.valueOf("argCount"), new ArgCount(resolver));
 		this.resolver = resolver;
 	}
-	public LuaValue setmetatable(LuaValue metatable) { return error("table is read-only"); }
-	public void set(int key, LuaValue value) { error("table is read-only"); }
-	public void rawset(int key, LuaValue value) { error("table is read-only"); }
-	public void rawset(LuaValue key, LuaValue value) { 
+
+	public LuaValue setmetatable(LuaValue metatable) {
+		return error("table is read-only");
+	}
+
+	public void set(int key, LuaValue value) {
+		error("table is read-only");
+	}
+
+	public void rawset(int key, LuaValue value) {
+		error("table is read-only");
+	}
+
+	public void rawset(LuaValue key, LuaValue value) {
 		if (key.isstring()) {
 			if (key.checkjstring().equals("return")) {
 				Object val;
@@ -53,24 +64,29 @@ public class MapToolMacro extends LuaTable {
 					throw new LuaError(e);
 				}
 				return;
-			}				
+			}
 		}
-		error("table is read-only, except for return"); 
+		error("table is read-only, except for return");
 	}
-	public LuaValue remove(int pos) { return error("table is read-only"); }
-		
+
+	public LuaValue remove(int pos) {
+		return error("table is read-only");
+	}
+
 	public String tojstring() {
 		return "Macro Properties";
 	}
-	
+
 	@Override
 	public LuaValue tostring() {
 		return LuaValue.valueOf(tojstring());
 	}
+
 	@Override
 	public LuaString checkstring() {
 		return LuaValue.valueOf(tojstring());
 	}
+
 	@Override
 	public String toString() {
 		return tojstring();
