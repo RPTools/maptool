@@ -58,7 +58,7 @@ public class VBL_Functions extends AbstractFunction {
 		return instance;
 	}
 
-	private static enum Shape {
+	public static enum Shape {
 		RECTANGLE, POLYGON, CROSS, CIRCLE
 	};
 
@@ -158,7 +158,7 @@ public class VBL_Functions extends AbstractFunction {
 	 *             If the minimum required parameters are not present in the
 	 *             JSON, throw ParserException
 	 */
-	private void drawRectangleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
+	public static void drawRectangleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Rectangle]";
 		// Required Parameters
 		String requiredParms[] = { "x", "y", "w", "h" };
@@ -253,7 +253,7 @@ public class VBL_Functions extends AbstractFunction {
 		renderVBL(renderer, area, erase);
 	}
 
-	private void applyTranslate(String funcname, AffineTransform at, JSONObject vblObject, String[] params) throws ParserException {
+	private static void applyTranslate(String funcname, AffineTransform at, JSONObject vblObject, String[] params) throws ParserException {
 		if (jsonKeysExist(vblObject, params, funcname)) {
 			double tx = getJSONdouble(vblObject, "tx", funcname);
 			double ty = getJSONdouble(vblObject, "ty", funcname);
@@ -261,7 +261,7 @@ public class VBL_Functions extends AbstractFunction {
 		}
 	}
 
-	private void applyScale(String funcname, AffineTransform at, JSONObject vblObject, String[] params) throws ParserException {
+	private static void applyScale(String funcname, AffineTransform at, JSONObject vblObject, String[] params) throws ParserException {
 		if (jsonKeysExist(vblObject, params, funcname)) {
 			double sx = getJSONdouble(vblObject, "sx", funcname);
 			double sy = getJSONdouble(vblObject, "sy", funcname);
@@ -284,7 +284,7 @@ public class VBL_Functions extends AbstractFunction {
 	 *             If the minimum required parameters are not present in the
 	 *             JSON, throw ParserException
 	 */
-	private void drawPolygonVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
+	public static void drawPolygonVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Polygon]";
 		String requiredParms[] = { "points" };
 		if (!jsonKeysExist(vblObject, requiredParms, funcname))
@@ -405,7 +405,7 @@ public class VBL_Functions extends AbstractFunction {
 	 *             If the minimum required parameters are not present in the
 	 *             JSON, throw ParserException
 	 */
-	private void drawCrossVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
+	public static void drawCrossVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Cross]";
 		// Required Parameters
 		String requiredParms[] = { "x", "y", "w", "h" };
@@ -492,7 +492,7 @@ public class VBL_Functions extends AbstractFunction {
 	 *             If the minimum required parameters are not present in the
 	 *             JSON, throw ParserException
 	 */
-	private void drawCircleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
+	public static void drawCircleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Circle]";
 		// Required Parameters
 		String requiredParms[] = { "x", "y", "radius", "sides" };
@@ -588,7 +588,7 @@ public class VBL_Functions extends AbstractFunction {
 	 *             If the minimum required parameters are not present in the
 	 *             JSON, throw ParserException
 	 */
-	private Area getVBL(ZoneRenderer renderer, JSONObject vblObject) throws ParserException {
+	public static Area getVBL(ZoneRenderer renderer, JSONObject vblObject) throws ParserException {
 		String funcname = "getVBL[Rectangle]";
 		// Required Parameters
 		String requiredParms[] = { "x", "y", "w", "h" };
@@ -678,7 +678,7 @@ public class VBL_Functions extends AbstractFunction {
 	 * @param simpleJSON
 	 *            Boolean to set output to array of points or key/value pairs
 	 */
-	private String getAreaPoints(Area area, boolean simpleJSON) {
+	public static String getAreaPoints(Area area, boolean simpleJSON) {
 		ArrayList<double[]> areaPoints = new ArrayList<double[]>();
 		double[] coords = new double[6];
 
@@ -770,7 +770,7 @@ public class VBL_Functions extends AbstractFunction {
 	 * @return boolean Return true only if all keys exist, otherwise return
 	 *         false if any key is missing.
 	 */
-	private boolean jsonKeysExist(JSONObject jsonObject, String[] parmList, String funcname) {
+	private static boolean jsonKeysExist(JSONObject jsonObject, String[] parmList, String funcname) {
 		for (String parm : parmList) {
 			if (!jsonObject.containsKey(parm))
 				return false;
@@ -788,7 +788,7 @@ public class VBL_Functions extends AbstractFunction {
 	 *            The string value to look for in the JSON.
 	 * @return An int
 	 */
-	private int getJSONint(JSONObject jsonObject, String key, String funcname) throws ParserException {
+	private static int getJSONint(JSONObject jsonObject, String key, String funcname) throws ParserException {
 		int value = 0;
 
 		try {
@@ -821,7 +821,7 @@ public class VBL_Functions extends AbstractFunction {
 	 *            The string value to look for in the JSON.
 	 * @return A double
 	 */
-	private double getJSONdouble(JSONObject jsonObject, String key, String funcname) throws ParserException {
+	private static double getJSONdouble(JSONObject jsonObject, String key, String funcname) throws ParserException {
 		double value = key.equals("facing") ? -90 : 0;
 		try {
 			if (jsonObject.containsKey(key)) {
@@ -854,7 +854,7 @@ public class VBL_Functions extends AbstractFunction {
 	 * @param erase
 	 *            Set to true to erase the VBL, otherwise draw it
 	 */
-	private void renderVBL(ZoneRenderer renderer, Area area, boolean erase) {
+	private static void renderVBL(ZoneRenderer renderer, Area area, boolean erase) {
 		if (erase) {
 			renderer.getZone().removeTopology(area);
 			MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);

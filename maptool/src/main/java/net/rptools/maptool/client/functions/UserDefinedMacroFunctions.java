@@ -48,9 +48,9 @@ public class UserDefinedMacroFunctions implements Function {
 		return nameCounter++;
 	}
 
-	private static class FunctionDefinition {
+	public static class FunctionDefinition {
 
-		public FunctionDefinition(String macroName, boolean ignoreOutput, boolean newVariableContext) {
+		private FunctionDefinition(String macroName, boolean ignoreOutput, boolean newVariableContext) {
 			this.macroName = macroName;
 			this.ignoreOutput = ignoreOutput;
 			this.newVariableContext = newVariableContext;
@@ -59,6 +59,16 @@ public class UserDefinedMacroFunctions implements Function {
 		String macroName;
 		boolean ignoreOutput;
 		boolean newVariableContext;
+		public String getMacroName() {
+			return macroName;
+		}
+		public boolean isIgnoreOutput() {
+			return ignoreOutput;
+		}
+		public boolean isNewVariableContext() {
+			return newVariableContext;
+		}
+		
 	}
 
 	private static class FunctionRedefinition {
@@ -236,4 +246,10 @@ public class UserDefinedMacroFunctions implements Function {
 			}
 		}
 	}
+
+	public Map<String, FunctionDefinition> getUserDefinedFunctions() {
+		return userDefinedFunctions;
+	}
+	
+	
 }

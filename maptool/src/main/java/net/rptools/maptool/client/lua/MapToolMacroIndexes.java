@@ -5,6 +5,7 @@ package net.rptools.maptool.client.lua;
 
 import java.util.ArrayList;
 
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.parser.ParserException;
@@ -23,9 +24,11 @@ import org.luaj.vm2.Varargs;
 
 public class MapToolMacroIndexes extends LuaTable {
 	private final MapToolToken token;
+	private MapToolVariableResolver resolver;
 
-	public MapToolMacroIndexes(MapToolToken token) {
+	public MapToolMacroIndexes(MapToolToken token, MapToolVariableResolver resolver) {
 		this.token = token;
+		this.resolver = resolver;
 	}
 
 	public LuaValue setmetatable(LuaValue metatable) {
@@ -106,7 +109,7 @@ public class MapToolMacroIndexes extends LuaTable {
 		if (token.isSelfOrTrusted()) {
 			if (key.isint()) {
 				if (token.getToken().getMacroPropertiesMap(true).containsKey(key.toint())) {
-					return new Macro(token, key.toint());
+					return new Macro(token, key.toint(), resolver);
 				}
 			}
 		}
@@ -152,7 +155,7 @@ public class MapToolMacroIndexes extends LuaTable {
 			}
 			for (Integer i : token.getToken().getMacroPropertiesMap(false).keySet()) {
 				if (found && !ObjectUtils.equals(name, i)) {
-					return varargsOf(valueOf(i), new Macro(token, i));
+					return varargsOf(valueOf(i), new Macro(token, i, resolver));
 				}
 				if (!found && name.equals(i)) {
 					found = true;

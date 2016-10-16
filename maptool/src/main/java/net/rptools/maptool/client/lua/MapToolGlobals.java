@@ -3,6 +3,7 @@
  */
 package net.rptools.maptool.client.lua;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +28,13 @@ import net.rptools.parser.ParserException;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.luaj.vm2.Globals;
+import org.luaj.vm2.LoadState;
+import org.luaj.vm2.LuaClosure;
 import org.luaj.vm2.LuaError;
+import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Prototype;
 
 /**
  * @author Maluku
@@ -39,12 +44,31 @@ public class MapToolGlobals extends Globals {
 	MapToolVariableResolver resolver;
 	private LuaValue m_campaignProps = null;
 
+//	private class CompilerUndumper implements Undumper {
+//		@Override
+//		public Prototype undump(InputStream stream, String chunkname)
+//				throws IOException {
+//			return compiler.compile(stream, chunkname);
+//		}
+//		
+//	}
+	
+	private class SimpleLoader implements Loader {
+
+		@Override
+		public LuaFunction load(Prototype prototype, String chunkname, LuaValue env) throws IOException {
+			return new LuaClosure(prototype, env);
+		}
+	}
+	
 	/**
 	 * @param res 
 	 * 
 	 */
 	public MapToolGlobals(MapToolVariableResolver res) {
 		resolver = res;
+		undumper = LoadState.instance;
+		loader = new SimpleLoader();
 	}
 
 	@Override

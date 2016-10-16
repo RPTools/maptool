@@ -3,13 +3,17 @@
  */
 package net.rptools.maptool.client.lua;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.parser.ParserException;
+import net.sf.json.JSONArray;
 
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaString;
@@ -135,10 +139,12 @@ public class Macro extends LuaTable
 
 	private int macro;
 	private final MapToolToken token;
+	private MapToolVariableResolver resolver;
 
-	public Macro(MapToolToken token, int macroindex) {
+	public Macro(MapToolToken token, int macroindex, MapToolVariableResolver resolver) {
 		this.macro = macroindex;
 		this.token = token;
+		this.resolver = resolver;
 		init();
 	}
 
@@ -321,8 +327,69 @@ public class Macro extends LuaTable
 	}
 
 	@Override
+	public LuaValue call() {
+		return invoke(LuaValue.NONE).arg1();
+	}
+	
+	@Override
+	public LuaValue call(LuaValue arg) {
+		return invoke(varargsOf(arg, NONE)).arg1();
+	}
+	
+	@Override
+	public LuaValue call(LuaValue arg1, LuaValue arg2) {
+		return invoke(varargsOf(arg1, arg2)).arg1();
+	}
+	
+	@Override
+	public LuaValue call(LuaValue arg1, LuaValue arg2, LuaValue arg3) {
+		return invoke(varargsOf(arg1, arg2, arg3)).arg1();
+	}
+	
+	@Override
+	public LuaValue call(String arg) {
+		return invoke(varargsOf(valueOf(arg), NONE)).arg1();
+	}
+	
+	@Override
 	public Varargs invoke(Varargs args) {
-		return call(args.arg(1));
+		MacroButtonProperties mbp = token.getToken().getMacro(macro, true);
+		if (mbp == null) {
+			error("Mo Macro at " + toString());
+		}
+		MapToolVariableResolver macroResolver = new MapToolVariableResolver(resolver.getTokenInContext());
+		MapToolMacroContext macroContext = new MapToolMacroContext(mbp.getLabel(), "token", MapTool.getPlayer().isGM());
+		String macroBody = mbp.getCommand();
+		return runMacro(macroResolver, macroContext, macroBody, args);
+	}
+
+	public static Varargs runMacro(MapToolVariableResolver macroResolver,
+			MapToolMacroContext macroContext, String macroBody, Varargs args) {
+		try {
+			JSONArray arr = new JSONArray();
+			macroResolver.setVariable("macro.args.num", BigDecimal.valueOf(args.narg()));
+			for (int i = 1; i <= args.narg(); i++) {
+				Object res = LuaConverters.toJson(args.arg(i));
+				macroResolver.setVariable("macro.args." + i, res);
+				arr.add(res);
+			}
+			macroResolver.setVariable("macro.args", arr);
+			macroResolver.setVariable("macro.return", "");
+			String macroOutput = MapTool.getParser().runMacroBlock(macroResolver, macroResolver.getTokenInContext(), macroBody, macroContext);
+			// Copy the return value of the macro into our current variable scope.
+			Object retval = macroResolver.getVariable("macro.return");
+			
+			if (macroOutput != null) {
+				// Note! Its important that trim is not used to replace the following two lines.
+				// If you use String.trim() you may inadvertnatly remove the special characters
+				// used to mark rolls.
+				macroOutput = macroOutput.replaceAll("^\\s+", "");
+				macroOutput = macroOutput.replaceAll("\\s+$", "");
+			}
+			return varargsOf(new LuaValue[] {LuaConverters.fromJson(retval), valueOf(macroOutput), LuaConverters.fromObj(retval)});
+		} catch (ParserException e) {
+			throw new LuaError(e);
+		}
 	}
 
 	public String tojstring() {

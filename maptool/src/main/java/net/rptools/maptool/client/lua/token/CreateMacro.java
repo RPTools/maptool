@@ -3,6 +3,7 @@
  */
 package net.rptools.maptool.client.lua.token;
 
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.lua.LuaConverters;
 import net.rptools.maptool.client.lua.Macro;
 import net.rptools.maptool.client.lua.MapToolToken;
@@ -22,9 +23,11 @@ import org.luaj.vm2.lib.ThreeArgFunction;
  */
 public class CreateMacro extends ThreeArgFunction {
 	MapToolToken token;
+	private MapToolVariableResolver resolver;
 
-	public CreateMacro(MapToolToken token) {
+	public CreateMacro(MapToolToken token, MapToolVariableResolver resolver) {
 		this.token = token;
+		this.resolver = resolver;
 	}
 
 	/* (non-Javadoc)
@@ -82,7 +85,7 @@ public class CreateMacro extends ThreeArgFunction {
 			}
 		}
 		mbp.save();
-		return new Macro(this.token, index);
+		return new Macro(this.token, index, resolver);
 	}
 
 }

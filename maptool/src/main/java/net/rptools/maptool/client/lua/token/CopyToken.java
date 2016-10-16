@@ -101,11 +101,11 @@ public class CopyToken extends VarArgFunction {
 		}
 		MapTool.getFrame().getCurrentZoneRenderer().flushLight();
 		if (numberCopies == 1) {
-			return new MapToolToken(resultTokens.get(0));
+			return new MapToolToken(resultTokens.get(0), resolver);
 		} else {
 			LuaTable result = new LuaTable();
 			for (Token t : resultTokens) {
-				result.insert(0, new MapToolToken(t));
+				result.insert(0, new MapToolToken(t, resolver));
 			}
 			return result;
 		}

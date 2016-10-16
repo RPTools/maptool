@@ -163,13 +163,20 @@ public class LuaConverters {
 	}
 
 	public static LuaValue fromJson(Object obj) {
-		Object im = JSONMacroFunctions.asJSON(obj);
-		if (im instanceof JSONObject) {
-			return fromJson((JSONObject) im, new HashSet<Object>());
-		} else if (im instanceof JSONArray) {
-			return fromJson((JSONArray) im, new HashSet<Object>());
+		if (obj instanceof JSONObject) {
+			return fromJson((JSONObject) obj, new HashSet<Object>());
+		} else if (obj instanceof JSONArray) {
+			return fromJson((JSONArray) obj, new HashSet<Object>());
 		}
-		return fromObj(im);
+		if (obj instanceof String) {
+			Object im = JSONMacroFunctions.convertToJSON((String) obj);
+			if (im instanceof JSONObject) {
+				return fromJson((JSONObject) im, new HashSet<Object>());
+			} else if (im instanceof JSONArray) {
+				return fromJson((JSONArray) im, new HashSet<Object>());
+			}
+		}
+		return fromObj(obj);
 
 	}
 

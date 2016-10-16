@@ -1496,7 +1496,7 @@ public class MapToolLineParser {
 	 *            the token.
 	 * @return true if it is secure.
 	 */
-	private boolean isSecure(String macroName, Token token) {
+	public boolean isSecure(String macroName, Token token) {
 		MacroButtonProperties mbp = token.getMacro(macroName, false);
 
 		// Macro button may be null as we could be running the unknown macro
@@ -1529,7 +1529,7 @@ public class MapToolLineParser {
 	}
 
 	/** Executes a string as a block of macro code. */
-	String runMacroBlock(MapToolVariableResolver resolver, Token tokenInContext, String macroBody, MapToolMacroContext context) throws ParserException {
+	public String runMacroBlock(MapToolVariableResolver resolver, Token tokenInContext, String macroBody, MapToolMacroContext context) throws ParserException {
 		String macroOutput = parseLine(resolver, tokenInContext, macroBody, context);
 		return macroOutput;
 	}
@@ -1678,7 +1678,7 @@ public class MapToolLineParser {
 		return retval;
 	}
 
-	private ExpressionParser createParser(VariableResolver resolver, boolean hasTokenInContext) {
+	public ExpressionParser createParser(VariableResolver resolver, boolean hasTokenInContext) {
 		ExpressionParser parser = new ExpressionParser(resolver);
 		parser.getParser().addFunctions(mapToolParserFunctions);
 		return parser;

@@ -13,6 +13,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.functions.TokenImage;
+import net.rptools.maptool.client.lua.token.SelectToken;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -28,6 +29,7 @@ import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.lib.LibFunction;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 
@@ -36,39 +38,43 @@ import org.luaj.vm2.lib.TwoArgFunction;
  * 
  */
 public class TokensLib extends TwoArgFunction {
-	public static MapToolVariableResolver resolver;
+	public MapToolVariableResolver resolver;
 
-	public static LuaValue exposed() {
+	public TokensLib(MapToolVariableResolver res) {
+		this.resolver = res;
+	}
+
+	public LuaValue exposed() {
 		checkTrusted("exposed");
 		Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 		return toLua(zone
 				.getTokensFiltered(new FindTokenFunctions.ExposedFilter(zone)));
 	}
 
-	public static LuaValue all() {
+	public LuaValue all() {
 		checkTrusted("all");
 		return toLua(MapTool.getFrame().getCurrentZoneRenderer().getZone()
 				.getTokensFiltered(new FindTokenFunctions.AllFilter()));
 	}
 
-	public static LuaValue pc() {
+	public LuaValue pc() {
 		checkTrusted("pc");
 		return toLua(MapTool.getFrame().getCurrentZoneRenderer().getZone()
 				.getTokensFiltered(new FindTokenFunctions.PCFilter()));
 	}
 
-	public static LuaValue npc() {
+	public LuaValue npc() {
 		checkTrusted("npc");
 		return toLua(MapTool.getFrame().getCurrentZoneRenderer().getZone()
 				.getTokensFiltered(new FindTokenFunctions.NPCFilter()));
 	}
 
-	public static LuaValue selected() {
+	public LuaValue selected() {
 		return toLua(MapTool.getFrame().getCurrentZoneRenderer()
 				.getSelectedTokensList());
 	}
 
-	public static LuaValue impersonated() {
+	public LuaValue impersonated() {
 		Token t;
 		GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
 		if (guid != null)
@@ -84,10 +90,10 @@ public class TokensLib extends TwoArgFunction {
 		if (t == null) {
 			return LuaValue.NIL;
 		}
-		return new MapToolToken(t, true);
+		return new MapToolToken(t, true, resolver);
 	}
 
-	public static LuaValue withState(LuaValue val) {
+	public LuaValue withState(LuaValue val) {
 		checkTrusted("withState");
 		return toLua(MapTool
 				.getFrame()
@@ -97,7 +103,7 @@ public class TokensLib extends TwoArgFunction {
 						new FindTokenFunctions.StateFilter(val.checkjstring())));
 	}
 
-	public static LuaValue ownedBy(LuaValue val) {
+	public LuaValue ownedBy(LuaValue val) {
 		checkTrusted("ownedBy");
 		return toLua(MapTool
 				.getFrame()
@@ -107,7 +113,7 @@ public class TokensLib extends TwoArgFunction {
 						new FindTokenFunctions.OwnedFilter(val.checkjstring())));
 	}
 
-	public static LuaValue visible(LuaValue val) {
+	public LuaValue visible(LuaValue val) {
 		ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
 		Zone zone = zoneRenderer.getZone();
 		List<Token> tokenList = new ArrayList<Token>();
@@ -117,7 +123,7 @@ public class TokensLib extends TwoArgFunction {
 		return toLua(tokenList);
 	}
 
-	public static LuaValue inLayers(LuaValue val) {
+	public LuaValue inLayers(LuaValue val) {
 		checkTrusted("inLayers");
 		ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
 		Zone zone = zoneRenderer.getZone();
@@ -133,16 +139,16 @@ public class TokensLib extends TwoArgFunction {
 				layers)));
 	}
 
-	public static LuaValue resolve(LuaValue val) {
+	public LuaValue resolve(LuaValue val) {
 		Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 		Token token = zone.resolveToken(val.checkjstring());
 		if (token != null) {
-			return new MapToolToken(token);
+			return new MapToolToken(token, resolver);
 		}
 		return LuaValue.NIL;
 	}
 
-	public static LuaValue image(LuaValue val, LuaValue size) {
+	public LuaValue image(LuaValue val, LuaValue size) {
 		try {
 			Token t = TokenImage.findImageToken(val.checkjstring(), "tokens.getImage");
 			if (t != null && t.getImageAssetId() != null) {
@@ -161,7 +167,7 @@ public class TokensLib extends TwoArgFunction {
 		}
 	}
 
-	public static LuaValue find(LuaValue val) {
+	public LuaValue find(LuaValue val) {
 		checkTrusted("getTokens");
 		Token t = null;
 		if (resolver != null) {
@@ -183,7 +189,7 @@ public class TokensLib extends TwoArgFunction {
 
 	}
 
-	public static LuaValue addAllToInitiative(Boolean pc, LuaValue duplicates) {
+	public LuaValue addAllToInitiative(Boolean pc, LuaValue duplicates) {
 		if (!MapTool.getParser().isMacroTrusted()) {
 			if (!MapTool.getFrame().getInitiativePanel().hasGMPermission())
 				throw new LuaError(new ParserException(I18N.getText("macro.function.initiative.mustBeGM", "addAll" + (pc != null ? (pc.booleanValue() ? "PCs" : "NPCs") : "") + "ToInitiative")));
@@ -203,7 +209,12 @@ public class TokensLib extends TwoArgFunction {
 		return LuaValue.valueOf(tokens.size());
 	}
 
-	public static final class Tokens0 extends OneArgFunction {
+	public final class Tokens0 extends OneArgFunction {
+		public Tokens0(int opcode, String name) {
+			this.opcode = opcode;
+			this.name = name;
+		}
+
 		public LuaValue call(LuaValue arg) {
 			switch (opcode) {
 			case 0:
@@ -223,7 +234,12 @@ public class TokensLib extends TwoArgFunction {
 		}
 	}
 
-	public static final class Tokens1 extends OneArgFunction {
+	public final class Tokens1 extends OneArgFunction {
+		public Tokens1(int opcode, String name) {
+			this.opcode = opcode;
+			this.name = name;
+		}
+
 		public LuaValue call(LuaValue arg) {
 			switch (opcode) {
 			case 0:
@@ -249,7 +265,12 @@ public class TokensLib extends TwoArgFunction {
 		}
 	}
 
-	public static final class Tokens2 extends TwoArgFunction {
+	public final class Tokens2 extends TwoArgFunction {
+		public Tokens2(int opcode, String name) {
+			this.opcode = opcode;
+			this.name = name;
+		}
+
 		public LuaValue call(LuaValue arg, LuaValue arg2) {
 			switch (opcode) {
 			case 0:
@@ -264,15 +285,43 @@ public class TokensLib extends TwoArgFunction {
 	@Override
 	public LuaValue call(LuaValue modname, LuaValue env) {
 		LuaTable t = new LuaTable();
-		bind(t, Tokens1.class, new String[] { "withState", "ownedBy", "visible", "inLayers", "resolve", "find", "addAllToInitiative", "addAllPCsToInitiative", "addAllNPCsToInitiative" });
-		bind(t, Tokens0.class, new String[] { "exposed", "all", "pc", "npc", "selected", "impersonated", });
-		bind(t, Tokens2.class, new String[] { "image" });
+		
+		
+		bind(t, 1, new String[] { "withState", "ownedBy", "visible", "inLayers", "resolve", "find", "addAllToInitiative", "addAllPCsToInitiative", "addAllNPCsToInitiative" });
+		bind(t, 0, new String[] { "exposed", "all", "pc", "npc", "selected", "impersonated", });
+		bind(t, 2, new String[] { "image" });
+		t.set("select", new SelectToken(false));
+		t.set("deselect", new SelectToken(true));
 		env.set("tokens", t);
 		env.get("package").get("loaded").set("tokens", t);
 		return t;
 	}
 
-	public static void checkTrusted(String cls) {
+	protected void bind(LuaValue env, int cls,  String[] names ) {
+		bind( env, cls, names, 0 );
+	}
+	
+	protected void bind(LuaValue env, int cls,  String[] names, int firstopcode ) {
+		try {
+			for ( int i=0, n=names.length; i<n; i++ ) {
+				LibFunction f = newInstance(cls, firstopcode + i, names[i]);
+				env.set(names[i], f);
+			}
+		} catch ( Exception e ) {
+			throw new LuaError( "bind failed: "+e );
+		}
+	}	
+	
+	private LibFunction newInstance(int cls, int opcode, String name) {
+		switch (cls) {
+		case 1: return new Tokens1(opcode, name);
+		case 2: return new Tokens2(opcode, name);
+		case 0: return new Tokens0(opcode, name);
+		default: throw new IllegalArgumentException("Unknown class: " + cls);
+		}
+	}
+
+	public void checkTrusted(String cls) {
 		if (!MapTool.getParser().isMacroTrusted()) {
 			if (!MapTool.getParser().isMacroTrusted()) {
 				throw new LuaError(new ParserException(I18N.getText(
@@ -282,13 +331,13 @@ public class TokensLib extends TwoArgFunction {
 
 	}
 
-	private static LuaValue toLua(Collection<? extends Token> tokens) {
+	private LuaValue toLua(Collection<? extends Token> tokens) {
 		LuaTable result = new LuaTable();
 		for (Token t : tokens) {
 			if (resolver != null && t == resolver.getTokenInContext())
-				result.insert(0, new MapToolToken(t, true));
+				result.insert(0, new MapToolToken(t, true, resolver));
 			else
-				result.insert(0, new MapToolToken(t));
+				result.insert(0, new MapToolToken(t, resolver));
 		}
 		return result;
 	}

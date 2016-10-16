@@ -9,6 +9,7 @@ import java.util.Locale;
 
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ReadOnlyLuaTable;
 import net.rptools.maptool.client.functions.TokenGMNameFunction;
 import net.rptools.maptool.client.functions.TokenHaloFunction;
@@ -117,14 +118,16 @@ public class MapToolToken extends LuaTable implements IRepresent {
 	private Token token;
 	private String lastfunc = "";
 	private LuaTable m_lightsTable;
+	private MapToolVariableResolver resolver;
 
-	public MapToolToken(Token t) {
-		this(t, false);
+	public MapToolToken(Token t, MapToolVariableResolver resolver) {
+		this(t, false, resolver);
 	}
 
-	public MapToolToken(Token t, boolean mainToken) {
+	public MapToolToken(Token t, boolean mainToken, MapToolVariableResolver resolver) {
 		token = t;
 		isSelf = mainToken;
+		this.resolver = resolver;
 	}
 
 	public LuaValue setmetatable(LuaValue metatable) {
@@ -628,7 +631,7 @@ public class MapToolToken extends LuaTable implements IRepresent {
 				if (!isSelf && !MapTool.getParser().isMacroTrusted()) {
 					throw new ParserException(I18N.getText("macro.function.general.noPerm", "token.getMacros"));
 				}
-				return new MapToolMacroIndexes(this);
+				return new MapToolMacroIndexes(this, resolver);
 			case F_ADDTOINITIATIVE:
 				return new AddToInitative(this);
 			case F_BRINGTOFRONT:
@@ -673,7 +676,7 @@ public class MapToolToken extends LuaTable implements IRepresent {
 			case F_MOVE:
 				return new Move(this);
 			case F_CREATEMACRO:
-				return new CreateMacro(this);
+				return new CreateMacro(this, resolver);
 
 			}
 		} catch (ParserException e) {

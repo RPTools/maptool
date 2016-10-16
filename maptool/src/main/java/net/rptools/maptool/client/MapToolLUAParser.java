@@ -3,12 +3,14 @@ package net.rptools.maptool.client;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 
 import net.rptools.maptool.client.lua.DiceLib;
 import net.rptools.maptool.client.lua.FunctionalTableLib;
 import net.rptools.maptool.client.lua.LuaConverters;
 import net.rptools.maptool.client.lua.MapToolBaseLib;
+import net.rptools.maptool.client.lua.MapToolFunctions;
 import net.rptools.maptool.client.lua.MapToolGlobals;
 import net.rptools.maptool.client.lua.MapToolMacro;
 import net.rptools.maptool.client.lua.MapToolMaps;
@@ -16,8 +18,10 @@ import net.rptools.maptool.client.lua.MapToolTables;
 import net.rptools.maptool.client.lua.MapToolToken;
 import net.rptools.maptool.client.lua.TokensLib;
 import net.rptools.maptool.client.lua.UILib;
+import net.rptools.maptool.client.lua.VBLLib;
 import net.rptools.maptool.client.lua.misc.Broadcast;
 import net.rptools.maptool.client.lua.misc.Decode;
+import net.rptools.maptool.client.lua.misc.DefineFunction;
 import net.rptools.maptool.client.lua.misc.Encode;
 import net.rptools.maptool.client.lua.misc.Export;
 import net.rptools.maptool.client.lua.misc.FromJson;
@@ -28,7 +32,6 @@ import net.rptools.maptool.client.lua.misc.Print;
 import net.rptools.maptool.client.lua.misc.Println;
 import net.rptools.maptool.client.lua.misc.ToJson;
 import net.rptools.maptool.client.lua.misc.ToStr;
-import net.rptools.maptool.client.lua.token.SelectToken;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
 
@@ -38,6 +41,8 @@ import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaFunction;
 import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Prototype;
+import org.luaj.vm2.compiler.DumpState;
 import org.luaj.vm2.compiler.LuaC;
 import org.luaj.vm2.lib.BaseLib;
 import org.luaj.vm2.lib.Bit32Lib;
@@ -55,7 +60,7 @@ import org.luaj.vm2.lib.jse.JseMathLib;
  *
  */
 public class MapToolLUAParser {
-	public static final String LUA_HEADER = "--{abort(0)} LUA--";
+	public static final String LUA_HEADER = "--{assert(0, \"LUA\")}--";
 	static Globals globals;
 
 	public MapToolLUAParser() {
@@ -80,10 +85,10 @@ public class MapToolLUAParser {
 		user_globals.load(new StringLib());
 		user_globals.load(new JseMathLib());
 		user_globals.load(new JseMathLib());
-		user_globals.load(new TokensLib());
+		user_globals.load(new TokensLib(res));
 		user_globals.load(new UILib());
 		user_globals.load(new DiceLib());
-		TokensLib.resolver = res;
+		user_globals.load(new VBLLib());
 		user_globals.set("print", new Print(base, user_globals));
 		user_globals.set("println", new Println(base, user_globals));
 		user_globals.set("fromJSON", new FromJson());
@@ -92,11 +97,10 @@ public class MapToolLUAParser {
 		user_globals.set("toStr", new ToStr());
 		user_globals.set("encode", new Encode());
 		user_globals.set("decode", new Decode());
+		user_globals.set("defineFunction", new DefineFunction(res));
 		user_globals.set("export", new Export(res));
-		user_globals.set("token", new MapToolToken(tokenInContext, true));
+		user_globals.set("token", new MapToolToken(tokenInContext, true, res));
 		//		user_globals.set("copyToken", new CopyToken(res));
-		user_globals.set("selectTokens", new SelectToken(false));
-		user_globals.set("deselectTokens", new SelectToken(true));
 		user_globals.set("tokenProperties", LuaValue.NIL);
 		user_globals.set("macro", new MapToolMacro(res));
 		user_globals.set("isGM", new IsGM());
@@ -104,17 +108,21 @@ public class MapToolLUAParser {
 		user_globals.set("broadcast", new Broadcast());
 		user_globals.set("maps", new MapToolMaps(res));
 		user_globals.set("tables", new MapToolTables());
+		user_globals.set("functions", new MapToolFunctions(res));
 		user_globals.set("_MAPTOOL_LUA_HEADER", LUA_HEADER);
 
 		ByteArrayOutputStream bo = new ByteArrayOutputStream();
 		user_globals.STDOUT = new PrintStream(bo);
 		try {
+			if (line.startsWith(LUA_HEADER)) {
+				line = line.substring(LUA_HEADER.length());
+			}
 			LuaValue chunk = globals.load(new ByteArrayInputStream(line.getBytes()),
 					(context != null ? context.getName() + "@" + context.getSouce() : "Chat") + (tokenInContext != null ? " (" + tokenInContext.getName() + ":" + tokenInContext.getId() + ")" : ""),
 					"t", user_globals);
 			LuaValue macroReturn = chunk.call();
-			if (macroReturn.isnoneornil(1)) {
-				res.setVariable("macro.return", null);
+			if (macroReturn.isnoneornil(1) ) {
+//				res.setVariable("macro.return", null);
 			} else {
 				res.setVariable("macro.return", LuaConverters.toJson(macroReturn));
 			}
@@ -139,5 +147,14 @@ public class MapToolLUAParser {
 		}
 		return bo.toString();
 	}
+	
+	public static InputStream compile(InputStream in, String location, LuaValue user_globals) throws IOException {
+		Prototype p = globals.loadPrototype(in, location, "t");
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		DumpState.dump(p, out, false);
+		// We could save dump here and check if location has not been modified to cache the compiled results, but this thing is blazing fast anyway.
+		return new ByteArrayInputStream(out.toByteArray());
+	}
+	
 }
 
