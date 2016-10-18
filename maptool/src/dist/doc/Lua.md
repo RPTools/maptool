@@ -203,7 +203,10 @@ Lua uses normal integer and floating point values for its numbers, while the Mac
 ### tokenProperties
 ### tokens
 ### maps
-### broadcast
+### macro
+### chat
+### functions
+### defineFunction
 
 
 ## Objects
@@ -293,7 +296,7 @@ These are in the macro library and like macro.args convert the arguments into lu
 ```lua
 --{assert(0, "LUA")}--
 for i = 1, macro.argCount() do
-  println("Arg ", i, " = ", macro.arg(i))
+  println("Arg ", i, " = ", macro.arg(i - 1)) -- arg starts at 0, lua starts at 1
 end
 ```
 
@@ -370,11 +373,11 @@ end
 ```
 
 #### Marco Function broadcast()
-The function broadcast() is in the global namespace.
+The function broadcast() is part of the chat library
 ```lua
 --{assert(0, "LUA")}--
-broadcast("Hi, my name is " .. token.name); --All
-broadcast("Actually I am " .. token.gm_name, "gm") --All GMs
+chat.broadcast("Hi, my name is " .. token.name); --All
+chat.broadcast("Actually I am " .. token.gm_name, "gm") --All GMs
 ```
 
 #### Macro Function canSeeToken()
@@ -516,7 +519,7 @@ local array = {1024, 2, 4, 8}
 println(divide(table.unpack(array))) -- Convert array to var-args
 ```
 
-#### Macro function drawVBL()
+#### Macro Function drawVBL()
 This function is part of the VBL library
 ```lua
 --{assert(0, "LUA")}--
@@ -527,12 +530,165 @@ local polygon = "{'shape':'polygon','r':0,'close':1,'thickness':10,'points':[{'x
 VBL.draw(rectangle, cross, circle, polygon) --No array needed. convert arrays with table.unpack(objectarray)
 ```
 
-#### Macro Functions drop()
+#### Macro Function drop()
 This function is part of the dice-library
 ```lua
 --{assert(0, "LUA")}--
 println(dice.drop(4,10,2)) --4d10d2
 ```
 
+#### Macro Function encode()
+```lua
+--{assert(0, "LUA")}--
+println("value = " .. encode("a;b") .. "; value2 = c")
+```
+
+#### Macro Function endsWith()
+endsWith() has been added to the string library
+```lua
+--{assert(0, "LUA")}--
+println(string.endsWith("This is a test","test"))
+```
+Since the string libraray is a metatable for all strings, this creates the same result:
+```lua
+--{assert(0, "LUA")}--
+local str = "This is a test"
+println(str:endsWith("test")) -- str:endsWith(... is the same as str.endsWith(str, ...
+```
+#### Macro Function eraseVBL()
+This function is part of the VBL library
+```lua
+--{assert(0, "LUA")}--
+local rectangle = "{'shape':'rectangle','x':50,'y':50,'w':100,'h':200,'r':45,'fill':1,'thickness':1,'scale':0}" --JSON-String
+local cross = "{'shape':'cross','x':-50,'y':-50,'w':50,'h':100,'r':30,'fill':1,'thickness':1,'scale':2}"
+local circle = {shape='circle', X=50, Y=100, radius=200, thickness=3, fill=0, sides=12, r=45} -- Lua table
+local polygon = "{'shape':'polygon','r':0,'close':1,'thickness':10,'points':[{'x':0,'y':0},{'x':200,'y':200},{'x':150,'y':10}]}"
+VBL.erase(rectangle, cross, circle, polygon) --No array needed. convert arrays with table.unpack(objectarray)
+```
+### Macro Function eval()
+This function can be used as normal, but for variables to be available in the macro code, they have to be exported first
+endsWith() has been added to the string library
+```lua
+--{assert(0, "LUA")}--
+export("Bonus", 10)
+local result = eval("2d10 + Bonus")
+println(result)
+```
+The result is automatically converted from JSON, the raw output is also returned as a second result, furthermore, arguments are supported and converted to JSON.
+```lua
+--{assert(0, "LUA")}--
+local table = {a="b"}
+local result, rawresult = eval('json.set(arg(0),"b","c")', table) -- Lua multiple results: https://www.lua.org/pil/5.1.html
+println(result.b)
+println(rawresult)
+```
+
+### Macro Function evalMacro(), execMacro() and json.evaluate()
+These functions are part of the macro library as macro.exec() and macro.eval(). macro.exec() does not allow access to the original variables, otherwise they are the same.
+For macro.eval(), named variables have be be exported first before they can be seen by the evaluated code
+
+They always return 3 values, the first is macro.result converted from JSON. The last one is the same, but not converted. The second one is the output created by the macro.
+```lua
+--{assert(0, "LUA")}--
+export("Bonus", 10)
+local result, output, rawresult = macro.eval("[t: macro.return = 2d10 + Bonus]") 
+println(result)
+println(output)
+```
+You can add parameters to the call that are converted to JSON
+```lua
+--{assert(0, "LUA")}--
+local table = {a="b", d = {1,2,3}} -- LUA table
+local result, output, rawresult = macro.exec('[h: macro.return = json.set(arg(0),"b","c")][r:json.get(macro.return,"d")]', table)
+println(result.b)
+println(output)
+println(rawresult)
+```
+You can also run LUA code:
+```lua
+--{assert(0, "LUA")}--
+local table = {a="b", d = {1,2,3}} -- LUA table
+local result, output, rawresult = macro.exec(_LUA_HEADER..'local r=macro.arg(0); r.b="c";print(toJSON(r.d)); return r', table)
+println(result.b)
+println(output)
+println(rawresult)
+```
+If you give these functions a table of strings, every entry of that table will be evaluated, like json.evaluate:
+```lua
+--{assert(0, "LUA")}--
+export("Bonus", 10)
+local code = {
+	attack="[t: macro.return = 1d20 + Bonus]",
+	damage=_LUA_HEADER.."damage=dice.roll(1,6); print(damage, \" massive damage\"); return damage"
+}
+local result, output, rawresult = macro.eval(code) 
+println(result.attack)
+println(output.attack)
+println(result.damage)
+println(output.damage)
+```
+### Macro Function execLink()
+execLink() is part of the marco library
+```lua
+--{assert(0, "LUA")}--
+token.createMacro('link','Called');
+local link = macro.linkText("link@TOKEN", "all")
+print(link)
+macro.execLink(link)
+macro.execLink(link, true) -- deferred
+```
+#### Macro Function explode()
+This function is part of the dice-library
+```lua
+--{assert(0, "LUA")}--
+println(dice.explode(4,10)) --4d10e
+```
+#### Macro Function explodingSuccess()
+This function is part of the dice-library
+```lua
+--{assert(0, "LUA")}--
+println(dice.explodingSuccess(4,2,8)) --4d10es8
+```
+#### Macro Functions exposeFOW() and exposePCOnlyArea()
+These can be called on any map
+```lua
+--{assert(0, "LUA")}--
+maps.current.exposeFOW()
+maps.visible["Grasslands"].exposePCOnlyArea()
+```
+#### Macro Functions f() and fudge()
+This function is part of the dice-library
+```lua
+--{assert(0, "LUA")}--
+println(dice.fudge(4)) --4df
+```
+#### Macro Functions findToken()
+In a trusted Macro, tokens.resolve() can be used for this purpose
+```lua
+--{assert(0, "LUA")}--
+println(tokens.resolve("Test").gm_name) 
+```
+#### Macro function floor()
+The [Lua Math library](https://www.lua.org/pil/18.html) has a floor() function
+```lua
+--{assert(0, "LUA")}--
+println(math.floor(10.2))
+```
+#### Macro function formatStrProp()
+There is no direct function to do this, but it can be done easily in LUA
+```lua
+--{assert(0, "LUA")}--
+function formatTable(t, listFormat, entryFormat, seperator) 
+  local values = {}
+  for key, value in pairs(t) do
+    table.insert(values, entryFormat:replace("%key", key):replace("%value", value))
+  end
+  return listFormat:replace("%list",table.concat(values, seperator))
+end
+
+props = "Strength=14 ; Constitution=8 ; Dexterity=13 ; Intelligence=4 ; Wisdom=18 ; Charisma=9"
+println(formatTable(fromStr(props), "<table border=1>%list</table>", "<tr> <td><b>%key</b></td> <td>%value</td> </tr>", "")) 
+--normally Lua-Tables are unsorted, but fromStr() keeps the order from the String Property
+```
 ### Roll-Options
 

@@ -12,6 +12,7 @@ import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
+import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONArray;
 
@@ -360,22 +361,21 @@ public class Macro extends LuaTable
 		MapToolVariableResolver macroResolver = new MapToolVariableResolver(resolver.getTokenInContext());
 		MapToolMacroContext macroContext = new MapToolMacroContext(mbp.getLabel(), "token", MapTool.getPlayer().isGM());
 		String macroBody = mbp.getCommand();
-		return runMacro(macroResolver, macroContext, macroBody, args);
+		return runMacro(macroResolver, macroResolver.getTokenInContext(), macroContext, macroBody, args);
 	}
 
-	public static Varargs runMacro(MapToolVariableResolver macroResolver,
-			MapToolMacroContext macroContext, String macroBody, Varargs args) {
+	public static Varargs runMacro(MapToolVariableResolver macroResolver, Token tokenInContext, MapToolMacroContext macroContext, String macroBody, Varargs args) {
 		try {
 			JSONArray arr = new JSONArray();
 			macroResolver.setVariable("macro.args.num", BigDecimal.valueOf(args.narg()));
 			for (int i = 1; i <= args.narg(); i++) {
 				Object res = LuaConverters.toJson(args.arg(i));
-				macroResolver.setVariable("macro.args." + i, res);
+				macroResolver.setVariable("macro.args." + (i - 1), res);
 				arr.add(res);
 			}
 			macroResolver.setVariable("macro.args", arr);
 			macroResolver.setVariable("macro.return", "");
-			String macroOutput = MapTool.getParser().runMacroBlock(macroResolver, macroResolver.getTokenInContext(), macroBody, macroContext);
+			String macroOutput = MapTool.getParser().runMacroBlock(macroResolver, tokenInContext, macroBody, macroContext);
 			// Copy the return value of the macro into our current variable scope.
 			Object retval = macroResolver.getVariable("macro.return");
 			

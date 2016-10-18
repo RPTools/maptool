@@ -141,7 +141,7 @@ public class MapToolLineParser {
 	private static final int MAX_LOOPS = 1000; // Max number of loop iterations
 	private MapToolLUAParser luaparser = new MapToolLUAParser();
 
-	private enum Output { // Mutually exclusive output formats
+	public enum Output { // Mutually exclusive output formats
 		NONE, RESULT, TOOLTIP, EXPANDED, UNFORMATTED,
 	}
 
@@ -234,7 +234,7 @@ public class MapToolLineParser {
 	 * In order to add a new roll option, follow the instructions in the "todo"
 	 * comments in this file.
 	 */
-	private enum OptionType {
+	public enum OptionType {
 		/*
 		 * TODO: If you're adding a new option, make an entry in this table
 		 */
@@ -1684,11 +1684,11 @@ public class MapToolLineParser {
 		return parser;
 	}
 
-	private String rollString(Collection<String> options, String text) {
+	public String rollString(Collection<String> options, String text) {
 		return rollString(options, null, text);
 	}
 
-	private String rollString(Collection<String> options, String tooltip, String text) {
+	public String rollString(Collection<String> options, String tooltip, String text) {
 		StringBuilder s = new StringBuilder("\036");
 		if (options != null)
 			s.append("\001" + StringUtils.join(options, ",") + "\002");

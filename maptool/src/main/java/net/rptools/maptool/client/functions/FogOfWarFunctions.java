@@ -65,7 +65,7 @@ public class FogOfWarFunctions extends AbstractFunction {
 		throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
 	}
 
-	private Set<GUID> getTokenSelectedSet(final ZoneRenderer zr) {
+	public static Set<GUID> getTokenSelectedSet(final ZoneRenderer zr) {
 		Set<GUID> tokens = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
 		Set<GUID> ownedTokens = MapTool.getFrame().getCurrentZoneRenderer().getOwnedTokens(tokens);
 		return ownedTokens;

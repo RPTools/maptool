@@ -12,6 +12,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -368,7 +369,7 @@ public class LuaConverters {
 	}
 	
 	public static Map<String, String> parse(String props, String delim) {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new LinkedHashMap<String, String>();
 		String delimPatt;
 		if (delim.equals("")) {
 			delimPatt = ";";
@@ -414,7 +415,7 @@ public class LuaConverters {
 	public static LuaValue fromStr(String val, String listSep, String propSep) {
 		String str = val;
 		if (str.contains("=") || str.contains(propSep) || str.matches("[^=]+\\.[0-9A-F]{2}.+")) {
-			LuaTable result = new LuaTable();
+			LuaTable result = new InsertionOrderLuaTable();
 			Map<String, String> parse = parse(str, propSep);
 			if (!parse.isEmpty()) {
 				for (Entry<String, String> e: parse.entrySet()) {
@@ -588,5 +589,12 @@ public class LuaConverters {
 				};
 			}
 		};
+	}
+
+	public static String toString(LuaValue arg) {
+		if (arg instanceof IRepresent) {
+			return ObjectUtils.toString(((IRepresent) arg).export());
+		}
+		return ObjectUtils.toString(arg);
 	}
 }

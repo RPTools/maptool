@@ -5,6 +5,7 @@ package net.rptools.maptool.client.lua;
 
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.lua.misc.Expose;
 import net.rptools.maptool.client.lua.token.CopyToken;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
@@ -80,6 +81,10 @@ public class MapToolMap extends LuaTable implements IRepresent {
 				return LuaValue.valueOf(zone.isVisible());
 			} else if (key.checkjstring().equals("copyToken")) {
 				return new CopyToken(resolver, this);
+			} else if (key.checkjstring().equals("exposeFOW")) {
+				return new Expose(false, this);
+			} else if (key.checkjstring().equals("exposePCOnlyArea")) {
+				return new Expose(true, this);
 			}
 		}
 		return NIL;

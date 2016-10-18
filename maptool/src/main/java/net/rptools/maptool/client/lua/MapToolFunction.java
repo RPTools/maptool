@@ -38,13 +38,13 @@ public class MapToolFunction extends VarArgFunction {
 	public Varargs invoke(Varargs args) {
 		FunctionDefinition funcDef = UserDefinedMacroFunctions.getInstance().getUserDefinedFunctions().get(function);
 		if (funcDef != null) {
-			return runMacro(resolver, funcDef.getMacroName(), funcDef.isIgnoreOutput(), funcDef.isNewVariableContext(), args);
+			return runMacro(resolver, resolver.getTokenInContext(), funcDef.getMacroName(), funcDef.isIgnoreOutput(), funcDef.isNewVariableContext(), args, true);
 		}
 		return NONE;
 	}
 	
 	public static Varargs runMacro(MapToolVariableResolver resolver,
-			String macro, boolean ignoreOutput, boolean newVariableContext, Varargs args) {
+			Token tokenInContext, String macro, boolean ignoreOutput, boolean newVariableContext, Varargs args, boolean stripComments) {
 		try {
 			MapToolMacroContext macroContext;
 			String macroBody = null;
@@ -68,7 +68,6 @@ public class MapToolFunction extends VarArgFunction {
 					macroLocation = "TOKEN";
 				}
 			}
-			Token tokenInContext = resolver.getTokenInContext();
 			if (macroLocation == null || macroLocation.length() == 0 || macroLocation.equals(MapToolLineParser.CHAT_INPUT)) {
 				// Unqualified names are not allowed.
 				throw new ParserException(I18N.getText("lineParser.invalidMacroLoc", macroName));
@@ -129,13 +128,17 @@ public class MapToolFunction extends VarArgFunction {
 				macroResolver = resolver;
 			}
 			
-			Varargs res = Macro.runMacro(macroResolver, macroContext, macroBody, args);
+			Varargs res = Macro.runMacro(macroResolver, tokenInContext, macroContext, macroBody, args);
 			String output = res.arg(2).toString();
 			if (ignoreOutput) {
-				return varargsOf(new LuaValue[] {res.arg(1), valueOf(""), res.arg(3)});
+				return varargsOf(res.arg(1), valueOf(""), res.arg(3));
 			}
-			String stripOutput = output.replaceAll("(?s)<!--.*?-->", ""); // Strip comments
-			return varargsOf(new LuaValue[] {res.arg(1), valueOf(stripOutput), res.arg(3)});
+			if (stripComments) {
+				String stripOutput = output.replaceAll("(?s)<!--.*?-->", ""); // Strip comments
+				return varargsOf(res.arg(1), valueOf(stripOutput), res.arg(3));
+			}
+			return varargsOf(res.arg(1), valueOf(output), res.arg(3));
+			
 		} catch (ParserException e) {
 			throw new LuaError(e);
 		}

@@ -140,10 +140,18 @@ public class TokensLib extends TwoArgFunction {
 	}
 
 	public LuaValue resolve(LuaValue val) {
+		String tok = val.checkjstring();
+		if (!MapTool.getParser().isMacroTrusted()) {
+			if (!tok.matches("^[A-Fa-f0-9]+$")) {
+				checkTrusted("findToken");
+			}
+		}
 		Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 		Token token = zone.resolveToken(val.checkjstring());
 		if (token != null) {
-			return new MapToolToken(token, resolver);
+			if (MapTool.getParser().isMacroTrusted() || tok.equals(token.getId().toString())) {
+				return new MapToolToken(token, resolver);
+			}
 		}
 		return LuaValue.NIL;
 	}

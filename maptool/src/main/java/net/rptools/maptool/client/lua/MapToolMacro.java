@@ -6,11 +6,16 @@ package net.rptools.maptool.client.lua;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.lua.misc.Abort;
 import net.rptools.maptool.client.lua.misc.Arg;
-import net.rptools.maptool.client.lua.misc.ArgCount;
+import net.rptools.maptool.client.lua.misc.Exec;
+import net.rptools.maptool.client.lua.misc.IsTrusted;
+import net.rptools.maptool.client.lua.misc.Link;
+import net.rptools.maptool.client.lua.misc.MacroCall;
+import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableModifiers;
 
 import org.apache.commons.lang.ObjectUtils;
+import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaString;
 import org.luaj.vm2.LuaTable;
@@ -23,9 +28,13 @@ import org.luaj.vm2.LuaValue;
 
 public class MapToolMacro extends LuaTable {
 	private MapToolVariableResolver resolver;
+	private Token tokenInContext;
+	private Globals globals;
 
-	public MapToolMacro(MapToolVariableResolver resolver) {
+	public MapToolMacro(MapToolVariableResolver resolver, Token tokenInContext, Globals globals) {
 		Object args = null;
+		this.globals = globals;
+		this.tokenInContext = tokenInContext;
 		try {
 			args = resolver.getVariable("macro.args", VariableModifiers.None);
 		} catch (ParserException e) {
@@ -33,7 +42,14 @@ public class MapToolMacro extends LuaTable {
 		super.rawset(LuaValue.valueOf("args"), args == null ? LuaValue.NIL : LuaConverters.fromJson(ObjectUtils.toString(args)));
 		super.rawset(LuaValue.valueOf("abort"), new Abort());
 		super.rawset(LuaValue.valueOf("arg"), new Arg(resolver));
-		super.rawset(LuaValue.valueOf("argCount"), new ArgCount(resolver));
+		super.rawset(LuaValue.valueOf("link"), new Link(true));
+		super.rawset(LuaValue.valueOf("linkText"), new Link(false));
+		super.rawset(LuaValue.valueOf("execLink"), new ExecLink());
+		super.rawset(LuaValue.valueOf("exec"), new Exec(resolver, true));
+		super.rawset(LuaValue.valueOf("eval"), new Exec(resolver, false));
+		super.rawset(LuaValue.valueOf("call"), new MacroCall(resolver, this.tokenInContext, null));
+		super.rawset(LuaValue.valueOf("run"), new MacroCall(resolver, this.tokenInContext, this.globals));
+		super.rawset(LuaValue.valueOf("isTrusted"), new IsTrusted());
 		this.resolver = resolver;
 	}
 

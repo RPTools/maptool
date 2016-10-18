@@ -158,7 +158,7 @@ public class MacroLinkFunction extends AbstractFunction {
 
 	}
 
-	private void execLink(final String link, boolean defer) {
+	public static void execLink(final String link, boolean defer) {
 		if (defer) {
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
@@ -166,7 +166,7 @@ public class MacroLinkFunction extends AbstractFunction {
 				}
 			});
 		} else {
-			this.runMacroLink(link);
+			runMacroLink(link);
 		}
 	}
 
@@ -194,7 +194,7 @@ public class MacroLinkFunction extends AbstractFunction {
 	 * @return
 	 * @throws ParserException
 	 */
-	public String createMacroText(String macroName, String who, String target, String args) throws ParserException {
+	public static String createMacroText(String macroName, String who, String target, String args) throws ParserException {
 		if (macroName.toLowerCase().endsWith("@this")) {
 			macroName = macroName.substring(0, macroName.length() - 4) + MapTool.getParser().getMacroSource();
 		}
@@ -205,7 +205,7 @@ public class MacroLinkFunction extends AbstractFunction {
 		return sb.toString();
 	}
 
-	private String encode(String str) throws ParserException {
+	private static String encode(String str) throws ParserException {
 		try {
 			JSONObject.fromObject(str);
 			try {
@@ -238,7 +238,7 @@ public class MacroLinkFunction extends AbstractFunction {
 	 * @throws ParserException
 	 *             if the argument encoding is incorrect.
 	 */
-	public String argsToStrPropList(String args) throws ParserException {
+	public static String argsToStrPropList(String args) throws ParserException {
 		String vals[] = args.split("&");
 		StringBuilder propList = new StringBuilder();
 
@@ -268,7 +268,7 @@ public class MacroLinkFunction extends AbstractFunction {
 	 * @throws ParserException
 	 *             if there is an error in encoding.
 	 */
-	public String strPropListToArgs(String props) throws ParserException {
+	public static String strPropListToArgs(String props) throws ParserException {
 		String vals[] = props.split(";");
 		StringBuilder args = new StringBuilder();
 		try {
@@ -296,7 +296,7 @@ public class MacroLinkFunction extends AbstractFunction {
 	 *            the link to get the tool tip of.
 	 * @return a string containing the tool tip.
 	 */
-	public String macroLinkToolTip(String link) {
+	public static String macroLinkToolTip(String link) {
 		Matcher m = Pattern.compile("([^:]*)://([^/]*)/([^/]*)/([^?]*)(?:\\?(.*))?").matcher(link);
 		StringBuilder tip = new StringBuilder();
 
@@ -362,7 +362,7 @@ public class MacroLinkFunction extends AbstractFunction {
 	 * @param link
 	 *            the link to the macro.
 	 */
-	public void runMacroLink(String link) {
+	public static void runMacroLink(String link) {
 		runMacroLink(link, false);
 	}
 
@@ -377,7 +377,7 @@ public class MacroLinkFunction extends AbstractFunction {
 	 *            should the variables be set in the macro context as well as
 	 *            passed in as macro.args.
 	 */
-	public void runMacroLink(String link, boolean setVars) {
+	public static void runMacroLink(String link, boolean setVars) {
 		if (link == null || link.length() == 0) {
 			return;
 		}
@@ -470,7 +470,7 @@ public class MacroLinkFunction extends AbstractFunction {
 		}
 	}
 
-	private void doOutput(Token token, OutputTo outputTo, String line, Set<String> playerList) {
+	private static void doOutput(Token token, OutputTo outputTo, String line, Set<String> playerList) {
 		/*
 		 * First we check our player list to make sure we are not sending things
 		 * out multiple times or the wrong way. This looks a little ugly, but
@@ -553,7 +553,7 @@ public class MacroLinkFunction extends AbstractFunction {
 
 	}
 
-	private void doWhisper(String message, Token token, String playerName) {
+	private static void doWhisper(String message, Token token, String playerName) {
 		ObservableList<Player> playerList = MapTool.getPlayerList();
 		List<String> players = new ArrayList<String>();
 		for (int count = 0; count < playerList.size(); count++) {
@@ -578,7 +578,7 @@ public class MacroLinkFunction extends AbstractFunction {
 
 	}
 
-	private String getSelf() {
+	private static String getSelf() {
 		return MapTool.getPlayer().getName();
 	}
 
@@ -602,7 +602,7 @@ public class MacroLinkFunction extends AbstractFunction {
 	 * @param link
 	 *            the link to the macro.
 	 */
-	private boolean isAutoExecLink(String link) {
+	private static boolean isAutoExecLink(String link) {
 		Matcher m = AUTOEXEC_PATTERN.matcher(link);
 
 		if (m.matches()) {
@@ -658,7 +658,7 @@ public class MacroLinkFunction extends AbstractFunction {
 		return false;
 	}
 
-	private void doSay(String msg, Token token, boolean trusted, String macroName) {
+	private static void doSay(String msg, Token token, boolean trusted, String macroName) {
 		StringBuilder sb = new StringBuilder();
 
 		String identity = token == null ? MapTool.getPlayer().getName() : token.getName();
