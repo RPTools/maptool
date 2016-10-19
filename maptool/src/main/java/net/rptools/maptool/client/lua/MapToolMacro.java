@@ -45,8 +45,10 @@ public class MapToolMacro extends LuaTable {
 		super.rawset(LuaValue.valueOf("link"), new Link(true));
 		super.rawset(LuaValue.valueOf("linkText"), new Link(false));
 		super.rawset(LuaValue.valueOf("execLink"), new ExecLink());
-		super.rawset(LuaValue.valueOf("exec"), new Exec(resolver, true));
-		super.rawset(LuaValue.valueOf("eval"), new Exec(resolver, false));
+		super.rawset(LuaValue.valueOf("exec"), new Exec(resolver, true, true));
+		super.rawset(LuaValue.valueOf("eval"), new Exec(resolver, false, true));
+		super.rawset(LuaValue.valueOf("execUntrusted"), new Exec(resolver, true, false));
+		super.rawset(LuaValue.valueOf("evalUntrusted"), new Exec(resolver, false, false));
 		super.rawset(LuaValue.valueOf("call"), new MacroCall(resolver, this.tokenInContext, null));
 		super.rawset(LuaValue.valueOf("run"), new MacroCall(resolver, this.tokenInContext, this.globals));
 		super.rawset(LuaValue.valueOf("isTrusted"), new IsTrusted());

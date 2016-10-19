@@ -107,7 +107,7 @@ public class MapToolGlobals extends Globals {
 		for (String group : propmap.keySet()) {
 			LuaTable tab = new LuaTable();
 			for (TokenProperty p : propmap.get(group)) {
-				LuaValue val = LuaValue.valueOf(p.getName());
+				LuaValue val = formatProp(p, trusted);
 				tab.insert(0, val);
 				tokenpropsall.insert(0, val);
 			}
@@ -188,6 +188,19 @@ public class MapToolGlobals extends Globals {
 		}
 
 		return new ReadOnlyLuaTable(campaign);
+	}
+	
+	private LuaTable formatProp(TokenProperty p, boolean trusted) {
+		LuaTable o = new LuaTable();
+		o.rawset("name", valOf(p.getName()));
+		o.rawset("short", valOf(p.getShortName()));
+		o.rawset("showOnSheet", valOf(p.isShowOnStatSheet()));
+		o.rawset("default", valOf(p.getDefaultValue()));
+		if (trusted) {
+			o.rawset("showGM", LuaValue.valueOf(p.isGMOnly()));
+			o.rawset("showOwner", LuaValue.valueOf(p.isOwnerOnly()));
+		}
+		return o;
 	}
 
 	private LuaTable overlay(AbstractTokenOverlay over, boolean trusted) {

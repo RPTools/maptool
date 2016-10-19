@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Observable;
 
 // TODO: Make this class implement 'List'
-public class ObservableList<K> extends Observable implements Iterable {
+public class ObservableList<K> extends Observable implements Iterable<K> {
 
 	private List<K> list;
 

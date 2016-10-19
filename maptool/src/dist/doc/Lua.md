@@ -668,13 +668,13 @@ In a trusted Macro, tokens.resolve() can be used for this purpose
 --{assert(0, "LUA")}--
 println(tokens.resolve("Test").gm_name) 
 ```
-#### Macro function floor()
+#### Macro Function floor()
 The [Lua Math library](https://www.lua.org/pil/18.html) has a floor() function
 ```lua
 --{assert(0, "LUA")}--
 println(math.floor(10.2))
 ```
-#### Macro function formatStrProp()
+#### Macro Function formatStrProp()
 There is no direct function to do this, but it can be done easily in LUA
 ```lua
 --{assert(0, "LUA")}--
@@ -690,5 +690,76 @@ props = "Strength=14 ; Constitution=8 ; Dexterity=13 ; Intelligence=4 ; Wisdom=1
 println(formatTable(fromStr(props), "<table border=1>%list</table>", "<tr> <td><b>%key</b></td> <td>%value</td> </tr>", "")) 
 --normally Lua-Tables are unsorted, but fromStr() keeps the order from the String Property
 ```
+
+#### Macro Function getAllMapNames()
+There is no direct function to do this, but it can be done easily in LUA using the maps library
+```lua
+--{assert(0, "LUA")}--
+function getAllMapNames() 
+  local values = {}
+  for name, map in pairs(maps.all) do
+    table.insert(values, name)
+  end
+  return values
+end
+
+println(toJSON(getAllMapNames()))
+```
+But you probably want to do something with the map:
+```lua
+--{assert(0, "LUA")}--
+for name, map in pairs(maps.all) do --Get all Map objects
+  println("Map ", name, " is ", map.visible and "visible" or "invisible")
+end
+```
+
+#### Macro Function getAllMapNames()
+This value is saved in the table chat.players
+```lua
+--{assert(0, "LUA")}--
+for index, player in ipairs(chat.players) do
+  println(player, " is logged in") --do something with a player
+end
+
+println(toStr(chat.players, ", ")) --to String list
+```
+
+#### Macro Function getAllPropertyNames()
+There is no direct function to do this, but it can be done easily in LUA using the campaign table
+```lua
+--{assert(0, "LUA")}--
+function getAllPropertyNames(group)
+  local source = campaign.allTokenProperties
+  if group ~= nil then
+    source = campaign.tokenProperties[group]
+  end
+  local values = {}
+  if source then
+    for index, prop in ipairs(source) do
+      table.insert(values, prop.name)
+    end
+  end
+  return values
+end
+
+println(toJSON(getAllPropertyNames()))
+println(toStr(getAllPropertyNames("PC")))
+```
+But you probably want to do something with the properties:
+```lua
+--{assert(0, "LUA")}--
+for index, prop in ipairs(campaign.tokenProperties["NPC"]) do --or campaign.allTokenProperties
+  println(prop.name, " is ", prop.default)
+end
+```
+
+#### Macro Function getBar()
+The bars are part of any Token
+```lua
+--{assert(0, "LUA")}--
+println ("Health: ", token.bars["Health"] * 100, "%") --careful: "health" does not work, case-sensitive
+```
+
+
 ### Roll-Options
 

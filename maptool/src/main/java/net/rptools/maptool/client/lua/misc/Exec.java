@@ -18,9 +18,11 @@ public class Exec extends VarArgFunction {
 	private MapToolVariableResolver resolver;
 	private Map<LuaValue, Varargs> seen = new IdentityHashMap<LuaValue, Varargs>();
 	boolean newContext = false;
-	public Exec(MapToolVariableResolver resolver, boolean newContext) {
+	boolean trusted = true;
+	public Exec(MapToolVariableResolver resolver, boolean newContext, boolean trusted) {
 		this.resolver = resolver;
 		this.newContext = newContext;
+		this.trusted = trusted;
 	}
 	@Override
 	public Varargs invoke(Varargs args) {
@@ -51,7 +53,7 @@ public class Exec extends VarArgFunction {
 			seen.put(input, v);
 			return v;
 		} else if (input.isstring()) {
-			MapToolMacroContext context = new MapToolMacroContext("<dynamic>", MapTool.getParser().getContext().getSouce(), true);
+			MapToolMacroContext context = new MapToolMacroContext("<dynamic>", MapTool.getParser().getContext().getSouce(), trusted);
 			MapToolVariableResolver res = resolver;
 			if (newContext) {
 				res = new MapToolVariableResolver(resolver.getTokenInContext());
