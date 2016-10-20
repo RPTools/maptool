@@ -14,6 +14,7 @@ import net.rptools.maptool.client.lua.LuaConverters;
 import net.rptools.maptool.client.lua.MapToolBaseLib;
 import net.rptools.maptool.client.lua.MapToolFunctions;
 import net.rptools.maptool.client.lua.MapToolGlobals;
+import net.rptools.maptool.client.lua.MapToolIniative;
 import net.rptools.maptool.client.lua.MapToolMacro;
 import net.rptools.maptool.client.lua.MapToolMaps;
 import net.rptools.maptool.client.lua.MapToolTables;
@@ -104,11 +105,12 @@ public class MapToolLUAParser {
 		user_globals.set("export", new Export(res));
 		user_globals.set("token", new MapToolToken(tokenInContext, true, res));
 		user_globals.set("tokenProperties", LuaValue.NIL);
-		user_globals.set("macro", new MapToolMacro(res, tokenInContext, globals));
+		user_globals.set("macro", new MapToolMacro(res, tokenInContext, globals, context));
 		user_globals.set("isGM", new IsGM());
 		user_globals.set("maps", new MapToolMaps(res));
 		user_globals.set("tables", new MapToolTables());
 		user_globals.set("functions", new MapToolFunctions(res));
+		user_globals.set("iniative", new MapToolIniative(res));
 		user_globals.set("_LUA_HEADER", LUA_HEADER);
 
 		ByteArrayOutputStream bo = new ByteArrayOutputStream();

@@ -3,6 +3,7 @@
  */
 package net.rptools.maptool.client.lua;
 
+import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.lua.misc.Abort;
 import net.rptools.maptool.client.lua.misc.Arg;
@@ -30,11 +31,13 @@ public class MapToolMacro extends LuaTable {
 	private MapToolVariableResolver resolver;
 	private Token tokenInContext;
 	private Globals globals;
+	private MapToolMacroContext context;
 
-	public MapToolMacro(MapToolVariableResolver resolver, Token tokenInContext, Globals globals) {
+	public MapToolMacro(MapToolVariableResolver resolver, Token tokenInContext, Globals globals, MapToolMacroContext context) {
 		Object args = null;
 		this.globals = globals;
 		this.tokenInContext = tokenInContext;
+		this.context = context;
 		try {
 			args = resolver.getVariable("macro.args", VariableModifiers.None);
 		} catch (ParserException e) {
@@ -52,6 +55,9 @@ public class MapToolMacro extends LuaTable {
 		super.rawset(LuaValue.valueOf("call"), new MacroCall(resolver, this.tokenInContext, null));
 		super.rawset(LuaValue.valueOf("run"), new MacroCall(resolver, this.tokenInContext, this.globals));
 		super.rawset(LuaValue.valueOf("isTrusted"), new IsTrusted());
+		super.rawset(LuaValue.valueOf("name"), valueOf(this.context.getName()));
+		super.rawset(LuaValue.valueOf("location"), valueOf(this.context.getSouce()));
+		super.rawset(LuaValue.valueOf("buttonIndex"), valueOf(this.context.getMacroButtonIndex()));
 		this.resolver = resolver;
 	}
 

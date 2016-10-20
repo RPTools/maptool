@@ -759,7 +759,85 @@ The bars are part of any Token
 --{assert(0, "LUA")}--
 println ("Health: ", token.bars["Health"] * 100, "%") --careful: "health" does not work, case-sensitive
 ```
+#### Macro Function getCurrentInitiative()
+This information is in the iniative library.
+This can be run in an untrusted macro, since getInitiativeList() returns the same information from an untrusted macro as well.
+```lua
+--{assert(0, "LUA")}--
+println ("Current: ", iniative.current)
+```
+#### Macro Function getCurrentMapName()
+The current map can be gotten from the Maps library, it has a name attribute which contains the name
+```lua
+--{assert(0, "LUA")}--
+println ("Current Map: ", maps.current.name) --map.current is the current Map object
+```
+#### Macro Function getDistance()
+The getDistance function can be called on any token
+```lua
+--{assert(0, "LUA")}--
+println ("Distance: ", token.getDistance("Bandit Champion", true, "NO_GRID"))
+println ("Distance: ", token.getDistance(tokens.resolve("Bandit Champion"), false))
+```
+#### Macro Function getDistanceXY()
+The getDistance function can be called on any token, it can also work with grid coordinates
+```lua
+--{assert(0, "LUA")}--
+println ("Distance: ", token.getDistance(10,10))
+println ("Distance: ", token.getDistance(10,10, true, "MANHATTAN"))
+```
 
+#### Macro Functions getExposedTokenNames() and getExposedTokens()
+The maps library has an exposed() function that collect all exposed tokens, which can be used to create these functions
+```lua
+--{assert(0, "LUA")}--
+function getExposedTokenNames()
+  local result = {}
+  for index, tok in ipairs(tokens.exposed()) do
+    table.insert(result, tok.name)
+  end
+  return result
+end
+
+function getExposedTokens()
+  local result = {}
+  for index, tok in ipairs(tokens.exposed()) do
+    table.insert(result, tok.id)
+  end
+  return result
+end
+
+println(toJSON(getExposedTokenNames()))
+println(toStr(getExposedTokens()))
+```
+Usually one would want to work with the token objects instead
+```lua
+--{assert(0, "LUA")}--
+for index, tok in ipairs(tokens.exposed()) do
+  println(tok.name, " is ", tok.label)
+end
+```
+
+#### Macro Function getFindCount()
+The amount of matches is returned as the first value of the strfind()-method of the string-library or any string
+```lua
+--{assert(0, "LUA")}--
+local test =  "this is a test"
+local findCount, groupCount, groups = test:strfind("(\\S+)\\s+(\\S+)\\s*")
+println("Count: ", findCount)
+```
+Used as a library function:
+```lua
+--{assert(0, "LUA")}--
+local findCount, groupCount, groups = string.strfind("this is a test", "(\\S+)\\s+(\\S+)\\s*")
+println("Count: ", findCount)
+```
+
+#### Macro Function getGMName()
+
+#### Macro Function getGMNotes()
+
+#### Macro Functions getGroup(), getGroupCount(), getGroupStart(), getGroupEnd()
 
 ### Roll-Options
 

@@ -26,6 +26,7 @@ import net.rptools.maptool.client.lua.token.BringToFront;
 import net.rptools.maptool.client.lua.token.CanSee;
 import net.rptools.maptool.client.lua.token.ClearLights;
 import net.rptools.maptool.client.lua.token.CreateMacro;
+import net.rptools.maptool.client.lua.token.Distance;
 import net.rptools.maptool.client.lua.token.GetOwners;
 import net.rptools.maptool.client.lua.token.HasLights;
 import net.rptools.maptool.client.lua.token.ImageFunc;
@@ -111,6 +112,7 @@ public class MapToolToken extends LuaTable implements IRepresent {
 	private static final String F_HANDOUT = "gethandout";
 	private static final String F_PORTRAIT = "getportrait";
 	private static final String F_MOVE = "move";
+	private static final String F_DISTANCE = "getdistance";
 	private static final String F_ADDTOINITIATIVE = "addtoinitiative";
 	private static final String F_CREATEMACRO = "createmacro";
 	//TODO trusted Macro und so
@@ -675,6 +677,8 @@ public class MapToolToken extends LuaTable implements IRepresent {
 				};
 			case F_MOVE:
 				return new Move(this);
+			case F_DISTANCE:
+				return new Distance(this);
 			case F_CREATEMACRO:
 				return new CreateMacro(this, resolver);
 

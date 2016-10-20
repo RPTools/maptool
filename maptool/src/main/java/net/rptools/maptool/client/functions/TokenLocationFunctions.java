@@ -269,7 +269,7 @@ public class TokenLocationFunctions extends AbstractFunction {
 	 * @return
 	 * @throws ParserException
 	 */
-	public double getDistance(Token source, Token target, boolean units, String metric) throws ParserException {
+	public static double getDistance(Token source, Token target, boolean units, String metric) throws ParserException {
 		ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
 		Grid grid = renderer.getZone().getGrid();
 
@@ -342,7 +342,7 @@ public class TokenLocationFunctions extends AbstractFunction {
 	 * @throws ParserException
 	 *             when an error occurs
 	 */
-	public double getDistance(Token source, int x, int y, boolean units, String metric) throws ParserException {
+	public static double getDistance(Token source, int x, int y, boolean units, String metric) throws ParserException {
 		ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
 		Grid grid = renderer.getZone().getGrid();
 
@@ -609,7 +609,7 @@ public class TokenLocationFunctions extends AbstractFunction {
 	 * 
 	 * @return the distance for each cell.
 	 */
-	private int getDistancePerCell() {
+	private static int getDistancePerCell() {
 		return MapTool.getFrame().getCurrentZoneRenderer().getZone().getUnitsPerCell();
 	}
 

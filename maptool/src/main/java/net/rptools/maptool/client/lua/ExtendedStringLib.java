@@ -134,7 +134,7 @@ public class ExtendedStringLib extends StringLib {
 			LuaTable result = new LuaTable();
 			while (m.find()) {
 				result.insert(0, new StrGroupResult(m.toMatchResult()));
-//				found++;
+				found++;
 //				LuaTable groups = new LuaTable();
 //				for (int i = 1; i < m.groupCount() + 1; i++) {
 //					LuaTable match = new LuaTable();
