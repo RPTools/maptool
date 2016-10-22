@@ -29,6 +29,7 @@ import net.rptools.maptool.client.lua.misc.Eval;
 import net.rptools.maptool.client.lua.misc.Export;
 import net.rptools.maptool.client.lua.misc.FromJson;
 import net.rptools.maptool.client.lua.misc.FromStr;
+import net.rptools.maptool.client.lua.misc.Info;
 import net.rptools.maptool.client.lua.misc.IsGM;
 import net.rptools.maptool.client.lua.misc.Print;
 import net.rptools.maptool.client.lua.misc.Println;
@@ -77,45 +78,46 @@ public class MapToolLUAParser {
 	}
 
 	public String parseLine(MapToolVariableResolver res, Token tokenInContext, String line, MapToolMacroContext context) throws ParserException {
-
-		BaseLib base = new MapToolBaseLib(res, tokenInContext, context);
-		Globals user_globals = new MapToolGlobals(res);
-		user_globals.load(base);
-		user_globals.load(new PackageLib());
-		user_globals.load(new Bit32Lib());
-		user_globals.load(new FunctionalTableLib());
-		user_globals.load(new ExtendedStringLib(res));
-		user_globals.load(new JseMathLib());
-		user_globals.load(new JseMathLib());
-		user_globals.load(new TokensLib(res));
-		user_globals.load(new UILib());
-		user_globals.load(new DiceLib());
-		user_globals.load(new VBLLib());
-		user_globals.load(new ChatLib(res, user_globals));
-		user_globals.set("print", new Print(base, user_globals));
-		user_globals.set("println", new Println(base, user_globals));
-		user_globals.set("fromJSON", new FromJson());
-		user_globals.set("toJSON", new ToJson());
-		user_globals.set("fromStr", new FromStr());
-		user_globals.set("toStr", new ToStr());
-		user_globals.set("encode", new Encode());
-		user_globals.set("decode", new Decode());
-		user_globals.set("defineFunction", new DefineFunction(res));
-		user_globals.set("eval", new Eval(res, false));
-		user_globals.set("export", new Export(res));
-		user_globals.set("token", new MapToolToken(tokenInContext, true, res));
-		user_globals.set("tokenProperties", LuaValue.NIL);
-		user_globals.set("macro", new MapToolMacro(res, tokenInContext, globals, context));
-		user_globals.set("isGM", new IsGM());
-		user_globals.set("maps", new MapToolMaps(res));
-		user_globals.set("tables", new MapToolTables());
-		user_globals.set("functions", new MapToolFunctions(res));
-		user_globals.set("iniative", new MapToolIniative(res));
-		user_globals.set("_LUA_HEADER", LUA_HEADER);
-
-		ByteArrayOutputStream bo = new ByteArrayOutputStream();
-		user_globals.STDOUT = new PrintStream(bo);
+		ByteArrayOutputStream bo;
 		try {
+			BaseLib base = new MapToolBaseLib(res, tokenInContext, context);
+			Globals user_globals = new MapToolGlobals(res);
+			user_globals.load(base);
+			user_globals.load(new PackageLib());
+			user_globals.load(new Bit32Lib());
+			user_globals.load(new FunctionalTableLib());
+			user_globals.load(new ExtendedStringLib(res));
+			user_globals.load(new JseMathLib());
+			user_globals.load(new JseMathLib());
+			user_globals.load(new TokensLib(res));
+			user_globals.load(new UILib());
+			user_globals.load(new DiceLib());
+			user_globals.load(new VBLLib());
+			user_globals.load(new ChatLib(res, user_globals));
+			user_globals.set("print", new Print(base, user_globals));
+			user_globals.set("println", new Println(base, user_globals));
+			user_globals.set("fromJSON", new FromJson());
+			user_globals.set("toJSON", new ToJson());
+			user_globals.set("fromStr", new FromStr());
+			user_globals.set("toStr", new ToStr());
+			user_globals.set("encode", new Encode());
+			user_globals.set("decode", new Decode());
+			user_globals.set("defineFunction", new DefineFunction(res));
+			user_globals.set("eval", new Eval(res, false));
+			user_globals.set("export", new Export(res));
+			user_globals.set("token", new MapToolToken(tokenInContext, true, res));
+			user_globals.set("tokenProperties", LuaValue.NIL);
+			user_globals.set("macro", new MapToolMacro(res, tokenInContext, globals, context));
+			user_globals.set("isGM", new IsGM());
+			user_globals.set("maps", new MapToolMaps(res));
+			user_globals.set("tables", new MapToolTables());
+			user_globals.set("functions", new MapToolFunctions(res));
+			user_globals.set("initiative", new MapToolIniative(res));
+			user_globals.set("getInfo", new Info());
+			user_globals.set("_LUA_HEADER", LUA_HEADER);
+	
+			bo = new ByteArrayOutputStream();
+			user_globals.STDOUT = new PrintStream(bo);
 			if (line.startsWith(LUA_HEADER)) {
 				line = line.substring(LUA_HEADER.length());
 			}
@@ -141,9 +143,12 @@ public class MapToolLUAParser {
 			} else {
 				throw new ParserException(e);
 			}
+		} catch (Exception e) {
+			throw new ParserException("Lua initialization Error: " + e.toString());
+			
 		}
 		try {
-			bo.close();
+			if (bo != null) bo.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

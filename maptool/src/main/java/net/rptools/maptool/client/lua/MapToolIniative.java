@@ -78,6 +78,9 @@ public class MapToolIniative extends LuaTable {
 				if (!MapTool.getParser().isMacroTrusted() && !InitiativeListModel.isTokenVisible(t, hideNPCs)) {
 					return NIL;
 				}
+				if (t == null) {
+					return NIL;
+				}
 				return new MapToolToken(t, resolver != null && t == resolver.getTokenInContext(), resolver);
 			} else if (key.checkjstring().equals("round")) {
 				return valueOf(list.getRound());
@@ -90,8 +93,8 @@ public class MapToolIniative extends LuaTable {
 						continue;
 					LuaTable tiL = new LuaTable();
 					tiL.rawset("holding", valueOf(ti.isHolding()));
-					tiL.rawset("initiative", ti.getState());
-					tiL.rawset("tokenId", ti.getId().toString());
+					tiL.rawset("initiative", ti.getState() == null ? NIL : valueOf(ti.getState()));
+					tiL.rawset("tokenId", ti.getId() == null ? NIL : valueOf(ti.getId().toString()));
 					tiL.rawset("token", new MapToolToken(ti.getToken(), resolver != null && ti.getToken() == resolver.getTokenInContext(), resolver));
 					table.insert(0, new ReadOnlyLuaTable(tiL, false));
 				}

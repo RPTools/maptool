@@ -90,7 +90,7 @@ public class getInfoFunction extends AbstractFunction {
 	 * @throws ParserException
 	 *             when there is an error.
 	 */
-	private JSONObject getMapInfo() throws ParserException {
+	public static JSONObject getMapInfo() throws ParserException {
 		Map<String, Object> minfo = new HashMap<String, Object>();
 		Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 
@@ -153,7 +153,7 @@ public class getInfoFunction extends AbstractFunction {
 	 * 
 	 * @return the client side preferences
 	 */
-	private JSONObject getClientInfo() {
+	public static  JSONObject getClientInfo() {
 		Map<String, Object> cinfo = new HashMap<String, Object>();
 
 		cinfo.put("face edge", AppPreferences.getFaceEdge() ? BigDecimal.ONE : BigDecimal.ZERO);
@@ -186,7 +186,7 @@ public class getInfoFunction extends AbstractFunction {
 		return JSONObject.fromObject(cinfo);
 	}
 
-	private String getTimeDate() {
+	private static String getTimeDate() {
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		return sdf.format(cal.getTime());
@@ -197,7 +197,7 @@ public class getInfoFunction extends AbstractFunction {
 	 * 
 	 * @return the server side preferences
 	 */
-	private JSONObject getServerInfo() {
+	public static  JSONObject getServerInfo() {
 		Map<String, Object> sinfo = new HashMap<String, Object>();
 		ServerPolicy sp = MapTool.getServerPolicy();
 
@@ -230,7 +230,7 @@ public class getInfoFunction extends AbstractFunction {
 	 * @throws ParserException
 	 *             if an error occurs.
 	 */
-	private JSONObject getCampaignInfo() throws ParserException {
+	public static  JSONObject getCampaignInfo() throws ParserException {
 		if (!MapTool.getParser().isMacroTrusted()) {
 			throw new ParserException(I18N.getText("macro.function.general.noPerm", "getInfo('campaign')"));
 		}
@@ -333,7 +333,7 @@ public class getInfoFunction extends AbstractFunction {
 	 * @throws ParserException
 	 *             if an error occurs.
 	 */
-	private JSONObject getDebugInfo() throws ParserException {
+	public static JSONObject getDebugInfo() throws ParserException {
 		SysInfo info = new SysInfo();
 		return info.getSysInfoJSON();
 	}

@@ -760,11 +760,11 @@ The bars are part of any Token
 println ("Health: ", token.bars["Health"] * 100, "%") --careful: "health" does not work, case-sensitive
 ```
 #### Macro Function getCurrentInitiative()
-This information is in the iniative library.
+This information is in the initiative library.
 This can be run in an untrusted macro, since getInitiativeList() returns the same information from an untrusted macro as well.
 ```lua
 --{assert(0, "LUA")}--
-println ("Current: ", iniative.current)
+println ("Current: ", initiative.current)
 ```
 #### Macro Function getCurrentMapName()
 The current map can be gotten from the Maps library, it has a name attribute which contains the name
@@ -834,10 +834,124 @@ println("Count: ", findCount)
 ```
 
 #### Macro Function getGMName()
-
+The GM-Name is a property of any token
+```lua
+--{assert(0, "LUA")}--
+println ("GM-Name: ", token.gmName)
+```
 #### Macro Function getGMNotes()
+The text of the GM-Notes is a property of any token
+```lua
+--{assert(0, "LUA")}--
+println ("GM-Notes: ", token.gmNotes)
+```
 
 #### Macro Functions getGroup(), getGroupCount(), getGroupStart(), getGroupEnd()
+The function findstr works slightly differently in LUA, since LUA can return multiple values, everything is returned on the first call
+
+```lua
+--{assert(0, "LUA")}--
+local test =  "Command-20, Sleight of Hand 10, Knowledge (Arcana) +5, Murder +100"
+local findCount, groupCount, groups = test:strfind("([^,]*?)\\s?([-+]?\\d+)(,|\$)")
+println("Found: ", findCount, " results with ", groupCount, " Groups each");
+for index, match in ipairs(groups) do
+  print("<b>Match ", index, "</b>")
+  local value, groupStart, groupEnd = match() -- no params or 0 is the 0-group
+  println (" from ", groupStart, " to ", groupEnd, " = ", value) -- end is a reserved word in lua
+  for i = 1, groupCount do
+    local value, groupStart, groupEnd = match(i) -- match is a function that also returns multiple values
+    println ("Group ", i, " from ", groupStart, " to ", groupEnd, " = ", value)
+  end
+end
+println("Direct access: ", groups[2](1).."") -- match 2 group 1 only the value
+```
+
+#### Macro Function getHalo()
+The halo is a property of any token
+```lua
+--{assert(0, "LUA")}--
+println ("Halo: ", token.halo)
+```
+
+#### Macro Function getImage()
+This function is part of the tokens library
+```lua
+--{assert(0, "LUA")}--
+println("<img src=\"", tokens.image("Image:Test"), "\">")
+println("<img src=\"", tokens.image("Image:Test", 100), "\">") --The function allows a size parameter
+```
+
+#### Macro Functions getImpersonated() and getImpersonatedName()
+The impersonated() function of the tokens libraray returns the currently impersonated token object
+```lua
+--{assert(0, "LUA")}--
+println("Impersonated : ", tokens.impersonated().name) -- getImpersonated()
+println("Impersonated ID : ", tokens.impersonated().id) -- getImpersonatedName()
+```
+If there is doubts whether a token is impersonated, the tokens.impersonated() might return nil, that can be guarded against like this:
+```lua
+--{assert(0, "LUA")}--
+println("Impersonated : ", tokens.impersonated() and tokens.impersonated().name) -- getImpersonated()
+println("Impersonated ID : ", tokens.impersonated() and tokens.impersonated().id) -- getImpersonatedName()
+```
+
+#### Macro Function getInfo()
+This function is available, however it does return LuaTables instead of JSON.
+```lua
+--{assert(0, "LUA")}--
+println(getInfo("debug").java.version)
+println(table.indent(getInfo("campaign")):replace("\n","<br>"):replace(" ","&nbsp;"))
+```
+
+#### Macro Function getInitiative()
+The initiative (for the current map) is a property of any token
+```lua
+--{assert(0, "LUA")}--
+println ("My initiative: ", token.initiative)
+```
+
+#### Macro Function getIniativeHold()
+The initiative hold (for the current map) is a property of any token
+```lua
+--{assert(0, "LUA")}--
+if (token.initiativeHold) then
+  println("Holding")
+else
+  println("Going")
+end
+```
+
+#### Macro Function getIniativeList()
+This information is contained in the tokens property of the initiative library
+```lua
+--{assert(0, "LUA")}--
+println("<pre>", table.indent(initiative.tokens), "</pre>")
+```
+
+#### Macro Function getIniativeRound()
+This information is contained in the round property of the initiative library
+```lua
+--{assert(0, "LUA")}--
+println("Round ", initiative.round, "!")
+```
+
+#### Macro Function getIniativeToken()
+This information is contained in the token property of the initiative library. The returned value is a token object
+```lua
+--{assert(0, "LUA")}--
+if initiative.token then
+  println(initiative.token.name, ", it is your turn")
+else
+  println("It's noone's turn right now")
+end
+```
+
+#### Macro Function getLabel()
+The label is a property of any token
+```lua
+--{assert(0, "LUA")}--
+println (token.name, " (", token.label, ")")
+```
 
 ### Roll-Options
 

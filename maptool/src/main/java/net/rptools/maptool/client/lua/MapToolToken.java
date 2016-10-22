@@ -66,7 +66,10 @@ public class MapToolToken extends LuaTable implements IRepresent {
 	private static final String VISIBLE = "visible";
 	private static final String HALO = "halo";
 	private static final String INIT = "init";
+	private static final String INITIATIVE = "initiative";
 	private static final String INIT_HOLD = "inithold";
+	private static final String INITIATIVE_HOLD = "initiativehold";
+	private static final String INITIATIVE_HOLD2 = "initiative_hold";
 	private static final String LAYER = "layer";
 	private static final String PROPERTIES = "properties";
 	private static final String SIGHT = "sight";
@@ -216,12 +219,15 @@ public class MapToolToken extends LuaTable implements IRepresent {
 				TokenVisibleFunction.getInstance().setVisible(token, isTrue(value));
 				return;
 			case INIT:
+			case INITIATIVE:
 				if (isSelf || MapTool.getParser().isMacroTrusted()) {
 					TokenInitFunction.getInstance().setTokenValue(token, value);
 				} else
 					throw new ParserException(I18N.getText("macro.function.general.noPerm", "token.init"));
 				return;
 			case INIT_HOLD:
+			case INITIATIVE_HOLD:
+			case INITIATIVE_HOLD2:
 				if (isSelf || MapTool.getParser().isMacroTrusted()) {
 					TokenInitHoldFunction.getInstance().setTokenValue(token, isTrue(value));
 				} else
@@ -498,11 +504,14 @@ public class MapToolToken extends LuaTable implements IRepresent {
 				}
 				return LuaValue.valueOf(TokenVisibleFunction.getInstance().getVisible(token).intValue() > 0);
 			case INIT:
+			case INITIATIVE:
 				if (!isSelf && !MapTool.getParser().isMacroTrusted()) {
 					throw new ParserException(I18N.getText("macro.function.general.noPerm", "token.init"));
 				}
 				return LuaValue.valueOf(TokenInitFunction.getInstance().getTokenValue(token).toString());
 			case INIT_HOLD:
+			case INITIATIVE_HOLD2:
+			case INITIATIVE_HOLD:
 				if (!isSelf && !MapTool.getParser().isMacroTrusted()) {
 					throw new ParserException(I18N.getText("macro.function.general.noPerm", "token.initHold"));
 				}

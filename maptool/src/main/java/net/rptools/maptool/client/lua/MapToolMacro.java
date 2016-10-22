@@ -55,10 +55,15 @@ public class MapToolMacro extends LuaTable {
 		super.rawset(LuaValue.valueOf("call"), new MacroCall(resolver, this.tokenInContext, null));
 		super.rawset(LuaValue.valueOf("run"), new MacroCall(resolver, this.tokenInContext, this.globals));
 		super.rawset(LuaValue.valueOf("isTrusted"), new IsTrusted());
-		super.rawset(LuaValue.valueOf("name"), valueOf(this.context.getName()));
-		super.rawset(LuaValue.valueOf("location"), valueOf(this.context.getSouce()));
-		super.rawset(LuaValue.valueOf("buttonIndex"), valueOf(this.context.getMacroButtonIndex()));
+		super.rawset(LuaValue.valueOf("name"), valOf(this.context != null ? this.context.getName() : "Chat"));
+		super.rawset(LuaValue.valueOf("location"), valOf(this.context != null ? this.context.getSouce() : "Chat"));
+		super.rawset(LuaValue.valueOf("buttonIndex"), valueOf(this.context != null ? this.context.getMacroButtonIndex() : -1));
 		this.resolver = resolver;
+	}
+
+	private LuaValue valOf(String text) {
+		if (text == null) return null;
+		return valueOf(text);
 	}
 
 	public LuaValue setmetatable(LuaValue metatable) {
