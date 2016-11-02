@@ -19,10 +19,12 @@ public class Exec extends VarArgFunction {
 	private Map<LuaValue, Varargs> seen = new IdentityHashMap<LuaValue, Varargs>();
 	boolean newContext = false;
 	boolean trusted = true;
-	public Exec(MapToolVariableResolver resolver, boolean newContext, boolean trusted) {
+	boolean convertToArray;
+	public Exec(MapToolVariableResolver resolver, boolean newContext, boolean trusted, boolean convertToArray) {
 		this.resolver = resolver;
 		this.newContext = newContext;
 		this.trusted = trusted;
+		this.convertToArray = convertToArray;
 	}
 	@Override
 	public Varargs invoke(Varargs args) {
@@ -58,7 +60,7 @@ public class Exec extends VarArgFunction {
 			if (newContext) {
 				res = new MapToolVariableResolver(resolver.getTokenInContext());
 			}
-			Varargs v = Macro.runMacro(res, res.getTokenInContext(), context, input.toString(), args);
+			Varargs v = Macro.runMacro(res, res.getTokenInContext(), context, input.toString(), args, convertToArray);
 			seen.put(input, v);
 			return v;
 		} else {

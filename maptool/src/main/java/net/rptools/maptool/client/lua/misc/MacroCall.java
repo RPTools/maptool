@@ -13,16 +13,18 @@ public class MacroCall extends VarArgFunction {
 	private MapToolVariableResolver resolver;
 	private Token token;
 	private Globals globals;
+	private boolean convertToArray;
 
-	public MacroCall(MapToolVariableResolver resolver, Token tokenInContext, Globals globals) {
+	public MacroCall(MapToolVariableResolver resolver, Token tokenInContext, Globals globals, boolean convertToArray) {
 		this.resolver = resolver;
 		this.token = tokenInContext;
 		this.globals = globals;
+		this.convertToArray = convertToArray;
 	}
 	@Override
 	public Varargs invoke(Varargs args) {
 		String macro = args.checkjstring(1);
-		Varargs v = MapToolFunction.runMacro(resolver, token, macro, false, true, args.subargs(2), false);
+		Varargs v = MapToolFunction.runMacro(resolver, token, macro, false, true, args.subargs(2), false, convertToArray);
 		if (globals != null) {
 			globals.STDOUT.print(v.arg(2).toString());
 			return varargsOf(v.arg1(), v.subargs(3));

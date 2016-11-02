@@ -29,22 +29,24 @@ import org.luaj.vm2.lib.VarArgFunction;
 public class MapToolFunction extends VarArgFunction {
 	private String function;
 	private MapToolVariableResolver resolver;
-	public MapToolFunction(String function, MapToolVariableResolver resolver) {
+	private boolean convertToArray;
+	public MapToolFunction(String function, MapToolVariableResolver resolver, boolean convertToArray) {
 		this.function = function;
 		this.resolver = resolver;
+		this.convertToArray = convertToArray;
 	}
 
 	@Override
 	public Varargs invoke(Varargs args) {
 		FunctionDefinition funcDef = UserDefinedMacroFunctions.getInstance().getUserDefinedFunctions().get(function);
 		if (funcDef != null) {
-			return runMacro(resolver, resolver.getTokenInContext(), funcDef.getMacroName(), funcDef.isIgnoreOutput(), funcDef.isNewVariableContext(), args, true);
+			return runMacro(resolver, resolver.getTokenInContext(), funcDef.getMacroName(), funcDef.isIgnoreOutput(), funcDef.isNewVariableContext(), args, true, convertToArray);
 		}
 		return NONE;
 	}
 	
 	public static Varargs runMacro(MapToolVariableResolver resolver,
-			Token tokenInContext, String macro, boolean ignoreOutput, boolean newVariableContext, Varargs args, boolean stripComments) {
+			Token tokenInContext, String macro, boolean ignoreOutput, boolean newVariableContext, Varargs args, boolean stripComments, boolean convertToArray) {
 		try {
 			MapToolMacroContext macroContext;
 			String macroBody = null;
@@ -128,7 +130,7 @@ public class MapToolFunction extends VarArgFunction {
 				macroResolver = resolver;
 			}
 			
-			Varargs res = Macro.runMacro(macroResolver, tokenInContext, macroContext, macroBody, args);
+			Varargs res = Macro.runMacro(macroResolver, tokenInContext, macroContext, macroBody, args, convertToArray);
 			String output = res.arg(2).toString();
 			if (ignoreOutput) {
 				return varargsOf(res.arg(1), valueOf(""), res.arg(3));

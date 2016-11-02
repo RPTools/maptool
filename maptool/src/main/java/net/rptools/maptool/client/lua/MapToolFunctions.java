@@ -19,9 +19,10 @@ import org.luaj.vm2.Varargs;
 
 public class MapToolFunctions extends LuaTable {
 	private MapToolVariableResolver resolver;
-
-	public MapToolFunctions(MapToolVariableResolver resolver) {
+	private boolean convertToArray;
+	public MapToolFunctions(MapToolVariableResolver resolver, boolean convertToArray) {
 		this.resolver = resolver;
+		this.convertToArray = convertToArray;
 	}
 
 	public LuaValue setmetatable(LuaValue metatable) {
@@ -47,7 +48,7 @@ public class MapToolFunctions extends LuaTable {
 	@Override
 	public LuaValue rawget(LuaValue key) {
 		if (UserDefinedMacroFunctions.getInstance().getUserDefinedFunctions().containsKey(key.checkjstring())) {
-			return new MapToolFunction(key.tojstring(), resolver);
+			return new MapToolFunction(key.tojstring(), resolver, convertToArray);
 		}
 		return NIL;
 	}
@@ -90,7 +91,7 @@ public class MapToolFunctions extends LuaTable {
 				continue;
 			}
 			if (found && !ObjectUtils.equals(s, name)) {
-				return varargsOf(valueOf(s), new MapToolFunction(s, resolver));
+				return varargsOf(valueOf(s), new MapToolFunction(s, resolver, convertToArray));
 			}
 			if (!found && name.equals(s)) {
 				found = true;

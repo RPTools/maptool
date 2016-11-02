@@ -111,7 +111,8 @@ public class MapToolLUAParser {
 			user_globals.set("isGM", new IsGM());
 			user_globals.set("maps", new MapToolMaps(res));
 			user_globals.set("tables", new MapToolTables());
-			user_globals.set("functions", new MapToolFunctions(res));
+			user_globals.set("functions", new MapToolFunctions(res, true));
+			user_globals.set("functionsRaw", new MapToolFunctions(res, false));
 			user_globals.set("initiative", new MapToolIniative(res));
 			user_globals.set("getInfo", new Info());
 			user_globals.set("_LUA_HEADER", LUA_HEADER);
