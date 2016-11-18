@@ -20,6 +20,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -38,10 +40,12 @@ import javax.swing.AbstractButton;
 import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -60,26 +64,34 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.text.JTextComponent;
-
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.SearchContext;
+import org.fife.ui.rtextarea.SearchEngine;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.AbstractTokenAccessorFunction;
 import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
-import net.rptools.maptool.client.ui.Toolbox;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Association;
 import net.rptools.maptool.model.Grid;
+import net.rptools.maptool.model.HeroLabData;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone.Layer;
+import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.ImageManager;
-
+import com.jcabi.xml.XML;
+import com.jcabi.xml.XMLDocument;
 import com.jeta.forms.gui.form.GridView;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -102,8 +114,15 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 	private GenericDialog dialog;
 	private ImageAssetPanel imagePanel;
 	// private CharSheetController controller;
+	private RSyntaxTextArea XMLstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
+	private RSyntaxTextArea TEXTstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
 
-	private final Toolbox toolbox = new Toolbox();
+	private static final ImageIcon REFRESH_ICON_ON = new ImageIcon(
+			EditTokenDialog.class.getClassLoader().getResource("net/rptools/maptool/client/image/refresh_arrows_small.png"));
+	private static final ImageIcon REFRESH_ICON_OFF = new ImageIcon(
+			EditTokenDialog.class.getClassLoader().getResource("net/rptools/maptool/client/image/refresh_off_arrows_small.png"));
+
+	//	private final Toolbox toolbox = new Toolbox();
 
 	/**
 	 * The size used to constrain the icon.
@@ -142,6 +161,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 			}
 		};
 		bind(token);
+
 		getRootPane().setDefaultButton(getOKButton());
 		dialog.showDialog();
 	}
@@ -225,10 +245,54 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		getImageTableCombo().setSelectedItem(token.getImageTableName());
 
 		// Jamz: Init the VBL tab...
-		getTokenVblPanel().setToken(token);
-		getAlwaysVisibleButton().setSelected(token.isAlwaysVisible());
-		getAlphaSensitivitySpinner().setValue(getTokenVblPanel().getAlphaSensitivity());
-		getVisibilityToleranceSpinner().setValue(token.getAlwaysVisibleTolerance());
+		JTabbedPane tabbedPane = getTabbedPane();
+
+		if (MapTool.getPlayer().isGM()) {
+			tabbedPane.setEnabledAt(tabbedPane.indexOfTab("VBL"), true);
+			getTokenVblPanel().setToken(token);
+			getAlwaysVisibleButton().setSelected(token.isAlwaysVisible());
+			getAlphaSensitivitySpinner().setValue(getTokenVblPanel().getAlphaSensitivity());
+			getVisibilityToleranceSpinner().setValue(token.getAlwaysVisibleTolerance());
+		} else {
+			tabbedPane.setEnabledAt(tabbedPane.indexOfTab("VBL"), false);
+			if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("VBL"))
+				tabbedPane.setSelectedIndex(0);
+		}
+
+		// Jamz: Init the Hero Lab tab...
+		HeroLabData heroLabData = token.getHeroLabData();
+
+		if (heroLabData != null) {
+			boolean isDirty = heroLabData.isDirty();
+			JButton refreshDataButton = (JButton) getComponent("refreshDataButton");
+
+			if (isDirty && refreshDataButton.getIcon() != REFRESH_ICON_ON) {
+				refreshDataButton.setIcon(REFRESH_ICON_ON);
+				refreshDataButton.setToolTipText("<html>Refresh data from Hero Lab<br/><b><i>Changes detected!</i></b></html>");
+			} else if (!isDirty && refreshDataButton.getIcon() != REFRESH_ICON_OFF) {
+				refreshDataButton.setIcon(REFRESH_ICON_OFF);
+				refreshDataButton.setToolTipText("<html>Refresh data from Hero Lab<br/><b><i>No changes detected...</i></b></html>");
+			}
+
+			tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Hero Lab"), true);
+			getHtmlStatblockEditor().setText(token.getHeroLabData().getStatBlock_html());
+			getHtmlStatblockEditor().setCaretPosition(0);
+
+			XMLstatblockRSyntaxTextArea.setText(token.getHeroLabData().getStatBlock_xml());
+			XMLstatblockRSyntaxTextArea.setCaretPosition(0);
+
+			TEXTstatblockRSyntaxTextArea.setText(token.getHeroLabData().getStatBlock_text());
+			TEXTstatblockRSyntaxTextArea.setCaretPosition(0);
+
+			((JCheckBox) getComponent("isAllyCheckBox")).setSelected(heroLabData.isAlly());
+			((JLabel) getComponent("summaryText")).setText(heroLabData.getSummary());
+			((JLabel) getComponent("portfolioLocation")).setText(heroLabData.getPortfolioFile().getPath());
+			((JLabel) getComponent("lastModified")).setText(heroLabData.getLastModified());
+		} else {
+			tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Hero Lab"), false);
+			if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("Hero Lab"))
+				tabbedPane.setSelectedIndex(6);
+		}
 
 		// we will disable the Owner only visible check box if the token is not
 		// visible to players to signify the relationship
@@ -259,10 +323,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		//		replaceComponent("sheetPanel", "characterSheet", controller.getPanel());
 
 		super.bind(token);
+
 	}
 
 	public JTabbedPane getTabbedPane() {
-		return (JTabbedPane) getComponent("tabs");
+		return (JTabbedPane) getComponent("TabPane");
 	}
 
 	public JTextArea getNotesTextArea() {
@@ -815,6 +880,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		return (TokenVblPanel) getComponent("vblPreview");
 	}
 
+	public JEditorPane getHtmlStatblockEditor() {
+		return (JEditorPane) getComponent("HTMLstatblockTextArea");
+	}
+
 	public void initVblPreviewPanel() {
 		TokenVblPanel vblPanel = new TokenVblPanel();
 		vblPanel.setPreferredSize(new Dimension(200, 200));
@@ -870,6 +939,130 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		});
 
 		getVisibilityToleranceSpinner().setModel(new SpinnerNumberModel(2, 1, 9, 1));
+	}
+
+	// Jamz: Using this to initialize the Hero Lab tab
+	public void initStatBlocks() {
+		// Setup the HTML panel
+		JEditorPane statblockPane = getHtmlStatblockEditor();
+		HTMLEditorKit kit = new HTMLEditorKit();
+		HTMLDocument statblockDoc = (HTMLDocument) kit.createDefaultDocument();
+		statblockPane.setEditorKit(kit);
+		statblockPane.setDocument(statblockDoc);
+
+		// We need this property as the kit can't handle <meta http-equiv="Content-Type" content="text/html; charset=XYZ> and the rendered html is blank 
+		statblockDoc.putProperty("IgnoreCharsetDirective", true);
+
+		// Setup the XML panel
+		XMLstatblockRSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
+		XMLstatblockRSyntaxTextArea.setEditable(false);
+		XMLstatblockRSyntaxTextArea.setCodeFoldingEnabled(true);
+		XMLstatblockRSyntaxTextArea.setLineWrap(true);
+		XMLstatblockRSyntaxTextArea.setWrapStyleWord(true);
+		XMLstatblockRSyntaxTextArea.setTabSize(2);
+
+		RTextScrollPane xmlStatblockRSyntaxScrollPane = new RTextScrollPane(XMLstatblockRSyntaxTextArea);
+		xmlStatblockRSyntaxScrollPane.setLineNumbersEnabled(false);
+		replaceComponent("xmlStatblockPanel", "XMLstatblockRTextScrollPane", xmlStatblockRSyntaxScrollPane);
+
+		// Setup the TEXT panel
+		TEXTstatblockRSyntaxTextArea.setEditable(false);
+		TEXTstatblockRSyntaxTextArea.setLineWrap(true);
+		TEXTstatblockRSyntaxTextArea.setWrapStyleWord(true);
+		TEXTstatblockRSyntaxTextArea.setTabSize(2);
+
+		RTextScrollPane TEXTstatblockRTextScrollPane = new RTextScrollPane(TEXTstatblockRSyntaxTextArea);
+		TEXTstatblockRTextScrollPane.setLineNumbersEnabled(false);
+		replaceComponent("textStatblockPanel", "TextStatblockRTextScrollPane", TEXTstatblockRTextScrollPane);
+
+		// Setup the refresh button, #refreshes the HeroLabData from the portfolio
+		JButton refreshDataButton = (JButton) getComponent("refreshDataButton");
+		refreshDataButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Token token = getModel();
+				HeroLabData heroLabData = token.getHeroLabData();
+
+				if (heroLabData != null) {
+					ExtractHeroLab heroLabFile = new ExtractHeroLab(heroLabData.getPortfolioFile(), true);
+					heroLabData = heroLabFile.refreshStatblocks(heroLabData);
+
+					if (heroLabData != null) {
+						token.setHeroLabData(heroLabData);
+						heroLabData.setDirty(false);
+
+						refreshDataButton.setIcon(REFRESH_ICON_OFF);
+						refreshDataButton.setToolTipText("<html>Refresh data from Hero Lab<br/><b><i>No changes detected...</i></b></html>");
+
+						((JLabel) getComponent("lastModified")).setText(heroLabData.getLastModified());
+
+						getHtmlStatblockEditor().setText(token.getHeroLabData().getStatBlock_html());
+						getHtmlStatblockEditor().setCaretPosition(0);
+
+						XMLstatblockRSyntaxTextArea.setText(token.getHeroLabData().getStatBlock_xml());
+						XMLstatblockRSyntaxTextArea.setCaretPosition(0);
+
+						TEXTstatblockRSyntaxTextArea.setText(token.getHeroLabData().getStatBlock_text());
+						TEXTstatblockRSyntaxTextArea.setCaretPosition(0);
+					}
+				}
+			}
+		});
+
+		// Setup xPath  searching for XML StatBlock
+		JTextField xmlStatblockSearchTextField = (JTextField) getComponent("xmlStatblockSearchTextField");
+		JButton xmlStatblockSearchButton = (JButton) getComponent("xmlStatblockSearchButton");
+
+		xmlStatblockSearchTextField.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					xmlStatblockSearchButton.doClick();
+					e.consume();
+				}
+			}
+		});
+
+		xmlStatblockSearchButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String searchText = xmlStatblockSearchTextField.getText();
+
+				if (searchText.isEmpty())
+					return;
+
+				XMLstatblockRSyntaxTextArea.setText(getModel().getHeroLabData().parseXML(searchText));
+				XMLstatblockRSyntaxTextArea.setCaretPosition(0);
+			}
+		});
+
+		// Setup regular expression searching for TEXT StatBlock
+		JTextField textStatblockSearchTextField = (JTextField) getComponent("textStatblockSearchTextField");
+		JButton textStatblockSearchButton = (JButton) getComponent("textStatblockSearchButton");
+
+		textStatblockSearchTextField.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					textStatblockSearchButton.doClick();
+					e.consume();
+				}
+			}
+		});
+
+		textStatblockSearchButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String searchText = textStatblockSearchTextField.getText();
+
+				if (searchText.isEmpty())
+					return;
+
+				SearchContext context = new SearchContext();
+				context.setSearchFor(searchText);
+				context.setRegularExpression(true);
+				// context.setMatchCase(matchCaseCB.isSelected());
+				// context.setSearchForward(forward);
+				// context.setWholeWord(false);
+
+				boolean found = SearchEngine.find(TEXTstatblockRSyntaxTextArea, context).wasFound();
+			}
+		});
 	}
 
 	// //

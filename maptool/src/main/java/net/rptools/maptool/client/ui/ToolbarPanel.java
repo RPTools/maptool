@@ -118,9 +118,9 @@ public class ToolbarPanel extends JToolBar {
 				I18N.getText("tools.token.fow.all.tooltip"), TokenSelection.ALL);
 
 		add(createTokenSelectionButton(
-				"net/rptools/maptool/client/image/tool/select-gm-blue.png",
-				"net/rptools/maptool/client/image/tool/select-gm-blue-off.png",
-				I18N.getText("tools.token.fow.all.tooltip"), TokenSelection.GM));
+				"net/rptools/maptool/client/image/tool/select-me-blue.png",
+				"net/rptools/maptool/client/image/tool/select-me-blue-off.png",
+				I18N.getText("tools.token.fow.gm.tooltip"), TokenSelection.GM));
 		add(tokenSelectionButtonAll);
 		add(createTokenSelectionButton("net/rptools/maptool/client/image/tool/select-pc-blue.png",
 				"net/rptools/maptool/client/image/tool/select-pc-blue-off.png",

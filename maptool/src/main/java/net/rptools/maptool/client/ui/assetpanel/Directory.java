@@ -25,10 +25,12 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.io.filefilter.MagicNumberFileFilter;
+import org.apache.commons.io.monitor.FileEntry;
 
 public class Directory {
 	private static final FileFilter DIRECTORY_FILTER = new DirectoryFileFilter();
-	private static final MagicNumberFileFilter pdfFileFilter = new MagicNumberFileFilter("%PDF");
+	private static final FileFilter HERO_LAB_FILE_FILTER = new HeroLabFileFilter();
+	private static final MagicNumberFileFilter PDF_FILE_FILTER = new MagicNumberFileFilter("%PDF");
 
 	private final List<PropertyChangeListener> listenerList = new CopyOnWriteArrayList<PropertyChangeListener>();
 	private final File directory;
@@ -37,6 +39,7 @@ public class Directory {
 	private List<Directory> subdirs;
 	private List<File> files;
 	private final FilenameFilter fileFilter;
+	private FileEntry dirWatcher;
 
 	public Directory(File directory) {
 		this(directory, null);
@@ -46,12 +49,13 @@ public class Directory {
 		if (!directory.exists()) {
 			throw new IllegalArgumentException(directory + " does not exist");
 		}
-		if (!directory.isDirectory() && !pdfFileFilter.accept(directory)) {
+		if (!directory.isDirectory() && !PDF_FILE_FILTER.accept(directory) && !HERO_LAB_FILE_FILTER.accept(directory)) {
 			throw new IllegalArgumentException(
-					directory + " is not a directory or pdf file");
+					directory + " is not a directory, pdf, or herolab portfolio.");
 		}
 		this.directory = directory;
 		this.fileFilter = fileFilter;
+		this.dirWatcher = new FileEntry(directory);
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -91,12 +95,20 @@ public class Directory {
 		return files;
 	}
 
+	public boolean hasChanged() {
+		return dirWatcher.refresh(directory);
+	}
+
 	public Directory getParent() {
 		return parent;
 	}
 
 	public boolean isPDF() {
-		return pdfFileFilter.accept(directory);
+		return PDF_FILE_FILTER.accept(directory);
+	}
+
+	public boolean isHeroLabPortfolio() {
+		return HERO_LAB_FILE_FILTER.accept(directory);
 	}
 
 	private void load() throws FileNotFoundException {
@@ -128,9 +140,27 @@ public class Directory {
 		}
 	}
 
+	private static class HeroLabFileFilter implements FileFilter {
+		private static final MagicNumberFileFilter MAGIC_NUMBER = new MagicNumberFileFilter(new byte[] { (byte) 0x50, (byte) 0x4B, (byte) 0x03, (byte) 0x04 });
+
+		public boolean accept(File file) {
+			if (file.isDirectory()) {
+				return false;
+			} else {
+				String path = file.getAbsolutePath().toLowerCase();
+
+				if (path.endsWith(".por") && MAGIC_NUMBER.accept(file)) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+	}
+
 	private static class DirectoryFileFilter implements FileFilter {
 		public boolean accept(File pathname) {
-			return pathname.isDirectory() || pdfFileFilter.accept(pathname);
+			return pathname.isDirectory() || PDF_FILE_FILTER.accept(pathname) || HERO_LAB_FILE_FILTER.accept(pathname);
 		}
 	}
 

@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -128,7 +129,6 @@ public class FogUtil {
 	}
 
 	public static void exposeVisibleArea(final ZoneRenderer renderer, Set<GUID> tokenSet) {
-		// Jamz: TODO: Double check and make sure false is best default value...
 		exposeVisibleArea(renderer, tokenSet, false);
 	}
 
@@ -191,6 +191,41 @@ public class FogUtil {
 					MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
 				}
 			}
+		}
+	}
+
+	public static void exposeVisibleAreaAtWaypoint(final ZoneRenderer renderer, Set<GUID> tokenSet, ZonePoint zp) {
+		final Zone zone = renderer.getZone();
+
+		for (GUID tokenGUID : tokenSet) {
+			Token token = zone.getToken(tokenGUID);
+			if (token == null) {
+				continue;
+			}
+			if (!token.getHasSight()) {
+				continue;
+			}
+			if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
+				continue;
+			}
+
+			ZonePoint zpStart = new ZonePoint(token.getX(), token.getY());
+			token.setX(zp.x);
+			token.setY(zp.y);
+			renderer.flush(token);
+
+			Area tokenVision = renderer.getZoneView()
+					.getVisibleArea(token);
+			if (tokenVision != null) {
+				Set<GUID> filteredToks = new HashSet<GUID>();
+				filteredToks.add(token.getId());
+				zone.exposeArea(tokenVision, token);
+				MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
+			}
+
+			token.setX(zpStart.x);
+			token.setY(zpStart.y);
+			renderer.flush(token);
 		}
 	}
 
@@ -268,7 +303,7 @@ public class FogUtil {
 		*/
 
 		renderer.getZone().clearExposedArea(tokenSet);
-		exposeVisibleArea(renderer, tokenSet, true); //Jamz: TODO: Clearing is working but re-exposure is not...working now?
+		exposeVisibleArea(renderer, tokenSet, true);
 	}
 
 	public static void restoreFoW(final ZoneRenderer renderer) {
@@ -280,6 +315,8 @@ public class FogUtil {
 	}
 
 	public static void exposeLastPath(final ZoneRenderer renderer, final Set<GUID> tokenSet) {
+		CodeTimer timer = new CodeTimer("exposeLastPath");
+
 		final Zone zone = renderer.getZone();
 		final Grid grid = zone.getGrid();
 		GridCapabilities caps = grid.getCapabilities();
@@ -287,22 +324,18 @@ public class FogUtil {
 		if (!caps.isPathingSupported() || !caps.isSnapToGridSupported()) {
 			return;
 		}
+
 		final Set<GUID> filteredToks = new HashSet<GUID>(2);
 
-		// Lee: putting a cap on the pool to avoid runaway performance costs
-		ExecutorService workPool = Executors.newFixedThreadPool(15);
-
 		for (final GUID tokenGUID : tokenSet) {
-
 			final Token token = zone.getToken(tokenGUID);
+			timer.start("exposeLastPath-" + token.getName());
 
 			@SuppressWarnings("unchecked")
 			Path<CellPoint> lastPath = (Path<CellPoint>) token.getLastPath();
 
 			if (lastPath == null)
 				return;
-
-			final Area visionArea = new Area();
 
 			Map<GUID, ExposedAreaMetaData> fullMeta = zone.getExposedAreaMetaData();
 			GUID exposedGUID = token.getExposedAreaGUID();
@@ -328,63 +361,34 @@ public class FogUtil {
 			List<CellPoint> processPath = zone.getWaypointExposureToggle() ? lastPath.getWayPointList() : lastPath.getCellPath();
 
 			int stepCount = processPath.size();
-			final CountDownLatch stepsCountDownLatch = new CountDownLatch(stepCount);
+			//System.out.println("Path size = " + stepCount);
 
-			// Lee: parallelize the task of revealing each step's FoW
 			for (final Object cell : processPath) {
-				workPool.submit(new Runnable() {
-
-					public void run() {
-						Area proc = new Area();
-						try {
-							/*
-							 * Lee: quick fix for a bug that happens when a
-							 * snapped PC token with vision is following an
-							 * unsnapped key token.
-							 */
-							if (cell instanceof CellPoint) {
-								ZonePoint zp = grid.convert((CellPoint) cell);
-								tokenClone.setX(zp.x);
-								tokenClone.setY(zp.y);
-							}
-
-							proc = zoneView.getVisibleArea(tokenClone);
-							zoneView.flush(tokenClone);
-
-							stepsCountDownLatch.countDown();
-
-						} finally {
-							// Lee: adding results to the cumulative area and
-							// history, skipping adding areas already traversed
-							visionArea.add(proc);
-							metaCopy.addToExposedAreaHistory(proc);
-						}
-					}
-
-				});
+				if (cell instanceof CellPoint) {
+					//timer.start("expose" + cell.toString());
+					ZonePoint zp = grid.convert((CellPoint) cell);
+					tokenClone.setX(zp.x);
+					tokenClone.setY(zp.y);
+					metaCopy.addToExposedAreaHistory(zoneView.getVisibleArea(tokenClone));
+					zoneView.flush(tokenClone);
+					//timer.start("expose" + cell.toString());
+				}
 			}
 
-			try {
-				stepsCountDownLatch.await();
-			} catch (InterruptedException e) {
-				// TODO: something
-				e.printStackTrace();
-			}
-
+			timer.stop("exposeLastPath-" + token.getName());
+			renderer.flush(tokenClone);
 			renderer.flush(token); // calls ZoneView.flush() -- too bad, I'd like to eliminate it...
-
 			filteredToks.clear();
 			filteredToks.add(token.getId());
-
-			zone.exposeArea(visionArea, token);
-
-			// Lee: will use optimized putTokens outside the loop instead
 			zone.putToken(token);
-			MapTool.serverCommand().exposeFoW(zone.getId(), visionArea, filteredToks);
-			MapTool.serverCommand().updateExposedAreaMeta(zone.getId(), exposedGUID, meta);
+			MapTool.serverCommand().updateExposedAreaMeta(zone.getId(), exposedGUID, metaCopy);
+
 		}
 
-		workPool.shutdown();
+		String results = timer.toString();
+		MapTool.getProfilingNoteFrame().addText(results);
+		//System.out.println(results);
+		timer.clear();
 	}
 
 	/**
@@ -410,7 +414,7 @@ public class FogUtil {
 
 	public static void main(String[] args) {
 		System.out.println("Creating topology");
-		final int topSize = 10000;
+		final int topSize = 20000;
 		final Area topology = new Area();
 		Random r = new Random(12345);
 		for (int i = 0; i < 500; i++) {

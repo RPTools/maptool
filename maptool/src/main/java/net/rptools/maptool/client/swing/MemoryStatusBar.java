@@ -17,14 +17,18 @@ import java.text.DecimalFormat;
 
 import javax.swing.JProgressBar;
 
+import org.apache.commons.io.FileUtils;
+
+import net.rptools.maptool.util.FileUtil;
+
 /**
  */
 public class MemoryStatusBar extends JProgressBar {
 	private static final long serialVersionUID = 1L;
 
-	private static final Dimension minSize = new Dimension(75, 10);
+	private static final Dimension minSize = new Dimension(100, 10);
 	private static final DecimalFormat format = new DecimalFormat("#,##0.#");
-	private static double largestMemoryUsed = -1;
+	private static long largestMemoryUsed = -1;
 	private static MemoryStatusBar msb = null;
 
 	public static MemoryStatusBar getInstance() {
@@ -84,15 +88,24 @@ public class MemoryStatusBar extends JProgressBar {
 	}
 
 	private void update() {
-		double totalMegs = Runtime.getRuntime().totalMemory() / (1024 * 1024);
-		double freeMegs = Runtime.getRuntime().freeMemory() / (1024 * 1024);
+		//double totalMegs = Runtime.getRuntime().totalMemory() / (1024 * 1024);
+		//double freeMegs = Runtime.getRuntime().freeMemory() / (1024 * 1024);
 
-		if (totalMegs > largestMemoryUsed)
-			largestMemoryUsed = totalMegs;
+		long totalMemory = Runtime.getRuntime().totalMemory();
+		long freeMemory = Runtime.getRuntime().freeMemory();
+		long maxMemory = Runtime.getRuntime().maxMemory();
 
-		setMaximum((int) totalMegs);
-		setValue((int) (totalMegs - freeMegs));
-		setString(format.format(totalMegs - freeMegs) + "M/" + format.format(totalMegs) + "M");
-		setToolTipText("Used Memory: " + (totalMegs - freeMegs) + "M, Total Memory: " + totalMegs + "M");
+		if (totalMemory > largestMemoryUsed)
+			largestMemoryUsed = totalMemory;
+
+		setMaximum((int) (totalMemory / (1024 * 1024)));
+		setValue((int) ((totalMemory - freeMemory) / (1024 * 1024)));
+		//setString(format.format(totalMegs - freeMegs) + "M/" + format.format(totalMegs) + "M");
+
+		setString(FileUtil.byteCountToDisplaySize((totalMemory - freeMemory)) + "/" + FileUtil.byteCountToDisplaySize(totalMemory));
+
+		setToolTipText("Used Memory: " + format.format((totalMemory - freeMemory) / (1024 * 1024))
+				+ "M, Total Memory: " + format.format(totalMemory / (1024 * 1024))
+				+ "M, Maximum Memory: " + format.format(maxMemory / (1024 * 1024)) + "M");
 	}
 }

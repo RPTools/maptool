@@ -1604,6 +1604,10 @@ public class MapTool {
 		getAutoSaveManager().restart();
 
 		taskbarFlasher = new TaskBarFlasher(clientFrame);
+
+		// Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync, 
+		// so after frame is all done loading we sync them back up.
+		MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
 	}
 
 	/**

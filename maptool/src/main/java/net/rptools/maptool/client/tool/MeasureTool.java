@@ -12,7 +12,10 @@
 package net.rptools.maptool.client.tool;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -42,10 +45,13 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
 
 	private ZoneWalker walker;
 	private Path<ZonePoint> gridlessPath;
+	private Cursor measureCursor;
 
 	public MeasureTool() {
 		try {
 			setIcon(new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/ruler-blue.png")));
+			measureCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+					ImageUtil.getImage("net/rptools/maptool/client/image/cursor-tape-measure.png"), new Point(2, 28), "Measure tool");
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
@@ -62,6 +68,8 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
 	}
 
 	public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
+		renderer.setCursor(measureCursor);
+
 		if (walker == null && gridlessPath == null) {
 			return;
 		}

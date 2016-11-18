@@ -29,8 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +46,7 @@ import org.apache.log4j.Logger;
 
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.lib.io.PackedFile;
 import net.rptools.lib.swing.ImagePanelModel;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
@@ -56,6 +55,7 @@ import net.rptools.maptool.client.TransferableToken;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.ExtractImagesFromPDF;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.PersistenceUtil;
@@ -63,21 +63,23 @@ import net.rptools.maptool.util.PersistenceUtil;
 public class ImageFileImagePanelModel implements ImagePanelModel {
 
 	private static final Logger log = Logger.getLogger(ImageFileImagePanelModel.class);
-	private static final Color TOKEN_BG_COLOR = new Color(255, 250, 205);
+	private static final Color TOKEN_BG_COLOR = new Color(215, 215, 215);
 	private static Image rptokenDecorationImage;
-
+	private static Image herolabDecorationImage;
 	static {
 		try {
 			rptokenDecorationImage = ImageUtil.getImage("net/rptools/maptool/client/image/rptokIcon.png");
+			herolabDecorationImage = ImageUtil.getImage("net/rptools/maptool/client/image/hero-lab-decoration.png");
 		} catch (IOException ioe) {
 			rptokenDecorationImage = null;
+			herolabDecorationImage = null;
 		}
 	}
 
 	private Directory dir;
 	private static String filter;
 	private boolean global;
-	private static List<File> fileList = new ArrayList<File>();;
+	private static List<File> fileList = new ArrayList<File>();
 	private List<Directory> subDirList;
 
 	private static int pagesProcessed = 0;
@@ -87,12 +89,6 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
 	public ImageFileImagePanelModel(Directory dir) {
 		this.dir = dir;
-
-		if (dir.isPDF()) {
-			refreshPDF(false);
-		} else {
-			refresh();
-		}
 	}
 
 	public void rescan(Directory dir) {
@@ -100,6 +96,8 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
 		if (dir.isPDF()) {
 			refreshPDF(true);
+		} else if (dir.isHeroLabPortfolio()) {
+			refreshHeroLab();
 		} else {
 			refresh();
 		}
@@ -111,6 +109,8 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 			if (!pdfExtractIsRunning) {
 				refreshPDF(false);
 			}
+		} else if (dir.isHeroLabPortfolio()) {
+			refreshHeroLab();
 		} else {
 			refresh();
 		}
@@ -127,18 +127,36 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	}
 
 	public Paint getBackground(int index) {
-		return Token.isTokenFile(fileList.get(index).getName()) ? TOKEN_BG_COLOR : null;
+		return null;
+		// return Token.isTokenFile(fileList.get(index).getName()) ? TOKEN_BG_COLOR : null;
 	}
 
 	public Image[] getDecorations(int index) {
-		return Token.isTokenFile(fileList.get(index).getName()) ? new Image[] { rptokenDecorationImage } : null;
+		if (Token.isTokenFile(fileList.get(index).getName())) {
+			try {
+				PackedFile pakFile = new PackedFile(fileList.get(index));
+				Object isHeroLab = pakFile.getProperty(PersistenceUtil.HERO_LAB);
+				if (isHeroLab != null) {
+					if ((boolean) isHeroLab) {
+						return new Image[] { herolabDecorationImage };
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			return new Image[] { rptokenDecorationImage };
+		} else {
+			return null;
+		}
 	}
 
 	public Image getImage(int index) {
 
 		Image image = null;
-		if (dir instanceof AssetDirectory) {
-
+		if (dir.isHeroLabPortfolio()) {
+			image = ((AssetDirectory) dir).getImageFor(fileList.get(index));
+		} else if (dir instanceof AssetDirectory) {
 			image = ((AssetDirectory) dir).getImageFor(fileList.get(index));
 		}
 		if (dir instanceof PdfAsDirectory) {
@@ -449,6 +467,32 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 		fileList.clear();
 		fileList.addAll(tempSet);
 		Collections.sort(fileList, filenameComparator);
+	}
+
+	private void refreshHeroLab() {
+		cancelPdfExtract(); // In case we interrupted the extract by changing directories before it finished...
+
+		fileList = new ArrayList<File>();
+		subDirList = new ArrayList<Directory>();
+
+		// Jamz: TODO Add progress bar!
+		// MapTool.getFrame().getAssetPanel().updateImagePanel();
+
+		boolean portfolioChanged = dir.hasChanged();
+		ExtractHeroLab heroLabFile = new ExtractHeroLab(dir.getPath(), portfolioChanged);
+		fileList.addAll(heroLabFile.getCharacterList(portfolioChanged));
+
+		if (filter != null && filter.length() > 0) {
+			for (ListIterator<File> iter = fileList.listIterator(); iter.hasNext();) {
+				File file = iter.next();
+				if (!file.getName().toUpperCase().contains(filter)) {
+					iter.remove();
+				}
+			}
+		}
+
+		Collections.sort(fileList, filenameComparator);
+		MapTool.getFrame().getAssetPanel().updateGlobalSearchLabel(fileList.size());
 	}
 
 	/**

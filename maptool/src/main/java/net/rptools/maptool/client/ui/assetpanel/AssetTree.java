@@ -72,6 +72,10 @@ public class AssetTree extends JTree implements TreeSelectionListener {
 		((ImageFileTreeModel) getModel()).refresh();
 	}
 
+	public void initialize() {
+		assetPanel.setDirectory(getSelectedAssetGroup());
+	}
+
 	////
 	// Tree Selection Listener
 	/* (non-Javadoc)

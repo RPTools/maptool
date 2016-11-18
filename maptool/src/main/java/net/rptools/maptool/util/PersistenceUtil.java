@@ -79,6 +79,7 @@ public class PersistenceUtil {
 	public static final String PROP_VERSION = "version"; //$NON-NLS-1$
 	public static final String PROP_CAMPAIGN_VERSION = "campaignVersion"; //$NON-NLS-1$
 	private static final String ASSET_DIR = "assets/"; //$NON-NLS-1$
+	public static final String HERO_LAB = "herolab"; //$NON-NLS-1$
 
 	private static final String CAMPAIGN_VERSION = "1.4.1";
 
@@ -582,6 +583,7 @@ public class PersistenceUtil {
 			pakFile.putFile(Token.FILE_THUMBNAIL_LARGE, ImageUtil.imageToBytes(thumbLarge, "png"));
 			pakFile.setContent(token);
 			pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
+			pakFile.setProperty(HERO_LAB, (token.getHeroLabData() != null));
 			pakFile.save();
 		} finally {
 			if (pakFile != null)

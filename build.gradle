@@ -66,6 +66,20 @@ def getLocalProperty(property) {
 				result = rootDir.toString() + "/build-resources/jWrapper"
 			}
 			break
+		case 'jWrapperBuildDir':
+			if (project.hasProperty('jWrapperBuildDir')) {
+				result = jWrapperBuildDir
+			} else {
+				result = rootDir.toString() + "/build-resources/jWrapper/JWrapperBuild"
+			}
+			break
+		case 'releaseDir':
+			if (project.hasProperty('releaseDir')) {
+				result = jWrapperBuildDir
+			} else {
+				result = rootDir.toString() + "/build-resources/releases"
+			}
+			break
 		case 'Windows32JRE':
 			if (project.hasProperty('Windows32JRE')) {
 				result = Windows32JRE
@@ -217,7 +231,12 @@ project(':launcher') {
 		with jar
 	}
 
-	task deleteBuild(type: Delete) { delete 'build/' }
+	task deleteBuild(type: Delete) { 
+		delete 'build/' 
+		outputs.upToDateWhen {
+			false
+		}
+	}
 }
 
 project(':maptool') {
@@ -240,7 +259,7 @@ project(':maptool') {
 		compile 'net.rptools.decktool:decktool:1.0.b1'
 		compile 'net.rptools.dicelib:dicelib:1.4.0.+'
 		compile 'net.sf.ezmorph:ezmorph:1.0.5'
-		compile 'com.caucho.hessian:hessian:3.1.6'
+		compile 'com.caucho:hessian:4.0.38'
 		compile 'jide-common:jide-common:3.2.3'
 		compile 'jide-components:jide-components:3.2.3'
 		compile 'jide-dialogs:jide-dialogs:3.2.3'
@@ -275,12 +294,16 @@ project(':maptool') {
 		compile 'org.eclipse.jetty.websocket:websocket-servlet:9.3.0.M1'
 		compile 'org.eclipse.jetty.websocket:websocket-api:9.3.0.M1'
 		compile 'org.reflections:reflections:0.9.10'
-		compile 'org.apache.pdfbox:pdfbox:2.0.0'		// Jamz: For pdf image extraction
-		compile 'org.apache.pdfbox:pdfbox-tools:2.0.0'	// Jamz: Dependancy for pdfbox
-		compile 'org.bouncycastle:bcmail-jdk15on:1.54'	// Jamz: To decrypt passworded/secured pdf's
-		compile 'com.github.jai-imageio:jai-imageio-core:1.3.1'	// Jamz: For pdf image extraction, specifically for jpeg2000 (jpx) support.
-		compile 'com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0'	// Jamz: For pdf image extraction, specifically for jpeg2000 (jpx) support.
-
+		compile 'org.apache.pdfbox:pdfbox:2.0.0'									// Jamz: For pdf image extraction
+		compile 'org.apache.pdfbox:pdfbox-tools:2.0.0'								// Jamz: Dependancy for pdfbox
+		compile 'org.bouncycastle:bcmail-jdk15on:1.54'								// Jamz: To decrypt passworded/secured pdf's
+		compile 'com.github.jai-imageio:jai-imageio-core:1.3.1'						// Jamz: For pdf image extraction, specifically for jpeg2000 (jpx) support.
+		compile 'com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0'					// Jamz: For pdf image extraction, specifically for jpeg2000 (jpx) support.
+		compile group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '2.6.0'	// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
+		compile group: 'com.fifesoft', name: 'autocomplete', version: '2.6.0'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
+		compile group: 'com.fifesoft', name: 'rstaui', version: '2.6.0'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
+		compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.17.2'			// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
+		
 		testCompile group: 'junit', name: 'junit', version: '4.11'
 	}
 
@@ -352,7 +375,12 @@ project(':maptool') {
 		exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
 	}
 	
-	task deleteBuild(type: Delete) { delete 'build/' }
+	task deleteBuild(type: Delete) { 
+		delete 'build/'
+		outputs.upToDateWhen {
+			false
+		}
+	}
 	
 	// Add access rule to classpath for nashorn api
 	// Note: This appends the following node to the JRE container classpathentry but only for Java 1.8 in case you are testing some other Java version
@@ -492,13 +520,29 @@ task createJwrapperRelease(dependsOn: ['createLaunchPropertiesFile', 'createFatJ
 	workingDir = 'build-resources/jWrapper'
 	
 	main  = 'jwrapper.launch.JWCompiler'
-	classpath = files("build-resources/jWrapper/jwrapper-00041197800.jar")
+	// classpath = files("build-resources/jWrapper/jwrapper-00041197800.jar")
+	classpath = files("build-resources/jWrapper/jwrapper-00044250826.jar")
 	args('jwrapper.xml')
 	
 	doLast {
 		println 'Creating MapTool jWrapper Release in: ' + workingDir
 	}
 }
+
+task renameJwrapperReleases(type: Copy) {
+	from (getLocalProperty('jWrapperBuildDir')) {
+		include 'MapTool-*-offline*'
+	}
+	
+	into getLocalProperty('releaseDir')
+	
+	rename('MapTool-windows64-offline.exe', 'MapTool-windows64-' + getVersionName() + '.exe')
+	rename('MapTool-windows32-offline.exe', 'MapTool-windows32-' + getVersionName() + '.exe')
+	rename('MapTool-linux32-offline.tar', 'MapTool-linux32-' + getVersionName() + '.tar')
+	rename('MapTool-linux64-offline.tar', 'MapTool-linux64-' + getVersionName() + '.tar')
+	rename('MapTool-macos64-offline.dmg', 'MapTool-macos64-' + getVersionName() + '.dmg')
+	rename('MapTool-macos32-offline.dmg', 'MapTool-macos32-' + getVersionName() + '.dmg')
+  }
 
 task ftpUpdateRelease {
 	description = "Uploads jWrapper build to remote server"
@@ -514,7 +558,7 @@ task ftpUpdateRelease {
 			classname: 'org.apache.tools.ant.taskdefs.optional.net.FTP',
 			classpath: configurations.ftpAntTask.asPath)
 			ftp(server: ftpServer, port: ftpPort, userid: ftpUserID, password: ftpPassword, remoteDir: ftpRemoteDir, passive: 'yes', verbose: true)
-			{ fileset(file: "build-resources/jWrapper/JWrapperBuild/MapTool-*") }
+			{ fileset(file: "build-resources/releases/MapTool-*") }
 		}
 	}
 }

@@ -38,6 +38,8 @@ public class AssetDirectory extends Directory {
 	public static final String PROPERTY_IMAGE_LOADED = "imageLoaded";
 	private static final Image PDF_IMAGE = new ImageIcon(
 			AssetDirectory.class.getClassLoader().getResource("net/rptools/maptool/client/image/pdf_icon.png")).getImage();
+	private static final Image HERO_LAB_IMAGE = new ImageIcon(
+			AssetDirectory.class.getClassLoader().getResource("net/rptools/maptool/client/image/hero-lab-icon.png")).getImage();
 
 	private final Map<File, FutureTask<Image>> imageMap = new HashMap<File, FutureTask<Image>>();
 
@@ -133,6 +135,9 @@ public class AssetDirectory extends Directory {
 				} else if (imageFile.getName().toLowerCase().endsWith(".pdf")) {
 					// Jamz: Added to mark all PDF assets with proper image, TODO: Move image asset to proper location
 					thumbnail = PDF_IMAGE;
+				} else if (imageFile.getName().toLowerCase().endsWith(".por")) {
+					// Jamz: Added to mark all Hero Lab assets with proper image, TODO: Move image asset to proper location
+					thumbnail = HERO_LAB_IMAGE;
 				} else {
 					thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
 

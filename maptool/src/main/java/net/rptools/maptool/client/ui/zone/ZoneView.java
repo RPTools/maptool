@@ -376,7 +376,7 @@ public class ZoneView implements ModelChangeListener {
 	 * 
 	 * @author Jamz
 	 * 
-	 * A Callable task add to the ExecutorCompletionService so we can track as Futures.
+	 * A Callable task add to the ExecutorCompletionService to combine lights as a threaded task
 	 *
 	 */
 	private final class CombineLightsTask implements Callable<TreeMap<Double, Area>> {

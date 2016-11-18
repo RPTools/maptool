@@ -21,6 +21,7 @@ import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 
+import org.apache.commons.io.monitor.FileEntry;
 import org.apache.log4j.Logger;
 
 /**
@@ -227,6 +229,8 @@ public class Token extends BaseModel implements Cloneable {
 		name, MACRO_CHANGED
 	}
 
+	private HeroLabData heroLabData;
+
 	public Token(Token token) {
 		this(token.name, token.getImageAssetId());
 		currentImageAsset = token.currentImageAsset;
@@ -324,7 +328,10 @@ public class Token extends BaseModel implements Cloneable {
 		if (token.sizeMap != null) {
 			sizeMap = new HashMap<Class<? extends Grid>, GUID>(token.sizeMap);
 		}
+
 		exposedAreaGUID = token.exposedAreaGUID;
+
+		heroLabData = token.heroLabData;
 	}
 
 	public Token() {
@@ -794,7 +801,7 @@ public class Token extends BaseModel implements Cloneable {
 	}
 
 	public synchronized boolean isOwner(String playerId) {
-		return /* getType() == Type.PC && */(ownerType == OWNER_TYPE_ALL || (ownerList != null && ownerList.contains(playerId)));
+		return (ownerType == OWNER_TYPE_ALL || (ownerList != null && ownerList.contains(playerId)));
 	}
 
 	@Override
@@ -1841,5 +1848,13 @@ public class Token extends BaseModel implements Cloneable {
 		} catch (CloneNotSupportedException e) {
 			return null;
 		}
+	}
+
+	public HeroLabData getHeroLabData() {
+		return heroLabData;
+	}
+
+	public void setHeroLabData(HeroLabData heroLabData) {
+		this.heroLabData = heroLabData;
 	}
 }

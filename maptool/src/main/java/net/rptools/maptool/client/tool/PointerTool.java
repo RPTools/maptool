@@ -254,6 +254,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		dragOffsetX = 0;
 		dragOffsetY = 0;
 
+		exposeFoW(null);
+	}
+
+	public void exposeFoW(ZonePoint p) {
 		// if has fog(required) 
 		// and ((isGM with pref set) OR serverPolicy allows auto reveal by players)
 		if (renderer.getZone().hasFog() && ((AppPreferences.getAutoRevealVisionOnGMMovement() && MapTool.getPlayer().isGM()) || MapTool.getServerPolicy().isAutoRevealOnMovement())) {
@@ -271,11 +275,18 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				}
 			}
 
+			if (p != null) {
+				FogUtil.exposeVisibleAreaAtWaypoint(renderer, exposeSet, p);
+				return;
+			}
+
 			// Lee: fog exposure according to reveal type
 			if (zone.getWaypointExposureToggle())
 				FogUtil.exposeVisibleArea(renderer, exposeSet, false);
-			else
+			else {
 				FogUtil.exposeLastPath(renderer, exposeSet);
+				FogUtil.exposeVisibleArea(renderer, exposeSet, false);
+			}
 		}
 	}
 
@@ -514,6 +525,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		mouseButtonDown = false;
+		//System.out.println("mouseReleased " + e.toString());
 
 		if (isShowingTokenStackPopup) {
 			if (tokenStackPanel.contains(e.getX(), e.getY())) {
@@ -524,6 +536,15 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				repaint();
 			}
 		}
+
+		// Jamz: We have to capture here as isLeftMouseButton is also true during drag
+		// Jamz: Also, changed to right button which is easier to click during drag
+		// WAYPOINT
+		if (SwingUtilities.isRightMouseButton(e) && isDraggingToken) {
+			setWaypoint();
+			return;
+		}
+
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			try {
 				// MARKER
@@ -572,10 +593,14 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			}
 			return;
 		}
+
+		// Jamz: This doesn't seem to work for me, looks like Mouse 1 is always returned along with Mouse 3 so it's caught above...
+		// And Middle button? That's a pain to click while dragging isn't it? How about Right click during drag?
 		// WAYPOINT
 		if (SwingUtilities.isMiddleMouseButton(e) && isDraggingToken) {
 			setWaypoint();
 		}
+
 		// POPUP MENU
 		if (SwingUtilities.isRightMouseButton(e) && !isDraggingToken && !isDraggingMap()) {
 			if (tokenUnderMouse != null && !renderer.getSelectedTokenSet().contains(tokenUnderMouse.getId())) {
@@ -1278,6 +1303,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
 	private void setWaypoint() {
 		ZonePoint p = new ZonePoint(dragStartX, dragStartY);
+		exposeFoW(p);
+
 		renderer.toggleMoveSelectionSetWaypoint(tokenBeingDragged.getId(), p);
 		MapTool.serverCommand().toggleTokenMoveWaypoint(renderer.getZone().getId(), tokenBeingDragged.getId(), p);
 	}
@@ -1305,6 +1332,11 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
 				ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
 				Pointer pointer = new Pointer(renderer.getZone(), zp.x, zp.y, 0, type);
+				// Jamz test move clients to view when using point (for GM only)...
+				// TODO: Snap player view back when done?
+				if (MapTool.getPlayer().isGM()) {
+					MapTool.serverCommand().enforceZoneView(renderer.getZone().getId(), zp.x, zp.y, renderer.getScale(), renderer.getWidth(), renderer.getHeight());
+				}
 				MapTool.serverCommand().showPointer(MapTool.getPlayer().getName(), pointer);
 			}
 			isSpaceDown = true;
@@ -1335,6 +1367,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	 */
 	public void paintOverlay(final ZoneRenderer renderer, Graphics2D g) {
 		Dimension viewSize = renderer.getSize();
+		renderer.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
 		Composite composite = g.getComposite();
 		if (selectionBoundBox != null) {

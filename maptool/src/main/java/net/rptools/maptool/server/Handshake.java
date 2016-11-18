@@ -41,7 +41,10 @@ public class Handshake {
 
 		HessianInput input = new HessianInput(s.getInputStream());
 		HessianOutput output = new HessianOutput(s.getOutputStream());
-		output.findSerializerFactory().setAllowNonSerializable(true);
+
+		//Jamz: Method renamed in Hessian 4.0.+
+		//output.findSerializerFactory().setAllowNonSerializable(true);
+		output.getSerializerFactory().setAllowNonSerializable(true);
 
 		Request request = (Request) input.readObject();
 
@@ -79,7 +82,9 @@ public class Handshake {
 	public static Response sendHandshake(Request request, Socket s) throws IOException {
 		HessianInput input = new HessianInput(s.getInputStream());
 		HessianOutput output = new HessianOutput(s.getOutputStream());
-		output.findSerializerFactory().setAllowNonSerializable(true);
+		//Jamz: Method renamed in Hessian 4.0.+
+		//output.findSerializerFactory().setAllowNonSerializable(true);
+		output.getSerializerFactory().setAllowNonSerializable(true);
 		output.writeObject(request);
 
 		return (Response) input.readObject();

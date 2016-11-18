@@ -15,6 +15,7 @@ import java.awt.Color;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +46,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
 	//	private transient static final List<String> HTMLColors = Arrays.asList("aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "purple", "red", "silver", "teal",
 	//			"white", "yellow");
+	private UUID macroUUID = UUID.randomUUID();
+
 	private transient MacroButton button;
 	private transient GUID tokenId;
 	private String saveLocation;
@@ -957,6 +960,13 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 		for (MacroButtonProperties nextMacro : oldMacros) {
 			fixOldMacroCompare(nextMacro);
 		}
+	}
+
+	public UUID getMacroUUID() {
+		if (macroUUID == null)
+			macroUUID = UUID.randomUUID();
+
+		return macroUUID;
 	}
 
 	public Object readResolve() {
