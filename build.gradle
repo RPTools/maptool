@@ -416,7 +416,7 @@ project(':maptool') {
 			withXml { classpathXml ->
 				def classpathXmlNode = classpathXml.asNode()
 				Node classpathJreNode = node.find {
-					t.@kind == 'con' &&
+					it.@kind == 'con' &&
 					it.@path.contains('JRE_CONTAINER') &&
 					it.@path.contains('JavaSE-1.8')
 				}
