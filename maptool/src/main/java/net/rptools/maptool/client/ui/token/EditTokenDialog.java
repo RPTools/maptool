@@ -71,6 +71,18 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
+import com.jeta.forms.gui.form.GridView;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.RowSpec;
+import com.jidesoft.grid.AbstractPropertyTableModel;
+import com.jidesoft.grid.Property;
+import com.jidesoft.grid.PropertyPane;
+import com.jidesoft.grid.PropertyTable;
+import com.jidesoft.swing.CheckBoxListWithSelectable;
+import com.jidesoft.swing.DefaultSelectable;
+import com.jidesoft.swing.Selectable;
+
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.AbstractTokenAccessorFunction;
@@ -87,23 +99,12 @@ import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
+import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.ImageManager;
 import com.jcabi.xml.XML;
 import com.jcabi.xml.XMLDocument;
-import com.jeta.forms.gui.form.GridView;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.RowSpec;
-import com.jidesoft.grid.AbstractPropertyTableModel;
-import com.jidesoft.grid.Property;
-import com.jidesoft.grid.PropertyPane;
-import com.jidesoft.grid.PropertyTable;
-import com.jidesoft.swing.CheckBoxListWithSelectable;
-import com.jidesoft.swing.DefaultSelectable;
-import com.jidesoft.swing.Selectable;
-
 /**
  * This dialog is used to display all of the token states and notes to the user.
  */
@@ -131,7 +132,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
 	/**
 	 * Create a new token notes dialog.
-	 * 
+	 *
 	 * @param token
 	 *            The token being displayed.
 	 */
@@ -824,7 +825,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 	}
 
 	public void initPropertiesPanel() {
-		PropertyTable propertyTable = new PropertyTable();
+		PropertyTable propertyTable = new PropertyTable() {
+			@Override
+			public String getToolTipText(MouseEvent event) {
+				String text = super.getToolTipText(event);
+				return text != null && text.length() > 100 ? text.substring(0, 100) + " ..." : text;
+			}
+		};
 		propertyTable.setFillsViewportHeight(true); // XXX This is Java6-only -- need Java5 solution
 		propertyTable.setName("propertiesTable");
 
@@ -1121,7 +1128,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		private static final long serialVersionUID = 2822797264738675580L;
 
 		private Map<String, String> propertyMap;
-		private List<net.rptools.maptool.model.TokenProperty> propertyList;
+		private List<TokenProperty> propertyList;
 
 		private Map<String, String> getPropertyMap() {
 			Token token = getModel();
@@ -1129,8 +1136,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 			if (propertyMap == null) {
 				propertyMap = new HashMap<String, String>();
 
-				List<net.rptools.maptool.model.TokenProperty> propertyList = getPropertyList();
-				for (net.rptools.maptool.model.TokenProperty property : propertyList) {
+				List<TokenProperty> propertyList = getPropertyList();
+				for (TokenProperty property : propertyList) {
 					String value = (String) token.getProperty(property.getName());
 					if (value == null) {
 						value = property.getDefaultValue();
@@ -1141,7 +1148,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 			return propertyMap;
 		}
 
-		private List<net.rptools.maptool.model.TokenProperty> getPropertyList() {
+		private List<TokenProperty> getPropertyList() {
 			if (propertyList == null) {
 				propertyList = MapTool.getCampaign().getTokenPropertyList((String) getPropertyTypeCombo().getSelectedItem());
 			}
@@ -1149,7 +1156,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		}
 
 		public void applyTo(Token token) {
-			for (net.rptools.maptool.model.TokenProperty property : getPropertyList()) {
+			for (TokenProperty property : getPropertyList()) {
 				String value = getPropertyMap().get(property.getName());
 				if (property.getDefaultValue() != null && property.getDefaultValue().equals(value)) {
 					token.setProperty(property.getName(), null); // Clear original value

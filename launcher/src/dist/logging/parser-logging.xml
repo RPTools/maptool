@@ -1,6 +1,0 @@
-<!-- DESC: Parser Evaluation Tree -->
-<!-- TTIP: Specifically just how the parser creates eval trees. -->
-<logger name="net.rptools.parser.EvaluationTreeParser">
-    <level value="DEBUG" />
-    <appender-ref ref="console"/>
-</logger>
