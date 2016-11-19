@@ -80,7 +80,7 @@ def getLocalProperty(property) {
 			if (project.hasProperty('releaseDir')) {
 				result = releaseDir
 			} else {
-				result = rootDir.toString() + "/build-resources/releases"
+				result = rootDir.toString() + "/build/releases"
 			}
 			break
 		case 'Windows32JRE':
@@ -140,6 +140,7 @@ allprojects {
 
 
 subprojects {
+	apply plugin: 'base'
 	apply plugin: 'java'
 	apply plugin: 'findbugs'
 	apply plugin: 'pmd'
@@ -617,7 +618,7 @@ task ftpUpdateRelease {
 				password: ftpPassword,
 				remoteDir: ftpRemoteDir,
 				passive: 'yes',
-				verbose: true) {
+				verbose: true)
 				{
 					fileset(file: "build-resources/releases/MapTool-*")
 				}
