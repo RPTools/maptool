@@ -232,6 +232,7 @@ public class MapToolLauncher extends JFrame {
 	private static final JCheckBox jcbDisable_java2d_d3d = new JCheckBox();
 	private static final JCheckBox jcbEnable_java2d_opengl = new JCheckBox();
 	private static final JCheckBox jcbEnable_macosx_embedded = new JCheckBox();
+	private static final JCheckBox jcbSetDPIAware = new JCheckBox();
 
 	private static final JLabel jlMTLogo = new JLabel();
 	private static final JLabel jlLaunchLogo = new JLabel();
@@ -717,7 +718,6 @@ public class MapToolLauncher extends JFrame {
 					jcbDisable_java2d_d3d.setSelected(extraArgs.contains(JAVA2D_D3D_OPTION));
 					jcbEnable_java2d_opengl.setSelected(extraArgs.contains(JAVA2D_OPENGL_OPTION));
 					jcbEnable_macosx_embedded.setSelected(extraArgs.contains(MACOSX_EMBEDDED_OPTION));
-
 					if (extraArgs.contains(DATADIR_OPTION)) {
 						extraArgs = cleanExtraArgs(extraArgs);
 					}
@@ -918,12 +918,30 @@ public class MapToolLauncher extends JFrame {
 				updateCommand();
 			}
 		});
+		jcbSetDPIAware.setAlignmentX(Component.LEFT_ALIGNMENT);
+		jcbSetDPIAware.setText(CopiedFromOtherJars.getText("msg.info.set_dpi_awareness")); //$NON-NLS-1$
+		jcbSetDPIAware.setToolTipText(CopiedFromOtherJars.getText("msg.tooltip.set_dpi_awareness")); //$NON-NLS-1$
+		jcbSetDPIAware.setSelected(SetDPIAware.getKeyValue());
+		jcbSetDPIAware.setEnabled(SetDPIAware.checkRegistryAccess());
+		jcbSetDPIAware.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					boolean success = SetDPIAware.setKeyValue(true);
+					System.out.println("ON: key is now set to: " + success);
+				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					boolean success = SetDPIAware.setKeyValue(false);
+					System.out.println("OFF: key is now set to: " + success);
+				}
+			}
+		});
 		p.add(logPanel, BorderLayout.NORTH);
 		Box other = new Box(BoxLayout.PAGE_AXIS);
 		other.add(jcbEnableAssertions);
 		other.add(jcbDisable_java2d_d3d);
 		other.add(jcbEnable_java2d_opengl);
 		other.add(jcbEnable_macosx_embedded);
+		other.add(jcbSetDPIAware);
 		other.add(Box.createVerticalGlue());
 		p.add(other, BorderLayout.CENTER);
 		return p;
