@@ -103,8 +103,7 @@ import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.ImageManager;
-import com.jcabi.xml.XML;
-import com.jcabi.xml.XMLDocument;
+
 /**
  * This dialog is used to display all of the token states and notes to the user.
  */
