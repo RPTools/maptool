@@ -80,7 +80,7 @@ def getLocalProperty(property) {
 			if (project.hasProperty('releaseDir')) {
 				result = releaseDir
 			} else {
-				result = rootDir.toString() + "/build/releases"
+				result = rootDir.toString() + "/build/release"
 			}
 			break
 		case 'Windows32JRE':
@@ -192,9 +192,7 @@ project(':launcher') {
 		compile 'commons-configuration:commons-configuration:1.10'
 		compile 'commons-cli:commons-cli:1.3'
 		compile files('../build-resources/jWrapper/jwrapperlib/jwrapper_utils.jar')
-		compile group: 'net.java.dev.jna', name: 'jna', version: '4.2.2'			// https://mvnrepository.com/artifact/net.java.dev.jna/jna
 		compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.2.2'	// https://mvnrepository.com/artifact/net.java.dev.jna/jna-platform
-		compile group: 'net.java.dev.jna', name: 'platform', version: '3.5.2'		// https://mvnrepository.com/artifact/net.java.dev.jna/platform
 		
 		testCompile group: 'junit', name: 'junit', version: '4.11'
 	}
@@ -585,18 +583,29 @@ task createJwrapperRelease(dependsOn: ['createLaunchPropertiesFile', 'createFatJ
 }
 
 task renameJwrapperReleases(type: Copy) {
-	from (getLocalProperty('jWrapperBuildDir')) {
-		include 'MapTool-*-offline*'
+	from ('build-resources/jWrapper/JWrapperBuild') {
+		include 'MapTool-*64-offline*'
 	}
-	
-	into getLocalProperty('releaseDir')
+	into getLocalProperty('releaseDir') + "-" + getVersionName()
 	
 	rename('MapTool-windows64-offline.exe', 'MapTool-windows64-' + getVersionName() + '.exe')
-	rename('MapTool-windows32-offline.exe', 'MapTool-windows32-' + getVersionName() + '.exe')
-	rename('MapTool-linux32-offline.tar', 'MapTool-linux32-' + getVersionName() + '.tar')
 	rename('MapTool-linux64-offline.tar', 'MapTool-linux64-' + getVersionName() + '.tar')
 	rename('MapTool-macos64-offline.dmg', 'MapTool-macos64-' + getVersionName() + '.dmg')
-	rename('MapTool-macos32-offline.dmg', 'MapTool-macos32-' + getVersionName() + '.dmg')
+	
+	
+	// We really shouldn't need 32 bit releases. There is the standard jar release for those odd ball needs
+	// Unfortunately we can not tell JWrapper to skip them.
+	// rename('MapTool-windows32-offline.exe', 'MapTool-windows32-' + getVersionName() + '.exe')
+	// rename('MapTool-linux32-offline.tar', 'MapTool-linux32-' + getVersionName() + '.tar')
+	// rename('MapTool-macos32-offline.dmg', 'MapTool-macos32-' + getVersionName() + '.dmg')
+
+	outputs.upToDateWhen {
+		false
+	}
+	
+	doLast {
+		println 'Renaming and moving MapTool jWrapper Release to: ' + getLocalProperty('releaseDir') + "-" + getVersionName()
+	}
   }
 
 task ftpUpdateRelease {
@@ -620,7 +629,7 @@ task ftpUpdateRelease {
 				passive: 'yes',
 				verbose: true)
 				{
-					fileset(file: "build-resources/releases/MapTool-*")
+					fileset(file: getLocalProperty('releaseDir') + "-" + getVersionName() + "/MapTool-*")
 				}
 		}
 	}
@@ -699,3 +708,4 @@ task release() << {
 }
 release.dependsOn += zipRelease
 release.dependsOn += zipOSXApp
+release.dependsOn += createJwrapperRelease

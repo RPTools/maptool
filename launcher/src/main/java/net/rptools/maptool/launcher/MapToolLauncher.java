@@ -927,11 +927,9 @@ public class MapToolLauncher extends JFrame {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					boolean success = SetDPIAware.setKeyValue(true);
-					System.out.println("ON: key is now set to: " + success);
+					SetDPIAware.setKeyValue(true);
 				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
-					boolean success = SetDPIAware.setKeyValue(false);
-					System.out.println("OFF: key is now set to: " + success);
+					SetDPIAware.setKeyValue(false);
 				}
 			}
 		});
