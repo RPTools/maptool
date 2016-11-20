@@ -953,5 +953,181 @@ The label is a property of any token
 println (token.name, " (", token.label, ")")
 ```
 
+#### Macro Function getLastPath()
+This function getLastPath() can be called on any token
+```lua
+--{assert(0, "LUA")}--
+for pathpoint, pos in ipairs(token.getLastPath()) do
+  println(toStr(pos))
+end
+println(table.indent(token.getLastPath(false)))
+```
+#### Macro Function getLayer()
+The layer is a property of any token
+```lua
+--{assert(0, "LUA")}--
+println ("I am on ", token.layer:lower())
+```
+
+#### Macro Function getLibProperty()
+The Tokens-library has a getLibProperty(property, [Token]) function that returns a token-property object.
+That object has a value property containing the value
+```lua
+--{assert(0, "LUA")}--
+println (tokens.getLibProperty("VERSION","Lib:Library").value)
+local prop = tokens.getLibProperty("VERSION","Lib:Library")
+println(prop.raw)
+println(prop.converted)
+```
+
+#### Macro Function getLibPropertyNames()
+The Tokens-library has a getLibProperties([Token]) function that returns a table of properties.
+```lua
+--{assert(0, "LUA")}--
+for name, obj in pairs(tokens.getLibProperties("Lib:Library")) do
+  println(name)
+end
+```
+With this, a getLibPropertyNames function can be easily defined as such:
+```lua
+--{assert(0, "LUA")}--
+function getLibPropertyNames(tok)
+  local result = {}
+  for name, obj in pairs(tokens.getLibProperties(tok)) do
+    table.insert(result, name)
+  end
+  return result
+end
+
+println(toJSON(getLibPropertyNames("Lib:Library")))
+```
+
+#### Macro Function getLights()
+Each token-object has a lights-tables that contains all the lights by category
+```lua
+--{assert(0, "LUA")}--
+for name, light in pairs(token.lights.D20) do
+  println(name, " is on")
+end
+```
+With this, a getLights function for all lights can be defined as such:
+```lua
+--{assert(0, "LUA")}--
+function getLights()
+  local result = {}
+  for catname, cat in pairs(token.lights) do
+    for lightname, light in pairs(cat) do
+      table.insert(result, lightname)
+    end
+  end
+  return result
+end
+
+println("Active Lights: ", toJSON(getLights()))
+```
+
+#### Macro Function getMacroButtonIndex()
+This is a property of the macro libraray
+```lua
+--{assert(0, "LUA")}--
+println(macro.buttonIndex)
+```
+
+#### Macro Function getMacroCommand()
+This is a property of any macro object
+```lua
+--{assert(0, "LUA")}--
+println(token.macros[1].command)
+```
+
+#### Macro Function getMacroGroup()
+There is no direct function to do this, but it can be implemented by iterating the token.macros table
+```lua
+--{assert(0, "LUA")}--
+function getMacroGroup(group, tok)
+  tok = tok or token
+  local result = {}
+  for index, macro in pairs(tok.macros) do
+    if macro.group == group then
+      table.insert(result, macro.label)
+    end
+  end
+  return result
+end
+
+println("Macros: ", toJSON(getMacroGroup(""))) --empty group
+println("Macros: ", toJSON(getMacroGroup("Group1")))
+println("Macros: ", toJSON(getMacroGroup("Group1", tokens.resolve("Test"))))
+```
+
+#### Macro Function getMacroIndexes()
+There is no direct function to do this, but it can be implemented by iterating the token.macros table
+```lua
+--{assert(0, "LUA")}--
+function getMacroIndices(label, tok)
+  tok = tok or token
+  local result = {}
+  for index, macro in pairs(tok.macros) do
+    if macro.label == label then
+      table.insert(result, index)
+    end
+  end
+  return result
+end
+
+println("Indices: ", toJSON(getMacroIndices("tokenVarTest")))
+println("Indices: ", toJSON(getMacroIndices("tokenVarTest", tokens.resolve("Test"))))
+```
+
+#### Macro Function getMacroLocation()
+This is a property of the macro libraray
+```lua
+--{assert(0, "LUA")}--
+println(macro.location)
+```
+
+#### Macro Function getMacroName()
+This is a property of the macro libraray
+```lua
+--{assert(0, "LUA")}--
+println(macro.name)
+```
+
+#### Macro Function getMacroProps()
+A macro object is also a table of the macro properties
+```lua
+--{assert(0, "LUA")}--
+println(toJSON(token.macros[1]))
+println(token.macros[1].label)
+```
+
+#### Macro Function getMacros()
+There is no direct function to do this, but it can be implemented by iterating the token.macros table
+```lua
+--{assert(0, "LUA")}--
+function getMacros(tok)
+  tok = tok or token
+  local result = {}
+  for index, macro in pairs(tok.macros) do
+    table.insert(result, macro.label)
+  end
+  return result
+end
+
+println("Macros: ", toJSON(getMacros())) --current Token
+println("Macros: ", toJSON(getMacros(tokens.resolve("Test"))))
+```
+
+#### Macro Function getMapVisible()
+This is a property of a map
+```lua
+--{assert(0, "LUA")}--
+println(maps.current.visible)
+println(maps.all["Grasslands"].visible)
+println(maps.visible["Grasslands"]~=nil)
+```
+
+
+
 ### Roll-Options
 

@@ -43,7 +43,7 @@ public class TokenProperties extends LuaTable {
 	}
 
 	public void rawset(LuaValue key, LuaValue value) {
-		if (!token.isSelfOrTrusted()) {
+		if (!token.isSelfOrTrustedOrLib()) {
 			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.setProperty")));
 		}
 		rawget(key).rawset("value", value);
@@ -55,7 +55,7 @@ public class TokenProperties extends LuaTable {
 
 	@Override
 	public LuaValue rawget(LuaValue key) {
-		if (!token.isSelfOrTrusted()) {
+		if (!token.isSelfOrTrustedOrLib()) {
 			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
 		}
 		return new MapToolTokenProperty(token, key.checkjstring(), propmap);
@@ -63,7 +63,7 @@ public class TokenProperties extends LuaTable {
 
 	@Override
 	public int length() {
-		if (!token.isSelfOrTrusted()) {
+		if (!token.isSelfOrTrustedOrLib()) {
 			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperties")));
 		}
 		return token.getToken().getPropertyMap().size();
@@ -71,7 +71,7 @@ public class TokenProperties extends LuaTable {
 
 	@Override
 	public Varargs next(LuaValue key) {
-		if (!token.isSelfOrTrusted()) {
+		if (!token.isSelfOrTrustedOrLib()) {
 			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperties")));
 		}
 		CaseInsensitiveHashMap<Object> propertyMap = token.getToken().getPropertyMap();

@@ -32,8 +32,12 @@ import net.rptools.maptool.client.lua.token.HasLights;
 import net.rptools.maptool.client.lua.token.ImageFunc;
 import net.rptools.maptool.client.lua.token.IsOwnedByAll;
 import net.rptools.maptool.client.lua.token.IsOwner;
+import net.rptools.maptool.client.lua.token.LastPath;
 import net.rptools.maptool.client.lua.token.MatchingProperties;
 import net.rptools.maptool.client.lua.token.Move;
+import net.rptools.maptool.client.lua.token.MovedOverPoints;
+import net.rptools.maptool.client.lua.token.MovedOverToken;
+import net.rptools.maptool.client.lua.token.Movement;
 import net.rptools.maptool.client.lua.token.SelectToken;
 import net.rptools.maptool.client.lua.token.SendToBack;
 import net.rptools.maptool.client.lua.token.SetOwner;
@@ -118,6 +122,10 @@ public class MapToolToken extends LuaTable implements IRepresent {
 	private static final String F_DISTANCE = "getdistance";
 	private static final String F_ADDTOINITIATIVE = "addtoinitiative";
 	private static final String F_CREATEMACRO = "createmacro";
+	private static final String F_LASTPATH = "getlastpath";
+	private static final String F_MOVEMENT = "getmovecount";
+	private static final String F_MOVEDOVERTOKEN = "movedovertoken";
+	private static final String F_MOVEDOVERPOINTS = "movedoverpoints";
 	//TODO trusted Macro und so
 	private boolean isSelf = false;
 	private Token token;
@@ -690,7 +698,14 @@ public class MapToolToken extends LuaTable implements IRepresent {
 				return new Distance(this);
 			case F_CREATEMACRO:
 				return new CreateMacro(this, resolver);
-
+			case F_LASTPATH:
+				return new LastPath(this);
+			case F_MOVEMENT:
+				return new Movement(this);
+			case F_MOVEDOVERPOINTS:
+				return new MovedOverPoints(this);
+			case F_MOVEDOVERTOKEN:
+				return new MovedOverToken(this);
 			}
 		} catch (ParserException e) {
 			throw new LuaError(e);
@@ -729,6 +744,19 @@ public class MapToolToken extends LuaTable implements IRepresent {
 
 	public boolean isSelfOrTrusted() {
 		return isSelf || MapTool.getParser().isMacroTrusted();
+	}
+	
+	public boolean isSelfOrTrustedOrLib() {
+		return isSelf || isLib() || MapTool.getParser().isMacroTrusted();
+	}
+	
+	
+
+	public boolean isLib() {
+		if (token != null) {
+			return token.getName().matches("(?i)^lib:.*");
+		}
+		return false;
 	}
 
 	public Token getToken() {

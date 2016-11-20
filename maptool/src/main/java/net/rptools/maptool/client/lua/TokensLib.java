@@ -105,12 +105,8 @@ public class TokensLib extends TwoArgFunction {
 
 	public LuaValue ownedBy(LuaValue val) {
 		checkTrusted("ownedBy");
-		return toLua(MapTool
-				.getFrame()
-				.getCurrentZoneRenderer()
-				.getZone()
-				.getTokensFiltered(
-						new FindTokenFunctions.OwnedFilter(val.checkjstring())));
+		return toLua(MapTool.getFrame().getCurrentZoneRenderer().getZone()
+				.getTokensFiltered(new FindTokenFunctions.OwnedFilter(val.checkjstring())));
 	}
 
 	public LuaValue visible(LuaValue val) {
@@ -170,6 +166,64 @@ public class TokensLib extends TwoArgFunction {
 				return valueOf(assetId.toString());
 			}
 			return valueOf("");
+		} catch (ParserException e) {
+			throw new LuaError(e);
+		}
+	}
+	
+	public LuaValue getLibProperty(LuaValue name, LuaValue location) {
+		try {
+			String loc;
+			MapToolToken token = null;
+			if (location.isstring()) {
+				loc = location.checkjstring();
+			} else if (location instanceof MapToolToken)  {
+				loc = ((MapToolToken) location).getToken().getName();
+				if (((MapToolToken) location).isLib()) {
+					token = (MapToolToken) location;
+				}
+			} else {
+				loc = MapTool.getParser().getMacroSource();
+			}
+			if (token == null) {
+				Token t = MapTool.getParser().getTokenMacroLib(loc);
+				if (t != null) {
+					token = new MapToolToken(t, false, resolver);
+				}
+			}
+			if (token != null) {
+				return new MapToolTokenProperty(token, name.checkjstring(), MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(token.getToken().getPropertyType()));
+			}
+			return NIL;
+		} catch (ParserException e) {
+			throw new LuaError(e);
+		}
+	}
+	
+	public LuaValue getLibProperties(LuaValue location) {
+		try {
+			String loc;
+			MapToolToken token = null;
+			if (location.isstring()) {
+				loc = location.checkjstring();
+			} else if (location instanceof MapToolToken)  {
+				loc = ((MapToolToken) location).getToken().getName();
+				if (((MapToolToken) location).isLib()) {
+					token = (MapToolToken) location;
+				}
+			} else {
+				loc = MapTool.getParser().getMacroSource();
+			}
+			if (token == null) {
+				Token t = MapTool.getParser().getTokenMacroLib(loc);
+				if (t != null) {
+					token = new MapToolToken(t, false, resolver);
+				}
+			}
+			if (token != null) {
+				return new TokenProperties(token);
+			}
+			return NIL;
 		} catch (ParserException e) {
 			throw new LuaError(e);
 		}
@@ -268,6 +322,8 @@ public class TokensLib extends TwoArgFunction {
 				return addAllToInitiative(true, arg);
 			case 8:
 				return addAllToInitiative(false, arg);
+			case 9:
+				return getLibProperties(arg);
 			}
 			return NIL;
 		}
@@ -283,6 +339,8 @@ public class TokensLib extends TwoArgFunction {
 			switch (opcode) {
 			case 0:
 				return image(arg, arg2);
+			case 1:
+				return getLibProperty(arg, arg2);
 			}
 			return NIL;
 		}
@@ -295,9 +353,9 @@ public class TokensLib extends TwoArgFunction {
 		LuaTable t = new LuaTable();
 		
 		
-		bind(t, 1, new String[] { "withState", "ownedBy", "visible", "inLayers", "resolve", "find", "addAllToInitiative", "addAllPCsToInitiative", "addAllNPCsToInitiative" });
+		bind(t, 1, new String[] { "withState", "ownedBy", "visible", "inLayers", "resolve", "find", "addAllToInitiative", "addAllPCsToInitiative", "addAllNPCsToInitiative", "getLibProperties" });
 		bind(t, 0, new String[] { "exposed", "all", "pc", "npc", "selected", "impersonated", });
-		bind(t, 2, new String[] { "image" });
+		bind(t, 2, new String[] { "image", "getLibProperty" });
 		t.set("select", new SelectToken(false));
 		t.set("deselect", new SelectToken(true));
 		env.set("tokens", t);
@@ -332,8 +390,7 @@ public class TokensLib extends TwoArgFunction {
 	public void checkTrusted(String cls) {
 		if (!MapTool.getParser().isMacroTrusted()) {
 			if (!MapTool.getParser().isMacroTrusted()) {
-				throw new LuaError(new ParserException(I18N.getText(
-						"macro.function.general.noPerm", "tokens." + cls)));
+				throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "tokens." + cls)));
 			}
 		}
 

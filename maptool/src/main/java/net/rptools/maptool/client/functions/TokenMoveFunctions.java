@@ -159,7 +159,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 		return null;
 	}
 
-	private List<Map<String, Integer>> crossedToken(final Zone zone, final Token tokenInContext, final Token target, final String pathString) {
+	public static List<Map<String, Integer>> crossedToken(final Zone zone, final Token tokenInContext, final Token target, final String pathString) {
 		Object jsonObject = JSONMacroFunctions.asJSON(pathString);
 
 		ArrayList<Map<String, Integer>> pathPoints = new ArrayList<Map<String, Integer>>();
@@ -174,15 +174,15 @@ public class TokenMoveFunctions extends AbstractFunction {
 				point.put("y", (Integer) bean.get("y"));
 				pathPoints.add(point);
 			}
-			return getInstance().crossedToken(zone, tokenInContext, target, pathPoints);
+			return crossedToken(zone, tokenInContext, target, pathPoints);
 		}
 		return pathPoints;
 	}
 
-	private List<Map<String, Integer>> crossedPoints(final Zone zone, final Token tokenInContext, final String pointsString, final String pathString) {
+	public static List<Map<String, Integer>> crossedPoints(final Zone zone, final Token tokenInContext, final String pointsString, final String pathString) {
 		List<Map<String, Integer>> pathPoints = convertJSONStringToList(pathString);
 
-		pathPoints = getInstance().crossedPoints(zone, tokenInContext, pointsString, pathPoints);
+		pathPoints = crossedPoints(zone, tokenInContext, pointsString, pathPoints);
 		return pathPoints;
 	}
 
@@ -192,7 +192,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 	 * @param pathPoints
 	 * @return
 	 */
-	private List<Map<String, Integer>> crossedPoints(final Zone zone, final Token tokenInContext, final String pointsString, final List<Map<String, Integer>> pathPoints) {
+	public static List<Map<String, Integer>> crossedPoints(final Zone zone, final Token tokenInContext, final String pointsString, final List<Map<String, Integer>> pathPoints) {
 		List<Map<String, Integer>> returnPoints = new ArrayList<Map<String, Integer>>();
 
 		List<Map<String, Integer>> targetPoints = convertJSONStringToList(pointsString);
@@ -231,7 +231,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 	 * @param pathPoints
 	 * @return
 	 */
-	private List<Map<String, Integer>> crossedToken(final Zone zone, final Token tokenInContext, final Token target, final List<Map<String, Integer>> pathPoints) {
+	public static List<Map<String, Integer>> crossedToken(final Zone zone, final Token tokenInContext, final Token target, final List<Map<String, Integer>> pathPoints) {
 		List<Map<String, Integer>> returnPoints = new ArrayList<Map<String, Integer>>();
 
 		/**
@@ -286,7 +286,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 		return returnPoints;
 	}
 
-	private JSONArray pathPointsToJSONArray(final List<Map<String, Integer>> pathPoints) {
+	public static JSONArray pathPointsToJSONArray(final List<Map<String, Integer>> pathPoints) {
 		if (log.isInfoEnabled()) {
 			log.info("DEVELOPMENT: in pathPointsToJSONArrayt.  Converting list to JSONArray");
 		}
@@ -316,7 +316,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 		return jsonArr;
 	}
 
-	private List<Map<String, Integer>> getLastPathList(final Path<?> path, final boolean useDistancePerCell) {
+	public static List<Map<String, Integer>> getLastPathList(final Path<?> path, final boolean useDistancePerCell) {
 		List<Map<String, Integer>> points = new ArrayList<Map<String, Integer>>();
 		if (path != null) {
 			Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
@@ -356,8 +356,8 @@ public class TokenMoveFunctions extends AbstractFunction {
 	public static BigDecimal tokenMoved(final Token originalToken, final Path<?> path, final List<GUID> filteredTokens) {
 		Token token = getMoveMacroToken(ON_TOKEN_MOVE_COMPLETE_CALLBACK);
 
-		List<Map<String, Integer>> pathPoints = getInstance().getLastPathList(path, true);
-		JSONArray pathArr = getInstance().pathPointsToJSONArray(pathPoints);
+		List<Map<String, Integer>> pathPoints = getLastPathList(path, true);
+		JSONArray pathArr = pathPointsToJSONArray(pathPoints);
 		String pathCoordinates = pathArr.toString();
 		// If we get here it is trusted so try to execute it.
 		if (token != null) {
@@ -422,8 +422,19 @@ public class TokenMoveFunctions extends AbstractFunction {
 		}
 		return null;
 	}
+	
+	public static String getMovement(final Token source) throws ParserException {
+		Object c = getMovementValue(source);
+		if (c instanceof Double) {
+			 return String.format("%.1f", c);
+		} 
+		if (c instanceof Integer) {
+			return c.toString();
+		}
+		return "";
+	}
 
-	private String getMovement(final Token source) throws ParserException {
+	public static Object getMovementValue(final Token source) throws ParserException {
 		ZoneWalker walker = null;
 
 		WalkerMetric metric = MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : MapTool.getServerPolicy().getMovementMetric();
@@ -447,7 +458,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 			x = source.getLastPath().getCellPath().get(0).x;
 			y = source.getLastPath().getCellPath().get(0).y;
 		} catch (NullPointerException e) {
-			return "0";
+			return Integer.valueOf(0);
 		}
 
 		if (source.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
@@ -462,7 +473,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 					cplist.add(tokenPoint);
 				}
 				int bar = calculateGridDistance(cplist, zone.getUnitsPerCell(), metric);
-				return Integer.valueOf(bar).toString();
+				return Integer.valueOf(bar);
 				//return  Integer.toString(walker.getDistance());
 			}
 		} else {
@@ -484,9 +495,9 @@ public class TokenMoveFunctions extends AbstractFunction {
 			}
 			c /= zone.getGrid().getSize(); // Number of "cells"
 			c *= zone.getUnitsPerCell(); // "actual" distance traveled
-			return String.format("%.1f", c);
+			return c;
 		}
-		return "";
+		return null;
 	}
 
 	public static BigDecimal multipleTokensMoved(List<GUID> filteredTokens) {
@@ -519,7 +530,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 		return BigDecimal.ZERO;
 	}
 
-	private List<Map<String, Integer>> convertJSONStringToList(final String pointsString) {
+	private static List<Map<String, Integer>> convertJSONStringToList(final String pointsString) {
 		Object jsonObject = JSONMacroFunctions.asJSON(pointsString);
 
 		ArrayList<Map<String, Integer>> pathPoints = new ArrayList<Map<String, Integer>>();
@@ -536,7 +547,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 		return pathPoints;
 	}
 
-	public int calculateGridDistance(List<CellPoint> path, int feetPerCell, WalkerMetric metric) {
+	public static int calculateGridDistance(List<CellPoint> path, int feetPerCell, WalkerMetric metric) {
 		if (path == null || path.size() == 0)
 			return 0;
 

@@ -60,14 +60,26 @@ public class MapToolTokenProperty extends LuaTable {
 	public void rawset(LuaValue key, LuaValue value) {
 		if (key.isstring()) {
 			if (key.checkjstring().equals("value")) {
-				if (!token.isSelfOrTrusted()) {
+				if (!token.isSelfOrTrustedOrLib()) {
 					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.setProperty")));
 				}
-				Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-				token.getToken().setProperty(property, LuaConverters.toJson(value));
-				MapTool.serverCommand().putToken(zone.getId(), token.getToken());
-				zone.putToken(token.getToken());
-				return;
+				if (token.isLib()) {
+					try {
+						token.getToken().setProperty(property, LuaConverters.toJson(value));
+						Zone z;
+						z = MapTool.getParser().getTokenMacroLibZone(token.getToken().getName());
+						MapTool.serverCommand().putToken(z.getId(), token.getToken());
+						z.putToken(token.getToken());
+					} catch (ParserException e) {
+						throw new LuaError(e);
+					}
+				} else {
+					Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+					token.getToken().setProperty(property, LuaConverters.toJson(value));
+					MapTool.serverCommand().putToken(zone.getId(), token.getToken());
+					zone.putToken(token.getToken());
+					return;
+				}
 			}
 		}
 		error("table is read-only, except for value");
@@ -82,17 +94,17 @@ public class MapToolTokenProperty extends LuaTable {
 		if (key.isstring()) {
 			switch (key.tojstring()) {
 			case "raw":
-				if (!token.isSelfOrTrusted()) {
+				if (!token.isSelfOrTrustedOrLib()) {
 					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getPropertyRaw")));
 				}
 				return LuaConverters.fromObj(token.getToken().getProperty(property));
 			case "value":
-				if (!token.isSelfOrTrusted()) {
+				if (!token.isSelfOrTrustedOrLib()) {
 					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
 				}
 				return LuaConverters.fromObj(token.getToken().getEvaluatedProperty(property));
 			case "converted":
-				if (!token.isSelfOrTrusted()) {
+				if (!token.isSelfOrTrustedOrLib()) {
 					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
 				}
 				return LuaConverters.fromJson(token.getToken().getEvaluatedProperty(property));
