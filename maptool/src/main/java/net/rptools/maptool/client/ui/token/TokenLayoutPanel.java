@@ -29,6 +29,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
@@ -48,6 +49,7 @@ public class TokenLayoutPanel extends JPanel {
 	private Token token;
 	private int dragOffsetX;
 	private int dragOffsetY;
+	private MD5Key tokenImage;
 
 	public TokenLayoutPanel() {
 		addMouseWheelListener(new MouseWheelListener() {
@@ -145,6 +147,15 @@ public class TokenLayoutPanel extends JPanel {
 
 	public void setToken(Token token) {
 		this.token = new Token(token);
+		setTokenImage(token.getImageAssetId());
+	}
+
+	public MD5Key getTokenImage() {
+		return tokenImage;
+	}
+
+	public void setTokenImage(MD5Key tokenImage) {
+		this.tokenImage = tokenImage;
 	}
 
 	@Override
@@ -153,7 +164,7 @@ public class TokenLayoutPanel extends JPanel {
 		Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 
 		// Gather info
-		BufferedImage image = ImageManager.getImage(token.getImageAssetId());
+		BufferedImage image = ImageManager.getImage(getTokenImage());
 
 		Rectangle tokenSize = token.getBounds(zone);
 		Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());

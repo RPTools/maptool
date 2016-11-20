@@ -14,9 +14,13 @@ package net.rptools.maptool.util;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -50,6 +54,28 @@ public class CreateVersionedInstallSplash extends Application {
 	private static Font versionFont;
 
 	public static void main(String[] args) {
+		Properties prop = new Properties();
+		InputStream input = null;
+		try {
+			input = new FileInputStream("D:/Development/git/JamzTheMan/maptool/gradle.properties");
+
+			// load a properties file
+			prop.load(input);
+
+			versionText = "v" + prop.getProperty("buildVersion");
+			updateWebVersion(prop.getProperty("buildVersion"));
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
 		Options cmdOptions = new Options();
 		cmdOptions.addOption("s", "source", true, "Source image to add version string to.");
 		cmdOptions.addOption("o", "output", true, "Output /path/image to write to.");
@@ -66,7 +92,7 @@ public class CreateVersionedInstallSplash extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		final File splashFile = new File(imageOutputFilename);
-		BufferedImage buffImage = createLaunchSplash("Installing... v" + versionText);
+		BufferedImage buffImage = createLaunchSplash("Installing... " + versionText);
 
 		try {
 			System.out.println("Version: " + versionText);
@@ -79,6 +105,19 @@ public class CreateVersionedInstallSplash extends Application {
 		}
 
 		System.exit(0);
+	}
+
+	private static void updateWebVersion(String versionText) {
+		try {
+			File releaseDir = new File("D:/Development/git/JamzTheMan/maptool/build/release-" + versionText);
+			releaseDir.mkdirs();
+			FileWriter fstream = new FileWriter("D:/Development/git/JamzTheMan/maptool/build/release-" + versionText + "/MapTool-version.js");
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write("var mtVersion = \"" + versionText + "\";");
+			out.close();
+		} catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
+		}
 	}
 
 	public static BufferedImage createLaunchSplash(String versionText) {

@@ -168,6 +168,8 @@ public class StringFunctions extends AbstractFunction {
 			return parameters.get(0).toString();
 		}
 		if (functionName.equals("number")) {
+			if (parameters.get(0).toString().trim().isEmpty())
+				return BigDecimal.ZERO;
 			try {
 				return BigDecimal.valueOf(Integer.parseInt(parameters.get(0).toString()));
 			} catch (NumberFormatException e) {

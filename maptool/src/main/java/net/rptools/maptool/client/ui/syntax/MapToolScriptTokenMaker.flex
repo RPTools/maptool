@@ -1,5 +1,5 @@
 /*
- * Generated on 11/15/16 4:29 AM
+ * Generated on 11/20/16 2:28 AM
  */
 package net.rptools.maptool.client.ui.syntax;
 
@@ -466,9 +466,11 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "hasSight" |
 "hero" |
 "herobody" |
+"herolab.XPath" |
 "herolab.getInfo" |
 "herolab.getStatBlock" |
 "herolab.hasChanged" |
+"herolab.refresh" |
 "herostun" |
 "hex" |
 "hypot" |
@@ -685,9 +687,7 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "u" |
 "ubiquity" |
 "upper" |
-"varsFromStrProp" |
-"xpath.getNode" |
-"xpath.getText"		{ addToken(Token.FUNCTION); }
+"varsFromStrProp"		{ addToken(Token.FUNCTION); }
 
 	{BooleanLiteral}			{ addToken(Token.LITERAL_BOOLEAN); }
 

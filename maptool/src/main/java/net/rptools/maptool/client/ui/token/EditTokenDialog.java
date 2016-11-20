@@ -25,6 +25,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,6 +84,7 @@ import com.jidesoft.swing.CheckBoxListWithSelectable;
 import com.jidesoft.swing.DefaultSelectable;
 import com.jidesoft.swing.Selectable;
 
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.AbstractTokenAccessorFunction;
@@ -91,6 +93,7 @@ import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Association;
 import net.rptools.maptool.model.Grid;
@@ -100,6 +103,7 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
+import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.ImageManager;
@@ -116,7 +120,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 	// private CharSheetController controller;
 	private RSyntaxTextArea XMLstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
 	private RSyntaxTextArea TEXTstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
-
+	private HeroLabData heroLabData;
 	private static final ImageIcon REFRESH_ICON_ON = new ImageIcon(
 			EditTokenDialog.class.getClassLoader().getResource("net/rptools/maptool/client/image/refresh_arrows_small.png"));
 	private static final ImageIcon REFRESH_ICON_OFF = new ImageIcon(
@@ -260,7 +264,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		}
 
 		// Jamz: Init the Hero Lab tab...
-		HeroLabData heroLabData = token.getHeroLabData();
+		heroLabData = token.getHeroLabData();
 
 		if (heroLabData != null) {
 			boolean isDirty = heroLabData.isDirty();
@@ -275,13 +279,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 			}
 
 			tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Hero Lab"), true);
-			getHtmlStatblockEditor().setText(token.getHeroLabData().getStatBlock_html());
+			getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());
 			getHtmlStatblockEditor().setCaretPosition(0);
 
-			XMLstatblockRSyntaxTextArea.setText(token.getHeroLabData().getStatBlock_xml());
+			XMLstatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_xml());
 			XMLstatblockRSyntaxTextArea.setCaretPosition(0);
 
-			TEXTstatblockRSyntaxTextArea.setText(token.getHeroLabData().getStatBlock_text());
+			TEXTstatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_text());
 			TEXTstatblockRSyntaxTextArea.setCaretPosition(0);
 
 			((JCheckBox) getComponent("isAllyCheckBox")).setSelected(heroLabData.isAlly());
@@ -595,6 +599,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 			token.setAlphaSensitivity(getTokenVblPanel().getAlphaSensitivity());
 		else
 			token.setAlphaSensitivity(-1);
+
+		token.setHeroLabData(heroLabData);
 
 		// OTHER
 		tokenSaved = true;
@@ -985,30 +991,44 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		JButton refreshDataButton = (JButton) getComponent("refreshDataButton");
 		refreshDataButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Token token = getModel();
-				HeroLabData heroLabData = token.getHeroLabData();
-
 				if (heroLabData != null) {
-					ExtractHeroLab heroLabFile = new ExtractHeroLab(heroLabData.getPortfolioFile(), true);
-					heroLabData = heroLabFile.refreshStatblocks(heroLabData);
+					ExtractHeroLab heroLabExtract = new ExtractHeroLab(heroLabData.getPortfolioFile(), true);
+					heroLabData = heroLabExtract.refreshCharacter(heroLabData);
 
 					if (heroLabData != null) {
-						token.setHeroLabData(heroLabData);
-						heroLabData.setDirty(false);
-
 						refreshDataButton.setIcon(REFRESH_ICON_OFF);
 						refreshDataButton.setToolTipText("<html>Refresh data from Hero Lab<br/><b><i>No changes detected...</i></b></html>");
 
 						((JLabel) getComponent("lastModified")).setText(heroLabData.getLastModified());
 
-						getHtmlStatblockEditor().setText(token.getHeroLabData().getStatBlock_html());
+						getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());
 						getHtmlStatblockEditor().setCaretPosition(0);
 
-						XMLstatblockRSyntaxTextArea.setText(token.getHeroLabData().getStatBlock_xml());
+						XMLstatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_xml());
 						XMLstatblockRSyntaxTextArea.setCaretPosition(0);
 
-						TEXTstatblockRSyntaxTextArea.setText(token.getHeroLabData().getStatBlock_text());
+						TEXTstatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_text());
 						TEXTstatblockRSyntaxTextArea.setCaretPosition(0);
+
+						// Update the images
+						Asset tokenAsset = heroLabData.getTokenImage();
+						if (tokenAsset != null) {
+							getTokenIconPanel().setImageId(tokenAsset.getId());
+							getTokenLayoutPanel().setTokenImage(tokenAsset.getId());
+						}
+
+						Asset portraitAsset = heroLabData.getTokenPortrait();
+						if (portraitAsset != null)
+							getPortraitPanel().setImageId(portraitAsset.getId());
+
+						// If NPC, lets not overwrite the Name, it may be "Creature 229" or such, GM name is enough
+						((JTextField) getComponent("@GMName")).setText(heroLabData.getName());
+						if (heroLabData.isAlly()) {
+							getTypeCombo().setSelectedItem(Type.PC);
+							getNameField().setText(heroLabData.getName());
+						} else {
+							getTypeCombo().setSelectedItem(Type.NPC);
+						}
 					}
 				}
 			}
@@ -1034,7 +1054,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 				if (searchText.isEmpty())
 					return;
 
-				XMLstatblockRSyntaxTextArea.setText(getModel().getHeroLabData().parseXML(searchText));
+				XMLstatblockRSyntaxTextArea.setText(heroLabData.parseXML(searchText));
 				XMLstatblockRSyntaxTextArea.setCaretPosition(0);
 			}
 		});

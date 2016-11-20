@@ -480,7 +480,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
 		boolean portfolioChanged = dir.hasChanged();
 		ExtractHeroLab heroLabFile = new ExtractHeroLab(dir.getPath(), portfolioChanged);
-		fileList.addAll(heroLabFile.getCharacterList(portfolioChanged));
+		fileList.addAll(heroLabFile.extractAllCharacters(portfolioChanged));
 
 		if (filter != null && filter.length() > 0) {
 			for (ListIterator<File> iter = fileList.listIterator(); iter.hasNext();) {

@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.collections.iterators.ListIteratorWrapper;
 import org.apache.commons.io.monitor.FileEntry;
 
 import com.jcabi.xml.XML;
@@ -37,11 +36,15 @@ public class HeroLabData {
 	private String summary;
 	private String playerName;
 	private String gameSystem;
+	private String heroLabIndex;
+
+	private Asset tokenImage;
+	private Asset tokenPortrait;
 
 	private boolean isAlly;
-	private boolean isDirty;
+	private boolean isDirty = false;
 
-	private HashMap statBlocks; // HashMap(<String> StatBlockType, <HashMap>(<String> StatBlockKey, <String> StatBlock))
+	private HashMap<String, HashMap<String, String>> statBlocks;
 
 	public interface StatBlockKey {
 		String DATA = "data";
@@ -82,38 +85,33 @@ public class HeroLabData {
 		return results;
 	}
 
-	/* Other xpath tests...
-		String xml = heroData.getStatBlock_xml();
-	
-		XPathFactory xpathFactory = XPathFactory.newInstance();
-		XPath xpath = xpathFactory.newXPath();
-	
-		InputSource source = new InputSource(new StringReader(xml));
-		String results = "";
-		try {
-			results = xpath.evaluate(searchText, source);
-		} catch (XPathExpressionException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		System.out.println(searchText);
-		System.out.println(results);
-	  */
+	/*
+	 * Other xpath tests... String xml = heroData.getStatBlock_xml();
+	 * 
+	 * XPathFactory xpathFactory = XPathFactory.newInstance(); XPath xpath =
+	 * xpathFactory.newXPath();
+	 * 
+	 * InputSource source = new InputSource(new StringReader(xml)); String
+	 * results = ""; try { results = xpath.evaluate(searchText, source); } catch
+	 * (XPathExpressionException e1) { // TODO Auto-generated catch block
+	 * e1.printStackTrace(); } System.out.println(searchText);
+	 * System.out.println(results);
+	 */
 
-	public boolean hasChanged() {
+	public boolean refresh() {
 		return portfolioWatcher.refresh(portfolioFile);
 	}
 
-	public HashMap getStatBlocks() {
+	public HashMap<String, HashMap<String, String>> getStatBlocks() {
 		return statBlocks;
 	}
 
-	public void setStatBlocks(HashMap statBlocks) {
+	public void setStatBlocks(HashMap<String, HashMap<String, String>> statBlocks) {
 		this.statBlocks = statBlocks;
 	}
 
 	public String getStatBlock_location(String type) {
-		return (String) ((HashMap) statBlocks.get(type)).get(StatBlockKey.LOCATION);
+		return (String) statBlocks.get(type).get(StatBlockKey.LOCATION);
 	}
 
 	public String getStatBlock_data(String type) {
@@ -127,10 +125,10 @@ public class HeroLabData {
 		else
 			type = StatBlockType.TEXT;
 
-		if ((HashMap) statBlocks.get(type) == null)
+		if (statBlocks.get(type) == null)
 			return "";
 
-		Object statBlock = ((HashMap) statBlocks.get(type)).get(StatBlockKey.DATA);
+		Object statBlock = statBlocks.get(type).get(StatBlockKey.DATA);
 
 		if (statBlock == null)
 			return "";
@@ -151,7 +149,7 @@ public class HeroLabData {
 	}
 
 	public boolean isDirty() {
-		boolean hasChanged = hasChanged();
+		boolean hasChanged = refresh();
 
 		if (hasChanged)
 			isDirty = true;
@@ -192,6 +190,14 @@ public class HeroLabData {
 		this.name = name;
 	}
 
+	public String getHeroLabIndex() {
+		return heroLabIndex;
+	}
+
+	public void setHeroLabIndex(String heroLabIndex) {
+		this.heroLabIndex = heroLabIndex;
+	}
+
 	public String getSummary() {
 		return summary;
 	}
@@ -222,6 +228,22 @@ public class HeroLabData {
 
 	public void setPlayerName(String playerName) {
 		this.playerName = playerName;
+	}
+
+	public Asset getTokenImage() {
+		return tokenImage;
+	}
+
+	public void setTokenImage(Asset tokenImage) {
+		this.tokenImage = tokenImage;
+	}
+
+	public Asset getTokenPortrait() {
+		return tokenPortrait;
+	}
+
+	public void setTokenPortrait(Asset tokenPortrait) {
+		this.tokenPortrait = tokenPortrait;
 	}
 
 	public List<Image> getImages() {

@@ -2,7 +2,7 @@
 <BuildOutputFolder>@jWrapperDir@/JWrapperBuild</BuildOutputFolder>
 <BundleName>MapTool</BundleName>
 <SplashPNG>@jWrapperDir@/maptool_installing_splash.png</SplashPNG>
-<BundleLogoPNG>@jWrapperDir@/RPTools_Logo_256.png</BundleLogoPNG>
+<BundleLogoPNG>@jWrapperDir@/Nerps_Logo.png</BundleLogoPNG>
 <InstallType>CurrentUser</InstallType>
 <App>
   <Name>MapTool Launcher</Name>

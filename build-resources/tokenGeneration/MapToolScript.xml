@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <TokenMakerDefinition>
   <general>
-    <package>net.rptools.maptool.client.ui</package>
+    <package>net.rptools.maptool.client.ui.syntax</package>
     <className>MapToolScriptTokenMaker</className>
     <extendedClass>AbstractJFlexCTokenMaker</extendedClass>
     <classComment>Auto-generated source created using TokenMakerMaker
@@ -244,9 +244,11 @@ https://github.com/bobbylight/TokenMakerMaker</classComment>
     <function>hasSight</function>
     <function>hero</function>
     <function>herobody</function>
+    <function>herolab.XPath</function>
     <function>herolab.getInfo</function>
     <function>herolab.getStatBlock</function>
     <function>herolab.hasChanged</function>
+    <function>herolab.refresh</function>
     <function>herostun</function>
     <function>hex</function>
     <function>hypot</function>
@@ -464,8 +466,6 @@ https://github.com/bobbylight/TokenMakerMaker</classComment>
     <function>ubiquity</function>
     <function>upper</function>
     <function>varsFromStrProp</function>
-    <function>xpath.getNode</function>
-    <function>xpath.getText</function>
   </functions>
   <numbers>
     <hexLiteral>0x{HexDigit}+</hexLiteral>

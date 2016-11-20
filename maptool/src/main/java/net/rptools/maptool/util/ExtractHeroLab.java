@@ -23,8 +23,6 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,12 +34,6 @@ import javax.swing.ImageIcon;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -93,7 +85,6 @@ public final class ExtractHeroLab {
 		try {
 			builder = factory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -126,11 +117,11 @@ public final class ExtractHeroLab {
 		}
 	}
 
-	public List<File> getCharacterList() {
-		return getCharacterList(false);
+	public List<File> extractAllCharacters() {
+		return extractAllCharacters(false);
 	}
 
-	public List<File> getCharacterList(boolean forceRescan) {
+	public List<File> extractAllCharacters(boolean forceRescan) {
 		List<File> heroes = new ArrayList<File>();
 
 		if (isExtracted() && !forceRescan) {
@@ -149,12 +140,16 @@ public final class ExtractHeroLab {
 			Document portfolioIndex = getPortolioIndex();
 
 			XPathExpression xPath_characters = xpath.compile("//character"); // Jamz: using this vs //document/characters/character which also captures //document/characters/character/minions/character
+			XPathExpression xPath_gameSystem = xpath.compile("/document/game/@name");
 			XPathExpression xPath_portraitImage = xpath.compile("images/image[1]");
 			XPathExpression xPath_tokenImage = xpath.compile("images/image[2]");
+
+			String gameSystem = (String) xPath_gameSystem.evaluate(portfolioIndex, XPathConstants.STRING);
 			IteratableNodeList heroNodes = new IteratableNodeList((NodeList) xPath_characters.evaluate(portfolioIndex, XPathConstants.NODESET));
 
 			for (Node hero : heroNodes) {
 				String heroName = ((Element) hero).getAttribute("name");
+				String heroLabIndex = ((Element) hero).getAttribute("herolableadindex");
 				File heroFile = getFileName(finalTempDir.getCanonicalPath(), heroName, "." + Token.FILE_EXTENSION);
 				File portraitImageFile = getFileName(finalTempDir.getCanonicalPath(), heroName + "_portrait", ".png");
 				File heroImageFile = getFileName(finalTempDir.getCanonicalPath(), heroName + "_token", ".png");
@@ -191,16 +186,16 @@ public final class ExtractHeroLab {
 
 				// Lets create the token!
 				Token heroLabToken = new Token();
-				Asset heroImageAsset = null;
-				heroImageAsset = AssetManager.createAsset(heroImageFile);
+				Asset heroImageAsset = AssetManager.createAsset(heroImageFile);
 				AssetManager.putAsset(heroImageAsset);
+				heroLabData.setTokenImage(heroImageAsset);
 				heroLabToken = new Token(heroName, heroImageAsset.getId());
 				heroLabToken.setGMName(heroName);
 
 				// set the image shape
 				Image image = ImageIO.read(heroImageFile);
 				heroLabToken.setShape(TokenUtil.guessTokenType(image));
-				heroLabData.addImage(image);
+				// heroLabData.addImage(image);
 
 				// set the height/width, fixes dragging to stamp layer issue
 				heroLabToken.setHeight(ImageUtil.createCompatibleImage(image).getHeight());
@@ -210,10 +205,13 @@ public final class ExtractHeroLab {
 				Asset portraitAsset = AssetManager.createAsset(portraitImageFile); // Change for portrait
 				AssetManager.putAsset(portraitAsset);
 				heroLabToken.setPortraitImage(portraitAsset.getId());
-				heroLabData.addImage(ImageIO.read(portraitImageFile));
+				heroLabData.setTokenPortrait(portraitAsset);
+				// heroLabData.addImage(ImageIO.read(portraitImageFile));
 				// Save the token and add it to the file list
 
 				heroLabData.setPortfolioFile(portfolioFile);
+				heroLabData.setHeroLabIndex(heroLabIndex);
+				heroLabData.setGameSystem(gameSystem);
 				heroLabData.setSummary(((Element) hero).getAttribute("summary"));
 				heroLabData.setPlayerName(((Element) hero).getAttribute("playername"));
 				heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes") ? true : false);
@@ -228,7 +226,6 @@ public final class ExtractHeroLab {
 
 				heroLabToken.setHeroLabData(heroLabData);
 
-				//Jamz TODO: lets make an option to show portrait OR image in asset panel! Also how about a HeroLab icon decoration?
 				PersistenceUtil.saveToken(heroLabToken, heroFile, true);
 				heroes.add(heroFile);
 				markComplete();
@@ -242,6 +239,85 @@ public final class ExtractHeroLab {
 		}
 
 		return heroes;
+	}
+
+	public HeroLabData refreshCharacter(HeroLabData heroLabData) {
+		try {
+			String heroLabIndex = heroLabData.getHeroLabIndex();
+
+			XPathFactory xPathfactory = XPathFactory.newInstance();
+			XPath xpath = xPathfactory.newXPath();
+			Document portfolioIndex = getPortolioIndex();
+
+			XPathExpression xPath_characters = xpath.compile("//character[@herolableadindex='" + heroLabIndex + "']");
+			XPathExpression xPath_gameSystem = xpath.compile("/document/game/@name");
+			XPathExpression xPath_portraitImage = xpath.compile("images/image[1]");
+			XPathExpression xPath_tokenImage = xpath.compile("images/image[2]");
+
+			String gameSystem = (String) xPath_gameSystem.evaluate(portfolioIndex, XPathConstants.STRING);
+			Node hero = (Node) xPath_characters.evaluate(portfolioIndex, XPathConstants.NODE);
+
+			String heroName = ((Element) hero).getAttribute("name");
+			heroLabData = new HeroLabData(heroName);
+
+			File portraitImageFile = getFileName(finalTempDir.getCanonicalPath(), heroName + "_portrait", ".png");
+			File heroImageFile = getFileName(finalTempDir.getCanonicalPath(), heroName + "_token", ".png");
+
+			// We need to set a convention so the second image in Hero Lab will be the token image
+			Node tokenImageNode = (Node) xPath_tokenImage.evaluate(hero, XPathConstants.NODE);
+			Element tokenImageElement = (Element) tokenImageNode;
+			if (tokenImageElement != null) {
+				String imageFileName = tokenImageElement.getAttribute("filename");
+				String imageFolder = tokenImageElement.getAttribute("folder");
+				heroImageFile = getFileName(finalTempDir.getCanonicalPath(), imageFileName, "");
+				extractFile(imageFolder + "/" + imageFileName, heroImageFile);
+			} else {
+				// If the default image still exists from a previous extraction, we don't want to reuse it here
+				FileUtils.deleteQuietly(heroImageFile);
+			}
+
+			// We need to set a convention so the first image in Hero Lab will be the portrait
+			Node portraitImageNode = (Node) xPath_portraitImage.evaluate(hero, XPathConstants.NODE);
+			Element portraitImageElement = (Element) portraitImageNode;
+			if (portraitImageElement != null) {
+				String imageFileName = portraitImageElement.getAttribute("filename");
+				String imageFolder = portraitImageElement.getAttribute("folder");
+				portraitImageFile = getFileName(finalTempDir.getCanonicalPath(), imageFileName, "");
+				extractFile(imageFolder + "/" + imageFileName, portraitImageFile);
+			}
+
+			// Update the token image if it exists
+			if (heroImageFile.exists()) {
+				Asset heroImageAsset = AssetManager.createAsset(heroImageFile);
+				AssetManager.putAsset(heroImageAsset);
+				heroLabData.setTokenImage(heroImageAsset);
+			}
+
+			// Update the token portrait if it exists
+			if (portraitImageFile.exists()) {
+				Asset portraitAsset = AssetManager.createAsset(portraitImageFile);
+				AssetManager.putAsset(portraitAsset);
+				heroLabData.setTokenPortrait(portraitAsset);
+			}
+
+			heroLabData.setPortfolioFile(portfolioFile);
+			heroLabData.setHeroLabIndex(heroLabIndex);
+			heroLabData.setGameSystem(gameSystem);
+			heroLabData.setSummary(((Element) hero).getAttribute("summary"));
+			heroLabData.setPlayerName(((Element) hero).getAttribute("playername"));
+			heroLabData.setAlly(((Element) hero).getAttribute("isally").equalsIgnoreCase("yes") ? true : false);
+			heroLabData.setStatBlocks(getStatBlocks(xpath, hero));
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+		} finally {
+			markComplete();
+		}
+
+		return heroLabData;
 	}
 
 	private File getFileName(String filePath, String fileName, String extension) {
@@ -289,8 +365,8 @@ public final class ExtractHeroLab {
 		return indexXml;
 	}
 
-	public HeroLabData refreshStatblocks(HeroLabData heroData) {
-		HashMap statBlocks = new HashMap(3);
+	public HeroLabData refreshHeroLabData(HeroLabData heroData) {
+		HashMap<String, HashMap<String, String>> statBlocks = new HashMap<String, HashMap<String, String>>(3);
 
 		statBlocks.put(HeroLabData.StatBlockType.TEXT, getStatBlock(heroData.getStatBlock_location(HeroLabData.StatBlockType.TEXT), HeroLabData.StatBlockType.TEXT));
 		statBlocks.put(HeroLabData.StatBlockType.HTML, getStatBlock(heroData.getStatBlock_location(HeroLabData.StatBlockType.HTML), HeroLabData.StatBlockType.HTML));
@@ -301,8 +377,8 @@ public final class ExtractHeroLab {
 		return heroData;
 	}
 
-	private HashMap getStatBlocks(XPath xpath, Node hero) {
-		HashMap statBlocks = new HashMap(3);
+	private HashMap<String, HashMap<String, String>> getStatBlocks(XPath xpath, Node hero) {
+		HashMap<String, HashMap<String, String>> statBlocks = new HashMap<String, HashMap<String, String>>(3);
 
 		statBlocks.put(HeroLabData.StatBlockType.TEXT, getStatBlock(getStatBlockPath(xpath, hero, HeroLabData.StatBlockType.TEXT), HeroLabData.StatBlockType.TEXT));
 		statBlocks.put(HeroLabData.StatBlockType.HTML, getStatBlock(getStatBlockPath(xpath, hero, HeroLabData.StatBlockType.HTML), HeroLabData.StatBlockType.HTML));
@@ -326,8 +402,8 @@ public final class ExtractHeroLab {
 		return path;
 	}
 
-	private HashMap getStatBlock(String zipPath, String type) {
-		HashMap statBlock = new HashMap(2);
+	private HashMap<String, String> getStatBlock(String zipPath, String type) {
+		HashMap<String, String> statBlock = new HashMap<String, String>(2);
 		ZipFile por;
 
 		try {
@@ -377,21 +453,5 @@ public final class ExtractHeroLab {
 
 		bos.write(bytesIn);
 		bos.close();
-	}
-
-	/*
-	 * Use: printDocument(doc, System.out);
-	 */
-	private static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
-		TransformerFactory tf = TransformerFactory.newInstance();
-		Transformer transformer = tf.newTransformer();
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-
-		transformer.transform(new DOMSource(doc),
-				new StreamResult(new OutputStreamWriter(out, "UTF-8")));
 	}
 }

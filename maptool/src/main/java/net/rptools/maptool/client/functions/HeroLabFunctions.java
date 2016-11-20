@@ -11,11 +11,15 @@
 
 package net.rptools.maptool.client.functions;
 
+import java.math.BigDecimal;
 import java.util.List;
+import org.apache.commons.lang.math.NumberUtils;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.HeroLabData;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -23,7 +27,7 @@ import net.rptools.parser.function.AbstractFunction;
 /**
  * @author Jamz
  *
- * Functions to support reading new Hero Lab data from a token.
+ *         Functions to support reading new Hero Lab data from a token.
  * 
  */
 public class HeroLabFunctions extends AbstractFunction {
@@ -31,7 +35,7 @@ public class HeroLabFunctions extends AbstractFunction {
 	private static final HeroLabFunctions instance = new HeroLabFunctions();
 
 	private HeroLabFunctions() {
-		super(0, 2, "herolab.getInfo", "herolab.getStatBlock", "herolab.hasChanged", "herolab.XPath", "xpath.getText", "xpath.getNode");
+		super(0, 2, "herolab.getInfo", "herolab.getStatBlock", "herolab.hasChanged", "herolab.refresh", "herolab.XPath");
 	}
 
 	public static HeroLabFunctions getInstance() {
@@ -128,6 +132,35 @@ public class HeroLabFunctions extends AbstractFunction {
 				throw new ParserException(I18N.getText("macro.function.herolab.null", functionName));
 
 			return token.getHeroLabData().isDirty();
+		} else if (functionName.equals("herolab.refresh")) {
+			Token token;
+
+			if (!MapTool.getParser().isMacroPathTrusted())
+				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+
+			if (parameters.size() == 1) {
+				token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
+				}
+			} else if (parameters.size() == 0) {
+				MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+				token = res.getTokenInContext();
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.noImpersonated", functionName));
+				}
+			} else {
+				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+			}
+
+			if (token.getHeroLabData() == null)
+				throw new ParserException(I18N.getText("macro.function.herolab.null", functionName));
+
+			HeroLabData heroLabData = token.getHeroLabData();
+			ExtractHeroLab heroLabExtract = new ExtractHeroLab(heroLabData.getPortfolioFile(), true);
+			token.setHeroLabData(heroLabExtract.refreshCharacter(heroLabData));
+
+			return BigDecimal.ONE;
 		} else if (functionName.equals("herolab.XPath")) {
 			if (!MapTool.getParser().isMacroPathTrusted())
 				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
@@ -159,8 +192,12 @@ public class HeroLabFunctions extends AbstractFunction {
 				throw new ParserException(I18N.getText("macro.function.herolab.null", functionName));
 
 			String xPathExpression = parameters.get(0).toString();
+			String result = token.getHeroLabData().parseXML(xPathExpression);
 
-			return token.getHeroLabData().parseXML(xPathExpression);
+			if (NumberUtils.isNumber(result))
+				return new BigDecimal(result).stripTrailingZeros();
+			else
+				return result;
 		}
 
 		return "<ERROR>";
