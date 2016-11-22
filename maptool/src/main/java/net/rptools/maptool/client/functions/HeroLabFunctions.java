@@ -195,7 +195,7 @@ public class HeroLabFunctions extends AbstractFunction {
 			String result = token.getHeroLabData().parseXML(xPathExpression);
 
 			if (NumberUtils.isNumber(result))
-				return new BigDecimal(result).stripTrailingZeros();
+				return new BigDecimal(result).stripTrailingZeros().toPlainString();
 			else
 				return result;
 		}
