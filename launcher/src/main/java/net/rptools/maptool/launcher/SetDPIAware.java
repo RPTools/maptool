@@ -32,13 +32,23 @@ public class SetDPIAware {
 	public static final int REGISTRY_VALUE_OFF = 0;
 
 	public static boolean getKeyValue() {
-		if (Advapi32Util.registryGetIntValue(HKEY_LOCAL_MACHINE, REGISTRY_KEY_PATH, REGISTRY_NAME) == REGISTRY_VALUE_ON)
-			return true;
-		else
-			return false;
+		try {
+			if (Advapi32Util.registryValueExists(HKEY_LOCAL_MACHINE, REGISTRY_KEY_PATH, REGISTRY_NAME)) {
+				if (Advapi32Util.registryGetIntValue(HKEY_LOCAL_MACHINE, REGISTRY_KEY_PATH, REGISTRY_NAME) == REGISTRY_VALUE_ON)
+					return true;
+			}
+		} catch (Win32Exception e) {
+			System.out.println("Windows Registry read access failed.");
+		}
+
+		return false;
 	}
 
 	public static boolean setKeyValue(boolean isSelected) {
+		if (!Advapi32Util.registryKeyExists(HKEY_LOCAL_MACHINE, REGISTRY_KEY_PATH)) {
+			Advapi32Util.registryCreateKey(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Windows\\CurrentVersion", "SideBySide");
+		}
+
 		if (isSelected)
 			Advapi32Util.registrySetIntValue(HKEY_LOCAL_MACHINE, REGISTRY_KEY_PATH, REGISTRY_NAME, REGISTRY_VALUE_ON);
 		else
