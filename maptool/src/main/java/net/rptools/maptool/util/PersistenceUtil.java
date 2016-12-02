@@ -1049,11 +1049,10 @@ public class PersistenceUtil {
 			return;
 		}
 
-		FileOutputStream out = null;
 		try {
-			tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + "." + asset.getImageExtension());
+			tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + ".png");
 			BufferedImage image = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()));
-			ImageIO.write(image, asset.getImageExtension(), tokenSaveFile);
+			ImageIO.write(image, "png", tokenSaveFile);
 			image.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

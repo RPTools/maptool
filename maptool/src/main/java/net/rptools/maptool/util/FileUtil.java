@@ -1,5 +1,7 @@
 package net.rptools.maptool.util;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -85,4 +87,71 @@ public class FileUtil {
 		return byteCountToDisplaySize(BigInteger.valueOf(fileSize));
 	}
 
+	/**
+	 * Formats a file's name into a proper canonical filename and strips invalid characters.
+	 * Also checks for duplicate file names, appending a _# where # increases until a unique name is found.
+	 *
+	 * @param filePath system path
+	 * @param fileName file's base without path or extension name
+	 * @param extension file extension
+	 * @return the File object with new name
+	 */
+	public static File getCleanFileName(String filePath, String fileName, String extension) {
+		File newFileName = new File(filePath + "/" + fileName + extension);
+
+		try {
+			newFileName = newFileName.getCanonicalFile();
+		} catch (IOException e) {
+			System.out.println("oh oh!");
+			e.printStackTrace();
+		}
+
+		int count = 2;
+		while (newFileName.exists()) {
+			newFileName = new File(filePath + "/" + fileName + "_" + count++ + extension);
+		}
+
+		try {
+			if (newFileName.createNewFile()) {
+				newFileName.delete();
+			}
+		} catch (IOException e) {
+			System.out.println("Bad file name, replacing bad characters in: " + fileName + extension);
+			fileName = fileName.replaceAll("[^a-zA-Z0-9\\._ \\/`~!@#$%\\^&\\(\\)\\-=\\+\\[\\]\\{\\}',\\\\:]+", "_");
+			newFileName = new File(filePath + "/" + fileName + extension);
+		}
+
+		return newFileName;
+	}
+
+	/**
+	 * Formats a file's name into a proper canonical filename and strips invalid characters.
+	 * Also checks for duplicate file names, appending a _# where # increases until a unique name is found.
+	 *
+	 * @param filePath system path
+	 * @param fileName file's base without path or extension name
+	 * @param extension file extension
+	 * @return the File object with new name
+	 */
+	public static File cleanFileName(String fileName, String extension) {
+		File newFileName = new File(fileName + extension);
+
+		try {
+			newFileName = newFileName.getCanonicalFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			if (newFileName.createNewFile()) {
+				newFileName.delete();
+			}
+		} catch (IOException e) {
+			System.out.println("Bad file name, replacing bad characters in: " + fileName + extension);
+			fileName = fileName.replaceAll("[^a-zA-Z0-9\\._ \\/`~!@#$%\\^&\\(\\)\\-=\\+\\[\\]\\{\\}',\\\\:]+", "_");
+			newFileName = new File(fileName + extension);
+		}
+
+		return newFileName;
+	}
 }

@@ -150,9 +150,9 @@ public final class ExtractHeroLab {
 			for (Node hero : heroNodes) {
 				String heroName = ((Element) hero).getAttribute("name");
 				String heroLabIndex = ((Element) hero).getAttribute("herolableadindex");
-				File heroFile = getFileName(finalTempDir.getCanonicalPath(), heroName, "." + Token.FILE_EXTENSION);
-				File portraitImageFile = getFileName(finalTempDir.getCanonicalPath(), heroName + "_portrait", ".png");
-				File heroImageFile = getFileName(finalTempDir.getCanonicalPath(), heroName + "_token", ".png");
+				File heroFile = FileUtil.getCleanFileName(finalTempDir.getCanonicalPath(), heroName, "." + Token.FILE_EXTENSION);
+				File portraitImageFile = FileUtil.getCleanFileName(finalTempDir.getCanonicalPath(), heroName + "_portrait", ".png");
+				File heroImageFile = FileUtil.getCleanFileName(finalTempDir.getCanonicalPath(), heroName + "_token", ".png");
 				HeroLabData heroLabData = new HeroLabData(heroName);
 
 				// We need to set a convention so the second image in Hero Lab will be the token image
@@ -161,7 +161,7 @@ public final class ExtractHeroLab {
 				if (tokenImageElement != null) {
 					String imageFileName = tokenImageElement.getAttribute("filename");
 					String imageFolder = tokenImageElement.getAttribute("folder");
-					heroImageFile = getFileName(finalTempDir.getCanonicalPath(), imageFileName, "");
+					heroImageFile = FileUtil.getCleanFileName(finalTempDir.getCanonicalPath(), imageFileName, "");
 					extractFile(imageFolder + "/" + imageFileName, heroImageFile);
 				} else {
 					createDefaultImage(heroImageFile, HERO_LAB_TOKEN);
@@ -173,7 +173,7 @@ public final class ExtractHeroLab {
 				if (portraitImageElement != null) {
 					String imageFileName = portraitImageElement.getAttribute("filename");
 					String imageFolder = portraitImageElement.getAttribute("folder");
-					portraitImageFile = getFileName(finalTempDir.getCanonicalPath(), imageFileName, "");
+					portraitImageFile = FileUtil.getCleanFileName(finalTempDir.getCanonicalPath(), imageFileName, "");
 					extractFile(imageFolder + "/" + imageFileName, portraitImageFile);
 				} else {
 					createDefaultImage(portraitImageFile, HERO_LAB_PORTRAIT);
@@ -260,8 +260,8 @@ public final class ExtractHeroLab {
 			String heroName = ((Element) hero).getAttribute("name");
 			heroLabData = new HeroLabData(heroName);
 
-			File portraitImageFile = getFileName(finalTempDir.getCanonicalPath(), heroName + "_portrait", ".png");
-			File heroImageFile = getFileName(finalTempDir.getCanonicalPath(), heroName + "_token", ".png");
+			File portraitImageFile = FileUtil.getCleanFileName(finalTempDir.getCanonicalPath(), heroName + "_portrait", ".png");
+			File heroImageFile = FileUtil.getCleanFileName(finalTempDir.getCanonicalPath(), heroName + "_token", ".png");
 
 			// We need to set a convention so the second image in Hero Lab will be the token image
 			Node tokenImageNode = (Node) xPath_tokenImage.evaluate(hero, XPathConstants.NODE);
@@ -269,7 +269,7 @@ public final class ExtractHeroLab {
 			if (tokenImageElement != null) {
 				String imageFileName = tokenImageElement.getAttribute("filename");
 				String imageFolder = tokenImageElement.getAttribute("folder");
-				heroImageFile = getFileName(finalTempDir.getCanonicalPath(), imageFileName, "");
+				heroImageFile = FileUtil.getCleanFileName(finalTempDir.getCanonicalPath(), imageFileName, "");
 				extractFile(imageFolder + "/" + imageFileName, heroImageFile);
 			} else {
 				// If the default image still exists from a previous extraction, we don't want to reuse it here
@@ -282,7 +282,7 @@ public final class ExtractHeroLab {
 			if (portraitImageElement != null) {
 				String imageFileName = portraitImageElement.getAttribute("filename");
 				String imageFolder = portraitImageElement.getAttribute("folder");
-				portraitImageFile = getFileName(finalTempDir.getCanonicalPath(), imageFileName, "");
+				portraitImageFile = FileUtil.getCleanFileName(finalTempDir.getCanonicalPath(), imageFileName, "");
 				extractFile(imageFolder + "/" + imageFileName, portraitImageFile);
 			}
 
@@ -318,36 +318,6 @@ public final class ExtractHeroLab {
 		}
 
 		return heroLabData;
-	}
-
-	private File getFileName(String filePath, String fileName, String extension) {
-		File newFileName = new File(filePath + "/" + fileName + extension);
-
-		try {
-			newFileName = newFileName.getCanonicalFile();
-		} catch (IOException e) {
-			System.out.println("oh oh!");
-			e.printStackTrace();
-		}
-
-		int count = 2;
-		while (newFileName.exists()) {
-			newFileName = new File(filePath + "/" + fileName + "_" + count++ + extension);
-		}
-
-		try {
-			if (newFileName.createNewFile()) {
-				newFileName.delete();
-			}
-		} catch (IOException e) {
-			System.out.println("Bad file name, replacing bad characters in: " + fileName + extension);
-			fileName = fileName.replaceAll("[^a-zA-Z0-9\\._ \\/`~!@#$%\\^&\\(\\)\\-=\\+\\[\\]\\{\\}',\\\\:]+", "_");
-			newFileName = new File(filePath + "/" + fileName + extension);
-			System.out.println("New file name: " + newFileName.getAbsolutePath());
-		}
-
-		return newFileName;
-
 	}
 
 	private Document getPortolioIndex() throws IOException, SAXException {

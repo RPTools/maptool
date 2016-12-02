@@ -17,10 +17,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
-import java.awt.geom.Area;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,7 +46,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.JTextComponent;
 
-import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -57,7 +54,6 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Direction;
 import net.rptools.maptool.model.GUID;
@@ -69,6 +65,7 @@ import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.util.FileUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.TokenUtil;
@@ -504,8 +501,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 				else
 					tokenNameGM = token.getGMName();
 
-				final File defaultFile = new File(FileUtil.stripInvalidCharacters(tokenName));
-				final File defaultFileGM = new File(FileUtil.stripInvalidCharacters(tokenNameGM));
+				final File defaultFile = FileUtil.cleanFileName(tokenName, "");
+				final File defaultFileGM = FileUtil.cleanFileName(tokenNameGM, "");
 
 				final JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
 				chooser.resetChoosableFileFilters();
@@ -548,9 +545,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					}
 
 					if (saveAsGmName) {
-						tokenSaveFile = new File(saveDirectory.getAbsolutePath() + "\\" + FileUtil.stripInvalidCharacters(tokenNameGM));
+						tokenSaveFile = FileUtil.cleanFileName(saveDirectory.getAbsolutePath() + "\\" + tokenNameGM, "");
 					} else {
-						tokenSaveFile = new File(saveDirectory.getAbsolutePath() + "\\" + FileUtil.stripInvalidCharacters(tokenName));
+						tokenSaveFile = FileUtil.cleanFileName(saveDirectory.getAbsolutePath() + "\\" + tokenName, "");
 					}
 				}
 
@@ -598,7 +595,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					if (saveAsImage && !saveAsPortrait) {
 						PersistenceUtil.saveTokenImage(token.getImageAssetId(), tokenSaveFile);
 					} else if (saveAsPortrait) {
-						PersistenceUtil.saveTokenImage(token.getPortraitImage(), tokenSaveFile);
+						PersistenceUtil.saveTokenImage(token.getPortraitImage(), FileUtil.cleanFileName(tokenSaveFile + " [Portrait]", ""));
 					} else {
 						PersistenceUtil.saveToken(token, tokenSaveFile);
 					}
