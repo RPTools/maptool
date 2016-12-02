@@ -442,6 +442,16 @@ project(':maptool') {
 		}
 	}
 
+	// Generates the splash screen JWrapper uses during install so user see's the version
+	// Also creates a splash to use on web page to show current version
+	// Lastly, it also creates a MapTool-version.js which is just a javascript variable that holds the version to use dynamically choose latest version to download
+	task createSplashImages(type:JavaExec) {
+		description = "Generates splash screens"
+		group = "Distribution"
+		main = "net.rptools.maptool.util.CreateVersionedInstallSplash"
+		classpath = sourceSets.main.runtimeClasspath
+	}
+
 	// Add access rule to classpath for nashorn api
 	// Note: This appends the following node to the JRE container classpathentry but only for Java 1.8 in case you are testing some other Java version
 	// <accessrules>
@@ -487,7 +497,7 @@ task showBuildVersion << {
 task wrapper(type: Wrapper) {
 	description = "Updates Gradle wrapper."
 	group = "Distribution"
-	gradleVersion='2.12'
+	gradleVersion='3.2.1'
 }
 
 task copySubProjectFiles(type: Sync) {
@@ -568,7 +578,7 @@ task createJwrapperConfig(type: Copy) {
 	}
 }
 
-task createJwrapperRelease(dependsOn: ['createLaunchPropertiesFile', 'createFatJars', 'createJwrapperConfig'], type:JavaExec) {
+task createJwrapperRelease(dependsOn: ['maptool:createSplashImages', 'createLaunchPropertiesFile', 'createFatJars', 'createJwrapperConfig'], type:JavaExec) {
 	description = "Generates a MapTool release using jWrapper"
 	group = "Distribution"
 	workingDir = 'build-resources/jWrapper'
