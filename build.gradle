@@ -211,25 +211,29 @@ project(':launcher') {
 				'buildNumber': getVersionName()
 			])
 		}
+		
 		from(sourceSets.main.resources.srcDirs) {
 			exclude '**/*.properties'
 		}
-		from ('build-resources/jWrapper') {
-			include 'launch-template.properties'
-			filter(ReplaceTokens, tokens: [
-				'buildDate': rootProject.ext.yyyymmdd,
-				'buildVersion': getVersionName()]
-			)
-		}
-		into 'launcher/src/main/resources/net/rptools/maptool/launcher/config'
-		rename { String fileName ->
-			fileName.replace('-template', '')
-		}
-		outputs.upToDateWhen {
-			false
-		}
-		doLast {
-			println 'Put new "launch.properties" into source tree...'
+		
+		copy{
+			from ('build-resources/config') {
+				include 'launch-template.properties'
+				filter(ReplaceTokens, tokens: [
+					'buildDate': rootProject.ext.yyyymmdd,
+					'buildVersion': getVersionName()]
+				)
+			}
+			into 'src/main/resources/net/rptools/maptool/launcher/config'
+			rename { String fileName ->
+				fileName.replace('-template', '')
+			}
+			outputs.upToDateWhen {
+				false
+			}
+			doLast {
+				println 'Put new "launch.properties" into source tree...'
+			}
 		}
 	}
 
@@ -243,7 +247,6 @@ project(':launcher') {
 		// to learn how to do that.  I know it's a Good Thing tho,
 		// since the output from gradle tells me that it notices the
 		// change to the file and reruns that other task again.
-		//dependsOn ':createLaunchPropertiesFile'
 		classifier 'fat'
 		manifest {
 			attributes 'Implementation-Title': 'MapTool-Launcher',
@@ -269,26 +272,6 @@ project(':launcher') {
 		outputs.upToDateWhen {
 			false
 		}
-	}
-}
-
-task createLaunchPropertiesFile(type: Copy) {
-	description = "Generates a default launch.properties for package release using jWrapper"
-	group = "Distribution"
-
-	from ('build-resources/jWrapper') {
-		include 'launch-template.properties'
-		filter(ReplaceTokens, tokens: [
-			'buildDate': rootProject.ext.yyyymmdd,
-			'buildVersion': getVersionName()]
-		)
-	}
-	into 'launcher/src/main/resources/net/rptools/maptool/launcher/config'
-	rename { String fileName ->
-		fileName.replace('-template', '')
-	}
-	outputs.upToDateWhen {
-		false
 	}
 }
 
@@ -578,7 +561,7 @@ task createJwrapperConfig(type: Copy) {
 	}
 }
 
-task createJwrapperRelease(dependsOn: ['maptool:createSplashImages', 'createLaunchPropertiesFile', 'createFatJars', 'createJwrapperConfig'], type:JavaExec) {
+task createJwrapperRelease(dependsOn: ['maptool:createSplashImages', 'createFatJars', 'createJwrapperConfig'], type:JavaExec) {
 	description = "Generates a MapTool release using jWrapper"
 	group = "Distribution"
 	workingDir = 'build-resources/jWrapper'
