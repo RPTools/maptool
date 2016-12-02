@@ -124,7 +124,21 @@ public class TokenMoveFunctions extends AbstractFunction {
 			}
 		}
 		if (functionName.equals("getMoveCount")) {
-			return getMovement(tokenInContext);
+			boolean useFractionOnly = false;
+
+			if (parameters.size() == 1) {
+				BigDecimal fractionOnly = (BigDecimal) parameters.get(0);
+				useFractionOnly = fractionOnly != null && fractionOnly.equals(BigDecimal.ZERO) ? false : true;
+			}
+
+			if (useFractionOnly) {
+				if (getMovement(tokenInContext, true).equals("0.5"))
+					return BigDecimal.ONE;
+				else
+					return BigDecimal.ZERO;
+			} else {
+				return getMovement(tokenInContext, false);
+			}
 		}
 		if (functionName.equals("movedOverToken")) {
 			//macro.function.general.noPerm
@@ -423,7 +437,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 		return null;
 	}
 
-	private String getMovement(final Token source) throws ParserException {
+	private String getMovement(final Token source, boolean returnFractionOnly) throws ParserException {
 		ZoneWalker walker = null;
 
 		WalkerMetric metric = MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : MapTool.getServerPolicy().getMovementMetric();
@@ -461,8 +475,15 @@ public class TokenMoveFunctions extends AbstractFunction {
 					walker.replaceLastWaypoint(tokenPoint);
 					cplist.add(tokenPoint);
 				}
-				int bar = calculateGridDistance(cplist, zone.getUnitsPerCell(), metric);
-				return Integer.valueOf(bar).toString();
+
+				double bar = calculateGridDistance(cplist, zone.getUnitsPerCell(), metric, returnFractionOnly);
+
+				if (returnFractionOnly) {
+					return Double.toString(bar);
+				} else {
+					return new BigDecimal(bar).stripTrailingZeros().toPlainString();
+				}
+
 				//return  Integer.toString(walker.getDistance());
 			}
 		} else {
@@ -536,15 +557,15 @@ public class TokenMoveFunctions extends AbstractFunction {
 		return pathPoints;
 	}
 
-	public int calculateGridDistance(List<CellPoint> path, int feetPerCell, WalkerMetric metric) {
+	public double calculateGridDistance(List<CellPoint> path, int feetPerCell, WalkerMetric metric, boolean oneTwoOneFractionOnly) {
 		if (path == null || path.size() == 0)
 			return 0;
 
-		final int feetDistance;
+		final double feetDistance;
 
 		{
-			int numDiag = 0;
-			int numStrt = 0;
+			double numDiag = 0;
+			double numStrt = 0;
 
 			CellPoint previousPoint = null;
 			for (CellPoint point : path) {
@@ -564,7 +585,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 				}
 				previousPoint = point;
 			}
-			final int cellDistance;
+			final double cellDistance;
 			switch (metric) {
 			case MANHATTAN:
 			case NO_DIAGONALS:
@@ -575,11 +596,19 @@ public class TokenMoveFunctions extends AbstractFunction {
 				break;
 			default:
 			case ONE_TWO_ONE:
-				cellDistance = (numStrt + numDiag + numDiag / 2);
+				// Jamz: It's useful to know if there is a fractional remainder left in the ONE_TWO_ONE movement
+				// Allows macros to track full movement even if token is moved 1 cell at a time now...
+				if (oneTwoOneFractionOnly) {
+					return (numDiag + numDiag / 2) - (int) (numDiag + numDiag / 2);
+				} else {
+					cellDistance = (int) (numStrt + numDiag + numDiag / 2);
+				}
 				break;
 			}
+
 			feetDistance = cellDistance * feetPerCell;
 		}
+
 		return feetDistance;
 	}
 }
