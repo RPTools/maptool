@@ -104,6 +104,9 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	}
 
 	public void setFilter(String filter) {
+		if (dir == null)
+			return;
+
 		ImageFileImagePanelModel.filter = filter.toUpperCase();
 		if (dir.isPDF()) {
 			if (!pdfExtractIsRunning) {
@@ -132,8 +135,9 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	}
 
 	public Image[] getDecorations(int index) {
-		if (Token.isTokenFile(fileList.get(index).getName())) {
-			try {
+		try {
+			if (Token.isTokenFile(fileList.get(index).getName())) {
+
 				PackedFile pakFile = new PackedFile(fileList.get(index));
 				Object isHeroLab = pakFile.getProperty(PersistenceUtil.HERO_LAB);
 				if (isHeroLab != null) {
@@ -141,27 +145,36 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 						return new Image[] { herolabDecorationImage };
 					}
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
+
+				return new Image[] { rptokenDecorationImage };
 			}
 
-			return new Image[] { rptokenDecorationImage };
-		} else {
-			return null;
+		} catch (IOException | NullPointerException | IndexOutOfBoundsException e) {
+			e.printStackTrace();
 		}
+
+		return null;
 	}
 
 	public Image getImage(int index) {
 
 		Image image = null;
-		if (dir.isHeroLabPortfolio()) {
-			image = ((AssetDirectory) dir).getImageFor(fileList.get(index));
-		} else if (dir instanceof AssetDirectory) {
-			image = ((AssetDirectory) dir).getImageFor(fileList.get(index));
-		}
-		if (dir instanceof PdfAsDirectory) {
-			//System.out.println("Here I am for: " + dir.hashCode());
-			image = ((PdfAsDirectory) dir).getImageFor(fileList.get(index));
+		try {
+			image = null;
+			if (dir.isHeroLabPortfolio()) {
+				image = ((AssetDirectory) dir).getImageFor(fileList.get(index));
+			} else if (dir instanceof AssetDirectory) {
+				image = ((AssetDirectory) dir).getImageFor(fileList.get(index));
+			}
+			if (dir instanceof PdfAsDirectory) {
+				//System.out.println("Here I am for: " + dir.hashCode());
+				image = ((PdfAsDirectory) dir).getImageFor(fileList.get(index));
+			}
+		} catch (IndexOutOfBoundsException e) {
+			// Jamz: OK, not pretty, I know... Occasionally this will happen while a PDF is extracting the files as it's multi-threaded and the panel
+			// is refreshing during the extract but I don't see this as a huge issue, we'll treat is as TRANSFERING_IMAGE. 
+			// We could write logic using the progress bar but most likely this panel will get an update with JavaFX soon(tm)...
+			e.printStackTrace();
 		}
 
 		return image != null ? image : ImageManager.TRANSFERING_IMAGE;
@@ -273,8 +286,15 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 			return null;
 		}
 
-		String name = fileList.get(index).getName();
-		return FileUtil.getNameWithoutExtension(name);
+		try {
+			String name = fileList.get(index).getName();
+			return FileUtil.getNameWithoutExtension(name);
+		} catch (NullPointerException e) {
+			// This can occasionally happen during PDF extraction as it's multi-threaded and the fileList is getting updated after each page is extracted...
+			e.printStackTrace();
+		}
+
+		return "";
 	}
 
 	public Object getID(int index) {
@@ -316,7 +336,8 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	 * ExecutorService/CompletionService to extract out the images, 1 threaded
 	 * task per page. This results in VERY fast extraction and allows up to
 	 * update the image panel after each thread.
-	 * @param forceRescan 
+	 * 
+	 * @param forceRescan
 	 */
 	private void refreshPDF(boolean forceRescan) {
 		cancelPdfExtract(); // If there is a current extract going on, lets cancel it...
@@ -408,8 +429,8 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	 * 
 	 * @author Jamz
 	 * 
-	 * A Callable task add to the ExecutorCompletionService so
-	 * we can track as Futures.
+	 *         A Callable task add to the ExecutorCompletionService so we can
+	 *         track as Futures.
 	 *
 	 */
 	private final class ExtractImagesTask implements Callable<Void> {
@@ -514,10 +535,12 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 			// assert global;
 
 			/*
-			 * Jamz: In the meantime, doing raw search and only search subdirectories if some criteria is filled in.
-			 * Didn't feel like hacking up AssetManager at this stage of development.
-			 * For now limiting global search to prevent very large arrays of 1000's of files which the panel
-			 * has a hard time rendering (even without global searches, it lags on large file lists).
+			 * Jamz: In the meantime, doing raw search and only search
+			 * subdirectories if some criteria is filled in. Didn't feel like
+			 * hacking up AssetManager at this stage of development. For now
+			 * limiting global search to prevent very large arrays of 1000's of
+			 * files which the panel has a hard time rendering (even without
+			 * global searches, it lags on large file lists).
 			 */
 
 			try {
@@ -604,11 +627,12 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 			MapTool.getFrame().getAssetPanel().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		}
 
-		/* 
-		 * Jamz: Return all assets in subdirectories and each to fileList
-		 *       This will spawn SwingWorkers for each subdir and is as such "multi-threaded"
-		 *       although not a true "Thread". It will cancel remaining workers once limit
-		 *       is reached. It searches through thousands of files very quickly.
+		/*
+		 * Jamz: Return all assets in subdirectories and each to fileList This
+		 * will spawn SwingWorkers for each subdir and is as such
+		 * "multi-threaded" although not a true "Thread". It will cancel
+		 * remaining workers once limit is reached. It searches through
+		 * thousands of files very quickly.
 		 */
 		private void listFilesInSubDirectories() {
 			publish(fileList.size());

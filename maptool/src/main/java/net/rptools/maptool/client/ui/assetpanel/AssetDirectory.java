@@ -72,7 +72,8 @@ public class AssetDirectory extends Directory {
 	}
 
 	/**
-	 * Returns the asset associated with this file, or null if the file has not yet been loaded as an asset
+	 * Returns the asset associated with this file, or null if the file has not
+	 * yet been loaded as an asset
 	 * 
 	 * @param imageFile
 	 * @return
@@ -101,12 +102,14 @@ public class AssetDirectory extends Directory {
 				firePropertyChangeEvent(new PropertyChangeEvent(AssetDirectory.this, PROPERTY_IMAGE_LOADED, false, true));
 			}
 		};
-		if (imageFile.length() < 30 * 1024) {
-			smallImageLoaderService.execute(future);
-		} else {
-			largeImageLoaderService.execute(future);
+		if (imageFile != null) {
+			if (imageFile.length() < 30 * 1024) {
+				smallImageLoaderService.execute(future);
+			} else {
+				largeImageLoaderService.execute(future);
+			}
+			imageMap.put(imageFile, future);
 		}
-		imageMap.put(imageFile, future);
 		return null;
 	}
 
