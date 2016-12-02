@@ -44,6 +44,8 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.SpinnerListModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -85,11 +87,12 @@ import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.store.properties.ListItemProperty;
 
 /**
- * This controller will handle all of the components on the States panel of the {@link CampaignPropertiesDialog}.
+ * This controller will handle all of the components on the States panel of the
+ * {@link CampaignPropertiesDialog}.
  * 
  * @author Jay
  */
-public class TokenStatesController implements ActionListener, DocumentListener, ListSelectionListener, ItemListener {
+public class TokenStatesController implements ActionListener, DocumentListener, ListSelectionListener, ItemListener, ChangeListener {
 
 	/** Panel containing the campaign properties form panel */
 	private final FormPanel formPanel;
@@ -107,25 +110,30 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	public static final String GROUP = "tokenStatesGroup";
 
 	/**
-	 * Name of the combo box containing a {@link String} value that maps directly to a {@link BooleanTokenOverlay} class
+	 * Name of the combo box containing a {@link String} value that maps
+	 * directly to a {@link BooleanTokenOverlay} class
 	 */
 	public static final String TYPE = "tokenStatesType";
 
-	/** Name of the color well containing a {@link Color} value for token state types that need colors */
+	/**
+	 * Name of the color well containing a {@link Color} value for token state
+	 * types that need colors
+	 */
 	public static final String COLOR = "tokenStatesColor";
 
 	/** Name of the check box containing the {@link Boolean} mouseover value */
 	public static final String MOUSEOVER = "tokenStatesMouseover";
 
 	/**
-	 * Name of the spinner containing an {@link Integer} value that is the width of lines for token state types that
-	 * need line width
+	 * Name of the spinner containing an {@link Integer} value that is the width
+	 * of lines for token state types that need line width
 	 */
 	public static final String WIDTH = "tokenStatesWidth";
 
 	/**
-	 * Name of the combo box containing a {@link String} value that one of the four corners of the token and is used in
-	 * the {@link ColorDotTokenOverlay} & {@link CornerImageTokenOverlay}
+	 * Name of the combo box containing a {@link String} value that one of the
+	 * four corners of the token and is used in the {@link ColorDotTokenOverlay}
+	 * & {@link CornerImageTokenOverlay}
 	 */
 	public static final String CORNER = "tokenStatesCorner";
 
@@ -138,13 +146,28 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	/** Name of the list containing all of the currently defined token states */
 	public static final String STATES = "tokenStatesStates";
 
-	/** Name of the spinner containing a {@link String} value that is converted into the grid size for flow token states */
+	/**
+	 * Name of the spinner containing a {@link String} value that is converted
+	 * into the grid size for flow token states
+	 */
 	public static final String FLOW_GRID = "tokenStatesFlowGrid";
 
-	/** Name of the spinner containing an {@link Integer} value that is the opacity used in drawing */
+	/**
+	 * Name of the spinner containing an {@link Integer} value that is the
+	 * opacity used in drawing
+	 */
 	public static final String OPACITY = "tokenStatesOpacity";
 
-	/** Name of the text field containing a {@link File} name that is the image file used for image token states */
+	/**
+	 * Name of the spinner containing an {@link Integer} value that is the index
+	 * position of the state
+	 */
+	public static final String INDEX = "tokenStatesIndex";
+
+	/**
+	 * Name of the text field containing a {@link File} name that is the image
+	 * file used for image token states
+	 */
 	public static final String IMAGE = "tokenStatesImageFile";
 
 	/** Name of the button used to browse for an image icon */
@@ -171,15 +194,22 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	/** The size of the ICON faked in the list renderer */
 	public static final int ICON_SIZE = 50;
 
-	/** Each of the data entry components that can be enabled/disabled by type of state */
+	/**
+	 * Each of the data entry components that can be enabled/disabled by type of
+	 * state
+	 */
 	public static final String[] DATA_ENTRY_COMPONENTS = { COLOR, WIDTH, CORNER, FLOW_GRID, IMAGE, BROWSE };
 
-	/** Each of the data entry components that can be enabled/disabled by type of state */
+	/**
+	 * Each of the data entry components that can be enabled/disabled by type of
+	 * state
+	 */
 	public static final String[] DATA_ENTRY_COMPONENT_LABELS = { COLOR + "Label", WIDTH + "Label", CORNER + "Label", FLOW_GRID + "Label", IMAGE + "Label" };
 
 	/**
-	 * Flags for each of the data entry components needed by each of the types. The order of the types is the' same as
-	 * the list in the combo box. The order of the flags is the same as that in {@link #DATA_ENTRY_COMPONENTS}.
+	 * Flags for each of the data entry components needed by each of the types.
+	 * The order of the types is the' same as the list in the combo box. The
+	 * order of the flags is the same as that in {@link #DATA_ENTRY_COMPONENTS}.
 	 */
 	public static final boolean[][] NEEDED_COMPONENTS = {
 			{ false, false, false, false, true, true }, // Image 
@@ -201,7 +231,8 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	};
 
 	/**
-	 * Set up the button listeners, spinner models, list cell renderer and selection listeners
+	 * Set up the button listeners, spinner models, list cell renderer and
+	 * selection listeners
 	 * 
 	 * @param panel
 	 *            The {@link CampaignProperties} form panel
@@ -218,6 +249,8 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 		panel.getSpinner(WIDTH).setModel(new SpinnerNumberModel(5, 1, 10, 1));
 		panel.getSpinner(FLOW_GRID).setModel(new SpinnerListModel(new String[] { "2x2", "3x3", "4x4", "5x5", "8x8" }));
 		panel.getSpinner(OPACITY).setModel(new SpinnerNumberModel(100, 1, 100, 5));
+		panel.getSpinner(INDEX).setModel(new SpinnerNumberModel(0, 0, 10000, 1)); //FIXME set proper upper limit?
+		panel.getSpinner(INDEX).addChangeListener(this);
 		panel.getList(STATES).setCellRenderer(new StateListRenderer());
 		panel.getList(STATES).addListSelectionListener(this);
 		panel.getTextComponent(NAME).getDocument().addDocumentListener(this);
@@ -243,23 +276,30 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	 */
 	public void actionPerformed(ActionEvent e) {
 		String name = ((JComponent) e.getSource()).getName();
-		JList list = formPanel.getList(STATES);
-		DefaultListModel model = (DefaultListModel) list.getModel();
+		JList<Object> list = formPanel.getList(STATES);
+		DefaultListModel<Object> model = (DefaultListModel<Object>) list.getModel();
 		int selected = list.getSelectedIndex();
 
 		// Add a new state
 		if (ADD.equals(name)) {
 			BooleanTokenOverlay overlay = createTokenOverlay(null);
 			if (overlay != null) {
-				model.addElement(overlay);
+				// model.addElement(overlay);
+				// Jamz: Lets insert the new state at the current index instead of at the bottom, we'll push the current element down one
+				Object oldElement = model.remove(selected);
+				model.insertElementAt(overlay, selected);
 				getNames().add(overlay.getName());
 				formPanel.setText(NAME, "");
 				formPanel.setText(GROUP, "");
 				formPanel.setSelected(MOUSEOVER, false);
 				formPanel.getSpinner(OPACITY).setValue(new Integer(100));
+				formPanel.getSpinner(INDEX).setValue(selected);
 				formPanel.setSelected(SHOW_GM, true);
 				formPanel.setSelected(SHOW_OWNER, true);
 				formPanel.setSelected(SHOW_OTHERS, true);
+				model.insertElementAt(oldElement, selected + 1);
+				list.ensureIndexIsVisible(selected);
+				list.setSelectedIndex(selected);
 			} // endif
 
 			// Delete selected state
@@ -308,8 +348,32 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 		} // endif
 	}
 
+	public void stateChanged(ChangeEvent e) {
+		String name = ((JComponent) e.getSource()).getName();
+		JList<Object> list = formPanel.getList(STATES);
+		DefaultListModel<Object> model = (DefaultListModel<Object>) list.getModel();
+		int selected = list.getSelectedIndex();
+
+		if (INDEX.equals(name)) {
+			int value = (int) ((JSpinner) e.getSource()).getValue();
+			if (selected != value) {
+				if (value < 0)
+					value = 0;
+
+				if (value >= model.getSize())
+					value = model.getSize() - 1;
+
+				Object element = model.remove(selected);
+				model.insertElementAt(element, value);
+				list.ensureIndexIsVisible(value);
+				list.setSelectedIndex(value);
+			}
+		}
+	}
+
 	/**
-	 * Enable the data components needed by the selected type of overlay. Disable the rest.
+	 * Enable the data components needed by the selected type of overlay.
+	 * Disable the rest.
 	 */
 	private void enableDataComponents() {
 		int selected = formPanel.getComboBox(TYPE).getSelectedIndex();
@@ -396,6 +460,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 			formPanel.setText(IMAGE, "");
 			formPanel.setSelected(MOUSEOVER, s.isMouseover());
 			formPanel.getSpinner(OPACITY).setValue(new Integer(s.getOpacity()));
+			formPanel.getSpinner(INDEX).setValue(selected);
 			formPanel.setSelected(SHOW_GM, s.isShowGM());
 			formPanel.setSelected(SHOW_OWNER, s.isShowOwner());
 			formPanel.setSelected(SHOW_OTHERS, s.isShowOthers());
@@ -458,7 +523,8 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	}
 
 	/**
-	 * The {@link ListCellRenderer} that draws the state as an icon and a state name.
+	 * The {@link ListCellRenderer} that draws the state as an icon and a state
+	 * name.
 	 * 
 	 * @author Jay
 	 */
@@ -477,8 +543,8 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 		AbstractTokenOverlay overlay;
 
 		/**
-		 * Create an icon from the token state. The icon has a black rectangle and the actual state is drawn inside of
-		 * it.
+		 * Create an icon from the token state. The icon has a black rectangle
+		 * and the actual state is drawn inside of it.
 		 */
 		Icon icon = new Icon() {
 			public int getIconHeight() {
@@ -504,8 +570,8 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 		/**
 		 * Set the icon and name in the renderer.
 		 * 
-		 * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object,
-		 *      int, boolean, boolean)
+		 * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList,
+		 *      java.lang.Object, int, boolean, boolean)
 		 */
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -525,7 +591,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	 */
 	public void copyCampaignToUI(CampaignProperties campaign) {
 		names.clear();
-		DefaultListModel model = new DefaultListModel();
+		DefaultListModel<Object> model = new DefaultListModel<Object>();
 		List<BooleanTokenOverlay> overlays = new ArrayList<BooleanTokenOverlay>(campaign.getTokenStatesMap().values());
 		Collections.sort(overlays, BooleanTokenOverlay.COMPARATOR);
 		for (BooleanTokenOverlay overlay : overlays) {
@@ -536,13 +602,14 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	}
 
 	/**
-	 * Copy the token states from the state tab and place it in the passed campaign.
+	 * Copy the token states from the state tab and place it in the passed
+	 * campaign.
 	 * 
 	 * @param campaign
 	 *            Campaign containing the properties being updated
 	 */
 	public void copyUIToCampaign(Campaign campaign) {
-		ListModel model = formPanel.getList(STATES).getModel();
+		ListModel<Object> model = formPanel.getList(STATES).getModel();
 		Map<String, BooleanTokenOverlay> states = new LinkedHashMap<String, BooleanTokenOverlay>();
 		for (int i = 0; i < model.getSize(); i++) {
 			BooleanTokenOverlay overlay = (BooleanTokenOverlay) model.getElementAt(i);
@@ -569,6 +636,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 		boolean mouseover = formPanel.isSelected(MOUSEOVER);
 		String overlay = ((ListItemProperty) formPanel.getSelectedItem(TYPE)).getLabel();
 		int opacity = getSpinner(OPACITY, "opacity", formPanel);
+		int index = getSpinner(INDEX, "index", formPanel);
 		boolean showGM = formPanel.isSelected(SHOW_GM);
 		boolean showOwner = formPanel.isSelected(SHOW_OWNER);
 		boolean showOthers = formPanel.isSelected(SHOW_OTHERS);
@@ -652,6 +720,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 			to.setGroup(group);
 			to.setMouseover(mouseover);
 			to.setOpacity(opacity);
+			to.setOrder(index);
 			to.setShowGM(showGM);
 			to.setShowOthers(showOthers);
 			to.setShowOwner(showOwner);
@@ -701,10 +770,12 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	 * Load an asset file to get its key.
 	 * 
 	 * @param fName
-	 *            Name of the asset file (returns <code>null</code> if <b>fName</b> is empty or <code>null</code>)
+	 *            Name of the asset file (returns <code>null</code> if
+	 *            <b>fName</b> is empty or <code>null</code>)
 	 * @param formPanel
 	 *            Panel to use as parent for displaying error messages
-	 * @return The asset id if found or <code>null</code> if it could not be found.
+	 * @return The asset id if found or <code>null</code> if it could not be
+	 *         found.
 	 */
 	public static MD5Key loadAsssetFile(String fName, FormPanel formPanel) {
 		if (StringUtil.isEmpty(fName))
