@@ -48,7 +48,8 @@ import net.rptools.maptool.client.swing.SplashScreen;
 
 public class CreateVersionedInstallSplash extends Application {
 	private static String resourceImage = "net/rptools/maptool/client/image/maptool_splash_template_nerps.png";
-	private static String imageOutputFilename = "../build-resources/jWrapper/maptool_installing_splash.png";
+	private static String installImageOutputFilename = "../build-resources/jWrapper/maptool_installing_splash.png";
+	private static String webImageOutputPath = "../build/release-";
 	private static String versionText = "Dev-Build";
 	private static final String FONT_RESOURCE = "/net/rptools/maptool/client/fonts/Horta.ttf";
 	private static Font versionFont;
@@ -62,8 +63,7 @@ public class CreateVersionedInstallSplash extends Application {
 			// load a properties file
 			prop.load(input);
 
-			versionText = "v" + prop.getProperty("buildVersion");
-			updateWebVersion(prop.getProperty("buildVersion"));
+			versionText = prop.getProperty("buildVersion");
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		} finally {
@@ -83,7 +83,7 @@ public class CreateVersionedInstallSplash extends Application {
 
 		// Parameters that can be overridden via command line options...
 		resourceImage = getCommandLineOption(cmdOptions, "source", resourceImage, args);
-		imageOutputFilename = getCommandLineOption(cmdOptions, "output", imageOutputFilename, args);
+		installImageOutputFilename = getCommandLineOption(cmdOptions, "output", installImageOutputFilename, args);
 		versionText = getCommandLineOption(cmdOptions, "version", versionText, args);
 
 		Application.launch(args);
@@ -91,15 +91,19 @@ public class CreateVersionedInstallSplash extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		final File splashFile = new File(imageOutputFilename);
-		BufferedImage buffImage = createLaunchSplash("Installing... " + versionText);
+		updateWebVersion(versionText);
+		final File installSplashFile = new File(installImageOutputFilename);
+		final File webSplashFile = new File(webImageOutputPath + versionText + "/MapTool-splash.png");
+		BufferedImage installImage = createLaunchSplash("Installing... " + "v" + versionText);
+		BufferedImage webImage = createLaunchSplash("v" + versionText);
 
 		try {
 			System.out.println("Version: " + versionText);
 			System.out.println("Source: " + resourceImage);
-			System.out.println("Output: " + splashFile.getCanonicalPath());
+			System.out.println("Output: " + installSplashFile.getCanonicalPath());
 
-			ImageIO.write(buffImage, "png", splashFile);
+			ImageIO.write(installImage, "png", installSplashFile);
+			ImageIO.write(webImage, "png", webSplashFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

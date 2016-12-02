@@ -582,7 +582,7 @@ task createJwrapperRelease(dependsOn: ['createLaunchPropertiesFile', 'createFatJ
 	}
 }
 
-task renameJwrapperReleases(type: Copy) {
+task renameJwrapperReleases(dependsOn: ['createJwrapperRelease'], type: Copy) {
 	from ('build-resources/jWrapper/JWrapperBuild') {
 		include 'MapTool-*64-offline*'
 	}
@@ -708,4 +708,4 @@ task release() << {
 }
 release.dependsOn += zipRelease
 release.dependsOn += zipOSXApp
-release.dependsOn += createJwrapperRelease
+release.dependsOn += renameJwrapperReleases
