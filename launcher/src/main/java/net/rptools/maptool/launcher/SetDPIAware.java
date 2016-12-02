@@ -26,12 +26,17 @@ import static com.sun.jna.platform.win32.WinReg.HKEY_LOCAL_MACHINE;
  * https://bugs.openjdk.java.net/browse/JDK-6829055
  */
 public class SetDPIAware {
+	private final static boolean WINDOWS = (System.getProperty("os.name").toLowerCase().startsWith("windows"));
+
 	private static final String REGISTRY_KEY_PATH = "Software\\Microsoft\\Windows\\CurrentVersion\\SideBySide";
 	private static final String REGISTRY_NAME = "PreferExternalManifest";
 	public static final int REGISTRY_VALUE_ON = 1;
 	public static final int REGISTRY_VALUE_OFF = 0;
 
 	public static boolean getKeyValue() {
+		if (!WINDOWS)
+			return false;
+
 		try {
 			if (Advapi32Util.registryValueExists(HKEY_LOCAL_MACHINE, REGISTRY_KEY_PATH, REGISTRY_NAME)) {
 				if (Advapi32Util.registryGetIntValue(HKEY_LOCAL_MACHINE, REGISTRY_KEY_PATH, REGISTRY_NAME) == REGISTRY_VALUE_ON)
@@ -45,6 +50,9 @@ public class SetDPIAware {
 	}
 
 	public static boolean setKeyValue(boolean isSelected) {
+		if (!WINDOWS)
+			return false;
+
 		if (!Advapi32Util.registryKeyExists(HKEY_LOCAL_MACHINE, REGISTRY_KEY_PATH)) {
 			Advapi32Util.registryCreateKey(HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Windows\\CurrentVersion", "SideBySide");
 		}
@@ -58,8 +66,10 @@ public class SetDPIAware {
 	}
 
 	public static boolean checkRegistryAccess() {
-		// If we can't create/delete keys it will throw an exception which in turns disables the checkbox
+		if (!WINDOWS)
+			return false;
 
+		// If we can't create/delete keys it will throw an exception which in turns disables the checkbox
 		try {
 			Advapi32Util.registryCreateKey(HKEY_LOCAL_MACHINE, "Software", "MapToolTestJNA");
 			Advapi32Util.registryDeleteKey(HKEY_LOCAL_MACHINE, "Software", "MapToolTestJNA");
