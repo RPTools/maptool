@@ -464,6 +464,60 @@ project(':maptool') {
 	}
 }
 
+project(':tokentool') {
+	mainClassName = 'net.rptools.tokentool.TokenTool'
+
+	dependencies {
+		compile project(':maptool') //, project(':rplib')
+		compile 'net.rptools.rplib:rplib:1.4.1.7+'
+		compile 'net.rptools.parser:parser:1.4.0.+'
+		compile 'com.withay:withay-util:1.0'
+		compile 'com.thoughtworks.xstream:xstream:1.4.9'
+		compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
+		compile 'net.java.abeille:abeille-formsrt:2.0'
+		compile 'commons-logging:commons-logging:1.1.1'
+		compile 'log4j:log4j:1.2.16'
+		compile 'commons-io:commons-io:2.4'
+	}
+
+	jar {
+		manifest.attributes(
+			'Main-Class': mainClassName,
+		)
+	}
+
+	// create a single Jar with all dependencies
+	task fatJar(type: Jar) {
+		classifier 'fat'
+		manifest {
+			attributes 'Implementation-Title': 'TokenTool',
+			'Implementation-Version': version,
+			'Built-By': System.getProperty('user.name'),
+			'Built-Date': new Date(),
+			'Built-JDK': System.getProperty('java.version'),
+			'Source-Compatibility': project.sourceCompatibility,
+			'Target-Compatibility': project.targetCompatibility,
+			'Main-Class': project.mainClassName
+		}
+		baseName = 'TokenTool'
+		from {
+			configurations.compile.collect {
+				it.isDirectory() ? it : zipTree(it)
+			}
+		}
+		with jar
+		exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
+	}
+
+	task deleteBuild(type: Delete) { 
+		delete 'build/' 
+		outputs.upToDateWhen {
+			false
+		}
+	}
+}
+
+
 /*
  * Global Gradle Tasks
  */
@@ -503,7 +557,7 @@ copySubProjectFiles.mustRunAfter(':maptool:release', ':launcher:release')
  * Task: publishRelease will create fresh jars and jWrapper build, then FTP
  * to server (currently for nerps.net).
  */
-task createFatJars(dependsOn: ['maptool:deleteBuild', 'launcher:deleteBuild', 'launcher:fatJar', 'maptool:fatJar']) {
+task createFatJars(dependsOn: ['maptool:deleteBuild', 'launcher:deleteBuild', 'tokentool:deleteBuild', 'launcher:fatJar', 'maptool:fatJar', 'tokentool:fatJar']) {
 	description = "Generates MapTool and Launcher Fat Jars for distribution."
 	group = "Distribution"
 	doLast {

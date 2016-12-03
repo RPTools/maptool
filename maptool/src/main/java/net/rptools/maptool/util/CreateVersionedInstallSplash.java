@@ -58,7 +58,7 @@ public class CreateVersionedInstallSplash extends Application {
 		Properties prop = new Properties();
 		InputStream input = null;
 		try {
-			input = new FileInputStream("D:/Development/git/JamzTheMan/maptool/gradle.properties");
+			input = new FileInputStream("D:/Development/git/JamzTheMan/rptools/gradle.properties");
 
 			// load a properties file
 			prop.load(input);
@@ -113,9 +113,9 @@ public class CreateVersionedInstallSplash extends Application {
 
 	private static void updateWebVersion(String versionText) {
 		try {
-			File releaseDir = new File("D:/Development/git/JamzTheMan/maptool/build/release-" + versionText);
+			File releaseDir = new File("D:/Development/git/JamzTheMan/rptools/build/release-" + versionText);
 			releaseDir.mkdirs();
-			FileWriter fstream = new FileWriter("D:/Development/git/JamzTheMan/maptool/build/release-" + versionText + "/MapTool-version.js");
+			FileWriter fstream = new FileWriter("D:/Development/git/JamzTheMan/rptools/build/release-" + versionText + "/MapTool-version.js");
 			BufferedWriter out = new BufferedWriter(fstream);
 			out.write("var mtVersion = \"" + versionText + "\";");
 			out.close();
