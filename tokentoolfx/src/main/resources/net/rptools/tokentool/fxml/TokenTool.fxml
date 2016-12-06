@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.tokentool.fx.controller.TokenTool_Controller">
+   <center>
+      <VBox prefHeight="800.0" prefWidth="800.0">
+      	<children>
+      		<MenuBar VBox.vgrow="NEVER">
+      			<menus>
+      				<Menu mnemonicParsing="false" text="%menu.title.file">
+      					<items>
+      						<MenuItem mnemonicParsing="false" text="%menu.title.file.manage.overlays" />
+      						<MenuItem mnemonicParsing="false" text="%menu.title.file.save.as.image" />
+      						<MenuItem mnemonicParsing="false" text="%menu.title.file.save.as.token" />
+      						<SeparatorMenuItem mnemonicParsing="false" />
+      						<MenuItem mnemonicParsing="false" text="%menu.title.file.exit" />
+      					</items>
+      				</Menu>
+      				<Menu mnemonicParsing="false" text="%menu.title.edit">
+      					<items>
+      						<MenuItem mnemonicParsing="false" text="%menu.title.edit.capture.screen" />
+      						<MenuItem mnemonicParsing="false" text="%menu.title.edit.copy.token" />
+      						<SeparatorMenuItem mnemonicParsing="false" />
+      						<MenuItem mnemonicParsing="false" text="%menu.title.edit.capture.screen" />
+      					</items>
+      				</Menu>
+      				<Menu mnemonicParsing="false" text="%menu.title.help">
+      					<items>
+      						<MenuItem mnemonicParsing="false" text="%menu.title.help.about" />
+      					</items>
+      				</Menu>
+      			</menus>
+      		</MenuBar>
+      		<HBox spacing="5.0" VBox.vgrow="ALWAYS">
+      			<children>
+                  <StackPane fx:id="compositeTokenPane" onMouseDragExited="#compositeTokenPane_MouseDragExited" onMouseDragged="#compositeTokenPane_MouseDragged" onMouseEntered="#compositeTokenPane_MouseEntered" onMouseExited="#compositeTokenPane_MouseExited" onMousePressed="#compositeTokenPane_MousePressed" onMouseReleased="#compositeTokenPane_MouseReleased" onScroll="#compositeTokenPane_OnScroll" styleClass="composite-view-black" HBox.hgrow="ALWAYS">
+                     <children>
+                        <AnchorPane>
+                           <children>
+                              <ImageView fx:id="portraitImageView" fitHeight="457.0" fitWidth="415.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../image/elf-archer.jpg" />
+                                 </image>
+                              </ImageView>
+                           </children>
+                        </AnchorPane>
+                        <Group fx:id="compositeGroup">
+                           <children>
+                              <ImageView fx:id="overlayImageView" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../image/gear-chrome-no-mask.png" />
+                                 </image>
+                              </ImageView>
+                              <ImageView fx:id="maskImageView" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../image/gear-chrome-mask.png" />
+                                 </image>
+                              </ImageView>
+                           </children>
+                        </Group>
+                     </children>
+                  </StackPane>
+      				<VBox alignment="TOP_CENTER" spacing="5.0">
+      					<children>
+                        <BorderPane fx:id="tokenPreviewPane" maxHeight="200.0" maxWidth="200.0" minHeight="200.0" minWidth="200.0" prefHeight="200.0" prefWidth="200.0" styleClass="token-view" VBox.vgrow="NEVER">
+                           <center>
+      								<ImageView fx:id="tokenPreview" blendMode="SRC_ATOP" cache="true" fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" scaleX="0.95" scaleY="0.95">
+      									<image>
+      										<Image url="@../image/token_tool_icon.png" />
+      									</image>
+      								</ImageView>
+                           </center>
+                        </BorderPane>
+                        <ScrollPane hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+                           <content>
+            						<Accordion maxHeight="1.7976931348623157E308" prefWidth="200.0">
+            							<panes>
+            								<TitledPane fx:id="saveOptionsPane" expanded="false" text="Save Options">
+            									<content>
+            										<VBox spacing="10.0">
+            											<children>
+            												<CheckBox mnemonicParsing="false" selected="true" styleClass="controls" text="%controls.dragAsTokenCheckbox.text">
+            													<tooltip>
+            														<Tooltip text="%controls.dragAsTokenCheckbox.tooltip" />
+            													</tooltip>
+            												</CheckBox>
+            												<CheckBox mnemonicParsing="false" styleClass="controls" text="%controls.useFileNumberingCheckbox.text" />
+            												<Label styleClass="controls-label" text="%controls.filenameLabel.text">
+            													<opaqueInsets>
+            														<Insets />
+            													</opaqueInsets>
+            													<VBox.margin>
+            														<Insets bottom="-8.0" left="2.0" />
+            													</VBox.margin>
+            												</Label>
+            												<TextField prefHeight="25.0" prefWidth="107.0" text="token" />
+            												<HBox alignment="CENTER_LEFT" spacing="5.0">
+            													<children>
+            														<Label styleClass="controls-label" text="%controls.filenameSuffixLabel.text" />
+            														<TextField prefColumnCount="3" text="000" HBox.hgrow="ALWAYS">
+            															<HBox.margin>
+            																<Insets />
+            															</HBox.margin>
+            														</TextField>
+            													</children>
+            													<VBox.margin>
+            														<Insets />
+            													</VBox.margin>
+            												</HBox>
+            												<Label alignment="CENTER" prefHeight="17.0" prefWidth="170.0" text="%controls.tokenResolution.text" textAlignment="CENTER">
+            													<VBox.margin>
+            														<Insets bottom="-5.0" />
+            													</VBox.margin>
+            												</Label>
+            												<Slider blockIncrement="1.0" majorTickUnit="1.0" max="10.0" min="1.0" minorTickCount="0" showTickMarks="true" snapToTicks="true" styleClass="controls-padding" value="1.0" />
+            											</children>
+            										</VBox>
+            									</content>
+            								</TitledPane>
+            								<TitledPane fx:id="overlayOptionsPane" text="Overlay Options">
+            									<content>
+            										<VBox spacing="10.0">
+            											<children>
+                                                <TreeView fx:id="overlayTreeView" prefHeight="325.0" prefWidth="170.0" styleClass="hide-scrollbar" />
+            												<CheckBox mnemonicParsing="false" styleClass="controls-padding" text="Use as token base? (temp?)" />
+            												<Spinner />
+            												<Spinner />
+            												<ColorPicker />
+            											</children>
+            										</VBox>
+            									</content>
+            								</TitledPane>
+            								<TitledPane fx:id="zoomOptionsPane" expanded="false" layoutX="10.0" layoutY="35.0" text="Fine Controls">
+            									<content>
+            										<VBox spacing="10.0">
+            											<children>
+            												<Slider styleClass="controls-padding" />
+            												<Slider styleClass="controls-padding" />
+            												<Slider styleClass="controls-padding" />
+            											</children>
+            										</VBox>
+            									</content>
+            								</TitledPane>
+            							</panes>
+            						</Accordion>
+                           </content>
+                        </ScrollPane>
+      					</children>
+      				</VBox>
+      			</children>
+      			<VBox.margin>
+      				<Insets />
+      			</VBox.margin>
+      		</HBox>
+      	</children>
+      	<stylesheets>
+      		<URL value="@../css/TokenTool.css" />
+      	</stylesheets>
+      </VBox>
+   </center>
+   <padding>
+      <Insets bottom="3.0" left="3.0" right="3.0" />
+   </padding>
+</BorderPane>

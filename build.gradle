@@ -517,6 +517,94 @@ project(':tokentool') {
 	}
 }
 
+project(':tokentoolfx') {
+	mainClassName = 'net.rptools.tokentool.fx.view.TokenToolFX'
+
+	dependencies {
+		compile project(':maptool') //, project(':rplib')
+		compile 'net.rptools.rplib:rplib:1.4.1.7+'
+		compile 'net.rptools.parser:parser:1.4.0.+'
+		compile 'com.withay:withay-util:1.0'
+		compile 'com.thoughtworks.xstream:xstream:1.4.9'
+		compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
+		compile 'net.java.abeille:abeille-formsrt:2.0'
+		compile 'commons-logging:commons-logging:1.1.1'
+		compile 'log4j:log4j:1.2.16'
+		compile 'commons-io:commons-io:2.4'
+	}
+
+	jar {
+		manifest.attributes(
+			'Main-Class': mainClassName,
+		)
+	}
+
+	// create a single Jar with all dependencies
+	task fatJar(type: Jar) {
+		classifier 'fat'
+		manifest {
+			attributes 'Implementation-Title': 'TokenToolFX',
+			'Implementation-Version': version,
+			'Built-By': System.getProperty('user.name'),
+			'Built-Date': new Date(),
+			'Built-JDK': System.getProperty('java.version'),
+			'Source-Compatibility': project.sourceCompatibility,
+			'Target-Compatibility': project.targetCompatibility,
+			'Main-Class': project.mainClassName
+		}
+		baseName = 'TokenTool'
+		from {
+			configurations.compile.collect {
+				it.isDirectory() ? it : zipTree(it)
+			}
+		}
+		with jar
+		exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
+	}
+
+	task deleteBuild(type: Delete) { 
+		delete 'build/' 
+		outputs.upToDateWhen {
+			false
+		}
+	}
+}
+
+project(':rplib') {
+	dependencies {
+		compile 'antlr:antlr:2.7.6'
+		compile 'commons-io:commons-io:2.4'
+		compile 'com.thoughtworks.xstream:xstream:1.4.9'
+		compile 'commons-lang:commons-lang:2.6'
+		compile 'commons-logging:commons-logging:1.1.1'
+		compile 'commons-net:commons-net:3.2'
+		compile 'log4j:log4j:1.2.16'
+		compile 'com.withay:withay-util:1.0'
+		compile 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
+		compile 'net.java.abeille:abeille-formsrt:2.0'
+		testCompile group: 'junit', name: 'junit', version: '4.11'
+	}
+
+	jar {
+		manifest {
+			attributes 'Implementation-Title': 'rplib',
+					'Implementation-Version': project.version,
+					'Built-By': System.getProperty('user.name'),
+					'Built-Date': new Date(),
+					'Built-JDK': System.getProperty('java.version'),
+					'Source-Compatibility': project.sourceCompatibility,
+					'Target-Compatibility': project.targetCompatibility
+		}
+	}
+
+	task deleteBuild(type: Delete) { 
+		delete 'build/' 
+		outputs.upToDateWhen {
+			false
+		}
+	}
+}
+
 
 /*
  * Global Gradle Tasks

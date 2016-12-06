@@ -1,0 +1,55 @@
+.menu-bar {
+/* 
+    -fx-background-color: #aeb5ba, linear-gradient(to bottom, #ecf4fa 0%, #ced4d9 100%);
+    -fx-background-insets: 0, 0 0 1 0;
+*/
+}
+
+.menu-bar .menu .label {
+    /*
+    -fx-text-fill: #2d3e4c;
+    */
+}
+
+/* leaf is a PsuedoClass added via the controller to child-only nodes, ie overlays... */
+.tree-cell:leaf {
+    -fx-content-display: graphic-only;
+    -fx-indent: 0;
+}
+
+.token-view {
+    -fx-background-image: url("../image/grid.png");
+    -fx-background-size: 20, 20;
+    -fx-border-color: black;
+    -fx-border-width: 2;
+}
+
+.composite-view-checkered {
+    -fx-background-image: url("../image/grid.png");
+    -fx-background-size: 20, 20;
+    -fx-border-color: black;
+    -fx-border-width: 2;
+}
+
+.composite-view-black {
+    -fx-background-color: black;
+    -fx-border-color: black;
+    -fx-border-width: 2;
+}
+
+/* Reminder: Padding is All | Top, Right, Bottom, Left */
+.controls {
+
+}
+
+.controls-label {
+
+}
+
+.controls-textbox {
+
+}
+
+.control-panel {
+    
+}

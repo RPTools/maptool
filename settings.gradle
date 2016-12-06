@@ -1,3 +1,3 @@
 rootProject.name = 'RPTools'
 
-include 'maptool', 'launcher', 'tokentool'
+include 'maptool', 'launcher', 'tokentool', 'tokentoolfx', 'rplib'
