@@ -4,6 +4,7 @@
 package net.rptools.maptool.client.lua;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.MapTool;
@@ -24,10 +25,17 @@ import org.luaj.vm2.Varargs;
 public class TokenProperties extends LuaTable {
 	private MapToolToken token;
 	private List<TokenProperty> propmap;
+	private Pattern pattern;
 
 	public TokenProperties(MapToolToken mapToolToken) {
 		this.token = mapToolToken;
 		propmap = MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(token.getToken().getPropertyType());
+	}
+	
+	public TokenProperties(MapToolToken mapToolToken, String pattern) {
+		this.token = mapToolToken;
+		propmap = MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(token.getToken().getPropertyType());
+		this.pattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
 	}
 
 	public LuaValue setmetatable(LuaValue metatable) {
@@ -83,7 +91,7 @@ public class TokenProperties extends LuaTable {
 			name = key.checkjstring();
 		}
 		for (String prop : propertyMap.keySetRaw()) {
-			if (found) {
+			if (found && (pattern == null || pattern.matcher(prop).matches())) {
 				return varargsOf(valueOf(prop), LuaConverters.fromObj(propertyMap.get(prop)));
 			}
 			if (!found && prop != null && prop.equals(name)) {

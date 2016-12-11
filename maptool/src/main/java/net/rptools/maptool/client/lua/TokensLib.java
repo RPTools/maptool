@@ -228,6 +228,35 @@ public class TokensLib extends TwoArgFunction {
 			throw new LuaError(e);
 		}
 	}
+	
+	public LuaValue getMatchingLibProperties(LuaValue location, LuaValue pattern) {
+		try {
+			String loc;
+			MapToolToken token = null;
+			if (location.isstring()) {
+				loc = location.checkjstring();
+			} else if (location instanceof MapToolToken)  {
+				loc = ((MapToolToken) location).getToken().getName();
+				if (((MapToolToken) location).isLib()) {
+					token = (MapToolToken) location;
+				}
+			} else {
+				loc = MapTool.getParser().getMacroSource();
+			}
+			if (token == null) {
+				Token t = MapTool.getParser().getTokenMacroLib(loc);
+				if (t != null) {
+					token = new MapToolToken(t, false, resolver);
+				}
+			}
+			if (token != null) {
+				return new TokenProperties(token, pattern.checkjstring());
+			}
+			return NIL;
+		} catch (ParserException e) {
+			throw new LuaError(e);
+		}
+	}
 
 	public LuaValue find(LuaValue val) {
 		checkTrusted("getTokens");
@@ -341,6 +370,8 @@ public class TokensLib extends TwoArgFunction {
 				return image(arg, arg2);
 			case 1:
 				return getLibProperty(arg, arg2);
+			case 2:
+				return getMatchingLibProperties(arg, arg2);
 			}
 			return NIL;
 		}
@@ -355,7 +386,7 @@ public class TokensLib extends TwoArgFunction {
 		
 		bind(t, 1, new String[] { "withState", "ownedBy", "visible", "inLayers", "resolve", "find", "addAllToInitiative", "addAllPCsToInitiative", "addAllNPCsToInitiative", "getLibProperties" });
 		bind(t, 0, new String[] { "exposed", "all", "pc", "npc", "selected", "impersonated", });
-		bind(t, 2, new String[] { "image", "getLibProperty" });
+		bind(t, 2, new String[] { "image", "getLibProperty", "getMatchingLibProperties" });
 		t.set("select", new SelectToken(false));
 		t.set("deselect", new SelectToken(true));
 		env.set("tokens", t);

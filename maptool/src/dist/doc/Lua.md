@@ -1127,7 +1127,197 @@ println(maps.all["Grasslands"].visible)
 println(maps.visible["Grasslands"]~=nil)
 ```
 
+#### Macro Function getMatchingLibProperties()
+The Tokens-library has a getMatchingLibProperties(Token, Pattern) function that returns a table of matching properties.
+```lua
+--{assert(0, "LUA")}--
+for name, obj in pairs(tokens.getMatchingLibProperties("Lib:Library", "Weapon.*")) do
+  println(name)
+end
+```
+The matching ignores the case by default, so to enable case-sensitivity, the pattern (?-i) needs to be added to the front
+```lua
+--{assert(0, "LUA")}--
+for name, obj in pairs(tokens.getMatchingLibProperties("Lib:Library", "(?-i)Weapon.*")) do
+  println(name)
+end
+``` 
 
+With this, a getMatchingLibPropertiesNames function can be easily defined as such:
+```lua
+--{assert(0, "LUA")}--
+function getMatchingLibPropertiesNames(pattern, tok)
+  local result = {}
+  for name, obj in pairs(tokens.getMatchingLibProperties(tok, pattern)) do
+    table.insert(result, name)
+  end
+  return result
+end
 
+println(toJSON(getMatchingLibPropertiesNames("Weapon.*", "Lib:Library")))
+println(toJSON(getMatchingLibPropertiesNames("(?-i)Weapon.*", "Lib:Library")))
+```
+
+#### Macro Function getMatchingProperties()
+Each Token has a matchingProperties(Pattern) function that returns a table of matching properties.
+```lua
+--{assert(0, "LUA")}--
+for name, obj in pairs(token.matchingLibProperties("Weapon.*")) do
+  println(name)
+end
+```
+The matching ignores the case by default, so to enable case-sensitivity, the pattern (?-i) needs to be added to the front
+```lua
+--{assert(0, "LUA")}--
+for name, obj in pairs(token.matchingLibProperties("(?-i)Weapon.*")) do
+  println(name)
+end
+```
+There is also a getMatchingProperties() function, that returns just the name
+```lua
+--{assert(0, "LUA")}--
+println(toJSON(token.getMatchingProperties("Weapon.*"))) --Names in lowercase
+println(toJSON(token.getMatchingProperties("Weapon.*", true))) --Raw name, case sensitiv matching
+```
+
+#### Macro Function getMoveCount()
+This method is part of any token
+```lua
+--{assert(0, "LUA")}--
+println(token.getMoveCount())
+```
+
+#### Macro Function getName()
+The name is a token property of any token
+```lua
+--{assert(0, "LUA")}--
+println(token.name)
+println(tokens.impersonated().name) -- The same, unless token got changed
+```
+
+#### Macro Function getNotes()
+The name is a token property of any token
+```lua
+--{assert(0, "LUA")}--
+println(token.notes)
+```
+
+#### Macro Functions getNPCNames() and getNPC()
+The maps library has an npc() function that collect all NPCs, which can be used to create these functions
+```lua
+--{assert(0, "LUA")}--
+function getNPCNames()
+  local result = {}
+  for index, tok in ipairs(tokens.npc()) do
+    table.insert(result, tok.name)
+  end
+  return result
+end
+
+function getNPC()
+  local result = {}
+  for index, tok in ipairs(tokens.npc()) do
+    table.insert(result, tok.id)
+  end
+  return result
+end
+
+println(toJSON(getNPCNames()))
+println(toStr(getNPC()))
+```
+Usually one would want to work with the token objects instead
+```lua
+--{assert(0, "LUA")}--
+for index, tok in ipairs(tokens.npc()) do
+  println(tok.name, " is ", tok.label)
+end
+```
+
+#### Macro Functions getOwnedNames() and getOwned()
+The maps library has an ownedBy() function that collect all tokens owned by a player, which can be used to create these functions
+```lua
+--{assert(0, "LUA")}--
+function getOwnedNames(player)
+  local result = {}
+  for index, tok in ipairs(tokens.ownedBy(player)) do
+    table.insert(result, tok.name)
+  end
+  return result
+end
+
+function getOwned(player)
+  local result = {}
+  for index, tok in ipairs(tokens.ownedBy(player)) do
+    table.insert(result, tok.id)
+  end
+  return result
+end
+
+println(toJSON(getOwnedNames(chat.player)))
+println(toStr(getOwned(chat.player)))
+```
+Usually one would want to work with the token objects instead
+```lua
+--{assert(0, "LUA")}--
+for index, tok in ipairs(tokens.ownedBy(chat.player)) do
+  println(tok.name, " is ", tok.label)
+end
+```
+
+#### Macro Function getOwnerOnlyVisible()
+This flag is a token property of any token
+```lua
+--{assert(0, "LUA")}--
+println(token.ownerOnlyVisible)
+```
+
+#### Macro Function getOwners()
+This method is part of any token and returns a table of owners
+```lua
+--{assert(0, "LUA")}--
+for index, owner in ipairs(token.getOwners()) do
+  println(owner)
+end
+```
+
+#### Macro Functions getPCNames() and getPC()
+The maps library has an pc() function that collect all PCs, which can be used to create these functions
+```lua
+--{assert(0, "LUA")}--
+function getPCNames()
+  local result = {}
+  for index, tok in ipairs(tokens.pc()) do
+    table.insert(result, tok.name)
+  end
+  return result
+end
+
+function getPC()
+  local result = {}
+  for index, tok in ipairs(tokens.pc()) do
+    table.insert(result, tok.id)
+  end
+  return result
+end
+
+println(toJSON(getPCNames()))
+println(toStr(getPC()))
+```
+Usually one would want to work with the token objects instead
+```lua
+--{assert(0, "LUA")}--
+for index, tok in ipairs(tokens.pc()) do
+  println(tok.name, " is ", tok.label)
+end
+```
+
+#### Macro Function getPlayerName()
+The player name can be retrieved from the chat library
+```lua
+--{assert(0, "LUA")}--
+println(chat.player)
+chat.broadcast("Hello, I'm "..chat.player..". Nice to meet you.")
+```
 ### Roll-Options
+
 

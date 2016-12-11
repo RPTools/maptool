@@ -115,9 +115,10 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 	// COMPARABLE
 	public int compareTo(VisibleAreaSegment o) {
 		if (o != this) {
-			double odist = o.getDistanceFromOrigin();
-			double val = getDistanceFromOrigin() - odist; // separate variable for debugging
-			return (int) val;
+			return Double.compare(getDistanceFromOrigin(), o.getDistanceFromOrigin());
+//			double odist = o.getDistanceFromOrigin();
+//			double val = getDistanceFromOrigin() - odist; // separate variable for debugging
+//			return (int) val;
 			//			return val < EPSILON && val > -EPSILON ? 0 : (int) val; // Should we use an EPSILON value?
 			//			return getDistanceFromOrigin() < odist ? -1 : getDistanceFromOrigin() > odist ? 1 : 0;
 		}

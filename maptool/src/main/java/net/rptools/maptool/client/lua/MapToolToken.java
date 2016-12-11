@@ -34,6 +34,7 @@ import net.rptools.maptool.client.lua.token.IsOwnedByAll;
 import net.rptools.maptool.client.lua.token.IsOwner;
 import net.rptools.maptool.client.lua.token.LastPath;
 import net.rptools.maptool.client.lua.token.MatchingProperties;
+import net.rptools.maptool.client.lua.token.MatchingProps;
 import net.rptools.maptool.client.lua.token.Move;
 import net.rptools.maptool.client.lua.token.MovedOverPoints;
 import net.rptools.maptool.client.lua.token.MovedOverToken;
@@ -126,6 +127,7 @@ public class MapToolToken extends LuaTable implements IRepresent {
 	private static final String F_MOVEMENT = "getmovecount";
 	private static final String F_MOVEDOVERTOKEN = "movedovertoken";
 	private static final String F_MOVEDOVERPOINTS = "movedoverpoints";
+	private static final String F_MATCHINGPROPS = "matchingproperties";
 	//TODO trusted Macro und so
 	private boolean isSelf = false;
 	private Token token;
@@ -706,6 +708,8 @@ public class MapToolToken extends LuaTable implements IRepresent {
 				return new MovedOverPoints(this);
 			case F_MOVEDOVERTOKEN:
 				return new MovedOverToken(this);
+			case F_MATCHINGPROPS:
+				return new MatchingProps(this);
 			}
 		} catch (ParserException e) {
 			throw new LuaError(e);
