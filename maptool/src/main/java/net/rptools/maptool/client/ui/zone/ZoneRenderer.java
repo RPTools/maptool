@@ -2802,6 +2802,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					if (AppPreferences.getForceFacingArrow() == false)
 						break;
 				case CIRCLE:
+					if (AppPreferences.getForceFacingArrow() == false)
+						break;
 					arrow = getCircleFacingArrow(token.getFacing(), footprintBounds.width / 2);
 					if (zone.getGrid().isIsometric())
 						arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
@@ -2817,6 +2819,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 					clippedG.translate(-cx, -cy);
 					break;
 				case SQUARE:
+					if (AppPreferences.getForceFacingArrow() == false)
+						break;
 
 					if (zone.getGrid().isIsometric()) {
 						arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
