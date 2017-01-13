@@ -103,6 +103,10 @@ public class Directory {
 		return parent;
 	}
 
+	public boolean isDir() {
+		return directory.isDirectory();
+	}
+
 	public boolean isPDF() {
 		return PDF_FILE_FILTER.accept(directory);
 	}
@@ -131,9 +135,25 @@ public class Directory {
 			}
 			Collections.sort(subdirs, new Comparator<Directory>() {
 				public int compare(Directory d1, Directory d2) {
+					// Lets sort by directories first, then Hero Lab Portfolios, then finally PDF's
 					String name1 = d1.getPath().getName();
 					String name2 = d2.getPath().getName();
-					return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
+
+					if (d1.isDir() && d2.isDir()) {
+						return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
+					} else if (!d1.isDir() && !d2.isDir()) {
+						if ((d1.isPDF() && d2.isPDF()) || (d1.isHeroLabPortfolio() && d2.isHeroLabPortfolio())) {
+							return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
+						} else if (d1.isPDF()) {
+							return 1;
+						} else {
+							return -1;
+						}
+					} else if (d1.isDir()) {
+						return -1;
+					} else {
+						return 1;
+					}
 				}
 			});
 			subdirs = Collections.unmodifiableList(subdirs);
