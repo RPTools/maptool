@@ -98,7 +98,9 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
 			frames.put(name, frame);
 			frame.updateContents(html);
 			frame.getDockingManager().showFrame(name);
-			center(name);
+			// Jamz: why undock frames to center them?
+			if (!frame.isDocked())
+				center(name);
 		}
 		return frame;
 	}
