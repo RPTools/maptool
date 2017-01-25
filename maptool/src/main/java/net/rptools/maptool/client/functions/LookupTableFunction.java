@@ -42,6 +42,7 @@ public class LookupTableFunction extends AbstractFunction {
 
 	/**
 	 * Gets the instance of TableLookup.
+	 * 
 	 * @return the TableLookup.
 	 */
 	public static LookupTableFunction getInstance() {
@@ -234,10 +235,14 @@ public class LookupTableFunction extends AbstractFunction {
 		} else if ("setTableEntry".equalsIgnoreCase(function)) {
 
 			checkTrusted(function);
-			checkNumberOfParameters("setTableEntry", params, 3, 3);
+			checkNumberOfParameters("setTableEntry", params, 3, 4);
 			String name = params.get(0).toString();
 			String roll = params.get(1).toString();
 			String result = params.get(2).toString();
+			MD5Key imageId = null;
+			if (params.size() == 4)
+				imageId = new MD5Key(params.get(3).toString());
+
 			LookupTable lookupTable = getMaptoolTable(name, function);
 			LookupEntry entry = lookupTable.getLookup(roll);
 			if (entry == null)
@@ -248,10 +253,14 @@ public class LookupTableFunction extends AbstractFunction {
 			List<LookupEntry> oldlist = new ArrayList<LookupEntry>(lookupTable.getEntryList());
 			lookupTable.clearEntries();
 			for (LookupEntry e : oldlist)
-				if (e != entry)
+				if (e != entry) {
 					lookupTable.addEntry(e.getMin(), e.getMax(), e.getValue(), e.getImageId());
-				else
-					lookupTable.addEntry(e.getMin(), e.getMax(), result, e.getImageId());
+				} else {
+					if (imageId == null)
+						imageId = e.getImageId();
+
+					lookupTable.addEntry(e.getMin(), e.getMax(), result, imageId);
+				}
 			MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
 			return 1;
 
@@ -314,15 +323,18 @@ public class LookupTableFunction extends AbstractFunction {
 	}
 
 	/**
-	 * Checks that the number of objects in the list <code>parameters</code>
-	 * is within given bounds (inclusive). Throws a <code>ParserException</code>
-	 * if the check fails.
+	 * Checks that the number of objects in the list <code>parameters</code> is within given bounds (inclusive). Throws a <code>ParserException</code> if the check fails.
 	 *
-	 * @param	functionName	this is used in the exception message
-	 * @param	parameters		a list of parameters
-	 * @param	min				the minimum amount of parameters (inclusive)
-	 * @param	max				the maximum amount of parameters (inclusive)
-	 * @throws	ParserException	if there were more or less parameters than allowed
+	 * @param functionName
+	 *            this is used in the exception message
+	 * @param parameters
+	 *            a list of parameters
+	 * @param min
+	 *            the minimum amount of parameters (inclusive)
+	 * @param max
+	 *            the maximum amount of parameters (inclusive)
+	 * @throws ParserException
+	 *             if there were more or less parameters than allowed
 	 */
 	private void checkNumberOfParameters(String functionName, List<Object> parameters, int min, int max) throws ParserException {
 		int numberOfParameters = parameters.size();
@@ -336,8 +348,10 @@ public class LookupTableFunction extends AbstractFunction {
 	/**
 	 * Checks whether or not the function is trusted
 	 * 
-	 * @param functionName     Name of the macro function
-	 * @throws ParserException Returns trust error message and function name 
+	 * @param functionName
+	 *            Name of the macro function
+	 * @throws ParserException
+	 *             Returns trust error message and function name
 	 */
 	private void checkTrusted(String functionName) throws ParserException {
 		if (!MapTool.getParser().isMacroTrusted()) {
@@ -346,10 +360,10 @@ public class LookupTableFunction extends AbstractFunction {
 	}
 
 	/***
-	 * If GM return all tables
-	 * Otherwise only return visible tables
+	 * If GM return all tables Otherwise only return visible tables
 	 * 
-	 * @param isGm boolean Does the calling function has GM privileges
+	 * @param isGm
+	 *            boolean Does the calling function has GM privileges
 	 * @return a list of table names
 	 */
 	private List<String> getTableList(boolean isGm) {
@@ -367,11 +381,13 @@ public class LookupTableFunction extends AbstractFunction {
 	/**
 	 * Function to return a maptool table.
 	 * 
-	 * @param tableName         String containing the name of the desired table
-	 * @param functionName      String containing the name of the calling function,
-	 *                          used by the error message.
-	 * @return LookupTable      The desired maptool table object
-	 * @throws ParserException	if there were more or less parameters than allowed
+	 * @param tableName
+	 *            String containing the name of the desired table
+	 * @param functionName
+	 *            String containing the name of the calling function, used by the error message.
+	 * @return LookupTable The desired maptool table object
+	 * @throws ParserException
+	 *             if there were more or less parameters than allowed
 	 */
 	private LookupTable getMaptoolTable(String tableName, String functionName) throws ParserException {
 

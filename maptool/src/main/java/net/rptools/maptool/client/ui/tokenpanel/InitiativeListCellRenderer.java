@@ -385,7 +385,7 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
 			for (String state : MapTool.getCampaign().getTokenStatesMap().keySet()) {
 				Object stateSet = token.getState(state);
 				AbstractTokenOverlay overlay = MapTool.getCampaign().getTokenStatesMap().get(state);
-				if (stateSet instanceof AbstractTokenOverlay || overlay == null || !overlay.showPlayer(token, MapTool.getPlayer()))
+				if (stateSet instanceof AbstractTokenOverlay || overlay == null || !overlay.showPlayer(token, MapTool.getPlayer()) || overlay.isMouseover())
 					continue;
 				overlay.paintOverlay((Graphics2D) g, token, bounds, stateSet);
 			} // endfor

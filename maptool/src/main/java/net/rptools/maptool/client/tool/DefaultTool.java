@@ -16,6 +16,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.AffineTransform;
 import java.util.Set;
 
 import javax.swing.SwingUtilities;
@@ -49,6 +50,9 @@ public abstract class DefaultTool extends Tool implements MouseListener, MouseMo
 	private long lastMoveRedraw;
 	private int mapDX, mapDY;
 	private static final int REDRAW_DELAY = 25; // millis
+
+	// TBD
+	private boolean isTouchScreen = false;
 
 	protected ZoneRenderer renderer;
 
@@ -87,7 +91,7 @@ public abstract class DefaultTool extends Tool implements MouseListener, MouseMo
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		if (isDraggingMap && SwingUtilities.isRightMouseButton(e)) {
+		if (isDraggingMap && isRightMouseButton(e)) {
 			renderer.maybeForcePlayersView();
 		}
 		// Cleanup
@@ -150,7 +154,7 @@ public abstract class DefaultTool extends Tool implements MouseListener, MouseMo
 			MapTool.getFrame().getCoordinateStatusBar().clear();
 		}
 		// MAP MOVEMENT
-		if (SwingUtilities.isRightMouseButton(e)) {
+		if (isRightMouseButton(e)) {
 			isDraggingMap = true;
 
 			mapDX += mX - dragStartX;
@@ -198,7 +202,56 @@ public abstract class DefaultTool extends Tool implements MouseListener, MouseMo
 					facing = -90; // natural alignment
 				}
 				if (SwingUtil.isControlDown(e)) {
-					facing += e.getWheelRotation() > 0 ? 5 : -5;
+					// Modify on the fly the rotation point
+					if (e.isAltDown()) {
+						int x = token.getX();
+						int y = token.getY();
+						int w = token.getWidth();
+						int h = token.getHeight();
+
+						double xc = x + w / 2;
+						double yc = y + h / 2;
+
+						facing += e.getWheelRotation() > 0 ? 5 : -5;
+						token.setFacing(facing);
+						int a = token.getFacingInDegrees();
+						double r = Math.toRadians(a);
+
+						System.out.println("Angle: " + a);
+						System.out.println("Origin x,y: " + x + ", " + y);
+						System.out.println("Origin bounds: " + token.getBounds(renderer.getZone()));
+						//						System.out.println("Anchor x,y: " + token.getAnchor().x + ", " + token.getAnchor().y);
+
+						//						x = (int) ((x + w) - w * Math.cos(r));
+						//						y = (int) (y - w * Math.sin(r));
+
+						//						double x1 = (x - xc) * Math.cos(r) - (y - yc) * Math.sin(r) + xc;
+						//						double y1 = (y - yc) * Math.cos(r) + (x - xc) * Math.sin(r) + yc;
+
+						//						x = (int) (x * Math.cos(r) - y * Math.sin(r));
+						//						y = (int) (y * Math.cos(r) + x * Math.sin(r));
+
+						AffineTransform at = new AffineTransform();
+						at.translate(x, y);
+						at.rotate(r, x + w, y);
+
+						x = (int) at.getTranslateX();
+						y = (int) at.getTranslateY();
+
+						//						token.setX(x);
+						//						token.setY(y);
+						//						renderer.flush(token);
+						//						MapTool.serverCommand().putToken(getZone().getId(), token);
+
+						//						token.setX(0);
+						//						token.setY(0);
+
+						System.out.println("New x,y: " + x + ", " + y);
+						System.out.println("New bounds: " + token.getBounds(renderer.getZone()).toString());
+
+					} else {
+						facing += e.getWheelRotation() > 0 ? 5 : -5;
+					}
 				} else {
 					int[] facingArray = getZone().getGrid().getFacingAngles();
 					int facingIndex = TokenUtil.getIndexNearestTo(facingArray, facing);
@@ -212,11 +265,13 @@ public abstract class DefaultTool extends Tool implements MouseListener, MouseMo
 					}
 					facing = facingArray[facingIndex];
 				}
+
 				token.setFacing(facing);
 
 				renderer.flush(token);
 				MapTool.serverCommand().putToken(getZone().getId(), token);
 			}
+
 			repaintZone();
 			return;
 		}
@@ -236,5 +291,32 @@ public abstract class DefaultTool extends Tool implements MouseListener, MouseMo
 	@Override
 	protected void resetTool() {
 		MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
+	}
+
+	/*
+	 * For touch screens, swap the events, easier to move map/draw by default
+	 */
+	public boolean isLeftMouseButton(MouseEvent event) {
+		if (isTouchScreen)
+			return SwingUtilities.isRightMouseButton(event);
+		else
+			return SwingUtilities.isLeftMouseButton(event);
+	}
+
+	/*
+	 * For touch screens, swap the events, easier to move map/draw by default
+	 */
+	public boolean isRightMouseButton(MouseEvent event) {
+		if (isTouchScreen)
+			return SwingUtilities.isLeftMouseButton(event);
+		else
+			return SwingUtilities.isRightMouseButton(event);
+	}
+
+	/*
+	 * Nothing do here for now...
+	 */
+	public boolean isMiddleMouseButton(MouseEvent event) {
+		return SwingUtilities.isMiddleMouseButton(event);
 	}
 }
