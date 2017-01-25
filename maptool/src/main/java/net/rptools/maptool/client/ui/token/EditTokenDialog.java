@@ -15,6 +15,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,7 +26,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +41,7 @@ import javax.swing.AbstractButton;
 import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -48,6 +49,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -84,7 +86,7 @@ import com.jidesoft.swing.CheckBoxListWithSelectable;
 import com.jidesoft.swing.DefaultSelectable;
 import com.jidesoft.swing.Selectable;
 
-import net.rptools.lib.MD5Key;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.AbstractTokenAccessorFunction;
@@ -121,6 +123,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 	private RSyntaxTextArea XMLstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
 	private RSyntaxTextArea TEXTstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
 	private HeroLabData heroLabData;
+
 	private static final ImageIcon REFRESH_ICON_ON = new ImageIcon(
 			EditTokenDialog.class.getClassLoader().getResource("net/rptools/maptool/client/image/refresh_arrows_small.png"));
 	private static final ImageIcon REFRESH_ICON_OFF = new ImageIcon(
@@ -247,6 +250,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		getPortraitPanel().setImageId(token.getPortraitImage());
 		getTokenLayoutPanel().setToken(token);
 		getImageTableCombo().setSelectedItem(token.getImageTableName());
+		getTokenOpacitySlider().setValue(new BigDecimal(token.getTokenOpacity()).multiply(new BigDecimal(100)).intValue());
 
 		// Jamz: Init the VBL tab...
 		JTabbedPane tabbedPane = getTabbedPane();
@@ -291,7 +295,15 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 			((JCheckBox) getComponent("isAllyCheckBox")).setSelected(heroLabData.isAlly());
 			((JLabel) getComponent("summaryText")).setText(heroLabData.getSummary());
 			((JLabel) getComponent("portfolioLocation")).setText(heroLabData.getPortfolioFile().getPath());
-			((JLabel) getComponent("lastModified")).setText(heroLabData.getLastModified());
+			((JLabel) getComponent("lastModified")).setText(heroLabData.getLastModifiedDateString());
+
+			EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					loadHeroLabImageList();
+				}
+			});
+
+			//			loadHeroLabImageList();
 		} else {
 			tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Hero Lab"), false);
 			if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("Hero Lab"))
@@ -458,6 +470,28 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		return (JComboBox) getComponent("imageTableCombo");
 	}
 
+	public void initTokenOpacitySlider() {
+		getTokenOpacitySlider().addChangeListener(new SliderListener());
+	}
+
+	class SliderListener implements ChangeListener {
+		public void stateChanged(ChangeEvent e) {
+			JSlider source = (JSlider) e.getSource();
+			if (!source.getValueIsAdjusting()) {
+				int value = (int) source.getValue();
+				getTokenOpacityLabel().setText(new BigDecimal(value).toString() + "%");
+			}
+		}
+	}
+
+	public JSlider getTokenOpacitySlider() {
+		return (JSlider) getComponent("tokenOpacitySlider");
+	}
+
+	public JLabel getTokenOpacityLabel() {
+		return (JLabel) getComponent("tokenOpacityLabel");
+	}
+
 	public void initOKButton() {
 		getOKButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -497,6 +531,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		token.setPropertyType((String) getPropertyTypeCombo().getSelectedItem());
 		token.setSightType((String) getSightTypeCombo().getSelectedItem());
 		token.setImageTableName((String) getImageTableCombo().getSelectedItem());
+		token.setTokenOpacity(new BigDecimal(getTokenOpacitySlider().getValue()).divide(new BigDecimal(100)).floatValue());
 
 		// Get the states
 		Component[] stateComponents = getStatesPanel().getComponents();
@@ -896,6 +931,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		return (JEditorPane) getComponent("HTMLstatblockTextArea");
 	}
 
+	public JList getHeroLabImagesList() {
+		return (JList) getComponent("heroLabImagesList");
+	}
+
 	public void initVblPreviewPanel() {
 		TokenVblPanel vblPanel = new TokenVblPanel();
 		vblPanel.setPreferredSize(new Dimension(200, 200));
@@ -953,7 +992,87 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		getVisibilityToleranceSpinner().setModel(new SpinnerNumberModel(2, 1, 9, 1));
 	}
 
-	// Jamz: Using this to initialize the Hero Lab tab
+	/*
+	 * Initialize the Hero Lab Images tab
+	 */
+	@SuppressWarnings("unchecked")
+	public void initHeroLabImageList() {
+		getHeroLabImagesList().setCellRenderer(new HeroLabImageListRenderer());
+
+		JButton setTokenImage = (JButton) getComponent("setAsImageButton");
+		setTokenImage.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int index = getHeroLabImagesList().getSelectedIndex();
+
+				if (heroLabData != null) {
+					getTokenIconPanel().setImageId(heroLabData.getImageAssetID(index));
+					getTokenLayoutPanel().setTokenImage(heroLabData.getImageAssetID(index));
+				}
+
+			}
+		});
+
+		JButton setPortraitImage = (JButton) getComponent("setAsPortraitButton");
+		setPortraitImage.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int index = getHeroLabImagesList().getSelectedIndex();
+
+				if (heroLabData != null) {
+					getPortraitPanel().setImageId(heroLabData.getImageAssetID(index));
+				}
+
+			}
+		});
+
+		JButton setHandoutImage = (JButton) getComponent("setAsHandoutButton");
+		setHandoutImage.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int index = getHeroLabImagesList().getSelectedIndex();
+
+				if (heroLabData != null)
+					getCharSheetPanel().setImageId(heroLabData.getImageAssetID(index));
+
+			}
+		});
+	}
+
+	@SuppressWarnings({ "unchecked" })
+	public void loadHeroLabImageList() {
+		if (heroLabData.getAssetMap() != null) {
+			getHeroLabImagesList().setEnabled(true);
+			getHeroLabImagesList().setFixedCellHeight(190);
+			getHeroLabImagesList().setListData(heroLabData.getAssetMap().keySet().toArray());
+			getHeroLabImagesList().setSelectedIndex(0);
+		} else {
+			getHeroLabImagesList().setEnabled(false);
+			String[] empty = { "" };
+			getHeroLabImagesList().setListData(empty);
+		}
+	}
+
+	public class HeroLabImageListRenderer extends DefaultListCellRenderer {
+		private static final long serialVersionUID = 7113815213979044509L;
+		Font font = new Font("helvitica", Font.BOLD, 24);
+
+		@Override
+		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+			JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			try {
+				ImageIcon finalImage = ImageUtil.scaleImage(new ImageIcon(ImageManager.getImageAndWait(heroLabData.getImageAssetID(index))), 250, 175);
+				label.setIcon(finalImage);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			label.setIconTextGap(10);
+			label.setHorizontalTextPosition(JLabel.LEFT);
+			label.setFont(font);
+			return label;
+		}
+	}
+
+	/*
+	 * Initialize the Hero Lab statblock tabs
+	 */
 	public void initStatBlocks() {
 		// Setup the HTML panel
 		JEditorPane statblockPane = getHtmlStatblockEditor();
@@ -999,7 +1118,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 						refreshDataButton.setIcon(REFRESH_ICON_OFF);
 						refreshDataButton.setToolTipText("<html>Refresh data from Hero Lab<br/><b><i>No changes detected...</i></b></html>");
 
-						((JLabel) getComponent("lastModified")).setText(heroLabData.getLastModified());
+						((JLabel) getComponent("lastModified")).setText(heroLabData.getLastModifiedDateString());
 
 						getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());
 						getHtmlStatblockEditor().setCaretPosition(0);
@@ -1017,9 +1136,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 							getTokenLayoutPanel().setTokenImage(tokenAsset.getId());
 						}
 
-						Asset portraitAsset = heroLabData.getTokenPortrait();
+						Asset portraitAsset = heroLabData.getPortraitImage();
 						if (portraitAsset != null)
 							getPortraitPanel().setImageId(portraitAsset.getId());
+
+						Asset handoutAsset = heroLabData.getHandoutImage();
+						if (handoutAsset != null)
+							getCharSheetPanel().setImageId(handoutAsset.getId());
 
 						// If NPC, lets not overwrite the Name, it may be "Creature 229" or such, GM name is enough
 						((JTextField) getComponent("@GMName")).setText(heroLabData.getName());
@@ -1029,6 +1152,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 						} else {
 							getTypeCombo().setSelectedItem(Type.NPC);
 						}
+
+						// Update image list
+						loadHeroLabImageList();
 					}
 				}
 			}

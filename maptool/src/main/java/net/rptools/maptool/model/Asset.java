@@ -11,6 +11,7 @@
 
 package net.rptools.maptool.model;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,6 +22,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
 
 import com.thoughtworks.xstream.annotations.XStreamConverter;
@@ -44,6 +46,20 @@ public class Asset {
 		this.name = name;
 		if (image != null) {
 			this.id = new MD5Key(image);
+			extension = null;
+			getImageExtension();
+		}
+	}
+
+	public Asset(String name, BufferedImage image) {
+		try {
+			this.image = ImageUtil.imageToBytes(image);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		this.name = name;
+		if (this.image != null) {
+			this.id = new MD5Key(this.image);
 			extension = null;
 			getImageExtension();
 		}

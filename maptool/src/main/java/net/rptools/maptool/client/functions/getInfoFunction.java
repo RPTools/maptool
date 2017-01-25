@@ -159,6 +159,7 @@ public class getInfoFunction extends AbstractFunction {
 		cinfo.put("face edge", AppPreferences.getFaceEdge() ? BigDecimal.ONE : BigDecimal.ZERO);
 		cinfo.put("face vertex", AppPreferences.getFaceVertex() ? BigDecimal.ONE : BigDecimal.ZERO);
 		cinfo.put("portrait size", AppPreferences.getPortraitSize());
+		cinfo.put("show portrait", AppPreferences.getShowPortrait());
 		cinfo.put("show stat sheet", AppPreferences.getShowStatSheet());
 		cinfo.put("version", MapTool.getVersion());
 		cinfo.put("isFullScreen", MapTool.getFrame().isFullScreen() ? BigDecimal.ONE : BigDecimal.ZERO);

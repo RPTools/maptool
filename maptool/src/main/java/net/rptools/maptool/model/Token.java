@@ -21,7 +21,6 @@ import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -52,12 +51,10 @@ import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 
-import org.apache.commons.io.monitor.FileEntry;
 import org.apache.log4j.Logger;
 
 /**
- * This object represents the placeable objects on a map. For example an icon that represents a character would exist as
- * an {@link Asset} (the image itself) and a location and scale.
+ * This object represents the placeable objects on a map. For example an icon that represents a character would exist as an {@link Asset} (the image itself) and a location and scale.
  */
 
 // Lee: made tokens cloneable
@@ -171,6 +168,9 @@ public class Token extends BaseModel implements Cloneable {
 
 	private Integer visionOverlayColorValue;
 	private transient Color visionOverlayColor;
+
+	// Jamz: allow token alpha channel modification
+	private float tokenOpacity = 1.0f;
 
 	private boolean isFlippedX;
 	private boolean isFlippedY;
@@ -332,6 +332,7 @@ public class Token extends BaseModel implements Cloneable {
 		exposedAreaGUID = token.exposedAreaGUID;
 
 		heroLabData = token.heroLabData;
+		tokenOpacity = token.tokenOpacity;
 	}
 
 	public Token() {
@@ -357,11 +358,9 @@ public class Token extends BaseModel implements Cloneable {
 	}
 
 	/**
-	 * This token object has just been imported on a map and needs to have most of its internal data wiped clean. This
-	 * prevents a token from being imported that makes use of the wrong property types, vision types, ownership, macros,
-	 * and so on. Basically anything related to the presentation of the token on-screen + the two notes fields is kept.
-	 * Note that the sightType is set to the campaign's default sight type, and the property type is not changed at all.
-	 * This will usually be correct since the default sight is what most tokens have and the property type is probably
+	 * This token object has just been imported on a map and needs to have most of its internal data wiped clean. This prevents a token from being imported that makes use of the wrong property types,
+	 * vision types, ownership, macros, and so on. Basically anything related to the presentation of the token on-screen + the two notes fields is kept. Note that the sightType is set to the
+	 * campaign's default sight type, and the property type is not changed at all. This will usually be correct since the default sight is what most tokens have and the property type is probably
 	 * specific to the campaign -- hopefully the properties were set up before the token/map was imported.
 	 */
 	public void imported() {
@@ -378,20 +377,15 @@ public class Token extends BaseModel implements Cloneable {
 		// propertyMapCI = null;
 		// propertyType = "Basic";
 		/**
-		 * Lee: why shouldn't propertyType be set to what the framework uses? In
-		 * case of multiple propertyType, give a choice; or incorporate in the
-		 * Campaign Properties window a marker for what is default for new
-		 * tokens.
+		 * Lee: why shouldn't propertyType be set to what the framework uses? In case of multiple propertyType, give a choice; or incorporate in the Campaign Properties window a marker for what is
+		 * default for new tokens.
 		 */
 
 		propertyType = getPropertyType();
 
 		/**
-		 * Jamz: Like propertyType, why shouldn't sight be kept if it
-		 * matches exists? Many creatures with DarkVision get reset and it
-		 * makes it painful. I'm turning off this reset for now. If there are
-		 * complaints/reasons, maybe the Import Dialog needs to be expanded to include
-		 * checkboxes for these items...
+		 * Jamz: Like propertyType, why shouldn't sight be kept if it matches exists? Many creatures with DarkVision get reset and it makes it painful. I'm turning off this reset for now. If there are
+		 * complaints/reasons, maybe the Import Dialog needs to be expanded to include checkboxes for these items...
 		 */
 
 		// Try and silently catch any errors if there is an issue with sightType...
@@ -504,6 +498,24 @@ public class Token extends BaseModel implements Cloneable {
 			haloColor = new Color(haloColorValue);
 		}
 		return haloColor;
+	}
+
+	public float getTokenOpacity() {
+		if (tokenOpacity <= 0.0f)
+			tokenOpacity = 1.0f;
+
+		return tokenOpacity;
+	}
+
+	public float setTokenOpacity(float alpha) {
+		if (alpha > 1.0f)
+			alpha = 1.0f;
+		if (alpha <= 0.0f)
+			alpha = 0.05f;
+
+		tokenOpacity = alpha;
+
+		return tokenOpacity;
 	}
 
 	public boolean isObjectStamp() {
@@ -826,10 +838,8 @@ public class Token extends BaseModel implements Cloneable {
 	}
 
 	/**
-	 * Set the name of this token to the provided string. There is a potential exposure of information to the player in
-	 * this method: through repeated attempts to name a token they own to another name, they could determine which token
-	 * names the GM is already using. Fortunately, the showError() call makes this extremely unlikely due to the
-	 * interactive nature of a failure.
+	 * Set the name of this token to the provided string. There is a potential exposure of information to the player in this method: through repeated attempts to name a token they own to another name,
+	 * they could determine which token names the GM is already using. Fortunately, the showError() call makes this extremely unlikely due to the interactive nature of a failure.
 	 * 
 	 * @param name
 	 * @throws IOException
@@ -931,9 +941,7 @@ public class Token extends BaseModel implements Cloneable {
 	}
 
 	/**
-	 * Lee: changing this to apply new X and Y values (as end point) for the
-	 * token BEFORE its path is computed. Path to be saved will be computed here
-	 * instead of in ZoneRenderer
+	 * Lee: changing this to apply new X and Y values (as end point) for the token BEFORE its path is computed. Path to be saved will be computed here instead of in ZoneRenderer
 	 */
 
 	public void applyMove(SelectionSet set, Path<? extends AbstractPoint> followerPath, int xOffset, int yOffset, Token keyToken, int cellOffX, int cellOffY) {
@@ -1056,8 +1064,7 @@ public class Token extends BaseModel implements Cloneable {
 	}
 
 	/**
-	 * This method returns the vbl stored on the token with AffineTransformations applied
-	 * for scale, position, rotation, & flipping.
+	 * This method returns the vbl stored on the token with AffineTransformations applied for scale, position, rotation, & flipping.
 	 * 
 	 * @author Jamz
 	 * @since 1.4.1.5
@@ -1575,8 +1582,7 @@ public class Token extends BaseModel implements Cloneable {
 	}
 
 	/**
-	 * Convert the token into a hash map. This is used to ship all of the properties for the token to other apps that do
-	 * need access to the <code>Token</code> class.
+	 * Convert the token into a hash map. This is used to ship all of the properties for the token to other apps that do need access to the <code>Token</code> class.
 	 * 
 	 * @return A map containing the properties of the token.
 	 */
@@ -1619,8 +1625,8 @@ public class Token extends BaseModel implements Cloneable {
 	}
 
 	/**
-	 * Constructor to create a new token from a transfer object containing its property values. This is used to read in
-	 * a new token from other apps that don't have access to the <code>Token</code> class.
+	 * Constructor to create a new token from a transfer object containing its property values. This is used to read in a new token from other apps that don't have access to the <code>Token</code>
+	 * class.
 	 * 
 	 * @param td
 	 *            Read the values from this transfer object.

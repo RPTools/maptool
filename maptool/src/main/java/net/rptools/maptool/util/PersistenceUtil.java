@@ -216,8 +216,7 @@ public class PersistenceUtil {
 	}
 
 	/**
-	 * Determines whether the incoming map name is unique. If it is, it's
-	 * returned as-is. If it's not unique, a newly generated name is returned.
+	 * Determines whether the incoming map name is unique. If it is, it's returned as-is. If it's not unique, a newly generated name is returned.
 	 * 
 	 * @param n
 	 *            name from imported map
@@ -299,17 +298,10 @@ public class PersistenceUtil {
 				saveTimer.stop("Save");
 			} catch (OutOfMemoryError oom) {
 				/*
-				 * This error is normally because the heap space has been
-				 * exceeded while trying to save the campaign. Since MapTool
-				 * caches the images used by the current Zone, and since the
-				 * VersionManager must keep the XML for objects in memory in
-				 * order to apply transforms to them, the memory usage can spike
-				 * very high during the save() operation. A common solution is
-				 * to switch to an empty map and perform the save from there;
-				 * this causes MapTool to unload any images that it may have had
-				 * cached and this can frequently free up enough memory for the
-				 * save() to work. We'll tell the user all this right here and
-				 * then fail the save and they can try again.
+				 * This error is normally because the heap space has been exceeded while trying to save the campaign. Since MapTool caches the images used by the current Zone, and since the
+				 * VersionManager must keep the XML for objects in memory in order to apply transforms to them, the memory usage can spike very high during the save() operation. A common solution is
+				 * to switch to an empty map and perform the save from there; this causes MapTool to unload any images that it may have had cached and this can frequently free up enough memory for the
+				 * save() to work. We'll tell the user all this right here and then fail the save and they can try again.
 				 */
 				saveTimer.start("OOM Close");
 				pakFile.close(); // Have to close the tmpFile first on some OSes
@@ -334,11 +326,8 @@ public class PersistenceUtil {
 		}
 
 		/*
-		 * Copy to the new location. Not the fastest solution in the world if
-		 * renameTo() fails, but worth the safety net it provides. 
-		 * Jamz: So, renameTo() is causing more issues than it is worth. It has a tendency
-		 * to lock a file under Google Drive/Drop box causing the save to fail.
-		 * Removed the for final save location...
+		 * Copy to the new location. Not the fastest solution in the world if renameTo() fails, but worth the safety net it provides. Jamz: So, renameTo() is causing more issues than it is worth. It
+		 * has a tendency to lock a file under Google Drive/Drop box causing the save to fail. Removed the for final save location...
 		 */
 		saveTimer.start("Backup");
 		File bakFile = new File(tmpDir.getAbsolutePath(), campaignFile.getName() + ".bak");
@@ -371,13 +360,9 @@ public class PersistenceUtil {
 	}
 
 	/*
-	 * A public function because I think it should be called when a campaign is
-	 * opened as well so if it is opened then closed without saving, there is
-	 * still a preview created; however, the rendering of the campaign appears
-	 * to complete after AppActions.loadCampaign returns, causing the preview to
-	 * always appear as black if this method is called from within loadCampaign.
-	 * Either need to find another place to call saveCampaignThumbnail upon
-	 * opening, or code to delay it's call until the render is complete. =P
+	 * A public function because I think it should be called when a campaign is opened as well so if it is opened then closed without saving, there is still a preview created; however, the rendering
+	 * of the campaign appears to complete after AppActions.loadCampaign returns, causing the preview to always appear as black if this method is called from within loadCampaign. Either need to find
+	 * another place to call saveCampaignThumbnail upon opening, or code to delay it's call until the render is complete. =P
 	 */
 	static public void saveCampaignThumbnail(String fileName) {
 		BufferedImage screen = MapTool.takeMapScreenShot(new PlayerView(MapTool.getPlayer().getRole()));
@@ -584,6 +569,8 @@ public class PersistenceUtil {
 			pakFile.setContent(token);
 			pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
 			pakFile.setProperty(HERO_LAB, (token.getHeroLabData() != null));
+			if (token.getHeroLabData() != null)
+				saveAssets(token.getHeroLabData().getAllImageAssets(), pakFile);
 			pakFile.save();
 		} finally {
 			if (pakFile != null)
@@ -766,13 +753,11 @@ public class PersistenceUtil {
 	}
 
 	/**
-	 * Answers the question, "Can this version of MapTool load an XML file with
-	 * a version string of <code>progVersion</code>?"
+	 * Answers the question, "Can this version of MapTool load an XML file with a version string of <code>progVersion</code>?"
 	 * 
 	 * @param progVersion
 	 *            version string read from the XML file
-	 * @return <code>true</code> if this MT can read the file based on the
-	 *         version string, <code>false</code> if it can't.
+	 * @return <code>true</code> if this MT can read the file based on the version string, <code>false</code> if it can't.
 	 */
 	private static boolean versionCheck(String progVersion) {
 		boolean okay = true;

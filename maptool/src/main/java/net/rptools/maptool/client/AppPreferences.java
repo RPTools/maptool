@@ -128,6 +128,9 @@ public class AppPreferences {
 	private static final String KEY_SOUNDS_ONLY_WHEN_NOT_FOCUSED = "playSystemSoundsOnlyWhenNotFocused";
 	private static final boolean DEFAULT_SOUNDS_ONLY_WHEN_NOT_FOCUSED = false;
 
+	private static final String KEY_SYRINSCAPE_ACTIVE = "syrinscapeActive";
+	private static final boolean DEFAULT_SYRINSCAPE_ACTIVE = false;
+
 	private static final String KEY_SHOW_AVATAR_IN_CHAT = "showAvatarInChat";
 	private static final boolean DEFAULT_SHOW_AVATAR_IN_CHAT = true;
 
@@ -142,6 +145,12 @@ public class AppPreferences {
 
 	private static final String KEY_SHOW_STAT_SHEET = "showStatSheet";
 	private static final boolean DEFAULT_SHOW_STAT_SHEET = true;
+
+	private static final String KEY_SHOW_PORTRAIT = "showPortrait";
+	private static final boolean DEFAULT_SHOW_PORTRAIT = true;
+
+	private static final String KEY_SHOW_STAT_SHEET_MODIFIER = "showStatSheetModifier";
+	private static final boolean DEFAULT_SHOW_STAT_SHEET_MODIFIER = false;
 
 	private static final String KEY_FILL_SELECTION_BOX = "fillSelectionBox";
 	private static final boolean DEFAULT_FILL_SELECTION_BOX = true;
@@ -527,6 +536,14 @@ public class AppPreferences {
 		return prefs.getBoolean(KEY_SOUNDS_ONLY_WHEN_NOT_FOCUSED, DEFAULT_SOUNDS_ONLY_WHEN_NOT_FOCUSED);
 	}
 
+	public static void setSyrinscapeActive(boolean active) {
+		prefs.putBoolean(KEY_SYRINSCAPE_ACTIVE, active);
+	}
+
+	public static boolean getSyrinscapeActive() {
+		return prefs.getBoolean(KEY_SYRINSCAPE_ACTIVE, DEFAULT_SYRINSCAPE_ACTIVE);
+	}
+
 	public static void setChatColor(Color color) {
 		prefs.putInt(KEY_CHAT_COLOR, color.getRGB());
 	}
@@ -721,6 +738,22 @@ public class AppPreferences {
 
 	public static void setShowStatSheet(boolean show) {
 		prefs.putBoolean(KEY_SHOW_STAT_SHEET, show);
+	}
+
+	public static boolean getShowPortrait() {
+		return prefs.getBoolean(KEY_SHOW_PORTRAIT, DEFAULT_SHOW_PORTRAIT);
+	}
+
+	public static void setShowPortrait(boolean show) {
+		prefs.putBoolean(KEY_SHOW_PORTRAIT, show);
+	}
+
+	public static boolean getShowStatSheetModifier() {
+		return prefs.getBoolean(KEY_SHOW_STAT_SHEET_MODIFIER, DEFAULT_SHOW_STAT_SHEET_MODIFIER);
+	}
+
+	public static void setShowStatSheetModifier(boolean show) {
+		prefs.putBoolean(KEY_SHOW_STAT_SHEET_MODIFIER, show);
 	}
 
 	public static boolean getForceFacingArrow() {

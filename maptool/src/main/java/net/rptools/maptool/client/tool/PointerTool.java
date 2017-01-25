@@ -91,10 +91,8 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.TokenUtil;
 
 /**
- * This is the pointer tool from the top-level of the toolbar. It allows tokens to be selected and moved, it triggers
- * the statsheet to be displayed, it handles keystroke movement of tokens using the NumPad keys, and it handles
- * positioning the Speech and Thought bubbles when the Spacebar is held down (possibly in combination with Shift or
- * Ctrl).
+ * This is the pointer tool from the top-level of the toolbar. It allows tokens to be selected and moved, it triggers the statsheet to be displayed, it handles keystroke movement of tokens using the
+ * NumPad keys, and it handles positioning the Speech and Thought bubbles when the Spacebar is held down (possibly in combination with Shift or Ctrl).
  */
 public class PointerTool extends DefaultTool implements ZoneOverlay {
 	private static final long serialVersionUID = 8606021718606275084L;
@@ -179,9 +177,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	}
 
 	/**
-	 * When implementation is completed, this method will accept a ZoneRenderer parameter and determine that zone's grid
-	 * style, then query the grid for the keystroke movement it wants to use. Those keystrokes are then added to the
-	 * InputMap and ActionMap for the component by calling the superclass's addListeners() method.
+	 * When implementation is completed, this method will accept a ZoneRenderer parameter and determine that zone's grid style, then query the grid for the keystroke movement it wants to use. Those
+	 * keystrokes are then added to the InputMap and ActionMap for the component by calling the superclass's addListeners() method.
 	 * 
 	 * @param comp
 	 */
@@ -194,12 +191,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	}
 
 	/**
-	 * Let the grid decide which keys perform which kind of movement. This allows hex grids to handle the six-sided
-	 * shapes intelligently depending on whether the grid is a vertical or horizontal grid. This also moves us one step
-	 * closer to defining the keys in an external file...
+	 * Let the grid decide which keys perform which kind of movement. This allows hex grids to handle the six-sided shapes intelligently depending on whether the grid is a vertical or horizontal grid.
+	 * This also moves us one step closer to defining the keys in an external file...
 	 * <p>
-	 * Boy, this is ugly. As I pin down fixes for code leading up to MT1.4 I find myself performing criminal acts on the
-	 * code base. :(
+	 * Boy, this is ugly. As I pin down fixes for code leading up to MT1.4 I find myself performing criminal acts on the code base. :(
 	 */
 	@Override
 	protected void addGridBasedKeys(Grid grid, boolean enable) { // XXX Currently not called from anywhere
@@ -731,9 +726,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				selectionBoundBox.width = Math.abs(x1 - x2);
 				selectionBoundBox.height = Math.abs(y1 - y2);
 				/*
-				 * NOTE: This is a weird one that has to do with the order of the mouseReleased event. If the selection
-				 * box started the drag while hovering over a marker, we need to tell it to not show the marker after
-				 * the drag is complete.
+				 * NOTE: This is a weird one that has to do with the order of the mouseReleased event. If the selection box started the drag while hovering over a marker, we need to tell it to not
+				 * show the marker after the drag is complete.
 				 */
 				markerUnderMouse = null;
 				renderer.repaint();
@@ -910,9 +904,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
 				Rectangle tokenSize = token.getBounds(zone);
 				/*
-				 * Perhaps create a counter and count the number of times that the contains() check returns true? There
-				 * are currently 9 rectangular areas checked by this code (note the "/3" in the two 'interval'
-				 * variables) so checking for 5 or more would mean more than 55%+ of the destination was visible...
+				 * Perhaps create a counter and count the number of times that the contains() check returns true? There are currently 9 rectangular areas checked by this code (note the "/3" in the two
+				 * 'interval' variables) so checking for 5 or more would mean more than 55%+ of the destination was visible...
 				 */
 				int intervalX = tokenSize.width - fudgeSize * 2;
 				int intervalY = tokenSize.height - fudgeSize * 2;
@@ -945,8 +938,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	}
 
 	/**
-	 * These keystrokes are currently hard-coded and should be exported to the i18n.properties file in a perfect
-	 * universe. :)
+	 * These keystrokes are currently hard-coded and should be exported to the i18n.properties file in a perfect universe. :)
 	 * <p>
 	 * <table>
 	 * <tr>
@@ -1362,8 +1354,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.rptools.maptool.client.ZoneOverlay#paintOverlay(net.rptools.maptool .client.ZoneRenderer,
-	 * java.awt.Graphics2D)
+	 * @see net.rptools.maptool.client.ZoneOverlay#paintOverlay(net.rptools.maptool .client.ZoneRenderer, java.awt.Graphics2D)
 	 */
 	public void paintOverlay(final ZoneRenderer renderer, Graphics2D g) {
 		Dimension viewSize = renderer.getSize();
@@ -1392,23 +1383,29 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		}
 		// Statsheet
 		if (tokenUnderMouse != null && !isDraggingToken && AppUtil.tokenIsVisible(renderer.getZone(), tokenUnderMouse, new PlayerView(MapTool.getPlayer().getRole()))) {
-			if (AppPreferences.getPortraitSize() > 0 && !SwingUtil.isShiftDown(keysDown) && (tokenOnStatSheet == null || !tokenOnStatSheet.equals(tokenUnderMouse) || statSheet == null)) {
+			if (AppPreferences.getPortraitSize() > 0 && (SwingUtil.isShiftDown(keysDown) == AppPreferences.getShowStatSheetModifier())
+					&& (tokenOnStatSheet == null || !tokenOnStatSheet.equals(tokenUnderMouse) || statSheet == null)) {
 				tokenOnStatSheet = tokenUnderMouse;
 
-				// Portrait
-				MD5Key portraitId = tokenUnderMouse.getPortraitImage() != null ? tokenUnderMouse.getPortraitImage() : tokenUnderMouse.getImageAssetId();
-				BufferedImage image = ImageManager.getImage(portraitId, new ImageObserver() {
-					public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-						// The image was loading, so now rebuild the portrait panel with the real image
-						statSheet = null;
-						renderer.repaint();
-						return true;
-					}
-				});
-				Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
+				BufferedImage image = null;
+				Dimension imgSize = new Dimension(0, 0);
+				if (AppPreferences.getShowPortrait()) {
+					// Portrait
+					MD5Key portraitId = tokenUnderMouse.getPortraitImage() != null ? tokenUnderMouse.getPortraitImage() : tokenUnderMouse.getImageAssetId();
+					image = ImageManager.getImage(portraitId, new ImageObserver() {
+						public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+							// The image was loading, so now rebuild the portrait panel with the real image
+							statSheet = null;
+							renderer.repaint();
+							return true;
+						}
+					});
 
-				// Size
-				SwingUtil.constrainTo(imgSize, AppPreferences.getPortraitSize());
+					imgSize = new Dimension(image.getWidth(), image.getHeight());
+
+					// Size
+					SwingUtil.constrainTo(imgSize, AppPreferences.getPortraitSize());
+				}
 
 				// Stats
 				Map<String, String> propertyMap = new LinkedHashMap<String, String>();
@@ -1459,7 +1456,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 					}
 					// Create the space for the image
 					int width = imgSize.width + (statSize != null ? statSize.width + rm : 0) + lm + rm;
-					int height = Math.max(imgSize.height, (statSize != null ? statSize.height + bm : 0)) + tm + bm;
+					int height = Math.max(imgSize.height, (statSize != null ? statSize.height + bm : 0)) + tm + bm + PADDING * 2;
 					statSheet = new BufferedImage(width, height, BufferedImage.BITMASK);
 					Graphics2D statsG = statSheet.createGraphics();
 					statsG.setClip(new Rectangle(0, 0, width, height));
@@ -1494,23 +1491,31 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 							y += PADDING + rowHeight;
 						}
 					}
+
 					// Draw the portrait
-					Rectangle bounds = new Rectangle(lm, height - imgSize.height - bm, imgSize.width, imgSize.height);
+					if (AppPreferences.getShowPortrait()) {
+						Rectangle bounds = new Rectangle(lm, height - imgSize.height - bm, imgSize.width, imgSize.height);
 
-					statsG.setPaint(new TexturePaint(AppStyle.panelTexture, new Rectangle(0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
-					statsG.fill(bounds);
-					statsG.drawImage(image, bounds.x, bounds.y, imgSize.width, imgSize.height, this);
-					AppStyle.miniMapBorder.paintAround(statsG, bounds);
-					AppStyle.shadowBorder.paintWithin(statsG, bounds);
+						statsG.setPaint(new TexturePaint(AppStyle.panelTexture, new Rectangle(0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
+						statsG.fill(bounds);
+						statsG.drawImage(image, bounds.x, bounds.y, imgSize.width, imgSize.height, this);
+						AppStyle.miniMapBorder.paintAround(statsG, bounds);
+						AppStyle.shadowBorder.paintWithin(statsG, bounds);
 
-					// Label
-					GraphicsUtil.drawBoxedString(statsG, tokenUnderMouse.getName(), bounds.width / 2 + lm, height - 15);
+						// Label
+						GraphicsUtil.drawBoxedString(statsG, tokenUnderMouse.getName(), bounds.width / 2 + lm, height - 15);
+					} else if (AppPreferences.getShowStatSheet() && statSize != null) {
+						// Label
+						Rectangle bounds = new Rectangle(lm, statSize.height, statSize.width + keyFM.getAscent() / 2 + PADDING / 2, statSize.height);
+						GraphicsUtil.drawBoxedString(statsG, tokenUnderMouse.getName(), bounds.width / 2 + lm, height - statSize.height - PADDING * 3);
+					}
 
 					statsG.dispose();
 				}
 			}
 
 		}
+
 		// Jamz: Statsheet was still showing on drag, added other tests to hide statsheet as well
 		if (statSheet != null && !isDraggingToken && !mouseButtonDown) {
 			g.drawImage(statSheet, 5, viewSize.height - statSheet.getHeight() - 5, this);

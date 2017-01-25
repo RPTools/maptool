@@ -48,59 +48,76 @@ public class TokenSightFunctions extends AbstractFunction {
 
 	@Override
 	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
-		Token tokenInContext = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
-		if (tokenInContext == null) {
-			throw new ParserException(I18N.getText("macro.function.general.noImpersonated", functionName));
+		Token token;
+
+		// For functions no parameters except option tokenID
+		if (functionName.equals("hasSight") || functionName.equals("getSightType")) {
+			if (parameters.size() == 1) {
+				token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
+				}
+			} else if (parameters.size() == 0) {
+				token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.noImpersonated", functionName));
+				}
+			} else {
+				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+			}
+
+			if (functionName.equals("hasSight"))
+				return token.getHasSight() ? BigDecimal.ONE : BigDecimal.ZERO;
+
+			if (functionName.equals("getSightType"))
+				return token.getSightType();
 		}
-		if (functionName.equals("hasSight")) {
-			return tokenInContext.getHasSight() ? BigDecimal.ONE : BigDecimal.ZERO;
+
+		// For functions with only 1 parameter and optional second parameter of tokenID 
+		if (parameters.size() > 2)
+			throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+
+		if (parameters.isEmpty())
+			throw new ParserException(I18N.getText("macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+
+		if (parameters.size() == 2) {
+			token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
+
+			if (token == null) {
+				throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
+			}
+		} else {
+			token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
+
+			if (token == null) {
+				throw new ParserException(I18N.getText("macro.function.general.noImpersonated", functionName));
+			}
 		}
-		if (functionName.equals("getSightType")) {
-			return tokenInContext.getSightType();
-		}
+
 		ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
 		Zone zone = renderer.getZone();
-		if (functionName.equals("setHasSight")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			}
-			tokenInContext.setHasSight(!parameters.get(0).equals(BigDecimal.ZERO));
-			zone.putToken(tokenInContext);
-			MapTool.serverCommand().putToken(zone.getId(), tokenInContext);
-			renderer.flushLight();
-			return "";
-		}
-		if (functionName.equals("setSightType")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			}
-			tokenInContext.setSightType(parameters.get(0).toString());
-			zone.putToken(tokenInContext);
-			MapTool.serverCommand().putToken(zone.getId(), tokenInContext);
-			renderer.flushLight();
-			return "";
-		}
-		if (functionName.equals("canSeeToken")) {
-			if (parameters.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-			}
-			if (parameters.size() > 2) {
-				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 2, parameters.size()));
-			}
-			if (parameters.size() == 2) {
-				try {
-					tokenInContext = FindTokenFunctions.findToken(parameters.get(1).toString(), zone.getName());
-				} catch (Exception e) {
-					if (e instanceof ClassCastException || tokenInContext == null) {
-						throw new ParserException(I18N.getText("macro.function.general.argumentTypeT", 2, functionName));
-					}
-				}
 
-			}
-			if (!tokenInContext.getHasSight()) {
+		if (functionName.equals("setHasSight")) {
+			token.setHasSight(!parameters.get(0).equals(BigDecimal.ZERO));
+			zone.putToken(token);
+			MapTool.serverCommand().putToken(zone.getId(), token);
+			renderer.flushLight();
+			return "";
+		}
+
+		if (functionName.equals("setSightType")) {
+			token.setSightType(parameters.get(0).toString());
+			zone.putToken(token);
+			MapTool.serverCommand().putToken(zone.getId(), token);
+			renderer.flushLight();
+			return "";
+		}
+
+		if (functionName.equals("canSeeToken")) {
+			if (!token.getHasSight()) {
 				return "[]";
 			}
-			Area tokensVisibleArea = renderer.getZoneView().getVisibleArea(tokenInContext);
+			Area tokensVisibleArea = renderer.getZoneView().getVisibleArea(token);
 			if (tokensVisibleArea == null) {
 				return "[]";
 			}
@@ -108,7 +125,7 @@ public class TokenSightFunctions extends AbstractFunction {
 			try {
 				target = FindTokenFunctions.findToken(parameters.get(0).toString(), zone.getName());
 			} catch (Exception e) {
-				if (e instanceof ClassCastException || tokenInContext == null) {
+				if (e instanceof ClassCastException || token == null) {
 					throw new ParserException(I18N.getText("macro.function.general.argumentTypeT", 2, functionName));
 				}
 			}
@@ -172,6 +189,7 @@ public class TokenSightFunctions extends AbstractFunction {
 			sb.append("]");
 			return sb.toString();
 		}
+
 		return "";
 	}
 }

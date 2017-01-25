@@ -33,6 +33,7 @@ import java.util.concurrent.Executors;
 
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 
@@ -470,9 +471,12 @@ public class AssetManager {
 						OutputStream out = new FileOutputStream(assetFile);
 						out.write(asset.getImage());
 						out.close();
-						// Jamz: Lets update the status bar with asset cache disk usage
-						MapTool.getFrame().getAssetCacheStatusBar().update(AppUtil.getDiskSpaceUsed(cacheDir));
-						MapTool.getFrame().getAppHomeDiskSpaceStatusBar().update();
+
+						// Jamz: Lets update the status bar with asset cache disk usage. We need to pause it during loading a campaign as it's a performance hit if alot of assets are added.
+						if (!AppState.isLoading()) {
+							MapTool.getFrame().getAssetCacheStatusBar().update(AppUtil.getDiskSpaceUsed(cacheDir));
+							MapTool.getFrame().getAppHomeDiskSpaceStatusBar().update();
+						}
 					} catch (IOException ioe) {
 						log.error("Could not persist asset while writing image data", ioe);
 						return;

@@ -9,8 +9,7 @@ import java.math.RoundingMode;
 import static org.apache.commons.io.FileUtils.*;
 
 /**
- * Custom Implementation of FileUtils.byteCountToDisplaySize to fix rounding bug
- * https://issues.apache.org/jira/browse/IO-373
+ * Custom Implementation of FileUtils.byteCountToDisplaySize to fix rounding bug https://issues.apache.org/jira/browse/IO-373
  */
 public class FileUtil {
 
@@ -40,7 +39,8 @@ public class FileUtil {
 	/**
 	 * Formats a file's size into a human readable format
 	 *
-	 * @param fileSize the file's size as BigInteger
+	 * @param fileSize
+	 *            the file's size as BigInteger
 	 * @return the size as human readable string
 	 */
 	public static String byteCountToDisplaySize(final BigInteger fileSize) {
@@ -80,7 +80,8 @@ public class FileUtil {
 	/**
 	 * Formats a file's size into a human readable format
 	 *
-	 * @param fileSize the file's size as long
+	 * @param fileSize
+	 *            the file's size as long
 	 * @return the size as human readable string
 	 */
 	public static String byteCountToDisplaySize(final long fileSize) {
@@ -88,12 +89,14 @@ public class FileUtil {
 	}
 
 	/**
-	 * Formats a file's name into a proper canonical filename and strips invalid characters.
-	 * Also checks for duplicate file names, appending a _# where # increases until a unique name is found.
+	 * Formats a file's name into a proper canonical filename and strips invalid characters. Also checks for duplicate file names, appending a _# where # increases until a unique name is found.
 	 *
-	 * @param filePath system path
-	 * @param fileName file's base without path or extension name
-	 * @param extension file extension
+	 * @param filePath
+	 *            system path
+	 * @param fileName
+	 *            file's base without path or extension name
+	 * @param extension
+	 *            file extension
 	 * @return the File object with new name
 	 */
 	public static File getCleanFileName(String filePath, String fileName, String extension) {
@@ -102,13 +105,14 @@ public class FileUtil {
 		try {
 			newFileName = newFileName.getCanonicalFile();
 		} catch (IOException e) {
-			System.out.println("oh oh!");
 			e.printStackTrace();
 		}
 
-		int count = 2;
-		while (newFileName.exists()) {
-			newFileName = new File(filePath + "/" + fileName + "_" + count++ + extension);
+		if (!extension.isEmpty()) {
+			int count = 2;
+			while (newFileName.exists()) {
+				newFileName = new File(filePath + "/" + fileName + "_" + count++ + extension);
+			}
 		}
 
 		try {
@@ -125,12 +129,14 @@ public class FileUtil {
 	}
 
 	/**
-	 * Formats a file's name into a proper canonical filename and strips invalid characters.
-	 * Also checks for duplicate file names, appending a _# where # increases until a unique name is found.
+	 * Formats a file's name into a proper canonical filename and strips invalid characters. Also checks for duplicate file names, appending a _# where # increases until a unique name is found.
 	 *
-	 * @param filePath system path
-	 * @param fileName file's base without path or extension name
-	 * @param extension file extension
+	 * @param filePath
+	 *            system path
+	 * @param fileName
+	 *            file's base without path or extension name
+	 * @param extension
+	 *            file extension
 	 * @return the File object with new name
 	 */
 	public static File cleanFileName(String fileName, String extension) {

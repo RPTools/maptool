@@ -105,6 +105,7 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
@@ -120,14 +121,12 @@ public class MapTool {
 	private static final Logger log = Logger.getLogger(MapTool.class);
 
 	/**
-	 * Contains just the version number of MapTool, such as <code>1.3.b49</code>
-	 * .
+	 * Contains just the version number of MapTool, such as <code>1.3.b49</code> .
 	 */
 	private static final String VERSION_TXT = "net/rptools/maptool/client/version.txt";
 
 	/**
-	 * Specifies the properties file that holds sound information. Only two
-	 * sounds currently: <b>Dink</b> and <b>Clink</b>.
+	 * Specifies the properties file that holds sound information. Only two sounds currently: <b>Dink</b> and <b>Clink</b>.
 	 */
 	private static final String SOUND_PROPERTIES = "net/rptools/maptool/client/sounds.properties";
 	public static final String SND_INVALID_OPERATION = "invalidOperation";
@@ -143,8 +142,7 @@ public class MapTool {
 	public static boolean WINDOWS = (System.getProperty("os.name").toLowerCase().startsWith("windows"));
 
 	/**
-	 * Version of Java being used. Note that this is the "specification version"
-	 * , so expect numbers like 1.4, 1.5, and 1.6.
+	 * Version of Java being used. Note that this is the "specification version" , so expect numbers like 1.4, 1.5, and 1.6.
 	 */
 	public static Double JAVA_VERSION;
 
@@ -206,9 +204,7 @@ public class MapTool {
 	}
 
 	/**
-	 * This method looks up the message key in the properties file and returns
-	 * the resultant text with the detail message from the
-	 * <code>Throwable</code> appended to the end.
+	 * This method looks up the message key in the properties file and returns the resultant text with the detail message from the <code>Throwable</code> appended to the end.
 	 *
 	 * @param msgKey
 	 *            the string to use when calling {@link I18N#getText(String)}
@@ -229,22 +225,17 @@ public class MapTool {
 	}
 
 	/**
-	 * This method is the base method for putting a dialog box up on the screen
-	 * that might be an error, a warning, or just an information message. Do not
-	 * use this method if the desired result is a simple confirmation box (use
-	 * {@link #confirm(String, Object...)} instead).
+	 * This method is the base method for putting a dialog box up on the screen that might be an error, a warning, or just an information message. Do not use this method if the desired result is a
+	 * simple confirmation box (use {@link #confirm(String, Object...)} instead).
 	 *
 	 * @param message
-	 *            the key in the properties file to put in the body of the
-	 *            dialog (formatted using <code>params</code>)
+	 *            the key in the properties file to put in the body of the dialog (formatted using <code>params</code>)
 	 * @param titleKey
-	 *            the key in the properties file to use when creating the title
-	 *            of the dialog window (formatted using <code>params</code>)
+	 *            the key in the properties file to use when creating the title of the dialog window (formatted using <code>params</code>)
 	 * @param messageType
 	 *            JOptionPane.{ERROR|WARNING|INFORMATION}_MESSAGE
 	 * @param params
-	 *            optional parameters to use when formatting the data from the
-	 *            properties file
+	 *            optional parameters to use when formatting the data from the properties file
 	 */
 	public static void showMessage(String message, String titleKey, int messageType, Object... params) {
 		String title = I18N.getText(titleKey, params);
@@ -252,24 +243,17 @@ public class MapTool {
 	}
 
 	/**
-	 * Same as {@link #showMessage(String, String, int, Object...)} except that
-	 * <code>messages</code> is stored into a JList and that component is then
-	 * used as the content of the dialog box. This allows multiple strings to be
-	 * displayed in a manner consistent with other message dialogs.
+	 * Same as {@link #showMessage(String, String, int, Object...)} except that <code>messages</code> is stored into a JList and that component is then used as the content of the dialog box. This
+	 * allows multiple strings to be displayed in a manner consistent with other message dialogs.
 	 *
 	 * @param messages
-	 *            the Objects (normally strings) to put in the body of the
-	 *            dialog; no properties file lookup is performed!
+	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is performed!
 	 * @param titleKey
-	 *            the key in the properties file to use when creating the title
-	 *            of the dialog window (formatted using <code>params</code>)
+	 *            the key in the properties file to use when creating the title of the dialog window (formatted using <code>params</code>)
 	 * @param messageType
-	 *            one of <code>JOptionPane.ERROR_MESSAGE</code>,
-	 *            <code>JOptionPane.WARNING_MESSAGE</code>,
-	 *            <code>JOptionPane.INFORMATION_MESSAGE</code>
+	 *            one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE</code>
 	 * @param params
-	 *            optional parameters to use when formatting the title text from
-	 *            the properties file
+	 *            optional parameters to use when formatting the title text from the properties file
 	 */
 	public static void showMessage(Object[] messages, String titleKey, int messageType, Object... params) {
 		String title = I18N.getText(titleKey, params);
@@ -278,22 +262,18 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays the messages provided as <code>messages</code> by calling
-	 * {@link #showMessage(Object[], String, int, Object...)} and passing
-	 * <code>"msg.title.messageDialogFeedback"</code> and
+	 * Displays the messages provided as <code>messages</code> by calling {@link #showMessage(Object[], String, int, Object...)} and passing <code>"msg.title.messageDialogFeedback"</code> and
 	 * <code>JOptionPane.ERROR_MESSAGE</code> as parameters.
 	 *
 	 * @param messages
-	 *            the Objects (normally strings) to put in the body of the
-	 *            dialog; no properties file lookup is performed!
+	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is performed!
 	 */
 	public static void showFeedback(Object[] messages) {
 		showMessage(messages, "msg.title.messageDialogFeedback", JOptionPane.ERROR_MESSAGE);
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showError(String, Throwable)}
-	 * and passing <code>null</code> for the second parameter.
+	 * Displays a dialog box by calling {@link #showError(String, Throwable)} and passing <code>null</code> for the second parameter.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -303,13 +283,10 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message
-	 * crafted by calling {@link #generateMessage(String, Throwable)} and
-	 * passing it the two parameters. Also logs an entry using the
-	 * {@link Logger#error(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
+	 * the {@link Logger#error(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogError"</code>
-	 * , and the dialog type is <code>JOptionPane.ERROR_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogError"</code> , and the dialog type is <code>JOptionPane.ERROR_MESSAGE</code>.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -323,8 +300,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showWarning(String, Throwable)}
-	 * and passing <code>null</code> for the second parameter.
+	 * Displays a dialog box by calling {@link #showWarning(String, Throwable)} and passing <code>null</code> for the second parameter.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -334,14 +310,10 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message
-	 * crafted by calling {@link #generateMessage(String, Throwable)} and
-	 * passing it the two parameters. Also logs an entry using the
-	 * {@link Logger#warn(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
+	 * the {@link Logger#warn(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key
-	 * <code>"msg.title.messageDialogWarning"</code>, and the dialog type is
-	 * <code>JOptionPane.WARNING_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogWarning"</code>, and the dialog type is <code>JOptionPane.WARNING_MESSAGE</code>.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -355,9 +327,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box by calling
-	 * {@link #showInformation(String, Throwable)} and passing <code>null</code>
-	 * for the second parameter.
+	 * Displays a dialog box by calling {@link #showInformation(String, Throwable)} and passing <code>null</code> for the second parameter.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -367,13 +337,10 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message
-	 * crafted by calling {@link #generateMessage(String, Throwable)} and
-	 * passing it the two parameters. Also logs an entry using the
-	 * {@link Logger#info(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
+	 * the {@link Logger#info(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogInfo"</code>,
-	 * and the dialog type is <code>JOptionPane.INFORMATION_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogInfo"</code>, and the dialog type is <code>JOptionPane.INFORMATION_MESSAGE</code>.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -387,17 +354,13 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a confirmation dialog that uses the message as a key to the
-	 * properties file, and the additional values as parameters to the
-	 * formatting of the key lookup.
+	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values as parameters to the formatting of the key lookup.
 	 *
 	 * @param message
-	 *            key from the properties file (preferred) or hard-coded string
-	 *            to display
+	 *            key from the properties file (preferred) or hard-coded string to display
 	 * @param params
 	 *            optional arguments for the formatting of the property value
-	 * @return <code>true</code> if the user clicks the OK button,
-	 *         <code>false</code> otherwise
+	 * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
 	 */
 	public static boolean confirm(String message, Object... params) {
 		//		String msg = I18N.getText(message, params);
@@ -408,19 +371,15 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a confirmation dialog that uses the message as a key to the
-	 * properties file, and the additional values as parameters to the
-	 * formatting of the key lookup.
+	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values as parameters to the formatting of the key lookup.
 	 *
 	 * @param title
 	 * @param buttons
 	 * @param message
-	 *            key from the properties file (preferred) or hard-coded string
-	 *            to display
+	 *            key from the properties file (preferred) or hard-coded string to display
 	 * @param params
 	 *            optional arguments for the formatting of the property value
-	 * @return <code>true</code> if the user clicks the OK button,
-	 *         <code>false</code> otherwise
+	 * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
 	 */
 	public static int confirmImpl(String title, int buttons, String message, Object... params) {
 		String msg = I18N.getText(message, params);
@@ -429,8 +388,7 @@ public class MapTool {
 	}
 
 	/**
-	 * This method is specific to deleting a token, but it can be used as a
-	 * basis for any other method which wants to be turned off via a property.
+	 * This method is specific to deleting a token, but it can be used as a basis for any other method which wants to be turned off via a property.
 	 *
 	 * @return true if the token should be deleted.
 	 */
@@ -499,9 +457,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Launch the platform's web browser and ask it to open the given URL. Note
-	 * that this should not be called from any uncontrolled macros as there are
-	 * both security and denial-of-service attacks possible.
+	 * Launch the platform's web browser and ask it to open the given URL. Note that this should not be called from any uncontrolled macros as there are both security and denial-of-service attacks
+	 * possible.
 	 *
 	 * @param url
 	 */
@@ -626,8 +583,7 @@ public class MapTool {
 	}
 
 	/**
-	 * This was added to make it easier to set a breakpoint and locate when the
-	 * frame was initialized.
+	 * This was added to make it easier to set a breakpoint and locate when the frame was initialized.
 	 *
 	 * @param frame
 	 */
@@ -640,9 +596,7 @@ public class MapTool {
 	}
 
 	/**
-	 * For Multi-monitor support, allows you to move the frame to a specific
-	 * monitor. It will also set the height, width and x, y position of the
-	 * frame.
+	 * For Multi-monitor support, allows you to move the frame to a specific monitor. It will also set the height, width and x, y position of the frame.
 	 *
 	 * @author Jamz
 	 * @since 1.4.1.0
@@ -650,8 +604,7 @@ public class MapTool {
 	 * @param frame
 	 *            The JFrame to move
 	 * @param monitor
-	 *            The monitor number as an int. Note the first monitor start at
-	 *            0, not 1.
+	 *            The monitor number as an int. Note the first monitor start at 0, not 1.
 	 * @param maximize
 	 *            set to true if you want to maximize the frame to that monitor.
 	 */
@@ -865,8 +818,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Add a message only this client can see. This is a shortcut for
-	 * addMessage(ME, ...)
+	 * Add a message only this client can see. This is a shortcut for addMessage(ME, ...)
 	 *
 	 * @param message
 	 */
@@ -875,8 +827,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Add a message all clients can see. This is a shortcut for addMessage(SAY,
-	 * ...)
+	 * Add a message all clients can see. This is a shortcut for addMessage(SAY, ...)
 	 *
 	 * @param message
 	 */
@@ -885,16 +836,13 @@ public class MapTool {
 	}
 
 	/**
-	 * Add a message all specified clients will see. This is a shortcut for
-	 * addMessage(WHISPER, ...) and addMessage(GM, ...). The
-	 * <code>targets</code> is expected do be in a string list built with
+	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM, ...). The <code>targets</code> is expected do be in a string list built with
 	 * <code>separator</code>.
 	 *
 	 * @param message
 	 *            message to be sent
 	 * @param targets
-	 *            string specifying clients to send the message to (spaces are
-	 *            trimmed)
+	 *            string specifying clients to send the message to (spaces are trimmed)
 	 * @param separator
 	 *            the separator between entries in <code>targets</code>
 	 */
@@ -906,14 +854,12 @@ public class MapTool {
 	}
 
 	/**
-	 * Add a message all specified clients will see. This is a shortcut for
-	 * addMessage(WHISPER, ...) and addMessage(GM, ...).
+	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM, ...).
 	 *
 	 * @param message
 	 *            message to be sent
 	 * @param targets
-	 *            list of <code>String</code>s specifying clients to send the
-	 *            message to
+	 *            list of <code>String</code>s specifying clients to send the message to
 	 */
 	public static void addGlobalMessage(String message, List<String> targets) {
 		for (String target : targets) {
@@ -1248,8 +1194,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Search for command line arguments for options. Expecting arguments
-	 * specified as -parameter=value pair and returns a string.
+	 * Search for command line arguments for options. Expecting arguments specified as -parameter=value pair and returns a string.
 	 *
 	 * Examples: -version=1.4.0.1 -user=Jamz
 	 *
@@ -1283,8 +1228,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Search for command line arguments for options. Expecting arguments
-	 * formatted as a switch
+	 * Search for command line arguments for options. Expecting arguments formatted as a switch
 	 *
 	 * Examples: -x or -fullscreen
 	 *
@@ -1315,8 +1259,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Search for command line arguments for options. Expecting arguments
-	 * specified as -parameter=value pair and returns a string.
+	 * Search for command line arguments for options. Expecting arguments specified as -parameter=value pair and returns a string.
 	 *
 	 * Examples: -monitor=1 -x=0 -y=0 -w=1200 -h=960
 	 *
@@ -1414,6 +1357,14 @@ public class MapTool {
 		// cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
 		RPTURLStreamHandlerFactory factory = new RPTURLStreamHandlerFactory();
 		factory.registerProtocol("asset", new AssetURLStreamHandler());
+
+		// Syrinscape Protocols
+		if (AppPreferences.getSyrinscapeActive()) {
+			factory.registerProtocol("syrinscape-fantasy", new SyrinscapeURLStreamHandler());
+			factory.registerProtocol("syrinscape-sci-fi", new SyrinscapeURLStreamHandler());
+			factory.registerProtocol("syrinscape-boardgame", new SyrinscapeURLStreamHandler());
+		}
+
 		URL.setURLStreamHandlerFactory(factory);
 
 		final Toolkit tk = Toolkit.getDefaultToolkit();
@@ -1474,14 +1425,12 @@ public class MapTool {
 			LookAndFeelFactory.installJideExtension(LookAndFeelFactory.XERTO_STYLE);
 
 			/****************************************************************************
-			 * For TinyLAF 1.3.04 this is how the color was changed for a
-			 * button.
+			 * For TinyLAF 1.3.04 this is how the color was changed for a button.
 			 */
 			// Theme.buttonPressedColor[Theme.style] = new ColorReference(Color.gray);
 
 			/****************************************************************************
-			 * And this is how it's done in TinyLAF 1.4.0 (no idea about the
-			 * intervening versions).
+			 * And this is how it's done in TinyLAF 1.4.0 (no idea about the intervening versions).
 			 */
 			Theme.buttonPressedColor = new SBReference(Color.GRAY, 0, -6, SBReference.SUB3_COLOR);
 
@@ -1494,11 +1443,8 @@ public class MapTool {
 		/**
 		 * This is a tweak that makes the Chinese version work better.
 		 * <p>
-		 * Consider reviewing
-		 * <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en.
-		 * wikipedia.org/wiki/CJK_characters</a> before making changes. And
-		 * http://www.scarfboy.com/coding/unicode-tool is also a really cool
-		 * site.
+		 * Consider reviewing <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en. wikipedia.org/wiki/CJK_characters</a> before making changes. And
+		 * http://www.scarfboy.com/coding/unicode-tool is also a really cool site.
 		 */
 		if (Locale.CHINA.equals(Locale.getDefault())) {
 			// The following font name appears to be "Sim Sun".  It can be downloaded
@@ -1538,16 +1484,11 @@ public class MapTool {
 	/**
 	 * Check to see if we're running on Java 6+.
 	 * <p>
-	 * While MapTool itself doesn't use any Java 6-specific features, we use a
-	 * couple dozen third-party libraries and a search of those JAR files
-	 * indicate that <i>they DO use</i> Java 6. So it's best if we warn users
-	 * that they might be going along happily and suddenly hit a Java runtime
-	 * error! It might even be something they do every time they run the
-	 * program, but some piece of data was different and the library took a
-	 * different path and the Java 6-only method was invoked...
+	 * While MapTool itself doesn't use any Java 6-specific features, we use a couple dozen third-party libraries and a search of those JAR files indicate that <i>they DO use</i> Java 6. So it's best
+	 * if we warn users that they might be going along happily and suddenly hit a Java runtime error! It might even be something they do every time they run the program, but some piece of data was
+	 * different and the library took a different path and the Java 6-only method was invoked...
 	 * <p>
-	 * This method uses the system property <b>java.specification.version</b> as
-	 * it seemed the easiest thing to test. :)
+	 * This method uses the system property <b>java.specification.version</b> as it seemed the easiest thing to test. :)
 	 */
 	private static void verifyJavaVersion() {
 		String version = System.getProperty("java.specification.version");
@@ -1566,10 +1507,8 @@ public class MapTool {
 	}
 
 	/**
-	 * If we're running on OSX we should call this method to download and
-	 * install the MapTool logo from the main web site. We cache this image so
-	 * that it appears correctly if the application is later executed in
-	 * "offline" mode, so to speak.
+	 * If we're running on OSX we should call this method to download and install the MapTool logo from the main web site. We cache this image so that it appears correctly if the application is later
+	 * executed in "offline" mode, so to speak.
 	 */
 	private static void macOSXicon() {
 		// If we're running on OSX, add the dock icon image
@@ -1599,13 +1538,10 @@ public class MapTool {
 			}
 		}
 		/*
-		 * Unfortunately the next line doesn't allow Eclipse to compile the code
-		 * on anything but a Mac. Too bad because there's no problem at runtime
-		 * since this code wouldn't be executed an any machine *except* a Mac.
-		 * Sigh.
+		 * Unfortunately the next line doesn't allow Eclipse to compile the code on anything but a Mac. Too bad because there's no problem at runtime since this code wouldn't be executed an any
+		 * machine *except* a Mac. Sigh.
 		 *
-		 * com.apple.eawt.Application appl =
-		 * com.apple.eawt.Application.getApplication();
+		 * com.apple.eawt.Application appl = com.apple.eawt.Application.getApplication();
 		 */
 		try {
 			Class<?> appClass = Class.forName("com.apple.eawt.Application");
@@ -1643,11 +1579,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Return whether the campaign file has changed. Only checks to see if there
-	 * is a single empty map with the default name
-	 * (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". We really
-	 * should check against things like campaign property changes as well,
-	 * including campaign macros...
+	 * Return whether the campaign file has changed. Only checks to see if there is a single empty map with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". We really
+	 * should check against things like campaign property changes as well, including campaign macros...
 	 */
 	public static boolean isCampaignDirty() {
 		// TODO: This is a very naive check, but it's better than nothing

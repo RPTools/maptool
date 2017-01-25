@@ -29,9 +29,9 @@ import net.rptools.lib.AppUtil;
 
 public class AppConstants {
 
-	public static final String APP_NAME = "tokenTool";
+	public static final String APP_NAME = "TokenToolFX";
 	public static final File OVERLAY_DIR = AppUtil.getAppHome("overlays");
 	public static final String DEFAULT_TOKEN_EXTENSION = ".rptok";
 	public static final String DEFAULT_IMAGE_EXTENSION = ".png";
-	public static final String DEFAULT_TOKEN_DRAG_NAME = "token_drag";
+	public static final String DEFAULT_TOKEN_DRAG_NAME = "token";
 }

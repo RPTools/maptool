@@ -56,7 +56,7 @@ public class TokenImage extends AbstractFunction {
 	private TokenImage() {
 		super(0, 2, "getTokenImage", "getTokenPortrait", "getTokenHandout",
 				"setTokenImage", "setTokenPortrait", "setTokenHandout",
-				"getImage");
+				"getImage", "setTokenOpacity", "getTokenOpacity");
 	}
 
 	/**
@@ -73,6 +73,58 @@ public class TokenImage extends AbstractFunction {
 		Token token;
 		BigDecimal size = null;
 		Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+
+		if (functionName.equals("setTokenOpacity")) {
+			if (!MapTool.getParser().isMacroPathTrusted())
+				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+
+			if (args.size() > 2)
+				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, args.size()));
+
+			if (args.isEmpty())
+				throw new ParserException(I18N.getText("macro.function.general.notenoughparms", functionName, 1, args.size()));
+
+			token = null;
+
+			if (args.size() == 2) {
+				token = FindTokenFunctions.findToken(args.get(1).toString(), null);
+
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, args.get(0).toString()));
+				}
+			} else if (args.size() == 1) {
+				MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+				token = res.getTokenInContext();
+
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.noImpersonated", functionName));
+				}
+			}
+
+			return token.setTokenOpacity(Float.parseFloat(args.get(0).toString()));
+		}
+
+		if (functionName.equals("getTokenOpacity")) {
+			if (!MapTool.getParser().isMacroPathTrusted())
+				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+
+			if (args.size() == 1) {
+				token = FindTokenFunctions.findToken(args.get(0).toString(), null);
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, args.get(0).toString()));
+				}
+			} else if (args.size() == 0) {
+				MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+				token = res.getTokenInContext();
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.noImpersonated", functionName));
+				}
+			} else {
+				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, args.size()));
+			}
+
+			return token.getTokenOpacity();
+		}
 
 		if (functionName.equals("setTokenImage")) {
 			if (args.size() != 1) {
@@ -184,6 +236,11 @@ public class TokenImage extends AbstractFunction {
 			assetId.append(i);
 		}
 		return assetId.toString();
+	}
+
+	private String typeOf(Object ob) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private static void assignImage(Token token, String assetName, imageType type, String func) throws ParserException {

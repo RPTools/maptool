@@ -76,6 +76,7 @@ import com.jeta.forms.gui.form.GridView;
 
 public class MacroButtonDialog extends JDialog implements SearchListener {
 
+	private static final long serialVersionUID = 8228617911117087993L;
 	private FormPanel panel;
 	MacroButton button;
 	MacroButtonProperties properties;
@@ -97,7 +98,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 	private ReplaceToolBar replaceToolBar;
 	private JLabel status;
 
-	private static HashSet<UUID> openMacroList = new HashSet(4);
+	private static HashSet<String> openMacroList = new HashSet(4);
 
 	public MacroButtonDialog() {
 		super(MapTool.getFrame(), "", true);
@@ -272,19 +273,17 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 	}
 
 	private void updateOpenMacroList(boolean addToList) {
-		UUID id = button.getProperties().getMacroUUID();
+		String id = button.getProperties().getMacroUUID();
 
 		if (addToList) {
 			openMacroList.add(id);
-			//			System.out.println(id + " :: Added - Open Dialogs: " + openMacroList.size());
 		} else {
 			openMacroList.remove(id);
-			//			System.out.println(id + " :: Removed - Open Dialogs: " + openMacroList.size());
 		}
 	}
 
 	public void show(MacroButton button) {
-		UUID id = button.getProperties().getMacroUUID();
+		String id = button.getProperties().getMacroUUID();
 
 		if (openMacroList.contains(id)) {
 			return;

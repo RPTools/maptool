@@ -11,9 +11,9 @@
 
 package net.rptools.maptool.client.ui.token;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-
 import net.rptools.maptool.client.functions.AbstractTokenAccessorFunction;
 import net.rptools.maptool.model.Token;
 
@@ -32,7 +32,8 @@ public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
 	/**
 	 * Create an overlay with the passed name.
 	 * 
-	 * @param aName Name of the new overlay.
+	 * @param aName
+	 *            Name of the new overlay.
 	 */
 	protected BooleanTokenOverlay(String aName) {
 		super(aName);
@@ -47,8 +48,14 @@ public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
 	 */
 	@Override
 	public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value) {
-		if (AbstractTokenAccessorFunction.getBooleanValue(value))
+		if (AbstractTokenAccessorFunction.getBooleanValue(value)) {
+			// Apply Alpha Transparency
+			float opacity = token.getTokenOpacity();
+			if (opacity < 1.0f)
+				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+
 			paintOverlay(g, token, bounds);
+		}
 	}
 
 	/*---------------------------------------------------------------------------------------------
@@ -58,13 +65,14 @@ public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
 	/**
 	 * Paint the overlay for the passed token.
 	 * 
-	 * @param g Graphics used to paint. It is already translated so that 0,0 is
-	 * the upper left corner of the token. It is also clipped so that the overlay can not
-	 * draw out of the token's bounding box.
-	 * @param token The token being painted.
-	 * @param bounds The bounds of the actual token. This will be different than the clip
-	 * since the clip also has to take into account the edge of the window. If you draw 
-	 * based on the clip it will be off for partial token painting.
+	 * @param g
+	 *            Graphics used to paint. It is already translated so that 0,0 is the upper left corner of the token. It is also clipped so that the overlay can not draw out of the token's bounding
+	 *            box.
+	 * @param token
+	 *            The token being painted.
+	 * @param bounds
+	 *            The bounds of the actual token. This will be different than the clip since the clip also has to take into account the edge of the window. If you draw based on the clip it will be off
+	 *            for partial token painting.
 	 */
 	public abstract void paintOverlay(Graphics2D g, Token token, Rectangle bounds);
 }

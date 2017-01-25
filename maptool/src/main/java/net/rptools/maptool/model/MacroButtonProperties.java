@@ -46,7 +46,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
 	//	private transient static final List<String> HTMLColors = Arrays.asList("aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "purple", "red", "silver", "teal",
 	//			"white", "yellow");
-	private UUID macroUUID = UUID.randomUUID();
+
+	private String macroUUID = UUID.randomUUID().toString(); // Jamz: Why a String and not UUID? Because stupid Hessian can't serialize UUID, ug.
 
 	private transient MacroButton button;
 	private transient GUID tokenId;
@@ -962,9 +963,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 		}
 	}
 
-	public UUID getMacroUUID() {
+	public String getMacroUUID() {
 		if (macroUUID == null)
-			macroUUID = UUID.randomUUID();
+			macroUUID = UUID.randomUUID().toString();
 
 		return macroUUID;
 	}

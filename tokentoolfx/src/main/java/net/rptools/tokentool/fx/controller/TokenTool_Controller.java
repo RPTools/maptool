@@ -1,27 +1,38 @@
 package net.rptools.tokentool.fx.controller;
 
 import java.awt.Point;
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Vector;
+
+import javax.imageio.ImageIO;
 
 import javafx.css.PseudoClass;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import net.rptools.tokentool.AppActions;
 import net.rptools.tokentool.fx.util.FxImageUtil;
+import net.rptools.tokentool.fx.util.TransferToken;
 
 public class TokenTool_Controller {
 	private Image overlayImage; // The overlay image with mask removed
@@ -58,6 +69,9 @@ public class TokenTool_Controller {
 	private BorderPane tokenPreviewPane;
 
 	@FXML
+	private TextField fileNameTextField;
+
+	@FXML
 	void initialize() {
 		assert portraitImageView != null : "fx:id=\"portraitImageView\" was not injected: check your FXML file 'TokenTool.fxml'.";
 		assert maskImageView != null : "fx:id=\"maskImageView\" was not injected: check your FXML file 'TokenTool.fxml'.";
@@ -81,8 +95,7 @@ public class TokenTool_Controller {
 
 		tokenPreview.fitWidthProperty().bind(tokenPreviewPane.widthProperty());
 		tokenPreview.fitHeightProperty().bind(tokenPreviewPane.heightProperty());
-		//		tokenPreview.setScaleX(0.95);
-		//		tokenPreview.setScaleY(0.95);
+		updateCompositImageView();
 	}
 
 	@FXML
@@ -97,6 +110,7 @@ public class TokenTool_Controller {
 
 		portraitImageView.setTranslateX(event.getX() - dragStart.x);
 		portraitImageView.setTranslateY(event.getY() - dragStart.y);
+		updateCompositImageView();
 	}
 
 	@FXML
@@ -156,6 +170,44 @@ public class TokenTool_Controller {
 		//		System.out.println("Scale: " + scale);
 	}
 
+	@FXML
+	void tokenPreview_OnDragDetected(MouseEvent event) {
+		Dragboard db = tokenPreview.startDragAndDrop(TransferMode.ANY);
+		ClipboardContent content = new ClipboardContent();
+		Vector<File> files = new Vector<File>();
+
+		boolean saveAsToken = false;
+
+		try {
+			//			File tempTokenFile = TransferToken.getTempFileAsToken(saveAsToken);
+			File tempTokenFile = new File(System.getProperty("java.io.tmpdir") + "token.png");
+			System.out.println(tempTokenFile.getAbsolutePath());
+
+			// remember the temp file to delete it later on ...
+			TransferToken.lastFile = tempTokenFile;
+
+			if (saveAsToken) {
+				AppActions.saveToken(tempTokenFile, true);
+			} else {
+				ImageIO.write(SwingFXUtils.fromFXImage(tokenPreview.getImage(), null), "png", tempTokenFile);
+			}
+
+			files.add(tempTokenFile);
+			content.putFiles(files);
+		} catch (Exception e) {
+			System.out.println(e);
+		} finally {
+			content.putImage(tokenPreview.getImage());
+			db.setContent(content);
+			event.consume();
+		}
+	}
+
+	@FXML
+	void tokenPreview_OnDragDone(DragEvent event) {
+
+	}
+
 	public void expandOverlayOptionsPane(boolean expand) {
 		overlayOptionsPane.setExpanded(expand);
 	}
@@ -167,13 +219,9 @@ public class TokenTool_Controller {
 	private void updateCompositImageView(TreeItem<?> newValue) {
 		try {
 			overlayImage = new Image(newValue.getValue().toString()); // Load the overlay
-
 			overlayImageView.setImage(FxImageUtil.magentaToTransparency(overlayImage, 1));
 			maskImageView.setImage(FxImageUtil.grabMask(overlayImage));
-			//			tokenPreview.setImage(FxImageUtil.composePreview(compositeGroup, overlayImageView, maskImageView));
-			tokenPreview.setImage(FxImageUtil.composePreview(compositeTokenPane, overlayImageView, maskImageView));
 
-			// stupid test... FIXME
 			updateCompositImageView();
 		} catch (IllegalArgumentException e) {
 			// Not a valid URL, most likely this is just because it's a directory node.
@@ -182,7 +230,7 @@ public class TokenTool_Controller {
 
 	private void updateCompositImageView() {
 		try {
-			tokenPreview.setImage(FxImageUtil.composePreview(compositeTokenPane, overlayImageView, maskImageView));
+			tokenPreview.setImage(FxImageUtil.composePreview(compositeTokenPane, maskImageView));
 		} catch (IllegalArgumentException e) {
 			// Not a valid URL, most likely this is just because it's a directory node.
 		}

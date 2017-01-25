@@ -12,7 +12,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 public class FxImageUtil {
-	private static final int COLOR_THRESHOLD = 1;
+	private static final int COLOR_THRESHOLD = -1;
 
 	public static Image magentaToTransparency(Image inputImage, int colorThreshold) {
 		int imageWidth = (int) inputImage.getWidth();
@@ -81,31 +81,27 @@ public class FxImageUtil {
 		return true;
 	}
 
-	public static Image composePreview(StackPane compositeTokenPane, ImageView overlayImageView, ImageView maskImageView) {
-		//		double x = compositeTokenPane.getLayoutX() + overlayImageView.getLayoutX();
-		//		double y = compositeTokenPane.getLayoutY() + overlayImageView.getLayoutY();
-		//		double width = overlayImageView.getImage().getWidth();
-		//		double height = overlayImageView.getImage().getHeight();
+	public static Image composePreview(StackPane compositeTokenPane, ImageView maskImageView) {
+		// Process layout as maskImage may have changed size if the overlay was changed
+		compositeTokenPane.layout();
 
 		double x = maskImageView.getParent().getLayoutX();
 		double y = maskImageView.getParent().getLayoutY();
 		double width = maskImageView.getImage().getWidth();
 		double height = maskImageView.getImage().getHeight();
 
-		//		System.out.println("X: " + maskImageView.getParent().getLayoutX());
-
 		Rectangle2D viewPort = new Rectangle2D(x, y, width, height);
 		WritableImage newImage = new WritableImage((int) width, (int) height);
 		SnapshotParameters parameter = new SnapshotParameters();
 		parameter.setViewport(viewPort);
-
-		System.out.println("Viewport: " + viewPort);
 
 		// Finally, create a composite image of the Portait view and the Overlay view
 		// We need to briefly turn the mask on during the snapshot...
 		maskImageView.setVisible(true);
 		compositeTokenPane.snapshot(parameter, newImage);
 		maskImageView.setVisible(false);
+
+		//		System.out.println("1. Viewport: " + viewPort);
 
 		return magentaToTransparency(newImage, COLOR_THRESHOLD);
 	}

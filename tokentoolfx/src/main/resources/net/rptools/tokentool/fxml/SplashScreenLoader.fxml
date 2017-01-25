@@ -9,27 +9,23 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="splashLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-	xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.tokentool.fx.controller.SplashScreen_Controller">
+<StackPane fx:id="splashLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.tokentool.fx.controller.SplashScreen_Controller">
 	<ImageView pickOnBounds="true" preserveRatio="true">
 		<image>
-			<Image url="@../image/token_tool_splash.jpg" />
+			<Image url="@../image/token_tool_nerps_splash.jpg" />
 		</image>
 	</ImageView>
-	<ProgressBar fx:id="loadProgress" opacity="0.70" prefHeight="18.0" prefWidth="420.0" progress="0.0"
-		StackPane.alignment="BOTTOM_LEFT">
+	<ProgressBar fx:id="loadProgress" opacity="0.70" prefHeight="18.0" prefWidth="420.0" progress="0.0" StackPane.alignment="BOTTOM_LEFT">
 		<StackPane.margin>
 			<Insets />
 		</StackPane.margin>
 	</ProgressBar>
-	<Rectangle arcHeight="5.0" arcWidth="5.0" blendMode="MULTIPLY" fill="#c7c8c9" height="17.0" stroke="BLACK"
-		strokeType="INSIDE" strokeWidth="0.0" width="420.0" StackPane.alignment="BOTTOM_CENTER">
+	<Rectangle arcHeight="5.0" arcWidth="5.0" blendMode="MULTIPLY" fill="#c7c8c9" height="17.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="420.0" StackPane.alignment="BOTTOM_CENTER">
 		<StackPane.margin>
 			<Insets bottom="18.0" />
 		</StackPane.margin>
 	</Rectangle>
-	<Label fx:id="progressText" prefWidth="415.0" text="%splash.label.text" textFill="#fcc53b"
-		StackPane.alignment="BOTTOM_LEFT">
+	<Label fx:id="progressText" prefWidth="415.0" text="%splash.label.text" textFill="#fcc53b" StackPane.alignment="BOTTOM_LEFT">
 		<font>
 			<Font name="System Bold" size="12.0" />
 		</font>

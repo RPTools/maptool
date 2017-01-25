@@ -14,9 +14,12 @@ package net.rptools.maptool.client.functions;
 import java.math.BigDecimal;
 import java.util.List;
 import org.apache.commons.lang.math.NumberUtils;
+
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.HeroLabData;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ExtractHeroLab;
@@ -35,7 +38,7 @@ public class HeroLabFunctions extends AbstractFunction {
 	private static final HeroLabFunctions instance = new HeroLabFunctions();
 
 	private HeroLabFunctions() {
-		super(0, 2, "herolab.getInfo", "herolab.getStatBlock", "herolab.hasChanged", "herolab.refresh", "herolab.XPath");
+		super(0, 2, "herolab.getInfo", "herolab.getStatBlock", "herolab.hasChanged", "herolab.refresh", "herolab.XPath", "herolab.getImage", "herolab.isMinion", "herolab.getMasterName");
 	}
 
 	public static HeroLabFunctions getInstance() {
@@ -44,8 +47,6 @@ public class HeroLabFunctions extends AbstractFunction {
 
 	@Override
 	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
-		String responseString = "";
-
 		if (functionName.equals("herolab.getInfo")) {
 			Token token;
 
@@ -70,10 +71,7 @@ public class HeroLabFunctions extends AbstractFunction {
 			if (token.getHeroLabData() == null)
 				throw new ParserException(I18N.getText("macro.function.herolab.null", functionName));
 
-			// Jamz: TODO actually return character info as a json...
-			responseString = token.getHeroLabData().getSummary();
-
-			return responseString;
+			return token.getHeroLabData().getInfo();
 		} else if (functionName.equals("herolab.getStatBlock")) {
 			if (!MapTool.getParser().isMacroPathTrusted())
 				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
@@ -157,10 +155,32 @@ public class HeroLabFunctions extends AbstractFunction {
 				throw new ParserException(I18N.getText("macro.function.herolab.null", functionName));
 
 			HeroLabData heroLabData = token.getHeroLabData();
-			ExtractHeroLab heroLabExtract = new ExtractHeroLab(heroLabData.getPortfolioFile(), true);
-			token.setHeroLabData(heroLabExtract.refreshCharacter(heroLabData));
+			ExtractHeroLab heroLabExtract = new ExtractHeroLab(heroLabData.getPortfolioFile(), false);
+			heroLabData = heroLabExtract.refreshCharacter(heroLabData);
 
-			return BigDecimal.ONE;
+			//heroLabExtract.extractAllCharacters(true);
+
+			if (heroLabData != null) {
+				token.setHeroLabData(heroLabData);
+
+				// Update the images
+				Asset tokenAsset = heroLabData.getTokenImage();
+				if (tokenAsset != null)
+					token.setImageAsset(null, tokenAsset.getId());
+
+				Asset portraitAsset = heroLabData.getPortraitImage();
+				if (portraitAsset != null)
+					token.setPortraitImage(portraitAsset.getId());
+
+				Asset handoutAsset = heroLabData.getHandoutImage();
+				if (handoutAsset != null)
+					token.setCharsheetImage(handoutAsset.getId());
+
+				return BigDecimal.ONE;
+			} else {
+				return BigDecimal.ZERO;
+			}
+
 		} else if (functionName.equals("herolab.XPath")) {
 			if (!MapTool.getParser().isMacroPathTrusted())
 				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
@@ -198,6 +218,95 @@ public class HeroLabFunctions extends AbstractFunction {
 				return new BigDecimal(result).stripTrailingZeros().toPlainString();
 			else
 				return result;
+		} else if (functionName.equals("herolab.getImage")) {
+			if (!MapTool.getParser().isMacroPathTrusted())
+				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+
+			if (parameters.size() > 2)
+				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+
+			if (parameters.isEmpty())
+				throw new ParserException(I18N.getText("macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+
+			Token token = null;
+
+			if (parameters.size() == 2) {
+				token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
+
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
+				}
+			} else if (parameters.size() == 1) {
+				MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+				token = res.getTokenInContext();
+
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.noImpersonated", functionName));
+				}
+			}
+
+			if (token.getHeroLabData() == null)
+				throw new ParserException(I18N.getText("macro.function.herolab.null", functionName));
+
+			int imageIndex = Integer.parseInt(parameters.get(0).toString());
+			MD5Key assetID = token.getHeroLabData().getImageAssetID(imageIndex);
+			if (assetID == null)
+				return "";
+
+			StringBuilder assetURL = new StringBuilder("asset://");
+			assetURL.append(assetID.toString());
+
+			return assetURL.toString();
+		} else if (functionName.equals("herolab.isMinion")) {
+			Token token;
+
+			if (!MapTool.getParser().isMacroPathTrusted())
+				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+
+			if (parameters.size() == 1) {
+				token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
+				}
+			} else if (parameters.size() == 0) {
+				MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+				token = res.getTokenInContext();
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.noImpersonated", functionName));
+				}
+			} else {
+				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+			}
+
+			if (token.getHeroLabData() == null)
+				throw new ParserException(I18N.getText("macro.function.herolab.null", functionName));
+
+			return token.getHeroLabData().isMinion() ? BigDecimal.ONE : BigDecimal.ZERO;
+		} else if (functionName.equals("herolab.getMasterName")) {
+			Token token;
+
+			if (!MapTool.getParser().isMacroPathTrusted())
+				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+
+			if (parameters.size() == 1) {
+				token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
+				}
+			} else if (parameters.size() == 0) {
+				MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+				token = res.getTokenInContext();
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.noImpersonated", functionName));
+				}
+			} else {
+				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+			}
+
+			if (token.getHeroLabData() == null)
+				throw new ParserException(I18N.getText("macro.function.herolab.null", functionName));
+
+			return token.getHeroLabData().getMinionMasterName();
 		}
 
 		return "<ERROR>";

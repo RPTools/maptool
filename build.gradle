@@ -281,6 +281,7 @@ project(':maptool') {
 	ext.distSource = projectDir.getPath() + '/src/dist/'
 
 	dependencies {
+	 	compile project(':rplib')
 		compile 'net.java.abeille:abeille-formsrt:2.0'
 		compile 'net.rptools.clientserver:clientserver:1.4.0.+'
 		compile 'org.hibernate:antlr:2.7.5H3'
@@ -295,7 +296,7 @@ project(':maptool') {
 		compile 'net.rptools.decktool:decktool:1.0.b1'
 		compile 'net.rptools.dicelib:dicelib:1.4.0.+'
 		compile 'net.sf.ezmorph:ezmorph:1.0.5'
-		compile 'com.caucho:hessian:4.0.38'
+		compile 'com.caucho.hessian:hessian:3.1.6'
 		compile 'jide-common:jide-common:3.2.3'
 		compile 'jide-components:jide-components:3.2.3'
 		compile 'jide-dialogs:jide-dialogs:3.2.3'
@@ -311,7 +312,7 @@ project(':maptool') {
 		compile 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
 		compile 'net.rptools.parser:parser:1.4.0.+'
 		compile 'ca.odell.renderpack:renderpack:1.2004'
-		compile 'net.rptools.rplib:rplib:1.4.1.7+'
+		// compile 'net.rptools.rplib:rplib:1.4.1.7+'
 		compile 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
 		compile 'org.swinglabs:swing-worker:1.1'
 		compile 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
@@ -338,7 +339,7 @@ project(':maptool') {
 		compile group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '2.6.0'	// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
 		compile group: 'com.fifesoft', name: 'autocomplete', version: '2.6.0'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 		compile group: 'com.fifesoft', name: 'rstaui', version: '2.6.0'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
-		compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.17.2'			// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
+		compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.18.1'			// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
 		
 		testCompile group: 'junit', name: 'junit', version: '4.11'
 	}

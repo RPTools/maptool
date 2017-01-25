@@ -423,4 +423,21 @@ public class ImageUtil {
 		// Default to 30x30 w/h not passed
 		return image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
 	}
+
+	public static ImageIcon scaleImage(ImageIcon icon, int w, int h) {
+		int nw = icon.getIconWidth();
+		int nh = icon.getIconHeight();
+
+		if (icon.getIconWidth() > w) {
+			nw = w;
+			nh = (nw * icon.getIconHeight()) / icon.getIconWidth();
+		}
+
+		if (nh > h) {
+			nh = h;
+			nw = (icon.getIconWidth() * nh) / icon.getIconHeight();
+		}
+
+		return new ImageIcon(icon.getImage().getScaledInstance(nw, nh, Image.SCALE_DEFAULT));
+	}
 }

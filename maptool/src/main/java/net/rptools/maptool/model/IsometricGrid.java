@@ -276,8 +276,8 @@ public class IsometricGrid extends Grid {
 			System.out.println(token.getName() + " footprint.getWidth() " + footprint.getWidth());
 			System.out.println(token.getName() + " footprint.getHeight() " + footprint.getHeight());
 		}
-		System.out.println("this.getDefaultFootprint() " + this.getDefaultFootprint());
-		System.out.println("token.getWidth() " + token.getWidth());
+		//		System.out.println("this.getDefaultFootprint() " + this.getDefaultFootprint());
+		//		System.out.println("token.getWidth() " + token.getWidth());
 
 		Area visibleArea = new Area();
 		switch (shape) {

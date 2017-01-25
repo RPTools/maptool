@@ -34,8 +34,16 @@ public class JSAPIClientInfo {
 		return AppPreferences.getPortraitSize();
 	}
 
+	public boolean showPortrait() {
+		return AppPreferences.getShowPortrait();
+	}
+
 	public boolean showStatSheet() {
 		return AppPreferences.getShowStatSheet();
+	}
+
+	public boolean showStatSheetModifier() {
+		return AppPreferences.getShowStatSheetModifier();
 	}
 
 	public String version() {

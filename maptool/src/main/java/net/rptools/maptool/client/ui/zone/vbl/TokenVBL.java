@@ -33,9 +33,9 @@ public class TokenVBL {
 		BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
 
 		// Future enhancement to create solid token VBL vs VBL with holes, further UI options...
-		// Area area = new Area();
-		// Polygon poly = makePolyFromImage(image, 6, 15, alphaSensitivity);
-		// area = new Area(poly);
+		// int detail = 1;
+		// int angle = 15;
+		// return new Area(makePolyFromImage(image, detail, angle, alphaSensitivity));
 
 		return createVblArea(image, alphaSensitivity);
 	}
@@ -69,7 +69,7 @@ public class TokenVBL {
 				}
 			}
 			if ((y2 - y1) >= 0) {
-				vblRectangle = new Rectangle(x, y1, 1, y2 - y1);
+				vblRectangle = new Rectangle(x, y1, 1, y2 - y1 + 1);
 				vblArea.add(new Area(vblRectangle));
 			}
 		}

@@ -549,8 +549,22 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 * Number facing = getTokenFacing(String tokenId: currentToken())
 		 */
 		if (functionName.equals("getTokenFacing")) {
-			checkNumberOfParameters(functionName, parameters, 0, 1);
+			checkNumberOfParameters(functionName, parameters, 0, 2);
+			BigDecimal inDegrees = BigDecimal.ZERO;
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+			;
+
+			if (parameters.size() > 1) {
+				inDegrees = getBigDecimalFromParam(functionName, parameters, 0);
+				token = getTokenFromParam(resolver, functionName, parameters, 1);
+			} else {
+				if (parameters.get(0).toString().trim().length() == 1)
+					inDegrees = getBigDecimalFromParam(functionName, parameters, 0);
+			}
+
+			if (inDegrees == BigDecimal.ONE)
+				return token.getFacingInDegrees();
+
 			if (token.getFacing() == null) {
 				return ""; // XXX Should be -1 instead of a string?
 			}

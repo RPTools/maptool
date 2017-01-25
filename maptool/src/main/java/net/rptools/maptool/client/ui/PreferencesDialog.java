@@ -115,6 +115,8 @@ public class PreferencesDialog extends JDialog {
 	private final JComboBox showNumberingCombo;
 	private final JComboBox movementMetricCombo;
 	private final JCheckBox showStatSheetCheckBox;
+	private final JCheckBox showPortraitCheckBox;
+	private final JCheckBox showStatSheetModifierCheckBox;
 	private final JCheckBox forceFacingArrowCheckBox;
 
 	private final JSpinner haloLineWidthSpinner;
@@ -127,6 +129,7 @@ public class PreferencesDialog extends JDialog {
 	private final JCheckBox showSmiliesCheckBox;
 	private final JCheckBox playSystemSoundCheckBox;
 	private final JCheckBox playSystemSoundOnlyWhenNotFocusedCheckBox;
+	private final JCheckBox syrinscapeActiveCheckBox;
 
 	private final JCheckBox facingFaceEdges;
 	private final JCheckBox facingFaceVertices;
@@ -192,6 +195,8 @@ public class PreferencesDialog extends JDialog {
 
 		forceFacingArrowCheckBox = panel.getCheckBox("forceFacingArrow");
 		showStatSheetCheckBox = panel.getCheckBox("showStatSheet");
+		showPortraitCheckBox = panel.getCheckBox("showPortrait");
+		showStatSheetModifierCheckBox = panel.getCheckBox("showStatSheetModifier");
 		showNumberingCombo = panel.getComboBox("showNumberingCombo");
 		saveReminderCheckBox = panel.getCheckBox("saveReminderCheckBox");
 		fillSelectionCheckBox = panel.getCheckBox("fillSelectionCheckBox");
@@ -226,6 +231,7 @@ public class PreferencesDialog extends JDialog {
 		showSmiliesCheckBox = panel.getCheckBox("showSmiliesCheckBox");
 		playSystemSoundCheckBox = panel.getCheckBox("playSystemSounds");
 		playSystemSoundOnlyWhenNotFocusedCheckBox = panel.getCheckBox("soundsOnlyWhenNotFocused");
+		syrinscapeActiveCheckBox = panel.getCheckBox("syrinscapeActive");
 		showAvatarInChat = panel.getCheckBox("showChatAvatar");
 		showDialogOnNewToken = panel.getCheckBox("showDialogOnNewToken");
 		movementMetricCombo = panel.getComboBox("movementMetric");
@@ -419,6 +425,16 @@ public class PreferencesDialog extends JDialog {
 				AppPreferences.setShowStatSheet(showStatSheetCheckBox.isSelected());
 			}
 		});
+		showPortraitCheckBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				AppPreferences.setShowPortrait(showPortraitCheckBox.isSelected());
+			}
+		});
+		showStatSheetModifierCheckBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				AppPreferences.setShowStatSheetModifier(showStatSheetModifierCheckBox.isSelected());
+			}
+		});
 		forceFacingArrowCheckBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AppPreferences.setForceFacingArrow(forceFacingArrowCheckBox.isSelected());
@@ -520,6 +536,12 @@ public class PreferencesDialog extends JDialog {
 		playSystemSoundOnlyWhenNotFocusedCheckBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AppPreferences.setPlaySystemSoundsOnlyWhenNotFocused(playSystemSoundOnlyWhenNotFocusedCheckBox.isSelected());
+			}
+		});
+
+		syrinscapeActiveCheckBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				AppPreferences.setSyrinscapeActive(syrinscapeActiveCheckBox.isSelected());
 			}
 		});
 
@@ -642,9 +664,8 @@ public class PreferencesDialog extends JDialog {
 	}
 
 	/**
-	 * Used by the ActionListeners of the facing checkboxes to update the facings for all of the current zones.
-	 * Redundant to go through all zones because all zones using the same grid type share facings but it doesn't hurt
-	 * anything and avoids having to track what grid types are being used.
+	 * Used by the ActionListeners of the facing checkboxes to update the facings for all of the current zones. Redundant to go through all zones because all zones using the same grid type share
+	 * facings but it doesn't hurt anything and avoids having to track what grid types are being used.
 	 */
 	private void updateFacings() {
 		//		List<Zone> zlist = MapTool.getServer().getCampaign().getZones();	// generated NPE http://forums.rptools.net/viewtopic.php?f=3&t=17334
@@ -672,6 +693,8 @@ public class PreferencesDialog extends JDialog {
 		stampsStartSnapToGridCheckBox.setSelected(AppPreferences.getObjectsStartSnapToGrid());
 		backgroundsStartFreeSizeCheckBox.setSelected(AppPreferences.getBackgroundsStartFreesize());
 		showStatSheetCheckBox.setSelected(AppPreferences.getShowStatSheet());
+		showPortraitCheckBox.setSelected(AppPreferences.getShowPortrait());
+		showStatSheetModifierCheckBox.setSelected(AppPreferences.getShowStatSheetModifier());
 		forceFacingArrowCheckBox.setSelected(AppPreferences.getForceFacingArrow());
 		backgroundsStartSnapToGridCheckBox.setSelected(AppPreferences.getBackgroundsStartSnapToGrid());
 		defaultGridSizeTextField.setText(Integer.toString(AppPreferences.getDefaultGridSize()));
@@ -691,6 +714,7 @@ public class PreferencesDialog extends JDialog {
 		showSmiliesCheckBox.setSelected(AppPreferences.getShowSmilies());
 		playSystemSoundCheckBox.setSelected(AppPreferences.getPlaySystemSounds());
 		playSystemSoundOnlyWhenNotFocusedCheckBox.setSelected(AppPreferences.getPlaySystemSoundsOnlyWhenNotFocused());
+		syrinscapeActiveCheckBox.setSelected(AppPreferences.getSyrinscapeActive());
 		showAvatarInChat.setSelected(AppPreferences.getShowAvatarInChat());
 		allowPlayerMacroEditsDefault.setSelected(AppPreferences.getAllowPlayerMacroEditsDefault());
 		toolTipInlineRolls.setSelected(AppPreferences.getUseToolTipForInlineRoll());

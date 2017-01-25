@@ -761,6 +761,8 @@ public class Zone extends BaseModel {
 
 			for (GUID guid : selectedToks) {
 				Token tok = getToken(guid);
+				if (tok == null)
+					continue;
 				if ((isAllowed || tok.isOwner(playerId)) && tok.getHasSight()) {
 					GUID tea = tok.getExposedAreaGUID();
 					meta = exposedAreaMeta.get(tea);

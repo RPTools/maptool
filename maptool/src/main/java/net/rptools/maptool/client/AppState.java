@@ -36,6 +36,7 @@ public class AppState {
 
 	private static boolean collectProfilingData = false;
 	private static boolean isSaving = false;
+	private static boolean isLoading = false;
 
 	private static PropertyChangeSupport changeSupport = new PropertyChangeSupport(AppState.class);
 
@@ -145,6 +146,14 @@ public class AppState {
 
 	public static void setShowLightSources(boolean show) {
 		showLightSources = show;
+	}
+
+	public synchronized static void setIsLoading(boolean loading) {
+		isLoading = loading;
+	}
+
+	public synchronized static boolean isLoading() {
+		return isLoading;
 	}
 
 	public synchronized static void setIsSaving(boolean saving) {

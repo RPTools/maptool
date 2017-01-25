@@ -58,7 +58,7 @@
       		</MenuBar>
       		<HBox spacing="5.0" VBox.vgrow="ALWAYS">
       			<children>
-                  <StackPane fx:id="compositeTokenPane" onMouseDragExited="#compositeTokenPane_MouseDragExited" onMouseDragged="#compositeTokenPane_MouseDragged" onMouseEntered="#compositeTokenPane_MouseEntered" onMouseExited="#compositeTokenPane_MouseExited" onMousePressed="#compositeTokenPane_MousePressed" onMouseReleased="#compositeTokenPane_MouseReleased" onScroll="#compositeTokenPane_OnScroll" styleClass="composite-view-black" HBox.hgrow="ALWAYS">
+                  <StackPane fx:id="compositeTokenPane" cacheShape="false" onMouseDragExited="#compositeTokenPane_MouseDragExited" onMouseDragged="#compositeTokenPane_MouseDragged" onMouseEntered="#compositeTokenPane_MouseEntered" onMouseExited="#compositeTokenPane_MouseExited" onMousePressed="#compositeTokenPane_MousePressed" onMouseReleased="#compositeTokenPane_MouseReleased" onScroll="#compositeTokenPane_OnScroll" styleClass="composite-view-black" HBox.hgrow="ALWAYS">
                      <children>
                         <AnchorPane>
                            <children>
@@ -76,7 +76,7 @@
                                     <Image url="@../image/gear-chrome-no-mask.png" />
                                  </image>
                               </ImageView>
-                              <ImageView fx:id="maskImageView" mouseTransparent="true" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="maskImageView" mouseTransparent="true" pickOnBounds="true" preserveRatio="true" visible="false">
                                  <image>
                                     <Image url="@../image/gear-chrome-mask.png" />
                                  </image>
@@ -89,7 +89,7 @@
       					<children>
                         <BorderPane fx:id="tokenPreviewPane" maxHeight="200.0" maxWidth="200.0" minHeight="200.0" minWidth="200.0" prefHeight="200.0" prefWidth="200.0" styleClass="token-view" VBox.vgrow="NEVER">
                            <center>
-      								<ImageView fx:id="tokenPreview" blendMode="SRC_ATOP" cache="true" fitHeight="200.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" scaleX="0.95" scaleY="0.95">
+      								<ImageView fx:id="tokenPreview" blendMode="SRC_ATOP" cache="true" fitHeight="200.0" fitWidth="200.0" onDragDetected="#tokenPreview_OnDragDetected" onDragDone="#tokenPreview_OnDragDone" pickOnBounds="true" preserveRatio="true" scaleX="0.95" scaleY="0.95">
       									<image>
       										<Image url="@../image/token_tool_icon.png" />
       									</image>
@@ -118,7 +118,7 @@
             														<Insets bottom="-8.0" left="2.0" />
             													</VBox.margin>
             												</Label>
-            												<TextField prefHeight="25.0" prefWidth="107.0" text="token" />
+            												<TextField fx:id="fileNameTextField" prefHeight="25.0" prefWidth="107.0" text="token" />
             												<HBox alignment="CENTER_LEFT" spacing="5.0">
             													<children>
             														<Label styleClass="controls-label" text="%controls.filenameSuffixLabel.text" />

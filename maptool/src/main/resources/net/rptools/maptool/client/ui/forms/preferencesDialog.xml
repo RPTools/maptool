@@ -24,7 +24,7 @@
     </at>
     <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
    </super>
-   <at name="id">F:\Data\Workspace\maptool\maptool\src\main\resources\net\rptools\maptool\client\ui\forms\preferencesDialog.xml</at>
+   <at name="id">D:\Development\git\JamzTheMan\rptools\maptool\src\main\resources\net\rptools\maptool\client\ui\forms\preferencesDialog.xml</at>
    <at name="path">net\rptools\maptool\client\ui\forms\preferencesDialog.xml</at>
    <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE</at>
    <at name="colspecs">FILL:15DLU:GROW(1.0),FILL:DEFAULT:NONE</at>
@@ -131,6 +131,7 @@
              </object>
             </at>
             <at name="componentCount">4</at>
+            <at name="name"></at>
             <at name="tabs">
              <object classname="com.jeta.forms.store.properties.TabbedPaneProperties">
               <at name="name">tabs</at>
@@ -164,7 +165,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.833091843</at>
+                     <at name="id">embedded.1175108137</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:8DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -186,7 +187,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1467915250</at>
+                          <at name="id">embedded.1879916103</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -1171,8 +1172,8 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1849080042</at>
-                          <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
+                          <at name="id">embedded.29742634</at>
+                          <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
                            <object classname="java.util.LinkedList">
@@ -2052,8 +2053,8 @@
                                      </at>
                                     </object>
                                    </at>
+                                   <at name="name"></at>
                                    <at name="width">149</at>
-                                   <at name="name"/>
                                    <at name="text">Statsheet Portrait Size</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -2247,7 +2248,7 @@
                                 <at name="cellconstraints">
                                  <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                                   <at name="column">4</at>
-                                  <at name="row">20</at>
+                                  <at name="row">22</at>
                                   <at name="colspan">1</at>
                                   <at name="rowspan">1</at>
                                   <at name="halign">default</at>
@@ -2302,7 +2303,7 @@
                                 <at name="cellconstraints">
                                  <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                                   <at name="column">2</at>
-                                  <at name="row">20</at>
+                                  <at name="row">22</at>
                                   <at name="colspan">1</at>
                                   <at name="rowspan">1</at>
                                   <at name="halign">default</at>
@@ -2347,7 +2348,7 @@
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Whether to show the statsheet.  The portrait is controlled separately.</at>
+                                   <at name="toolTipText">Whether to show the statsheet when the mouse hovers over a Token.</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -2363,7 +2364,7 @@
                                 <at name="cellconstraints">
                                  <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                                   <at name="column">4</at>
-                                  <at name="row">22</at>
+                                  <at name="row">26</at>
                                   <at name="colspan">1</at>
                                   <at name="rowspan">1</at>
                                   <at name="halign">default</at>
@@ -2418,7 +2419,7 @@
                                 <at name="cellconstraints">
                                  <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                                   <at name="column">2</at>
-                                  <at name="row">22</at>
+                                  <at name="row">26</at>
                                   <at name="colspan">1</at>
                                   <at name="rowspan">1</at>
                                   <at name="halign">default</at>
@@ -2465,6 +2466,238 @@
                                    </at>
                                    <at name="toolTipText">Forces the display of the token facing arrow for Top Down tokens and tokens with image tables.</at>
                                    <at name="height">14</at>
+                                  </object>
+                                 </at>
+                                </object>
+                               </at>
+                              </object>
+                             </at>
+                            </item>
+                            <item >
+                             <at name="value">
+                              <object classname="com.jeta.forms.store.memento.BeanMemento">
+                               <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                                <at name="cellconstraints">
+                                 <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                                  <at name="column">2</at>
+                                  <at name="row">20</at>
+                                  <at name="colspan">1</at>
+                                  <at name="rowspan">1</at>
+                                  <at name="halign">default</at>
+                                  <at name="valign">default</at>
+                                  <at name="insets" object="insets">0,0,0,0</at>
+                                 </object>
+                                </at>
+                                <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                               </super>
+                               <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                               <at name="beanclass">com.jeta.forms.components.label.JETALabel</at>
+                               <at name="beanproperties">
+                                <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                                 <at name="classname">com.jeta.forms.components.label.JETALabel</at>
+                                 <at name="properties">
+                                  <object classname="com.jeta.forms.store.support.PropertyMap">
+                                   <at name="border">
+                                    <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                     <at name="borders">
+                                      <object classname="java.util.LinkedList">
+                                       <item >
+                                        <at name="value">
+                                         <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                          <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                           <at name="name">border</at>
+                                          </super>
+                                         </object>
+                                        </at>
+                                       </item>
+                                      </object>
+                                     </at>
+                                    </object>
+                                   </at>
+                                   <at name="name"></at>
+                                   <at name="width">149</at>
+                                   <at name="text">Show Portrait on mouseover</at>
+                                   <at name="fill">
+                                    <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                                     <at name="name">fill</at>
+                                    </object>
+                                   </at>
+                                   <at name="toolTipText">Whether to show the Token&apos;s Portrait when the mouse hovers over a Token.</at>
+                                   <at name="height">14</at>
+                                  </object>
+                                 </at>
+                                </object>
+                               </at>
+                              </object>
+                             </at>
+                            </item>
+                            <item >
+                             <at name="value">
+                              <object classname="com.jeta.forms.store.memento.BeanMemento">
+                               <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                                <at name="cellconstraints">
+                                 <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                                  <at name="column">4</at>
+                                  <at name="row">20</at>
+                                  <at name="colspan">1</at>
+                                  <at name="rowspan">1</at>
+                                  <at name="halign">default</at>
+                                  <at name="valign">default</at>
+                                  <at name="insets" object="insets">0,0,0,0</at>
+                                 </object>
+                                </at>
+                                <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                               </super>
+                               <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                               <at name="beanclass">javax.swing.JCheckBox</at>
+                               <at name="beanproperties">
+                                <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                                 <at name="classname">javax.swing.JCheckBox</at>
+                                 <at name="properties">
+                                  <object classname="com.jeta.forms.store.support.PropertyMap">
+                                   <at name="border">
+                                    <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                     <at name="borders">
+                                      <object classname="java.util.LinkedList">
+                                       <item >
+                                        <at name="value">
+                                         <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                          <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                           <at name="name">border</at>
+                                          </super>
+                                         </object>
+                                        </at>
+                                       </item>
+                                      </object>
+                                     </at>
+                                    </object>
+                                   </at>
+                                   <at name="actionCommand">Show statsheet on mouseover</at>
+                                   <at name="name">showPortrait</at>
+                                   <at name="width">47</at>
+                                   <at name="height">15</at>
+                                  </object>
+                                 </at>
+                                </object>
+                               </at>
+                              </object>
+                             </at>
+                            </item>
+                            <item >
+                             <at name="value">
+                              <object classname="com.jeta.forms.store.memento.BeanMemento">
+                               <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                                <at name="cellconstraints">
+                                 <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                                  <at name="column">2</at>
+                                  <at name="row">24</at>
+                                  <at name="colspan">1</at>
+                                  <at name="rowspan">1</at>
+                                  <at name="halign">default</at>
+                                  <at name="valign">default</at>
+                                  <at name="insets" object="insets">0,0,0,0</at>
+                                 </object>
+                                </at>
+                                <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                               </super>
+                               <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                               <at name="beanclass">com.jeta.forms.components.label.JETALabel</at>
+                               <at name="beanproperties">
+                                <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                                 <at name="classname">com.jeta.forms.components.label.JETALabel</at>
+                                 <at name="properties">
+                                  <object classname="com.jeta.forms.store.support.PropertyMap">
+                                   <at name="border">
+                                    <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                     <at name="borders">
+                                      <object classname="java.util.LinkedList">
+                                       <item >
+                                        <at name="value">
+                                         <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                          <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                           <at name="name">border</at>
+                                          </super>
+                                         </object>
+                                        </at>
+                                       </item>
+                                      </object>
+                                     </at>
+                                    </object>
+                                   </at>
+                                   <at name="name"></at>
+                                   <at name="width">149</at>
+                                   <at name="text">Stat sheet requires Shift key</at>
+                                   <at name="fill">
+                                    <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                                     <at name="name">fill</at>
+                                    </object>
+                                   </at>
+                                   <at name="toolTipText">The stat sheet will only show when the mouse hovers over a Token if the Shift key is also held down. Otherwise, Shift key will hide stat sheet on mouse hovers.</at>
+                                   <at name="height">14</at>
+                                  </object>
+                                 </at>
+                                </object>
+                               </at>
+                              </object>
+                             </at>
+                            </item>
+                            <item >
+                             <at name="value">
+                              <object classname="com.jeta.forms.store.memento.BeanMemento">
+                               <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                                <at name="cellconstraints">
+                                 <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                                  <at name="column">4</at>
+                                  <at name="row">24</at>
+                                  <at name="colspan">1</at>
+                                  <at name="rowspan">1</at>
+                                  <at name="halign">default</at>
+                                  <at name="valign">default</at>
+                                  <at name="insets" object="insets">0,0,0,0</at>
+                                 </object>
+                                </at>
+                                <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                               </super>
+                               <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                               <at name="beanclass">javax.swing.JCheckBox</at>
+                               <at name="beanproperties">
+                                <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                                 <at name="classname">javax.swing.JCheckBox</at>
+                                 <at name="properties">
+                                  <object classname="com.jeta.forms.store.support.PropertyMap">
+                                   <at name="border">
+                                    <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                     <at name="borders">
+                                      <object classname="java.util.LinkedList">
+                                       <item >
+                                        <at name="value">
+                                         <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                          <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                           <at name="name">border</at>
+                                          </super>
+                                         </object>
+                                        </at>
+                                       </item>
+                                      </object>
+                                     </at>
+                                    </object>
+                                   </at>
+                                   <at name="actionCommand">Show statsheet on mouseover</at>
+                                   <at name="name">showStatSheetModifier</at>
+                                   <at name="width">47</at>
+                                   <at name="height">15</at>
                                   </object>
                                  </at>
                                 </object>
@@ -2550,7 +2783,7 @@
                           <at name="cellpainters">
                            <object classname="com.jeta.forms.store.support.Matrix">
                             <at name="rows">
-                             <object classname="[Ljava.lang.Object;" size="23">
+                             <object classname="[Ljava.lang.Object;" size="27">
                               <at name="item" index="0">
                                <object classname="[Ljava.lang.Object;" size="5"/>
                               </at>
@@ -2620,6 +2853,18 @@
                               <at name="item" index="22">
                                <object classname="[Ljava.lang.Object;" size="5"/>
                               </at>
+                              <at name="item" index="23">
+                               <object classname="[Ljava.lang.Object;" size="5"/>
+                              </at>
+                              <at name="item" index="24">
+                               <object classname="[Ljava.lang.Object;" size="5"/>
+                              </at>
+                              <at name="item" index="25">
+                               <object classname="[Ljava.lang.Object;" size="5"/>
+                              </at>
+                              <at name="item" index="26">
+                               <object classname="[Ljava.lang.Object;" size="5"/>
+                              </at>
                              </object>
                             </at>
                            </object>
@@ -2658,7 +2903,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.294781260</at>
+                          <at name="id">embedded.1919072280</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -3027,7 +3272,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1844574225</at>
+                          <at name="id">embedded.182272586</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -3396,7 +3641,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.40017996</at>
+                          <at name="id">embedded.78313723</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:GROW(1.0),FILL:23DLU:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -4537,7 +4782,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1938604828</at>
+                          <at name="id">embedded.1276784779</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -4906,7 +5151,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                           </object>
                          </at>
-                         <at name="name"></at>
+                         <at name="name"/>
                          <at name="fill">
                           <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                            <at name="name">fill</at>
@@ -5013,7 +5258,7 @@ Disabled (default): show tooltips for macroLinks</at>
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.230750636</at>
+                     <at name="id">embedded.1123657824</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -5496,7 +5741,7 @@ Disabled (default): show tooltips for macroLinks</at>
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1107135989</at>
+                     <at name="id">embedded.542939217</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -5518,7 +5763,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.204662633</at>
+                          <at name="id">embedded.2119181264</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:15DLU:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -5567,7 +5812,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">614</at>
+                                   <at name="width">576</at>
                                    <at name="name"/>
                                    <at name="text">Halo line width</at>
                                    <at name="fill">
@@ -5696,7 +5941,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">614</at>
+                                   <at name="width">576</at>
                                    <at name="name"/>
                                    <at name="text">Halo opacity</at>
                                    <at name="fill">
@@ -5757,7 +6002,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">614</at>
+                                   <at name="width">576</at>
                                    <at name="name"/>
                                    <at name="text">Auto-expose fog on token movement (GM Only)</at>
                                    <at name="fill">
@@ -5873,7 +6118,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">614</at>
+                                   <at name="width">576</at>
                                    <at name="name"/>
                                    <at name="text">Aura opacity</at>
                                    <at name="fill">
@@ -5934,7 +6179,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">614</at>
+                                   <at name="width">576</at>
                                    <at name="name"/>
                                    <at name="text">Light opacity</at>
                                    <at name="fill">
@@ -6063,7 +6308,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">614</at>
+                                   <at name="width">576</at>
                                    <at name="name"/>
                                    <at name="text">Fog opacity</at>
                                    <at name="fill">
@@ -6158,7 +6403,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">614</at>
+                                   <at name="width">576</at>
                                    <at name="name"/>
                                    <at name="text">Use halo color for vision</at>
                                    <at name="fill">
@@ -6392,7 +6637,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.564419496</at>
+                          <at name="id">embedded.97826390</at>
                           <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:15DLU:NONE,FILL:1PX:GROW(1.0),FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -6441,7 +6686,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">372</at>
+                                   <at name="width">368</at>
                                    <at name="name"/>
                                    <at name="text">Campaign autosave every</at>
                                    <at name="fill">
@@ -6596,7 +6841,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">372</at>
+                                   <at name="width">368</at>
                                    <at name="name"/>
                                    <at name="text">Save reminder on close</at>
                                    <at name="fill">
@@ -6713,9 +6958,9 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">372</at>
-                                   <at name="name"/>
-                                   <at name="text">Time between autosaves</at>
+                                   <at name="name"></at>
+                                   <at name="width">368</at>
+                                   <at name="text">Time between chat log autosaves</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -6834,7 +7079,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">372</at>
+                                   <at name="width">368</at>
                                    <at name="name"/>
                                    <at name="text">Autosave chat log filename</at>
                                    <at name="fill">
@@ -6896,7 +7141,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                     </object>
                                    </at>
                                    <at name="name">chatFilenameFormat</at>
-                                   <at name="width">337</at>
+                                   <at name="width">303</at>
                                    <at name="height">20</at>
                                   </object>
                                  </at>
@@ -7083,7 +7328,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1025471055</at>
+                          <at name="id">embedded.445924947</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:GROW(1.0)</at>
                           <at name="components">
@@ -7105,7 +7350,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.505861977</at>
+                               <at name="id">embedded.1931218207</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -7157,7 +7402,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                         <at name="actionCommand">Fill selection box</at>
                                         <at name="name">fillSelectionCheckBox</at>
                                         <at name="width">56</at>
-                                        <at name="height">15</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7209,7 +7454,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">584</at>
+                                        <at name="width">546</at>
                                         <at name="name"/>
                                         <at name="text">Fill selection box</at>
                                         <at name="fill">
@@ -7218,7 +7463,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                          </object>
                                         </at>
                                         <at name="toolTipText">If enabled, a shaded area is used when dragging the mouse to select multiple tokens.</at>
-                                        <at name="height">14</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7352,7 +7597,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.383003822</at>
+                               <at name="id">embedded.1727193482</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -7410,7 +7655,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                          </object>
                                         </at>
                                         <at name="toolTipText">If enabled, NPCs will not appear in the players views of the Initiative panel.</at>
-                                        <at name="height">14</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7465,7 +7710,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                         <at name="actionCommand">Hide NPCs from players on new maps</at>
                                         <at name="name">hideNPCs</at>
                                         <at name="width">56</at>
-                                        <at name="height">15</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7526,7 +7771,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                          </object>
                                         </at>
                                         <at name="toolTipText">Owner Permission allows players to perform certain actions on their tokens in the Initiative panel.</at>
-                                        <at name="height">14</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7581,7 +7826,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                         <at name="actionCommand">Give owners Permission in new campaigns</at>
                                         <at name="name">ownerPermission</at>
                                         <at name="width">56</at>
-                                        <at name="height">15</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7642,7 +7887,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                          </object>
                                         </at>
                                         <at name="toolTipText">When enabled, players will only be able to move their token when that token has initiative.</at>
-                                        <at name="height">14</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7697,7 +7942,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                         <at name="actionCommand">Lock Player Movement in new campaigns</at>
                                         <at name="name">lockMovement</at>
                                         <at name="width">56</at>
-                                        <at name="height">15</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7758,7 +8003,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                          </object>
                                         </at>
                                         <at name="toolTipText">When enabled, a message is sent to chat when a token gains initative.</at>
-                                        <at name="height">14</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7813,7 +8058,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                         <at name="actionCommand">Lock Player Movement in new campaigns</at>
                                         <at name="name">showInitGainMessage</at>
                                         <at name="width">56</at>
-                                        <at name="height">15</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7965,7 +8210,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.9664870</at>
+                               <at name="id">embedded.1888327864</at>
                                <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -8014,7 +8259,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">584</at>
+                                        <at name="width">546</at>
                                         <at name="name"/>
                                         <at name="text">Fit GM view </at>
                                         <at name="fill">
@@ -8023,7 +8268,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                          </object>
                                         </at>
                                         <at name="toolTipText">When forcing players to the GM&apos;s view, should the player&apos;s map be zoomed such that their screen shows at least the same content as the GM&apos;s screen?</at>
-                                        <at name="height">14</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -8078,7 +8323,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                         <at name="actionCommand">Fit GM view</at>
                                         <at name="name">fitGMView</at>
                                         <at name="width">56</at>
-                                        <at name="height">15</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -8209,7 +8454,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.2009492509</at>
+                               <at name="id">embedded.1511112519</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -8258,7 +8503,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">584</at>
+                                        <at name="width">546</at>
                                         <at name="name"/>
                                         <at name="text">Default: Allow players to edit macros</at>
                                         <at name="fill">
@@ -8267,7 +8512,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                          </object>
                                         </at>
                                         <at name="toolTipText">&lt;html&gt;Player-editable macros cannot call &lt;b&gt;trusted&lt;/b&gt; functions.  When developing a framework, this should be disabled.</at>
-                                        <at name="height">14</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -8322,7 +8567,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                         <at name="actionCommand">Default: Allow Players to Edit Macros</at>
                                         <at name="name">allowPlayerMacroEditsDefault</at>
                                         <at name="width">56</at>
-                                        <at name="height">15</at>
+                                        <at name="height">12</at>
                                        </object>
                                       </at>
                                      </object>
@@ -8456,7 +8701,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.758358334</at>
+                               <at name="id">embedded.1210635744</at>
                                <at name="rowspecs">CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:2DLU:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:40DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -8559,8 +8804,8 @@ Disabled (default): show tooltips for macroLinks</at>
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="name"></at>
-                                        <at name="width">581</at>
+                                        <at name="width">546</at>
+                                        <at name="name"/>
                                         <at name="text">Discovery Timeout</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -8614,7 +8859,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="name"></at>
+                                   <at name="name"/>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -8921,8 +9166,8 @@ Disabled (default): show tooltips for macroLinks</at>
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.678588698</at>
-                     <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
+                     <at name="id">embedded.1330158783</at>
+                     <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
                       <object classname="java.util.LinkedList">
@@ -8972,61 +9217,6 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="actionCommand">Play system sounds</at>
                               <at name="name">playSystemSounds</at>
-                              <at name="width">15</at>
-                              <at name="height">15</at>
-                             </object>
-                            </at>
-                           </object>
-                          </at>
-                         </object>
-                        </at>
-                       </item>
-                       <item >
-                        <at name="value">
-                         <object classname="com.jeta.forms.store.memento.BeanMemento">
-                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
-                           <at name="cellconstraints">
-                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
-                             <at name="column">4</at>
-                             <at name="row">4</at>
-                             <at name="colspan">1</at>
-                             <at name="rowspan">1</at>
-                             <at name="halign">default</at>
-                             <at name="valign">default</at>
-                             <at name="insets" object="insets">0,0,0,0</at>
-                            </object>
-                           </at>
-                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
-                          </super>
-                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
-                          <at name="beanclass">javax.swing.JCheckBox</at>
-                          <at name="beanproperties">
-                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
-                            <at name="classname">javax.swing.JCheckBox</at>
-                            <at name="properties">
-                             <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="border">
-                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
-                                <super classname="com.jeta.forms.store.properties.BorderProperty">
-                                 <at name="name">border</at>
-                                </super>
-                                <at name="borders">
-                                 <object classname="java.util.LinkedList">
-                                  <item >
-                                   <at name="value">
-                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
-                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
-                                      <at name="name">border</at>
-                                     </super>
-                                    </object>
-                                   </at>
-                                  </item>
-                                 </object>
-                                </at>
-                               </object>
-                              </at>
-                              <at name="actionCommand">Only when window not focused</at>
-                              <at name="name">soundsOnlyWhenNotFocused</at>
                               <at name="width">15</at>
                               <at name="height">15</at>
                              </object>
@@ -9141,8 +9331,8 @@ Disabled (default): show tooltips for macroLinks</at>
                                 </at>
                                </object>
                               </at>
+                              <at name="name"></at>
                               <at name="width">150</at>
-                              <at name="name"/>
                               <at name="text">Only when window not focused</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -9151,6 +9341,177 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="toolTipText">Only turn off sounds when the window is not focused.</at>
                               <at name="height">14</at>
+                             </object>
+                            </at>
+                           </object>
+                          </at>
+                         </object>
+                        </at>
+                       </item>
+                       <item >
+                        <at name="value">
+                         <object classname="com.jeta.forms.store.memento.BeanMemento">
+                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                           <at name="cellconstraints">
+                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                             <at name="column">4</at>
+                             <at name="row">4</at>
+                             <at name="colspan">1</at>
+                             <at name="rowspan">1</at>
+                             <at name="halign">default</at>
+                             <at name="valign">default</at>
+                             <at name="insets" object="insets">0,0,0,0</at>
+                            </object>
+                           </at>
+                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                          </super>
+                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                          <at name="beanclass">javax.swing.JCheckBox</at>
+                          <at name="beanproperties">
+                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                            <at name="classname">javax.swing.JCheckBox</at>
+                            <at name="properties">
+                             <object classname="com.jeta.forms.store.support.PropertyMap">
+                              <at name="border">
+                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                 <at name="name">border</at>
+                                </super>
+                                <at name="borders">
+                                 <object classname="java.util.LinkedList">
+                                  <item >
+                                   <at name="value">
+                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                    </object>
+                                   </at>
+                                  </item>
+                                 </object>
+                                </at>
+                               </object>
+                              </at>
+                              <at name="actionCommand">Only when window not focused</at>
+                              <at name="name">soundsOnlyWhenNotFocused</at>
+                              <at name="width">15</at>
+                              <at name="height">15</at>
+                             </object>
+                            </at>
+                           </object>
+                          </at>
+                         </object>
+                        </at>
+                       </item>
+                       <item >
+                        <at name="value">
+                         <object classname="com.jeta.forms.store.memento.BeanMemento">
+                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                           <at name="cellconstraints">
+                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                             <at name="column">2</at>
+                             <at name="row">6</at>
+                             <at name="colspan">1</at>
+                             <at name="rowspan">1</at>
+                             <at name="halign">default</at>
+                             <at name="valign">default</at>
+                             <at name="insets" object="insets">0,0,0,0</at>
+                            </object>
+                           </at>
+                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                          </super>
+                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                          <at name="beanclass">com.jeta.forms.components.label.JETALabel</at>
+                          <at name="beanproperties">
+                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                            <at name="classname">com.jeta.forms.components.label.JETALabel</at>
+                            <at name="properties">
+                             <object classname="com.jeta.forms.store.support.PropertyMap">
+                              <at name="border">
+                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                 <at name="name">border</at>
+                                </super>
+                                <at name="borders">
+                                 <object classname="java.util.LinkedList">
+                                  <item >
+                                   <at name="value">
+                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                    </object>
+                                   </at>
+                                  </item>
+                                 </object>
+                                </at>
+                               </object>
+                              </at>
+                              <at name="name"></at>
+                              <at name="width">150</at>
+                              <at name="text">Turn on Syrinscape Integration</at>
+                              <at name="fill">
+                               <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                                <at name="name">fill</at>
+                               </object>
+                              </at>
+                              <at name="toolTipText">Allow MapTool to launch Syrinscape via 3rd party integration URI. This will take affect on next launch of MapTool.</at>
+                              <at name="height">14</at>
+                             </object>
+                            </at>
+                           </object>
+                          </at>
+                         </object>
+                        </at>
+                       </item>
+                       <item >
+                        <at name="value">
+                         <object classname="com.jeta.forms.store.memento.BeanMemento">
+                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                           <at name="cellconstraints">
+                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                             <at name="column">4</at>
+                             <at name="row">6</at>
+                             <at name="colspan">1</at>
+                             <at name="rowspan">1</at>
+                             <at name="halign">default</at>
+                             <at name="valign">default</at>
+                             <at name="insets" object="insets">0,0,0,0</at>
+                            </object>
+                           </at>
+                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                          </super>
+                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                          <at name="beanclass">javax.swing.JCheckBox</at>
+                          <at name="beanproperties">
+                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                            <at name="classname">javax.swing.JCheckBox</at>
+                            <at name="properties">
+                             <object classname="com.jeta.forms.store.support.PropertyMap">
+                              <at name="border">
+                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                 <at name="name">border</at>
+                                </super>
+                                <at name="borders">
+                                 <object classname="java.util.LinkedList">
+                                  <item >
+                                   <at name="value">
+                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                    </object>
+                                   </at>
+                                  </item>
+                                 </object>
+                                </at>
+                               </object>
+                              </at>
+                              <at name="actionCommand">Only when window not focused</at>
+                              <at name="name">syrinscapeActive</at>
+                              <at name="width">15</at>
+                              <at name="height">15</at>
                              </object>
                             </at>
                            </object>
@@ -9175,7 +9536,7 @@ Disabled (default): show tooltips for macroLinks</at>
                            </at>
                           </object>
                          </at>
-                         <at name="name"/>
+                         <at name="name"></at>
                          <at name="fill">
                           <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                            <at name="name">fill</at>
@@ -9215,7 +9576,7 @@ Disabled (default): show tooltips for macroLinks</at>
                      <at name="cellpainters">
                       <object classname="com.jeta.forms.store.support.Matrix">
                        <at name="rows">
-                        <object classname="[Ljava.lang.Object;" size="5">
+                        <object classname="[Ljava.lang.Object;" size="7">
                          <at name="item" index="0">
                           <object classname="[Ljava.lang.Object;" size="5"/>
                          </at>
@@ -9229,6 +9590,12 @@ Disabled (default): show tooltips for macroLinks</at>
                           <object classname="[Ljava.lang.Object;" size="5"/>
                          </at>
                          <at name="item" index="4">
+                          <object classname="[Ljava.lang.Object;" size="5"/>
+                         </at>
+                         <at name="item" index="5">
+                          <object classname="[Ljava.lang.Object;" size="5"/>
+                         </at>
+                         <at name="item" index="6">
                           <object classname="[Ljava.lang.Object;" size="5"/>
                          </at>
                         </object>
@@ -9258,10 +9625,9 @@ Disabled (default): show tooltips for macroLinks</at>
               </at>
              </object>
             </at>
-            <at name="width">1603</at>
-            <at name="name"/>
+            <at name="width">1527</at>
             <at name="tabCount">4</at>
-            <at name="height">671</at>
+            <at name="height">741</at>
            </object>
           </at>
          </object>

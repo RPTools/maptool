@@ -2165,7 +2165,7 @@ public class AppActions {
 						// I'm going to get struck by lighting for writing code like this.
 						// CLEAN ME CLEAN ME CLEAN ME !   I NEED A SWINGWORKER!
 						MapTool.getFrame().showFilledGlassPane(progressDialog);
-
+						AppState.setIsLoading(true);
 						// Before we do anything, let's back it up
 						if (MapTool.getBackupManager() != null)
 							MapTool.getBackupManager().backup(campaignFile);
@@ -2212,6 +2212,9 @@ public class AppActions {
 					} finally {
 						MapTool.getAutoSaveManager().restart();
 						MapTool.getFrame().hideGlassPane();
+						AppState.setIsLoading(false);
+						MapTool.getFrame().getAssetCacheStatusBar().update(AppUtil.getDiskSpaceUsed(AppUtil.getAppHome("assetcache")));
+						MapTool.getFrame().getAppHomeDiskSpaceStatusBar().update();
 					}
 				} catch (IOException ioe) {
 					MapTool.showError("msg.error.failedLoadCampaign", ioe);
