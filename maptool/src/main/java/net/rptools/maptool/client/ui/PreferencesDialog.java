@@ -170,6 +170,7 @@ public class PreferencesDialog extends JDialog {
 	//Application
 	private final JCheckBox fitGMView;
 	private final JCheckBox fillSelectionCheckBox;
+	private final JCheckBox initEnableServerSyncCheckBox;
 	private final JCheckBox hideNPCs;
 	private final JCheckBox ownerPermissions;
 	private final JCheckBox lockMovement;
@@ -200,6 +201,7 @@ public class PreferencesDialog extends JDialog {
 		showNumberingCombo = panel.getComboBox("showNumberingCombo");
 		saveReminderCheckBox = panel.getCheckBox("saveReminderCheckBox");
 		fillSelectionCheckBox = panel.getCheckBox("fillSelectionCheckBox");
+		initEnableServerSyncCheckBox = panel.getCheckBox("initEnableServerSyncCheckBox");
 		autoSaveSpinner = panel.getSpinner("autoSaveSpinner");
 		duplicateTokenCombo = panel.getComboBox("duplicateTokenCombo");
 		tokenNamingCombo = panel.getComboBox("tokenNamingCombo");
@@ -366,6 +368,11 @@ public class PreferencesDialog extends JDialog {
 		fillSelectionCheckBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AppPreferences.setFillSelectionBox(fillSelectionCheckBox.isSelected());
+			}
+		});
+		initEnableServerSyncCheckBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				AppPreferences.setInitEnableServerSync(initEnableServerSyncCheckBox.isSelected());
 			}
 		});
 		showDialogOnNewToken.addActionListener(new ActionListener() {
@@ -682,6 +689,7 @@ public class PreferencesDialog extends JDialog {
 		showDialogOnNewToken.setSelected(AppPreferences.getShowDialogOnNewToken());
 		saveReminderCheckBox.setSelected(AppPreferences.getSaveReminder());
 		fillSelectionCheckBox.setSelected(AppPreferences.getFillSelectionBox());
+		initEnableServerSyncCheckBox.setSelected(AppPreferences.getInitEnableServerSync());
 		autoSaveSpinner.setValue(AppPreferences.getAutoSaveIncrement());
 		newMapsHaveFOWCheckBox.setSelected(AppPreferences.getNewMapsHaveFOW());
 		tokensPopupWarningWhenDeletedCheckBox.setSelected(AppPreferences.getTokensWarnWhenDeleted());

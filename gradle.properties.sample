@@ -1,4 +1,4 @@
-buildVersion=1.4.1.0
+buildVersion=1.4.3.0
 ftpServer=ftp.myserver.net
 ftpPort=21
 ftpUserID=myid
@@ -6,7 +6,9 @@ ftpPassword=mypassword
 ftpRemoteDir=/www/maptool/prod_updates
 
 // Local jWrapper directory to build from/to
-jWrapperDir=D:/Development/git/JamzTheMan/maptool/build-resources/jWrapper
+jWrapperDir=D:/Development/git/JamzTheMan/rptools/build-resources/jWrapper
+jWrapperBuildDir=D:/Development/git/JamzTheMan/rptools/build/jWrapperBuild
+releaseDir=D:/Development/git/JamzTheMan/rptools/build/release
 
 // Local JRE copies
 Linux32JRE=D:/Development/Java_JRE/java-1.8.92/jre-8u92-linux-i586

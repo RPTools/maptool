@@ -559,7 +559,8 @@ public class InitiativeList implements Serializable {
 		if (zoneId == null)
 			return;
 		LOGGER.debug("Full update");
-		MapTool.serverCommand().updateInitiative(this, null);
+		if (AppPreferences.getInitEnableServerSync())
+			MapTool.serverCommand().updateInitiative(this, null);
 	}
 
 	/**
@@ -571,7 +572,8 @@ public class InitiativeList implements Serializable {
 		if (zoneId == null)
 			return;
 		LOGGER.debug("Token Init update: " + ti.getId());
-		MapTool.serverCommand().updateTokenInitiative(zoneId, ti.getId(), ti.isHolding(), ti.getState(), indexOf(ti));
+		if (AppPreferences.getInitEnableServerSync())
+			MapTool.serverCommand().updateTokenInitiative(zoneId, ti.getId(), ti.isHolding(), ti.getState(), indexOf(ti));
 	}
 
 	/** @param aZone Setter for the zone */

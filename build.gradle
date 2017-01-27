@@ -83,25 +83,11 @@ def getLocalProperty(property) {
 				result = rootDir.toString() + "/build/release"
 			}
 			break
-		case 'Windows32JRE':
-			if (project.hasProperty('Windows32JRE')) {
-				result = Windows32JRE
-			} else {
-				result = rootDir.toString() + "../JREs/windows32"
-			}
-			break
 		case 'Windows64JRE':
 			if (project.hasProperty('Windows64JRE')) {
 				result = Windows64JRE
 			} else {
 				result = rootDir.toString() + "../JREs/windows64"
-			}
-			break
-		case 'Linux32JRE':
-			if (project.hasProperty('Linux32JRE')) {
-				result = Linux32JRE
-			} else {
-				result = rootDir.toString() + "../JREs/linux32"
 			}
 			break
 		case 'Linux64JRE':
@@ -522,8 +508,9 @@ project(':tokentoolfx') {
 	mainClassName = 'net.rptools.tokentool.fx.view.TokenToolFX'
 
 	dependencies {
-		compile project(':maptool') //, project(':rplib')
-		compile 'net.rptools.rplib:rplib:1.4.1.7+'
+		compile project(':maptool') 
+		project(':rplib')
+		// compile 'net.rptools.rplib:rplib:1.4.1.7+'
 		compile 'net.rptools.parser:parser:1.4.0.+'
 		compile 'com.withay:withay-util:1.0'
 		compile 'com.thoughtworks.xstream:xstream:1.4.9'
@@ -684,9 +671,7 @@ task createJwrapperConfig(type: Copy) {
 			'buildDate': rootProject.ext.yyyymmdd,
 			'buildVersion': getVersionName(),
 			'jWrapperDir': getLocalProperty('jWrapperDir'),
-			'Linux32JRE': getLocalProperty('Linux32JRE'),
 			'Linux64JRE': getLocalProperty('Linux64JRE'),
-			'Windows32JRE': getLocalProperty('Windows32JRE'),
 			'Windows64JRE': getLocalProperty('Windows64JRE'),
 			'Mac64JRE': getLocalProperty('Mac64JRE'),
 			'rootDir': rootDir.toString()])
@@ -710,7 +695,7 @@ task createJwrapperRelease(dependsOn: ['maptool:createSplashImages', 'createFatJ
 	workingDir = 'build-resources/jWrapper'
 	
 	main  = 'jwrapper.launch.JWCompiler'
-	classpath = files("build-resources/jWrapper/jwrapper-00044250826.jar")
+	classpath = files("build-resources/jWrapper/jwrapper-00049034758.jar")
 	args('jwrapper.xml')
 
 	doLast {
@@ -727,13 +712,6 @@ task renameJwrapperReleases(dependsOn: ['createJwrapperRelease'], type: Copy) {
 	rename('MapTool-windows64-offline.exe', 'MapTool-windows64-' + getVersionName() + '.exe')
 	rename('MapTool-linux64-offline.tar', 'MapTool-linux64-' + getVersionName() + '.tar')
 	rename('MapTool-macos64-offline.dmg', 'MapTool-macos64-' + getVersionName() + '.dmg')
-	
-	
-	// We really shouldn't need 32 bit releases. There is the standard jar release for those odd ball needs
-	// Unfortunately we can not tell JWrapper to skip them.
-	// rename('MapTool-windows32-offline.exe', 'MapTool-windows32-' + getVersionName() + '.exe')
-	// rename('MapTool-linux32-offline.tar', 'MapTool-linux32-' + getVersionName() + '.tar')
-	// rename('MapTool-macos32-offline.dmg', 'MapTool-macos32-' + getVersionName() + '.dmg')
 
 	outputs.upToDateWhen {
 		false

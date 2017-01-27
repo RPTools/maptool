@@ -22,11 +22,13 @@
   <MainClass>net.rptools.tokentool.TokenTool</MainClass>
 </App>
 <SupportedLanguages>en</SupportedLanguages>
-<Windows32JRE>@Windows32JRE@</Windows32JRE>
 <Windows64JRE>@Windows64JRE@</Windows64JRE>
-<Linux32JRE>@Linux32JRE@</Linux32JRE>
 <Linux64JRE>@Linux64JRE@</Linux64JRE>
 <Mac64JRE>@Mac64JRE@</Mac64JRE>
+<SkipWindows32>true</SkipWindows32>
+<SkipLinux32>true</SkipLinux32>
+<SkipMac32>true</SkipMac32>
+<SkipLinuxARM32>true</SkipLinuxARM32>
 <NoStripJREs>true</NoStripJREs>
 <WindowsElevation>None</WindowsElevation>
 <WindowsElevationUiAccess>true</WindowsElevationUiAccess>
