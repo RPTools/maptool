@@ -42,7 +42,7 @@ public class HTTP_Functions extends AbstractFunction {
 	private static final HTTP_Functions instance = new HTTP_Functions();
 
 	private HTTP_Functions() {
-		super(1, 2, "requestURL", "sendURL");
+		super(1, 3, "requestURL", "sendURL");
 	}
 
 	public static HTTP_Functions getInstance() {
@@ -78,15 +78,23 @@ public class HTTP_Functions extends AbstractFunction {
 		}
 
 		if (functionName.equals("sendURL")) {
+			if (parameters.size() == 0 || parameters.size() > 3)
+				throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
+
 			// Send POST request to URL
 			Map<String, String> params = new HashMap<String, String>();
 			String requestURL = parameters.get(0).toString();
 
 			if (!requestURL.startsWith("syrinscape")) {
-				if (parameters.size() != 2)
+				if (parameters.size() > 3)
 					throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 2, parameters.size()));
 
-				params.put("jsonData", parameters.get(1).toString());
+				// Use default key name of jsonData
+				if (parameters.size() == 2)
+					params.put("jsonData", parameters.get(1).toString());
+
+				if (parameters.size() == 3)
+					params.put(parameters.get(1).toString(), parameters.get(2).toString());
 
 				InputStream is;
 				try {
