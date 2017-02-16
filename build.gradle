@@ -69,13 +69,6 @@ def getLocalProperty(property) {
 				result = rootDir.toString() + "/build-resources/jWrapper"
 			}
 			break
-		case 'jWrapperBuildDir':
-			if (project.hasProperty('jWrapperBuildDir')) {
-				result = jWrapperBuildDir
-			} else {
-				result = rootDir.toString() + "/build-resources/jWrapper/JWrapperBuild"
-			}
-			break
 		case 'releaseDir':
 			if (project.hasProperty('releaseDir')) {
 				result = releaseDir
@@ -416,11 +409,15 @@ project(':maptool') {
 	// Generates the splash screen JWrapper uses during install so user see's the version
 	// Also creates a splash to use on web page to show current version
 	// Lastly, it also creates a MapTool-version.js which is just a javascript variable that holds the version to use dynamically choose latest version to download
-	task createSplashImages(type:JavaExec) {
+	task createSplashImages(type: JavaExec) {
 		description = "Generates splash screens"
 		group = "Distribution"
 		main = "net.rptools.maptool.util.CreateVersionedInstallSplash"
 		classpath = sourceSets.main.runtimeClasspath
+
+		args '-version=' + getVersionName()
+		args '-output=' + getLocalProperty('jWrapperDir') + '/maptool_installing_splash.png'
+		args '-web_output=' + getLocalProperty('releaseDir') + '-' + getVersionName()
 	}
 
 	// Add access rule to classpath for nashorn api

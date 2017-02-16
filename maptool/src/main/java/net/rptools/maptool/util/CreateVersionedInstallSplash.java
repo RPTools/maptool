@@ -49,51 +49,31 @@ import net.rptools.maptool.client.swing.SplashScreen;
 public class CreateVersionedInstallSplash extends Application {
 	private static String resourceImage = "net/rptools/maptool/client/image/maptool_splash_template.png";
 	private static String installImageOutputFilename = "../build-resources/jWrapper/maptool_installing_splash.png";
-	private static String webImageOutputPath = "../build/release-";
+	private static String webOutputPath;
 	private static String versionText = "Dev-Build";
 	private static final String FONT_RESOURCE = "/net/rptools/maptool/client/fonts/Horta.ttf";
 	private static Font versionFont;
 
 	public static void main(String[] args) {
-		Properties prop = new Properties();
-		InputStream input = null;
-		try {
-			input = new FileInputStream("D:/Development/git/JamzTheMan/rptools/gradle.properties");
-
-			// load a properties file
-			prop.load(input);
-
-			versionText = prop.getProperty("buildVersion");
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
 		Options cmdOptions = new Options();
 		cmdOptions.addOption("s", "source", true, "Source image to add version string to.");
 		cmdOptions.addOption("o", "output", true, "Output /path/image to write to.");
 		cmdOptions.addOption("v", "version", true, "Version text to add to image.");
+		cmdOptions.addOption("w", "web_output", true, "Output path for upload to web server");
 
 		// Parameters that can be overridden via command line options...
 		resourceImage = getCommandLineOption(cmdOptions, "source", resourceImage, args);
 		installImageOutputFilename = getCommandLineOption(cmdOptions, "output", installImageOutputFilename, args);
 		versionText = getCommandLineOption(cmdOptions, "version", versionText, args);
+		webOutputPath = getCommandLineOption(cmdOptions, "web_output", null, args);
 
 		Application.launch(args);
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		updateWebVersion(versionText);
 		final File installSplashFile = new File(installImageOutputFilename);
-		final File webSplashFile = new File(webImageOutputPath + versionText + "/MapTool-splash.png");
+
 		BufferedImage installImage = createLaunchSplash("Installing... " + "v" + versionText);
 		BufferedImage webImage = createLaunchSplash("v" + versionText);
 
@@ -103,25 +83,28 @@ public class CreateVersionedInstallSplash extends Application {
 			System.out.println("Output: " + installSplashFile.getCanonicalPath());
 
 			ImageIO.write(installImage, "png", installSplashFile);
-			ImageIO.write(webImage, "png", webSplashFile);
+			if (webOutputPath != null) {
+				System.out.println("Web Output: " + webOutputPath);
+				updateWebVersion(versionText);
+				ImageIO.write(webImage, "png", new File(webOutputPath + "/MapTool-splash.png"));
+			}
+
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println("Error: " + e.getMessage());
 		}
 
 		System.exit(0);
 	}
 
-	private static void updateWebVersion(String versionText) {
-		try {
-			File releaseDir = new File("D:/Development/git/JamzTheMan/rptools/build/release-" + versionText);
-			releaseDir.mkdirs();
-			FileWriter fstream = new FileWriter("D:/Development/git/JamzTheMan/rptools/build/release-" + versionText + "/MapTool-version.js");
-			BufferedWriter out = new BufferedWriter(fstream);
-			out.write("var mtVersion = \"" + versionText + "\";");
-			out.close();
-		} catch (Exception e) {
-			System.err.println("Error: " + e.getMessage());
-		}
+	private static void updateWebVersion(String versionText) throws IOException {
+		File releaseDir = new File(webOutputPath);
+		if (!releaseDir.mkdirs())
+			System.out.println("Error: Unable to create directory path [" + releaseDir + "]");
+
+		FileWriter fstream = new FileWriter(webOutputPath + "/MapTool-version.js");
+		BufferedWriter out = new BufferedWriter(fstream);
+		out.write("var mtVersion = \"" + versionText + "\";");
+		out.close();
 	}
 
 	public static BufferedImage createLaunchSplash(String versionText) {
