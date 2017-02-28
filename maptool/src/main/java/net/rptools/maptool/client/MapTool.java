@@ -67,6 +67,8 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
@@ -84,6 +86,7 @@ import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.box2d.MapToolGame;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
@@ -189,6 +192,7 @@ public class MapTool {
 	private static String lastWhisperer;
 
 	private static final MTWebAppServer webAppServer = new MTWebAppServer();
+	private static LwjglApplication MapToolLwjglApplication;
 
 	// Jamz: To support new command line parameters for multi-monitor support & enhanced PrintStream
 	private static boolean debug = false;
@@ -198,6 +202,7 @@ public class MapTool {
 	private static int windowHeight = -1;
 	private static int windowX = -1;
 	private static int windowY = -1;
+	private static boolean startLibGDX = false;
 
 	public static Dimension getThumbnailSize() {
 		return THUMBNAIL_SIZE;
@@ -1140,6 +1145,10 @@ public class MapTool {
 		return clientFrame;
 	}
 
+	public static LwjglApplication getApp() {
+		return MapToolLwjglApplication;
+	}
+
 	private static void configureLogging() {
 		String logging = null;
 		try {
@@ -1302,6 +1311,10 @@ public class MapTool {
 		cmdOptions.addOption("h", "height", true, "override MapTool window height");
 		cmdOptions.addOption("x", "xpos", true, "override MapTool window starting x coordinate");
 		cmdOptions.addOption("y", "ypos", true, "override MapTool window starting y coordinate");
+
+		// For libGDX testing
+		cmdOptions.addOption("l", "libgdx", false, "start & show libGDX application window");
+		startLibGDX = getCommandLineOption(cmdOptions, "libgdx", args);
 
 		debug = getCommandLineOption(cmdOptions, "debug", args);
 		version = getCommandLineOption(cmdOptions, "version", version, args);
@@ -1469,6 +1482,17 @@ public class MapTool {
 					public void run() {
 						clientFrame.setVisible(true);
 						splash.hideSplashScreen();
+
+						// Add a LibGDX App/window for testing
+						if (startLibGDX) {
+							LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+							cfg.title = MapToolGame.TITLE;
+							cfg.width = MapToolGame.V_WIDTH;
+							cfg.height = MapToolGame.V_HEIGHT;
+
+							MapToolLwjglApplication = new LwjglApplication(new MapToolGame(), cfg);
+						}
+
 						EventQueue.invokeLater(new Runnable() {
 							public void run() {
 								postInitialize();

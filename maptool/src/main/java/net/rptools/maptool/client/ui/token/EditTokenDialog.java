@@ -86,6 +86,7 @@ import com.jidesoft.swing.CheckBoxListWithSelectable;
 import com.jidesoft.swing.DefaultSelectable;
 import com.jidesoft.swing.Selectable;
 
+import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -95,7 +96,6 @@ import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Association;
 import net.rptools.maptool.model.Grid;
@@ -1130,19 +1130,19 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 						TEXTstatblockRSyntaxTextArea.setCaretPosition(0);
 
 						// Update the images
-						Asset tokenAsset = heroLabData.getTokenImage();
-						if (tokenAsset != null) {
-							getTokenIconPanel().setImageId(tokenAsset.getId());
-							getTokenLayoutPanel().setTokenImage(tokenAsset.getId());
+						MD5Key tokenImageKey = heroLabData.getTokenImage();
+						if (tokenImageKey != null) {
+							getTokenIconPanel().setImageId(tokenImageKey);
+							getTokenLayoutPanel().setTokenImage(tokenImageKey);
 						}
 
-						Asset portraitAsset = heroLabData.getPortraitImage();
-						if (portraitAsset != null)
-							getPortraitPanel().setImageId(portraitAsset.getId());
+						MD5Key portraitAssetKeY = heroLabData.getPortraitImage();
+						if (portraitAssetKeY != null)
+							getPortraitPanel().setImageId(portraitAssetKeY);
 
-						Asset handoutAsset = heroLabData.getHandoutImage();
-						if (handoutAsset != null)
-							getCharSheetPanel().setImageId(handoutAsset.getId());
+						MD5Key handoutAssetKey = heroLabData.getHandoutImage();
+						if (handoutAssetKey != null)
+							getCharSheetPanel().setImageId(handoutAssetKey);
 
 						// If NPC, lets not overwrite the Name, it may be "Creature 229" or such, GM name is enough
 						((JTextField) getComponent("@GMName")).setText(heroLabData.getName());

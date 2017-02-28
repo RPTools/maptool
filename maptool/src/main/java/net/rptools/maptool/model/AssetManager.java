@@ -349,6 +349,23 @@ public class AssetManager {
 	}
 
 	/**
+	 * Request that the asset be loaded from the server, blocks access while loading, use with caution!
+	 * 
+	 * @param id
+	 *            MD5 of the asset to load from the server
+	 * @return 
+	 */
+	public static Asset requestAssetFromServer(MD5Key id) {
+
+		if (id != null) {
+			assetLoader.requestAsset(id);
+			return getAsset(id);
+		}
+
+		return null;
+	}
+
+	/**
 	 * Retrieve the asset from the persistent cache. If the asset is not in the cache, or loading from the cache failed
 	 * then this function returns null.
 	 * 

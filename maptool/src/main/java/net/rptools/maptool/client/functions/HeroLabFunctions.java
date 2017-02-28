@@ -19,7 +19,6 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.HeroLabData;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ExtractHeroLab;
@@ -158,23 +157,21 @@ public class HeroLabFunctions extends AbstractFunction {
 			ExtractHeroLab heroLabExtract = new ExtractHeroLab(heroLabData.getPortfolioFile(), false);
 			heroLabData = heroLabExtract.refreshCharacter(heroLabData);
 
-			//heroLabExtract.extractAllCharacters(true);
-
 			if (heroLabData != null) {
 				token.setHeroLabData(heroLabData);
 
 				// Update the images
-				Asset tokenAsset = heroLabData.getTokenImage();
+				MD5Key tokenAsset = heroLabData.getTokenImage();
 				if (tokenAsset != null)
-					token.setImageAsset(null, tokenAsset.getId());
+					token.setImageAsset(null, tokenAsset);
 
-				Asset portraitAsset = heroLabData.getPortraitImage();
+				MD5Key portraitAsset = heroLabData.getPortraitImage();
 				if (portraitAsset != null)
-					token.setPortraitImage(portraitAsset.getId());
+					token.setPortraitImage(portraitAsset);
 
-				Asset handoutAsset = heroLabData.getHandoutImage();
+				MD5Key handoutAsset = heroLabData.getHandoutImage();
 				if (handoutAsset != null)
-					token.setCharsheetImage(handoutAsset.getId());
+					token.setCharsheetImage(handoutAsset);
 
 				return BigDecimal.ONE;
 			} else {

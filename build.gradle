@@ -69,13 +69,6 @@ def getLocalProperty(property) {
 				result = rootDir.toString() + "/build-resources/jWrapper"
 			}
 			break
-		case 'jWrapperBuildDir':
-			if (project.hasProperty('jWrapperBuildDir')) {
-				result = jWrapperBuildDir
-			} else {
-				result = rootDir.toString() + "/build-resources/jWrapper/JWrapperBuild"
-			}
-			break
 		case 'releaseDir':
 			if (project.hasProperty('releaseDir')) {
 				result = releaseDir
@@ -127,10 +120,16 @@ def getLocalProperty(property) {
 }
 
 allprojects {
+	ext {
+        gdxVersion = '1.9.5'
+        box2DLightsVersion = '1.4'
+        //aiVersion = '1.8.0'
+        //roboVMVersion = '2.3.0'
+    }
+    
 	repositories {
 		mavenCentral()
 		maven { url = 'http://maptool.craigs-stuff.net/repo/' }
-		// maven { url = 'http://www.nerps.net/repo/' }
 		mavenLocal()
 	}
 
@@ -341,6 +340,26 @@ project(':maptool') {
 		compile group: 'com.fifesoft', name: 'rstaui', version: '2.6.0'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
 		compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.18.1'			// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
 		
+		// box2dlights test
+		//compile group: 'com.badlogicgames.gdx', name: 'gdx-platform', version: '1.9.5'			// https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-platform
+		//compile group: 'com.badlogicgames.gdx', name: 'gdx-backend-lwjgl', version: '1.9.5'		// https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-backend-lwjgl
+		//compile group: 'com.badlogicgames.gdx', name: 'gdx-box2d', version: '1.9.5'				// https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-box2d
+		//compile group: 'com.badlogicgames.box2dlights', name: 'box2dlights', version: '1.4'
+
+		compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+        
+        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+        compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+        
+        //compile "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
+        //compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+        //compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
+        //compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+        //compile "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
+        
 		testCompile group: 'junit', name: 'junit', version: '4.11'
 	}
 
@@ -429,11 +448,15 @@ project(':maptool') {
 	// Generates the splash screen JWrapper uses during install so user see's the version
 	// Also creates a splash to use on web page to show current version
 	// Lastly, it also creates a MapTool-version.js which is just a javascript variable that holds the version to use dynamically choose latest version to download
-	task createSplashImages(type:JavaExec) {
+	task createSplashImages(type: JavaExec) {
 		description = "Generates splash screens"
 		group = "Distribution"
 		main = "net.rptools.maptool.util.CreateVersionedInstallSplash"
 		classpath = sourceSets.main.runtimeClasspath
+
+		args '-version=' + getVersionName()
+		args '-output=' + getLocalProperty('jWrapperDir') + '/maptool_installing_splash.png'
+		args '-web_output=' + getLocalProperty('releaseDir') + '-' + getVersionName()
 	}
 
 	// Add access rule to classpath for nashorn api
@@ -709,7 +732,7 @@ task createJwrapperRelease(dependsOn: ['maptool:createSplashImages', 'createFatJ
 	description = "Generates a MapTool release using jWrapper"
 	group = "Distribution"
 	workingDir = 'build-resources/jWrapper'
-	
+
 	main  = 'jwrapper.launch.JWCompiler'
 	classpath = files("build-resources/jWrapper/jwrapper-00049034758.jar")
 	args('jwrapper.xml')

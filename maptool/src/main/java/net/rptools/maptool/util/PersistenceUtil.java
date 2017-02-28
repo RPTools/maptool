@@ -569,8 +569,6 @@ public class PersistenceUtil {
 			pakFile.setContent(token);
 			pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
 			pakFile.setProperty(HERO_LAB, (token.getHeroLabData() != null));
-			if (token.getHeroLabData() != null)
-				saveAssets(token.getHeroLabData().getAllImageAssets(), pakFile);
 			pakFile.save();
 		} finally {
 			if (pakFile != null)

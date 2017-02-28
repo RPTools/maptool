@@ -882,6 +882,11 @@ public class Token extends BaseModel implements Cloneable {
 		Set<MD5Key> assetSet = new HashSet<MD5Key>(imageAssetMap.values());
 		assetSet.add(charsheetImage);
 		assetSet.add(portraitImage);
+
+		if (heroLabData != null)
+			if (heroLabData.getAllAssetIDs() != null)
+				assetSet.addAll(heroLabData.getAllAssetIDs());
+
 		assetSet.remove(null); // Clean up from any null values from above
 		return assetSet;
 	}

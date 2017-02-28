@@ -183,18 +183,18 @@ public final class ExtractHeroLab {
 				}
 
 				// Lets add everything to the token
-				heroLabToken = new Token(heroName, heroLabData.getTokenImage().getId());
+				heroLabToken = new Token(heroName, heroLabData.getTokenImage());
 				heroLabToken.setGMName(heroName);
 
 				// set the image shape
-				heroLabToken.setShape(TokenUtil.guessTokenType(ImageManager.getImageAndWait(heroLabData.getTokenImage().getId())));
+				heroLabToken.setShape(TokenUtil.guessTokenType(ImageManager.getImageAndWait(heroLabData.getTokenImage())));
 
 				// set the portrait image asset
-				heroLabToken.setPortraitImage(heroLabData.getPortraitImage().getId());
+				heroLabToken.setPortraitImage(heroLabData.getPortraitImage());
 
 				// set the hand out image asset (if exists)
 				if (heroLabData.getHandoutImage() != null) {
-					heroLabToken.setCharsheetImage(heroLabData.getHandoutImage().getId());
+					heroLabToken.setCharsheetImage(heroLabData.getHandoutImage());
 				}
 
 				heroLabData.setPortfolioFile(portfolioFile);
