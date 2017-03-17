@@ -207,7 +207,12 @@ public class AppUtil {
 	 * @return String of disk usage info
 	 */
 	public static String getDiskSpaceUsed(File directory) {
-		return FileUtils.byteCountToDisplaySize(FileUtils.sizeOfDirectory(directory)) + " ";
+		try {
+			return FileUtils.byteCountToDisplaySize(FileUtils.sizeOfDirectory(directory)) + " ";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	/**

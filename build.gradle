@@ -121,7 +121,7 @@ def getLocalProperty(property) {
 
 allprojects {
 	ext {
-        gdxVersion = '1.9.5'
+        gdxVersion = '1.9.6'
         box2DLightsVersion = '1.4'
         //aiVersion = '1.8.0'
         //roboVMVersion = '2.3.0'

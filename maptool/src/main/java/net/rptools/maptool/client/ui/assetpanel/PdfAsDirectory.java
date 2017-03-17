@@ -141,10 +141,6 @@ public class PdfAsDirectory extends Directory {
 					thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
 				} else {
 					thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
-
-					// Update disk usage in the status bar after we add a new thumbnail...
-					MapTool.getFrame().getImageCacheStatusBar().update(AppUtil.getDiskSpaceUsed(MapTool.getThumbnailManager().getThumbnailLocation()));
-					MapTool.getFrame().getAppHomeDiskSpaceStatusBar().update();
 				}
 			} catch (Throwable t) {
 				t.printStackTrace();

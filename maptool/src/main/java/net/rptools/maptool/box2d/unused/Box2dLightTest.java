@@ -1,4 +1,4 @@
-package net.rptools.maptool.box2d;
+package net.rptools.maptool.box2d.unused;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;

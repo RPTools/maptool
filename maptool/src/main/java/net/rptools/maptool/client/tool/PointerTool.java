@@ -77,6 +77,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.MovementKey;
 import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
@@ -858,6 +859,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			int deltaY = point.y - leadToken.getY();
 			Grid grid = zone.getGrid();
 			// Loop through all tokens.  As soon as one of them is blocked, stop processing and return false.
+			// Jamz: Option this for lead token only? It's annoying dragging a group when one token has limited vision...
 			for (Iterator<GUID> iter = tokenSet.iterator(); !isBlocked && iter.hasNext();) {
 				Area tokenFog = new Area(zoneFog);
 				GUID tokenGUID = iter.next();
@@ -865,13 +867,21 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				if (token == null) {
 					continue;
 				}
+
 				if (useTokenExposedArea) {
-					ExposedAreaMetaData meta = zone.getExposedAreaMetaData(token.getExposedAreaGUID());
-					tokenFog.add(meta.getExposedAreaHistory());
+					if (token.getHasSight()) {
+						ExposedAreaMetaData meta = zone.getExposedAreaMetaData(token.getExposedAreaGUID());
+						tokenFog.add(meta.getExposedAreaHistory());
+					} else {
+						// Jamz: Allow a token without site to move within the current PlayerView
+						tokenFog.add(renderer.getZoneView().getVisibleArea(new PlayerView(Role.PLAYER)));
+					}
 				}
+
 				Rectangle tokenSize = token.getBounds(zone);
 				Rectangle destination = new Rectangle(tokenSize.x + deltaX, tokenSize.y + deltaY, tokenSize.width, tokenSize.height);
 				isBlocked = !grid.validateMove(token, destination, dirx, diry, tokenFog);
+
 			}
 		}
 		return !isBlocked;

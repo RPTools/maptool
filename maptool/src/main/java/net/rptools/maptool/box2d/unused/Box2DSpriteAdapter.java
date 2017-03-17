@@ -1,4 +1,4 @@
-package net.rptools.maptool.box2d;
+package net.rptools.maptool.box2d.unused;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;

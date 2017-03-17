@@ -1133,7 +1133,7 @@ public class AppActions {
 		}
 	};
 
-	// Jamz: Force a directory to rsscan
+	// Jamz: Force a directory to rescan
 	public static final Action RESCAN_NODE = new DefaultClientAction() {
 		{
 			init("action.rescanNode");
@@ -2213,8 +2213,6 @@ public class AppActions {
 						MapTool.getAutoSaveManager().restart();
 						MapTool.getFrame().hideGlassPane();
 						AppState.setIsLoading(false);
-						MapTool.getFrame().getAssetCacheStatusBar().update(AppUtil.getDiskSpaceUsed(AppUtil.getAppHome("assetcache")));
-						MapTool.getFrame().getAppHomeDiskSpaceStatusBar().update();
 					}
 				} catch (IOException ioe) {
 					MapTool.showError("msg.error.failedLoadCampaign", ioe);

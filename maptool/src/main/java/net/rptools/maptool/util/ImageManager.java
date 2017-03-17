@@ -26,11 +26,15 @@ import java.util.concurrent.Executors;
 
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetAvailableListener;
 import net.rptools.maptool.model.AssetManager;
 
 import org.apache.log4j.Logger;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 
 /**
  * The ImageManager class keeps a cache of loaded images. This class can be used to load the raw image data from an
@@ -46,6 +50,7 @@ public class ImageManager {
 
 	/** Cache of images loaded for assets. */
 	private static final Map<MD5Key, BufferedImage> imageMap = new HashMap<MD5Key, BufferedImage>();
+	private static final Map<MD5Key, byte[]> textureMap = new HashMap<MD5Key, byte[]>();
 
 	/**
 	 * The unknown image, a "?" is used for all situations where the image will eventually appear e.g. asset download,
@@ -53,12 +58,14 @@ public class ImageManager {
 	 */
 	private static final String UNKNOWN_IMAGE_PNG = "net/rptools/maptool/client/image/unknown.png";
 	public static BufferedImage TRANSFERING_IMAGE;
+	public static Texture TRANSFERING_TEXTURE;
 
 	/**
 	 * The broken image, a "X" is used for all situations where the asset or image was invalid.
 	 */
 	private static final String BROKEN_IMAGE_PNG = "net/rptools/maptool/client/image/broken.png";
 	public static BufferedImage BROKEN_IMAGE;
+	public static Texture BROKEN_TEXTURE;
 
 	/**
 	 * Small and large thread pools for background processing of asset raw image data.
@@ -190,6 +197,45 @@ public class ImageManager {
 		}
 	}
 
+	public static byte[] getTexture(MD5Key assetId, ImageObserver... observers) {
+		return getTexture(assetId, null, observers);
+	}
+
+	public static byte[] getTexture(MD5Key assetId, Map<String, Object> hints, ImageObserver... observers) {
+		// Ugg, can't load textures before libgdx app is loaded...
+		if (TRANSFERING_TEXTURE == null)
+			TRANSFERING_TEXTURE = new Texture(Gdx.files.internal(UNKNOWN_IMAGE_PNG));
+
+		if (BROKEN_TEXTURE == null)
+			BROKEN_TEXTURE = new Texture(Gdx.files.internal(BROKEN_IMAGE_PNG));
+
+		if (assetId == null) {
+			return null;
+		}
+
+		synchronized (imageLoaderMutex) {
+			byte[] texture = textureMap.get(assetId);
+
+			if (texture != null) {
+				//				System.out.println("here... ");
+				return texture;
+			}
+			// Make note that we're currently processing it
+			//			textureMap.put(assetId, TRANSFERING_TEXTURE);
+
+			// Make sure we are informed when it's done loading
+			addObservers(assetId, observers);
+
+			// Force a load of the asset, this will trigger a transfer if the 
+			// asset is not available locally
+			if (texture == null) {
+				AssetManager.getAssetAsynchronously(assetId, new AssetListener(assetId, hints));
+			}
+
+			return null;
+		}
+	}
+
 	/**
 	 * Remove the image associated the asset from the cache.
 	 * 
@@ -209,6 +255,7 @@ public class ImageManager {
 	public static void flushImage(MD5Key assetId) {
 		// LATER: investigate how this effects images that are already in progress
 		imageMap.remove(assetId);
+		textureMap.remove(assetId);
 	}
 
 	/**
@@ -263,22 +310,70 @@ public class ImageManager {
 		public void run() {
 			log.debug("Loading asset: " + asset.getId());
 			BufferedImage image = imageMap.get(asset.getId());
+
 			if (image != null && image != TRANSFERING_IMAGE) {
 				// We've somehow already loaded this image
 				log.debug("Image wasn't in transit: " + asset.getId());
 				return;
 			}
+
 			try {
 				assert asset.getImage() != null : "asset.getImage() for " + asset.toString() + "returns null?!";
 				image = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()), hints);
 			} catch (Throwable t) {
-				log.error("BackgroundImageLoader.run(" + asset.getName() + "," + asset.getId() + "): not resolved", t);
+				log.error("BackgroundImageLoader.run(" + asset.getName() + "," + asset.getId() + "): image not resolved", t);
 				image = BROKEN_IMAGE;
 			}
+
 			synchronized (imageLoaderMutex) {
 				// Replace placeholder with actual image
 				imageMap.put(asset.getId(), image);
 				notifyObservers(asset, image);
+			}
+
+		}
+	}
+
+	private static class BackgroundTextureLoader implements Runnable {
+		private final Asset asset;
+
+		/**
+		 * Create a background image loader to load the asset image using the hints provided.
+		 * 
+		 * @param asset
+		 *            Asset to load
+		 * @param hints
+		 *            Hints to use for image loading
+		 */
+		public BackgroundTextureLoader(Asset asset) {
+			this.asset = asset;
+		}
+
+		/**
+		 * Load the asset raw texture data and notify observers that the image is loaded.
+		 */
+		public void run() {
+			log.debug("Loading asset: " + asset.getId());
+			byte[] texture = textureMap.get(asset.getId());
+
+			if ((texture != null) || !MapTool.libgdxLoaded) {
+				// We've somehow already loaded this texture
+				log.debug("Texture wasn't in transit: " + asset.getId());
+				return;
+			}
+
+			try {
+				assert asset.getImage() != null : "asset.getImage() for " + asset.toString() + "returns null?!";
+				texture = asset.getImage();
+			} catch (Exception e) {
+				log.error("BackgroundTextureLoader.run(" + asset.getName() + "," + asset.getId() + "): texture not resolved", e);
+				System.out.println("BackgroundTextureLoader.run(" + asset.getName() + "," + asset.getId() + "): texture not resolved :: " + e);
+				//texture = BROKEN_TEXTURE;
+			}
+
+			synchronized (imageLoaderMutex) {
+				// Replace placeholder with actual image
+				textureMap.put(asset.getId(), texture);
 			}
 		}
 	}
@@ -317,6 +412,8 @@ public class ImageManager {
 		} else {
 			smallImageLoader.execute(new BackgroundImageLoader(asset, hints));
 		}
+
+		largeImageLoader.execute(new BackgroundTextureLoader(asset));
 	}
 
 	private static class AssetListener implements AssetAvailableListener {

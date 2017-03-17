@@ -60,8 +60,6 @@ public class PreviewPanelFileChooser extends JFileChooser {
 			} else {
 				getPreviewPanel().setImage(null);
 			}
-			MapTool.getFrame().getImageCacheStatusBar().update(AppUtil.getDiskSpaceUsed(MapTool.getThumbnailManager().getThumbnailLocation()));
-			MapTool.getFrame().getAppHomeDiskSpaceStatusBar().update();
 		}
 	}
 

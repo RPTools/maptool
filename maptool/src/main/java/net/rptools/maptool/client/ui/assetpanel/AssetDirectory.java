@@ -72,8 +72,7 @@ public class AssetDirectory extends Directory {
 	}
 
 	/**
-	 * Returns the asset associated with this file, or null if the file has not
-	 * yet been loaded as an asset
+	 * Returns the asset associated with this file, or null if the file has not yet been loaded as an asset
 	 * 
 	 * @param imageFile
 	 * @return
@@ -143,10 +142,6 @@ public class AssetDirectory extends Directory {
 					thumbnail = HERO_LAB_IMAGE;
 				} else {
 					thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
-
-					// Update disk usage in the status bar after we add a new thumbnail...
-					MapTool.getFrame().getImageCacheStatusBar().update(AppUtil.getDiskSpaceUsed(MapTool.getThumbnailManager().getThumbnailLocation()));
-					MapTool.getFrame().getAppHomeDiskSpaceStatusBar().update();
 				}
 			} catch (Throwable t) {
 				t.printStackTrace();

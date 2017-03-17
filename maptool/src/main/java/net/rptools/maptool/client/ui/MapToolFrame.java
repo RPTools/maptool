@@ -1136,11 +1136,14 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 				Zone zone = ZoneFactory.createZone();
 				zone.setName(asset.getName());
 				BufferedImage image = ImageManager.getImageAndWait(asset.getId());
+				// Jamz FIXME: setBackgroundAsset properly for libgdx...
 				if (image.getWidth() < 200 || image.getHeight() < 200) {
 					zone.setBackgroundPaint(new DrawableTexturePaint(asset));
+					zone.setBackgroundAsset(asset.getId());
 				} else {
 					zone.setMapAsset(asset.getId());
 					zone.setBackgroundPaint(new DrawableColorPaint(Color.black));
+					zone.setBackgroundAsset(asset.getId());
 				}
 				MapPropertiesDialog newMapDialog = new MapPropertiesDialog(MapTool.getFrame());
 				newMapDialog.setZone(zone);
