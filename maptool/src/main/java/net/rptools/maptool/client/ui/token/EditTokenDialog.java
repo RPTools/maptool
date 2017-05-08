@@ -294,7 +294,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
 			((JCheckBox) getComponent("isAllyCheckBox")).setSelected(heroLabData.isAlly());
 			((JLabel) getComponent("summaryText")).setText(heroLabData.getSummary());
-			((JLabel) getComponent("portfolioLocation")).setText(heroLabData.getPortfolioFile().getPath());
+			((JLabel) getComponent("portfolioLocation")).setText(heroLabData.getPortfolioFile().getAbsolutePath());
+			((JLabel) getComponent("portfolioLocation")).setToolTipText(heroLabData.getPortfolioPath());
 			((JLabel) getComponent("lastModified")).setText(heroLabData.getLastModifiedDateString());
 
 			EventQueue.invokeLater(new Runnable() {
@@ -1118,6 +1119,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 						refreshDataButton.setIcon(REFRESH_ICON_OFF);
 						refreshDataButton.setToolTipText("<html>Refresh data from Hero Lab<br/><b><i>No changes detected...</i></b></html>");
 
+						((JLabel) getComponent("portfolioLocation")).setToolTipText(heroLabData.getPortfolioPath());
 						((JLabel) getComponent("lastModified")).setText(heroLabData.getLastModifiedDateString());
 
 						getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());

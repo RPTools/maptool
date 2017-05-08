@@ -716,8 +716,13 @@ public class PersistenceUtil {
 				log.error("AssetId " + assetId + " not found while saving?!");
 				continue;
 			}
-			pakFile.putFile(ASSET_DIR + assetId + "." + asset.getImageExtension(), asset.getImage());
-			pakFile.putFile(ASSET_DIR + assetId, asset); // Does not write the image
+
+			String extension = asset.getImageExtension();
+			byte[] assetData = asset.getImage();
+			//			System.out.println("Saving AssetId " + assetId + "." + extension + " with size of " + assetData.length);
+
+			pakFile.putFile(ASSET_DIR + assetId + "." + extension, assetData);
+			pakFile.putFile(ASSET_DIR + assetId + "", asset); // Does not write the image
 		}
 	}
 

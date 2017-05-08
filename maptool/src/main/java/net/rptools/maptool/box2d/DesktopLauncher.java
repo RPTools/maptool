@@ -21,9 +21,9 @@ public class DesktopLauncher extends JFrame {
 		cfg.height = MapToolGame.SCREEN_HEIGHT;
 		mapToolFrame = clientFrame;
 
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		//		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		canvas = new LwjglAWTCanvas(new MapToolGame(mapToolFrame), cfg);
+		canvas = new LwjglAWTCanvas(new MapToolGame(mapToolFrame, this), cfg);
 		canvas.getCanvas().setSize(MapToolGame.SCREEN_WIDTH, MapToolGame.SCREEN_HEIGHT);
 		add(canvas.getCanvas());
 

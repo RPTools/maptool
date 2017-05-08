@@ -3,8 +3,8 @@ package net.rptools.tokentool.fx.view;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Comparator;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.commons.cli.CommandLine;
@@ -24,7 +24,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import net.rptools.lib.DebugStream;
 import net.rptools.lib.FileUtil;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.tokentool.AppConstants;
 import net.rptools.tokentool.AppSetup;
 import net.rptools.tokentool.fx.controller.TokenTool_Controller;
@@ -34,10 +33,8 @@ import net.rptools.tokentool.fx.util.FxImageUtil;
  * 
  * @author Jamz
  * 
- *         To see splashscreen during testing, use JVM arg:
- *         -Djavafx.preloader=net.rptools.tokentool..fx.view.SplashScreenLoader Otherwise
- *         splashscreen will only show when defined as JavaFX-Preloader-Class in
- *         the JAR manifest.
+ *         To see splashscreen during testing, use JVM arg: -Djavafx.preloader=net.rptools.tokentool..fx.view.SplashScreenLoader Otherwise splashscreen will only show when defined as
+ *         JavaFX-Preloader-Class in the JAR manifest.
  * 
  */
 public class TokenToolFX extends Application {
@@ -53,7 +50,7 @@ public class TokenToolFX extends Application {
 	private static final int THUMB_SIZE = 100;
 	private int overlayCount = 0;
 	private int loadCount = 1;
-	private TreeItem<String> overlayTreeItems;
+	private TreeItem<Path> overlayTreeItems;
 
 	@Override
 	public void start(Stage primaryStage) throws IOException {
@@ -70,11 +67,12 @@ public class TokenToolFX extends Application {
 		controller.updateOverlayTreeview(overlayTreeItems);
 		primaryStage.show();
 		controller.expandOverlayOptionsPane(true);
+		controller.updateTokenPreviewImageView();
 	}
 
 	@Override
 	public void init() throws Exception {
-		final Parameters params = getParameters();
+		// final Parameters params = getParameters();
 
 		// System.out.println("3D Hardware Available? " + Platform.isSupported(ConditionalFeature.SCENE3D));
 		VERSION = getVersion();
@@ -93,16 +91,15 @@ public class TokenToolFX extends Application {
 	/**
 	 * 
 	 * @author Jamz
+	 * @throws IOException
 	 * @since 1.4.0.1
 	 * 
-	 *	This method loads and processes all the overlays found in
-	 *	user.home/overlays It can take a minute to load as it creates
-	 *	thumbnail versions for the comboBox so we call this during the
-	 *	init and display progress in the preLoader (splash screen).
+	 *        This method loads and processes all the overlays found in user.home/overlays It can take a minute to load as it creates thumbnail versions for the comboBox so we call this during the
+	 *        init and display progress in the preLoader (splash screen).
 	 *
 	 */
-	private TreeItem<String> cacheOverlays(File dir, TreeItem<String> parent, int THUMB_SIZE) {
-		TreeItem<String> root = new TreeItem<>(dir.getName());
+	private TreeItem<Path> cacheOverlays(File dir, TreeItem<Path> parent, int THUMB_SIZE) throws IOException {
+		TreeItem<Path> root = new TreeItem<>(dir.toPath());
 		root.setExpanded(false);
 
 		File[] files = dir.listFiles();
@@ -110,13 +107,9 @@ public class TokenToolFX extends Application {
 			if (file.isDirectory()) {
 				cacheOverlays(file, root, THUMB_SIZE);
 			} else {
-				if (ImageUtil.SUPPORTED_IMAGE_FILE_FILTER.accept(file, file.getName())) {
-					// Create a thumbnail and translate Magenta to Transparency...
-					Image thumb = FxImageUtil.magentaToTransparency(
-							new Image(file.toURI().toString(), THUMB_SIZE, THUMB_SIZE, true, true), 1);
-					TreeItem<String> imageNode = new TreeItem<>(file.toURI().toString(), new ImageView(thumb));
-					root.getChildren().add(imageNode);
-				}
+				Path filePath = file.toPath();
+				TreeItem<Path> imageNode = new TreeItem<>(filePath, FxImageUtil.getOverlayThumb(new ImageView(), filePath));
+				root.getChildren().add(imageNode);
 
 				notifyPreloader(new Preloader.ProgressNotification((double) loadCount++ / overlayCount));
 			}
@@ -126,9 +119,9 @@ public class TokenToolFX extends Application {
 			// When we show the overlay image, the TreeItem value is "" so we need to
 			// sort those to the bottom for a cleaner look and keep sub dir's at the top.
 			// If a node has no children then it's an overlay, otherwise it's a directory...
-			root.getChildren().sort(new Comparator<TreeItem<String>>() {
+			root.getChildren().sort(new Comparator<TreeItem<Path>>() {
 				@Override
-				public int compare(TreeItem<String> o1, TreeItem<String> o2) {
+				public int compare(TreeItem<Path> o1, TreeItem<Path> o2) {
 					if (o1.getChildren().size() == 0 && o2.getChildren().size() == 0)
 						return 0;
 					else if (o1.getChildren().size() == 0)
@@ -147,6 +140,9 @@ public class TokenToolFX extends Application {
 	}
 
 	private String getVersion() {
+		if (!VERSION.isEmpty())
+			return VERSION;
+
 		String version = "DEVELOPMENT";
 		try {
 			if (getClass().getClassLoader().getResource("net/rptools/tokentool/version.txt") != null) {
@@ -164,7 +160,7 @@ public class TokenToolFX extends Application {
 		return version;
 	}
 
-	private static boolean getCommandLineOption(Options options, String searchValue, String[] args) {
+	private static boolean getCommandLineBooleanOption(Options options, String searchValue, String[] args) {
 		CommandLineParser parser = new DefaultParser();
 
 		try {
@@ -179,9 +175,23 @@ public class TokenToolFX extends Application {
 		return false;
 	}
 
+	private static String getCommandLineStringOption(Options options, String searchValue, String[] args) {
+		CommandLineParser parser = new DefaultParser();
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+			if (cmd.hasOption(searchValue)) {
+				cmd.toString();
+			}
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return "";
+	}
+
 	/**
-	 * Legacy, it simply calls launches the FX Application which calls init()
-	 * then start()
+	 * Legacy, it simply calls launches the FX Application which calls init() then start()
 	 * 
 	 * @author Jamz
 	 * @since 1.4.0.1
@@ -191,9 +201,11 @@ public class TokenToolFX extends Application {
 	 */
 	public static void main(String[] args) {
 		Options cmdOptions = new Options();
+		cmdOptions.addOption("v", "version", true, "override version number");
 		cmdOptions.addOption("d", "debug", false, "turn on System.out enhanced debug output");
 
-		boolean debug = getCommandLineOption(cmdOptions, "debug", args);
+		VERSION = getCommandLineStringOption(cmdOptions, "version", args);
+		boolean debug = getCommandLineBooleanOption(cmdOptions, "debug", args);
 
 		// Jamz: Just a little console log formatter for system.out to hyperlink messages to source.
 		if (debug)

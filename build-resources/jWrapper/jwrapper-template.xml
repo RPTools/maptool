@@ -1,23 +1,23 @@
 <jwrapper>
 <BuildOutputFolder>@jWrapperDir@/JWrapperBuild</BuildOutputFolder>
-<BundleName>MapTool</BundleName>
+<BundleName>MapTool@altBundle@</BundleName>
 <SplashPNG>@jWrapperDir@/maptool_installing_splash.png</SplashPNG>
 <BundleLogoPNG>@jWrapperDir@/Nerps_Logo.png</BundleLogoPNG>
 <InstallType>CurrentUser</InstallType>
 <App>
-  <Name>MapTool Launcher</Name>
+  <Name>MapTool Launcher@altBundle@</Name>
   <LogoPNG>@jWrapperDir@/MapTool_Launcher.png</LogoPNG>
   <MainClass>@mainClass@</MainClass>
   <Param>-force_prompt</Param>
 </App>
 <App>
-  <Name>MapTool</Name>
+  <Name>MapTool@altBundle@</Name>
   <LogoPNG>@jWrapperDir@/MapTool.png</LogoPNG>
   <MainClass>@mainClass@</MainClass>
   <Param>-skip_prompt</Param>
 </App>
 <App>
-  <Name>TokenTool</Name>
+  <Name>TokenTool@altBundle@</Name>
   <LogoPNG>@jWrapperDir@/TokenTool_Logo_256.png</LogoPNG>
   <MainClass>net.rptools.tokentool.TokenTool</MainClass>
 </App>

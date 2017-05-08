@@ -403,6 +403,9 @@ public class AppPreferences {
 	private static final String KEY_UPNP_DISCOVERY_TIMEOUT = "upnpDiscoveryTimeout";
 	private static final int DEFAULT_UPNP_DISCOVERY_TIMEOUT = 5000;
 
+	private static final String KEY_FILE_SYNC_PATH = "fileSyncPath";
+	private static final String DEFAULT_FILE_SYNC_PATH = "";
+
 	public static void setTypingNotificationDuration(int ms) {
 		prefs.putInt(KEY_TYPING_NOTIFICATION_DURATION, ms);
 		MapTool.getFrame().setChatNotifyDuration(ms);
@@ -782,6 +785,14 @@ public class AppPreferences {
 
 	public static int getUpnpDiscoveryTimeout() {
 		return prefs.getInt(KEY_UPNP_DISCOVERY_TIMEOUT, DEFAULT_UPNP_DISCOVERY_TIMEOUT);
+	}
+
+	public static String getFileSyncPath() {
+		return prefs.get(KEY_FILE_SYNC_PATH, DEFAULT_FILE_SYNC_PATH);
+	}
+
+	public static void setFileSyncPath(String path) {
+		prefs.put(KEY_FILE_SYNC_PATH, path);
 	}
 
 	public static WalkerMetric getMovementMetric() {

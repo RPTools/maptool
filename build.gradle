@@ -111,6 +111,13 @@ def getLocalProperty(property) {
 				result = rootDir.toString() + "../JREs/mac64"
 			}
 			break
+		case 'altBundle':
+			if (project.hasProperty('altBundle')) {
+				result = " " + altBundle
+			} else {
+				result = ""
+			}
+			break
 		default:
 			result = ''
 			break
@@ -456,7 +463,7 @@ project(':maptool') {
 
 		args '-version=' + getVersionName()
 		args '-output=' + getLocalProperty('jWrapperDir') + '/maptool_installing_splash.png'
-		args '-web_output=' + getLocalProperty('releaseDir') + '-' + getVersionName()
+		args '-web_output=' + getLocalProperty('releaseDir') + getLocalProperty('altBundle') + '-' + getVersionName()
 	}
 
 	// Add access rule to classpath for nashorn api
@@ -547,6 +554,8 @@ project(':tokentoolfx') {
 	dependencies {
 		compile project(':maptool') 
 		compile project(':rplib')
+		 // Jamz: I hate having to add JavaFX SDK manually via Project -> Properties -> Build Path -> Add Libraries -> JavaFX SDK
+		compile files("C:/Users/Jamz/.p2/pool/plugins/org.eclipse.fx.ide.css.jfx8_2.4.0.201605112122.jar")
 		// compile 'net.rptools.rplib:rplib:1.4.1.7+'
 		compile 'net.rptools.parser:parser:1.4.0.+'
 		compile 'com.withay:withay-util:1.0'
@@ -556,6 +565,13 @@ project(':tokentoolfx') {
 		compile 'commons-logging:commons-logging:1.1.1'
 		compile 'log4j:log4j:1.2.16'
 		compile 'commons-io:commons-io:2.4'
+		
+		compile 'com.getsentry.raven:raven:7.8.6'	// https://sentry.io/nerps/nerps-maptool/getting-started/java/
+		
+		compile group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+		// compile group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-tiff
+		compile group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
+		
 	}
 
 	jar {
@@ -705,6 +721,7 @@ task createJwrapperConfig(type: Copy) {
 		include 'jwrapper-template.xml'
 		filter(ReplaceTokens, tokens: [
 			'mainClass': mainClassName,
+			'altBundle': getLocalProperty('altBundle'),
 			'buildDate': rootProject.ext.yyyymmdd,
 			'buildVersion': getVersionName(),
 			'jWrapperDir': getLocalProperty('jWrapperDir'),
@@ -736,7 +753,7 @@ task createJwrapperRelease(dependsOn: ['maptool:createSplashImages', 'createFatJ
 	main  = 'jwrapper.launch.JWCompiler'
 	classpath = files("build-resources/jWrapper/jwrapper-00049034758.jar")
 	args('jwrapper.xml')
-
+	
 	doLast {
 		println 'Creating MapTool jWrapper Release in: ' + workingDir
 	}
@@ -746,11 +763,11 @@ task renameJwrapperReleases(dependsOn: ['createJwrapperRelease'], type: Copy) {
 	from ('build-resources/jWrapper/JWrapperBuild') {
 		include 'MapTool-*64-offline*'
 	}
-	into getLocalProperty('releaseDir') + "-" + getVersionName()
+	into getLocalProperty('releaseDir') + getLocalProperty('altBundle') + "-" + getVersionName()
 	
-	rename('MapTool-windows64-offline.exe', 'MapTool-windows64-' + getVersionName() + '.exe')
-	rename('MapTool-linux64-offline.tar', 'MapTool-linux64-' + getVersionName() + '.tar')
-	rename('MapTool-macos64-offline.dmg', 'MapTool-macos64-' + getVersionName() + '.dmg')
+	rename('MapTool-windows64-offline.exe', 'MapTool-windows64-' + getLocalProperty('altBundle') + getVersionName() + '.exe')
+	rename('MapTool-linux64-offline.tar', 'MapTool-linux64-' + getLocalProperty('altBundle') + getVersionName() + '.tar')
+	rename('MapTool-macos64-offline.dmg', 'MapTool-macos64-' + getLocalProperty('altBundle') + getVersionName() + '.dmg')
 	
 	
 	// We really shouldn't need 32 bit releases. There is the standard jar release for those odd ball needs
@@ -764,7 +781,7 @@ task renameJwrapperReleases(dependsOn: ['createJwrapperRelease'], type: Copy) {
 	}
 	
 	doLast {
-		println 'Renaming and moving MapTool jWrapper Release to: ' + getLocalProperty('releaseDir') + "-" + getVersionName()
+		println 'Renaming and moving MapTool jWrapper Release to: ' + getLocalProperty('releaseDir') + getLocalProperty('altBundle') + "-" + getVersionName()
 	}
   }
 
@@ -775,7 +792,7 @@ task ftpUpdateRelease {
 	doLast {
 		println "Uploading via FTP..."
 		println "To remote server: " + ftpServer
-		println "Remote directory: " + ftpRemoteDir
+		println "Remote directory: " + ftpRemoteDir + getLocalProperty('altBundle')
 
 		ant {
 			taskdef(name: 'ftp',
@@ -785,11 +802,11 @@ task ftpUpdateRelease {
 				port: ftpPort,
 				userid: ftpUserID,
 				password: ftpPassword,
-				remoteDir: ftpRemoteDir,
+				remoteDir: ftpRemoteDir + getLocalProperty('altBundle'),
 				passive: 'yes',
 				verbose: true)
 				{
-					fileset(file: getLocalProperty('releaseDir') + "-" + getVersionName() + "/MapTool-*")
+					fileset(file: getLocalProperty('releaseDir') + getLocalProperty('altBundle') + "-" + getVersionName() + "/MapTool-*")
 				}
 		}
 	}

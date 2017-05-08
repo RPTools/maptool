@@ -26,6 +26,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -176,6 +177,8 @@ public class PreferencesDialog extends JDialog {
 	private final JCheckBox lockMovement;
 	private final JCheckBox showInitGainMessage;
 	private final JTextField upnpDiscoveryTimeoutTextField;
+	private final JTextField fileSyncPath;
+	private final JButton fileSyncPathButton;
 
 	public PreferencesDialog() {
 		super(MapTool.getFrame(), "Preferences", true);
@@ -260,6 +263,9 @@ public class PreferencesDialog extends JDialog {
 		showInitGainMessage = panel.getCheckBox("showInitGainMessage");
 		upnpDiscoveryTimeoutTextField = panel.getTextField("upnpDiscoveryTimeoutTextField");
 		typingNotificationDuration = panel.getSpinner("typingNotificationDuration");
+		fileSyncPath = panel.getTextField("fileSyncPath");
+		fileSyncPathButton = (JButton) panel.getButton("fileSyncPathButton");
+
 		setInitialState();
 
 		// And keep it updated
@@ -590,6 +596,25 @@ public class PreferencesDialog extends JDialog {
 				AppPreferences.setUpnpDiscoveryTimeout(value);
 			}
 		});
+		fileSyncPathButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser(AppPreferences.getFileSyncPath());
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				int returnVal = fileChooser.showOpenDialog(null);
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					String selectedPath = fileChooser.getSelectedFile().getPath().toString();
+
+					// Set the text field
+					fileSyncPath.setText(selectedPath);
+					fileSyncPath.setCaretPosition(0);
+
+					// Save to preferences
+					AppPreferences.setFileSyncPath(selectedPath);
+				}
+			}
+		});
+
 		chatNotificationShowBackground.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AppPreferences.setChatNotificationShowBackground(chatNotificationShowBackground.isSelected());
@@ -743,6 +768,8 @@ public class PreferencesDialog extends JDialog {
 		lockMovement.setSelected(AppPreferences.getInitLockMovement());
 		showInitGainMessage.setSelected(AppPreferences.isShowInitGainMessage());
 		upnpDiscoveryTimeoutTextField.setText(Integer.toString(AppPreferences.getUpnpDiscoveryTimeout()));
+		fileSyncPath.setText(AppPreferences.getFileSyncPath());
+
 		Integer rawVal = AppPreferences.getTypingNotificationDuration();
 		Integer typingVal = null;
 		if (rawVal != null && rawVal > 99) { // backward compatibility -- used to be stored in ms, now in seconds

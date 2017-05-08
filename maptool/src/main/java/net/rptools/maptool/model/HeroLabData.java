@@ -7,20 +7,20 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 import com.jcabi.xml.XML;
 import com.jcabi.xml.XMLDocument;
 
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.AppPreferences;
 import net.sf.json.JSONObject;
 
 /**
@@ -48,7 +48,7 @@ public class HeroLabData {
 	private boolean isMinion = false;
 
 	private File portfolioFile;
-	private URL portfolioURL;
+	private String portfolioPath;
 	private long lastModified = 0L;
 
 	private HashMap<String, MD5Key> heroImageAssets = new HashMap<>();
@@ -154,6 +154,7 @@ public class HeroLabData {
 			byteIn.close();
 			in.close();
 		} catch (ClassNotFoundException | IOException e) {
+			System.out.println("ERROR: Attempting to read Asset ID: " + heroLabStatblockAssetID);
 			e.printStackTrace();
 		}
 
@@ -174,7 +175,7 @@ public class HeroLabData {
 			if (statBlocks != null) {
 				out.writeObject(statBlocks);
 
-				String assetName = portfolioFile + "/" + heroLabIndex + "/" + name;
+				String assetName = getPortfolioFile() + "/" + heroLabIndex + "/" + name;
 				Asset statBlockAsset = new Asset(assetName, byteOut.toByteArray());
 				AssetManager.putAsset(statBlockAsset);
 				heroLabStatblockAssetID = statBlockAsset.getId();
@@ -243,17 +244,39 @@ public class HeroLabData {
 	}
 
 	public File getPortfolioFile() {
-		return portfolioFile;
+		String fileSyncPath = AppPreferences.getFileSyncPath();
+
+		if (portfolioPath == null || portfolioPath.isEmpty() || fileSyncPath.isEmpty()) {
+			return portfolioFile;
+		} else {
+			if (portfolioPath.startsWith(fileSyncPath))
+				return new File(portfolioPath);
+			else
+				return new File(fileSyncPath, portfolioPath);
+		}
 	}
 
 	public void setPortfolioFile(File portfolioFile) {
 		this.portfolioFile = portfolioFile;
 		lastModified = getPortfolioLastModified();
+
+		if (!AppPreferences.getFileSyncPath().isEmpty()) {
+			try {
+				portfolioPath = Paths.get(AppPreferences.getFileSyncPath()).relativize(portfolioFile.toPath()).toString();
+			} catch (IllegalArgumentException e) {
+				System.out.println("Unable to relativize paths for: [" + portfolioFile + "] [" + AppPreferences.getFileSyncPath() + "]");
+				portfolioPath = "";
+			}
+		} else {
+			portfolioPath = portfolioFile.getPath().toString();
+		}
+
+		System.out.println("portfolioPath: " + portfolioPath);
 	}
 
 	private long getPortfolioLastModified() {
-		if (portfolioFile != null)
-			return portfolioFile.lastModified();
+		if (getPortfolioFile() != null)
+			return getPortfolioFile().lastModified();
 		else
 			return 0L;
 	}
@@ -321,12 +344,15 @@ public class HeroLabData {
 		this.isMinion = isMinion;
 	}
 
-	public URL getPortfolioURL() {
-		return portfolioURL;
+	public String getPortfolioPath() {
+		if (portfolioPath == null)
+			setPortfolioPath("");
+
+		return portfolioPath;
 	}
 
-	public void setPortfolioURL(URL portfolioURL) {
-		this.portfolioURL = portfolioURL;
+	public void setPortfolioPath(String portfolioPath) {
+		this.portfolioPath = portfolioPath;
 	}
 
 	public String getPlayerName() {
@@ -449,7 +475,8 @@ public class HeroLabData {
 		heroLabInfo.put("isDirty", isDirty());
 		heroLabInfo.put("isAlly", isAlly);
 		heroLabInfo.put("isMinion", isMinion);
-		heroLabInfo.put("portfolioFile", portfolioFile.getAbsolutePath());
+		heroLabInfo.put("portfolioFile", getPortfolioFile().getAbsolutePath());
+		heroLabInfo.put("portfolioPath", portfolioPath);
 		heroLabInfo.put("lastModified", getLastModifiedDateString());
 		heroLabInfo.put("images", getAllImageAssetsURLs().toArray());
 

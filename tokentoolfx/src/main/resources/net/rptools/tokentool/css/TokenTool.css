@@ -13,43 +13,58 @@
 
 /* leaf is a PsuedoClass added via the controller to child-only nodes, ie overlays... */
 .tree-cell:leaf {
-    -fx-content-display: graphic-only;
-    -fx-indent: 0;
+	-fx-content-display: graphic-only;
+	-fx-indent: 0.0;
 }
 
 .token-view {
-    -fx-background-image: url("../image/grid.png");
-    -fx-background-size: 20, 20;
-    -fx-border-color: black;
-    -fx-border-width: 2;
+	-fx-background-image: url("../image/grid.png");
+	-fx-background-size: 20.0, 20.0;
+	-fx-border-color: black;
+	-fx-border-width: 2.0;
 }
 
 .composite-view-checkered {
-    -fx-background-image: url("../image/grid.png");
-    -fx-background-size: 20, 20;
-    -fx-border-color: black;
-    -fx-border-width: 2;
+	-fx-background-image: url("../image/grid.png");
+	-fx-background-size: 20.0, 20.0;
+	-fx-border-color: black;
+	-fx-border-width: 2.0;
 }
 
 .composite-view-black {
-    -fx-background-color: black;
-    -fx-border-color: black;
-    -fx-border-width: 2;
+	-fx-background-color: black;
+	-fx-background: black;
+	-fx-border-color: black;
+	-fx-border-width: 2.0;
 }
 
-/* Reminder: Padding is All | Top, Right, Bottom, Left */
-.controls {
-
+.composite-transparent {
+	-fx-background-color: transparent;
+	-fx-background: transparent;
+	-fx-border-color: black;
+	-fx-border-width: 2.0;
 }
 
-.controls-label {
-
+.stack-pane > .viewport {
+	-fx-background-color: transparent;
 }
 
-.controls-textbox {
-
+.stack-pane {
+   -fx-background-color: transparent;
 }
 
-.control-panel {
-    
+.scroll-pane > .viewport {
+	-fx-background-color: transparent;
+}
+
+.scroll-pane {
+   -fx-background-color: transparent;
+}
+
+.toggle-button {
+  -fx-graphic: url("../image/unlocked.png");
+}
+
+.toggle-button:selected {
+  -fx-graphic: url("../image/locked.png");
 }

@@ -100,6 +100,9 @@ public class Asset {
 						reader.setInput(iis);
 						extension = reader.getFormatName().toLowerCase();
 					}
+					// We can store more than images, eg HeroLabData in the form of a HashMap
+					if (extension.isEmpty())
+						extension = "data";
 				}
 			} catch (IOException e) {
 				MapTool.showError("IOException?!", e); // Can this happen??

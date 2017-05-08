@@ -320,6 +320,11 @@ public class AppMenuBar extends JMenuBar {
 			menu.addSeparator();
 		}
 		menu.add(new JMenuItem(AppActions.GATHER_DEBUG_INFO));
+
+		// Jamz: Box2d Testing...
+		menu.addSeparator();
+		menu.add(new JMenuItem(AppActions.SHOW_BOX2D_TEST));
+
 		if (!MapTool.MAC_OS_X) {
 			menu.addSeparator();
 			menu.add(new JMenuItem(AppActions.SHOW_ABOUT));

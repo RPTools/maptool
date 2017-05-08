@@ -11,11 +11,10 @@
 
 package net.rptools.maptool.model;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.net.InetAddress;
+import java.util.UUID;
 
-import net.rptools.maptool.client.ui.io.ResolveLocalHostname;
+import org.apache.commons.lang.StringUtils;
 
 import com.withay.util.HexCode;
 
@@ -33,21 +32,10 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
 	public static final int GUID_BUCKETS = 100;
 	// NOTE: THIS CAN NEVER BE CHANGED, OR IT WILL AFFECT ALL THINGS THAT PREVIOUSLY USED IT
 
-	private static byte[] ip;
 	private final byte[] baGUID;
 
 	// Cache of the hashCode for a GUID
 	private transient int hash;
-
-	static {
-		try {
-			InetAddress rptools = null; // InetAddress.getByName("www.rptools.net");
-			InetAddress localAddy = ResolveLocalHostname.getLocalHost(rptools);
-			ip = localAddy.getAddress();
-		} catch (IOException e) { // Could be UnknownHostException or SocketException
-			ip = new byte[4];
-		}
-	}
 
 	public GUID() {
 		this.baGUID = generateGUID();
@@ -74,7 +62,7 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
 		if (baGUID == null)
 			throw new InvalidGUIDException("GUID is null");
 		if (baGUID.length != GUID_LENGTH)
-			throw new InvalidGUIDException("GUID length is invalid");
+			throw new InvalidGUIDException("GUID length is invalid: " + baGUID.length);
 	}
 
 	/** Returns the GUID representation of the {@link byte} array argument. */
@@ -131,8 +119,7 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
 	}
 
 	/**
-	 * Returns a hashcode for this GUID. This function is based on the algorithm
-	 * that JDK 1.3 uses for a String.
+	 * Returns a hashcode for this GUID. This function is based on the algorithm that JDK 1.3 uses for a String.
 	 * 
 	 * @return a hash code value for this object.
 	 */
@@ -150,36 +137,19 @@ public class GUID extends Object implements Serializable, Comparable<GUID> {
 		return h;
 	}
 
-	private static long guidGenerationCounter = 0;
-
+	/**
+	 * Returns a new non-numeric GUID using UUID to generate a unique alphanumeric string
+	 * 
+	 * @return a byte[]
+	 */
 	public static byte[] generateGUID() throws InvalidGUIDException {
-		byte[] guid = new byte[16];
+		String newGUID = UUID.randomUUID().toString().replaceAll("-", "");
 
-		System.currentTimeMillis();
+		while (StringUtils.isNumeric(newGUID)) {
+			newGUID = UUID.randomUUID().toString().replaceAll("-", "");
+		}
 
-		long time = System.currentTimeMillis();
-
-		guidGenerationCounter++;
-
-		int n = 0;
-		guid[n++] = ip[0];
-		guid[n++] = ip[1];
-		guid[n++] = ip[2];
-		guid[n++] = ip[3];
-		guid[n++] = (byte) (time & 0xFF);
-		guid[n++] = (byte) (time >> 8 & 0xFF);
-		guid[n++] = (byte) (time >> 16 & 0xFF);
-		guid[n++] = (byte) (time >> 24 & 0xFF);
-		guid[n++] = (byte) (guidGenerationCounter & 0xFF);
-		guid[n++] = (byte) (guidGenerationCounter >> 8 & 0xFF);
-		guid[n++] = (byte) (guidGenerationCounter >> 16 & 0xFF);
-		guid[n++] = (byte) (guidGenerationCounter >> 24 & 0xFF);
-		guid[n++] = (byte) ((time >> 24 & 0xFF) & ip[0]);
-		guid[n++] = (byte) ((time >> 16 & 0xFF) & ip[1]);
-		guid[n++] = (byte) ((time >> 8 & 0xFF) & ip[2]);
-		guid[n++] = (byte) ((time >> 0 & 0xFF) & ip[3]);
-
-		return guid;
+		return new GUID(newGUID).getBytes();
 	}
 
 	public static void main(String[] args) throws Exception {

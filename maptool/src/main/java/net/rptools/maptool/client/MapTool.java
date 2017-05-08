@@ -1149,6 +1149,19 @@ public class MapTool {
 		return MapToolLwjglApplication;
 	}
 
+	public static void loadBox2dTest() {
+		if (MapToolLwjglApplication == null) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					MapToolLwjglApplication = new DesktopLauncher(clientFrame);
+					libgdxLoaded = true;
+				}
+			});
+		} else if (!MapToolLwjglApplication.isVisible()) {
+			MapToolLwjglApplication.setVisible(true);
+		}
+	}
+
 	private static void configureLogging() {
 		String logging = null;
 		try {

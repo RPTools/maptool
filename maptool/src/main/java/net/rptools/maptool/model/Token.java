@@ -609,9 +609,19 @@ public class Token extends BaseModel implements Cloneable {
 
 	public Integer getFacingInDegrees() {
 		if (facing == null)
-			return 0;
+			return -1;
 		else
 			return -(facing + 90);
+	}
+
+	public Integer getFacingInRealDegrees() {
+		if (facing == null)
+			return -1;
+
+		if (facing >= 0)
+			return facing;
+		else
+			return facing + 360;
 	}
 
 	public boolean getHasSight() {

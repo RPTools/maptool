@@ -25,6 +25,7 @@ package net.rptools.tokentool;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
 
@@ -49,8 +50,10 @@ public class AppSetup {
 
 		// Only init once or if version.text is missing
 		// After 1.4.0.1 we can install only newer overlays based on version if needed
+		// overLays.length is 0 because of sub dirs, FIXME
 		try {
-			if (overlayVer.exists() && overLays.length > 0) {
+			//			if (overlayVer.exists() && overLays.length > 0) {
+			if (overlayVer.exists()) {
 				return;
 			} else if (!overlayVer.exists()) {
 				//overlayVer.createNewFile();

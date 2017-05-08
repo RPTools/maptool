@@ -56,6 +56,7 @@ import javax.swing.KeyStroke;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.box2d.DesktopLauncher;
 import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.GridTool;
 import net.rptools.maptool.client.ui.AddResourceDialog;
@@ -2763,6 +2764,17 @@ public class AppActions {
 		@Override
 		public void execute(java.awt.event.ActionEvent e) {
 			SysInfo.createAndShowGUI((String) getValue(Action.NAME));
+		}
+	};
+
+	public static final Action SHOW_BOX2D_TEST = new DefaultClientAction() {
+		{
+			init("Show Box2D Test");
+		}
+
+		@Override
+		public void execute(java.awt.event.ActionEvent e) {
+			MapTool.loadBox2dTest();
 		}
 	};
 

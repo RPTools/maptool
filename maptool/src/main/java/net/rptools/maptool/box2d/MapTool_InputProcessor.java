@@ -58,7 +58,7 @@ public class MapTool_InputProcessor implements InputProcessor {
 			renderer.getCamera().unproject(input);
 
 			//Now you can use input.x and input.y, as opposed to Gdx.input.getX() and Gdx.input.getY(), to draw the circle
-			System.out.println("x, y: " + input.x + ", " + input.y);
+			//			System.out.println("x, y: " + input.x + ", " + input.y);
 			renderer.createBody(true, input.x, input.y);
 		} else if (button == Buttons.RIGHT) {
 			renderer.clearLights();

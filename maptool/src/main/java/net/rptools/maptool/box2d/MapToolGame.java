@@ -11,7 +11,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import net.rptools.maptool.client.ui.MapToolFrame;
 
 public class MapToolGame extends Game {
-	public static final String TITLE = "MapTool Raycasting Test";
+	public static final String TITLE = "MapTool Box2D Lights Test";
 	public static int SCREEN_WIDTH = 1900;
 	public static int SCREEN_HEIGHT = 1100;
 	public static int VIEWPORT_WIDTH = 25;
@@ -26,9 +26,11 @@ public class MapToolGame extends Game {
 	public BitmapFont font;
 
 	private MapToolFrame mapToolFrame;
+	public DesktopLauncher launcher;
 
-	public MapToolGame(MapToolFrame parentFrame) {
+	public MapToolGame(MapToolFrame parentFrame, DesktopLauncher desktopLauncher) {
 		mapToolFrame = parentFrame;
+		launcher = desktopLauncher;
 	}
 
 	@Override
