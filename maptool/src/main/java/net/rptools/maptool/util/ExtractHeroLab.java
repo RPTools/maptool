@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -45,6 +47,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.model.HeroLabData;
 import net.rptools.maptool.model.Token;
@@ -61,7 +64,8 @@ import org.xml.sax.SAXException;
 import com.jcabi.xml.XMLDocument;
 
 /**
- * Extracts character information from a Hero Lab portfolio and can create rptok token files in .maptool/tmp or updates the token live
+ * Extracts character information from a Hero Lab portfolio and can create rptok
+ * token files in .maptool/tmp or updates the token live
  * 
  * @author Jamz
  *
@@ -76,7 +80,7 @@ public final class ExtractHeroLab {
 	private DocumentBuilder builder;
 
 	public ExtractHeroLab(File heroLabPortfolio, boolean forceRescan) {
-		this.portfolioFile = heroLabPortfolio;
+		this.portfolioFile = validatePortfolioFile(heroLabPortfolio);
 
 		factory = DocumentBuilderFactory.newInstance();
 
@@ -87,7 +91,8 @@ public final class ExtractHeroLab {
 		}
 
 		finalTempDir = new File(tmpDir + "/hero_lab_" + heroLabPortfolio.hashCode());
-		extractComplete = new File(tmpDir + "/hero_lab_" + heroLabPortfolio.hashCode() + "/completed_" + heroLabPortfolio.hashCode() + ".txt");
+		extractComplete = new File(tmpDir + "/hero_lab_" + heroLabPortfolio.hashCode() + "/completed_"
+				+ heroLabPortfolio.hashCode() + ".txt");
 
 		if (forceRescan) {
 			FileUtils.deleteQuietly(finalTempDir);
@@ -96,18 +101,33 @@ public final class ExtractHeroLab {
 		finalTempDir.mkdirs();
 	}
 
-	public File getTempDir() {
-		return finalTempDir;
+	private File validatePortfolioFile(File heroLabPortfolio) {
+		// If unable to find file, prompt user to point to new location or fail
+		if (!heroLabPortfolio.exists()) {
+			JFileChooser fileChooser = new JFileChooser(AppPreferences.getFileSyncPath());
+			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Hero Lab Portfolio", "por");
+			fileChooser.setFileFilter(filter);
+
+			int returnVal = fileChooser.showOpenDialog(null);
+
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				System.out.println("New portfolio picked: " + fileChooser.getSelectedFile().getAbsolutePath());
+				return fileChooser.getSelectedFile();
+			}
+		}
+
+		return heroLabPortfolio;
 	}
 
-	public boolean isExtracted() {
+	private boolean isExtracted() {
 		if (extractComplete.exists())
 			return true;
 		else
 			return false;
 	}
 
-	public void markComplete() {
+	private void markComplete() {
 		try {
 			extractComplete.createNewFile();
 			FileUtils.forceDeleteOnExit(finalTempDir);
@@ -116,7 +136,7 @@ public final class ExtractHeroLab {
 		}
 	}
 
-	public void markComplete(String contents) {
+	private void markComplete(String contents) {
 		try {
 			PrintWriter out = new PrintWriter(extractComplete);
 			out.print(contents);
@@ -149,22 +169,28 @@ public final class ExtractHeroLab {
 			XPath xpath = xPathfactory.newXPath();
 			Document portfolioIndex = getPortolioIndex();
 
-			XPathExpression xPath_characters = xpath.compile("//character"); // Jamz: using this vs //document/characters/character which also captures //document/characters/character/minions/character
+			XPathExpression xPath_characters = xpath.compile("//character"); // Jamz: using this vs
+																				// //document/characters/character which
+																				// also captures
+																				// //document/characters/character/minions/character
 			XPathExpression xPath_gameSystem = xpath.compile("/document/game/@name");
 			XPathExpression xPath_images = xpath.compile("images/image");
 
 			String gameSystem = (String) xPath_gameSystem.evaluate(portfolioIndex, XPathConstants.STRING);
-			IteratableNodeList heroNodes = new IteratableNodeList((NodeList) xPath_characters.evaluate(portfolioIndex, XPathConstants.NODESET));
+			IteratableNodeList heroNodes = new IteratableNodeList(
+					(NodeList) xPath_characters.evaluate(portfolioIndex, XPathConstants.NODESET));
 
 			for (Node hero : heroNodes) {
 				Token heroLabToken = new Token();
 				String heroName = ((Element) hero).getAttribute("name");
 				String heroLabIndex = ((Element) hero).getAttribute("herolableadindex");
 				HeroLabData heroLabData = new HeroLabData(heroName);
-				File heroFile = FileUtil.getCleanFileName(finalTempDir.getCanonicalPath(), heroName, "." + Token.FILE_EXTENSION);
+				File heroFile = FileUtil.getCleanFileName(finalTempDir.getCanonicalPath(), heroName,
+						"." + Token.FILE_EXTENSION);
 
 				// Store all the images for macro use, eg store disguises or alternate portraits
-				IteratableNodeList imageNodes = new IteratableNodeList((NodeList) xPath_images.evaluate(hero, XPathConstants.NODESET));
+				IteratableNodeList imageNodes = new IteratableNodeList(
+						(NodeList) xPath_images.evaluate(hero, XPathConstants.NODESET));
 				heroLabData.clearImages();
 				for (Node image : imageNodes) {
 					Element imageElement = (Element) image;
@@ -187,7 +213,8 @@ public final class ExtractHeroLab {
 				heroLabToken.setGMName(heroName);
 
 				// set the image shape
-				heroLabToken.setShape(TokenUtil.guessTokenType(ImageManager.getImageAndWait(heroLabData.getTokenImage())));
+				heroLabToken
+						.setShape(TokenUtil.guessTokenType(ImageManager.getImageAndWait(heroLabData.getTokenImage())));
 
 				// set the portrait image asset
 				heroLabToken.setPortraitImage(heroLabData.getPortraitImage());
@@ -255,7 +282,8 @@ public final class ExtractHeroLab {
 			XPath xpath = xPathfactory.newXPath();
 			Document portfolioIndex = getPortolioIndex();
 
-			XPathExpression xPath_characters = xpath.compile("//character[@herolableadindex='" + heroLabIndex + minionCriteria + "']");
+			XPathExpression xPath_characters = xpath
+					.compile("//character[@herolableadindex='" + heroLabIndex + minionCriteria + "']");
 			XPathExpression xPath_gameSystem = xpath.compile("/document/game/@name");
 			XPathExpression xPath_images = xpath.compile("images/image");
 
@@ -265,7 +293,8 @@ public final class ExtractHeroLab {
 			String heroName = ((Element) hero).getAttribute("name");
 			heroLabData = new HeroLabData(heroName);
 
-			IteratableNodeList imageNodes = new IteratableNodeList((NodeList) xPath_images.evaluate(hero, XPathConstants.NODESET));
+			IteratableNodeList imageNodes = new IteratableNodeList(
+					(NodeList) xPath_images.evaluate(hero, XPathConstants.NODESET));
 			heroLabData.clearImages();
 			for (Node image : imageNodes) {
 				Element imageElement = (Element) image;
@@ -337,9 +366,12 @@ public final class ExtractHeroLab {
 	public HeroLabData refreshHeroLabData(HeroLabData heroData) {
 		HashMap<String, HashMap<String, String>> statBlocks = new HashMap<String, HashMap<String, String>>(3);
 
-		statBlocks.put(HeroLabData.StatBlockType.TEXT, getStatBlock(heroData.getStatBlock_location(HeroLabData.StatBlockType.TEXT), HeroLabData.StatBlockType.TEXT));
-		statBlocks.put(HeroLabData.StatBlockType.HTML, getStatBlock(heroData.getStatBlock_location(HeroLabData.StatBlockType.HTML), HeroLabData.StatBlockType.HTML));
-		statBlocks.put(HeroLabData.StatBlockType.XML, getStatBlock(heroData.getStatBlock_location(HeroLabData.StatBlockType.XML), HeroLabData.StatBlockType.XML));
+		statBlocks.put(HeroLabData.StatBlockType.TEXT, getStatBlock(
+				heroData.getStatBlock_location(HeroLabData.StatBlockType.TEXT), HeroLabData.StatBlockType.TEXT));
+		statBlocks.put(HeroLabData.StatBlockType.HTML, getStatBlock(
+				heroData.getStatBlock_location(HeroLabData.StatBlockType.HTML), HeroLabData.StatBlockType.HTML));
+		statBlocks.put(HeroLabData.StatBlockType.XML, getStatBlock(
+				heroData.getStatBlock_location(HeroLabData.StatBlockType.XML), HeroLabData.StatBlockType.XML));
 
 		heroData.setStatBlocks(statBlocks);
 
@@ -350,15 +382,19 @@ public final class ExtractHeroLab {
 		return getStatBlocks(xpath, hero, null, null);
 	}
 
-	private HashMap<String, HashMap<String, String>> getStatBlocks(XPath xpath, Node hero, Node master, String minionName) {
+	private HashMap<String, HashMap<String, String>> getStatBlocks(XPath xpath, Node hero, Node master,
+			String minionName) {
 		HashMap<String, HashMap<String, String>> statBlocks = new HashMap<String, HashMap<String, String>>(3);
 
-		statBlocks.put(HeroLabData.StatBlockType.TEXT, getStatBlock(getStatBlockPath(xpath, hero, HeroLabData.StatBlockType.TEXT), HeroLabData.StatBlockType.TEXT));
-		statBlocks.put(HeroLabData.StatBlockType.HTML, getStatBlock(getStatBlockPath(xpath, hero, HeroLabData.StatBlockType.HTML), HeroLabData.StatBlockType.HTML));
+		statBlocks.put(HeroLabData.StatBlockType.TEXT, getStatBlock(
+				getStatBlockPath(xpath, hero, HeroLabData.StatBlockType.TEXT), HeroLabData.StatBlockType.TEXT));
+		statBlocks.put(HeroLabData.StatBlockType.HTML, getStatBlock(
+				getStatBlockPath(xpath, hero, HeroLabData.StatBlockType.HTML), HeroLabData.StatBlockType.HTML));
 
 		HashMap<String, String> xmlStatBlockMap = new HashMap<String, String>(2);
 		String zipPath;
-		// Minion XML statblocks are actually stored in the main characters <minions node, ugg...
+		// Minion XML statblocks are actually stored in the main characters <minions
+		// node, ugg...
 		if (master == null) {
 			zipPath = getStatBlockPath(xpath, hero, HeroLabData.StatBlockType.XML);
 		} else {
@@ -371,7 +407,8 @@ public final class ExtractHeroLab {
 			xmlStatBlock = getXmlFromZip(zipPath);
 
 			if (master == null) {
-				// We don't need the minion data in the main character so we will remove that node to save space
+				// We don't need the minion data in the main character so we will remove that
+				// node to save space
 				NodeList nodes = xmlStatBlock.getElementsByTagName("minions");
 				Element minions = (Element) nodes.item(0);
 				minions.getParentNode().removeChild(minions);
@@ -385,7 +422,8 @@ public final class ExtractHeroLab {
 
 				statBlocks.put(HeroLabData.StatBlockType.XML, xmlStatBlockMap);
 			} else {
-				// We only need the <character> node for this minion, so lets find it and clone it...
+				// We only need the <character> node for this minion, so lets find it and clone
+				// it...
 				NodeList nodes = xmlStatBlock.getElementsByTagName("character");
 				Node minionNode = null;
 
@@ -402,7 +440,8 @@ public final class ExtractHeroLab {
 					}
 				}
 
-				// If we find it, remove all <character> nodes and insert the saved clone copy under the proper parent node, <public>
+				// If we find it, remove all <character> nodes and insert the saved clone copy
+				// under the proper parent node, <public>
 				if (minionNode != null) {
 					nodes = xmlStatBlock.getElementsByTagName("character");
 					Element character = (Element) nodes.item(0);
@@ -438,7 +477,8 @@ public final class ExtractHeroLab {
 			XPathExpression xPath_statBlock = xpath.compile("statblocks/statblock[@format='" + type + "']");
 			Node statBlockNode = (Node) xPath_statBlock.evaluate(hero, XPathConstants.NODE);
 			if (statBlockNode != null)
-				path = ((Element) statBlockNode).getAttribute("folder") + "/" + ((Element) statBlockNode).getAttribute("filename");
+				path = ((Element) statBlockNode).getAttribute("folder") + "/"
+						+ ((Element) statBlockNode).getAttribute("filename");
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();
 		}

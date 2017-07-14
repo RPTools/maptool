@@ -243,6 +243,17 @@ public class HeroLabData {
 		this.isDirty = isDirty;
 	}
 
+	public String getPortfolioPath() {
+		if (portfolioPath == null)
+			setPortfolioPath("");
+
+		return portfolioPath;
+	}
+
+	public void setPortfolioPath(String portfolioPath) {
+		this.portfolioPath = portfolioPath;
+	}
+	
 	public File getPortfolioFile() {
 		String fileSyncPath = AppPreferences.getFileSyncPath();
 
@@ -342,17 +353,6 @@ public class HeroLabData {
 
 	public void setMinion(boolean isMinion) {
 		this.isMinion = isMinion;
-	}
-
-	public String getPortfolioPath() {
-		if (portfolioPath == null)
-			setPortfolioPath("");
-
-		return portfolioPath;
-	}
-
-	public void setPortfolioPath(String portfolioPath) {
-		this.portfolioPath = portfolioPath;
 	}
 
 	public String getPlayerName() {
