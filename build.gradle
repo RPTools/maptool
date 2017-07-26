@@ -520,8 +520,8 @@ task createJwrapperConfig(type: Copy) {
 			'rootDir': rootDir.toString()])
 	}
 	into 'build-resources/jWrapper'
-	rename { String fileName ->
-		fileName.replace('-template', '')
+	rename {
+        String fileName -> fileName.replace('-template', '')
 	}
     outputs.upToDateWhen {
 		false
