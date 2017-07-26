@@ -1,6 +1,29 @@
 MapTool
 =======
 
+Setup instructions
+------------------
+Prior to building MapTool, some prerequisites are needed.
+
+1.  Unpack the JREs for the platforms you plan to build for.
+
+2.  For Windows' platforms, copy the four manifest files under
+    `build-resources/Windows` into the `bin` directory of each unpacked
+    Windows JRE.  (This causes them to be included in the JWrapper
+    bundle when deployed on the user's system.)
+
+3.  Copy the `gradle.properties.sample` file to `gradle.properties` in
+    the top-level directory.
+
+4.  Edit the `gradle.properties` file so that the last few properties
+    refer to the directories where the JREs were unpacked.
+
+5.  When you proceed to the next section, be prepared for a long build
+    the first time.  The JREs need to be bundled with JWrapper and often
+    there are significant downloads required so a network connection is
+    needed.  This can take 20 minutes with reasonable bandwidth, much
+    longer if you're on hotel wifi. :/
+
 Build instructions
 ------------------
 Gradle is used to build MapTool and the build process is siginificanly
