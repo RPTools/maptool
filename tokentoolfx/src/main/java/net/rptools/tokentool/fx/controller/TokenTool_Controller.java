@@ -28,9 +28,11 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -56,19 +58,38 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Window;
+import net.rptools.lib.FileUtil;
 import net.rptools.tokentool.AppActions;
+import net.rptools.tokentool.AppConstants;
+import net.rptools.tokentool.TokenTool;
 import net.rptools.tokentool.fx.util.FxImageUtil;
-import net.rptools.tokentool.fx.util.TransferToken;
+import net.rptools.tokentool.fx.util.FileSaveUtil;
 
 public class TokenTool_Controller {
-	//	private Image overlayImage; // The overlay image with mask removed
-	private Point dragStart = new Point();
-	private Point portraitImageStart = new Point();
-
 	@FXML
 	private ResourceBundle resources;
 	@FXML
 	private URL location;
+
+	@FXML
+	private MenuItem fileManageOverlaysMenu;
+	@FXML
+	private MenuItem fileSaveAsMenu;
+	@FXML
+	private MenuItem fileExitMenu;
+
+	@FXML
+	private MenuItem editCaptureScreenMenu;
+	@FXML
+	private MenuItem editCopyTokenMenu;
+	@FXML
+	private MenuItem editPasteImageMenu;
+
+	@FXML
+	private MenuItem helpAboutMenu;
 
 	@FXML
 	private TitledPane saveOptionsPane;
@@ -120,12 +141,27 @@ public class TokenTool_Controller {
 	@FXML
 	private Spinner<Double> overlayHeightSpinner;
 
+	private Point dragStart = new Point();
+	private Point portraitImageStart = new Point();
+	private FileSaveUtil fileSaveUtil = new FileSaveUtil();
+
 	// A custom set of Width/Height sizes to use for Overlays
-	private NavigableSet<Double> overlaySpinnerSteps = new TreeSet<Double>(Arrays.asList(50d, 100d, 128d, 150d, 200d, 256d, 300d, 400d, 500d, 512d, 600d, 700d, 750d, 800d, 900d, 1000d));
+	private NavigableSet<Double> overlaySpinnerSteps = new TreeSet<Double>(Arrays.asList(50d, 100d, 128d, 150d, 200d,
+			256d, 300d, 400d, 500d, 512d, 600d, 700d, 750d, 800d, 900d, 1000d));
 
 	@FXML
 	void initialize() {
 		// Note: A Pane is added to the compositeTokenPane so the ScrollPane doesn't consume the mouse events
+		assert fileManageOverlaysMenu != null : "fx:id=\"fileManageOverlaysMenu\" was not injected: check your FXML file 'TokenTool.fxml'.";
+		assert fileSaveAsMenu != null : "fx:id=\"fileSaveAsMenu\" was not injected: check your FXML file 'TokenTool.fxml'.";
+		assert fileExitMenu != null : "fx:id=\"fileExitMenu\" was not injected: check your FXML file 'TokenTool.fxml'.";
+
+		assert editCaptureScreenMenu != null : "fx:id=\"editCaptureScreenMenu\" was not injected: check your FXML file 'TokenTool.fxml'.";
+		assert editCopyTokenMenu != null : "fx:id=\"editCopyTokenMenu\" was not injected: check your FXML file 'TokenTool.fxml'.";
+		assert editPasteImageMenu != null : "fx:id=\"editPasteImageMenu\" was not injected: check your FXML file 'TokenTool.fxml'.";
+
+		assert helpAboutMenu != null : "fx:id=\"helpAboutMenu\" was not injected: check your FXML file 'TokenTool.fxml'.";
+
 		assert saveOptionsPane != null : "fx:id=\"saveOptionsPane\" was not injected: check your FXML file 'TokenTool.fxml'.";
 		assert overlayOptionsPane != null : "fx:id=\"overlayOptionsPane\" was not injected: check your FXML file 'TokenTool.fxml'.";
 		assert zoomOptionsPane != null : "fx:id=\"zoomOptionsPane\" was not injected: check your FXML file 'TokenTool.fxml'.";
@@ -141,7 +177,7 @@ public class TokenTool_Controller {
 		assert portraitImageView != null : "fx:id=\"portraitImageView\" was not injected: check your FXML file 'TokenTool.fxml'.";
 		assert maskImageView != null : "fx:id=\"maskImageView\" was not injected: check your FXML file 'TokenTool.fxml'.";
 		assert overlayImageView != null : "fx:id=\"overlayImageView\" was not injected: check your FXML file 'TokenTool.fxml'.";
-		assert tokenImageView != null : "fx:id=\"tokenPreviewPortrait\" was not injected: check your FXML file 'TokenTool.fxml'.";
+		assert tokenImageView != null : "fx:id=\"tokenImageView\" was not injected: check your FXML file 'TokenTool.fxml'.";
 
 		assert useFileNumberingCheckbox != null : "fx:id=\"useFileNumberingCheckbox\" was not injected: check your FXML file 'TokenTool.fxml'.";
 		assert overlayUseAsBaseCheckbox != null : "fx:id=\"overlayUseAsBaseCheckbox\" was not injected: check your FXML file 'TokenTool.fxml'.";
@@ -157,8 +193,7 @@ public class TokenTool_Controller {
 
 		overlayTreeView.setShowRoot(false);
 
-		overlayTreeView.getSelectionModel()
-				.selectedItemProperty()
+		overlayTreeView.getSelectionModel().selectedItemProperty()
 				.addListener((observable, oldValue, newValue) -> updateCompositImageView((TreeItem<Path>) newValue));
 
 		addPseudoClassToLeafs(overlayTreeView);
@@ -170,12 +205,15 @@ public class TokenTool_Controller {
 			return new Background(fill);
 		}, backgroundColorPicker.valueProperty()));
 
-		overlayWidthSpinner.getValueFactory().valueProperty().bindBidirectional(overlayHeightSpinner.getValueFactory().valueProperty());
-		overlayWidthSpinner.valueProperty().addListener((observable, oldValue, newValue) -> overlayWidthSpinner_onTextChanged(oldValue, newValue));
-		overlayHeightSpinner.valueProperty().addListener((observable, oldValue, newValue) -> overlayHeightSpinner_onTextChanged(oldValue, newValue));
+		overlayWidthSpinner.getValueFactory().valueProperty()
+				.bindBidirectional(overlayHeightSpinner.getValueFactory().valueProperty());
+		overlayWidthSpinner.valueProperty()
+				.addListener((observable, oldValue, newValue) -> overlayWidthSpinner_onTextChanged(oldValue, newValue));
+		overlayHeightSpinner.valueProperty().addListener(
+				(observable, oldValue, newValue) -> overlayHeightSpinner_onTextChanged(oldValue, newValue));
 
-		//		tokenImageView.fitWidthProperty().bind(tokenPreviewPane.widthProperty());
-		//		tokenImageView.fitHeightProperty().bind(tokenPreviewPane.heightProperty());
+		// tokenImageView.fitWidthProperty().bind(tokenPreviewPane.widthProperty());
+		// tokenImageView.fitHeightProperty().bind(tokenPreviewPane.heightProperty());
 	}
 
 	public Color getBackgroundColor() {
@@ -184,13 +222,52 @@ public class TokenTool_Controller {
 
 	@FXML
 	void updateMainView(ActionEvent event) {
-		System.out.println("probably should do something here...");
+		System.out.println("probably should do something here?");
+	}
+
+	@FXML
+	void fileManageOverlaysMenu_onAction(ActionEvent event) {
+		System.out.println("fileManageOverlaysMenu_onAction invoked!");
+	}
+
+	@FXML
+	void fileSaveAsMenu_onAction(ActionEvent event) {
+		saveToken();
+	}
+
+	@FXML
+	void fileExitMenu_onAction(ActionEvent event) {
+		System.out.println("fileExitMenu_onAction invoked!");
+		System.exit(0);
+	}
+
+	@FXML
+	void editCaptureScreenMenu_onAction(ActionEvent event) {
+		System.out.println("editCaptureScreenMenu_onAction invoked!");
+	}
+
+	@FXML
+	void editCopyTokenMenu_onAction(ActionEvent event) {
+		System.out.println("editCopyTokenMenu_onAction invoked!");
+	}
+
+	@FXML
+	void editPasteImageMenu_onAction(ActionEvent event) {
+		System.out.println("editPasteImageMenu_onAction invoked!");
+	}
+
+	@FXML
+	void helpAboutMenu_onAction(ActionEvent event) {
+		System.out.println("helpAboutMenu_onAction invoked!");
+		// TokenTool.getFrame().showAboutDialog();
 	}
 
 	@FXML
 	void compositeTokenPane_MouseDragged(MouseEvent event) {
-		//		System.out.println("drag delta: " + (event.getX() - dragStart.x) + ", " + (event.getY() - dragStart.y));
-		//		System.out.println("portraitImageView: " + portraitImageView.getTranslateX() + ", " + portraitImageView.getTranslateY());
+		// System.out.println("drag delta: " + (event.getX() - dragStart.x) + ", " +
+		// (event.getY() - dragStart.y));
+		// System.out.println("portraitImageView: " + portraitImageView.getTranslateX()
+		// + ", " + portraitImageView.getTranslateY());
 
 		portraitImageView.setTranslateX(event.getX() - dragStart.x + portraitImageStart.x);
 		portraitImageView.setTranslateY(event.getY() - dragStart.y + portraitImageStart.y);
@@ -200,7 +277,8 @@ public class TokenTool_Controller {
 
 	@FXML
 	void compositeTokenPane_MouseDragExited(MouseDragEvent event) {
-		//		System.out.println("Mouse Drag Exited: " + event.getX() + ", " + event.getY());
+		// System.out.println("Mouse Drag Exited: " + event.getX() + ", " +
+		// event.getY());
 	}
 
 	@FXML
@@ -218,39 +296,41 @@ public class TokenTool_Controller {
 
 	@FXML
 	void compositeTokenPane_MouseEntered(MouseEvent event) {
-		//		System.out.println("Mouse Entered: " + event.getX() + ", " + event.getY());
+		// System.out.println("Mouse Entered: " + event.getX() + ", " + event.getY());
 		portraitImageView.setCursor(Cursor.HAND);
 	}
 
 	@FXML
 	void compositeTokenPane_MouseExited(MouseEvent event) {
-		//		System.out.println("Mouse Exited: " + event.getX() + ", " + event.getY());
+		// System.out.println("Mouse Exited: " + event.getX() + ", " + event.getY());
 	}
 
 	@FXML
 	void compositeTokenPane_MouseMoved(MouseEvent event) {
-		//				System.out.println("Mouse Moved: " + event.getX() + ", " + event.getY());
+		// System.out.println("Mouse Moved: " + event.getX() + ", " + event.getY());
 	}
 
 	@FXML
 	void compositeTokenPane_OnScroll(ScrollEvent event) {
 		if (event.isShiftDown()) {
 			Double r = portraitImageView.getRotate() + event.getDeltaX() / 20;
-			//			System.out.println("Rotation: " + r + " event.getDeltaX() " + event.getDeltaX());
+			// System.out.println("Rotation: " + r + " event.getDeltaX() " +
+			// event.getDeltaX());
 
 			if (r < -360d || r > 360d)
 				r = 0d;
 
-			//			System.out.println("Rotation: " + r);
+			// System.out.println("Rotation: " + r);
 			portraitImageView.setRotate(r);
 		} else {
 			Double scale = portraitImageView.getScaleY() * Math.pow(1.001, event.getDeltaY());
-			//			System.out.println("scale: " + scale + " event.getDeltaY() " + event.getDeltaY());
+			// System.out.println("scale: " + scale + " event.getDeltaY() " +
+			// event.getDeltaY());
 			portraitImageView.setScaleX(scale);
 			portraitImageView.setScaleY(scale);
 		}
 		updateTokenPreviewImageView();
-		//		System.out.println("Scale: " + scale);
+		// System.out.println("Scale: " + scale);
 	}
 
 	@FXML
@@ -312,7 +392,8 @@ public class TokenTool_Controller {
 
 	@FXML
 	void compositeTokenPane_DragOver(DragEvent event) {
-		//		System.out.println("compositeTokenPane_DraggedOver event " + event.toString());
+		// System.out.println("compositeTokenPane_DraggedOver event " +
+		// event.toString());
 		if (event.getDragboard().hasImage() || event.getDragboard().hasFiles() || event.getDragboard().hasUrl()) {
 			// Set Pane color to an alpha green
 			event.acceptTransferModes(TransferMode.COPY);
@@ -331,16 +412,15 @@ public class TokenTool_Controller {
 		boolean saveAsToken = false;
 
 		try {
-			File tempTokenFile = TransferToken.getTempFileAsToken(saveAsToken, useFileNumberingCheckbox.isSelected(), fileNameTextField.getText(), fileNameSuffixTextField);
-
-			// remember the temp file to delete it later on ...
-			TransferToken.lastFile = tempTokenFile;
+			File tempTokenFile = fileSaveUtil.getTempFileName(saveAsToken, useFileNumberingCheckbox.isSelected(),
+					fileNameTextField.getText(), fileNameSuffixTextField);
 
 			if (saveAsToken) {
 				AppActions.saveToken(tempTokenFile, true);
 			} else {
 				ImageIO.write(SwingFXUtils.fromFXImage(tokenImageView.getImage(), null), "png", tempTokenFile);
-				//				System.out.println("Drag size: " + tokenImageView.getImage().getWidth() + ", " + tokenImageView.getImage().getHeight());
+				// System.out.println("Drag size: " + tokenImageView.getImage().getWidth() + ",
+				// " + tokenImageView.getImage().getHeight());
 			}
 
 			files.add(tempTokenFile);
@@ -358,7 +438,8 @@ public class TokenTool_Controller {
 	@FXML
 	void tokenImageView_OnDragDone(DragEvent event) {
 		// Finished creating token...
-		//		System.out.println("tokenPreview_OnDragDone Done! " + TransferToken.lastFile);
+		// System.out.println("tokenPreview_OnDragDone Done! " +
+		// TransferToken.lastFile);
 	}
 
 	@FXML
@@ -383,11 +464,13 @@ public class TokenTool_Controller {
 		if (overlayAspectToggleButton.isSelected()) {
 			overlayImageView.setPreserveRatio(true);
 			maskImageView.setPreserveRatio(true);
-			overlayWidthSpinner.getValueFactory().valueProperty().bindBidirectional(overlayHeightSpinner.getValueFactory().valueProperty());
+			overlayWidthSpinner.getValueFactory().valueProperty()
+					.bindBidirectional(overlayHeightSpinner.getValueFactory().valueProperty());
 		} else {
 			overlayImageView.setPreserveRatio(false);
 			maskImageView.setPreserveRatio(false);
-			overlayWidthSpinner.getValueFactory().valueProperty().unbindBidirectional(overlayHeightSpinner.getValueFactory().valueProperty());
+			overlayWidthSpinner.getValueFactory().valueProperty()
+					.unbindBidirectional(overlayHeightSpinner.getValueFactory().valueProperty());
 		}
 
 		updateTokenPreviewImageView();
@@ -438,12 +521,68 @@ public class TokenTool_Controller {
 	}
 
 	public void updateTokenPreviewImageView() {
-		tokenImageView
-				.setImage(FxImageUtil.composePreview(compositeTokenPane, backgroundColorPicker.getValue(), portraitImageView, maskImageView, overlayImageView, overlayUseAsBaseCheckbox.isSelected()));
+		tokenImageView.setImage(FxImageUtil.composePreview(compositeTokenPane, backgroundColorPicker.getValue(),
+				portraitImageView, maskImageView, overlayImageView, overlayUseAsBaseCheckbox.isSelected()));
 		tokenImageView.setPreserveRatio(true);
 
-		//		System.out.println("tokenImageView image width: " + tokenImageView.getImage().getWidth());
-		//		System.out.println("tokenImageView getFitWidth: " + tokenImageView.getFitWidth());
+		// System.out.println("tokenImageView image width: " +
+		// tokenImageView.getImage().getWidth());
+		// System.out.println("tokenImageView getFitWidth: " +
+		// tokenImageView.getFitWidth());
+	}
+
+	private void saveToken() {
+		boolean asToken = false; // TODO: Get from checkbox Save Option
+		FileChooser fileChooser = new FileChooser();
+
+		try {
+			File tokenFile = fileSaveUtil.getFileName(asToken, useFileNumberingCheckbox.isSelected(),
+					fileNameTextField.getText(), fileNameSuffixTextField);
+			fileChooser.setInitialFileName(tokenFile.getName());
+			if (tokenFile.getParentFile() != null)
+				if (tokenFile.getParentFile().isDirectory())
+					fileChooser.setInitialDirectory(tokenFile.getParentFile());
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		fileChooser.getExtensionFilters().addAll(AppConstants.TOKEN_EXTENSION_FILTER,
+				AppConstants.IMAGE_EXTENSION_FILTER);
+
+		if (asToken) {
+			fileChooser.setTitle("Save as Token");
+			fileChooser.setSelectedExtensionFilter(AppConstants.TOKEN_EXTENSION_FILTER);
+		} else {
+			fileChooser.setTitle("Save as Image");
+			fileChooser.setSelectedExtensionFilter(AppConstants.IMAGE_EXTENSION_FILTER);
+		}
+
+		File tokenSaved = fileChooser.showSaveDialog(saveOptionsPane.getScene().getWindow());
+
+		if (tokenSaved == null)
+			return;
+
+		System.out.println("selected: " + fileChooser.getSelectedExtensionFilter().getDescription());
+		System.out.println("Saving token to : " + tokenSaved.getAbsolutePath());
+
+		try {
+			if (fileChooser.getSelectedExtensionFilter().equals(AppConstants.TOKEN_EXTENSION_FILTER)) {
+				AppActions.saveToken(tokenSaved, true);
+			} else {
+				ImageIO.write(SwingFXUtils.fromFXImage(tokenImageView.getImage(), null), "png", tokenSaved);
+			}
+
+			if (!useFileNumberingCheckbox.isSelected()) {
+				fileNameTextField.setText(FileUtil.getNameWithoutExtension(tokenSaved));
+				fileSaveUtil.setLastFile(tokenSaved);
+			}
+
+			System.out.println("tokenSaved is " + tokenSaved);
+
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 	}
 
 	private void addPseudoClassToLeafs(TreeView<Path> tree) {
@@ -460,7 +599,8 @@ public class TokenTool_Controller {
 					cell.setGraphic(cell.getTreeItem().getGraphic());
 				}
 			});
-			cell.treeItemProperty().addListener((obs, oldTreeItem, newTreeItem) -> cell.pseudoClassStateChanged(leaf, newTreeItem != null && newTreeItem.isLeaf()));
+			cell.treeItemProperty().addListener((obs, oldTreeItem, newTreeItem) -> cell.pseudoClassStateChanged(leaf,
+					newTreeItem != null && newTreeItem.isLeaf()));
 			return cell;
 		});
 	}

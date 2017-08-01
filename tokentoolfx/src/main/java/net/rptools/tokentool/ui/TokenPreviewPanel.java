@@ -174,7 +174,7 @@ public class TokenPreviewPanel extends JComponent implements Observer, DragGestu
 
 			tempFileName = TokenTool.getFrame().getControlPanel().getNamePrefix();
 			if (tempFileName == null || tempFileName.isEmpty())
-				tempFileName = AppConstants.DEFAULT_TOKEN_DRAG_NAME + _extension;
+				tempFileName = AppConstants.DEFAULT_TOKEN_NAME + _extension;
 			tempFileName += _extension;
 		}
 

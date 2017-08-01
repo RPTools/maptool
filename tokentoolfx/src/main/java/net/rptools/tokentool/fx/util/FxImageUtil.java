@@ -105,6 +105,10 @@ public class FxImageUtil {
 						int y = Integer.parseInt(overlayLayerInfo.getAttribute("top"));
 
 						// Lets pad the overlay with transparency to make it the same size as the mask
+						if (x < 0 || y < 0) {
+							System.out.println("w,h,x,y: " + width + ", " + height + ", " + x + ", " + y);
+						}
+
 						thumb = resizeCanvas(SwingFXUtils.toFXImage(thumbBI, null), width, height, x, y);
 					} else {
 						thumb = SwingFXUtils.toFXImage(thumbBI, null);

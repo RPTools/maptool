@@ -25,6 +25,7 @@ package net.rptools.tokentool;
 
 import java.io.File;
 
+import javafx.stage.FileChooser.ExtensionFilter;
 import net.rptools.lib.AppUtil;
 
 public class AppConstants {
@@ -33,5 +34,12 @@ public class AppConstants {
 	public static final File OVERLAY_DIR = AppUtil.getAppHome("overlays");
 	public static final String DEFAULT_TOKEN_EXTENSION = ".rptok";
 	public static final String DEFAULT_IMAGE_EXTENSION = ".png";
-	public static final String DEFAULT_TOKEN_DRAG_NAME = "token";
+	public static final String DEFAULT_TOKEN_EXTENSION_DESCRIPTION = "MapTool Token";
+	public static final String DEFAULT_IMAGE_EXTENSION_DESCRIPTION = "PNG Image";
+	public static final String DEFAULT_TOKEN_NAME = "token";
+
+	public static final ExtensionFilter TOKEN_EXTENSION_FILTER = new ExtensionFilter(
+			DEFAULT_TOKEN_EXTENSION_DESCRIPTION, "*" + DEFAULT_TOKEN_EXTENSION);
+	public static final ExtensionFilter IMAGE_EXTENSION_FILTER = new ExtensionFilter(
+			DEFAULT_IMAGE_EXTENSION_DESCRIPTION, "*" + DEFAULT_IMAGE_EXTENSION);
 }

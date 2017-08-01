@@ -33,7 +33,7 @@ import net.rptools.tokentool.fx.util.FxImageUtil;
  * 
  * @author Jamz
  * 
- *         To see splashscreen during testing, use JVM arg: -Djavafx.preloader=net.rptools.tokentool..fx.view.SplashScreenLoader Otherwise splashscreen will only show when defined as
+ *         To see splashscreen during testing, use JVM arg: -Djavafx.preloader=net.rptools.tokentool.fx.view.SplashScreenLoader Otherwise splashscreen will only show when defined as
  *         JavaFX-Preloader-Class in the JAR manifest.
  * 
  */
@@ -77,7 +77,7 @@ public class TokenToolFX extends Application {
 		// System.out.println("3D Hardware Available? " + Platform.isSupported(ConditionalFeature.SCENE3D));
 		VERSION = getVersion();
 
-		// Lets unzip/install the overlays in newer version
+		// Lets install/update the overlays if newer version
 		AppSetup.install(VERSION);
 
 		// Now lets cache any overlays we find and update preLoader with progress

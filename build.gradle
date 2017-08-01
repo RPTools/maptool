@@ -555,7 +555,7 @@ project(':tokentoolfx') {
 		compile project(':maptool') 
 		compile project(':rplib')
 		 // Jamz: I hate having to add JavaFX SDK manually via Project -> Properties -> Build Path -> Add Libraries -> JavaFX SDK
-		compile files("C:/Users/Jamz/.p2/pool/plugins/org.eclipse.fx.ide.css.jfx8_2.4.0.201605112122.jar")
+		// compile files("C:/Users/Jamz/.p2/pool/plugins/org.eclipse.fx.ide.css.jfx8_2.4.0.201605112122.jar")
 		// compile 'net.rptools.rplib:rplib:1.4.1.7+'
 		compile 'net.rptools.parser:parser:1.4.0.+'
 		compile 'com.withay:withay-util:1.0'

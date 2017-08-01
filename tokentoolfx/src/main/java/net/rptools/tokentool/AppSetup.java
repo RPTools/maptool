@@ -25,9 +25,17 @@ package net.rptools.tokentool;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
 
 import javafx.scene.control.TreeItem;
 import net.rptools.lib.AppUtil;
@@ -38,14 +46,17 @@ import net.rptools.lib.image.ImageUtil;
  * Executes only the first time the application is run.
  */
 public class AppSetup {
-	private static final String DEFAULT_TOKEN_ZIP = "net/rptools/tokentool/zip/overlays.zip";
+	//	private static final String DEFAULT_TOKEN_ZIP = "net/rptools/tokentool/zip/overlays.zip";
+	private static final String DEFAULT_OVERLAYS = "net/rptools/tokentool/overlays";
+
+	//	https://dzone.com/articles/get-all-classes-within-package
 
 	public static void install(String versionString) {
 		AppUtil.init("tokentoolfx");
 
 		File appDir = AppUtil.getAppHome();
 		File overlayDir = AppConstants.OVERLAY_DIR;
-		File[] overLays = overlayDir.listFiles(ImageUtil.SUPPORTED_IMAGE_FILE_FILTER);
+		File[] overLays = overlayDir.listFiles(ImageUtil.SUPPORTED_IMAGE_FILE_FILTER); // TODO Does this search subdirs? Prob not
 		File overlayVer = new File(appDir.getAbsolutePath() + "/version.txt");
 
 		// Only init once or if version.text is missing
@@ -54,7 +65,7 @@ public class AppSetup {
 		try {
 			//			if (overlayVer.exists() && overLays.length > 0) {
 			if (overlayVer.exists()) {
-				return;
+				//				return;
 			} else if (!overlayVer.exists()) {
 				//overlayVer.createNewFile();
 				FileUtils.writeStringToFile(overlayVer, versionString);
@@ -68,7 +79,9 @@ public class AppSetup {
 			}
 
 			// Put in a default samples
-			FileUtil.unzip(DEFAULT_TOKEN_ZIP, overlayDir);
+			//			FileUtil.unzip(DEFAULT_TOKEN_ZIP, overlayDir);
+
+			installDefaultOverlays();
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
@@ -80,6 +93,25 @@ public class AppSetup {
 		overlayDir.mkdirs();
 
 		// Put in a default samples
-		FileUtil.unzip(DEFAULT_TOKEN_ZIP, overlayDir);
+		//		FileUtil.unzip(DEFAULT_TOKEN_ZIP, overlayDir);
+
+		// Copy default overlays from resources
+		Reflections reflections = new Reflections(DEFAULT_OVERLAYS, new ResourcesScanner());
+		Set<String> resourcePathSet = reflections.getResources(Pattern.compile(".*"));
+
+		for (String resourcePath : resourcePathSet) {
+			URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
+			String resourceName = resourcePath.substring(DEFAULT_OVERLAYS.length());
+
+			//			System.out.println("resource: " + resource);
+			//			System.out.println("URL: " + inputUrl);
+			//			System.out.println("Filename: " + resourceName);
+			try {
+				FileUtils.copyURLToFile(inputUrl, new File(overlayDir, resourceName));
+			} catch (IOException e) {
+				System.out.println("ERROR writing " + inputUrl);
+				e.printStackTrace();
+			}
+		}
 	}
 }

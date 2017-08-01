@@ -34,26 +34,25 @@
 			<children>
 				<MenuBar VBox.vgrow="NEVER">
 					<menus>
-						<Menu mnemonicParsing="false" text="%menu.title.file">
+						<Menu text="%menu.title.file">
 							<items>
-								<MenuItem mnemonicParsing="false" text="%menu.title.file.manage.overlays" />
-								<MenuItem mnemonicParsing="false" text="%menu.title.file.save.as.image" />
-								<MenuItem mnemonicParsing="false" text="%menu.title.file.save.as.token" />
+								<MenuItem fx:id="fileManageOverlaysMenu" onAction="#fileManageOverlaysMenu_onAction" text="%menu.title.file.manage.overlays" />
+								<MenuItem fx:id="fileSaveAsMenu" onAction="#fileSaveAsMenu_onAction" text="%menu.title.file.save.as" />
 								<SeparatorMenuItem mnemonicParsing="false" />
-								<MenuItem mnemonicParsing="false" text="%menu.title.file.exit" />
+								<MenuItem fx:id="fileExitMenu" onAction="#fileExitMenu_onAction" text="%menu.title.file.exit" />
 							</items>
 						</Menu>
-						<Menu mnemonicParsing="false" text="%menu.title.edit">
+						<Menu text="%menu.title.edit">
 							<items>
-								<MenuItem mnemonicParsing="false" text="%menu.title.edit.capture.screen" />
-								<MenuItem mnemonicParsing="false" text="%menu.title.edit.copy.token" />
+								<MenuItem fx:id="editCaptureScreenMenu" onAction="#editCaptureScreenMenu_onAction" text="%menu.title.edit.capture.screen" />
 								<SeparatorMenuItem mnemonicParsing="false" />
-								<MenuItem mnemonicParsing="false" text="%menu.title.edit.capture.screen" />
+								<MenuItem fx:id="editCopyTokenMenu" onAction="#editCopyTokenMenu_onAction" text="%menu.title.edit.copy.token" />
+								<MenuItem fx:id="editPasteImageMenu" onAction="#editPasteImageMenu_onAction" text="%menu.title.edit.paste.image" />
 							</items>
 						</Menu>
-						<Menu mnemonicParsing="false" text="%menu.title.help">
+						<Menu fx:id="helpAboutMenu" onAction="#helpAboutMenu_onAction" text="%menu.title.help">
 							<items>
-								<MenuItem mnemonicParsing="false" text="%menu.title.help.about" />
+								<MenuItem text="%menu.title.help.about" />
 							</items>
 						</Menu>
 					</menus>
@@ -114,49 +113,6 @@
 									<content>
 										<Accordion maxHeight="1.7976931348623157E308" prefWidth="200.0">
 											<panes>
-												<TitledPane fx:id="overlayOptionsPane" text="Overlay Options">
-													<content>
-														<VBox spacing="10.0">
-															<children>
-																<Label fx:id="overlayNameLabel" alignment="BOTTOM_LEFT" graphicTextGap="0.0" text="Gear, Chrome" textFill="#900b0b">
-																	<font>
-																		<Font name="System Bold Italic" size="11.0" />
-																	</font>
-																	<VBox.margin>
-																		<Insets bottom="-7.0" top="-7.0" />
-																	</VBox.margin>
-																</Label>
-																<TreeView fx:id="overlayTreeView" prefHeight="325.0" prefWidth="170.0" VBox.vgrow="ALWAYS" />
-																<CheckBox fx:id="overlayUseAsBaseCheckbox" mnemonicParsing="false" onAction="#overlayUseAsBaseCheckbox_onAction" styleClass="controls-padding" text="Use as token base?" />
-																<HBox spacing="4.0">
-																	<children>
-																		<VBox alignment="CENTER" spacing="6.0">
-																			<children>
-																				<Spinner fx:id="overlayWidthSpinner" editable="true" initialValue="256d" max="1000d" min="50d" styleClass="split-arrows-horizontal" />
-																				<Spinner fx:id="overlayHeightSpinner" editable="true" initialValue="256d" max="1000d" min="50d" styleClass="split-arrows-horizontal" />
-																			</children>
-																		</VBox>
-																		<StackPane>
-																			<children>
-																				<ToggleButton fx:id="overlayAspectToggleButton" contentDisplay="TOP" graphicTextGap="0.0" mnemonicParsing="false" onAction="#overlayAspectToggleButton_onAction" selected="true">
-																					<StackPane.margin>
-																						<Insets left="5.0" />
-																					</StackPane.margin>
-																					<padding>
-																						<Insets bottom="8.0" left="4.0" right="4.0" top="8.0" />
-																					</padding>
-																					<tooltip>
-																						<Tooltip text="Keep the aspect ratio of the overlay" />
-																					</tooltip>
-																				</ToggleButton>
-																			</children>
-																		</StackPane>
-																	</children>
-																</HBox>
-															</children>
-														</VBox>
-													</content>
-												</TitledPane>
 												<TitledPane fx:id="backgroundOptionsPane" text="Background Options">
 													<content>
 														<VBox>
@@ -210,6 +166,49 @@
 																<Slider styleClass="controls-padding" />
 																<Slider styleClass="controls-padding" />
 																<Slider styleClass="controls-padding" />
+															</children>
+														</VBox>
+													</content>
+												</TitledPane>
+												<TitledPane fx:id="overlayOptionsPane" text="Overlay Options">
+													<content>
+														<VBox spacing="10.0">
+															<children>
+																<Label fx:id="overlayNameLabel" alignment="BOTTOM_LEFT" graphicTextGap="0.0" text="Gear, Chrome" textFill="#900b0b">
+																	<font>
+																		<Font name="System Bold Italic" size="11.0" />
+																	</font>
+																	<VBox.margin>
+																		<Insets bottom="-7.0" top="-7.0" />
+																	</VBox.margin>
+																</Label>
+																<TreeView fx:id="overlayTreeView" prefHeight="325.0" prefWidth="170.0" VBox.vgrow="ALWAYS" />
+																<CheckBox fx:id="overlayUseAsBaseCheckbox" mnemonicParsing="false" onAction="#overlayUseAsBaseCheckbox_onAction" styleClass="controls-padding" text="Use as token base?" />
+																<HBox spacing="4.0">
+																	<children>
+																		<VBox alignment="CENTER" spacing="6.0">
+																			<children>
+																				<Spinner fx:id="overlayWidthSpinner" editable="true" initialValue="256d" max="1000d" min="50d" styleClass="split-arrows-horizontal" />
+																				<Spinner fx:id="overlayHeightSpinner" editable="true" initialValue="256d" max="1000d" min="50d" styleClass="split-arrows-horizontal" />
+																			</children>
+																		</VBox>
+																		<StackPane>
+																			<children>
+																				<ToggleButton fx:id="overlayAspectToggleButton" contentDisplay="TOP" graphicTextGap="0.0" mnemonicParsing="false" onAction="#overlayAspectToggleButton_onAction" selected="true">
+																					<StackPane.margin>
+																						<Insets left="5.0" />
+																					</StackPane.margin>
+																					<padding>
+																						<Insets bottom="8.0" left="4.0" right="4.0" top="8.0" />
+																					</padding>
+																					<tooltip>
+																						<Tooltip text="Keep the aspect ratio of the overlay" />
+																					</tooltip>
+																				</ToggleButton>
+																			</children>
+																		</StackPane>
+																	</children>
+																</HBox>
 															</children>
 														</VBox>
 													</content>
