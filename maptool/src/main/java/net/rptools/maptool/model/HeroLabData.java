@@ -253,7 +253,7 @@ public class HeroLabData {
 	public void setPortfolioPath(String portfolioPath) {
 		this.portfolioPath = portfolioPath;
 	}
-	
+
 	public File getPortfolioFile() {
 		String fileSyncPath = AppPreferences.getFileSyncPath();
 
