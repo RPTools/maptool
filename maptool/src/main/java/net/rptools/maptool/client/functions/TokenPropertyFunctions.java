@@ -56,7 +56,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 				"setPropertyType", "getPropertyType", "getRawProperty",
 				"getTokenFacing", "setTokenFacing", "removeTokenFacing", "getTokenRotation",
 				"getMatchingProperties", "getMatchingLibProperties",
-				"isSnapToGrid", "setOwner", "getTokenWidth", "getTokenHeight",
+				"isSnapToGrid", "setOwner", "setOwnedByAll", "getTokenWidth", "getTokenHeight",
 				"setTokenWidth", "setTokenHeight", "getTokenShape",
 				"setTokenShape", "getGMNotes", "setGMNotes", "getNotes",
 				"setNotes", "setTokenSnapToGrid");
@@ -637,6 +637,29 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
+		 * String empty = setOwner(0|1, String tokenId: currentToken())
+		 */
+		if (functionName.equals("setOwnedByAll")) {
+			// If not trusted, do nothing and return -1 result
+			if (!MapTool.getParser().isMacroTrusted())
+				return -1;
+
+			checkNumberOfParameters(functionName, parameters, 1, 2);
+			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+			BigDecimal ownedByAll = getBigDecimalFromParam(functionName, parameters, 0);
+
+			if (ownedByAll.compareTo(BigDecimal.ZERO) == 0) {
+				token.setOwnedByAll(false);
+			} else {
+				token.setOwnedByAll(true);
+			}
+
+			MapTool.serverCommand().putToken(zone.getId(), token);
+			zone.putToken(token);
+			return token.isOwnedByAll() ? BigDecimal.ONE : BigDecimal.ZERO;
+		}
+
+		/*
 		 * String newShape = getTokenShape(String tokenId: currentToken())
 		 *
 		 * See Token.TokenShape for return values. Currently "Top down",
@@ -754,7 +777,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Gets the size of the token.
 	 *
-	 * @param token The token to get the size of.
+	 * @param token
+	 *            The token to get the size of.
 	 * @return the size of the token.
 	 */
 	private String getSize(Token token) {
@@ -772,10 +796,13 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Sets the size of the token.
 	 *
-	 * @param token The token to set the size of.
-	 * @param size The size to set the token to.
+	 * @param token
+	 *            The token to set the size of.
+	 * @param size
+	 *            The size to set the token to.
 	 * @return The new size of the token.
-	 * @throws ParserException if the size specified is an invalid size.
+	 * @throws ParserException
+	 *             if the size specified is an invalid size.
 	 */
 	private String setSize(Token token, String size) throws ParserException {
 		if (size.equalsIgnoreCase("native") || size.equalsIgnoreCase("free")) {
@@ -803,12 +830,15 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Sets the layer of the token.
 	 *
-	 * @param token The token to move to a different layer.
-	 * @param layerName the name of the layer to move the token to.
-	 * @param forceShape normally <code>true</code>, but can be optionally set
-	 *            to <code>false</code> by MTscript
+	 * @param token
+	 *            The token to move to a different layer.
+	 * @param layerName
+	 *            the name of the layer to move the token to.
+	 * @param forceShape
+	 *            normally <code>true</code>, but can be optionally set to <code>false</code> by MTscript
 	 * @return the name of the layer the token was moved to.
-	 * @throws ParserException if the layer name is invalid.
+	 * @throws ParserException
+	 *             if the layer name is invalid.
 	 */
 	public String setLayer(Token token, String layerName, boolean forceShape) throws ParserException {
 		Zone.Layer layer;
@@ -848,8 +878,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Checks to see if the token has the specified property.
 	 *
-	 * @param token The token to check.
-	 * @param name The name of the property to check.
+	 * @param token
+	 *            The token to check.
+	 * @param name
+	 *            The name of the property to check.
 	 * @return true if the token has the property.
 	 */
 	private boolean hasProperty(Token token, String name) {
@@ -866,11 +898,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Gets all the property names for the specified type. If type is null then
-	 * all the property names for all types are returned.
+	 * Gets all the property names for the specified type. If type is null then all the property names for all types are returned.
 	 *
-	 * @param type The type of property.
-	 * @param delim The list delimiter.
+	 * @param type
+	 *            The type of property.
+	 * @param delim
+	 *            The list delimiter.
 	 * @return a string list containing the property names.
 	 * @throws ParserException
 	 */
@@ -907,8 +940,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Creates a string list delimited by <b>delim</b> of the names of all the
-	 * properties for a given token. Returned strings are all lowercase.
+	 * Creates a string list delimited by <b>delim</b> of the names of all the properties for a given token. Returned strings are all lowercase.
 	 *
 	 * @param token
 	 *            The token to get the property names for.
@@ -945,8 +977,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	/**
 	 * Gets the owners for the token.
 	 *
-	 * @param token The token to get the owners for.
-	 * @param delim the delimiter for the list.
+	 * @param token
+	 *            The token to get the owners for.
+	 * @param delim
+	 *            the delimiter for the list.
 	 * @return a string list of the token owners.
 	 */
 	public String getOwners(Token token, String delim) {
@@ -960,15 +994,18 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Checks that the number of objects in the list <code>parameters</code>
-	 * is within given bounds (inclusive). Throws a <code>ParserException</code>
-	 * if the check fails.
+	 * Checks that the number of objects in the list <code>parameters</code> is within given bounds (inclusive). Throws a <code>ParserException</code> if the check fails.
 	 *
-	 * @param	functionName	this is used in the exception message
-	 * @param	parameters		a list of parameters
-	 * @param	min				the minimum amount of parameters (inclusive)
-	 * @param	max				the maximum amount of parameters (inclusive)
-	 * @throws	ParserException	if there were more or less parameters than allowed
+	 * @param functionName
+	 *            this is used in the exception message
+	 * @param parameters
+	 *            a list of parameters
+	 * @param min
+	 *            the minimum amount of parameters (inclusive)
+	 * @param max
+	 *            the maximum amount of parameters (inclusive)
+	 * @throws ParserException
+	 *             if there were more or less parameters than allowed
 	 */
 	private void checkNumberOfParameters(String functionName, List<Object> parameters, int min, int max) throws ParserException {
 		int numberOfParameters = parameters.size();
@@ -980,17 +1017,19 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Checks if the object stored at the specified index is a BigDecimal
-	 * and returns it if that is the case. It is not safe to call this
-	 * method without first checking the list size (possibly by using
+	 * Checks if the object stored at the specified index is a BigDecimal and returns it if that is the case. It is not safe to call this method without first checking the list size (possibly by using
 	 * <code>checkNumberOfParameters</code>).
 	 *
-	 * @param	functionName	this is used in the exception message
-	 * @param	parameters		a list of parameters
-	 * @param	index			the index to find the BigDecimal at
-	 * @return					the parameter cast to BigDecimal
-	 * @throws	ParserException	if the parameter did not contain a BigDecimal
-	 * @see		checkNumberOfParameters
+	 * @param functionName
+	 *            this is used in the exception message
+	 * @param parameters
+	 *            a list of parameters
+	 * @param index
+	 *            the index to find the BigDecimal at
+	 * @return the parameter cast to BigDecimal
+	 * @throws ParserException
+	 *             if the parameter did not contain a BigDecimal
+	 * @see checkNumberOfParameters
 	 */
 	private BigDecimal getBigDecimalFromParam(String functionName, List<Object> parameters, int index) throws ParserException {
 		Object param = parameters.get(index);
@@ -1002,20 +1041,20 @@ public class TokenPropertyFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Gets the token from the specified index or returns the token in context.
-	 * This method will check the list size before trying to retrieve the token
-	 * so it is safe to use for functions that have the token as a optional
-	 * argument.
+	 * Gets the token from the specified index or returns the token in context. This method will check the list size before trying to retrieve the token so it is safe to use for functions that have
+	 * the token as a optional argument.
 	 *
-	 * @param res the variable resolver
-	 * @param functionName The function name (used for generating exception
-	 *            messages).
-	 * @param param The parameters for the function.
-	 * @param index The index to find the token at.
+	 * @param res
+	 *            the variable resolver
+	 * @param functionName
+	 *            The function name (used for generating exception messages).
+	 * @param param
+	 *            The parameters for the function.
+	 * @param index
+	 *            The index to find the token at.
 	 * @return the token.
-	 * @throws ParserException if a token is specified but the macro is not
-	 *             trusted, or the specified token can not be found, or if no
-	 *             token is specified and no token is impersonated.
+	 * @throws ParserException
+	 *             if a token is specified but the macro is not trusted, or the specified token can not be found, or if no token is specified and no token is impersonated.
 	 */
 	private Token getTokenFromParam(MapToolVariableResolver res, String functionName, List<Object> param, int index) throws ParserException {
 		Token token;
