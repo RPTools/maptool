@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.beans.IndexedPropertyChangeEvent;
@@ -24,8 +21,7 @@ import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token.Type;
 
 /**
- * This implements a list model for the for the panel. It removes all of the tokens that aren't
- * visible to players if needed.
+ * This implements a list model for the for the panel. It removes all of the tokens that aren't visible to players if needed.
  * 
  * @author Jay
  */
@@ -47,8 +43,7 @@ public class InitiativeListModel extends AbstractListModel implements PropertyCh
 	/**
 	 * Get the token with the current initiative. Handle GM vs. Player
 	 * 
-	 * @return The current token displayed to the user or <code>null</code> if there is no current token. 
-	 * May be different for GM and Player
+	 * @return The current token displayed to the user or <code>null</code> if there is no current token. May be different for GM and Player
 	 */
 	public TokenInitiative getCurrentTokenInitiative() {
 		if (list.getCurrent() < 0)
@@ -68,7 +63,8 @@ public class InitiativeListModel extends AbstractListModel implements PropertyCh
 	/**
 	 * Get the display index for the token at the passed list index
 	 * 
-	 * @param index The list index of a token;
+	 * @param index
+	 *            The list index of a token;
 	 * @return The index in the display model or -1 if the item is not displayed.
 	 */
 	public int getDisplayIndex(int index) {
@@ -95,10 +91,13 @@ public class InitiativeListModel extends AbstractListModel implements PropertyCh
 		return list;
 	}
 
-	/** @param theList Setter for the list to set */
+	/**
+	 * @param theList
+	 *            Setter for the list to set
+	 */
 	public void setList(InitiativeList theList) {
 
-		// Remove the old list 
+		// Remove the old list
 		int oldCount = 0;
 		if (list != null) {
 			list.removePropertyChangeListener(this);
@@ -127,8 +126,10 @@ public class InitiativeListModel extends AbstractListModel implements PropertyCh
 	/**
 	 * Is the passed token displayed in the list?
 	 * 
-	 * @param token Token being displayed
-	 * @param hideNPC Flag indicating that NPC's are hidden.
+	 * @param token
+	 *            Token being displayed
+	 * @param hideNPC
+	 *            Flag indicating that NPC's are hidden.
 	 * @return The value <code>true</code> if this token is shown to the user.
 	 */
 	public static boolean isTokenVisible(Token token, boolean hideNPC) {
@@ -222,9 +223,11 @@ public class InitiativeListModel extends AbstractListModel implements PropertyCh
 
 	/**
 	 * Get the number of visible tokens in a list;
-	 *  
-	 * @param tokens Search for visible tokens in this list.
-	 * @param hideNPC Should the NPC's be hidden?
+	 * 
+	 * @param tokens
+	 *            Search for visible tokens in this list.
+	 * @param hideNPC
+	 *            Should the NPC's be hidden?
 	 * @return The number of visible tokens.
 	 */
 	private int getSize(List<TokenInitiative> tokens, boolean hideNPC) {

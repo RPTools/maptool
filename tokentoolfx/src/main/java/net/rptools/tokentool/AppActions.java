@@ -1,27 +1,11 @@
 /*
- * The MIT License
- * 
- * Copyright (c) 2005 David Rice, Trevor Croft
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.tokentool;
 
 import java.awt.AWTException;
@@ -222,39 +206,39 @@ public class AppActions {
 				BufferedImage tokenImg = TokenTool.getFrame().getComposedToken();
 				BufferedImage portraitImg = TokenTool.getFrame().getTokenCompositionPanel().getBaseImage();
 
-				//ImageWriter writer = getImageWriterBySuffix("png");
+				// ImageWriter writer = getImageWriterBySuffix("png");
 				// Created object for outputStream so we can properly close it! No longer locks .png files until app closes!
-				//ImageOutputStream ios = ImageIO.createImageOutputStream(tokenImageFile);
-				//writer.setOutput(ios);
-				//ImageWriteParam param = writer.getDefaultWriteParam();
+				// ImageOutputStream ios = ImageIO.createImageOutputStream(tokenImageFile);
+				// writer.setOutput(ios);
+				// ImageWriteParam param = writer.getDefaultWriteParam();
 
-				//				PNGMetadata png = new PNGMetadata();
-				//				// 39.375 inches per meter
-				//				// I'm using the image width for the DPI under
-				//				// the assumption that the token fits within
-				//				// one cell.
-				//				int resX = (int) (tokenImg.getWidth() * 39.375f);
-				//				png.pHYs_pixelsPerUnitXAxis = resX;
-				//				png.pHYs_pixelsPerUnitYAxis = resX;
-				//				png.pHYs_unitSpecifier = 1; // Meters - alternative is "unknown"
-				//				png.pHYs_present = true;
+				// PNGMetadata png = new PNGMetadata();
+				// // 39.375 inches per meter
+				// // I'm using the image width for the DPI under
+				// // the assumption that the token fits within
+				// // one cell.
+				// int resX = (int) (tokenImg.getWidth() * 39.375f);
+				// png.pHYs_pixelsPerUnitXAxis = resX;
+				// png.pHYs_pixelsPerUnitYAxis = resX;
+				// png.pHYs_unitSpecifier = 1; // Meters - alternative is "unknown"
+				// png.pHYs_present = true;
 
 				ImageIO.write(tokenImg, "png", tokenImageFile);
-				//writer.write(null, new IIOImage(tokenImg, null, png), param);
-				//ios.close();
+				// writer.write(null, new IIOImage(tokenImg, null, png), param);
+				// ios.close();
 
 				// Now write out the Portrait image, here we'll use JPEG to save space
 				File portraitImageFile = File.createTempFile("portraitImage", ".jpg");
-				//writer.reset();
-				//writer = getImageWriterBySuffix("jpg");
-				//ios = ImageIO.createImageOutputStream(portraitImageFile);
-				//writer.setOutput(ios);
-				//param = writer.getDefaultWriteParam();
+				// writer.reset();
+				// writer = getImageWriterBySuffix("jpg");
+				// ios = ImageIO.createImageOutputStream(portraitImageFile);
+				// writer.setOutput(ios);
+				// param = writer.getDefaultWriteParam();
 
 				ImageIO.write(portraitImg, "jpg", tokenImageFile);
-				//writer.write(null, new IIOImage(portraitImg, null, null), param);
-				//writer.dispose();
-				//ios.close();
+				// writer.write(null, new IIOImage(portraitImg, null, null), param);
+				// writer.dispose();
+				// ios.close();
 
 				// Lets create the token!
 				Token _token = new Token();
@@ -265,8 +249,8 @@ public class AppActions {
 				_token.setGMName(tokenName);
 
 				// Jamz: Below calls not needed, creates extra entries in XML preventing token image from changing inside MapTool
-				//_token.setImageAsset(tokenImage.getName());
-				//_token.setImageAsset(tokenImage.getName(), tokenImage.getId());
+				// _token.setImageAsset(tokenImage.getName());
+				// _token.setImageAsset(tokenImage.getName(), tokenImage.getId());
 
 				// set the image shape
 				Image image = ImageIO.read(tokenImageFile);
@@ -356,29 +340,29 @@ public class AppActions {
 							// PW: This code addes the pHYs chunk to the
 							// output png file with X & Y dpi set.
 							BufferedImage img = TokenTool.getFrame().getComposedToken();
-							//ImageWriter writer = getImageWriterBySuffix("png");
-							//ImageOutputStream ios = ImageIO.createImageOutputStream(file);
-							//writer.setOutput(ios);
-							//ImageWriteParam param = writer.getDefaultWriteParam();
-							//							PNGMetadata png = new PNGMetadata();
-							//							// 39.375 inches per meter
-							//							// I'm using the image width for the DPI under
-							//							// the assumption that the token fits within
-							//							// one cell.
-							//							int resX = (int) (img.getWidth() * 39.375f);
-							//							png.pHYs_pixelsPerUnitXAxis = resX;
-							//							png.pHYs_pixelsPerUnitYAxis = resX;
-							//							png.pHYs_unitSpecifier = 1; // Meters - alternative is "unknown"
-							//							png.pHYs_present = true;
+							// ImageWriter writer = getImageWriterBySuffix("png");
+							// ImageOutputStream ios = ImageIO.createImageOutputStream(file);
+							// writer.setOutput(ios);
+							// ImageWriteParam param = writer.getDefaultWriteParam();
+							// PNGMetadata png = new PNGMetadata();
+							// // 39.375 inches per meter
+							// // I'm using the image width for the DPI under
+							// // the assumption that the token fits within
+							// // one cell.
+							// int resX = (int) (img.getWidth() * 39.375f);
+							// png.pHYs_pixelsPerUnitXAxis = resX;
+							// png.pHYs_pixelsPerUnitYAxis = resX;
+							// png.pHYs_unitSpecifier = 1; // Meters - alternative is "unknown"
+							// png.pHYs_present = true;
 
 							// TBD save the location and dimensions of the base, so that MapTool
 							// can scale this token so that the base fits within the grid while leaving
 							// the rest to perhaps overflow!
 
 							ImageIO.write(img, "png", file);
-							//writer.write(null, new IIOImage(img, null, png), param);
-							//writer.dispose();
-							//ios.close();
+							// writer.write(null, new IIOImage(img, null, png), param);
+							// writer.dispose();
+							// ios.close();
 						} catch (IOException ioe) {
 							ioe.printStackTrace();
 							TokenTool.showError("Unable to write image: " + ioe);

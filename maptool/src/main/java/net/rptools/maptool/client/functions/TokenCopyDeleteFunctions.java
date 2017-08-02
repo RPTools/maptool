@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
@@ -77,10 +74,8 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 	}
 
 	/*
-	 * Token copyToken(String tokenId, Number numCopies: 1, String fromMap:
-	 * (""|currentMap()), JSONObject updates: null) JSONArray copyToken(String
-	 * tokenId, Number numCopies, String fromMap: (""|currentMap()), JSONObject
-	 * updates: null)
+	 * Token copyToken(String tokenId, Number numCopies: 1, String fromMap: (""|currentMap()), JSONObject updates: null) JSONArray copyToken(String tokenId, Number numCopies, String fromMap:
+	 * (""|currentMap()), JSONObject updates: null)
 	 */
 	private Object copyTokens(MapToolVariableResolver res, List<Object> param) throws ParserException {
 		Token token = null;
@@ -145,7 +140,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 		JSONObject newVals = JSONObject.fromObject(vals);
 		newVals = (JSONObject) JSONMacroFunctions.getInstance().JSONEvaluate(res, newVals);
 
-		// FJE Should we remove the keys as we process them?  We could then warn the user
+		// FJE Should we remove the keys as we process them? We could then warn the user
 		// if there are still keys in the hash at the end...
 
 		// Update the Token Name.
@@ -222,14 +217,14 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 		}
 
 		if (tokenMoved) {
-			//			System.err.println(newVals + " @ (" + x + ", " + y + ")");
+			// System.err.println(newVals + " @ (" + x + ", " + y + ")");
 			TokenLocationFunctions.getInstance().moveToken(token, x, y, useDistance);
 		}
 
 		// Facing
 		if (newVals.containsKey("facing")) {
 			token.setFacing(newVals.getInt("facing"));
-			//			MapTool.getFrame().getCurrentZoneRenderer().flushLight();	// FJE Already part of copyToken()
+			// MapTool.getFrame().getCurrentZoneRenderer().flushLight(); // FJE Already part of copyToken()
 		}
 
 		// Size

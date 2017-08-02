@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.server;
 
 import java.io.IOException;
@@ -204,9 +201,9 @@ public class MapToolServer {
 						String msg = I18N.getText("msg.info.heartbeat.registrySuccess", errors);
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
-								// Write to the GM's console.  (Code taken from client.functions.ChatFunction)
+								// Write to the GM's console. (Code taken from client.functions.ChatFunction)
 								MapTool.serverCommand().message(TextMessage.gm(null, msg));
-								// Write to our console.  (Code taken from client.functions.ChatFunction)
+								// Write to our console. (Code taken from client.functions.ChatFunction)
 								MapTool.addServerMessage(TextMessage.me(null, msg));
 							}
 						});
@@ -219,31 +216,31 @@ public class MapToolServer {
 				} catch (Exception e) {
 					// Any other exception is a problem with the Hessian protocol and/or a network issue
 					// Regardless, we will count the number of consecutive errors and display a dialog
-					// at appropriate times, but otherwise ignore it.  The purpose of the heartbeat is
+					// at appropriate times, but otherwise ignore it. The purpose of the heartbeat is
 					// to let the website registry know this server is still running so that clients can
-					// easily connect.  If it breaks in the middle of a game, the clients are already connected
-					// so it's not *that* terrible.  However, our dialog to the user should tell them where
+					// easily connect. If it breaks in the middle of a game, the clients are already connected
+					// so it's not *that* terrible. However, our dialog to the user should tell them where
 					// the connection info can be found so they can give it to a client, if needed.
 					errors++;
 					if ((errors % WARNING_TIME) == 0) {
 						WARNING_TIME = Math.min(WARNING_TIME * 3, 10);
-						// It's been X heartbeats since we last talked to the registry successfully.  Let
+						// It's been X heartbeats since we last talked to the registry successfully. Let
 						// the user know we'll keep trying, but there may be an unrecoverable problem.
 						// We use a linear backoff so we don't inundate the user with popups!
 
 						String msg = I18N.getText("msg.info.heartbeat.registryFailure", IP_addr, port, errors);
 						SwingUtilities.invokeLater(new Runnable() {
 							public void run() {
-								// Write to the GM's console.  (Code taken from client.functions.ChatFunction)
+								// Write to the GM's console. (Code taken from client.functions.ChatFunction)
 								MapTool.serverCommand().message(TextMessage.gm(null, msg));
-								// Write to our console.  (Code taken from client.functions.ChatFunction)
+								// Write to our console. (Code taken from client.functions.ChatFunction)
 								MapTool.addServerMessage(TextMessage.me(null, msg));
 
 								// This is the first time the heartbeat has failed in this stretch of time.
-								// Only writes to the log on the first error.  Should it always add an entry?
+								// Only writes to the log on the first error. Should it always add an entry?
 								if (!ever_had_an_error) {
 									ever_had_an_error = true;
-									// Uses a popup to tell the user what's going on.  Includes a 'Logger.warn()' message.
+									// Uses a popup to tell the user what's going on. Includes a 'Logger.warn()' message.
 									MapTool.showWarning(msg, e);
 								}
 							}

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
@@ -153,8 +150,7 @@ public class FindTokenFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Filter by the layer the token is on (allows selecting tokens on the
-	 * Object and Background layers).
+	 * Filter by the layer the token is on (allows selecting tokens on the Object and Background layers).
 	 */
 	private class LayerFilter implements Zone.Filter {
 		private final JSONArray layers;
@@ -256,18 +252,14 @@ public class FindTokenFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Called when the MTscript function is <code>getToken</code>,
-	 * <code>getTokens</code>, <code>getTokenName</code>, or
-	 * <code>getTokenNames</code>.
+	 * Called when the MTscript function is <code>getToken</code>, <code>getTokens</code>, <code>getTokenName</code>, or <code>getTokenNames</code>.
 	 * 
 	 * @param parser
 	 *            parser context object
 	 * @param nameOnly
-	 *            whether to return only token names (<code>false</code> = token
-	 *            GUIDs)
+	 *            whether to return only token names (<code>false</code> = token GUIDs)
 	 * @param delim
-	 *            either <code>json</code> or a string delimiter between output
-	 *            entries
+	 *            either <code>json</code> or a string delimiter between output entries
 	 * @param jsonString
 	 *            incoming JSON data structure to filter results
 	 * @return
@@ -276,7 +268,7 @@ public class FindTokenFunctions extends AbstractFunction {
 	private Object getTokenList(Parser parser, boolean nameOnly, String delim, String jsonString) throws ParserException {
 		JSONObject jobj = JSONObject.fromObject(jsonString);
 
-		// First get a list of all our tokens.  By default this is limited to the TOKEN and GM layers.
+		// First get a list of all our tokens. By default this is limited to the TOKEN and GM layers.
 		List<Token> allTokens = null;
 		JSONArray layers = null;
 		if (!jobj.containsKey("layer")) {
@@ -322,8 +314,8 @@ public class FindTokenFunctions extends AbstractFunction {
 			} else if ("area".equalsIgnoreCase(searchType)) {
 				// We will do this as one of the last steps as it's one of the most expensive so we want to do it on as few tokens as possible
 				area = jobj.getJSONObject(searchType);
-				//			} else if ("unsetStates".equalsIgnoreCase(searchType)) {
-				//				// ignore
+				// } else if ("unsetStates".equalsIgnoreCase(searchType)) {
+				// // ignore
 			} else {
 				if (booleanCheck(jobj, searchType)) {
 					List<Token> lst = null;
@@ -353,7 +345,7 @@ public class FindTokenFunctions extends AbstractFunction {
 		// This is a little more painful as first we get the tokens that match
 		// the criteria, remove those from a list of all tokens, and use that
 		// resultant list to tell the tokenList which to retain.
-		// FJE Huh?  Why not just remove ones that match from 'tokenList'???
+		// FJE Huh? Why not just remove ones that match from 'tokenList'???
 		List<Token> inverseList = new ArrayList<Token>();
 		for (Object key : jobj.keySet()) {
 			String searchType = key.toString();
@@ -365,12 +357,12 @@ public class FindTokenFunctions extends AbstractFunction {
 					inverseList.removeAll(getTokenList(parser, FindType.STATE, st.toString()));
 					tokenList.retainAll(inverseList);
 				}
-				//			} else if ("setStates".equalsIgnoreCase(searchType)) {
-				//				// ignore
-				//			} else if ("range".equalsIgnoreCase(searchType)) {
-				//				// ignore
-				//			} else if ("area".equalsIgnoreCase(searchType)) {
-				//				// ignore
+				// } else if ("setStates".equalsIgnoreCase(searchType)) {
+				// // ignore
+				// } else if ("range".equalsIgnoreCase(searchType)) {
+				// // ignore
+				// } else if ("area".equalsIgnoreCase(searchType)) {
+				// // ignore
 			} else {
 				if (!booleanCheck(jobj, searchType)) {
 					inverseList.clear();

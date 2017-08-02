@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.AlphaComposite;
@@ -58,10 +55,10 @@ public class ASyncPartitionedDrawableRenderer implements DrawableRenderer {
 	}
 
 	public void flush() {
-		//		for (BufferedImage image : chunkMap.values()) {
-		//			releaseChunk(image);
-		//		}
-		//		chunkMap.clear();
+		// for (BufferedImage image : chunkMap.values()) {
+		// releaseChunk(image);
+		// }
+		// chunkMap.clear();
 		renderQueue.clear();
 	}
 
@@ -117,40 +114,40 @@ public class ASyncPartitionedDrawableRenderer implements DrawableRenderer {
 						chunk = NO_IMAGE;
 					chunkMap.put(key, chunk);
 				} else {
-					//					System.out.println("cache: " + getKey(cellX, cellY) + " - " + (chunk == NO_IMAGE));
+					// System.out.println("cache: " + getKey(cellX, cellY) + " - " + (chunk == NO_IMAGE));
 				}
 				if (chunk != null && chunk != NO_IMAGE) {
-					//					System.out.println("Drawing: " + key);
+					// System.out.println("Drawing: " + key);
 					g.drawImage(chunk, x, y, null);
 				}
 				chunkCache.remove(key);
 
-				//				if (col%2 == 0) {
-				//					if (row%2 == 0) {
-				//						g.setColor(Color.white);
-				//					} else {
-				//						g.setColor(Color.green);
-				//					}
-				//				} else {
-				//					if (row%2 == 0) {
-				//						g.setColor(Color.green);
-				//					} else {
-				//						g.setColor(Color.white);
-				//					}
-				//				}
-				//				g.drawRect(x, y, CHUNK_SIZE-1, CHUNK_SIZE-1);
-				//				g.drawString(key, x + CHUNK_SIZE/2, y + CHUNK_SIZE/2);
+				// if (col%2 == 0) {
+				// if (row%2 == 0) {
+				// g.setColor(Color.white);
+				// } else {
+				// g.setColor(Color.green);
+				// }
+				// } else {
+				// if (row%2 == 0) {
+				// g.setColor(Color.green);
+				// } else {
+				// g.setColor(Color.white);
+				// }
+				// }
+				// g.drawRect(x, y, CHUNK_SIZE-1, CHUNK_SIZE-1);
+				// g.drawString(key, x + CHUNK_SIZE/2, y + CHUNK_SIZE/2);
 			}
 		}
 		for (String key : chunkCache) {
-			//			System.out.println("Removing: " + key);
+			// System.out.println("Removing: " + key);
 			releaseChunk(chunkMap.remove(key));
 		}
 
 	}
 
 	private void createChunk(List<DrawnElement> drawableList, int gridx, int gridy, double scale, Rectangle view) {
-		//		System.out.println("create: " + getKey(gridx, gridy));
+		// System.out.println("create: " + getKey(gridx, gridy));
 		renderQueue.add(new QueuedRenderer(drawableList, gridx, gridy, scale, view));
 	}
 
@@ -174,10 +171,10 @@ public class ASyncPartitionedDrawableRenderer implements DrawableRenderer {
 
 			Rectangle2D drawnBounds = drawable.getBounds();
 			Rectangle2D chunkBounds = new Rectangle((int) (gridx * (CHUNK_SIZE / scale)), (int) (gridy * (CHUNK_SIZE / scale)), (int) (CHUNK_SIZE / scale), (int) (CHUNK_SIZE / scale));
-			//			if (gridx == 0 && gridy == 1) {
-			//				System.out.println(drawnBounds.intersects(chunkBounds));
-			//				System.out.println(drawnBounds + " - " + chunkBounds);
-			//			}
+			// if (gridx == 0 && gridy == 1) {
+			// System.out.println(drawnBounds.intersects(chunkBounds));
+			// System.out.println(drawnBounds + " - " + chunkBounds);
+			// }
 
 			// TODO: handle pen size
 			if (!drawnBounds.intersects(chunkBounds)) {
@@ -199,12 +196,14 @@ public class ASyncPartitionedDrawableRenderer implements DrawableRenderer {
 			}
 
 			Pen pen = element.getPen();
-			if (pen.getOpacity() != 1 && pen.getOpacity() != 0 /* handle legacy pens, besides, it doesn't make sense to have a non visible pen*/) {
+			if (pen.getOpacity() != 1 && pen.getOpacity() != 0 /*
+																 * handle legacy pens, besides, it doesn't make sense to have a non visible pen
+																 */) {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
 			}
-			//			if (gridx == 0 && gridy == 1) {
-			//				System.out.println("draw");
-			//			}
+			// if (gridx == 0 && gridy == 1) {
+			// System.out.println("draw");
+			// }
 			drawable.draw(g, pen);
 			g.setComposite(oldComposite);
 		}
@@ -212,10 +211,10 @@ public class ASyncPartitionedDrawableRenderer implements DrawableRenderer {
 		if (g != null) {
 			g.dispose();
 		}
-		//		if (image != null && isEmpty(image)) {
-		//			releaseChunk(image);
-		//			image = null;
-		//		}
+		// if (image != null && isEmpty(image)) {
+		// releaseChunk(image);
+		// image = null;
+		// }
 		if (image == null) {
 			image = NO_IMAGE;
 		}
@@ -224,15 +223,15 @@ public class ASyncPartitionedDrawableRenderer implements DrawableRenderer {
 	}
 
 	private static void releaseChunk(BufferedImage image) {
-		//		if (image == null || image == NO_IMAGE || chunkPool.size() >= maxChunkPoolSize) {
-		//			return;
-		//		}
-		//		clearImage(image);
-		//		chunkPool.add(image);
+		// if (image == null || image == NO_IMAGE || chunkPool.size() >= maxChunkPoolSize) {
+		// return;
+		// }
+		// clearImage(image);
+		// chunkPool.add(image);
 	}
 
 	private static BufferedImage getNewChunk() {
-		//		System.out.println("New chunk");
+		// System.out.println("New chunk");
 		return new BufferedImage(CHUNK_SIZE, CHUNK_SIZE, Transparency.BITMASK);
 	}
 
@@ -259,9 +258,9 @@ public class ASyncPartitionedDrawableRenderer implements DrawableRenderer {
 		}
 
 		public void render() {
-			//			System.out.println("rendering:" + getKey(cellX, cellY));
+			// System.out.println("rendering:" + getKey(cellX, cellY));
 			BufferedImage chunk = renderChunk(this);
-			//			System.out.println("putting:" + getKey(cellX, cellY) + " - " + (chunk == NO_IMAGE));
+			// System.out.println("putting:" + getKey(cellX, cellY) + " - " + (chunk == NO_IMAGE));
 			chunkMap.put(getKey(cellX, cellY), chunk);
 		}
 	}
@@ -274,7 +273,7 @@ public class ASyncPartitionedDrawableRenderer implements DrawableRenderer {
 				try {
 					QueuedRenderer renderer = renderQueue.take();
 					if (!renderer.isValid()) {
-						//						System.out.println("invalid: " + getKey(renderer.cellX, renderer.cellY));
+						// System.out.println("invalid: " + getKey(renderer.cellX, renderer.cellY));
 						continue;
 					}
 

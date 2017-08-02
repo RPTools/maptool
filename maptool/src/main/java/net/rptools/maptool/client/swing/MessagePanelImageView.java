@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.swing;
 
 import java.awt.Color;
@@ -84,8 +81,7 @@ public class MessagePanelImageView extends View {
 	private int width;
 	private int height;
 	/**
-	 * Bitmask containing some of the above bitmask values. Because the image loading notification can happen on another
-	 * thread access to this is synchronized (at least for modifying it).
+	 * Bitmask containing some of the above bitmask values. Because the image loading notification can happen on another thread access to this is synchronized (at least for modifying it).
 	 */
 	private int state;
 	private Container container;
@@ -125,8 +121,7 @@ public class MessagePanelImageView extends View {
 	}
 
 	/**
-	 * Returns the text to display if the image can't be loaded. This is obtained from the Elements attribute set with
-	 * the attribute name <code>HTML.Attribute.ALT</code>.
+	 * Returns the text to display if the image can't be loaded. This is obtained from the Elements attribute set with the attribute name <code>HTML.Attribute.ALT</code>.
 	 */
 	public String getAltText() {
 		return (String) getElement().getAttributes().getAttribute(HTML.Attribute.ALT);
@@ -172,9 +167,8 @@ public class MessagePanelImageView extends View {
 	}
 
 	/**
-	 * Sets how the image is loaded. If <code>newValue</code> is true, the image we be loaded when first asked for,
-	 * otherwise it will be loaded asynchronously. The default is to not load synchronously, that is to load the image
-	 * asynchronously.
+	 * Sets how the image is loaded. If <code>newValue</code> is true, the image we be loaded when first asked for, otherwise it will be loaded asynchronously. The default is to not load
+	 * synchronously, that is to load the image asynchronously.
 	 */
 	public void setLoadsSynchronously(boolean newValue) {
 		synchronized (this) {
@@ -202,8 +196,7 @@ public class MessagePanelImageView extends View {
 	}
 
 	/**
-	 * Fetches the attributes to use when rendering. This is implemented to multiplex the attributes specified in the
-	 * model with a StyleSheet.
+	 * Fetches the attributes to use when rendering. This is implemented to multiplex the attributes specified in the model with a StyleSheet.
 	 */
 	@Override
 	public AttributeSet getAttributes() {
@@ -212,8 +205,7 @@ public class MessagePanelImageView extends View {
 	}
 
 	/**
-	 * For images the tooltip text comes from text specified with the <code>ALT</code> attribute. This is overriden to
-	 * return <code>getAltText</code>.
+	 * For images the tooltip text comes from text specified with the <code>ALT</code> attribute. This is overriden to return <code>getAltText</code>.
 	 * 
 	 * @see JTextComponent#getToolTipText
 	 */
@@ -383,8 +375,8 @@ public class MessagePanelImageView extends View {
 	 * 
 	 * @param axis
 	 *            may be either X_AXIS or Y_AXIS
-	 * @return the span the view would like to be rendered into; typically the view is told to render into the span that
-	 *         is returned, although there is no guarantee; the parent may choose to resize or break the view
+	 * @return the span the view would like to be rendered into; typically the view is told to render into the span that is returned, although there is no guarantee; the parent may choose to resize or
+	 *         break the view
 	 */
 	@Override
 	public float getPreferredSpan(int axis) {
@@ -430,14 +422,12 @@ public class MessagePanelImageView extends View {
 	}
 
 	/**
-	 * Determines the desired alignment for this view along an axis. This is implemented to give the alignment to the
-	 * bottom of the icon along the y axis, and the default along the x axis.
+	 * Determines the desired alignment for this view along an axis. This is implemented to give the alignment to the bottom of the icon along the y axis, and the default along the x axis.
 	 * 
 	 * @param axis
 	 *            may be either X_AXIS or Y_AXIS
-	 * @return the desired alignment; this should be a value between 0.0 and 1.0 where 0 indicates alignment at the
-	 *         origin and 1.0 indicates alignment to the full span away from the origin; an alignment of 0.5 would be
-	 *         the center of the view
+	 * @return the desired alignment; this should be a value between 0.0 and 1.0 where 0 indicates alignment at the origin and 1.0 indicates alignment to the full span away from the origin; an
+	 *         alignment of 0.5 would be the center of the view
 	 */
 	@Override
 	public float getAlignment(int axis) {
@@ -597,8 +587,7 @@ public class MessagePanelImageView extends View {
 	}
 
 	/**
-	 * Loads the image and updates the size accordingly. This should be invoked instead of invoking
-	 * <code>loadImage</code> or <code>updateImageSize</code> directly.
+	 * Loads the image and updates the size accordingly. This should be invoked instead of invoking <code>loadImage</code> or <code>updateImageSize</code> directly.
 	 */
 	private void refreshImage() {
 		synchronized (this) {
@@ -757,8 +746,7 @@ public class MessagePanelImageView extends View {
 	}
 
 	/**
-	 * ImageHandler implements the ImageObserver to correctly update the display as new parts of the image become
-	 * available.
+	 * ImageHandler implements the ImageObserver to correctly update the display as new parts of the image become available.
 	 */
 	private class ImageHandler implements ImageObserver {
 		// This can come on any thread. If we are in the process of reloading
@@ -790,8 +778,7 @@ public class MessagePanelImageView extends View {
 	}
 
 	/**
-	 * ImageLabelView is used if the image can't be loaded, and the attribute specified an alt attribute. It overriden a
-	 * handle of methods as the text is hardcoded and does not come from the document.
+	 * ImageLabelView is used if the image can't be loaded, and the attribute specified an alt attribute. It overriden a handle of methods as the text is hardcoded and does not come from the document.
 	 */
 	private class ImageLabelView extends InlineView {
 		private Segment segment;

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
@@ -77,8 +74,7 @@ public class TokenLightFunctions extends AbstractFunction {
 	 * @param token
 	 *            The token to get the light sources for.
 	 * @param category
-	 *            The category to get the light sources for, if null then the light sources for all categories will be
-	 *            returned.
+	 *            The category to get the light sources for, if null then the light sources for all categories will be returned.
 	 * @param delim
 	 *            the delimiter for the list.
 	 * @return a string list containing the lights that are on.
@@ -152,10 +148,9 @@ public class TokenLightFunctions extends AbstractFunction {
 	 *            The token to check.
 	 * @param parameters
 	 *            The parameters for light sources to check.
-	 * @return true if the token has the light source. If there are no parameters then the token is checked for any
-	 *         light source. If there is one parameter then the token is checked to see if it contains a light source
-	 *         for that category. If there are two parameters the token is checked to see if it has a light source with
-	 *         the name in the second parameter from the category in the first parameter.
+	 * @return true if the token has the light source. If there are no parameters then the token is checked for any light source. If there is one parameter then the token is checked to see if it
+	 *         contains a light source for that category. If there are two parameters the token is checked to see if it has a light source with the name in the second parameter from the category in
+	 *         the first parameter.
 	 */
 	private boolean hasLightSource(Token token, List<Object> parameters) {
 		if (parameters.size() < 1) {

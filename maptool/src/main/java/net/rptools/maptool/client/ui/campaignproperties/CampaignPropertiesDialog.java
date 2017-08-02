@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.campaignproperties;
 
 import java.awt.Color;
@@ -79,12 +76,12 @@ public class CampaignPropertiesDialog extends JDialog {
 	public CampaignPropertiesDialog(JFrame owner) {
 		super(owner, "Campaign Properties", true);
 		setMinimumSize(new Dimension(450, 450)); // These sizes mess up my custom LAF settings. :(
-		//		setPreferredSize(new Dimension(450, 450));	// If the dialog were packed() would they be needed?
+		// setPreferredSize(new Dimension(450, 450)); // If the dialog were packed() would they be needed?
 
 		initialize();
 		pack(); // FJE
 
-		//		setSize(635, 605);
+		// setSize(635, 605);
 	}
 
 	public Status getStatus() {
@@ -217,7 +214,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
 		tokenStatesController.copyCampaignToUI(campaignProperties);
 		tokenBarController.copyCampaignToUI(campaignProperties);
-		//		updateTableList();
+		// updateTableList();
 	}
 
 	private String updateSightPanel(Map<String, SightType> sightTypeMap) {
@@ -313,13 +310,13 @@ public class CampaignPropertiesDialog extends JDialog {
 							shape = light.getShape().toString().toLowerCase();
 							break;
 						case CONE:
-						//							if (light.getArcAngle() != 0 && light.getArcAngle() != 90 && light.getArcAngle() != lastArc)
+						// if (light.getArcAngle() != 0 && light.getArcAngle() != 90 && light.getArcAngle() != lastArc)
 						{
 							lastArc = light.getArcAngle();
 							shape = "cone arc=" + StringUtil.formatDecimal(lastArc);
 						}
-							//							else
-							//								shape = "cone";
+							// else
+							// shape = "cone";
 							break;
 						}
 						if (!lastShape.equals(shape))
@@ -501,31 +498,22 @@ public class CampaignPropertiesDialog extends JDialog {
 	}
 
 	/**
-	 * Converts the string stored in <code>getLightPanel().getText()</code> into
-	 * a Map that relates a group of light sources to a Map of GUID and
-	 * LightSource.
+	 * Converts the string stored in <code>getLightPanel().getText()</code> into a Map that relates a group of light sources to a Map of GUID and LightSource.
 	 * <p>
 	 * The format for the text is as follows:
 	 * <ol>
 	 * <li>Any line starting with a dash ("-") is a comment and is ignored.
-	 * <li>Blank lines (those containing only zero or more spaces) are group
-	 * separators.
+	 * <li>Blank lines (those containing only zero or more spaces) are group separators.
 	 * <li>The first line of a sequence is the group name.
 	 * <li>Within a group, any line without a colon (":") is ignored.
 	 * <li>Remaining lines are of the following format:
 	 * <p>
-	 * <b>
-	 * <code>[Gm | Owner] [Circle+ | Square | Cone] [Normal+ | Aura] [Arc=angle] distance [#rrggbb]</code>
-	 * </b>
+	 * <b> <code>[Gm | Owner] [Circle+ | Square | Cone] [Normal+ | Aura] [Arc=angle] distance [#rrggbb]</code> </b>
 	 * </p>
 	 * <p>
-	 * Brackets indicate optional components. A plus sign follows any default
-	 * value for a given field. Fields starting with an uppercase letter are
-	 * literal text (although they are case-insensitive). Fields that do not
-	 * start with an uppercase letter represent user-supplied values, typically
-	 * numbers (such as <code>angle</code>, <code>distance</code>, and
-	 * <code>#rrggbb</code>). The <code>GM</code>/<code>Owner</code> field is
-	 * only valid for Auras.
+	 * Brackets indicate optional components. A plus sign follows any default value for a given field. Fields starting with an uppercase letter are literal text (although they are case-insensitive).
+	 * Fields that do not start with an uppercase letter represent user-supplied values, typically numbers (such as <code>angle</code>, <code>distance</code>, and <code>#rrggbb</code>). The
+	 * <code>GM</code>/<code>Owner</code> field is only valid for Auras.
 	 * </p>
 	 * </ol>
 	 * </p>
@@ -663,7 +651,7 @@ public class CampaignPropertiesDialog extends JDialog {
 					}
 				}
 				// Keep ID the same if modifying existing light
-				// TODO FJE Why?  Is there some benefit to doing so?  Changes to light sources require the map to be re-rendered anyway, don't they?
+				// TODO FJE Why? Is there some benefit to doing so? Changes to light sources require the map to be re-rendered anyway, don't they?
 				if (originalLightSourcesMap.containsKey(currentGroupName)) {
 					for (LightSource ls : originalLightSourcesMap.get(currentGroupName).values()) {
 						if (ls.getName().equalsIgnoreCase(name)) {
@@ -760,7 +748,7 @@ public class CampaignPropertiesDialog extends JDialog {
 	private void initExportButton() {
 		getExportButton().addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO: Remove this hack.  Specifically, make the export use a properties object
+				// TODO: Remove this hack. Specifically, make the export use a properties object
 				// composed of the current dialog entries instead of directly from the campaign
 				copyUIToCampaign();
 				// END HACK

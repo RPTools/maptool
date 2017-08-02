@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.awt.Color;
@@ -85,7 +82,8 @@ import de.muntjak.tinylookandfeel.TinyComboBoxButton;
 
 /**
  * <pre>
- * <span style="font-family:sans-serif;">The input() function prompts the user to input several variable values at once.
+ * <span style=
+"font-family:sans-serif;">The input() function prompts the user to input several variable values at once.
  * 
  * Each of the string parameters has the following format:
  *     "varname|value|prompt|inputType|options"
@@ -182,8 +180,7 @@ public class InputFunction extends AbstractFunction {
 		}
 
 		/**
-		 * Obtain one of the enum values, or null if <code>strName</code> 
-		 * doesn't match any of them.
+		 * Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them.
 		 */
 		public static InputType inputTypeFromName(String strName) {
 			for (InputType it : InputType.values()) {
@@ -199,8 +196,7 @@ public class InputFunction extends AbstractFunction {
 		}
 
 		/**
-		 * Parses a string and returns a Map of options for the given type.
-		 * Options not found are set to the default value for the type.
+		 * Parses a string and returns a Map of options for the given type. Options not found are set to the default value for the type.
 		 */
 		public OptionMap parseOptionString(String s) throws OptionException {
 			OptionMap ret = new OptionMap();
@@ -247,8 +243,7 @@ public class InputFunction extends AbstractFunction {
 
 			/**
 			 * Case-insensitive numeric get. <br>
-			 * Returns <code>defaultValue</code> if the option's value is
-			 * non-numeric. <br>
+			 * Returns <code>defaultValue</code> if the option's value is non-numeric. <br>
 			 * Use when caller wants to override erroneous option settings.
 			 */
 			public int getNumeric(String key, int defaultValue) {
@@ -263,8 +258,7 @@ public class InputFunction extends AbstractFunction {
 
 			/**
 			 * Case-insensitive numeric get. <br>
-			 * Returns the default value for the input type if option's value is
-			 * non-numeric. <br>
+			 * Returns the default value for the input type if option's value is non-numeric. <br>
 			 * Use when caller wants to ignore erroneous option settings.
 			 */
 			public int getNumeric(String key) {
@@ -302,8 +296,7 @@ public class InputFunction extends AbstractFunction {
 	} ///////////////////// end of InputType enum
 
 	/**********************************************************************************
-	 * Variable Specifier structure - holds extracted bits of info for a
-	 * variable.
+	 * Variable Specifier structure - holds extracted bits of info for a variable.
 	 **********************************************************************************/
 	final class VarSpec {
 		public String name, value, prompt;
@@ -363,10 +356,8 @@ public class InputFunction extends AbstractFunction {
 
 		/**
 		 * Parses a string into a list of values, for composite types. <br>
-		 * Before calling, the <code>inputType</code> and <code>value</code>
-		 * must be set. <br>
-		 * After calling, the <code>listIndex</code> member is adjusted if
-		 * necessary.
+		 * Before calling, the <code>inputType</code> and <code>value</code> must be set. <br>
+		 * After calling, the <code>listIndex</code> member is adjusted if necessary.
 		 */
 		public List<String> parseStringList(String valueString) {
 			List<String> ret = new ArrayList<String>();
@@ -394,8 +385,7 @@ public class InputFunction extends AbstractFunction {
 	} ///////////////////// end of VarSpec class
 
 	/**
-	 * Contains input controls, which are arranged in a two-column label +
-	 * control layout.
+	 * Contains input controls, which are arranged in a two-column label + control layout.
 	 */
 	@SuppressWarnings("serial")
 	final class ColumnPanel extends JPanel {
@@ -444,9 +434,7 @@ public class InputFunction extends AbstractFunction {
 		}
 
 		/**
-		 * Adds a row to the ColumnPanel with a label and input field.
-		 * <code>addToVarList</code> controls whether the VarSpec is added to
-		 * the local listing.
+		 * Adds a row to the ColumnPanel with a label and input field. <code>addToVarList</code> controls whether the VarSpec is added to the local listing.
 		 */
 		protected void addVariable(VarSpec vs, boolean addToVarList) {
 			if (addToVarList)
@@ -510,11 +498,11 @@ public class InputFunction extends AbstractFunction {
 
 		/** Sets the focus to the control that last had it. */
 		public void restoreFocus() {
-			//			// debugging
-			//			String s = (onShowFocus instanceof JTextField) ?
-			//				" (" + ((JTextField)onShowFocus).getText() + ")" : "";
-			//			String c = (onShowFocus == null) ? "null" : onShowFocus.getClass().getName();
-			//			System.out.println("  Shown: onShowFocus is " + c + s);
+			// // debugging
+			// String s = (onShowFocus instanceof JTextField) ?
+			// " (" + ((JTextField)onShowFocus).getText() + ")" : "";
+			// String c = (onShowFocus == null) ? "null" : onShowFocus.getClass().getName();
+			// System.out.println(" Shown: onShowFocus is " + c + s);
 
 			if (onShowFocus != null) {
 				onShowFocus.requestFocusInWindow();
@@ -537,10 +525,10 @@ public class InputFunction extends AbstractFunction {
 					lastFocus = src;
 					if (src instanceof JTextField)
 						((JTextField) src).selectAll();
-					//						// debugging
-					//						String s = (src instanceof JTextField) ?
-					//							" (" + ((JTextField)src).getText() + ")" : "";
-					//						System.out.println("  Got focus " + src.getClass().getName() + s);
+					// // debugging
+					// String s = (src instanceof JTextField) ?
+					// " (" + ((JTextField)src).getText() + ")" : "";
+					// System.out.println(" Got focus " + src.getClass().getName() + s);
 				}
 
 				public void focusLost(FocusEvent arg0) {
@@ -557,13 +545,13 @@ public class InputFunction extends AbstractFunction {
 					// The stupid JComboBox has two subcomponents, BOTH of which accept the focus.
 					// Thus it takes two Tab presses to move to the next control, and if you
 					// tab once and then hit the down arrow, you can then tab away while the dropdown
-					// list remains displayed.  (Other comboboxes in MapTool have similar problems.)
+					// list remains displayed. (Other comboboxes in MapTool have similar problems.)
 					// Since the user is likely to tab between values when inputting, this is a
 					// confusing nuisance.
 					//
 					// The hack used here is to make one of the two components (TinyComboBoxButton)
-					// not focusable.  We have to do it in a callback like this because the subcomponents
-					// don't exist until the dialog is created (I think?).  The code has a hardcoded index of 0,
+					// not focusable. We have to do it in a callback like this because the subcomponents
+					// don't exist until the dialog is created (I think?). The code has a hardcoded index of 0,
 					// which is where the TinyComboBoxButton lives on my Windows box (discovered using the debugger).
 					// The code may fail on other OSs, or if a future version of Swing is used.
 					// You're not supposed to mess with the internals like this.
@@ -572,17 +560,17 @@ public class InputFunction extends AbstractFunction {
 					for (int i = 0; i < list.length; i++)
 						if (list[i] instanceof TinyComboBoxButton)
 							list[i].setFocusable(false); // HACK!
-					//				} else if (c instanceof JTextField) {
-					//					// Select all text when the text field gains focus
-					//					final JTextField textFieldFinal = (JTextField) c;
-					//					textFieldFinal.addFocusListener(new FocusListener() {
-					//						public void focusGained(FocusEvent fe) {
-					//							textFieldFinal.selectAll();
-					//						}
+					// } else if (c instanceof JTextField) {
+					// // Select all text when the text field gains focus
+					// final JTextField textFieldFinal = (JTextField) c;
+					// textFieldFinal.addFocusListener(new FocusListener() {
+					// public void focusGained(FocusEvent fe) {
+					// textFieldFinal.selectAll();
+					// }
 					//
-					//						public void focusLost(FocusEvent fe) {
-					//						}
-					//					});
+					// public void focusLost(FocusEvent fe) {
+					// }
+					// });
 				} else if (c instanceof ColumnPanel) {
 					ColumnPanel cp = (ColumnPanel) c;
 					cp.runtimeFixup();
@@ -642,7 +630,7 @@ public class InputFunction extends AbstractFunction {
 				// Swing has an UNBELIEVABLY STUPID BUG when multiple items in a JComboBox compare as equal.
 				// The combo box then stops supporting navigation with arrow keys, and
 				// no matter which of the identical items is chosen, it returns the index
-				// of the first one.  Sun closed this bug as "by design" in 1998.
+				// of the first one. Sun closed this bug as "by design" in 1998.
 				// A workaround found on the web is to use this alternate string class (defined below)
 				// which never reports two items as being equal.
 				NoEqualString[] nesValues = new NoEqualString[vs.valueList.size()];
@@ -811,12 +799,8 @@ public class InputFunction extends AbstractFunction {
 	} ///////////// end of ColumnPanel class
 
 	/**
-	 * Wrapper panel provides alignment and scrolling to a ColumnPanel.
-	 * ColumnPanel uses GridBagLayout, which ignores size requests. Thus, the
-	 * ColumnPanel is always the size of its container, and is always centered.
-	 * We wrap the ColumnPanel in a ScrollingPanel to set the alignment and
-	 * desired maximum size. The ScrollingPanel is wrapped in a JScrollPane to
-	 * provide scrolling support.
+	 * Wrapper panel provides alignment and scrolling to a ColumnPanel. ColumnPanel uses GridBagLayout, which ignores size requests. Thus, the ColumnPanel is always the size of its container, and is
+	 * always centered. We wrap the ColumnPanel in a ScrollingPanel to set the alignment and desired maximum size. The ScrollingPanel is wrapped in a JScrollPane to provide scrolling support.
 	 */
 	@SuppressWarnings("serial")
 	final class ColumnPanelHost extends JScrollPane {
@@ -948,8 +932,7 @@ public class InputFunction extends AbstractFunction {
 		}
 
 		/**
-		 * Returns the first focusable control on the tab which is shown
-		 * initially.
+		 * Returns the first focusable control on the tab which is shown initially.
 		 */
 		public JComponent findFirstFocusable() {
 			ColumnPanel cp = columnPanels.get(initialTab);
@@ -958,8 +941,7 @@ public class InputFunction extends AbstractFunction {
 		}
 
 		/**
-		 * Adjusts the runtime behavior of components, and sets the initial
-		 * focus.
+		 * Adjusts the runtime behavior of components, and sets the initial focus.
 		 */
 		public void runtimeFixup() {
 			for (ColumnPanel cp : columnPanels) {
@@ -978,7 +960,7 @@ public class InputFunction extends AbstractFunction {
 
 			// When tab changes, save the last field that had the focus.
 			// (The first field in the panel will gain focus before the panel is shown,
-			//  so we have to save cp.lastFocus before it's overwritten.)
+			// so we have to save cp.lastFocus before it's overwritten.)
 			if (tabPane != null) {
 				tabPane.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
@@ -986,12 +968,12 @@ public class InputFunction extends AbstractFunction {
 						ColumnPanel cp = columnPanels.get(newTabIndex);
 						cp.onShowFocus = cp.lastFocus;
 
-						//						// debugging
-						//						JComponent foc = cp.onShowFocus;
-						//						String s = (foc instanceof JTextField) ?
-						//							" (" + ((JTextField)foc).getText() + ")" : "";
-						//						String c = (foc!=null) ? foc.getClass().getName() : "";
-						//						System.out.println("tabpane foc = " + c + s);
+						// // debugging
+						// JComponent foc = cp.onShowFocus;
+						// String s = (foc instanceof JTextField) ?
+						// " (" + ((JTextField)foc).getText() + ")" : "";
+						// String c = (foc!=null) ? foc.getClass().getName() : "";
+						// System.out.println("tabpane foc = " + c + s);
 					}
 				});
 			}
@@ -1204,7 +1186,7 @@ public class InputFunction extends AbstractFunction {
 		return BigDecimal.ONE; // success
 
 		// for debugging:
-		//return debugOutput(varSpecs);
+		// return debugOutput(varSpecs);
 	}
 
 	@Override
@@ -1218,8 +1200,7 @@ public class InputFunction extends AbstractFunction {
 	}
 
 	/**
-	 * Gets icon from the asset manager. Code copied and modified from
-	 * EditTokenDialog.java
+	 * Gets icon from the asset manager. Code copied and modified from EditTokenDialog.java
 	 */
 	private ImageIcon getIcon(String id, int size, ImageObserver io) {
 		// Extract the MD5Key from the URL
@@ -1279,7 +1260,7 @@ public class InputFunction extends AbstractFunction {
 			this.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					//					System.out.println(macroLink);
+					// System.out.println(macroLink);
 				}
 			});
 		}
@@ -1333,132 +1314,84 @@ public class InputFunction extends AbstractFunction {
 	}
 
 	// Dumps out the parsed input specifications for debugging purposes
-	//	private String debugOutput(ArrayList<VarSpec> varSpecs) {
-	//		StringBuilder builder = new StringBuilder();
-	//		builder.append("<br><table border='1' padding='2px 2px'>");
-	//		builder.append(
-	//				"<tr style='font-weight:bold'><td>Name</td><td>Value</td><td>Prompt</td><td>Input Type</td><td>Options</td></tr>"
-	//				);
-	//		for (VarSpec vs : varSpecs) {
-	//			builder.append("<tr>");
-	//			builder.append("<td>");
-	//			builder.append(vs.name);
-	//			builder.append("</td><td>");
-	//			if (vs.inputType == InputType.LIST) {
-	//				builder.append("(( ");
-	//				for (String s : vs.valueList) {
-	//					builder.append(s);
-	//					builder.append(",");
-	//				}
-	//				builder.append(" ))");
-	//			} else {
-	//				builder.append(vs.value);
-	//			}
-	//			builder.append("</td><td>");
-	//			builder.append(vs.prompt);
-	//			builder.append("</td><td>");
-	//			builder.append(vs.inputType);
-	//			builder.append("</td><td>");
-	//			for (Map.Entry<String, String> entry : vs.optionValues.entrySet())
-	//				builder.append(entry.getKey() + "=" + entry.getValue() + "<br>");
-	//			builder.append("</td></tr>");
-	//		}
-	//		builder.append("</table>");
-	//		return builder.toString();
-	//	}
+	// private String debugOutput(ArrayList<VarSpec> varSpecs) {
+	// StringBuilder builder = new StringBuilder();
+	// builder.append("<br><table border='1' padding='2px 2px'>");
+	// builder.append(
+	// "<tr style='font-weight:bold'><td>Name</td><td>Value</td><td>Prompt</td><td>Input Type</td><td>Options</td></tr>"
+	// );
+	// for (VarSpec vs : varSpecs) {
+	// builder.append("<tr>");
+	// builder.append("<td>");
+	// builder.append(vs.name);
+	// builder.append("</td><td>");
+	// if (vs.inputType == InputType.LIST) {
+	// builder.append("(( ");
+	// for (String s : vs.valueList) {
+	// builder.append(s);
+	// builder.append(",");
+	// }
+	// builder.append(" ))");
+	// } else {
+	// builder.append(vs.value);
+	// }
+	// builder.append("</td><td>");
+	// builder.append(vs.prompt);
+	// builder.append("</td><td>");
+	// builder.append(vs.inputType);
+	// builder.append("</td><td>");
+	// for (Map.Entry<String, String> entry : vs.optionValues.entrySet())
+	// builder.append(entry.getKey() + "=" + entry.getValue() + "<br>");
+	// builder.append("</td></tr>");
+	// }
+	// builder.append("</table>");
+	// return builder.toString();
+	// }
 }
 
 // A sample for the TAB control
 /*
  * 
- * [h: status = input( "tab0 | Abilities | Enter abilities here | TAB",
- * "blah|Max value is 18|Note|LABEL ## abils|Str=8;Con=8;Dex=8;Int=8;Wis=8;Cha=8|Abilities|PROPS"
- * , "txt0|text on tab 0|",
- * "tab1 | Options | Various options | TAB |select=true",
- * "txt|default text ## ck|1|Toggle me|CHECK ## list|a,b,This is a very long item,d|Pick one|LIST ## foo|foo"
- * )] [h: abort(status)] tab0 is set to [tab0] <br>tab1 is set to [tab1] <br>
- * <br>list is set to [list] <br>get list from the tab1 variable:
- * [getStrProp(tab1,"list","","##")]
+ * [h: status = input( "tab0 | Abilities | Enter abilities here | TAB", "blah|Max value is 18|Note|LABEL ## abils|Str=8;Con=8;Dex=8;Int=8;Wis=8;Cha=8|Abilities|PROPS" , "txt0|text on tab 0|",
+ * "tab1 | Options | Various options | TAB |select=true", "txt|default text ## ck|1|Toggle me|CHECK ## list|a,b,This is a very long item,d|Pick one|LIST ## foo|foo" )] [h: abort(status)] tab0 is set
+ * to [tab0] <br>tab1 is set to [tab1] <br> <br>list is set to [list] <br>get list from the tab1 variable: [getStrProp(tab1,"list","","##")]
  */
 
 // A tall tab control, to demonstrate scrolling
 /*
- * [h: props =
- * "a=3;b=bob;c=cow;d=40;e=55;f=33;g=big time;h=hello;i=interesting;j=jack;k=kow;l=leap;m=moon;"
- * ] [h: status = input( "tab0 | Settings | Settings tooltip | TAB",
- * "foo|||CHECK ## bar|bar",
- * "tab1 | Options | Options tooltip | TAB | select=true",
- * "num|a,b,c,d|Pick one|list ## zot|zot ## zam|zam",
- * "tab2 | Options2 | Options2 tooltip | TAB | ", "p | " + props +
- * " | Sample props | PROPS ## p2 | " + props + " | More props | PROPS ## p3 | "
- * + props + " | Even more props | PROPS ## p4 | " + props +
- * " | Still more props | PROPS", "num2|a,b,c,d|Pick one|list ",
- * "num3|after all it's only a listbox here now isn't it dear?,b,c,d|Pick one|list|span=true ## ee|ee ## ff|ff ## gg|gg ## hh|hh ## ii|ii ## jj|jj ## kk|kk"
- * , "tab3 | Empty | nothin' | TAB" )] [h: abort(status)] tab0 is [tab0]<br> foo
- * is [foo]<br> tab1 is [tab1]<br> num is [num]<br> tab2 is [tab2]<br> tab3 is
- * [tab3]<br>
+ * [h: props = "a=3;b=bob;c=cow;d=40;e=55;f=33;g=big time;h=hello;i=interesting;j=jack;k=kow;l=leap;m=moon;" ] [h: status = input( "tab0 | Settings | Settings tooltip | TAB", "foo|||CHECK ## bar|bar",
+ * "tab1 | Options | Options tooltip | TAB | select=true", "num|a,b,c,d|Pick one|list ## zot|zot ## zam|zam", "tab2 | Options2 | Options2 tooltip | TAB | ", "p | " + props +
+ * " | Sample props | PROPS ## p2 | " + props + " | More props | PROPS ## p3 | " + props + " | Even more props | PROPS ## p4 | " + props + " | Still more props | PROPS", "num2|a,b,c,d|Pick one|list ",
+ * "num3|after all it's only a listbox here now isn't it dear?,b,c,d|Pick one|list|span=true ## ee|ee ## ff|ff ## gg|gg ## hh|hh ## ii|ii ## jj|jj ## kk|kk" , "tab3 | Empty | nothin' | TAB" )] [h:
+ * abort(status)] tab0 is [tab0]<br> foo is [foo]<br> tab1 is [tab1]<br> num is [num]<br> tab2 is [tab2]<br> tab3 is [tab3]<br>
  */
 
 // Here's a sample input to exercise the options
 /*
  * 
- * Original props = [props =
- * "Name=Longsword +1; Damage=1d8+1; Crit=1d6; Keyword=fire;"] [H: input( "foo",
- * "YourName|George Washington|Your name|TEXT",
- * "Weapon|Axe,Sword,Mace|Choose weapon|LIST",
- * "WarCry|Attack!,No surrender!,I give up!|Pick a war cry|LIST|VALUE=STRING select=1"
- * , "CA || Combat advantage|     CHECK|",
- * "props |"+props+"|Weapon properties|PROPS|setvars=true",
- * "UsePower |1|Use the power|CHECK",
- * "Weight|light,medium,heavy||RADIO|ORIENT=H select=1",
- * "Ambition|Survive today, Defeat my enemies, Rule the world, Become immortal||RADIO|VALUE=STRING"
- * ,
- * "bar | a, b, c, d, e, f, g , h     ,i  j, k   |Radio button test   |  RADIO       | select=5 value = string ; oRiEnT   =h;;;;"
- * )]<br> <i>New values of variables:</i> <br>foo is [foo] <br>YourName is
- * [YourName] <br>Weapon is [Weapon] <br>WarCry is [WarCry] <br>CA is [CA]
- * <br>props is [props] <br>UsePower is [UsePower] <br>Weight is [Weight]
- * <br>Ambition is [Ambition] <br> <br>Name is [Name], Damage is [Damage], Crit
- * is [Crit], Keyword is [Keyword]
+ * Original props = [props = "Name=Longsword +1; Damage=1d8+1; Crit=1d6; Keyword=fire;"] [H: input( "foo", "YourName|George Washington|Your name|TEXT", "Weapon|Axe,Sword,Mace|Choose weapon|LIST",
+ * "WarCry|Attack!,No surrender!,I give up!|Pick a war cry|LIST|VALUE=STRING select=1" , "CA || Combat advantage|     CHECK|", "props |"+props+"|Weapon properties|PROPS|setvars=true",
+ * "UsePower |1|Use the power|CHECK", "Weight|light,medium,heavy||RADIO|ORIENT=H select=1", "Ambition|Survive today, Defeat my enemies, Rule the world, Become immortal||RADIO|VALUE=STRING" ,
+ * "bar | a, b, c, d, e, f, g , h     ,i  j, k   |Radio button test   |  RADIO       | select=5 value = string ; oRiEnT   =h;;;;" )]<br> <i>New values of variables:</i> <br>foo is [foo] <br>YourName
+ * is [YourName] <br>Weapon is [Weapon] <br>WarCry is [WarCry] <br>CA is [CA] <br>props is [props] <br>UsePower is [UsePower] <br>Weight is [Weight] <br>Ambition is [Ambition] <br> <br>Name is [Name],
+ * Damage is [Damage], Crit is [Crit], Keyword is [Keyword]
  */
 
 // Here's a longer version of that sample, but the 9/14/08 checked in version of MapTool gets
 // a stack overflow when this is pasted into chat (due to its length?)
 /*
  * 
- * Original props = [props =
- * "Name=Longsword +1; Damage=1d8+1; Crit=1d6; Keyword=fire;"] [h: setPropVars =
- * 1] [H: input( "foo", "YourName|George Washington|Your name|TEXT",
- * "Weapon|Axe,Sword,Mace|Choose weapon|LIST",
- * "WarCry|Attack!,No surrender!,I give up!|Pick a war cry|LIST|VALUE=STRING select=1"
- * , "CA || Combat advantage|     CHECK|",
- * "props |"+props+"|Weapon properties|PROPS|setvars=true",
- * "UsePower |1|Use the power|CHECK",
- * "Weight|light,medium,heavy||RADIO|ORIENT=H select=1",
- * "Ambition|Survive today, Defeat my enemies, Rule the world, Become immortal||RADIO|VALUE=STRING"
- * ,
- * "bar | a, b, c, d, e, f, g , h     ,i  j, k   |Radio button test   |  RADIO       | select=5 value = string ; oRiEnT   =h;;;;"
- * )]<br> <i>New values of variables:</i> <table border=0><tr
- * style='font-weight:bold;'><td>Name&nbsp;&nbsp;&nbsp;</td><td>Value</td></tr>
- * <tr><td>foo&nbsp;&nbsp;&nbsp;</td><td>{foo}</td></tr>
- * <tr><td>YourName&nbsp;&nbsp;&nbsp;</td><td>{YourName}</td></tr>
- * <tr><td>Weapon&nbsp;&nbsp;&nbsp;</td><td>{Weapon}</td></tr>
- * <tr><td>WarCry&nbsp;&nbsp;&nbsp;</td><td>{WarCry}</td></tr>
- * <tr><td>CA&nbsp;&nbsp;&nbsp;</td><td>{CA}&nbsp;&nbsp;&nbsp;</td></tr>
- * <tr><td>props&nbsp;&nbsp;&nbsp;</td><td>{props}&nbsp;&nbsp;&nbsp;</td></tr>
- * <tr
- * ><td>UsePower&nbsp;&nbsp;&nbsp;</td><td>{UsePower}&nbsp;&nbsp;&nbsp;</td></
- * tr>
- * <tr><td>Weight&nbsp;&nbsp;&nbsp;</td><td>{Weight}&nbsp;&nbsp;&nbsp;</td></tr>
- * <
- * tr><td>Ambition&nbsp;&nbsp;&nbsp;</td><td>{Ambition}&nbsp;&nbsp;&nbsp;</td></
- * tr> <tr><td>&nbsp;&nbsp;&nbsp;</td><td>&nbsp;&nbsp;&nbsp;</td></tr>
- * <tr><td>&nbsp;&nbsp;&nbsp;</td><td>&nbsp;&nbsp;&nbsp;</td></tr> {if
- * (setPropVars,
- * "<tr><td>Name&nbsp;&nbsp;&nbsp;</td><td>"+Name+"&nbsp;&nbsp;&nbsp;</td></tr>
- * <
- * tr><td>Damage&nbsp;&nbsp;&nbsp;</td><td>"+Damage+"&nbsp;&nbsp;&nbsp;</td></tr
- * > <tr><td>Crit&nbsp;&nbsp;&nbsp;</td><td>"+Crit+"&nbsp;&nbsp;&nbsp;</td></tr>
- * <
- * tr><td>Keyword&nbsp;&nbsp;&nbsp;</td><td>"+Keyword+"&nbsp;&nbsp;&nbsp;</td></
- * tr>", "")} </td></tr> </table> New props = [props]
+ * Original props = [props = "Name=Longsword +1; Damage=1d8+1; Crit=1d6; Keyword=fire;"] [h: setPropVars = 1] [H: input( "foo", "YourName|George Washington|Your name|TEXT",
+ * "Weapon|Axe,Sword,Mace|Choose weapon|LIST", "WarCry|Attack!,No surrender!,I give up!|Pick a war cry|LIST|VALUE=STRING select=1" , "CA || Combat advantage|     CHECK|",
+ * "props |"+props+"|Weapon properties|PROPS|setvars=true", "UsePower |1|Use the power|CHECK", "Weight|light,medium,heavy||RADIO|ORIENT=H select=1",
+ * "Ambition|Survive today, Defeat my enemies, Rule the world, Become immortal||RADIO|VALUE=STRING" ,
+ * "bar | a, b, c, d, e, f, g , h     ,i  j, k   |Radio button test   |  RADIO       | select=5 value = string ; oRiEnT   =h;;;;" )]<br> <i>New values of variables:</i> <table border=0><tr
+ * style='font-weight:bold;'><td>Name&nbsp;&nbsp;&nbsp;</td><td>Value</td></tr> <tr><td>foo&nbsp;&nbsp;&nbsp;</td><td>{foo}</td></tr> <tr><td>YourName&nbsp;&nbsp;&nbsp;</td><td>{YourName}</td></tr>
+ * <tr><td>Weapon&nbsp;&nbsp;&nbsp;</td><td>{Weapon}</td></tr> <tr><td>WarCry&nbsp;&nbsp;&nbsp;</td><td>{WarCry}</td></tr> <tr><td>CA&nbsp;&nbsp;&nbsp;</td><td>{CA}&nbsp;&nbsp;&nbsp;</td></tr>
+ * <tr><td>props&nbsp;&nbsp;&nbsp;</td><td>{props}&nbsp;&nbsp;&nbsp;</td></tr> <tr ><td>UsePower&nbsp;&nbsp;&nbsp;</td><td>{UsePower}&nbsp;&nbsp;&nbsp;</td></ tr>
+ * <tr><td>Weight&nbsp;&nbsp;&nbsp;</td><td>{Weight}&nbsp;&nbsp;&nbsp;</td></tr> < tr><td>Ambition&nbsp;&nbsp;&nbsp;</td><td>{Ambition}&nbsp;&nbsp;&nbsp;</td></ tr>
+ * <tr><td>&nbsp;&nbsp;&nbsp;</td><td>&nbsp;&nbsp;&nbsp;</td></tr> <tr><td>&nbsp;&nbsp;&nbsp;</td><td>&nbsp;&nbsp;&nbsp;</td></tr> {if (setPropVars,
+ * "<tr><td>Name&nbsp;&nbsp;&nbsp;</td><td>"+Name+"&nbsp;&nbsp;&nbsp;</td></tr> < tr><td>Damage&nbsp;&nbsp;&nbsp;</td><td>"+Damage+"&nbsp;&nbsp;&nbsp;</td></tr >
+ * <tr><td>Crit&nbsp;&nbsp;&nbsp;</td><td>"+Crit+"&nbsp;&nbsp;&nbsp;</td></tr> < tr><td>Keyword&nbsp;&nbsp;&nbsp;</td><td>"+Keyword+"&nbsp;&nbsp;&nbsp;</td></ tr>", "")} </td></tr> </table> New props
+ * = [props]
  */

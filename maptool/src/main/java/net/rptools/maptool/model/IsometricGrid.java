@@ -1,3 +1,11 @@
+/*
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.model;
 
 import java.awt.BasicStroke;
@@ -32,9 +40,8 @@ import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
 
 public class IsometricGrid extends Grid {
 	/**
-	 * An attempt at an isometric style map grid where each cell is a diamond with the sides angled at approx 30
-	 * degrees. However rather than being true isometric, each cell is twice as wide as high. This makes converting
-	 * images significantly easier for end-users.
+	 * An attempt at an isometric style map grid where each cell is a diamond with the sides angled at approx 30 degrees. However rather than being true isometric, each cell is twice as wide as high.
+	 * This makes converting images significantly easier for end-users.
 	 *
 	 **/
 	private static final int ISO_ANGLE = 27;
@@ -71,9 +78,8 @@ public class IsometricGrid extends Grid {
 	/**
 	 * Cell Dimensions
 	 *
-	 * I decided to use cell size provided by Map Properties (getSize()) for the cell height. It might appear more
-	 * logical for getSize() to be the edge length. However, using it for height means there is a correlation between
-	 * square grid points and isometric grid points. This will make the creation of maps and tokens easier.
+	 * I decided to use cell size provided by Map Properties (getSize()) for the cell height. It might appear more logical for getSize() to be the edge length. However, using it for height means there
+	 * is a correlation between square grid points and isometric grid points. This will make the creation of maps and tokens easier.
 	 *
 	 ***/
 	@Override
@@ -276,8 +282,8 @@ public class IsometricGrid extends Grid {
 			System.out.println(token.getName() + " footprint.getWidth() " + footprint.getWidth());
 			System.out.println(token.getName() + " footprint.getHeight() " + footprint.getHeight());
 		}
-		//		System.out.println("this.getDefaultFootprint() " + this.getDefaultFootprint());
-		//		System.out.println("token.getWidth() " + token.getWidth());
+		// System.out.println("this.getDefaultFootprint() " + this.getDefaultFootprint());
+		// System.out.println("token.getWidth() " + token.getWidth());
 
 		Area visibleArea = new Area();
 		switch (shape) {
@@ -296,7 +302,7 @@ public class IsometricGrid extends Grid {
 			}
 			// Rotate the vision range by 45 degrees for isometric view
 			visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
-			// Get the cone, use degreesFromIso to convert the facing from isometric to plan 
+			// Get the cone, use degreesFromIso to convert the facing from isometric to plan
 			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2, token.getFacing() - (arcAngle / 2.0)
 					+ (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
 			// Get the cell footprint
@@ -426,7 +432,7 @@ public class IsometricGrid extends Grid {
 		int nSize = (planArea.getBounds().width + planArea.getBounds().height);
 
 		return resize(rotate(planArea), nSize, nSize / 2);
-		//return rotate(planArea);
+		// return rotate(planArea);
 	}
 
 	private static Area rotate(Area planArea) {

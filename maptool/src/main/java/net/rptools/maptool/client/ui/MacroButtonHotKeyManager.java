@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui;
 
 import javax.swing.KeyStroke;
@@ -23,9 +20,9 @@ import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
  */
 public class MacroButtonHotKeyManager {
 
-	//Changing and adding more hotkeys should work smoothly, however hotkeys[0]
-	//should be kept as the "no hotkey" option, regardless of the actual String used for it.
-	//HOTKEYS strings must follow the syntax required by getKeyStroke(String s)
+	// Changing and adding more hotkeys should work smoothly, however hotkeys[0]
+	// should be kept as the "no hotkey" option, regardless of the actual String used for it.
+	// HOTKEYS strings must follow the syntax required by getKeyStroke(String s)
 	public static final String[] HOTKEYS = { "None", "F2", "F3", "F4", "F5", "F6", "F7", "F8",
 			"F9", "F10", "F11", "F12", "alt F1", "alt F2", "alt F3", "alt F5", "alt F6",
 			"alt F7", "alt F8", "alt F9", "alt F10", "alt F11", "alt F12", "ctrl F1", "ctrl F2",
@@ -65,7 +62,7 @@ public class MacroButtonHotKeyManager {
 				oldButton.getProperties().setHotKey(HOTKEYS[0]);
 				// remove the hot key reference from the button's text
 				oldButton.setText(oldButton.getButtonText());
-				//remove from our map
+				// remove from our map
 				buttonsByKeyStroke.remove(keystroke);
 				// need to save settings
 				oldButton.getProperties().save();
@@ -76,7 +73,7 @@ public class MacroButtonHotKeyManager {
 
 			// keep macrotabbedpane's keystrokes in sync
 			if (MapTool.getFrame() != null) {
-				//MapTool.getFrame().getMacroTabbedPane().updateKeyStrokes();
+				// MapTool.getFrame().getMacroTabbedPane().updateKeyStrokes();
 				// TODO: change this later to use the hub
 				MapTool.getFrame().updateKeyStrokes();
 			}

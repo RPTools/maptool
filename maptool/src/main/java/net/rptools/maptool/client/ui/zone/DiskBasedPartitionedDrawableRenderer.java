@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.AlphaComposite;
@@ -56,7 +53,7 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 
 	static {
 		try {
-			// Clear out the cache.  Boot up is as good of a time as any
+			// Clear out the cache. Boot up is as good of a time as any
 			if (CACHE_DIR.exists()) {
 				FileUtil.delete(CACHE_DIR);
 			}
@@ -117,27 +114,27 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 					chunkMap.put(key, chunk);
 				}
 				if (chunk != null && chunk != NO_IMAGE) {
-					//					System.out.println("Drawing: " + key);
+					// System.out.println("Drawing: " + key);
 					count++;
 					g.drawImage(chunk, x, y, null);
 				}
 				chunkCache.remove(key);
 
-				//				if (col%2 == 0) {
-				//					if (row%2 == 0) {
-				//						g.setColor(Color.white);
-				//					} else {
-				//						g.setColor(Color.green);
-				//					}
-				//				} else {
-				//					if (row%2 == 0) {
-				//						g.setColor(Color.green);
-				//					} else {
-				//						g.setColor(Color.white);
-				//					}
-				//				}
-				//				g.drawRect(x, y, CHUNK_SIZE-1, CHUNK_SIZE-1);
-				//				g.drawString(key, x + CHUNK_SIZE/2, y + CHUNK_SIZE/2);
+				// if (col%2 == 0) {
+				// if (row%2 == 0) {
+				// g.setColor(Color.white);
+				// } else {
+				// g.setColor(Color.green);
+				// }
+				// } else {
+				// if (row%2 == 0) {
+				// g.setColor(Color.green);
+				// } else {
+				// g.setColor(Color.white);
+				// }
+				// }
+				// g.drawRect(x, y, CHUNK_SIZE-1, CHUNK_SIZE-1);
+				// g.drawString(key, x + CHUNK_SIZE/2, y + CHUNK_SIZE/2);
 			}
 		}
 		for (String key : chunkCache) {
@@ -146,7 +143,7 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 				chunkMap.remove(key);
 			}
 		}
-		//		System.out.println("Chunks: " + count);
+		// System.out.println("Chunks: " + count);
 
 		// REMEMBER
 		lastViewport = viewport;
@@ -160,13 +157,13 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 		if (chunkFile.exists()) {
 			try {
 				BufferedImage image = ImageIO.read(chunkFile);
-				//				System.out.println("Using cache: " + gridx + ", " + gridy);
+				// System.out.println("Using cache: " + gridx + ", " + gridy);
 				return image;
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
 			}
 		}
-		//		System.out.println("Creating " + gridx + ", " + gridy);
+		// System.out.println("Creating " + gridx + ", " + gridy);
 
 		int x = gridx * CHUNK_SIZE;
 		int y = gridy * CHUNK_SIZE;
@@ -180,10 +177,10 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 
 			Rectangle2D drawnBounds = drawable.getBounds();
 			Rectangle2D chunkBounds = new Rectangle((int) (gridx * (CHUNK_SIZE / scale)), (int) (gridy * (CHUNK_SIZE / scale)), (int) (CHUNK_SIZE / scale), (int) (CHUNK_SIZE / scale));
-			//			if (gridx == 0 && gridy == 1) {
-			//				System.out.println(drawnBounds.intersects(chunkBounds));
-			//				System.out.println(drawnBounds + " - " + chunkBounds);
-			//			}
+			// if (gridx == 0 && gridy == 1) {
+			// System.out.println(drawnBounds.intersects(chunkBounds));
+			// System.out.println(drawnBounds + " - " + chunkBounds);
+			// }
 
 			// TODO: handle pen size
 			if (!drawnBounds.intersects(chunkBounds)) {
@@ -207,9 +204,9 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 			if (pen.getOpacity() != 1 && pen.getOpacity() != 0) {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
 			}
-			//			if (gridx == 0 && gridy == 1) {
-			//				System.out.println("draw");
-			//			}
+			// if (gridx == 0 && gridy == 1) {
+			// System.out.println("draw");
+			// }
 			drawable.draw(g, pen);
 			g.setComposite(oldComposite);
 		}
@@ -217,10 +214,10 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
 		if (g != null) {
 			g.dispose();
 		}
-		//		if (image != null && isEmpty(image)) {
-		//			releaseChunk(image);
-		//			image = null;
-		//		}
+		// if (image != null && isEmpty(image)) {
+		// releaseChunk(image);
+		// image = null;
+		// }
 		if (image == null) {
 			image = NO_IMAGE;
 		} else {

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.awt.BasicStroke;
@@ -40,17 +37,13 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 /**
- * New class extending AbstractFunction to create new "Macro Functions" drawVBL,
- * eraseVBL, getVBL
+ * New class extending AbstractFunction to create new "Macro Functions" drawVBL, eraseVBL, getVBL
  * 
- * drawVBL(jsonArray) :: Takes an array of JSON Objects containing information
- * to draw a Shape in VBL
+ * drawVBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a Shape in VBL
  * 
- * eraseVBL(jsonArray) :: Takes an array of JSON Objects containing information
- * to erase a Shape in VBL
+ * eraseVBL(jsonArray) :: Takes an array of JSON Objects containing information to erase a Shape in VBL
  * 
- * getVBL(jsonArray) :: Get the VBL for a given area and return as array of
- * points
+ * getVBL(jsonArray) :: Get the VBL for a given area and return as array of points
  */
 public class VBL_Functions extends AbstractFunction {
 	private static final VBL_Functions instance = new VBL_Functions();
@@ -367,20 +360,17 @@ public class VBL_Functions extends AbstractFunction {
 	}
 
 	/**
-	 * Get the required parameters needed from the JSON to draw a rectangle and
-	 * render as VBL.
+	 * Get the required parameters needed from the JSON to draw a rectangle and render as VBL.
 	 * 
 	 * @param renderer
 	 *            Reference to the ZoneRenderer
 	 * @param vblObject
-	 *            The JSONObject containing all the coordinates and values to
-	 *            needed to draw a rectangle.
+	 *            The JSONObject containing all the coordinates and values to needed to draw a rectangle.
 	 * @param erase
 	 *            Set to true to erase the rectangle in VBL, otherwise draw it
-	 * @return 
+	 * @return
 	 * @throws ParserException
-	 *             If the minimum required parameters are not present in the
-	 *             JSON, throw ParserException
+	 *             If the minimum required parameters are not present in the JSON, throw ParserException
 	 */
 	private Area drawRectangleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Rectangle]";
@@ -493,20 +483,17 @@ public class VBL_Functions extends AbstractFunction {
 	}
 
 	/**
-	 * Get the required parameters needed from the JSON to draw a Polygon and
-	 * render as VBL.
+	 * Get the required parameters needed from the JSON to draw a Polygon and render as VBL.
 	 * 
 	 * @param renderer
 	 *            Reference to the ZoneRenderer
 	 * @param vblObject
-	 *            The JSONObject containing all the coordinates and values to
-	 *            needed to draw a rectangle.
+	 *            The JSONObject containing all the coordinates and values to needed to draw a rectangle.
 	 * @param erase
 	 *            Set to true to erase the rectangle in VBL, otherwise draw it
-	 * @return 
+	 * @return
 	 * @throws ParserException
-	 *             If the minimum required parameters are not present in the
-	 *             JSON, throw ParserException
+	 *             If the minimum required parameters are not present in the JSON, throw ParserException
 	 */
 	private Area drawPolygonVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Polygon]";
@@ -611,22 +598,18 @@ public class VBL_Functions extends AbstractFunction {
 	}
 
 	/**
-	 * Get the required parameters needed from the JSON to draw two Polygon
-	 * 'lines' and render as VBL. This is a convenience function to draw two
-	 * lines perpendicular to each other to form a "cross" commonly used to
-	 * block LOS for objects like Trees but still show most of the image.
+	 * Get the required parameters needed from the JSON to draw two Polygon 'lines' and render as VBL. This is a convenience function to draw two lines perpendicular to each other to form a "cross"
+	 * commonly used to block LOS for objects like Trees but still show most of the image.
 	 * 
 	 * @param renderer
 	 *            Reference to the ZoneRenderer
 	 * @param vblObject
-	 *            The JSONObject containing all the coordinates and values to
-	 *            needed to draw a rectangle.
+	 *            The JSONObject containing all the coordinates and values to needed to draw a rectangle.
 	 * @param erase
 	 *            Set to true to erase the rectangle in VBL, otherwise draw it
 	 * @return the token.
 	 * @throws ParserException
-	 *             If the minimum required parameters are not present in the
-	 *             JSON, throw ParserException
+	 *             If the minimum required parameters are not present in the JSON, throw ParserException
 	 */
 	private Area drawCrossVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Cross]";
@@ -700,20 +683,17 @@ public class VBL_Functions extends AbstractFunction {
 	}
 
 	/**
-	 * Get the required parameters needed from the JSON to draw an approximate
-	 * circle and render as VBL.
+	 * Get the required parameters needed from the JSON to draw an approximate circle and render as VBL.
 	 * 
 	 * @param renderer
 	 *            Reference to the ZoneRenderer
 	 * @param vblObject
-	 *            The JSONObject containing all the coordinates and values to
-	 *            needed to draw a rectangle.
+	 *            The JSONObject containing all the coordinates and values to needed to draw a rectangle.
 	 * @param erase
 	 *            Set to true to erase the rectangle in VBL, otherwise draw it
-	 * @return 
+	 * @return
 	 * @throws ParserException
-	 *             If the minimum required parameters are not present in the
-	 *             JSON, throw ParserException
+	 *             If the minimum required parameters are not present in the JSON, throw ParserException
 	 */
 	private Area drawCircleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Circle]";
@@ -798,17 +778,14 @@ public class VBL_Functions extends AbstractFunction {
 	}
 
 	/**
-	 * Get the required parameters needed from the JSON to get/set VBL within a
-	 * defined rectangle.
+	 * Get the required parameters needed from the JSON to get/set VBL within a defined rectangle.
 	 * 
 	 * @param renderer
 	 *            Reference to the ZoneRenderer
 	 * @param vblObject
-	 *            The JSONObject containing all the coordinates and values to
-	 *            needed to draw a rectangle.
+	 *            The JSONObject containing all the coordinates and values to needed to draw a rectangle.
 	 * @throws ParserException
-	 *             If the minimum required parameters are not present in the
-	 *             JSON, throw ParserException
+	 *             If the minimum required parameters are not present in the JSON, throw ParserException
 	 */
 	private Area getVBL(ZoneRenderer renderer, JSONObject vblObject) throws ParserException {
 		String funcname = "getVBL[Rectangle]";
@@ -892,8 +869,7 @@ public class VBL_Functions extends AbstractFunction {
 	}
 
 	/**
-	 * Get the required parameters needed from the JSON to get/set VBL within a
-	 * defined rectangle.
+	 * Get the required parameters needed from the JSON to get/set VBL within a defined rectangle.
 	 * 
 	 * @param area
 	 *            Area passed in to convert to path of points
@@ -989,8 +965,7 @@ public class VBL_Functions extends AbstractFunction {
 	 *            The JSONObject to validate.
 	 * @param parmList
 	 *            A String array of keys to look up.
-	 * @return boolean Return true only if all keys exist, otherwise return
-	 *         false if any key is missing.
+	 * @return boolean Return true only if all keys exist, otherwise return false if any key is missing.
 	 */
 	private boolean jsonKeysExist(JSONObject jsonObject, String[] parmList, String funcname) {
 		for (String parm : parmList) {
@@ -1001,8 +976,7 @@ public class VBL_Functions extends AbstractFunction {
 	}
 
 	/**
-	 * This is a convenience method to fetch and return an int value from the
-	 * JSON if key exists, otherwise return 0.
+	 * This is a convenience method to fetch and return an int value from the JSON if key exists, otherwise return 0.
 	 * 
 	 * @param jsonObject
 	 *            The JSONObject to get key from.
@@ -1034,8 +1008,7 @@ public class VBL_Functions extends AbstractFunction {
 	}
 
 	/**
-	 * This is a convenience method to fetch and return a double value from the
-	 * JSON if key exists, otherwise return 0.
+	 * This is a convenience method to fetch and return a double value from the JSON if key exists, otherwise return 0.
 	 * 
 	 * @param jsonObject
 	 *            The JSON object to get key from.
@@ -1066,8 +1039,7 @@ public class VBL_Functions extends AbstractFunction {
 	}
 
 	/**
-	 * This is a convenience method to send the VBL Area to be rendered to the
-	 * server
+	 * This is a convenience method to send the VBL Area to be rendered to the server
 	 * 
 	 * @param renderer
 	 *            Reference to the ZoneRenderer

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.utilities;
 
 import java.util.HashMap;
@@ -20,15 +17,10 @@ import javax.management.RuntimeErrorException;
 import net.rptools.maptool.client.MapTool;
 
 /**
- * This class produces a numeric suffix in the range of 1 to 256 intended to
- * uniquely identify a token on the map. The class remembers previous token
- * names and will never return the same value for any given name. If all
- * possible 256 suffixes have been used then the class simply starts over
- * but using an offset of 256.
+ * This class produces a numeric suffix in the range of 1 to 256 intended to uniquely identify a token on the map. The class remembers previous token names and will never return the same value for any
+ * given name. If all possible 256 suffixes have been used then the class simply starts over but using an offset of 256.
  * <p>
- * Internally the class uses bytes (almost) exclusively in order to reduce the
- * memory footprint. In addition, the class has been designed in a manner to
- * reduce running time.
+ * Internally the class uses bytes (almost) exclusively in order to reduce the memory footprint. In addition, the class has been designed in a manner to reduce running time.
  *
  * @author Alexander "d4rkAlf" Johansson Werne
  */
@@ -54,13 +46,11 @@ public class RandomSuffixFactory {
 	}
 
 	/**
-	 * Returns a unique suffix for any given token name. The first batch will
-	 * generate values in the range of 1 to 256. When this first batch has been
-	 * used up it will return values in the range of 257 to 512 and so on and so
-	 * forth.
+	 * Returns a unique suffix for any given token name. The first batch will generate values in the range of 1 to 256. When this first batch has been used up it will return values in the range of 257
+	 * to 512 and so on and so forth.
 	 *
-	 * @param tokenName is used to check if a suffix has already been generated for
-	 *            that name
+	 * @param tokenName
+	 *            is used to check if a suffix has already been generated for that name
 	 * @return a unique suffix for the given token name
 	 */
 	public int nextSuffixForToken(String tokenName) {
@@ -74,8 +64,7 @@ public class RandomSuffixFactory {
 	}
 
 	/**
-	 * This inner class is used to encapsulate an array containing all possible
-	 * suffix values in random order, an index and an offset.
+	 * This inner class is used to encapsulate an array containing all possible suffix values in random order, an index and an offset.
 	 */
 	private class SuffixGenerator {
 		private byte[] suffixes;
@@ -90,8 +79,7 @@ public class RandomSuffixFactory {
 		}
 
 		/**
-		 * Simultaneously initialize and shuffle the suffixes by using the
-		 * inside-out Fisher-Yates shuffle.
+		 * Simultaneously initialize and shuffle the suffixes by using the inside-out Fisher-Yates shuffle.
 		 */
 		private void initializeAndShuffle() {
 			suffixes = new byte[256];

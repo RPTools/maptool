@@ -1,17 +1,11 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.lib.tool;
 
 import java.awt.datatransfer.DataFlavor;
@@ -29,9 +23,7 @@ import javax.swing.JLabel;
 import net.rptools.lib.transferable.ImageTransferableHandler;
 
 /**
- * This class will show a frame that accepts system drag-and-drop events
- * it is a discovery tool useful to determine which flavors a drop from a specific application
- * supports (such as a browser)
+ * This class will show a frame that accepts system drag-and-drop events it is a discovery tool useful to determine which flavors a drop from a specific application supports (such as a browser)
  */
 @SuppressWarnings("serial")
 public class DropTargetInfo extends JFrame implements DropTargetListener {

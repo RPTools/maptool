@@ -1,15 +1,10 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.lib;
 
@@ -158,8 +153,8 @@ public class FileUtil {
 		String file = url.getFile();
 		try {
 			file = url.toURI().getPath();
-			//			int beginning = file.lastIndexOf(File.separatorChar); // Don't need to strip the path since the File() constructor will take care of that
-			//			file = file.substring(beginning < 0 ? 0 : beginning + 1);
+			// int beginning = file.lastIndexOf(File.separatorChar); // Don't need to strip the path since the File() constructor will take care of that
+			// file = file.substring(beginning < 0 ? 0 : beginning + 1);
 		} catch (URISyntaxException e) {
 			// If the conversion doesn't work, ignore it and use the original file name.
 		}
@@ -177,12 +172,10 @@ public class FileUtil {
 	}
 
 	/**
-	 * Returns the data in a file using the UTF-8 character encoding. The platform default may not be appropriate since
-	 * the file could've been produced on a different platform. The only safe thing to do is use UTF-8 and hope that
-	 * everyone uses it by default when they edit text files. :-/
+	 * Returns the data in a file using the UTF-8 character encoding. The platform default may not be appropriate since the file could've been produced on a different platform. The only safe thing to
+	 * do is use UTF-8 and hope that everyone uses it by default when they edit text files. :-/
 	 * 
-	 * @deprecated This is not in use, and {@link IOUtils#toCharArray(InputStream, String)} should be used directly
-	 *             anyways
+	 * @deprecated This is not in use, and {@link IOUtils#toCharArray(InputStream, String)} should be used directly anyways
 	 */
 	@Deprecated
 	public static String getString(InputStream is) throws IOException {
@@ -194,8 +187,7 @@ public class FileUtil {
 	/**
 	 * Reads the given file as UTF-8 bytes and returns the contents as a standard Java string.
 	 * 
-	 * @deprecated This is not in use, and {@link FileUtils#readFileToString(File, String)} should be used directly
-	 *             anyways
+	 * @deprecated This is not in use, and {@link FileUtils#readFileToString(File, String)} should be used directly anyways
 	 * @param file
 	 *            file to retrieve contents from
 	 * @return String representing the contents
@@ -243,8 +235,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * Given a <code>File</code> this method tries to figure out what the content type might be based only on the
-	 * filename extension.
+	 * Given a <code>File</code> this method tries to figure out what the content type might be based only on the filename extension.
 	 * 
 	 * @param file
 	 *            the File to check
@@ -259,20 +250,19 @@ public class FileUtil {
 	}
 
 	/**
-		 * Returns a {@link BufferedReader from the given <code>File</code> object.  The contents
-		 * of the file are expected to be UTF-8.
-		 * 
-		 * @param file the input data source
-		 * @return a String representing the data
-		 * @throws IOException
-		 */
+	 * Returns a {@link BufferedReader from the given <code>File</code> object. The contents of the file are expected to be UTF-8.
+	 * 
+	 * @param file
+	 *            the input data source
+	 * @return a String representing the data
+	 * @throws IOException
+	 */
 	public static BufferedReader getFileAsReader(File file) throws IOException {
 		return new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
 	}
 
 	/**
-	 * Given a URL this method determines the content type of the URL (if possible) and then returns a Reader with the
-	 * appropriate character encoding.
+	 * Given a URL this method determines the content type of the URL (if possible) and then returns a Reader with the appropriate character encoding.
 	 * 
 	 * @param url
 	 *            the source of the data stream
@@ -282,7 +272,7 @@ public class FileUtil {
 	public static Reader getURLAsReader(URL url) throws IOException {
 		InputStreamReader isr = null;
 		URLConnection conn = null;
-		// We're assuming character here, but it could be bytes.  Perhaps we should
+		// We're assuming character here, but it could be bytes. Perhaps we should
 		// check the MIME type returned by the network server?
 		conn = url.openConnection();
 		if (log.isDebugEnabled()) {
@@ -310,7 +300,7 @@ public class FileUtil {
 	public static InputStream getURLAsInputStream(URL url) throws IOException {
 		InputStream is = null;
 		URLConnection conn = null;
-		// We're assuming character here, but it could be bytes.  Perhaps we should
+		// We're assuming character here, but it could be bytes. Perhaps we should
 		// check the MIME type returned by the network server?
 		conn = url.openConnection();
 		if (log.isDebugEnabled()) {
@@ -324,8 +314,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * Writes given bytes to file indicated by <code>file</code>. This method will overwrite any existing file at that
-	 * location, and will create any sub-directories required.
+	 * Writes given bytes to file indicated by <code>file</code>. This method will overwrite any existing file at that location, and will create any sub-directories required.
 	 * 
 	 * @deprecated use {@link FileUtils#writeByteArrayToFile(File, byte[])} instead.
 	 * @param file
@@ -338,9 +327,8 @@ public class FileUtil {
 	}
 
 	/**
-	 * Copies <code>sourceFile</code> to <code>destFile</code> overwriting as required, and <b>not</b> preserving the
-	 * source file's last modified time. The destination directory is created if it does not exist, and if the
-	 * destination file exists, it is overwritten.
+	 * Copies <code>sourceFile</code> to <code>destFile</code> overwriting as required, and <b>not</b> preserving the source file's last modified time. The destination directory is created if it does
+	 * not exist, and if the destination file exists, it is overwritten.
 	 * 
 	 * @param sourceFile
 	 * @param destFile
@@ -436,7 +424,7 @@ public class FileUtil {
 				String path = file.getAbsolutePath();
 				file.getParentFile().mkdirs();
 
-				//System.out.println("Writing file: " + path);
+				// System.out.println("Writing file: " + path);
 				is = zipFile.getInputStream(entry);
 				os = new BufferedOutputStream(new FileOutputStream(path));
 				copyWithClose(is, os);
@@ -486,8 +474,8 @@ public class FileUtil {
 	}
 
 	/**
-	 * Recursively deletes all files and/or directories that have been modified longer than <code>daysOld</code> days
-	 * ago. Note that this will recursively examine a directory, and only deletes those items that are too old.
+	 * Recursively deletes all files and/or directories that have been modified longer than <code>daysOld</code> days ago. Note that this will recursively examine a directory, and only deletes those
+	 * items that are too old.
 	 * 
 	 * @param file
 	 *            the file or directory to recursively check and possibly delete
@@ -526,8 +514,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * Replace invalid File name characters, useful for token Save function to
-	 * replace the : in Lib tokens.
+	 * Replace invalid File name characters, useful for token Save function to replace the : in Lib tokens.
 	 * 
 	 * @author Jamz
 	 * @since 1.4.0.2

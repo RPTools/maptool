@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.io.BufferedReader;
@@ -75,17 +72,14 @@ public class AssetLoader {
 
 	/**
 	 * <p>
-	 * This method returns the mapping from MD5Key to asset name on the server
-	 * for the given repository.
+	 * This method returns the mapping from MD5Key to asset name on the server for the given repository.
 	 * </p>
 	 * <p>
-	 * The return value is an immutable mapping so as to prevent any chance of
-	 * the mapping being corrupted by the caller.
+	 * The return value is an immutable mapping so as to prevent any chance of the mapping being corrupted by the caller.
 	 * </p>
 	 * 
 	 * @param repo
-	 *            the name of the repository, probably from the campaign
-	 *            properties
+	 *            the name of the repository, probably from the campaign properties
 	 * @return an immutable <code>Map&lt;String, String></code>
 	 */
 	public Map<String, String> getRepositoryMap(String repo) {
@@ -97,14 +91,11 @@ public class AssetLoader {
 	 * This method extracts an asset map from the given repository.
 	 * </p>
 	 * <p>
-	 * It starts by checking to see if the repository index is already in the
-	 * cache. If not, it makes a network connection and grabs it, calling
-	 * {@link #storeIndexFile(String, byte[])} to store it into the cache.
+	 * It starts by checking to see if the repository index is already in the cache. If not, it makes a network connection and grabs it, calling {@link #storeIndexFile(String, byte[])} to store it
+	 * into the cache.
 	 * </p>
 	 * <p>
-	 * Once the index file has been located, {@link #parseIndex(List)} is called
-	 * to convert the text file into a <code>Map&lt;String, Sting></code> for
-	 * the return value.
+	 * Once the index file has been located, {@link #parseIndex(List)} is called to convert the text file into a <code>Map&lt;String, Sting></code> for the return value.
 	 * </p>
 	 * 
 	 * @param repository
@@ -172,9 +163,7 @@ public class AssetLoader {
 
 	/**
 	 * <p>
-	 * Converts the specified repository of assets into an index file that can
-	 * be uploaded and used as the <b>index.gz</b> (after being compressed, of
-	 * course).
+	 * Converts the specified repository of assets into an index file that can be uploaded and used as the <b>index.gz</b> (after being compressed, of course).
 	 * </p>
 	 * 
 	 * @param repository
@@ -281,7 +270,7 @@ public class AssetLoader {
 					if (split >= 0) {
 						ref = ref.substring(split + 1);
 					}
-					//					System.out.println("Got " + id + " from " + repo);
+					// System.out.println("Got " + id + " from " + repo);
 					ref = FileUtil.getNameWithoutExtension(ref);
 					AssetManager.putAsset(new Asset(ref, data));
 
@@ -289,7 +278,7 @@ public class AssetLoader {
 					return;
 				} catch (IOException ioe) {
 					// Well, try a different repo
-					//					ioe.printStackTrace();
+					// ioe.printStackTrace();
 					continue;
 				} catch (Throwable t) {
 					t.printStackTrace();
@@ -297,9 +286,9 @@ public class AssetLoader {
 			}
 
 			// Last resort, ask the MT server
-			// We can drop off the end of this runnable because it'll background load the 
+			// We can drop off the end of this runnable because it'll background load the
 			// image from the server
-			//			System.out.println("Got " + id + " from MT");
+			// System.out.println("Got " + id + " from MT");
 			MapTool.serverCommand().getAsset(id);
 		}
 	}

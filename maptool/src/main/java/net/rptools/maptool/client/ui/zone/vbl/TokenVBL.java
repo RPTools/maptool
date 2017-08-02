@@ -1,3 +1,11 @@
+/*
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.ui.zone.vbl;
 
 import java.awt.Color;
@@ -18,9 +26,7 @@ import net.rptools.maptool.util.ImageManager;
 public class TokenVBL {
 
 	/**
-	 * A passed token will have it's image asset rendered into an Area
-	 * based on pixels that have an Alpha transparency level greater than
-	 * or equal to the alphaSensitivity parameter.
+	 * A passed token will have it's image asset rendered into an Area based on pixels that have an Alpha transparency level greater than or equal to the alphaSensitivity parameter.
 	 * 
 	 * @author Jamz
 	 * @since 1.4.1.6
@@ -41,7 +47,7 @@ public class TokenVBL {
 	}
 
 	private static Area createVblArea(BufferedImage image, int alphaSensitivity) {
-		//Assumes all colors form the VBL Area, eg everything except transparent pixels with alpha >= alphaSensitivity
+		// Assumes all colors form the VBL Area, eg everything except transparent pixels with alpha >= alphaSensitivity
 		if (image == null)
 			return null;
 
@@ -82,11 +88,11 @@ public class TokenVBL {
 
 	private static Polygon makePolyFromImage(BufferedImage image, int detail, int angle, int alphaSensitivity) {
 
-		//creates an outline of a transparent image, points are stored in an array
-		//arg0 - BufferedImage source image 
-		//arg1 - Int detail (lower = better)
-		//arg2 - Int angle threshold in degrees (will remove points with angle differences below this level; 15 is a good value)
-		//making this larger will make the body faster but less accurate;
+		// creates an outline of a transparent image, points are stored in an array
+		// arg0 - BufferedImage source image
+		// arg1 - Int detail (lower = better)
+		// arg2 - Int angle threshold in degrees (will remove points with angle differences below this level; 15 is a good value)
+		// making this larger will make the body faster but less accurate;
 
 		int w = image.getWidth(null);
 		int h = image.getHeight(null);

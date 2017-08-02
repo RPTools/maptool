@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.util;
 
 import java.awt.AlphaComposite;
@@ -194,9 +191,7 @@ public class GraphicsUtil {
 	}
 
 	/**
-	 * @return a lighter color, as opposed to a brighter color as in
-	 *         Color.brighter(). This prevents light colors from getting
-	 *         bleached out.
+	 * @return a lighter color, as opposed to a brighter color as in Color.brighter(). This prevents light colors from getting bleached out.
 	 */
 	public static Color lighter(Color c) {
 		if (c == null)
@@ -318,14 +313,14 @@ public class GraphicsUtil {
 		g2.setClip(newClip);
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF); // Faster without antialiasing, and looks just as good
 
-		//        float alpha = (float)initialAlpha / width / 6;
+		// float alpha = (float)initialAlpha / width / 6;
 		float alpha = .04f;
 		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 		for (int i = 1; i < width; i += 2) {
-			//        	if (alpha * i < .2) {
-			//        		// Too faded to see anyway, don't waste cycles on it
-			//        		continue;
-			//        	}
+			// if (alpha * i < .2) {
+			// // Too faded to see anyway, don't waste cycles on it
+			// continue;
+			// }
 			g2.setStroke(new BasicStroke(i));
 			g2.draw(shape);
 		}
@@ -347,13 +342,13 @@ public class GraphicsUtil {
 
 			double bottomAngle = (angle + delta / 2) % 360;
 			double topAngle = bottomAngle + 180;
-			//			System.out.println(angle + " - " + delta + " - " + bottomAngle + " - " + topAngle);
+			// System.out.println(angle + " - " + delta + " - " + bottomAngle + " - " + topAngle);
 
 			bottomList.add(getPoint(points[i], bottomAngle, width));
 			topList.add(getPoint(points[i], topAngle, width));
 		}
-		//    	System.out.println(bottomList);
-		//    	System.out.println(topList);
+		// System.out.println(bottomList);
+		// System.out.println(topList);
 		Collections.reverse(topList);
 
 		GeneralPath path = new GeneralPath();
@@ -374,13 +369,13 @@ public class GraphicsUtil {
 		double x = point.getX() + length * Math.cos(Math.toRadians(angle));
 		double y = point.getY() - length * Math.sin(Math.toRadians(angle));
 
-		//		System.out.println(point + " - " + angle + " - " + x + "x" + y + " - " + Math.cos(Math.toRadians(angle)) + " - " + Math.sin(Math.toRadians(angle)) + " - " + Math.toRadians(angle));
+		// System.out.println(point + " - " + angle + " - " + x + "x" + y + " - " + Math.cos(Math.toRadians(angle)) + " - " + Math.sin(Math.toRadians(angle)) + " - " + Math.toRadians(angle));
 		return new Point2D.Double(x, y);
 	}
 
 	public static void main(String[] args) {
 		final Point2D[] points = new Point2D[] { new Point(20, 20), new Point(50, 50), new Point(80, 20), new Point(100, 100) };
-		//		final Point2D[] points = new Point2D[]{new Point(50, 50), new Point(20, 20), new Point(20, 100), new Point(50,75)};
+		// final Point2D[] points = new Point2D[]{new Point(50, 50), new Point(20, 20), new Point(20, 100), new Point(50,75)};
 		final Area line = createLine(10, points);
 
 		JFrame f = new JFrame();
@@ -405,6 +400,6 @@ public class GraphicsUtil {
 		};
 		f.add(p);
 		f.setVisible(true);
-		//		System.out.println(area.equals(area2));
+		// System.out.println(area.equals(area2));
 	}
 }

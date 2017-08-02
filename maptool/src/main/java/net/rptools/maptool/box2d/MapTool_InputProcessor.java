@@ -1,3 +1,11 @@
+/*
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.box2d;
 
 import com.badlogic.gdx.Gdx;
@@ -47,7 +55,7 @@ public class MapTool_InputProcessor implements InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		//		System.out.println("pointer, button: " + pointer + ", " + button);
+		// System.out.println("pointer, button: " + pointer + ", " + button);
 		return false;
 	}
 
@@ -57,8 +65,8 @@ public class MapTool_InputProcessor implements InputProcessor {
 			Vector3 input = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
 			renderer.getCamera().unproject(input);
 
-			//Now you can use input.x and input.y, as opposed to Gdx.input.getX() and Gdx.input.getY(), to draw the circle
-			//			System.out.println("x, y: " + input.x + ", " + input.y);
+			// Now you can use input.x and input.y, as opposed to Gdx.input.getX() and Gdx.input.getY(), to draw the circle
+			// System.out.println("x, y: " + input.x + ", " + input.y);
 			renderer.createBody(true, input.x, input.y);
 		} else if (button == Buttons.RIGHT) {
 			renderer.clearLights();
@@ -75,7 +83,7 @@ public class MapTool_InputProcessor implements InputProcessor {
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		//		System.out.println("mouse moved: " + screenX + ", " + screenY);
+		// System.out.println("mouse moved: " + screenX + ", " + screenY);
 		return false;
 	}
 

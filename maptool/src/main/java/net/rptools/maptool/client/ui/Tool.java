@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui;
 
 import java.awt.event.ActionEvent;
@@ -137,14 +134,13 @@ public abstract class Tool extends JToggleButton implements ActionListener, KeyL
 		ActionMap actionMap = new ActionMap();
 		for (KeyStroke keyStroke : keyActionMap.keySet()) {
 			actionMap.put(keyStroke.toString(), keyActionMap.get(keyStroke));
-			//			System.out.println(keyStroke.toString() + ":  " + keyActionMap.get(keyStroke).toString());
+			// System.out.println(keyStroke.toString() + ": " + keyActionMap.get(keyStroke).toString());
 		}
 		return actionMap;
 	}
 
 	/**
-	 * Implement this method to clear internal data to a start drawing state. This method must repaint whatever it is
-	 * being displayed upon.
+	 * Implement this method to clear internal data to a start drawing state. This method must repaint whatever it is being displayed upon.
 	 */
 	protected abstract void resetTool();
 
@@ -162,7 +158,7 @@ public abstract class Tool extends JToggleButton implements ActionListener, KeyL
 		public void actionPerformed(ActionEvent e) {
 			// This should probably go somewhere else like MapToolFrame...
 			// but it was just too easy to plop down here to resist =)
-			// although having it here will be a quick reminder about competing 
+			// although having it here will be a quick reminder about competing
 			// Escape actions.
 			if (MapTool.getFrame().isFullScreen()) {
 				MapTool.getFrame().showWindowed();

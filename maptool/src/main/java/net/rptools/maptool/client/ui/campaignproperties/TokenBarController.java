@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.campaignproperties;
 
 import java.awt.Color;
@@ -90,25 +87,37 @@ public class TokenBarController implements ActionListener, DocumentListener, Lis
 	/** Name of the text field containing the name {@link String} value */
 	public static final String NAME = "tokenBarName";
 
-	/** Name of the combo box containing a {@link String} value that maps directly to a {@link BarTokenOverlay} class */
+	/**
+	 * Name of the combo box containing a {@link String} value that maps directly to a {@link BarTokenOverlay} class
+	 */
 	public static final String TYPE = "tokenBarType";
 
-	/** Name of the color well containing a {@link Color} value for token bar types that need colors */
+	/**
+	 * Name of the color well containing a {@link Color} value for token bar types that need colors
+	 */
 	public static final String COLOR = "tokenBarColor";
 
-	/** Name of the color well containing a {@link Color} value for token bar types that need background colors */
+	/**
+	 * Name of the color well containing a {@link Color} value for token bar types that need background colors
+	 */
 	public static final String BG_COLOR = "tokenBarBgColor";
 
 	/** Name of the check box containing the {@link Boolean} mouseover value */
 	public static final String MOUSEOVER = "tokenBarMouseover";
 
-	/** Name of the spinner containing an {@link Integer} value that is the thickness of bar types that need bar width */
+	/**
+	 * Name of the spinner containing an {@link Integer} value that is the thickness of bar types that need bar width
+	 */
 	public static final String THICKNESS = "tokenBarThickness";
 
-	/** Name of the spinner containing an {@link Integer} value that is the thickness of bar types that need bar width */
+	/**
+	 * Name of the spinner containing an {@link Integer} value that is the thickness of bar types that need bar width
+	 */
 	public static final String INCREMENTS = "tokenBarIncrements";
 
-	/** Name of the combo box containing a {@link String} value for one of the four sides of the token */
+	/**
+	 * Name of the combo box containing a {@link String} value for one of the four sides of the token
+	 */
 	public static final String SIDE = "tokenBarSide";
 
 	/** Name of the button used to add a new token bar */
@@ -129,10 +138,14 @@ public class TokenBarController implements ActionListener, DocumentListener, Lis
 	/** Name of the list containing all of the currently defined token bars */
 	public static final String BARS = "tokenBarBars";
 
-	/** Name of the spinner containing an {@link Integer} value that is the opacity used in drawing */
+	/**
+	 * Name of the spinner containing an {@link Integer} value that is the opacity used in drawing
+	 */
 	public static final String OPACITY = "tokenBarOpacity";
 
-	/** Name of the list field containing {@link File} names that is the image file used for image token bars */
+	/**
+	 * Name of the list field containing {@link File} names that is the image file used for image token bars
+	 */
 	public static final String IMAGES = "tokenBarImages";
 
 	/** Name of the button used to add a new token bar image */
@@ -165,15 +178,19 @@ public class TokenBarController implements ActionListener, DocumentListener, Lis
 	/** The size of the ICON faked in the list renderer */
 	public static final int ICON_SIZE = 50;
 
-	/** Each of the data entry components that can be enabled/disabled by type of bar */
+	/**
+	 * Each of the data entry components that can be enabled/disabled by type of bar
+	 */
 	public static final String[] DATA_ENTRY_COMPONENTS = { COLOR, BG_COLOR, THICKNESS, IMAGES, IMAGE_ADD, IMAGE_DELETE, IMAGE_MOVE_DOWN, IMAGE_MOVE_UP, IMAGE_UPDATE };
 
-	/** Each of the data entry components that can be enabled/disabled by type of bar */
+	/**
+	 * Each of the data entry components that can be enabled/disabled by type of bar
+	 */
 	public static final String[] DATA_ENTRY_COMPONENT_LABELS = { COLOR + "Label", BG_COLOR + "Label", THICKNESS + "Label", IMAGES + "Label" };
 
 	/**
-	 * Flags for each of the data entry components needed by each of the types. The order of the types is the' same as
-	 * the list in the combo box. The order of the flags is the same as that in {@link #DATA_ENTRY_COMPONENTS}.
+	 * Flags for each of the data entry components needed by each of the types. The order of the types is the' same as the list in the combo box. The order of the flags is the same as that in
+	 * {@link #DATA_ENTRY_COMPONENTS}.
 	 */
 	public static final boolean[][] NEEDED_COMPONENTS = { { false, false, false, true, true, true, true, true, true }, // Two Image
 			{ false, false, false, true, true, true, true, true, true }, // One Image
@@ -546,8 +563,7 @@ public class TokenBarController implements ActionListener, DocumentListener, Lis
 		/**
 		 * Set the icon and name in the renderer.
 		 * 
-		 * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object,
-		 *      int, boolean, boolean)
+		 * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
 		 */
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {

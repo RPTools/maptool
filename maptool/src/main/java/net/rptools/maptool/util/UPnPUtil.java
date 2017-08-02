@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.util;
 
 import java.awt.BorderLayout;
@@ -99,9 +96,9 @@ public class UPnPUtil {
 									if (log.isInfoEnabled())
 										log.info("UPnP:  Found IGD: " + igd.getIGDRootDevice().getModelName());
 									if (igds.put(igd, ni) != null) {
-										// There was a previous mapping for this IGD!  It's unlikely to have two NICs on the
-										// the same network segment, but it IS possible.  For example, both a wired and
-										// wireless connection using the same router as the gateway.  For our purposes it
+										// There was a previous mapping for this IGD! It's unlikely to have two NICs on the
+										// the same network segment, but it IS possible. For example, both a wired and
+										// wireless connection using the same router as the gateway. For our purposes it
 										// doesn't really matter which one we use, but in the future we should give the
 										// user a choice.
 										// FIXME We SHOULD be using the "networking binding order" (Windows)
@@ -189,11 +186,11 @@ public class UPnPUtil {
 			try {
 				ActionResponse actResp = gd.getSpecificPortMappingEntry(null, port, "TCP");
 				if (actResp != null && "MapTool".equals(actResp.getOutActionArgumentValue("NewPortMappingDescription"))) {
-					//					NewInternalPort=51234
-					//					NewEnabled=1
-					//					NewInternalClient=192.168.0.30
-					//					NewLeaseDuration=0
-					//					NewPortMappingDescription=MapTool
+					// NewInternalPort=51234
+					// NewEnabled=1
+					// NewInternalClient=192.168.0.30
+					// NewLeaseDuration=0
+					// NewPortMappingDescription=MapTool
 					boolean unmapped = gd.deletePortMapping(null, port, "TCP");
 					if (unmapped) {
 						iter.remove();

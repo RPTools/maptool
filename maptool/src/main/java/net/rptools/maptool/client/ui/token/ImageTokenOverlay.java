@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.token;
 
 import java.awt.AlphaComposite;
@@ -53,8 +50,10 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
 	/**
 	 * Create the complete image overlay.
 	 * 
-	 * @param name Name of the new token overlay
-	 * @param anAssetId Id of the image displayed in the new token overlay.
+	 * @param name
+	 *            Name of the new token overlay
+	 * @param anAssetId
+	 *            Id of the image displayed in the new token overlay.
 	 */
 	public ImageTokenOverlay(String name, MD5Key anAssetId) {
 		super(name);
@@ -112,8 +111,10 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
 	/**
 	 * Calculate the image bounds from the token bounds
 	 * 
-	 * @param bounds Bounds of the token passed to the overlay.
-	 * @param token Token being decorated.
+	 * @param bounds
+	 *            Bounds of the token passed to the overlay.
+	 * @param token
+	 *            Token being decorated.
 	 * @return The bounds w/in the token where the image is painted.
 	 */
 	protected Rectangle getImageBounds(Rectangle bounds, Token token) {

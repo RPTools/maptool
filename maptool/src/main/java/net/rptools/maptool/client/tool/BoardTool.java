@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.tool;
 
 import java.awt.Dimension;
@@ -51,9 +48,8 @@ import net.rptools.maptool.util.StringUtil;
 import com.jeta.forms.components.panel.FormPanel;
 
 /**
- * Allows user to re-position the background map (internally called the
- * 'board'). This entire class should be 'transient'... should this be in the
- * var names, or in the reference to the BoardTool instance?
+ * Allows user to re-position the background map (internally called the 'board'). This entire class should be 'transient'... should this be in the var names, or in the reference to the BoardTool
+ * instance?
  */
 public class BoardTool extends DefaultTool {
 	private static final long serialVersionUID = 98389912045059L;
@@ -90,7 +86,7 @@ public class BoardTool extends DefaultTool {
 		}
 		// Create the control panel
 		controlPanel = new FormPanel("net/rptools/maptool/client/ui/forms/adjustBoardControlPanel.xml");
-		//		controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+		// controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
 		boardPositionXTextField = controlPanel.getTextField("offsetX");
 		boardPositionXTextField.addKeyListener(new UpdateBoardListener());
@@ -159,8 +155,7 @@ public class BoardTool extends DefaultTool {
 	}
 
 	/**
-	 * Sets the snap mode with independent x/y snaps and adjusts the board
-	 * position appropriately.
+	 * Sets the snap mode with independent x/y snaps and adjusts the board position appropriately.
 	 * 
 	 * @param x
 	 *            the new x snap amount
@@ -179,9 +174,7 @@ public class BoardTool extends DefaultTool {
 	}
 
 	/**
-	 * Copies the current board (map image as set in "New Map/Edit Map") info to
-	 * the tool so we have the appropriate starting info. Should be called each
-	 * time the tool is un-hidden.
+	 * Copies the current board (map image as set in "New Map/Edit Map") info to the tool so we have the appropriate starting info. Should be called each time the tool is un-hidden.
 	 */
 	private void copyBoardToControlPanel() {
 		boardPosition.x = zone.getBoardX();
@@ -207,8 +200,7 @@ public class BoardTool extends DefaultTool {
 	}
 
 	/**
-	 * Parses the text field of the component into a number, returning the
-	 * default value if the text field is _not_ a number.
+	 * Parses the text field of the component into a number, returning the default value if the text field is _not_ a number.
 	 */
 	private int getInt(JTextComponent component, int defaultValue) {
 		// Get the string from the component, then
@@ -217,9 +209,8 @@ public class BoardTool extends DefaultTool {
 	}
 
 	/*
-	 * private double getDouble(String value, double defaultValue) { try {
-	 * return value.length() > 0 ? Double.parseDouble(value.trim()) :
-	 * defaultValue; } catch (NumberFormatException e) { return 0; } }
+	 * private double getDouble(String value, double defaultValue) { try { return value.length() > 0 ? Double.parseDouble(value.trim()) : defaultValue; } catch (NumberFormatException e) { return 0; }
+	 * }
 	 */
 
 	/*

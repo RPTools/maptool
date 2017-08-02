@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.token;
 
 import java.awt.Graphics2D;
@@ -95,7 +92,8 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 	/**
 	 * Create an overlay with the passed name.
 	 * 
-	 * @param aName Name of the new overlay.
+	 * @param aName
+	 *            Name of the new overlay.
 	 */
 	protected AbstractTokenOverlay(String aName) {
 		assert aName != null : "A name is required but null was passed.";
@@ -118,7 +116,8 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 	/**
 	 * Set the value of name for this AbstractTokenOverlay.
 	 *
-	 * @param aName The name to set.
+	 * @param aName
+	 *            The name to set.
 	 */
 	public void setName(String aName) {
 		name = aName;
@@ -129,7 +128,10 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 		return order;
 	}
 
-	/** @param order Setter for the order to set */
+	/**
+	 * @param order
+	 *            Setter for the order to set
+	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
@@ -139,7 +141,10 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 		return group;
 	}
 
-	/** @param group Setter for group */
+	/**
+	 * @param group
+	 *            Setter for group
+	 */
 	public void setGroup(String group) {
 		this.group = group;
 	}
@@ -149,7 +154,10 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 		return mouseover;
 	}
 
-	/** @param mouseover Setter for mouseover */
+	/**
+	 * @param mouseover
+	 *            Setter for mouseover
+	 */
 	public void setMouseover(boolean mouseover) {
 		this.mouseover = mouseover;
 	}
@@ -161,7 +169,10 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 		return opacity;
 	}
 
-	/** @param opacity Setter for opacity */
+	/**
+	 * @param opacity
+	 *            Setter for opacity
+	 */
 	public void setOpacity(int opacity) {
 		this.opacity = opacity;
 	}
@@ -173,7 +184,10 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 		return showGM;
 	}
 
-	/** @param showGM Setter for showGM */
+	/**
+	 * @param showGM
+	 *            Setter for showGM
+	 */
 	public void setShowGM(boolean showGM) {
 		this.showGM = showGM;
 	}
@@ -185,7 +199,10 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 		return showOwner;
 	}
 
-	/** @param showOwner Setter for showOwner */
+	/**
+	 * @param showOwner
+	 *            Setter for showOwner
+	 */
 	public void setShowOwner(boolean showOwner) {
 		this.showOwner = showOwner;
 	}
@@ -197,7 +214,10 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 		return showOthers;
 	}
 
-	/** @param showOthers Setter for showOthers */
+	/**
+	 * @param showOthers
+	 *            Setter for showOthers
+	 */
 	public void setShowOthers(boolean showOthers) {
 		this.showOthers = showOthers;
 	}
@@ -205,8 +225,10 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 	/**
 	 * Determine if the current overly should be displayed to a player for a given token
 	 * 
-	 * @param token Check owner of this token
-	 * @param player Check to see if this player can see this overlay.
+	 * @param token
+	 *            Check owner of this token
+	 * @param player
+	 *            Check to see if this player can see this overlay.
 	 * @return The value <code>true</code> if the passed player can see this overlay on the token.
 	 */
 	public boolean showPlayer(Token token, Player player) {
@@ -227,14 +249,16 @@ public abstract class AbstractTokenOverlay implements Cloneable {
 	/**
 	 * Paint the overlay for the passed token.
 	 * 
-	 * @param g Graphics used to paint. It is already translated so that 0,0 is
-	 * the upper left corner of the token. It is also clipped so that the overlay can not
-	 * draw out of the token's bounding box.
-	 * @param token The token being painted.
-	 * @param bounds The bounds of the actual token. This will be different than the clip
-	 * since the clip also has to take into account the edge of the window. If you draw 
-	 * based on the clip it will be off for partial token painting.
-	 * @param value The value for the token state.
+	 * @param g
+	 *            Graphics used to paint. It is already translated so that 0,0 is the upper left corner of the token. It is also clipped so that the overlay can not draw out of the token's bounding
+	 *            box.
+	 * @param token
+	 *            The token being painted.
+	 * @param bounds
+	 *            The bounds of the actual token. This will be different than the clip since the clip also has to take into account the edge of the window. If you draw based on the clip it will be off
+	 *            for partial token painting.
+	 * @param value
+	 *            The value for the token state.
 	 */
 	public abstract void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value);
 

@@ -1,18 +1,10 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with this
- * work for additional information regarding copyright ownership. The ASF
- * licenses this file to You under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.util;
 
@@ -51,10 +43,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
 
 /**
- * Extract all images from a PDF using Apache's PdfBox 2.0
- * This will also walk through all annotations and extract those images as well
- * which is key, some interactive PDF's, such as from Paizo, store different versions
- * of maps as button icons, which will not normally extract using other methods.
+ * Extract all images from a PDF using Apache's PdfBox 2.0 This will also walk through all annotations and extract those images as well which is key, some interactive PDF's, such as from Paizo, store
+ * different versions of maps as button icons, which will not normally extract using other methods.
  * 
  * @author Jamz
  *
@@ -68,7 +58,7 @@ public final class ExtractImagesFromPDF {
 	private String prefix;
 	private String outDir;
 
-	private static final File tmpDir = AppUtil.getTmpDir(); //new File(System.getProperty("java.io.tmpdir"));
+	private static final File tmpDir = AppUtil.getTmpDir(); // new File(System.getProperty("java.io.tmpdir"));
 	private File finalTempDir;
 
 	private static Set<String> imageTracker = new HashSet<String>(); // static Set tracks extracted images across Threads.
@@ -80,8 +70,8 @@ public final class ExtractImagesFromPDF {
 	private PDDocument document = null;
 
 	public ExtractImagesFromPDF(File pdfFile, boolean forceRescan) throws IOException {
-		//		System.out.println("***************************************************************************");
-		//		System.out.println("ExtractImagesFromPDF called...");
+		// System.out.println("***************************************************************************");
+		// System.out.println("ExtractImagesFromPDF called...");
 
 		prefix = FileUtil.getNameWithoutExtension(pdfFile.getName());
 		outDir = tmpDir + "/" + prefix + "/";
@@ -96,12 +86,12 @@ public final class ExtractImagesFromPDF {
 		if (isExtracted() && !forceRescan)
 			return;
 
-		//document = PDDocument.load(pdfFile, MemoryUsageSetting.setupMixed((1024^2))); // doesn't seem to help?
+		// document = PDDocument.load(pdfFile, MemoryUsageSetting.setupMixed((1024^2))); // doesn't seem to help?
 		document = PDDocument.load(pdfFile);
-		//		AccessPermission ap = document.getCurrentAccessPermission();
-		//		if (!ap.canExtractContent()) {
-		//			throw new IOException("You do not have permission to extract images.");
-		//		}
+		// AccessPermission ap = document.getCurrentAccessPermission();
+		// if (!ap.canExtractContent()) {
+		// throw new IOException("You do not have permission to extract images.");
+		// }
 
 		fileList = new ArrayList<File>();
 		pageCount = document.getNumberOfPages();
@@ -163,23 +153,17 @@ public final class ExtractImagesFromPDF {
 	}
 
 	/*
-	 * public void extractAll_nope() throws IOException { PDDocumentCatalog
-	 * catalog = document.getDocumentCatalog(); int imgCount = 1; int counter =
-	 * 1;
+	 * public void extractAll_nope() throws IOException { PDDocumentCatalog catalog = document.getDocumentCatalog(); int imgCount = 1; int counter = 1;
 	 * MapTool.getFrame().getAssetPanel().setImagePanelProgressMax(pageCount);
 	 * 
-	 * for (Object pageObj : catalog.getPages()) { PDPage page = (PDPage)
-	 * pageObj; PDResources resources = page.getResources();
+	 * for (Object pageObj : catalog.getPages()) { PDPage page = (PDPage) pageObj; PDResources resources = page.getResources();
 	 * 
 	 * MapTool.getFrame().getAssetPanel().setImagePanelProgress(counter++);
 	 * 
-	 * for (COSName cosname : resources.getXObjectNames()) { System.out.println(
-	 * "Parsing COS: " + cosname.getName());
+	 * for (COSName cosname : resources.getXObjectNames()) { System.out.println( "Parsing COS: " + cosname.getName());
 	 * 
-	 * if (resources.isImageXObject(cosname)) { PDXObject xObject =
-	 * resources.getXObject(cosname); write2file((PDImageXObject) xObject,
-	 * outDir + prefix + "_" + imgCount++, DIRECT_JPEG); System.out.println(
-	 * "Writing PDImageXObject"); }
+	 * if (resources.isImageXObject(cosname)) { PDXObject xObject = resources.getXObject(cosname); write2file((PDImageXObject) xObject, outDir + prefix + "_" + imgCount++, DIRECT_JPEG);
+	 * System.out.println( "Writing PDImageXObject"); }
 	 * 
 	 * }
 	 * 
@@ -193,7 +177,7 @@ public final class ExtractImagesFromPDF {
 		extractor.run(pageNumber);
 		extractAnnotationImages(page, pageNumber, outDir + prefix + "%s");
 
-		//PDResources resources = page.getResources();
+		// PDResources resources = page.getResources();
 
 		close();
 
@@ -202,7 +186,7 @@ public final class ExtractImagesFromPDF {
 
 	public File extractAll() throws IOException {
 		int pageNumber = 1;
-		//MapTool.getFrame().getAssetPanel().setImagePanelProgressMax(pageCount);
+		// MapTool.getFrame().getAssetPanel().setImagePanelProgressMax(pageCount);
 
 		if (!isExtracted()) {
 			for (PDPage page : document.getPages()) {
@@ -210,7 +194,7 @@ public final class ExtractImagesFromPDF {
 				extractor.run(pageNumber);
 				extractAnnotationImages(page, pageNumber, outDir + prefix + "%s");
 
-				//MapTool.getFrame().getAssetPanel().setImagePanelProgress(pageNumber++);
+				// MapTool.getFrame().getAssetPanel().setImagePanelProgress(pageNumber++);
 			}
 		}
 
@@ -221,16 +205,11 @@ public final class ExtractImagesFromPDF {
 	/*
 	 * Jamz: A note on what we are doing here...
 	 * 
-	 * Paizo's Interactive PDF's (amongst others) are sneaky and put map images
-	 * in the PDF as a "button" with an image resource. So we need to walk
-	 * through all the forms to find the buttons, then walk through all the
-	 * button resources for the images. Also, a 'Button Down' may hold the
-	 * 'Grid' version of the map and 'Button Up' may hold the 'Non-Grid'
-	 * version. There may also be Player vs GM versions of each for a total of
-	 * up to 4 images per button!
+	 * Paizo's Interactive PDF's (amongst others) are sneaky and put map images in the PDF as a "button" with an image resource. So we need to walk through all the forms to find the buttons, then walk
+	 * through all the button resources for the images. Also, a 'Button Down' may hold the 'Grid' version of the map and 'Button Up' may hold the 'Non-Grid' version. There may also be Player vs GM
+	 * versions of each for a total of up to 4 images per button!
 	 * 
-	 * This is the REAL beauty of this function as currently no other tools
-	 * outside of Full Acrobat extracts these raw images!
+	 * This is the REAL beauty of this function as currently no other tools outside of Full Acrobat extracts these raw images!
 	 * 
 	 */
 	private void extractAnnotationImages(PDPage page, int pageNumber, String pageFormat) throws IOException {
@@ -261,7 +240,7 @@ public final class ExtractImagesFromPDF {
 		if (resources == null)
 			return;
 
-		//resources.isImageXObject(name)
+		// resources.isImageXObject(name)
 		for (COSName cosname : resources.getXObjectNames()) {
 			PDXObject xObject = resources.getXObject(cosname);
 
@@ -278,7 +257,7 @@ public final class ExtractImagesFromPDF {
 		if (resources == null)
 			return;
 
-		//resources.isImageXObject(name)
+		// resources.isImageXObject(name)
 		for (COSName cosname : resources.getXObjectNames()) {
 			PDXObject xObject = resources.getXObject(cosname);
 
@@ -291,7 +270,7 @@ public final class ExtractImagesFromPDF {
 	}
 
 	public void extractAnnotationImages(PDImageXObject image, String imageFormat) throws IOException {
-		//String filename = String.format(imageFormat, "", image.getSuffix());
+		// String filename = String.format(imageFormat, "", image.getSuffix());
 		String filename = String.format(imageFormat, "", "");
 		write2file(image, filename);
 	}
@@ -312,7 +291,7 @@ public final class ExtractImagesFromPDF {
 		@Override
 		public void drawImage(PDImage pdImage) throws IOException {
 			if (pdImage instanceof PDImageXObject) {
-				//PDImageXObject xobject = (PDImageXObject) pdImage;
+				// PDImageXObject xobject = (PDImageXObject) pdImage;
 
 				// save image
 				String pageNumberFormatted = String.format(pageNumberFormat, pageNumber);
@@ -385,8 +364,7 @@ public final class ExtractImagesFromPDF {
 	}
 
 	/**
-	 * Writes the image to a file with the filename + an appropriate suffix,
-	 * like "Image.jpg". The suffix is automatically set by the
+	 * Writes the image to a file with the filename + an appropriate suffix, like "Image.jpg". The suffix is automatically set by the
 	 * 
 	 * @param filename
 	 *            the filename
@@ -410,7 +388,7 @@ public final class ExtractImagesFromPDF {
 
 		// Lets see if we can find dupes...
 		if (imageTracker.contains(md5Key.toString())) {
-			//System.out.println("*** Skipping Duplicate image [" + filename + "]");
+			// System.out.println("*** Skipping Duplicate image [" + filename + "]");
 			filename += md5Key.toString() + "." + fileSuffix;
 			return;
 		} else {
@@ -422,12 +400,12 @@ public final class ExtractImagesFromPDF {
 		try {
 			fileCheck = new File(filename);
 			if (fileCheck.exists()) {
-				//System.out.println("*** Found Duplicate file [" + filename + "]");
+				// System.out.println("*** Found Duplicate file [" + filename + "]");
 				filename += md5Key.toString() + "." + fileSuffix;
 				return;
 			}
 
-			//System.out.println("Saving image: " + filename);
+			// System.out.println("Saving image: " + filename);
 			out = new FileOutputStream(filename);
 
 			if (image != null) {

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
@@ -60,8 +57,10 @@ public class TokenBarFunction extends AbstractFunction {
 	/**
 	 * Get the value for the bar.
 	 * 
-	 * @param token Get the value from this token
-	 * @param bar For this bar
+	 * @param token
+	 *            Get the value from this token
+	 * @param bar
+	 *            For this bar
 	 * @return A {@link BigDecimal} value.
 	 * @throws ParserException
 	 */
@@ -70,9 +69,12 @@ public class TokenBarFunction extends AbstractFunction {
 	}
 
 	/**
-	 * @param token Set the value in this token
-	 * @param bar For this bar
-	 * @param value New value for the bar. Will be converted into a {@link BigDecimal} before setting
+	 * @param token
+	 *            Set the value in this token
+	 * @param bar
+	 *            For this bar
+	 * @param value
+	 *            New value for the bar. Will be converted into a {@link BigDecimal} before setting
 	 * @return The {@link BigDecimal} value that was actually set.
 	 * @throws ParserException
 	 */
@@ -96,9 +98,9 @@ public class TokenBarFunction extends AbstractFunction {
 	/**
 	 * Convert the passed object into a big decimal value.
 	 * 
-	 * @param value The value to be converted
-	 * @return The {@link BigDecimal} version of the value. The <code>null</code> value and strings
-	 * that can't be converted to numbers return {@link BigDecimal#ZERO}
+	 * @param value
+	 *            The value to be converted
+	 * @return The {@link BigDecimal} version of the value. The <code>null</code> value and strings that can't be converted to numbers return {@link BigDecimal#ZERO}
 	 */
 	public static BigDecimal getBigDecimalValue(Object value) {
 		BigDecimal val = null;

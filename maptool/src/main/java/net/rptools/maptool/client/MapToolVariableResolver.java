@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.math.BigDecimal;
@@ -64,13 +61,19 @@ public class MapToolVariableResolver extends MapVariableResolver {
 	/** The variable name for querying and setting token name */
 	private final static String TOKEN_LABEL = "token.label";
 
-	/** The variable name for querying and setting the initiative of the current token. */
+	/**
+	 * The variable name for querying and setting the initiative of the current token.
+	 */
 	public final static String TOKEN_INITIATIVE = "token.init";
 
-	/** The variable name for querying and setting the initiative of the current token. */
+	/**
+	 * The variable name for querying and setting the initiative of the current token.
+	 */
 	public final static String TOKEN_INITIATIVE_HOLD = "token.initHold";
 
-	/** The variable name for querying and setting the current round in initiative. */
+	/**
+	 * The variable name for querying and setting the current round in initiative.
+	 */
 	public final static String INITIATIVE_ROUND = "init.round";
 
 	/** The variable name for querying and setting the current initiative. */
@@ -85,7 +88,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
 
 	public MapToolVariableResolver(Token tokenInContext) {
 		this.tokenInContext = tokenInContext;
-		// Set the default macro.args to ""  so that it is always present.
+		// Set the default macro.args to "" so that it is always present.
 		try {
 			this.setVariable("macro.args", "");
 			this.setVariable("macro.args.num", BigDecimal.ZERO);
@@ -407,8 +410,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
 	}
 
 	/**
-	 * Sets the token that is in context for this variable resolver. You will only ever need to call this method if you
-	 * want to change the in context token mid macro.
+	 * Sets the token that is in context for this variable resolver. You will only ever need to call this method if you want to change the in context token mid macro.
 	 * 
 	 * @param token
 	 *            The new token in context.

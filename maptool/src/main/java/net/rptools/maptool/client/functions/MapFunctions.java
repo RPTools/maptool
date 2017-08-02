@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.util.LinkedList;
@@ -125,10 +122,14 @@ public class MapFunctions extends AbstractFunction {
 
 	/**
 	 * Find the map/zone for a given map name
-	 * @param functionName String Name of the calling function.
-	 * @param mapName      String Name of the searched for map.
-	 * @return             ZoneRenderer The map/zone.
-	 * @throws ParserException  if the map is not found
+	 * 
+	 * @param functionName
+	 *            String Name of the calling function.
+	 * @param mapName
+	 *            String Name of the searched for map.
+	 * @return ZoneRenderer The map/zone.
+	 * @throws ParserException
+	 *             if the map is not found
 	 */
 	private ZoneRenderer getNamedMap(String functionName, String mapName) throws ParserException {
 		for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
@@ -140,15 +141,18 @@ public class MapFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Checks that the number of objects in the list <code>parameters</code>
-	 * is within given bounds (inclusive). Throws a <code>ParserException</code>
-	 * if the check fails.
+	 * Checks that the number of objects in the list <code>parameters</code> is within given bounds (inclusive). Throws a <code>ParserException</code> if the check fails.
 	 *
-	 * @param    functionName    this is used in the exception message
-	 * @param    parameters      a list of parameters
-	 * @param    min             the minimum amount of parameters (inclusive)
-	 * @param    max             the maximum amount of parameters (inclusive)
-	 * @throws   ParserException    if there were more or less parameters than allowed
+	 * @param functionName
+	 *            this is used in the exception message
+	 * @param parameters
+	 *            a list of parameters
+	 * @param min
+	 *            the minimum amount of parameters (inclusive)
+	 * @param max
+	 *            the maximum amount of parameters (inclusive)
+	 * @throws ParserException
+	 *             if there were more or less parameters than allowed
 	 */
 	private void checkNumberOfParameters(String functionName, List<Object> parameters, int min, int max) throws ParserException {
 		int numberOfParameters = parameters.size();
@@ -162,8 +166,10 @@ public class MapFunctions extends AbstractFunction {
 	/**
 	 * Checks whether or not the function is trusted
 	 * 
-	 * @param functionName     Name of the macro function
-	 * @throws ParserException Returns trust error message and function name 
+	 * @param functionName
+	 *            Name of the macro function
+	 * @throws ParserException
+	 *             Returns trust error message and function name
 	 */
 	private void checkTrusted(String functionName) throws ParserException {
 		if (!MapTool.getParser().isMacroTrusted()) {

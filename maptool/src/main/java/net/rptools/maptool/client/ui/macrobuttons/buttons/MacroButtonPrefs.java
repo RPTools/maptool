@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.macrobuttons.buttons;
 
 import java.util.ArrayList;
@@ -22,8 +19,7 @@ import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;
 import net.rptools.maptool.model.MacroButtonProperties;
 
 /**
- * Class that is responsible for storing global macro buttons' data in the registry (on Windows that is, dunno where it
- * stores on other platforms, duh.) so it persists across sessions.
+ * Class that is responsible for storing global macro buttons' data in the registry (on Windows that is, dunno where it stores on other platforms, duh.) so it persists across sessions.
  */
 public class MacroButtonPrefs {
 	private static int maxIndex = 0;
@@ -54,7 +50,7 @@ public class MacroButtonPrefs {
 		// use zero padding to ensure proper ordering in the registry (otherwise 10 will come before 2 etc.)
 		String paddedIndex = String.format(FORMAT_STRING, index);
 
-		//		prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/macros/" + paddedIndex);
+		// prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/macros/" + paddedIndex);
 		Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/macros");
 
 		try {
@@ -63,8 +59,8 @@ public class MacroButtonPrefs {
 			} else {
 				prefs = prefs.node(paddedIndex);
 			}
-			// Start with the macro text itself.  Apparently Windows has a length limit for registry values and the JRE doesn't
-			// re-read the registry to determine if all information was actually written...  So we'll do it ourselves.  We start with
+			// Start with the macro text itself. Apparently Windows has a length limit for registry values and the JRE doesn't
+			// re-read the registry to determine if all information was actually written... So we'll do it ourselves. We start with
 			// the macro text because if it fails, we don't want to bother saving the rest of the fields.
 			String text = properties.getCommand();
 			prefs.put(PREF_COMMAND_KEY, text);

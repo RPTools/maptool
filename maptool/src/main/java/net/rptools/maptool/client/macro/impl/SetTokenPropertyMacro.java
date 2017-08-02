@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.macro.impl;
 
 import java.util.ArrayList;
@@ -91,9 +88,9 @@ public class SetTokenPropertyMacro implements Macro {
 				}
 			}
 			// TODO: This is currently done as part of the MapToolVariableResolver. I know this is bad
-			//       as it is an implementation issue of MapToolVariableResolver that we should know nothing
-			//       about or depend on here but at the moment it can't be helped.
-			//			MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token); // update so others see the changes.
+			// as it is an implementation issue of MapToolVariableResolver that we should know nothing
+			// about or depend on here but at the moment it can't be helped.
+			// MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token); // update so others see the changes.
 		}
 	}
 
@@ -102,8 +99,7 @@ public class SetTokenPropertyMacro implements Macro {
 	 * 
 	 * @param tokenName
 	 *            The name of the token to try retrieve.
-	 * @return The tokens. If the token in <code>tokenName</code> is empty or <code>tokenName</code> is null then the
-	 *         selected tokens are returned.
+	 * @return The tokens. If the token in <code>tokenName</code> is empty or <code>tokenName</code> is null then the selected tokens are returned.
 	 */
 	protected Set<Token> getTokens(String tokenName) {
 		Set<Token> selectedTokenSet = new HashSet<Token>();
@@ -112,10 +108,8 @@ public class SetTokenPropertyMacro implements Macro {
 			Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 			Token token = zone.getTokenByName(tokenName);
 			/*
-			 * Give the player the benefit of the doubt. If they specified a token that is invisible then try the name
-			 * as a property. This will also stop players that are trying to "guess" token names and trying to change
-			 * properties figuring out that there is a token there because they are getting a different error message
-			 * (benefit of the doubt only goes so far ;) )
+			 * Give the player the benefit of the doubt. If they specified a token that is invisible then try the name as a property. This will also stop players that are trying to "guess" token names
+			 * and trying to change properties figuring out that there is a token there because they are getting a different error message (benefit of the doubt only goes so far ;) )
 			 */
 			if (!MapTool.getPlayer().isGM()) {
 				if ((!zone.isTokenVisible(token) || token.getLayer() == Zone.Layer.GM)) {

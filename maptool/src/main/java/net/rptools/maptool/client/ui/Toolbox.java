@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui;
 
 import java.awt.EventQueue;
@@ -51,7 +48,7 @@ public class Toolbox {
 		try {
 			Constructor<? extends Tool> constructor = toolClass.getDeclaredConstructor(new Class[] {});
 			tool = constructor.newInstance(new Object[] {});
-			//			tool = constructor.newInstance((Object) null);
+			// tool = constructor.newInstance((Object) null);
 
 			buttonGroup.add(tool);
 			toolMap.put(toolClass, tool);
@@ -107,7 +104,7 @@ public class Toolbox {
 				if (currentTool != null) {
 					if (currentRenderer != null) {
 						currentTool.removeListeners(currentRenderer);
-						//						currentTool.addGridBasedKeys(currentRenderer, false);
+						// currentTool.addGridBasedKeys(currentRenderer, false);
 						currentTool.detachFrom(currentRenderer);
 
 						if (currentTool instanceof ZoneOverlay) {
@@ -122,7 +119,7 @@ public class Toolbox {
 					if (currentRenderer != null) {
 						// We have a renderer at this point so we can figure out the grid type and add its keystrokes
 						// to the PointerTool.
-						//						currentTool.addGridBasedKeys(currentRenderer, true);
+						// currentTool.addGridBasedKeys(currentRenderer, true);
 						currentTool.addListeners(currentRenderer);
 						currentTool.attachTo(currentRenderer);
 

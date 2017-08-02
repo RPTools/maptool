@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.awt.Point;
@@ -69,7 +66,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 	}
 
 	public static TokenMoveFunctions getInstance() {
-		//		log.setLevel(Level.INFO);
+		// log.setLevel(Level.INFO);
 		return instance;
 	}
 
@@ -97,7 +94,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 			return pathPointsToJSONArray(pathPoints);
 		}
 		if (functionName.equals("movedOverPoints")) {
-			//macro.function.general.noPerm
+			// macro.function.general.noPerm
 			if (!MapTool.getParser().isMacroTrusted()) {
 				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 			}
@@ -141,7 +138,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 			}
 		}
 		if (functionName.equals("movedOverToken")) {
-			//macro.function.general.noPerm
+			// macro.function.general.noPerm
 			if (!MapTool.getParser().isMacroTrusted()) {
 				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 			}
@@ -182,7 +179,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 
 			for (Object o : tempPoints) {
 				MorphDynaBean bean = (MorphDynaBean) o;
-				//System.out.println(bean.get("x"));
+				// System.out.println(bean.get("x"));
 				Map<String, Integer> point = new HashMap<String, Integer>();
 				point.put("x", (Integer) bean.get("x"));
 				point.put("y", (Integer) bean.get("y"));
@@ -271,7 +268,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 				}
 			}
 		} else {
-			//Lee: establish first point, then process line intersection when a line can be drawn.
+			// Lee: establish first point, then process line intersection when a line can be drawn.
 			int ctr = 0;
 			Point previousPoint = new Point();
 			Map<String, Integer> firstPoint = new HashMap<String, Integer>(), secondPoint = new HashMap<String, Integer>();
@@ -294,8 +291,8 @@ public class TokenMoveFunctions extends AbstractFunction {
 				previousPoint = currentPoint;
 				ctr += 1;
 			}
-			//Lee: commenting this out
-			//originalArea = tokenInContext.getBounds(zone);
+			// Lee: commenting this out
+			// originalArea = tokenInContext.getBounds(zone);
 		}
 		return returnPoints;
 	}
@@ -309,7 +306,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 			return jsonArr;
 		}
 		JSONObject pointObj = new JSONObject();
-		//Lee: had to add handling for the line segment made by unsnapped movedOverToken()
+		// Lee: had to add handling for the line segment made by unsnapped movedOverToken()
 		if (pathPoints.get(0).containsKey("x"))
 			for (Map<String, Integer> entry : pathPoints) {
 				pointObj.element("x", entry.get("x"));
@@ -448,12 +445,10 @@ public class TokenMoveFunctions extends AbstractFunction {
 
 		Path<ZonePoint> gridlessPath;
 		/*
-		 * Lee: causes an NPE when used on a newly dropped token. While a true solution would probably be to create a
-		 * "path" based on the token's coords when it is dropped on the map, the easy out here would be to just return a
-		 * "0".
+		 * Lee: causes an NPE when used on a newly dropped token. While a true solution would probably be to create a "path" based on the token's coords when it is dropped on the map, the easy out
+		 * here would be to just return a "0".
 		 * 
-		 * Final Edit: attempting to create a default path for new drops had undesirable effects. Therefore, let's opt
-		 * for the easy fix
+		 * Final Edit: attempting to create a default path for new drops had undesirable effects. Therefore, let's opt for the easy fix
 		 */
 		int x = 0, y = 0;
 
@@ -471,7 +466,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 				walker.replaceLastWaypoint(new CellPoint(x, y));
 				for (AbstractPoint point : source.getLastPath().getCellPath()) {
 					CellPoint tokenPoint = new CellPoint(point.x, point.y);
-					//walker.setWaypoints(tokenPoint);
+					// walker.setWaypoints(tokenPoint);
 					walker.replaceLastWaypoint(tokenPoint);
 					cplist.add(tokenPoint);
 				}
@@ -484,7 +479,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 					return new BigDecimal(bar).stripTrailingZeros().toPlainString();
 				}
 
-				//return  Integer.toString(walker.getDistance());
+				// return Integer.toString(walker.getDistance());
 			}
 		} else {
 			gridlessPath = new Path<ZonePoint>();

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui;
 
 import java.awt.BorderLayout;
@@ -353,8 +350,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 		zoneRendererPanel = new JPanel(new PositionalLayout(5));
 		zoneRendererPanel.setBackground(Color.black);
-		//		zoneRendererPanel.add(zoneMiniMapPanel, PositionalLayout.Position.SE);
-		//		zoneRendererPanel.add(getChatTypingLabel(), PositionalLayout.Position.NW);
+		// zoneRendererPanel.add(zoneMiniMapPanel, PositionalLayout.Position.SE);
+		// zoneRendererPanel.add(getChatTypingLabel(), PositionalLayout.Position.NW);
 		zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
 		zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
 
@@ -383,7 +380,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		glassPaneComposite.add(dragImageGlassPane, constraints);
 
 		setGlassPane(glassPane);
-		//		setGlassPane(glassPaneComposite);
+		// setGlassPane(glassPaneComposite);
 
 		glassPaneComposite.setVisible(true);
 
@@ -430,7 +427,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	public boolean macOSXExit() {
 		((ClientAction) AppActions.EXIT).execute(null);
-		// Always return false to abort exit from os.  Above call will close app normally if user accepts
+		// Always return false to abort exit from os. Above call will close app normally if user accepts
 		return false;
 	}
 
@@ -451,20 +448,12 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	public enum MTFrame {
 		/*
-		 * These enums should be specified using references to the properties
-		 * file. However, a simple toString() method is used later to determine
-		 * what to display on the various panels. So if I convert the propName
-		 * into the value from the properties file and return it, parts of the
-		 * code later on use that string to do a properties file lookup! That
-		 * means that any code using MTFrame enums that are converted to Strings
-		 * need to be checked so that when the return value is used as the NAME
-		 * of an Action, the property name is retrieved instead. Ugh. :(
+		 * These enums should be specified using references to the properties file. However, a simple toString() method is used later to determine what to display on the various panels. So if I
+		 * convert the propName into the value from the properties file and return it, parts of the code later on use that string to do a properties file lookup! That means that any code using MTFrame
+		 * enums that are converted to Strings need to be checked so that when the return value is used as the NAME of an Action, the property name is retrieved instead. Ugh. :(
 		 * 
-		 * We'll need two additional methods: getPropName() and
-		 * getDisplayName(). Perhaps toString() could call getDisplayName(), but
-		 * it might be much simpler to debug if toString() weren't used. In that
-		 * case, there's no reason to use an enum either ... may as well use a
-		 * class with static final objects in it. Sigh.
+		 * We'll need two additional methods: getPropName() and getDisplayName(). Perhaps toString() could call getDisplayName(), but it might be much simpler to debug if toString() weren't used. In
+		 * that case, there's no reason to use an enum either ... may as well use a class with static final objects in it. Sigh.
 		 */
 		// @formatter:off
 		CONNECTIONS("Connections"),
@@ -785,8 +774,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	public void showFilledGlassPane(JComponent component) {
 		glassPane.setLayout(new GridLayout());
 		glassPane.add(component);
-		//		glassPane.setActionMap(null);
-		//		glassPane.setInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, null);
+		// glassPane.setActionMap(null);
+		// glassPane.setInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, null);
 		glassPane.setVisible(true);
 	}
 
@@ -1099,18 +1088,18 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				// TODO use for real popup logic
-				//				if (SwingUtilities.isLeftMouseButton(e)) {
-				//					if (e.getClickCount() == 2) {
+				// if (SwingUtilities.isLeftMouseButton(e)) {
+				// if (e.getClickCount() == 2) {
 				//
-				//						List<Object> idList = panel.getSelectedIds();
-				//						if (idList == null || idList.size() == 0) {
-				//							return;
-				//						}
+				// List<Object> idList = panel.getSelectedIds();
+				// if (idList == null || idList.size() == 0) {
+				// return;
+				// }
 				//
-				//						final int index = (Integer) idList.get(0);
-				//						createZone(panel.getAsset(index));
-				//					}
-				//				}
+				// final int index = (Integer) idList.get(0);
+				// createZone(panel.getAsset(index));
+				// }
+				// }
 				if (SwingUtilities.isRightMouseButton(e) && MapTool.getPlayer().isGM()) {
 					List<Object> idList = panel.getSelectedIds();
 					if (idList == null || idList.size() == 0) {
@@ -1280,7 +1269,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 			ImageManager.flush(renderer.getZone().getAllAssetIds());
 		} else {
 			ImageManager.flush();
-			//			zoneRendererList.remove(currentRenderer);
+			// zoneRendererList.remove(currentRenderer);
 		}
 		// Handle new renderers
 		// TODO: should this be here ?
@@ -1414,14 +1403,14 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 			return;
 		}
 		final Zone zone = (Zone) evt.getNewValue();
-		//		AssetAvailableListener listener = new AssetAvailableListener() {
-		//			public void assetAvailable(net.rptools.lib.MD5Key key) {
-		//				ZoneRenderer renderer = getCurrentZoneRenderer();
-		//				if (renderer.getZone() == zone) {
-		//					ImageManager.getImage(key, renderer);
-		//				}
-		//			}
-		//		};
+		// AssetAvailableListener listener = new AssetAvailableListener() {
+		// public void assetAvailable(net.rptools.lib.MD5Key key) {
+		// ZoneRenderer renderer = getCurrentZoneRenderer();
+		// if (renderer.getZone() == zone) {
+		// ImageManager.getImage(key, renderer);
+		// }
+		// }
+		// };
 		// Let's add all the assets, starting with the backgrounds
 		for (Token token : zone.getBackgroundStamps()) {
 			MD5Key key = token.getImageAssetId();
@@ -1463,7 +1452,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		if (AppPreferences.getSaveReminder()) {
 			if (MapTool.getPlayer().isGM()) {
 				int result = MapTool.confirmImpl(I18N.getText("msg.title.saveCampaign"), JOptionPane.YES_NO_CANCEL_OPTION, "msg.confirm.saveCampaign", (Object[]) null);
-				//				int result = JOptionPane.showConfirmDialog(MapTool.getFrame(), I18N.getText("msg.confirm.saveCampaign"), I18N.getText("msg.title.saveCampaign"), JOptionPane.YES_NO_CANCEL_OPTION);
+				// int result = JOptionPane.showConfirmDialog(MapTool.getFrame(), I18N.getText("msg.confirm.saveCampaign"), I18N.getText("msg.title.saveCampaign"), JOptionPane.YES_NO_CANCEL_OPTION);
 
 				if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
 					return;
@@ -1538,12 +1527,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	public void updateKeyStrokes() {
 		/*
-		 * Lee: This causes input map conflicts in Java 7. Going over the code,
-		 * this line does nothing as key mapping here does not conflict with
-		 * hotkeys set aside for macros; unless someone modifies the
-		 * accelerators in the i18n file. Commenting it out.
+		 * Lee: This causes input map conflicts in Java 7. Going over the code, this line does nothing as key mapping here does not conflict with hotkeys set aside for macros; unless someone modifies
+		 * the accelerators in the i18n file. Commenting it out.
 		 */
-		//		updateKeyStrokes(menuBar);
+		// updateKeyStrokes(menuBar);
 
 		for (MTFrame frame : frameMap.keySet()) {
 			updateKeyStrokes(frameMap.get(frame));
@@ -1593,7 +1580,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 		if (c.getActionMap().keys() != null) {
 			for (Object o : c.getActionMap().keys()) {
-				// We're looking for MacroButton here, but we're adding AbstractActions below...  Is this right? XXX
+				// We're looking for MacroButton here, but we're adding AbstractActions below... Is this right? XXX
 				if (o instanceof MacroButton) {
 					if (log.isInfoEnabled())
 						log.info("Removing MacroButton " + ((MacroButton) o).getButtonText());
@@ -1717,7 +1704,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		return saveTableFileChooser;
 	}
 
-	// Should the load FileChooser really be different from the save?  That means recording two separate default directories
+	// Should the load FileChooser really be different from the save? That means recording two separate default directories
 	// and when a user loads a file, don't they expect the save dialog to start at the same place??
 	public JFileChooser getLoadTableFileChooser() {
 		if (loadTableFileChooser == null) {

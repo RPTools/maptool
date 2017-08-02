@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.chat;
 
 import java.awt.Dimension;
@@ -82,8 +79,7 @@ public class SmileyChatTranslationRuleGroup extends ChatTranslationRuleGroup {
 			String key = (String) e.nextElement();
 			String value = smileyProps.getProperty(key);
 			/*
-			 * Make sure we're not in roll output. Wouldn't let me do this
-			 * usinglookbehind :-/
+			 * Make sure we're not in roll output. Wouldn't let me do this usinglookbehind :-/
 			 */
 			key = "^((?:[^\036]|\036[^\036]*\036)*)" + key;
 			value = "$1" + value;
@@ -92,7 +88,7 @@ public class SmileyChatTranslationRuleGroup extends ChatTranslationRuleGroup {
 	}
 
 	////
-	// EMOTE 
+	// EMOTE
 	private class InsertEmoteAction extends AbstractAction {
 		private final String insert;
 

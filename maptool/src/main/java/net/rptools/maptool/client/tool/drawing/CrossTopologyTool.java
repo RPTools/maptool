@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.tool.drawing;
 
 import java.awt.Graphics2D;
@@ -75,7 +72,7 @@ public class CrossTopologyTool extends AbstractDrawingTool implements MouseMotio
 
 	@Override
 	public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
-		//Color oldColor = g.getColor();
+		// Color oldColor = g.getColor();
 
 		if (MapTool.getPlayer().isGM()) {
 			Zone zone = renderer.getZone();
@@ -128,10 +125,10 @@ public class CrossTopologyTool extends AbstractDrawingTool implements MouseMotio
 				int y1 = Math.min(cross.getStartPoint().y, cross.getEndPoint().y);
 				int y2 = Math.max(cross.getStartPoint().y, cross.getEndPoint().y);
 
-				//Area area = new Area(new Rectangle(x1-1, y1-1, x2 - x1 + 2, y2 - y1 + 2));
+				// Area area = new Area(new Rectangle(x1-1, y1-1, x2 - x1 + 2, y2 - y1 + 2));
 
-				//Area area = new Area( new Line2D.Double(x1,y1,x2,y2));
-				//area.add( new Area(new Line2D.Double(x1,y2,x2,y1)));
+				// Area area = new Area( new Line2D.Double(x1,y1,x2,y2));
+				// area.add( new Area(new Line2D.Double(x1,y2,x2,y1)));
 
 				Area area = GraphicsUtil.createLine(1, new Point2D.Double(x1, y1), new Point2D.Double(x2, y2));
 				area.add(GraphicsUtil.createLine(1, new Point2D.Double(x1, y2), new Point2D.Double(x2, y1)));

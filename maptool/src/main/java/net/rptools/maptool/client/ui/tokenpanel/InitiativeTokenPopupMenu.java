@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.tokenpanel;
 
 import java.awt.event.ActionEvent;
@@ -47,13 +44,20 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
 	private TokenInitiative tokenInitiativeUnderMouse;
 
 	/**
-	 * @param selectedTokenSet Tokens handled by this menu
-	 * @param selectedInitiatives TokenIntiatives handled by this menu
-	 * @param x X location of the menu
-	 * @param y Y location of the menu
-	 * @param renderer Renderer of the map
-	 * @param tokenUnderMouse The token under the mouse provides default values.
-	 * @param tokenInitUnderMouse The initiative item under the mouse.
+	 * @param selectedTokenSet
+	 *            Tokens handled by this menu
+	 * @param selectedInitiatives
+	 *            TokenIntiatives handled by this menu
+	 * @param x
+	 *            X location of the menu
+	 * @param y
+	 *            Y location of the menu
+	 * @param renderer
+	 *            Renderer of the map
+	 * @param tokenUnderMouse
+	 *            The token under the mouse provides default values.
+	 * @param tokenInitUnderMouse
+	 *            The initiative item under the mouse.
 	 */
 	public InitiativeTokenPopupMenu(Set<GUID> selectedTokenSet, Set<TokenInitiative> selectedInitiatives, int x, int y,
 			ZoneRenderer renderer, Token tokenUnderMouse, TokenInitiative tokenInitUnderMouse) {

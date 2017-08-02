@@ -1,15 +1,10 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.lib.swing.preference;
 
@@ -22,12 +17,11 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 /**
- * Automatically keeps track of and restores frame size when opening/closing
- * the application.
+ * Automatically keeps track of and restores frame size when opening/closing the application.
  * 
  * To use, simply add a line like this to you frame's constructor:
  * 
- *      new WindowPreferences(appName, identifier, this);
+ * new WindowPreferences(appName, identifier, this);
  */
 public class WindowPreferences extends WindowAdapter {
 	private final Preferences prefs;
@@ -43,14 +37,15 @@ public class WindowPreferences extends WindowAdapter {
 	private static int DEFAULT_HEIGHT;
 
 	/**
-	 * Creates an object that holds the window boundary information after storing it into
-	 * {@link Preferences#userRoot()}.  This object also registers a <code>WindowListener</code> on the
-	 * passed in <code>Window</code> object so that it is notified when the window is closed,
-	 * allowing this object to save the final window boundary into <code>Preferences</code> again.
+	 * Creates an object that holds the window boundary information after storing it into {@link Preferences#userRoot()}. This object also registers a <code>WindowListener</code> on the passed in
+	 * <code>Window</code> object so that it is notified when the window is closed, allowing this object to save the final window boundary into <code>Preferences</code> again.
 	 * 
-	 * @param appName top-level name to use in the Preferences
-	 * @param controlName bottom level name to use
-	 * @param window the window whose boundary information is being recorded
+	 * @param appName
+	 *            top-level name to use in the Preferences
+	 * @param controlName
+	 *            bottom level name to use
+	 * @param window
+	 *            the window whose boundary information is being recorded
 	 */
 	public WindowPreferences(String appName, String controlName, Window window) {
 		prefs = Preferences.userRoot().node(appName + "/control/" + controlName);

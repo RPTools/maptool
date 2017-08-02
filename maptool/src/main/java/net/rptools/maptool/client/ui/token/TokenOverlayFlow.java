@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.token;
 
 import java.awt.Rectangle;
@@ -54,8 +51,7 @@ public class TokenOverlayFlow {
 	private final double size;
 
 	/**
-	 * This map contains the list of states for each token in the order they are drawn. It's done this way so that the
-	 * states don't jump around as they are added or removed.
+	 * This map contains the list of states for each token in the order they are drawn. It's done this way so that the states don't jump around as they are added or removed.
 	 */
 	private final Map<GUID, List<String>> savedStates = new HashMap<GUID, List<String>>();
 
@@ -91,8 +87,7 @@ public class TokenOverlayFlow {
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o
-	 * changing the order. It also removes any unused states.
+	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o changing the order. It also removes any unused states.
 	 * 
 	 * @param bounds
 	 *            The token's bounds. All states are drawn inside this area.
@@ -153,8 +148,7 @@ public class TokenOverlayFlow {
 	}
 
 	/**
-	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o
-	 * changing the order. It also removes any unused states.
+	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o changing the order. It also removes any unused states.
 	 * 
 	 * @param bounds
 	 *            The token's bounds. All states are drawn inside this area.

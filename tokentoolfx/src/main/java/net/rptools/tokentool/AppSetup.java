@@ -1,25 +1,10 @@
 /*
- * The MIT License
- * 
- * Copyright (c) 2005 David Rice, Trevor Croft
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.tokentool;
 
@@ -46,10 +31,10 @@ import net.rptools.lib.image.ImageUtil;
  * Executes only the first time the application is run.
  */
 public class AppSetup {
-	//	private static final String DEFAULT_TOKEN_ZIP = "net/rptools/tokentool/zip/overlays.zip";
+	// private static final String DEFAULT_TOKEN_ZIP = "net/rptools/tokentool/zip/overlays.zip";
 	private static final String DEFAULT_OVERLAYS = "net/rptools/tokentool/overlays";
 
-	//	https://dzone.com/articles/get-all-classes-within-package
+	// https://dzone.com/articles/get-all-classes-within-package
 
 	public static void install(String versionString) {
 		AppUtil.init("tokentoolfx");
@@ -63,11 +48,11 @@ public class AppSetup {
 		// After 1.4.0.1 we can install only newer overlays based on version if needed
 		// overLays.length is 0 because of sub dirs, FIXME
 		try {
-			//			if (overlayVer.exists() && overLays.length > 0) {
+			// if (overlayVer.exists() && overLays.length > 0) {
 			if (overlayVer.exists()) {
-				//				return;
+				// return;
 			} else if (!overlayVer.exists()) {
-				//overlayVer.createNewFile();
+				// overlayVer.createNewFile();
 				FileUtils.writeStringToFile(overlayVer, versionString);
 			}
 
@@ -79,7 +64,7 @@ public class AppSetup {
 			}
 
 			// Put in a default samples
-			//			FileUtil.unzip(DEFAULT_TOKEN_ZIP, overlayDir);
+			// FileUtil.unzip(DEFAULT_TOKEN_ZIP, overlayDir);
 
 			installDefaultOverlays();
 		} catch (IOException ioe) {
@@ -93,7 +78,7 @@ public class AppSetup {
 		overlayDir.mkdirs();
 
 		// Put in a default samples
-		//		FileUtil.unzip(DEFAULT_TOKEN_ZIP, overlayDir);
+		// FileUtil.unzip(DEFAULT_TOKEN_ZIP, overlayDir);
 
 		// Copy default overlays from resources
 		Reflections reflections = new Reflections(DEFAULT_OVERLAYS, new ResourcesScanner());
@@ -103,9 +88,9 @@ public class AppSetup {
 			URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
 			String resourceName = resourcePath.substring(DEFAULT_OVERLAYS.length());
 
-			//			System.out.println("resource: " + resource);
-			//			System.out.println("URL: " + inputUrl);
-			//			System.out.println("Filename: " + resourceName);
+			// System.out.println("resource: " + resource);
+			// System.out.println("URL: " + inputUrl);
+			// System.out.println("Filename: " + resourceName);
 			try {
 				FileUtils.copyURLToFile(inputUrl, new File(overlayDir, resourceName));
 			} catch (IOException e) {

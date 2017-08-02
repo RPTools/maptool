@@ -1,3 +1,11 @@
+/*
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.tokentool.fx.util;
 
 import java.awt.image.BufferedImage;
@@ -206,7 +214,7 @@ public class FxImageUtil {
 			}
 		}
 
-		// Create a viewport to clip the image using snapshot 
+		// Create a viewport to clip the image using snapshot
 		Rectangle2D viewPort = new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
 		SnapshotParameters parameter = new SnapshotParameters();
 		parameter.setViewport(viewPort);
@@ -223,7 +231,7 @@ public class FxImageUtil {
 		Image finalImage = null;
 
 		if (useAsBase) {
-			// Snapshot the whole compositeTokenpane to capture portrait and overlay and then crop the image to it's smallest size. 
+			// Snapshot the whole compositeTokenpane to capture portrait and overlay and then crop the image to it's smallest size.
 			// The layers have already been blended together so no other work needed.
 			parameter.setFill(Color.TRANSPARENT);
 			finalImage = autoCropImage(compositeTokenPane.snapshot(parameter, null));
@@ -246,7 +254,7 @@ public class FxImageUtil {
 			ImageView clippedImageView = new ImageView();
 			Group blend;
 
-			//			System.out.println("Viewport: " + viewPort);
+			// System.out.println("Viewport: " + viewPort);
 			parameter.setViewport(viewPort);
 			parameter.setFill(bgColor);
 			portraitImageView.snapshot(parameter, newImage);
@@ -277,8 +285,8 @@ public class FxImageUtil {
 	}
 
 	public static double getScaleXRatio(ImageView imageView) {
-		//		System.out.println("imageView.getBoundsInParent().getWidth(): " + imageView.getBoundsInParent().getWidth());
-		//		System.out.println("imageView.getImage().getWidth(): " + imageView.getImage().getWidth());
+		// System.out.println("imageView.getBoundsInParent().getWidth(): " + imageView.getBoundsInParent().getWidth());
+		// System.out.println("imageView.getImage().getWidth(): " + imageView.getImage().getWidth());
 		return imageView.getBoundsInParent().getWidth() / imageView.getImage().getWidth();
 	}
 

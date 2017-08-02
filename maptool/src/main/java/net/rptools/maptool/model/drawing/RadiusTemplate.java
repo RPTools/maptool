@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model.drawing;
 
 import java.awt.Graphics2D;
@@ -42,12 +39,10 @@ public class RadiusTemplate extends AbstractTemplate {
 	 * @param gridSize
 	 *            The size of one side of the grid in screen coordinates.
 	 * @param distance
-	 *            The distance in cells from the vertex to the cell which is offset from the vertex by <code>x</code> &
-	 *            <code>y</code>.
+	 *            The distance in cells from the vertex to the cell which is offset from the vertex by <code>x</code> & <code>y</code>.
 	 * @param radius
 	 *            The radius where the border is painted.
-	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintBorder(java.awt.Graphics2D, int, int, int, int, int,
-	 *      int)
+	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintBorder(java.awt.Graphics2D, int, int, int, int, int, int)
 	 */
 	protected void paintBorderAtRadius(Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance, int radius) {
 		// At the border?
@@ -75,8 +70,7 @@ public class RadiusTemplate extends AbstractTemplate {
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintBorder(java.awt.Graphics2D, int, int, int, int, int,
-	 *      int)
+	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintBorder(java.awt.Graphics2D, int, int, int, int, int, int)
 	 */
 	@Override
 	protected void paintBorder(Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance) {
@@ -84,14 +78,13 @@ public class RadiusTemplate extends AbstractTemplate {
 
 		// At the center?
 		// FIXME This is wrong because it draws the filled rectangle at CellPoint(0,0) and it should be at the
-		// origin of the radius template.  Perhaps the transform is missing a call to translate()?
-		//		if (x == 0 && y == 0)
-		//			g.fillRect(getVertex().x + xOff - 4, getVertex().y + yOff - 4, 7, 7);
+		// origin of the radius template. Perhaps the transform is missing a call to translate()?
+		// if (x == 0 && y == 0)
+		// g.fillRect(getVertex().x + xOff - 4, getVertex().y + yOff - 4, 7, 7);
 	}
 
 	/**
-	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintArea(java.awt.Graphics2D, int, int, int, int, int,
-	 *      int)
+	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintArea(java.awt.Graphics2D, int, int, int, int, int, int)
 	 */
 	@Override
 	protected void paintArea(Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance) {

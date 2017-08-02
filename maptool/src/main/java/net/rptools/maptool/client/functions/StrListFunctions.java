@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
@@ -344,8 +341,7 @@ public class StrListFunctions extends AbstractFunction {
 	 * MapTool call: <code>listInsert(list, index, target [,delim])</code>
 	 * 
 	 * @param index
-	 *            A zero-based number from 0 to the list length (if equal to list length, <code>target</code> is
-	 *            appended)
+	 *            A zero-based number from 0 to the list length (if equal to list length, <code>target</code> is appended)
 	 * @param target
 	 *            A string or number to insert
 	 * @param delim
@@ -439,8 +435,7 @@ public class StrListFunctions extends AbstractFunction {
 	 * MapTool call: <code>listSort(list, sortType [,delim])</code>
 	 * 
 	 * @param sortType
-	 *            Either "A" or "N" for alphabetic vs. numeric sorting, and optional second character "+" or "-" to
-	 *            control ascending vs. descending sort.
+	 *            Either "A" or "N" for alphabetic vs. numeric sorting, and optional second character "+" or "-" to control ascending vs. descending sort.
 	 * @return A new sorted list
 	 */
 	public Object listSort(List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -600,7 +595,9 @@ public class StrListFunctions extends AbstractFunction {
 		}
 	}
 
-	/** Tries to convert a string to a number, returning <code>null</code> on failure. */
+	/**
+	 * Tries to convert a string to a number, returning <code>null</code> on failure.
+	 */
 	public Integer strToInt(String s) {
 		Integer intval = null;
 		try { // convert to numeric value if possible
@@ -617,7 +614,9 @@ public class StrListFunctions extends AbstractFunction {
 		// The work is done in checkVaryingParameters() instead.
 	}
 
-	/** Checks number and types of parameters (pass null type to suppress typechecking for that slot). */
+	/**
+	 * Checks number and types of parameters (pass null type to suppress typechecking for that slot).
+	 */
 	public void checkVaryingParameters(
 			String funcName, int minParams, int maxParams, List<Object> parameters, Class<?>[] expected)
 			throws ParameterException {

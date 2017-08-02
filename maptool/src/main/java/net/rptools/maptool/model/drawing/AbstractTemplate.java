@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model.drawing;
 
 import java.awt.AlphaComposite;
@@ -82,24 +79,31 @@ public abstract class AbstractTemplate extends AbstractDrawing {
 		// Draw a cone in the indicated direction. Order is important!
 		/** Draw a cone directly to the west (left) of the selection point. */
 		WEST,
-		/** Draw a cone directly to the north west (upper left quadrant) of the selection point. */
+		/**
+		 * Draw a cone directly to the north west (upper left quadrant) of the selection point.
+		 */
 		NORTH_WEST,
 		/** Draw a cone directly to the north (up) of the selection point. */
 		NORTH,
-		/** Draw a cone directly to the north east (upper right quadrant) of the selection point. */
+		/**
+		 * Draw a cone directly to the north east (upper right quadrant) of the selection point.
+		 */
 		NORTH_EAST,
 		/** Draw a cone directly to the east (right) of the selection point. */
 		EAST,
-		/** Draw a cone directly to the south east (lower right quadrant) of the selection point. */
+		/**
+		 * Draw a cone directly to the south east (lower right quadrant) of the selection point.
+		 */
 		SOUTH_EAST,
 		/** Draw a cone directly to the south (down) of the selection point. */
 		SOUTH,
-		/** Draw a cone directly to the south west (lower left quadrant) of the selection point. */
+		/**
+		 * Draw a cone directly to the south west (lower left quadrant) of the selection point.
+		 */
 		SOUTH_WEST;
 
 		/**
-		 * Find the direction to draw a cone from two points. The first point would be the mouse location and the second
-		 * would be the vertex of the cone.
+		 * Find the direction to draw a cone from two points. The first point would be the mouse location and the second would be the vertex of the cone.
 		 * 
 		 * @param x1
 		 *            Mouse X coordinate.
@@ -406,8 +410,7 @@ public abstract class AbstractTemplate extends AbstractDrawing {
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * Paint the border of the template. Note that all coordinates are for the south east quadrant, just change the
-	 * signs of the x/y and xOff/yOff offsets to get to the other quadrants.
+	 * Paint the border of the template. Note that all coordinates are for the south east quadrant, just change the signs of the x/y and xOff/yOff offsets to get to the other quadrants.
 	 * 
 	 * @param g
 	 *            Where to paint
@@ -422,14 +425,12 @@ public abstract class AbstractTemplate extends AbstractDrawing {
 	 * @param gridSize
 	 *            The size of one side of the grid in screen coordinates.
 	 * @param distance
-	 *            The distance in cells from the vertex to the cell which is offset from the vertex by <code>x</code> &
-	 *            <code>y</code>.
+	 *            The distance in cells from the vertex to the cell which is offset from the vertex by <code>x</code> & <code>y</code>.
 	 */
 	protected abstract void paintBorder(Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance);
 
 	/**
-	 * Paint the border of the template. Note that all coordinates are for the south east quadrant, just change the
-	 * signs of the x/y and xOff/yOff offsets to get to the other quadrants.
+	 * Paint the border of the template. Note that all coordinates are for the south east quadrant, just change the signs of the x/y and xOff/yOff offsets to get to the other quadrants.
 	 * 
 	 * @param g
 	 *            Where to paint
@@ -444,8 +445,7 @@ public abstract class AbstractTemplate extends AbstractDrawing {
 	 * @param gridSize
 	 *            The size of one side of the grid in screen coordinates.
 	 * @param distance
-	 *            The distance in cells from the vertex to the cell which is offset from the vertex by <code>x</code> &
-	 *            <code>y</code>.
+	 *            The distance in cells from the vertex to the cell which is offset from the vertex by <code>x</code> & <code>y</code>.
 	 */
 	protected abstract void paintArea(Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance);
 }

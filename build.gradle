@@ -15,7 +15,10 @@ buildscript {
 	dependencies {
 		classpath 'org.ajoberstar:gradle-git:0.11.2'
 		classpath "de.gliderpilot.gradle.jnlp:gradle-jnlp-plugin:0.0.5"
-		classpath "com.diffplug.gradle.spotless:spotless:1.3.3"
+		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.4.1"
+		
+		// https://github.com/FibreFoX/javafx-gradle-plugin
+		classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
 	}
 }
 
@@ -153,7 +156,8 @@ subprojects {
 	apply plugin: 'application'
 	apply plugin: "com.diffplug.gradle.spotless"
 	apply plugin: 'eclipse'
-
+	apply plugin: 'javafx-gradle-plugin'
+	
 	sourceCompatibility = 1.8
 	targetCompatibility = 1.8
 
@@ -174,8 +178,8 @@ subprojects {
 
 	spotless {
 		java {
-			//licenseHeaderFile	'../spotless.license.java'
-			eclipseFormatFile	'../build-resources/eclipse.prefs.formatter.xml'
+			licenseHeaderFile	'../spotless.license.java'
+			eclipse().configFile('../build-resources/eclipse.prefs.formatter.xml')
 		}
 
 		format 'misc', {
@@ -190,9 +194,56 @@ subprojects {
 }
 
 
+project(':rplib') {
+	dependencies {
+		compile 'antlr:antlr:2.7.6'
+		compile 'commons-io:commons-io:2.4'
+		compile 'com.thoughtworks.xstream:xstream:1.4.9'
+		compile 'commons-lang:commons-lang:2.6'
+		compile 'commons-logging:commons-logging:1.1.1'
+		compile 'commons-net:commons-net:3.2'
+		compile 'log4j:log4j:1.2.16'
+		compile 'com.withay:withay-util:1.0'
+		compile 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
+		compile 'net.java.abeille:abeille-formsrt:2.0'
+		testCompile group: 'junit', name: 'junit', version: '4.11'
+	}
+
+	jar {
+		manifest {
+			attributes 'Implementation-Title': 'rplib',
+					'Implementation-Version': project.version,
+					'Built-By': System.getProperty('user.name'),
+					'Built-Date': new Date(),
+					'Built-JDK': System.getProperty('java.version'),
+					'Source-Compatibility': project.sourceCompatibility,
+					'Target-Compatibility': project.targetCompatibility
+		}
+	}
+
+	task deleteBuild(type: Delete) { 
+		delete 'build/' 
+		outputs.upToDateWhen {
+			false
+		}
+	}
+}
+
 project(':launcher') {
 	mainClassName = 'net.rptools.maptool.launcher.MapToolLauncher'
 	ext.distSource = projectDir.getPath() + '/src/dist/'
+
+	jfx {
+	    // minimal requirement for jfxJar-task
+	    mainClass = 'net.rptools.maptool.launcher.MapToolLauncher'
+	    
+	    // minimal requirement for jfxNative-task
+	    vendor = 'Nerps'
+	    
+	    // gradle jfxNative
+	    bundler = "exe"
+
+	}
 
 	dependencies {
 		compile 'commons-configuration:commons-configuration:1.10'
@@ -243,7 +294,7 @@ project(':launcher') {
 		}
 	}
 
-	task release(dependsOn: assemble) << {
+	task release(dependsOn: assemble) {
 	}
 
 	// create a single Jar with all dependencies
@@ -286,6 +337,17 @@ project(':maptool') {
 	mainClassName='net.rptools.maptool.client.LaunchInstructions'
 	ext.distSource = projectDir.getPath() + '/src/dist/'
 
+	jfx {
+	    // minimal requirement for jfxJar-task
+	    mainClass = 'net.rptools.maptool.client.LaunchInstructions'
+	    
+	    // minimal requirement for jfxNative-task
+	    vendor = 'Nerps'
+	    
+	    // gradle jfxNative
+	    bundler = "exe"
+	}
+	
 	dependencies {
 	 	compile project(':rplib')
 		compile 'net.java.abeille:abeille-formsrt:2.0'
@@ -401,7 +463,7 @@ project(':maptool') {
 	}
 	assemble.dependsOn += copyLibs;
 
-	task release(dependsOn: build) << {
+	task release(dependsOn: build) {
 	}
 
 	jnlp {
@@ -611,59 +673,26 @@ project(':tokentoolfx') {
 	}
 }
 
-project(':rplib') {
-	dependencies {
-		compile 'antlr:antlr:2.7.6'
-		compile 'commons-io:commons-io:2.4'
-		compile 'com.thoughtworks.xstream:xstream:1.4.9'
-		compile 'commons-lang:commons-lang:2.6'
-		compile 'commons-logging:commons-logging:1.1.1'
-		compile 'commons-net:commons-net:3.2'
-		compile 'log4j:log4j:1.2.16'
-		compile 'com.withay:withay-util:1.0'
-		compile 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
-		compile 'net.java.abeille:abeille-formsrt:2.0'
-		testCompile group: 'junit', name: 'junit', version: '4.11'
-	}
-
-	jar {
-		manifest {
-			attributes 'Implementation-Title': 'rplib',
-					'Implementation-Version': project.version,
-					'Built-By': System.getProperty('user.name'),
-					'Built-Date': new Date(),
-					'Built-JDK': System.getProperty('java.version'),
-					'Source-Compatibility': project.sourceCompatibility,
-					'Target-Compatibility': project.targetCompatibility
-		}
-	}
-
-	task deleteBuild(type: Delete) { 
-		delete 'build/' 
-		outputs.upToDateWhen {
-			false
-		}
-	}
-}
-
 
 /*
  * Global Gradle Tasks
  */
 
 // Shows project build version
-task showBuildVersion << {
+task showBuildVersion {
 	description = "Shows project build version"
 	group = "Information"
-
-	println 'Build Version Number = ' + project.version
+	
+	doLast {
+		println 'Build Version Number = ' + project.version
+    }
 }
 
 // Generates gradle wrapper
 task wrapper(type: Wrapper) {
 	description = "Updates Gradle wrapper."
 	group = "Distribution"
-	gradleVersion='3.2.1'
+	gradleVersion='4.0.2'
 }
 
 task copySubProjectFiles(type: Sync) {
@@ -833,39 +862,41 @@ task zipRelease(dependsOn: copySubProjectFiles, type: Zip) {
 	}
 }
 
-task osxApp() << {
-	def baseDir = '.'
-	def buildVersion = rootProject.getVersionName()
-	def mainClassName = project(":maptool").mainClassName
-	def sourceDir = 'build/tmp/dist'
-	ant {
-		taskdef(
-			name: 'bundleapp',
-			classname: 'com.oracle.appbundler.AppBundlerTask',
-			classpath: configurations.osxTools.asPath
-		)
-		bundleapp(
-			outputdirectory: 'build/tmp/',
-			name: 'MapTool-' + buildVersion,
-			displayname: 'MapTool-' + buildVersion,
-			identifier: 'net.rptools.maptool',
-			mainclassname: mainClassName,
-			signature: 'RPTM',
-			icon: 'build-resources/maptool-icon.icns'
-		) {
-			classpath(dir: sourceDir) {
-				include(name: '*.jar')
-				include(name: '**/*.jar')
+task osxApp() {
+	doLast {
+        def baseDir = '.'
+		def buildVersion = rootProject.getVersionName()
+		def mainClassName = project(":maptool").mainClassName
+		def sourceDir = 'build/tmp/dist'
+		ant {
+			taskdef(
+				name: 'bundleapp',
+				classname: 'com.oracle.appbundler.AppBundlerTask',
+				classpath: configurations.osxTools.asPath
+			)
+			bundleapp(
+				outputdirectory: 'build/tmp/',
+				name: 'MapTool-' + buildVersion,
+				displayname: 'MapTool-' + buildVersion,
+				identifier: 'net.rptools.maptool',
+				mainclassname: mainClassName,
+				signature: 'RPTM',
+				icon: 'build-resources/maptool-icon.icns'
+			) {
+				classpath(dir: sourceDir) {
+					include(name: '*.jar')
+					include(name: '**/*.jar')
+				}
+				option(value: '-Dapple.laf.useScreenMenuBar=true')
+				option(value: '-Dfile.encoding=UTF-8')
+				option(value: '-Xmx768m')
+				option(value: '-Xss4m')
+				option(value: '-Dcom.apple.textantialiasing=true')
+				option(value: '-Dcom.apple.antialiasing=true')
+				option(value: '-Djava.library.path=$APP_ROOT/Contents/Java')
 			}
-			option(value: '-Dapple.laf.useScreenMenuBar=true')
-			option(value: '-Dfile.encoding=UTF-8')
-			option(value: '-Xmx768m')
-			option(value: '-Xss4m')
-			option(value: '-Dcom.apple.textantialiasing=true')
-			option(value: '-Dcom.apple.antialiasing=true')
-			option(value: '-Djava.library.path=$APP_ROOT/Contents/Java')
 		}
-	}
+    }
 }
 osxApp.mustRunAfter(copySubProjectFiles)
 
@@ -880,8 +911,10 @@ task zipOSXApp(dependsOn: osxApp, type: Zip) {
 	}
 }
 
-task release() << {
-	println 'Creating Release'
+task release() {
+	doLast {
+		println 'Creating Release'
+	}
 }
 release.dependsOn += zipRelease
 release.dependsOn += zipOSXApp

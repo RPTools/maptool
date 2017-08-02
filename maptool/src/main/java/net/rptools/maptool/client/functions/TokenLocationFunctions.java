@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.awt.Rectangle;
@@ -489,9 +486,8 @@ public class TokenLocationFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Moves a token to the specified x,y location. If <code>units</code> is true, the incoming (x,y) is treated as a
-	 * <code>ZonePoint</code>. If <code>units</code> is false, the incoming (x,y) is treated as a <code>CellPoint</code>
-	 * and is converted to a ZonePoint by calling {@link Grid#convert(CellPoint)}.
+	 * Moves a token to the specified x,y location. If <code>units</code> is true, the incoming (x,y) is treated as a <code>ZonePoint</code>. If <code>units</code> is false, the incoming (x,y) is
+	 * treated as a <code>CellPoint</code> and is converted to a ZonePoint by calling {@link Grid#convert(CellPoint)}.
 	 * 
 	 * @param token
 	 *            The token to move.
@@ -625,9 +621,8 @@ public class TokenLocationFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Gets the token from the specified index or returns the token in context. This method will check the list size
-	 * before trying to retrieve the token so it is safe to use for functions that have the token as an optional
-	 * argument.
+	 * Gets the token from the specified index or returns the token in context. This method will check the list size before trying to retrieve the token so it is safe to use for functions that have
+	 * the token as an optional argument.
 	 * 
 	 * @param res
 	 *            The variable resolver.
@@ -639,8 +634,7 @@ public class TokenLocationFunctions extends AbstractFunction {
 	 *            The index to find the token at.
 	 * @return the token.
 	 * @throws ParserException
-	 *             if a token is specified but the macro is not trusted, or the specified token can not be found, or if
-	 *             no token is specified and no token is impersonated.
+	 *             if a token is specified but the macro is not trusted, or the specified token can not be found, or if no token is specified and no token is impersonated.
 	 */
 	private Token getTokenFromParam(MapToolVariableResolver res, String functionName, List<Object> param, int index) throws ParserException {
 		Token token;

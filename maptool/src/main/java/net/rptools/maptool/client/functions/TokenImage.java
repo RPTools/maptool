@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
@@ -179,10 +176,10 @@ public class TokenImage extends AbstractFunction {
 			}
 			token = findImageToken(args.get(0).toString(), "getImage");
 
-			//			Lee: would interfere with the "" return, commenting out...
-			//			if (token == null) {
-			//				throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, args.get(0).toString()));
-			//			}
+			// Lee: would interfere with the "" return, commenting out...
+			// if (token == null) {
+			// throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, args.get(0).toString()));
+			// }
 			if (args.size() > 1) {
 				size = (BigDecimal) args.get(1);
 			}
@@ -203,7 +200,7 @@ public class TokenImage extends AbstractFunction {
 			}
 		}
 
-		//Lee: people want a blank instead of an error
+		// Lee: people want a blank instead of an error
 		if (token == null)
 			return "";
 
@@ -296,13 +293,13 @@ public class TokenImage extends AbstractFunction {
 					// If we are not the GM and the token is not visible to players then we don't
 					// let them get functions from it.
 					if (!MapTool.getPlayer().isGM() && !token.isVisible()) {
-						//						Lee: as requested, handling this as "" instead of an error
-						//						throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, name));
+						// Lee: as requested, handling this as "" instead of an error
+						// throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, name));
 						return null;
 					}
 					if (imageToken != null) {
-						//						Lee: returning first found instead.
-						//						throw new ParserException("Duplicate " + name + " tokens");
+						// Lee: returning first found instead.
+						// throw new ParserException("Duplicate " + name + " tokens");
 						return imageToken;
 					}
 					imageToken = token;
@@ -311,8 +308,8 @@ public class TokenImage extends AbstractFunction {
 			return imageToken;
 		}
 
-		//Lee: for the final "" return
+		// Lee: for the final "" return
 		return null;
-		//		throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, name));
+		// throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, name));
 	}
 }

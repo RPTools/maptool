@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.awt.Component;
@@ -42,11 +39,9 @@ public class RemoteFileDownloader {
 	}
 
 	/**
-	 * Read the data at the given URL. This method should not be called on the
-	 * EDT.
+	 * Read the data at the given URL. This method should not be called on the EDT.
 	 * 
-	 * @return File pointer to the location of the data, file will be deleted at
-	 *         program end
+	 * @return File pointer to the location of the data, file will be deleted at program end
 	 */
 	public File read() throws IOException {
 		URLConnection conn = url.openConnection();
@@ -86,7 +81,7 @@ public class RemoteFileDownloader {
 				bytesRead += nRead;
 				out.write(buf, 0, nRead);
 				monitor.setProgress(bytesRead);
-				//                monitor.setNote("Elapsed: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+				// monitor.setNote("Elapsed: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
 			}
 		} finally {
 			if (in != null) {

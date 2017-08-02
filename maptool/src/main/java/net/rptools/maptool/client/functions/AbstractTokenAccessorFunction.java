@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
@@ -31,9 +28,12 @@ import net.rptools.parser.function.AbstractFunction;
 public abstract class AbstractTokenAccessorFunction extends AbstractFunction {
 
 	/**
-	 * @param minParameters Maximum number of parameters allowed on a function call
-	 * @param maxParameters Minimum number of parameters allowed on a function call
-	 * @param aliases All function names handled by this instance.
+	 * @param minParameters
+	 *            Maximum number of parameters allowed on a function call
+	 * @param maxParameters
+	 *            Minimum number of parameters allowed on a function call
+	 * @param aliases
+	 *            All function names handled by this instance.
 	 */
 	public AbstractTokenAccessorFunction(int minParameters, int maxParameters, String... aliases) {
 		super(minParameters, maxParameters, aliases);
@@ -42,9 +42,11 @@ public abstract class AbstractTokenAccessorFunction extends AbstractFunction {
 	/**
 	 * External call to get the token value.
 	 * 
-	 * @param token Get the value from this token
+	 * @param token
+	 *            Get the value from this token
 	 * @return Get the value from the token.
-	 * @throws ParserException Error setting value
+	 * @throws ParserException
+	 *             Error setting value
 	 */
 	public Object getTokenValue(Token token) throws ParserException {
 		return getValue(token);
@@ -52,11 +54,14 @@ public abstract class AbstractTokenAccessorFunction extends AbstractFunction {
 
 	/**
 	 * External call to set the token value
-	 *  
-	 * @param token Set this token
-	 * @param value To this value.
+	 * 
+	 * @param token
+	 *            Set this token
+	 * @param value
+	 *            To this value.
 	 * @return The new value of the token variable.
-	 * @throws ParserException Error setting value
+	 * @throws ParserException
+	 *             Error setting value
 	 */
 	public Object setTokenValue(Token token, Object value) throws ParserException {
 		Object ret = setValue(token, value);
@@ -67,11 +72,15 @@ public abstract class AbstractTokenAccessorFunction extends AbstractFunction {
 	/**
 	 * Get the token that is being modified.
 	 * 
-	 * @param parser Parser being evaluated.
-	 * @param args parameters to the function.
-	 * @param count Number of parameters expected if the token GUID was passed.
+	 * @param parser
+	 *            Parser being evaluated.
+	 * @param args
+	 *            parameters to the function.
+	 * @param count
+	 *            Number of parameters expected if the token GUID was passed.
 	 * @return The token being modified.
-	 * @throws ParserException Unable to get a token.
+	 * @throws ParserException
+	 *             Unable to get a token.
 	 */
 	public static Token getTarget(Parser parser, List<Object> args, int count) throws ParserException {
 		Token token = null;
@@ -102,25 +111,30 @@ public abstract class AbstractTokenAccessorFunction extends AbstractFunction {
 	}
 
 	/**
-	 * @param token Get the value from this token
+	 * @param token
+	 *            Get the value from this token
 	 * @return Get the value from the token.
-	 * @throws ParserException Error getting value
+	 * @throws ParserException
+	 *             Error getting value
 	 */
 	protected abstract Object getValue(Token token) throws ParserException;
 
 	/**
-	 * @param token Set this token
-	 * @param value To this value.
+	 * @param token
+	 *            Set this token
+	 * @param value
+	 *            To this value.
 	 * @return The value that was set
-	 * @throws ParserException Error setting value
+	 * @throws ParserException
+	 *             Error setting value
 	 */
 	protected abstract Object setValue(Token token, Object value) throws ParserException;
 
 	/**
 	 * Convert an object into a boolean value.
 	 * 
-	 * @param value Convert this object. Must be {@link Boolean}, {@link BigDecimal}, or a can 
-	 * have its string value be converted to one of those types.
+	 * @param value
+	 *            Convert this object. Must be {@link Boolean}, {@link BigDecimal}, or a can have its string value be converted to one of those types.
 	 * @return The boo
 	 */
 	public static boolean getBooleanValue(Object value) {

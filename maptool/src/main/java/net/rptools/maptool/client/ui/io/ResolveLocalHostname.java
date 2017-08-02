@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.io;
 
 import java.net.InetAddress;
@@ -21,10 +18,8 @@ import java.net.UnknownHostException;
  */
 public class ResolveLocalHostname {
 	/**
-	 * Currently the parameter is unused. This routine there returns the ANY
-	 * local address if it can, or the local host address if it can't. It
-	 * presumes that ANY is actually "0.0.0.0" but if the underlying platform
-	 * says it is, that's when it fallsback to using localhost.
+	 * Currently the parameter is unused. This routine there returns the ANY local address if it can, or the local host address if it can't. It presumes that ANY is actually "0.0.0.0" but if the
+	 * underlying platform says it is, that's when it fallsback to using localhost.
 	 * 
 	 * @param intendedDestination
 	 *            used to determine which NIC MapTool should bind to

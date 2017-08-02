@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.server;
 
 import java.awt.geom.Area;
@@ -61,7 +58,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 
 	public void handleMethod(String id, String method, Object... parameters) {
 		ServerCommand.COMMAND cmd = Enum.valueOf(ServerCommand.COMMAND.class, method);
-		//		System.out.println("ServerMethodHandler#handleMethod: " + id + " - " + cmd.name());
+		// System.out.println("ServerMethodHandler#handleMethod: " + id + " - " + cmd.name());
 
 		try {
 			RPCContext context = new RPCContext(id, method, parameters);
@@ -558,17 +555,17 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 	}
 
 	public void undoDraw(GUID zoneGUID, GUID drawableGUID) {
-		// This is a problem.  The contents of the UndoManager are not synchronized across machines
+		// This is a problem. The contents of the UndoManager are not synchronized across machines
 		// so if one machine uses Meta-Z to undo a drawing, that drawable will be removed on all
-		// machines, but there is no attempt to keep the UndoManager in sync.  So that same drawable
-		// will still be in the UndoManager queue on other machines.  Ideally we should be filtering
+		// machines, but there is no attempt to keep the UndoManager in sync. So that same drawable
+		// will still be in the UndoManager queue on other machines. Ideally we should be filtering
 		// the local Undomanager queue based on the drawable (removing it when we find it), but
 		// the Swing UndoManager doesn't provide that capability so we would need to subclass it.
-		// And if we're going to do that, we may as well fix the other problems:  the UndoManager should
-		// be per-map and per-layer (?) and not a singleton instance for the entire application!  But
-		// now we're talking a pretty intrusive set of changes:  when a zone is deleted, the UndoManagers
+		// And if we're going to do that, we may as well fix the other problems: the UndoManager should
+		// be per-map and per-layer (?) and not a singleton instance for the entire application! But
+		// now we're talking a pretty intrusive set of changes: when a zone is deleted, the UndoManagers
 		// would need to be cleared and duplicating a zone means doing a deep copy on the UndoManager
-		// or flushing it entirely in the new zone.  We'll save all of this for a separate patch against 1.3 or
+		// or flushing it entirely in the new zone. We'll save all of this for a separate patch against 1.3 or
 		// for 1.4.
 		server.getConnection().broadcastCallMethod(ClientCommand.COMMAND.undoDraw.name(), zoneGUID, drawableGUID);
 		Zone zone = server.getCampaign().getZone(zoneGUID);
@@ -611,8 +608,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net.rptools.maptool.model.GUID,
-	 * net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
+	 * @see net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net. rptools.maptool.model.GUID, net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
 	 */
 	public void updateExposedAreaMeta(GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
 		forwardToClients();
@@ -624,9 +620,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 		forwardToAllClients();
 
 		// same as forwardToClients?
-		//server.getConnection().broadcastCallMethod(
-		//		ClientCommand.COMMAND.clearExposedArea.name(),
-		//		RPCContext.getCurrent().parameters);
+		// server.getConnection().broadcastCallMethod(
+		// ClientCommand.COMMAND.clearExposedArea.name(),
+		// RPCContext.getCurrent().parameters);
 	}
 
 	////

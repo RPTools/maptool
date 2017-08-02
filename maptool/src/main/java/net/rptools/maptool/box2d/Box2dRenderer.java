@@ -1,3 +1,11 @@
+/*
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.box2d;
 
 import java.awt.geom.AffineTransform;
@@ -91,7 +99,7 @@ public class Box2dRenderer implements Screen {
 			renderer = new Box2DDebugRenderer();
 
 		rayHandler = new RayHandler(app.world);
-		//rayHandler.setAmbientLight(new Color(.1f, .1f, .1f, .1f));
+		// rayHandler.setAmbientLight(new Color(.1f, .1f, .1f, .1f));
 		RayHandler.useDiffuseLight(true);
 		rayHandler.setCombinedMatrix(app.camera);
 		shapeRenderer = new ShapeRenderer();
@@ -111,7 +119,7 @@ public class Box2dRenderer implements Screen {
 			// Create a couple of lights on bodies?
 			for (int i = 0; i < 5; i++) {
 				createRandomBody(true);
-				//				createRandomLight();
+				// createRandomLight();
 			}
 		}
 
@@ -163,7 +171,7 @@ public class Box2dRenderer implements Screen {
 		debugLights();
 
 		// Drawn after rayHandler, spites always shown regardless of light then, eg always visible, can break up vbl/tokens later
-		//		renderSoccerBalls(bodies, false);
+		// renderSoccerBalls(bodies, false);
 		renderFPS();
 
 		if (!GAME_PAUSED)
@@ -180,9 +188,9 @@ public class Box2dRenderer implements Screen {
 	public void resize(int width, int height) {
 		app.camera.viewportHeight = (MapToolGame.VIEWPORT_WIDTH / width) * height;
 
-		//		stage.getViewport().update(width, height, true);
-		//		MapToolGame.SCREEN_WIDTH = width;
-		//		MapToolGame.SCREEN_HEIGHT = height;
+		// stage.getViewport().update(width, height, true);
+		// MapToolGame.SCREEN_WIDTH = width;
+		// MapToolGame.SCREEN_HEIGHT = height;
 	}
 
 	@Override
@@ -284,7 +292,7 @@ public class Box2dRenderer implements Screen {
 
 		shapeRenderer.begin();
 		for (DebugPointLight light : lightSet) {
-			//light.drawRays(shapeRenderer);
+			// light.drawRays(shapeRenderer);
 			light.drawEdge(shapeRenderer);
 		}
 		shapeRenderer.end();
@@ -427,24 +435,24 @@ public class Box2dRenderer implements Screen {
 		return vblAreas;
 	}
 
-	//	private void drawFilledPolygon(Polygon polygon, Color color) {
-	//		ShapeRenderer shapeRenderer = null;
-	//		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-	//		shapeRenderer.setColor(color);
+	// private void drawFilledPolygon(Polygon polygon, Color color) {
+	// ShapeRenderer shapeRenderer = null;
+	// shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+	// shapeRenderer.setColor(color);
 	//
-	//		float[] vertices = polygon.getTransformedVertices();
+	// float[] vertices = polygon.getTransformedVertices();
 	//
-	//		// NOTE: you probably don't want to create a new EarClippingTriangulator each frame
-	//		ShortArray triangleIndices = new EarClippingTriangulator().computeTriangles(vertices);
-	//		for (int i = 0; i < triangleIndices.size; i += 3) {
-	//			shapeRenderer.triangle(
-	//					vertices[triangleIndices.get(i) * 2], vertices[triangleIndices.get(i) * 2 + 1],
-	//					vertices[triangleIndices.get(i + 1) * 2], vertices[triangleIndices.get(i + 1) * 2 + 1],
-	//					vertices[triangleIndices.get(i + 2) * 2], vertices[triangleIndices.get(i + 2) * 2 + 1]);
-	//		}
+	// // NOTE: you probably don't want to create a new EarClippingTriangulator each frame
+	// ShortArray triangleIndices = new EarClippingTriangulator().computeTriangles(vertices);
+	// for (int i = 0; i < triangleIndices.size; i += 3) {
+	// shapeRenderer.triangle(
+	// vertices[triangleIndices.get(i) * 2], vertices[triangleIndices.get(i) * 2 + 1],
+	// vertices[triangleIndices.get(i + 1) * 2], vertices[triangleIndices.get(i + 1) * 2 + 1],
+	// vertices[triangleIndices.get(i + 2) * 2], vertices[triangleIndices.get(i + 2) * 2 + 1]);
+	// }
 	//
-	//		shapeRenderer.end();
-	//	}
+	// shapeRenderer.end();
+	// }
 
 	private float[] areaToVertices(Area area) {
 		if (area.isEmpty())
@@ -471,33 +479,33 @@ public class Box2dRenderer implements Screen {
 		return finalVertices;
 	}
 
-	//	private Body createVblBody(ShortArray triangles) {
-	//		if (triangles.size == 0)
-	//			return null;
+	// private Body createVblBody(ShortArray triangles) {
+	// if (triangles.size == 0)
+	// return null;
 	//
-	//		Body vblBody;
+	// Body vblBody;
 	//
-	//		BodyDef vblDef = new BodyDef();
-	//		vblDef.type = BodyType.StaticBody;
-	//		vblBody = app.world.createBody(vblDef);
+	// BodyDef vblDef = new BodyDef();
+	// vblDef.type = BodyType.StaticBody;
+	// vblBody = app.world.createBody(vblDef);
 	//
-	//		System.out.println("Looks like we have an array size of: " + triangles.size);
-	//		System.out.println("triangle: " + triangles.toString());
+	// System.out.println("Looks like we have an array size of: " + triangles.size);
+	// System.out.println("triangle: " + triangles.toString());
 	//
-	//		for (int i = 0; i < triangles.size; i = i + 6) {
-	//			PolygonShape vblShape = new PolygonShape();
+	// for (int i = 0; i < triangles.size; i = i + 6) {
+	// PolygonShape vblShape = new PolygonShape();
 	//
-	//			Vector2[] triangle = { new Vector2(triangles.get(i + 0), triangles.get(i + 1)),
-	//					new Vector2(triangles.get(i + 2), triangles.get(i + 3)),
-	//					new Vector2(triangles.get(i + 4), triangles.get(i + 5)) };
+	// Vector2[] triangle = { new Vector2(triangles.get(i + 0), triangles.get(i + 1)),
+	// new Vector2(triangles.get(i + 2), triangles.get(i + 3)),
+	// new Vector2(triangles.get(i + 4), triangles.get(i + 5)) };
 	//
-	//			vblShape.set(triangle);
-	//			vblBody.createFixture(vblShape, 0f);
-	//			vblShape.dispose();
-	//		}
+	// vblShape.set(triangle);
+	// vblBody.createFixture(vblShape, 0f);
+	// vblShape.dispose();
+	// }
 	//
-	//		return vblBody;
-	//	}
+	// return vblBody;
+	// }
 
 	private Body createVblBody(float[] areaPath) {
 		if (areaPath.length == 0)
@@ -514,7 +522,7 @@ public class Box2dRenderer implements Screen {
 
 		ShortArray triangles = new EarClippingTriangulator().computeTriangles(areaPath);
 		FloatArray polygon = new FloatArray(areaPath);
-		//		FloatArray triangleOutlines = new FloatArray(triangles.size * 2);
+		// FloatArray triangleOutlines = new FloatArray(triangles.size * 2);
 
 		System.out.println("triangle size : " + triangles.size);
 
@@ -536,9 +544,9 @@ public class Box2dRenderer implements Screen {
 			triangleOutlines.add(cx);
 			triangleOutlines.add(cy);
 
-			//			System.out.println("triangleOutlines : " + Arrays.toString(triangleOutlines.toArray()));
+			// System.out.println("triangleOutlines : " + Arrays.toString(triangleOutlines.toArray()));
 			vblShape.set(triangleOutlines.toArray());
-			//			System.out.println("Body shape created ok.");
+			// System.out.println("Body shape created ok.");
 			vblBody.createFixture(vblShape, 0f);
 
 			vblShape.dispose();
@@ -547,24 +555,24 @@ public class Box2dRenderer implements Screen {
 		return vblBody;
 	}
 
-	//	private Body createVblBodyOLD(float[] vertices) {
-	//		if (vertices.length == 0)
-	//			return null;
+	// private Body createVblBodyOLD(float[] vertices) {
+	// if (vertices.length == 0)
+	// return null;
 	//
-	//		Body vblBody;
+	// Body vblBody;
 	//
-	//		BodyDef vblDef = new BodyDef();
-	//		vblDef.type = BodyType.StaticBody;
-	//		vblBody = app.world.createBody(vblDef);
+	// BodyDef vblDef = new BodyDef();
+	// vblDef.type = BodyType.StaticBody;
+	// vblBody = app.world.createBody(vblDef);
 	//
-	//		PolygonShape vblShape = new PolygonShape();
-	//		vblShape.set(vertices);
-	//		vblBody.createFixture(vblShape, 0f);
+	// PolygonShape vblShape = new PolygonShape();
+	// vblShape.set(vertices);
+	// vblBody.createFixture(vblShape, 0f);
 	//
-	//		vblShape.dispose();
+	// vblShape.dispose();
 	//
-	//		return vblBody;
-	//	}
+	// return vblBody;
+	// }
 
 	public double getScale() {
 		return mapToolFrame.getCurrentZoneRenderer().getScale();
@@ -633,10 +641,10 @@ public class Box2dRenderer implements Screen {
 		float g = rand.nextFloat();
 		float b = rand.nextFloat();
 
-		//		float distance = (rand.nextFloat() * 500) + 400;
+		// float distance = (rand.nextFloat() * 500) + 400;
 		float distance = 20 * MapToolGame.F2M * MapToolGame.PPM; // 20 feet?
 
-		//		Color randomColor = new Color(0f, 0f, 0f, 255f);
+		// Color randomColor = new Color(0f, 0f, 0f, 255f);
 		Color randomColor = new Color(r, g, b, 255);
 
 		DebugPointLight light = createLight(randomColor, distance, x, y);
@@ -678,7 +686,7 @@ public class Box2dRenderer implements Screen {
 		circleFixture.restitution = random(.25f, 1f);
 
 		circleBody.createFixture(circleFixture);
-		//circleBody.setAngularVelocity(random(-5f, 5f));
+		// circleBody.setAngularVelocity(random(-5f, 5f));
 		circleBody.setLinearVelocity(new Vector2(random(-250, 250), random(-250, 250)));
 
 		// Attach the sprite
@@ -690,7 +698,7 @@ public class Box2dRenderer implements Screen {
 
 		bodySprite.setOriginCenter();
 		bodySprite.setPosition(x, y);
-		//sprite.scale(r);
+		// sprite.scale(r);
 		circleBody.setUserData(bodySprite);
 
 		if (attachLight) {

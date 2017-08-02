@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.tool.drawing;
 
 import java.awt.Color;
@@ -39,12 +36,10 @@ import net.rptools.maptool.model.drawing.DrawnLabel;
 import net.rptools.maptool.model.drawing.Pen;
 
 /**
- * A text tool that uses a text component to allow text to be entered on the
- * display and then renders it as an image.
+ * A text tool that uses a text component to allow text to be entered on the display and then renders it as an image.
  * 
  * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2006-03-11 02:57:18 -0600 (Sat, 11 Mar
- *          2006) $ $Author: azhrei_fje $
+ * @version $Revision: 5945 $ $Date: 2006-03-11 02:57:18 -0600 (Sat, 11 Mar 2006) $ $Author: azhrei_fje $
  */
 public class DrawnTextTool extends AbstractDrawingTool implements
 		MouseMotionListener {
@@ -90,16 +85,16 @@ public class DrawnTextTool extends AbstractDrawingTool implements
 	 * Initialize the tool icon
 	 */
 	public DrawnTextTool() {
-		//		try {
-		//			setIcon(new ImageIcon(
-		//					ImageIO
-		//							.read(getClass()
-		//									.getClassLoader()
-		//									.getResourceAsStream(
-		//											"net/rptools/maptool/client/image/Tool_Draw_Write.gif"))));
-		//		} catch (IOException ioe) {
-		//			ioe.printStackTrace();
-		//		} // endtry
+		// try {
+		// setIcon(new ImageIcon(
+		// ImageIO
+		// .read(getClass()
+		// .getClassLoader()
+		// .getResourceAsStream(
+		// "net/rptools/maptool/client/image/Tool_Draw_Write.gif"))));
+		// } catch (IOException ioe) {
+		// ioe.printStackTrace();
+		// } // endtry
 	}
 
 	/*---------------------------------------------------------------------------------------------
@@ -107,8 +102,7 @@ public class DrawnTextTool extends AbstractDrawingTool implements
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * @see net.rptools.maptool.client.tool.drawing.AbstractDrawingTool#paintOverlay(net.rptools.maptool.client.ui.zone.ZoneRenderer,
-	 *      java.awt.Graphics2D)
+	 * @see net.rptools.maptool.client.tool.drawing.AbstractDrawingTool#paintOverlay(net.rptools.maptool.client.ui.zone.ZoneRenderer, java.awt.Graphics2D)
 	 */
 	@Override
 	public void paintOverlay(ZoneRenderer aRenderer, Graphics2D aG) {
@@ -295,8 +289,8 @@ public class DrawnTextTool extends AbstractDrawingTool implements
 		// Create a style for the component
 		Style style = textPane.addStyle("default", null);
 		TwoToneTextPane.setFont(style, Font.decode(font));
-		//		style.addAttribute(StyleConstants.Foreground, new Color(pen.getColor()));
-		//		style.addAttribute(StyleConstants.Background, new Color(pen.getBackgroundColor()));
+		// style.addAttribute(StyleConstants.Foreground, new Color(pen.getColor()));
+		// style.addAttribute(StyleConstants.Background, new Color(pen.getBackgroundColor()));
 		textPane.setLogicalStyle(style);
 		return textPane;
 	}

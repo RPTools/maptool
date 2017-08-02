@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.awt.Point;
@@ -73,7 +70,7 @@ public class TokenSightFunctions extends AbstractFunction {
 				return token.getSightType();
 		}
 
-		// For functions with only 1 parameter and optional second parameter of tokenID 
+		// For functions with only 1 parameter and optional second parameter of tokenID
 		if (parameters.size() > 2)
 			throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
 
@@ -153,31 +150,31 @@ public class TokenSightFunctions extends AbstractFunction {
 			int halfY = y + (h) / 2;
 			if (tokensVisibleArea.intersects(bounds)) {
 				if (tokensVisibleArea.contains(new Point(x, y))) {
-					//TOP_LEFT
+					// TOP_LEFT
 					sb.append("\"");
 					sb.append(TokenLocations.TOP_LEFT.toString());
 					sb.append("\", ");
 				}
 				if (tokensVisibleArea.contains(new Point(x, y + h))) {
-					//BOTTOM_LEFT
+					// BOTTOM_LEFT
 					sb.append("\"");
 					sb.append(TokenLocations.BOTTOM_LEFT.toString());
 					sb.append("\", ");
 				}
 				if (tokensVisibleArea.contains(new Point(x + w, y))) {
-					//TOP_RIGHT
+					// TOP_RIGHT
 					sb.append("\"");
 					sb.append(TokenLocations.TOP_RIGHT.toString());
 					sb.append("\", ");
 				}
 				if (tokensVisibleArea.contains(new Point(x + w, y + h))) {
-					//BOTTOM_RIGHT
+					// BOTTOM_RIGHT
 					sb.append("\"");
 					sb.append(TokenLocations.BOTTOM_RIGHT.toString());
 					sb.append("\", ");
 				}
 				if (tokensVisibleArea.contains(new Point(halfX, halfY))) {
-					//BOTTOM_RIGHT
+					// BOTTOM_RIGHT
 					sb.append("\"");
 					sb.append(TokenLocations.CENTER.toString());
 					sb.append("\", ");

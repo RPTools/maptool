@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.util;
 
 import javax.imageio.ImageIO;
@@ -84,11 +81,11 @@ public class PersistenceUtil {
 	private static final String CAMPAIGN_VERSION = "1.4.1";
 
 	// Please add a single note regarding why the campaign version number has been updated:
-	// 1.3.70	ownerOnly added to model.Light (not backward compatible)
-	// 1.3.75	model.Token.visibleOnlyToOwner (actually added to b74 but I didn't catch it before release)
-	// 1.3.83	ExposedAreaData added to tokens in b78 but again not caught until b82 :(
-	// 1.3.85	Added CampaignProperties.hasUsedFogToolbar (old versions could ignore this field, but how to implement?)
-	// 1.4.0 	Added lumens to LightSource class, old versions will not load unless saved as b89 compatible
+	// 1.3.70 ownerOnly added to model.Light (not backward compatible)
+	// 1.3.75 model.Token.visibleOnlyToOwner (actually added to b74 but I didn't catch it before release)
+	// 1.3.83 ExposedAreaData added to tokens in b78 but again not caught until b82 :(
+	// 1.3.85 Added CampaignProperties.hasUsedFogToolbar (old versions could ignore this field, but how to implement?)
+	// 1.4.0 Added lumens to LightSource class, old versions will not load unless saved as b89 compatible
 
 	private static final ModelVersionManager campaignVersionManager = new ModelVersionManager();
 	private static final ModelVersionManager assetnameVersionManager = new ModelVersionManager();
@@ -108,29 +105,29 @@ public class PersistenceUtil {
 
 		// FIXME We should be using javax.xml.transform to do XSL transforms with a mechanism
 		// that allows the XSL to be stored externally, perhaps via a URL with version number(s)
-		// as parameters.  Then if some backward compatibility fix is needed it could be
-		// provided dynamically via the RPTools.net web site or somewhere else.  We'll add this
+		// as parameters. Then if some backward compatibility fix is needed it could be
+		// provided dynamically via the RPTools.net web site or somewhere else. We'll add this
 		// in 1.4 <wink, wink>
 
 		// Note: This only allows you to fix up outdated XML data. If you _added_
-		//  variables to any persistent class which must be initialized, you need to make sure to
-		//  modify the object's readResolve() function, because XStream does _not_ call the
-		//  regular constructors! Using factory methods won't help here, since it won't be called by XStream.
+		// variables to any persistent class which must be initialized, you need to make sure to
+		// modify the object's readResolve() function, because XStream does _not_ call the
+		// regular constructors! Using factory methods won't help here, since it won't be called by XStream.
 
-		// Notes:							any XML earlier than this ---v		will have this --v applied to it
-		//																					V								V
+		// Notes: any XML earlier than this ---v will have this --v applied to it
+		// V V
 		campaignVersionManager.registerTransformation("1.3.51", new PCVisionTransform());
 		campaignVersionManager.registerTransformation("1.3.75", new ExportInfoTransform());
 		campaignVersionManager.registerTransformation("1.3.78", new TokenPropertyMapTransform()); // FJE 2010-12-29
 
-		// For a short time, assets were stored separately in files ending with ".dat".  As of 1.3.64, they are
-		// stored in separate files using the correct filename extension for the image type.  This transform
-		// is used to convert asset filenames and not XML.  Old assets with the image embedded as Base64
-		// text are still supported for reading by using an XStream custom Converter.  See the Asset
+		// For a short time, assets were stored separately in files ending with ".dat". As of 1.3.64, they are
+		// stored in separate files using the correct filename extension for the image type. This transform
+		// is used to convert asset filenames and not XML. Old assets with the image embedded as Base64
+		// text are still supported for reading by using an XStream custom Converter. See the Asset
 		// class for the annotation used to reference the converter.
 		assetnameVersionManager.registerTransformation("1.3.51", new AssetNameTransform("^(.*)\\.(dat)?$", "$1"));
 
-		// This version manager is only for loading and saving tokens.  Note that many (all?) of its contents will
+		// This version manager is only for loading and saving tokens. Note that many (all?) of its contents will
 		// be used by the campaign version manager since campaigns contain tokens...
 		tokenVersionManager.registerTransformation("1.3.78", new TokenPropertyMapTransform()); // FJE 2010-12-29
 	}
@@ -189,14 +186,14 @@ public class PersistenceUtil {
 			loadAssets(persistedMap.assetMap.keySet(), pakFile);
 
 			// FJE We only want the token's graphical data, so loop through all tokens and
-			// destroy all properties and macros.  Keep some fields, though.  Since that type
+			// destroy all properties and macros. Keep some fields, though. Since that type
 			// of object editing doesn't belong here, we just call Token.imported() and let
 			// that method Do The Right Thing.
 			for (Iterator<Token> iter = persistedMap.zone.getAllTokens().iterator(); iter.hasNext();) {
 				Token token = iter.next();
 				token.imported();
 			}
-			// XXX FJE This doesn't work the way I want it to.  But doing this the Right Way
+			// XXX FJE This doesn't work the way I want it to. But doing this the Right Way
 			// is too much work right now. :-}
 			Zone z = persistedMap.zone;
 			String n = fixupZoneName(z.getName());
@@ -337,7 +334,7 @@ public class PersistenceUtil {
 		if (campaignFile.exists()) {
 			saveTimer.start("Backup campaignFile");
 			FileUtil.copyFile(campaignFile, bakFile);
-			//campaignFile.delete();
+			// campaignFile.delete();
 			saveTimer.stop("Backup campaignFile");
 		}
 
@@ -429,11 +426,11 @@ public class PersistenceUtil {
 					zone.optimize();
 				}
 
-				//for (Entry<String, Map<GUID, LightSource>> entry : persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
-				//	for (Entry<GUID, LightSource> entryLs : entry.getValue().entrySet()) {
-				//		System.out.println(entryLs.getValue().getName() + " :: " + entryLs.getValue().getType() + " :: " + entryLs.getValue().getLumens());
-				//	}
-				//}
+				// for (Entry<String, Map<GUID, LightSource>> entry : persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
+				// for (Entry<GUID, LightSource> entryLs : entry.getValue().entrySet()) {
+				// System.out.println(entryLs.getValue().getName() + " :: " + entryLs.getValue().getType() + " :: " + entryLs.getValue().getLumens());
+				// }
+				// }
 
 				return persistedCampaign;
 			}
@@ -610,7 +607,7 @@ public class PersistenceUtil {
 	}
 
 	private static void loadAssets(Collection<MD5Key> assetIds, PackedFile pakFile) throws IOException {
-		// Special handling of assets:  XML file to describe the Asset, but binary file for the image data
+		// Special handling of assets: XML file to describe the Asset, but binary file for the image data
 		pakFile.getXStream().processAnnotations(Asset.class);
 
 		String campaignVersion = (String) pakFile.getProperty(PROP_CAMPAIGN_VERSION);
@@ -643,7 +640,7 @@ public class PersistenceUtil {
 					try {
 						asset = (Asset) pakFile.getFileObject(pathname); // XML deserialization
 					} catch (Exception e) {
-						// Do nothing.  The asset will be 'null' and it'll be handled below.
+						// Do nothing. The asset will be 'null' and it'll be handled below.
 						log.info("Exception while handling asset '" + pathname + "'", e);
 					}
 				}
@@ -651,7 +648,7 @@ public class PersistenceUtil {
 					log.error("Referenced asset '" + pathname + "' not found while loading?!");
 					continue;
 				}
-				// If the asset was marked as "broken" then ignore it completely.  The end
+				// If the asset was marked as "broken" then ignore it completely. The end
 				// result is that MT will attempt to load it from a repository again, as normal.
 				if ("broken".equals(asset.getName())) {
 					log.warn("Reference to 'broken' asset '" + pathname + "' not restored.");
@@ -683,8 +680,8 @@ public class PersistenceUtil {
 			}
 		}
 		if (!addToServer.isEmpty()) {
-			// Isn't this the same as (MapTool.getServer() == null) ?  And won't there always
-			// be a server?  Even if we don't start one explicitly, MapTool keeps a server
+			// Isn't this the same as (MapTool.getServer() == null) ? And won't there always
+			// be a server? Even if we don't start one explicitly, MapTool keeps a server
 			// running in the background all the time (called a "personal server") so that the rest
 			// of the code is consistent with regard to client<->server operations...
 			boolean server = !MapTool.isHostingServer() && !MapTool.isPersonalServer();
@@ -701,7 +698,7 @@ public class PersistenceUtil {
 	}
 
 	private static void saveAssets(Collection<MD5Key> assetIds, PackedFile pakFile) throws IOException {
-		// Special handling of assets:  XML file to describe the Asset, but binary file for the image data
+		// Special handling of assets: XML file to describe the Asset, but binary file for the image data
 		pakFile.getXStream().processAnnotations(Asset.class);
 
 		for (MD5Key assetId : assetIds) {
@@ -719,7 +716,7 @@ public class PersistenceUtil {
 
 			String extension = asset.getImageExtension();
 			byte[] assetData = asset.getImage();
-			//			System.out.println("Saving AssetId " + assetId + "." + extension + " with size of " + assetData.length);
+			// System.out.println("Saving AssetId " + assetId + "." + extension + " with size of " + assetData.length);
 
 			pakFile.putFile(ASSET_DIR + assetId + "." + extension, assetData);
 			pakFile.putFile(ASSET_DIR + assetId + "", asset); // Does not write the image

@@ -1,15 +1,10 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.lib.sound;
 
@@ -39,8 +34,7 @@ public class SoundManager {
 	}
 
 	/**
-	 * These represent the built-in sounds. This is different than user contributed sounds which have an actual path to
-	 * them.
+	 * These represent the built-in sounds. This is different than user contributed sounds which have an actual path to them.
 	 */
 	public void registerSound(String name, URL sound) {
 		if (sound != null) {
@@ -51,8 +45,7 @@ public class SoundManager {
 	}
 
 	/**
-	 * These represent the built-in sounds. This is different than user contributed sounds which have an actual path to
-	 * them. The file is pulled from the class path.
+	 * These represent the built-in sounds. This is different than user contributed sounds which have an actual path to them. The file is pulled from the class path.
 	 */
 	public void registerSound(String name, String path) {
 		if (path != null && path.trim().length() == 0) {

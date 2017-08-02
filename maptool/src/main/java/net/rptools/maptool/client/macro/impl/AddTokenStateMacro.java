@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.macro.impl;
 
 import java.awt.Color;
@@ -292,8 +289,7 @@ public class AddTokenStateMacro implements Macro {
 	 *            The decimal value of the integer.
 	 * @param defaultValue
 	 *            The default value for the number.
-	 * @return The number parsed from the name or the <code>defaultValue</code> if the passed name was <code>null</code>
-	 *         ;
+	 * @return The number parsed from the name or the <code>defaultValue</code> if the passed name was <code>null</code> ;
 	 */
 	private int findInteger(String name, int defaultValue) {
 		if (name == null)
@@ -310,8 +306,7 @@ public class AddTokenStateMacro implements Macro {
 	 * 
 	 * @param name
 	 *            The name or abbreviation of a quadrant value
-	 * @return The quadrant representing the passed corner name of the <code>Quadrant.SOUTH_EAST</code> if the passed
-	 *         name was <code>null</code>.
+	 * @return The quadrant representing the passed corner name of the <code>Quadrant.SOUTH_EAST</code> if the passed name was <code>null</code>.
 	 */
 	private Quadrant findCorner(String name) {
 		try {

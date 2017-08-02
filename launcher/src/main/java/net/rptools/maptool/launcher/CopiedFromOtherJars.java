@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.launcher;
 
 import java.awt.Component;
@@ -52,8 +49,7 @@ public class CopiedFromOtherJars {
 	private static ResourceBundle BUNDLE = null;
 
 	/**
-	 * This is used when parsing integers in order to keep the input style
-	 * local-aware.
+	 * This is used when parsing integers in order to keep the input style local-aware.
 	 */
 	private static NumberFormat nf = NumberFormat.getNumberInstance();
 
@@ -65,16 +61,11 @@ public class CopiedFromOtherJars {
 	}
 
 	/**
-	 * Generates a list of all translations available within the package in the
-	 * same storage file as this class. The return value is a Map of
-	 * &lt;key,value&gt; pairs. The key is the locale code as determined by
-	 * stripping the prefix and suffix from the property filename. The value is
-	 * the name of the language as read from the file itself, looking for a line
-	 * that literally starts with <b><code># LANGUAGE=</code></b> and then using
-	 * the remaining text on that line.
+	 * Generates a list of all translations available within the package in the same storage file as this class. The return value is a Map of &lt;key,value&gt; pairs. The key is the locale code as
+	 * determined by stripping the prefix and suffix from the property filename. The value is the name of the language as read from the file itself, looking for a line that literally starts with
+	 * <b><code># LANGUAGE=</code></b> and then using the remaining text on that line.
 	 * 
-	 * Created this method to support property files stored in the jar vs
-	 * external source.
+	 * Created this method to support property files stored in the jar vs external source.
 	 * 
 	 * @author Jamz
 	 * @since 1.4.0.1
@@ -126,9 +117,7 @@ public class CopiedFromOtherJars {
 	}
 
 	/**
-	 * Returns <code>text</code> converted to an integer value, or the value of
-	 * <code>def</code> if the string cannot be converted. This method is
-	 * locale-aware (which doesn't mean much for integers).
+	 * Returns <code>text</code> converted to an integer value, or the value of <code>def</code> if the string cannot be converted. This method is locale-aware (which doesn't mean much for integers).
 	 * 
 	 * @param text
 	 *            string to convert to a number
@@ -148,9 +137,7 @@ public class CopiedFromOtherJars {
 	}
 
 	/**
-	 * Returns <code>text</code> converted to an integer value or throws an
-	 * exception. This method is locale-aware (which doesn't mean much for
-	 * integers).
+	 * Returns <code>text</code> converted to an integer value or throws an exception. This method is locale-aware (which doesn't mean much for integers).
 	 * 
 	 * @param text
 	 *            string to convert to a number
@@ -168,11 +155,8 @@ public class CopiedFromOtherJars {
 	}
 
 	/**
-	 * Returns <code>text</code> converted to a Boolean value, or the value of
-	 * <code>def</code> if the string cannot be converted. This method returns
-	 * <code>Boolean.TRUE</code> if the string provided is not <code>null</code>
-	 * and is "true" using a case-insensitive comparison, or if it is parseable
-	 * as an integer and represents a non-zero value.
+	 * Returns <code>text</code> converted to a Boolean value, or the value of <code>def</code> if the string cannot be converted. This method returns <code>Boolean.TRUE</code> if the string provided
+	 * is not <code>null</code> and is "true" using a case-insensitive comparison, or if it is parseable as an integer and represents a non-zero value.
 	 * 
 	 * @param text
 	 *            string to convert to a Boolean
@@ -192,10 +176,8 @@ public class CopiedFromOtherJars {
 	}
 
 	/**
-	 * Returns <code>text</code> converted to a Boolean value or throws an
-	 * exception. This method returns <code>Boolean.TRUE</code> if the string
-	 * provided is not <code>null</code> and is "true" using a case-insensitive
-	 * comparison or represents a non-zero value as an integer.
+	 * Returns <code>text</code> converted to a Boolean value or throws an exception. This method returns <code>Boolean.TRUE</code> if the string provided is not <code>null</code> and is "true" using
+	 * a case-insensitive comparison or represents a non-zero value as an integer.
 	 * 
 	 * @param text
 	 *            string to convert to a Boolean
@@ -216,17 +198,12 @@ public class CopiedFromOtherJars {
 	}
 
 	/**
-	 * Displays the messages provided as <code>messages</code> by creating a
-	 * message dialog and populating it with each entry in the array converted
-	 * to a string.
+	 * Displays the messages provided as <code>messages</code> by creating a message dialog and populating it with each entry in the array converted to a string.
 	 * 
 	 * @param msgType
-	 *            the message type passed to the JOptionPane. common values are
-	 *            <code>JOptionPane.ERROR_MESSAGE</code> and
-	 *            <code>JOptionPane.WARNING_MESSAGE</code>
+	 *            the message type passed to the JOptionPane. common values are <code>JOptionPane.ERROR_MESSAGE</code> and <code>JOptionPane.WARNING_MESSAGE</code>
 	 * @param messages
-	 *            the Objects (normally strings) to put in the body of the
-	 *            dialog; no properties file lookup is performed!
+	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is performed!
 	 */
 	public static void showFeedback(int msgType, Object[] messages) {
 		final String title = getText("msg.title.messageDialogFeedback");
@@ -247,9 +224,9 @@ public class CopiedFromOtherJars {
 	public static String getVersion() {
 		try {
 			// Jamz: Do we really need the buildDate in the title?
-			//String buildDate = VERSION.getString("app.buildDate");
+			// String buildDate = VERSION.getString("app.buildDate");
 			String buildNumber = VERSION.getString("app.buildNumber");
-			//return buildDate + "." + buildNumber;
+			// return buildDate + "." + buildNumber;
 			return buildNumber;
 		} catch (final MissingResourceException e) {
 			return null;
@@ -272,14 +249,12 @@ public class CopiedFromOtherJars {
 	}
 
 	/**
-	 * Returns the text associated with the given key after removing any menu
-	 * mnemonic. So for the key <b>action.loadMap</b> that has the value
-	 * "&Load Map" in the properties file, this method returns "Load Map".
+	 * Returns the text associated with the given key after removing any menu mnemonic. So for the key <b>action.loadMap</b> that has the value "&Load Map" in the properties file, this method returns
+	 * "Load Map".
 	 * 
 	 * @param key
 	 *            the component to search for
-	 * @return the String found with mnemonics removed, or the input key if not
-	 *         found
+	 * @return the String found with mnemonics removed, or the input key if not found
 	 */
 	public static String getText(String key) {
 		final String value = getString(key);
@@ -292,19 +267,13 @@ public class CopiedFromOtherJars {
 	}
 
 	/**
-	 * Functionally identical to {@link #getText(String key)} except that this
-	 * one bundles the formatting calls into this code. This version of the
-	 * method is truly only needed when the string being retrieved contains
-	 * parameters, but using it when no parameters are provided or are
-	 * <code>null</code> is still valid and will work, as long as the retrieved
-	 * message doesn't require parameters. In MapTool, this commonly means the
-	 * player's name or a filename. See the "Parameterized Strings" section of
-	 * the <b>i18n.properties</b> file for example usage. Full documentation for
-	 * this technique can be found under {@link MessageFormat#format}.
+	 * Functionally identical to {@link #getText(String key)} except that this one bundles the formatting calls into this code. This version of the method is truly only needed when the string being
+	 * retrieved contains parameters, but using it when no parameters are provided or are <code>null</code> is still valid and will work, as long as the retrieved message doesn't require parameters.
+	 * In MapTool, this commonly means the player's name or a filename. See the "Parameterized Strings" section of the <b>i18n.properties</b> file for example usage. Full documentation for this
+	 * technique can be found under {@link MessageFormat#format}.
 	 * 
 	 * @param key
-	 *            the <code>propertyKey</code> to use for lookup in the
-	 *            properties file
+	 *            the <code>propertyKey</code> to use for lookup in the properties file
 	 * @param args
 	 *            parameters needed for formatting purposes
 	 * @return the formatted String
@@ -348,14 +317,12 @@ public class CopiedFromOtherJars {
 	}
 
 	/**
-	 * Copies <code>from</code> file to <code>to</code> file returning success
-	 * or failure.
+	 * Copies <code>from</code> file to <code>to</code> file returning success or failure.
 	 * 
 	 * @param from
 	 *            <code>File</code> representing object to copy
 	 * @param to
-	 *            <code>File</code> representing destination filename for copied
-	 *            object (must not be directory)
+	 *            <code>File</code> representing destination filename for copied object (must not be directory)
 	 * @return true or false whether the copy succeeded
 	 */
 	public static boolean copyFile(final File from, final File to) {

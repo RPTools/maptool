@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model.drawing;
 
 import java.awt.Graphics2D;
@@ -18,8 +15,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.ZonePoint;
 
 /**
- * The cone template draws a highlight over all the squares effected from a specific
- * spine. There are 8 different directions from each spine.
+ * The cone template draws a highlight over all the squares effected from a specific spine. There are 8 different directions from each spine.
  * 
  * @author jgorrell
  * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author: azhrei_fje $
@@ -31,9 +27,8 @@ public class ConeTemplate extends RadiusTemplate {
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * The dirction to paint. The ne,se,nw,sw paint a quadrant and the n,w,e,w paint
-	 * along the spine of the selected vertex. Saved as a string as a hack to get around 
-	 * the hessian library's problem w/ serializing enumerations.
+	 * The dirction to paint. The ne,se,nw,sw paint a quadrant and the n,w,e,w paint along the spine of the selected vertex. Saved as a string as a hack to get around the hessian library's problem w/
+	 * serializing enumerations.
 	 */
 	private String direction = Direction.SOUTH_EAST.name();
 
@@ -55,7 +50,8 @@ public class ConeTemplate extends RadiusTemplate {
 	/**
 	 * Set the value of direction for this ConeTemplate.
 	 *
-	 * @param direction The direction to draw the cone from the center vertex.
+	 * @param direction
+	 *            The direction to draw the cone from the center vertex.
 	 */
 	public void setDirection(Direction direction) {
 		if (direction != null)
@@ -67,15 +63,22 @@ public class ConeTemplate extends RadiusTemplate {
 	/**
 	 * Paint the border at a specific radius.
 	 * 
-	 * @param g Where to paint
-	 * @param x Distance from vertex along X axis in cell coordinates.
-	 * @param y Distance from vertex along Y axis in cell coordinates.
-	 * @param xOff Distance from vertex along X axis in screen coordinates.
-	 * @param yOff Distance from vertex along Y axis in screen coordinates.
-	 * @param gridSize The size of one side of the grid in screen coordinates.
-	 * @param distance The distance in cells from the vertex to the cell which
-	 * is offset from the vertex by <code>x</code> & <code>y</code>.
-	 * @param radius The radius where the border is painted.
+	 * @param g
+	 *            Where to paint
+	 * @param x
+	 *            Distance from vertex along X axis in cell coordinates.
+	 * @param y
+	 *            Distance from vertex along Y axis in cell coordinates.
+	 * @param xOff
+	 *            Distance from vertex along X axis in screen coordinates.
+	 * @param yOff
+	 *            Distance from vertex along Y axis in screen coordinates.
+	 * @param gridSize
+	 *            The size of one side of the grid in screen coordinates.
+	 * @param distance
+	 *            The distance in cells from the vertex to the cell which is offset from the vertex by <code>x</code> & <code>y</code>.
+	 * @param radius
+	 *            The radius where the border is painted.
 	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintBorder(java.awt.Graphics2D, int, int, int, int, int, int)
 	 */
 	protected void paintBorderAtRadius(Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance, int radius) {
@@ -122,14 +125,20 @@ public class ConeTemplate extends RadiusTemplate {
 	/**
 	 * Paint the border at a specific radius.
 	 * 
-	 * @param g Where to paint
-	 * @param x Distance from vertex along X axis in cell coordinates.
-	 * @param y Distance from vertex along Y axis in cell coordinates.
-	 * @param xOff Distance from vertex along X axis in screen coordinates.
-	 * @param yOff Distance from vertex along Y axis in screen coordinates.
-	 * @param gridSize The size of one side of the grid in screen coordinates.
-	 * @param distance The distance in cells from the vertex to the cell which
-	 * is offset from the vertex by <code>x</code> & <code>y</code>.
+	 * @param g
+	 *            Where to paint
+	 * @param x
+	 *            Distance from vertex along X axis in cell coordinates.
+	 * @param y
+	 *            Distance from vertex along Y axis in cell coordinates.
+	 * @param xOff
+	 *            Distance from vertex along X axis in screen coordinates.
+	 * @param yOff
+	 *            Distance from vertex along Y axis in screen coordinates.
+	 * @param gridSize
+	 *            The size of one side of the grid in screen coordinates.
+	 * @param distance
+	 *            The distance in cells from the vertex to the cell which is offset from the vertex by <code>x</code> & <code>y</code>.
 	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintBorder(java.awt.Graphics2D, int, int, int, int, int, int)
 	 */
 	protected void paintEdges(Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance) {
@@ -227,7 +236,7 @@ public class ConeTemplate extends RadiusTemplate {
 	public Rectangle getBounds() {
 
 		if (MapTool.getCampaign().getZone(getZoneId()) == null) {
-			// How does this happen ?!  Anyway, try to use the current zone (since that's what we're drawing anyway, seems reasonable
+			// How does this happen ?! Anyway, try to use the current zone (since that's what we're drawing anyway, seems reasonable
 			if (MapTool.getFrame().getCurrentZoneRenderer() == null) {
 				// Wha?!
 				return new Rectangle();

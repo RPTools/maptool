@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model.transform.campaign;
 
 import java.util.regex.Pattern;
@@ -24,8 +21,7 @@ public class TokenPropertyMapTransform implements ModelVersionTransformation {
 	private static final Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
 
 	/**
-	 * Delete the block containing the now-obsolete exportInfo class data, since there is no place to put it (and
-	 * therefore generates an XStream error)
+	 * Delete the block containing the now-obsolete exportInfo class data, since there is no place to put it (and therefore generates an XStream error)
 	 */
 	public String transform(String xml) {
 		// Same as: return xml.replaceAll(regex, replacement);

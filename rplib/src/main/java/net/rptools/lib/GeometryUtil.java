@@ -1,15 +1,10 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.lib;
 
@@ -88,7 +83,7 @@ public class GeometryUtil {
 	public static double getDistanceXXX(Point2D p1, Point2D p2) {
 		double a = p2.getX() - p1.getX();
 		double b = p2.getY() - p1.getY();
-		return Math.sqrt(a * a + b * b); // Was just "a+b" -- was that on purpose?  A shortcut speed-up perhaps?
+		return Math.sqrt(a * a + b * b); // Was just "a+b" -- was that on purpose? A shortcut speed-up perhaps?
 	}
 
 	public static Set<Line2D> getFrontFaces(PointNode nodeList, Point2D origin) {
@@ -120,7 +115,8 @@ public class GeometryUtil {
 		double pointAngle = GeometryUtil.getAngle(startPoint, endPoint);
 		int lastDirection = GeometryUtil.getAngleDelta(originAngle, pointAngle) > 0 ? 1 : -1;
 
-		//		System.out.format("%s: %.2f %s, %.2f %s => %.2f : %d : %s\n", frontFace, originAngle, startPoint.toString(), pointAngle, endPoint.toString(), getAngleDelta(originAngle, pointAngle), lastDirection, (closestNode.previous.point.equals(secondPoint) ? "second" : "closest").toString());
+		// System.out.format("%s: %.2f %s, %.2f %s => %.2f : %d : %s\n", frontFace, originAngle, startPoint.toString(), pointAngle, endPoint.toString(), getAngleDelta(originAngle, pointAngle),
+		// lastDirection, (closestNode.previous.point.equals(secondPoint) ? "second" : "closest").toString());
 		PointNode node = secondPoint.equals(closestNode.next.point) ? closestNode.next : closestNode;
 		do {
 			Point2D point = node.point;
@@ -129,7 +125,7 @@ public class GeometryUtil {
 			originAngle = GeometryUtil.getAngle(origin, point);
 			pointAngle = GeometryUtil.getAngle(origin, nextPoint);
 
-			//			System.out.println(point + ":" + originAngle + ", " + nextPoint + ":"+ pointAngle + ", " + getAngleDelta(originAngle, pointAngle));
+			// System.out.println(point + ":" + originAngle + ", " + nextPoint + ":"+ pointAngle + ", " + getAngleDelta(originAngle, pointAngle));
 			if (GeometryUtil.getAngleDelta(originAngle, pointAngle) > 0) {
 				if (lastDirection < 0) {
 					frontFace = !frontFace;
@@ -170,7 +166,7 @@ public class GeometryUtil {
 				// First line segment
 				lastLine = new Line2D.Double(lastPoint, point);
 
-				// Keep track 
+				// Keep track
 				continue;
 			}
 		}

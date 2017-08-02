@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.macrobuttons.buttons;
 
 import java.awt.Cursor;
@@ -47,8 +44,8 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
 /**
- * Base class of {@link CampaignMacroButton} and {@link GlobalMacroButton}. {@link TokenMacroButton} doesn't extend this
- * class because it is very simple. <code>MacroButton</code>s that extend this class use {@link MacroButtonProperties}.
+ * Base class of {@link CampaignMacroButton} and {@link GlobalMacroButton}. {@link TokenMacroButton} doesn't extend this class because it is very simple. <code>MacroButton</code>s that extend this
+ * class use {@link MacroButtonProperties}.
  * <p>
  * These buttons are used in Macro Button Panel in the UI.
  */
@@ -121,7 +118,7 @@ public class MacroButton extends JButton implements MouseListener {
 	}
 
 	public void setColor(String colorKey) {
-		//If the key doesn't correspond to one of our colors, then use the default
+		// If the key doesn't correspond to one of our colors, then use the default
 		// FJE Why??
 		if ("default".equals(colorKey)) {
 			setBackground(null);
@@ -277,25 +274,25 @@ public class MacroButton extends JButton implements MouseListener {
 	private class DSListener implements DragSourceListener {
 
 		public void dragEnter(DragSourceDragEvent event) {
-			//System.out.println("TMB: drag enter");
-			//DragSourceContext context = event.getDragSourceContext();
-			//context.getComponent()
+			// System.out.println("TMB: drag enter");
+			// DragSourceContext context = event.getDragSourceContext();
+			// context.getComponent()
 		}
 
 		public void dragOver(DragSourceDragEvent event) {
-			//System.out.println("TMB: drag over");
+			// System.out.println("TMB: drag over");
 		}
 
 		public void dropActionChanged(DragSourceDragEvent event) {
-			//System.out.println("TMB: drop action changed");
+			// System.out.println("TMB: drop action changed");
 		}
 
 		public void dragExit(DragSourceEvent event) {
-			//System.out.println("TMB: drag exit");
+			// System.out.println("TMB: drag exit");
 		}
 
 		public void dragDropEnd(DragSourceDropEvent event) {
-			//System.out.println("TMB: drag drop end");
+			// System.out.println("TMB: drag drop end");
 			// js commented out for testing - MapTool.getFrame().updateSelectionPanel();
 			List<Token> affectedTokens = new ArrayList<Token>();
 			MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(affectedTokens);

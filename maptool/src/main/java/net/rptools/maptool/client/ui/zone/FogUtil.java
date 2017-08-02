@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.Color;
@@ -133,7 +130,7 @@ public class FogUtil {
 	}
 
 	// Jamz: Added boolean exposeCurrentOnly
-	//@SuppressWarnings("unchecked")
+	// @SuppressWarnings("unchecked")
 	public static void exposeVisibleArea(final ZoneRenderer renderer, Set<GUID> tokenSet, boolean exposeCurrentOnly) {
 		final Zone zone = renderer.getZone();
 
@@ -179,7 +176,7 @@ public class FogUtil {
 						MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
 					}
 				}
-				//System.out.println("2. Token: " + token.getGMName() + " - ID: " + token.getId());
+				// System.out.println("2. Token: " + token.getGMName() + " - ID: " + token.getId());
 				renderer.flush(token);
 			} else {
 				renderer.flush(token);
@@ -230,9 +227,8 @@ public class FogUtil {
 	}
 
 	/**
-	 * This function is called by Meta-Shift-O, the token right-click, Expose -> only Currently visible menu,
-	 * from the Client/Server methods calls from net.rptools.maptool.server.ServerMethodHandler.exposePCArea(GUID),
-	 * and the macro exposePCOnlyArea().
+	 * This function is called by Meta-Shift-O, the token right-click, Expose -> only Currently visible menu, from the Client/Server methods calls from
+	 * net.rptools.maptool.server.ServerMethodHandler.exposePCArea(GUID), and the macro exposePCOnlyArea().
 	 * 
 	 * 
 	 * @author updated Jamz
@@ -282,32 +278,25 @@ public class FogUtil {
 		for (Token token : tokList)
 			tokenSet.add(token.getId());
 
-		//System.out.println("tokList: " + tokList.toString());
+		// System.out.println("tokList: " + tokList.toString());
 
-		/* TODO: Jamz: May need to add back the isUseIndividualViews() logic later after testing...
-		String playerName = MapTool.getPlayer().getName();
-		boolean isGM = MapTool.getPlayer().getRole() == Role.GM;
-		
-		for (Token token : tokList) {
-			boolean owner = token.isOwner(playerName) || isGM;
-			
-			//System.out.println("token: " + token.getName() + ", owner: " + owner);
-			
-			if ((!MapTool.isPersonalServer()
-					|| MapTool.getServerPolicy().isUseIndividualViews())
-					&& !owner) {
-				continue;
-			}
-			tokenSet.add(token.getId());
-		}
-		*/
+		/*
+		 * TODO: Jamz: May need to add back the isUseIndividualViews() logic later after testing... String playerName = MapTool.getPlayer().getName(); boolean isGM = MapTool.getPlayer().getRole() ==
+		 * Role.GM;
+		 * 
+		 * for (Token token : tokList) { boolean owner = token.isOwner(playerName) || isGM;
+		 * 
+		 * //System.out.println("token: " + token.getName() + ", owner: " + owner);
+		 * 
+		 * if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner) { continue; } tokenSet.add(token.getId()); }
+		 */
 
 		renderer.getZone().clearExposedArea(tokenSet);
 		exposeVisibleArea(renderer, tokenSet, true);
 	}
 
 	public static void restoreFoW(final ZoneRenderer renderer) {
-		//System.out.println("Zone ID: " + renderer.getZone().getId());
+		// System.out.println("Zone ID: " + renderer.getZone().getId());
 
 		renderer.getZone().clearExposedArea();
 		renderer.flush();
@@ -347,11 +336,8 @@ public class FogUtil {
 			}
 
 			/*
-			 * Lee: this assumes that all tokens that pass through the checks
-			 * above stored CellPoints. Well, they don't, not in the context of
-			 * a snapped to grid follower following an unsnapped key token.
-			 * Commenting out and replacing... for (CellPoint cell :
-			 * lastPath.getCellPath()) {
+			 * Lee: this assumes that all tokens that pass through the checks above stored CellPoints. Well, they don't, not in the context of a snapped to grid follower following an unsnapped key
+			 * token. Commenting out and replacing... for (CellPoint cell : lastPath.getCellPath()) {
 			 */
 			final ExposedAreaMetaData metaCopy = meta;
 			final Token tokenClone = new Token(token);
@@ -361,17 +347,17 @@ public class FogUtil {
 			List<CellPoint> processPath = zone.getWaypointExposureToggle() ? lastPath.getWayPointList() : lastPath.getCellPath();
 
 			int stepCount = processPath.size();
-			//System.out.println("Path size = " + stepCount);
+			// System.out.println("Path size = " + stepCount);
 
 			for (final Object cell : processPath) {
 				if (cell instanceof CellPoint) {
-					//timer.start("expose" + cell.toString());
+					// timer.start("expose" + cell.toString());
 					ZonePoint zp = grid.convert((CellPoint) cell);
 					tokenClone.setX(zp.x);
 					tokenClone.setY(zp.y);
 					metaCopy.addToExposedAreaHistory(zoneView.getVisibleArea(tokenClone));
 					zoneView.flush(tokenClone);
-					//timer.start("expose" + cell.toString());
+					// timer.start("expose" + cell.toString());
 				}
 			}
 
@@ -387,13 +373,13 @@ public class FogUtil {
 
 		String results = timer.toString();
 		MapTool.getProfilingNoteFrame().addText(results);
-		//System.out.println(results);
+		// System.out.println(results);
 		timer.clear();
 	}
 
 	/**
-	 * Find the center point of a vision TODO: This is a horrible horrible method. the API is just plain disgusting. But
-	 * it'll work to consolidate all the places this has to be done until we can encapsulate it into the vision itself
+	 * Find the center point of a vision TODO: This is a horrible horrible method. the API is just plain disgusting. But it'll work to consolidate all the places this has to be done until we can
+	 * encapsulate it into the vision itself
 	 */
 	public static Point calculateVisionCenter(Token token, Zone zone) {
 		Grid grid = zone.getGrid();
@@ -508,12 +494,12 @@ public class FogUtil {
 				g.setColor(Color.black);
 				g.drawLine(size.width / 2, 0, size.width / 2, size.height);
 
-				//				g.setClip(new Rectangle(0, 0, size.width/2, size.height));
-				//				g.setColor(Color.green);
-				//				g2d.fill(top);
+				// g.setClip(new Rectangle(0, 0, size.width/2, size.height));
+				// g.setColor(Color.green);
+				// g2d.fill(top);
 				//
-				//				g.setColor(Color.lightGray);
-				//				g2d.fill(a1.createTransformedArea(at));
+				// g.setColor(Color.lightGray);
+				// g2d.fill(a1.createTransformedArea(at));
 
 				g.setClip(new Rectangle(size.width / 2, 0, size.width / 2, size.height));
 				g2d.translate(200, 0);
@@ -527,11 +513,11 @@ public class FogUtil {
 					g.setColor(Color.red);
 					g2d.draw(areaMeta.area.createTransformedArea(at));
 				}
-				//				g.setColor(Color.red);
-				//				System.out.println("Size: " + data.metaList.size() + " - " + skippedAreaList.size());
-				//				for (Area area : skippedAreaList) {
-				//					g2d.fill(area.createTransformedArea(at));
-				//				}
+				// g.setColor(Color.red);
+				// System.out.println("Size: " + data.metaList.size() + " - " + skippedAreaList.size());
+				// for (Area area : skippedAreaList) {
+				// g2d.fill(area.createTransformedArea(at));
+				// }
 				g2d.translate(-200, 0);
 			}
 		});

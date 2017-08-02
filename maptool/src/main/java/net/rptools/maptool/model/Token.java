@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.awt.Color;
@@ -204,10 +201,10 @@ public class Token extends BaseModel implements Cloneable {
 	/**
 	 * Properties
 	 */
-	// I screwed up.  propertyMap was HashMap<String,Object> in pre-1.3b70 (?)
-	// and became a CaseInsensitiveHashMap<Object> thereafter.  So in order to
+	// I screwed up. propertyMap was HashMap<String,Object> in pre-1.3b70 (?)
+	// and became a CaseInsensitiveHashMap<Object> thereafter. So in order to
 	// be able to load old tokens, we need to read in the original data type and
-	// copy the elements into the new data type.  But because the name didn't
+	// copy the elements into the new data type. But because the name didn't
 	// change (that was the screw up) we have special code in readResolve() to
 	// help XStream move the data around.
 	private Map<String, Object> propertyMap; // 1.3b77 and earlier
@@ -219,11 +216,9 @@ public class Token extends BaseModel implements Cloneable {
 	private Map<String, String> speechMap;
 
 	// Deprecated, here to allow deserialization
-	@SuppressWarnings("unused")
-	private transient int size; // 1.3b16
+	@SuppressWarnings("unused") private transient int size; // 1.3b16
 
-	@SuppressWarnings("unused")
-	private transient List<Vision> visionList; // 1.3b18
+	@SuppressWarnings("unused") private transient List<Vision> visionList; // 1.3b18
 
 	public enum ChangeEvent {
 		name, MACRO_CHANGED
@@ -240,9 +235,9 @@ public class Token extends BaseModel implements Cloneable {
 		z = token.z;
 
 		// These properties shouldn't be transferred, they are more transient and relate to token history, not to new tokens
-		//		lastX = token.lastX;
-		//		lastY = token.lastY;
-		//		lastPath = token.lastPath;
+		// lastX = token.lastX;
+		// lastY = token.lastY;
+		// lastPath = token.lastPath;
 
 		snapToScale = token.snapToScale;
 		width = token.width;
@@ -372,7 +367,7 @@ public class Token extends BaseModel implements Cloneable {
 		lastX = lastY = 0;
 		// lightSourceList?
 		macroMap = null;
-		//		macroPropertiesMap = null;
+		// macroPropertiesMap = null;
 		ownerList = null;
 		// propertyMapCI = null;
 		// propertyType = "Basic";
@@ -747,7 +742,7 @@ public class Token extends BaseModel implements Cloneable {
 		}
 	}
 
-	//My Addition
+	// My Addition
 	public void clearLightSources() {
 		if (lightSourceList == null) {
 			return;
@@ -755,7 +750,7 @@ public class Token extends BaseModel implements Cloneable {
 		lightSourceList = null;
 	}
 
-	//End My Addition
+	// End My Addition
 
 	public boolean hasLightSource(LightSource source) {
 		if (lightSourceList == null) {
@@ -855,7 +850,7 @@ public class Token extends BaseModel implements Cloneable {
 	 * @throws IOException
 	 */
 	public void setName(String name) throws IllegalArgumentException {
-		//Let's see if there is another Token with that name (only if Player is not GM)
+		// Let's see if there is another Token with that name (only if Player is not GM)
 		if (!MapTool.getPlayer().isGM() && !MapTool.getParser().isMacroTrusted()) {
 			Zone curZone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 			List<Token> tokensList = curZone.getTokens();
@@ -1178,11 +1173,11 @@ public class Token extends BaseModel implements Cloneable {
 		Grid grid = zone.getGrid();
 		TokenFootprint footprint = getFootprint(grid);
 		Rectangle footprintBounds = footprint.getBounds(grid, grid.convert(new ZonePoint(getX(), getY())));
-		//if (getShape() == TokenShape.FIGURE) {
-		//	double th = this.height * Double.valueOf(footprintBounds.width) / this.width;
-		//	double ho = footprintBounds.height - th;
-		//	footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y + (int)ho, footprintBounds.width, (int)th);
-		//}
+		// if (getShape() == TokenShape.FIGURE) {
+		// double th = this.height * Double.valueOf(footprintBounds.width) / this.width;
+		// double ho = footprintBounds.height - th;
+		// footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y + (int)ho, footprintBounds.width, (int)th);
+		// }
 
 		double w = footprintBounds.width;
 		double h = footprintBounds.height;
@@ -1205,8 +1200,8 @@ public class Token extends BaseModel implements Cloneable {
 				footprintBounds.x -= (w - footprintBounds.width) / 2;
 				footprintBounds.y -= (h - footprintBounds.height) / 2;
 			} else {
-				//	        	footprintBounds.x -= zone.getGrid().getSize()/2;
-				//	        	footprintBounds.y -= zone.getGrid().getSize()/2;
+				// footprintBounds.x -= zone.getGrid().getSize()/2;
+				// footprintBounds.y -= zone.getGrid().getSize()/2;
 			}
 		}
 		footprintBounds.width = (int) w; // perhaps make this a double
@@ -1289,14 +1284,14 @@ public class Token extends BaseModel implements Cloneable {
 	public Object getProperty(String key) {
 		Object value = getPropertyMap().get(key);
 
-		//		// Short name ?
-		//		if (value == null) {
-		//			for (EditTokenProperty property : MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(getPropertyType())) {
-		//				if (property.getShortName().equals(key)) {
-		//					value = getPropertyMap().get(property.getShortName().toUpperCase());
-		//				}
-		//			}
-		//		}
+		// // Short name ?
+		// if (value == null) {
+		// for (EditTokenProperty property : MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(getPropertyType())) {
+		// if (property.getShortName().equals(key)) {
+		// value = getPropertyMap().get(property.getShortName().toUpperCase());
+		// }
+		// }
+		// }
 		return value;
 	}
 
@@ -1822,8 +1817,8 @@ public class Token extends BaseModel implements Cloneable {
 	protected Object readResolve() {
 		super.readResolve();
 		// FJE: If the propertyMap field has something in it, it could be:
-		//		a pre-1.3b66 token that contains a HashMap<?,?>, or
-		//		a pre-1.3b78 token that actually has the CaseInsensitiveHashMap<?>.
+		// a pre-1.3b66 token that contains a HashMap<?,?>, or
+		// a pre-1.3b78 token that actually has the CaseInsensitiveHashMap<?>.
 		// Newer tokens will use propertyMapCI so we only need to make corrections
 		// if the old field has data in it.
 		if (propertyMap != null) {

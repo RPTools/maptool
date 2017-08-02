@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
@@ -27,15 +24,14 @@ import net.rptools.parser.function.ParameterException;
 
 /**
  * Implements various "property string" (<code>*PropStr()</code>) functions. <br>
- * The <code>properties</code> string is of the form
- * "key1 = value1 ; key2=value2; ...". <br>
+ * The <code>properties</code> string is of the form "key1 = value1 ; key2=value2; ...". <br>
  * An optional final argument <code>delim</code> sets the item delimiter
  * 
  * @author knizia.fan
  */
 public class StrPropFunctions extends AbstractFunction {
 	// Changed to allow spaces within keys, although spaces on either end of keys or
-	// values will be trimmed.  http://forums.rptools.net/viewtopic.php?f=3&t=23841
+	// values will be trimmed. http://forums.rptools.net/viewtopic.php?f=3&t=23841
 	// Added "." to allowed key names since variable names can contain dots.
 	private static final String keyValuePatt = "\\s*([\\w .]+)\\s*=\\s*(.*)";
 	private static final Pattern keyValueParser = Pattern.compile(keyValuePatt);
@@ -62,8 +58,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 * @param props
 	 *            has the form "key1=val1 ; key2=val2 ; ..."
 	 * @param map
-	 *            is populated with the settings. The keys are normalized to
-	 *            upper case.
+	 *            is populated with the settings. The keys are normalized to upper case.
 	 * @param oldKeys
 	 *            holds the un-normalized keys, in their original order.
 	 * @param delim
@@ -77,7 +72,7 @@ public class StrPropFunctions extends AbstractFunction {
 			delimPatt = fullyQuoteString(delim); // XXX Why are we not using \\Q...\\E instead?
 		}
 		// Changed to allow spaces within keys, although spaces on either end of keys or
-		// values will be trimmed.  http://forums.rptools.net/viewtopic.php?f=3&t=23841
+		// values will be trimmed. http://forums.rptools.net/viewtopic.php?f=3&t=23841
 		// Added "." to allowed key names since variable names can contain dots.
 		final String entryPatt = "\\s*([\\w .]+\\s*=.*?)" + delimPatt + "|([\\w.]+\\s*=.*)";
 		final Pattern entryParser = Pattern.compile(entryPatt);
@@ -88,7 +83,7 @@ public class StrPropFunctions extends AbstractFunction {
 		Matcher entryMatcher = entryParser.matcher(props);
 		while (entryMatcher.find()) {
 			if (!lastEntry) {
-				//	    		String entry = entryMatcher.group();
+				// String entry = entryMatcher.group();
 				String entry = entryMatcher.group(1);
 				if (entry == null) {
 					entry = entryMatcher.group(2);
@@ -98,7 +93,7 @@ public class StrPropFunctions extends AbstractFunction {
 					// so this flag will prevent that.
 					lastEntry = true;
 				}
-				//				private static final String keyValuePatt = "([\\w .]+)=(.*)";
+				// private static final String keyValuePatt = "([\\w .]+)=(.*)";
 				Matcher keyValueMatcher = keyValueParser.matcher(entry);
 				if (keyValueMatcher.find()) {
 					String propKey = keyValueMatcher.group(1).trim();
@@ -159,16 +154,13 @@ public class StrPropFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * MapTool code:
-	 * <code>getStrProp(properties, key [, defaultValue [, delim]])</code>
+	 * MapTool code: <code>getStrProp(properties, key [, defaultValue [, delim]])</code>
 	 * 
 	 * @param key
 	 *            A string to look up
 	 * @param defaultValue
-	 *            An optional default returned when <code>key</code> is not
-	 *            found (default is <code>""</code>
-	 * @return The matching value for <code>key</code>, or <code>""</code> if
-	 *         not found. The value is converted to a number if possible.
+	 *            An optional default returned when <code>key</code> is not found (default is <code>""</code>
+	 * @return The matching value for <code>key</code>, or <code>""</code> if not found. The value is converted to a number if possible.
 	 */
 	public Object getStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized) throws ParserException {
 		Object retval = "";
@@ -195,8 +187,7 @@ public class StrPropFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * MapTool code: <code>setStrProp(properties, key, value)</code> - adds or
-	 * replaces a key's value, respecting the order and case of existing keys.
+	 * MapTool code: <code>setStrProp(properties, key, value)</code> - adds or replaces a key's value, respecting the order and case of existing keys.
 	 * 
 	 * @param key
 	 *            A string to look up
@@ -240,13 +231,11 @@ public class StrPropFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * MapTool code: <code>deleteStrProp(properties, key)</code> - deletes a key
-	 * from the properties string.
+	 * MapTool code: <code>deleteStrProp(properties, key)</code> - deletes a key from the properties string.
 	 * 
 	 * @param key
 	 *            A string to look up.
-	 * @return The new property string. (If <code>key</code> is not found, no
-	 *         changes are made.)
+	 * @return The new property string. (If <code>key</code> is not found, no changes are made.)
 	 */
 	public Object deleteStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized) throws ParserException {
 		Object retval = "";
@@ -280,11 +269,9 @@ public class StrPropFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * MapTool code: <code>varsFromStrProp(properties, setVars)</code> - assigns
-	 * each of the values to variables named by the keys.
+	 * MapTool code: <code>varsFromStrProp(properties, setVars)</code> - assigns each of the values to variables named by the keys.
 	 * <p>
-	 * For backwards compatibility with an earlier version, this function
-	 * accepts the following argument patterns:
+	 * For backwards compatibility with an earlier version, this function accepts the following argument patterns:
 	 * <ul>
 	 * <li>properties
 	 * <li>properties, setVars
@@ -292,39 +279,30 @@ public class StrPropFunctions extends AbstractFunction {
 	 * <li>properties, setVars, delim
 	 * </ul>
 	 * <p>
-	 * The parameter setVars that is passed in from the macro call determines
-	 * how to create variable names This argument can be:
+	 * The parameter setVars that is passed in from the macro call determines how to create variable names This argument can be:
 	 * <ul>
 	 * <li><code>NONE</code>: no assignments are made.
-	 * <li><code> SUFFIXED</code>: assignments are made to variable names with
-	 * "_" appended.
-	 * <li><code>UNSUFFIXED</code>: assignments are made to unmodified variable
-	 * names.
+	 * <li><code> SUFFIXED</code>: assignments are made to variable names with "_" appended.
+	 * <li><code>UNSUFFIXED</code>: assignments are made to unmodified variable names.
 	 * </ul>
 	 * <p>
-	 * The 2-parameter options are distinguished based on the actual string
-	 * contents. (So, you can't use "NONE", "SUFFIXED", or "UNSUFFIXED" as
-	 * non-default delimiters!)
+	 * The 2-parameter options are distinguished based on the actual string contents. (So, you can't use "NONE", "SUFFIXED", or "UNSUFFIXED" as non-default delimiters!)
 	 * 
 	 * @param parameters
 	 *            list of parameters from the macro call
 	 * @param lastParam
-	 *            last parameter passed from the macro call (convenience
-	 *            variable)
+	 *            last parameter passed from the macro call (convenience variable)
 	 * @param props
 	 *            the StrProp string to parse
 	 * @param map
-	 *            where the normalized <key,value> pairs are stored (return
-	 *            value)
+	 *            where the normalized <key,value> pairs are stored (return value)
 	 * @param oldKeys
 	 *            list of the original keys from <code>props</code>
 	 * @param oldKeysNormalized
-	 *            list of the original keys (converted to uppercase) from
-	 *            <code>props</code>
+	 *            list of the original keys (converted to uppercase) from <code>props</code>
 	 * @param parser
 	 *            parser object to use as context
-	 * @return The number of assignments made (keys with spaces in their names
-	 *         are ignored and don't appear in the count)
+	 * @return The number of assignments made (keys with spaces in their names are ignored and don't appear in the count)
 	 */
 	public Object varsFromStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized, Parser parser)
 			throws ParserException {
@@ -365,7 +343,7 @@ public class StrPropFunctions extends AbstractFunction {
 		parse(props, map, oldKeys, oldKeysNormalized, delim);
 		int count = 0;
 		for (String k : oldKeys) {
-			// As of 1.3b90, parse() supports spaces in the key string.  We can't create variables
+			// As of 1.3b90, parse() supports spaces in the key string. We can't create variables
 			// with spaces in their names though (well, we could, but the script could never access them)
 			// so filter out names with spaces.
 			if (!k.contains(" ")) {
@@ -396,8 +374,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 * @param varList
 	 *            A comma-separated list of variable names.
 	 * @param varStyle
-	 *            Either "SUFFIXED" or "UNSUFFIXED", indicating how to decorate
-	 *            the variable names when fetching values.
+	 *            Either "SUFFIXED" or "UNSUFFIXED", indicating how to decorate the variable names when fetching values.
 	 * @return A property string containing the settings of all the variables.
 	 */
 	public Object strPropFromVars(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized, Parser parser)
@@ -456,8 +433,7 @@ public class StrPropFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * MapTool code: <code>indexKeyStrProp(properties, index)</code> - returns
-	 * the key at the position given by <code>index</code>.
+	 * MapTool code: <code>indexKeyStrProp(properties, index)</code> - returns the key at the position given by <code>index</code>.
 	 * 
 	 * @param index
 	 *            A number from 0 to (length-1). Ignored if out of range.
@@ -484,13 +460,11 @@ public class StrPropFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * MapTool code: <code>indexValueStrProp(properties, index)</code> - returns
-	 * the value at the position given by <code>index</code>.
+	 * MapTool code: <code>indexValueStrProp(properties, index)</code> - returns the value at the position given by <code>index</code>.
 	 * 
 	 * @param index
 	 *            A number from 0 to (length-1). Ignored if out of range.
-	 * @return The value (converted to a number if possible) for the setting at
-	 *         position <code>index</code>
+	 * @return The value (converted to a number if possible) for the setting at position <code>index</code>
 	 */
 	public Object indexValueStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized) throws ParserException {
 		String value = "";
@@ -524,16 +498,12 @@ public class StrPropFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * MapTool code:
-	 * <code>formatStrProp(properties, listFormat, entryFormat, separator [, delim])</code>
-	 * -
+	 * MapTool code: <code>formatStrProp(properties, listFormat, entryFormat, separator [, delim])</code> -
 	 * 
 	 * @param listFormat
-	 *            Controls overall format of the output, with "%list" where the
-	 *            list goes.
+	 *            Controls overall format of the output, with "%list" where the list goes.
 	 * @param itemFormat
-	 *            Controls appearance of each entry, with "%key" and "%value"
-	 *            where the keys and values go.
+	 *            Controls appearance of each entry, with "%key" and "%value" where the keys and values go.
 	 * @param separator
 	 *            Placed between each output item.
 	 * @return A string containing the formatted property string.
@@ -574,8 +544,7 @@ public class StrPropFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Tries to convert a string to a number, returning <code>null</code> on
-	 * failure.
+	 * Tries to convert a string to a number, returning <code>null</code> on failure.
 	 */
 	public Integer strToInt(String s) {
 		Integer intval = null;
@@ -594,8 +563,7 @@ public class StrPropFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Checks number and types of parameters (pass null type to suppress
-	 * typechecking for that slot).
+	 * Checks number and types of parameters (pass null type to suppress typechecking for that slot).
 	 */
 	public void checkVaryingParameters(String funcName, int minParams, int maxParams, List<Object> parameters, Class<?>[] expected) throws ParameterException {
 		if (parameters.size() < minParams || parameters.size() > maxParams) {

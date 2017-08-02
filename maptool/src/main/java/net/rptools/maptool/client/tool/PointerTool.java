@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.tool;
 
 import java.awt.AlphaComposite;
@@ -243,7 +240,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	}
 
 	public void stopTokenDrag() {
-		renderer.commitMoveSelectionSet(tokenBeingDragged.getId()); // TODO:  figure out a better way
+		renderer.commitMoveSelectionSet(tokenBeingDragged.getId()); // TODO: figure out a better way
 		isDraggingToken = false;
 		isMovingWithKeys = false;
 
@@ -254,7 +251,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	}
 
 	public void exposeFoW(ZonePoint p) {
-		// if has fog(required) 
+		// if has fog(required)
 		// and ((isGM with pref set) OR serverPolicy allows auto reveal by players)
 		if (renderer.getZone().hasFog() && ((AppPreferences.getAutoRevealVisionOnGMMovement() && MapTool.getPlayer().isGM()) || MapTool.getServerPolicy().isAutoRevealOnMovement())) {
 			Set<GUID> exposeSet = new HashSet<GUID>();
@@ -265,7 +262,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 					continue;
 				}
 				// Jamz: Changed to allow NPC FoW
-				//if (token.getType() == Token.Type.PC) {
+				// if (token.getType() == Token.Type.PC) {
 				if (MapTool.getPlayer().isGM() || token.isOwner(MapTool.getPlayer().getName())) {
 					exposeSet.add(tokenGUID);
 				}
@@ -443,7 +440,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		if (isDraggingToken) {
 			return;
 		}
-		dragStartX = e.getX(); // These same two lines are in super.mousePressed().  Why do them here?
+		dragStartX = e.getX(); // These same two lines are in super.mousePressed(). Why do them here?
 		dragStartY = e.getY();
 
 		// Properties
@@ -486,7 +483,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 					renderer.clearSelectedTokens();
 				}
 				// XXX Isn't Windows standard to use Ctrl-click to add one element and Shift-click to extend?
-				// XXX Similarly, OSX uses Cmd-click to add one element and Shift-click to extend...  Change it later.
+				// XXX Similarly, OSX uses Cmd-click to add one element and Shift-click to extend... Change it later.
 				if (SwingUtil.isShiftDown(e) && renderer.getSelectedTokenSet().contains(token.getId())) {
 					renderer.deselectToken(token.getId());
 				} else {
@@ -521,7 +518,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		mouseButtonDown = false;
-		//System.out.println("mouseReleased " + e.toString());
+		// System.out.println("mouseReleased " + e.toString());
 
 		if (isShowingTokenStackPopup) {
 			if (tokenStackPanel.contains(e.getX(), e.getY())) {
@@ -610,11 +607,11 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				if (tokenUnderMouse.isStamp()) {
 					new StampPopupMenu(renderer.getSelectedTokenSet(), e.getX(), e.getY(), renderer, tokenUnderMouse).showPopup(renderer);
 				} else if (AppUtil.playerOwns(tokenUnderMouse)) {
-					// FIXME  Every once in awhile we get a report on the forum of the following exception:
+					// FIXME Every once in awhile we get a report on the forum of the following exception:
 					// java.awt.IllegalComponentStateException: component must be showing on the screen to determine its location
-					// It's thrown as a result of the showPopup() call on the next line.  For the life of me, I can't figure out why the
-					// "renderer" component might not be "showing on the screen"???  Maybe it has something to do with a dual-monitor
-					// configuration?  Or a monitor added after Java was started and then MT dragged to that monitor?
+					// It's thrown as a result of the showPopup() call on the next line. For the life of me, I can't figure out why the
+					// "renderer" component might not be "showing on the screen"??? Maybe it has something to do with a dual-monitor
+					// configuration? Or a monitor added after Java was started and then MT dragged to that monitor?
 					new TokenPopupMenu(renderer.getSelectedTokenSet(), e.getX(), e.getY(), renderer, tokenUnderMouse).showPopup(renderer);
 				}
 				return;
@@ -632,8 +629,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		}
 		super.mouseMoved(e);
 
-		//		mouseX = e.getX(); // done by super.mouseMoved()
-		//		mouseY = e.getY();
+		// mouseX = e.getX(); // done by super.mouseMoved()
+		// mouseY = e.getY();
 		if (isShowingPointer) {
 			ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
 			Pointer pointer = MapTool.getFrame().getPointerOverlay().getPointer(MapTool.getPlayer().getName());
@@ -656,7 +653,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		}
 
 		if (isDraggingToken) {
-			// FJE If we're dragging the token, wouldn't mouseDragged() be called instead?  Can this code ever be executed?
+			// FJE If we're dragging the token, wouldn't mouseDragged() be called instead? Can this code ever be executed?
 			if (isMovingWithKeys) {
 				return;
 			}
@@ -709,7 +706,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				renderer.repaint();
 			}
 		}
-		// XXX Updating the status bar is done in super.mouseDragged() -- maybe just call that here?  But it also causes repaint events...
+		// XXX Updating the status bar is done in super.mouseDragged() -- maybe just call that here? But it also causes repaint events...
 		CellPoint cellUnderMouse = renderer.getCellAt(new ScreenPoint(mouseX, mouseY));
 		if (cellUnderMouse != null) {
 			MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
@@ -858,7 +855,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			int deltaX = point.x - leadToken.getX();
 			int deltaY = point.y - leadToken.getY();
 			Grid grid = zone.getGrid();
-			// Loop through all tokens.  As soon as one of them is blocked, stop processing and return false.
+			// Loop through all tokens. As soon as one of them is blocked, stop processing and return false.
 			// Jamz: Option this for lead token only? It's annoying dragging a group when one token has limited vision...
 			for (Iterator<GUID> iter = tokenSet.iterator(); !isBlocked && iter.hasNext();) {
 				Area tokenFog = new Area(zoneFog);
@@ -1089,7 +1086,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0), new MovementKey(this, 0, -size));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), new MovementKey(this, size, -size));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), new MovementKey(this, -size, 0));
-		//		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(this, 0, 0));
+		// actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(this, 0, 0));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), new MovementKey(this, size, 0));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, 0), new MovementKey(this, -size, size));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, 0), new MovementKey(this, 0, size));
@@ -1155,11 +1152,11 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent e) {
-				//  Only let the GM's do this
+				// Only let the GM's do this
 				if (MapTool.getPlayer().isGM()) {
 					FogUtil.exposePCArea(renderer);
-					// Jamz: This doesn't seem to be needed 
-					//MapTool.serverCommand().exposePCArea(renderer.getZone().getId());
+					// Jamz: This doesn't seem to be needed
+					// MapTool.serverCommand().exposePCArea(renderer.getZone().getId());
 				}
 			}
 		});
@@ -1288,10 +1285,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			dx = zp.x - tokenBeingDragged.getX();
 			dy = zp.y - tokenBeingDragged.getY();
 		} else {
-			// Scalar for dx/dy in zone space.  Defaulting to essentially 1 pixel.
+			// Scalar for dx/dy in zone space. Defaulting to essentially 1 pixel.
 			int moveFactor = 1;
 			if (tokenBeingDragged.isSnapToGrid()) {
-				// Move in grid size increments.  Allows tokens set snap-to-grid on gridless maps
+				// Move in grid size increments. Allows tokens set snap-to-grid on gridless maps
 				// to move in whole cell size increments.
 				moveFactor = grid.getSize();
 			}
@@ -1556,10 +1553,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			}
 
 			// Background
-			//			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .5f));
-			//			g.setColor(Color.black);
-			//			g.fillRect(location.x, location.y, size.width, size.height);
-			//			g.setComposite(composite);
+			// g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .5f));
+			// g.setColor(Color.black);
+			// g.fillRect(location.x, location.y, size.width, size.height);
+			// g.setComposite(composite);
 			g.setPaint(new TexturePaint(AppStyle.panelTexture, new Rectangle(0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
 			g.fillRect(location.x, location.y, size.width, size.height);
 

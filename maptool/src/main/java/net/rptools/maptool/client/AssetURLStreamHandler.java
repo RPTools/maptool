@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.awt.Graphics2D;
@@ -78,24 +75,24 @@ public class AssetURLStreamHandler extends URLStreamHandler {
 				} else
 					break;
 			}
-			// Default value is 0:  scale the dimension to preserve the aspect ratio
+			// Default value is 0: scale the dimension to preserve the aspect ratio
 			// Use -1 to indicate that the original dimension from the image should be used
 			int scaleW = var.get("width") != null ? Integer.valueOf(var.get("width")) : 0;
 			int scaleH = var.get("height") != null ? Integer.valueOf(var.get("height")) : 0;
 
 			// Need to make sure the image is available
 			// TODO: Create a AssetManager.getAssetAndWait(id) and put this block in it
-			//			final CountDownLatch latch = new CountDownLatch(1);
-			//			AssetManager.getAssetAsynchronously(assetId, new AssetAvailableListener() {
-			//				public void assetAvailable(MD5Key key) {
-			//					if (key.equals(assetId)) {
-			//						latch.countDown();
-			//					}
-			//				}
-			//			});
+			// final CountDownLatch latch = new CountDownLatch(1);
+			// AssetManager.getAssetAsynchronously(assetId, new AssetAvailableListener() {
+			// public void assetAvailable(MD5Key key) {
+			// if (key.equals(assetId)) {
+			// latch.countDown();
+			// }
+			// }
+			// });
 
 			byte[] data = null;
-			//			latch.await();
+			// latch.await();
 			BufferedImage img = ImageManager.getImageAndWait(assetId);
 
 			Asset asset = AssetManager.getAsset(assetId);

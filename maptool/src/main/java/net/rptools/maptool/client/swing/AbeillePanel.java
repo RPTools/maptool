@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.swing;
 
 import java.awt.Component;
@@ -35,28 +32,19 @@ import com.jeta.forms.components.panel.FormPanel;
 
 /**
  * <p>
- * This class acts as a "field binding front-end" for the {@link FormPanel}
- * class.
+ * This class acts as a "field binding front-end" for the {@link FormPanel} class.
  * </p>
  * <p>
- * After instantiating an object and passing it the name of the Abeille form,
- * call the {@link #bind(Object)} method and pass the data model instance as a
- * parameter. This class will then copy the data from the model to the view
- * using the field names specified when the Abeille form was created. View field
- * names must start with "@" to be automatically associated with a corresponding
- * model field. Anything in the field name from the first period to the end is
- * ignored.
+ * After instantiating an object and passing it the name of the Abeille form, call the {@link #bind(Object)} method and pass the data model instance as a parameter. This class will then copy the data
+ * from the model to the view using the field names specified when the Abeille form was created. View field names must start with "@" to be automatically associated with a corresponding model field.
+ * Anything in the field name from the first period to the end is ignored.
  * </p>
  * <p>
- * As changes occur to the view (the user has edited the text fields or changed
- * the value of a radiobutton), those changes will NOT propagate back to the
- * model -- the application programmer must call {@link #commit()} for those
- * changes to be recorded in the model. This allows for Cancel, OK, and Reset
- * buttons, if desired.
+ * As changes occur to the view (the user has edited the text fields or changed the value of a radiobutton), those changes will NOT propagate back to the model -- the application programmer must call
+ * {@link #commit()} for those changes to be recorded in the model. This allows for Cancel, OK, and Reset buttons, if desired.
  * </p>
  * <p>
- * In all cases, the {@link Binder} class is the one that uses Reflection and
- * standard JavaBean characteristics to link view fields with model fields.
+ * In all cases, the {@link Binder} class is the one that uses Reflection and standard JavaBean characteristics to link view fields with model fields.
  * </p>
  * 
  * @author tcroft
@@ -78,7 +66,7 @@ public class AbeillePanel<T> extends JPanel {
 					return null;
 				}
 
-				//				System.out.println("Name:" + name);
+				// System.out.println("Name:" + name);
 				name = name.substring(1).trim(); // cut the "@"
 				int point = name.indexOf(".");
 				if (point >= 0)
@@ -130,17 +118,13 @@ public class AbeillePanel<T> extends JPanel {
 	}
 
 	/**
-	 * Creates the link between the model and the view by calling
-	 * {@link Binder#bindContainer(Class, java.awt.Container, UpdateTime)} and
-	 * passing it the class of the model, the view component, and when to make
-	 * the updates.
+	 * Creates the link between the model and the view by calling {@link Binder#bindContainer(Class, java.awt.Container, UpdateTime)} and passing it the class of the model, the view component, and
+	 * when to make the updates.
 	 * <p>
 	 * This code assumes that the updates will never occur automatically.
 	 * </p>
 	 * <p>
-	 * Also, this code calls the protected method {@link #preModelBind()} to
-	 * allow subclasses to modify the binding characteristics before copying the
-	 * model fields to the view.
+	 * Also, this code calls the protected method {@link #preModelBind()} to allow subclasses to modify the binding characteristics before copying the model fields to the view.
 	 * </p>
 	 * 
 	 * @param model
@@ -162,8 +146,7 @@ public class AbeillePanel<T> extends JPanel {
 	}
 
 	/**
-	 * This method is invoked by the application code whenever it wants to copy
-	 * data from the view to the model.
+	 * This method is invoked by the application code whenever it wants to copy data from the view to the model.
 	 * 
 	 * @return <code>true</code> if successful, <code>false</code> otherwise
 	 */
@@ -196,7 +179,7 @@ public class AbeillePanel<T> extends JPanel {
 			try {
 				return getValue();
 			} catch (Exception e) {
-				//				YLogger.logException(e);
+				// YLogger.logException(e);
 				return null;
 			}
 		}
@@ -228,7 +211,7 @@ public class AbeillePanel<T> extends JPanel {
 
 		@Override
 		public void bind(Property property, Component view, UpdateTime updateTime) {
-			//			System.out.println("bind:" + view.getName() + " - " + view);
+			// System.out.println("bind:" + view.getName() + " - " + view);
 			if (view instanceof JRadioButton) {
 				button = (JRadioButton) view;
 				super.bind(property, view, updateTime);

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.awt.event.ActionEvent;
@@ -44,7 +41,7 @@ public class AutoSaveManager implements ActionListener {
 	public void restart() {
 		int interval = AppPreferences.getAutoSaveIncrement();
 
-		//convert to milliseconds
+		// convert to milliseconds
 		int delay = interval * 60 * 1000;
 		if (log.isDebugEnabled())
 			log.debug("Starting autosave manager; interval in seconds is " + (interval * 60)); //$NON-NLS-1$
@@ -68,8 +65,7 @@ public class AutoSaveManager implements ActionListener {
 	}
 
 	/**
-	 * Applications can use this to pause the timer. The {@link #restart()} method can be called at any time to reset
-	 * and start the timer.
+	 * Applications can use this to pause the timer. The {@link #restart()} method can be called at any time to reset and start the timer.
 	 */
 	public void pause() {
 		if (autoSaveTimer != null && autoSaveTimer.isRunning())
@@ -120,11 +116,11 @@ public class AutoSaveManager implements ActionListener {
 				}
 			}, "AutoSaveThread").start();
 		} catch (Throwable t) {
-			// If this routine fails, be sure the isSaving is turned off.  This should not be necessary:
+			// If this routine fails, be sure the isSaving is turned off. This should not be necessary:
 			// If the exception occurs anywhere before the .start() method of Thread, the boolean
-			// does not need to be reset anyway.  And if the .start() method is successful, this code
+			// does not need to be reset anyway. And if the .start() method is successful, this code
 			// will never be invoked, in which case the .run() method will decide when to set/reset
-			// the flag.  For safety's sake I retrieve the current value and report it if it's true, but
+			// the flag. For safety's sake I retrieve the current value and report it if it's true, but
 			// we shouldn't be able to get here in that case...
 			if (AppState.isSaving()) {
 				MapTool.showError(I18N.getString("AutoSaveManager.failed") + "<br/>\nand AppState.isSaving() is true!", t);

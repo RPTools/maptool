@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.Point;
@@ -68,7 +65,7 @@ public class ZoneView implements ModelChangeListener {
 	private final Map<PlayerView, VisibleAreaMeta> visibleAreaMap = new HashMap<PlayerView, VisibleAreaMeta>();
 	private final SortedMap<Double, Area> allLightAreaMap = new ConcurrentSkipListMap<Double, Area>(); // Hold all of our lights combined by lumens
 
-	//private AreaData topologyAreaData;
+	// private AreaData topologyAreaData;
 	private AreaTree topologyTree;
 	private Area tokenTopolgy;
 
@@ -81,8 +78,8 @@ public class ZoneView implements ModelChangeListener {
 	public Area getVisibleArea(PlayerView view) {
 		calculateVisibleArea(view);
 		ZoneView.VisibleAreaMeta visible = visibleAreaMap.get(view);
-		//		if (visible == null)
-		//			System.out.println("ZoneView: visible == null.  Please report this on our forum @ forum.rptools.net.  Thank you!");
+		// if (visible == null)
+		// System.out.println("ZoneView: visible == null. Please report this on our forum @ forum.rptools.net. Thank you!");
 		return visible != null ? visible.visibleArea : new Area();
 	}
 
@@ -112,13 +109,13 @@ public class ZoneView implements ModelChangeListener {
 	}
 
 	// Jamz: This function and such "AreaData" never seems to get used...either old or future code?
-	//	public AreaData getTopologyAreaData() {
-	//		if (topologyAreaData == null) {
-	//			topologyAreaData = new AreaData(zone.getTopology());
-	//			topologyAreaData.digest();
-	//		}
-	//		return topologyAreaData;
-	//	}
+	// public AreaData getTopologyAreaData() {
+	// if (topologyAreaData == null) {
+	// topologyAreaData = new AreaData(zone.getTopology());
+	// topologyAreaData.digest();
+	// }
+	// return topologyAreaData;
+	// }
 
 	private TreeMap<Double, Area> getLightSourceArea(Token baseToken, Token lightSourceToken) {
 		Map<String, TreeMap<Double, Area>> areaBySightMap = lightSourceCache.get(lightSourceToken.getId());
@@ -209,9 +206,9 @@ public class ZoneView implements ModelChangeListener {
 		}
 		// FIXME There was a bug report of a ConcurrentModificationException regarding drawableLightCache.
 		// I don't see how, but perhaps this code -- and the ones in flush() and flush(Token) -- should be
-		// wrapped in a synchronization block?  This method is probably called only on the same thread as
-		// getDrawableLights() but the two flush() methods may be called from different threads.  How to
-		// verify this with Eclipse?  Maybe the flush() methods should defer modifications to the EventDispatchingThread?
+		// wrapped in a synchronization block? This method is probably called only on the same thread as
+		// getDrawableLights() but the two flush() methods may be called from different threads. How to
+		// verify this with Eclipse? Maybe the flush() methods should defer modifications to the EventDispatchingThread?
 		Map<String, Set<DrawableLight>> lightMap = drawableLightCache.get(lightSourceToken.getId());
 		if (lightMap == null) {
 			lightMap = new HashMap<String, Set<DrawableLight>>();
@@ -242,7 +239,7 @@ public class ZoneView implements ModelChangeListener {
 		}
 		// Cache ?
 		Area tokenVisibleArea = tokenVisionCache.get(token.getId());
-		//System.out.println("tokenVisionCache size? " + tokenVisionCache.size());
+		// System.out.println("tokenVisionCache size? " + tokenVisionCache.size());
 
 		if (tokenVisibleArea != null)
 			return tokenVisibleArea;
@@ -250,7 +247,7 @@ public class ZoneView implements ModelChangeListener {
 		SightType sight = MapTool.getCampaign().getSightType(token.getSightType());
 		// More sanity checks; maybe sight type removed from campaign after token set?
 		if (sight == null) {
-			// TODO Should we turn off the token's HasSight flag?  Would speed things up for later...
+			// TODO Should we turn off the token's HasSight flag? Would speed things up for later...
 			return null;
 		}
 
@@ -313,8 +310,8 @@ public class ZoneView implements ModelChangeListener {
 			Area allLightArea = new Area();
 			for (Entry<Double, Area> light : allLightAreaMap.entrySet()) {
 				boolean isDarkness = false;
-				// Jamz: negative lumens were converted to absolute value + .5 to sort lights 
-				// in tree map, so non-integers == darkness and lights are draw/removed in order 
+				// Jamz: negative lumens were converted to absolute value + .5 to sort lights
+				// in tree map, so non-integers == darkness and lights are draw/removed in order
 				// of lumens and darkness with equal lumens are drawn second due to the added .5
 				if (light.getKey().intValue() != light.getKey())
 					isDarkness = true;
@@ -365,8 +362,8 @@ public class ZoneView implements ModelChangeListener {
 
 		@Override
 		public void done() {
-			lightsThreadPool.shutdown(); //always reclaim resources just in case?
-			//System.out.println("Time to calculated lights for token: " + baseToken.getName() + ", " + (System.currentTimeMillis() - startTime) + "ms");
+			lightsThreadPool.shutdown(); // always reclaim resources just in case?
+			// System.out.println("Time to calculated lights for token: " + baseToken.getName() + ", " + (System.currentTimeMillis() - startTime) + "ms");
 
 			return;
 		}
@@ -376,7 +373,7 @@ public class ZoneView implements ModelChangeListener {
 	 * 
 	 * @author Jamz
 	 * 
-	 * A Callable task add to the ExecutorCompletionService to combine lights as a threaded task
+	 *         A Callable task add to the ExecutorCompletionService to combine lights as a threaded task
 	 *
 	 */
 	private final class CombineLightsTask implements Callable<TreeMap<Double, Area>> {
@@ -527,7 +524,7 @@ public class ZoneView implements ModelChangeListener {
 			visibleAreaMap.clear();
 		}
 		// TODO: This fixes a bug with changing vision type, I don't like it though, it needs to be optimized back out
-		//		lightSourceCache.clear();
+		// lightSourceCache.clear();
 	}
 
 	private void calculateVisibleArea(PlayerView view) {
@@ -561,7 +558,7 @@ public class ZoneView implements ModelChangeListener {
 			} else {
 				// If we're viewing the map as a player and the token is not a PC or we're not the GM, then skip it.
 				// This used to be the code:
-				//				if ((token.getType() != Token.Type.PC && !view.isGMView() || (!view.isGMView() && MapTool.getPlayer().getRole() == Role.GM))) {
+				// if ((token.getType() != Token.Type.PC && !view.isGMView() || (!view.isGMView() && MapTool.getPlayer().getRole() == Role.GM))) {
 				if (!isGMview && (token.getType() != Token.Type.PC || MapTool.getPlayer().isGM())) {
 					continue;
 				}
@@ -576,7 +573,7 @@ public class ZoneView implements ModelChangeListener {
 			}
 		}
 
-		//System.out.println("calculateVisibleArea: " + (System.currentTimeMillis() - startTime) + "ms");
+		// System.out.println("calculateVisibleArea: " + (System.currentTimeMillis() - startTime) + "ms");
 	}
 
 	////
@@ -643,14 +640,14 @@ public class ZoneView implements ModelChangeListener {
 				topologyTree = null;
 				tokenTopolgy = null;
 				tokenVisibleAreaCache.clear();
-				//topologyAreaData = null;  // Jamz: This isn't used, probably never completed code.
+				// topologyAreaData = null; // Jamz: This isn't used, probably never completed code.
 			}
 
 		}
 	}
 
 	/**
-	 * @return 
+	 * @return
 	 * 
 	 */
 	private boolean processTokenAddChangeEvent(List<Token> tokens) {

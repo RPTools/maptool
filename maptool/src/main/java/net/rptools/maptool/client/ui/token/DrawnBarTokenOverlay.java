@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.token;
 
 import java.awt.Color;
@@ -37,9 +34,12 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
 	/**
 	 * Build the bar with all of the details
 	 * 
-	 * @param name Name of the overlay
-	 * @param aBarColor Color of the bar
-	 * @param aThickness Thickness of the bar
+	 * @param name
+	 *            Name of the overlay
+	 * @param aBarColor
+	 *            Color of the bar
+	 * @param aThickness
+	 *            Thickness of the bar
 	 */
 	public DrawnBarTokenOverlay(String name, Color aBarColor, int aThickness) {
 		super(name);
@@ -106,7 +106,10 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
 		return barColor;
 	}
 
-	/** @param barColor Setter for barColor */
+	/**
+	 * @param barColor
+	 *            Setter for barColor
+	 */
 	public void setBarColor(Color barColor) {
 		this.barColor = barColor;
 	}
@@ -116,7 +119,10 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
 		return thickness;
 	}
 
-	/** @param thickness Setter for thickness */
+	/**
+	 * @param thickness
+	 *            Setter for thickness
+	 */
 	public void setThickness(int thickness) {
 		this.thickness = thickness;
 	}

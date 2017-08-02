@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.campaignproperties;
 
 import java.awt.EventQueue;
@@ -215,10 +212,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 	}
 
 	/**
-	 * Given a string (normally from the JTextArea which holds the properties for a Property Type)
-	 * this method converts those lines into a List of EditTokenProperty objects.  It checks for
-	 * duplicates along the way, ignoring any it finds.  (Should produce a list of warnings to
-	 * indicate which ones are duplicates.  See the Light/Sight code for examples.)
+	 * Given a string (normally from the JTextArea which holds the properties for a Property Type) this method converts those lines into a List of EditTokenProperty objects. It checks for duplicates
+	 * along the way, ignoring any it finds. (Should produce a list of warnings to indicate which ones are duplicates. See the Light/Sight code for examples.)
 	 *
 	 * @param propertyText
 	 * @return
@@ -271,7 +266,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 						property.setDefaultValue(defaultVal);
 					}
 
-					//remove the default value from the end of the string...
+					// remove the default value from the end of the string...
 					line = line.substring(0, indexDefault);
 				}
 				// Suffix

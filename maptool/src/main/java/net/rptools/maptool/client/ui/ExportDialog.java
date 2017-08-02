@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui;
 
 import java.awt.Graphics2D;
@@ -59,9 +56,7 @@ import com.jeta.forms.gui.form.FormAccessor;
 /**
  * Creates a dialog for performing a screen capture to a PNG file.
  * <p>
- * This uses a modal dialog based on an Abeille form. It creates a PNG file at
- * the resolution of the 'board' image/tile. The file can be saved to disk or
- * sent to an FTP location.
+ * This uses a modal dialog based on an Abeille form. It creates a PNG file at the resolution of the 'board' image/tile. The file can be saved to disk or sent to an FTP location.
  * 
  * @return a dialog box
  */
@@ -111,8 +106,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	private boolean waitingForPostScreenshot = false;
 
 	/**
-	 * Only doing this because I don't expect more than one instance of this
-	 * modal dialog
+	 * Only doing this because I don't expect more than one instance of this modal dialog
 	 */
 	private static int instanceCount = 0;
 
@@ -130,17 +124,16 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 
 	//
 	// TODO: Abeille should auto-generate most of this code:
-	//   1. We shouldn't have to synchronize the names of variables manually
-	//   2. Specifying the name of a button in Abeille is the same as declaring a variable
-	//   3. This code is always the same for every form, aside from the var names
-	//   4. JAVA doesn't have a way to do abstract enumerated types, so we can't re-use the code except by copy/paste
-	//   5. Abeille seems to be abandonded at this point (July 2010). The owner replied as recently as July 2009, but
-	//      seems not to have followed up.
+	// 1. We shouldn't have to synchronize the names of variables manually
+	// 2. Specifying the name of a button in Abeille is the same as declaring a variable
+	// 3. This code is always the same for every form, aside from the var names
+	// 4. JAVA doesn't have a way to do abstract enumerated types, so we can't re-use the code except by copy/paste
+	// 5. Abeille seems to be abandonded at this point (July 2010). The owner replied as recently as July 2009, but
+	// seems not to have followed up.
 	//
 
 	/**
-	 * This enum is for ALL the radio buttons in the dialog, regardless of their
-	 * grouping.
+	 * This enum is for ALL the radio buttons in the dialog, regardless of their grouping.
 	 * <p>
 	 * The names of the enums should be the same as the button names.
 	 */
@@ -180,7 +173,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 
 		//
 		// Generic utility methods
-		//   NON-Static
+		// NON-Static
 		//
 		public void setChecked(boolean checked) {
 			form.getRadioButton(this.toString()).setSelected(checked);
@@ -195,8 +188,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 		}
 
 		/**
-		 * Shortcut to allow clean code and type-checking of invocations of
-		 * specific buttons
+		 * Shortcut to allow clean code and type-checking of invocations of specific buttons
 		 */
 		public void addActionListener(ActionListener listener) {
 			form.getRadioButton(this.toString()).addActionListener(listener);
@@ -253,18 +245,15 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 		private final boolean playerCanModify;
 
 		/**
-		 * Constructor, sets rules for export of this layer. 'Player' is in
-		 * reference to the Role type (Player vs. GM).
+		 * Constructor, sets rules for export of this layer. 'Player' is in reference to the Role type (Player vs. GM).
 		 */
 		ExportLayers(boolean playerCanModify) {
 			this.playerCanModify = playerCanModify;
 		}
 
 		/**
-		 * Stores the form this is attached to, so we don't have to store
-		 * duplicate data locally (like selected and enabled). Also perform some
-		 * error checking, since we _are_ duplicating the description of the
-		 * form itself (like what buttons it has).
+		 * Stores the form this is attached to, so we don't have to store duplicate data locally (like selected and enabled). Also perform some error checking, since we _are_ duplicating the
+		 * description of the form itself (like what buttons it has).
 		 * 
 		 * @param form
 		 *            The FormPanel this dialog is part of.
@@ -332,17 +321,12 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * Ensures that the user can only check/uncheck boxes as appropriate. For
-	 * example, if "fog" is not enabled on the map, it cannot be enabled for
-	 * export.
+	 * Ensures that the user can only check/uncheck boxes as appropriate. For example, if "fog" is not enabled on the map, it cannot be enabled for export.
 	 * <p>
-	 * This should get called during initialization and whenever the radio
-	 * buttons change.
+	 * This should get called during initialization and whenever the radio buttons change.
 	 * <p>
-	 * The GM and Players have different rules, to prevent players from gaining
-	 * knowledge they should not have using the screenshot (such as revealing
-	 * things under other things by disabling layers). Players can basically
-	 * only turn off tokens, to get an 'empty' version of the map.
+	 * The GM and Players have different rules, to prevent players from gaining knowledge they should not have using the screenshot (such as revealing things under other things by disabling layers).
+	 * Players can basically only turn off tokens, to get an 'empty' version of the map.
 	 */
 	public static void enforceButtonRules() {
 		if (!MapTool.getPlayer().isGM()) {
@@ -393,9 +377,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 		// The window uses about 1MB. Disposing frees this, but repeated uses
 		// will cause more memory fragmentation.
 		// MCL: I figure it's better to save the 1MB for low-mem systems,
-		//      but it would be even better to HIDE it, and then dispose() it
-		//      when the user clicks on the memory meter to free memory
-		//		setDefaultCloseOperation(HIDE_ON_CLOSE);
+		// but it would be even better to HIDE it, and then dispose() it
+		// when the user clicks on the memory meter to free memory
+		// setDefaultCloseOperation(HIDE_ON_CLOSE);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		//
@@ -534,10 +518,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * This is the top-level screen-capture routine. It sends the resulting PNG
-	 * image to the location previously selected by the user. TODO: It currently
-	 * calls {@link MapTool#takeMapScreenShot()} for "normal" screenshots, but
-	 * that's just until this code is considered stable enough.
+	 * This is the top-level screen-capture routine. It sends the resulting PNG image to the location previously selected by the user. TODO: It currently calls {@link MapTool#takeMapScreenShot()} for
+	 * "normal" screenshots, but that's just until this code is considered stable enough.
 	 * 
 	 * @throws Exception
 	 */
@@ -582,7 +564,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 						if (interactPanel.isSelected("METHOD_BUFFERED_IMAGE")) {
 							image = new BufferedImage(renderer.getWidth(), renderer.getHeight(), Transparency.OPAQUE);
 							final Graphics2D g = image.createGraphics();
-							//							g.setClip(0, 0, renderer.getWidth(), renderer.getHeight());
+							// g.setClip(0, 0, renderer.getWidth(), renderer.getHeight());
 							renderer.renderZone(g, view);
 							g.dispose();
 						} else {
@@ -668,9 +650,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * Turn off all JToggleButtons on the form. We don't care if we turn off
-	 * fields that are normally turned on, since {@link #enforceButtonRules()}
-	 * will turn them back on as appropriate.
+	 * Turn off all JToggleButtons on the form. We don't care if we turn off fields that are normally turned on, since {@link #enforceButtonRules()} will turn them back on as appropriate.
 	 */
 	private void resetExportSettings() {
 		FormAccessor fa = interactPanel.getFormAccessor();
@@ -706,8 +686,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * This is a preserves the layer settings on the Zone object. It should be
-	 * followed by restoreZone()
+	 * This is a preserves the layer settings on the Zone object. It should be followed by restoreZone()
 	 * 
 	 * @return the image to be saved to a file
 	 */
@@ -741,8 +720,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * This restores the layer settings on the Zone object. It should follow
-	 * setupZoneLayers().
+	 * This restores the layer settings on the Zone object. It should follow setupZoneLayers().
 	 * 
 	 * @return the image to be saved to a file
 	 */
@@ -757,18 +735,13 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * Finds the extents of the map, sets up zone to be captured. If the user is
-	 * the GM, the extents include every object and everything that has any
-	 * area, such as 'fog' and 'visibility' objects.
+	 * Finds the extents of the map, sets up zone to be captured. If the user is the GM, the extents include every object and everything that has any area, such as 'fog' and 'visibility' objects.
 	 * <p>
-	 * If a background tiling texture is used, the image is aligned to it, so
-	 * that it can be used on re-import as a new base map image.
+	 * If a background tiling texture is used, the image is aligned to it, so that it can be used on re-import as a new base map image.
 	 * <p>
-	 * If the user is a player (or GM posing as a player), the extents only go
-	 * as far as the revealed fog-of-war.
+	 * If the user is a player (or GM posing as a player), the extents only go as far as the revealed fog-of-war.
 	 * <p>
-	 * Must be followed by postScreenshot at some point, or the Zone will be
-	 * messed up.
+	 * Must be followed by postScreenshot at some point, or the Zone will be messed up.
 	 * 
 	 * @return the image to be saved
 	 */
@@ -779,8 +752,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 		boolean viewAsPlayer = ExportRadioButtons.VIEW_PLAYER.isChecked();
 
 		// First, figure out the 'extents' of the canvas
-		//   This will be later modified by the fog (for players),
-		//   and by the tiling texture (for re-importing)
+		// This will be later modified by the fog (for players),
+		// and by the tiling texture (for re-importing)
 		//
 		PlayerView view = new PlayerView(viewAsPlayer ? Player.Role.PLAYER : Player.Role.GM);
 		Rectangle extents = renderer.zoneExtents(view);
@@ -859,17 +832,17 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	//
 
 	private void switchToWaitPanel() {
-		//		remove(interactPanel);
-		//		add(waitPanel);
-		//		getRootPane().setDefaultButton(null);
-		//		pack();
+		// remove(interactPanel);
+		// add(waitPanel);
+		// getRootPane().setDefaultButton(null);
+		// pack();
 	}
 
 	private void switchToInteractPanel() {
-		//		remove(waitPanel);
-		//		add(interactPanel);
-		//		getRootPane().setDefaultButton((JButton) interactPanel.getButton("exportButton"));
-		//		pack();
+		// remove(waitPanel);
+		// add(interactPanel);
+		// getRootPane().setDefaultButton((JButton) interactPanel.getButton("exportButton"));
+		// pack();
 	}
 
 	private void createWaitPanel() {

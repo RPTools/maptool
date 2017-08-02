@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.token;
 
 import java.awt.Dimension;
@@ -47,13 +44,13 @@ public class TokenVblPanel extends JPanel {
 				if (!token.isSnapToScale()) {
 					return;
 				}
-				//double delta = e.getWheelRotation() > 0 ? -.1 : .1;
-				//double scale = token.getSizeScale() + delta;
+				// double delta = e.getWheelRotation() > 0 ? -.1 : .1;
+				// double scale = token.getSizeScale() + delta;
 
 				// Range
-				//scale = Math.max(.1, scale);
-				//scale = Math.min(3, scale);
-				//token.setSizeScale(scale);
+				// scale = Math.max(.1, scale);
+				// scale = Math.min(3, scale);
+				// token.setSizeScale(scale);
 				repaint();
 			}
 		});
@@ -70,13 +67,13 @@ public class TokenVblPanel extends JPanel {
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				old = MapTool.getFrame().getStatusMessage();
-				//MapTool.getFrame().setStatusMessage("Mouse Wheel to zoom; double-LClick to reset position and zoom");
+				// MapTool.getFrame().setStatusMessage("Mouse Wheel to zoom; double-LClick to reset position and zoom");
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				//				if (old != null)
-				//					//MapTool.getFrame().setStatusMessage(old);
+				// if (old != null)
+				// //MapTool.getFrame().setStatusMessage(old);
 			}
 
 			@Override

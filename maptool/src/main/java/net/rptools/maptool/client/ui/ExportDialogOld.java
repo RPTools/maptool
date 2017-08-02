@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui;
 
 import java.awt.Dimension;
@@ -51,11 +48,9 @@ import com.jeta.forms.components.panel.FormPanel;
 /**
  * Creates a dialog for performing a screen capture to a PNG file.
  * <p>
- * This uses a modal dialog based on an Abeille form.
- * It creates a PNG file at the resolution of the 'board' image/tile.
- * The file can be saved to disk or sent to an FTP location.
+ * This uses a modal dialog based on an Abeille form. It creates a PNG file at the resolution of the 'board' image/tile. The file can be saved to disk or sent to an FTP location.
  *
- * @return      a dialog box
+ * @return a dialog box
  */
 @SuppressWarnings("serial")
 public class ExportDialogOld extends JDialog {
@@ -65,12 +60,12 @@ public class ExportDialogOld extends JDialog {
 
 	//
 	// TODO: Abeille should auto-generate most of this code:
-	//   1. We shouldn't have to synchronize the names of variables manually
-	//   2. Specifying the name of a button in Abeille is the same as declaring a variable
-	//   3. This code is always the same for every form, aside from the var names
-	//   4. JAVA doesn't have a way to do abstract enumerated types, so we can't re-use the code except by copy/paste
-	//   5. Abeille seems to be abandonded at this point (July 2010). The owner replied as recently as July 2009, but
-	//      seems not to have followed up.
+	// 1. We shouldn't have to synchronize the names of variables manually
+	// 2. Specifying the name of a button in Abeille is the same as declaring a variable
+	// 3. This code is always the same for every form, aside from the var names
+	// 4. JAVA doesn't have a way to do abstract enumerated types, so we can't re-use the code except by copy/paste
+	// 5. Abeille seems to be abandonded at this point (July 2010). The owner replied as recently as July 2009, but
+	// seems not to have followed up.
 	//
 
 	/**
@@ -115,7 +110,7 @@ public class ExportDialogOld extends JDialog {
 
 		//
 		// Generic utility methods
-		//   NON-Static
+		// NON-Static
 		//
 		public void setChecked(boolean checked) {
 			form.getRadioButton(this.toString()).setSelected(checked);
@@ -187,20 +182,18 @@ public class ExportDialogOld extends JDialog {
 		private final boolean playerCanModify;
 
 		/**
-		 * Constructor, sets rules for export of this layer.
-		 * 'Player' is in reference to the Role type (Player vs. GM).
+		 * Constructor, sets rules for export of this layer. 'Player' is in reference to the Role type (Player vs. GM).
 		 */
 		ExportLayers(boolean playerCanModify) {
 			this.playerCanModify = playerCanModify;
 		}
 
 		/**
-		 * Stores the form this is attached to, so we don't have to store
-		 * duplicate data locally (like selected and enabled).
-		 * Also perform some error checking, since we _are_ duplicating the
+		 * Stores the form this is attached to, so we don't have to store duplicate data locally (like selected and enabled). Also perform some error checking, since we _are_ duplicating the
 		 * description of the form itself (like what buttons it has).
 		 *
-		 * @param form  The FormPanel this dialog is part of.
+		 * @param form
+		 *            The FormPanel this dialog is part of.
 		 */
 		public static void setForm(FormPanel form) {
 			ExportLayers.form = form;
@@ -265,18 +258,12 @@ public class ExportDialogOld extends JDialog {
 	}
 
 	/**
-	 * Ensures that the user can only check/uncheck boxes as appropriate.
-	 * For example, if "fog" is not enabled on the map, it cannot be
-	 * enabled for export.
+	 * Ensures that the user can only check/uncheck boxes as appropriate. For example, if "fog" is not enabled on the map, it cannot be enabled for export.
 	 * <p>
-	 * This should get called during initialization and whenever
-	 * the radio buttons change.
+	 * This should get called during initialization and whenever the radio buttons change.
 	 * <p>
-	 * The GM and Players have different rules,
-	 * to prevent players from gaining knowledge they should not have
-	 * using the screenshot (such as revealing things under other things
-	 * by disabling layers). Players can basically only turn off tokens,
-	 * to get an 'empty' version of the map.
+	 * The GM and Players have different rules, to prevent players from gaining knowledge they should not have using the screenshot (such as revealing things under other things by disabling layers).
+	 * Players can basically only turn off tokens, to get an 'empty' version of the map.
 	 */
 	public static void enforceButtonRules() {
 		if (!MapTool.getPlayer().isGM()) {
@@ -321,9 +308,9 @@ public class ExportDialogOld extends JDialog {
 		// The window uses about 1MB. Disposing frees this, but repeated uses
 		// will cause more memory fragmentation.
 		// MCL: I figure it's better to save the 1MB for low-mem systems,
-		//      but it would be even better to HIDE it, and then dispose() it
-		//      when the user clicks on the memory meter to free memory
-		//		setDefaultCloseOperation(HIDE_ON_CLOSE);
+		// but it would be even better to HIDE it, and then dispose() it
+		// when the user clicks on the memory meter to free memory
+		// setDefaultCloseOperation(HIDE_ON_CLOSE);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		//
@@ -436,11 +423,8 @@ public class ExportDialogOld extends JDialog {
 	}
 
 	/**
-	 * This is the top-level screen-capture routine. It sends the resulting
-	 * PNG image to the location previously selected by the user.
-	 * TODO: It currently calls {@link MapTool.takeMapScreenShot()} for
-	 * "normal" screenshots, but that's just until this code is considered
-	 * stable enough.
+	 * This is the top-level screen-capture routine. It sends the resulting PNG image to the location previously selected by the user. TODO: It currently calls {@link MapTool.takeMapScreenShot()} for
+	 * "normal" screenshots, but that's just until this code is considered stable enough.
 	 * 
 	 * @throws Exception
 	 */
@@ -499,8 +483,7 @@ public class ExportDialogOld extends JDialog {
 	}
 
 	/**
-	 * This is a wrapper that preserves the layer settings on the Zone object.
-	 * It calls {@link takeEntireMapScreenShot()} to to the real work.
+	 * This is a wrapper that preserves the layer settings on the Zone object. It calls {@link takeEntireMapScreenShot()} to to the real work.
 	 * 
 	 * @return the image to be saved to a file
 	 */
@@ -537,9 +520,9 @@ public class ExportDialogOld extends JDialog {
 
 		//
 		// screenshot!
-		//   MCL: NOTE: while turning off Fog, there is a possibility the players
-		//    may see the map flash for a second with fog turned off-- need to look into
-		//    whether this is true.
+		// MCL: NOTE: while turning off Fog, there is a possibility the players
+		// may see the map flash for a second with fog turned off-- need to look into
+		// whether this is true.
 		BufferedImage image = null;
 		try {
 			image = takeEntireMapScreenShot();
@@ -554,22 +537,19 @@ public class ExportDialogOld extends JDialog {
 			Zone.Layer.GM.setEnabled(savedHidden);
 			Zone.Layer.OBJECT.setEnabled(savedObject);
 			Zone.Layer.BACKGROUND.setEnabled(savedBackground);
-			//			MapTool.getFrame().getCurrentZoneRenderer().invalidateCurrentViewCache();
+			// MapTool.getFrame().getCurrentZoneRenderer().invalidateCurrentViewCache();
 		}
 
 		return image;
 	}
 
 	/**
-	 * Finds the extents of the map, then takes a 'screenshot' of that area.
-	 * If the user is the GM, the extents include every object and everything
-	 * that has any area, such as 'fog' and 'visibility' objects.
+	 * Finds the extents of the map, then takes a 'screenshot' of that area. If the user is the GM, the extents include every object and everything that has any area, such as 'fog' and 'visibility'
+	 * objects.
 	 * <p>
-	 * If a background tiling texture is used, the image is aligned to it, so
-	 * that it can be used on re-import as a new base map image.
+	 * If a background tiling texture is used, the image is aligned to it, so that it can be used on re-import as a new base map image.
 	 * <p>
-	 * If the user is a player (or GM posing as a player), the extents only
-	 * go as far as the revealed fog-of-war.
+	 * If the user is a player (or GM posing as a player), the extents only go as far as the revealed fog-of-war.
 	 * 
 	 * @return the image to be saved
 	 */
@@ -583,8 +563,8 @@ public class ExportDialogOld extends JDialog {
 
 		//
 		// First, figure out the 'extents' of the canvas
-		//   This will be later modified by the fog (for players),
-		//   and by the tiling texture (for re-importing)
+		// This will be later modified by the fog (for players),
+		// and by the tiling texture (for re-importing)
 		//
 		final PlayerView view = new PlayerView(viewAsPlayer ? Player.Role.PLAYER : Player.Role.GM);
 		Rectangle extents = renderer.zoneExtents(view);
@@ -657,8 +637,8 @@ public class ExportDialogOld extends JDialog {
 
 		// Finally, draw the image.
 		// Copied this thread concept from the original screenshot code in MapTool.
-		//  Have to do this on the EDT so that there aren't any odd side effects
-		//  of rendering using a renderer that's on screen.
+		// Have to do this on the EDT so that there aren't any odd side effects
+		// of rendering using a renderer that's on screen.
 
 		try {
 			renderer.setZoneScale(s);

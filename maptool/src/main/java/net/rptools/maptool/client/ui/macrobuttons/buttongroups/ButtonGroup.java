@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.macrobuttons.buttongroups;
 
 import javax.swing.JLabel;
@@ -81,7 +78,7 @@ public class ButtonGroup extends AbstractButtonGroup {
 	}
 
 	public void drop(DropTargetDropEvent event) {
-		//System.out.println("BG: drop!");
+		// System.out.println("BG: drop!");
 		String panelClass = getPanelClass();
 
 		try {
@@ -152,7 +149,7 @@ public class ButtonGroup extends AbstractButtonGroup {
 				// if this happens, it's a bug
 				throw new Exception(I18N.getText("msg.error.macro.buttonGroupDnDFail"));
 			}
-			//System.out.println("drop accepted");
+			// System.out.println("drop accepted");
 			event.dropComplete(true);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -192,42 +189,19 @@ public class ButtonGroup extends AbstractButtonGroup {
 		return prefSize;
 	}
 
-	/* The following version of getPreferredSize allows multiple small groups to flow on one row.  
-	 * However it has some glitches in calculating sizes, and makes it harder to find a spot to 
-	 * right-click/drop things on since it doesn't extend the full width of the panel.  Not using
-	 * until the kinks are worked out.
-		@Override
-		public Dimension getPreferredSize() {
-			FlowLayout layout = (FlowLayout) getLayout();
-			Insets insets = getInsets();
-			int availableWidth = getPanel().getAvailableWidth() - insets.left - insets.right;
-			// This isn't exact, but hopefully it's close enough
-			int height = insets.top + insets.bottom + layout.getVgap();
-			int width = 0;
-			int rowHeight = 0;
-			int rowWidth = insets.left + layout.getHgap() + insets.right;
-			int maxRowWidth = 0;
-			for (Component c : getComponents()) {
-				Dimension cSize = c.getPreferredSize();
-				if (rowWidth + cSize.width + layout.getHgap() + 15 > availableWidth && rowWidth > 0) {
-					maxRowWidth = Math.max(maxRowWidth, rowWidth);
-					height += rowHeight + layout.getVgap(); 
-					System.out.println("***** "+getPanelClass()+":"+getGroupClass()+":"+getGroupLabel()+" New Row, Size: "+maxRowWidth+", "+height);
-					rowHeight = 0;
-					rowWidth = insets.left + layout.getHgap() + insets.right;
-				}
-				rowWidth += cSize.width + layout.getHgap();
-				rowHeight = Math.max(cSize.height, rowHeight);
-			}
-			height += rowHeight;
-			maxRowWidth = Math.max(maxRowWidth, rowWidth);
-			System.out.println("***** "+getPanelClass()+":"+getGroupClass()+":"+getGroupLabel()+" New Row, Size: "+maxRowWidth+", "+height);
-			width = maxRowWidth; // always use the full width for the general area
-			Dimension prefSize = new Dimension(width, height);
-			System.out.println("***** "+getPanelClass()+":"+getGroupClass()+":"+getGroupLabel()+" PREFERRED SIZE: "+width+", "+height);
-			return prefSize;
-		}
-	*/
+	/*
+	 * The following version of getPreferredSize allows multiple small groups to flow on one row. However it has some glitches in calculating sizes, and makes it harder to find a spot to
+	 * right-click/drop things on since it doesn't extend the full width of the panel. Not using until the kinks are worked out.
+	 * 
+	 * @Override public Dimension getPreferredSize() { FlowLayout layout = (FlowLayout) getLayout(); Insets insets = getInsets(); int availableWidth = getPanel().getAvailableWidth() - insets.left -
+	 * insets.right; // This isn't exact, but hopefully it's close enough int height = insets.top + insets.bottom + layout.getVgap(); int width = 0; int rowHeight = 0; int rowWidth = insets.left +
+	 * layout.getHgap() + insets.right; int maxRowWidth = 0; for (Component c : getComponents()) { Dimension cSize = c.getPreferredSize(); if (rowWidth + cSize.width + layout.getHgap() + 15 >
+	 * availableWidth && rowWidth > 0) { maxRowWidth = Math.max(maxRowWidth, rowWidth); height += rowHeight + layout.getVgap(); System.out.println("***** "+getPanelClass()+":"+getGroupClass()+":"+
+	 * getGroupLabel()+" New Row, Size: "+maxRowWidth+", "+height); rowHeight = 0; rowWidth = insets.left + layout.getHgap() + insets.right; } rowWidth += cSize.width + layout.getHgap(); rowHeight =
+	 * Math.max(cSize.height, rowHeight); } height += rowHeight; maxRowWidth = Math.max(maxRowWidth, rowWidth); System.out.println("***** "+getPanelClass()+":"+getGroupClass()+":"+
+	 * getGroupLabel()+" New Row, Size: "+maxRowWidth+", "+height); width = maxRowWidth; // always use the full width for the general area Dimension prefSize = new Dimension(width, height);
+	 * System.out.println("***** "+getPanelClass()+":"+getGroupClass()+":"+ getGroupLabel()+" PREFERRED SIZE: "+width+", "+height); return prefSize; }
+	 */
 
 	public List<MacroButton> getButtons() {
 		List<MacroButton> myButtons = new ArrayList<MacroButton>();

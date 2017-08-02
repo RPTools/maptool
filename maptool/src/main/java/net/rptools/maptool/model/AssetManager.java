@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.io.BufferedInputStream;
@@ -59,8 +56,7 @@ public class AssetManager {
 	private static boolean usePersistentCache;
 
 	/**
-	 * A list of listeners which should be notified when the asset associated with a given MD5 sum has finished
-	 * downloading.
+	 * A list of listeners which should be notified when the asset associated with a given MD5 sum has finished downloading.
 	 */
 	private static Map<MD5Key, List<AssetAvailableListener>> assetListenerListMap = new ConcurrentHashMap<MD5Key, List<AssetAvailableListener>>();
 
@@ -80,8 +76,7 @@ public class AssetManager {
 	}
 
 	/**
-	 * Brute force clear asset cache... TODO: Create preferences and filter to
-	 * clear cache automatically by age of asset
+	 * Brute force clear asset cache... TODO: Create preferences and filter to clear cache automatically by age of asset
 	 * 
 	 * @author Jamz
 	 * @since 1.4.0.1
@@ -99,8 +94,7 @@ public class AssetManager {
 	}
 
 	/**
-	 * Remove all existing repositories and load all the repositories from the
-	 * currently loaded campaign.
+	 * Remove all existing repositories and load all the repositories from the currently loaded campaign.
 	 */
 	public static void updateRepositoryList() {
 		assetLoader.removeAllRepositories();
@@ -110,9 +104,8 @@ public class AssetManager {
 	}
 
 	/**
-	 * Determine if the asset is currently being requested. While an asset is being loaded it will be marked as
-	 * requested and this function will return true. Once the asset is done loading this function will return false and
-	 * the asset will be available from the cache.
+	 * Determine if the asset is currently being requested. While an asset is being loaded it will be marked as requested and this function will return true. Once the asset is done loading this
+	 * function will return false and the asset will be available from the cache.
 	 * 
 	 * @param key
 	 *            MD5Key of asset being requested
@@ -261,8 +254,7 @@ public class AssetManager {
 	}
 
 	/**
-	 * Get the asset from the cache. If the asset is not currently available, will return null. Does not request the
-	 * asset from the server
+	 * Get the asset from the cache. If the asset is not currently available, will return null. Does not request the asset from the server
 	 * 
 	 * @param id
 	 *            MD5 of the asset requested
@@ -353,7 +345,7 @@ public class AssetManager {
 	 * 
 	 * @param id
 	 *            MD5 of the asset to load from the server
-	 * @return 
+	 * @return
 	 */
 	public static Asset requestAssetFromServer(MD5Key id) {
 
@@ -366,8 +358,7 @@ public class AssetManager {
 	}
 
 	/**
-	 * Retrieve the asset from the persistent cache. If the asset is not in the cache, or loading from the cache failed
-	 * then this function returns null.
+	 * Retrieve the asset from the persistent cache. If the asset is not in the cache, or loading from the cache failed then this function returns null.
 	 * 
 	 * @param id
 	 *            MD5 of the requested asset
@@ -552,9 +543,8 @@ public class AssetManager {
 	}
 
 	/**
-	 * Store an absolute path to where this asset exists. Perhaps this should be saved in a single data structure that
-	 * is read/written when it's modified? This would allow the fileFilterText field from the AssetPanel the option of
-	 * searching through all directories and not just the current one. FJE
+	 * Store an absolute path to where this asset exists. Perhaps this should be saved in a single data structure that is read/written when it's modified? This would allow the fileFilterText field
+	 * from the AssetPanel the option of searching through all directories and not just the current one. FJE
 	 * 
 	 * @param image
 	 */
@@ -689,8 +679,7 @@ public class AssetManager {
 	}
 
 	/**
-	 * Recursively search from the rootDir, filtering files based on fileFilter, and store a reference to every file
-	 * seen.
+	 * Recursively search from the rootDir, filtering files based on fileFilter, and store a reference to every file seen.
 	 * 
 	 * @param rootDir
 	 *            Starting directory to recurse from
@@ -722,17 +711,14 @@ public class AssetManager {
 
 	/**
 	 * <p>
-	 * This method accepts the name of a repository (as it appears in the CampaignProperties) and updates it by adding
-	 * the additional mappings that are in <code>add</code>.
+	 * This method accepts the name of a repository (as it appears in the CampaignProperties) and updates it by adding the additional mappings that are in <code>add</code>.
 	 * </p>
 	 * <p>
-	 * This method first retrieves the mapping from the AssetLoader. It then adds in the new assets. Last, it has to
-	 * create the new index file. The index file should be stored in the local repository cache. Note that this function
-	 * <b>does not</b> update the original (network storage) repository location.
+	 * This method first retrieves the mapping from the AssetLoader. It then adds in the new assets. Last, it has to create the new index file. The index file should be stored in the local repository
+	 * cache. Note that this function <b>does not</b> update the original (network storage) repository location.
 	 * </p>
 	 * <p>
-	 * If the calling function does not update the network storage for <b>index.gz</b>, a restart of MapTool will lose
-	 * the information when the index is downloaded again.
+	 * If the calling function does not update the network storage for <b>index.gz</b>, a restart of MapTool will lose the information when the index is downloaded again.
 	 * </p>
 	 * 
 	 * @param repo
@@ -756,13 +742,11 @@ public class AssetManager {
 
 	/**
 	 * <p>
-	 * Constructs a set of all assets in the given list of repositories, then builds a map of <code>MD5Key</code> and
-	 * <code>Asset</code> for all assets that do not appear in that set.
+	 * Constructs a set of all assets in the given list of repositories, then builds a map of <code>MD5Key</code> and <code>Asset</code> for all assets that do not appear in that set.
 	 * </p>
 	 * <p>
-	 * This provides the calling function with a list of all assets currently in use by the campaign that do not appear
-	 * in one of the listed repositories. It's entirely possible that the asset is in a different repository or in none
-	 * at all.
+	 * This provides the calling function with a list of all assets currently in use by the campaign that do not appear in one of the listed repositories. It's entirely possible that the asset is in a
+	 * different repository or in none at all.
 	 * </p>
 	 * 
 	 * @param repos
@@ -783,12 +767,11 @@ public class AssetManager {
 		}
 
 		/*
-		 * The 'aggregate' now holds the sum total of all asset keys that are in repositories. Now we go through the
-		 * 'assetMap' and copy over <K,V> pairs that are NOT in 'aggregate' to our 'missing' Map.
+		 * The 'aggregate' now holds the sum total of all asset keys that are in repositories. Now we go through the 'assetMap' and copy over <K,V> pairs that are NOT in 'aggregate' to our 'missing'
+		 * Map.
 		 * 
-		 * Unfortunately, the repository is a Map<String, String> while the return value is going to be a Map<MD5Key,
-		 * Asset>, which means each individual entry needs to be checked and references copied. If both were the same
-		 * data type, converting both to Set<String> would allow for an addAll() and removeAll() and be done with it!
+		 * Unfortunately, the repository is a Map<String, String> while the return value is going to be a Map<MD5Key, Asset>, which means each individual entry needs to be checked and references
+		 * copied. If both were the same data type, converting both to Set<String> would allow for an addAll() and removeAll() and be done with it!
 		 */
 		Map<MD5Key, Asset> missing = new HashMap<MD5Key, Asset>(Math.min(assetMap.size(), aggregate.size()));
 		for (MD5Key key : assetMap.keySet()) {

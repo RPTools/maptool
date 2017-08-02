@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.commandpanel;
 
 import java.awt.Color;
@@ -159,9 +156,8 @@ public class MessagePanel extends JPanel {
 	}
 
 	/*
-	 * We use ASCII control characters to mark off the rolls so that there's no limitation on what (printable)
-	 * characters the output can include Rolls look like "\036roll output\036" or "\036tooltip\037roll output\036" or
-	 * "\036\001format info\002roll output\036" or "\036\001format info\002tooltip\037roll output\036"
+	 * We use ASCII control characters to mark off the rolls so that there's no limitation on what (printable) characters the output can include Rolls look like "\036roll output\036" or
+	 * "\036tooltip\037roll output\036" or "\036\001format info\002roll output\036" or "\036\001format info\002tooltip\037roll output\036"
 	 */
 	private static Pattern roll_pattern = Pattern.compile("\036(?:\001([^\002]*)\002)?([^\036\037]*)(?:\037([^\036]*))?\036");
 
@@ -210,7 +206,7 @@ public class MessagePanel extends JPanel {
 					output = text.toString();
 				}
 				// Auto inline expansion for {HTTP|HTTPS} URLs
-				//				output = output.replaceAll("(^|\\s|>|\002)(https?://[\\w.%-/~?&+#=]+)", "$1<a href='$2'>$2</a>");
+				// output = output.replaceAll("(^|\\s|>|\002)(https?://[\\w.%-/~?&+#=]+)", "$1<a href='$2'>$2</a>");
 				output = output.replaceAll("(^|\\s|>|\002)(https?://[^<>\002\003]+)", "$1<a href='$2'>$2</a>");
 
 				if (!message.getSource().equals(MapTool.getPlayer().getName())) {

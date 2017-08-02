@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.io.UnsupportedEncodingException;
@@ -280,8 +277,7 @@ public class StringFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Formats a string using the String.format() rules, as well as replacing
-	 * any values in %{} with the contents of the variable.
+	 * Formats a string using the String.format() rules, as well as replacing any values in %{} with the contents of the variable.
 	 * 
 	 * @param string
 	 *            The string to format.
@@ -301,7 +297,7 @@ public class StringFunctions extends AbstractFunction {
 				m.appendReplacement(sb, resolver.getVariable(m.group(1)).toString());
 			} catch (NullPointerException npe) {
 				// FJE Added catch block so that NPE leaves original format intact in the output string
-				//				m.appendReplacement(sb, m.group(1).toString());
+				// m.appendReplacement(sb, m.group(1).toString());
 			}
 		}
 		m.appendTail(sb);
@@ -312,7 +308,7 @@ public class StringFunctions extends AbstractFunction {
 
 		Object[] argArray = args.toArray();
 
-		//Change all integers in BigDecimal to BigIntegers so formating specifiers work correctly.
+		// Change all integers in BigDecimal to BigIntegers so formating specifiers work correctly.
 		for (int i = 0; i < argArray.length; i++) {
 			if (argArray[i] instanceof BigDecimal) {
 				BigDecimal bd = (BigDecimal) argArray[i];
@@ -334,8 +330,7 @@ public class StringFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Splits up a string based on a pattern and returns s string delimited
-	 * list.
+	 * Splits up a string based on a pattern and returns s string delimited list.
 	 * 
 	 * @param string
 	 *            The string to split up.
@@ -406,9 +401,7 @@ public class StringFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Replaces a pattern in a string a certain number of times. The pattern and
-	 * replacement strings follow the same rules as in the repalceFirst() and
-	 * replaceAll() methods in String.
+	 * Replaces a pattern in a string a certain number of times. The pattern and replacement strings follow the same rules as in the repalceFirst() and replaceAll() methods in String.
 	 * 
 	 * @param string
 	 *            The string to do the replacement on.
@@ -439,9 +432,7 @@ public class StringFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Replaces all the occurrences of a pattern in a string. The pattern and
-	 * replacement strings follow the same rules as in the repalceFirst() and
-	 * replaceAll() methods in String.
+	 * Replaces all the occurrences of a pattern in a string. The pattern and replacement strings follow the same rules as in the repalceFirst() and replaceAll() methods in String.
 	 * 
 	 * @param string
 	 *            The string to do the replacement on.
@@ -456,8 +447,7 @@ public class StringFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Matches the pattern against the input string and set variables in the
-	 * resolver with the capture groups
+	 * Matches the pattern against the input string and set variables in the resolver with the capture groups
 	 * 
 	 * @param resolver
 	 *            The variable resolver to set the variables in.
@@ -468,16 +458,9 @@ public class StringFunctions extends AbstractFunction {
 	 * @return The number of matches that were found
 	 * @throws ParserException
 	 * 
-	 *             Variables that are set in the variable resolver.
-	 *             match.groupCount = The number of capture groups in the
-	 *             pattern. {matchNo} is a sequence used to differentiate
-	 *             different calls to strfind match.{matchNo}.matchCount = The
-	 *             number of matches found. match.{matchNo}.m{M}.group{G} = The
-	 *             matching string for Match {M} and Group number {G}.
-	 *             match.{matchNo}.m{M}.group{G}.start = The start of Group
-	 *             number {G} in Match Number {M}
-	 *             match.{matchNo}.m{M}.group{G}.end = The end of Group number
-	 *             {G} in Match Number {M}
+	 *             Variables that are set in the variable resolver. match.groupCount = The number of capture groups in the pattern. {matchNo} is a sequence used to differentiate different calls to
+	 *             strfind match.{matchNo}.matchCount = The number of matches found. match.{matchNo}.m{M}.group{G} = The matching string for Match {M} and Group number {G}.
+	 *             match.{matchNo}.m{M}.group{G}.start = The start of Group number {G} in Match Number {M} match.{matchNo}.m{M}.group{G}.end = The end of Group number {G} in Match Number {M}
 	 */
 	public BigDecimal stringFind(VariableResolver resolver, String str, String pattern) throws ParserException {
 		Pattern p = Pattern.compile(pattern);

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model.drawing;
 
 import java.awt.Graphics2D;
@@ -30,8 +27,7 @@ import net.rptools.maptool.model.ZonePoint;
  * A drawing tool that will draw a line template between 2 vertices.
  * 
  * @author jgorrell
- * @version $Revision: 5967 $ $Date: 2013-06-02 15:05:50 -0400 (Sun, 02 Jun
- *          2013) $ $Author: azhrei_fje $
+ * @version $Revision: 5967 $ $Date: 2013-06-02 15:05:50 -0400 (Sun, 02 Jun 2013) $ $Author: azhrei_fje $
  */
 public class LineTemplate extends AbstractTemplate {
 	/*---------------------------------------------------------------------------------------------
@@ -59,8 +55,7 @@ public class LineTemplate extends AbstractTemplate {
 	private ArrayList<CellPoint> pool;
 
 	/**
-	 * The line is drawn in this quadrant. A string is used as a hack to get
-	 * around the hessian library's problem w/ serialization of enums
+	 * The line is drawn in this quadrant. A string is used as a hack to get around the hessian library's problem w/ serialization of enums
 	 */
 	private String quadrant = null;
 
@@ -74,8 +69,7 @@ public class LineTemplate extends AbstractTemplate {
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintArea(java.awt.Graphics2D,
-	 *      int, int, int, int, int, int)
+	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintArea(java.awt.Graphics2D, int, int, int, int, int, int)
 	 */
 	@Override
 	protected void paintArea(Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance) {
@@ -83,11 +77,9 @@ public class LineTemplate extends AbstractTemplate {
 	}
 
 	/**
-	 * This method is cheating, the distance parameter was replaced with the
-	 * offset into the path.
+	 * This method is cheating, the distance parameter was replaced with the offset into the path.
 	 * 
-	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintBorder(java.awt.Graphics2D,
-	 *      int, int, int, int, int, int)
+	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintBorder(java.awt.Graphics2D, int, int, int, int, int, int)
 	 */
 	@Override
 	protected void paintBorder(Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int pElement) {
@@ -121,8 +113,7 @@ public class LineTemplate extends AbstractTemplate {
 	}
 
 	/**
-	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paint(java.awt.Graphics2D,
-	 *      boolean, boolean)
+	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#paint(java.awt.Graphics2D, boolean, boolean)
 	 */
 	@Override
 	protected void paint(Graphics2D g, boolean border, boolean area) {
@@ -231,7 +222,7 @@ public class LineTemplate extends AbstractTemplate {
 				} else if (Math.floor(yValue) == y) {
 					path.add(getPointFromPool(x + 1, y));
 				} else {
-					//					System.err.println("I can't do math: dx=" + dx + " dy=" + dy + " m=" + m + " x=" + x + " xValue=" + xValue + " y=" + y + " yValue=" + yValue);
+					// System.err.println("I can't do math: dx=" + dx + " dy=" + dy + " m=" + m + " x=" + x + " xValue=" + xValue + " y=" + y + " yValue=" + yValue);
 					return path;
 				} // endif
 				p = path.get(path.size() - 1);
@@ -321,8 +312,7 @@ public class LineTemplate extends AbstractTemplate {
 	}
 
 	/**
-	 * Clear the current path. This will cause it to be recalculated during the
-	 * next draw.
+	 * Clear the current path. This will cause it to be recalculated during the next draw.
 	 */
 	public void clearPath() {
 		if (path != null)

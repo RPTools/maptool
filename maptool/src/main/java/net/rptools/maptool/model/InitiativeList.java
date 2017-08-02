@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.beans.PropertyChangeEvent;
@@ -29,9 +26,8 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 
 /**
- * All of the tokens currently being shown in the initiative list. It includes a reference to all
- * the tokens in order, a reference to the current token, a displayable initiative value and a
- * hold state for each token.
+ * All of the tokens currently being shown in the initiative list. It includes a reference to all the tokens in order, a reference to the current token, a displayable initiative value and a hold state
+ * for each token.
  * 
  * @author Jay
  */
@@ -72,9 +68,8 @@ public class InitiativeList implements Serializable {
 	private GUID zoneId;
 
 	/**
-	 * Hold the update when this variable is greater than 0. Some methods need to call 
-	 * {@link #updateServer()} when they are called, but they also get called by other 
-	 * methods that update the server. This keeps it from happening multiple times.
+	 * Hold the update when this variable is greater than 0. Some methods need to call {@link #updateServer()} when they are called, but they also get called by other methods that update the server.
+	 * This keeps it from happening multiple times.
 	 */
 	private transient int holdUpdate;
 
@@ -129,7 +124,8 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Create an initiative list for a zone.
 	 * 
-	 * @param aZone The zone that owns this initiative list.
+	 * @param aZone
+	 *            The zone that owns this initiative list.
 	 */
 	public InitiativeList(Zone aZone) {
 		setZone(aZone);
@@ -142,7 +138,8 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Get the token initiative data at the passed index. Allows the other state to be set.
 	 * 
-	 * @param index Index of the token initiative data needed. 
+	 * @param index
+	 *            Index of the token initiative data needed.
 	 * @return The token initiative data for the passed index.
 	 */
 	public TokenInitiative getTokenInitiative(int index) {
@@ -161,7 +158,8 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Get the token at the passed index.
 	 * 
-	 * @param index Index of the token needed. 
+	 * @param index
+	 *            Index of the token needed.
 	 * @return The token for the passed index.
 	 */
 	public Token getToken(int index) {
@@ -171,8 +169,10 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Insert a new token into the initiative.
 	 * 
-	 * @param index Insert the token here.
-	 * @param token Insert this token.
+	 * @param index
+	 *            Insert the token here.
+	 * @param token
+	 *            Insert this token.
 	 * @return The token initiative value that holds the token.
 	 */
 	public TokenInitiative insertToken(int index, Token token) {
@@ -192,7 +192,8 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Insert a new token into the initiative.
 	 * 
-	 * @param tokens Insert these tokens.
+	 * @param tokens
+	 *            Insert these tokens.
 	 */
 	public void insertTokens(List<Token> tokens) {
 		startUnitOfWork();
@@ -204,7 +205,8 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Find the index of the passed token.
 	 * 
-	 * @param token Search for this token.
+	 * @param token
+	 *            Search for this token.
 	 * @return A list of the indexes found for the listed token
 	 */
 	public List<Integer> indexOf(Token token) {
@@ -218,7 +220,8 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Find the index of the passed token initiative.
 	 * 
-	 * @param ti Search for this token initiative instance
+	 * @param ti
+	 *            Search for this token initiative instance
 	 * @return The index of the token initiative that was found or -1 if the token initiative was not found;
 	 */
 	public int indexOf(TokenInitiative ti) {
@@ -231,7 +234,8 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Remove a token from the initiative.
 	 * 
-	 * @param index Remove the token at this index.
+	 * @param index
+	 *            Remove the token at this index.
 	 * @return The token that was removed.
 	 */
 	public Token removeToken(int index) {
@@ -264,7 +268,10 @@ public class InitiativeList implements Serializable {
 		return current;
 	}
 
-	/** @param aCurrent Setter for the current to set */
+	/**
+	 * @param aCurrent
+	 *            Setter for the current to set
+	 */
 	public void setCurrent(int aCurrent) {
 		if (current == aCurrent)
 			return;
@@ -310,7 +317,10 @@ public class InitiativeList implements Serializable {
 		return round;
 	}
 
-	/** @param aRound Setter for the round to set */
+	/**
+	 * @param aRound
+	 *            Setter for the round to set
+	 */
 	public void setRound(int aRound) {
 		if (round == aRound)
 			return;
@@ -324,7 +334,8 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Add a listener to any property change.
 	 * 
-	 * @param listener The listener to be added.
+	 * @param listener
+	 *            The listener to be added.
 	 */
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		getPCS().addPropertyChangeListener(listener);
@@ -333,8 +344,10 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Add a listener to the given property name
 	 * 
-	 * @param propertyName Add the listener to this property name.
-	 * @param listener The listener to be added.
+	 * @param propertyName
+	 *            Add the listener to this property name.
+	 * @param listener
+	 *            The listener to be added.
 	 */
 	public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
 		getPCS().addPropertyChangeListener(propertyName, listener);
@@ -343,7 +356,8 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Remove a listener for all property changes.
 	 * 
-	 * @param listener The listener to be removed.
+	 * @param listener
+	 *            The listener to be removed.
 	 */
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		getPCS().removePropertyChangeListener(listener);
@@ -352,8 +366,10 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Remove a listener from a given property name
 	 * 
-	 * @param propertyName Remove the listener from this property name.
-	 * @param listener The listener to be removed.
+	 * @param propertyName
+	 *            Remove the listener from this property name.
+	 * @param listener
+	 *            The listener to be removed.
 	 */
 	public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
 		getPCS().removePropertyChangeListener(propertyName, listener);
@@ -380,7 +396,8 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Finish the current unit of work on a single initiative item and update the server.
 	 * 
-	 * @param ti Only need to update this token initiative.
+	 * @param ti
+	 *            Only need to update this token initiative.
 	 */
 	public void finishUnitOfWork(TokenInitiative ti) {
 		assert holdUpdate > 0 : "Trying to close unit of work when one is not open.";
@@ -396,7 +413,7 @@ public class InitiativeList implements Serializable {
 	}
 
 	/**
-	 * Remove all of the tokens from the model and clear round and current 
+	 * Remove all of the tokens from the model and clear round and current
 	 */
 	public void clearModel() {
 		if (current == -1 && round == -1 && tokens.isEmpty())
@@ -413,7 +430,7 @@ public class InitiativeList implements Serializable {
 	}
 
 	/**
-	 * Updates occurred to the tokens. 
+	 * Updates occurred to the tokens.
 	 */
 	public void update() {
 
@@ -447,9 +464,8 @@ public class InitiativeList implements Serializable {
 	}
 
 	/**
-	 * Sort the tokens by their initiative state from largest to smallest. If the initiative state string can be converted into a 
-	 * {@link Double} that is done first. All values converted to {@link Double}s are always considered bigger than the {@link String}
-	 * values. The {@link String} values are considered bigger than any <code>null</code> values.
+	 * Sort the tokens by their initiative state from largest to smallest. If the initiative state string can be converted into a {@link Double} that is done first. All values converted to
+	 * {@link Double}s are always considered bigger than the {@link String} values. The {@link String} values are considered bigger than any <code>null</code> values.
 	 */
 	public void sort() {
 		startUnitOfWork();
@@ -517,8 +533,10 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Move a token from it's current position to the new one.
 	 * 
-	 * @param oldIndex Move the token at this index
-	 * @param index To here.
+	 * @param oldIndex
+	 *            Move the token at this index
+	 * @param index
+	 *            To here.
 	 */
 	public void moveToken(int oldIndex, int index) {
 
@@ -566,7 +584,8 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Update the server with the new Token Initiative
 	 * 
-	 * @param ti Item to update
+	 * @param ti
+	 *            Item to update
 	 */
 	public void updateServer(TokenInitiative ti) {
 		if (zoneId == null)
@@ -576,7 +595,10 @@ public class InitiativeList implements Serializable {
 			MapTool.serverCommand().updateTokenInitiative(zoneId, ti.getId(), ti.isHolding(), ti.getState(), indexOf(ti));
 	}
 
-	/** @param aZone Setter for the zone */
+	/**
+	 * @param aZone
+	 *            Setter for the zone
+	 */
 	public void setZone(Zone aZone) {
 		zone = aZone;
 		if (aZone != null) {
@@ -591,7 +613,10 @@ public class InitiativeList implements Serializable {
 		return hideNPC;
 	}
 
-	/** @param hide Setter for hideNPC */
+	/**
+	 * @param hide
+	 *            Setter for hideNPC
+	 */
 	public void setHideNPC(boolean hide) {
 		if (hide == hideNPC)
 			return;
@@ -633,7 +658,7 @@ public class InitiativeList implements Serializable {
 		private boolean holding;
 
 		/**
-		 * Optional state that can be displayed in the initiative panel. 
+		 * Optional state that can be displayed in the initiative panel.
 		 */
 		private String state;
 
@@ -649,7 +674,8 @@ public class InitiativeList implements Serializable {
 		/**
 		 * Create the token initiative for the passed token.
 		 * 
-		 * @param aToken Add this token to the initiative.
+		 * @param aToken
+		 *            Add this token to the initiative.
 		 */
 		public TokenInitiative(Token aToken) {
 			if (aToken != null)
@@ -670,7 +696,10 @@ public class InitiativeList implements Serializable {
 			return id;
 		}
 
-		/** @param id Setter for the id to set */
+		/**
+		 * @param id
+		 *            Setter for the id to set
+		 */
 		public void setId(GUID id) {
 			this.id = id;
 		}
@@ -680,7 +709,10 @@ public class InitiativeList implements Serializable {
 			return holding;
 		}
 
-		/** @param isHolding Setter for the holding to set */
+		/**
+		 * @param isHolding
+		 *            Setter for the holding to set
+		 */
 		public void setHolding(boolean isHolding) {
 			if (holding == isHolding)
 				return;
@@ -696,7 +728,10 @@ public class InitiativeList implements Serializable {
 			return state;
 		}
 
-		/** @param aState Setter for the state to set */
+		/**
+		 * @param aState
+		 *            Setter for the state to set
+		 */
 		public void setState(String aState) {
 			if (state == aState || (state != null && state.equals(aState)))
 				return;
@@ -712,17 +747,21 @@ public class InitiativeList implements Serializable {
 			return displayIcon;
 		}
 
-		/** @param displayIcon Setter for the displayIcon to set */
+		/**
+		 * @param displayIcon
+		 *            Setter for the displayIcon to set
+		 */
 		public void setDisplayIcon(Icon displayIcon) {
 			this.displayIcon = displayIcon;
 		}
 
 		/**
-		 * Update the internal state w/o firing events. Needed for single token 
-		 * init updates. 
+		 * Update the internal state w/o firing events. Needed for single token init updates.
 		 * 
-		 * @param isHolding New holding state
-		 * @param aState New state
+		 * @param isHolding
+		 *            New holding state
+		 * @param aState
+		 *            New state
 		 */
 		public void update(boolean isHolding, String aState) {
 			boolean old = holding;

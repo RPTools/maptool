@@ -1,5 +1,10 @@
-/**
- * 
+/*
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.launcher;
 
@@ -8,20 +13,15 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
- * It seems that converting an absolute pathname into a relative pathname (based
- * on some second absolute pathname) is a not-so-simple problem. This class is
- * adapted from <a href=
- * "http://stackoverflow.com/questions/204784/how-to-construct-a-relative-path-in-java-from-two-absolute-paths-or-urls"
- * >a question on StackOverflow.com</a> where an answer is given that relies on
- * org.apache.commons.io.FilenameUtils. Since we don't want to use external JARs
- * if we don't have to, he dependencies have been re-implemented in this class
- * as public methods (may as well let them be used elsewhere).
+ * It seems that converting an absolute pathname into a relative pathname (based on some second absolute pathname) is a not-so-simple problem. This class is adapted from
+ * <a href= "http://stackoverflow.com/questions/204784/how-to-construct-a-relative-path-in-java-from-two-absolute-paths-or-urls" >a question on StackOverflow.com</a> where an answer is given that
+ * relies on org.apache.commons.io.FilenameUtils. Since we don't want to use external JARs if we don't have to, he dependencies have been re-implemented in this class as public methods (may as well
+ * let them be used elsewhere).
  * 
  * @author frank
  */
 public class PathUtils {
-	@SuppressWarnings("unused")
-	private static final Logger log = Logger.getLogger(PathUtils.class.getName());
+	@SuppressWarnings("unused") private static final Logger log = Logger.getLogger(PathUtils.class.getName());
 
 	public static final char UNIX_SEPARATOR = '/';
 	public static final char WINDOWS_SEPARATOR = '\\';
@@ -50,18 +50,14 @@ public class PathUtils {
 	}
 
 	/**
-	 * Get the relative path from one file to another, specifying the directory
-	 * separator. If one of the provided resources does not exist, it is assumed
-	 * to be a file unless it ends with '/' or '\'.
+	 * Get the relative path from one file to another, specifying the directory separator. If one of the provided resources does not exist, it is assumed to be a file unless it ends with '/' or '\'.
 	 * 
 	 * @param targetPath
 	 *            targetPath is calculated to this file
 	 * @param basePath
 	 *            basePath is calculated from this file
 	 * @param pathSeparator
-	 *            directory separator. The platform default is not assumed so
-	 *            that we can test Unix behavior when running on Windows (for
-	 *            example)
+	 *            directory separator. The platform default is not assumed so that we can test Unix behavior when running on Windows (for example)
 	 * @return resulting relative path string
 	 */
 	public static String getRelativePath(String targetPath, String basePath, String pathSeparator) {
@@ -80,7 +76,7 @@ public class PathUtils {
 			normalizedTargetPath = separatorsToWindows(normalizedTargetPath);
 			normalizedBasePath = separatorsToWindows(normalizedBasePath);
 		} else {
-			throw new IllegalArgumentException(CopiedFromOtherJars.getText("msg.error.unrecognizedDirSeparator", pathSeparator)); //$NON-NLS-1$ 
+			throw new IllegalArgumentException(CopiedFromOtherJars.getText("msg.error.unrecognizedDirSeparator", pathSeparator)); //$NON-NLS-1$
 		}
 		final String[] base = normalizedBasePath.split(Pattern.quote(pathSeparator));
 		final String[] target = normalizedTargetPath.split(Pattern.quote(pathSeparator));
@@ -106,7 +102,7 @@ public class PathUtils {
 		// For example, the relative path from
 		//
 		// /foo/bar/baz/gg/ff to /foo/bar/baz
-		// 
+		//
 		// ".." if ff is a file
 		// "../.." if ff is a directory
 		//
@@ -257,14 +253,11 @@ public class PathUtils {
 	}
 
 	/**
-	 * Returns the length of the filename prefix, such as <code>C:/</code> or
-	 * <code>~/</code>.
+	 * Returns the length of the filename prefix, such as <code>C:/</code> or <code>~/</code>.
 	 * <p>
 	 * This method will handle a file in either Unix or Windows format.
 	 * <p>
-	 * The prefix length includes the first slash in the full filename if
-	 * applicable. Thus, it is possible that the length returned is greater than
-	 * the length of the input string.
+	 * The prefix length includes the first slash in the full filename if applicable. Thus, it is possible that the length returned is greater than the length of the input string.
 	 * 
 	 * <pre>
 	 * Windows:
@@ -283,8 +276,7 @@ public class PathUtils {
 	 * ~user               --> "~user/"    --> named user (slash added)
 	 * </pre>
 	 * <p>
-	 * The output will be the same irrespective of the machine that the code is
-	 * running on. ie. both Unix and Windows prefixes are matched regardless.
+	 * The output will be the same irrespective of the machine that the code is running on. ie. both Unix and Windows prefixes are matched regardless.
 	 * 
 	 * <b>Note:</b> Fails on Unix if first character of pathname is a colon.
 	 * 

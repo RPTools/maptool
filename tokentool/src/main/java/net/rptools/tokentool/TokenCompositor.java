@@ -1,27 +1,11 @@
 /*
- * The MIT License
- * 
- * Copyright (c) 2005 David Rice, Trevor Croft
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.tokentool;
 
 import java.awt.Color;
@@ -55,14 +39,14 @@ public class TokenCompositor {
 		int scaledTokenImageWidth = (int) (tokenImage.getWidth() * scale);
 		int scaledTokenImageHeight = (int) (tokenImage.getHeight() * scale);
 
-		// assume we are composing a token with an nonbase overlay, 
-		// if we are, the height and width of the token 
+		// assume we are composing a token with an nonbase overlay,
+		// if we are, the height and width of the token
 		// are very simple -- it is just the height and width of the overlay.
 		int width = overlayWidth;
 		int height = overlayHeight;
 
 		// however, if we are composing a token with a base, we will override the default
-		// values.  and we must be concerne with exactly how the token image and overlay 
+		// values. and we must be concerne with exactly how the token image and overlay
 		// overlap.
 
 		if (props.isBase()) {
@@ -73,11 +57,11 @@ public class TokenCompositor {
 			height = scaledTokenImageHeight;
 
 			if (offsetX < 0) {
-				// the base is to the left of the left image edge.  Add offsetX to the width.
+				// the base is to the left of the left image edge. Add offsetX to the width.
 				width -= offsetX;
 			}
 			if (offsetY < 0) {
-				// the base is above the top image edge.  Add offsetY to the height
+				// the base is above the top image edge. Add offsetY to the height
 				height -= offsetY;
 			}
 
@@ -106,7 +90,7 @@ public class TokenCompositor {
 		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
 		// if the isBase checkbox is selected, we draw the overlay first
-		// so that it appears underneath the token art.  The ternaries in the x,y
+		// so that it appears underneath the token art. The ternaries in the x,y
 		// coord parameters keep the base and the token properly oriented.
 
 		if (props.isBase()) {
@@ -124,17 +108,17 @@ public class TokenCompositor {
 					null);
 		}
 
-		// if the isBase checkbox is not selected, we draw 
+		// if the isBase checkbox is not selected, we draw
 		// the overlay first so that it appears *above* the token art.
 
 		else {
 			if (tokenImage != null) {
-				//            	if (props.isSmooth()) {
-				//                	Image scaledImage = tokenImage.getScaledInstance((int)(tokenImage.getWidth()*scale), (int)(tokenImage.getHeight()*scale), Image.SCALE_SMOOTH);
-				//                	g.drawImage(scaledImage, -offsetX, -offsetY, null);
-				//            	} else {
+				// if (props.isSmooth()) {
+				// Image scaledImage = tokenImage.getScaledInstance((int)(tokenImage.getWidth()*scale), (int)(tokenImage.getHeight()*scale), Image.SCALE_SMOOTH);
+				// g.drawImage(scaledImage, -offsetX, -offsetY, null);
+				// } else {
 				g.drawImage(tokenImage, -offsetX, -offsetY, scaledTokenImageWidth, scaledTokenImageHeight, null);
-				//            	}
+				// }
 			}
 			g.drawImage(translateOverlay(overlayImage, props.getFudgeFactor()), 0, 0, width, height, null);
 		}

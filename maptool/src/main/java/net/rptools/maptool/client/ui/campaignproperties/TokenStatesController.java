@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.campaignproperties;
 
 import java.awt.Color;
@@ -87,8 +84,7 @@ import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.store.properties.ListItemProperty;
 
 /**
- * This controller will handle all of the components on the States panel of the
- * {@link CampaignPropertiesDialog}.
+ * This controller will handle all of the components on the States panel of the {@link CampaignPropertiesDialog}.
  * 
  * @author Jay
  */
@@ -110,14 +106,12 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	public static final String GROUP = "tokenStatesGroup";
 
 	/**
-	 * Name of the combo box containing a {@link String} value that maps
-	 * directly to a {@link BooleanTokenOverlay} class
+	 * Name of the combo box containing a {@link String} value that maps directly to a {@link BooleanTokenOverlay} class
 	 */
 	public static final String TYPE = "tokenStatesType";
 
 	/**
-	 * Name of the color well containing a {@link Color} value for token state
-	 * types that need colors
+	 * Name of the color well containing a {@link Color} value for token state types that need colors
 	 */
 	public static final String COLOR = "tokenStatesColor";
 
@@ -125,15 +119,12 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	public static final String MOUSEOVER = "tokenStatesMouseover";
 
 	/**
-	 * Name of the spinner containing an {@link Integer} value that is the width
-	 * of lines for token state types that need line width
+	 * Name of the spinner containing an {@link Integer} value that is the width of lines for token state types that need line width
 	 */
 	public static final String WIDTH = "tokenStatesWidth";
 
 	/**
-	 * Name of the combo box containing a {@link String} value that one of the
-	 * four corners of the token and is used in the {@link ColorDotTokenOverlay}
-	 * & {@link CornerImageTokenOverlay}
+	 * Name of the combo box containing a {@link String} value that one of the four corners of the token and is used in the {@link ColorDotTokenOverlay} & {@link CornerImageTokenOverlay}
 	 */
 	public static final String CORNER = "tokenStatesCorner";
 
@@ -147,26 +138,22 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	public static final String STATES = "tokenStatesStates";
 
 	/**
-	 * Name of the spinner containing a {@link String} value that is converted
-	 * into the grid size for flow token states
+	 * Name of the spinner containing a {@link String} value that is converted into the grid size for flow token states
 	 */
 	public static final String FLOW_GRID = "tokenStatesFlowGrid";
 
 	/**
-	 * Name of the spinner containing an {@link Integer} value that is the
-	 * opacity used in drawing
+	 * Name of the spinner containing an {@link Integer} value that is the opacity used in drawing
 	 */
 	public static final String OPACITY = "tokenStatesOpacity";
 
 	/**
-	 * Name of the spinner containing an {@link Integer} value that is the index
-	 * position of the state
+	 * Name of the spinner containing an {@link Integer} value that is the index position of the state
 	 */
 	public static final String INDEX = "tokenStatesIndex";
 
 	/**
-	 * Name of the text field containing a {@link File} name that is the image
-	 * file used for image token states
+	 * Name of the text field containing a {@link File} name that is the image file used for image token states
 	 */
 	public static final String IMAGE = "tokenStatesImageFile";
 
@@ -195,44 +182,40 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	public static final int ICON_SIZE = 50;
 
 	/**
-	 * Each of the data entry components that can be enabled/disabled by type of
-	 * state
+	 * Each of the data entry components that can be enabled/disabled by type of state
 	 */
 	public static final String[] DATA_ENTRY_COMPONENTS = { COLOR, WIDTH, CORNER, FLOW_GRID, IMAGE, BROWSE };
 
 	/**
-	 * Each of the data entry components that can be enabled/disabled by type of
-	 * state
+	 * Each of the data entry components that can be enabled/disabled by type of state
 	 */
 	public static final String[] DATA_ENTRY_COMPONENT_LABELS = { COLOR + "Label", WIDTH + "Label", CORNER + "Label", FLOW_GRID + "Label", IMAGE + "Label" };
 
 	/**
-	 * Flags for each of the data entry components needed by each of the types.
-	 * The order of the types is the' same as the list in the combo box. The
-	 * order of the flags is the same as that in {@link #DATA_ENTRY_COMPONENTS}.
+	 * Flags for each of the data entry components needed by each of the types. The order of the types is the' same as the list in the combo box. The order of the flags is the same as that in
+	 * {@link #DATA_ENTRY_COMPONENTS}.
 	 */
 	public static final boolean[][] NEEDED_COMPONENTS = {
-			{ false, false, false, false, true, true }, // Image 
-			{ false, false, true, false, true, true }, // Corner Image 
-			{ false, false, false, true, true, true }, // Flow Image 
+			{ false, false, false, false, true, true }, // Image
+			{ false, false, true, false, true, true }, // Corner Image
+			{ false, false, false, true, true, true }, // Flow Image
 			{ true, false, true, false, false, false }, // Dot
 			{ true, false, false, true, false, false }, // Flow Dot
-			{ true, true, false, false, false, false }, // Circle 
-			{ true, false, false, false, false, false }, // Shaded 
+			{ true, true, false, false, false, false }, // Circle
+			{ true, false, false, false, false, false }, // Shaded
 			{ true, true, false, false, false, false }, // X
-			{ true, true, false, false, false, false }, // Cross 
-			{ true, true, false, false, false, false }, // Diamond 
+			{ true, true, false, false, false, false }, // Cross
+			{ true, true, false, false, false, false }, // Diamond
 			{ true, false, false, true, false, false }, // Flow Diamond
-			{ true, true, false, false, false, false }, // Yield 
-			{ true, false, false, true, false, false }, // Flow Yield 
-			{ true, true, false, false, false, false }, // Triangle 
+			{ true, true, false, false, false, false }, // Yield
+			{ true, false, false, true, false, false }, // Flow Yield
+			{ true, true, false, false, false, false }, // Triangle
 			{ true, false, false, true, false, false }, // Flow Triangle
 			{ true, false, false, true, false, false }, // Flow Square
 	};
 
 	/**
-	 * Set up the button listeners, spinner models, list cell renderer and
-	 * selection listeners
+	 * Set up the button listeners, spinner models, list cell renderer and selection listeners
 	 * 
 	 * @param panel
 	 *            The {@link CampaignProperties} form panel
@@ -249,7 +232,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 		panel.getSpinner(WIDTH).setModel(new SpinnerNumberModel(5, 1, 10, 1));
 		panel.getSpinner(FLOW_GRID).setModel(new SpinnerListModel(new String[] { "2x2", "3x3", "4x4", "5x5", "8x8" }));
 		panel.getSpinner(OPACITY).setModel(new SpinnerNumberModel(100, 1, 100, 5));
-		panel.getSpinner(INDEX).setModel(new SpinnerNumberModel(0, 0, 10000, 1)); //FIXME set proper upper limit?
+		panel.getSpinner(INDEX).setModel(new SpinnerNumberModel(0, 0, 10000, 1)); // FIXME set proper upper limit?
 		panel.getSpinner(INDEX).addChangeListener(this);
 		panel.getList(STATES).setCellRenderer(new StateListRenderer());
 		panel.getList(STATES).addListSelectionListener(this);
@@ -372,8 +355,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	}
 
 	/**
-	 * Enable the data components needed by the selected type of overlay.
-	 * Disable the rest.
+	 * Enable the data components needed by the selected type of overlay. Disable the rest.
 	 */
 	private void enableDataComponents() {
 		int selected = formPanel.getComboBox(TYPE).getSelectedIndex();
@@ -480,7 +462,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 				formPanel.getSpinner(FLOW_GRID).setValue(size + "x" + size);
 			} // endif
 
-			// Handle the 
+			// Handle the
 			if (s instanceof CornerImageTokenOverlay) {
 				type = 1;
 				formPanel.getComboBox(CORNER).setSelectedIndex(((CornerImageTokenOverlay) s).getCorner().ordinal());
@@ -523,8 +505,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	}
 
 	/**
-	 * The {@link ListCellRenderer} that draws the state as an icon and a state
-	 * name.
+	 * The {@link ListCellRenderer} that draws the state as an icon and a state name.
 	 * 
 	 * @author Jay
 	 */
@@ -543,8 +524,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 		AbstractTokenOverlay overlay;
 
 		/**
-		 * Create an icon from the token state. The icon has a black rectangle
-		 * and the actual state is drawn inside of it.
+		 * Create an icon from the token state. The icon has a black rectangle and the actual state is drawn inside of it.
 		 */
 		Icon icon = new Icon() {
 			public int getIconHeight() {
@@ -570,8 +550,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 		/**
 		 * Set the icon and name in the renderer.
 		 * 
-		 * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList,
-		 *      java.lang.Object, int, boolean, boolean)
+		 * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
 		 */
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -602,8 +581,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	}
 
 	/**
-	 * Copy the token states from the state tab and place it in the passed
-	 * campaign.
+	 * Copy the token states from the state tab and place it in the passed campaign.
 	 * 
 	 * @param campaign
 	 *            Campaign containing the properties being updated
@@ -770,12 +748,10 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 	 * Load an asset file to get its key.
 	 * 
 	 * @param fName
-	 *            Name of the asset file (returns <code>null</code> if
-	 *            <b>fName</b> is empty or <code>null</code>)
+	 *            Name of the asset file (returns <code>null</code> if <b>fName</b> is empty or <code>null</code>)
 	 * @param formPanel
 	 *            Panel to use as parent for displaying error messages
-	 * @return The asset id if found or <code>null</code> if it could not be
-	 *         found.
+	 * @return The asset id if found or <code>null</code> if it could not be found.
 	 */
 	public static MD5Key loadAsssetFile(String fName, FormPanel formPanel) {
 		if (StringUtil.isEmpty(fName))

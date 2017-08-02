@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.adjustgrid;
 
 import java.awt.Color;
@@ -281,7 +278,7 @@ public class AdjustGridPanel extends JComponent implements MouseListener, MouseM
 		}
 	}
 
-	//// 
+	////
 	// MOUSE LISTENER
 	public void mouseClicked(MouseEvent e) {
 	}
@@ -416,30 +413,22 @@ public class AdjustGridPanel extends JComponent implements MouseListener, MouseM
 		propertyChangeSupport.removePropertyChangeListener(name, listener);
 	}
 	/*
-	 * private final Map<KeyStroke, Action> KEYSTROKES = new HashMap<KeyStroke, Action>() { {
-	 * put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, KeyEvent.SHIFT_DOWN_MASK), new GridSizeAction(Size.Decrease));
-	 * put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.SHIFT_DOWN_MASK), new GridSizeAction(Size.Decrease));
-	 * put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, KeyEvent.SHIFT_DOWN_MASK), new GridSizeAction(Size.Increase));
-	 * put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.SHIFT_DOWN_MASK), new GridSizeAction(Size.Increase));
-	 * put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), new GridOffsetAction(GridOffsetAction.Direction.Up));
-	 * put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), new GridOffsetAction(GridOffsetAction.Direction.Left));
-	 * put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), new GridOffsetAction(GridOffsetAction.Direction.Down));
-	 * put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), new GridOffsetAction(GridOffsetAction.Direction.Right)); } };
-	 * protected Map<KeyStroke, Action> getKeyActionMap() { return KEYSTROKES; }
+	 * private final Map<KeyStroke, Action> KEYSTROKES = new HashMap<KeyStroke, Action>() { { put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, KeyEvent.SHIFT_DOWN_MASK), new GridSizeAction(Size.Decrease));
+	 * put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.SHIFT_DOWN_MASK), new GridSizeAction(Size.Decrease)); put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, KeyEvent.SHIFT_DOWN_MASK), new
+	 * GridSizeAction(Size.Increase)); put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.SHIFT_DOWN_MASK), new GridSizeAction(Size.Increase)); put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), new
+	 * GridOffsetAction(GridOffsetAction.Direction.Up)); put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), new GridOffsetAction(GridOffsetAction.Direction.Left));
+	 * put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), new GridOffsetAction(GridOffsetAction.Direction.Down)); put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), new
+	 * GridOffsetAction(GridOffsetAction.Direction.Right)); } }; protected Map<KeyStroke, Action> getKeyActionMap() { return KEYSTROKES; }
 	 * 
-	 * private final class GridSizeAction extends AbstractAction { private final Size size; public GridSizeAction(Size
-	 * size) { this.size = size; }
+	 * private final class GridSizeAction extends AbstractAction { private final Size size; public GridSizeAction(Size size) { this.size = size; }
 	 * 
-	 * public void actionPerformed(ActionEvent e) { ZoneRenderer renderer = (ZoneRenderer) e.getSource();
-	 * adjustGridSize(renderer, size); } }
+	 * public void actionPerformed(ActionEvent e) { ZoneRenderer renderer = (ZoneRenderer) e.getSource(); adjustGridSize(renderer, size); } }
 	 * 
-	 * private static final class GridOffsetAction extends AbstractAction { private static enum Direction { Left, Right,
-	 * Up, Down }; private final Direction direction;
+	 * private static final class GridOffsetAction extends AbstractAction { private static enum Direction { Left, Right, Up, Down }; private final Direction direction;
 	 * 
 	 * public GridOffsetAction(Direction direction) { this.direction = direction; }
 	 * 
-	 * public void actionPerformed(ActionEvent e) { ZoneRenderer renderer = (ZoneRenderer) e.getSource(); switch
-	 * (direction) { case Left: renderer.moveGridBy(-1, 0); break; case Right: renderer.moveGridBy(1, 0); break; case
-	 * Up: renderer.moveGridBy(0, -1); break; case Down: renderer.moveGridBy(0, 1); break; } } }
+	 * public void actionPerformed(ActionEvent e) { ZoneRenderer renderer = (ZoneRenderer) e.getSource(); switch (direction) { case Left: renderer.moveGridBy(-1, 0); break; case Right:
+	 * renderer.moveGridBy(1, 0); break; case Up: renderer.moveGridBy(0, -1); break; case Down: renderer.moveGridBy(0, 1); break; } } }
 	 */
 }

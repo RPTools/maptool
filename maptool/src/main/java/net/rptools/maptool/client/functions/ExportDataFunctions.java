@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.io.BufferedWriter;
@@ -26,8 +23,8 @@ import net.rptools.parser.function.AbstractFunction;
  * 
  * These functions is to allow for easier data exports to external files.
  * 
- * exportData(FilePath file, String data, boolean appendToFile) :: Saves string data to external file.
- * getEnvironmentVariable(String name) Returns the value stored in the Environment Variable. Useful to store local directory paths for saving data
+ * exportData(FilePath file, String data, boolean appendToFile) :: Saves string data to external file. getEnvironmentVariable(String name) Returns the value stored in the Environment Variable. Useful
+ * to store local directory paths for saving data
  * 
  */
 public class ExportDataFunctions extends AbstractFunction {
@@ -87,10 +84,10 @@ public class ExportDataFunctions extends AbstractFunction {
 			String value = System.getenv(envName);
 
 			if (value != null) {
-				//System.out.format("%s=%s%n", envName, value);
+				// System.out.format("%s=%s%n", envName, value);
 				return value;
 			} else {
-				//System.out.format("%s is not assigned.%n", envName);
+				// System.out.format("%s is not assigned.%n", envName);
 				return "";
 			}
 		}

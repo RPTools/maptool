@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.awt.Color;
@@ -61,7 +58,9 @@ public class CampaignProperties {
 	/** Flag indicating that owners have special permissions */
 	private boolean initiativeOwnerPermissions = AppPreferences.getInitOwnerPermissions();
 
-	/** Flag indicating that owners can only move tokens when they have initiative */
+	/**
+	 * Flag indicating that owners can only move tokens when they have initiative
+	 */
 	private boolean initiativeMovementLock = AppPreferences.getInitLockMovement();
 
 	public CampaignProperties() {
@@ -308,7 +307,7 @@ public class CampaignProperties {
 		try {
 			dv.setPersonalLightSource(LightSource.getDefaultLightSources().get("Generic").get(5));
 			// sightTypeMap.put("Darkvision & Lowlight", new SightType("Darkvision", 2,
-			// 		LightSource.getDefaultLightSources().get("Generic").get(4)));
+			// LightSource.getDefaultLightSources().get("Generic").get(4)));
 		} catch (IOException e) {
 			MapTool.showError("CampaignProperties.error.noGenericLight", e);
 		}
@@ -416,8 +415,7 @@ public class CampaignProperties {
 	}
 
 	/**
-	 * Getter for characterSheets. Only called by {@link Campaign#getCharacterSheets()} and that function is never used
-	 * elsewhere within MapTool. Yet. ;-)
+	 * Getter for characterSheets. Only called by {@link Campaign#getCharacterSheets()} and that function is never used elsewhere within MapTool. Yet. ;-)
 	 */
 	public Map<String, String> getCharacterSheets() {
 		if (characterSheets == null)

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.util;
 
 import java.text.NumberFormat;
@@ -30,9 +27,7 @@ public class StringUtil {
 	}
 
 	/**
-	 * Returns <code>text</code> converted to a double-precision value, or the
-	 * value of <code>def</code> if the string cannot be converted. This method
-	 * is locale-aware.
+	 * Returns <code>text</code> converted to a double-precision value, or the value of <code>def</code> if the string cannot be converted. This method is locale-aware.
 	 * 
 	 * @param text
 	 *            string to convert to a number
@@ -51,8 +46,7 @@ public class StringUtil {
 	}
 
 	/**
-	 * Returns <code>text</code> converted to a double-precision value or throws
-	 * an exception. This method is locale-aware.
+	 * Returns <code>text</code> converted to a double-precision value or throws an exception. This method is locale-aware.
 	 * 
 	 * @param text
 	 *            string to convert to a number
@@ -65,14 +59,12 @@ public class StringUtil {
 		if (text == null)
 			return def;
 		def = nf.parse(text).doubleValue();
-		//		System.out.println("Decimal:  Input string is >>"+text+"<< and parsing produces "+newValue);
+		// System.out.println("Decimal: Input string is >>"+text+"<< and parsing produces "+newValue);
 		return def;
 	}
 
 	/**
-	 * Returns <code>text</code> converted to an integer value, or the value of
-	 * <code>def</code> if the string cannot be converted. This method is
-	 * locale-aware (which doesn't mean much for integers).
+	 * Returns <code>text</code> converted to an integer value, or the value of <code>def</code> if the string cannot be converted. This method is locale-aware (which doesn't mean much for integers).
 	 * 
 	 * @param text
 	 *            string to convert to a number
@@ -91,9 +83,7 @@ public class StringUtil {
 	}
 
 	/**
-	 * Returns <code>text</code> converted to an integer value or throws an
-	 * exception. This method is locale-aware (which doesn't mean much for
-	 * integers).
+	 * Returns <code>text</code> converted to an integer value or throws an exception. This method is locale-aware (which doesn't mean much for integers).
 	 * 
 	 * @param text
 	 *            string to convert to a number
@@ -106,16 +96,13 @@ public class StringUtil {
 		if (text == null)
 			return def;
 		def = nf.parse(text).intValue();
-		//		System.out.println("Integer:  Input string is >>"+text+"<< and parsing produces "+newValue);
+		// System.out.println("Integer: Input string is >>"+text+"<< and parsing produces "+newValue);
 		return def;
 	}
 
 	/**
-	 * Returns <code>text</code> converted to a Boolean value, or the value of
-	 * <code>def</code> if the string cannot be converted. This method returns
-	 * <code>Boolean.TRUE</code> if the string provided is not <code>null</code>
-	 * and is "true" using a case-insensitive comparison, or if it is parseable
-	 * as an integer and represents a non-zero value.
+	 * Returns <code>text</code> converted to a Boolean value, or the value of <code>def</code> if the string cannot be converted. This method returns <code>Boolean.TRUE</code> if the string provided
+	 * is not <code>null</code> and is "true" using a case-insensitive comparison, or if it is parseable as an integer and represents a non-zero value.
 	 * 
 	 * @param text
 	 *            string to convert to a Boolean
@@ -134,10 +121,8 @@ public class StringUtil {
 	}
 
 	/**
-	 * Returns <code>text</code> converted to a Boolean value or throws an
-	 * exception. This method returns <code>Boolean.TRUE</code> if the string
-	 * provided is not <code>null</code> and is "true" using a case-insensitive
-	 * comparison or represents a non-zero value as an integer.
+	 * Returns <code>text</code> converted to a Boolean value or throws an exception. This method returns <code>Boolean.TRUE</code> if the string provided is not <code>null</code> and is "true" using
+	 * a case-insensitive comparison or represents a non-zero value as an integer.
 	 * 
 	 * @param text
 	 *            string to convert to a Boolean
@@ -188,8 +173,7 @@ public class StringUtil {
 	}
 
 	/**
-	 * Gets copy of <b>string</b> wrapped with '\n' character a wraplength or
-	 * the nearest space between words.
+	 * Gets copy of <b>string</b> wrapped with '\n' character a wraplength or the nearest space between words.
 	 * 
 	 * @param string
 	 *            The multiline string to be wrapped
@@ -201,9 +185,7 @@ public class StringUtil {
 	}
 
 	/**
-	 * Whether the string is null or all whitespace chars (This should use
-	 * {@link String#isEmpty()} but that's new to Java 6 and we're trying to
-	 * stay compatible with Java 5 if possible.)
+	 * Whether the string is null or all whitespace chars (This should use {@link String#isEmpty()} but that's new to Java 6 and we're trying to stay compatible with Java 5 if possible.)
 	 */
 	public static boolean isEmpty(String string) {
 		return string == null || string.trim().length() == 0;
@@ -223,7 +205,7 @@ public class StringUtil {
 		List<String> list = new ArrayList<String>();
 		while (line != null && line.trim().length() > 0) {
 			line = line.trim();
-			//			System.out.println("'" + line + "'");
+			// System.out.println("'" + line + "'");
 			List<String> split = splitNextWord(line);
 
 			String nextWord = split.get(0);

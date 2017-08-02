@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.server;
 
 import java.awt.geom.Area;
@@ -37,7 +34,25 @@ import net.rptools.maptool.model.drawing.Pen;
 
 public interface ServerCommand {
 	public static enum COMMAND {
-		bootPlayer, setCampaign, getZone, putZone, removeZone, putAsset, getAsset, removeAsset, putToken, removeToken, draw, updateDrawing, clearAllDrawings, setZoneGridSize, message, undoDraw, showPointer, movePointer, hidePointer, startTokenMove, stopTokenMove, toggleTokenMoveWaypoint, updateTokenMove, setZoneVisibility, enforceZoneView, setZoneHasFoW, exposeFoW, hideFoW, setFoW, putLabel, removeLabel, sendTokensToBack, bringTokensToFront, enforceZone, setServerPolicy, addTopology, removeTopology, renameZone, heartbeat, updateCampaign, updateInitiative, updateTokenInitiative, setVisionType, updateCampaignMacros, setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be depended on for general purpose token movement
+		bootPlayer, setCampaign, getZone, putZone, removeZone, putAsset, getAsset, removeAsset, putToken, removeToken, draw, updateDrawing, clearAllDrawings, setZoneGridSize, message, undoDraw, showPointer, movePointer, hidePointer, startTokenMove, stopTokenMove, toggleTokenMoveWaypoint, updateTokenMove, setZoneVisibility, enforceZoneView, setZoneHasFoW, exposeFoW, hideFoW, setFoW, putLabel, removeLabel, sendTokensToBack, bringTokensToFront, enforceZone, setServerPolicy, addTopology, removeTopology, renameZone, heartbeat, updateCampaign, updateInitiative, updateTokenInitiative, setVisionType, updateCampaignMacros, setTokenLocation, // NOTE:
+																																																																																																																																																																// This
+																																																																																																																																																																// is
+																																																																																																																																																																// to
+																																																																																																																																																																// support
+																																																																																																																																																																// third
+																																																																																																																																																																// party
+																																																																																																																																																																// token
+																																																																																																																																																																// placement
+																																																																																																																																																																// and
+																																																																																																																																																																// shouldn't
+																																																																																																																																																																// be
+																																																																																																																																																																// depended
+																																																																																																																																																																// on
+																																																																																																																																																																// for
+																																																																																																																																																																// general
+																																																																																																																																																																// purpose
+																																																																																																																																																																// token
+																																																																																																																																																																// movement
 		setLiveTypingLabel, // Experimental
 		enforceNotification, // Override toggle button to show typing notifications
 		exposePCArea, setBoard, updateExposedAreaMeta, clearExposedArea

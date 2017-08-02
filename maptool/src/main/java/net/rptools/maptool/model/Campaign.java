@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.util.ArrayList;
@@ -39,12 +36,11 @@ import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 
 /**
  * <p>
- * This object contains {@link Zone}s and {@link Asset}s that make up a campaign as well as links to a variety of other
- * campaign characteristics (campaign macros, properties, lookup tables, and so on).
+ * This object contains {@link Zone}s and {@link Asset}s that make up a campaign as well as links to a variety of other campaign characteristics (campaign macros, properties, lookup tables, and so
+ * on).
  * </p>
  * <p>
- * Roughly this is equivalent to multiple tabs that will appear on the client and all of the images that will appear on
- * it (and also campaign macro buttons).
+ * Roughly this is equivalent to multiple tabs that will appear on the client and all of the images that will appear on it (and also campaign macro buttons).
  * </p>
  */
 public class Campaign {
@@ -56,8 +52,7 @@ public class Campaign {
 	private GUID id = new GUID();
 	private Map<GUID, Zone> zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
 
-	@SuppressWarnings("unused")
-	private transient static ExportDialog exportInfo = null; // transient so it is not written out; entire element ignore when reading
+	@SuppressWarnings("unused") private transient static ExportDialog exportInfo = null; // transient so it is not written out; entire element ignore when reading
 	private static ExportDialog exportDialog; // this is the new export dialog (different name for upward compatibility)
 	private static CampaignExportDialog campaignExportDialog;
 
@@ -87,8 +82,7 @@ public class Campaign {
 	// private Map<GUID, LightSource> lightSourceMap;
 
 	/**
-	 * This flag indicates whether the manual fog tools have been used in this campaign while a server is not running.
-	 * See {@link ToolbarPanel#createFogPanel()} for details.
+	 * This flag indicates whether the manual fog tools have been used in this campaign while a server is not running. See {@link ToolbarPanel#createFogPanel()} for details.
 	 * <p>
 	 * <ul>
 	 * <li>null - server never started for this campaign
@@ -134,9 +128,8 @@ public class Campaign {
 		zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
 
 		/*
-		 * JFJ 2010-10-27 Don't forget that since these are new zones AND new tokens created here from the old one, if
-		 * you have any data that needs to transfer over you will need to manually copy it as is done below for the
-		 * campaign properties and macro buttons.
+		 * JFJ 2010-10-27 Don't forget that since these are new zones AND new tokens created here from the old one, if you have any data that needs to transfer over you will need to manually copy it
+		 * as is done below for the campaign properties and macro buttons.
 		 */
 		for (Entry<GUID, Zone> entry : campaign.zones.entrySet()) {
 			Zone copy = new Zone(entry.getValue());
@@ -239,8 +232,7 @@ public class Campaign {
 	}
 
 	/**
-	 * Convenience method that iterates through {@link #getLightSourcesMap()} and returns the value for the key
-	 * <code>lightSourceId</code>.
+	 * Convenience method that iterates through {@link #getLightSourcesMap()} and returns the value for the key <code>lightSourceId</code>.
 	 * 
 	 * @return
 	 */
@@ -302,8 +294,7 @@ public class Campaign {
 	}
 
 	/**
-	 * Returns an <code>ArrayList</code> of all available <code>Zone</code>s from the <code>zones</code>
-	 * <code>LinkedHashMap</code>.
+	 * Returns an <code>ArrayList</code> of all available <code>Zone</code>s from the <code>zones</code> <code>LinkedHashMap</code>.
 	 * 
 	 * @return
 	 */
@@ -322,8 +313,7 @@ public class Campaign {
 	}
 
 	/**
-	 * Create an entry for the given <code>Zone</code> in the map, using <code>zone</code>'s {@link Zone#getId()}
-	 * method.
+	 * Create an entry for the given <code>Zone</code> in the map, using <code>zone</code>'s {@link Zone#getId()} method.
 	 * 
 	 * @param zone
 	 */
@@ -354,8 +344,8 @@ public class Campaign {
 	}
 
 	/**
-	 * Whether a server has been started using this campaign and, if so, whether the IndividualFog feature was turned on
-	 * at the time. This method returns <code>true</code> IFF a server has been started with the IF feature turned on.
+	 * Whether a server has been started using this campaign and, if so, whether the IndividualFog feature was turned on at the time. This method returns <code>true</code> IFF a server has been
+	 * started with the IF feature turned on.
 	 * 
 	 * @return <code>true</code> if IF feature has ever been used; <code>false</code> otherwise
 	 */
@@ -396,7 +386,7 @@ public class Campaign {
 
 	public void saveMacroButtonProperty(MacroButtonProperties properties) {
 		// find the matching property in the array
-		//TODO: hashmap? or equals()? or what?
+		// TODO: hashmap? or equals()? or what?
 		for (MacroButtonProperties prop : macroButtonProperties) {
 			if (prop.getIndex() == properties.getIndex()) {
 				prop.setColorKey(properties.getColorKey());
@@ -438,8 +428,7 @@ public class Campaign {
 
 	/**
 	 * <p>
-	 * This method iterates through all Zones, TokenStates, TokenBars, and LookupTables and writes the keys into a new,
-	 * empty set. That set is the return value.
+	 * This method iterates through all Zones, TokenStates, TokenBars, and LookupTables and writes the keys into a new, empty set. That set is the return value.
 	 * 
 	 * @return
 	 */
@@ -517,9 +506,9 @@ public class Campaign {
 				return null;
 			}
 		}
-		//		 TODO:  Ugh, what a kludge.  This needs to be refactored so that the settings are separate from the dialog
-		//		 and easily accessible from elsewhere.  I want separate XML files in the .cmpgn file eventually so that
-		//		 will be a good time to do this.
+		// TODO: Ugh, what a kludge. This needs to be refactored so that the settings are separate from the dialog
+		// and easily accessible from elsewhere. I want separate XML files in the .cmpgn file eventually so that
+		// will be a good time to do this.
 		exportDialog.setExportSettings(exportSettings);
 		exportDialog.setExportLocation(exportLocation);
 		return exportDialog;

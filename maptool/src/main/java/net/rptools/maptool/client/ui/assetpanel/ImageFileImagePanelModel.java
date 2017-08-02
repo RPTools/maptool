@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.assetpanel;
 
 import java.awt.Color;
@@ -167,12 +164,12 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 				image = ((AssetDirectory) dir).getImageFor(fileList.get(index));
 			}
 			if (dir instanceof PdfAsDirectory) {
-				//System.out.println("Here I am for: " + dir.hashCode());
+				// System.out.println("Here I am for: " + dir.hashCode());
 				image = ((PdfAsDirectory) dir).getImageFor(fileList.get(index));
 			}
 		} catch (IndexOutOfBoundsException e) {
 			// Jamz: OK, not pretty, I know... Occasionally this will happen while a PDF is extracting the files as it's multi-threaded and the panel
-			// is refreshing during the extract but I don't see this as a huge issue, we'll treat is as TRANSFERING_IMAGE. 
+			// is refreshing during the extract but I don't see this as a huge issue, we'll treat is as TRANSFERING_IMAGE.
 			// We could write logic using the progress bar but most likely this panel will get an update with JavaFX soon(tm)...
 			e.printStackTrace();
 		}
@@ -210,7 +207,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 		return asset != null ? new TransferableAsset(asset) : null;
 	}
 
-	// 
+	//
 	/**
 	 * Gets image dimensions for given file without ImageIO overhead...
 	 * 
@@ -247,13 +244,13 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	}
 
 	// Jamz: Added second method to return a caption with more image details for use
-	//		 with the ImagePanel/Asset window
+	// with the ImagePanel/Asset window
 	public String getCaption(int index, boolean withDimensions) {
 		if (index < 0 || index >= fileList.size()) {
 			return null;
 		}
 
-		//String name = fileList.get(index).getName();
+		// String name = fileList.get(index).getName();
 		File file = fileList.get(index);
 		String name = FileUtil.getNameWithoutExtension(file.getName());
 		String caption = "<html><b>" + name + "</b></html>";
@@ -325,17 +322,11 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	}
 
 	/**
-	 * We need to display the contents of the PDF instead of a directory and
-	 * need to cache results. Since extracted files could result in a lot of
-	 * images where most are not needed long term, we'll cache them in the
-	 * .maptool temp directory and delete on exit. If the delete fails, the temp
-	 * directory automatically cleans up anything older than 2 days on startup.
+	 * We need to display the contents of the PDF instead of a directory and need to cache results. Since extracted files could result in a lot of images where most are not needed long term, we'll
+	 * cache them in the .maptool temp directory and delete on exit. If the delete fails, the temp directory automatically cleans up anything older than 2 days on startup.
 	 * 
-	 * First we'll spawn a SwingWorker so we can get back to the GUI while all
-	 * the magic happens. The SwingWorker will then spawn a multi-threaded
-	 * ExecutorService/CompletionService to extract out the images, 1 threaded
-	 * task per page. This results in VERY fast extraction and allows up to
-	 * update the image panel after each thread.
+	 * First we'll spawn a SwingWorker so we can get back to the GUI while all the magic happens. The SwingWorker will then spawn a multi-threaded ExecutorService/CompletionService to extract out the
+	 * images, 1 threaded task per page. This results in VERY fast extraction and allows up to update the image panel after each thread.
 	 * 
 	 * @param forceRescan
 	 */
@@ -429,8 +420,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	 * 
 	 * @author Jamz
 	 * 
-	 *         A Callable task add to the ExecutorCompletionService so we can
-	 *         track as Futures.
+	 *         A Callable task add to the ExecutorCompletionService so we can track as Futures.
 	 *
 	 */
 	private final class ExtractImagesTask implements Callable<Void> {
@@ -517,9 +507,8 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	}
 
 	/**
-	 * Determines which images to display based on the setting of the Global vs.
-	 * Local flag (<code>global</code> == <b>true</b> means to search
-	 * subdirectories as well as parent directory) and the filter text.
+	 * Determines which images to display based on the setting of the Global vs. Local flag (<code>global</code> == <b>true</b> means to search subdirectories as well as parent directory) and the
+	 * filter text.
 	 */
 	private void refresh() {
 		cancelPdfExtract(); // In case we interrupted the extract by changing directories before it finished...
@@ -535,12 +524,8 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 			// assert global;
 
 			/*
-			 * Jamz: In the meantime, doing raw search and only search
-			 * subdirectories if some criteria is filled in. Didn't feel like
-			 * hacking up AssetManager at this stage of development. For now
-			 * limiting global search to prevent very large arrays of 1000's of
-			 * files which the panel has a hard time rendering (even without
-			 * global searches, it lags on large file lists).
+			 * Jamz: In the meantime, doing raw search and only search subdirectories if some criteria is filled in. Didn't feel like hacking up AssetManager at this stage of development. For now
+			 * limiting global search to prevent very large arrays of 1000's of files which the panel has a hard time rendering (even without global searches, it lags on large file lists).
 			 */
 
 			try {
@@ -623,16 +608,13 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 			}
 
 			// Jamz: Causes cursor to flicker due to multiple threads running. Needs a supervisior thread to
-			//       watch over all threads. Pain to code, leave for later? Remove cursor changes?
+			// watch over all threads. Pain to code, leave for later? Remove cursor changes?
 			MapTool.getFrame().getAssetPanel().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		}
 
 		/*
-		 * Jamz: Return all assets in subdirectories and each to fileList This
-		 * will spawn SwingWorkers for each subdir and is as such
-		 * "multi-threaded" although not a true "Thread". It will cancel
-		 * remaining workers once limit is reached. It searches through
-		 * thousands of files very quickly.
+		 * Jamz: Return all assets in subdirectories and each to fileList This will spawn SwingWorkers for each subdir and is as such "multi-threaded" although not a true "Thread". It will cancel
+		 * remaining workers once limit is reached. It searches through thousands of files very quickly.
 		 */
 		private void listFilesInSubDirectories() {
 			publish(fileList.size());

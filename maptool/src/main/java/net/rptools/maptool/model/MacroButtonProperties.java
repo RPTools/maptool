@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.awt.Color;
@@ -44,8 +41,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
 	private static final Logger log = Logger.getLogger(MacroButtonProperties.class);
 
-	//	private transient static final List<String> HTMLColors = Arrays.asList("aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "purple", "red", "silver", "teal",
-	//			"white", "yellow");
+	// private transient static final List<String> HTMLColors = Arrays.asList("aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "purple", "red", "silver", "teal",
+	// "white", "yellow");
 
 	private String macroUUID = UUID.randomUUID().toString(); // Jamz: Why a String and not UUID? Because stupid Hessian can't serialize UUID, ug.
 
@@ -60,8 +57,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 	private String group;
 	private String sortby;
 	private boolean autoExecute;
-	private boolean includeLabel; //include the macro label when printing output?
-	private boolean applyToTokens; //when the button is clicked it will impersonate every selected token when executing the macro
+	private boolean includeLabel; // include the macro label when printing output?
+	private boolean applyToTokens; // when the button is clicked it will impersonate every selected token when executing the macro
 	private String fontColorKey;
 	private String fontSize;
 	private String minWidth;
@@ -314,9 +311,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 	}
 
 	/**
-	 * The top level method for executing macros with the given list of tokens as context. In essence, this method calls
-	 * the macro once for each token, and the token becomes the "impersonated" token for the duration of the macro
-	 * barring any use of the <b>token()</b> or <b>switchToken()</b> roll options inside the macro itself.
+	 * The top level method for executing macros with the given list of tokens as context. In essence, this method calls the macro once for each token, and the token becomes the "impersonated" token
+	 * for the duration of the macro barring any use of the <b>token()</b> or <b>switchToken()</b> roll options inside the macro itself.
 	 * 
 	 * @param tokenList
 	 */
@@ -336,9 +332,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
 	private void executeCommonMacro(Collection<Token> tokenList) {
 		/*
-		 * This is actually one of the "common macro" buttons that are on the selection panel so we need to handle this
-		 * case a little differently. If apply to all tokens is checked by the user then we need to check that the
-		 * command is part of the common values otherwise it would cause unexpected things to occur.
+		 * This is actually one of the "common macro" buttons that are on the selection panel so we need to handle this case a little differently. If apply to all tokens is checked by the user then we
+		 * need to check that the command is part of the common values otherwise it would cause unexpected things to occur.
 		 */
 		if (applyToTokens) {
 			if (!compareCommand) {
@@ -409,7 +404,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 						loc = "campaign";
 					} else if (contextToken != null) {
 						// Should this IF stmt really be:
-						//		contextToken.matches("^[^:\\s]+:")
+						// contextToken.matches("^[^:\\s]+:")
 						// That would match any token with a string of text followed by a colon
 						// with no spaces in front of the colon.
 						if (contextToken.getName().toLowerCase().startsWith("lib:")) {
@@ -554,15 +549,14 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 	}
 
 	public static String[] getFontColors() {
-		//		return (String[]) HTMLColors.toArray();
+		// return (String[]) HTMLColors.toArray();
 		String[] array = MapToolUtil.getColorNames().toArray(new String[0]);
 		return array;
 	}
 
 	/**
-	 * Returns the font color of this button as an HTML string. It might be one of the 16 colors defined by the W3C as a
-	 * standard HTML color (see <code>COLOR_MAP_HTML</code> for a list), but if it's not then the color is converted to
-	 * CSS format <b>#FF00FF</b> format and that string is returned.
+	 * Returns the font color of this button as an HTML string. It might be one of the 16 colors defined by the W3C as a standard HTML color (see <code>COLOR_MAP_HTML</code> for a list), but if it's
+	 * not then the color is converted to CSS format <b>#FF00FF</b> format and that string is returned.
 	 * 
 	 * @return
 	 */
@@ -705,7 +699,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 		toolTip = "";
 	}
 
-	//TODO: may have to rewrite hashcode and equals to only take index into account
+	// TODO: may have to rewrite hashcode and equals to only take index into account
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -799,7 +793,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 	}
 
 	// function to enable sorting of buttons; uses the group first, then sortby field
-	// concatenated with the label field.  Case Insensitive
+	// concatenated with the label field. Case Insensitive
 	public int compareTo(MacroButtonProperties b2) throws ClassCastException {
 		if (b2 != this) {
 			String b1group = getGroup();

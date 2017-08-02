@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.token;
 
 import java.awt.Color;
@@ -39,9 +36,8 @@ import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.util.ImageManager;
 
 /**
- * Support class used by the token editor dialog on the "Properties" tab to allow a token's image to be moved around
- * within a one-cell grid area. Scaling is supported using the mousewheel and position is supported using left-drag. We
- * should add rotation ability using Shift-mousewheel as well.
+ * Support class used by the token editor dialog on the "Properties" tab to allow a token's image to be moved around within a one-cell grid area. Scaling is supported using the mousewheel and position
+ * is supported using left-drag. We should add rotation ability using Shift-mousewheel as well.
  * 
  * @author trevor
  */
@@ -61,10 +57,10 @@ public class TokenLayoutPanel extends JPanel {
 				double delta = e.getWheelRotation() > 0 ? -.1 : .1;
 				if (SwingUtil.isShiftDown(e)) {
 					// Nothing yet, as changing the facing isn't the right way to handle it --
-					// the image itself really should be rotated.  And it's probably better to
-					// not simply store a Transform but to create a new image.  We could
+					// the image itself really should be rotated. And it's probably better to
+					// not simply store a Transform but to create a new image. We could
 					// store an AffineTransform until the dialog is closed and then create
-					// the new image.  But the amount of rotation needs to be saved so
+					// the new image. But the amount of rotation needs to be saved so
 					// that future adjustments can return back to the original image (as
 					// a way of reducing round off error from multiple rotations).
 				}

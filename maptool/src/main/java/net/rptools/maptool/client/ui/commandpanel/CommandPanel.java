@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.commandpanel;
 
 import java.awt.BorderLayout;
@@ -96,8 +93,8 @@ public class CommandPanel extends JPanel implements Observer {
 	private String typedCommandBuffer;
 
 	// Chat timers
-	//	private long chatNotifyDuration; // Initialize it on first load
-	//	private Timer chatTimer;
+	// private long chatNotifyDuration; // Initialize it on first load
+	// private Timer chatTimer;
 
 	private ChatProcessor chatProcessor;
 
@@ -147,9 +144,8 @@ public class CommandPanel extends JPanel implements Observer {
 	}
 
 	/**
-	 * If the current impersonation was assigned using a GUID, that value is returned. This allows the calling code to
-	 * find a specific token even if there are duplicate names. If a GUID was not used (perhaps an arbitrary strings was
-	 * used via {@link #setIdentityName(String)}?) then <code>null</code> is returned.
+	 * If the current impersonation was assigned using a GUID, that value is returned. This allows the calling code to find a specific token even if there are duplicate names. If a GUID was not used
+	 * (perhaps an arbitrary strings was used via {@link #setIdentityName(String)}?) then <code>null</code> is returned.
 	 * 
 	 * @return
 	 */
@@ -172,8 +168,8 @@ public class CommandPanel extends JPanel implements Observer {
 	}
 
 	/**
-	 * Sets the impersonated identity to <code>guid</code> which is a token GUID. This allows {@link #getIdentity()} to
-	 * retrieve the token name and/or token GUID for reporting to the user. (Name is preferred.)
+	 * Sets the impersonated identity to <code>guid</code> which is a token GUID. This allows {@link #getIdentity()} to retrieve the token name and/or token GUID for reporting to the user. (Name is
+	 * preferred.)
 	 * 
 	 * @param guid
 	 */
@@ -187,8 +183,7 @@ public class CommandPanel extends JPanel implements Observer {
 	}
 
 	/**
-	 * Sets the impersonated identity to <code>identity</code> which is a token name. This allows impersonation of a
-	 * token that doesn't exist; the name is stored with a <code>null</code> for the GUID.
+	 * Sets the impersonated identity to <code>identity</code> which is a token name. This allows impersonation of a token that doesn't exist; the name is stored with a <code>null</code> for the GUID.
 	 * 
 	 * @param identity
 	 */
@@ -404,8 +399,7 @@ public class CommandPanel extends JPanel implements Observer {
 	}
 
 	/**
-	 * KeyListener for command area to handle live typing notification. Implements an idle timer that removes the typing
-	 * notification after the duration set in AppPreferences expires.
+	 * KeyListener for command area to handle live typing notification. Implements an idle timer that removes the typing notification after the duration set in AppPreferences expires.
 	 */
 	private class ChatTypingListener extends KeyAdapter {
 		@Override
@@ -437,7 +431,8 @@ public class CommandPanel extends JPanel implements Observer {
 	/**
 	 * Disables the chat notification toggle if the GM enforces notification
 	 * 
-	 * @param boolean whether to disable the toggle
+	 * @param boolean
+	 *            whether to disable the toggle
 	 */
 
 	public void disableNotifyButton(Boolean disable) {
@@ -592,7 +587,7 @@ public class CommandPanel extends JPanel implements Observer {
 	public static class TextColorWell extends JPanel {
 		private static final long serialVersionUID = -9006587537198176935L;
 
-		//Set the Color from the saved chat color from AppPreferences
+		// Set the Color from the saved chat color from AppPreferences
 		private Color color = AppPreferences.getChatColor();
 
 		public TextColorWell() {
@@ -615,7 +610,7 @@ public class CommandPanel extends JPanel implements Observer {
 		public void setColor(Color newColor) {
 			color = newColor;
 			repaint();
-			AppPreferences.setChatColor(color); //Set the Chat Color in AppPreferences
+			AppPreferences.setChatColor(color); // Set the Chat Color in AppPreferences
 		}
 
 		public Color getColor() {
@@ -696,7 +691,7 @@ public class CommandPanel extends JPanel implements Observer {
 			break;
 		case add:
 		case remove:
-			//resetMessagePanel();
+			// resetMessagePanel();
 			break;
 		case clear:
 			clearMessagePanel();
@@ -747,8 +742,7 @@ public class CommandPanel extends JPanel implements Observer {
 	 */
 
 	/**
-	 * If the GM enforces typing notification and no listener is present (because the client had notification off), a
-	 * new listener is added to the command text area
+	 * If the GM enforces typing notification and no listener is present (because the client had notification off), a new listener is added to the command text area
 	 */
 	private void maybeAddTypingListener() {
 		if (commandTextArea.getListeners(ChatTypingListener.class).length == 0) {

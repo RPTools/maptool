@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.io.File;
@@ -24,7 +21,7 @@ import javax.swing.JMenuItem;
  * @author tylere
  */
 public class MRUCampaignManager {
-	//To increase max mru's need to update mnemonics code
+	// To increase max mru's need to update mnemonics code
 	private static final int DEFAULT_MAX_MRU = 9;
 	private final JMenu mruMenu;
 	private List<File> mruCampaigns;
@@ -47,7 +44,7 @@ public class MRUCampaignManager {
 	 */
 	public void addMRUCampaign(File newCampaign) {
 		// FIXME (this coupling is too tight; change the calling function to avoid this call entirely)
-		//don't add the autosave recovery file until it is resaved
+		// don't add the autosave recovery file until it is resaved
 		if (newCampaign == AutoSaveManager.AUTOSAVE_FILE)
 			return;
 
@@ -55,11 +52,11 @@ public class MRUCampaignManager {
 			mruCampaigns.add(newCampaign);
 		} else {
 			// This code would be much simpler, but too late in the 1.3 cycle for this change.
-			//			LinkedList<File> newMruList = new LinkedList<File>(mruCampaigns);
-			//			newMruList.removeFirstOccurrence(newCampaign);
-			//			newMruList.addFirst(newCampaign);
-			//			while (newMruList.size() > DEFAULT_MAX_MRU)
-			//				newMruList.removeLast();
+			// LinkedList<File> newMruList = new LinkedList<File>(mruCampaigns);
+			// newMruList.removeFirstOccurrence(newCampaign);
+			// newMruList.addFirst(newCampaign);
+			// while (newMruList.size() > DEFAULT_MAX_MRU)
+			// newMruList.removeLast();
 			ArrayList<File> newMruList = new ArrayList<File>(DEFAULT_MAX_MRU + 1);
 			newMruList.add(newCampaign);
 			for (ListIterator<File> iter = mruCampaigns.listIterator(); iter.hasNext();) {

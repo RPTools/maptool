@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.tokenpanel;
 
 import java.awt.BasicStroke;
@@ -85,8 +82,7 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
 	private ImageLabel backgroundImageLabel;
 
 	/**
-	 * The text height for the background image label. Only the text is painted inside, the token remains on the
-	 * outside,
+	 * The text height for the background image label. Only the text is painted inside, the token remains on the outside,
 	 */
 	private final int textHeight;
 
@@ -142,7 +138,7 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
 		setBorder(SELECTED_BORDER);
 		setBackground(Color.WHITE);
 
-		// The current indicator 
+		// The current indicator
 		currentIndicator = new JLabel();
 		currentIndicator.setPreferredSize(INDICATOR_SIZE);
 		currentIndicator.setHorizontalAlignment(SwingConstants.CENTER);
@@ -164,8 +160,7 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * @see javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean,
-	 *      boolean)
+	 * @see javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
 	 */
 	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 
@@ -220,7 +215,7 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
 			name.setHorizontalTextPosition(SwingConstants.LEFT);
 		} else {
 			name.setHorizontalTextPosition(SwingConstants.RIGHT);
-		} // endif 
+		} // endif
 
 		// Selected?
 		if (isSelected) {
@@ -395,7 +390,7 @@ public class InitiativeListCellRenderer extends JPanel implements ListCellRender
 				if (overlay == null || !overlay.showPlayer(token, MapTool.getPlayer()))
 					continue;
 				overlay.paintOverlay((Graphics2D) g, token, bounds, barSet);
-			} // endfor            
+			} // endfor
 			g.setClip(old);
 			g.translate(-x, -y);
 		}

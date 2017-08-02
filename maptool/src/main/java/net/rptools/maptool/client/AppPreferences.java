@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.awt.Color;
@@ -47,8 +44,8 @@ public class AppPreferences {
 	private static final String KEY_AUTO_SAVE_INCREMENT = "autoSaveIncrement";
 	private static final int DEFAULT_AUTO_SAVE_INCREMENT = 5; // Minutes
 
-	//	private static final String KEY_ENABLE_MAP_EXPORT_IMPORT = "enableMapExportImport";
-	//	private static final boolean DEFAULT_ENABLE_MAP_EXPORT_IMPORT = false;
+	// private static final String KEY_ENABLE_MAP_EXPORT_IMPORT = "enableMapExportImport";
+	// private static final boolean DEFAULT_ENABLE_MAP_EXPORT_IMPORT = false;
 
 	private static final String KEY_CHAT_AUTOSAVE_TIME = "chatAutosaveTime";
 	private static final int DEFAULT_CHAT_AUTOSAVE_TIME = 0; // Minutes; zero=disabled
@@ -181,14 +178,14 @@ public class AppPreferences {
 		return prefs.getBoolean(KEY_SAVE_REMINDER, DEFAULT_SAVE_REMINDER);
 	}
 
-	//	public static void setEnabledMapExportImport(boolean reminder) {
-	//		prefs.putBoolean(KEY_ENABLE_MAP_EXPORT_IMPORT, reminder);
-	//		AppActions.updateActions();
-	//	}
+	// public static void setEnabledMapExportImport(boolean reminder) {
+	// prefs.putBoolean(KEY_ENABLE_MAP_EXPORT_IMPORT, reminder);
+	// AppActions.updateActions();
+	// }
 
-	//	public static boolean isEnabledMapExportImport() {
-	//		return prefs.getBoolean(KEY_ENABLE_MAP_EXPORT_IMPORT, DEFAULT_ENABLE_MAP_EXPORT_IMPORT);
-	//	}
+	// public static boolean isEnabledMapExportImport() {
+	// return prefs.getBoolean(KEY_ENABLE_MAP_EXPORT_IMPORT, DEFAULT_ENABLE_MAP_EXPORT_IMPORT);
+	// }
 
 	public static void setAutoSaveIncrement(int increment) {
 		prefs.putInt(KEY_AUTO_SAVE_INCREMENT, increment);
@@ -828,7 +825,7 @@ public class AppPreferences {
 			StringBuffer result = new StringBuffer(list.length() + root.getPath().length() + 10);
 			Set<String> rootList = new HashSet<String>(roots.length);
 
-			// This loop ensures that each path only appears once.  If there are currently
+			// This loop ensures that each path only appears once. If there are currently
 			// duplicates in the list, only the first one is kept.
 			for (String r : roots) {
 				if (!rootList.contains(r)) {
@@ -871,7 +868,7 @@ public class AppPreferences {
 			Set<String> rootList = new HashSet<String>(roots.length);
 			String rootPath = root.getPath();
 
-			// This loop ensures that each path only appears once.  If there are
+			// This loop ensures that each path only appears once. If there are
 			// duplicates in the list, only the first one is kept.
 			for (String r : roots) {
 				if (!r.equals(rootPath) && !rootList.contains(r)) {
@@ -897,7 +894,7 @@ public class AppPreferences {
 					log.info("unexpected during file.getCanonicalPath()", e); // $NON-NLS-1$
 				path = file.getPath();
 			}
-			// It's important that '%3A' is done last.  Note that the pathSeparator may not be a colon on
+			// It's important that '%3A' is done last. Note that the pathSeparator may not be a colon on
 			// the current platform, but it doesn't matter since it will be reconverted when read back in again.
 			// THink of the '%3A' as a symbol of the separator, not an encoding of the character.
 			combined.append(path.replaceAll("%", "%25").replaceAll(File.pathSeparator, "%3A"));
@@ -1032,7 +1029,7 @@ public class AppPreferences {
 	}
 
 	public static boolean getChatNotificationShowBackground() {
-		//System.out.println("Getting Value:" + prefs.getBoolean(KEY_CHAT_NOTIFICATION_SHOW_BACKGROUND, DEFAULT_CHAT_NOTIFICATION_SHOW_BACKGROUND));
+		// System.out.println("Getting Value:" + prefs.getBoolean(KEY_CHAT_NOTIFICATION_SHOW_BACKGROUND, DEFAULT_CHAT_NOTIFICATION_SHOW_BACKGROUND));
 		return prefs.getBoolean(KEY_CHAT_NOTIFICATION_SHOW_BACKGROUND, DEFAULT_CHAT_NOTIFICATION_SHOW_BACKGROUND);
 	}
 
@@ -1041,7 +1038,7 @@ public class AppPreferences {
 	}
 
 	public static boolean isShowInitGainMessage() {
-		//KEY_SHOW_INIT_GAIN_MESSAGE
+		// KEY_SHOW_INIT_GAIN_MESSAGE
 		return prefs.getBoolean(KEY_SHOW_INIT_GAIN_MESSAGE, DEFAULT_SHOW_INIT_GAIN_MESSAGE);
 	}
 

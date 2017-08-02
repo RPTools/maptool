@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.awt.Color;
@@ -81,10 +78,8 @@ public class MapToolUtil {
 		COLOR_MAP.put("gray75", new Color(0xBF, 0xBF, 0xBF));
 
 		/*
-		 * These are valid HTML colors. When getFontColor() is called, if one of
-		 * these is selected then the name is returned. When another value is
-		 * selected, the Color is converted to the '#112233f' notation and
-		 * returned instead -- even if it's a name in COLOR_MAP, above.
+		 * These are valid HTML colors. When getFontColor() is called, if one of these is selected then the name is returned. When another value is selected, the Color is converted to the '#112233f'
+		 * notation and returned instead -- even if it's a name in COLOR_MAP, above.
 		 */
 		String[] html = { "black", "white", "fuchsia", "aqua", "silver", "red", "lime", "blue", "yellow", "gray", "purple", "maroon", "navy", "olive", "green", "teal" };
 		for (int i = 0; i < html.length; i++) {
@@ -121,12 +116,12 @@ public class MapToolUtil {
 	private static final Pattern NAME_PATTERN = Pattern.compile("^(.*)\\s+(\\d+)\\s*$");
 
 	/**
-	 * Determine what the name of the new token should be. This method tries to
-	 * choose a token name which is (a) unique and (b) adheres to a numeric
-	 * sequence.
+	 * Determine what the name of the new token should be. This method tries to choose a token name which is (a) unique and (b) adheres to a numeric sequence.
 	 *
-	 * @param zone the map that the token is being placed onto
-	 * @param token the new token to be named
+	 * @param zone
+	 *            the map that the token is being placed onto
+	 * @param token
+	 *            the new token to be named
 	 * @return the new token's algorithmically generated name
 	 */
 	public static String nextTokenId(Zone zone, Token token, boolean force) {
@@ -152,9 +147,7 @@ public class MapToolUtil {
 					newNum = Integer.parseInt(m.group(2));
 				} catch (NumberFormatException nfe) {
 					/*
-					 * This exception happens if the number is too big to fit
-					 * inside an integer. In this case, we use the original name
-					 * as the filename and assign a new number as the suffix.
+					 * This exception happens if the number is too big to fit inside an integer. In this case, we use the original name as the filename and assign a new number as the suffix.
 					 */
 					newName = baseName;
 				}
@@ -167,10 +160,8 @@ public class MapToolUtil {
 		boolean addNumToName = !AppPreferences.getTokenNumberDisplay().equals(Token.NUM_ON_GM);
 
 		/*
-		 * If the token already has a number suffix, if the preferences indicate
-		 * that token numbering should be random and this token is on the Token
-		 * layer, or if the token already exists somewhere on this map, then we
-		 * need to choose a new name.
+		 * If the token already has a number suffix, if the preferences indicate that token numbering should be random and this token is on the Token layer, or if the token already exists somewhere on
+		 * this map, then we need to choose a new name.
 		 */
 		if (newNum != null || random || zone.getTokenByName(newName) != null) {
 
@@ -210,19 +201,13 @@ public class MapToolUtil {
 	}
 
 	/**
-	 * Returns a {@link Color} object if the parameter can be evaluated as a
-	 * color. This includes a text search against a list of known colors
-	 * (case-insensitive; see {@link #COLOR_MAP}) and conversion of the string
-	 * into a color using {@link Color#decode(String)}. Invalid strings cause
-	 * <code>COLOR_MAP.get("black")</code> to be returned. Calls
-	 * {@link #convertStringToColor(String)} if the parameter is not a
-	 * recognized color name.
+	 * Returns a {@link Color} object if the parameter can be evaluated as a color. This includes a text search against a list of known colors (case-insensitive; see {@link #COLOR_MAP}) and conversion
+	 * of the string into a color using {@link Color#decode(String)}. Invalid strings cause <code>COLOR_MAP.get("black")</code> to be returned. Calls {@link #convertStringToColor(String)} if the
+	 * parameter is not a recognized color name.
 	 *
-	 * @param name a recognized color name or an integer color value in octal or
-	 *            hexadecimal form (such as <code>#123</code>,
-	 *            <code>0x112233</code>, or <code>0X111222333</code>)
-	 * @return the corresponding Color object or {@link Color#BLACK} if not in a
-	 *         recognized format
+	 * @param name
+	 *            a recognized color name or an integer color value in octal or hexadecimal form (such as <code>#123</code>, <code>0x112233</code>, or <code>0X111222333</code>)
+	 * @return the corresponding Color object or {@link Color#BLACK} if not in a recognized format
 	 */
 	public static Color getColor(String name) {
 		name = name.trim().toLowerCase();
@@ -234,13 +219,11 @@ public class MapToolUtil {
 	}
 
 	/**
-	 * Converts the incoming string value to a Color object and stores
-	 * <code>val</code> and the Color as a key/value pair in a cache. The
-	 * incoming string may start with a <code>#</code> to indicate a numeric
-	 * color value in CSS format. Any errors cause {@link #COLOR_MAP}
-	 * <code>.get("black")</code> to be returned.
+	 * Converts the incoming string value to a Color object and stores <code>val</code> and the Color as a key/value pair in a cache. The incoming string may start with a <code>#</code> to indicate a
+	 * numeric color value in CSS format. Any errors cause {@link #COLOR_MAP} <code>.get("black")</code> to be returned.
 	 *
-	 * @param val color value to interpret
+	 * @param val
+	 *            color value to interpret
 	 * @return Color object
 	 */
 	private static Color convertStringToColor(String val) {

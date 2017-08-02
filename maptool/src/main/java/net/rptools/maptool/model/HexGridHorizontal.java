@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.awt.Dimension;
@@ -37,12 +34,11 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 public class HexGridHorizontal extends HexGrid {
 
 	/*
-	 * Facings are set when a new map is created with a particular grid and these facings affect all maps with the same
-	 * grid. Other maps with different grids will remain the same.
+	 * Facings are set when a new map is created with a particular grid and these facings affect all maps with the same grid. Other maps with different grids will remain the same.
 	 * 
 	 * Facings are set when maps are loaded to the current preferences.
 	 */
-	private static int[] FACING_ANGLES; // =  new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
+	private static int[] FACING_ANGLES; // = new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
 	private static final int[] ALL_ANGLES = new int[] { -150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180 };
 	private static List<TokenFootprint> footprintList;
 

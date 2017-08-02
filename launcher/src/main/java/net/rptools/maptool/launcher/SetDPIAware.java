@@ -1,17 +1,11 @@
 /*
- * This software Copyright by the RPTools.net development team, and licensed
- * under the Affero GPL Version 3 or, at your option, any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * MapTool Source Code is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * You should have received a copy of the GNU Affero General Public License *
- * along with this source Code. If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license text at
- * <http://www.gnu.org/licenses/agpl.html>.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.launcher;
 
 import com.sun.jna.platform.win32.Advapi32Util;
@@ -20,10 +14,8 @@ import com.sun.jna.platform.win32.Win32Exception;
 import static com.sun.jna.platform.win32.WinReg.HKEY_LOCAL_MACHINE;
 
 /*
- * This class inserts/updates the registry entry to allow HiDPI screens to scale
- * ie MapTool fonts/menu/icons are larger on high resolution screens. The
- * manifest file should already be baked into the JRE we supply. See:
- * https://bugs.openjdk.java.net/browse/JDK-6829055
+ * This class inserts/updates the registry entry to allow HiDPI screens to scale ie MapTool fonts/menu/icons are larger on high resolution screens. The manifest file should already be baked into the
+ * JRE we supply. See: https://bugs.openjdk.java.net/browse/JDK-6829055
  */
 public class SetDPIAware {
 	private final static boolean WINDOWS = (System.getProperty("os.name").toLowerCase().startsWith("windows"));

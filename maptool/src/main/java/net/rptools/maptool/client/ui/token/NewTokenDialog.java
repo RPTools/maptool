@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.token;
 
 import java.awt.Dimension;
@@ -111,23 +108,23 @@ public class NewTokenDialog extends AbeillePanel<Token> {
 		return (JTextField) getComponent("@name");
 	}
 
-	//	
-	//	public JTextField getGMNameTextField() {
-	//		return (JTextField) getComponent("gmName");
-	//	}
 	//
-	//	public JRadioButton getNPCTypeRadio() {
-	//		return (JRadioButton) getComponent("npcType");
-	//	}
-	//	
-	//	public JRadioButton getMarkerTypeRadio() {
-	//		return (JRadioButton) getComponent("markerType");
-	//	}
-	//	
-	//	public JRadioButton getPCTypeRadio() {
-	//		return (JRadioButton) getComponent("pcType");
-	//	}
-	//	
+	// public JTextField getGMNameTextField() {
+	// return (JTextField) getComponent("gmName");
+	// }
+	//
+	// public JRadioButton getNPCTypeRadio() {
+	// return (JRadioButton) getComponent("npcType");
+	// }
+	//
+	// public JRadioButton getMarkerTypeRadio() {
+	// return (JRadioButton) getComponent("markerType");
+	// }
+	//
+	// public JRadioButton getPCTypeRadio() {
+	// return (JRadioButton) getComponent("pcType");
+	// }
+	//
 	public JButton getOKButton() {
 		return (JButton) getComponent("okButton");
 	}
@@ -140,22 +137,22 @@ public class NewTokenDialog extends AbeillePanel<Token> {
 		return (JCheckBox) getComponent("showDialogCheckbox");
 	}
 
-	//	public void initNameTextField() {
-	//		getNameTextField().setText(token.getName());
-	//	}
-	//	
-	//	public void initGMNameTextField() {
-	//		getGMNameTextField().setText(token.getGMName());
-	//	}
-	//	
-	//	public void initNPCTypeRadio() {
-	//		getNPCTypeRadio().setSelected(true);
-	//	}
-	//	
-	//	public void initMarkerTypeRadio() {
-	//		getMarkerTypeRadio().setVisible(false);
-	//	}
-	//	
+	// public void initNameTextField() {
+	// getNameTextField().setText(token.getName());
+	// }
+	//
+	// public void initGMNameTextField() {
+	// getGMNameTextField().setText(token.getGMName());
+	// }
+	//
+	// public void initNPCTypeRadio() {
+	// getNPCTypeRadio().setSelected(true);
+	// }
+	//
+	// public void initMarkerTypeRadio() {
+	// getMarkerTypeRadio().setVisible(false);
+	// }
+	//
 	public void initTokenIconPanel() {
 		getTokenIconPanel().setPreferredSize(new Dimension(100, 100));
 		getTokenIconPanel().setMinimumSize(new Dimension(100, 100));
@@ -193,26 +190,26 @@ public class NewTokenDialog extends AbeillePanel<Token> {
 		return success;
 	}
 
-	//	/**
-	//	 * Update the token to match the state of the dialog
-	//	 */
-	//	public void updateToken() {
+	// /**
+	// * Update the token to match the state of the dialog
+	// */
+	// public void updateToken() {
 	//
-	//		token.setName(getNameTextField().getText());
-	//		token.setGMName(getGMNameTextField().getText());
-	//		if (getNPCTypeRadio().isSelected()) {
-	//			token.setType(Token.Type.NPC);
-	//		}
-	//		if (getPCTypeRadio().isSelected()) {
-	//			token.setType(Token.Type.PC);
-	//		}
-	//		if (getMarkerTypeRadio().isSelected()) {
-	//			token.setType(Token.Type.NPC);
-	//			token.setLayer(Zone.Layer.OBJECT);
-	//			token.setGMNote("Marker"); // In order for it to be recognized as a marker, it needs something in the notes field 
-	//			token.setVisible(false);
-	//		}
-	//	}
+	// token.setName(getNameTextField().getText());
+	// token.setGMName(getGMNameTextField().getText());
+	// if (getNPCTypeRadio().isSelected()) {
+	// token.setType(Token.Type.NPC);
+	// }
+	// if (getPCTypeRadio().isSelected()) {
+	// token.setType(Token.Type.PC);
+	// }
+	// if (getMarkerTypeRadio().isSelected()) {
+	// token.setType(Token.Type.NPC);
+	// token.setLayer(Zone.Layer.OBJECT);
+	// token.setGMNote("Marker"); // In order for it to be recognized as a marker, it needs something in the notes field
+	// token.setVisible(false);
+	// }
+	// }
 	//
 	/**
 	 * Get and icon from the asset manager and scale it properly.

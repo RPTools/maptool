@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.io;
 
 /**
@@ -66,25 +63,19 @@ public class FTPClient {
 
 	/**
 	 * <p>
-	 * This method enables or disables the processing of transfer objects in the
-	 * queue.
+	 * This method enables or disables the processing of transfer objects in the queue.
 	 * </p>
 	 * <p>
-	 * If this method is called with a <code>true</code> parameter, the object
-	 * begins processing FTP requests as soon as they are added to the queue, up
-	 * to the maximum number of simultaneous transfers as set by a call to
-	 * {@link #setNumberOfThreads(int)}.
+	 * If this method is called with a <code>true</code> parameter, the object begins processing FTP requests as soon as they are added to the queue, up to the maximum number of simultaneous transfers
+	 * as set by a call to {@link #setNumberOfThreads(int)}.
 	 * </p>
 	 * <p>
-	 * If this method is called with a <code>false</code> parameter, transfer
-	 * requests will be added to the queue but no transfers in the queue will be
-	 * started. If there are existing transfers already in progress, they will
-	 * continue but the queue will not be read to process additional ones.
+	 * If this method is called with a <code>false</code> parameter, transfer requests will be added to the queue but no transfers in the queue will be started. If there are existing transfers already
+	 * in progress, they will continue but the queue will not be read to process additional ones.
 	 * <p/>
 	 * 
 	 * @param b
-	 *            whether this object should process transfer requests from the
-	 *            queue
+	 *            whether this object should process transfer requests from the queue
 	 */
 	public void setEnabled(boolean b) {
 		boolean old = running;
@@ -111,9 +102,7 @@ public class FTPClient {
 
 	/**
 	 * <p>
-	 * This method may be called by threads other than the EventDispatch thread,
-	 * so we use <code>SwingUtilities.invokeLater()</code> to handle running it
-	 * on the AWT EDT.
+	 * This method may be called by threads other than the EventDispatch thread, so we use <code>SwingUtilities.invokeLater()</code> to handle running it on the AWT EDT.
 	 * </p>
 	 * 
 	 * @param data
@@ -159,10 +148,8 @@ public class FTPClient {
 			todoMap.put(xfer.local, xfer);
 		}
 		/*
-		 * Could perhaps optimize this better by looking for GET vs. PUT jobs
-		 * and doing one or two GETs in parallel with one or two PUTs. Most of
-		 * time this application will be using PUT so it probably doesn't
-		 * matter.
+		 * Could perhaps optimize this better by looking for GET vs. PUT jobs and doing one or two GETs in parallel with one or two PUTs. Most of time this application will be using PUT so it probably
+		 * doesn't matter.
 		 */
 		boolean startAnother = false;
 		synchronized (transferringMap) {
@@ -180,7 +167,7 @@ public class FTPClient {
 			fifoQueue.remove(local);
 			todoMap.remove(local);
 		}
-		// Now check to see if it's running.  If so, deleting it from the transferringMap means
+		// Now check to see if it's running. If so, deleting it from the transferringMap means
 		// we don't care about the results.
 		synchronized (transferringMap) {
 			transferringMap.remove(local);
@@ -189,13 +176,9 @@ public class FTPClient {
 
 	public void removeAllFromQueue() {
 		/*
-		 * We can't actually stop an FTP transfer; we have to let it finish.
-		 * This is ugly. It means that we need to let the transfer finish and
-		 * remove the remote file, but we don't want to be displaying the
-		 * progress bar(s) in the mean time. The calling method must turn off
-		 * display of the dialog yet not remove the change changeListeners until
-		 * all outstanding transfer objects have been completed. Then those
-		 * objects should be removed from the server.
+		 * We can't actually stop an FTP transfer; we have to let it finish. This is ugly. It means that we need to let the transfer finish and remove the remote file, but we don't want to be
+		 * displaying the progress bar(s) in the mean time. The calling method must turn off display of the dialog yet not remove the change changeListeners until all outstanding transfer objects have
+		 * been completed. Then those objects should be removed from the server.
 		 */
 		synchronized (todoMap) {
 			fifoQueue.clear();
@@ -258,7 +241,7 @@ public class FTPClient {
 				is = (ByteArrayInputStream) data.local;
 			} else if (data.local instanceof InputStream) {
 				is = (InputStream) data.local;
-				//				System.err.println("is.available() = " + is.available());
+				// System.err.println("is.available() = " + is.available());
 			} else if (data.local instanceof String) {
 				File file = new File((String) data.local);
 				try {
@@ -295,17 +278,17 @@ public class FTPClient {
 			/*
 			 * In this situation, "data.remote" is the OutputStream.
 			 */
-			//			try {
+			// try {
 			if (data.remoteDir != null) {
 				cconn.mkdir(data.remoteDir.getPath());
 				os = cconn.openUploadStream(data.remoteDir.getPath(), data.remote);
 			} else
 				os = cconn.openUploadStream(data.remote);
-			//			} catch (IOException e) {
-			//				File file = new File(data.remoteDir, data.remote);
-			//				log.error("Attempting to FTP_PUT local asset " + file.getPath());
-			//				e.printStackTrace();
-			//			}
+			// } catch (IOException e) {
+			// File file = new File(data.remoteDir, data.remote);
+			// log.error("Attempting to FTP_PUT local asset " + file.getPath());
+			// e.printStackTrace();
+			// }
 		} else {
 			/*
 			 * In this situation, "data.local" is the OutputStream.
@@ -349,12 +332,8 @@ public class FTPClient {
 			data.incrCurrentPosition();
 		} catch (IOException e) {
 			/*
-			 * For an IOException, it doesn't matter if it's a networking
-			 * problem or just that the FTP server doesn't like the commands
-			 * we're sending. Either way, we can mark this connection as dead
-			 * and skip any remaining transfers. Since we might be multithreaded
-			 * though, we just flag this client as "not usable" and let the
-			 * queue drain normally.
+			 * For an IOException, it doesn't matter if it's a networking problem or just that the FTP server doesn't like the commands we're sending. Either way, we can mark this connection as dead
+			 * and skip any remaining transfers. Since we might be multithreaded though, we just flag this client as "not usable" and let the queue drain normally.
 			 */
 			log.error(e.getMessage(), e);
 			setEnabled(false);
@@ -394,7 +373,7 @@ public class FTPClient {
 
 		String[] uploadList = new String[] { "campaignItemList.xml", "mockup.jfpr", "standard.mtprops", "updateRepoDialog.xml", };
 		FTPClient ftp = new FTPClient("www.eeconsulting.net", "username", "password");
-		//		ftp.setNumberOfThreads(3);
+		// ftp.setNumberOfThreads(3);
 		File dir = new File("testdir");
 		for (int i = 0; i < uploadList.length; i++) {
 			FTPTransferObject fto = new FTPTransferObject(FTPTransferObject.Direction.FTP_PUT, uploadList[i], dir, uploadList[i]);

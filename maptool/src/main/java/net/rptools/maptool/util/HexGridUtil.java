@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.util;
 
 import java.awt.Dimension;
@@ -22,12 +19,12 @@ import net.rptools.maptool.model.HexGridHorizontal;
 
 /**
  * Provides methods to handle hexgrid issues that don't exist with a square grid.
+ * 
  * @author Tylere
  */
 public class HexGridUtil {
-	/** 
-	 * Convert to u-v coordinates where the v-axis points
-	 * along the direction of edge to edge hexes
+	/**
+	 * Convert to u-v coordinates where the v-axis points along the direction of edge to edge hexes
 	 */
 	private static int[] toUVCoords(CellPoint cp, HexGrid grid) {
 		int cpU, cpV;
@@ -43,6 +40,7 @@ public class HexGridUtil {
 
 	/**
 	 * Convert from u-v coords to grid coords
+	 * 
 	 * @return the point in grid-space
 	 */
 	private static CellPoint fromUVCoords(int u, int v, HexGrid grid) {

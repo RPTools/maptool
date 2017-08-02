@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.tool.drawing;
 
 import java.awt.BasicStroke;
@@ -37,9 +34,8 @@ import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.RadiusTemplate;
 
 /**
- * Draw a template for an effect with a radius. Make the template show the squares that are effected, not just draw a
- * circle. Let the player choose the vertex with the mouse and use the wheel to set the radius. This allows the user to
- * move the entire template where it is to be used before placing it which is very important when casting a spell.
+ * Draw a template for an effect with a radius. Make the template show the squares that are effected, not just draw a circle. Let the player choose the vertex with the mouse and use the wheel to set
+ * the radius. This allows the user to move the entire template where it is to be used before placing it which is very important when casting a spell.
  * 
  * @author jgorrell
  * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author: azhrei_fje $
@@ -60,14 +56,13 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
 	protected boolean painting;
 
 	/**
-	 * Has the anchoring point been set? When false, the anchor point is being placed. When true, the area of effect is
-	 * being drawn on the display.
+	 * Has the anchoring point been set? When false, the anchor point is being placed. When true, the area of effect is being drawn on the display.
 	 */
 	protected boolean anchorSet;
 
 	/**
-	 * The offset used to move the vertex when the control key is pressed. If this value is <code>null</code> then this
-	 * would be the first time that the control key had been reported in the mouse event.
+	 * The offset used to move the vertex when the control key is pressed. If this value is <code>null</code> then this would be the first time that the control key had been reported in the mouse
+	 * event.
 	 */
 	protected ZonePoint controlOffset;
 
@@ -76,8 +71,8 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * The width of the cursor. Since the cursor is a cross, this is the width of the horizontal bar and the height of
-	 * the vertical bar. Always make it an odd number to keep it aligned on the grid properly.
+	 * The width of the cursor. Since the cursor is a cross, this is the width of the horizontal bar and the height of the vertical bar. Always make it an odd number to keep it aligned on the grid
+	 * properly.
 	 */
 	public static final int CURSOR_WIDTH = 25;
 
@@ -110,8 +105,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
 	}
 
 	/**
-	 * Calculate the cell at the mouse point. If it is different from the current point, make it the current point and
-	 * repaint.
+	 * Calculate the cell at the mouse point. If it is different from the current point, make it the current point and repaint.
 	 * 
 	 * @param e
 	 *            The event to be checked.
@@ -225,8 +219,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
 	 * New instance of the template, at the passed vertex
 	 * 
 	 * @param vertex
-	 *            The starting vertex for the new template or <code>null</code> if we should use the current template's
-	 *            vertex.
+	 *            The starting vertex for the new template or <code>null</code> if we should use the current template's vertex.
 	 */
 	protected void resetTool(ZonePoint vertex) {
 		anchorSet = false;
@@ -242,8 +235,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
 	}
 
 	/**
-	 * Handles setting the vertex when the control key is pressed during mouse movement. A change in the passed vertex
-	 * causes the template to repaint the zone.
+	 * Handles setting the vertex when the control key is pressed during mouse movement. A change in the passed vertex causes the template to repaint the zone.
 	 * 
 	 * @param e
 	 *            The mouse movement event.
@@ -282,8 +274,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
 	}
 
 	/**
-	 * Handle mouse movement. Done here so that subclasses can still benefit from the code in DefaultTool w/o rewriting
-	 * it.
+	 * Handle mouse movement. Done here so that subclasses can still benefit from the code in DefaultTool w/o rewriting it.
 	 * 
 	 * @param e
 	 *            Current mouse location
@@ -325,8 +316,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * @see net.rptools.maptool.client.ui.zone.ZoneOverlay#paintOverlay(net.rptools.maptool.client.ui.zone.ZoneRenderer,
-	 *      java.awt.Graphics2D)
+	 * @see net.rptools.maptool.client.ui.zone.ZoneOverlay#paintOverlay(net.rptools.maptool.client.ui.zone.ZoneRenderer, java.awt.Graphics2D)
 	 */
 	@Override
 	public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui;
 
 import java.awt.Graphics;
@@ -26,17 +23,14 @@ import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 
 /**
- * This is a read-only implementation of BufferedImage intended to
- * be used with ImageWriters to create very large graphics
- * files. Since this is read-only, it gets its pixel data
- * by rasterizing a Zone piece-meal as the data is requested
- * by getData(rectangle) calls.
+ * This is a read-only implementation of BufferedImage intended to be used with ImageWriters to create very large graphics files. Since this is read-only, it gets its pixel data by rasterizing a Zone
+ * piece-meal as the data is requested by getData(rectangle) calls.
  * 
  * A very simple 4 MB cache is implemented to reduce zoneRender calls.
  */
 public class ZoneImageGenerator extends BufferedImage {
 
-	//	final JComponent largeComponent;
+	// final JComponent largeComponent;
 	final ZoneRenderer renderer;
 	final PlayerView view;
 	final Rectangle origBounds;
@@ -146,7 +140,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	///////////////////////////////////////////////////////////////////////
 
 	/**
-	 *  This object cannot be written to. Method does nothing.
+	 * This object cannot be written to. Method does nothing.
 	 */
 	@Override
 	public WritableRaster getRaster() {
@@ -154,7 +148,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  This object cannot be written to. Method does nothing.
+	 * This object cannot be written to. Method does nothing.
 	 */
 	@Override
 	public synchronized void setRGB(int x, int y, int rgb) {
@@ -163,7 +157,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  This object cannot be written to. Method does nothing.
+	 * This object cannot be written to. Method does nothing.
 	 */
 	@Override
 	public void setRGB(int startX, int startY, int w, int h, int[] rgbArray,
@@ -173,8 +167,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  To the outside world, we represent that this image is as large
-	 *  as the Component.
+	 * To the outside world, we represent that this image is as large as the Component.
 	 */
 	@Override
 	public int getWidth() {
@@ -182,8 +175,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  To the outside world, we represent that this image is as large
-	 *  as the Component.
+	 * To the outside world, we represent that this image is as large as the Component.
 	 */
 	@Override
 	public int getHeight() {
@@ -191,8 +183,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  To the outside world, we represent that this image is as large
-	 *  as the Component.
+	 * To the outside world, we represent that this image is as large as the Component.
 	 */
 	@Override
 	public int getWidth(ImageObserver observer) {
@@ -200,8 +191,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  To the outside world, we represent that this image is as large
-	 *  as the Component.
+	 * To the outside world, we represent that this image is as large as the Component.
 	 */
 	@Override
 	public int getHeight(ImageObserver observer) {
@@ -209,7 +199,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  This object cannot be written to. Returns null.
+	 * This object cannot be written to. Returns null.
 	 */
 	@Override
 	public Graphics getGraphics() {
@@ -217,7 +207,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  This object cannot be written to. Returns null.
+	 * This object cannot be written to. Returns null.
 	 */
 	@Override
 	public Graphics2D createGraphics() {
@@ -231,7 +221,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  This should not be needed... hopefully all ImageWriters use getData instead.
+	 * This should not be needed... hopefully all ImageWriters use getData instead.
 	 */
 	@Override
 	public WritableRaster copyData(WritableRaster outRaster) {
@@ -244,7 +234,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  This object cannot be written to. Method does nothing.
+	 * This object cannot be written to. Method does nothing.
 	 */
 	@Override
 	public void setData(Raster r) {
@@ -262,7 +252,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  This object cannot be written to. Returns false.
+	 * This object cannot be written to. Returns false.
 	 */
 	@Override
 	public boolean isTileWritable(int tileX, int tileY) {
@@ -270,7 +260,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  This object cannot be written to. Returns null.
+	 * This object cannot be written to. Returns null.
 	 */
 	@Override
 	public Point[] getWritableTileIndices() {
@@ -278,7 +268,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  This object cannot be written to. Returns false.
+	 * This object cannot be written to. Returns false.
 	 */
 	@Override
 	public boolean hasTileWriters() {
@@ -286,7 +276,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  This object cannot be written to. Returns null.
+	 * This object cannot be written to. Returns null.
 	 */
 	@Override
 	public WritableRaster getWritableTile(int tileX, int tileY) {
@@ -294,7 +284,7 @@ public class ZoneImageGenerator extends BufferedImage {
 	}
 
 	/**
-	 *  This object cannot be written to. Method does nothing.
+	 * This object cannot be written to. Method does nothing.
 	 */
 	@Override
 	public void releaseWritableTile(int tileX, int tileY) {

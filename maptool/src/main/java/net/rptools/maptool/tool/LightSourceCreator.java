@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.tool;
 
 import java.awt.Color;
@@ -56,7 +53,7 @@ public class LightSourceCreator {
 
 	private static LightSource createLightSource(String name, double radius, double arcAngle) {
 		LightSource source = new LightSource(name);
-		//		source.add(new Light(0, 5, arcAngle, new DrawableColorPaint(new Color(255, 255, 0, 50))));
+		// source.add(new Light(0, 5, arcAngle, new DrawableColorPaint(new Color(255, 255, 0, 50))));
 		source.add(new Light(ShapeType.CIRCLE, 0, radius, arcAngle, null));
 		return source;
 	}
@@ -64,7 +61,7 @@ public class LightSourceCreator {
 	private static LightSource createD20LightSource(String name, double radius, double arcAngle) {
 		LightSource source = new LightSource(name);
 
-		//		source.add(new Light(0, 5, arcAngle, new DrawableColorPaint(new Color(255, 255, 0, 50))));
+		// source.add(new Light(0, 5, arcAngle, new DrawableColorPaint(new Color(255, 255, 0, 50))));
 		source.add(new Light(ShapeType.CIRCLE, 0, radius, arcAngle, null));
 		source.add(new Light(ShapeType.CIRCLE, 0, radius * 2, arcAngle, new DrawableColorPaint(new Color(0, 0, 0, 100))));
 

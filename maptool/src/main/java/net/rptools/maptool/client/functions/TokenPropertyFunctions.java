@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.awt.Image;
@@ -84,21 +81,19 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String empty = setPropertyType(String propTypeName, String tokenId:
-		 * currentToken())
+		 * String empty = setPropertyType(String propTypeName, String tokenId: currentToken())
 		 */
 		if (functionName.equals("setPropertyType")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			token.setPropertyType(parameters.get(0).toString());
 			MapTool.serverCommand().putToken(zone.getId(), token);
-			zone.putToken(token); //TODO: FJE Should this be here?  Added because other places have it...?!
+			zone.putToken(token); // TODO: FJE Should this be here? Added because other places have it...?!
 			return "";
 		}
 
 		/*
-		 * String names = getPropertyNames(String delim: ",", String tokenId:
-		 * currentToken())
+		 * String names = getPropertyNames(String delim: ",", String tokenId: currentToken())
 		 */
 		if (functionName.equals("getPropertyNames") || functionName.equals("getPropertyNamesRaw")) {
 			checkNumberOfParameters(functionName, parameters, 0, 2);
@@ -109,8 +104,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String names = getMatchingProperties(String pattern, String delim:
-		 * ",", String tokenId: currentToken())
+		 * String names = getMatchingProperties(String pattern, String delim: ",", String tokenId: currentToken())
 		 */
 		if (functionName.equals("getMatchingProperties")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
@@ -121,8 +115,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String names = getAllPropertyNames(String propType: "", String delim:
-		 * ",")
+		 * String names = getAllPropertyNames(String propType: "", String delim: ",")
 		 */
 		if (functionName.equals("getAllPropertyNames")) {
 			checkNumberOfParameters(functionName, parameters, 0, 2);
@@ -134,8 +127,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * Number zeroOne = hasProperty(String propName, String tokenId:
-		 * currentToken())
+		 * Number zeroOne = hasProperty(String propName, String tokenId: currentToken())
 		 */
 		if (functionName.equals("hasProperty")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
@@ -199,8 +191,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String layer = setLayer(String layer, String tokenId: currentToken(),
-		 * boolean forceShape: true)
+		 * String layer = setLayer(String layer, String tokenId: currentToken(), boolean forceShape: true)
 		 */
 		if (functionName.equals("setLayer")) {
 			boolean forceShape = true;
@@ -236,8 +227,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String owners = getOwners(String delim: ",", String tokenId:
-		 * currentToken())
+		 * String owners = getOwners(String delim: ",", String tokenId: currentToken())
 		 */
 		if (functionName.equals("getOwners")) {
 			checkNumberOfParameters(functionName, parameters, 0, 2);
@@ -255,8 +245,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * Number zeroOne = isOwner(String player: self, String tokenId:
-		 * currentToken())
+		 * Number zeroOne = isOwner(String player: self, String tokenId: currentToken())
 		 */
 		if (functionName.equals("isOwner")) {
 			checkNumberOfParameters(functionName, parameters, 0, 2);
@@ -268,8 +257,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String empty = resetProperty(String propName, String tokenId:
-		 * currentToken())
+		 * String empty = resetProperty(String propName, String tokenId: currentToken())
 		 */
 		if (functionName.equals("resetProperty")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
@@ -281,8 +269,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String empty = setProperty(String propName, String value, String
-		 * tokenId: currentToken())
+		 * String empty = setProperty(String propName, String value, String tokenId: currentToken())
 		 */
 		if (functionName.equals("setProperty")) {
 			checkNumberOfParameters(functionName, parameters, 2, 3);
@@ -294,8 +281,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * {String|Number} value = getRawProperty(String propName, String
-		 * tokenId: currentToken())
+		 * {String|Number} value = getRawProperty(String propName, String tokenId: currentToken())
 		 */
 		if (functionName.equals("getRawProperty")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
@@ -318,8 +304,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * {String|Number} value = getProperty(String propName, String tokenId:
-		 * currentToken())
+		 * {String|Number} value = getProperty(String propName, String tokenId: currentToken())
 		 */
 		if (functionName.equals("getProperty")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
@@ -339,8 +324,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * Number zeroOne = isPropertyEmpty(String propName, String tokenId:
-		 * currentToken())
+		 * Number zeroOne = isPropertyEmpty(String propName, String tokenId: currentToken())
 		 */
 		if (functionName.equals("isPropertyEmpty")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
@@ -351,8 +335,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		/*
 		 * pre 1.3.b64 only took a single parameter
 		 *
-		 * Number zeroOne = getPropertyDefault(String propName, String propType:
-		 * currentToken().getPropertyType())
+		 * Number zeroOne = getPropertyDefault(String propName, String propType: currentToken().getPropertyType())
 		 */
 		if (functionName.equals("getPropertyDefault")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
@@ -455,8 +438,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String value = getLibProperty(String propName, String tokenId:
-		 * macroSource)
+		 * String value = getLibProperty(String propName, String tokenId: macroSource)
 		 */
 		if (functionName.equals("getLibProperty")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
@@ -479,8 +461,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String empty = setLibProperty(String propName, String value, String
-		 * tokenId: macroSource)
+		 * String empty = setLibProperty(String propName, String value, String tokenId: macroSource)
 		 */
 		if (functionName.equals("setLibProperty")) {
 			checkNumberOfParameters(functionName, parameters, 2, 3);
@@ -499,8 +480,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String names = getLibPropertyNames(String tokenId: {macroSource | "*"
-		 * | "this"}, String delim: ",")
+		 * String names = getLibPropertyNames(String tokenId: {macroSource | "*" | "this"}, String delim: ",")
 		 */
 		if (functionName.equals("getLibPropertyNames")) {
 			checkNumberOfParameters(functionName, parameters, 0, 2);
@@ -522,8 +502,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String names = getMatchingLibProperties(String pattern, String
-		 * tokenId: {macroSource | "*" | "this"}, String delim: ",")
+		 * String names = getMatchingLibProperties(String pattern, String tokenId: {macroSource | "*" | "this"}, String delim: ",")
 		 */
 		if (functionName.equals("getMatchingLibProperties")) {
 			checkNumberOfParameters(functionName, parameters, 1, 3);
@@ -568,8 +547,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String empty = setTokenFacing(Number facing, String tokenId:
-		 * currentToken())
+		 * String empty = setTokenFacing(Number facing, String tokenId: currentToken())
 		 */
 		if (functionName.equals("setTokenFacing")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
@@ -577,7 +555,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			Token token = getTokenFromParam(resolver, functionName, parameters, 1);
 			token.setFacing(facing.intValue());
 			MapTool.serverCommand().putToken(zone.getId(), token);
-			zoneR.flushLight(); // FJE This isn't needed unless the token had a light source, right?  Should we check for that?
+			zoneR.flushLight(); // FJE This isn't needed unless the token had a light source, right? Should we check for that?
 			zone.putToken(token);
 			return "";
 		}
@@ -605,8 +583,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String empty = setOwner(String playerName | JSONArray playerNames,
-		 * String tokenId: currentToken())
+		 * String empty = setOwner(String playerName | JSONArray playerNames, String tokenId: currentToken())
 		 */
 		if (functionName.equals("setOwner")) {
 			checkNumberOfParameters(functionName, parameters, 0, 2);
@@ -662,14 +639,13 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		/*
 		 * String newShape = getTokenShape(String tokenId: currentToken())
 		 *
-		 * See Token.TokenShape for return values. Currently "Top down",
-		 * "Circle", and "Square".
+		 * See Token.TokenShape for return values. Currently "Top down", "Circle", and "Square".
 		 */
 		if (functionName.equals("getTokenShape")) {
 			checkNumberOfParameters(functionName, parameters, 0, 1);
 
 			Token token;
-			//TODO: should just call getTokenFromParam? This doesn't check if the macro is trusted though...
+			// TODO: should just call getTokenFromParam? This doesn't check if the macro is trusted though...
 			if (parameters.isEmpty()) {
 				token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
 				if (token == null)
@@ -683,17 +659,15 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		}
 
 		/*
-		 * String newShape = setTokenShape(String shape, String tokenId:
-		 * currentToken())
+		 * String newShape = setTokenShape(String shape, String tokenId: currentToken())
 		 *
-		 * See Token.TokenShape for shape values. Currently "Top down",
-		 * "Top_down", "Circle", and "Square".
+		 * See Token.TokenShape for shape values. Currently "Top down", "Top_down", "Circle", and "Square".
 		 */
 		if (functionName.equals("setTokenShape")) {
 			checkNumberOfParameters(functionName, parameters, 0, 2);
 
 			Token token;
-			//TODO: should just call getTokenFromParam? This doesn't check if the macro is trusted though...
+			// TODO: should just call getTokenFromParam? This doesn't check if the macro is trusted though...
 			if (parameters.size() == 1) {
 				token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
 				if (token == null)
@@ -713,14 +687,13 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 *
 		 * String newShape = getTokenHeight(String tokenId: currentToken())
 		 *
-		 * Returns pixel width/height for a given token. Useful for free size
-		 * tokens.
+		 * Returns pixel width/height for a given token. Useful for free size tokens.
 		 */
 		if (functionName.equals("getTokenWidth") || functionName.equals("getTokenHeight")) {
 			checkNumberOfParameters(functionName, parameters, 0, 1);
 
 			Token token;
-			//TODO: should just call getTokenFromParam? This doesn't check if the macro is trusted though...
+			// TODO: should just call getTokenFromParam? This doesn't check if the macro is trusted though...
 			if (parameters.isEmpty()) {
 				token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
 				if (token == null)
@@ -762,7 +735,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
 			return "";
 		}
 
-		/* Sets whether the token should snap to the grid or not*/
+		/* Sets whether the token should snap to the grid or not */
 		if (functionName.equals("setTokenSnapToGrid")) {
 			checkNumberOfParameters(functionName, parameters, 1, 2);
 

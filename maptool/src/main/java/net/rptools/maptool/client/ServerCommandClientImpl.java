@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.awt.geom.Area;
@@ -45,7 +42,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
 	public ServerCommandClientImpl() {
 		movementUpdateQueue.start();
-		//		new AssetRetrievalThread().start();
+		// new AssetRetrievalThread().start();
 	}
 
 	public void heartbeat(String data) {
@@ -249,7 +246,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 	}
 
 	public void clearExposedArea(GUID zoneGUID) {
-		//System.out.println("in ServerCommandClientImpl");
+		// System.out.println("in ServerCommandClientImpl");
 		makeServerCall(COMMAND.clearExposedArea, zoneGUID);
 	}
 
@@ -262,9 +259,9 @@ public class ServerCommandClientImpl implements ServerCommand {
 	public void setBoard(GUID zoneGUID, MD5Key mapAssetId, int x, int y) {
 		// First, ensure that the possibly new map texture is available on the client
 		// note: This may not be the optimal solution... can't tell from available documentation.
-		//       it may send a texture that is already sent
-		//       it might be better to do it in the background(?)
-		//       there seem to be other ways to upload textures (?) (e.g. in MapToolUtil)
+		// it may send a texture that is already sent
+		// it might be better to do it in the background(?)
+		// there seem to be other ways to upload textures (?) (e.g. in MapToolUtil)
 		putAsset(AssetManager.getAsset(mapAssetId));
 		// Second, tell the client to change the zone's board info
 		makeServerCall(COMMAND.setBoard, zoneGUID, mapAssetId, x, y);
@@ -273,18 +270,15 @@ public class ServerCommandClientImpl implements ServerCommand {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net.rptools.maptool.model.GUID,
-	 * net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
+	 * @see net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net. rptools.maptool.model.GUID, net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
 	 */
 	public void updateExposedAreaMeta(GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
 		makeServerCall(COMMAND.updateExposedAreaMeta, zoneGUID, tokenExposedAreaGUID, meta);
 	}
 
 	/**
-	 * Some events become obsolete very quickly, such as dragging a token around. This queue always has exactly one
-	 * element, the more current version of the event. The event is then dispatched at some time interval. If a new
-	 * event arrives before the time interval elapses, it is replaced. In this way, only the most current version of the
-	 * event is released.
+	 * Some events become obsolete very quickly, such as dragging a token around. This queue always has exactly one element, the more current version of the event. The event is then dispatched at some
+	 * time interval. If a new event arrives before the time interval elapses, it is replaced. In this way, only the most current version of the event is released.
 	 */
 	private static class TimedEventQueue extends Thread {
 

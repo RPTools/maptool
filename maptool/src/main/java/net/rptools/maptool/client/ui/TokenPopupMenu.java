@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui;
 
 import java.awt.Color;
@@ -97,18 +94,17 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 		add(new JSeparator());
 
 		/*
-		 * This adds the expose menu to token right click when the player is GM and the server setting is set to use
-		 * individual FOW
+		 * This adds the expose menu to token right click when the player is GM and the server setting is set to use individual FOW
 		 */
 		if (MapTool.getPlayer().isGM() && MapTool.getServerPolicy().isUseIndividualFOW()) {
 			add(createExposedFOWMenu());
 		}
 		if (MapTool.getPlayer().isGM() || MapTool.getServerPolicy().getPlayersCanRevealVision()) {
 			add(createExposeMenu());
-			//			if (MapTool.getPlayer().isGM()) {
-			//				addGMItem(createVisionMenu());
-			//			}
-			//			add(new JSeparator());
+			// if (MapTool.getPlayer().isGM()) {
+			// addGMItem(createVisionMenu());
+			// }
+			// add(new JSeparator());
 		}
 		addOwnedItem(createLightSourceMenu());
 		add(new JSeparator());
@@ -183,7 +179,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 	private JMenu createExposedFOWMenu() {
 		String viewMenu = I18N.getText("token.popup.menu.fow");
 		JMenu menu = new JMenu(viewMenu);
-		//menu.add(new AddGlobalExposedAreaAction());
+		// menu.add(new AddGlobalExposedAreaAction());
 		menu.add(new AddPartyExposedAreaAction());
 
 		Zone zone = getRenderer().getZone();
@@ -239,9 +235,8 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 	}
 
 	/**
-	 * XXX If this object is supposed to merge all exposed areas together and apply that to the currently selected
-	 * tokens, why is it using a nested loop? Should one loop be used to create the exposed area object, then a second
-	 * (non-nested) loop be used to modify the exposed area of all selected tokens?
+	 * XXX If this object is supposed to merge all exposed areas together and apply that to the currently selected tokens, why is it using a nested loop? Should one loop be used to create the exposed
+	 * area object, then a second (non-nested) loop be used to modify the exposed area of all selected tokens?
 	 */
 	private class AddPartyExposedAreaAction extends AbstractAction {
 		private static final long serialVersionUID = 3672180436608883849L;
@@ -254,7 +249,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 			ZoneRenderer renderer = getRenderer();
 			Zone zone = renderer.getZone();
 
-			// This is ALL tokens; perhaps it should be owned tokens?  Or just PC tokens?  Or only those with HasSight?
+			// This is ALL tokens; perhaps it should be owned tokens? Or just PC tokens? Or only those with HasSight?
 			// Or can players not use this feature at all so the above don't matter?
 			List<Token> allToks = zone.getTokens();
 
@@ -620,7 +615,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
 		protected Set<GUID> tokenSet;
 		protected ZoneRenderer renderer;
 
-		//		private final String title = "Choose Halo Color";
+		// private final String title = "Choose Halo Color";
 
 		public SetColorChooserAction(ZoneRenderer renderer, Set<GUID> tokenSet, String name) {
 			this.tokenSet = tokenSet;

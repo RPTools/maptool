@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import javax.swing.JTextField;
@@ -58,8 +55,10 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"KP_RIGHT", DefaultEditorKit.forwardAction,
 				"KP_LEFT", DefaultEditorKit.backwardAction,
 				"ENTER", JTextField.notifyAction,
-				"ctrl BACK_SLASH", "unselect"/* DefaultEditorKit.unselectAction */,
-				//				"control shift O",			"toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
+				"ctrl BACK_SLASH", "unselect"/*
+												 * DefaultEditorKit. unselectAction
+												 */,
+				// "control shift O", "toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
 				// FJE: {
 				"meta LEFT", DefaultEditorKit.beginLineAction,
 				"meta KP_LEFT", DefaultEditorKit.beginLineAction,
@@ -102,8 +101,10 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"KP_RIGHT", DefaultEditorKit.forwardAction,
 				"KP_LEFT", DefaultEditorKit.backwardAction,
 				"ENTER", JTextField.notifyAction,
-				"ctrl BACK_SLASH", "unselect"/* DefaultEditorKit.unselectAction */,
-				//				"control shift O",			"toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
+				"ctrl BACK_SLASH", "unselect"/*
+												 * DefaultEditorKit. unselectAction
+												 */,
+				// "control shift O", "toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
 				// FJE: {
 				"meta LEFT", DefaultEditorKit.beginLineAction,
 				"meta KP_LEFT", DefaultEditorKit.beginLineAction,
@@ -162,7 +163,9 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"KP_RIGHT", DefaultEditorKit.forwardAction,
 				"KP_LEFT", DefaultEditorKit.backwardAction,
 				"TAB", DefaultEditorKit.insertTabAction,
-				"ctrl BACK_SLASH", "unselect"/* DefaultEditorKit.unselectAction */,
+				"ctrl BACK_SLASH", "unselect"/*
+												 * DefaultEditorKit. unselectAction
+												 */,
 				"ctrl HOME", DefaultEditorKit.beginAction,
 				"ctrl END", DefaultEditorKit.endAction,
 				"ctrl shift HOME", DefaultEditorKit.selectionBeginAction,
@@ -170,7 +173,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"ctrl T", "next-link-action",
 				"ctrl shift T", "previous-link-action",
 				"ctrl SPACE", "activate-link-action",
-				//				"control shift O",				"toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
+				// "control shift O", "toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
 				// FJE: {
 				"meta LEFT", DefaultEditorKit.beginLineAction,
 				"meta KP_LEFT", DefaultEditorKit.beginLineAction,
@@ -221,7 +224,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 						"KP_LEFT", DefaultEditorKit.backwardAction,
 						"ENTER", JTextField.notifyAction,
 						"ctrl BACK_SLASH", "unselect",
-						//						"ctrl shift O",				"toggle-componentOrientation",
+						// "ctrl shift O", "toggle-componentOrientation",
 						"ESCAPE", "reset-field-edit",
 						"UP", "increment",
 						"KP_UP", "increment",
@@ -323,7 +326,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 						"ESCAPE", "escape",
 						"ctrl F9", "minimize",
 						"ctrl F10", "maximize",
-						"ctrl F6", "selectNextFrame", //FJE Should be (meta ~)?
+						"ctrl F6", "selectNextFrame", // FJE Should be (meta ~)?
 						"ctrl TAB", "selectNextFrame",
 						"meta Alt F6", "selectNextFrame",
 						"shift meta Alt F6", "selectPreviousFrame",

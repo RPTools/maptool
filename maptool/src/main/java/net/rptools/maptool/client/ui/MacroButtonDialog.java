@@ -1,12 +1,10 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui;
 
@@ -214,14 +212,14 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 	private void installFontColorCombo() {
 		JComboBox combo = panel.getComboBox("fontColorComboBox");
 		combo.setModel(new DefaultComboBoxModel(MacroButtonProperties.getFontColors()));
-		//		combo.insertItemAt("default", 0);
+		// combo.insertItemAt("default", 0);
 		combo.setSelectedItem("black");
 		combo.setRenderer(new ColorComboBoxRenderer());
 	}
 
 	private void installFontSizeCombo() {
 		String[] fontSizes = { "0.75em", "0.80em", "0.85em", "0.90em", "0.95em", "1.00em", "1.05em", "1.10em", "1.15em", "1.20em", "1.25em" };
-		//		String[] fontSizes = { "6pt", "7pt", "8pt", "9pt", "10pt", "11pt", "12pt", "13pt", "14pt", "15pt", "16pt" };
+		// String[] fontSizes = { "6pt", "7pt", "8pt", "9pt", "10pt", "11pt", "12pt", "13pt", "14pt", "15pt", "16pt" };
 		JComboBox combo = panel.getComboBox("fontSizeComboBox");
 		combo.setModel(new DefaultComboBoxModel(fontSizes));
 	}
@@ -374,13 +372,13 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
 		// Set the color style via Theme
 		try {
-			//			Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/default.xml"));
-			//			Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/dark.xml"));
-			//			Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/eclipse.xml"));
-			//			Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/idea.xml"));
-			//			Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/vs.xml"));
+			// Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/default.xml"));
+			// Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/dark.xml"));
+			// Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/eclipse.xml"));
+			// Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/idea.xml"));
+			// Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/vs.xml"));
 			Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/nerps.xml"));
-			//			Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/nerps-dark.xml"));
+			// Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/nerps-dark.xml"));
 			theme.apply(macroEditorRSyntaxTextArea);
 			macroEditorRSyntaxTextArea.revalidate();
 		} catch (IOException e) {
@@ -410,7 +408,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
 		RTextScrollPane macroEditorRTextScrollPane = new RTextScrollPane(macroEditorRSyntaxTextArea);
 		macroEditorRTextScrollPane.setLineNumbersEnabled(true);
-		//replaceComponent("macroEditorPanel", "macroEditorRTextScrollPane", macroEditorRTextScrollPane);
+		// replaceComponent("macroEditorPanel", "macroEditorRTextScrollPane", macroEditorRTextScrollPane);
 
 		csp.add(macroEditorRTextScrollPane);
 	}
@@ -474,7 +472,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 				replaceDialog.setVisible(false);
 			}
 
-			//findDialog.setSearchString(macroEditorRSyntaxTextArea.getSelectedText());			
+			// findDialog.setSearchString(macroEditorRSyntaxTextArea.getSelectedText());
 			SwingUtil.centerOver(findDialog, callingDialog);
 			findDialog.setVisible(true);
 
@@ -497,7 +495,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 				findDialog.setVisible(false);
 			}
 
-			//findDialog.setSearchString(macroEditorRSyntaxTextArea.getSelectedText());
+			// findDialog.setSearchString(macroEditorRSyntaxTextArea.getSelectedText());
 			SwingUtil.centerOver(replaceDialog, callingDialog);
 			replaceDialog.setVisible(true);
 		}
@@ -534,16 +532,16 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 	}
 
 	// Jamz: maybe later...
-	//	public void rememberLastWindowLocation() {
-	//		Dimension windowSize = this.getSize();
+	// public void rememberLastWindowLocation() {
+	// Dimension windowSize = this.getSize();
 	//
-	//		int x = outerWindow.getLocation().x + (outerSize.width - innerSize.width) / 2;
-	//		int y = outerWindow.getLocation().y + (outerSize.height - innerSize.height) / 2;
+	// int x = outerWindow.getLocation().x + (outerSize.width - innerSize.width) / 2;
+	// int y = outerWindow.getLocation().y + (outerSize.height - innerSize.height) / 2;
 	//
-	//		// Jamz: For multiple monitor's, x & y can be negative values...
-	//		// innerWindow.setLocation(x < 0 ? 0 : x, y < 0 ? 0 : y);
-	//		innerWindow.setLocation(x, y);
-	//	}
+	// // Jamz: For multiple monitor's, x & y can be negative values...
+	// // innerWindow.setLocation(x < 0 ? 0 : x, y < 0 ? 0 : y);
+	// innerWindow.setLocation(x, y);
+	// }
 
 	private void save(boolean closeDialog) {
 		String hotKey = getHotKeyCombo().getSelectedItem().toString();
@@ -652,7 +650,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 		}
 
 		if (closeDialog) {
-			//			setVisible(false);
+			// setVisible(false);
 			updateOpenMacroList(false);
 			dispose();
 		} else {
@@ -661,7 +659,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 	}
 
 	private void cancel() {
-		//		setVisible(false);
+		// setVisible(false);
 		updateOpenMacroList(false);
 		dispose();
 	}

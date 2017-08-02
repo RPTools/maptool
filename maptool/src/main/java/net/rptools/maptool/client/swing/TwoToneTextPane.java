@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.swing;
 
 import java.awt.Color;
@@ -59,7 +56,7 @@ public class TwoToneTextPane extends JTextPane {
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * The constant used as the attribute name for two tone colors. 
+	 * The constant used as the attribute name for two tone colors.
 	 */
 	public static final Object TwoToneColor = new ColorConstants("two-tone-color");
 
@@ -83,7 +80,8 @@ public class TwoToneTextPane extends JTextPane {
 	/**
 	 * Create a pane for the styled document.
 	 * 
-	 * @param aDoc The styled document being displayed.
+	 * @param aDoc
+	 *            The styled document being displayed.
 	 */
 	public TwoToneTextPane(StyledDocument aDoc) {
 		super(aDoc);
@@ -97,7 +95,8 @@ public class TwoToneTextPane extends JTextPane {
 	/**
 	 * Gets the background color setting from the attribute list.
 	 *
-	 * @param a the attribute set
+	 * @param a
+	 *            the attribute set
 	 * @return the color, Color.black as the default
 	 */
 	public static Color getTwoToneColor(AttributeSet a) {
@@ -108,19 +107,22 @@ public class TwoToneTextPane extends JTextPane {
 	/**
 	 * Sets the background color.
 	 *
-	 * @param a the attribute set
-	 * @param fg the color
+	 * @param a
+	 *            the attribute set
+	 * @param fg
+	 *            the color
 	 */
 	public static void setTwoToneColor(MutableAttributeSet a, Color fg) {
 		a.addAttribute(TwoToneColor, fg);
 	}
 
 	/**
-	 * Not really support for two tone styles, but a convience method
-	 * to set all of the properties for a single font.
+	 * Not really support for two tone styles, but a convience method to set all of the properties for a single font.
 	 * 
-	 * @param style Style being modified
-	 * @param font Font to add to the style.
+	 * @param style
+	 *            Style being modified
+	 * @param font
+	 *            Font to add to the style.
 	 */
 	public static final void setFont(Style style, Font font) {
 		StyleConstants.setFontFamily(style, font.getFamily());
@@ -132,7 +134,8 @@ public class TwoToneTextPane extends JTextPane {
 	/**
 	 * A convience method to read a font from a style.
 	 * 
-	 * @param style Style being modified
+	 * @param style
+	 *            Style being modified
 	 * @return The font inside the passed style
 	 */
 	public static String getFontString(Style style) {
@@ -148,11 +151,12 @@ public class TwoToneTextPane extends JTextPane {
 	}
 
 	/**
-	 * Parse the passed text string for style names and add
-	 * the styled text to the text pane's document.
+	 * Parse the passed text string for style names and add the styled text to the text pane's document.
 	 * 
-	 * @param text Text to parse
-	 * @param pane Pane to modify. The pane also provides the style names
+	 * @param text
+	 *            Text to parse
+	 * @param pane
+	 *            Pane to modify. The pane also provides the style names
 	 */
 	public static final void parse(String text, JTextPane pane) {
 		try {
@@ -214,8 +218,7 @@ public class TwoToneTextPane extends JTextPane {
 	 *------------------------------------------------------------------------------------------*/
 
 	/**
-	 * This factory is the default view factory extended to return
-	 * a view that paints two tone text.
+	 * This factory is the default view factory extended to return a view that paints two tone text.
 	 * 
 	 * @author jgorrell
 	 * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author: azhrei_fje $
@@ -251,7 +254,7 @@ public class TwoToneTextPane extends JTextPane {
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * Label view that can paint two tone text. 
+	 * Label view that can paint two tone text.
 	 * 
 	 * @author jgorrell
 	 * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author: azhrei_fje $
@@ -264,7 +267,7 @@ public class TwoToneTextPane extends JTextPane {
 		private GlyphView.GlyphPainter painter = new TwoToneGlyphPainter();
 
 		/**
-		 * Create a new TwoToneLabelView 
+		 * Create a new TwoToneLabelView
 		 *
 		 * @param element
 		 */
@@ -279,11 +282,9 @@ public class TwoToneTextPane extends JTextPane {
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * Paints a black or white background text offest by a pixel both vertically and
-	 * horizontally and then paints the normal text. This code is just a copy of 
-	 * <code>javax.swing.text.GlyphPainter1</code> modified to return an extra pixel for
-	 * the width and height and to do the extra painting.
-	 *  
+	 * Paints a black or white background text offest by a pixel both vertically and horizontally and then paints the normal text. This code is just a copy of
+	 * <code>javax.swing.text.GlyphPainter1</code> modified to return an extra pixel for the width and height and to do the extra painting.
+	 * 
 	 * @author jgorrell
 	 * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author: azhrei_fje $
 	 */
@@ -317,15 +318,15 @@ public class TwoToneTextPane extends JTextPane {
 		 *-------------------------------------------------------------------------------------------*/
 
 		/**
-		 * Fetch a reference to the text that occupies
-		 * the given range.  This is normally used by
-		 * the GlyphPainter to determine what characters
-		 * it should render glyphs for.
+		 * Fetch a reference to the text that occupies the given range. This is normally used by the GlyphPainter to determine what characters it should render glyphs for.
 		 *
-		 * @param v   Read the text from this glyph view's document.
-		 * @param p0  the starting document offset >= 0
-		 * @param p1  the ending document offset >= p0
-		 * @return    the <code>Segment</code> containing the text
+		 * @param v
+		 *            Read the text from this glyph view's document.
+		 * @param p0
+		 *            the starting document offset >= 0
+		 * @param p1
+		 *            the ending document offset >= p0
+		 * @return the <code>Segment</code> containing the text
 		 */
 		public Segment getText(GlyphView v, int p0, int p1) {
 			Segment text = new Segment();
@@ -364,8 +365,7 @@ public class TwoToneTextPane extends JTextPane {
 		}
 
 		/**
-		 * Fetches the ascent above the baseline for the glyphs
-		 * corresponding to the given range in the model.
+		 * Fetches the ascent above the baseline for the glyphs corresponding to the given range in the model.
 		 * 
 		 * @see javax.swing.text.GlyphView.GlyphPainter#getAscent(javax.swing.text.GlyphView)
 		 */
@@ -375,8 +375,7 @@ public class TwoToneTextPane extends JTextPane {
 		}
 
 		/**
-		 * Fetches the descent below the baseline for the glyphs
-		 * corresponding to the given range in the model.
+		 * Fetches the descent below the baseline for the glyphs corresponding to the given range in the model.
 		 * 
 		 * @see javax.swing.text.GlyphView.GlyphPainter#getDescent(javax.swing.text.GlyphView)
 		 */
@@ -415,8 +414,7 @@ public class TwoToneTextPane extends JTextPane {
 		}
 
 		/**
-		 * Provides a mapping from the view coordinate space to the logical
-		 * coordinate space of the model.
+		 * Provides a mapping from the view coordinate space to the logical coordinate space of the model.
 		 *
 		 * @see View#viewToModel(float, float, java.awt.Shape, javax.swing.text.Position.Bias[])
 		 * @see javax.swing.text.GlyphView.GlyphPainter#viewToModel(javax.swing.text.GlyphView, float, float, java.awt.Shape, javax.swing.text.Position.Bias[])
@@ -444,11 +442,8 @@ public class TwoToneTextPane extends JTextPane {
 		}
 
 		/**
-		 * Determines the best location (in the model) to break
-		 * the given view.
-		 * This method attempts to break on a whitespace
-		 * location.  If a whitespace location can't be found, the
-		 * nearest character location is returned.
+		 * Determines the best location (in the model) to break the given view. This method attempts to break on a whitespace location. If a whitespace location can't be found, the nearest character
+		 * location is returned.
 		 *
 		 * @see View#breakView
 		 * @see javax.swing.text.GlyphView.GlyphPainter#getBoundedPosition(javax.swing.text.GlyphView, int, float, float)
@@ -466,7 +461,8 @@ public class TwoToneTextPane extends JTextPane {
 		/**
 		 * Synchronize this painter with the current state of the view.
 		 * 
-		 * @param v Sync to this view.
+		 * @param v
+		 *            Sync to this view.
 		 */
 		@SuppressWarnings("deprecation")
 		void sync(GlyphView v) {
@@ -486,7 +482,7 @@ public class TwoToneTextPane extends JTextPane {
 
 		/**
 		 * Much of this code is copied from GlyphPainter1's implementation.
-		 *  
+		 * 
 		 * @see javax.swing.text.GlyphView.GlyphPainter#paint(javax.swing.text.GlyphView, java.awt.Graphics, java.awt.Shape, int, int)
 		 */
 		public void paint(GlyphView v, Graphics g, Shape a, int p0, int p1) {
@@ -541,9 +537,10 @@ public class TwoToneTextPane extends JTextPane {
 		String name;
 
 		/**
-		 * Create a new ColorConstants 
+		 * Create a new ColorConstants
 		 *
-		 * @param aName The name of the new color constant.
+		 * @param aName
+		 *            The name of the new color constant.
 		 */
 		protected ColorConstants(String aName) {
 			name = aName;

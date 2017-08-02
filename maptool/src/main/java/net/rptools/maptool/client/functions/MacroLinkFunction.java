@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.awt.Color;
@@ -175,13 +172,10 @@ public class MacroLinkFunction extends AbstractFunction {
 	 * This method generates a string in the form of a macro invocation.
 	 * </p>
 	 * <p>
-	 * The resulting output is of the form <code>macro://</code><i>macroName</i>
-	 * <code>/</code><i>who</i> <code>/</code> <i>target</i><code>?</code>
-	 * <i>args</i>
+	 * The resulting output is of the form <code>macro://</code><i>macroName</i> <code>/</code><i>who</i> <code>/</code> <i>target</i><code>?</code> <i>args</i>
 	 * </p>
 	 * <p>
-	 * The <code>args</code> parameter is a String which is converted to a
-	 * property list and then back to a String.
+	 * The <code>args</code> parameter is a String which is converted to a property list and then back to a String.
 	 * </p>
 	 * 
 	 * @param macroName
@@ -374,8 +368,7 @@ public class MacroLinkFunction extends AbstractFunction {
 	 * @param link
 	 *            the link to the macro.
 	 * @param setVars
-	 *            should the variables be set in the macro context as well as
-	 *            passed in as macro.args.
+	 *            should the variables be set in the macro context as well as passed in as macro.args.
 	 */
 	public void runMacroLink(String link, boolean setVars) {
 		if (link == null || link.length() == 0) {
@@ -472,12 +465,9 @@ public class MacroLinkFunction extends AbstractFunction {
 
 	private void doOutput(Token token, OutputTo outputTo, String line, Set<String> playerList) {
 		/*
-		 * First we check our player list to make sure we are not sending things
-		 * out multiple times or the wrong way. This looks a little ugly, but
-		 * all it is doing is searching for the strings "say", "gm", or
-		 * "gmself", and if it contains no other strings changes it to a more
-		 * appropriate for such as /togm, /self, etc. If it contains other names
-		 * then gm, self etc will be replaced with player names.
+		 * First we check our player list to make sure we are not sending things out multiple times or the wrong way. This looks a little ugly, but all it is doing is searching for the strings "say",
+		 * "gm", or "gmself", and if it contains no other strings changes it to a more appropriate for such as /togm, /self, etc. If it contains other names then gm, self etc will be replaced with
+		 * player names.
 		 */
 		if (outputTo == OutputTo.LIST) {
 			if (playerList == null) {
@@ -583,8 +573,7 @@ public class MacroLinkFunction extends AbstractFunction {
 	}
 
 	/**
-	 * Runs the macro specified by the link if it is auto executable otherwise
-	 * does nothing..
+	 * Runs the macro specified by the link if it is auto executable otherwise does nothing..
 	 * 
 	 * @param link
 	 *            the link to the macro.
@@ -596,8 +585,7 @@ public class MacroLinkFunction extends AbstractFunction {
 	}
 
 	/**
-	 * Runs the macro specified by the link if it is auto executable otherwise
-	 * does nothing..
+	 * Runs the macro specified by the link if it is auto executable otherwise does nothing..
 	 * 
 	 * @param link
 	 *            the link to the macro.

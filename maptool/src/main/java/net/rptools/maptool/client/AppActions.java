@@ -1,15 +1,10 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client;
 
@@ -124,25 +119,17 @@ import org.jdesktop.swingworker.SwingWorker;
 import com.jidesoft.docking.DockableFrame;
 
 /**
- * This class acts as a container for a wide variety of {@link Action}s that are
- * used throughout the application. Most of these are added to the main frame
- * menu, but some are added dynamically as needed, sometimes to the frame menu
- * but also to the context menu (the "right-click menu").
+ * This class acts as a container for a wide variety of {@link Action}s that are used throughout the application. Most of these are added to the main frame menu, but some are added dynamically as
+ * needed, sometimes to the frame menu but also to the context menu (the "right-click menu").
  *
- * Each object instantiated from {@link DefaultClientAction} should have an
- * initializer that calls {@link ClientAction#init(String)} and passes the base
- * message key from the properties file. This base message key will be used to
- * locate the text that should appear on the menu item as well as the
- * accelerator, mnemonic, and short description strings. (See the {@link I18N}
- * class for more details on how the key is used.
+ * Each object instantiated from {@link DefaultClientAction} should have an initializer that calls {@link ClientAction#init(String)} and passes the base message key from the properties file. This base
+ * message key will be used to locate the text that should appear on the menu item as well as the accelerator, mnemonic, and short description strings. (See the {@link I18N} class for more details on
+ * how the key is used.
  *
- * In addition, each object should override {@link ClientAction#isAvailable()}
- * and return true if the application is in a state where the Action should be
- * enabled. (The default is <code>true</code>.)
+ * In addition, each object should override {@link ClientAction#isAvailable()} and return true if the application is in a state where the Action should be enabled. (The default is <code>true</code>.)
  *
- * Last is the {@link ClientAction#execute(ActionEvent)} method. It is passed
- * the {@link ActionEvent} object that triggered this Action as a parameter. It
- * should perform the necessary work to accomplish the effect of the Action.
+ * Last is the {@link ClientAction#execute(ActionEvent)} method. It is passed the {@link ActionEvent} object that triggered this Action as a parameter. It should perform the necessary work to
+ * accomplish the effect of the Action.
  */
 public class AppActions {
 	private static final Logger log = Logger.getLogger(AppActions.class);
@@ -154,18 +141,13 @@ public class AppActions {
 		int key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 		String prop = System.getProperty("os.name", "unknown");
 		if ("darwin".equalsIgnoreCase(prop)) {
-			// TODO Should we install our own AWTKeyStroke class?  If we do it should only be if menu shortcut is CTRL...
+			// TODO Should we install our own AWTKeyStroke class? If we do it should only be if menu shortcut is CTRL...
 			if (key == Event.CTRL_MASK)
 				key = Event.META_MASK;
 			/*
-			 * In order for OpenJDK to work on Mac OS X, the user must have the
-			 * X11 package installed unless they're running headless. However,
-			 * in order for the Command key to work, the X11 Preferences must be
-			 * set to "Enable the Meta Key" in X11 applications. Essentially, if
-			 * this option is turned on, the Command key (called Meta in X11)
-			 * will be intercepted by the X11 package and not sent to the
-			 * application. The next step for MapTool will be better integration
-			 * with the Mac desktop to eliminate the X11 menu altogether.
+			 * In order for OpenJDK to work on Mac OS X, the user must have the X11 package installed unless they're running headless. However, in order for the Command key to work, the X11
+			 * Preferences must be set to "Enable the Meta Key" in X11 applications. Essentially, if this option is turned on, the Command key (called Meta in X11) will be intercepted by the X11
+			 * package and not sent to the application. The next step for MapTool will be better integration with the Mac desktop to eliminate the X11 menu altogether.
 			 */
 		}
 		return key;
@@ -338,57 +320,36 @@ public class AppActions {
 
 		/**
 		 * <p>
-		 * This action performs a repository update by comparing the assets in
-		 * the current campaign against all assets in all repositories and
-		 * uploading assets to one of the repositories and creating a
-		 * replacement <b>index.gz</b> which is also uploaded.
+		 * This action performs a repository update by comparing the assets in the current campaign against all assets in all repositories and uploading assets to one of the repositories and creating
+		 * a replacement <b>index.gz</b> which is also uploaded.
 		 * </p>
 		 * <p>
-		 * For the purposes of this action, only the FTP protocol is supported.
-		 * The primary reason for this has to do with the way images will be
-		 * uploaded. If HTTP were used and a single file sent, there would need
-		 * to be a script on the remote end that knew how to unpack the file
-		 * correctly. This cannot be assumed in the general case.
+		 * For the purposes of this action, only the FTP protocol is supported. The primary reason for this has to do with the way images will be uploaded. If HTTP were used and a single file sent,
+		 * there would need to be a script on the remote end that knew how to unpack the file correctly. This cannot be assumed in the general case.
 		 * </p>
 		 * <p>
-		 * Using FTP, we can upload individual files to particular directories.
-		 * While this same approach could be used for HTTP, once again the user
-		 * would have to install some kind of upload script on the server side.
-		 * This again makes HTTP impractical and FTP more "user-friendly".
+		 * Using FTP, we can upload individual files to particular directories. While this same approach could be used for HTTP, once again the user would have to install some kind of upload script on
+		 * the server side. This again makes HTTP impractical and FTP more "user-friendly".
 		 * </p>
 		 * <p>
-		 * <b>Implementation.</b> This method first makes a list of all known
-		 * repositories from the campaign properties. They are presented to the
-		 * user who then selects one as the destination for new assets to be
-		 * uploaded. A list of assets currently used in the campaign is then
-		 * generated and compared against the index files of all repositories
-		 * from the previous list. Any new assets are aggregated and the user is
-		 * presented with a summary of the images to be uploaded, including file
-		 * size. The user enters FTP connection information and the upload
-		 * begins as a separate thread. (Perhaps the Transfer Window can be used
-		 * to keep track of the uploading process?)
+		 * <b>Implementation.</b> This method first makes a list of all known repositories from the campaign properties. They are presented to the user who then selects one as the destination for new
+		 * assets to be uploaded. A list of assets currently used in the campaign is then generated and compared against the index files of all repositories from the previous list. Any new assets are
+		 * aggregated and the user is presented with a summary of the images to be uploaded, including file size. The user enters FTP connection information and the upload begins as a separate thread.
+		 * (Perhaps the Transfer Window can be used to keep track of the uploading process?)
 		 * </p>
 		 * <p>
-		 * <b>Optimizations.</b> At some point, creating the list of assets
-		 * could be spun into another thread, although there's probably not much
-		 * value there. Or the FTP information could be collected at the
-		 * beginning and as assets are checked they could immediately begin
-		 * uploading with the summary including all assets, even those already
-		 * uploaded.
+		 * <b>Optimizations.</b> At some point, creating the list of assets could be spun into another thread, although there's probably not much value there. Or the FTP information could be collected
+		 * at the beginning and as assets are checked they could immediately begin uploading with the summary including all assets, even those already uploaded.
 		 * </p>
 		 * <p>
-		 * My review of FTP client libraries brought me to <a href=
-		 * "http://www.javaworld.com/javaworld/jw-04-2003/jw-0404-ftp.html">
-		 * this extensive review of FTP libraries</a> If we're going to do much
-		 * more with FTP, <b>Globus GridFTP</b> looks good, but the library
-		 * itself is 2.7MB.
+		 * My review of FTP client libraries brought me to <a href= "http://www.javaworld.com/javaworld/jw-04-2003/jw-0404-ftp.html"> this extensive review of FTP libraries</a> If we're going to do
+		 * much more with FTP, <b>Globus GridFTP</b> looks good, but the library itself is 2.7MB.
 		 * </p>
 		 */
 		@Override
 		public void execute(ActionEvent e) {
 			/*
-			 * 1. Ask the user to select repositories which should be
-			 * considered. 2. Ask the user for FTP upload information.
+			 * 1. Ask the user to select repositories which should be considered. 2. Ask the user for FTP upload information.
 			 */
 			UpdateRepoDialog urd;
 
@@ -404,25 +365,19 @@ public class AppActions {
 			MapTool.getCampaign().getExportDialog().setExportLocation(urd.getFTPLocation());
 
 			/*
-			 * 3. Check all assets against the repository indices and build a
-			 * new list from those that are not found.
+			 * 3. Check all assets against the repository indices and build a new list from those that are not found.
 			 */
 			Map<MD5Key, Asset> missing = AssetManager.findAllAssetsNotInRepositories(urd.getSelectedRepositories());
 
 			/*
-			 * 4. Give the user a summary and ask for permission to begin the
-			 * upload. I'm going to display a listbox and let the user click on
-			 * elements of the list in order to see a preview to the right. But
-			 * there's no plan to make it a CheckBoxList. (Wouldn't be _that_
-			 * tough, however.)
+			 * 4. Give the user a summary and ask for permission to begin the upload. I'm going to display a listbox and let the user click on elements of the list in order to see a preview to the
+			 * right. But there's no plan to make it a CheckBoxList. (Wouldn't be _that_ tough, however.)
 			 */
 			if (!MapTool.confirm(I18N.getText("msg.confirm.aboutToBeginFTP", missing.size() + 1)))
 				return;
 
 			/*
-			 * 5. Build the index as we go, but add the images to FTP to a queue
-			 * handled by another thread. Add a progress bar of some type or use
-			 * the Transfer Status window.
+			 * 5. Build the index as we go, but add the images to FTP to a queue handled by another thread. Add a progress bar of some type or use the Transfer Status window.
 			 */
 			try {
 				File topdir = urd.getDirectory();
@@ -446,11 +401,11 @@ public class AppActions {
 				// Handle the index
 				ByteArrayOutputStream bout = new ByteArrayOutputStream();
 				String saveTo = urd.getSaveToRepository();
-				// When this runs our local 'repoindx' is updated.  If the FTP upload later fails,
-				// it doesn't really matter much because the assets are already there.  However,
+				// When this runs our local 'repoindx' is updated. If the FTP upload later fails,
+				// it doesn't really matter much because the assets are already there. However,
 				// if our local cache is ever downloaded again, we'll "forget" that the assets are
-				// on the server.  It sounds like it might be nice to have some way to resync
-				// the local system with the FTP server.  But it's probably better to let the user
+				// on the server. It sounds like it might be nice to have some way to resync
+				// the local system with the FTP server. But it's probably better to let the user
 				// do it manually.
 				byte[] index = AssetManager.updateRepositoryMap(saveTo, repoEntries);
 				repoEntries.clear();
@@ -465,9 +420,9 @@ public class AppActions {
 		}
 
 		private String getFormattedDate(Date d) {
-			// Use today's date as the directory on the FTP server.  This doesn't affect players'
+			// Use today's date as the directory on the FTP server. This doesn't affect players'
 			// ability to download it and might help the user determine what was uploaded to
-			// their site and why.  It can't hurt. :)
+			// their site and why. It can't hurt. :)
 			SimpleDateFormat df = (SimpleDateFormat) DateFormat.getDateInstance();
 			df.applyPattern("yyyy-MM-dd");
 			return df.format(d == null ? new Date() : d);
@@ -475,8 +430,7 @@ public class AppActions {
 	};
 
 	/**
-	 * This is the menu option that forces clients to display the GM's current
-	 * map.
+	 * This is the menu option that forces clients to display the GM's current map.
 	 */
 	public static final Action ENFORCE_ZONE = new ZoneAdminClientAction() {
 
@@ -715,30 +669,18 @@ public class AppActions {
 	};
 
 	/*
-	 * public static final DefaultClientAction UNDO_DRAWING = new
-	 * DefaultClientAction() { { init("action.undoDrawing"); isAvailable(); //
-	 * XXX FJE Is this even necessary? }
+	 * public static final DefaultClientAction UNDO_DRAWING = new DefaultClientAction() { { init("action.undoDrawing"); isAvailable(); // XXX FJE Is this even necessary? }
 	 *
-	 * @Override public void execute(ActionEvent e) {
-	 * DrawableUndoManager.getInstance().undo(); isAvailable();
-	 * REDO_DRAWING.isAvailable(); // XXX FJE Calling these forces the update,
-	 * but won't the framework call them? }
+	 * @Override public void execute(ActionEvent e) { DrawableUndoManager.getInstance().undo(); isAvailable(); REDO_DRAWING.isAvailable(); // XXX FJE Calling these forces the update, but won't the
+	 * framework call them? }
 	 *
-	 * @Override public boolean isAvailable() {
-	 * setEnabled(DrawableUndoManager.getInstance().getUndoManager().canUndo());
-	 * return isEnabled(); } };
+	 * @Override public boolean isAvailable() { setEnabled(DrawableUndoManager.getInstance().getUndoManager().canUndo()); return isEnabled(); } };
 	 *
-	 * public static final DefaultClientAction REDO_DRAWING = new
-	 * DefaultClientAction() { { init("action.redoDrawing"); isAvailable(); //
-	 * XXX Is this even necessary? }
+	 * public static final DefaultClientAction REDO_DRAWING = new DefaultClientAction() { { init("action.redoDrawing"); isAvailable(); // XXX Is this even necessary? }
 	 *
-	 * @Override public void execute(ActionEvent e) {
-	 * DrawableUndoManager.getInstance().redo(); isAvailable();
-	 * UNDO_DRAWING.isAvailable(); }
+	 * @Override public void execute(ActionEvent e) { DrawableUndoManager.getInstance().redo(); isAvailable(); UNDO_DRAWING.isAvailable(); }
 	 *
-	 * @Override public boolean isAvailable() {
-	 * setEnabled(DrawableUndoManager.getInstance().getUndoManager().canRedo());
-	 * return isEnabled(); } };
+	 * @Override public boolean isAvailable() { setEnabled(DrawableUndoManager.getInstance().getUndoManager().canRedo()); return isEnabled(); } };
 	 */
 
 	public static final DefaultClientAction CLEAR_DRAWING = new DefaultClientAction() {
@@ -788,19 +730,16 @@ public class AppActions {
 	/**
 	 * Cut tokens in the set from the given zone.
 	 * <p>
-	 * If no tokens are deleted (because the incoming set is empty, because none
-	 * of the tokens in the set exist in the zone, or because the user doesn't
-	 * have permission to delete the tokens) then the
+	 * If no tokens are deleted (because the incoming set is empty, because none of the tokens in the set exist in the zone, or because the user doesn't have permission to delete the tokens) then the
 	 * {@link MapTool#SND_INVALID_OPERATION} sound is played.
 	 * <p>
-	 * If any tokens<i>are</i> deleted, then the selection set for the zone is
-	 * cleared.
+	 * If any tokens<i>are</i> deleted, then the selection set for the zone is cleared.
 	 *
 	 * @param zone
 	 * @param tokenSet
 	 */
 	public static final void cutTokens(Zone zone, Set<GUID> tokenSet) {
-		// Only cut if some tokens are selected.  Don't want to accidentally
+		// Only cut if some tokens are selected. Don't want to accidentally
 		// lose what might already be in the clipboard.
 		boolean anythingDeleted = false;
 		if (!tokenSet.isEmpty()) {
@@ -841,14 +780,11 @@ public class AppActions {
 	};
 
 	/**
-	 * Copies the given set of tokens to a holding area (not really the
-	 * "clipboard") so that they can be pasted back in again later. This is the
-	 * highest level function in that it determines token ownership (only owners
-	 * can copy/cut tokens).
+	 * Copies the given set of tokens to a holding area (not really the "clipboard") so that they can be pasted back in again later. This is the highest level function in that it determines token
+	 * ownership (only owners can copy/cut tokens).
 	 *
 	 * @param tokenSet
-	 *            the set of tokens to copy; if empty, plays the
-	 *            {@link MapTool#SND_INVALID_OPERATION} sound.
+	 *            the set of tokens to copy; if empty, plays the {@link MapTool#SND_INVALID_OPERATION} sound.
 	 */
 	public static final void copyTokens(Set<GUID> tokenSet) {
 		List<Token> tokenList = null;
@@ -867,7 +803,7 @@ public class AppActions {
 				}
 			}
 		}
-		// Only cut if some tokens are selected.  Don't want to accidentally
+		// Only cut if some tokens are selected. Don't want to accidentally
 		// lose what might already be in the clipboard.
 		if (anythingCopied) {
 			copyTokens(tokenList);
@@ -879,61 +815,46 @@ public class AppActions {
 	private static Grid gridCopiedFrom = null;
 
 	/**
-	 * Copies the given set of tokens to a holding area (not really the
-	 * "clipboard") so that they can be pasted back in again later. This method
-	 * ignores token ownership and operates on the entire list. A token's (x,y)
-	 * offset from the first token in the set is preserved so that relative
-	 * positions are preserved when they are pasted back in later.
+	 * Copies the given set of tokens to a holding area (not really the "clipboard") so that they can be pasted back in again later. This method ignores token ownership and operates on the entire
+	 * list. A token's (x,y) offset from the first token in the set is preserved so that relative positions are preserved when they are pasted back in later.
 	 * <p>
 	 * Here are the criteria for how copy/paste of tokens should work:
 	 * <ol>
 	 * <li><b>Both maps are gridless.</b><br>
-	 * This case is very simple since there's no need to convert anything to
-	 * cell coordinates and back again.
+	 * This case is very simple since there's no need to convert anything to cell coordinates and back again.
 	 * <ul>
-	 * <li>All tokens have their relative pixel offsets saved and reproduced
-	 * when pasted back in.
+	 * <li>All tokens have their relative pixel offsets saved and reproduced when pasted back in.
 	 * </ul>
 	 *
 	 * <li><b>Both maps have grids.</b><br>
-	 * This scheme will preserve proper spacing on the Token layer (for tokens)
-	 * and on the Object and Background layers (for stamps). The spacing will
-	 * NOT be correct when there's a mix of snapToGrid tokens and non-snapToGrid
-	 * tokens, but I don't see any way to correct that. (Well, we could
-	 * calculate a percentage distance from the token in the extreme corners of
-	 * the pasted set and use that percentage to calculate a pixel location.
-	 * Seems like a lot of work for not much payoff.)
+	 * This scheme will preserve proper spacing on the Token layer (for tokens) and on the Object and Background layers (for stamps). The spacing will NOT be correct when there's a mix of snapToGrid
+	 * tokens and non-snapToGrid tokens, but I don't see any way to correct that. (Well, we could calculate a percentage distance from the token in the extreme corners of the pasted set and use that
+	 * percentage to calculate a pixel location. Seems like a lot of work for not much payoff.)
 	 * <ul>
-	 * <li>For all tokens that are snapToGrid, the relative distances between
-	 * tokens should be kept in "cell" units when copied. That way they can be
-	 * pasted back in with the relative cell spacing reproduced.
-	 * <li>For all tokens that are not snapToGrid, their relative pixel offsets
-	 * should be saved and reproduced when the tokens are pasted.
+	 * <li>For all tokens that are snapToGrid, the relative distances between tokens should be kept in "cell" units when copied. That way they can be pasted back in with the relative cell spacing
+	 * reproduced.
+	 * <li>For all tokens that are not snapToGrid, their relative pixel offsets should be saved and reproduced when the tokens are pasted.
 	 * </ul>
 	 *
 	 * <li><b>The source map is gridless and the destination has a grid.</b><br>
 	 * This one is essentially identical to the first case.
 	 * <ul>
-	 * <li>All tokens are copied with relative pixel offsets. When pasted, those
-	 * relative offsets are used for all non-snapToGrid tokens, but snapToGrid
-	 * tokens have the relative pixel offsets applied and then are "snapped"
-	 * into the correct cell location.
+	 * <li>All tokens are copied with relative pixel offsets. When pasted, those relative offsets are used for all non-snapToGrid tokens, but snapToGrid tokens have the relative pixel offsets applied
+	 * and then are "snapped" into the correct cell location.
 	 * </ul>
 	 *
 	 * <li><b>The source map has a grid and the destination is gridless.</b><br>
 	 * This one is essentially identical to the first case.
 	 * <ul>
-	 * <li>All tokens have their relative pixel distances saved and those
-	 * offsets are reproduced when pasted.
+	 * <li>All tokens have their relative pixel distances saved and those offsets are reproduced when pasted.
 	 * </ul>
 	 * </ol>
 	 *
 	 * @param tokenList
-	 *            the list of tokens to copy; if empty, plays the
-	 *            {@link MapTool#SND_INVALID_OPERATION} sound.
+	 *            the list of tokens to copy; if empty, plays the {@link MapTool#SND_INVALID_OPERATION} sound.
 	 */
 	public static final void copyTokens(List<Token> tokenList) {
-		// Only cut if some tokens are selected.  Don't want to accidentally
+		// Only cut if some tokens are selected. Don't want to accidentally
 		// lose what might already be in the clipboard.
 		if (!tokenList.isEmpty()) {
 			if (tokenCopySet != null)
@@ -949,13 +870,9 @@ public class AppActions {
 				tokenCopySet.add(newToken);
 			}
 			/*
-			 * Normalize. For gridless maps, keep relative pixel distances. For
-			 * gridded maps, keep relative cell spacing. Since we're going to
-			 * keep relative positions, we can just modify the (x,y) coordinates
-			 * of all tokens by subtracting the position of the one in
-			 * 'topLeft'. On paste we can use the saved 'gridCopiedFrom' to
-			 * determine whether to use pixel distances or convert to cell
-			 * distances.
+			 * Normalize. For gridless maps, keep relative pixel distances. For gridded maps, keep relative cell spacing. Since we're going to keep relative positions, we can just modify the (x,y)
+			 * coordinates of all tokens by subtracting the position of the one in 'topLeft'. On paste we can use the saved 'gridCopiedFrom' to determine whether to use pixel distances or convert to
+			 * cell distances.
 			 */
 			Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 			try {
@@ -966,7 +883,7 @@ public class AppActions {
 			int x = topLeft.getX();
 			int y = topLeft.getY();
 			for (Token token : tokenCopySet) {
-				// Save all token locations as relative pixel offsets.  They'll be made absolute when pasting them back in.
+				// Save all token locations as relative pixel offsets. They'll be made absolute when pasting them back in.
 				token.setX(token.getX() - x);
 				token.setY(token.getY() - y);
 			}
@@ -1003,14 +920,11 @@ public class AppActions {
 	};
 
 	/**
-	 * Pastes tokens from {@link #tokenCopySet} into the current zone at the
-	 * specified location on the given layer. See {@link #copyTokens(List)} for
-	 * details of how the copy/paste operations work with respect to grid type
-	 * on the source and destination zones.
+	 * Pastes tokens from {@link #tokenCopySet} into the current zone at the specified location on the given layer. See {@link #copyTokens(List)} for details of how the copy/paste operations work with
+	 * respect to grid type on the source and destination zones.
 	 *
 	 * @param destination
-	 *            ZonePoint specifying where to paste; normally this is
-	 *            unchanged from the MouseEvent
+	 *            ZonePoint specifying where to paste; normally this is unchanged from the MouseEvent
 	 * @param layer
 	 *            the Zone.Layer that specifies which layer to paste onto
 	 */
@@ -1068,7 +982,7 @@ public class AppActions {
 				token.setX(zp.x + destination.x);
 				token.setY(zp.y + destination.y);
 			} else {
-				// For gridless sources, gridless destinations, or tokens that are not SnapToGrid:  just use the pixel offsets
+				// For gridless sources, gridless destinations, or tokens that are not SnapToGrid: just use the pixel offsets
 				token.setX(token.getX() + destination.x);
 				token.setY(token.getY() + destination.y);
 			}
@@ -1079,12 +993,12 @@ public class AppActions {
 			// XXX Merge this with the drag/drop code in ZoneRenderer.addTokens().
 			boolean tokenNeedsNewName = false;
 			if (MapTool.getPlayer().isGM()) {
-				// For GMs, only change the name of NPCs.  It's possible that we should be changing the name of PCs as well
+				// For GMs, only change the name of NPCs. It's possible that we should be changing the name of PCs as well
 				// since macros don't work properly when multiple tokens have the same name, but if we changed it without
-				// asking it could be seriously confusing.  Yet we don't want to popup a confirmation every time the GM pastes either. :(
+				// asking it could be seriously confusing. Yet we don't want to popup a confirmation every time the GM pastes either. :(
 				tokenNeedsNewName = token.getType() != Token.Type.PC;
 			} else {
-				// For Players, check to see if the name is already in use.  If it is already in use, make sure the current Player
+				// For Players, check to see if the name is already in use. If it is already in use, make sure the current Player
 				// owns the token being duplicated (to avoid subtle ways of manipulating someone else's token!).
 				Token tokenNameUsed = zone.getTokenByName(token.getName());
 				if (tokenNameUsed != null) {
@@ -1106,8 +1020,8 @@ public class AppActions {
 			String mesg = "Failed to paste token(s) with duplicate name(s): " + failedPaste;
 			TextMessage msg = TextMessage.gm(null, mesg);
 			MapTool.addMessage(msg);
-			//			msg.setChannel(Channel.ME);
-			//			MapTool.addMessage(msg);
+			// msg.setChannel(Channel.ME);
+			// MapTool.addMessage(msg);
 		}
 	}
 
@@ -1191,8 +1105,7 @@ public class AppActions {
 	};
 
 	/**
-	 * This is the menu item that lets the GM override the typing notification
-	 * toggle on the clients
+	 * This is the menu item that lets the GM override the typing notification toggle on the clients
 	 */
 	public static final Action TOGGLE_ENFORCE_NOTIFICATION = new AdminClientAction() {
 		{
@@ -1213,8 +1126,7 @@ public class AppActions {
 	};
 
 	/**
-	 * This is the menu option that forces the player view to continuously track
-	 * the GM view.
+	 * This is the menu option that forces the player view to continuously track the GM view.
 	 */
 	public static final Action TOGGLE_LINK_PLAYER_VIEW = new AdminClientAction() {
 		{
@@ -1319,7 +1231,7 @@ public class AppActions {
 		@Override
 		public void execute(ActionEvent e) {
 			Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-			// XXX Perhaps ask the user if the copied map should have its GEA and/or TEA cleared?  An imported map would ask...
+			// XXX Perhaps ask the user if the copied map should have its GEA and/or TEA cleared? An imported map would ask...
 			String zoneName = JOptionPane.showInputDialog("New map name:", "Copy of " + zone.getName());
 			if (zoneName != null) {
 				Zone zoneCopy = new Zone(zone);
@@ -1356,8 +1268,7 @@ public class AppActions {
 	};
 
 	/**
-	 * This is the menu option that warps all clients views to the current GM's
-	 * view.
+	 * This is the menu option that warps all clients views to the current GM's view.
 	 */
 	public static final Action ENFORCE_ZONE_VIEW = new ZoneAdminClientAction() {
 		{
@@ -1764,13 +1675,9 @@ public class AppActions {
 	};
 
 	/**
-	 * Note that the ZOOM actions are defined as DefaultClientAction types. This
-	 * allows the {@link ClientAction#getKeyStroke()} method to be invoked where
-	 * otherwise it couldn't be.
+	 * Note that the ZOOM actions are defined as DefaultClientAction types. This allows the {@link ClientAction#getKeyStroke()} method to be invoked where otherwise it couldn't be.
 	 * <p>
-	 * (Well, it <i>could be</i> if we cast this object to the right type
-	 * everywhere else but that's just tedious. And what is tedious is
-	 * error-prone. :))
+	 * (Well, it <i>could be</i> if we cast this object to the right type everywhere else but that's just tedious. And what is tedious is error-prone. :))
 	 */
 	public static final DefaultClientAction ZOOM_IN = new DefaultClientAction() {
 		{
@@ -1924,7 +1831,7 @@ public class AppActions {
 					// Tool Tips for unformatted inline rolls.
 					policy.setUseToolTipsForDefaultRollFormat(serverProps.getUseToolTipsForUnformattedRolls());
 
-					//my addition
+					// my addition
 					policy.setRestrictedImpersonation(serverProps.getRestrictedImpersonation());
 					policy.setMovementMetric(serverProps.getMovementMetric());
 					boolean useIF = serverProps.getUseIndividualViews() && serverProps.getUseIndividualFOW();
@@ -1945,26 +1852,19 @@ public class AppActions {
 						if (serverProps.getUseUPnP()) {
 							UPnPUtil.openPort(serverProps.getPort());
 						}
-						// Right now set this is set to whatever the last server settings were.  If we wanted to turn it on and
+						// Right now set this is set to whatever the last server settings were. If we wanted to turn it on and
 						// leave it turned on, the line would change to:
-						//						campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
+						// campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
 						campaign.setHasUsedFogToolbar(useIF);
 
 						// Make a copy of the campaign since we don't coordinate local changes well ... yet
 
 						/*
-						 * JFJ 2010-10-27 The below creates a NEW campaign with
-						 * a copy of the existing campaign. However, this is NOT
-						 * a full copy. In the constructor called below, each
-						 * zone from the previous campaign(ie, the one passed
-						 * in) is recreated. This means that only some items for
-						 * that campaign, zone(s), and token's are copied over
-						 * when you start a new server instance.
+						 * JFJ 2010-10-27 The below creates a NEW campaign with a copy of the existing campaign. However, this is NOT a full copy. In the constructor called below, each zone from the
+						 * previous campaign(ie, the one passed in) is recreated. This means that only some items for that campaign, zone(s), and token's are copied over when you start a new server
+						 * instance.
 						 *
-						 * You need to modify either Campaign(Campaign) or
-						 * Zone(Zone) to get any data you need to persist from
-						 * the pre-server campaign to the post server start up
-						 * campaign.
+						 * You need to modify either Campaign(Campaign) or Zone(Zone) to get any data you need to persist from the pre-server campaign to the post server start up campaign.
 						 */
 						MapTool.startServer(dialog.getUsernameTextField().getText(), config, policy, new Campaign(campaign));
 
@@ -2164,7 +2064,7 @@ public class AppActions {
 					StaticMessageDialog progressDialog = new StaticMessageDialog(I18N.getText("msg.info.campaignLoading"));
 					try {
 						// I'm going to get struck by lighting for writing code like this.
-						// CLEAN ME CLEAN ME CLEAN ME !   I NEED A SWINGWORKER!
+						// CLEAN ME CLEAN ME CLEAN ME ! I NEED A SWINGWORKER!
 						MapTool.getFrame().showFilledGlassPane(progressDialog);
 						AppState.setIsLoading(true);
 						// Before we do anything, let's back it up
@@ -2174,8 +2074,8 @@ public class AppActions {
 						// Load
 						final PersistedCampaign campaign = PersistenceUtil.loadCampaign(campaignFile);
 						if (campaign != null) {
-							//							current = MapTool.getFrame().getCurrentZoneRenderer();
-							//							MapTool.getFrame().setCurrentZoneRenderer(null);
+							// current = MapTool.getFrame().getCurrentZoneRenderer();
+							// MapTool.getFrame().setCurrentZoneRenderer(null);
 							ImageManager.flush(); // Clear out the old campaign's images
 
 							AppState.setCampaignFile(campaignFile);
@@ -2183,19 +2083,18 @@ public class AppActions {
 							AppMenuBar.getMruManager().addMRUCampaign(campaignFile);
 
 							/*
-							 * Bypass the serialization when we are hosting the
-							 * server.
+							 * Bypass the serialization when we are hosting the server.
 							 */
-							//							if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
-							//								/*
-							//								 * TODO: This optimization doesn't work since
-							//								 * the player name isn't the right thing to use
-							//								 * to exclude this thread...
-							//								 */
-							//								String playerName = MapTool.getPlayer().getName();
-							//								String command = ServerCommand.COMMAND.setCampaign.name();
-							//								MapTool.getServer().getMethodHandler().handleMethod(playerName, command, new Object[] { campaign.campaign });
-							//							} else
+							// if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
+							// /*
+							// * TODO: This optimization doesn't work since
+							// * the player name isn't the right thing to use
+							// * to exclude this thread...
+							// */
+							// String playerName = MapTool.getPlayer().getName();
+							// String command = ServerCommand.COMMAND.setCampaign.name();
+							// MapTool.getServer().getMethodHandler().handleMethod(playerName, command, new Object[] { campaign.campaign });
+							// } else
 							{
 								MapTool.serverCommand().setCampaign(campaign.campaign);
 							}
@@ -2223,11 +2122,8 @@ public class AppActions {
 	}
 
 	/**
-	 * This is the integrated load/save interface that allows individual
-	 * components of the application's dataet to be saved to an external file.
-	 * The goal is to allow specific maps and tokens, campaign properties
-	 * (sight, light, token props), and layers + their contents to be saved
-	 * through a single unified interface.
+	 * This is the integrated load/save interface that allows individual components of the application's dataet to be saved to an external file. The goal is to allow specific maps and tokens, campaign
+	 * properties (sight, light, token props), and layers + their contents to be saved through a single unified interface.
 	 */
 	public static final Action LOAD_SAVE = new DeveloperClientAction() {
 		{
@@ -2434,10 +2330,8 @@ public class AppActions {
 	}
 
 	/**
-	 * LOAD_MAP is the Action used to implement the loading of an externally
-	 * stored map into the current campaign. This Action is only available when
-	 * the current application is either hosting a server or is not connected to
-	 * a server.
+	 * LOAD_MAP is the Action used to implement the loading of an externally stored map into the current campaign. This Action is only available when the current application is either hosting a server
+	 * or is not connected to a server.
 	 *
 	 * Property used from <b>i18n.properties</b> is <code>action.loadMap</code>
 	 *
@@ -2450,7 +2344,7 @@ public class AppActions {
 
 		@Override
 		public boolean isAvailable() {
-			//			return MapTool.isHostingServer() || MapTool.isPersonalServer();
+			// return MapTool.isHostingServer() || MapTool.isPersonalServer();
 			// I'd like to be able to use this instead as it's less restrictive, but it's safer to disallow for now.
 			return MapTool.isHostingServer() || (MapTool.getPlayer() != null && MapTool.getPlayer().isGM());
 		}
@@ -2464,7 +2358,7 @@ public class AppActions {
 				isRemoteGM = true;
 				if (isRemoteGM) {
 					// Returns true if they select OK and false otherwise
-					//					setSeenWarning(MapTool.confirm("action.loadMap.warning"));
+					// setSeenWarning(MapTool.confirm("action.loadMap.warning"));
 					ImageIcon icon = null;
 					try {
 						Image img = ImageUtil.getImage("net/rptools/maptool/client/image/book_open.png");
@@ -2486,8 +2380,8 @@ public class AppActions {
 						setSeenWarning(true); // Yes
 					else {
 						if (result == 0) { // Help
-							// TODO We really need a better way to disseminate this information.  Perhaps we could assign every
-							// external link a UUID, then have MapTool load a mapping from UUID-to-URL at runtime?  The
+							// TODO We really need a better way to disseminate this information. Perhaps we could assign every
+							// external link a UUID, then have MapTool load a mapping from UUID-to-URL at runtime? The
 							// mapping could come from the rptools.net site initially and be cached for future use, with a
 							// periodic "Check for new updates" option available from the Help menu...?
 							MapTool.showDocument("http://forums.rptools.net/viewtopic.php?f=3&t=23614");
@@ -2746,10 +2640,10 @@ public class AppActions {
 					newMapDialog.setZone(zone);
 					newMapDialog.setVisible(true);
 					// Too many things can change to send them 1 by 1 to the client... just resend the zone
-					//					MapTool.serverCommand().setBoard(zone.getId(), zone.getMapAssetId(), zone.getBoardX(), zone.getBoardY());
+					// MapTool.serverCommand().setBoard(zone.getId(), zone.getMapAssetId(), zone.getBoardX(), zone.getBoardY());
 					MapTool.serverCommand().removeZone(zone.getId());
 					MapTool.serverCommand().putZone(zone);
-					//MapTool.getFrame().getCurrentZoneRenderer().flush();
+					// MapTool.getFrame().getCurrentZoneRenderer().flush();
 					MapTool.getFrame().setCurrentZoneRenderer(MapTool.getFrame().getCurrentZoneRenderer());
 				}
 			});
@@ -2905,11 +2799,8 @@ public class AppActions {
 		}
 
 		/**
-		 * This convenience function returns the KeyStroke that represents the
-		 * accelerator key used by the Action. This function can return
-		 * <code>null</code> because not all Actions have an associated
-		 * accelerator key defined, but it is currently only called by methods
-		 * that reference the {CUT,COPY,PASTE}_TOKEN Actions.
+		 * This convenience function returns the KeyStroke that represents the accelerator key used by the Action. This function can return <code>null</code> because not all Actions have an associated
+		 * accelerator key defined, but it is currently only called by methods that reference the {CUT,COPY,PASTE}_TOKEN Actions.
 		 *
 		 * @return KeyStroke associated with the Action or <code>null</code>
 		 */
@@ -2944,9 +2835,7 @@ public class AppActions {
 	}
 
 	/**
-	 * This class simply provides an implementation for
-	 * <code>isAvailable()</code> that returns <code>true</code> if the current
-	 * player is a GM.
+	 * This class simply provides an implementation for <code>isAvailable()</code> that returns <code>true</code> if the current player is a GM.
 	 */
 	public static abstract class AdminClientAction extends ClientAction {
 		@Override
@@ -2956,9 +2845,7 @@ public class AppActions {
 	}
 
 	/**
-	 * This class simply provides an implementation for
-	 * <code>isAvailable()</code> that returns <code>true</code> if the current
-	 * player is a GM and there is a ZoneRenderer current.
+	 * This class simply provides an implementation for <code>isAvailable()</code> that returns <code>true</code> if the current player is a GM and there is a ZoneRenderer current.
 	 */
 	public static abstract class ZoneAdminClientAction extends AdminClientAction {
 		@Override
@@ -2968,8 +2855,7 @@ public class AppActions {
 	}
 
 	/**
-	 * This class simply provides an implementation for
-	 * <code>isAvailable()</code> that returns <code>true</code>.
+	 * This class simply provides an implementation for <code>isAvailable()</code> that returns <code>true</code>.
 	 */
 	public static abstract class DefaultClientAction extends ClientAction {
 		@Override
@@ -2985,8 +2871,8 @@ public class AppActions {
 		public OpenUrlAction(String key) {
 			// The init() method will load the "key", "key.accel", and "key.description".
 			// The value of "key" will be used as the menu text, the accelerator is not used,
-			// and the description will be the destination URL.  We also configure "key.icon"
-			// to be the value of SMALL_ICON.  Only the Help menu uses these objects and
+			// and the description will be the destination URL. We also configure "key.icon"
+			// to be the value of SMALL_ICON. Only the Help menu uses these objects and
 			// only the Help menu expects that field to be set...
 			init(key);
 			try {
@@ -3006,12 +2892,9 @@ public class AppActions {
 	}
 
 	/**
-	 * This class simply provides an implementation for
-	 * <code>isAvailable()</code> that returns <code>true</code> if the system
-	 * property MAPTOOL_DEV is not set to "false". This allows it to contain the
-	 * version number of the compatible build for debugging purposes. For
-	 * example, if I'm working on a patch to 1.3.b54, I can set MAPTOOL_DEV to
-	 * 1.3.b54 in order to test it against a 1.3.b54 client.
+	 * This class simply provides an implementation for <code>isAvailable()</code> that returns <code>true</code> if the system property MAPTOOL_DEV is not set to "false". This allows it to contain
+	 * the version number of the compatible build for debugging purposes. For example, if I'm working on a patch to 1.3.b54, I can set MAPTOOL_DEV to 1.3.b54 in order to test it against a 1.3.b54
+	 * client.
 	 */
 	@SuppressWarnings("serial")
 	public static abstract class DeveloperClientAction extends ClientAction {
@@ -3055,10 +2938,8 @@ public class AppActions {
 			}
 
 			/*
-			 * There is some extra space appearing to the right of the images,
-			 * which sounds similar to what was reported in this bug (bottom
-			 * half): http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5047379
-			 * Removing the mnemonic will remove this extra space.
+			 * There is some extra space appearing to the right of the images, which sounds similar to what was reported in this bug (bottom half):
+			 * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5047379 Removing the mnemonic will remove this extra space.
 			 */
 			putValue(Action.SHORT_DESCRIPTION, htmlTip);
 		}

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
@@ -527,8 +524,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Removes all the values in the second and any subsequent objects/arrays
-	 * from the first JSON object or array.
+	 * Removes all the values in the second and any subsequent objects/arrays from the first JSON object or array.
 	 * 
 	 * @param parameters
 	 *            The parameters to the function.
@@ -579,8 +575,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Returns a JSON array with no duplicates. There is order of elements may
-	 * not be preserved.
+	 * Returns a JSON array with no duplicates. There is order of elements may not be preserved.
 	 * 
 	 * @param obj
 	 *            The JSON array to remove the duplicates from.
@@ -699,8 +694,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 	 *            The value to search for.
 	 * @param start
 	 *            The index to start from.
-	 * @return The index of the first occurance of the value in the array or -1
-	 *         if it does not occur.
+	 * @return The index of the first occurance of the value in the array or -1 if it does not occur.
 	 * @throws ParserException
 	 */
 	private BigDecimal JSONIndexOf(Object json, Object searchFor, int start) throws ParserException {
@@ -800,17 +794,14 @@ public class JSONMacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Sorts a json array. If all values in the array are numbers then the
-	 * values are sorted in numeric order, otherwise values are sorted in string
-	 * order.
+	 * Sorts a json array. If all values in the array are numbers then the values are sorted in numeric order, otherwise values are sorted in string order.
 	 * 
 	 * @param jsonArray
 	 *            The json array to sort.
 	 * @param direction
 	 *            The direction "ascending" or "descending" to sort the array.
 	 * @param fields
-	 *            A list of Strings defining which fields with the JSON objects
-	 *            to use for sorting and the precedence of those fields.
+	 *            A list of Strings defining which fields with the JSON objects to use for sorting and the precedence of those fields.
 	 * @return The sorted array.
 	 * @throws ParserException
 	 *             if the object is not a JSON array.
@@ -827,7 +818,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 			return JSONSortObjects(jarr, direction, fields);
 		}
 
-		//Check to see if we are all numbers
+		// Check to see if we are all numbers
 		boolean sortAsNumber = true;
 		for (Object o : jarr) {
 			if (!(o instanceof Double) && !(o instanceof Integer)) {
@@ -1154,9 +1145,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Gets the length of a JSON object. If the object is an array then the
-	 * number of elements is returned, if it is an object then the number of
-	 * fields is returned.
+	 * Gets the length of a JSON object. If the object is an array then the number of elements is returned, if it is an object then the number of fields is returned.
 	 * 
 	 * @param obj
 	 *            The JSON object.

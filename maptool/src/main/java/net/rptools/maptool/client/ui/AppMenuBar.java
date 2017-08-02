@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui;
 
 import java.awt.event.ActionEvent;
@@ -99,7 +96,7 @@ public class AppMenuBar extends JMenuBar {
 
 		menu.add(new JMenuItem(AppActions.EXPORT_CAMPAIGN_AS));
 		menu.add(new JMenuItem(AppActions.EXPORT_CAMPAIGN_REPO));
-		//		menu.add(new JMenuItem(AppActions.UPDATE_CAMPAIGN_REPO));
+		// menu.add(new JMenuItem(AppActions.UPDATE_CAMPAIGN_REPO));
 
 		return menu;
 	}
@@ -184,8 +181,8 @@ public class AppMenuBar extends JMenuBar {
 		JMenu menu = I18N.createMenu("menu.edit");
 		menu.add(new JMenuItem(AppActions.UNDO_PER_MAP));
 		menu.add(new JMenuItem(AppActions.REDO_PER_MAP));
-		//		menu.add(new JMenuItem(AppActions.UNDO_DRAWING));
-		//		menu.add(new JMenuItem(AppActions.REDO_DRAWING));
+		// menu.add(new JMenuItem(AppActions.UNDO_DRAWING));
+		// menu.add(new JMenuItem(AppActions.REDO_DRAWING));
 		menu.add(new JMenuItem(AppActions.CLEAR_DRAWING));
 
 		menu.addSeparator();
@@ -283,8 +280,7 @@ public class AppMenuBar extends JMenuBar {
 	}
 
 	/**
-	 * Builds the help menu. This menu contains a block of special url items.
-	 * These items are populated from {@link I18N#getUrlActionKeys()}.
+	 * Builds the help menu. This menu contains a block of special url items. These items are populated from {@link I18N#getUrlActionKeys()}.
 	 * 
 	 * @return the help menu
 	 */
@@ -310,10 +306,8 @@ public class AppMenuBar extends JMenuBar {
 			for (String key : helpArray) {
 				OpenUrlAction temp = new AppActions.OpenUrlAction(key);
 				/*
-				 * TODO This could be more efficient by using ImageManager or
-				 * AssetManager, but I'm not sure those facilities have been
-				 * initialized by the time this code is executed so this is
-				 * safer. :-/
+				 * TODO This could be more efficient by using ImageManager or AssetManager, but I'm not sure those facilities have been initialized by the time this code is executed so this is safer.
+				 * :-/
 				 */
 				menu.add(new JMenuItem(temp));
 			}

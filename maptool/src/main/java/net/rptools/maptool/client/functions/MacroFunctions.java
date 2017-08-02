@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
@@ -292,8 +289,8 @@ public class MacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Checks to see if the token has the specified macro. The first value in param is the name of the macro to check,
-	 * if there is a second argument then it is the token to check, otherwise the token in context is checked.
+	 * Checks to see if the token has the specified macro. The first value in param is the name of the macro to check, if there is a second argument then it is the token to check, otherwise the token
+	 * in context is checked.
 	 * 
 	 * @param resolver
 	 *            The variable resolver.
@@ -329,8 +326,8 @@ public class MacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Gets the name of the macros for a token. If param has 2 arguments then the first is resolved as the token name
-	 * the second is the macro, if it only has one then the token in context is used and the argument is the macro name.
+	 * Gets the name of the macros for a token. If param has 2 arguments then the first is resolved as the token name the second is the macro, if it only has one then the token in context is used and
+	 * the argument is the macro name.
 	 * 
 	 * @param resolver
 	 *            The variable resolver.
@@ -379,9 +376,8 @@ public class MacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Gets the macro properties for a macro button on a token. If param has 1 value it used as the index of the button,
-	 * if there are 2 values then the second is used as the delimiter. If there is a third value then it is the token to
-	 * get the button property from. If no token is specified then the token in context is used.
+	 * Gets the macro properties for a macro button on a token. If param has 1 value it used as the index of the button, if there are 2 values then the second is used as the delimiter. If there is a
+	 * third value then it is the token to get the button property from. If no token is specified then the token in context is used.
 	 * 
 	 * @param resolver
 	 *            The variable resolver.
@@ -439,9 +435,8 @@ public class MacroFunctions extends AbstractFunction {
 	 * @param resolver
 	 *            The variable resolver.
 	 * @param param
-	 *            The list of parameters. The first parameter is the label to get the indexes for, the second parameter
-	 *            if it exists is the delimiter to use (',' if not specified) and the third is the token to get the
-	 *            indexes from. If no token is specified then the token in context is used.
+	 *            The list of parameters. The first parameter is the label to get the indexes for, the second parameter if it exists is the delimiter to use (',' if not specified) and the third is the
+	 *            token to get the indexes from. If no token is specified then the token in context is used.
 	 * @return the indexes for the macro buttons.
 	 * @throws ParserException
 	 *             if an error occurs.
@@ -495,9 +490,8 @@ public class MacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Gets the command for a macro button on a token. The fist value in param is the index of the macro button to get
-	 * the command from. If there is a second value in param then this is the token to get the command from. If no token
-	 * is specified then the token in context is used.
+	 * Gets the command for a macro button on a token. The fist value in param is the index of the macro button to get the command from. If there is a second value in param then this is the token to
+	 * get the command from. If no token is specified then the token in context is used.
 	 * 
 	 * @param resolver
 	 *            The variable resolver.
@@ -547,13 +541,10 @@ public class MacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Creates a macro button on a token. If There is only one argument in param and it is a json string then the values
-	 * in this are used to create the button on the token in context. If there are two arguments and the first is a json
-	 * string the second argument is the token to create the button on. If the first argument is not a json string then
-	 * it is the label for the new button. The second argument is the command, if the third argument is specified then
-	 * it is the properties for the button. The fourth contains the delimiter for these properties (defaults to ';' if
-	 * not specified). The fifth argument is the token to create the macro button on, if no token is specified it is
-	 * created on the token in context.
+	 * Creates a macro button on a token. If There is only one argument in param and it is a json string then the values in this are used to create the button on the token in context. If there are two
+	 * arguments and the first is a json string the second argument is the token to create the button on. If the first argument is not a json string then it is the label for the new button. The second
+	 * argument is the command, if the third argument is specified then it is the properties for the button. The fourth contains the delimiter for these properties (defaults to ';' if not specified).
+	 * The fifth argument is the token to create the macro button on, if no token is specified it is created on the token in context.
 	 * 
 	 * @param resolver
 	 *            The variable resolver.
@@ -636,7 +627,7 @@ public class MacroFunctions extends AbstractFunction {
 			if (token == null) {
 				throw new ParserException("createMacro(): No impersonated token.");
 			}
-		} else if (param.size() == 4) { //label, command, props, delim
+		} else if (param.size() == 4) { // label, command, props, delim
 			label = param.get(0).toString();
 			command = param.get(1).toString();
 			prop = param.get(2).toString();
@@ -645,7 +636,7 @@ public class MacroFunctions extends AbstractFunction {
 			if (token == null) {
 				throw new ParserException("createMacro(): No impersonated token.");
 			}
-		} else if (param.size() == 5) { //label, command, props, delim, token
+		} else if (param.size() == 5) { // label, command, props, delim, token
 			if (!MapTool.getParser().isMacroTrusted()) {
 				throw new ParserException("createMacro(): You do not have the permission to specify the token.");
 			}
@@ -679,11 +670,9 @@ public class MacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Sets the properties for macro buttons on a token. The first argument in params is the button index or label of
-	 * the buttons to set the properties for, if it is an index then only that button is changed, if it is a label then
-	 * all buttons with that label are changed. The second argument is the properties to change, the third if specified
-	 * is the delimiter for the properties (defaults to ';') if there is a fourth argument then it is the token that
-	 * contains the buttons. If no token is specified then the token in context is used.
+	 * Sets the properties for macro buttons on a token. The first argument in params is the button index or label of the buttons to set the properties for, if it is an index then only that button is
+	 * changed, if it is a label then all buttons with that label are changed. The second argument is the properties to change, the third if specified is the delimiter for the properties (defaults to
+	 * ';') if there is a fourth argument then it is the token that contains the buttons. If no token is specified then the token in context is used.
 	 * 
 	 * @param resolver
 	 *            The variable resolver.
@@ -747,9 +736,8 @@ public class MacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Sets the command for a macro button on a token. The first value param is the index of the macro button to change.
-	 * The second value param is the command to set for the button. The third value if present is the token that the
-	 * button is for. If no token is specified then the token in context is used.
+	 * Sets the command for a macro button on a token. The first value param is the index of the macro button to change. The second value param is the command to set for the button. The third value if
+	 * present is the token that the button is for. If no token is specified then the token in context is used.
 	 * 
 	 * @param res
 	 *            The variable resolver.
@@ -801,9 +789,8 @@ public class MacroFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Removes a macro button from a token. The first argument in param is the index of the button to remove. The second
-	 * argument in param is the token to remove the button from, if the token is not specified then the token in context
-	 * is used.
+	 * Removes a macro button from a token. The first argument in param is the index of the button to remove. The second argument in param is the token to remove the button from, if the token is not
+	 * specified then the token in context is used.
 	 * 
 	 * @param resolver
 	 *            The variable resolver.

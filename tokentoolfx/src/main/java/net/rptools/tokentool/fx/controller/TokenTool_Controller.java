@@ -1,3 +1,11 @@
+/*
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.tokentool.fx.controller;
 
 import java.awt.Point;
@@ -69,77 +77,47 @@ import net.rptools.tokentool.fx.util.FxImageUtil;
 import net.rptools.tokentool.fx.util.FileSaveUtil;
 
 public class TokenTool_Controller {
-	@FXML
-	private ResourceBundle resources;
-	@FXML
-	private URL location;
+	@FXML private ResourceBundle resources;
+	@FXML private URL location;
 
-	@FXML
-	private MenuItem fileManageOverlaysMenu;
-	@FXML
-	private MenuItem fileSaveAsMenu;
-	@FXML
-	private MenuItem fileExitMenu;
+	@FXML private MenuItem fileManageOverlaysMenu;
+	@FXML private MenuItem fileSaveAsMenu;
+	@FXML private MenuItem fileExitMenu;
 
-	@FXML
-	private MenuItem editCaptureScreenMenu;
-	@FXML
-	private MenuItem editCopyTokenMenu;
-	@FXML
-	private MenuItem editPasteImageMenu;
+	@FXML private MenuItem editCaptureScreenMenu;
+	@FXML private MenuItem editCopyTokenMenu;
+	@FXML private MenuItem editPasteImageMenu;
 
-	@FXML
-	private MenuItem helpAboutMenu;
+	@FXML private MenuItem helpAboutMenu;
 
-	@FXML
-	private TitledPane saveOptionsPane;
-	@FXML
-	private TitledPane overlayOptionsPane;
-	@FXML
-	private TitledPane zoomOptionsPane;
+	@FXML private TitledPane saveOptionsPane;
+	@FXML private TitledPane overlayOptionsPane;
+	@FXML private TitledPane zoomOptionsPane;
 
-	@FXML
-	private StackPane compositeTokenPane;
-	@FXML
-	private BorderPane tokenPreviewPane;
-	@FXML
-	private ScrollPane portraitScrollPane;
+	@FXML private StackPane compositeTokenPane;
+	@FXML private BorderPane tokenPreviewPane;
+	@FXML private ScrollPane portraitScrollPane;
 
-	@FXML
-	private Group compositeGroup;
+	@FXML private Group compositeGroup;
 
-	@FXML
-	private TreeView<Path> overlayTreeView;
+	@FXML private TreeView<Path> overlayTreeView;
 
-	@FXML
-	private ImageView portraitImageView; // The bottom "Portrait" layer
-	@FXML
-	private ImageView maskImageView; // The mask layer used to crop the Portrait layer
-	@FXML
-	private ImageView overlayImageView; // The overlay layer to apply on top of everything
-	@FXML
-	private ImageView tokenImageView;
+	@FXML private ImageView portraitImageView; // The bottom "Portrait" layer
+	@FXML private ImageView maskImageView; // The mask layer used to crop the Portrait layer
+	@FXML private ImageView overlayImageView; // The overlay layer to apply on top of everything
+	@FXML private ImageView tokenImageView;
 
-	@FXML
-	private CheckBox useFileNumberingCheckbox;
-	@FXML
-	private CheckBox overlayUseAsBaseCheckbox;
+	@FXML private CheckBox useFileNumberingCheckbox;
+	@FXML private CheckBox overlayUseAsBaseCheckbox;
 
-	@FXML
-	private TextField fileNameTextField;
-	@FXML
-	private TextField fileNameSuffixTextField;
-	@FXML
-	private Label overlayNameLabel;
-	@FXML
-	private ColorPicker backgroundColorPicker;
-	@FXML
-	private ToggleButton overlayAspectToggleButton;
+	@FXML private TextField fileNameTextField;
+	@FXML private TextField fileNameSuffixTextField;
+	@FXML private Label overlayNameLabel;
+	@FXML private ColorPicker backgroundColorPicker;
+	@FXML private ToggleButton overlayAspectToggleButton;
 
-	@FXML
-	private Spinner<Double> overlayWidthSpinner;
-	@FXML
-	private Spinner<Double> overlayHeightSpinner;
+	@FXML private Spinner<Double> overlayWidthSpinner;
+	@FXML private Spinner<Double> overlayHeightSpinner;
 
 	private Point dragStart = new Point();
 	private Point portraitImageStart = new Point();

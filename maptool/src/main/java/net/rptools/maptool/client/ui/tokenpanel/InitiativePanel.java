@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.tokenpanel;
 
 import java.awt.BorderLayout;
@@ -114,8 +111,7 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 	private boolean showInitState = AppPreferences.getInitShowInitiative();
 
 	/**
-	 * Flag indicating that two lines are used for initiative stated. It is only valid if {@link #showInitState} is
-	 * <code>true</code>.
+	 * Flag indicating that two lines are used for initiative stated. It is only valid if {@link #showInitState} is <code>true</code>.
 	 */
 	private boolean initStateSecondLine = AppPreferences.getInitShow2ndLine();
 
@@ -145,8 +141,7 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 	private JCheckBoxMenuItem movementLockMenuItem;
 
 	/**
-	 * Flag indicating that the owners of tokens have been granted permission to restricted actions when they own the
-	 * token.
+	 * Flag indicating that the owners of tokens have been granted permission to restricted actions when they own the token.
 	 */
 	private boolean ownerPermissions;
 
@@ -232,8 +227,7 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * Update the view after the connection has been created. This allows the menus to be tailored for GM's and Player's
-	 * properly
+	 * Update the view after the connection has been created. This allows the menus to be tailored for GM's and Player's properly
 	 */
 	public void updateView() {
 		displayList.setDragEnabled(hasGMPermission());
@@ -414,8 +408,7 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 	}
 
 	/**
-	 * See if the current player has permission to execute GM restricted actions. This is <b>not</b> related to
-	 * so-called <i>trusted macros</i> in MTscript.
+	 * See if the current player has permission to execute GM restricted actions. This is <b>not</b> related to so-called <i>trusted macros</i> in MTscript.
 	 * 
 	 * @return The value <code>true</code> if this player has permission for all actions.
 	 */

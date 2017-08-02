@@ -1,3 +1,11 @@
+/*
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.util;
 
 import java.io.BufferedReader;
@@ -14,8 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class encapsulates methods for requesting a server via HTTP GET/POST
- * and provides methods for parsing response from the server.
+ * This class encapsulates methods for requesting a server via HTTP GET/POST and provides methods for parsing response from the server.
  * 
  * @author Ha Minh Nam
  *
@@ -25,8 +32,7 @@ import java.util.Map;
 public class HTTPUtil {
 
 	/**
-	 * Makes an HTTP request using GET method to the specified URL and returns
-	 * an input stream that wraps server's response.
+	 * Makes an HTTP request using GET method to the specified URL and returns an input stream that wraps server's response.
 	 * 
 	 * @param requestURL
 	 *            the URL of the remote server
@@ -46,8 +52,7 @@ public class HTTPUtil {
 	}
 
 	/**
-	 * Makes an HTTP request using POST method to the specified URL and returns
-	 * an input stream that wraps server's response.
+	 * Makes an HTTP request using POST method to the specified URL and returns an input stream that wraps server's response.
 	 * 
 	 * @param requestURL
 	 *            the URL of the remote server
@@ -90,8 +95,7 @@ public class HTTPUtil {
 	}
 
 	/**
-	 * Returns only one line from the server's response. This method should be used
-	 * if the server returns only a single line of String.
+	 * Returns only one line from the server's response. This method should be used if the server returns only a single line of String.
 	 * 
 	 * @param inputStream
 	 *            the InputStream to parse server's response
@@ -108,8 +112,7 @@ public class HTTPUtil {
 	}
 
 	/**
-	 * Returns an array of lines from the server's response. This method should be used
-	 * if the server returns multiple lines of String.
+	 * Returns an array of lines from the server's response. This method should be used if the server returns multiple lines of String.
 	 * 
 	 * @param inputStream
 	 *            the InputStream to parse server's response

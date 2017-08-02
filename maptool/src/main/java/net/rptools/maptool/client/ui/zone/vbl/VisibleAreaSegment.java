@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.zone.vbl;
 
 import java.awt.BasicStroke;
@@ -42,7 +39,7 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 	}
 
 	public long getDistanceFromOrigin() {
-		//	return GeometryUtil.getDistance(getCenterPoint(), origin);
+		// return GeometryUtil.getDistance(getCenterPoint(), origin);
 		return (long) (getCenterPoint().distance(origin) * 1000);
 	}
 
@@ -50,7 +47,7 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 		if (centerPoint == null) {
 			Area path = getPath();
 			Rectangle2D bounds = path.getBounds2D();
-			// Jamz: getCenter points now available from class 
+			// Jamz: getCenter points now available from class
 			// centerPoint = new Point2D.Double(bounds.getX() + bounds.getWidth() / 2.0, bounds.getY() + bounds.getHeight() / 2.0);
 			centerPoint = new Point2D.Double(bounds.getCenterX(), bounds.getCenterY());
 		}
@@ -99,7 +96,7 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 			pathPoints.add(face.getP2());
 			pathPoints.add(0, GraphicsUtil.getProjectedPoint(origin, face.getP2(), Integer.MAX_VALUE / 2));
 		}
-		//		System.out.println("Skipped: " + skipCount);
+		// System.out.println("Skipped: " + skipCount);
 
 		GeneralPath path = null;
 		for (Point2D p : pathPoints) {
@@ -122,8 +119,8 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 			long odist = o.getDistanceFromOrigin();
 			long val = getDistanceFromOrigin() - odist; // separate variable for debugging
 			return (int) val;
-			//			return val < EPSILON && val > -EPSILON ? 0 : (int) val; // Should we use an EPSILON value?
-			//			return getDistanceFromOrigin() < odist ? -1 : getDistanceFromOrigin() > odist ? 1 : 0;
+			// return val < EPSILON && val > -EPSILON ? 0 : (int) val; // Should we use an EPSILON value?
+			// return getDistanceFromOrigin() < odist ? -1 : getDistanceFromOrigin() > odist ? 1 : 0;
 		}
 		return 0;
 	}

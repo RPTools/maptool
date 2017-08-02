@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.macrobuttons.buttongroups;
 
 import java.awt.Color;
@@ -62,23 +59,23 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 	private AreaGroup area;
 
 	public void dragEnter(DropTargetDragEvent event) {
-		//System.out.println("BG: drag enter");
+		// System.out.println("BG: drag enter");
 	}
 
 	public void dragOver(DropTargetDragEvent event) {
-		//System.out.println("BG: drag over");
+		// System.out.println("BG: drag over");
 	}
 
 	public void dropActionChanged(DropTargetDragEvent event) {
-		//System.out.println("BG: drag action changed");
+		// System.out.println("BG: drag action changed");
 	}
 
 	public void dragExit(DropTargetEvent event) {
-		//System.out.println("BG: drag exit");
+		// System.out.println("BG: drag exit");
 	}
 
 	public void drop(DropTargetDropEvent event) {
-		//System.out.println("BG: drop!");
+		// System.out.println("BG: drop!");
 	}
 
 	public Token getToken() {
@@ -223,7 +220,7 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 		private String label;
 		private Rectangle imageBounds;
 
-		//private final int X_OFFSET = 5;
+		// private final int X_OFFSET = 5;
 
 		public ThumbnailedBorder(Image image, String label) {
 			this.image = image;
@@ -233,9 +230,9 @@ public abstract class AbstractButtonGroup extends JPanel implements DropTargetLi
 		}
 
 		public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-			//((Graphics2D) g).setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			// ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-			//TODO: change magic numbers to final fields
+			// TODO: change magic numbers to final fields
 			// match line color to default titledborder line color
 			g.setColor(new Color(165, 163, 151));
 

@@ -1,15 +1,10 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.lib.io;
 
@@ -61,27 +56,22 @@ import com.thoughtworks.xstream.XStream;
  * <li>Files - Any arbitrary files/data that are packed within the packed file
  * </ul>
  * <p>
- * The implementation uses two {@link Set}s, <b>addedFileSet</b> and <b>removedFileSet</b>, to keep track of paths for
- * content that has been added or removed from the packed file, respectively. This is because the actual file itself
- * isn't written until the {@link #save()} method is called, yet the application may want to dynamically add and remove
- * paths to the packed file and query the state of which files are currently included or excluded from the packed file.
+ * The implementation uses two {@link Set}s, <b>addedFileSet</b> and <b>removedFileSet</b>, to keep track of paths for content that has been added or removed from the packed file, respectively. This
+ * is because the actual file itself isn't written until the {@link #save()} method is called, yet the application may want to dynamically add and remove paths to the packed file and query the state
+ * of which files are currently included or excluded from the packed file.
  * <p>
- * In addition, the API allows for storing multiple types of objects into the packed file. The easiest to understand are
- * byte streams as they are binary values that are not modified by character set encoding during output. They are
- * represented by an array of bytes or an {@link InputStream}.
+ * In addition, the API allows for storing multiple types of objects into the packed file. The easiest to understand are byte streams as they are binary values that are not modified by character set
+ * encoding during output. They are represented by an array of bytes or an {@link InputStream}.
  * <p>
- * The second type of data is the file, represented here as a URL as it is more universally applicable (although
- * currently it is unused outside this class). URLs have their content retrieved from the source and are currently
- * written into the packed file without any character encoding (it is possible that the <code>Content-Type</code> of the
- * data stream could provide information on how the data should be written so this may change in the future).
+ * The second type of data is the file, represented here as a URL as it is more universally applicable (although currently it is unused outside this class). URLs have their content retrieved from the
+ * source and are currently written into the packed file without any character encoding (it is possible that the <code>Content-Type</code> of the data stream could provide information on how the data
+ * should be written so this may change in the future).
  * <p>
- * The last and most important type of data is the POJO (plain old Java object). These are converted into XML using the
- * XStream library from codehaus.org. As the data is written to the output file it is character set encoded to UTF-8. It
- * is hoped that this solves the localization issues with saved macros and other data not being restored properly.
- * Because of this, data loaded from a packed file is always retrieved without character set encoding <b>unless</b> it
- * is XML data. This should preserve binary data such as JPEG and PNG images properly. A side effect of this is that all
- * character data should be written to the packed file as POJOs in order to obtain the automatic character set encoding.
- * (Otherwise, strings can be converted to UTF-8 using the {@link String#getBytes(String)} method.
+ * The last and most important type of data is the POJO (plain old Java object). These are converted into XML using the XStream library from codehaus.org. As the data is written to the output file it
+ * is character set encoded to UTF-8. It is hoped that this solves the localization issues with saved macros and other data not being restored properly. Because of this, data loaded from a packed file
+ * is always retrieved without character set encoding <b>unless</b> it is XML data. This should preserve binary data such as JPEG and PNG images properly. A side effect of this is that all character
+ * data should be written to the packed file as POJOs in order to obtain the automatic character set encoding. (Otherwise, strings can be converted to UTF-8 using the {@link String#getBytes(String)}
+ * method.
  */
 public class PackedFile {
 
@@ -107,8 +97,7 @@ public class PackedFile {
 	private ModelVersionManager versionManager;
 
 	/**
-	 * By default all temporary files are handled in /tmp. Use this method to globally set the location of the temporary
-	 * directory
+	 * By default all temporary files are handled in /tmp. Use this method to globally set the location of the temporary directory
 	 */
 	public static void init(File tmpDir) {
 		PackedFile.tmpDir = tmpDir;
@@ -136,8 +125,7 @@ public class PackedFile {
 	}
 
 	/**
-	 * Retrieves the property map from the campaign file and accesses the given key, returning an Object that the key
-	 * holds. The Object is constructed from the XML content and could be anything.
+	 * Retrieves the property map from the campaign file and accesses the given key, returning an Object that the key holds. The Object is constructed from the XML content and could be anything.
 	 * 
 	 * @param key
 	 *            key for accessing the property map
@@ -185,8 +173,7 @@ public class PackedFile {
 	}
 
 	/**
-	 * Retrieves the contents of the <code>CONTENT_FILE</code> as a POJO. This object is the top-level data structure
-	 * for all information regarding the content of the PackedFile.
+	 * Retrieves the contents of the <code>CONTENT_FILE</code> as a POJO. This object is the top-level data structure for all information regarding the content of the PackedFile.
 	 * 
 	 * @return the results of the deserialization
 	 * @throws IOException
@@ -196,10 +183,8 @@ public class PackedFile {
 	}
 
 	/**
-	 * Same as {@link #getContent()} except that the version can be specified. This allows a newer release of an
-	 * application to provide automatic transformation information that will be applied to the XML as the object is
-	 * deserialized. The default transformation manager is used. (Think of the transformation as a simplified XSTL
-	 * process.)
+	 * Same as {@link #getContent()} except that the version can be specified. This allows a newer release of an application to provide automatic transformation information that will be applied to the
+	 * XML as the object is deserialized. The default transformation manager is used. (Think of the transformation as a simplified XSTL process.)
 	 * 
 	 * @param fileVersion
 	 *            such as "1.3.70"
@@ -211,8 +196,7 @@ public class PackedFile {
 	}
 
 	/**
-	 * Same as {@link #getContent(String)} except that the transformation manager, <code>versionManager</code>, is
-	 * specified as a parameter.
+	 * Same as {@link #getContent(String)} except that the transformation manager, <code>versionManager</code>, is specified as a parameter.
 	 * 
 	 * @param versionManager
 	 *            which set of transforms to apply to older file versions
@@ -320,12 +304,12 @@ public class PackedFile {
 					ZipEntry entry = entries.nextElement();
 					if (!entry.isDirectory() && !addedFileSet.contains(entry.getName()) && !removedFileSet.contains(entry.getName())
 							&& !CONTENT_FILE.equals(entry.getName()) && !PROPERTY_FILE.equals(entry.getName())) {
-						//						if (entry.getName().endsWith(".png") ||
-						//								entry.getName().endsWith(".gif") ||
-						//								entry.getName().endsWith(".jpeg"))
-						//							zout.setLevel(Deflater.NO_COMPRESSION); // none needed for images as they are already compressed
-						//						else
-						//							zout.setLevel(Deflater.BEST_COMPRESSION); // fast compression
+						// if (entry.getName().endsWith(".png") ||
+						// entry.getName().endsWith(".gif") ||
+						// entry.getName().endsWith(".jpeg"))
+						// zout.setLevel(Deflater.NO_COMPRESSION); // none needed for images as they are already compressed
+						// else
+						// zout.setLevel(Deflater.BEST_COMPRESSION); // fast compression
 						zout.putNextEntry(entry);
 						is = getFileAsInputStream(entry.getName()); // When copying, always use an InputStream
 						IOUtils.copy(is, zout);
@@ -408,9 +392,8 @@ public class PackedFile {
 	}
 
 	/**
-	 * Does the work of preparing for output to a temporary file, returning the {@link File} object associated with the
-	 * temporary location. The caller is then expected to open and write their data to the file which will later be
-	 * added to the ZIP file.
+	 * Does the work of preparing for output to a temporary file, returning the {@link File} object associated with the temporary location. The caller is then expected to open and write their data to
+	 * the file which will later be added to the ZIP file.
 	 * 
 	 * @param path
 	 *            path within the ZIP to write to
@@ -437,8 +420,7 @@ public class PackedFile {
 	}
 
 	/**
-	 * Write the <code>byte</code> data to the given path in the ZIP file; as the data is binary there is no
-	 * {@link Charset} conversion.
+	 * Write the <code>byte</code> data to the given path in the ZIP file; as the data is binary there is no {@link Charset} conversion.
 	 * 
 	 * @param path
 	 *            location within the ZIP file
@@ -453,8 +435,7 @@ public class PackedFile {
 	}
 
 	/**
-	 * Write the <b>binary</b> data to the given path in the ZIP file; as the data is presumed to be binary there is no
-	 * charset conversion.
+	 * Write the <b>binary</b> data to the given path in the ZIP file; as the data is presumed to be binary there is no charset conversion.
 	 * 
 	 * @param path
 	 *            location within the ZIP file
@@ -470,8 +451,8 @@ public class PackedFile {
 	}
 
 	/**
-	 * Write the serialized object to the given path in the ZIP file; as the data is an object it is first converted to
-	 * XML and character set encoding will take place as the data is written to the (temporary) file.
+	 * Write the serialized object to the given path in the ZIP file; as the data is an object it is first converted to XML and character set encoding will take place as the data is written to the
+	 * (temporary) file.
 	 * 
 	 * @param path
 	 *            location within the ZIP file
@@ -492,8 +473,7 @@ public class PackedFile {
 	}
 
 	/**
-	 * Write the data from the given URL to the path in the ZIP file; as the data is presumed binary there is no
-	 * {@link Charset} conversion.
+	 * Write the data from the given URL to the path in the ZIP file; as the data is presumed binary there is no {@link Charset} conversion.
 	 * <p>
 	 * FIXME Should the MIME type of the InputStream be checked??
 	 * 
@@ -535,8 +515,7 @@ public class PackedFile {
 	}
 
 	/**
-	 * Returns a POJO by reading the contents of the zip archive path specified and converting the XML via the
-	 * associated XStream object. (Because the XML is character data, this routine calls
+	 * Returns a POJO by reading the contents of the zip archive path specified and converting the XML via the associated XStream object. (Because the XML is character data, this routine calls
 	 * {@link #getFileAsReader(String)} to handle character encoding.)
 	 * <p>
 	 * <b>TODO:</b> add {@link ModelVersionManager} support
@@ -548,14 +527,14 @@ public class PackedFile {
 	 */
 	public Object getFileObject(String path) throws IOException {
 		// This next line really should be routed thru the version manager...
-		// Update:  a new XStreamConverter was created for the Asset object that
-		// never marshalls the image data, but *does* unmarshall it.  This allows
+		// Update: a new XStreamConverter was created for the Asset object that
+		// never marshalls the image data, but *does* unmarshall it. This allows
 		// older pre-1.3.b64 campaigns to be loaded but only the newer format
 		// (with a separate image file) works on output.
 		LineNumberReader r = getFileAsReader(path);
 		Object o = null;
 		try {
-			xstream.ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new classes/fields added.		
+			xstream.ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new classes/fields added.
 			o = xstream.fromXML(r);
 		} catch (InstantiationError ie) {
 			log.error("Found at line number " + r.getLineNumber());
@@ -568,9 +547,8 @@ public class PackedFile {
 	}
 
 	/**
-	 * Returns an InputStreamReader that corresponds to the zip file path specified. This method should be called only
-	 * for character-based file contents such as the <b>CONTENT_FILE</b> and <b>PROPERTY_FILE</b>. For binary data, such
-	 * as images (assets and thumbnails) use {@link #getFileAsInputStream(String)} instead.
+	 * Returns an InputStreamReader that corresponds to the zip file path specified. This method should be called only for character-based file contents such as the <b>CONTENT_FILE</b> and
+	 * <b>PROPERTY_FILE</b>. For binary data, such as images (assets and thumbnails) use {@link #getFileAsInputStream(String)} instead.
 	 * 
 	 * @param path
 	 *            zip file archive path entry
@@ -604,9 +582,8 @@ public class PackedFile {
 	}
 
 	/**
-	 * Returns an InputStream that corresponds to the zip file path specified. This method should be called only for
-	 * binary file contents such as images (assets and thumbnails). For character-based data, use
-	 * {@link #getFileAsReader(String)} instead.
+	 * Returns an InputStream that corresponds to the zip file path specified. This method should be called only for binary file contents such as images (assets and thumbnails). For character-based
+	 * data, use {@link #getFileAsReader(String)} instead.
 	 * 
 	 * @param path
 	 *            zip file archive path entry
@@ -668,9 +645,8 @@ public class PackedFile {
 	/**
 	 * Get all of the path names for this packed file.
 	 * 
-	 * @return All the path names. Changing this set does not affect the packed file. Changes to the file made after
-	 *         this method is called are not reflected in the path and do not cause a ConcurrentModificationException.
-	 *         Directories in the packed file are also included in the set.
+	 * @return All the path names. Changing this set does not affect the packed file. Changes to the file made after this method is called are not reflected in the path and do not cause a
+	 *         ConcurrentModificationException. Directories in the packed file are also included in the set.
 	 * @throws IOException
 	 *             Problem with the zip file.
 	 */

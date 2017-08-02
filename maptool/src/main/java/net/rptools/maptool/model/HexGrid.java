@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.awt.BasicStroke;
@@ -31,8 +28,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 
 /**
- * An abstract hex grid class that uses generic Cartesian-coordinates for calculations to allow for various hex grid
- * orientations.
+ * An abstract hex grid class that uses generic Cartesian-coordinates for calculations to allow for various hex grid orientations.
  * 
  * The v-axis points along the direction of edge to edge hexes
  */
@@ -41,7 +37,9 @@ public abstract class HexGrid extends Grid {
 	// the ratio = minor_radius / edge_length
 	public static final double REGULAR_HEX_RATIO = Math.sqrt(3) / 2;
 
-	/** One DirectionCalculator object is shared by all instances of this hex grid class. */
+	/**
+	 * One DirectionCalculator object is shared by all instances of this hex grid class.
+	 */
 	private static final DirectionCalculator calculator = new DirectionCalculator();
 
 	static {
@@ -83,8 +81,7 @@ public abstract class HexGrid extends Grid {
 		private static final int SW = 5;
 
 		/**
-		 * Given delta movement on the X and Y axes, determine which direction that would be for the current grid type.
-		 * Note that horizontal and vertical hex grids will be different.
+		 * Given delta movement on the X and Y axes, determine which direction that would be for the current grid type. Note that horizontal and vertical hex grids will be different.
 		 * 
 		 * @param dirx
 		 *            movement on the X axis
@@ -106,12 +103,10 @@ public abstract class HexGrid extends Grid {
 		}
 
 		/**
-		 * Given a particular direction returns the opposite direction. Used for finding the "pie slice" on the 'other
-		 * side' of the hex grid cell.
+		 * Given a particular direction returns the opposite direction. Used for finding the "pie slice" on the 'other side' of the hex grid cell.
 		 * 
 		 * @param dir
-		 *            one of the constants <code>DirectionCalculator.NW</code> .. <code>DirectionCalculator.SW</code>
-		 *            (0..5)
+		 *            one of the constants <code>DirectionCalculator.NW</code> .. <code>DirectionCalculator.SW</code> (0..5)
 		 * @return
 		 */
 		public int oppositeDirection(int dir) {
@@ -122,18 +117,16 @@ public abstract class HexGrid extends Grid {
 		 * <div style="float: left">Image of a <i>vertical hex</i> grid:<br>
 		 * <img src="doc-files/HexGridVertical.png" title="Vertical Hex"> </div> <div>
 		 * <p>
-		 * Returns a {@link Shape} that can be used to test for exposed fog areas in the direction specified by
-		 * <code>dir</code>. Note that <code>dir</code> is the direction from which a token is entering a grid cell. So
-		 * if the token is coming from the North, <code>dir</code> should be Direction.Calculator.N (i.e. "2"). The
-		 * resulting Shape returned would be the isosceles triangle that represents one-sixth of the hex in an upward
-		 * direction. The returned Shape has its origin at the center of the hex grid cell.
+		 * Returns a {@link Shape} that can be used to test for exposed fog areas in the direction specified by <code>dir</code>. Note that <code>dir</code> is the direction from which a token is
+		 * entering a grid cell. So if the token is coming from the North, <code>dir</code> should be Direction.Calculator.N (i.e. "2"). The resulting Shape returned would be the isosceles triangle
+		 * that represents one-sixth of the hex in an upward direction. The returned Shape has its origin at the center of the hex grid cell.
 		 * 
 		 * @param dir
 		 *            direction that the movement is coming from
 		 * @return a {@link Shape} representing one slice of the 6-slice pie </div>
 		 */
 		public Shape getFogAreaToCheck(int dir) {
-			//			pieSlices = null; // debugging -- forces the following IF statement to always be true
+			// pieSlices = null; // debugging -- forces the following IF statement to always be true
 			if (pieSlices == null) {
 				double coords[][] = {
 						{ 0, 0, -114, 0, -57, -100 }, // NW
@@ -164,7 +157,9 @@ public abstract class HexGrid extends Grid {
 	/** minorRadius / edgeLength */
 	private double hexRatio = REGULAR_HEX_RATIO;
 
-	/** One-half the length of an edge. Set to sqrt(edgeLength^2 - minorRadius^2), i.e. one side of a right triangle. */
+	/**
+	 * One-half the length of an edge. Set to sqrt(edgeLength^2 - minorRadius^2), i.e. one side of a right triangle.
+	 */
 	private double edgeProjection;
 
 	public double getEdgeProjection() {
@@ -187,8 +182,7 @@ public abstract class HexGrid extends Grid {
 	}
 
 	/**
-	 * Distance from centerpoint to vertex. Set to minorRadius/hexRatio (basically, uses 30 degree cosine to calculate
-	 * sqrt(3)/2).
+	 * Distance from centerpoint to vertex. Set to minorRadius/hexRatio (basically, uses 30 degree cosine to calculate sqrt(3)/2).
 	 */
 	private double edgeLength;
 
@@ -211,8 +205,7 @@ public abstract class HexGrid extends Grid {
 	private transient GeneralPath scaledHex;
 
 	/**
-	 * The offset required to translate from the center of a cell to the top right (x_min, y_min) of the cell's bounding
-	 * rectangle.
+	 * The offset required to translate from the center of a cell to the top right (x_min, y_min) of the cell's bounding rectangle.
 	 */
 	private Dimension cellOffset;
 
@@ -222,7 +215,7 @@ public abstract class HexGrid extends Grid {
 
 	@Override
 	protected Area createCellShape(int size) {
-		// don't use size.  it has already been used to set the minorRadius
+		// don't use size. it has already been used to set the minorRadius
 		// and will only introduce a rounding error.
 		return new Area(createShape(minorRadius, edgeProjection, edgeLength));
 	}
@@ -239,7 +232,7 @@ public abstract class HexGrid extends Grid {
 		zp.x -= w / 2 + getOffsetX();
 		zp.y -= h / 2 + getOffsetY();
 
-		//		System.out.println(new Rectangle(zp.x, zp.y, w, h));
+		// System.out.println(new Rectangle(zp.x, zp.y, w, h));
 		return new Rectangle(zp.x, zp.y, w, h);
 	}
 
@@ -281,8 +274,7 @@ public abstract class HexGrid extends Grid {
 	}
 
 	/**
-	 * The offset required to translate from the center of a cell to the top right (x_min, y_min) of the cell's bounding
-	 * rectangle.
+	 * The offset required to translate from the center of a cell to the top right (x_min, y_min) of the cell's bounding rectangle.
 	 */
 	protected abstract Dimension setCellOffset();
 
@@ -293,13 +285,13 @@ public abstract class HexGrid extends Grid {
 		if (hexRatio == 0) {
 			hexRatio = REGULAR_HEX_RATIO;
 		}
-		// Using size as the edge-to-edge distance or 
+		// Using size as the edge-to-edge distance or
 		// minor diameter of the hex.
 		size = constrainSize(size);
 
 		minorRadius = (double) size / 2;
 		edgeLength = minorRadius / hexRatio;
-		//		edgeProjection = Math.sqrt(edgeLength * edgeLength - minorRadius * minorRadius); // Pythagorus
+		// edgeProjection = Math.sqrt(edgeLength * edgeLength - minorRadius * minorRadius); // Pythagorus
 		edgeProjection = edgeLength / 2; // It's an isosceles triangle, after all!
 
 		scaledHex = null;
@@ -372,7 +364,7 @@ public abstract class HexGrid extends Grid {
 			return false;
 
 		// The next step is to check the triangle that covers the hex face we are leaving from and teh one we
-		// are entering through to see if either contain any fog.  If they do, the movement is disallowed.
+		// are entering through to see if either contain any fog. If they do, the movement is disallowed.
 		int direction = calculator.getDirection(dirx, diry);
 		if (direction < DirectionCalculator.NW || direction > DirectionCalculator.SW) {
 			// we're not really moving so return 'true' -- it's a valid movement
@@ -397,15 +389,15 @@ public abstract class HexGrid extends Grid {
 	private boolean checkOneSlice(ZonePoint zp, int dir, Area exposedFog) {
 		Shape s = calculator.getFogAreaToCheck(dir);
 
-		// The resulting Shape is 4x larger than it should be.  Use a transform to correct it.
+		// The resulting Shape is 4x larger than it should be. Use a transform to correct it.
 		AffineTransform af = new AffineTransform();
 		af.translate(zp.x, zp.y);
 		af.scale(minorRadius / 100, minorRadius / 100);
 		Area transformed = new Area(af.createTransformedShape(s));
 
-		// Create an Area based on the pie slice, then calculate the intersection with the exposed area.  If the result
+		// Create an Area based on the pie slice, then calculate the intersection with the exposed area. If the result
 		// is exactly the same as the original pie slice, then the entire slice must have been contained with the
-		// exposed area.  That means it's fine for a token to move into the grid cell.  Whew. ;-)
+		// exposed area. That means it's fine for a token to move into the grid cell. Whew. ;-)
 		Area a = new Area(transformed);
 		a.intersect(exposedFog);
 		return a.equals(transformed);
@@ -518,8 +510,8 @@ public abstract class HexGrid extends Grid {
 
 		double m = edgeProjection / minorRadius;
 
-		//		System.out.format("gx:%d gy:%d px:%d py:%d m:%f\n", xSect, ySect, xPxl, yPxl, m);
-		//		System.out.format("gx:%d gy:%d px:%d py:%d\n", xSect, ySect, zp.x, zp.y);
+		// System.out.format("gx:%d gy:%d px:%d py:%d m:%f\n", xSect, ySect, xPxl, yPxl, m);
+		// System.out.format("gx:%d gy:%d px:%d py:%d\n", xSect, ySect, zp.x, zp.y);
 
 		switch (Math.abs(xSect) % 2) {
 		case 0:
@@ -531,7 +523,7 @@ public abstract class HexGrid extends Grid {
 			} else {
 				if (xPxl < (yPxl - minorRadius) * m) {
 					gridX = xSect - 1;
-					//gridY = ySect;
+					// gridY = ySect;
 				}
 			}
 			break;
@@ -539,24 +531,24 @@ public abstract class HexGrid extends Grid {
 			if (yPxl >= minorRadius) {
 				if (xPxl < (edgeProjection - (yPxl - minorRadius) * m)) {
 					gridX = xSect - 1;
-					//gridY = ySect;
+					// gridY = ySect;
 				} else {
-					//gridX = xSect;
-					//gridY = ySect;
+					// gridX = xSect;
+					// gridY = ySect;
 				}
 			} else {
 				if (xPxl < (yPxl * m)) {
 					gridX = xSect - 1;
-					//gridY = ySect;
+					// gridY = ySect;
 				} else {
-					//gridX = xSect;
+					// gridX = xSect;
 					gridY = ySect - 1;
 				}
 			}
 
 			break;
 		}
-		//		System.out.format("gx:%d gy:%d\n", gridX, gridY);
+		// System.out.format("gx:%d gy:%d\n", gridX, gridY);
 		return new CellPoint(gridX, gridY);
 	}
 
@@ -579,7 +571,7 @@ public abstract class HexGrid extends Grid {
 		if (length < minorRadius * 2) {
 			hexRatio = REGULAR_HEX_RATIO;
 		} else {
-			//	some linear algebra and a quadratic equation results in:
+			// some linear algebra and a quadratic equation results in:
 			double aspectRatio = length / (2 * minorRadius);
 			double a = 0.75;
 			double c = -(aspectRatio * aspectRatio + 1) * minorRadius * minorRadius;

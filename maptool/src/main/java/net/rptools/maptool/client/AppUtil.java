@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.io.File;
@@ -51,8 +48,7 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns a {@link File} path that points to the AppHome base directory along with the subpath denoted in the
-	 * "subdir" argument.
+	 * Returns a {@link File} path that points to the AppHome base directory along with the subpath denoted in the "subdir" argument.
 	 * <p>
 	 * For example <code>getAppHome("cache")</code> will return the path <code>{APPHOME}/cache</code>.
 	 * <p>
@@ -68,7 +64,7 @@ public class AppUtil {
 		if (!StringUtils.isEmpty(subdir)) {
 			path = new File(path.getAbsolutePath(), subdir);
 		}
-		// Now check for characters known to cause problems.  See getDataDir() for details.
+		// Now check for characters known to cause problems. See getDataDir() for details.
 		if (path.getAbsolutePath().matches("!"))
 			throw new RuntimeException(I18N.getText("msg.error.unusableDir", path.getAbsolutePath()));
 
@@ -107,9 +103,9 @@ public class AppUtil {
 				path = getUserHome() + "/" + path;
 			}
 			// Now we need to check for characters that are known to cause problems in
-			// path names.  We want to allow the local platform to make this decision, but
+			// path names. We want to allow the local platform to make this decision, but
 			// the built-in "jar://" URL uses the "!" as a separator between the archive name
-			// and the archive member. :(  Right now we're only checking for that one character
+			// and the archive member. :( Right now we're only checking for that one character
 			// but the list may need to be expanded in the future.
 			if (path.matches("!"))
 				throw new RuntimeException(I18N.getText("msg.error.unusableDataDir", path));
@@ -120,12 +116,10 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns a File path representing the base directory to store local data. By default this is a ".maptool"
-	 * directory in the user's home directory.
+	 * Returns a File path representing the base directory to store local data. By default this is a ".maptool" directory in the user's home directory.
 	 * <p>
-	 * If you want to change the dir for data storage you can set the system property MAPTOOL_DATADIR. If the value of
-	 * the MAPTOOL_DATADIR has any file separator characters in it, it will assume you are using an absolute path. If
-	 * the path does not include a file separator it will use it as a subdirectory in the user's home directory
+	 * If you want to change the dir for data storage you can set the system property MAPTOOL_DATADIR. If the value of the MAPTOOL_DATADIR has any file separator characters in it, it will assume you
+	 * are using an absolute path. If the path does not include a file separator it will use it as a subdirectory in the user's home directory
 	 * <p>
 	 * As a side-effect the function creates the directory pointed to by File.
 	 * 
@@ -145,8 +139,7 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns true if the player owns the token, otherwise false. If the player is GM this function always returns
-	 * true. If strict token management is disabled then this function always returns true.
+	 * Returns true if the player owns the token, otherwise false. If the player is GM this function always returns true. If strict token management is disabled then this function always returns true.
 	 * 
 	 * @param token
 	 * @return true if the player owns the token
@@ -163,8 +156,7 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns true if the token is visible in the zone. If the view is the GM view then this function always returns
-	 * true.
+	 * Returns true if the token is visible in the zone. If the view is the GM view then this function always returns true.
 	 * 
 	 * @param token
 	 * @return true if the GM "owns" the token
@@ -179,8 +171,7 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns true if the token is visible in the zone. If the view is the GM
-	 * view then this function always returns true.
+	 * Returns true if the token is visible in the zone. If the view is the GM view then this function always returns true.
 	 * 
 	 * @param zone
 	 *            to check for visibility
@@ -198,8 +189,7 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns the disk spaced used in a given directory in a human readable format automatically
-	 * adjusting to kb/mb/gb etc.
+	 * Returns the disk spaced used in a given directory in a human readable format automatically adjusting to kb/mb/gb etc.
 	 * 
 	 * @author Jamz
 	 * @since 1.4.0.1
@@ -216,8 +206,7 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns the free disk spaced for a given directory in a human readable format automatically
-	 * adjusting to kb/mb/gb etc.
+	 * Returns the free disk spaced for a given directory in a human readable format automatically adjusting to kb/mb/gb etc.
 	 * 
 	 * @author Jamz
 	 * @since 1.4.0.1

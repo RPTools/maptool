@@ -1,21 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
- * 
- * Created on May 30, 2010, 10:27:59 AM
- * 
- * Lee: Features extended on February, 2013
- * 
- * Azhrei: extensive cleanup, string externalization, configuration file
- * handling. June 10th, 2013
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.launcher;
 
 import static javax.swing.JOptionPane.ERROR_MESSAGE;
@@ -106,9 +96,7 @@ import net.rptools.maptool.launcher.PathUtils.PathResolutionException;
 /**
  * Generic launcher for MapTool.
  * 
- * Prompts user for the various memory settings to use when starting MapTool and
- * then launches it with those settings preserving them in the launch.properties file for
- * use later.
+ * Prompts user for the various memory settings to use when starting MapTool and then launches it with those settings preserving them in the launch.properties file for use later.
  * 
  * @authors Phergus, Lee, Azhrei
  */
@@ -162,8 +150,7 @@ public class MapToolLauncher extends JFrame {
 	private static String jarCommand = "-jar"; //$NON-NLS-1$
 
 	/*
-	 * Lee: registering the MT executable due to the wildcard bug in J7u10+.
-	 * This is also helpful for multiple MT instances with different versions.
+	 * Lee: registering the MT executable due to the wildcard bug in J7u10+. This is also helpful for multiple MT instances with different versions.
 	 */
 	private static String mapToolJarName = null;
 	private static String mapToolVersion = EMPTY; // added to MAC_TITLE_FIX string
@@ -181,9 +168,8 @@ public class MapToolLauncher extends JFrame {
 	private static Map<String, String> locales;
 
 	/**
-	 * The list of fields that will be recognized when reading the configuration
-	 * file. This is also the order that the fields will be written out (if they
-	 * exist) whenever the configuration file is saved.
+	 * The list of fields that will be recognized when reading the configuration file. This is also the order that the fields will be written out (if they exist) whenever the configuration file is
+	 * saved.
 	 */
 	// @formatter:off
 	private static final String[] recognizedFields = new String[] {
@@ -280,7 +266,7 @@ public class MapToolLauncher extends JFrame {
 		}
 
 		// Lets test the current directory first, lets lets a local JAR copy to run independently of config stored in .maptool directory, .eg to run multiple versions of MT
-		launchConfigFile = new File(currentDir, LAUNCH_CONFIG); //$NON-NLS-1$
+		launchConfigFile = new File(currentDir, LAUNCH_CONFIG); // $NON-NLS-1$
 		if (launchConfigFile.exists()) {
 			readCfgFile();
 		} else {
@@ -310,14 +296,14 @@ public class MapToolLauncher extends JFrame {
 			updateCommand();
 			jbLaunch.requestFocusInWindow();
 		} else {
-			// Do we need to recreate the 'logging.xml' every time?  Or save the configuration
+			// Do we need to recreate the 'logging.xml' every time? Or save the configuration
 			// file every time?
 			createLogConfig();
 			saveCfgFile();
 
-			// Make a list of all XML files in the current directory.  We're going to copy new ones
+			// Make a list of all XML files in the current directory. We're going to copy new ones
 			// to the data directory when the Launch button is activated.
-			//copyXmlFiles(logConfigs, dataDirPath);
+			// copyXmlFiles(logConfigs, dataDirPath);
 
 			setVisible(false);
 			launchMapTool();
@@ -353,7 +339,7 @@ public class MapToolLauncher extends JFrame {
 	 * Copies default resources over to users .maptool/config directory
 	 * 
 	 * @author Jamz
-	 * @throws IOException 
+	 * @throws IOException
 	 * @since 1.4.1.0
 	 *
 	 */
@@ -379,9 +365,8 @@ public class MapToolLauncher extends JFrame {
 	/**
 	 * Launch MT in a separate process with its own JVM.
 	 * 
-	 * Note that each string passed in must have just a single "argument". Which
-	 * is to say that you can't just lump them all into one string and pass
-	 * that. So the max mem gets one, the min mem gets one and so on.
+	 * Note that each string passed in must have just a single "argument". Which is to say that you can't just lump them all into one string and pass that. So the max mem gets one, the min mem gets
+	 * one and so on.
 	 * 
 	 * @throws IOException
 	 */
@@ -394,7 +379,7 @@ public class MapToolLauncher extends JFrame {
 		if (startConsole) {
 			if (IS_WINDOWS) {
 				cmdArgs = getLaunchCommand(invocationCommands[1], mapToolJarDir);
-				//				log = null; // Windows doesn't like having multiple tasks opening the same file for writing all at once
+				// log = null; // Windows doesn't like having multiple tasks opening the same file for writing all at once
 			} else if (IS_MAC) {
 				cmdArgs = getLaunchCommand(invocationCommands[0], mapToolJarDir);
 				pb = new ProcessBuilder(new String[] { "open", "-a", "Console", log.toString() });
@@ -429,11 +414,11 @@ public class MapToolLauncher extends JFrame {
 		final JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());
 
-		// BASIC:  Top panel
+		// BASIC: Top panel
 		final JPanel logoPanel = new JPanel();
 		logoPanel.setLayout(new FlowLayout());
 		logoPanel.setPreferredSize(new Dimension(450, 140));
-		logoPanel.setBorder(new LineBorder(Color.BLACK)); //$NON-NLS-1$
+		logoPanel.setBorder(new LineBorder(Color.BLACK)); // $NON-NLS-1$
 
 		jlLaunchLogo.setIcon(CopiedFromOtherJars.resizeImage(launchIcon, 128, 128));
 		logoPanel.add(jlLaunchLogo);
@@ -468,7 +453,7 @@ public class MapToolLauncher extends JFrame {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				//setCursor(new Cursor(Cursor.HAND_CURSOR));
+				// setCursor(new Cursor(Cursor.HAND_CURSOR));
 			}
 
 			@Override
@@ -477,13 +462,13 @@ public class MapToolLauncher extends JFrame {
 			}
 		});
 
-		// BASIC:  Middle panel
+		// BASIC: Middle panel
 		final JPanel memPanel = new JPanel();
 		memPanel.setLayout(new GridLayout(3, 2));
 		memPanel.setBorder(new LineBorder(Color.WHITE));
 
 		jtfMaxMem.setHorizontalAlignment(SwingConstants.RIGHT);
-		jtfMaxMem.setInfo(CopiedFromOtherJars.getText("msg.info.javaMaxMem", DEFAULT_MAXMEM)); //$NON-NLS-1$ 
+		jtfMaxMem.setInfo(CopiedFromOtherJars.getText("msg.info.javaMaxMem", DEFAULT_MAXMEM)); //$NON-NLS-1$
 		jtfMaxMem.setToolTipText(CopiedFromOtherJars.getText("msg.tooltip.javaMaxMem")); //$NON-NLS-1$
 		jtfMaxMem.addActionListener(new ActionListener() {
 			@Override
@@ -505,7 +490,7 @@ public class MapToolLauncher extends JFrame {
 		jtfMaxMem.addKeyListener(new InputValidator());
 
 		jtfMinMem.setHorizontalAlignment(SwingConstants.RIGHT);
-		jtfMinMem.setInfo(CopiedFromOtherJars.getText("msg.info.javaMinMem", DEFAULT_MINMEM)); //$NON-NLS-1$ 
+		jtfMinMem.setInfo(CopiedFromOtherJars.getText("msg.info.javaMinMem", DEFAULT_MINMEM)); //$NON-NLS-1$
 		jtfMinMem.setToolTipText(CopiedFromOtherJars.getText("msg.tooltip.javaMinMem")); //$NON-NLS-1$
 		jtfMinMem.addActionListener(new ActionListener() {
 			@Override
@@ -527,7 +512,7 @@ public class MapToolLauncher extends JFrame {
 		jtfMinMem.addKeyListener(new InputValidator());
 
 		jtfStackSize.setHorizontalAlignment(SwingConstants.RIGHT);
-		jtfStackSize.setInfo(CopiedFromOtherJars.getText("msg.info.javaStackSize", DEFAULT_STACKSIZE)); //$NON-NLS-1$ 
+		jtfStackSize.setInfo(CopiedFromOtherJars.getText("msg.info.javaStackSize", DEFAULT_STACKSIZE)); //$NON-NLS-1$
 		jtfStackSize.setToolTipText(CopiedFromOtherJars.getText("msg.tooltip.javaStackSize")); //$NON-NLS-1$
 		jtfStackSize.addActionListener(new ActionListener() {
 			@Override
@@ -552,7 +537,7 @@ public class MapToolLauncher extends JFrame {
 		memPanel.add(jtfMinMem);
 		memPanel.add(jtfStackSize);
 
-		// BASIC:  Bottom panel
+		// BASIC: Bottom panel
 		final JPanel southPanel = new JPanel();
 		southPanel.setLayout(new BorderLayout());
 
@@ -655,7 +640,7 @@ public class MapToolLauncher extends JFrame {
 				mapToolLocale = e.getActionCommand();
 				// Setting the language won't work without reinitalizing the interface.
 				// Instead, we just save it and use it for MapTool.
-				//				CopiedFromOtherJars.setLanguage(mapToolLocale);
+				// CopiedFromOtherJars.setLanguage(mapToolLocale);
 				updateCommand();
 			}
 		};
@@ -740,7 +725,7 @@ public class MapToolLauncher extends JFrame {
 				updateCommand();
 			}
 		});
-		//		jcbRelativePath.setSelected(false); // since initComponents() is called after reading the config, don't do this here
+		// jcbRelativePath.setSelected(false); // since initComponents() is called after reading the config, don't do this here
 
 		jcbConsole.setText(CopiedFromOtherJars.getText("msg.info.launchWithConsole")); //$NON-NLS-1$
 		jcbConsole.setToolTipText(CopiedFromOtherJars.getText("msg.tooltip.launchWithConsole")); //$NON-NLS-1$
@@ -778,7 +763,7 @@ public class MapToolLauncher extends JFrame {
 						for (final String fileName : fileList) {
 							final File check = new File(f, fileName);
 							final String lc = check.getName().toLowerCase();
-							if (lc.equals("java") || (IS_WINDOWS && lc.startsWith("java."))) { //$NON-NLS-1$ //$NON-NLS-2$ 
+							if (lc.equals("java") || (IS_WINDOWS && lc.startsWith("java."))) { //$NON-NLS-1$ //$NON-NLS-2$
 								javaFound = true;
 								break;
 							}
@@ -946,8 +931,7 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	/**
-	 * This method is called from within the constructor to initialize the form
-	 * components.
+	 * This method is called from within the constructor to initialize the form components.
 	 */
 	private void initComponents() {
 		// Lee: for esthetics and Linux won't display window controls on an untitled window.
@@ -1043,7 +1027,7 @@ public class MapToolLauncher extends JFrame {
 		});
 		Dimension d = new Dimension(advancedPanel.getPreferredSize().width, 25);
 		jtfArgs.setPreferredSize(d);
-		//		mtlOptions.setPreferredSize(new Dimension(350, getPreferredSize().height));
+		// mtlOptions.setPreferredSize(new Dimension(350, getPreferredSize().height));
 		d.width = -1;
 		d.height = -1;
 		JLabel tabLabel = null;
@@ -1072,20 +1056,16 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	/**
-	 * Accumulates all logging facilities in one place, ie. invoke this guy and
-	 * he'll invoke the Logger's log() method as well as JOptionPane's
-	 * showMessageDialog() method.
+	 * Accumulates all logging facilities in one place, ie. invoke this guy and he'll invoke the Logger's log() method as well as JOptionPane's showMessageDialog() method.
 	 * 
 	 * @param type
 	 *            severity level of the message
 	 * @param english
 	 *            English message (only displayed to Logger)
 	 * @param msgId
-	 *            key for properties file; displayed by Logger and looked up in
-	 *            properties for user dialog
+	 *            key for properties file; displayed by Logger and looked up in properties for user dialog
 	 * @param args
-	 *            parameters for <code>english</code> and <code>msgId</code>
-	 *            value from properties
+	 *            parameters for <code>english</code> and <code>msgId</code> value from properties
 	 */
 	public static void logMsg(Level type, String english, String msgId, Object... args) {
 		if (msgId == null) {
@@ -1253,11 +1233,8 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	/**
-	 * Given a locale string of the form <b>aa</b> or <b>aa_BB</b>, returns the
-	 * appropriate Java command line options for setting the language to
-	 * <b>aa</b> and, if provided, the country to <b>BB</b>. For this example,
-	 * that means returning the string <code>-Duser.language=aa</code> or
-	 * <code>-Duser.language=aa -Duser.country=BB</code>, respectively.
+	 * Given a locale string of the form <b>aa</b> or <b>aa_BB</b>, returns the appropriate Java command line options for setting the language to <b>aa</b> and, if provided, the country to <b>BB</b>.
+	 * For this example, that means returning the string <code>-Duser.language=aa</code> or <code>-Duser.language=aa -Duser.country=BB</code>, respectively.
 	 * 
 	 * @param locale
 	 *            locale string to convert
@@ -1352,11 +1329,11 @@ public class MapToolLauncher extends JFrame {
 				errors.add(msg);
 			}
 		}
-		// For the data directory field allow multiple values.  They are, in increasing precedence:
-		//   ~/.maptool
-		//   DATA_DIRECTORY
-		//   MAPTOOL_DATADIR
-		//   MAPTOOL_DATADIR system property (from command line)
+		// For the data directory field allow multiple values. They are, in increasing precedence:
+		// ~/.maptool
+		// DATA_DIRECTORY
+		// MAPTOOL_DATADIR
+		// MAPTOOL_DATADIR system property (from command line)
 		dir = values.get("MAPTOOL_DATADIR"); //$NON-NLS-1$
 		if (dir == null || dir.isEmpty()) {
 			dir = values.get("DATA_DIRECTORY"); //$NON-NLS-1$
@@ -1423,17 +1400,17 @@ public class MapToolLauncher extends JFrame {
 			// If there is no EXECUTABLE field (or it failed the above tests) but there is a
 			// MAPTOOL_DIRECTORY field,
 			// we want to search the MAPTOOL_DIRECTORY directory looking for a valid
-			// matching MapTool jar and auto-select it if it's the only one.  Just trying to
-			// save the user a little trouble.  Note that it will be written out later when
-			// saving the config file.  Maybe we shouldn't do that?  That's a discussion for
+			// matching MapTool jar and auto-select it if it's the only one. Just trying to
+			// save the user a little trouble. Note that it will be written out later when
+			// saving the config file. Maybe we shouldn't do that? That's a discussion for
 			// the forums, I think.
 			String[] names = mapToolJarDir.list(new FilenameFilter() {
 				@Override
 				public boolean accept(File dir, String name) {
-					// Directory doesn't matter.  Just compare the filename.  We ignore case when
-					// comparing, but we shouldn't need to.  MapTool is distributed with the JAR
+					// Directory doesn't matter. Just compare the filename. We ignore case when
+					// comparing, but we shouldn't need to. MapTool is distributed with the JAR
 					// filename in all lowercase, but what if the user decides to rename it to make
-					// it look good?  (I've done that myself sometimes, in rare cases.)
+					// it look good? (I've done that myself sometimes, in rare cases.)
 					String n = name.toLowerCase();
 					return n.startsWith("maptool-") && n.endsWith(".jar");
 				}
@@ -1482,17 +1459,16 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	/**
-	 * Reads from a file named launch.properties in the same directory to get the following
-	 * options. Each option is placed on a single line followed by an equal sign
-	 * ('=') and then the appropriate value. The default values are coded below.
+	 * Reads from a file named launch.properties in the same directory to get the following options. Each option is placed on a single line followed by an equal sign ('=') and then the appropriate
+	 * value. The default values are coded below.
 	 * 
 	 * All memory sizes are in megabytes.
 	 */
 	private boolean readCfgFile() {
 		boolean rv = false;
 
-		// Set the defaults in the map.  As lines are read from the config file, overwrite the
-		// map entries with the new values.  When we're done, we can look at the map entries
+		// Set the defaults in the map. As lines are read from the config file, overwrite the
+		// map entries with the new values. When we're done, we can look at the map entries
 		// in an appropriate order and ensure dependencies are handled correctly as well as
 		// convert values to the proper data types.
 		final Map<String, String> values = new HashMap<String, String>(10);
@@ -1540,7 +1516,7 @@ public class MapToolLauncher extends JFrame {
 			logMsg(Level.INFO, "Configuration file not found; using built-in defaults", "msg.error.configNotFound", launchConfigFile); //$NON-NLS-1$ $NON-NLS-2$
 		}
 		// Build a list of all XML files found in the .maptool/logging directory, if it exists, otherwise
-		// Build a list of all XML files in the same directory as the launcher.  This list of
+		// Build a list of all XML files in the same directory as the launcher. This list of
 		// filenames will be used to validate the LOGGING parameter from the configuration file.
 		File logging = new File(mapToolDataDir, "logging"); //$NON-NLS-1$
 		if (!logging.isDirectory()) {
@@ -1592,13 +1568,13 @@ public class MapToolLauncher extends JFrame {
 			}
 		}
 
-		// Now process the records just read in (or the defaults).  Errors are accumulated into 'errors'.
+		// Now process the records just read in (or the defaults). Errors are accumulated into 'errors'.
 		parseCfgValues(values, errors);
 		if (!errors.isEmpty()) {
 			errors.add(0, CopiedFromOtherJars.getText("msg.info.configFeedback")); //$NON-NLS-1$
 			CopiedFromOtherJars.showFeedback(ERROR_MESSAGE, errors.toArray());
 		}
-		// Keep track of the original values.  When we go to save the configuration file, we
+		// Keep track of the original values. When we go to save the configuration file, we
 		// only write to it if something has changed.
 		originalSettings = values;
 
@@ -1612,14 +1588,11 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	/**
-	 * Reads all XML files within the given directory and creates a list of
-	 * {@link LoggingConfig} objects to represent those files. The list is
-	 * returned sorted in order by the description string embedded in the XML
-	 * file, or by filename if no description is available.
+	 * Reads all XML files within the given directory and creates a list of {@link LoggingConfig} objects to represent those files. The list is returned sorted in order by the description string
+	 * embedded in the XML file, or by filename if no description is available.
 	 * 
 	 * @param fromDir
-	 *            <code>File</code> object representing the directory (must be
-	 *            non-null)
+	 *            <code>File</code> object representing the directory (must be non-null)
 	 * @return <code>List</code> of {@link LoggingConfig} objects
 	 */
 	private List<LoggingConfig> buildLoggingFileList(File fromDir) {
@@ -1636,17 +1609,13 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	/**
-	 * Read the given XML file and look for specially formatted lines so that a
-	 * description of the files purpose and text to display in a tooltip are
-	 * retrieved. The current process involves looking for XML comments that
-	 * match the regex <code><b>^&lt;!--\s+(\w+):\s*(.*)\s+--&gt;$</b></code>
-	 * and pull out the two fields; the first field is the key and the second is
-	 * the value for storing the information in the returned object.
+	 * Read the given XML file and look for specially formatted lines so that a description of the files purpose and text to display in a tooltip are retrieved. The current process involves looking
+	 * for XML comments that match the regex <code><b>^&lt;!--\s+(\w+):\s*(.*)\s+--&gt;$</b></code> and pull out the two fields; the first field is the key and the second is the value for storing the
+	 * information in the returned object.
 	 * 
 	 * @param xml
 	 *            <code>File</code> object representing the file to read
-	 * @return a {@link LoggingConfig} object which stores information about the
-	 *         XML file
+	 * @return a {@link LoggingConfig} object which stores information about the XML file
 	 */
 	private LoggingConfig readDescFromXmlFile(File xml) {
 		final LoggingConfig config = new LoggingConfig(xml, new JCheckBox());
@@ -1684,20 +1653,15 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	/**
-	 * Copies all XML files from <code>fileList</code> to <code>toDir</code> if
-	 * they are newer than the ones already there or if they are newer than the
-	 * configuration file itself. As files are copied the corresponding
-	 * <code>JCheckBox</code> item is enabled based on whether the destination
-	 * file actually exists. (It's possible the copy could fail because the file
-	 * is already there; the checkbox will be enabled in that case since the
-	 * destination <i>does</i> exist.)
+	 * Copies all XML files from <code>fileList</code> to <code>toDir</code> if they are newer than the ones already there or if they are newer than the configuration file itself. As files are copied
+	 * the corresponding <code>JCheckBox</code> item is enabled based on whether the destination file actually exists. (It's possible the copy could fail because the file is already there; the
+	 * checkbox will be enabled in that case since the destination <i>does</i> exist.)
 	 * 
 	 * @param fileList
 	 *            List of XML files to process
 	 * @param toDir
 	 *            destination directory (must be non-null)
-	 * @return count of the number of unsuccessfully copied files (non-zero is
-	 *         bad!)
+	 * @return count of the number of unsuccessfully copied files (non-zero is bad!)
 	 */
 	private int copyXmlFiles(List<LoggingConfig> fileList, File toDir) {
 		if (!toDir.exists()) {
@@ -1744,7 +1708,7 @@ public class MapToolLauncher extends JFrame {
 
 		// Settings did not change, existing logging.xml file will be used
 		// Jamz: Not sure I like this logic, originally it deleted the file first but did not recreate it
-		// unless settings changed. I moved the delete below this check but there's no guarantee that 
+		// unless settings changed. I moved the delete below this check but there's no guarantee that
 		// the file hasn't been changed/deleted outside this program....
 		if (val == null)
 			val = EMPTY;
@@ -1801,9 +1765,7 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	/**
-	 * Examines the passed in string and removes anything that doesn't need to
-	 * be there. Examples include "-DMAPTOOL_DATADIR" since there's a separate
-	 * option for that.
+	 * Examines the passed in string and removes anything that doesn't need to be there. Examples include "-DMAPTOOL_DATADIR" since there's a separate option for that.
 	 * 
 	 * @param extraArgs2
 	 *            String to clean
@@ -1815,10 +1777,10 @@ public class MapToolLauncher extends JFrame {
 		final int index = extraArgs.indexOf(DATADIR_OPTION);
 		if (index != -1) {
 			String test;
-			// Found it.  Remove it.  The value ends at the first unescaped whitespace character.
+			// Found it. Remove it. The value ends at the first unescaped whitespace character.
 			// (Too bad we can't use StringEscapeUtils from org.apache.commons.lang)
 			if (extraArgs.indexOf(" ", index + DATADIR_OPTION.length()) == -1) { //$NON-NLS-1$
-				// There are no spaces, escaped or otherwise.  Just use the rest of the string.
+				// There are no spaces, escaped or otherwise. Just use the rest of the string.
 				test = extraArgs.substring(index + DATADIR_OPTION.length());
 				extraArgs = extraArgs.substring(0, index);
 			} else {
@@ -1867,12 +1829,12 @@ public class MapToolLauncher extends JFrame {
 
 		// Force trailing separators so relative path can be constructed properly
 		baseDir = currentDir.getAbsolutePath() + File.separator;
-		//		baseDir = "E:\\MapTool\\MapTool V1-3b89\\"; // For testing the relative pathing routines
+		// baseDir = "E:\\MapTool\\MapTool V1-3b89\\"; // For testing the relative pathing routines
 
 		relDir = mapToolJarDir.getAbsolutePath();
 		if (jcbRelativePath.isSelected()) {
 			targetDir = relDir + File.separator;
-			//			targetDir = "E:\\MapTool\\MapTool V1-3b89\\";
+			// targetDir = "E:\\MapTool\\MapTool V1-3b89\\";
 			try {
 				relDir = PathUtils.getRelativePath(targetDir, baseDir);
 			} catch (final PathResolutionException e) {
@@ -2036,8 +1998,7 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	/**
-	 * Search for command line arguments for options. Expecting arguments
-	 * formatted as a switch
+	 * Search for command line arguments for options. Expecting arguments formatted as a switch
 	 * 
 	 * Examples: -f or -force_prompt
 	 * 

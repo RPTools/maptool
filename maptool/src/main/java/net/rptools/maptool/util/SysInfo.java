@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.util;
 
 import java.awt.BorderLayout;
@@ -54,8 +51,7 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 
 /**
- * Retrieves certain characteristics of the execution environment for the purposes of problem determination and
- * diagnostics. This class is invoked via the Help menu, Gather Debug Info... menu option.
+ * Retrieves certain characteristics of the execution environment for the purposes of problem determination and diagnostics. This class is invoked via the Help menu, Gather Debug Info... menu option.
  * 
  * @author frank
  */
@@ -84,18 +80,18 @@ public class SysInfo {
 
 		// maptool info
 		mt.put("version", MapTool.getVersion());
-		//		mt.put("home", AppUtil.getAppHome()); // this  line crashes, I didnt figured out why
+		// mt.put("home", AppUtil.getAppHome()); // this line crashes, I didnt figured out why
 		mt.put("max mem avail", format.format(Runtime.getRuntime().maxMemory() / (1024 * 1024)));
 		mt.put("max mem used", format.format(MemoryStatusBar.getInstance().getLargestMemoryUsed()));
 		info.put("maptool", mt);
 
-		//java
+		// java
 		java.put("vendor", p.getProperty("java.vendor"));
 		java.put("home", p.getProperty("java.home"));
 		java.put("version", p.getProperty("java.version"));
 		info.put("java", java);
 
-		//locale
+		// locale
 		Locale loc = Locale.getDefault();
 		locale.put("country", loc.getDisplayCountry());
 		locale.put("language", loc.getDisplayLanguage());
@@ -103,11 +99,11 @@ public class SysInfo {
 		locale.put("variant", loc.getDisplayVariant());
 		info.put("locale", locale);
 
-		//os
+		// os
 		os.put("name", p.getProperty("os.name"));
 		os.put("version", p.getProperty("os.version"));
 		os.put("arch", p.getProperty("os.arch"));
-		//		os.put("path",  (env.get("PATH") != null ? env.get("PATH") : p.getProperty("java.library.path")));
+		// os.put("path", (env.get("PATH") != null ? env.get("PATH") : p.getProperty("java.library.path")));
 		info.put("os", os);
 
 		return info;
@@ -238,9 +234,9 @@ public class SysInfo {
 
 		appendInfo("==== Display Information ====");
 		appendInfo("Number of Displays: " + gs.length);
-		// XXX Is there any way to report on the actual hardware?  nVidia and
+		// XXX Is there any way to report on the actual hardware? nVidia and
 		// ATI/AMD cards sometimes have bugs in their proprietary drivers that
-		// cause headache for Java.  It would be nice to have that information.
+		// cause headache for Java. It would be nice to have that information.
 		// For Windows it would be good to see DirectX module names and version
 		// numbers, but can we obtain that from the JRE...?
 		int i = 0;
@@ -351,12 +347,12 @@ public class SysInfo {
 		try {
 			Image img = ImageUtil.getImage("net/rptools/maptool/client/image/maptool_icon.png");
 			frame.setIconImage(img);
-			//			URL url = MapTool.class.getClassLoader().getResource("net/rptools/maptool/client/image/maptool_icon.png");
-			//			Toolkit tk = Toolkit.getDefaultToolkit();
-			//			if (url != null) {
-			//				Image img = tk.createImage(url);
-			//				frame.setIconImage(img);
-			//			}
+			// URL url = MapTool.class.getClassLoader().getResource("net/rptools/maptool/client/image/maptool_icon.png");
+			// Toolkit tk = Toolkit.getDefaultToolkit();
+			// if (url != null) {
+			// Image img = tk.createImage(url);
+			// frame.setIconImage(img);
+			// }
 		} catch (Exception ex) {
 			MapTool.showError("While retrieving MapTool logo image?!", ex);
 		}

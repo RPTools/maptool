@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui;
 
 import java.awt.Color;
@@ -33,13 +30,12 @@ import org.apache.commons.collections.map.LinkedMap;
 @SuppressWarnings("serial")
 public class ChatTypingNotification extends JPanel {
 	/**
-	 * This component is only made visible when there are notifications to be displayed. That means the first couple of
-	 * IF statements in this method are redundant since paintComponent() will not be called unless the component is
-	 * visible, and it will only be visible when there are notifications...
+	 * This component is only made visible when there are notifications to be displayed. That means the first couple of IF statements in this method are redundant since paintComponent() will not be
+	 * called unless the component is visible, and it will only be visible when there are notifications...
 	 */
 	@Override
 	protected void paintComponent(Graphics g) {
-		//		System.out.println("Chat panel is painting itself...");
+		// System.out.println("Chat panel is painting itself...");
 		if (AppPreferences.getTypingNotificationDuration() == 0) {
 			return;
 		}

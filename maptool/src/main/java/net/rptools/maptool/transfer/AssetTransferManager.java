@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.transfer;
 
 import java.io.IOException;
@@ -34,8 +31,7 @@ public class AssetTransferManager {
 	}
 
 	/**
-	 * Add a new producer to the chunk queue.  Assumes that the header has already been transferred
-	 * to the consumer.  Producer chunks can then be retrieved via nextChunk()
+	 * Add a new producer to the chunk queue. Assumes that the header has already been transferred to the consumer. Producer chunks can then be retrieved via nextChunk()
 	 */
 	public synchronized void addProducer(AssetProducer producer) {
 		producerList.add(producer);
@@ -43,7 +39,9 @@ public class AssetTransferManager {
 
 	/**
 	 * Get the next chunk from the available producers
-	 * @param size size of the data to retrieve
+	 * 
+	 * @param size
+	 *            size of the data to retrieve
 	 * @throws IOException
 	 */
 	public synchronized AssetChunk nextChunk(int size) throws IOException {
@@ -59,8 +57,7 @@ public class AssetTransferManager {
 	}
 
 	/**
-	 * Add the corresponding consumer that is expecting to receive chunks.
-	 * Add a ConsumerListener to know when the asset is complete
+	 * Add the corresponding consumer that is expecting to receive chunks. Add a ConsumerListener to know when the asset is complete
 	 */
 	public synchronized void addConsumer(AssetConsumer consumer) {
 		if (consumerMap.get(consumer.getId()) != null) {
@@ -73,8 +70,8 @@ public class AssetTransferManager {
 	}
 
 	/**
-	 * Update the appropriate asset.  To be notified when the asset is complete add a ConsumerListener.
-	 * When the asset is complete it will be removed from the internal map automatically
+	 * Update the appropriate asset. To be notified when the asset is complete add a ConsumerListener. When the asset is complete it will be removed from the internal map automatically
+	 * 
 	 * @throws IOException
 	 */
 	public synchronized void update(AssetChunk chunk) throws IOException {

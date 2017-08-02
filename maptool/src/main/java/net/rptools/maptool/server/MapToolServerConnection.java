@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.server;
 
 import java.io.IOException;
@@ -40,7 +37,7 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.rptools.clientserver.simple.server.ServerConnection#handleConnectionHandshake(java.net.Socket)
+	 * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
 	 */
 	@Override
 	public boolean handleConnectionHandshake(String id, Socket socket) {
@@ -89,10 +86,10 @@ public class MapToolServerConnection extends ServerConnection implements ServerO
 			server.getConnection().callMethod(conn.getId(), ClientCommand.COMMAND.playerConnected.name(), playerMap.get(id));
 		}
 		server.getConnection().broadcastCallMethod(ClientCommand.COMMAND.playerConnected.name(), player);
-		//     if (!server.isHostId(player.getName())) {
+		// if (!server.isHostId(player.getName())) {
 		// Don't bother sending the campaign file if we're hosting it ourselves
 		server.getConnection().callMethod(conn.getId(), ClientCommand.COMMAND.setCampaign.name(), server.getCampaign());
-		//     }
+		// }
 	}
 
 	public void connectionRemoved(net.rptools.clientserver.simple.client.ClientConnection conn) {

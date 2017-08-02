@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui;
 
 import java.awt.Dimension;
@@ -278,7 +275,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 		} catch (Exception e) {
 			// Oh well, might not be connected
 		}
-		//		System.out.println("External address is: " + externalAddress);
+		// System.out.println("External address is: " + externalAddress);
 
 		JComponent selectedPanel = (JComponent) getTabPane().getSelectedComponent();
 		if (SwingUtil.hasComponent(selectedPanel, "lanPanel")) {
@@ -348,7 +345,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 					return;
 			}
 		} catch (UnknownHostException e) {
-			// If an exception occurs, don't bother doing the comparison.  But otherwise it's not an error.
+			// If an exception occurs, don't bother doing the comparison. But otherwise it's not an error.
 		}
 		if (commit()) {
 			accepted = true;

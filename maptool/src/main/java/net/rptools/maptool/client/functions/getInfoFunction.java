@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
@@ -83,8 +80,7 @@ public class getInfoFunction extends AbstractFunction {
 	}
 
 	/**
-	 * Retrieves the information about the current zone/map and returns it as a
-	 * JSON Object.
+	 * Retrieves the information about the current zone/map and returns it as a JSON Object.
 	 * 
 	 * @return The information about the map.
 	 * @throws ParserException
@@ -148,8 +144,7 @@ public class getInfoFunction extends AbstractFunction {
 	}
 
 	/**
-	 * Retrieves the client side preferences that do not have server over rides
-	 * as a json object.
+	 * Retrieves the client side preferences that do not have server over rides as a json object.
 	 * 
 	 * @return the client side preferences
 	 */
@@ -264,10 +259,10 @@ public class getInfoFunction extends AbstractFunction {
 				linfo.put("name", ls.getName());
 				linfo.put("max range", ls.getMaxRange());
 				linfo.put("type", ls.getType());
-				//				List<Light> lights = new ArrayList<Light>();
-				//				for (Light light : ls.getLightList()) {
-				//					lights.add(light);
-				//				}
+				// List<Light> lights = new ArrayList<Light>();
+				// for (Light light : ls.getLightList()) {
+				// lights.add(light);
+				// }
 				linfo.put("light segments", ls.getLightList());
 				ltinfo.add(linfo);
 			}

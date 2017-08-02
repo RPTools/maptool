@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.util.ArrayList;
@@ -231,10 +228,10 @@ public class LookupTable {
 		return assetSet;
 	}
 
-	/**Retrieves the visible flag for the LookupTable.
-	 * @return Boolean -- True indicates that the table will be
-	 * visible to players.  False indicates that the table will
-	 * be hidden from players.
+	/**
+	 * Retrieves the visible flag for the LookupTable.
+	 * 
+	 * @return Boolean -- True indicates that the table will be visible to players. False indicates that the table will be hidden from players.
 	 */
 	public Boolean getVisible() {
 		if (visible == null) {
@@ -243,20 +240,21 @@ public class LookupTable {
 		return visible;
 	}
 
-	/**Sets the visible flag for the LookupTable.
-	 * @param value(Boolean) -- True specifies that the table will
-	 * be visible to players.  False indicates that the table will
-	 * be hidden from players.
+	/**
+	 * Sets the visible flag for the LookupTable.
+	 * 
+	 * @param value(Boolean)
+	 *            -- True specifies that the table will be visible to players. False indicates that the table will be hidden from players.
 	 */
 	public void setVisible(Boolean value) {
 		visible = value;
 	}
 
-	/**Retrieves the allowLookup flag for the LookupTable.
-	 * @return Boolean -- True indicates that players can call
-	 * for values from this table.  False indicates that players
-	 * will be prevented from calling values from this table.
-	 * GM's can ALWAYS perform lookups against a table.
+	/**
+	 * Retrieves the allowLookup flag for the LookupTable.
+	 * 
+	 * @return Boolean -- True indicates that players can call for values from this table. False indicates that players will be prevented from calling values from this table. GM's can ALWAYS perform
+	 *         lookups against a table.
 	 */
 	public Boolean getAllowLookup() {
 		if (allowLookup == null) {
@@ -265,11 +263,12 @@ public class LookupTable {
 		return allowLookup;
 	}
 
-	/**Sets the allowLookup flag for the LookupTable.
-	 * @param value(Boolean) -- True indicates that players can call
-	 * for values from this table.  False indicates that players
-	 * will be prevented from calling values from this table.
-	 * GM's can ALWAYS perform lookups against a table.
+	/**
+	 * Sets the allowLookup flag for the LookupTable.
+	 * 
+	 * @param value(Boolean)
+	 *            -- True indicates that players can call for values from this table. False indicates that players will be prevented from calling values from this table. GM's can ALWAYS perform
+	 *            lookups against a table.
 	 */
 	public void setAllowLookup(Boolean value) {
 		allowLookup = value;

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.AlphaComposite;
@@ -96,9 +93,9 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 		int gridx = (int) Math.floor(-viewport.x / (double) CHUNK_SIZE);
 		int gridy = (int) Math.floor(-viewport.y / (double) CHUNK_SIZE);
 
-		// OK, weirdest hack ever.  Basically, when the viewport.x is exactly divisible by the chunk size, the gridx decrements
-		// too early, creating a visual jump in the drawables.  I don't know the exact cause, but this seems to account for it
-		// note that it only happens in the negative space.  Weird.
+		// OK, weirdest hack ever. Basically, when the viewport.x is exactly divisible by the chunk size, the gridx decrements
+		// too early, creating a visual jump in the drawables. I don't know the exact cause, but this seems to account for it
+		// note that it only happens in the negative space. Weird.
 		gridx += (viewport.x > CHUNK_SIZE && (viewport.x % CHUNK_SIZE == 0) ? -1 : 0);
 		gridy += (viewport.y > CHUNK_SIZE && (viewport.y % CHUNK_SIZE == 0) ? -1 : 0);
 
@@ -126,7 +123,7 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 				// Trim to the right size
 				if (chunkList.size() > maxChunks) {
 					int chunkSize = chunkList.size();
-					//					chunkList.subList(maxChunks, chunkSize).clear();
+					// chunkList.subList(maxChunks, chunkSize).clear();
 					while (chunkSize > maxChunks) {
 						chunkList.remove(--chunkSize);
 					}
@@ -168,13 +165,12 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 		lastScale = scale;
 
 		if (timer.isEnabled()) {
-			//			System.out.println(timer);
+			// System.out.println(timer);
 		}
 	}
 
 	/**
-	 * Given a List and a String key, find the element in the list that matches
-	 * the key.
+	 * Given a List and a String key, find the element in the list that matches the key.
 	 * 
 	 * @param list
 	 * @param key
@@ -237,19 +233,13 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 			timer.stop("createChunk:CreateChunk");
 
 			if (pen.getOpacity() != 1 && pen.getOpacity() != 0 /*
-																 * handle legacy
-																 * pens,
-																 * besides, it
-																 * doesn't make
-																 * sense to have
-																 * a non visible
-																 * pen
+																 * handle legacy pens, besides, it doesn't make sense to have a non visible pen
 																 */) {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
 			}
 
-			//			g.setColor(Color.red);
-			//			g.draw(drawnBounds);
+			// g.setColor(Color.red);
+			// g.draw(drawnBounds);
 
 			timer.start("createChunk:Draw");
 			if (drawable instanceof DrawablesGroup) {

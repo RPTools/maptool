@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.awt.Color;
@@ -368,10 +365,10 @@ public class MapTool {
 	 * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
 	 */
 	public static boolean confirm(String message, Object... params) {
-		//		String msg = I18N.getText(message, params);
-		//		log.debug(message);
+		// String msg = I18N.getText(message, params);
+		// log.debug(message);
 		String title = I18N.getText("msg.title.messageDialogConfirm");
-		//		return JOptionPane.showConfirmDialog(clientFrame, msg, title, JOptionPane.OK_OPTION) == JOptionPane.OK_OPTION;
+		// return JOptionPane.showConfirmDialog(clientFrame, msg, title, JOptionPane.OK_OPTION) == JOptionPane.OK_OPTION;
 		return confirmImpl(title, JOptionPane.OK_OPTION, message, params) == JOptionPane.OK_OPTION;
 	}
 
@@ -530,8 +527,8 @@ public class MapTool {
 	}
 
 	// TODO: This method is redundant now. It should be rolled into the
-	// TODO:   ExportDialog screenshot method. But until that has proven stable
-	// TODO:   for a while, I don't want to mess with this. (version 1.3b70 is most recent)
+	// TODO: ExportDialog screenshot method. But until that has proven stable
+	// TODO: for a while, I don't want to mess with this. (version 1.3b70 is most recent)
 	public static BufferedImage takeMapScreenShot(final PlayerView view) {
 		final ZoneRenderer renderer = clientFrame.getCurrentZoneRenderer();
 		if (renderer == null) {
@@ -1197,7 +1194,8 @@ public class MapTool {
 				defaults.put("OptionPane.bannerFontSize", 13);
 				defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
 				defaults.put("OptionPane.bannerMaxCharsPerLine", 60);
-				defaults.put("OptionPane.bannerForeground", painter != null ? painter.getOptionPaneBannerForeground() : null); // you should adjust this if banner background is not the default gradient paint
+				defaults.put("OptionPane.bannerForeground", painter != null ? painter.getOptionPaneBannerForeground() : null); // you should adjust this if banner background is not the default
+																																// gradient paint
 				defaults.put("OptionPane.bannerBorder", null); // use default border
 
 				// set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want gradient
@@ -1348,7 +1346,7 @@ public class MapTool {
 		if (MAC_OS_X) {
 			// On OSX the menu bar at the top of the screen can be enabled at any time, but the
 			// title (ie. name of the application) has to be set before the GUI is initialized (by
-			// creating a frame, loading a splash screen, etc).  So we do it here.
+			// creating a frame, loading a splash screen, etc). So we do it here.
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
 			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "About MapTool...");
 			System.setProperty("apple.awt.brushMetalLook", "true");
@@ -1411,19 +1409,19 @@ public class MapTool {
 				macOSXicon();
 			}
 			// If running on Windows based OS, CJK font is broken when using TinyLAF.
-			//			else if (WINDOWS) {
-			//				UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-			//				menuBar = new AppMenuBar();
-			//			}
+			// else if (WINDOWS) {
+			// UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+			// menuBar = new AppMenuBar();
+			// }
 			else {
 				lafname = "de.muntjak.tinylookandfeel.TinyLookAndFeel";
 				UIManager.setLookAndFeel(lafname);
 				menuBar = new AppMenuBar();
 			}
 			// After the TinyLAF library is initialized, look to see if there is a Default.theme
-			// in our AppHome directory and load it if there is.  Unfortunately, changing the
+			// in our AppHome directory and load it if there is. Unfortunately, changing the
 			// search path for the default theme requires subclassing TinyLAF and because
-			// we have both the original and a Mac version that gets cumbersome.  (Really
+			// we have both the original and a Mac version that gets cumbersome. (Really
 			// the Mac version should use the default and then install the keystroke differences
 			// but what we have works and I'm loathe to go playing with it at 1.3b87 -- yes, 87!)
 			File f = AppUtil.getAppHome("config");
@@ -1436,7 +1434,7 @@ public class MapTool {
 
 						// Update the ComponentUIs for all Components. This
 						// needs to be invoked for all windows.
-						//SwingUtilities.updateComponentTreeUI(rootComponent);
+						// SwingUtilities.updateComponentTreeUI(rootComponent);
 					}
 				}
 			}
@@ -1473,8 +1471,8 @@ public class MapTool {
 		 * http://www.scarfboy.com/coding/unicode-tool is also a really cool site.
 		 */
 		if (Locale.CHINA.equals(Locale.getDefault())) {
-			// The following font name appears to be "Sim Sun".  It can be downloaded
-			// from here:  http://fr.cooltext.com/Fonts-Unicode-Chinese
+			// The following font name appears to be "Sim Sun". It can be downloaded
+			// from here: http://fr.cooltext.com/Fonts-Unicode-Chinese
 			Font f = new Font("\u65B0\u5B8B\u4F53", Font.PLAIN, 12);
 			FontUIResource fontRes = new FontUIResource(f);
 			for (Enumeration<Object> keys = UIManager.getDefaults().keys(); keys.hasMoreElements();) {
@@ -1505,12 +1503,12 @@ public class MapTool {
 								}
 							});
 
-							//							LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-							//							cfg.title = MapToolGame.TITLE;
-							//							cfg.width = MapToolGame.SCREEN_WIDTH;
-							//							cfg.height = MapToolGame.SCREEN_HEIGHT;
+							// LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+							// cfg.title = MapToolGame.TITLE;
+							// cfg.width = MapToolGame.SCREEN_WIDTH;
+							// cfg.height = MapToolGame.SCREEN_HEIGHT;
 							//
-							//							MapToolLwjglApplication = new LwjglApplication(new MapToolGame(), cfg);
+							// MapToolLwjglApplication = new LwjglApplication(new MapToolGame(), cfg);
 						}
 
 						EventQueue.invokeLater(new Runnable() {
@@ -1592,13 +1590,13 @@ public class MapTool {
 			Method getApplication = appClass.getDeclaredMethod("getApplication", (Class[]) null);
 			Object appl = getApplication.invoke(null, (Object[]) null);
 			Method setDockIconImage = appl.getClass().getDeclaredMethod("setDockIconImage", new Class[] { java.awt.Image.class });
-			// If we couldn't grab the image for some reason, don't set the dock bar icon!  Duh!
+			// If we couldn't grab the image for some reason, don't set the dock bar icon! Duh!
 			if (img != null)
 				setDockIconImage.invoke(appl, new Object[] { img });
 
 			if (MapToolUtil.isDebugEnabled()) {
-				// For some reason Mac users don't like the dock badge icon.  But from a development standpoint I like seeing the
-				// version number in the dock bar.  So we'll only include it when running with MAPTOOL_DEV on the command line.
+				// For some reason Mac users don't like the dock badge icon. But from a development standpoint I like seeing the
+				// version number in the dock bar. So we'll only include it when running with MAPTOOL_DEV on the command line.
 				Method setDockIconBadge = appl.getClass().getDeclaredMethod("setDockIconBadge", new Class[] { java.lang.String.class });
 				String vers = getVersion();
 				vers = vers.substring(vers.length() - 2);
@@ -1617,7 +1615,7 @@ public class MapTool {
 
 		taskbarFlasher = new TaskBarFlasher(clientFrame);
 
-		// Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync, 
+		// Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
 		// so after frame is all done loading we sync them back up.
 		MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
 	}

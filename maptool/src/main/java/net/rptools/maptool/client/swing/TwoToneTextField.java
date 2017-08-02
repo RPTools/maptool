@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.swing;
 
 import java.awt.Color;
@@ -66,7 +63,8 @@ public class TwoToneTextField extends JTextField {
 	/**
 	 * Create the field with the passed text.
 	 *
-	 * @param aText The text for the new field.
+	 * @param aText
+	 *            The text for the new field.
 	 */
 	public TwoToneTextField(String aText) {
 		super(aText);
@@ -75,7 +73,8 @@ public class TwoToneTextField extends JTextField {
 	/**
 	 * Create the field with a set number of columns
 	 * 
-	 * @param aColumns The number of columns for the new field.
+	 * @param aColumns
+	 *            The number of columns for the new field.
 	 */
 	public TwoToneTextField(int aColumns) {
 		super(aColumns);
@@ -84,8 +83,10 @@ public class TwoToneTextField extends JTextField {
 	/**
 	 * Create a field with the passed text and number of columns
 	 * 
-	 * @param aText The text for the new field.
-	 * @param aColumns The number of columns for the new field.
+	 * @param aText
+	 *            The text for the new field.
+	 * @param aColumns
+	 *            The number of columns for the new field.
 	 */
 	public TwoToneTextField(String aText, int aColumns) {
 		super(aText, aColumns);
@@ -94,9 +95,12 @@ public class TwoToneTextField extends JTextField {
 	/**
 	 * Create a field with the given document, text, and column count.
 	 * 
-	 * @param aDoc The document for the new field.
-	 * @param aText The text for the new field.
-	 * @param aColumns The number of columns for the new field.
+	 * @param aDoc
+	 *            The document for the new field.
+	 * @param aText
+	 *            The text for the new field.
+	 * @param aColumns
+	 *            The number of columns for the new field.
 	 */
 	public TwoToneTextField(Document aDoc, String aText, int aColumns) {
 		super(aDoc, aText, aColumns);
@@ -118,7 +122,8 @@ public class TwoToneTextField extends JTextField {
 	/**
 	 * Set the value of twoToneColor for this TwoToneTextField.
 	 *
-	 * @param aTwoToneColor The twoToneColor to set.
+	 * @param aTwoToneColor
+	 *            The twoToneColor to set.
 	 */
 	public void setTwoToneColor(Color aTwoToneColor) {
 		twoToneColor = aTwoToneColor;

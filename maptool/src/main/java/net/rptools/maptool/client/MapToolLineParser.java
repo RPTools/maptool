@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.math.BigDecimal;
@@ -76,8 +73,7 @@ public class MapToolLineParser {
 	private volatile boolean macroPathTrusted = false;
 
 	/**
-	 * The macro button index of the button on the impersonated token that
-	 * called us.
+	 * The macro button index of the button on the impersonated token that called us.
 	 */
 	private volatile int macroButtonIndex = -1;
 
@@ -180,8 +176,7 @@ public class MapToolLineParser {
 	}
 
 	/*****************************************************************************
-	 * OptionType - defines roll options, including values for default
-	 * parameters.
+	 * OptionType - defines roll options, including values for default parameters.
 	 *****************************************************************************/
 	// These items are only used in the enum below, but have to be declared out here
 	// because they must appear before being used in the enum definitions.
@@ -189,8 +184,7 @@ public class MapToolLineParser {
 	private static final Object nullParam = null;
 
 	/*
-	 * In order to add a new roll option, follow the instructions in the "todo"
-	 * comments in this file.
+	 * In order to add a new roll option, follow the instructions in the "todo" comments in this file.
 	 */
 	private enum OptionType {
 		/*
@@ -198,7 +192,7 @@ public class MapToolLineParser {
 		 */
 
 		// The format is:
-		//   NAME   (nameRegex, minParams, maxParams, defaultValues...)
+		// NAME (nameRegex, minParams, maxParams, defaultValues...)
 		//
 		// You must provide (maxParams - minParams) default values (BigDecimal or String types).
 		//
@@ -210,7 +204,7 @@ public class MapToolLineParser {
 		GM("g|gm", 0, 0), SELF("s|self", 0, 0), WHISPER("w|whisper", 1, -1),
 		// tooltip visibility
 		GMTT("gt|gmtt", 0, 0), SELFTT("st|selftt", 0, 0),
-		//		WHISPER     ("wt|whispertt",  1, -1),
+		// WHISPER ("wt|whispertt", 1, -1),
 		// loops
 		COUNT("c|count", 1, 2, defaultLoopSep), FOR("for", 3, 5, BigDecimal.ONE, defaultLoopSep), FOREACH("foreach", 2, 4, defaultLoopSep, ","), WHILE("while", 1, 2, defaultLoopSep),
 		// branches
@@ -248,8 +242,7 @@ public class MapToolLineParser {
 		}
 
 		/**
-		 * Obtain one of the enum values, or null if <code>strName</code> 
-		 * doesn't match any of them.
+		 * Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them.
 		 */
 		protected static OptionType optionTypeFromName(String strName) {
 			for (OptionType rot : OptionType.values()) {
@@ -319,8 +312,7 @@ public class MapToolLineParser {
 		private Object[] params;
 
 		/**
-		 * Attempts to create an OptionInfo object by parsing the text in
-		 * <code>optionString</code> beginning at position <code>start</code>.
+		 * Attempts to create an OptionInfo object by parsing the text in <code>optionString</code> beginning at position <code>start</code>.
 		 */
 		public OptionInfo(String optionString, int start) throws RollOptionException {
 			srcString = optionString;
@@ -411,8 +403,7 @@ public class MapToolLineParser {
 		}
 
 		/**
-		 * Converts a String to a BigDecimal if possible, otherwise returns
-		 * original String.
+		 * Converts a String to a BigDecimal if possible, otherwise returns original String.
 		 */
 		private Object toNumIfPossible(String s) {
 			Object retval = s;
@@ -462,7 +453,7 @@ public class MapToolLineParser {
 		 */
 		public String getIdentifierParam(int index) throws ParserException {
 			String s = params[index].toString();
-			if (!s.matches("[a-zA-Z]\\w*")) { // MapTool doesn't allow variable names to start with '_'				
+			if (!s.matches("[a-zA-Z]\\w*")) { // MapTool doesn't allow variable names to start with '_'
 				throw new ParserException(I18N.getText("lineParser.notValidVariableName", s));
 			}
 			return s;
@@ -491,8 +482,7 @@ public class MapToolLineParser {
 		}
 
 		/**
-		 * Returns a param as int, parsing it as an expression if it is a
-		 * string.
+		 * Returns a param as int, parsing it as an expression if it is a string.
 		 */
 		public int getParsedIntParam(int index, MapToolVariableResolver res, Token tokenInContext) throws ParserException {
 			Object retval = getParsedParam(index, res, tokenInContext);
@@ -534,14 +524,12 @@ public class MapToolLineParser {
 	}
 
 	/**
-	 * Scans a string of options and builds OptionInfo objects for each option
-	 * found.
+	 * Scans a string of options and builds OptionInfo objects for each option found.
 	 * 
 	 * @param optionString
 	 *            A string containing a comma-delimited list of roll options.
 	 * @throws RollOptionException
-	 *             if any of the options are unknown or don't match the template
-	 *             for that option type.
+	 *             if any of the options are unknown or don't match the template for that option type.
 	 */
 	private List<OptionInfo> getRollOptionList(String optionString) throws RollOptionException {
 		if (optionString == null)
@@ -663,11 +651,8 @@ public class MapToolLineParser {
 						for (OptionInfo option : optionList) {
 							String error = null;
 							/*
-							 * TODO: If you're adding a new option, add a new
-							 * case here to collect info from the parameters. If
-							 * your option uses parameters, use the
-							 * option.getXxxParam() methods to get the text or
-							 * parsed values of the parameters.
+							 * TODO: If you're adding a new option, add a new case here to collect info from the parameters. If your option uses parameters, use the option.getXxxParam() methods to get
+							 * the text or parsed values of the parameters.
 							 */
 							switch (option.optionType) {
 
@@ -914,15 +899,14 @@ public class MapToolLineParser {
 						}
 
 						if (loopType != LoopType.NO_LOOP) {
-							// We only update roll.count in a loop statement.  This allows simple nested 
+							// We only update roll.count in a loop statement. This allows simple nested
 							// statements to inherit roll.count from the outer statement.
 							resolver.setVariable("roll.count", iteration);
 						}
 
 						switch (loopType) {
 						/*
-						 * TODO: If you're adding a new looping option, add a
-						 * new case to handle the iteration
+						 * TODO: If you're adding a new looping option, add a new case to handle the iteration
 						 */
 						case NO_LOOP:
 							if (iteration > 0) { // stop after first iteration
@@ -1011,7 +995,7 @@ public class MapToolLineParser {
 						String rollBranch = roll;
 						String branchRegex, branchSepRegex, branchLastSepRegex;
 						if (codeType != CodeType.CODEBLOCK) {
-							// matches any text not containing a ";" (skipping over strings) 
+							// matches any text not containing a ";" (skipping over strings)
 							String noCodeRegex = "((?:[^\";]|\"[^\"]*\"|'[^']*')*)";
 							branchRegex = noCodeRegex;
 							branchSepRegex = ";";
@@ -1027,8 +1011,7 @@ public class MapToolLineParser {
 						// Extract the branch to use
 						switch (branchType) {
 						/*
-						 * TODO: If you're adding a new branching option, add a
-						 * new case to extract the branch text
+						 * TODO: If you're adding a new branching option, add a new case to extract the branch text
 						 */
 						case NO_BRANCH: {
 							// There's only one branch, so our regex is very simple
@@ -1062,7 +1045,7 @@ public class MapToolLineParser {
 						}
 						case SWITCH: {
 							// We augment the branch regex to detect the "case xxx:" or "default:" prefixes,
-							// and search for a match.  An error is thrown if no case match is found.
+							// and search for a match. An error is thrown if no case match is found.
 
 							// Regex matches 'default', 'case 123:', 'case "123":', 'case "abc":', but not 'case abc:'
 							branchRegex = "(?:case\\s*\"?((?<!\")(?:\\+|-)?[\\d]+(?!\")|(?<=\")[^\"]*(?=\"))\"?|(default))\\s*:\\s*" + branchRegex;
@@ -1098,7 +1081,7 @@ public class MapToolLineParser {
 						}
 						} // end of switch(branchType) statement
 
-						// Construct the output.  
+						// Construct the output.
 						// If a MACRO or CODE block is being used, we default to bare output as in the RESULT style.
 						// The output style NONE is also allowed in these cases.
 						Result result;
@@ -1108,8 +1091,7 @@ public class MapToolLineParser {
 							// If none of the code options are active, any of the formatting options can be used.
 							switch (output) {
 							/*
-							 * TODO: If you're adding a new formatting option,
-							 * add a new case to build the output
+							 * TODO: If you're adding a new formatting option, add a new case to build the output
 							 */
 							case NONE:
 								parseExpression(resolver, tokenInContext, rollBranch);
@@ -1159,8 +1141,7 @@ public class MapToolLineParser {
 							} // end of switch(output) statement
 							break; // end of case NO_CODE in switch(codeType) statement
 						/*
-						 * TODO: If you're adding a new code option, add a new
-						 * case to execute the code
+						 * TODO: If you're adding a new code option, add a new case to execute the code
 						 */
 						case MACRO:
 							// [MACRO("macroName@location"): args]
@@ -1237,7 +1218,7 @@ public class MapToolLineParser {
 			if (contextStackEmpty()) {
 				HTMLFrameFactory.tokenChanged(tokenInContext);
 			}
-			MapTool.getFrame().refresh(); // Repaint incase macros changed anything. 
+			MapTool.getFrame().refresh(); // Repaint incase macros changed anything.
 		}
 	}
 
@@ -1340,7 +1321,7 @@ public class MapToolLineParser {
 		if (macroName.equalsIgnoreCase(""))
 			return "";
 
-		// IF the macro is a  @this, then we get the location of the current macro and use that.
+		// IF the macro is a @this, then we get the location of the current macro and use that.
 		if (macroLocation != null && macroLocation.equalsIgnoreCase("this")) {
 			macroLocation = getMacroSource();
 			if (macroLocation.equals(CHAT_INPUT) || macroLocation.toLowerCase().startsWith("token:")) {
@@ -1439,14 +1420,13 @@ public class MapToolLineParser {
 			}
 			return macroOutput;
 		} finally {
-			//			exitContext();
+			// exitContext();
 			macroRecurseDepth--;
 		}
 	}
 
 	/**
-	 * Returns if the specified macro on the token is secure, that is player
-	 * would not be able to edit it.
+	 * Returns if the specified macro on the token is secure, that is player would not be able to edit it.
 	 * 
 	 * @param macroName
 	 *            The name of the macro.
@@ -1493,18 +1473,15 @@ public class MapToolLineParser {
 	}
 
 	/**
-	 * Searches all maps for a token and returns the body of the requested
-	 * macro.
+	 * Searches all maps for a token and returns the body of the requested macro.
 	 * 
 	 * @param macro
 	 *            The name of the macro to fetch.
 	 * @param location
-	 *            The name of the token containing the macro. Must begin with
-	 *            "lib:".
+	 *            The name of the token containing the macro. Must begin with "lib:".
 	 * @return The body of the requested macro.
 	 * @throws ParserException
-	 *             if the token name is illegal, the token appears multiple
-	 *             times, or if the caller doesn't have access to the token.
+	 *             if the token name is illegal, the token appears multiple times, or if the caller doesn't have access to the token.
 	 */
 	public String getTokenLibMacro(String macro, String location) throws ParserException {
 		Token token = getTokenMacroLib(location);
@@ -1527,8 +1504,7 @@ public class MapToolLineParser {
 	 *
 	 * @return The token which holds the library.
 	 * @throws ParserException
-	 *             if the token name is illegal, the token appears multiple
-	 *             times, or if the caller doesn't have access to the token.
+	 *             if the token name is illegal, the token appears multiple times, or if the caller doesn't have access to the token.
 	 */
 	public Token getTokenMacroLib(String location) throws ParserException {
 		if (!location.matches("(?i)^lib:.*")) {
@@ -1547,7 +1523,7 @@ public class MapToolLineParser {
 
 				for (Token token : tokenList) {
 					// If we are not the GM and the token is not visible to players then we don't
-					// let them get functions from it.	
+					// let them get functions from it.
 					if (!MapTool.getPlayer().isGM() && !token.isVisible()) {
 						throw new ParserException(I18N.getText("lineParser.libUnableToExec", libTokenName));
 					}
@@ -1564,13 +1540,11 @@ public class MapToolLineParser {
 	}
 
 	/**
-	 * Searches all maps for a token and returns the zone that the lib: macro is
-	 * in.
+	 * Searches all maps for a token and returns the zone that the lib: macro is in.
 	 * 
 	 * @return The zone which holds the library.
 	 * @throws ParserException
-	 *             if the token name is illegal, the token appears multiple
-	 *             times, or if the caller doesn't have access to the token.
+	 *             if the token name is illegal, the token appears multiple times, or if the caller doesn't have access to the token.
 	 */
 	public Zone getTokenMacroLibZone(String location) throws ParserException {
 		if (!location.matches("(?i)^lib:.*")) {
@@ -1589,7 +1563,7 @@ public class MapToolLineParser {
 
 				for (Token token : tokenList) {
 					// If we are not the GM and the token is not visible to players then we don't
-					// let them get functions from it.	
+					// let them get functions from it.
 					if (!MapTool.getPlayer().isGM() && !token.isVisible()) {
 						throw new ParserException(I18N.getText("lineParser.libUnableToExec", libTokenName));
 					}
@@ -1658,9 +1632,8 @@ public class MapToolLineParser {
 	 * Enters a new context for the macro.
 	 * 
 	 * @param context
-	 *            The context for the macro. If context is null and there is a
-	 *            current context it is reentered. If context is null and there
-	 *            is no current context then a new top level context is created.
+	 *            The context for the macro. If context is null and there is a current context it is reentered. If context is null and there is no current context then a new top level context is
+	 *            created.
 	 */
 	public void enterContext(MapToolMacroContext context) {
 		// First time through set our trusted path to same as first context.
@@ -1707,8 +1680,7 @@ public class MapToolLineParser {
 	}
 
 	/**
-	 * Gets the current context for the execution. It is save to enter a context
-	 * a second time.
+	 * Gets the current context for the execution. It is save to enter a context a second time.
 	 * 
 	 * @return the current context.
 	 */
@@ -1770,8 +1742,7 @@ public class MapToolLineParser {
 	}
 
 	/**
-	 * Gets if the macro context is trusted or not. An empty context stack
-	 * returns false.
+	 * Gets if the macro context is trusted or not. An empty context stack returns false.
 	 * 
 	 * @return if the macro context is trusted or not.
 	 */
@@ -1853,11 +1824,9 @@ public class MapToolLineParser {
 	}
 
 	/**
-	 * Gets if the whole of the macro path up to this point has been running in
-	 * a trusted context.
+	 * Gets if the whole of the macro path up to this point has been running in a trusted context.
 	 * 
-	 * @return true if the whole of the macro path is running in trusted
-	 *         context.
+	 * @return true if the whole of the macro path is running in trusted context.
 	 */
 	public boolean isMacroPathTrusted() {
 		return macroPathTrusted;
@@ -1874,6 +1843,7 @@ public class MapToolLineParser {
 
 	/**
 	 * Gets the maximum number of iterations for a loop in a loop.
+	 * 
 	 * @return the maximum number of macro loop iterations.
 	 */
 	public int getMaxLoopIterations() {
@@ -1881,10 +1851,10 @@ public class MapToolLineParser {
 	}
 
 	/**
-	 * Sets the maximum number of iterations allowed in a macro.
-	 * Note: this will not set the value smaller than the initial starting value.
+	 * Sets the maximum number of iterations allowed in a macro. Note: this will not set the value smaller than the initial starting value.
 	 *
-	 * @param loopIterations The maximum number of iterations allowed.
+	 * @param loopIterations
+	 *            The maximum number of iterations allowed.
 	 */
 	public void setMaxLoopIterations(int loopIterations) {
 		maxLoopIterations = Math.max(loopIterations, DEFAULT_MAX_LOOP_ITERATIONS);
@@ -1892,6 +1862,7 @@ public class MapToolLineParser {
 
 	/**
 	 * Gets the maximum recursive depth allowed for macros.
+	 * 
 	 * @return The maxiumum recursive depth allowed for macros.
 	 */
 	public int getMaxRecursionDepth() {
@@ -1899,10 +1870,10 @@ public class MapToolLineParser {
 	}
 
 	/**
-	 * Sets the maximum recursive depth for macros.
-	 * Note: this will not set the value smaller than the initial starting value.
+	 * Sets the maximum recursive depth for macros. Note: this will not set the value smaller than the initial starting value.
 	 *
-	 * @param recursionDepth The maximum recursive depth allowed.
+	 * @param recursionDepth
+	 *            The maximum recursive depth allowed.
 	 */
 	public void setMaxRecursionDepth(int recursionDepth) {
 		maxRecursionDepth = Math.max(recursionDepth, DEFAULT_MAX_RECURSIVE_DEPTH);
@@ -1910,6 +1881,7 @@ public class MapToolLineParser {
 
 	/**
 	 * Gets the current recursive depth. This will be the macro or parser recursive depth which ever is greater.
+	 * 
 	 * @return the current recursive depth.
 	 */
 	public int getRecursionDepth() {

@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.io;
 
 import java.awt.BorderLayout;
@@ -37,19 +34,18 @@ import net.rptools.lib.swing.SwingUtil;
  * This class produces a modal dialog that shows the progress being made by FTP transfers.
  * </p>
  * <p>
- * It builds a panel and places it inside the dialog.  Each entry in the dialog is a panel with
- * exactly the same size as all other panels.  The panel contains a ProgressBar on the
- * left and a JLabel on the right (to hold the remote filename).
+ * It builds a panel and places it inside the dialog. Each entry in the dialog is a panel with exactly the same size as all other panels. The panel contains a ProgressBar on the left and a JLabel on
+ * the right (to hold the remote filename).
  * </p>
+ * 
  * @author crash
  */
 @SuppressWarnings("serial")
 public class ProgressBarList extends JDialog implements ChangeListener {
 	private static final Logger log = Logger.getLogger(ProgressBarList.class);
 	/*
-	 * The general layout approach for this class is to put a BorderLayout on the
-	 * main window.  GridLayout is added to a panel that becomes the CENTER
-	 * and the SOUTH is used for a Hide and Cancel button.
+	 * The general layout approach for this class is to put a BorderLayout on the main window. GridLayout is added to a panel that becomes the CENTER and the SOUTH is used for a Hide and Cancel
+	 * button.
 	 */
 	private FTPClient ftp;
 	private JPanel progressBars;
@@ -109,13 +105,15 @@ public class ProgressBarList extends JDialog implements ChangeListener {
 		setVisible(true);
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event. ChangeEvent)
 	 */
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == ftp) {
 			// This event is sent when the FTPClient has no more data in the 'todo' queue
-			// and there are no additional operations pending.  We use our checkbox to
+			// and there are no additional operations pending. We use our checkbox to
 			// determine if we should auto-hideButton.
 			progressBars.removeAll();
 			cancelButton.setEnabled(false);
@@ -145,7 +143,7 @@ public class ProgressBarList extends JDialog implements ChangeListener {
 				// New FTO that's not being shown yet...
 				bar = new JProgressBar();
 				bar.setStringPainted(true);
-				//				bar.setString(fto.remoteDir + fto.remote);
+				// bar.setString(fto.remoteDir + fto.remote);
 				bar.setMaximum(fto.maximumPosition);
 				bars.put(fto, bar);
 				progressBars.add(bar);

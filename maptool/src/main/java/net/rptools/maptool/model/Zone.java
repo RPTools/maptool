@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.model;
 
 import java.awt.Color;
@@ -103,10 +100,10 @@ public class Zone extends BaseModel {
 
 	public static final DrawablePaint DEFAULT_FOG = new DrawableColorPaint(Color.black);
 
-	// The zones should be ordered.  We could have the server assign each zone
+	// The zones should be ordered. We could have the server assign each zone
 	// an incrementing number as new zones are created, but that would take a lot
-	// more elegance than we really need.  Instead, let's just keep track of the
-	// time when it was created.  This should give us sufficient granularity, because
+	// more elegance than we really need. Instead, let's just keep track of the
+	// time when it was created. This should give us sufficient granularity, because
 	// seriously -- what's the likelihood of two GMs separately creating a new zone at exactly
 	// the same millisecond since the epoch?
 	private long creationTime = System.currentTimeMillis();
@@ -143,8 +140,8 @@ public class Zone extends BaseModel {
 
 	// The 'board' layer, at the very bottom of the layer stack.
 	// Itself has two sub-layers:
-	//   The top one is an optional texture, typically a pre-drawn map.
-	//   The bottom one is either an infinitely tiling texture or a color.
+	// The top one is an optional texture, typically a pre-drawn map.
+	// The bottom one is either an infinitely tiling texture or a color.
 	private DrawablePaint backgroundPaint;
 	private MD5Key mapAsset;
 	private Point boardPosition = new Point(0, 0);
@@ -173,7 +170,7 @@ public class Zone extends BaseModel {
 	 */
 	public Zone() {
 		// TODO: Was this needed?
-		//		setGrid(new SquareGrid());
+		// setGrid(new SquareGrid());
 		undo = new UndoPerZone(this); // registers as ModelChangeListener for drawables...
 		addModelChangeListener(undo);
 	}
@@ -223,7 +220,7 @@ public class Zone extends BaseModel {
 	 */
 	public int getTokenVisionInPixels() {
 		if (tokenVisionDistance == 0) {
-			// TODO: This is here to provide transition between pre 1.3b19 an 1.3b19.  Remove later
+			// TODO: This is here to provide transition between pre 1.3b19 an 1.3b19. Remove later
 			tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE;
 		}
 		return (tokenVisionDistance * grid.getSize() / getUnitsPerCell());
@@ -287,7 +284,7 @@ public class Zone extends BaseModel {
 
 		// In the following blocks we allocate a new linked list then fill it with null values
 		// because the Collections.copy() method requires the destination list to already be
-		// of a large enough size.  I couldn't find any method that would copy individual
+		// of a large enough size. I couldn't find any method that would copy individual
 		// elements as it populated the new linked lists except those from the Apache Commons
 		// library that use a Transformer and that seemed like a lot more work. :-/
 		if (zone.drawables != null && !zone.drawables.isEmpty()) {
@@ -411,7 +408,7 @@ public class Zone extends BaseModel {
 	public void setGrid(Grid grid) {
 		this.grid = grid;
 		grid.setZone(this);
-		//		tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE * grid.getSize() / unitsPerCell;
+		// tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE * grid.getSize() / unitsPerCell;
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.GRID_CHANGED));
 	}
 
@@ -639,7 +636,7 @@ public class Zone extends BaseModel {
 		}
 		combined.intersect(tokenFootprint);
 		return !combined.isEmpty();
-		//return combined.intersects(tokenSize);
+		// return combined.intersects(tokenSize);
 	}
 
 	public void clearTopology() {
@@ -739,7 +736,7 @@ public class Zone extends BaseModel {
 			boolean isAllowed = MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().useStrictTokenManagement();
 			String playerId = MapTool.getPlayer().getName();
 			MapToolFrame frame = MapTool.getFrame();
-			ZoneRenderer zr = frame.getZoneRenderer(getId()); // FIXME 'zr' was null -- how can this happen?  Fix is to use getId() instead of 'this'
+			ZoneRenderer zr = frame.getZoneRenderer(getId()); // FIXME 'zr' was null -- how can this happen? Fix is to use getId() instead of 'this'
 			ZoneView zoneView = zr.getZoneView();
 			ExposedAreaMetaData meta = null;
 
@@ -864,9 +861,9 @@ public class Zone extends BaseModel {
 		}
 		for (Token tok : toks) {
 			// Don't need this IF statement; see net.rptools.maptool.client.ui.zone.ZoneRenderer.getPlayerView(Role)
-			//			if (!tok.getHasSight() || !AppUtil.playerOwns(tok)) {
-			//				continue;
-			//			}
+			// if (!tok.getHasSight() || !AppUtil.playerOwns(tok)) {
+			// continue;
+			// }
 			ExposedAreaMetaData meta = exposedAreaMeta.get(tok.getExposedAreaGUID());
 			if (meta != null)
 				combined.add(meta.getExposedAreaHistory());
@@ -1017,7 +1014,7 @@ public class Zone extends BaseModel {
 
 	public void removeDrawable(GUID drawableId) {
 		// Since we don't know anything about the drawable, look through all the layers
-		// Do we need to remove it from the Undo manager as well?  Probably.  Perhaps some
+		// Do we need to remove it from the Undo manager as well? Probably. Perhaps some
 		// UndoPerZone method that searches and deletes the drawable ID?
 		removeDrawable(drawables, drawableId);
 		removeDrawable(backgroundDrawables, drawableId);
@@ -1109,7 +1106,7 @@ public class Zone extends BaseModel {
 	 */
 	@Deprecated
 	public void putTokens(List<Token> tokens) {
-		//		System.out.println("putToken() called with list of " + tokens.size() + " tokens.");
+		// System.out.println("putToken() called with list of " + tokens.size() + " tokens.");
 
 		Collection<Token> values = tokenMap.values();
 
@@ -1403,13 +1400,13 @@ public class Zone extends BaseModel {
 	public List<Token> getOwnedTokensWithSight(Player p) {
 		return getTokensFiltered(new Filter() {
 			public boolean matchToken(Token t) {
-				//System.out.println("isOwnedByAll(): " + t.getName() + ":" + t.isOwnedByAll());
-				//System.out.println("AppUtil.playerOwns(t): " + t.getName() + ":" + AppUtil.playerOwns(t));
-				//return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
+				// System.out.println("isOwnedByAll(): " + t.getName() + ":" + t.isOwnedByAll());
+				// System.out.println("AppUtil.playerOwns(t): " + t.getName() + ":" + AppUtil.playerOwns(t));
+				// return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
 
 				if (tokenSelection == null)
 					tokenSelection = TokenSelection.ALL;
-				//System.out.println("TokenSelection: " + tokenSelection);
+				// System.out.println("TokenSelection: " + tokenSelection);
 				switch (tokenSelection) {
 				case ALL: // Show FoW for ANY Token I own
 					return t.getHasSight() && AppUtil.playerOwns(t);
@@ -1435,18 +1432,18 @@ public class Zone extends BaseModel {
 		});
 	}
 
-	// Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by All", 
+	// Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by All",
 	// or "Owned" by the current player; in theory, NPC tokens the Player control.
 	public List<Token> getTokensOwnedByAllWithSight() {
 		return getTokensFiltered(new Filter() {
-			//String playerId = MapTool.getPlayer().getName();
+			// String playerId = MapTool.getPlayer().getName();
 			public boolean matchToken(Token t) {
 				return (t.getHasSight() && (t.getType() == Token.Type.PC && (t.isOwnedByAll() || AppUtil.playerOwns(t))));
 			}
 		});
 	}
 
-	// Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by All", 
+	// Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by All",
 	// or "Owned" by the current player; in theory, NPC tokens the Player control.
 	public List<Token> getTokensOwnedByAllWithSight(Player p) {
 		return getTokensFiltered(new Filter() {
@@ -1506,8 +1503,7 @@ public class Zone extends BaseModel {
 		public boolean matchToken(Token t);
 	}
 
-	@Deprecated
-	public static final Comparator<Token> TOKEN_Z_ORDER_COMPARATOR = new TokenZOrderComparator();
+	@Deprecated public static final Comparator<Token> TOKEN_Z_ORDER_COMPARATOR = new TokenZOrderComparator();
 
 	public static class TokenZOrderComparator implements Comparator<Token> {
 		@Override
@@ -1623,12 +1619,12 @@ public class Zone extends BaseModel {
 				continue;
 			}
 			// The following is over-zealous optimization. Lines (1-dimensional) should be kept.
-			// (Does drawable cover area?  If not, get rid of it.)
+			// (Does drawable cover area? If not, get rid of it.)
 			// if (drawnArea.isEmpty()) {
-			//	drawnIter.remove();
-			//	continue;
+			// drawnIter.remove();
+			// continue;
 			// }
-			//    		if (GraphicsUtil.contains(area, drawnArea)) {  // Too expensive
+			// if (GraphicsUtil.contains(area, drawnArea)) { // Too expensive
 			if (area.contains(drawnArea.getBounds())) { // Not as accurate, but faster
 				drawnIter.remove();
 				continue;

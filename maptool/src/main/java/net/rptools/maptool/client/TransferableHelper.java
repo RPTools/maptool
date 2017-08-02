@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client;
 
 import java.awt.datatransfer.DataFlavor;
@@ -50,19 +47,12 @@ import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.StringUtil;
 
 /**
- * A helper class for converting Transferable objects into their respective data
- * types. This class hides the details of drag/drop protocols as much as
- * possible and therefore contains platform-dependent checks (such as the
- * URI_LIST_FLAVOR hack needed for Linux).
+ * A helper class for converting Transferable objects into their respective data types. This class hides the details of drag/drop protocols as much as possible and therefore contains
+ * platform-dependent checks (such as the URI_LIST_FLAVOR hack needed for Linux).
  * <p>
- * <b>Note:</b> Drag-n-drop operations cannot be properly debugged by setting
- * breakpoints at random locations. For example, once a drop operation occurs
- * the code must run to a point where getTransferData() has been called as the
- * JRE is maintaining some of the state internally and hitting a breakpoint
- * disturbs that state. (For instance the JRE only allows a single drag
- * operation at a time -- how could there be more? -- so a global structure is
- * used to record drag information and some of the fields are queried from the
- * peer component which may be time-sensitive.)
+ * <b>Note:</b> Drag-n-drop operations cannot be properly debugged by setting breakpoints at random locations. For example, once a drop operation occurs the code must run to a point where
+ * getTransferData() has been called as the JRE is maintaining some of the state internally and hitting a breakpoint disturbs that state. (For instance the JRE only allows a single drag operation at a
+ * time -- how could there be more? -- so a global structure is used to record drag information and some of the fields are queried from the peer component which may be time-sensitive.)
  *
  * @author tcroft
  */
@@ -74,29 +64,25 @@ public class TransferableHelper extends TransferHandler {
 	/**
 	 * <b>text/uri-list; class=java.lang.String</b>
 	 * <p>
-	 * This is a JRE bug on Linux; the JRE <i>should</i> be providing
-	 * DataFlavor.javaFileListFlavor but doesn't. :(
+	 * This is a JRE bug on Linux; the JRE <i>should</i> be providing DataFlavor.javaFileListFlavor but doesn't. :(
 	 */
 	private static final DataFlavor URI_LIST_FLAVOR = new DataFlavor("text/uri-list; class=java.lang.String", "Image"); //$NON-NLS-1$
 	/**
 	 * <b>application/x-java-url; class=java.net.URL</b>
 	 * <p>
-	 * The best type of object to get is this one -- a URL -- since the
-	 * representation of URLs is universal
+	 * The best type of object to get is this one -- a URL -- since the representation of URLs is universal
 	 */
 	private static final DataFlavor URL_FLAVOR_URI = new DataFlavor("application/x-java-url; class=java.net.URL", "Image"); //$NON-NLS-1$
 	/**
 	 * <b>image/x-java-image; class=java.awt.Image</b>
 	 * <p>
-	 * The next best type of object to get is this one, since the JRE has
-	 * already recognized the type of data
+	 * The next best type of object to get is this one, since the JRE has already recognized the type of data
 	 */
 	private static final DataFlavor X_JAVA_IMAGE = new DataFlavor("image/x-java-image; class=java.awt.Image", "Image"); //$NON-NLS-1$
 	/**
 	 * <b>text/plain; class=java.lang.String</b>
 	 * <p>
-	 * The last type of object to check for is text/plain. It's likely a URL --
-	 * or so we assume. :(
+	 * The last type of object to check for is text/plain. It's likely a URL -- or so we assume. :(
 	 */
 	private static final DataFlavor URL_FLAVOR_PLAIN = new DataFlavor("text/plain; class=java.lang.String", "Image"); //$NON-NLS-1$
 
@@ -119,15 +105,10 @@ public class TransferableHelper extends TransferHandler {
 	// @formatter:on
 
 	/**
-	 * Looks at a complete URL and tries to figure out which string within the
-	 * URL might be the name of an image.
+	 * Looks at a complete URL and tries to figure out which string within the URL might be the name of an image.
 	 * <p>
-	 * It does this by looking for known filename extensions such as JPG, JPEG,
-	 * and PNG to determine where the end of the name might be, then works left
-	 * from there looking for something not normally part of a name. For
-	 * example, in the query string of a URL it would stop looking at an equal
-	 * sign ("="), an ampersand ("&amp;"), a question mark ("?"), or a number
-	 * sign ("#").
+	 * It does this by looking for known filename extensions such as JPG, JPEG, and PNG to determine where the end of the name might be, then works left from there looking for something not normally
+	 * part of a name. For example, in the query string of a URL it would stop looking at an equal sign ("="), an ampersand ("&amp;"), a question mark ("?"), or a number sign ("#").
 	 *
 	 * @throws URISyntaxException
 	 */
@@ -160,7 +141,7 @@ public class TransferableHelper extends TransferHandler {
 		if (extensionPattern == null) {
 			String extensions[] = ImageIO.getReaderFileSuffixes();
 			String list = Arrays.deepToString(extensions);
-			// Final result is something like:  (\w+\.(jpeg|jpg|png|gif|tiff))
+			// Final result is something like: (\w+\.(jpeg|jpg|png|gif|tiff))
 			String pattern = "([^/\\\\]+\\." + list.replace('[', '(').replace(']', ')').replace(", ", "|") + ")\\b";
 			extensionPattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
 		}
@@ -171,14 +152,13 @@ public class TransferableHelper extends TransferHandler {
 	}
 
 	/**
-	 * Takes a drop event and returns an asset from it. Returns null if an asset
-	 * could not be obtained.
+	 * Takes a drop event and returns an asset from it. Returns null if an asset could not be obtained.
 	 */
 	public static List<Object> getAsset(Transferable transferable) {
 		List<Object> assets = new ArrayList<Object>();
 		try {
 			Object o = null;
-			// This *really* should be done using either the Strategy or Template patterns.  Sigh.
+			// This *really* should be done using either the Strategy or Template patterns. Sigh.
 
 			// EXISTING ASSET
 			if (o == null && transferable.isDataFlavorSupported(TransferableAsset.dataFlavor)) {
@@ -195,22 +175,15 @@ public class TransferableHelper extends TransferHandler {
 			/**
 			 * Check for all InputStream types first?
 			 * <p>
-			 * This would allow an application to give us a data stream instead
-			 * of, for example, a URL. This could be significantly better for
-			 * web browsers since they have already downloaded the image anyway
-			 * and could give us an InputStream connected to the cached data.
-			 * But being passed an InputStream is a bit of a pain since the MIME
-			 * type can't be known in advance for all possible applications.
-			 * We'd need to loop through all of them
-			 * {@link #whichOnesWork(Transferable)} and look for ones that
-			 * return InputStream. But how to choose which of those to actually
-			 * use?
+			 * This would allow an application to give us a data stream instead of, for example, a URL. This could be significantly better for web browsers since they have already downloaded the image
+			 * anyway and could give us an InputStream connected to the cached data. But being passed an InputStream is a bit of a pain since the MIME type can't be known in advance for all possible
+			 * applications. We'd need to loop through all of them {@link #whichOnesWork(Transferable)} and look for ones that return InputStream. But how to choose which of those to actually use?
 			 */
 
 			// LOCAL FILESYSTEM
-			// Used by Linux when files are dragged from the desktop.  Other systems don't use this so we're safe checking for it first.
+			// Used by Linux when files are dragged from the desktop. Other systems don't use this so we're safe checking for it first.
 			// (Except Mac OS X 10.11 does appear to use it now, but textURIListToFileList() will fail as the URIs can't be converted
-			// to URLs.  This is why we check for the empty 'list' -- if it's empty, we can't use this conversion and we want 'o' to be
+			// to URLs. This is why we check for the empty 'list' -- if it's empty, we can't use this conversion and we want 'o' to be
 			// null for the following checks.)
 			// Note that "text/uri-list" is considered a JRE bug and it should be converting the event into "text/x-java-file-list", but
 			// until it does...
@@ -227,7 +200,7 @@ public class TransferableHelper extends TransferHandler {
 			}
 
 			// LOCAL FILESYSTEM
-			// Used by OSX (and Windows?) when files are dragged from the desktop:  'text/java-file-list; java.util.List<java.io.File>'
+			// Used by OSX (and Windows?) when files are dragged from the desktop: 'text/java-file-list; java.util.List<java.io.File>'
 			if (o == null && transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
 				if (log.isInfoEnabled())
 					log.info("Selected: " + DataFlavor.javaFileListFlavor);
@@ -307,12 +280,12 @@ public class TransferableHelper extends TransferHandler {
 				// There's no reason to trap the individual exceptions when a single catch suffices.
 				if (log.isInfoEnabled())
 					log.info(s, e);
-				//			} catch (URISyntaxException e) {				// Thrown by the URI constructor
-				//				e.printStackTrace();
-				//			} catch (IllegalArgumentException e) {	// Thrown by URI.toURL()
-				//				e.printStackTrace();
-				//			} catch (MalformedURLException e) {		// Thrown by URI.toURL()
-				//				e.printStackTrace();
+				// } catch (URISyntaxException e) { // Thrown by the URI constructor
+				// e.printStackTrace();
+				// } catch (IllegalArgumentException e) { // Thrown by URI.toURL()
+				// e.printStackTrace();
+				// } catch (MalformedURLException e) { // Thrown by URI.toURL()
+				// e.printStackTrace();
 			}
 		}
 		return list;
@@ -342,45 +315,45 @@ public class TransferableHelper extends TransferHandler {
 		return asset;
 	}
 
-	//	private static Asset handleImage(Transferable transferable) throws IOException, UnsupportedFlavorException {
-	//		String name = null;
-	//		BufferedImage image = null;
-	//		if (transferable.isDataFlavorSupported(URL_FLAVOR_PLAIN)) {
-	//			try {
-	//				String fname = (String) transferable.getTransferData(URL_FLAVOR_PLAIN);
-	//				if (log.isDebugEnabled())
-	//					log.debug("Transferable " + fname); //$NON-NLS-1$
-	//				name = FileUtil.getNameWithoutExtension(fname);
+	// private static Asset handleImage(Transferable transferable) throws IOException, UnsupportedFlavorException {
+	// String name = null;
+	// BufferedImage image = null;
+	// if (transferable.isDataFlavorSupported(URL_FLAVOR_PLAIN)) {
+	// try {
+	// String fname = (String) transferable.getTransferData(URL_FLAVOR_PLAIN);
+	// if (log.isDebugEnabled())
+	// log.debug("Transferable " + fname); //$NON-NLS-1$
+	// name = FileUtil.getNameWithoutExtension(fname);
 	//
-	//				File file;
-	//				URL url = new URL(fname);
-	//				try {
-	//					URI uri = url.toURI(); // Should replace '%20' sequences and such
-	//					file = new File(uri);
-	//				} catch (URISyntaxException e) {
-	//					file = new File(fname);
-	//				}
-	//				if (file.exists()) {
-	//					if (log.isDebugEnabled())
-	//						log.debug("Reading local file:  " + file); //$NON-NLS-1$
-	//					image = ImageIO.read(file);
-	//				} else {
-	//					if (log.isDebugEnabled())
-	//						log.debug("Reading remote URL:  " + url); //$NON-NLS-1$
-	//					image = ImageIO.read(url);
-	//				}
-	//			} catch (Exception e) {
-	//				MapTool.showError("TransferableHelper.error.urlFlavor", e); //$NON-NLS-1$
-	//			}
-	//		}
-	//		if (image == null) {
-	//			if (log.isDebugEnabled())
-	//				log.debug("URL_FLAVOR_PLAIN didn't work; trying ImageTransferableHandler().getTransferObject()"); //$NON-NLS-1$
-	//			image = (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
-	//		}
-	//		Asset asset = new Asset(name, ImageUtil.imageToBytes(image));
-	//		return asset;
-	//	}
+	// File file;
+	// URL url = new URL(fname);
+	// try {
+	// URI uri = url.toURI(); // Should replace '%20' sequences and such
+	// file = new File(uri);
+	// } catch (URISyntaxException e) {
+	// file = new File(fname);
+	// }
+	// if (file.exists()) {
+	// if (log.isDebugEnabled())
+	// log.debug("Reading local file: " + file); //$NON-NLS-1$
+	// image = ImageIO.read(file);
+	// } else {
+	// if (log.isDebugEnabled())
+	// log.debug("Reading remote URL: " + url); //$NON-NLS-1$
+	// image = ImageIO.read(url);
+	// }
+	// } catch (Exception e) {
+	// MapTool.showError("TransferableHelper.error.urlFlavor", e); //$NON-NLS-1$
+	// }
+	// }
+	// if (image == null) {
+	// if (log.isDebugEnabled())
+	// log.debug("URL_FLAVOR_PLAIN didn't work; trying ImageTransferableHandler().getTransferObject()"); //$NON-NLS-1$
+	// image = (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
+	// }
+	// Asset asset = new Asset(name, ImageUtil.imageToBytes(image));
+	// return asset;
+	// }
 
 	private static List<Object> handleURLList(List<URL> list) throws Exception {
 		List<Object> assets = new ArrayList<Object>();
@@ -389,7 +362,7 @@ public class TransferableHelper extends TransferHandler {
 			if (!url.getPath().equals("")) { //$NON-NLS-1$
 				if (Token.isTokenFile(url.getPath())) {
 					// Loading the token causes the assets to be added to the AssetManager
-					// so it doesn't need to be added to our List here.  In fact, getAsset()
+					// so it doesn't need to be added to our List here. In fact, getAsset()
 					// will strip out anything in the List that isn't an Asset anyway...
 					Token token = PersistenceUtil.loadToken(url);
 					assets.add(token);
@@ -418,8 +391,7 @@ public class TransferableHelper extends TransferHandler {
 	 *
 	 * @param transferable
 	 *            The data that was dropped.
-	 * @return The tokens from the data or <code>null</code> if this isn't the
-	 *         proper data type.
+	 * @return The tokens from the data or <code>null</code> if this isn't the proper data type.
 	 */
 	@SuppressWarnings("unchecked")
 	public static List<Token> getTokens(Transferable transferable) {
@@ -439,8 +411,8 @@ public class TransferableHelper extends TransferHandler {
 			if (tokens.size() != tokenMaps.size()) {
 				final int missingTokens = tokenMaps.size() - tokens.size();
 				final String message = I18N.getText("TransferableHelper.warning.tokensAddedAndExcluded", tokens.size(), missingTokens); //$NON-NLS-1$
-				//				if (EventQueue.isDispatchThread())
-				//					System.out.println("Yes, we are on the EDT already.");
+				// if (EventQueue.isDispatchThread())
+				// System.out.println("Yes, we are on the EDT already.");
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
 						MapTool.showWarning(message);
@@ -465,8 +437,7 @@ public class TransferableHelper extends TransferHandler {
 	}
 
 	/**
-	 * @see javax.swing.TransferHandler#canImport(javax.swing.JComponent,
-	 *      java.awt.datatransfer.DataFlavor[])
+	 * @see javax.swing.TransferHandler#canImport(javax.swing.JComponent, java.awt.datatransfer.DataFlavor[])
 	 */
 	@Override
 	public boolean canImport(JComponent comp, DataFlavor[] transferFlavors) {
@@ -483,18 +454,15 @@ public class TransferableHelper extends TransferHandler {
 	List<Token> tokens;
 
 	/**
-	 * Whether or not each token needs additional configuration (set footprint,
-	 * guess shape).
+	 * Whether or not each token needs additional configuration (set footprint, guess shape).
 	 */
 	List<Boolean> configureTokens;
 
 	/**
-	 * Retrieves a list of DataFlavors from the passed in Transferable, then
-	 * tries to actually retrieve an object from the drop event using each one.
+	 * Retrieves a list of DataFlavors from the passed in Transferable, then tries to actually retrieve an object from the drop event using each one.
 	 * <p>
-	 * Theoretically at least one should always work. But this can backfire as
-	 * some data sources may not support retreiving the object more than once.
-	 * (Think of a data source such as unidirectional pipe.)
+	 * Theoretically at least one should always work. But this can backfire as some data sources may not support retreiving the object more than once. (Think of a data source such as unidirectional
+	 * pipe.)
 	 *
 	 * @param t
 	 *            Transferable to check
@@ -504,13 +472,13 @@ public class TransferableHelper extends TransferHandler {
 		List<DataFlavor> worked = new ArrayList<DataFlavor>();
 
 		// On OSX Java6, any data flavor that uses java.nio.ByteBuffer or an array of bytes
-		// appears to output the object to the console (via System.out?).  Geez, can't
+		// appears to output the object to the console (via System.out?). Geez, can't
 		// Apple even run a frakkin' grep against their code before releasing it?!
-		//		PrintStream old = null;
-		//		if (MapTool.MAC_OS_X) {
-		//			old = System.out;
-		//			setOnOff(null);
-		//		}
+		// PrintStream old = null;
+		// if (MapTool.MAC_OS_X) {
+		// old = System.out;
+		// setOnOff(null);
+		// }
 		for (DataFlavor flavor : t.getTransferDataFlavors()) {
 			Object result = null;
 			try {
@@ -522,7 +490,7 @@ public class TransferableHelper extends TransferHandler {
 				if (log.isDebugEnabled())
 					log.debug("Failed (IOE):  " + flavor.toString()); //$NON-NLS-1$
 			} catch (Exception e) {
-				//				System.err.println(e);
+				// System.err.println(e);
 			}
 			if (result != null) {
 				for (Class<?> type : validTypes) {
@@ -535,29 +503,28 @@ public class TransferableHelper extends TransferHandler {
 				}
 			}
 		}
-		//		if (MapTool.MAC_OS_X)
-		//			setOnOff(old);
+		// if (MapTool.MAC_OS_X)
+		// setOnOff(old);
 		return worked;
 	}
 
-	//	private static void setOnOff(PrintStream old) {
-	//		System.setOut(old);
-	//	}
+	// private static void setOnOff(PrintStream old) {
+	// System.setOut(old);
+	// }
 
 	private static final Class<?> validTypes[] = { java.lang.String.class, java.net.URL.class, java.util.List.class, java.awt.Image.class, };
 
 	/**
-	 * @see javax.swing.TransferHandler#importData(javax.swing.JComponent,
-	 *      java.awt.datatransfer.Transferable)
+	 * @see javax.swing.TransferHandler#importData(javax.swing.JComponent, java.awt.datatransfer.Transferable)
 	 */
 	@Override
 	public boolean importData(JComponent comp, Transferable t) {
 		if (tokens != null) {
-			//tokens.clear(); // will not help with memory cleanup and we may see unmodifiable lists here
+			// tokens.clear(); // will not help with memory cleanup and we may see unmodifiable lists here
 			tokens = null;
 		}
 		if (configureTokens != null) {
-			//configureTokens.clear(); // will not help with memory cleanup and we may see unmodifiable lists here
+			// configureTokens.clear(); // will not help with memory cleanup and we may see unmodifiable lists here
 			configureTokens = null;
 		}
 		if (log.isInfoEnabled())
@@ -567,18 +534,18 @@ public class TransferableHelper extends TransferHandler {
 		if (assets != null) {
 			tokens = new ArrayList<Token>(assets.size());
 			configureTokens = new ArrayList<Boolean>(assets.size());
-			//			Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+			// Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 			for (Object working : assets) {
 				if (working instanceof Asset) {
 					Asset asset = (Asset) working;
 					Token token = new Token(asset.getName(), asset.getId());
-					//					token.setName(MapToolUtil.nextTokenId(zone, token));
+					// token.setName(MapToolUtil.nextTokenId(zone, token));
 					tokens.add(token);
 					// A token from an image asset needs additional configuration.
 					configureTokens.add(true);
 				} else if (working instanceof Token) {
 					Token token = new Token((Token) working);
-					//					token.setName(MapToolUtil.nextTokenId(zone, token));
+					// token.setName(MapToolUtil.nextTokenId(zone, token));
 					tokens.add(token);
 					// A token from an .rptok file is already fully configured.
 					configureTokens.add(false);
@@ -595,10 +562,10 @@ public class TransferableHelper extends TransferHandler {
 					// There's no reason to trap the individual exceptions when a single catch suffices.
 					if (log.isEnabledFor(Level.ERROR))
 						log.error("while using TransferableToken.dataFlavor", e); //$NON-NLS-1$
-					//				} catch (UnsupportedFlavorException ufe) {
-					//					ufe.printStackTrace();
-					//				} catch (IOException ioe) {
-					//					ioe.printStackTrace();
+					// } catch (UnsupportedFlavorException ufe) {
+					// ufe.printStackTrace();
+					// } catch (IOException ioe) {
+					// ioe.printStackTrace();
 				}
 			} else if (t.isDataFlavorSupported(GroupTokenTransferData.GROUP_TOKEN_LIST_FLAVOR)) {
 				tokens = getTokens(t);
@@ -633,7 +600,7 @@ public class TransferableHelper extends TransferHandler {
 	 */
 	public void setTokens(List<Token> tokens) {
 		// This doesn't appear to be called from anywhere; this class simply makes assignments
-		// to the instance member variable.  Remove this method?
+		// to the instance member variable. Remove this method?
 		this.tokens = tokens;
 	}
 

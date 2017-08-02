@@ -1,14 +1,11 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * See the file LICENSE elsewhere in this distribution for license details.
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.htmlframe;
 
 import java.awt.Dimension;
@@ -108,9 +105,8 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
 	}
 
 	/**
-	 * Shows the HTML Dialog. This will create a new dialog if the named dialog does not already exist. The width and
-	 * height fields are ignored if the dialog has already been opened so that it will not override any resizing that
-	 * the user may have done.
+	 * Shows the HTML Dialog. This will create a new dialog if the named dialog does not already exist. The width and height fields are ignored if the dialog has already been opened so that it will
+	 * not override any resizing that the user may have done.
 	 * 
 	 * @param name
 	 *            The name of the dialog.
@@ -143,7 +139,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
 			dialogs.put(name, dialog);
 			dialog.updateContents(html, temp, closeButton, input);
 		}
-		//		dialog.canResize = false;
+		// dialog.canResize = false;
 		if (!dialog.isVisible()) {
 			dialog.setVisible(true);
 		}

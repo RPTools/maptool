@@ -1,15 +1,10 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.lib.image;
 
@@ -50,12 +45,12 @@ public class ImageUtil {
 	public static final String HINT_TRANSPARENCY = "hintTransparency";
 
 	// TODO: perhaps look at reintroducing this later
-	//private static GraphicsConfiguration graphicsConfig = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+	// private static GraphicsConfiguration graphicsConfig = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
 
 	public static final FilenameFilter SUPPORTED_IMAGE_FILE_FILTER = new FilenameFilter() {
 		public boolean accept(File dir, String name) {
 			name = name.toLowerCase();
-			//			TODO: FJE: When we move to Java 6, use <code>ImageIO.getReaderFileSuffixes()</code> instead
+			// TODO: FJE: When we move to Java 6, use <code>ImageIO.getReaderFileSuffixes()</code> instead
 			return name.endsWith(".png") ||
 					name.endsWith(".gif") ||
 					name.endsWith(".jpg") ||
@@ -64,9 +59,9 @@ public class ImageUtil {
 		}
 	};
 
-	//	public static void setGraphicsConfiguration(GraphicsConfiguration config) {
-	//		graphicsConfig = config;
-	//	}
+	// public static void setGraphicsConfiguration(GraphicsConfiguration config) {
+	// graphicsConfig = config;
+	// }
 	//
 	/**
 	 * Load the image. Does not create a graphics configuration compatible version.
@@ -156,9 +151,8 @@ public class ImageUtil {
 	}
 
 	/**
-	 * Look at the image and determine which Transparency is most appropriate. If it finds any translucent pixels it
-	 * returns Transparency.TRANSLUCENT, if it finds at least one purely transparent pixel and no translucent pixels it
-	 * will return Transparency.BITMASK, in all other cases it returns Transparency.OPAQUE, including errors
+	 * Look at the image and determine which Transparency is most appropriate. If it finds any translucent pixels it returns Transparency.TRANSLUCENT, if it finds at least one purely transparent pixel
+	 * and no translucent pixels it will return Transparency.BITMASK, in all other cases it returns Transparency.OPAQUE, including errors
 	 * 
 	 * @param image
 	 * @return one of Transparency constants

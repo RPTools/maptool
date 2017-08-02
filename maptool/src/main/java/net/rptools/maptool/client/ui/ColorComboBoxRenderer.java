@@ -1,12 +1,10 @@
 /*
- * This software copyright by various authors including the RPTools.net
- * development team, and licensed under the LGPL Version 3 or, at your option,
- * any later version.
- * 
- * Portions of this software were originally covered under the Apache Software
- * License, Version 1.1 or Version 2.0.
- * 
- * See the file LICENSE elsewhere in this distribution for license details.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui;
 
@@ -27,10 +25,8 @@ public class ColorComboBoxRenderer extends JLabel implements ListCellRenderer {
 	private static final long serialVersionUID = -8994115147056186827L;
 
 	/**
-	 * Selects a black or white text color for the given background color. The function tries to optimize readability by
-	 * computing the gray value of the background color. Black is used only if the color becomes lighter than 70% gray
-	 * because white it is significantly more difficult to read. The luma of the background color is calculated using
-	 * the standard PAL/NTSC luma algorithm.
+	 * Selects a black or white text color for the given background color. The function tries to optimize readability by computing the gray value of the background color. Black is used only if the
+	 * color becomes lighter than 70% gray because white it is significantly more difficult to read. The luma of the background color is calculated using the standard PAL/NTSC luma algorithm.
 	 * 
 	 * @param background
 	 *            color
@@ -54,7 +50,7 @@ public class ColorComboBoxRenderer extends JLabel implements ListCellRenderer {
 		setOpaque(true);
 	}
 
-	//@Override
+	// @Override
 	/**
 	 * Renders the label as a color selection combo box entry.
 	 */
