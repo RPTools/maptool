@@ -140,6 +140,7 @@ allprojects {
 	repositories {
 		mavenCentral()
 		maven { url = 'http://maptool.craigs-stuff.net/repo/' }
+		maven { url = 'http://www.nerps.net/repo/' }
 		mavenLocal()
 	}
 
@@ -156,7 +157,6 @@ subprojects {
 	apply plugin: 'application'
 	apply plugin: "com.diffplug.gradle.spotless"
 	apply plugin: 'eclipse'
-	apply plugin: 'javafx-gradle-plugin'
 	
 	sourceCompatibility = 1.8
 	targetCompatibility = 1.8
@@ -178,7 +178,7 @@ subprojects {
 
 	spotless {
 		java {
-			licenseHeaderFile	'../spotless.license.java'
+			//licenseHeaderFile	'../spotless.license.java'
 			eclipse().configFile('../build-resources/eclipse.prefs.formatter.xml')
 		}
 
@@ -220,30 +220,11 @@ project(':rplib') {
 					'Target-Compatibility': project.targetCompatibility
 		}
 	}
-
-	task deleteBuild(type: Delete) { 
-		delete 'build/' 
-		outputs.upToDateWhen {
-			false
-		}
-	}
 }
 
 project(':launcher') {
 	mainClassName = 'net.rptools.maptool.launcher.MapToolLauncher'
 	ext.distSource = projectDir.getPath() + '/src/dist/'
-
-	jfx {
-	    // minimal requirement for jfxJar-task
-	    mainClass = 'net.rptools.maptool.launcher.MapToolLauncher'
-	    
-	    // minimal requirement for jfxNative-task
-	    vendor = 'Nerps'
-	    
-	    // gradle jfxNative
-	    bundler = "exe"
-
-	}
 
 	dependencies {
 		compile 'commons-configuration:commons-configuration:1.10'
@@ -253,7 +234,7 @@ project(':launcher') {
 		
 		testCompile group: 'junit', name: 'junit', version: '4.11'
 	}
-
+	
 	jar {
 		manifest.attributes(
 			'Main-Class': mainClassName,
@@ -299,6 +280,8 @@ project(':launcher') {
 
 	// create a single Jar with all dependencies
 	task fatJar(type: Jar) {
+		group = "Distribution"
+		
 		// This is wrong.  Calling this task should be done in the
 		// 'processResources' task of this project, but I still need
 		// to learn how to do that.  I know it's a Good Thing tho,
@@ -324,6 +307,52 @@ project(':launcher') {
 		with jar
 	}
 
+	// https://docs.oracle.com/javase/8/docs/technotes/tools/unix/javapackager.html
+	task deployMe(dependsOn: fatJar) {
+		doLast{
+			group = "Distribution"
+			
+			def classpath = sourceSets.main.runtimeClasspath
+	
+			// Using the -createjar Command	:: javapackager -createjar -appclass package.ClassName -srcdir classes -outdir out -outfile outjar -v
+			// Using the -deploy Command	:: javapackager -deploy -outdir outdir -outfile outfile -width 34 -height 43 
+			// Using the -makeall Command	:: javapackager -makeall -appclass brickbreaker.Main -name BrickBreaker -width 600 -height 600 -name AppName -appclass package.ClassName -v -srcdir compiled
+
+			def javapackager_createjar = exec {
+				workingDir "${project.projectDir.absolutePath}"
+
+				commandLine "javapackager",
+					"-createjar", "-v",
+					"-appclass", "net.rptools.maptool.launcher.MapToolLauncher",
+					"-classpath", "${classpath}",
+					"-outdir", "${buildDir}${File.separator}${libsDir.name}",
+					"-outfile", "${project.archivesBaseName}",
+					"-srcdir", "D:/Development/git/JamzTheMan/rptools/launcher/src/main/java" //sourceSets.main.java.srcDirs
+			}
+						
+			// Using the -deploy Command with Bundler Arguments 
+			// 		javapackager -deploy -native exe -BsystemWide=true -BjvmOptions=-Xmx128m -BjvmOptions=-Xms128m -outdir packages -outfile BrickBreaker -srcdir dist 
+			//		-srcfiles BrickBreaker.jar -appclass brickbreaker.Main -name BrickBreaker -title "BrickBreaker demo"	
+
+			def javapackager_deploy = exec {
+				workingDir "${project.projectDir.absolutePath}"
+				
+				commandLine "javapackager",
+					"-deploy", "-v",
+					"-native", "exe",
+					"-BsystemWide=true",
+					"-appclass", "net.rptools.maptool.launcher.MapToolLauncher",
+					"-outdir", "${buildDir}${File.separator}${libsDir.name}",
+					"-outfile", "${project.archivesBaseName}",
+					"-srcdir", "D:/Development/git/JamzTheMan/rptools/launcher/src/main/java", //sourceSets.main.java.srcDirs
+					"-srcfiles", "MapTool-Launcher-1.4.3.21-fat.jar",
+					"-appclass", mainClassName,
+					"-title", "Some Title here"
+					
+			}
+		}
+	}
+	
 	task deleteBuild(type: Delete) { 
 		delete 'build/' 
 		outputs.upToDateWhen {
@@ -337,19 +366,10 @@ project(':maptool') {
 	mainClassName='net.rptools.maptool.client.LaunchInstructions'
 	ext.distSource = projectDir.getPath() + '/src/dist/'
 
-	jfx {
-	    // minimal requirement for jfxJar-task
-	    mainClass = 'net.rptools.maptool.client.LaunchInstructions'
-	    
-	    // minimal requirement for jfxNative-task
-	    vendor = 'Nerps'
-	    
-	    // gradle jfxNative
-	    bundler = "exe"
-	}
-	
 	dependencies {
 	 	compile project(':rplib')
+	 	
+	 	// compile 'net.rptools.rplib:rplib:1.4.3.21+'
 		compile 'net.java.abeille:abeille-formsrt:2.0'
 		compile 'net.rptools.clientserver:clientserver:1.4.0.+'
 		compile 'org.hibernate:antlr:2.7.5H3'
@@ -380,7 +400,6 @@ project(':maptool') {
 		compile 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
 		compile 'net.rptools.parser:parser:1.4.0.+'
 		compile 'ca.odell.renderpack:renderpack:1.2004'
-		// compile 'net.rptools.rplib:rplib:1.4.1.7+'
 		compile 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
 		compile 'org.swinglabs:swing-worker:1.1'
 		compile 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
@@ -451,7 +470,7 @@ project(':maptool') {
 		from configurations.compile
 		into jar.destinationDir.getPath() + '/lib'
 	}
-
+	
 	// Create the JAR
 	jar {
 		manifest.attributes(
@@ -557,12 +576,16 @@ project(':maptool') {
 	}
 }
 
+
+
 project(':tokentool') {
 	mainClassName = 'net.rptools.tokentool.TokenTool'
 
 	dependencies {
-		compile project(':maptool') //, project(':rplib')
-		compile 'net.rptools.rplib:rplib:1.4.1.7+'
+		compile project(':maptool')
+		compile project(':rplib')
+		
+		//compile 'net.rptools.rplib:rplib:1.4.1.7+'
 		compile 'net.rptools.parser:parser:1.4.0.+'
 		compile 'com.withay:withay-util:1.0'
 		compile 'com.thoughtworks.xstream:xstream:1.4.9'
@@ -573,6 +596,7 @@ project(':tokentool') {
 		compile 'commons-io:commons-io:2.4'
 	}
 
+	
 	jar {
 		manifest.attributes(
 			'Main-Class': mainClassName,
@@ -612,12 +636,11 @@ project(':tokentool') {
 
 project(':tokentoolfx') {
 	mainClassName = 'net.rptools.tokentool.fx.view.TokenToolFX'
-
+	
 	dependencies {
 		compile project(':maptool') 
 		compile project(':rplib')
-		 // Jamz: I hate having to add JavaFX SDK manually via Project -> Properties -> Build Path -> Add Libraries -> JavaFX SDK
-		// compile files("C:/Users/Jamz/.p2/pool/plugins/org.eclipse.fx.ide.css.jfx8_2.4.0.201605112122.jar")
+
 		// compile 'net.rptools.rplib:rplib:1.4.1.7+'
 		compile 'net.rptools.parser:parser:1.4.0.+'
 		compile 'com.withay:withay-util:1.0'
