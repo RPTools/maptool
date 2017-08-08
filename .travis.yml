@@ -6,6 +6,3 @@ addons:
   apt:
     packages:
     - oracle-java8-installer
- notifications:
-    slack: 
-      nerps:JumMHisqOlXac7be25Ca8FbN
