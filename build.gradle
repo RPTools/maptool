@@ -546,13 +546,12 @@ project(':maptool') {
 			// Using the -createjar Command	:: javapackager -createjar -appclass package.ClassName -srcdir classes -outdir out -outfile outjar -v
 			// Using the -deploy Command	:: javapackager -deploy -outdir outdir -outfile outfile -width 34 -height 43 
 			// Using the -makeall Command	:: javapackager -makeall -appclass brickbreaker.Main -name BrickBreaker -width 600 -height 600 -name AppName -appclass package.ClassName -v -srcdir compiled
-
-
 						
 			// Using the -deploy Command with Bundler Arguments 
 			// 		javapackager -deploy -native exe -BsystemWide=true -BjvmOptions=-Xmx128m -BjvmOptions=-Xms128m -outdir packages -outfile BrickBreaker -srcdir dist 
 			//		-srcfiles BrickBreaker.jar -appclass brickbreaker.Main -name BrickBreaker -title "BrickBreaker demo"	
 
+			// Working! Weee!
 			def javapackager_deploy = exec {
 				workingDir "${project.projectDir.absolutePath}"
 				
