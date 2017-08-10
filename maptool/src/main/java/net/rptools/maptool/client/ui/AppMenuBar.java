@@ -82,7 +82,7 @@ public class AppMenuBar extends JMenuBar {
 		fileMenu.add(new JMenuItem(AppActions.SHOW_CONNECTION_INFO));
 		fileMenu.addSeparator();
 		fileMenu.add(createRecentCampaignMenu());
-		if (!MapTool.MAC_OS_X) {
+		if (!AppUtil.MAC_OS_X) {
 			fileMenu.addSeparator();
 			fileMenu.add(new JMenuItem(AppActions.EXIT));
 		}
@@ -197,7 +197,7 @@ public class AppMenuBar extends JMenuBar {
 		menu.addSeparator();
 
 		menu.add(new JMenuItem(AppActions.CAMPAIGN_PROPERTIES));
-		if (!MapTool.MAC_OS_X)
+		if (!AppUtil.MAC_OS_X)
 			menu.add(new JMenuItem(AppActions.SHOW_PREFERENCES));
 
 		return menu;
@@ -320,7 +320,7 @@ public class AppMenuBar extends JMenuBar {
 			menu.addSeparator();
 		}
 		menu.add(new JMenuItem(AppActions.GATHER_DEBUG_INFO));
-		if (!MapTool.MAC_OS_X) {
+		if (!AppUtil.MAC_OS_X) {
 			menu.addSeparator();
 			menu.add(new JMenuItem(AppActions.SHOW_ABOUT));
 		}
