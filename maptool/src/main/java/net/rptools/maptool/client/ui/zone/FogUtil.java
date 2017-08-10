@@ -128,8 +128,7 @@ public class FogUtil {
 	}
 
 	public static void exposeVisibleArea(final ZoneRenderer renderer, Set<GUID> tokenSet) {
-		// Jamz: TODO: Double check and make sure false is best default value...
-		exposeVisibleArea(renderer, tokenSet, false);
+		exposeVisibleArea(renderer, tokenSet, true);
 	}
 
 	// Jamz: Added boolean exposeCurrentOnly

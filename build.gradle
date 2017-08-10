@@ -69,6 +69,20 @@ def getLocalProperty(property) {
 				result = rootDir.toString() + "/build-resources/jWrapper"
 			}
 			break
+		case 'jWrapperBuildDir':
+			if (project.hasProperty('jWrapperBuildDir')) {
+				result = jWrapperBuildDir
+			} else {
+				result = rootDir.toString() + "/build-resources/jWrapper/JWrapperBuild"
+			}
+			break
+		case 'releaseDir':
+			if (project.hasProperty('releaseDir')) {
+				result = releaseDir
+			} else {
+				result = rootDir.toString() + "/build/release"
+			}
+			break
 		case 'Windows32JRE':
 			if (project.hasProperty('Windows32JRE')) {
 				result = Windows32JRE
@@ -116,7 +130,6 @@ allprojects {
 	repositories {
 		mavenCentral()
 		maven { url = 'http://maptool.craigs-stuff.net/repo/' }
-		// maven { url = 'http://www.nerps.net/repo/' }
 		mavenLocal()
 	}
 
@@ -126,6 +139,7 @@ allprojects {
 
 
 subprojects {
+	apply plugin: 'base'
 	apply plugin: 'java'
 	apply plugin: 'findbugs'
 	apply plugin: 'pmd'
@@ -195,25 +209,29 @@ project(':launcher') {
 				'buildNumber': getVersionName()
 			])
 		}
+		
 		from(sourceSets.main.resources.srcDirs) {
 			exclude '**/*.properties'
 		}
-		from ('build-resources/jWrapper') {
-			include 'launch-template.properties'
-			filter(ReplaceTokens, tokens: [
-				'buildDate': rootProject.ext.yyyymmdd,
-				'buildVersion': getVersionName()]
-			)
-		}
-		into 'launcher/src/main/resources/net/rptools/maptool/launcher/config'
-		rename { String fileName ->
-			fileName.replace('-template', '')
-		}
-		outputs.upToDateWhen {
-			false
-		}
-		doLast {
-			println 'Put new "launch.properties" into source tree...'
+		
+		copy{
+			from ('build-resources/config') {
+				include 'launch-template.properties'
+				filter(ReplaceTokens, tokens: [
+					'buildDate': rootProject.ext.yyyymmdd,
+					'buildVersion': getVersionName()]
+				)
+			}
+			into 'src/main/resources/net/rptools/maptool/launcher/config'
+			rename { String fileName ->
+				fileName.replace('-template', '')
+			}
+			outputs.upToDateWhen {
+				false
+			}
+			doLast {
+				println 'Put new "launch.properties" into source tree...'
+			}
 		}
 	}
 
@@ -227,7 +245,6 @@ project(':launcher') {
 		// to learn how to do that.  I know it's a Good Thing tho,
 		// since the output from gradle tells me that it notices the
 		// change to the file and reruns that other task again.
-		//dependsOn ':createLaunchPropertiesFile'
 		classifier 'fat'
 		manifest {
 			attributes 'Implementation-Title': 'MapTool-Launcher',
@@ -248,26 +265,11 @@ project(':launcher') {
 		with jar
 	}
 
-	task deleteBuild(type: Delete) { delete 'build/' }
-}
-
-task createLaunchPropertiesFile(type: Copy) {
-	description = "Generates a default launch.properties for package release using jWrapper"
-	group = "Distribution"
-
-	from ('build-resources/jWrapper') {
-		include 'launch-template.properties'
-		filter(ReplaceTokens, tokens: [
-			'buildDate': rootProject.ext.yyyymmdd,
-			'buildVersion': getVersionName()]
-		)
-	}
-	into 'launcher/src/main/resources/net/rptools/maptool/launcher/config'
-	rename { String fileName ->
-		fileName.replace('-template', '')
-	}
-	outputs.upToDateWhen {
-		false
+	task deleteBuild(type: Delete) { 
+		delete 'build/' 
+		outputs.upToDateWhen {
+			false
+		}
 	}
 }
 
@@ -404,7 +406,22 @@ project(':maptool') {
 		with jar
 	}
 
-	task deleteBuild(type: Delete) { delete 'build/' }
+	task deleteBuild(type: Delete) { 
+		delete 'build/'
+		outputs.upToDateWhen {
+			false
+		}
+	}
+
+	// Generates the splash screen JWrapper uses during install so user see's the version
+	// Also creates a splash to use on web page to show current version
+	// Lastly, it also creates a MapTool-version.js which is just a javascript variable that holds the version to use dynamically choose latest version to download
+	task createSplashImages(type:JavaExec) {
+		description = "Generates splash screens"
+		group = "Distribution"
+		main = "net.rptools.maptool.util.CreateVersionedInstallSplash"
+		classpath = sourceSets.main.runtimeClasspath
+	}
 
 	// Add access rule to classpath for nashorn api
 	// Note: This appends the following node to the JRE container classpathentry but only for Java 1.8 in case you are testing some other Java version
@@ -451,7 +468,7 @@ task showBuildVersion << {
 task wrapper(type: Wrapper) {
 	description = "Updates Gradle wrapper."
 	group = "Distribution"
-	gradleVersion='2.12'
+	gradleVersion='3.2.1'
 }
 
 task copySubProjectFiles(type: Sync) {
@@ -532,19 +549,45 @@ task createJwrapperConfig(type: Copy) {
 	}
 }
 
-task createJwrapperRelease(dependsOn: ['createLaunchPropertiesFile', 'createFatJars', 'createJwrapperConfig'], type:JavaExec) {
+task createJwrapperRelease(dependsOn: ['maptool:createSplashImages', 'createFatJars', 'createJwrapperConfig'], type:JavaExec) {
 	description = "Generates a MapTool release using jWrapper"
 	group = "Distribution"
 	workingDir = 'build-resources/jWrapper'
 
 	main  = 'jwrapper.launch.JWCompiler'
-	classpath = files("build-resources/jWrapper/jwrapper-00041197800.jar")
+	classpath = files("build-resources/jWrapper/jwrapper-00049034758.jar")
 	args('jwrapper.xml')
 
 	doLast {
 		println 'Creating MapTool jWrapper Release in: ' + workingDir
 	}
 }
+
+task renameJwrapperReleases(dependsOn: ['createJwrapperRelease'], type: Copy) {
+	from ('build-resources/jWrapper/JWrapperBuild') {
+		include 'MapTool-*64-offline*'
+	}
+	into getLocalProperty('releaseDir') + "-" + getVersionName()
+	
+	rename('MapTool-windows64-offline.exe', 'MapTool-windows64-' + getVersionName() + '.exe')
+	rename('MapTool-linux64-offline.tar', 'MapTool-linux64-' + getVersionName() + '.tar')
+	rename('MapTool-macos64-offline.dmg', 'MapTool-macos64-' + getVersionName() + '.dmg')
+	
+	
+	// We really shouldn't need 32 bit releases. There is the standard jar release for those odd ball needs
+	// Unfortunately we can not tell JWrapper to skip them.
+	// rename('MapTool-windows32-offline.exe', 'MapTool-windows32-' + getVersionName() + '.exe')
+	// rename('MapTool-linux32-offline.tar', 'MapTool-linux32-' + getVersionName() + '.tar')
+	// rename('MapTool-macos32-offline.dmg', 'MapTool-macos32-' + getVersionName() + '.dmg')
+
+	outputs.upToDateWhen {
+		false
+	}
+	
+	doLast {
+		println 'Renaming and moving MapTool jWrapper Release to: ' + getLocalProperty('releaseDir') + "-" + getVersionName()
+	}
+  }
 
 task ftpUpdateRelease {
 	description = "Uploads jWrapper build to remote server"
@@ -565,8 +608,9 @@ task ftpUpdateRelease {
 				password: ftpPassword,
 				remoteDir: ftpRemoteDir,
 				passive: 'yes',
-				verbose: true) {
-					fileset(file: "build-resources/jWrapper/JWrapperBuild/MapTool-*")
+				verbose: true)
+				{
+					fileset(file: getLocalProperty('releaseDir') + "-" + getVersionName() + "/MapTool-*")
 				}
 		}
 	}
@@ -645,3 +689,4 @@ task release() << {
 }
 release.dependsOn += zipRelease
 release.dependsOn += zipOSXApp
+release.dependsOn += renameJwrapperReleases
