@@ -415,9 +415,9 @@ project(':maptool') {
 		main = "net.rptools.maptool.util.CreateVersionedInstallSplash"
 		classpath = sourceSets.main.runtimeClasspath
 
-		args '-version=' + getVersionName()
-		args '-output=' + getLocalProperty('jWrapperDir') + '/maptool_installing_splash.png'
-		args '-web_output=' + getLocalProperty('releaseDir') + '-' + getVersionName()
+//		args '-version=' + getVersionName()
+//		args '-output=' + getLocalProperty('jWrapperDir') + '/maptool_installing_splash.png'
+//		args '-web_output=' + getLocalProperty('releaseDir') + '-' + getVersionName()
 	}
 
 	// Add access rule to classpath for nashorn api

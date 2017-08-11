@@ -20,6 +20,12 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Properties;
 
 import javax.imageio.ImageIO;
@@ -101,29 +107,27 @@ public class CreateVersionedInstallSplash extends Application {
 		resourceImage = getCommandLineOption(cmdOptions, "source", resourceImage, args);
 		installImageOutputFilename = getCommandLineOption(cmdOptions, "output", installImageOutputFilename, args);
 		versionText = getCommandLineOption(cmdOptions, "version", versionText, args);
-		webOutputPath = getCommandLineOption(cmdOptions, "web_output", null, args);
+		webImageOutputPath = getCommandLineOption(cmdOptions, "web_output", null, args);
 
 		Application.launch(args);
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		updateWebVersion(versionText);
-		final File installSplashFile = new File(rootPrefix + installImageOutputFilename);
-		final File webSplashFile = new File(rootPrefix + webImageOutputPath + versionText + "/MapTool-splash.png");
-		BufferedImage installImage = createLaunchSplash("Installing... " + "v" + versionText);
-		BufferedImage webImage = createLaunchSplash("v" + versionText);
-
 		try {
+			updateWebVersion(versionText);
+			final File installSplashFile = new File(rootPrefix + installImageOutputFilename);
 			System.out.println("Version: " + versionText);
 			System.out.println("Source: " + resourceImage);
 			System.out.println("Output: " + installSplashFile.getCanonicalPath());
-
+			BufferedImage installImage = createLaunchSplash("Installing... " + "v" + versionText);
 			ImageIO.write(installImage, "png", installSplashFile);
-			if (webOutputPath != null) {
-				System.out.println("Web Output: " + webOutputPath);
-				updateWebVersion(versionText);
-				ImageIO.write(webImage, "png", new File(webOutputPath + "/MapTool-splash.png"));
+
+			if (webImageOutputPath != null) {
+				final File webSplashFile = new File(rootPrefix + webImageOutputPath + versionText + "/MapTool-splash.png");
+				System.out.println("Web Output: " + webSplashFile);
+				BufferedImage webImage = createLaunchSplash("v" + versionText);
+				ImageIO.write(webImage, "png", webSplashFile);
 			}
 
 		} catch (IOException e) {
@@ -136,8 +140,12 @@ public class CreateVersionedInstallSplash extends Application {
 	private static void updateWebVersion(String versionText) {
 		try {
 			File releaseDir = new File(rootPrefix + "build/release-" + versionText);
-			if (!releaseDir.mkdirs())
-				System.out.println("Error: Unable to create directory path [" + releaseDir + "]");
+			if (releaseDir.isDirectory())
+				deleteRecursively(releaseDir);
+			if (!releaseDir.mkdirs()) {
+				System.err.println("Error: Unable to create directory path [" + releaseDir + "]");
+				System.exit(2);
+			}
 			System.out.println("Created directory " + releaseDir);
 			FileWriter fstream = new FileWriter(rootPrefix + "build/release-" + versionText + "/MapTool-version.js");
 			BufferedWriter out = new BufferedWriter(fstream);
@@ -145,6 +153,28 @@ public class CreateVersionedInstallSplash extends Application {
 			out.close();
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
+		}
+	}
+
+	private static void deleteRecursively(File f) {
+		Path directory = Paths.get(f.toURI());
+		try {
+			Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					Files.delete(file);
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+					Files.delete(dir);
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		} catch (IOException e) {
+			System.err.println("Error: Failed trying to delete [" + f + "]");
+			System.exit(2);
 		}
 	}
 
@@ -203,7 +233,6 @@ public class CreateVersionedInstallSplash extends Application {
 
 	private static String getCommandLineOption(Options options, String searchValue, String defaultValue, String[] args) {
 		CommandLineParser parser = new DefaultParser();
-
 		try {
 			CommandLine cmd = parser.parse(options, args);
 			if (cmd.hasOption(searchValue)) {
