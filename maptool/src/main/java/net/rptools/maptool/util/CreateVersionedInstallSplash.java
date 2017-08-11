@@ -25,12 +25,6 @@ import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Group;
@@ -44,22 +38,43 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import net.rptools.maptool.client.swing.SplashScreen;
 
 public class CreateVersionedInstallSplash extends Application {
 	private static String resourceImage = "net/rptools/maptool/client/image/maptool_splash_template.png";
-	private static String installImageOutputFilename = "../build-resources/jWrapper/maptool_installing_splash.png";
-	private static String webImageOutputPath = "../build/release-";
+	private static String installImageOutputFilename = "build-resources/jWrapper/maptool_installing_splash.png";
+	private static String webImageOutputPath = "build/release-";
 	private static String versionText = "Dev-Build";
 	private static final String FONT_RESOURCE = "/net/rptools/maptool/client/fonts/Horta.ttf";
 	private static Font versionFont;
+	private static String rootPrefix;
 
 	public static void main(String[] args) {
 		Properties prop = new Properties();
 		InputStream input = null;
 		try {
-			input = new FileInputStream("D:/Development/git/JamzTheMan/rptools/gradle.properties");
-
+			StringBuilder prefix = new StringBuilder("../");
+			for (int i = 30; i-- > 0;) {
+				try {
+					input = new FileInputStream(prefix.toString() + "gradle.properties");
+					break;
+				} catch (Exception e) {
+					prefix.append("../");
+				}
+			}
+			if (input == null) {
+				System.err.println("Couldn't find 'gradle.properties' file in any parent (30 levels searched).");
+				System.exit(1);
+			}
+			rootPrefix = prefix.toString();
+			System.out.println("Root prefix: " + rootPrefix);
 			// load a properties file
 			prop.load(input);
 
@@ -92,8 +107,8 @@ public class CreateVersionedInstallSplash extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		updateWebVersion(versionText);
-		final File installSplashFile = new File(installImageOutputFilename);
-		final File webSplashFile = new File(webImageOutputPath + versionText + "/MapTool-splash.png");
+		final File installSplashFile = new File(rootPrefix + installImageOutputFilename);
+		final File webSplashFile = new File(rootPrefix + webImageOutputPath + versionText + "/MapTool-splash.png");
 		BufferedImage installImage = createLaunchSplash("Installing... " + "v" + versionText);
 		BufferedImage webImage = createLaunchSplash("v" + versionText);
 
@@ -113,11 +128,13 @@ public class CreateVersionedInstallSplash extends Application {
 
 	private static void updateWebVersion(String versionText) {
 		try {
-			File releaseDir = new File("D:/Development/git/JamzTheMan/rptools/build/release-" + versionText);
-			releaseDir.mkdirs();
-			FileWriter fstream = new FileWriter("D:/Development/git/JamzTheMan/rptools/build/release-" + versionText + "/MapTool-version.js");
+			File releaseDir = new File(rootPrefix + "build/release-" + versionText);
+			if (!releaseDir.mkdirs())
+				System.out.println("Error: Unable to create directory path [" + releaseDir + "]");
+			System.out.println("Created directory " + releaseDir);
+			FileWriter fstream = new FileWriter(rootPrefix + "build/release-" + versionText + "/MapTool-version.js");
 			BufferedWriter out = new BufferedWriter(fstream);
-			out.write("var mtVersion = \"" + versionText + "\";");
+			out.write("var mtVersion = '" + versionText + "';\n");
 			out.close();
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
@@ -182,12 +199,10 @@ public class CreateVersionedInstallSplash extends Application {
 
 		try {
 			CommandLine cmd = parser.parse(options, args);
-
 			if (cmd.hasOption(searchValue)) {
 				return cmd.getOptionValue(searchValue);
 			}
 		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		return defaultValue;
