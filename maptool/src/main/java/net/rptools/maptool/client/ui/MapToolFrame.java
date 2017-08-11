@@ -387,7 +387,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 		glassPaneComposite.setVisible(true);
 
-		if (!MapTool.MAC_OS_X)
+		if (!AppUtil.MAC_OS_X)
 			removeWindowsF10();
 		else
 			registerForMacOSXEvents();
@@ -1368,14 +1368,14 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 		// Under mac os x this does not properly hide the menu bar so adjust top and height
 		// so menu bar does not overlay screen.
-		if (MapTool.MAC_OS_X) {
+		if (AppUtil.MAC_OS_X) {
 			fullScreenFrame.setBounds(bounds.x, bounds.y + 21, bounds.width, bounds.height - 21);
 		} else {
 			fullScreenFrame.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
 		}
 		fullScreenFrame.setJMenuBar(menuBar);
 		// Menu bar is visible anyways on MAC so leave menu items on it
-		if (!MapTool.MAC_OS_X)
+		if (!AppUtil.MAC_OS_X)
 			menuBar.setVisible(false);
 
 		fullScreenFrame.setVisible(true);

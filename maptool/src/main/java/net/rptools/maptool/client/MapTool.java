@@ -138,16 +138,6 @@ public class MapTool {
 	public static final String SND_INVALID_OPERATION = "invalidOperation";
 
 	/**
-	 * Returns true if currently running on a Mac OS X based operating system.
-	 */
-	public static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
-
-	/**
-	 * Returns true if currently running on a Windows based operating system.
-	 */
-	public static boolean WINDOWS = (System.getProperty("os.name").toLowerCase().startsWith("windows"));
-
-	/**
 	 * Version of Java being used. Note that this is the "specification version"
 	 * , so expect numbers like 1.4, 1.5, and 1.6.
 	 */
@@ -1381,7 +1371,7 @@ public class MapTool {
 		else
 			DebugStream.deactivate();
 
-		if (MAC_OS_X) {
+		if (AppUtil.MAC_OS_X) {
 			// On OSX the menu bar at the top of the screen can be enabled at any time, but the
 			// title (ie. name of the application) has to be set before the GUI is initialized (by
 			// creating a frame, loading a splash screen, etc).  So we do it here.
@@ -1432,7 +1422,7 @@ public class MapTool {
 			// allows the system to set up system defaults before we go and modify things.
 			// That is, please don't move these lines around unless you test the result on windows and mac
 			String lafname;
-			if (MAC_OS_X) {
+			if (AppUtil.MAC_OS_X) {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				menuBar = new AppMenuBar();
 				lafname = "net.rptools.maptool.client.TinyLookAndFeelMac";
