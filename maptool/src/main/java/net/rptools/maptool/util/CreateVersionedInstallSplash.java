@@ -95,11 +95,13 @@ public class CreateVersionedInstallSplash extends Application {
 		cmdOptions.addOption("s", "source", true, "Source image to add version string to.");
 		cmdOptions.addOption("o", "output", true, "Output /path/image to write to.");
 		cmdOptions.addOption("v", "version", true, "Version text to add to image.");
+		cmdOptions.addOption("w", "web_output", true, "Output path for upload to web server");
 
 		// Parameters that can be overridden via command line options...
 		resourceImage = getCommandLineOption(cmdOptions, "source", resourceImage, args);
 		installImageOutputFilename = getCommandLineOption(cmdOptions, "output", installImageOutputFilename, args);
 		versionText = getCommandLineOption(cmdOptions, "version", versionText, args);
+		webOutputPath = getCommandLineOption(cmdOptions, "web_output", null, args);
 
 		Application.launch(args);
 	}
@@ -118,9 +120,14 @@ public class CreateVersionedInstallSplash extends Application {
 			System.out.println("Output: " + installSplashFile.getCanonicalPath());
 
 			ImageIO.write(installImage, "png", installSplashFile);
-			ImageIO.write(webImage, "png", webSplashFile);
+			if (webOutputPath != null) {
+				System.out.println("Web Output: " + webOutputPath);
+				updateWebVersion(versionText);
+				ImageIO.write(webImage, "png", new File(webOutputPath + "/MapTool-splash.png"));
+			}
+
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println("Error: " + e.getMessage());
 		}
 
 		System.exit(0);
