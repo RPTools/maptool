@@ -33,6 +33,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
 
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
@@ -43,6 +44,7 @@ import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool.util.UserJvmPrefs;
 
 import com.jeta.forms.components.colors.JETAColorWell;
 import com.jeta.forms.components.panel.FormPanel;
@@ -194,6 +196,8 @@ public class PreferencesDialog extends JDialog {
 			}
 		});
 
+		DefaultTableModel test = UserJvmPrefs.getJvmOptionsTableModel();
+		
 		forceFacingArrowCheckBox = panel.getCheckBox("forceFacingArrow");
 		showStatSheetCheckBox = panel.getCheckBox("showStatSheet");
 		showPortraitCheckBox = panel.getCheckBox("showPortrait");

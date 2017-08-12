@@ -369,6 +369,7 @@ project(':maptool') {
 
 	dependencies {
 	 	compile project(':rplib')
+	 	compile files("${System.properties['java.home']}/../lib/packager.jar")	// This dependency is for UserJvmOptionsService
 	 	
 	 	// compile 'net.rptools.rplib:rplib:1.4.3.21+'
 		compile 'net.java.abeille:abeille-formsrt:2.0'
@@ -538,7 +539,7 @@ project(':maptool') {
 	// https://docs.oracle.com/javase/8/docs/technotes/tools/unix/javapackager.html
 	// http://speling.shemnon.com/blog/2014/04/10/getting-your-java-app-in-the-mac-app-store/ 
 	task deployMe(dependsOn: fatJar) {
-		group = "Distribution"
+
 		
 		doLast {
 			def classpath = sourceSets.main.runtimeClasspath
@@ -558,29 +559,38 @@ project(':maptool') {
 				
 				commandLine "javapackager",
 					"-deploy", "-v",
-					"-native", "exe",
+					"-native", "installer",
 					"-appclass", mainClassName,
 					"-outdir", "${buildDir}${File.separator}${libsDir.name}",
 					"-outfile", "${project.archivesBaseName}",
-					"-srcdir", "D:/Development/git/JamzTheMan/rptools/maptool/build/libs", //sourceSets.main.java.srcDirs
+					"-srcdir", "build/libs", //sourceSets.main.java.srcDirs
 					"-srcfiles", "MapTool-"+version+"-fat.jar",
 					"-name", "MapTool",
 					"-title", "MapTool",
+					"-vendor", "Nerps",
+					"-Bdescription=Something about MapTool here...",
 					"-BsystemWide=true",
+					"-BmenuHint=true",
+					"-Bwin.menuGroup=RPTools",
+					"-BshortcutHint=true",					
 					"-BappVersion=" + version,
-					"-Bicon=D:/Development/MapTool Artwork/maptool-icon.ico",
+					"-Bruntime=../../../deploy-ready-jre",
 					"-BuserJvmOptions=-Xss=4m"
 			}
 		}
 	}
-	
+
+	configure(deployMe) {   
+	    group = 'Nerps'
+	    description = 'Test task grouping'
+	}
 	
 	// Generates the splash screen JWrapper uses during install so user see's the version
 	// Also creates a splash to use on web page to show current version
 	// Lastly, it also creates a MapTool-version.js which is just a javascript variable that holds the version to use dynamically choose latest version to download
 	task createSplashImages(type: JavaExec) {
 		description = "Generates splash screens"
-		group = "Distribution"
+		group = "distribution"
 		main = "net.rptools.maptool.util.CreateVersionedInstallSplash"
 		classpath = sourceSets.main.runtimeClasspath
 
@@ -682,7 +692,9 @@ project(':tokentoolfx') {
 	dependencies {
 		compile project(':maptool') 
 		compile project(':rplib')
-
+		
+		 // Jamz: I hate having to add JavaFX SDK manually via Project -> Properties -> Build Path -> Add Libraries -> JavaFX SDK
+		compile files("C:/Users/Lee/.p2/pool/plugins/org.eclipse.fx.ide.css.jfx8_3.0.0.201705220750.jar")
 		// compile 'net.rptools.rplib:rplib:1.4.1.7+'
 		compile 'net.rptools.parser:parser:1.4.0.+'
 		compile 'com.withay:withay-util:1.0'
@@ -757,7 +769,7 @@ task showBuildVersion {
 task wrapper(type: Wrapper) {
 	description = "Updates Gradle wrapper."
 	group = "Distribution"
-	gradleVersion='4.0.2'
+	gradleVersion='4.1'
 }
 
 task copySubProjectFiles(type: Sync) {
