@@ -53,6 +53,12 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import org.jdesktop.swingworker.SwingWorker;
+
+import com.jidesoft.docking.DockableFrame;
+
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -60,12 +66,12 @@ import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.GridTool;
 import net.rptools.maptool.client.ui.AddResourceDialog;
 import net.rptools.maptool.client.ui.AppMenuBar;
+import net.rptools.maptool.client.ui.CampaignExportDialog;
 import net.rptools.maptool.client.ui.ClientConnectionPanel;
 import net.rptools.maptool.client.ui.ConnectToServerDialog;
 import net.rptools.maptool.client.ui.ConnectToServerDialogPreferences;
 import net.rptools.maptool.client.ui.ConnectionInfoDialog;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
-import net.rptools.maptool.client.ui.CampaignExportDialog;
 import net.rptools.maptool.client.ui.ExportDialog;
 import net.rptools.maptool.client.ui.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.MapToolFrame;
@@ -115,12 +121,6 @@ import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
 import net.rptools.maptool.util.PersistenceUtil.PersistedMap;
 import net.rptools.maptool.util.SysInfo;
 import net.rptools.maptool.util.UPnPUtil;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
-import org.jdesktop.swingworker.SwingWorker;
-
-import com.jidesoft.docking.DockableFrame;
 
 /**
  * This class acts as a container for a wide variety of {@link Action}s that are
@@ -1744,13 +1744,28 @@ public class AppActions {
 			init("action.newCampaign");
 		}
 
+		/**
+		 * Displays a modal dialog asking Yes/No whether a new campaign should
+		 * be started; this is here because MapTool doesn't have a confirmImpl()
+		 * that allows the default button to be selected via a parameter.
+		 * 
+		 * @return true if the select button is Yes, false for anything else
+		 */
+		private boolean confirmNewCampaign() {
+			String msg = I18N.getText("msg.confirm.newCampaign");
+			log.debug(msg);
+			Object[] options = { I18N.getText("msg.title.messageDialog.yes"), I18N.getText("msg.title.messageDialog.no") };
+			String title = I18N.getText("msg.title.messageDialogConfirm");
+			int val = JOptionPane.showOptionDialog(MapTool.getFrame(), msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[1]);
+
+			return val == JOptionPane.YES_OPTION;
+		}
+
 		@Override
 		public void execute(ActionEvent e) {
 
-			if (!MapTool.confirm("msg.confirm.newCampaign")) {
-
+			if (!confirmNewCampaign())
 				return;
-			}
 
 			Campaign campaign = CampaignFactory.createBasicCampaign();
 			AppState.setCampaignFile(null);
@@ -2472,14 +2487,10 @@ public class AppActions {
 					}
 					JButton b = new JButton("Help", icon);
 					Object[] options = { b, "Yes", "No" };
-					int result = JOptionPane.showOptionDialog(
-							MapTool.getFrame(),
+					int result = JOptionPane.showOptionDialog(MapTool.getFrame(),
 							// FIXME This string doesn't render as HTML properly -- no BOLD shows up?!
 							"<html>This is an <b>experimental</b> feature.  Save your campaign before using this feature (you are a GM logged in remotely).",
-							I18N.getText("msg.title.messageDialogConfirm"),
-							JOptionPane.DEFAULT_OPTION,
-							JOptionPane.WARNING_MESSAGE, null,
-							options, options[2]);
+							I18N.getText("msg.title.messageDialogConfirm"), JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[2]);
 					if (result == 1)
 						setSeenWarning(true); // Yes
 					else {
