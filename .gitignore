@@ -40,8 +40,3 @@ workbench.xmi
 # Keystore
 build-resources/rptools-keystore
 /gradle.properties
-
-
-# Generated
-build-resources/jWrapper/JWrapperLaunchTemp
-build-resources/jWrapper/jwrapper.xml

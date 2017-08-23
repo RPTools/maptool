@@ -1,998 +1,248 @@
-// vi:set ts=4:
-import org.apache.tools.ant.filters.ReplaceTokens
-import java.text.SimpleDateFormat
-import org.ajoberstar.grgit.*
-import org.gradle.api.tasks.JavaExec
+/*
+* For more details take a look at the Java Quickstart chapter in the Gradle
+* user guide available at https://docs.gradle.org/4.1/userguide/tutorial_java_projects.html
+*/
 
 buildscript {
-	repositories {
-		mavenCentral()
-		jcenter()
-		maven {
-			url "https://plugins.gradle.org/m2/"
-		}
-	}
 	dependencies {
-		classpath 'org.ajoberstar:gradle-git:0.11.2'
-		classpath "de.gliderpilot.gradle.jnlp:gradle-jnlp-plugin:0.0.5"
 		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.4.1"
-		
-		// https://github.com/FibreFoX/javafx-gradle-plugin
-		classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
-	}
-}
-
-configurations {
-	osxTools
-	ftpAntTask
-}
-
-configurations.all {
-	resolutionStrategy {
-		cacheChangingModulesFor 0, 'seconds'
-	}
-}
-
-
-dependencies {
-	osxTools 'com.oracle.appbundler:AppBundlerTask:1.0'
-
-	ftpAntTask("org.apache.ant:ant-commons-net:1.9.4") {
-		module("commons-net:commons-net:1.4.1") {
-			dependencies "oro:oro:2.0.8:jar"
-		}
-	}
-}
-
-//Functions & Variables
-ext.compileDate = new Date();
-ext.yyyymmdd = (new SimpleDateFormat('yyyyMMdd')).format(ext.compileDate);
-ext.repo = Grgit.open(project.file('.'))
-
-//Gets the version name from the build file or gradle properties
-def getVersionName() {
-	if (project.hasProperty('buildVersion')) {
-		return buildVersion
-	} else {
-		String vtxtVersionNo = file('build-resources/version.txt').text.trim()
-		return vtxtVersionNo
-	}
-}
-
-// Look for various properties and return defaults if not defined.  (You
-// should define the various local directories in your
-// gradle.properties)
-def getLocalProperty(property) {
-	def result
-	switch (property) {
-		case 'jWrapperDir':
-			if (project.hasProperty('jWrapperDir')) {
-				result = jWrapperDir
-			} else {
-				result = rootDir.toString() + "/build-resources/jWrapper"
-			}
-			break
-		case 'releaseDir':
-			if (project.hasProperty('releaseDir')) {
-				result = releaseDir
-			} else {
-				result = rootDir.toString() + "/build/release"
-			}
-			break
-		case 'Windows32JRE':
-			if (project.hasProperty('Windows32JRE')) {
-				result = Windows32JRE
-			} else {
-				result = rootDir.toString() + "../JREs/windows32"
-			}
-			break
-		case 'Windows64JRE':
-			if (project.hasProperty('Windows64JRE')) {
-				result = Windows64JRE
-			} else {
-				result = rootDir.toString() + "../JREs/windows64"
-			}
-			break
-		case 'Linux32JRE':
-			if (project.hasProperty('Linux32JRE')) {
-				result = Linux32JRE
-			} else {
-				result = rootDir.toString() + "../JREs/linux32"
-			}
-			break
-		case 'Linux64JRE':
-			if (project.hasProperty('Linux64JRE')) {
-				result = Linux64JRE
-			} else {
-				result = rootDir.toString() + "../JREs/linux64"
-			}
-			break
-		case 'Mac64JRE':
-			if (project.hasProperty('Mac64JRE')) {
-				result = Mac64JRE
-			} else {
-				result = rootDir.toString() + "../JREs/mac64"
-			}
-			break
-		case 'altBundle':
-			if (project.hasProperty('altBundle')) {
-				result = " " + altBundle
-			} else {
-				result = ""
-			}
-			break
-		default:
-			result = ''
-			break
+		// classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
 	}
 
-	return result
-}
-
-allprojects {
-	ext {
-        gdxVersion = '1.9.6'
-        box2DLightsVersion = '1.4'
-        //aiVersion = '1.8.0'
-        //roboVMVersion = '2.3.0'
-    }
-    
 	repositories {
 		mavenCentral()
-		maven { url = 'http://maptool.craigs-stuff.net/repo/' }
-		maven { url = 'http://www.nerps.net/repo/' }
-		mavenLocal()
-	}
-
-	group = 'net.rptools.maptool'
-	version = getVersionName()
-}
-
-
-subprojects {
-	apply plugin: 'base'
-	apply plugin: 'java'
-	apply plugin: 'findbugs'
-	apply plugin: 'pmd'
-	apply plugin: 'application'
-	apply plugin: "com.diffplug.gradle.spotless"
-	apply plugin: 'eclipse'
-	
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
-
-	// Don't fail build if tests fail until tests are cleaned up
-	test.ignoreFailures = true
-
-	findbugs {
-		ignoreFailures = true
-		toolVersion = '3.0.0'
-		effort = 'max'
-		sourceSets = []  // Empty source set so it wont run during build/check
-	}
-
-	pmd {
-		ignoreFailures = true
-		sourceSets = []  // Empty source set so it wont run during build/check
-	}
-
-	spotless {
-		java {
-			//licenseHeaderFile	'../spotless.license.java'
-			eclipse().configFile('../build-resources/eclipse.prefs.formatter.xml')
-		}
-
-		format 'misc', {
-			target '**/*.gradle', '**/*.md', '**/.gitignore'
-
-			// spotless has built-in rules for most basic formatting tasks
-			trimTrailingWhitespace()
-			// or spaces. Takes an integer argument if you don't like 4
-			indentWithTabs()
-		}
 	}
 }
 
+// Apply the java plugin to add support for Java
+apply plugin: 'base'
+apply plugin: 'application'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'com.diffplug.gradle.spotless'
+//apply plugin: 'javafx-gradle-plugin'
 
-project(':rplib') {
-	dependencies {
-		compile 'antlr:antlr:2.7.6'
-		compile 'commons-io:commons-io:2.4'
-		compile 'com.thoughtworks.xstream:xstream:1.4.9'
-		compile 'commons-lang:commons-lang:2.6'
-		compile 'commons-logging:commons-logging:1.1.1'
-		compile 'commons-net:commons-net:3.2'
-		compile 'log4j:log4j:1.2.16'
-		compile 'com.withay:withay-util:1.0'
-		compile 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
-		compile 'net.java.abeille:abeille-formsrt:2.0'
-		testCompile group: 'junit', name: 'junit', version: '4.11'
+// Definitions
+defaultTasks 'clean', 'run'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+// Used by gradle assemble & run tasks
+version = '1.5.0'
+mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
+applicationDefaultJvmArgs = ["-Xss4M"]
+
+// Custom properties
+ext {
+	vendor = "Nerps" // Change to RPTools for official builds
+	gdxVersion = '1.9.6'
+	box2DLightsVersion = '1.4'
+	//aiVersion = '1.8.0'
+	//roboVMVersion = '2.3.0'
+}
+
+run {
+	args = [ '-v='+version, '-debug', '-fullscreen' ]
+}
+
+spotless {
+	java {
+		licenseHeaderFile	'spotless.license.java'
+		eclipse().configFile('build-resources/eclipse.prefs.formatter.xml')
 	}
 
-	jar {
-		manifest {
-			attributes 'Implementation-Title': 'rplib',
-					'Implementation-Version': project.version,
-					'Built-By': System.getProperty('user.name'),
-					'Built-Date': new Date(),
-					'Built-JDK': System.getProperty('java.version'),
-					'Source-Compatibility': project.sourceCompatibility,
-					'Target-Compatibility': project.targetCompatibility
-		}
+	format 'misc', {
+		target '**/*.gradle', '**/*.md', '**/.gitignore'
+
+		// spotless has built-in rules for most basic formatting tasks
+		trimTrailingWhitespace()
+		// or spaces. Takes an integer argument if you don't like 4
+		indentWithTabs()
 	}
 }
 
-project(':launcher') {
-	mainClassName = 'net.rptools.maptool.launcher.MapToolLauncher'
-	ext.distSource = projectDir.getPath() + '/src/dist/'
-
-	dependencies {
-		compile 'commons-configuration:commons-configuration:1.10'
-		compile 'commons-cli:commons-cli:1.3'
-		compile files('../build-resources/jWrapper/jwrapperlib/jwrapper_utils.jar')
-		compile group: 'net.java.dev.jna', name: 'jna-platform', version: '4.2.2'	// https://mvnrepository.com/artifact/net.java.dev.jna/jna-platform
-		
-		testCompile group: 'junit', name: 'junit', version: '4.11'
-	}
-	
-	jar {
-		manifest.attributes(
-			'Main-Class': mainClassName,
-		)
-	}
-
-	processResources {
-		from(sourceSets.main.resources.srcDirs) {
-			include '**/*.properties'
-			filter(ReplaceTokens, tokens: [
-				'buildDate': rootProject.ext.yyyymmdd,
-				'buildNumber': getVersionName()
-			])
-		}
-		
-		from(sourceSets.main.resources.srcDirs) {
-			exclude '**/*.properties'
-		}
-		
-		copy{
-			from ('build-resources/config') {
-				include 'launch-template.properties'
-				filter(ReplaceTokens, tokens: [
-					'buildDate': rootProject.ext.yyyymmdd,
-					'buildVersion': getVersionName()]
-				)
-			}
-			into 'src/main/resources/net/rptools/maptool/launcher/config'
-			rename { String fileName ->
-				fileName.replace('-template', '')
-			}
-			outputs.upToDateWhen {
-				false
-			}
-			doLast {
-				println 'Put new "launch.properties" into source tree...'
-			}
-		}
-	}
-
-	task release(dependsOn: assemble) {
-	}
-
-	// create a single Jar with all dependencies
-	task fatJar(type: Jar) {
-		group = "Distribution"
-		
-		// This is wrong.  Calling this task should be done in the
-		// 'processResources' task of this project, but I still need
-		// to learn how to do that.  I know it's a Good Thing tho,
-		// since the output from gradle tells me that it notices the
-		// change to the file and reruns that other task again.
-		classifier 'fat'
-		manifest {
-			attributes 'Implementation-Title': 'MapTool-Launcher',
-			'Implementation-Version': version,
-			'Built-By': System.getProperty('user.name'),
-			'Built-Date': new Date(),
-			'Built-JDK': System.getProperty('java.version'),
-			'Source-Compatibility': project.sourceCompatibility,
-			'Target-Compatibility': project.targetCompatibility,
-			'Main-Class': project.mainClassName
-		}
-		baseName = 'MapTool-Launcher'
-		from {
-			configurations.compile.collect {
-				it.isDirectory() ? it : zipTree(it)
-			}
-		}
-		with jar
-	}
-
-	// https://docs.oracle.com/javase/8/docs/technotes/tools/unix/javapackager.html
-	// http://speling.shemnon.com/blog/2014/04/10/getting-your-java-app-in-the-mac-app-store/ 
-	task deployMe(dependsOn: fatJar) {
-		group = "Distribution"
-		
-		doLast{
-			def classpath = sourceSets.main.runtimeClasspath
-	
-			// Using the -createjar Command	:: javapackager -createjar -appclass package.ClassName -srcdir classes -outdir out -outfile outjar -v
-			// Using the -deploy Command	:: javapackager -deploy -outdir outdir -outfile outfile -width 34 -height 43 
-			// Using the -makeall Command	:: javapackager -makeall -appclass brickbreaker.Main -name BrickBreaker -width 600 -height 600 -name AppName -appclass package.ClassName -v -srcdir compiled
-
-			def javapackager_createjar = exec {
-				workingDir "${project.projectDir.absolutePath}"
-
-				commandLine "javapackager",
-					"-createjar", "-v",
-					"-appclass", "net.rptools.maptool.launcher.MapToolLauncher",
-					"-classpath", "${classpath}",
-					"-outdir", "${buildDir}${File.separator}${libsDir.name}",
-					"-outfile", "${project.archivesBaseName}",
-					"-srcdir", "D:/Development/git/JamzTheMan/rptools/launcher/src/main/java" //sourceSets.main.java.srcDirs
-			}
-						
-			// Using the -deploy Command with Bundler Arguments 
-			// 		javapackager -deploy -native exe -BsystemWide=true -BjvmOptions=-Xmx128m -BjvmOptions=-Xms128m -outdir packages -outfile BrickBreaker -srcdir dist 
-			//		-srcfiles BrickBreaker.jar -appclass brickbreaker.Main -name BrickBreaker -title "BrickBreaker demo"	
-
-			def javapackager_deploy = exec {
-				workingDir "${project.projectDir.absolutePath}"
-				
-				commandLine "javapackager",
-					"-deploy", "-v",
-					"-native", "exe",
-					"-BsystemWide=true",
-					"-appclass", "net.rptools.maptool.launcher.MapToolLauncher",
-					"-outdir", "${buildDir}${File.separator}${libsDir.name}",
-					"-outfile", "${project.archivesBaseName}",
-					"-srcdir", "D:/Development/git/JamzTheMan/rptools/launcher/build/libs", //sourceSets.main.java.srcDirs
-					"-srcfiles", "MapTool-Launcher-1.4.3.21-fat.jar",
-					"-name", "MapTool Launcher",
-					"-title", "Some Title here"
-					
-			}
-		}
-	}
-	
-	task deleteBuild(type: Delete) { 
-		delete 'build/' 
-		outputs.upToDateWhen {
-			false
-		}
-	}
+// In this section you declare where to find the dependencies of your project
+repositories {
+	// Use 'jcenter' for resolving your dependencies.
+	// You can declare any Maven/Ivy/file repository here.
+	jcenter()
+	mavenCentral()
+	maven { url = 'http://maptool.craigs-stuff.net/repo/' }
+	maven { url = 'http://www.nerps.net/repo/' }
+	mavenLocal()
 }
 
-project(':maptool') {
-	apply plugin: 'de.gliderpilot.jnlp'
-	mainClassName='net.rptools.maptool.client.LaunchInstructions'
-	ext.distSource = projectDir.getPath() + '/src/dist/'
 
-	dependencies {
-	 	compile project(':rplib')
-	 	compile files("${System.properties['java.home']}/../lib/packager.jar")	// This dependency is for UserJvmOptionsService
-	 	
-	 	// compile 'net.rptools.rplib:rplib:1.4.3.21+'
-		compile 'net.java.abeille:abeille-formsrt:2.0'
-		compile 'net.rptools.clientserver:clientserver:1.4.0.+'
-		compile 'org.hibernate:antlr:2.7.5H3'
-		compile 'commons-beanutils:commons-beanutils-core:1.8.3'
-		compile 'org.ow2.util.bundles:commons-collections-3.2.1:1.0.0'
-		compile 'commons-io:commons-io:2.4'
-		compile 'commons-jxpath:commons-jxpath:1.3'
-		compile 'commons-lang:commons-lang:2.6'
-		compile 'commons-logging:commons-logging:1.1.1'
-		compile 'commons-net:commons-net:3.2'
-		compile 'commons-cli:commons-cli:1.3'
-		compile 'net.rptools.decktool:decktool:1.0.b1'
-		compile 'net.rptools.dicelib:dicelib:1.4.0.+'
-		compile 'net.sf.ezmorph:ezmorph:1.0.5'
-		compile 'com.caucho.hessian:hessian:3.1.6'
-		compile 'jide-common:jide-common:3.2.3'
-		compile 'jide-components:jide-components:3.2.3'
-		compile 'jide-dialogs:jide-dialogs:3.2.3'
-		compile 'jide-dock:jide-dock:3.2.3'
-		compile 'jide-editor:jide-editor:3.2.3'
-		compile 'jide-grids:jide-grids:3.2.3'
-		compile 'jide-properties:jide-properties:3.2.3'
-		compile 'jide-shortcut:jide-shortcut:3.2.3'
-		compile 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
-		compile 'rhino:js:1.7R1'
-		compile 'net.sf.json-lib:json-lib:2.4:jdk15'
-		compile 'log4j:log4j:1.2.16'
-		compile 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
-		compile 'net.rptools.parser:parser:1.4.0.+'
-		compile 'ca.odell.renderpack:renderpack:1.2004'
-		compile 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
-		compile 'org.swinglabs:swing-worker:1.1'
-		compile 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
-		compile 'com.withay:withay-util:1.0'
-		compile 'xmlpull:xmlpull:1.1.3.1'
-		compile 'xpp3:xpp3_min:1.1.4c'
-		compile 'com.thoughtworks.xstream:xstream:1.4.9'
-		compile 'yasb:yasb:0.2-21012007'
-		compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
-		compile 'org.eclipse.jetty:jetty-server:9.3.0.M0'
-		compile 'org.eclipse.jetty:jetty-servlet:9.3.0.M0'
-		compile 'org.eclipse.jetty:jetty-webapp:9.3.0.M0'
-		compile 'org.eclipse.jetty:jetty-continuation:9.3.0.M1'
-		compile 'org.eclipse.jetty.websocket:websocket-server:9.3.0.M1'
-		compile 'org.eclipse.jetty.websocket:websocket-client:9.3.0.M1'
-		compile 'org.eclipse.jetty.websocket:websocket-servlet:9.3.0.M1'
-		compile 'org.eclipse.jetty.websocket:websocket-api:9.3.0.M1'
-		compile 'org.reflections:reflections:0.9.10'
-		compile 'org.apache.pdfbox:pdfbox:2.0.0'									// Jamz: For pdf image extraction
-		compile 'org.apache.pdfbox:pdfbox-tools:2.0.0'								// Jamz: Dependancy for pdfbox
-		compile 'org.bouncycastle:bcmail-jdk15on:1.54'								// Jamz: To decrypt passworded/secured pdf's
-		compile 'com.github.jai-imageio:jai-imageio-core:1.3.1'						// Jamz: For pdf image extraction, specifically for jpeg2000 (jpx) support.
-		compile 'com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0'					// Jamz: For pdf image extraction, specifically for jpeg2000 (jpx) support.
-		compile group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '2.6.0'	// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
-		compile group: 'com.fifesoft', name: 'autocomplete', version: '2.6.0'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
-		compile group: 'com.fifesoft', name: 'rstaui', version: '2.6.0'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
-		compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.18.1'			// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
-		
-		// box2dlights test
-		//compile group: 'com.badlogicgames.gdx', name: 'gdx-platform', version: '1.9.5'			// https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-platform
-		//compile group: 'com.badlogicgames.gdx', name: 'gdx-backend-lwjgl', version: '1.9.5'		// https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-backend-lwjgl
-		//compile group: 'com.badlogicgames.gdx', name: 'gdx-box2d', version: '1.9.5'				// https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-box2d
-		//compile group: 'com.badlogicgames.box2dlights', name: 'box2dlights', version: '1.4'
+// In this section you declare the dependencies for your production and test code
+dependencies {
+	compile files("${System.properties['java.home']}/../lib/packager.jar")	// This dependency is for UserJvmOptionsService
 
-		compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-        compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
-        
-        compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
-        compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
-        
-        //compile "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
-        //compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-        //compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
-        //compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-        //compile "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
-        
-		testCompile group: 'junit', name: 'junit', version: '4.11'
-	}
+	compile 'net.java.abeille:abeille-formsrt:2.0'
+	compile 'net.rptools.clientserver:clientserver:1.4.0.+'
+	compile 'org.hibernate:antlr:2.7.5H3'
+	compile 'commons-beanutils:commons-beanutils-core:1.8.3'
+	compile 'org.ow2.util.bundles:commons-collections-3.2.1:1.0.0'
+	compile 'commons-io:commons-io:2.4'
+	compile 'commons-jxpath:commons-jxpath:1.3'
+	compile 'commons-lang:commons-lang:2.6'
+	compile 'commons-logging:commons-logging:1.1.1'
+	compile 'commons-net:commons-net:3.2'
+	compile 'commons-cli:commons-cli:1.3'
+	compile 'net.rptools.decktool:decktool:1.0.b1'
+	compile 'net.rptools.dicelib:dicelib:1.4.0.+'
+	compile 'net.sf.ezmorph:ezmorph:1.0.5'
+	compile 'com.caucho.hessian:hessian:3.1.6'
+	compile 'jide-common:jide-common:3.2.3'
+	compile 'jide-components:jide-components:3.2.3'
+	compile 'jide-dialogs:jide-dialogs:3.2.3'
+	compile 'jide-dock:jide-dock:3.2.3'
+	compile 'jide-editor:jide-editor:3.2.3'
+	compile 'jide-grids:jide-grids:3.2.3'
+	compile 'jide-properties:jide-properties:3.2.3'
+	compile 'jide-shortcut:jide-shortcut:3.2.3'
+	compile 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
+	compile 'rhino:js:1.7R1'
+	compile 'net.sf.json-lib:json-lib:2.4:jdk15'
+	compile 'log4j:log4j:1.2.16'
+	compile 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
+	compile 'net.rptools.parser:parser:1.4.0.+'
+	compile 'ca.odell.renderpack:renderpack:1.2004'
+	compile 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
+	compile 'org.swinglabs:swing-worker:1.1'
+	compile 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
+	compile 'com.withay:withay-util:1.0'
+	compile 'xmlpull:xmlpull:1.1.3.1'
+	compile 'xpp3:xpp3_min:1.1.4c'
+	compile 'com.thoughtworks.xstream:xstream:1.4.9'
+	compile 'yasb:yasb:0.2-21012007'
+	compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
+	compile 'org.eclipse.jetty:jetty-server:9.3.0.M0'
+	compile 'org.eclipse.jetty:jetty-servlet:9.3.0.M0'
+	compile 'org.eclipse.jetty:jetty-webapp:9.3.0.M0'
+	compile 'org.eclipse.jetty:jetty-continuation:9.3.0.M1'
+	compile 'org.eclipse.jetty.websocket:websocket-server:9.3.0.M1'
+	compile 'org.eclipse.jetty.websocket:websocket-client:9.3.0.M1'
+	compile 'org.eclipse.jetty.websocket:websocket-servlet:9.3.0.M1'
+	compile 'org.eclipse.jetty.websocket:websocket-api:9.3.0.M1'
+	compile 'org.reflections:reflections:0.9.10'
+	compile 'org.apache.pdfbox:pdfbox:2.0.0'									// Jamz: For pdf image extraction
+	compile 'org.apache.pdfbox:pdfbox-tools:2.0.0'								// Jamz: Dependancy for pdfbox
+	compile 'org.bouncycastle:bcmail-jdk15on:1.54'								// Jamz: To decrypt passworded/secured pdf's
+	compile 'com.github.jai-imageio:jai-imageio-core:1.3.1'						// Jamz: For pdf image extraction, specifically for jpeg2000 (jpx) support.
+	compile 'com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0'					// Jamz: For pdf image extraction, specifically for jpeg2000 (jpx) support.
+	compile group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '2.6.0'	// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
+	compile group: 'com.fifesoft', name: 'autocomplete', version: '2.6.0'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
+	compile group: 'com.fifesoft', name: 'rstaui', version: '2.6.0'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
+	compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.18.1'			// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
 
-	processResources {
-		from(sourceSets.main.resources.srcDirs) {
-			include '**/*.txt'
-			filter(ReplaceTokens, tokens: [
-				'buildDate': rootProject.ext.yyyymmdd,
-				'buildNumber': getVersionName()
-			])
-		}
-		from(sourceSets.main.resources.srcDirs) {
-			exclude '**/*.txt'
-		}
-	}
+	// box2dlights test
+	//compile group: 'com.badlogicgames.gdx', name: 'gdx-platform', version: '1.9.5'			// https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-platform
+	//compile group: 'com.badlogicgames.gdx', name: 'gdx-backend-lwjgl', version: '1.9.5'		// https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-backend-lwjgl
+	//compile group: 'com.badlogicgames.gdx', name: 'gdx-box2d', version: '1.9.5'				// https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-box2d
+	//compile group: 'com.badlogicgames.box2dlights', name: 'box2dlights', version: '1.4'
 
-	task copyLibs(type: Sync) {
-		description = "Copy the library files over to /lib"
-		group = "Distribution"
-		from configurations.compile
-		into jar.destinationDir.getPath() + '/lib'
-	}
+	compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+	compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+	compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
 
-	// Create the JAR
-	jar {
-		manifest.attributes(
-			'Main-Class': mainClassName,
-			'Class-Path': configurations.runtime.files.collect {
-				"lib/" + it.name
-			}.join(' ')
-		)
-	}
-	assemble.dependsOn += copyLibs;
+	compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+	compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+	compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
 
-	task release(dependsOn: build) {
-	}
+	// Not in use at this time, left for easy reference later...
+	//compile "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
+	//compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+	//compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
+	//compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+	//compile "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
 
-	jnlp {
-		withXml {
-			information {
-				title 'RPTools MapTool'
-				vendor project.group ?: project.name
+	// Declare the dependency for your favourite test framework you want to use in your tests.
+	// TestNG is also supported by the Gradle Test task. Just change the
+	// testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
+	// 'test.useTestNG()' to your build script.
+	testCompile 'junit:junit:4.12'
+}
+
+// Adjust access rule in Eclipse for Nashorn
+eclipse.classpath.file {
+	whenMerged {
+		withXml { classpathXml ->
+			def classpathXmlNode = classpathXml.asNode()
+			Node classpathJreNode = node.find {
+				it.@kind == 'con' &&
+				it.@path.contains('JRE_CONTAINER') &&
+				it.@path.contains('JavaSE-1.8')
 			}
-			security {
-				'all-permissions'()
-			}
-		}
-		signJarParams = [
-			storepass: 'rptools',
-			keystore: '../build-resources/rptools-keystore',
-			alias: 'rptools',
-			lazy: 'true'
-		]
-	}
-
-	// create a single Jar with all dependencies
-	task fatJar(type: Jar) {
-		classifier 'fat'
-		manifest {
-			attributes 'Implementation-Title': 'MapTool',
-			'Implementation-Version': version,
-			'Built-By': System.getProperty('user.name'),
-			'Built-Date': new Date(),
-			'Built-JDK': System.getProperty('java.version'),
-			'Source-Compatibility': project.sourceCompatibility,
-			'Target-Compatibility': project.targetCompatibility,
-			'Main-Class': project.mainClassName
-		}
-		baseName = 'MapTool'
-		from {
-			configurations.compile.collect {
-				it.isDirectory() ? it : zipTree(it)
-			}
-		}
-		with jar
-		exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
-	}
-
-	task deleteBuild(type: Delete) { 
-		delete 'build/'
-		outputs.upToDateWhen {
-			false
-		}
-	}
-
-
-	// https://docs.oracle.com/javase/8/docs/technotes/tools/unix/javapackager.html
-	// http://speling.shemnon.com/blog/2014/04/10/getting-your-java-app-in-the-mac-app-store/ 
-	task deployMe(dependsOn: fatJar) {
-
-		
-		doLast {
-			def classpath = sourceSets.main.runtimeClasspath
-	
-			// Using the -createjar Command	:: javapackager -createjar -appclass package.ClassName -srcdir classes -outdir out -outfile outjar -v
-			// Using the -deploy Command	:: javapackager -deploy -outdir outdir -outfile outfile -width 34 -height 43 
-			// Using the -makeall Command	:: javapackager -makeall -appclass brickbreaker.Main -name BrickBreaker -width 600 -height 600 -name AppName -appclass package.ClassName -v -srcdir compiled
-
-
-						
-			// Using the -deploy Command with Bundler Arguments 
-			// 		javapackager -deploy -native exe -BsystemWide=true -BjvmOptions=-Xmx128m -BjvmOptions=-Xms128m -outdir packages -outfile BrickBreaker -srcdir dist 
-			//		-srcfiles BrickBreaker.jar -appclass brickbreaker.Main -name BrickBreaker -title "BrickBreaker demo"	
-
-			def javapackager_deploy = exec {
-				workingDir "${project.projectDir.absolutePath}"
-				
-				commandLine "javapackager",
-					"-deploy", "-v",
-					"-native", "installer",
-					"-appclass", mainClassName,
-					"-outdir", "${buildDir}${File.separator}${libsDir.name}",
-					"-outfile", "${project.archivesBaseName}",
-					"-srcdir", "build/libs", //sourceSets.main.java.srcDirs
-					"-srcfiles", "MapTool-"+version+"-fat.jar",
-					"-name", "MapTool",
-					"-title", "MapTool",
-					"-vendor", "Nerps",
-					"-Bdescription=Something about MapTool here...",
-					"-BsystemWide=true",
-					"-BmenuHint=true",
-					"-Bwin.menuGroup=RPTools",
-					"-BshortcutHint=true",					
-					"-BappVersion=" + version,
-					"-Bruntime=../../../deploy-ready-jre",
-					"-BuserJvmOptions=-Xss=4m"
-			}
-		}
-	}
-
-	configure(deployMe) {   
-	    group = 'Nerps'
-	    description = 'Test task grouping'
-	}
-	
-	// Generates the splash screen JWrapper uses during install so user see's the version
-	// Also creates a splash to use on web page to show current version
-	// Lastly, it also creates a MapTool-version.js which is just a javascript variable that holds the version to use dynamically choose latest version to download
-	task createSplashImages(type: JavaExec) {
-		description = "Generates splash screens"
-		group = "distribution"
-		main = "net.rptools.maptool.util.CreateVersionedInstallSplash"
-		classpath = sourceSets.main.runtimeClasspath
-
-		args '-version=' + getVersionName()
-		args '-output=' + getLocalProperty('jWrapperDir') + '/maptool_installing_splash.png'
-		args '-web_output=' + getLocalProperty('releaseDir') + getLocalProperty('altBundle') + '-' + getVersionName()
-	}
-
-	// Add access rule to classpath for nashorn api
-	// Note: This appends the following node to the JRE container classpathentry but only for Java 1.8 in case you are testing some other Java version
-	// <accessrules>
-	//   <accessrule kind="accessible" pattern="jdk/nashorn/api/**"/>
-	// </accessrules>
-	eclipse.classpath.file {
-		whenMerged {
-			withXml { classpathXml ->
-				def classpathXmlNode = classpathXml.asNode()
-				Node classpathJreNode = node.find {
-					it.@kind == 'con' &&
-					it.@path.contains('JRE_CONTAINER') &&
-					it.@path.contains('JavaSE-1.8')
-				}
-				// Only append if node is not null, eg
-				// if it found the proper node entry.
-				if (classpathJreNode) {
-					classpathJreNode
-						.appendNode('accessrules')
-						.appendNode('accessrule', [
-							kind: 'accessible',
-							pattern: 'jdk/nashorn/api/**'
-						])
-				}
+			// Only append if node is not null, eg
+			// if it found the proper node entry.
+			if (classpathJreNode) {
+				classpathJreNode
+					.appendNode('accessrules')
+					.appendNode('accessrule', [
+						kind: 'accessible',
+						pattern: 'jdk/nashorn/api/**'
+					])
 			}
 		}
 	}
 }
 
 
+task uberJar(type: Jar) {
+	group = 'distribution'
+	description = 'Create uber jar for native installers'
 
-project(':tokentool') {
-	mainClassName = 'net.rptools.tokentool.TokenTool'
-
-	dependencies {
-		compile project(':maptool')
-		compile project(':rplib')
-		
-		//compile 'net.rptools.rplib:rplib:1.4.1.7+'
-		compile 'net.rptools.parser:parser:1.4.0.+'
-		compile 'com.withay:withay-util:1.0'
-		compile 'com.thoughtworks.xstream:xstream:1.4.9'
-		compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
-		compile 'net.java.abeille:abeille-formsrt:2.0'
-		compile 'commons-logging:commons-logging:1.1.1'
-		compile 'log4j:log4j:1.2.16'
-		compile 'commons-io:commons-io:2.4'
+	manifest {
+		attributes 'Implementation-Title': project.name,
+		'Implementation-Version': version,
+		'Implementation-Vendor': vendor,
+		'Built-By': System.getProperty('user.name'),
+		'Built-Date': new Date(),
+		'Built-JDK': System.getProperty('java.version'),
+		'Source-Compatibility': project.sourceCompatibility,
+		'Target-Compatibility': project.targetCompatibility,
+		'Main-Class': project.mainClassName
 	}
 
-	
-	jar {
-		manifest.attributes(
-			'Main-Class': mainClassName,
-		)
-	}
-
-	// create a single Jar with all dependencies
-	task fatJar(type: Jar) {
-		classifier 'fat'
-		manifest {
-			attributes 'Implementation-Title': 'TokenTool',
-			'Implementation-Version': version,
-			'Built-By': System.getProperty('user.name'),
-			'Built-Date': new Date(),
-			'Built-JDK': System.getProperty('java.version'),
-			'Source-Compatibility': project.sourceCompatibility,
-			'Target-Compatibility': project.targetCompatibility,
-			'Main-Class': project.mainClassName
-		}
-		baseName = 'TokenTool'
-		from {
-			configurations.compile.collect {
-				it.isDirectory() ? it : zipTree(it)
-			}
-		}
-		with jar
-		exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
-	}
-
-	task deleteBuild(type: Delete) { 
-		delete 'build/' 
-		outputs.upToDateWhen {
-			false
+	from {
+		configurations.compile.collect {
+			it.isDirectory() ? it : zipTree(it)
 		}
 	}
+	with jar
+	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
 }
 
-project(':tokentoolfx') {
-	mainClassName = 'net.rptools.tokentool.fx.view.TokenToolFX'
-	
-	dependencies {
-		compile project(':maptool') 
-		compile project(':rplib')
-		
-		 // Jamz: I hate having to add JavaFX SDK manually via Project -> Properties -> Build Path -> Add Libraries -> JavaFX SDK
-		compile files("C:/Users/Lee/.p2/pool/plugins/org.eclipse.fx.ide.css.jfx8_3.0.0.201705220750.jar")
-		// compile 'net.rptools.rplib:rplib:1.4.1.7+'
-		compile 'net.rptools.parser:parser:1.4.0.+'
-		compile 'com.withay:withay-util:1.0'
-		compile 'com.thoughtworks.xstream:xstream:1.4.9'
-		compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
-		compile 'net.java.abeille:abeille-formsrt:2.0'
-		compile 'commons-logging:commons-logging:1.1.1'
-		compile 'log4j:log4j:1.2.16'
-		compile 'commons-io:commons-io:2.4'
-		
-		compile 'com.getsentry.raven:raven:7.8.6'	// https://sentry.io/nerps/nerps-maptool/getting-started/java/
-		
-		compile group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-		// compile group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-tiff
-		compile group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
-		
-	}
-
-	jar {
-		manifest.attributes(
-			'Main-Class': mainClassName,
-		)
-	}
-
-	// create a single Jar with all dependencies
-	task fatJar(type: Jar) {
-		classifier 'fat'
-		manifest {
-			attributes 'Implementation-Title': 'TokenToolFX',
-			'Implementation-Version': version,
-			'Built-By': System.getProperty('user.name'),
-			'Built-Date': new Date(),
-			'Built-JDK': System.getProperty('java.version'),
-			'Source-Compatibility': project.sourceCompatibility,
-			'Target-Compatibility': project.targetCompatibility,
-			'Main-Class': project.mainClassName
-		}
-		baseName = 'TokenTool'
-		from {
-			configurations.compile.collect {
-				it.isDirectory() ? it : zipTree(it)
-			}
-		}
-		with jar
-		exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
-	}
-
-	task deleteBuild(type: Delete) { 
-		delete 'build/' 
-		outputs.upToDateWhen {
-			false
-		}
-	}
-}
-
-
-/*
- * Global Gradle Tasks
- */
-
-// Shows project build version
-task showBuildVersion {
-	description = "Shows project build version"
-	group = "Information"
-	
-	doLast {
-		println 'Build Version Number = ' + project.version
-    }
-}
-
-// Generates gradle wrapper
-task wrapper(type: Wrapper) {
-	description = "Updates Gradle wrapper."
-	group = "Distribution"
-	gradleVersion='4.1'
-}
-
-task copySubProjectFiles(type: Sync) {
-	from project(':maptool').jar.destinationDir.getPath()
-	from project(':maptool').ext.distSource
-	from project(':launcher').jar.destinationDir.getPath()
-	from project(':launcher').ext.distSource
-	into 'build/tmp/dist/'
-	outputs.upToDateWhen {
-		false
-	}
-}
-copySubProjectFiles.mustRunAfter(':maptool:release', ':launcher:release')
-
-
-/**
- * The following tasks are used to create the Fat Jar distribution as well as
- * creating the jWrapper XML &amp; launch.properties from templates.
- *
- * Task: publishRelease will create fresh jars and jWrapper build, then FTP
- * to server (currently for nerps.net).
- */
-task createFatJars(dependsOn: ['maptool:deleteBuild', 'launcher:deleteBuild', 'tokentool:deleteBuild', 'launcher:fatJar', 'maptool:fatJar', 'tokentool:fatJar']) {
-	description = "Generates MapTool and Launcher Fat Jars for distribution."
-	group = "Distribution"
-	doLast {
-		println 'Creating MapTool and Launcher Fat Jars...'
-	}
-}
-
-task deleteJwrapperConfig(type: Delete) {
-	description = "Delete the generated jwrapper.xml file"
-	delete "${rootDir}/build-resources/jWrapper/jwrapper.xml"
+task deploy(dependsOn: uberJar) {
+	group = 'distribution'
+	description = 'Create native installers'
 
 	doLast {
-		println "Deleting ${rootDir}/build-resources/jWrapper/jwrapper.xml"
-	}
-}
+		// Using the -deploy Command with Bundler Arguments
+		// 		javapackager -deploy -native exe -BsystemWide=true -BjvmOptions=-Xmx128m -BjvmOptions=-Xms128m -outdir packages -outfile BrickBreaker -srcdir dist
+		//		-srcfiles BrickBreaker.jar -appclass brickbreaker.Main -name BrickBreaker -title "BrickBreaker demo"
+		// *Note: You can specify a JRE using "-Bruntime=../../../deploy-ready-jre"
+		//		  It will bundle system/workspace JDK by default
+		def javapackager_deploy = exec {
+			workingDir "${project.projectDir.absolutePath}"
 
-task deleteLaunchProperties(type: Delete) {
-	description = "Delete the generated launch.properties file"
-	delete "${rootDir}/launcher/src/main/resources/net/rptools/maptool/launcher/config/launch.properties"
-
-	doLast {
-		println "Deleting ${rootDir}/launcher/src/main/resources/net/rptools/maptool/launcher/config/launch.properties"
-	}
-}
-
-task createJwrapperConfig(type: Copy) {
-	description = "Generates jWrapper XML config from template"
-	group = "Distribution"
-	def mainClassName = 'net.rptools.maptool.launcher.MapToolLauncher'
-
-	from ('build-resources/jWrapper') {
-		include 'jwrapper-template.xml'
-		filter(ReplaceTokens, tokens: [
-			'mainClass': mainClassName,
-			'altBundle': getLocalProperty('altBundle'),
-			'buildDate': rootProject.ext.yyyymmdd,
-			'buildVersion': getVersionName(),
-			'jWrapperDir': getLocalProperty('jWrapperDir'),
-			'Linux32JRE': getLocalProperty('Linux32JRE'),
-			'Linux64JRE': getLocalProperty('Linux64JRE'),
-			'Windows32JRE': getLocalProperty('Windows32JRE'),
-			'Windows64JRE': getLocalProperty('Windows64JRE'),
-			'Mac64JRE': getLocalProperty('Mac64JRE'),
-			'rootDir': rootDir.toString()])
-	}
-	into 'build-resources/jWrapper'
-	rename { String fileName ->
-		fileName.replace('-template', '')
-	}
-    outputs.upToDateWhen {
-		false
-	}
-
-	doLast {
-		println 'Setting jWrapper directory to: ' + "${rootDir}/build-resources/jWrapper"
-	}
-}
-
-task createJwrapperRelease(dependsOn: ['maptool:createSplashImages', 'createFatJars', 'createJwrapperConfig'], type:JavaExec) {
-	description = "Generates a MapTool release using jWrapper"
-	group = "Distribution"
-	workingDir = 'build-resources/jWrapper'
-
-	main  = 'jwrapper.launch.JWCompiler'
-	classpath = files("build-resources/jWrapper/jwrapper-00049034758.jar")
-	args('jwrapper.xml')
-	
-	doLast {
-		println 'Creating MapTool jWrapper Release in: ' + workingDir
-	}
-}
-
-task renameJwrapperReleases(dependsOn: ['createJwrapperRelease'], type: Copy) {
-	from ('build-resources/jWrapper/JWrapperBuild') {
-		include 'MapTool-*64-offline*'
-	}
-	into getLocalProperty('releaseDir') + getLocalProperty('altBundle') + "-" + getVersionName()
-	
-	rename('MapTool-windows64-offline.exe', 'MapTool-windows64-' + getLocalProperty('altBundle') + getVersionName() + '.exe')
-	rename('MapTool-linux64-offline.tar', 'MapTool-linux64-' + getLocalProperty('altBundle') + getVersionName() + '.tar')
-	rename('MapTool-macos64-offline.dmg', 'MapTool-macos64-' + getLocalProperty('altBundle') + getVersionName() + '.dmg')
-	
-	
-	// We really shouldn't need 32 bit releases. There is the standard jar release for those odd ball needs
-	// Unfortunately we can not tell JWrapper to skip them.
-	// rename('MapTool-windows32-offline.exe', 'MapTool-windows32-' + getVersionName() + '.exe')
-	// rename('MapTool-linux32-offline.tar', 'MapTool-linux32-' + getVersionName() + '.tar')
-	// rename('MapTool-macos32-offline.dmg', 'MapTool-macos32-' + getVersionName() + '.dmg')
-
-	outputs.upToDateWhen {
-		false
-	}
-	
-	doLast {
-		println 'Renaming and moving MapTool jWrapper Release to: ' + getLocalProperty('releaseDir') + getLocalProperty('altBundle') + "-" + getVersionName()
-	}
-  }
-
-task ftpUpdateRelease {
-	description = "Uploads jWrapper build to remote server"
-	group = "Distribution"
-
-	doLast {
-		println "Uploading via FTP..."
-		println "To remote server: " + ftpServer
-		println "Remote directory: " + ftpRemoteDir + getLocalProperty('altBundle')
-
-		ant {
-			taskdef(name: 'ftp',
-				classname: 'org.apache.tools.ant.taskdefs.optional.net.FTP',
-				classpath: configurations.ftpAntTask.asPath)
-			ftp(server: ftpServer,
-				port: ftpPort,
-				userid: ftpUserID,
-				password: ftpPassword,
-				remoteDir: ftpRemoteDir + getLocalProperty('altBundle'),
-				passive: 'yes',
-				verbose: true)
-				{
-					fileset(file: getLocalProperty('releaseDir') + getLocalProperty('altBundle') + "-" + getVersionName() + "/MapTool-*")
-				}
+			commandLine "javapackager",
+				"-deploy", "-v",
+				"-native", "installer",
+				"-appclass", mainClassName,
+				"-srcdir", "build/libs", //sourceSets.main.java.srcDirs
+				"-srcfiles", "MapTool-"+version+".jar",
+				"-outdir", "releases/release-"+version,
+				"-outfile", project.name,
+				"-name", project.name,
+				"-title", project.name,
+				"-vendor", vendor,
+				"-BsystemWide=false",
+				"-BmenuHint=true",
+				"-Bwin.menuGroup=RPTools",
+				"-BshortcutHint=true",
+				"-BappVersion=" + version,
+				"-BuserJvmOptions=-Xss=4m"
 		}
 	}
 }
-
-task publishRelease(dependsOn: ['createJwrapperRelease', 'ftpUpdateRelease']) {
-	description = "Generates jWrapper Release and Uploads to remote server."
-	group = "Distribution"
-	doLast{
-		println 'Publish MapTool version ' + version + ' to maptool.nerps.net'
-	}
-}
-
-
-
-//Deprecated: Use new Fat JAR & jWrapper build tasks.
-task zipRelease(dependsOn: copySubProjectFiles, type: Zip) {
-	from 'build/tmp/dist/'
-	into  ''
-	baseName = 'maptool-' + getVersionName()
-	destinationDir = new File(projectDir, 'build')
-	outputs.upToDateWhen {
-		false
-	}
-}
-
-task osxApp() {
-	doLast {
-        def baseDir = '.'
-		def buildVersion = rootProject.getVersionName()
-		def mainClassName = project(":maptool").mainClassName
-		def sourceDir = 'build/tmp/dist'
-		ant {
-			taskdef(
-				name: 'bundleapp',
-				classname: 'com.oracle.appbundler.AppBundlerTask',
-				classpath: configurations.osxTools.asPath
-			)
-			bundleapp(
-				outputdirectory: 'build/tmp/',
-				name: 'MapTool-' + buildVersion,
-				displayname: 'MapTool-' + buildVersion,
-				identifier: 'net.rptools.maptool',
-				mainclassname: mainClassName,
-				signature: 'RPTM',
-				icon: 'build-resources/maptool-icon.icns'
-			) {
-				classpath(dir: sourceDir) {
-					include(name: '*.jar')
-					include(name: '**/*.jar')
-				}
-				option(value: '-Dapple.laf.useScreenMenuBar=true')
-				option(value: '-Dfile.encoding=UTF-8')
-				option(value: '-Xmx768m')
-				option(value: '-Xss4m')
-				option(value: '-Dcom.apple.textantialiasing=true')
-				option(value: '-Dcom.apple.antialiasing=true')
-				option(value: '-Djava.library.path=$APP_ROOT/Contents/Java')
-			}
-		}
-    }
-}
-osxApp.mustRunAfter(copySubProjectFiles)
-
-task zipOSXApp(dependsOn: osxApp, type: Zip) {
-	def buildVersion = rootProject.getVersionName()
-	from 'build/tmp/MapTool-' + buildVersion + '.app'
-	into  'MapTool-' + buildVersion + '.app'
-	baseName = 'maptool-' + buildVersion + '-osx'
-	destinationDir new File(projectDir, 'build')
-	outputs.upToDateWhen {
-		false
-	}
-}
-
-task release() {
-	doLast {
-		println 'Creating Release'
-	}
-}
-release.dependsOn += zipRelease
-release.dependsOn += zipOSXApp
-release.dependsOn += renameJwrapperReleases
