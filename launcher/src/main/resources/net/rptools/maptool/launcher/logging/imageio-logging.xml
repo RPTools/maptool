@@ -1,6 +1,0 @@
-<!-- DESC: Asset File IO -->
-<!-- TTIP: Monitors all use of "asset://" URLs. -->
-<logger name="net.rptools.maptool.client.AssetURLStreamHandler">
-    <level value="DEBUG" />
-    <appender-ref ref="console"/>
-</logger>
