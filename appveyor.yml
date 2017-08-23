@@ -6,10 +6,6 @@ build:
 build_script:
   - gradlew.bat deploy
 
-branches:
-  only:
-    - 1.5.0
-
 cache:
   - C:\Users\appveyor\.gradle
 
