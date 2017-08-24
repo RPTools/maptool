@@ -23,7 +23,7 @@ apply plugin: 'com.diffplug.gradle.spotless'
 //apply plugin: 'javafx-gradle-plugin'
 
 // Definitions
-defaultTasks 'clean', 'run'
+defaultTasks 'clean', 'build'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
