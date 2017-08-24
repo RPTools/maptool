@@ -9,7 +9,7 @@ environment:
 build:
   verbosity: detailed
 build_script:
-- ps: gradlew.bat deploy
+- gradlew.bat deploy
 before_test:
 - ps: echo my build folder is [$env:appveyor_build_folder]
 artifacts:
