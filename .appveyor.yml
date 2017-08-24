@@ -10,7 +10,7 @@ before_test:
 after_test:
 - ps: ls $env:appveyor_build_folder\releases\release-1.4.4.0\bundles\
 artifacts:
-- path: $env:appveyor_build_folder\releases\release-1.4.4.0\bundles\MapTool-1.4.4.0.exe
+- path: releases\release-1.4.4.0\bundles\MapTool-1.4.4.0.exe
   name: maptool
 deploy:
 - provider: GitHub
