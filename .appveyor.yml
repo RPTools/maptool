@@ -3,11 +3,8 @@ skip_non_tags: true
 image: Visual Studio 2017
 platform: x64
 shallow_clone: true
-install:
-- ps: choco install gradle
-cache: C:\Users\appveyor\.gradle
 build_script:
-- ps: gradle deploy
+- gradlew.bat deploy
 before_test:
 - ps: echo my build folder is [$env:appveyor_build_folder]
 after_test:
