@@ -197,7 +197,7 @@ public class PreferencesDialog extends JDialog {
 		});
 
 		DefaultTableModel test = UserJvmPrefs.getJvmOptionsTableModel();
-		
+
 		forceFacingArrowCheckBox = panel.getCheckBox("forceFacingArrow");
 		showStatSheetCheckBox = panel.getCheckBox("showStatSheet");
 		showPortraitCheckBox = panel.getCheckBox("showPortrait");

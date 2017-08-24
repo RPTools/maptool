@@ -3,7 +3,7 @@ MapTool
 
 Welcome to the MapTool 1.4 repository. The old version (1.3) still resides on [SourceForge](http://sourceforge.net/p/rptools/svn/HEAD/tree/) but should only be updated with major bug fixes.
 
-So what is MapTool? 
+So what is MapTool?
 -------------------
 
 MapTool is much more than just a mapping program. Included are not only powerful tools for the creation of detailed maps, but also a chat function, detailed token management (allowing you to track properties of the units placed on the map and display health and status information), and an initiative tracker. Functions not being used can be hidden out of sight. These features enable your computer screen to function as a virtual table top, filling the role of battlemats and dry-erase markers and providing for infinitely scrollable maps and the ability to use a large-screen TV or video projector.  It is "game system agnostic", meaning that while MapTool has special support for some game systems (like hexes for GURPS or square templates for D&D 4E) there is no requirement for you to use these features.
@@ -21,9 +21,9 @@ Requirements
 Resources
 ---------
 
- - **Website:** http://rptools.net/ 
- - **Forums:**  http://forums.rptools.net 
- - **Wiki:**    http://lmwcs.com/rptools/wiki/Main_Page 
+- **Website:** http://rptools.net/
+- **Forums:**  http://forums.rptools.net
+- **Wiki:**    http://lmwcs.com/rptools/wiki/Main_Page
 
 Building Maptool
 ----------------
@@ -34,13 +34,13 @@ First, [install the JDK](doc/How_To_Install_JDK.md).
 as it downloads everything it needs.
 
 ```Shell
-./gradlew build  
+./gradlew build
 ```
 
 For Windows, remember to flip the slash:
 
 ```Shell
-.\gradlew build  
+.\gradlew build
 ```
 
 Building the Distributable Zip
@@ -53,7 +53,7 @@ Building the Distributable Zip
 For Windows, remember to flip the slash:
 
 ```Shell
-.\gradlew clean release 
+.\gradlew clean release
 ```
 
 This will create a `.zip` file for use on all systems as well as a zipped `.app` for Mac OS X in the `maptool/build/` directory. The build number will be based on the latest tag and latest commit.

@@ -70,7 +70,7 @@ Build the Maptool Gradle Project
 
 ```
 [sts] -----------------------------------------------------
-[sts] Starting Gradle build for the following tasks: 
+[sts] Starting Gradle build for the following tasks:
 [sts]      Build
 [sts] -----------------------------------------------------
 Creating Release

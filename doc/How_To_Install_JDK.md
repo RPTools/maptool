@@ -1,5 +1,5 @@
 How to Install Java Development Kit (JDK)
-======================= 
+=======================
 
 You may not have a software development kits, which you will need if you want to do any coding. You may also want to install multiple versions of Java. If you run old versions of Maptool you will have Java 6. For Maptool 1.4 you will need Java 7 (1.7) and possibly Java 8. If you haven't already, lets install both!
 
@@ -7,7 +7,7 @@ You may not have a software development kits, which you will need if you want to
 
 1. open `Windows Explorer`
 2. right click on `Computer`
-3. select `Properties` 
+3. select `Properties`
 
 This opens the Control Panel Homes Page about your PC and in the "System" section against the "System Type" it will say either "32-bit Operating System" or 64.
 
