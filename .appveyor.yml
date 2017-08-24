@@ -3,22 +3,30 @@ skip_non_tags: true
 image: Visual Studio 2017
 platform: x64
 shallow_clone: true
-environment:
-  matrix:
-  - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
-build:
-  verbosity: detailed
+install:
+- ps: choco install gradle
+cache: C:\Users\appveyor\.gradle
 build_script:
-- gradlew.bat deploy
+- ps: gradle deploy
 before_test:
 - ps: echo my build folder is [$env:appveyor_build_folder]
+after_test:
+- ps: ls $env:appveyor_build_folder\releases\release-1.4.4.0\bundles\
 artifacts:
 - path: maptool\releases\release-1.4.4.0\bundles\MapTool-1.4.4.0.exe
   name: maptool
 deploy:
 - provider: GitHub
+  description: Test release from AppVeyor
   auth_token:
     secure: HXIHe/F7K2yGOZ0I56DW5PevrQDe+zjyunjORGKYaUGxFtvPYPcmOdjZT69tzHcS
   artifact: maptool
   draft: true
   force_update: true
+notifications:
+- provider: Slack
+  incoming_webhook: https://hooks.slack.com/services/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
+  channel: '#exceptions'
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: true
