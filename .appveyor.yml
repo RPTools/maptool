@@ -1,4 +1,4 @@
-version: '{branch}.{build}'
+version: '{branch}'
 skip_non_tags: true
 image: Visual Studio 2017
 platform: x64
@@ -8,9 +8,9 @@ build_script:
 before_test:
 - ps: echo my build folder is [$env:appveyor_build_folder]
 after_test:
-- ps: ls $env:appveyor_build_folder\releases\release-1.4.4.0\bundles\
+- ps: ls $env:appveyor_build_folder\releases\release-*\bundles\
 artifacts:
-- path: releases\release-1.4.4.0\bundles\MapTool-1.4.4.0.exe
+- path: releases\release-*\bundles\MapTool-*.exe
   name: maptool
 deploy:
 - provider: GitHub
