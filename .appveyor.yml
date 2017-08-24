@@ -6,8 +6,6 @@ shallow_clone: true
 environment:
   matrix:
   - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
-install:
-- ps: set path=c:\Program Files (x86)\WiX Toolset v3.11\bin;%path%
 build:
   verbosity: detailed
 build_script:
