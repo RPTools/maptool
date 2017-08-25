@@ -12,12 +12,14 @@ addons:
     packages:
     - oracle-java8-installer
     - fakeroot
-script: "./gradlew build"
+script: 
+  - "./gradlew build"
+  - "./gradlew jfxJar"
 notifications:
   slack: nerps:JumMHisqOlXac7be25Ca8FbN
 before_cache:
-- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
   - "$HOME/.gradle/caches/"
