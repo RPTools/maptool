@@ -28,7 +28,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 // Used by gradle assemble & run tasks
-version = '1.4.4.0'
+version = '1.4.3.30'
 mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
 applicationDefaultJvmArgs = ["-Xss4M"]
 
