@@ -26,7 +26,8 @@ deploy:
   provider: releases
   api_key:
     secure: kkJvHO3wHKCnGT2aKQs4zt4Z+HYEwOnpM7Gnnz+8PzXx8uCi/7+bDROC619lAKxFQAVNobj88kyHQ5mKqgdgYpz8Rdk8MfEMX+4m+FaqY2kDYzkCK2v9zrDohoe39W6my/nLpO9DJ/hel5J9o0oXfCmik6FqbTZG6EYgl3vY2II8X1GR8O07OgxpnPnft9LMXG08Kkc0Ni/LayFXjF8Pg0LcOY18o4jwSOXIKPUPYLomMIYEr8vGkZJ9AP8b6GsxyWXy4gUQRjVNcb0QzbPX6PxhR+elCeg/1VR4w8WVAdfCJPzoIibzHitQfdALekgvwMe8Z7RrwiCYc9e89mLAL/PM9o/2qCuHiY2CJYUW1q8qc5MiXWaxLXTi4uC4IFB8eNXqU9LZUlCXUo0IZyujMhR23WxaK0nWYYntmLgVh7/PNie/ooDIXK54AOzsSpyWw0mfgJ99GgdyiUKsEH3UqmqIpXgnOmSbzK5s511Ag3/swJQuMU0DqZemKrRAShTdLhGED2e/6JTtLVpMbpfs7KvAqIk6hFQ+L1IKfyBWRab7V2gF1sutxTpicwaTusDF20hdGsHycxN1jPuxhduqkQ/LIjRt8pyAkWGEy/ARmGuXpY8jpbbXGyvNnqh70r/wJaFsN6NQ34VFSl2yMxw9DrKOSmGvtPNpK82X0bILI3A=
-  file: /home/travis/build/JamzTheMan/maptool/releases/*
+  file_glob: true
+  file: releases/release-*/bundles/*
   skip_cleanup: true
   on:
     repo: JamzTheMan/maptool
