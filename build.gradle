@@ -3,10 +3,13 @@
 * user guide available at https://docs.gradle.org/4.1/userguide/tutorial_java_projects.html
 */
 
+// Current Build version
+version = '1.4.4.0'
+
 buildscript {
 	dependencies {
 		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.4.1"
-		// classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
+		classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
 	}
 
 	repositories {
@@ -20,7 +23,7 @@ apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'com.diffplug.gradle.spotless'
-//apply plugin: 'javafx-gradle-plugin'
+apply plugin: 'javafx-gradle-plugin'
 
 // Definitions
 defaultTasks 'clean', 'build'
@@ -28,7 +31,6 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 // Used by gradle assemble & run tasks
-version = '1.4.3.30'
 mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
 applicationDefaultJvmArgs = ["-Xss4M"]
 
@@ -43,6 +45,7 @@ ext {
 
 run {
 	args = [ '-v='+version, '-debug', '-fullscreen' ]
+	applicationDefaultJvmArgs = [ "-Djava.library.path=lib" ]
 }
 
 spotless {
@@ -245,4 +248,9 @@ task deploy(dependsOn: uberJar) {
 				"-BuserJvmOptions=-Xss=4m"
 		}
 	}
+}
+
+jfx {
+    // minimal requirement for jfxJar-task
+    mainClass = mainClassName
 }

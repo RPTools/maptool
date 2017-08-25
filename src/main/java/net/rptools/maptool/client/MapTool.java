@@ -594,6 +594,8 @@ public class MapTool {
 
 		if (graphicsMonitor > -1) {
 			moveToMonitor(clientFrame, graphicsMonitor, useFullScreen);
+		} else if (useFullScreen) {
+			frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		}
 	}
 
@@ -710,15 +712,13 @@ public class MapTool {
 
 	public static String getVersion() {
 		if (version == null) {
-			version = "DEVELOPMENT";
-			try {
-				if (MapTool.class.getClassLoader().getResource(VERSION_TXT) != null) {
-					version = new String(FileUtil.loadResource(VERSION_TXT)).trim();
-				}
-			} catch (IOException ioe) {
-				String msg = I18N.getText("msg.info.versionFile", VERSION_TXT);
-				version = msg;
-				MapTool.showError("msg.error.versionFileMissing");
+			System.out.println("Version from manifest is: " + MapTool.class.getPackage().getImplementationVersion());
+			System.out.println("Vendor from manifest is: " + MapTool.class.getPackage().getImplementationVendor());
+
+			if (MapTool.class.getPackage().getImplementationVersion() != null) {
+				version = MapTool.class.getPackage().getImplementationVersion().trim();
+			} else {
+				version = "DEVELOPMENT";
 			}
 		}
 		return version;
@@ -1342,6 +1342,11 @@ public class MapTool {
 			DebugStream.activate();
 		else
 			DebugStream.deactivate();
+
+		// List out passed in arguments
+		for (String arg : args) {
+			System.out.println("arg: " + arg);
+		}
 
 		if (MAC_OS_X) {
 			// On OSX the menu bar at the top of the screen can be enabled at any time, but the
