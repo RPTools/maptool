@@ -5,10 +5,6 @@ platform: x64
 shallow_clone: true
 build_script:
 - gradlew.bat deploy
-before_test:
-- ps: echo my build folder is [$env:appveyor_build_folder]
-after_test:
-- ps: ls $env:appveyor_build_folder\releases\release-*\bundles\
 artifacts:
 - path: releases\release-*\bundles\MapTool-*.exe
   name: maptool
