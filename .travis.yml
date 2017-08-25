@@ -32,3 +32,4 @@ deploy:
   on:
     repo: JamzTheMan/maptool
     tags: true
+    all_branches: true

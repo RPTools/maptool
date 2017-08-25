@@ -14,16 +14,9 @@ artifacts:
   name: maptool
 deploy:
 - provider: GitHub
-  description: Test release from AppVeyor
+  description: Draft release from AppVeyor
   auth_token:
     secure: HXIHe/F7K2yGOZ0I56DW5PevrQDe+zjyunjORGKYaUGxFtvPYPcmOdjZT69tzHcS
   artifact: maptool
   draft: true
   force_update: true
-notifications:
-- provider: Slack
-  incoming_webhook: https://hooks.slack.com/services/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
-  channel: '#exceptions'
-  on_build_success: true
-  on_build_failure: true
-  on_build_status_changed: true
