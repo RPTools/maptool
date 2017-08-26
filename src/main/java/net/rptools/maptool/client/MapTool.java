@@ -71,6 +71,10 @@ import com.jidesoft.plaf.basic.ThemePainter;
 
 import de.muntjak.tinylookandfeel.Theme;
 import de.muntjak.tinylookandfeel.util.SBReference;
+import io.sentry.Sentry;
+import io.sentry.SentryClient;
+import io.sentry.event.BreadcrumbBuilder;
+import io.sentry.event.UserBuilder;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
@@ -118,6 +122,7 @@ import net.tsc.servicediscovery.ServiceAnnouncer;
  */
 public class MapTool {
 	private static final Logger log = Logger.getLogger(MapTool.class);
+	private static SentryClient sentry;
 
 	/**
 	 * Contains just the version number of MapTool, such as <code>1.3.b49</code> .
@@ -368,7 +373,8 @@ public class MapTool {
 		// String msg = I18N.getText(message, params);
 		// log.debug(message);
 		String title = I18N.getText("msg.title.messageDialogConfirm");
-		// return JOptionPane.showConfirmDialog(clientFrame, msg, title, JOptionPane.OK_OPTION) == JOptionPane.OK_OPTION;
+		// return JOptionPane.showConfirmDialog(clientFrame, msg, title, JOptionPane.OK_OPTION) ==
+		// JOptionPane.OK_OPTION;
 		return confirmImpl(title, JOptionPane.OK_OPTION, message, params) == JOptionPane.OK_OPTION;
 	}
 
@@ -401,9 +407,11 @@ public class MapTool {
 
 		String msg = I18N.getText("msg.confirm.deleteToken");
 		log.debug(msg);
-		Object[] options = { I18N.getText("msg.title.messageDialog.yes"), I18N.getText("msg.title.messageDialog.no"), I18N.getText("msg.title.messageDialog.dontAskAgain") };
+		Object[] options = { I18N.getText("msg.title.messageDialog.yes"), I18N.getText("msg.title.messageDialog.no"),
+				I18N.getText("msg.title.messageDialog.dontAskAgain") };
 		String title = I18N.getText("msg.title.messageDialogConfirm");
-		int val = JOptionPane.showOptionDialog(clientFrame, msg, title, JOptionPane.NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+		int val = JOptionPane.showOptionDialog(clientFrame, msg, title, JOptionPane.NO_OPTION,
+				JOptionPane.WARNING_MESSAGE, null, options, options[0]);
 
 		// "Yes, don't show again" Button
 		if (val == 2) {
@@ -425,9 +433,11 @@ public class MapTool {
 
 		String msg = I18N.getText("msg.confirm.deleteDraw");
 		log.debug(msg);
-		Object[] options = { I18N.getText("msg.title.messageDialog.yes"), I18N.getText("msg.title.messageDialog.no"), I18N.getText("msg.title.messageDialog.dontAskAgain") };
+		Object[] options = { I18N.getText("msg.title.messageDialog.yes"), I18N.getText("msg.title.messageDialog.no"),
+				I18N.getText("msg.title.messageDialog.dontAskAgain") };
 		String title = I18N.getText("msg.title.messageDialogConfirm");
-		int val = JOptionPane.showOptionDialog(clientFrame, msg, title, JOptionPane.NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+		int val = JOptionPane.showOptionDialog(clientFrame, msg, title, JOptionPane.NO_OPTION,
+				JOptionPane.WARNING_MESSAGE, null, options, options[0]);
 
 		// "Yes, don't show again" Button
 		if (val == 2) {
@@ -622,7 +632,8 @@ public class MapTool {
 			}
 
 			if (windowX > -1 && windowY > -1) {
-				frame.setLocation(windowX + gd[monitor].getDefaultConfiguration().getBounds().x, windowY + gd[monitor].getDefaultConfiguration().getBounds().y);
+				frame.setLocation(windowX + gd[monitor].getDefaultConfiguration().getBounds().x,
+						windowY + gd[monitor].getDefaultConfiguration().getBounds().y);
 
 			} else {
 				frame.setLocation(gd[monitor].getDefaultConfiguration().getBounds().x, frame.getY());
@@ -905,7 +916,8 @@ public class MapTool {
 		for (Zone zone : campaign.getZones()) {
 			ZoneRenderer renderer = ZoneRendererFactory.newRenderer(zone);
 			clientFrame.addZoneRenderer(renderer);
-			if ((currRenderer == null || zone.getId().equals(defaultRendererId)) && (getPlayer().isGM() || zone.isVisible())) {
+			if ((currRenderer == null || zone.getId().equals(defaultRendererId))
+					&& (getPlayer().isGM() || zone.isVisible())) {
 				currRenderer = renderer;
 			}
 			eventDispatcher.fireEvent(ZoneEvent.Added, campaign, null, zone);
@@ -927,7 +939,8 @@ public class MapTool {
 		return assetTransferManager;
 	}
 
-	public static void startServer(String id, ServerConfig config, ServerPolicy policy, Campaign campaign) throws IOException {
+	public static void startServer(String id, ServerConfig config, ServerPolicy policy, Campaign campaign)
+			throws IOException {
 		if (server != null) {
 			Thread.dumpStack();
 			showError("msg.error.alreadyRunningServer");
@@ -1180,7 +1193,8 @@ public class MapTool {
 		logging = logging.replace("${appHome}", AppUtil.getAppHome().getAbsolutePath().replace('\\', '/'));
 
 		// Configure
-		new DOMConfigurator().doConfigure(new ByteArrayInputStream(logging.getBytes()), LogManager.getLoggerRepository());
+		new DOMConfigurator().doConfigure(new ByteArrayInputStream(logging.getBytes()),
+				LogManager.getLoggerRepository());
 	}
 
 	private static final void configureJide() {
@@ -1190,12 +1204,16 @@ public class MapTool {
 				defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
 
 				defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default is true
-				defaults.put("OptionPane.bannerIcon", new ImageIcon(MapTool.class.getClassLoader().getResource("net/rptools/maptool/client/image/maptool_icon.png")));
+				defaults.put("OptionPane.bannerIcon", new ImageIcon(MapTool.class.getClassLoader()
+						.getResource("net/rptools/maptool/client/image/maptool_icon.png")));
 				defaults.put("OptionPane.bannerFontSize", 13);
 				defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
 				defaults.put("OptionPane.bannerMaxCharsPerLine", 60);
-				defaults.put("OptionPane.bannerForeground", painter != null ? painter.getOptionPaneBannerForeground() : null); // you should adjust this if banner background is not the default
-																																// gradient paint
+				defaults.put("OptionPane.bannerForeground",
+						painter != null ? painter.getOptionPaneBannerForeground() : null); // you should adjust this if
+																							// banner background is not
+																							// the default
+																							// gradient paint
 				defaults.put("OptionPane.bannerBorder", null); // use default border
 
 				// set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want gradient
@@ -1203,7 +1221,8 @@ public class MapTool {
 				defaults.put("OptionPane.bannerBackgroundLt", painter != null ? painter.getOptionPaneBannerLt() : null);
 				defaults.put("OptionPane.bannerBackgroundDirection", Boolean.TRUE); // default is true
 
-				// optionally, you can set a Paint object for BannerPanel. If so, the three UIDefaults related to banner background above will be ignored.
+				// optionally, you can set a Paint object for BannerPanel. If so, the three UIDefaults related to banner
+				// background above will be ignored.
 				defaults.put("OptionPane.bannerBackgroundPaint", null);
 
 				defaults.put("OptionPane.buttonAreaBorder", BorderFactory.createEmptyBorder(6, 6, 6, 6));
@@ -1231,7 +1250,8 @@ public class MapTool {
 	 *            String array of passed in args
 	 * @return Option value found as a String, or defaultValue if not found
 	 */
-	private static String getCommandLineOption(Options options, String searchValue, String defaultValue, String[] args) {
+	private static String getCommandLineOption(Options options, String searchValue, String defaultValue,
+			String[] args) {
 		CommandLineParser parser = new DefaultParser();
 
 		try {
@@ -1311,7 +1331,69 @@ public class MapTool {
 		return -1;
 	}
 
+	private static void initSentry() {
+		/*
+		 * It is recommended that you use the DSN detection system, which will check the environment variable "SENTRY_DSN", the Java System Property "sentry.dsn", or the "sentry.properties" file in
+		 * your classpath. This makes it easier to provide and adjust your DSN without needing to change your code. See the configuration page for more information.
+		 */
+		Sentry.init();
+
+		// You can also manually provide the DSN to the ``init`` method.
+		// String dsn = args[0];
+		// Sentry.init(dsn);
+
+		/*
+		 * It is possible to go around the static ``Sentry`` API, which means you are responsible for making the SentryClient instance available to your code.
+		 */
+		// sentry = SentryClientFactory.sentryClient();
+
+		logWithStaticAPI();
+		// myClass.logWithInstanceAPI();
+	}
+
+	/**
+	 * Examples using the (recommended) static API.
+	 */
+	public static void logWithStaticAPI() {
+		// Note that all fields set on the context are optional. Context data is copied onto
+		// all future events in the current context (until the context is cleared).
+
+		// Record a breadcrumb in the current context. By default the last 100 breadcrumbs are kept.
+		Sentry.getContext().recordBreadcrumb(new BreadcrumbBuilder().setMessage("User made an action").build());
+
+		// Set the user in the current context.
+		Sentry.getContext().setUser(new UserBuilder().setEmail("hello@sentry.io").build());
+
+		// Add extra data to future events in this context.
+		Sentry.getContext().addExtra("extra", "thing");
+
+		// Add an additional tag to future events in this context.
+		Sentry.getContext().addTag("tagName", "tagValue");
+
+		/*
+		 * This sends a simple event to Sentry using the statically stored instance that was created in the ``main`` method.
+		 */
+		Sentry.capture("This is a test");
+
+		try {
+			unsafeMethod();
+		} catch (Exception e) {
+			// This sends an exception event to Sentry using the statically stored instance
+			// that was created in the ``main`` method.
+			Sentry.capture(e);
+		}
+	}
+
+	/**
+	 * An example method that throws an exception.
+	 */
+	static void unsafeMethod() {
+		throw new UnsupportedOperationException("You shouldn't call this!");
+	}
+
 	public static void main(String[] args) {
+		initSentry();
+
 		// Jamz: Overwrite version for testing if passed as command line argument using -v or -version
 		Options cmdOptions = new Options();
 		cmdOptions.addOption("d", "debug", false, "turn on System.out enhanced debug output");
@@ -1380,7 +1462,7 @@ public class MapTool {
 		System.setProperty("swing.aatext", "true");
 		// System.setProperty("sun.java2d.opengl", "true");
 
-		final SplashScreen splash = new SplashScreen(getVersion());
+		final SplashScreen splash = new SplashScreen((isDevelopment()) ? "v" + getVersion() : getVersion());
 
 		// Protocol handlers
 		// cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
@@ -1577,7 +1659,8 @@ public class MapTool {
 			try {
 				img = ImageUtil.bytesToImage(FileUtil.getBytes(logoURL));
 				// If we did download the logo, save it to the 'config' dir for later use.
-				BufferedImage bimg = ImageUtil.createCompatibleImage(img, img.getWidth(null), img.getHeight(null), null);
+				BufferedImage bimg = ImageUtil.createCompatibleImage(img, img.getWidth(null), img.getHeight(null),
+						null);
 				FileUtils.writeByteArrayToFile(logoFile, ImageUtil.imageToBytes(bimg, "png"));
 				img = bimg;
 			} catch (IOException e1) {
@@ -1594,22 +1677,28 @@ public class MapTool {
 			Class<?> appClass = Class.forName("com.apple.eawt.Application");
 			Method getApplication = appClass.getDeclaredMethod("getApplication", (Class[]) null);
 			Object appl = getApplication.invoke(null, (Object[]) null);
-			Method setDockIconImage = appl.getClass().getDeclaredMethod("setDockIconImage", new Class[] { java.awt.Image.class });
+			Method setDockIconImage = appl.getClass().getDeclaredMethod("setDockIconImage",
+					new Class[] { java.awt.Image.class });
 			// If we couldn't grab the image for some reason, don't set the dock bar icon! Duh!
 			if (img != null)
 				setDockIconImage.invoke(appl, new Object[] { img });
 
 			if (MapToolUtil.isDebugEnabled()) {
-				// For some reason Mac users don't like the dock badge icon. But from a development standpoint I like seeing the
-				// version number in the dock bar. So we'll only include it when running with MAPTOOL_DEV on the command line.
-				Method setDockIconBadge = appl.getClass().getDeclaredMethod("setDockIconBadge", new Class[] { java.lang.String.class });
+				// For some reason Mac users don't like the dock badge icon. But from a development standpoint I like
+				// seeing the
+				// version number in the dock bar. So we'll only include it when running with MAPTOOL_DEV on the command
+				// line.
+				Method setDockIconBadge = appl.getClass().getDeclaredMethod("setDockIconBadge",
+						new Class[] { java.lang.String.class });
 				String vers = getVersion();
 				vers = vers.substring(vers.length() - 2);
 				vers = vers.replaceAll("[^0-9]", "0"); // Convert all non-digits to zeroes
 				setDockIconBadge.invoke(appl, new Object[] { vers });
 			}
 		} catch (Exception e) {
-			log.info("Cannot find/invoke methods on com.apple.eawt.Application; use -X command line options to set dock bar attributes", e);
+			log.info(
+					"Cannot find/invoke methods on com.apple.eawt.Application; use -X command line options to set dock bar attributes",
+					e);
 		}
 	}
 

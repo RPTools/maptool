@@ -14,7 +14,6 @@ addons:
     - fakeroot
 script: 
   - "./gradlew build"
-  - "./gradlew jfxJar"
 notifications:
   slack: nerps:JumMHisqOlXac7be25Ca8FbN
 before_cache:

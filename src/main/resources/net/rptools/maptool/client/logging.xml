@@ -1,35 +1,36 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
-<!--
-/*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
- *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
- *
- *  See the file LICENSE elsewhere in this distribution for license details.
- */
--->
+<!-- /* * This software copyright by various authors including the RPTools.net 
+	* development team, and licensed under the LGPL Version 3 or, at your * option, 
+	any later version. * * Portions of this software were originally covered 
+	under the Apache * Software License, Version 1.1 or Version 2.0. * * See 
+	the file LICENSE elsewhere in this distribution for license details. */ -->
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
-  <appender name="console" class="org.apache.log4j.ConsoleAppender">
-    <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%d [%C{2}:%L] %p - %m%n" />
-    </layout>
-  </appender>
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d [%C{2}:%L] %p - %m%n" />
+		</layout>
+	</appender>
 
-  <appender name="appender" class="org.apache.log4j.FileAppender">
-    <param name="File" value="${appHome}/log.txt" />
-    <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%d [%C{2}:%L] %p - %m%n" />
-    </layout>
-  </appender>
+	<appender name="appender" class="org.apache.log4j.FileAppender">
+		<param name="File" value="${appHome}/log.txt" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d [%C{2}:%L] %p - %m%n" />
+		</layout>
+	</appender>
 
-INSERT_LOCAL_CONFIG_HERE
+<!-- 
+	<appender name="Sentry" class="io.sentry.log4j.SentryAppender">
+		<param name="threshold" value="WARN" />
+	</appender>
+ -->
+ 
+	INSERT_LOCAL_CONFIG_HERE
 
-  <root>
-    <priority value="warn" />
-    <appender-ref ref="appender" />
-  </root>
-</log4j:configuration> 
+	<root>
+		<level value="DEBUG" />
+		<priority value="warn" />
+		<appender-ref ref="appender" />
+		<appender-ref ref="Sentry" />
+	</root>
+</log4j:configuration>

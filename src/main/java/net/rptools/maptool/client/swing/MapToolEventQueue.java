@@ -47,6 +47,11 @@ public class MapToolEventQueue extends EventQueue {
 				// Fallback to standard swing dialog.
 				log.error(thrown, thrown);
 				JOptionPane.showMessageDialog(null, toString(thrown), I18N.getString("MapToolEventQueue.unexpectedError"), JOptionPane.ERROR_MESSAGE);
+			} finally {
+				System.out.println("INSERT SENTRY LOG HERE!");
+				log.debug("SENTRY TEST :: Debug message");
+				log.info("SENTRY TEST :: Info message");
+				log.warn("SENTRY TEST :: Warn message");
 			}
 		}
 	}

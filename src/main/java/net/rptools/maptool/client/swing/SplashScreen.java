@@ -61,7 +61,7 @@ public class SplashScreen extends JFrame {
 		Group root = new Group();
 		Scene scene = new Scene(root, Color.TRANSPARENT);
 
-		Image splashImage = SwingFXUtils.toFXImage(CreateVersionedInstallSplash.createLaunchSplash("Launching... v" + versionText), null);
+		Image splashImage = SwingFXUtils.toFXImage(CreateVersionedInstallSplash.createLaunchSplash("Launching... " + versionText), null);
 		ImageView splashView = new ImageView(splashImage);
 		imgWidth = (int) splashImage.getWidth();
 		imgHeight = (int) splashImage.getHeight();
