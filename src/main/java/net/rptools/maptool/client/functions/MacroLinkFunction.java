@@ -42,10 +42,11 @@ import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class MacroLinkFunction extends AbstractFunction {
-	private static final Logger log = Logger.getLogger(MacroLinkFunction.class);
+	private static final Logger log = LogManager.getLogger(MacroLinkFunction.class);
 
 	private enum OutputTo {
 		SELF, NONE, GM, ALL, SELF_AND_GM, LIST

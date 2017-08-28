@@ -33,6 +33,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
@@ -42,10 +45,8 @@ import net.rptools.maptool.client.swing.ImageChooserDialog;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.util.ImageManager;
 
-import org.apache.log4j.Logger;
-
 public class ImageAssetPanel extends JPanel implements DropTargetListener {
-	private static final Logger log = Logger.getLogger(ImageAssetPanel.class);
+	private static final Logger log = LogManager.getLogger(ImageAssetPanel.class);
 
 	private MD5Key imageId;
 
@@ -139,7 +140,8 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
 	@Override
 	protected void paintComponent(Graphics g) {
 		Dimension size = getSize();
-		((Graphics2D) g).setPaint(new TexturePaint(AppStyle.panelTexture, new Rectangle(0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
+		((Graphics2D) g).setPaint(new TexturePaint(AppStyle.panelTexture,
+				new Rectangle(0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
 		g.fillRect(0, 0, size.width, size.height);
 
 		if (imageId == null) {
@@ -150,7 +152,8 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
 		Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
 		SwingUtil.constrainTo(imgSize, size.width - 8, size.height - 8);
 
-		g.drawImage(image, (size.width - imgSize.width) / 2, (size.height - imgSize.height) / 2, imgSize.width, imgSize.height, this);
+		g.drawImage(image, (size.width - imgSize.width) / 2, (size.height - imgSize.height) / 2, imgSize.width,
+				imgSize.height, this);
 	}
 
 	////
@@ -166,7 +169,8 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
 
 	public void drop(DropTargetDropEvent dtde) {
 		Transferable t = dtde.getTransferable();
-		if (!(TransferableHelper.isSupportedAssetFlavor(t) || TransferableHelper.isSupportedTokenFlavor(t)) || (dtde.getDropAction() & DnDConstants.ACTION_COPY_OR_MOVE) == 0) {
+		if (!(TransferableHelper.isSupportedAssetFlavor(t) || TransferableHelper.isSupportedTokenFlavor(t))
+				|| (dtde.getDropAction() & DnDConstants.ACTION_COPY_OR_MOVE) == 0) {
 			dtde.rejectDrop(); // Not a supported flavor or not a copy/move
 			log.warn("Couldn't figure out the drop type");
 			return;

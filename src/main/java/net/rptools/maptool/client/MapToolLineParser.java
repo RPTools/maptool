@@ -38,12 +38,13 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class MapToolLineParser {
 
 	// Logger for this class.
-	private static final Logger log = Logger.getLogger(MapToolLineParser.class);
+	private static final Logger log = LogManager.getLogger(MapToolLineParser.class);
 
 	/** MapTool functions to add to the parser. */
 	private static final Function[] mapToolParserFunctions = { AbortFunction.getInstance(), AssertFunction.getInstance(), AddAllToInitiativeFunction.getInstance(), ChatFunction.getInstance(),

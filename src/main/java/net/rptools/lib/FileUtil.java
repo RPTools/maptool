@@ -38,12 +38,13 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.thoughtworks.xstream.XStream;
 
 public class FileUtil {
-	private static final Logger log = Logger.getLogger(FileUtil.class);
+	private static final Logger log = LogManager.getLogger(FileUtil.class);
 
 	/**
 	 * Can't use this for String objects yet as it's Java 6+ and we're trying to be Java 5 compatible. But soon...

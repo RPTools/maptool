@@ -22,7 +22,6 @@ import java.awt.Transparency;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -63,7 +62,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
@@ -73,6 +71,8 @@ import de.muntjak.tinylookandfeel.Theme;
 import de.muntjak.tinylookandfeel.util.SBReference;
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
+import io.sentry.SentryClientFactory;
+import io.sentry.context.Context;
 import io.sentry.event.BreadcrumbBuilder;
 import io.sentry.event.UserBuilder;
 import net.rptools.clientserver.hessian.client.ClientConnection;
@@ -121,7 +121,7 @@ import net.tsc.servicediscovery.ServiceAnnouncer;
 /**
  */
 public class MapTool {
-	private static final Logger log = Logger.getLogger(MapTool.class);
+	private static final Logger log = LogManager.getLogger(MapTool.class);
 	private static SentryClient sentry;
 
 	/**
@@ -130,7 +130,8 @@ public class MapTool {
 	private static final String VERSION_TXT = "net/rptools/maptool/client/version.txt";
 
 	/**
-	 * Specifies the properties file that holds sound information. Only two sounds currently: <b>Dink</b> and <b>Clink</b>.
+	 * Specifies the properties file that holds sound information. Only two sounds currently: <b>Dink</b> and
+	 * <b>Clink</b>.
 	 */
 	private static final String SOUND_PROPERTIES = "net/rptools/maptool/client/sounds.properties";
 	public static final String SND_INVALID_OPERATION = "invalidOperation";
@@ -146,7 +147,8 @@ public class MapTool {
 	public static boolean WINDOWS = (System.getProperty("os.name").toLowerCase().startsWith("windows"));
 
 	/**
-	 * Version of Java being used. Note that this is the "specification version" , so expect numbers like 1.4, 1.5, and 1.6.
+	 * Version of Java being used. Note that this is the "specification version" , so expect numbers like 1.4, 1.5, and
+	 * 1.6.
 	 */
 	public static Double JAVA_VERSION;
 
@@ -211,7 +213,8 @@ public class MapTool {
 	}
 
 	/**
-	 * This method looks up the message key in the properties file and returns the resultant text with the detail message from the <code>Throwable</code> appended to the end.
+	 * This method looks up the message key in the properties file and returns the resultant text with the detail
+	 * message from the <code>Throwable</code> appended to the end.
 	 *
 	 * @param msgKey
 	 *            the string to use when calling {@link I18N#getText(String)}
@@ -232,13 +235,15 @@ public class MapTool {
 	}
 
 	/**
-	 * This method is the base method for putting a dialog box up on the screen that might be an error, a warning, or just an information message. Do not use this method if the desired result is a
-	 * simple confirmation box (use {@link #confirm(String, Object...)} instead).
+	 * This method is the base method for putting a dialog box up on the screen that might be an error, a warning, or
+	 * just an information message. Do not use this method if the desired result is a simple confirmation box (use
+	 * {@link #confirm(String, Object...)} instead).
 	 *
 	 * @param message
 	 *            the key in the properties file to put in the body of the dialog (formatted using <code>params</code>)
 	 * @param titleKey
-	 *            the key in the properties file to use when creating the title of the dialog window (formatted using <code>params</code>)
+	 *            the key in the properties file to use when creating the title of the dialog window (formatted using
+	 *            <code>params</code>)
 	 * @param messageType
 	 *            JOptionPane.{ERROR|WARNING|INFORMATION}_MESSAGE
 	 * @param params
@@ -250,15 +255,19 @@ public class MapTool {
 	}
 
 	/**
-	 * Same as {@link #showMessage(String, String, int, Object...)} except that <code>messages</code> is stored into a JList and that component is then used as the content of the dialog box. This
-	 * allows multiple strings to be displayed in a manner consistent with other message dialogs.
+	 * Same as {@link #showMessage(String, String, int, Object...)} except that <code>messages</code> is stored into a
+	 * JList and that component is then used as the content of the dialog box. This allows multiple strings to be
+	 * displayed in a manner consistent with other message dialogs.
 	 *
 	 * @param messages
-	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is performed!
+	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is
+	 *            performed!
 	 * @param titleKey
-	 *            the key in the properties file to use when creating the title of the dialog window (formatted using <code>params</code>)
+	 *            the key in the properties file to use when creating the title of the dialog window (formatted using
+	 *            <code>params</code>)
 	 * @param messageType
-	 *            one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE</code>
+	 *            one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>JOptionPane.WARNING_MESSAGE</code>,
+	 *            <code>JOptionPane.INFORMATION_MESSAGE</code>
 	 * @param params
 	 *            optional parameters to use when formatting the title text from the properties file
 	 */
@@ -269,18 +278,21 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays the messages provided as <code>messages</code> by calling {@link #showMessage(Object[], String, int, Object...)} and passing <code>"msg.title.messageDialogFeedback"</code> and
-	 * <code>JOptionPane.ERROR_MESSAGE</code> as parameters.
+	 * Displays the messages provided as <code>messages</code> by calling
+	 * {@link #showMessage(Object[], String, int, Object...)} and passing <code>"msg.title.messageDialogFeedback"</code>
+	 * and <code>JOptionPane.ERROR_MESSAGE</code> as parameters.
 	 *
 	 * @param messages
-	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is performed!
+	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is
+	 *            performed!
 	 */
 	public static void showFeedback(Object[] messages) {
 		showMessage(messages, "msg.title.messageDialogFeedback", JOptionPane.ERROR_MESSAGE);
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showError(String, Throwable)} and passing <code>null</code> for the second parameter.
+	 * Displays a dialog box by calling {@link #showError(String, Throwable)} and passing <code>null</code> for the
+	 * second parameter.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -290,10 +302,12 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
-	 * the {@link Logger#error(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling
+	 * {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using the
+	 * {@link Logger#error(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogError"</code> , and the dialog type is <code>JOptionPane.ERROR_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogError"</code> , and the dialog type is
+	 * <code>JOptionPane.ERROR_MESSAGE</code>.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -307,7 +321,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showWarning(String, Throwable)} and passing <code>null</code> for the second parameter.
+	 * Displays a dialog box by calling {@link #showWarning(String, Throwable)} and passing <code>null</code> for the
+	 * second parameter.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -317,10 +332,12 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
-	 * the {@link Logger#warn(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling
+	 * {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using the
+	 * {@link Logger#warn(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogWarning"</code>, and the dialog type is <code>JOptionPane.WARNING_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogWarning"</code>, and the dialog type is
+	 * <code>JOptionPane.WARNING_MESSAGE</code>.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -334,7 +351,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showInformation(String, Throwable)} and passing <code>null</code> for the second parameter.
+	 * Displays a dialog box by calling {@link #showInformation(String, Throwable)} and passing <code>null</code> for
+	 * the second parameter.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -344,10 +362,12 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
-	 * the {@link Logger#info(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling
+	 * {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using the
+	 * {@link Logger#info(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogInfo"</code>, and the dialog type is <code>JOptionPane.INFORMATION_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogInfo"</code>, and the dialog type is
+	 * <code>JOptionPane.INFORMATION_MESSAGE</code>.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -361,7 +381,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values as parameters to the formatting of the key lookup.
+	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values
+	 * as parameters to the formatting of the key lookup.
 	 *
 	 * @param message
 	 *            key from the properties file (preferred) or hard-coded string to display
@@ -379,7 +400,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values as parameters to the formatting of the key lookup.
+	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values
+	 * as parameters to the formatting of the key lookup.
 	 *
 	 * @param title
 	 * @param buttons
@@ -396,7 +418,8 @@ public class MapTool {
 	}
 
 	/**
-	 * This method is specific to deleting a token, but it can be used as a basis for any other method which wants to be turned off via a property.
+	 * This method is specific to deleting a token, but it can be used as a basis for any other method which wants to be
+	 * turned off via a property.
 	 *
 	 * @return true if the token should be deleted.
 	 */
@@ -469,8 +492,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Launch the platform's web browser and ask it to open the given URL. Note that this should not be called from any uncontrolled macros as there are both security and denial-of-service attacks
-	 * possible.
+	 * Launch the platform's web browser and ask it to open the given URL. Note that this should not be called from any
+	 * uncontrolled macros as there are both security and denial-of-service attacks possible.
 	 *
 	 * @param url
 	 */
@@ -610,7 +633,8 @@ public class MapTool {
 	}
 
 	/**
-	 * For Multi-monitor support, allows you to move the frame to a specific monitor. It will also set the height, width and x, y position of the frame.
+	 * For Multi-monitor support, allows you to move the frame to a specific monitor. It will also set the height, width
+	 * and x, y position of the frame.
 	 *
 	 * @author Jamz
 	 * @since 1.4.1.0
@@ -849,8 +873,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM, ...). The <code>targets</code> is expected do be in a string list built with
-	 * <code>separator</code>.
+	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM,
+	 * ...). The <code>targets</code> is expected do be in a string list built with <code>separator</code>.
 	 *
 	 * @param message
 	 *            message to be sent
@@ -867,7 +891,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM, ...).
+	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM,
+	 * ...).
 	 *
 	 * @param message
 	 *            message to be sent
@@ -1193,8 +1218,9 @@ public class MapTool {
 		logging = logging.replace("${appHome}", AppUtil.getAppHome().getAbsolutePath().replace('\\', '/'));
 
 		// Configure
-		new DOMConfigurator().doConfigure(new ByteArrayInputStream(logging.getBytes()),
-				LogManager.getLoggerRepository());
+		// new DOMConfigurator().doConfigure(new ByteArrayInputStream(logging.getBytes()),
+		// LogManager.getLoggerRepository());
+		log.info("DOMConfigurator configuration disabled, no custom logging currently implemented. -Jamz");
 	}
 
 	private static final void configureJide() {
@@ -1233,7 +1259,196 @@ public class MapTool {
 	}
 
 	/**
-	 * Search for command line arguments for options. Expecting arguments specified as -parameter=value pair and returns a string.
+	 * Check to see if we're running on Java 6+.
+	 * <p>
+	 * While MapTool itself doesn't use any Java 6-specific features, we use a couple dozen third-party libraries and a
+	 * search of those JAR files indicate that <i>they DO use</i> Java 6. So it's best if we warn users that they might
+	 * be going along happily and suddenly hit a Java runtime error! It might even be something they do every time they
+	 * run the program, but some piece of data was different and the library took a different path and the Java 6-only
+	 * method was invoked...
+	 * <p>
+	 * This method uses the system property <b>java.specification.version</b> as it seemed the easiest thing to test. :)
+	 */
+	private static void verifyJavaVersion() {
+		String version = System.getProperty("java.specification.version");
+		boolean keepgoing = true;
+		if (version == null) {
+			keepgoing = confirm("msg.error.unknownJavaVersion");
+			JAVA_VERSION = 1.5;
+		} else {
+			JAVA_VERSION = Double.valueOf(version);
+			if (JAVA_VERSION < 1.6) {
+				keepgoing = confirm("msg.error.wrongJavaVersion", version);
+			}
+		}
+		if (!keepgoing)
+			System.exit(1);
+	}
+
+	/**
+	 * If we're running on OSX we should call this method to download and install the MapTool logo from the main web
+	 * site. We cache this image so that it appears correctly if the application is later executed in "offline" mode, so
+	 * to speak.
+	 */
+	private static void macOSXicon() {
+		// If we're running on OSX, add the dock icon image
+		// -- and change our application name to just "MapTool" (not currently)
+		// We wait until after we call initialize() so that the asset and image managers
+		// are configured.
+		Image img = null;
+		File logoFile = new File(AppUtil.getAppHome("config"), "maptool-dock-icon.png");
+		URL logoURL = null;
+		try {
+			logoURL = new URL("http://www.rptools.net/images/logo/RPTools_Map_Logo.png");
+		} catch (MalformedURLException e) {
+			showError("Attemping to form URL -- shouldn't happen as URL is hard-coded", e);
+		}
+		try {
+			img = ImageUtil.bytesToImage(FileUtils.readFileToByteArray(logoFile));
+		} catch (IOException e) {
+			log.debug("Attemping to read cached icon: " + logoFile, e);
+			try {
+				img = ImageUtil.bytesToImage(FileUtil.getBytes(logoURL));
+				// If we did download the logo, save it to the 'config' dir for later use.
+				BufferedImage bimg = ImageUtil.createCompatibleImage(img, img.getWidth(null), img.getHeight(null),
+						null);
+				FileUtils.writeByteArrayToFile(logoFile, ImageUtil.imageToBytes(bimg, "png"));
+				img = bimg;
+			} catch (IOException e1) {
+				log.warn("Cannot read '" + logoURL + "' or  cached '" + logoFile + "'; no dock icon", e1);
+			}
+		}
+		/*
+		 * Unfortunately the next line doesn't allow Eclipse to compile the code on anything but a Mac. Too bad because
+		 * there's no problem at runtime since this code wouldn't be executed an any machine *except* a Mac. Sigh.
+		 *
+		 * com.apple.eawt.Application appl = com.apple.eawt.Application.getApplication();
+		 */
+		try {
+			Class<?> appClass = Class.forName("com.apple.eawt.Application");
+			Method getApplication = appClass.getDeclaredMethod("getApplication", (Class[]) null);
+			Object appl = getApplication.invoke(null, (Object[]) null);
+			Method setDockIconImage = appl.getClass().getDeclaredMethod("setDockIconImage",
+					new Class[] { java.awt.Image.class });
+			// If we couldn't grab the image for some reason, don't set the dock bar icon! Duh!
+			if (img != null)
+				setDockIconImage.invoke(appl, new Object[] { img });
+
+			if (MapToolUtil.isDebugEnabled()) {
+				// For some reason Mac users don't like the dock badge icon. But from a development standpoint I like
+				// seeing the
+				// version number in the dock bar. So we'll only include it when running with MAPTOOL_DEV on the command
+				// line.
+				Method setDockIconBadge = appl.getClass().getDeclaredMethod("setDockIconBadge",
+						new Class[] { java.lang.String.class });
+				String vers = getVersion();
+				vers = vers.substring(vers.length() - 2);
+				vers = vers.replaceAll("[^0-9]", "0"); // Convert all non-digits to zeroes
+				setDockIconBadge.invoke(appl, new Object[] { vers });
+			}
+		} catch (Exception e) {
+			log.info(
+					"Cannot find/invoke methods on com.apple.eawt.Application; use -X command line options to set dock bar attributes",
+					e);
+		}
+	}
+
+	private static void postInitialize() {
+		// Check to see if there is an autosave file from MT crashing
+		getAutoSaveManager().check();
+		getAutoSaveManager().restart();
+
+		taskbarFlasher = new TaskBarFlasher(clientFrame);
+
+		// Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
+		// so after frame is all done loading we sync them back up.
+		MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
+	}
+
+	/**
+	 * Return whether the campaign file has changed. Only checks to see if there is a single empty map with the default
+	 * name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". We really should check against things like
+	 * campaign property changes as well, including campaign macros...
+	 */
+	public static boolean isCampaignDirty() {
+		// TODO: This is a very naive check, but it's better than nothing
+		if (getCampaign().getZones().size() == 1) {
+			Zone singleZone = MapTool.getCampaign().getZones().get(0);
+			if (ZoneFactory.DEFAULT_MAP_NAME.equals(singleZone.getName()) && singleZone.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static void setLastWhisperer(String lastWhisperer) {
+		if (lastWhisperer != null) {
+			MapTool.lastWhisperer = lastWhisperer;
+		}
+	}
+
+	public static String getLastWhisperer() {
+		return lastWhisperer;
+	}
+
+	public static boolean useToolTipsForUnformatedRolls() {
+		if (isPersonalServer()) {
+			return AppPreferences.getUseToolTipForInlineRoll();
+		} else {
+			return getServerPolicy().getUseToolTipsForDefaultRollFormat();
+		}
+	}
+
+	public static MTWebAppServer getWebAppServer() {
+		return webAppServer;
+	}
+
+	public static void startWebAppServer(final int port) {
+		try {
+			Thread webAppThread = new Thread() {
+				@Override
+				public void run() {
+					webAppServer.setPort(port);
+					webAppServer.startServer();
+				}
+			};
+
+			webAppThread.run();
+		} catch (Exception e) { // TODO: This needs to be logged
+			System.out.println("Unable to start web server");
+			e.printStackTrace();
+		}
+	}
+
+	public static String getClientId() {
+		return clientId;
+	}
+
+	private static class ServerHeartBeatThread extends Thread {
+		@Override
+		public void run() {
+
+			// This should always run, so we should be able to safely
+			// loop forever
+			while (true) {
+				try {
+					Thread.sleep(20000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+				ServerCommand command = serverCommand;
+				if (command != null) {
+					command.heartbeat(getPlayer().getName());
+				}
+
+			}
+		}
+	}
+
+	/**
+	 * Search for command line arguments for options. Expecting arguments specified as -parameter=value pair and returns
+	 * a string.
 	 *
 	 * Examples: -version=1.4.0.1 -user=Jamz
 	 *
@@ -1299,7 +1514,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Search for command line arguments for options. Expecting arguments specified as -parameter=value pair and returns a string.
+	 * Search for command line arguments for options. Expecting arguments specified as -parameter=value pair and returns
+	 * a string.
 	 *
 	 * Examples: -monitor=1 -x=0 -y=0 -w=1200 -h=960
 	 *
@@ -1331,30 +1547,40 @@ public class MapTool {
 		return -1;
 	}
 
-	private static void initSentry() {
-		/*
-		 * It is recommended that you use the DSN detection system, which will check the environment variable "SENTRY_DSN", the Java System Property "sentry.dsn", or the "sentry.properties" file in
-		 * your classpath. This makes it easier to provide and adjust your DSN without needing to change your code. See the configuration page for more information.
-		 */
-		Sentry.init();
+	// private static void initSentry() {
+	// /*
+	// * It is recommended that you use the DSN detection system, which will check the environment variable
+	// "SENTRY_DSN", the Java System Property "sentry.dsn", or the "sentry.properties" file in
+	// * your classpath. This makes it easier to provide and adjust your DSN without needing to change your code. See
+	// the configuration page for more information.
+	// */
+	// Sentry.init();
+	//
+	// // You can also manually provide the DSN to the ``init`` method.
+	// // String dsn = args[0];
+	// // Sentry.init(dsn);
+	//
+	// /*
+	// * It is possible to go around the static ``Sentry`` API, which means you are responsible for making the
+	// SentryClient instance available to your code.
+	// */
+	// // sentry = SentryClientFactory.sentryClient();
+	//
+	// logWithStaticAPI();
+	// // myClass.logWithInstanceAPI();
+	// }
 
-		// You can also manually provide the DSN to the ``init`` method.
-		// String dsn = args[0];
-		// Sentry.init(dsn);
-
-		/*
-		 * It is possible to go around the static ``Sentry`` API, which means you are responsible for making the SentryClient instance available to your code.
-		 */
-		// sentry = SentryClientFactory.sentryClient();
-
-		logWithStaticAPI();
-		// myClass.logWithInstanceAPI();
+	/**
+	 * An example method that throws an exception.
+	 */
+	static void unsafeMethod() {
+		throw new UnsupportedOperationException("You shouldn't call this!");
 	}
 
 	/**
 	 * Examples using the (recommended) static API.
 	 */
-	public static void logWithStaticAPI() {
+	static void logWithStaticAPI() {
 		// Note that all fields set on the context are optional. Context data is copied onto
 		// all future events in the current context (until the context is cleared).
 
@@ -1371,9 +1597,10 @@ public class MapTool {
 		Sentry.getContext().addTag("tagName", "tagValue");
 
 		/*
-		 * This sends a simple event to Sentry using the statically stored instance that was created in the ``main`` method.
+		 * This sends a simple event to Sentry using the statically stored instance that was created in the ``main``
+		 * method.
 		 */
-		Sentry.capture("This is a test");
+		Sentry.capture("This is a logWithStaticAPI test");
 
 		try {
 			unsafeMethod();
@@ -1385,14 +1612,51 @@ public class MapTool {
 	}
 
 	/**
-	 * An example method that throws an exception.
+	 * Examples that use the SentryClient instance directly.
 	 */
-	static void unsafeMethod() {
-		throw new UnsupportedOperationException("You shouldn't call this!");
+	static void logWithInstanceAPI() {
+		// Retrieve the current context.
+		Context context = sentry.getContext();
+
+		// Record a breadcrumb in the current context. By default the last 100 breadcrumbs are kept.
+		context.recordBreadcrumb(new BreadcrumbBuilder().setMessage("User made an action").build());
+
+		// Set the user in the current context.
+		context.setUser(new UserBuilder().setEmail("hello@sentry.io").build());
+
+		// This sends a simple event to Sentry.
+		sentry.sendMessage("This is a logWithInstanceAPI test");
+
+		try {
+			unsafeMethod();
+		} catch (Exception e) {
+			// This sends an exception event to Sentry.
+			sentry.sendException(e);
+		}
 	}
 
 	public static void main(String[] args) {
-		initSentry();
+		/*
+		 * It is recommended that you use the DSN detection system, which will check the environment variable
+		 * "SENTRY_DSN", the Java System Property "sentry.dsn", or the "sentry.properties" file in your classpath. This
+		 * makes it easier to provide and adjust your DSN without needing to change your code. See the configuration
+		 * page for more information.
+		 */
+		Sentry.init();
+
+		/*
+		 * It is possible to go around the static ``Sentry`` API, which means you are responsible for making the
+		 * SentryClient instance available to your code.
+		 */
+		sentry = SentryClientFactory.sentryClient();
+
+		// Set MapTool version
+		sentry.setRelease(getVersion());
+		sentry.setEnvironment("Development");
+
+		// MapTool myClass = new MapTool();
+		logWithStaticAPI();
+		logWithInstanceAPI();
 
 		// Jamz: Overwrite version for testing if passed as command line argument using -v or -version
 		Options cmdOptions = new Options();
@@ -1554,8 +1818,9 @@ public class MapTool {
 		/**
 		 * This is a tweak that makes the Chinese version work better.
 		 * <p>
-		 * Consider reviewing <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en. wikipedia.org/wiki/CJK_characters</a> before making changes. And
-		 * http://www.scarfboy.com/coding/unicode-tool is also a really cool site.
+		 * Consider reviewing <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en.
+		 * wikipedia.org/wiki/CJK_characters</a> before making changes. And http://www.scarfboy.com/coding/unicode-tool
+		 * is also a really cool site.
 		 */
 		if (Locale.CHINA.equals(Locale.getDefault())) {
 			// The following font name appears to be "Sim Sun". It can be downloaded
@@ -1609,189 +1874,4 @@ public class MapTool {
 		});
 		// new Thread(new HeapSpy()).start();
 	}
-
-	/**
-	 * Check to see if we're running on Java 6+.
-	 * <p>
-	 * While MapTool itself doesn't use any Java 6-specific features, we use a couple dozen third-party libraries and a search of those JAR files indicate that <i>they DO use</i> Java 6. So it's best
-	 * if we warn users that they might be going along happily and suddenly hit a Java runtime error! It might even be something they do every time they run the program, but some piece of data was
-	 * different and the library took a different path and the Java 6-only method was invoked...
-	 * <p>
-	 * This method uses the system property <b>java.specification.version</b> as it seemed the easiest thing to test. :)
-	 */
-	private static void verifyJavaVersion() {
-		String version = System.getProperty("java.specification.version");
-		boolean keepgoing = true;
-		if (version == null) {
-			keepgoing = confirm("msg.error.unknownJavaVersion");
-			JAVA_VERSION = 1.5;
-		} else {
-			JAVA_VERSION = Double.valueOf(version);
-			if (JAVA_VERSION < 1.6) {
-				keepgoing = confirm("msg.error.wrongJavaVersion", version);
-			}
-		}
-		if (!keepgoing)
-			System.exit(1);
-	}
-
-	/**
-	 * If we're running on OSX we should call this method to download and install the MapTool logo from the main web site. We cache this image so that it appears correctly if the application is later
-	 * executed in "offline" mode, so to speak.
-	 */
-	private static void macOSXicon() {
-		// If we're running on OSX, add the dock icon image
-		// -- and change our application name to just "MapTool" (not currently)
-		// We wait until after we call initialize() so that the asset and image managers
-		// are configured.
-		Image img = null;
-		File logoFile = new File(AppUtil.getAppHome("config"), "maptool-dock-icon.png");
-		URL logoURL = null;
-		try {
-			logoURL = new URL("http://www.rptools.net/images/logo/RPTools_Map_Logo.png");
-		} catch (MalformedURLException e) {
-			showError("Attemping to form URL -- shouldn't happen as URL is hard-coded", e);
-		}
-		try {
-			img = ImageUtil.bytesToImage(FileUtils.readFileToByteArray(logoFile));
-		} catch (IOException e) {
-			log.debug("Attemping to read cached icon: " + logoFile, e);
-			try {
-				img = ImageUtil.bytesToImage(FileUtil.getBytes(logoURL));
-				// If we did download the logo, save it to the 'config' dir for later use.
-				BufferedImage bimg = ImageUtil.createCompatibleImage(img, img.getWidth(null), img.getHeight(null),
-						null);
-				FileUtils.writeByteArrayToFile(logoFile, ImageUtil.imageToBytes(bimg, "png"));
-				img = bimg;
-			} catch (IOException e1) {
-				log.warn("Cannot read '" + logoURL + "' or  cached '" + logoFile + "'; no dock icon", e1);
-			}
-		}
-		/*
-		 * Unfortunately the next line doesn't allow Eclipse to compile the code on anything but a Mac. Too bad because there's no problem at runtime since this code wouldn't be executed an any
-		 * machine *except* a Mac. Sigh.
-		 *
-		 * com.apple.eawt.Application appl = com.apple.eawt.Application.getApplication();
-		 */
-		try {
-			Class<?> appClass = Class.forName("com.apple.eawt.Application");
-			Method getApplication = appClass.getDeclaredMethod("getApplication", (Class[]) null);
-			Object appl = getApplication.invoke(null, (Object[]) null);
-			Method setDockIconImage = appl.getClass().getDeclaredMethod("setDockIconImage",
-					new Class[] { java.awt.Image.class });
-			// If we couldn't grab the image for some reason, don't set the dock bar icon! Duh!
-			if (img != null)
-				setDockIconImage.invoke(appl, new Object[] { img });
-
-			if (MapToolUtil.isDebugEnabled()) {
-				// For some reason Mac users don't like the dock badge icon. But from a development standpoint I like
-				// seeing the
-				// version number in the dock bar. So we'll only include it when running with MAPTOOL_DEV on the command
-				// line.
-				Method setDockIconBadge = appl.getClass().getDeclaredMethod("setDockIconBadge",
-						new Class[] { java.lang.String.class });
-				String vers = getVersion();
-				vers = vers.substring(vers.length() - 2);
-				vers = vers.replaceAll("[^0-9]", "0"); // Convert all non-digits to zeroes
-				setDockIconBadge.invoke(appl, new Object[] { vers });
-			}
-		} catch (Exception e) {
-			log.info(
-					"Cannot find/invoke methods on com.apple.eawt.Application; use -X command line options to set dock bar attributes",
-					e);
-		}
-	}
-
-	private static void postInitialize() {
-		// Check to see if there is an autosave file from MT crashing
-		getAutoSaveManager().check();
-		getAutoSaveManager().restart();
-
-		taskbarFlasher = new TaskBarFlasher(clientFrame);
-
-		// Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
-		// so after frame is all done loading we sync them back up.
-		MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
-	}
-
-	/**
-	 * Return whether the campaign file has changed. Only checks to see if there is a single empty map with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". We really
-	 * should check against things like campaign property changes as well, including campaign macros...
-	 */
-	public static boolean isCampaignDirty() {
-		// TODO: This is a very naive check, but it's better than nothing
-		if (getCampaign().getZones().size() == 1) {
-			Zone singleZone = MapTool.getCampaign().getZones().get(0);
-			if (ZoneFactory.DEFAULT_MAP_NAME.equals(singleZone.getName()) && singleZone.isEmpty()) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public static void setLastWhisperer(String lastWhisperer) {
-		if (lastWhisperer != null) {
-			MapTool.lastWhisperer = lastWhisperer;
-		}
-	}
-
-	public static String getLastWhisperer() {
-		return lastWhisperer;
-	}
-
-	public static boolean useToolTipsForUnformatedRolls() {
-		if (isPersonalServer()) {
-			return AppPreferences.getUseToolTipForInlineRoll();
-		} else {
-			return getServerPolicy().getUseToolTipsForDefaultRollFormat();
-		}
-	}
-
-	public static MTWebAppServer getWebAppServer() {
-		return webAppServer;
-	}
-
-	public static void startWebAppServer(final int port) {
-		try {
-			Thread webAppThread = new Thread() {
-				@Override
-				public void run() {
-					webAppServer.setPort(port);
-					webAppServer.startServer();
-				}
-			};
-
-			webAppThread.run();
-		} catch (Exception e) { // TODO: This needs to be logged
-			System.out.println("Unable to start web server");
-			e.printStackTrace();
-		}
-	}
-
-	public static String getClientId() {
-		return clientId;
-	}
-
-	private static class ServerHeartBeatThread extends Thread {
-		@Override
-		public void run() {
-
-			// This should always run, so we should be able to safely
-			// loop forever
-			while (true) {
-				try {
-					Thread.sleep(20000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-				ServerCommand command = serverCommand;
-				if (command != null) {
-					command.heartbeat(getPlayer().getName());
-				}
-
-			}
-		}
-	}
-
 }

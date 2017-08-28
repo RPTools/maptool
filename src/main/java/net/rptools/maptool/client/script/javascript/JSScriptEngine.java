@@ -12,6 +12,8 @@ import jdk.nashorn.api.scripting.ClassFilter;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIDefinition;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
+
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.reflections.Reflections;
 
@@ -23,7 +25,7 @@ import java.util.Stack;
 public class JSScriptEngine {
 
 	private static JSScriptEngine jsScriptEngine = new JSScriptEngine();
-	private static final Logger log = Logger.getLogger(JSScriptEngine.class);
+	private static final Logger log = LogManager.getLogger(JSScriptEngine.class);
 
 	private ScriptEngine engine;
 	private ScriptContext anonymousContext;

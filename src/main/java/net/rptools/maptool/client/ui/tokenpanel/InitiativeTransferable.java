@@ -12,8 +12,9 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import net.rptools.maptool.model.GUID;
 
@@ -50,7 +51,7 @@ public class InitiativeTransferable implements Transferable {
 	/**
 	 * Logger instance for this class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(InitiativeTransferable.class.getName());
+	private static final Logger LOGGER = LogManager.getLogger(InitiativeTransferable.class);
 
 	/*---------------------------------------------------------------------------------------------
 	 * Constructors
@@ -75,9 +76,10 @@ public class InitiativeTransferable implements Transferable {
 	static {
 		DataFlavor guid = null;
 		try {
-			guid = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType + ";class=net.rptools.maptool.client.ui.tokenpanel.InitiativeTransferable");
+			guid = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType
+					+ ";class=net.rptools.maptool.client.ui.tokenpanel.InitiativeTransferable");
 		} catch (ClassNotFoundException e) {
-			LOGGER.log(Level.WARNING, "Should never happen since the GUID is a valid class when the classpath is correct.");
+			LOGGER.warn("Should never happen since the GUID is a valid class when the classpath is correct.");
 		} // endtry
 		INIT_TOKEN_FLAVOR = guid;
 	}
@@ -93,7 +95,7 @@ public class InitiativeTransferable implements Transferable {
 		if (INIT_TOKEN_FLAVOR.equals(flavor)) {
 			return this;
 		}
-		InitiativeTransferHandler.LOGGER.warning("Can't support flavor: " + flavor.getHumanPresentableName());
+		InitiativeTransferHandler.LOGGER.warn("Can't support flavor: " + flavor.getHumanPresentableName());
 		throw new UnsupportedFlavorException(flavor);
 	}
 

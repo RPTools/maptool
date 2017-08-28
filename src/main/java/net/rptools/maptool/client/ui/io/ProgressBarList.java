@@ -25,6 +25,7 @@ import javax.swing.JProgressBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import net.rptools.lib.swing.SwingUtil;
@@ -42,7 +43,7 @@ import net.rptools.lib.swing.SwingUtil;
  */
 @SuppressWarnings("serial")
 public class ProgressBarList extends JDialog implements ChangeListener {
-	private static final Logger log = Logger.getLogger(ProgressBarList.class);
+	private static final Logger log = LogManager.getLogger(ProgressBarList.class);
 	/*
 	 * The general layout approach for this class is to put a BorderLayout on the main window. GridLayout is added to a panel that becomes the CENTER and the SOUTH is used for a Hide and Cancel
 	 * button.

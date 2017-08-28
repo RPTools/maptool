@@ -13,6 +13,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.commandpanel.MessagePanel;
 import net.rptools.parser.ParserException;
+
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import javax.swing.*;
@@ -36,7 +38,7 @@ import java.util.regex.Matcher;
 
 @SuppressWarnings("serial")
 public class HTMLPane extends JEditorPane {
-	private static final Logger log = Logger.getLogger(HTMLPane.class);
+	private static final Logger log = LogManager.getLogger(HTMLPane.class);
 
 	private ActionListener actionListeners;
 	private final HTMLPaneEditorKit editorKit;

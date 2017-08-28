@@ -23,10 +23,11 @@ import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class AppPreferences {
-	private static final Logger log = Logger.getLogger(AppPreferences.class);
+	private static final Logger log = LogManager.getLogger(AppPreferences.class);
 	private static Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
 
 	private static final String KEY_ASSET_ROOTS = "assetRoots";

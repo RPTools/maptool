@@ -28,11 +28,12 @@ import javax.swing.text.html.HTML;
 
 import net.sf.json.JSONObject;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class HTMLPaneFormView extends FormView {
 
-	private static final Logger LOGGER = Logger.getLogger(HTMLPaneFormView.class);
+	private static final Logger log = LogManager.getLogger(HTMLPaneFormView.class);
 
 	private final HTMLPane htmlPane;
 
@@ -174,7 +175,7 @@ public class HTMLPaneFormView extends FormView {
 					try {
 						vals.put(name, encode(pd.getText(0, pd.getLength())));
 					} catch (BadLocationException e1) {
-						LOGGER.error(e1.getStackTrace());
+						log.error(e1.getStackTrace());
 					}
 				} else if (type == null && model instanceof ComboBoxModel) {
 					vals.put(name, ((ComboBoxModel) model).getSelectedItem().toString());
@@ -183,7 +184,7 @@ public class HTMLPaneFormView extends FormView {
 					try {
 						vals.put(name, encode(pd.getText(0, pd.getLength())));
 					} catch (BadLocationException e1) {
-						LOGGER.error(e1.getStackTrace());
+						log.error(e1.getStackTrace());
 					}
 				} else if ("submit".equals(type)) {
 					// Ignore
@@ -205,7 +206,7 @@ public class HTMLPaneFormView extends FormView {
 					try {
 						vals.put(name, encode(pd.getText(0, pd.getLength())));
 					} catch (BadLocationException e1) {
-						LOGGER.error(e1.getStackTrace());
+						log.error(e1.getStackTrace());
 					}
 				} else if ("hidden".equals(type)) {
 					vals.put(name, encode(encode((String) as.getAttribute(HTML.Attribute.VALUE))));
@@ -221,7 +222,7 @@ public class HTMLPaneFormView extends FormView {
 		try {
 			return URLEncoder.encode(str, "utf-8");
 		} catch (UnsupportedEncodingException e) {
-			LOGGER.error(e.getStackTrace());
+			log.error(e.getStackTrace());
 			return str;
 		}
 	}

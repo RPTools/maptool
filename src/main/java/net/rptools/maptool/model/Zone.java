@@ -26,6 +26,9 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -45,16 +48,14 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.StringUtil;
 
-import org.apache.log4j.Logger;
-
 /**
  * This object represents the maps that will appear for placement of {@link Token}s.
  * <p>
- * Note: When adding new fields to this class, make sure to add functionality to the constructor, {@link #imported()}, {@link #optimize()}, and {@link #readResolve()} to ensure they are properly
- * initialized for maximum compatibility.
+ * Note: When adding new fields to this class, make sure to add functionality to the constructor, {@link #imported()},
+ * {@link #optimize()}, and {@link #readResolve()} to ensure they are properly initialized for maximum compatibility.
  */
 public class Zone extends BaseModel {
-	private static final Logger log = Logger.getLogger(Zone.class);
+	private static final Logger log = LogManager.getLogger(Zone.class);
 
 	public enum VisionType {
 		OFF, DAY, NIGHT
@@ -166,7 +167,8 @@ public class Zone extends BaseModel {
 	private transient HashMap<String, Integer> tokenNumberCache;
 
 	/**
-	 * Note: When adding new fields to this class, make sure to update all constructors, {@link #imported()}, {@link #readResolve()}, and potentially {@link #optimize()}.
+	 * Note: When adding new fields to this class, make sure to update all constructors, {@link #imported()},
+	 * {@link #readResolve()}, and potentially {@link #optimize()}.
 	 */
 	public Zone() {
 		// TODO: Was this needed?
@@ -256,10 +258,12 @@ public class Zone extends BaseModel {
 	}
 
 	/**
-	 * Note: When adding new fields to this class, make sure to update all constructors, {@link #imported()}, {@link #readResolve()}, and potentially {@link #optimize()}.
+	 * Note: When adding new fields to this class, make sure to update all constructors, {@link #imported()},
+	 * {@link #readResolve()}, and potentially {@link #optimize()}.
 	 * <p>
-	 * JFJ 2010-10-27 Don't forget that since there are new zones AND new tokens created here from the old one being passed in, if you have any data that needs to transfer over, you will need to
-	 * manually copy it as is done below for various items.
+	 * JFJ 2010-10-27 Don't forget that since there are new zones AND new tokens created here from the old one being
+	 * passed in, if you have any data that needs to transfer over, you will need to manually copy it as is done below
+	 * for various items.
 	 */
 	public Zone(Zone zone) {
 		backgroundPaint = zone.backgroundPaint;
@@ -371,8 +375,9 @@ public class Zone extends BaseModel {
 	}
 
 	/**
-	 * Should be invoked only when a Zone has been imported from an external source and needs to be cleaned up before being used. Currently this cleanup consists of allocating a new GUID, setting the
-	 * creation time to `now', and resetting the initiative list (setting the related zone and clearing the model).
+	 * Should be invoked only when a Zone has been imported from an external source and needs to be cleaned up before
+	 * being used. Currently this cleanup consists of allocating a new GUID, setting the creation time to `now', and
+	 * resetting the initiative list (setting the related zone and clearing the model).
 	 */
 	public void imported() {
 		id = new GUID();
@@ -503,12 +508,15 @@ public class Zone extends BaseModel {
 	}
 
 	/**
-	 * Determines whether the given ZonePoint is visible when using the specified PlayerView. This currently includes checking the following criteria:
+	 * Determines whether the given ZonePoint is visible when using the specified PlayerView. This currently includes
+	 * checking the following criteria:
 	 * <ol>
 	 * <li>If fog is turned off, return true.
 	 * <li>If the view is a GM view, return true.
-	 * <li>If Vision is <b>Day</b> or <b>Night</b> and we're not using IndividualFOW, return intersection of point with exposedArea.
-	 * <li>If Vision is off or we ARE using IndividualFOW, combine exposed areas of all owned tokens (with HasSight==true) and return intersection of point with the combined area.
+	 * <li>If Vision is <b>Day</b> or <b>Night</b> and we're not using IndividualFOW, return intersection of point with
+	 * exposedArea.
+	 * <li>If Vision is off or we ARE using IndividualFOW, combine exposed areas of all owned tokens (with
+	 * HasSight==true) and return intersection of point with the combined area.
 	 * </ol>
 	 *
 	 * @param point
@@ -537,17 +545,16 @@ public class Zone extends BaseModel {
 
 	public boolean isEmpty() {
 		// @formatter:off
-		return	(drawables == null || drawables.isEmpty()) &&
-					(gmDrawables == null || gmDrawables.isEmpty()) &&
-					(objectDrawables == null || objectDrawables.isEmpty()) &&
-					(backgroundDrawables == null || backgroundDrawables.isEmpty()) &&
-					(tokenOrderedList == null || tokenOrderedList.isEmpty()) &&
-					(labels == null || labels.isEmpty());
+		return (drawables == null || drawables.isEmpty()) && (gmDrawables == null || gmDrawables.isEmpty())
+				&& (objectDrawables == null || objectDrawables.isEmpty())
+				&& (backgroundDrawables == null || backgroundDrawables.isEmpty())
+				&& (tokenOrderedList == null || tokenOrderedList.isEmpty()) && (labels == null || labels.isEmpty());
 		// @formatter:on
 	}
 
 	/**
-	 * Determines if the passed non-<code>null</code> parameter represents a visible token. The current criteria works like this:
+	 * Determines if the passed non-<code>null</code> parameter represents a visible token. The current criteria works
+	 * like this:
 	 * <ol>
 	 * <li>If the <i>Visible to Players</i> flag is off, return <code>false</code>.
 	 * <li>If the fog-of-war for the map is off, return <code>true</code>.
@@ -695,7 +702,8 @@ public class Zone extends BaseModel {
 			return;
 		}
 		if (tok != null) {
-			if (MapTool.isPersonalServer() || (MapTool.getServerPolicy().isUseIndividualFOW() && AppUtil.playerOwns(tok))) {
+			if (MapTool.isPersonalServer()
+					|| (MapTool.getServerPolicy().isUseIndividualFOW() && AppUtil.playerOwns(tok))) {
 				GUID tea = tok.getExposedAreaGUID();
 				ExposedAreaMetaData meta = exposedAreaMeta.get(tea);
 				if (meta == null) {
@@ -704,7 +712,8 @@ public class Zone extends BaseModel {
 				}
 				meta.addToExposedAreaHistory(area);
 				ZoneRenderer zr = MapTool.getFrame().getZoneRenderer(this.getId());
-				if (zr != null) // Could be null if the AutoSaveManager is saving the campaign by copying Zones, but not ZoneRenderers
+				if (zr != null) // Could be null if the AutoSaveManager is saving the campaign by copying Zones, but not
+								// ZoneRenderers
 					zr.getZoneView().flush();
 				putToken(tok);
 				fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
@@ -716,8 +725,8 @@ public class Zone extends BaseModel {
 	}
 
 	/**
-	 * Retrieves the selected tokens and adds the passed in area to their exposed area. (Why are we passing in a <code>Set&lt;GUID></code> when <code>Set&lt;Token></code> would be much more
-	 * efficient?)
+	 * Retrieves the selected tokens and adds the passed in area to their exposed area. (Why are we passing in a
+	 * <code>Set&lt;GUID></code> when <code>Set&lt;Token></code> would be much more efficient?)
 	 *
 	 * @param area
 	 * @param selectedToks
@@ -732,11 +741,13 @@ public class Zone extends BaseModel {
 			// Jamz: if this exposedArea isn't done then it breaks getExposedTokens when vision is off...
 			exposedArea.add(area);
 		}
-		if (selectedToks != null && !selectedToks.isEmpty() && (MapTool.getServerPolicy().isUseIndividualFOW() || MapTool.isPersonalServer())) {
+		if (selectedToks != null && !selectedToks.isEmpty()
+				&& (MapTool.getServerPolicy().isUseIndividualFOW() || MapTool.isPersonalServer())) {
 			boolean isAllowed = MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().useStrictTokenManagement();
 			String playerId = MapTool.getPlayer().getName();
 			MapToolFrame frame = MapTool.getFrame();
-			ZoneRenderer zr = frame.getZoneRenderer(getId()); // FIXME 'zr' was null -- how can this happen? Fix is to use getId() instead of 'this'
+			ZoneRenderer zr = frame.getZoneRenderer(getId()); // FIXME 'zr' was null -- how can this happen? Fix is to
+																// use getId() instead of 'this'
 			ZoneView zoneView = zr.getZoneView();
 			ExposedAreaMetaData meta = null;
 
@@ -765,7 +776,8 @@ public class Zone extends BaseModel {
 	}
 
 	/**
-	 * Modifies the global exposed area (GEA) or token exposed by resetting it and then setting it to the contents of the passed in Area and firing a ModelChangeEvent.
+	 * Modifies the global exposed area (GEA) or token exposed by resetting it and then setting it to the contents of
+	 * the passed in Area and firing a ModelChangeEvent.
 	 *
 	 * @param area
 	 * @param selectedToks
@@ -808,7 +820,8 @@ public class Zone extends BaseModel {
 		if (getVisionType() == VisionType.OFF) {
 			exposedArea.subtract(area);
 		}
-		if (selectedToks != null && !selectedToks.isEmpty() && (MapTool.getServerPolicy().isUseIndividualFOW() || MapTool.isPersonalServer())) {
+		if (selectedToks != null && !selectedToks.isEmpty()
+				&& (MapTool.getServerPolicy().isUseIndividualFOW() || MapTool.isPersonalServer())) {
 			List<Token> allToks = new ArrayList<Token>();
 
 			for (GUID guid : selectedToks) {
@@ -844,8 +857,9 @@ public class Zone extends BaseModel {
 	}
 
 	/**
-	 * Returns the Area of the exposed fog for the current tokens (as determined by view.getTokens()). This means if no tokens are current, the return value is the zone's global exposed fog area. If
-	 * tokens are returned by getTokens(), their exposed areas are added to the zone's global area and the result is returned.
+	 * Returns the Area of the exposed fog for the current tokens (as determined by view.getTokens()). This means if no
+	 * tokens are current, the return value is the zone's global exposed fog area. If tokens are returned by
+	 * getTokens(), their exposed areas are added to the zone's global area and the result is returned.
 	 *
 	 * @param view
 	 *            holds whether or not tokens are selected
@@ -855,7 +869,8 @@ public class Zone extends BaseModel {
 		Area combined = new Area(exposedArea);
 
 		List<Token> toks = view.getTokens();
-		// Don't need to worry about StrictTokenOwnership since the PlayerView only contains tokens we own by calling AppUtil.playerOwns()
+		// Don't need to worry about StrictTokenOwnership since the PlayerView only contains tokens we own by calling
+		// AppUtil.playerOwns()
 		if (toks == null || toks.isEmpty()) {
 			return combined;
 		}
@@ -1072,8 +1087,9 @@ public class Zone extends BaseModel {
 	// tokens
 	///////////////////////////////////////////////////////////////////////////
 	/**
-	 * Adds the specified Token to this zone, accounting for updating the ordered list of tokens as well as firing the appropriate <code>ModelChangeEvent</code> (either <code>Event.TOKEN_ADDED</code>
-	 * or <code>Event.TOKEN_CHANGED</code>).
+	 * Adds the specified Token to this zone, accounting for updating the ordered list of tokens as well as firing the
+	 * appropriate <code>ModelChangeEvent</code> (either <code>Event.TOKEN_ADDED</code> or
+	 * <code>Event.TOKEN_CHANGED</code>).
 	 *
 	 * @param token
 	 *            the Token to be added to this zone
@@ -1096,10 +1112,12 @@ public class Zone extends BaseModel {
 	}
 
 	/**
-	 * Same as {@link #putToken(List)} but optimizes map updates by accepting a list of Tokens. Note that this method fires a single <code>ModelChangeEvent</code> using <code>Event.TOKEN_ADDED</code>
-	 * and passes the list of added tokens as a parameter. Ditto for <code>Event.TOKEN_CHANGED</code>.
+	 * Same as {@link #putToken(List)} but optimizes map updates by accepting a list of Tokens. Note that this method
+	 * fires a single <code>ModelChangeEvent</code> using <code>Event.TOKEN_ADDED</code> and passes the list of added
+	 * tokens as a parameter. Ditto for <code>Event.TOKEN_CHANGED</code>.
 	 * <p>
-	 * Not currently invoked by other code, but event handling changes for multiple tokens has been made. Marked as deprecated to prevent use until the rest of the integration is completed.
+	 * Not currently invoked by other code, but event handling changes for multiple tokens has been made. Marked as
+	 * deprecated to prevent use until the rest of the integration is completed.
 	 *
 	 * @param tokens
 	 *            List of Tokens to be added to this zone
@@ -1387,8 +1405,8 @@ public class Zone extends BaseModel {
 	}
 
 	/**
-	 * This method is called when no tokens are selected and it determines which tokens FoW to show. New buttons were added to select what type of tokens, by ownership, should be shown and driven by
-	 * the TokenSelection enum.
+	 * This method is called when no tokens are selected and it determines which tokens FoW to show. New buttons were
+	 * added to select what type of tokens, by ownership, should be shown and driven by the TokenSelection enum.
 	 * 
 	 * @author updated by Jamz
 	 * @since updated 1.4.1.0
@@ -1411,9 +1429,11 @@ public class Zone extends BaseModel {
 				case ALL: // Show FoW for ANY Token I own
 					return t.getHasSight() && AppUtil.playerOwns(t);
 				case NPC: // Show FoW for only NPC Tokens I own
-					return t.getHasSight() && t.getType() == Token.Type.NPC && (t.isOwnedByAll() || AppUtil.playerOwns(t));
+					return t.getHasSight() && t.getType() == Token.Type.NPC
+							&& (t.isOwnedByAll() || AppUtil.playerOwns(t));
 				case PC: // Show FoW for only PC Tokens I own
-					return t.getHasSight() && t.getType() == Token.Type.PC && (t.isOwnedByAll() || AppUtil.playerOwns(t));
+					return t.getHasSight() && t.getType() == Token.Type.PC
+							&& (t.isOwnedByAll() || AppUtil.playerOwns(t));
 				case GM: // Show FoW for ANY Token the GM "username" explicitly owns OR has no ownership
 					return t.getHasSight() && AppUtil.gmOwns(t);
 				default: // Show FoW for ANY Token I own
@@ -1438,7 +1458,8 @@ public class Zone extends BaseModel {
 		return getTokensFiltered(new Filter() {
 			// String playerId = MapTool.getPlayer().getName();
 			public boolean matchToken(Token t) {
-				return (t.getHasSight() && (t.getType() == Token.Type.PC && (t.isOwnedByAll() || AppUtil.playerOwns(t))));
+				return (t.getHasSight()
+						&& (t.getType() == Token.Type.PC && (t.isOwnedByAll() || AppUtil.playerOwns(t))));
 			}
 		});
 	}
@@ -1520,14 +1541,16 @@ public class Zone extends BaseModel {
 	}
 
 	/**
-	 * Need to replace static TOKEN_Z_ORDER_COMPARATOR comparator with instantiated version so that grid is available and can access token footprint
+	 * Need to replace static TOKEN_Z_ORDER_COMPARATOR comparator with instantiated version so that grid is available
+	 * and can access token footprint
 	 **/
 	public Comparator<Token> getZOrderComparator() {
 		return new Comparator<Token>() {
 			@Override
 			public int compare(Token o1, Token o2) {
 				/**
-				 * If either token is a figure, get the footprint and find the lowest point but if the same, return the smallest, else use normal z order
+				 * If either token is a figure, get the footprint and find the lowest point but if the same, return the
+				 * smallest, else use normal z order
 				 */
 				if (o1.getShape() == Token.TokenShape.FIGURE || o2.getShape() == Token.TokenShape.FIGURE) {
 					int v1 = getFigureZOrder(o1);
@@ -1557,12 +1580,14 @@ public class Zone extends BaseModel {
 
 	private int getFigureZOrder(Token t) {
 		/**
-		 * If set size return the footprint, otherwise return bounding box. Figure tokens are designed for set sizes so we need to approximate free size tokens
+		 * If set size return the footprint, otherwise return bounding box. Figure tokens are designed for set sizes so
+		 * we need to approximate free size tokens
 		 */
 		Rectangle b1 = t.isSnapToScale() ? t.getFootprint(getGrid()).getBounds(getGrid()) : t.getBounds(getZone());
 		/**
-		 * This is an awful approximation of centre of token footprint. The bounding box (b1 & b2) are usually centred on token x & y So token y + bounding y give you the bottom of the box Then
-		 * subtract portion of height to get the centre point of the base.
+		 * This is an awful approximation of centre of token footprint. The bounding box (b1 & b2) are usually centred
+		 * on token x & y So token y + bounding y give you the bottom of the box Then subtract portion of height to get
+		 * the centre point of the base.
 		 */
 		int bottom = (t.isSnapToScale() ? t.getY() + b1.y : b1.y) + b1.height;
 		int centre = t.isSnapToScale() ? b1.height / 2 : b1.width / 4;
@@ -1594,7 +1619,8 @@ public class Zone extends BaseModel {
 	}
 
 	/**
-	 * Clear out any drawables that are hidden/erased. This is an optimization step that should only happen when you can't undo your changes and re-expose a drawable, typically at load.
+	 * Clear out any drawables that are hidden/erased. This is an optimization step that should only happen when you
+	 * can't undo your changes and re-expose a drawable, typically at load.
 	 */
 	private void collapseDrawables() {
 		collapseDrawableLayer(drawables);

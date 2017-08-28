@@ -20,14 +20,15 @@ import java.util.ListIterator;
 
 import javax.swing.Icon;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 
 /**
- * All of the tokens currently being shown in the initiative list. It includes a reference to all the tokens in order, a reference to the current token, a displayable initiative value and a hold state
- * for each token.
+ * All of the tokens currently being shown in the initiative list. It includes a reference to all the tokens in order, a
+ * reference to the current token, a displayable initiative value and a hold state for each token.
  * 
  * @author Jay
  */
@@ -68,8 +69,9 @@ public class InitiativeList implements Serializable {
 	private GUID zoneId;
 
 	/**
-	 * Hold the update when this variable is greater than 0. Some methods need to call {@link #updateServer()} when they are called, but they also get called by other methods that update the server.
-	 * This keeps it from happening multiple times.
+	 * Hold the update when this variable is greater than 0. Some methods need to call {@link #updateServer()} when they
+	 * are called, but they also get called by other methods that update the server. This keeps it from happening
+	 * multiple times.
 	 */
 	private transient int holdUpdate;
 
@@ -115,7 +117,7 @@ public class InitiativeList implements Serializable {
 	/**
 	 * Logger for this class
 	 */
-	private static final Logger LOGGER = Logger.getLogger(InitiativeList.class);
+	private static final Logger LOGGER = LogManager.getLogger(InitiativeList.class);
 
 	/*---------------------------------------------------------------------------------------------
 	 * Constructor
@@ -240,7 +242,8 @@ public class InitiativeList implements Serializable {
 	 */
 	public Token removeToken(int index) {
 
-		// If we are deleting the token with initiative, drop back to the previous token, if we're at the beginning, clear current
+		// If we are deleting the token with initiative, drop back to the previous token, if we're at the beginning,
+		// clear current
 		startUnitOfWork();
 		TokenInitiative currentInitiative = getTokenInitiative(getCurrent()); // Save the currently selected initiative
 		int currentInitIndex = indexOf(currentInitiative);
@@ -402,7 +405,8 @@ public class InitiativeList implements Serializable {
 	public void finishUnitOfWork(TokenInitiative ti) {
 		assert holdUpdate > 0 : "Trying to close unit of work when one is not open.";
 		holdUpdate -= 1;
-		LOGGER.debug("finishUnitOfWork(" + (ti == null ? "" : ti.getId().toString()) + "): = " + holdUpdate + " full: " + fullUpdate);
+		LOGGER.debug("finishUnitOfWork(" + (ti == null ? "" : ti.getId().toString()) + "): = " + holdUpdate + " full: "
+				+ fullUpdate);
 		if (holdUpdate == 0) {
 			if (fullUpdate || ti == null) {
 				updateServer();
@@ -464,8 +468,10 @@ public class InitiativeList implements Serializable {
 	}
 
 	/**
-	 * Sort the tokens by their initiative state from largest to smallest. If the initiative state string can be converted into a {@link Double} that is done first. All values converted to
-	 * {@link Double}s are always considered bigger than the {@link String} values. The {@link String} values are considered bigger than any <code>null</code> values.
+	 * Sort the tokens by their initiative state from largest to smallest. If the initiative state string can be
+	 * converted into a {@link Double} that is done first. All values converted to {@link Double}s are always considered
+	 * bigger than the {@link String} values. The {@link String} values are considered bigger than any <code>null</code>
+	 * values.
 	 */
 	public void sort() {
 		startUnitOfWork();
@@ -541,7 +547,8 @@ public class InitiativeList implements Serializable {
 	public void moveToken(int oldIndex, int index) {
 
 		// Bad index, same index, oldIndex->oldindex+1, or moving the last token to the end of the list do nothing.
-		if (oldIndex < 0 || oldIndex == index || (oldIndex == tokens.size() - 1 && index == tokens.size()) || oldIndex == (index - 1))
+		if (oldIndex < 0 || oldIndex == index || (oldIndex == tokens.size() - 1 && index == tokens.size())
+				|| oldIndex == (index - 1))
 			return;
 
 		// Save the current position, the token moves but the initiative does not.
@@ -592,7 +599,8 @@ public class InitiativeList implements Serializable {
 			return;
 		LOGGER.debug("Token Init update: " + ti.getId());
 		if (AppPreferences.getInitEnableServerSync())
-			MapTool.serverCommand().updateTokenInitiative(zoneId, ti.getId(), ti.isHolding(), ti.getState(), indexOf(ti));
+			MapTool.serverCommand().updateTokenInitiative(zoneId, ti.getId(), ti.isHolding(), ti.getState(),
+					indexOf(ti));
 	}
 
 	/**

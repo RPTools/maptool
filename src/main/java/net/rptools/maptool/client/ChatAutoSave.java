@@ -15,17 +15,18 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 
 /**
  * @author frank
  */
 public class ChatAutoSave {
-	private static Logger log = Logger.getLogger(ChatAutoSave.class);
+	private static Logger log = LogManager.getLogger(ChatAutoSave.class);
 	private static final ChatAutoSave self = new ChatAutoSave();
 
 	private final Timer countdown;

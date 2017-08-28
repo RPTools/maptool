@@ -28,15 +28,16 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import net.rptools.lib.net.FTPLocation;
-import net.rptools.lib.net.Location;
-import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
-
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jidesoft.swing.CheckBoxListWithSelectable;
+
+import net.rptools.lib.net.FTPLocation;
+import net.rptools.lib.net.Location;
+import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.MapTool;
 
 /**
  * @author crash
@@ -44,7 +45,7 @@ import com.jidesoft.swing.CheckBoxListWithSelectable;
  */
 @SuppressWarnings("serial")
 public class UpdateRepoDialog extends JDialog {
-	private static final Logger log = Logger.getLogger(FTPClient.class);
+	private static final Logger log = LogManager.getLogger(FTPClient.class);
 	private static final String UPDATE_REPO_DIALOG = "net/rptools/maptool/client/ui/forms/updateRepoDialog.xml";
 	private static final FormPanel form = new FormPanel(UPDATE_REPO_DIALOG);
 
@@ -112,8 +113,8 @@ public class UpdateRepoDialog extends JDialog {
 		subdir = form.getCheckBox("@subdir");
 		password = (JPasswordField) form.getComponentByName("@password");
 		// If any of the above are null, there's a mismatch with the form.
-		if (list == null || saveTo == null || hostname == null || directory == null ||
-				username == null || subdir == null || password == null)
+		if (list == null || saveTo == null || hostname == null || directory == null || username == null
+				|| subdir == null || password == null)
 			log.error("Form does not match code: " + UPDATE_REPO_DIALOG);
 	}
 
@@ -170,7 +171,8 @@ public class UpdateRepoDialog extends JDialog {
 		List<String> repoList = new ArrayList<String>(objects.length);
 		for (int i = 0; i < objects.length; i++) {
 			Object s = objects[i];
-			// System.out.println("repoList[" + i + "] = " + s.toString() + ", type = " + s.getClass().getCanonicalName());
+			// System.out.println("repoList[" + i + "] = " + s.toString() + ", type = " +
+			// s.getClass().getCanonicalName());
 			repoList.add(s.toString());
 		}
 		return repoList;

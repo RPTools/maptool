@@ -135,6 +135,7 @@ import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.ImageManager;
 
 import org.apache.commons.collections.map.LinkedMap;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
@@ -144,7 +145,7 @@ import com.jidesoft.docking.DockableFrame;
 /**
  */
 public class MapToolFrame extends DefaultDockableHolder implements WindowListener, AppEventListener {
-	private static final Logger log = Logger.getLogger(MapToolFrame.class);
+	private static final Logger log = LogManager.getLogger(MapToolFrame.class);
 	private static final String INITIAL_LAYOUT_XML = "net/rptools/maptool/client/ui/ilayout.xml";
 	private static final String MAPTOOL_LOGO_IMAGE = "net/rptools/maptool/client/image/maptool-logo.png";
 	private static final String CREDITS_HTML = "net/rptools/maptool/client/credits.html";

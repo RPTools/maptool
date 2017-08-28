@@ -25,6 +25,7 @@ import javax.swing.JDialog;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.jeta.forms.components.panel.FormPanel;
@@ -38,7 +39,7 @@ public class ConnectionInfoDialog extends JDialog {
 	private static String externalAddress = "Unknown"; // Used to be "Discovering ..." -- note that this is a UX change
 	private static JTextField externalAddressLabel;
 
-	private static final Logger log = Logger.getLogger(ConnectionInfoDialog.class);
+	private static final Logger log = LogManager.getLogger(ConnectionInfoDialog.class);
 
 	/**
 	 * This is the default constructor

@@ -17,6 +17,7 @@ import java.util.Random;
 
 import javax.swing.SwingUtilities;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import net.rptools.clientserver.simple.client.ClientConnection;
@@ -37,7 +38,7 @@ import net.rptools.maptool.transfer.AssetTransferManager;
  * @author drice
  */
 public class MapToolServer {
-	private static final Logger log = Logger.getLogger(MapToolServer.class);
+	private static final Logger log = LogManager.getLogger(MapToolServer.class);
 	private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
 	private final MapToolServerConnection conn;

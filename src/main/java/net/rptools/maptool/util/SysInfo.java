@@ -48,6 +48,7 @@ import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.UPNPResponseException;
 import net.sf.json.JSONObject;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 /**
@@ -56,7 +57,7 @@ import org.apache.log4j.Logger;
  * @author frank
  */
 public class SysInfo {
-	private static final Logger log = Logger.getLogger(SysInfo.class);
+	private static final Logger log = LogManager.getLogger(SysInfo.class);
 	private static final DecimalFormat format = new DecimalFormat("#,##0.#");
 
 	private static JDialog frame;

@@ -17,21 +17,19 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Zone;
 
 /**
  * @author crash
  *
  */
 public class LoadSaveImpl {
-	private static final Logger log = Logger.getLogger(LoadSaveImpl.class);
+	private static final Logger log = LogManager.getLogger(LoadSaveImpl.class);
 
 	private Campaign cmpgn;
 	private UIBuilder.TreeModel model;
@@ -43,7 +41,8 @@ public class LoadSaveImpl {
 
 	/**
 	 * <p>
-	 * This method is used by other subsystems to register with us so we know they exist! This allows us to call them when the user wants to load/save their data.
+	 * This method is used by other subsystems to register with us so we know they exist! This allows us to call them
+	 * when the user wants to load/save their data.
 	 * </p>
 	 * 
 	 * @param dt

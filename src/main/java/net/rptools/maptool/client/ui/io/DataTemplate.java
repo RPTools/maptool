@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 /**
@@ -52,7 +53,7 @@ import org.apache.log4j.Logger;
  */
 abstract public class DataTemplate {
 
-	private static final Logger log = Logger.getLogger(DataTemplate.class);
+	private static final Logger log = LogManager.getLogger(DataTemplate.class);
 
 	/**
 	 * <p>

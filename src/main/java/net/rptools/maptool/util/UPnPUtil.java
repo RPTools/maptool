@@ -28,21 +28,22 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.MapTool;
 import net.sbbi.upnp.Discovery;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.ActionResponse;
 import net.sbbi.upnp.messages.UPNPResponseException;
 
-import org.apache.log4j.Logger;
-
 /**
  * @author Phil Wright
  */
 public class UPnPUtil {
-	private static final Logger log = Logger.getLogger(UPnPUtil.class);
+	private static final Logger log = LogManager.getLogger(UPnPUtil.class);
 	private static Map<InternetGatewayDevice, NetworkInterface> igds;
 	private static List<InternetGatewayDevice> mappings;
 	private static JDialog dialog = null;
@@ -88,7 +89,8 @@ public class UPnPUtil {
 								log.info("UPnP:  Trying interface " + ni.getDisplayName());
 							InternetGatewayDevice[] thisNI;
 							showMessage(ni.getDisplayName(), "Looking for gateway devices on " + ni.getDisplayName());
-							thisNI = InternetGatewayDevice.getDevices(AppPreferences.getUpnpDiscoveryTimeout(), Discovery.DEFAULT_TTL, Discovery.DEFAULT_MX, ni);
+							thisNI = InternetGatewayDevice.getDevices(AppPreferences.getUpnpDiscoveryTimeout(),
+									Discovery.DEFAULT_TTL, Discovery.DEFAULT_MX, ni);
 							showMessage(null, null);
 							if (thisNI != null) {
 								for (InternetGatewayDevice igd : thisNI) {
@@ -96,7 +98,8 @@ public class UPnPUtil {
 									if (log.isInfoEnabled())
 										log.info("UPnP:  Found IGD: " + igd.getIGDRootDevice().getModelName());
 									if (igds.put(igd, ni) != null) {
-										// There was a previous mapping for this IGD! It's unlikely to have two NICs on the
+										// There was a previous mapping for this IGD! It's unlikely to have two NICs on
+										// the
 										// the same network segment, but it IS possible. For example, both a wired and
 										// wireless connection using the same router as the gateway. For our purposes it
 										// doesn't really matter which one we use, but in the future we should give the
@@ -132,7 +135,8 @@ public class UPnPUtil {
 			findIGDs();
 		}
 		if (igds == null || igds.isEmpty()) {
-			MapTool.showError("UPnP Error - No Internet Gateway Devices found.<br><br>UPnP port mapping will not be available.");
+			MapTool.showError(
+					"UPnP Error - No Internet Gateway Devices found.<br><br>UPnP port mapping will not be available.");
 			return false;
 		}
 		for (InternetGatewayDevice gd : igds.keySet()) {
@@ -162,13 +166,16 @@ public class UPnPUtil {
 				if (mapped) {
 					mappings.add(gd);
 					if (log.isInfoEnabled())
-						log.info("UPnP: Port " + port + " mapped on " + ni.getDisplayName() + " at address " + localHostIP);
+						log.info("UPnP: Port " + port + " mapped on " + ni.getDisplayName() + " at address "
+								+ localHostIP);
 				}
 			} catch (UPNPResponseException respEx) {
 				// oops the IGD did not like something !!
-				log.error("UPnP Error 1: Could not add port mapping on device " + ni.getDisplayName() + ", IP address " + localHostIP, respEx);
+				log.error("UPnP Error 1: Could not add port mapping on device " + ni.getDisplayName() + ", IP address "
+						+ localHostIP, respEx);
 			} catch (IOException ioe) {
-				log.error("UPnP Error 2: Could not add port mapping on device " + ni.getDisplayName() + ", IP address " + localHostIP, ioe);
+				log.error("UPnP Error 2: Could not add port mapping on device " + ni.getDisplayName() + ", IP address "
+						+ localHostIP, ioe);
 			}
 		}
 		if (mappings.isEmpty())
@@ -185,7 +192,8 @@ public class UPnPUtil {
 			InternetGatewayDevice gd = iter.next();
 			try {
 				ActionResponse actResp = gd.getSpecificPortMappingEntry(null, port, "TCP");
-				if (actResp != null && "MapTool".equals(actResp.getOutActionArgumentValue("NewPortMappingDescription"))) {
+				if (actResp != null
+						&& "MapTool".equals(actResp.getOutActionArgumentValue("NewPortMappingDescription"))) {
 					// NewInternalPort=51234
 					// NewEnabled=1
 					// NewInternalClient=192.168.0.30

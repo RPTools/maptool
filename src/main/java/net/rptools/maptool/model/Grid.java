@@ -25,6 +25,9 @@ import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.tool.PointerTool;
@@ -33,18 +36,18 @@ import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.Zone.Event;
 
-import org.apache.log4j.Logger;
-
 /**
  * Base class for grids.
  * 
  * @author trevor
  */
 public abstract class Grid implements Cloneable {
-	private static final Logger log = Logger.getLogger(Grid.class);
+	private static final Logger log = LogManager.getLogger(Grid.class);
 	/**
-	 * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm for determining whether a given square cell can be entered due to fog blocking the cell is based
-	 * on the cell being split into 3x3, then the center further being split into 3x3; thus at least 9 pixels horizontally and vertically are required.
+	 * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm for determining
+	 * whether a given square cell can be entered due to fog blocking the cell is based on the cell being split into
+	 * 3x3, then the center further being split into 3x3; thus at least 9 pixels horizontally and vertically are
+	 * required.
 	 */
 	public static final int MIN_GRID_SIZE = 9;
 	public static final int MAX_GRID_SIZE = 350;
@@ -74,9 +77,11 @@ public abstract class Grid implements Cloneable {
 	}
 
 	/**
-	 * Set the facing options for tokens/objects on a grid. Each grid type can providing facings to the edges, the vertices, both, or neither.
+	 * Set the facing options for tokens/objects on a grid. Each grid type can providing facings to the edges, the
+	 * vertices, both, or neither.
 	 * 
-	 * If both are false, tokens on that grid will not be able to rotate with the mouse and keyboard controls for setting facing.
+	 * If both are false, tokens on that grid will not be able to rotate with the mouse and keyboard controls for
+	 * setting facing.
 	 * 
 	 * @param faceEdges
 	 *            - Tokens can face edges.
@@ -155,7 +160,8 @@ public abstract class Grid implements Cloneable {
 		int gridx = (int) Math.round((point.x - getOffsetX()) / getCellWidth());
 		int gridy = (int) Math.round((point.y - getOffsetY()) / getCellHeight());
 
-		return new ZonePoint((int) (gridx * getCellWidth() + getOffsetX()), (int) (gridy * getCellHeight() + getOffsetY()));
+		return new ZonePoint((int) (gridx * getCellWidth() + getOffsetX()),
+				(int) (gridy * getCellHeight() + getOffsetY()));
 	}
 
 	public abstract GridCapabilities getCapabilities();
@@ -173,10 +179,13 @@ public abstract class Grid implements Cloneable {
 	}
 
 	/**
-	 * @return The offset required to translate from the center of a cell to the top right (x_min, y_min) of the cell's bounding rectangle. Used for non-square grids only.<br>
+	 * @return The offset required to translate from the center of a cell to the top right (x_min, y_min) of the cell's
+	 *         bounding rectangle. Used for non-square grids only.<br>
 	 *         <br>
-	 *         Why? Because mySquareGrid.convert(CellPoint cp) returns a ZonePoint in the top right corner(x_min, y_min) of the square-cell, whereas myHexGrid.convert(CellPoint cp) returns a ZonePoint
-	 *         in the center of the hex-cell. Thus adding the CellOffset allows us to position the ZonePoint returned by myHexGrid.convert(CellPoint cp) in an equivalent position to that returned by
+	 *         Why? Because mySquareGrid.convert(CellPoint cp) returns a ZonePoint in the top right corner(x_min, y_min)
+	 *         of the square-cell, whereas myHexGrid.convert(CellPoint cp) returns a ZonePoint in the center of the
+	 *         hex-cell. Thus adding the CellOffset allows us to position the ZonePoint returned by
+	 *         myHexGrid.convert(CellPoint cp) in an equivalent position to that returned by
 	 *         mySquareGrid.convert(CellPoint cp)....I think ;)
 	 */
 	public Dimension getCellOffset() {
@@ -289,7 +298,8 @@ public abstract class Grid implements Cloneable {
 	 *            used to increase the area based on token footprint
 	 * @return Area
 	 */
-	public Area getShapedArea(ShapeType shape, Token token, double range, double arcAngle, int offsetAngle, boolean scaleWithToken) {
+	public Area getShapedArea(ShapeType shape, Token token, double range, double arcAngle, int offsetAngle,
+			boolean scaleWithToken) {
 		if (shape == null) {
 			shape = ShapeType.CIRCLE;
 		}
@@ -305,7 +315,8 @@ public abstract class Grid implements Cloneable {
 				double tokenBoundsWidth = token.getBounds(getZone()).getWidth() / 2;
 				visionRange += (footprintWidth > tokenBoundsWidth) ? tokenBoundsWidth : tokenBoundsWidth;
 			} else {
-				// For grids, this will be the same, but for Hex's we'll use the smaller side depending on which Hex type you choose
+				// For grids, this will be the same, but for Hex's we'll use the smaller side depending on which Hex
+				// type you choose
 				double footprintHeight = token.getFootprint(this).getBounds(this).getHeight() / 2;
 				visionRange += (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
 			}
@@ -323,7 +334,8 @@ public abstract class Grid implements Cloneable {
 			visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
 			break;
 		case SQUARE:
-			visibleArea = new Area(new Rectangle2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
+			visibleArea = new Area(
+					new Rectangle2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
 			break;
 		case CONE:
 			if (token.getFacing() == null) {
@@ -331,14 +343,18 @@ public abstract class Grid implements Cloneable {
 			}
 			// TODO: confirm if we want the offset to be positive-counter-clockwise, negative-clockwise or vice versa
 			// simply a matter of changing the sign on offsetAngle
-			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2, 360.0 - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
+			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange, visionRange * 2,
+					visionRange * 2, 360.0 - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
 			// Rotate
-			tempvisibleArea = tempvisibleArea.createTransformedArea(AffineTransform.getRotateInstance(-Math.toRadians(token.getFacing())));
+			tempvisibleArea = tempvisibleArea
+					.createTransformedArea(AffineTransform.getRotateInstance(-Math.toRadians(token.getFacing())));
 
 			Rectangle footprint = token.getFootprint(this).getBounds(this);
 			footprint.x = -footprint.width / 2;
 			footprint.y = -footprint.height / 2;
-			// footprint = footprint.createTransformedArea(AffineTransform.getTranslateInstance(-footprint.getBounds().getWidth() / 2, -footprint.getBounds().getHeight() / 2));
+			// footprint =
+			// footprint.createTransformedArea(AffineTransform.getTranslateInstance(-footprint.getBounds().getWidth() /
+			// 2, -footprint.getBounds().getHeight() / 2));
 			visibleArea.add(new Area(footprint));
 			visibleArea.add(tempvisibleArea);
 			break;
@@ -473,16 +489,18 @@ public abstract class Grid implements Cloneable {
 	private static final DirectionCalculator calculator = new DirectionCalculator();
 
 	/**
-	 * Tests the grid cell location to determine whether a token is allowed to move into it when such movement is player-initiated. (The GM may always move a token into a given grid cell.) This
-	 * implementation only handles square grids. When a hex and/or gridless implementation is created, this method should be refactored to the {@link SquareGrid} class and this method changed to
-	 * always return <code>true</code>.
+	 * Tests the grid cell location to determine whether a token is allowed to move into it when such movement is
+	 * player-initiated. (The GM may always move a token into a given grid cell.) This implementation only handles
+	 * square grids. When a hex and/or gridless implementation is created, this method should be refactored to the
+	 * {@link SquareGrid} class and this method changed to always return <code>true</code>.
 	 * <p>
 	 * Theory of operation:
 	 * <ol>
 	 * <li>Break the area to check into a 3x3 set of pieces.
 	 * <li>Determine which direction the token is coming from.
-	 * <li>For the three pieces of the 3x3 set which are closest to that incoming direction, if all of the three contain fog, the cell cannot be entered. Return <code>false</code>. Otherwise, at least
-	 * one does not contain fog. Proceed to the next step.
+	 * <li>For the three pieces of the 3x3 set which are closest to that incoming direction, if all of the three contain
+	 * fog, the cell cannot be entered. Return <code>false</code>. Otherwise, at least one does not contain fog. Proceed
+	 * to the next step.
 	 * <li>Select the region encompassed by the center of the 3x3 set of pieces.
 	 * <li>Break this region into another 3x3 set of pieces.
 	 * <li>If at least 6 of these pieces are fog-free, then the space is open. Return <code>true</code>.
@@ -522,7 +540,8 @@ public abstract class Grid implements Cloneable {
 				return checkCenterRegion(areaToCheck, exposedFog);
 			}
 		}
-		// Everything is covered with fog. Or at least, the three regions that we wanted to use to enter the destination area.
+		// Everything is covered with fog. Or at least, the three regions that we wanted to use to enter the destination
+		// area.
 		return false;
 	}
 
@@ -573,7 +592,8 @@ public abstract class Grid implements Cloneable {
 			}
 		}
 		if (log.isInfoEnabled())
-			log.info("Center region of size " + regionToCheck.getSize() + " contains neither 4+ closed spaces nor 6+ open spaces?!");
+			log.info("Center region of size " + regionToCheck.getSize()
+					+ " contains neither 4+ closed spaces nor 6+ open spaces?!");
 		return openSpace >= closedSpace;
 	}
 
@@ -608,13 +628,15 @@ public abstract class Grid implements Cloneable {
 		}
 
 		if (log.isInfoEnabled())
-			log.info("Center region of size " + regionToCheck.getSize() + " contains neither " + (9 - tolerance) + "+ closed spaces nor " + tolerance + "+ open spaces?!");
+			log.info("Center region of size " + regionToCheck.getSize() + " contains neither " + (9 - tolerance)
+					+ "+ closed spaces nor " + tolerance + "+ open spaces?!");
 		return openSpace >= closedSpace;
 	}
 
 	/**
-	 * Divides the specified region into one of nine parts, where the column and row range from 0..2. The destination Rectangle must already exist (no check for this is made) and it must not be a
-	 * reference to the same object as the region to divide (also not checked).
+	 * Divides the specified region into one of nine parts, where the column and row range from 0..2. The destination
+	 * Rectangle must already exist (no check for this is made) and it must not be a reference to the same object as the
+	 * region to divide (also not checked).
 	 * 
 	 * @param regionToDivide
 	 *            region to subdivide
@@ -630,7 +652,12 @@ public abstract class Grid implements Cloneable {
 		int height = regionToDivide.height * row / 3;
 		destination.x = regionToDivide.x + width;
 		destination.y = regionToDivide.y + height;
-		destination.width = regionToDivide.width * (column + 1) / 3 - regionToDivide.width * column / 3; // don't simplify or roundoff will be introduced
+		destination.width = regionToDivide.width * (column + 1) / 3 - regionToDivide.width * column / 3; // don't
+																											// simplify
+																											// or
+																											// roundoff
+																											// will be
+																											// introduced
 		destination.height = regionToDivide.height * (row + 1) / 3 - regionToDivide.height * row / 3;
 	}
 }

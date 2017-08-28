@@ -13,10 +13,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class OSXAdapter implements InvocationHandler {
-	private static final Logger log = Logger.getLogger(OSXAdapter.class);
+	private static final Logger log = LogManager.getLogger(OSXAdapter.class);
 	protected Object targetObject;
 	protected Method targetMethod;
 	protected String proxySignature;

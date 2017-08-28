@@ -12,10 +12,11 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class AppState {
-	private static final Logger log = Logger.getLogger(AppState.class);
+	private static final Logger log = LogManager.getLogger(AppState.class);
 	public static final String USE_DOUBLE_WIDE_PROP_NAME = "useDoubleWide";
 
 	private static boolean showGrid = false;

@@ -30,6 +30,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 /**
@@ -39,7 +40,7 @@ import org.apache.log4j.Logger;
  */
 public class MacroButtonProperties implements Comparable<MacroButtonProperties> {
 
-	private static final Logger log = Logger.getLogger(MacroButtonProperties.class);
+	private static final Logger log = LogManager.getLogger(MacroButtonProperties.class);
 
 	// private transient static final List<String> HTMLColors = Arrays.asList("aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "purple", "red", "silver", "teal",
 	// "white", "yellow");

@@ -21,18 +21,19 @@ import java.net.URL;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 
-import net.rptools.lib.FileUtil;
-import net.rptools.maptool.model.AssetManager;
-
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jdesktop.swingworker.SwingWorker;
+
+import net.rptools.lib.FileUtil;
+import net.rptools.maptool.model.AssetManager;
 
 /**
  * Executes only the first time the application is run.
  */
 public class AppSetup {
-	private static final Logger log = Logger.getLogger(AppSetup.class);
+	private static final Logger log = LogManager.getLogger(AppSetup.class);
 
 	public static void install() {
 		File appDir = AppUtil.getAppHome();

@@ -15,21 +15,22 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
 /**
  * This class provides utility functions for maptool client.
  */
 public class AppUtil {
-	private static final Logger log = Logger.getLogger(AppUtil.class);
+	private static final Logger log = LogManager.getLogger(AppUtil.class);
 
 	public static final String DEFAULT_DATADIR_NAME = ".maptool";
 	public static final String DATADIR_PROPERTY_NAME = "MAPTOOL_DATADIR";

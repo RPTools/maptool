@@ -28,12 +28,13 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.jidesoft.docking.DockableFrame;
 
 public class SelectionPanel extends AbstractMacroPanel {
-	private static final Logger log = Logger.getLogger(SelectionPanel.class);
+	private static final Logger log = LogManager.getLogger(SelectionPanel.class);
 
 	private final List<Token> tokenList = null;
 	private List<MacroButtonProperties> commonMacros = new ArrayList<MacroButtonProperties>();

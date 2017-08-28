@@ -18,13 +18,14 @@ import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
 import net.rptools.maptool.model.Player;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 /**
  * @author trevor
  */
 public class MapToolServerConnection extends ServerConnection implements ServerObserver {
-	private static final Logger log = Logger.getLogger(MapToolServerConnection.class);
+	private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
 	private final Map<String, Player> playerMap = new ConcurrentHashMap<String, Player>();
 	private final MapToolServer server;
 

@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import yasb.Binder;
@@ -53,7 +54,7 @@ import com.jeta.forms.components.panel.FormPanel;
  */
 @SuppressWarnings("serial")
 public class AbeillePanel<T> extends JPanel {
-	private static final Logger log = Logger.getLogger(AbeillePanel.class);
+	private static final Logger log = LogManager.getLogger(AbeillePanel.class);
 	private final FormPanel panel;
 	private T model;
 

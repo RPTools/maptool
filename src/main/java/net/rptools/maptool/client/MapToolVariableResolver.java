@@ -36,12 +36,13 @@ import net.rptools.parser.VariableModifiers;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class MapToolVariableResolver extends MapVariableResolver {
 
 	// Logger for this class.
-	private static final Logger LOGGER = Logger.getLogger(MapToolVariableResolver.class);
+	private static final Logger LOGGER = LogManager.getLogger(MapToolVariableResolver.class);
 
 	/** The prefix for querying and setting state values . */
 	public final static String STATE_PREFIX = "state.";

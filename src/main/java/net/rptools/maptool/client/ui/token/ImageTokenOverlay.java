@@ -14,12 +14,12 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.logging.Logger;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
 
@@ -38,7 +38,7 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
 	/**
 	 * Logger instance for this class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(ImageTokenOverlay.class.getName());
+	private static final Logger LOGGER = LogManager.getLogger(ImageTokenOverlay.class);
 
 	/**
 	 * Needed for serialization
@@ -77,7 +77,8 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
 	}
 
 	/**
-	 * @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token, java.awt.Rectangle)
+	 * @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D,
+	 *      net.rptools.maptool.model.Token, java.awt.Rectangle)
 	 */
 	@Override
 	public void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {

@@ -20,17 +20,20 @@ import javax.swing.Action;
 import javax.swing.JMenu;
 import javax.swing.KeyStroke;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.MapTool;
 
-import org.apache.log4j.Logger;
-
 /**
- * This class is the front-end for all string handling. The goal is for all text to be external from the application source so that translations can be done without editing source code. To that end,
- * this class will locate the <b>i18n.properties</b> file for the current locale and read the string values from it, returning the results.
+ * This class is the front-end for all string handling. The goal is for all text to be external from the application
+ * source so that translations can be done without editing source code. To that end, this class will locate the
+ * <b>i18n.properties</b> file for the current locale and read the string values from it, returning the results.
  * <p>
- * As MapTool uses a base name for the string and extensions for alternate pieces (such as <code>action.loadMap</code> as the base and <code>action.loadMap.accel</code> as the menu accelerator key)
- * there are different methods used to return the different components.
+ * As MapTool uses a base name for the string and extensions for alternate pieces (such as <code>action.loadMap</code>
+ * as the base and <code>action.loadMap.accel</code> as the menu accelerator key) there are different methods used to
+ * return the different components.
  * <p>
  * The ResourceBundle name is <b>net.rptools.maptool.language.i18n</b>.
  * 
@@ -39,7 +42,7 @@ import org.apache.log4j.Logger;
 
 public class I18N {
 	private static final ResourceBundle BUNDLE;
-	private static final Logger log = Logger.getLogger(I18N.class);
+	private static final Logger log = LogManager.getLogger(I18N.class);
 
 	private static final String ACCELERATOR_EXTENSION = ".accel";
 	private static final String DESCRIPTION_EXTENSION = ".description";
@@ -52,8 +55,9 @@ public class I18N {
 	}
 
 	/**
-	 * Returns a <b>JMenu</b> object to represent the given <b>Action</b> key. The key is used to locate the menu text in the properties file. The menu mnemonic is extracted as well and assigned to
-	 * the JMenu object that is then returned.
+	 * Returns a <b>JMenu</b> object to represent the given <b>Action</b> key. The key is used to locate the menu text
+	 * in the properties file. The menu mnemonic is extracted as well and assigned to the JMenu object that is then
+	 * returned.
 	 * 
 	 * @param key
 	 *            the component to search for
@@ -70,16 +74,23 @@ public class I18N {
 	}
 
 	/**
-	 * Returns the text associated with the given key that is to be used as the menu accelerator for the <b>Action</b>. This method uses the same key as used by the prior methods, but appends the
-	 * string <code>ACCELERATOR_EXTENSION</code> to the end. This allows a single key to be composed of multiple (optional) parts.
+	 * Returns the text associated with the given key that is to be used as the menu accelerator for the <b>Action</b>.
+	 * This method uses the same key as used by the prior methods, but appends the string
+	 * <code>ACCELERATOR_EXTENSION</code> to the end. This allows a single key to be composed of multiple (optional)
+	 * parts.
 	 * <p>
-	 * Note that the modifier key used by the platform to initiate the sequence is not included in the properties file. This is because the key changes from platform to platform. For example, on
-	 * Windows the key is the Control key, while on Mac OSX the key is the Command key. The AWT Toolkit represents these differently ("ctrl" on Windows and "meta" on OSX) so our only choice is to
-	 * eliminate the modifiers from the properties file and add them back in programmatically. The application does this by retrieving the platform's <code>menuShortcut</code> and saving it in a
-	 * <code>final</code> field. The value of that field is used as the modifier throughout the application. The properties file may still specify other modifiers, such as "Shift" or "Alt".
+	 * Note that the modifier key used by the platform to initiate the sequence is not included in the properties file.
+	 * This is because the key changes from platform to platform. For example, on Windows the key is the Control key,
+	 * while on Mac OSX the key is the Command key. The AWT Toolkit represents these differently ("ctrl" on Windows and
+	 * "meta" on OSX) so our only choice is to eliminate the modifiers from the properties file and add them back in
+	 * programmatically. The application does this by retrieving the platform's <code>menuShortcut</code> and saving it
+	 * in a <code>final</code> field. The value of that field is used as the modifier throughout the application. The
+	 * properties file may still specify other modifiers, such as "Shift" or "Alt".
 	 * <p>
-	 * This seems a little bogus, though. Shouldn't <b>all</b> keystrokes be definable from outside the application? So then shouldn't there be some text that can appear in the properties file that
-	 * means "use menuShortcutKey"? But what text should that be? And can it be automatically parsed by the library code so that it becomes Ctrl or Cmd as appropriate?
+	 * This seems a little bogus, though. Shouldn't <b>all</b> keystrokes be definable from outside the application? So
+	 * then shouldn't there be some text that can appear in the properties file that means "use menuShortcutKey"? But
+	 * what text should that be? And can it be automatically parsed by the library code so that it becomes Ctrl or Cmd
+	 * as appropriate?
 	 * 
 	 * @param key
 	 *            the component to search for
@@ -90,8 +101,9 @@ public class I18N {
 	}
 
 	/**
-	 * Returns the description text for the given key. This text normally appears in the statusbar of the main application frame. As described by the {@link #getAccelerator(String)} method, the input
-	 * key has the string DESCRIPTION_EXTENSION appended to it.
+	 * Returns the description text for the given key. This text normally appears in the statusbar of the main
+	 * application frame. As described by the {@link #getAccelerator(String)} method, the input key has the string
+	 * DESCRIPTION_EXTENSION appended to it.
 	 * 
 	 * @param key
 	 * @return
@@ -101,8 +113,9 @@ public class I18N {
 	}
 
 	/**
-	 * Returns the character to use as the menu mnemonic for the given key. This method searches the properties file for the given key. If the value contains an ampersand ("&amp;") the character
-	 * following the ampersand is converted to uppercase and returned.
+	 * Returns the character to use as the menu mnemonic for the given key. This method searches the properties file for
+	 * the given key. If the value contains an ampersand ("&amp;") the character following the ampersand is converted to
+	 * uppercase and returned.
 	 * 
 	 * @param key
 	 *            the component to search for
@@ -136,8 +149,8 @@ public class I18N {
 	}
 
 	/**
-	 * Returns the text associated with the given key after removing any menu mnemonic. So for the key <b>action.loadMap</b> that has the value "&Load Map" in the properties file, this method returns
-	 * "Load Map".
+	 * Returns the text associated with the given key after removing any menu mnemonic. So for the key
+	 * <b>action.loadMap</b> that has the value "&Load Map" in the properties file, this method returns "Load Map".
 	 * 
 	 * @param key
 	 *            the component to search for
@@ -153,9 +166,11 @@ public class I18N {
 	}
 
 	/**
-	 * Functionally identical to {@link #getText(String key)} except that this one bundles the formatting calls into this code. This version of the method is truly only needed when the string being
-	 * retrieved contains parameters. In MapTool, this commonly means the player's name or a filename. See the "Parameterized Strings" section of the <b>i18n.properties</b> file for example usage.
-	 * Full documentation for this technique can be found under {@link MessageFormat#format}.
+	 * Functionally identical to {@link #getText(String key)} except that this one bundles the formatting calls into
+	 * this code. This version of the method is truly only needed when the string being retrieved contains parameters.
+	 * In MapTool, this commonly means the player's name or a filename. See the "Parameterized Strings" section of the
+	 * <b>i18n.properties</b> file for example usage. Full documentation for this technique can be found under
+	 * {@link MessageFormat#format}.
 	 * 
 	 * @param key
 	 *            the <code>propertyKey</code> to use for lookup in the properties file
@@ -193,23 +208,28 @@ public class I18N {
 	 * Set all of the I18N values on an <code>Action</code> by retrieving said values from the properties file.
 	 * </p>
 	 * <p>
-	 * Uses the <code>key</code> as the index for the properties file to set the <b>Action.NAME</b> field of <b>action</b>.
+	 * Uses the <code>key</code> as the index for the properties file to set the <b>Action.NAME</b> field of
+	 * <b>action</b>.
 	 * </p>
 	 * <p>
-	 * The string used for the <b>NAME</b> is searched for an ampersand ("&amp;") to determine the mnemonic used by any menu item (no mnemonic is set if there is no ampersand). If there is one, the
-	 * <b>Action.MNEMONIC_KEY</b> property is set.
+	 * The string used for the <b>NAME</b> is searched for an ampersand ("&amp;") to determine the mnemonic used by any
+	 * menu item (no mnemonic is set if there is no ampersand). If there is one, the <b>Action.MNEMONIC_KEY</b> property
+	 * is set.
 	 * </p>
 	 * <p>
-	 * The <code>key</code> string has "<code>.accel</code>" appended to it and the properties file is searched again, this time to obtain a string representing the shortcut key. If there is one, the
-	 * <b>Action.ACCELERATOR_KEY</b> property is set.
+	 * The <code>key</code> string has "<code>.accel</code>" appended to it and the properties file is searched again,
+	 * this time to obtain a string representing the shortcut key. If there is one, the <b>Action.ACCELERATOR_KEY</b>
+	 * property is set.
 	 * </p>
 	 * <p>
-	 * The <code>key</code> string has "<code>.description</code>" appended to it and the properties file is searched again, this time to obtain a string representing the status bar help message. If
-	 * there is one, the <b>Action.SHORT_DESCRIPTION</b> property is set.
+	 * The <code>key</code> string has "<code>.description</code>" appended to it and the properties file is searched
+	 * again, this time to obtain a string representing the status bar help message. If there is one, the
+	 * <b>Action.SHORT_DESCRIPTION</b> property is set.
 	 * </p>
 	 * <p>
-	 * If <b>addMenuShortcut</b> is <code>true</code> then the proper shortcut key for the platform is added to the modifiers for the keystroke ( {@link AppActions#menuShortcut} and any menu items
-	 * that do not require modifiers, such as {@link AppActions#ZOOM_IN}).
+	 * If <b>addMenuShortcut</b> is <code>true</code> then the proper shortcut key for the platform is added to the
+	 * modifiers for the keystroke ( {@link AppActions#menuShortcut} and any menu items that do not require modifiers,
+	 * such as {@link AppActions#ZOOM_IN}).
 	 * </p>
 	 * 
 	 * @param key

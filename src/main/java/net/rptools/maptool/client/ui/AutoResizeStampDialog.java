@@ -10,31 +10,29 @@ package net.rptools.maptool.client.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.JSpinner;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import net.rptools.maptool.language.I18N;
 
-import org.apache.log4j.Logger;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-import javax.swing.SwingConstants;
-
 public class AutoResizeStampDialog extends JDialog {
-	private static final Logger log = Logger.getLogger(AutoResizeStampDialog.class);
+	private static final Logger log = LogManager.getLogger(AutoResizeStampDialog.class);
 
 	private static final long serialVersionUID = 3443156494702113624L;
 	private final JPanel contentPanel = new JPanel();
@@ -50,15 +48,18 @@ public class AutoResizeStampDialog extends JDialog {
 	 * @param selectedWidth
 	 * @param selectedHeight
 	 */
-	public AutoResizeStampDialog(int selectedWidth, int selectedHeight, int stampWidth, int stampHeight, int anchorX, int anchorY) {
+	public AutoResizeStampDialog(int selectedWidth, int selectedHeight, int stampWidth, int stampHeight, int anchorX,
+			int anchorY) {
 		final JSpinner spinnerCellWidthSelected = new JSpinner();
 		final JSpinner spinnerCellHeightSelected = new JSpinner();
 		final JSpinner spinnerPixelWidthSelected = new JSpinner();
 		final JSpinner spinnerPixelHeightSelected = new JSpinner();
 		final JSpinner spinnerPixelWidthAnchor = new JSpinner();
 		final JSpinner spinnerPixelHeightAnchor = new JSpinner();
-		final JCheckBox chckbxAdjustHorizontalAnchor = new JCheckBox(I18N.getText("dialog.resizeStamp.checkbox.horizontal.anchor"));
-		final JCheckBox chckbxAdjustVerticalAnchor = new JCheckBox(I18N.getText("dialog.resizeStamp.checkbox.vertical.anchor"));
+		final JCheckBox chckbxAdjustHorizontalAnchor = new JCheckBox(
+				I18N.getText("dialog.resizeStamp.checkbox.horizontal.anchor"));
+		final JCheckBox chckbxAdjustVerticalAnchor = new JCheckBox(
+				I18N.getText("dialog.resizeStamp.checkbox.vertical.anchor"));
 
 		setModal(true);
 		setResizable(false);
@@ -114,86 +115,98 @@ public class AutoResizeStampDialog extends JDialog {
 		JLabel lblX = new JLabel(stampWidth + " x " + stampHeight);
 		lblX.setHorizontalAlignment(SwingConstants.CENTER);
 		GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
-		gl_contentPanel.setHorizontalGroup(
-				gl_contentPanel.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_contentPanel.createSequentialGroup()
-								.addContainerGap()
-								.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
-										.addComponent(lblCellWidthSelected)
-										.addComponent(lblCellHeightSelected)
-										.addComponent(chckbxAdjustHorizontalAnchor)
-										.addComponent(chckbxAdjustVerticalAnchor, GroupLayout.PREFERRED_SIZE, 149, GroupLayout.PREFERRED_SIZE))
-								.addGap(18)
+		gl_contentPanel.setHorizontalGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_contentPanel.createSequentialGroup().addContainerGap()
+						.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
+								.addComponent(lblCellWidthSelected).addComponent(lblCellHeightSelected)
+								.addComponent(chckbxAdjustHorizontalAnchor).addComponent(
+										chckbxAdjustVerticalAnchor, GroupLayout.PREFERRED_SIZE, 149,
+										GroupLayout.PREFERRED_SIZE))
+						.addGap(18)
+						.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_contentPanel.createSequentialGroup()
+										.addGroup(gl_contentPanel
+												.createParallelGroup(Alignment.LEADING, false)
+												.addComponent(spinnerCellWidthSelected, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(spinnerCellHeightSelected, GroupLayout.PREFERRED_SIZE, 42,
+														Short.MAX_VALUE))
+										.addGap(18)
+										.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING, false)
+												.addGroup(gl_contentPanel.createSequentialGroup()
+														.addComponent(lblPixelWidthSelected)
+														.addPreferredGap(ComponentPlacement.RELATED,
+																GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+														.addComponent(spinnerPixelWidthSelected,
+																GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																GroupLayout.PREFERRED_SIZE))
+												.addGroup(gl_contentPanel.createSequentialGroup()
+														.addComponent(lblPixelHeightSelected).addGap(18).addComponent(
+																spinnerPixelHeightSelected, GroupLayout.PREFERRED_SIZE,
+																GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+										.addGap(4)
+										.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
+												.addComponent(lblPx).addComponent(lblPx2, GroupLayout.PREFERRED_SIZE,
+														12, GroupLayout.PREFERRED_SIZE)))
 								.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
 										.addGroup(gl_contentPanel.createSequentialGroup()
-												.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING, false)
-														.addComponent(spinnerCellWidthSelected, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-														.addComponent(spinnerCellHeightSelected, GroupLayout.PREFERRED_SIZE, 42, Short.MAX_VALUE))
-												.addGap(18)
-												.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING, false)
-														.addGroup(gl_contentPanel.createSequentialGroup()
-																.addComponent(lblPixelWidthSelected)
-																.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-																.addComponent(spinnerPixelWidthSelected, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-														.addGroup(gl_contentPanel.createSequentialGroup()
-																.addComponent(lblPixelHeightSelected)
-																.addGap(18)
-																.addComponent(spinnerPixelHeightSelected, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-												.addGap(4)
-												.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
-														.addComponent(lblPx)
-														.addComponent(lblPx2, GroupLayout.PREFERRED_SIZE, 12, GroupLayout.PREFERRED_SIZE)))
-										.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
-												.addGroup(gl_contentPanel.createSequentialGroup()
-														.addComponent(spinnerPixelWidthAnchor, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
-														.addPreferredGap(ComponentPlacement.RELATED)
-														.addComponent(lblPx3, GroupLayout.PREFERRED_SIZE, 12, GroupLayout.PREFERRED_SIZE))
-												.addGroup(gl_contentPanel.createSequentialGroup()
-														.addComponent(spinnerPixelHeightAnchor, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
-														.addPreferredGap(ComponentPlacement.RELATED)
-														.addComponent(lblPx4, GroupLayout.PREFERRED_SIZE, 12, GroupLayout.PREFERRED_SIZE))))
-								.addContainerGap(69, Short.MAX_VALUE))
-						.addGroup(Alignment.TRAILING, gl_contentPanel.createSequentialGroup()
-								.addContainerGap(338, Short.MAX_VALUE)
+												.addComponent(spinnerPixelWidthAnchor, GroupLayout.PREFERRED_SIZE, 84,
+														GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblPx3,
+														GroupLayout.PREFERRED_SIZE, 12, GroupLayout.PREFERRED_SIZE))
+										.addGroup(gl_contentPanel.createSequentialGroup()
+												.addComponent(spinnerPixelHeightAnchor, GroupLayout.PREFERRED_SIZE, 84,
+														GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblPx4,
+														GroupLayout.PREFERRED_SIZE, 12, GroupLayout.PREFERRED_SIZE))))
+						.addContainerGap(69, Short.MAX_VALUE))
+				.addGroup(Alignment.TRAILING,
+						gl_contentPanel.createSequentialGroup().addContainerGap(338, Short.MAX_VALUE)
 								.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING, false)
 										.addComponent(lblX, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
 										.addComponent(lblStampDimensions))
 								.addContainerGap()));
-		gl_contentPanel.setVerticalGroup(
-				gl_contentPanel.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_contentPanel.createSequentialGroup()
-								.addContainerGap()
-								.addGroup(gl_contentPanel.createParallelGroup(Alignment.BASELINE)
-										.addComponent(lblCellWidthSelected)
-										.addComponent(spinnerCellWidthSelected, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblPixelWidthSelected)
-										.addComponent(spinnerPixelWidthSelected, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addComponent(lblPx))
-								.addPreferredGap(ComponentPlacement.UNRELATED)
+		gl_contentPanel
+				.setVerticalGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_contentPanel.createSequentialGroup().addContainerGap().addGroup(gl_contentPanel
+								.createParallelGroup(Alignment.BASELINE).addComponent(lblCellWidthSelected)
+								.addComponent(spinnerCellWidthSelected, GroupLayout.PREFERRED_SIZE,
+										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								.addComponent(lblPixelWidthSelected)
+								.addComponent(spinnerPixelWidthSelected, GroupLayout.PREFERRED_SIZE,
+										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								.addComponent(lblPx)).addPreferredGap(ComponentPlacement.UNRELATED)
 								.addGroup(gl_contentPanel.createParallelGroup(Alignment.BASELINE)
 										.addComponent(lblCellHeightSelected)
-										.addComponent(spinnerCellHeightSelected, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+										.addComponent(spinnerCellHeightSelected, GroupLayout.PREFERRED_SIZE,
+												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 										.addComponent(lblPixelHeightSelected)
-										.addComponent(spinnerPixelHeightSelected, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+										.addComponent(
+												spinnerPixelHeightSelected, GroupLayout.PREFERRED_SIZE,
+												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 										.addComponent(lblPx2))
 								.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
-										.addGroup(gl_contentPanel.createSequentialGroup()
-												.addGap(18)
+										.addGroup(gl_contentPanel.createSequentialGroup().addGap(18)
 												.addGroup(gl_contentPanel.createParallelGroup(Alignment.BASELINE)
 														.addComponent(chckbxAdjustHorizontalAnchor)
-														.addComponent(spinnerPixelWidthAnchor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+														.addComponent(spinnerPixelWidthAnchor,
+																GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																GroupLayout.PREFERRED_SIZE)
 														.addComponent(lblPx3))
 												.addPreferredGap(ComponentPlacement.UNRELATED)
 												.addGroup(gl_contentPanel.createParallelGroup(Alignment.BASELINE)
 														.addComponent(chckbxAdjustVerticalAnchor)
-														.addComponent(spinnerPixelHeightAnchor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+														.addComponent(spinnerPixelHeightAnchor,
+																GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																GroupLayout.PREFERRED_SIZE)
 														.addComponent(lblPx4)))
-										.addGroup(gl_contentPanel.createSequentialGroup()
-												.addGap(27)
-												.addComponent(lblStampDimensions)
-												.addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(lblX, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-												.addGap(11)))
+										.addGroup(
+												gl_contentPanel.createSequentialGroup().addGap(27)
+														.addComponent(lblStampDimensions)
+														.addPreferredGap(ComponentPlacement.RELATED)
+														.addComponent(lblX, GroupLayout.DEFAULT_SIZE,
+																GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+														.addGap(11)))
 								.addGap(19)));
 		contentPanel.setLayout(gl_contentPanel);
 		{

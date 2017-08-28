@@ -28,16 +28,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
-
 public class AssetLoader {
-	private static final Logger log = Logger.getLogger(AssetLoader.class);
+	private static final Logger log = LogManager.getLogger(AssetLoader.class);
 
 	public enum RepoState {
 		ACTIVE, BAD_URL, INDX_BAD_FORMAT, UNAVAILABLE
@@ -75,7 +76,8 @@ public class AssetLoader {
 	 * This method returns the mapping from MD5Key to asset name on the server for the given repository.
 	 * </p>
 	 * <p>
-	 * The return value is an immutable mapping so as to prevent any chance of the mapping being corrupted by the caller.
+	 * The return value is an immutable mapping so as to prevent any chance of the mapping being corrupted by the
+	 * caller.
 	 * </p>
 	 * 
 	 * @param repo
@@ -91,11 +93,12 @@ public class AssetLoader {
 	 * This method extracts an asset map from the given repository.
 	 * </p>
 	 * <p>
-	 * It starts by checking to see if the repository index is already in the cache. If not, it makes a network connection and grabs it, calling {@link #storeIndexFile(String, byte[])} to store it
-	 * into the cache.
+	 * It starts by checking to see if the repository index is already in the cache. If not, it makes a network
+	 * connection and grabs it, calling {@link #storeIndexFile(String, byte[])} to store it into the cache.
 	 * </p>
 	 * <p>
-	 * Once the index file has been located, {@link #parseIndex(List)} is called to convert the text file into a <code>Map&lt;String, Sting></code> for the return value.
+	 * Once the index file has been located, {@link #parseIndex(List)} is called to convert the text file into a
+	 * <code>Map&lt;String, Sting></code> for the return value.
 	 * </p>
 	 * 
 	 * @param repository
@@ -130,7 +133,8 @@ public class AssetLoader {
 	}
 
 	protected List<String> decode(byte[] indexData) throws IOException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(indexData))));
+		BufferedReader reader = new BufferedReader(
+				new InputStreamReader(new GZIPInputStream(new ByteArrayInputStream(indexData))));
 
 		List<String> list = new ArrayList<String>();
 
@@ -163,7 +167,8 @@ public class AssetLoader {
 
 	/**
 	 * <p>
-	 * Converts the specified repository of assets into an index file that can be uploaded and used as the <b>index.gz</b> (after being compressed, of course).
+	 * Converts the specified repository of assets into an index file that can be uploaded and used as the
+	 * <b>index.gz</b> (after being compressed, of course).
 	 * </p>
 	 * 
 	 * @param repository

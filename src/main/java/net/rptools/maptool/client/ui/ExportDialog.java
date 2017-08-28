@@ -33,6 +33,13 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import com.jeta.forms.components.panel.FormPanel;
+import com.jeta.forms.gui.form.FormAccessor;
+
 import net.rptools.lib.net.FTPLocation;
 import net.rptools.lib.net.LocalLocation;
 import net.rptools.lib.net.Location;
@@ -47,16 +54,11 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.util.ImageManager;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-
-import com.jeta.forms.components.panel.FormPanel;
-import com.jeta.forms.gui.form.FormAccessor;
-
 /**
  * Creates a dialog for performing a screen capture to a PNG file.
  * <p>
- * This uses a modal dialog based on an Abeille form. It creates a PNG file at the resolution of the 'board' image/tile. The file can be saved to disk or sent to an FTP location.
+ * This uses a modal dialog based on an Abeille form. It creates a PNG file at the resolution of the 'board' image/tile.
+ * The file can be saved to disk or sent to an FTP location.
  * 
  * @return a dialog box
  */
@@ -65,7 +67,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	//
 	// Dialog/ UI related vars
 	//
-	private static final Logger log = Logger.getLogger(ExportDialog.class);
+	private static final Logger log = LogManager.getLogger(ExportDialog.class);
 
 	/** the modal panel the user uses to select the screenshot options */
 	private static FormPanel interactPanel;
@@ -238,7 +240,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	 */
 	private static enum ExportLayers {
 		// enum_val (fieldName as per Abeille Forms Designer, playerCanModify)
-		LAYER_TOKEN(true), LAYER_HIDDEN(false), LAYER_OBJECT(false), LAYER_BACKGROUND(false), LAYER_BOARD(false), LAYER_FOG(false), LAYER_VISIBILITY(true);
+		LAYER_TOKEN(true), LAYER_HIDDEN(false), LAYER_OBJECT(false), LAYER_BACKGROUND(false), LAYER_BOARD(
+				false), LAYER_FOG(false), LAYER_VISIBILITY(true);
 
 		private static FormPanel form;
 
@@ -252,8 +255,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 		}
 
 		/**
-		 * Stores the form this is attached to, so we don't have to store duplicate data locally (like selected and enabled). Also perform some error checking, since we _are_ duplicating the
-		 * description of the form itself (like what buttons it has).
+		 * Stores the form this is attached to, so we don't have to store duplicate data locally (like selected and
+		 * enabled). Also perform some error checking, since we _are_ duplicating the description of the form itself
+		 * (like what buttons it has).
 		 * 
 		 * @param form
 		 *            The FormPanel this dialog is part of.
@@ -321,12 +325,14 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * Ensures that the user can only check/uncheck boxes as appropriate. For example, if "fog" is not enabled on the map, it cannot be enabled for export.
+	 * Ensures that the user can only check/uncheck boxes as appropriate. For example, if "fog" is not enabled on the
+	 * map, it cannot be enabled for export.
 	 * <p>
 	 * This should get called during initialization and whenever the radio buttons change.
 	 * <p>
-	 * The GM and Players have different rules, to prevent players from gaining knowledge they should not have using the screenshot (such as revealing things under other things by disabling layers).
-	 * Players can basically only turn off tokens, to get an 'empty' version of the map.
+	 * The GM and Players have different rules, to prevent players from gaining knowledge they should not have using the
+	 * screenshot (such as revealing things under other things by disabling layers). Players can basically only turn off
+	 * tokens, to get an 'empty' version of the map.
 	 */
 	public static void enforceButtonRules() {
 		if (!MapTool.getPlayer().isGM()) {
@@ -518,8 +524,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * This is the top-level screen-capture routine. It sends the resulting PNG image to the location previously selected by the user. TODO: It currently calls {@link MapTool#takeMapScreenShot()} for
-	 * "normal" screenshots, but that's just until this code is considered stable enough.
+	 * This is the top-level screen-capture routine. It sends the resulting PNG image to the location previously
+	 * selected by the user. TODO: It currently calls {@link MapTool#takeMapScreenShot()} for "normal" screenshots, but
+	 * that's just until this code is considered stable enough.
 	 * 
 	 * @throws Exception
 	 */
@@ -545,7 +552,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 					ImageIO.write(screenCap, "png", imageOut);
 					screenCap = null; // Free up the memory as soon as possible
 					MapTool.getFrame().setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaving"));
-					exportLocation.putContent(new BufferedInputStream(new ByteArrayInputStream(imageOut.toByteArray())));
+					exportLocation
+							.putContent(new BufferedInputStream(new ByteArrayInputStream(imageOut.toByteArray())));
 				} finally {
 					IOUtils.closeQuietly(imageOut);
 				}
@@ -553,12 +561,14 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 				break;
 			case TYPE_ENTIRE_MAP:
 				switchToWaitPanel();
-				if (interactPanel.isSelected("METHOD_BUFFERED_IMAGE") || interactPanel.isSelected("METHOD_IMAGE_WRITER")) {
+				if (interactPanel.isSelected("METHOD_BUFFERED_IMAGE")
+						|| interactPanel.isSelected("METHOD_IMAGE_WRITER")) {
 					// Using a buffer in memory for the whole image
 					try {
 						final PlayerView view = preScreenshot();
 						final ImageWriter pngWriter = ImageIO.getImageWritersByFormatName("png").next();
-						MapTool.getFrame().setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotStreaming"));
+						MapTool.getFrame()
+								.setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotStreaming"));
 
 						BufferedImage image;
 						if (interactPanel.isSelected("METHOD_BUFFERED_IMAGE")) {
@@ -578,7 +588,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 						}
 						MapTool.getFrame().setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaving"));
 					} catch (Exception e) {
-						MapTool.getFrame().setStatusMessage(I18N.getString("dialog.screenshot.error.failedImageGeneration"));
+						MapTool.getFrame()
+								.setStatusMessage(I18N.getString("dialog.screenshot.error.failedImageGeneration"));
 					} finally {
 						postScreenshot();
 						MapTool.getFrame().setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaved"));
@@ -608,7 +619,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 							public void run() {
 								try {
 									PlayerView view = preScreenshot();
-									final ZoneImageGenerator zoneImageGenerator = new ZoneImageGenerator(renderer, view);
+									final ZoneImageGenerator zoneImageGenerator = new ZoneImageGenerator(renderer,
+											view);
 									final ImageWriter pngWriter = ImageIO.getImageWritersByFormatName("png").next();
 									exportLocation.putContent(pngWriter, zoneImageGenerator);
 									// postScreenshot is called by the callback imageComplete()
@@ -650,7 +662,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * Turn off all JToggleButtons on the form. We don't care if we turn off fields that are normally turned on, since {@link #enforceButtonRules()} will turn them back on as appropriate.
+	 * Turn off all JToggleButtons on the form. We don't care if we turn off fields that are normally turned on, since
+	 * {@link #enforceButtonRules()} will turn them back on as appropriate.
 	 */
 	private void resetExportSettings() {
 		FormAccessor fa = interactPanel.getFormAccessor();
@@ -735,9 +748,11 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * Finds the extents of the map, sets up zone to be captured. If the user is the GM, the extents include every object and everything that has any area, such as 'fog' and 'visibility' objects.
+	 * Finds the extents of the map, sets up zone to be captured. If the user is the GM, the extents include every
+	 * object and everything that has any area, such as 'fog' and 'visibility' objects.
 	 * <p>
-	 * If a background tiling texture is used, the image is aligned to it, so that it can be used on re-import as a new base map image.
+	 * If a background tiling texture is used, the image is aligned to it, so that it can be used on re-import as a new
+	 * base map image.
 	 * <p>
 	 * If the user is a player (or GM posing as a player), the extents only go as far as the revealed fog-of-war.
 	 * <p>
@@ -765,7 +780,11 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 				Rectangle fogE = renderer.fogExtents();
 				// MapTool.showError(fogE.x + " " + fogE.y + " " + fogE.width + " " + fogE.height);
 				if ((fogE.width < 0) || (fogE.height < 0)) {
-					MapTool.showError(I18N.getString("dialog.screenshot.error.negativeFogExtents")); // Image is not clipped to show only fog-revealed areas!"));
+					MapTool.showError(I18N.getString("dialog.screenshot.error.negativeFogExtents")); // Image is not
+																										// clipped to
+																										// show only
+																										// fog-revealed
+																										// areas!"));
 				} else {
 					extents = extents.intersection(fogE);
 				}

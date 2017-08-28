@@ -30,6 +30,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import net.rptools.lib.MD5Key;
@@ -59,7 +60,7 @@ import net.rptools.maptool.util.StringUtil;
 public class TransferableHelper extends TransferHandler {
 	private static final long serialVersionUID = 6019141249887841907L;
 
-	private static final Logger log = Logger.getLogger(TransferableHelper.class);
+	private static final Logger log = LogManager.getLogger(TransferableHelper.class);
 
 	/**
 	 * <b>text/uri-list; class=java.lang.String</b>

@@ -12,12 +12,13 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.TransferHandler;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -45,7 +46,7 @@ public class InitiativeTransferHandler extends TransferHandler {
 	/**
 	 * Logger instance for this class.
 	 */
-	static final Logger LOGGER = Logger.getLogger(InitiativeTransferHandler.class.getName());
+	static final Logger LOGGER = LogManager.getLogger(InitiativeTransferHandler.class);
 
 	/*---------------------------------------------------------------------------------------------
 	 * Constructors
@@ -87,7 +88,8 @@ public class InitiativeTransferHandler extends TransferHandler {
 
 			// Get the token and it's current position
 			InitiativeList list = panel.getList();
-			InitiativeTransferable data = (InitiativeTransferable) t.getTransferData(InitiativeTransferable.INIT_TOKEN_FLAVOR);
+			InitiativeTransferable data = (InitiativeTransferable) t
+					.getTransferData(InitiativeTransferable.INIT_TOKEN_FLAVOR);
 			JList displayList = (JList) comp;
 			int newIndex = displayList.getSelectedIndex();
 			if (newIndex == -1)
@@ -97,9 +99,9 @@ public class InitiativeTransferHandler extends TransferHandler {
 			list.moveToken(data.getInititiave(), newIndex);
 			return true;
 		} catch (UnsupportedFlavorException e) {
-			LOGGER.log(Level.WARNING, "Should not happen, I've already checked to make sure it is valid", e);
+			LOGGER.warn("Should not happen, I've already checked to make sure it is valid", e);
 		} catch (IOException e) {
-			LOGGER.log(Level.WARNING, "Rat bastards changed valid types after I started reading data", e);
+			LOGGER.warn("Rat bastards changed valid types after I started reading data", e);
 		} // entry
 		return false;
 	}

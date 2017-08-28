@@ -46,6 +46,7 @@ import net.sf.ezmorph.bean.MorphDynaBean;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 /**
@@ -59,7 +60,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 	private static final String ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK = "onMultipleTokensMove";
 	private static final String NO_GRID = "NO_GRID";
 
-	private static final Logger log = Logger.getLogger(TokenMoveFunctions.class);
+	private static final Logger log = LogManager.getLogger(TokenMoveFunctions.class);
 
 	private TokenMoveFunctions() {
 		super(0, 2, "getLastPath", "movedOverToken", "movedOverPoints", "getMoveCount");

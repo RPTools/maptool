@@ -19,13 +19,14 @@ import java.net.URLStreamHandler;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.util.ImageManager;
-
-import org.apache.log4j.Logger;
 
 /**
  * Support "asset://" in Swing components
@@ -34,7 +35,7 @@ import org.apache.log4j.Logger;
  */
 public class AssetURLStreamHandler extends URLStreamHandler {
 
-	private static final Logger log = Logger.getLogger(AssetURLStreamHandler.class);
+	private static final Logger log = LogManager.getLogger(AssetURLStreamHandler.class);
 
 	@Override
 	protected URLConnection openConnection(URL u) throws IOException {

@@ -14,12 +14,13 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.rptools.maptool.util.GraphicsUtil;
-
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import net.rptools.maptool.util.GraphicsUtil;
+
 public class AreaTree {
-	private static final Logger log = Logger.getLogger(AreaTree.class);
+	private static final Logger log = LogManager.getLogger(AreaTree.class);
 	private AreaOcean theOcean;
 
 	public AreaTree(Area area) {

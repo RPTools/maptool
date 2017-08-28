@@ -34,6 +34,9 @@ import java.util.Set;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -48,15 +51,13 @@ import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 
-import org.apache.log4j.Logger;
-
 /**
  * This object represents the placeable objects on a map. For example an icon that represents a character would exist as an {@link Asset} (the image itself) and a location and scale.
  */
 
 // Lee: made tokens cloneable
 public class Token extends BaseModel implements Cloneable {
-	private static final Logger log = Logger.getLogger(Token.class);
+	private static final Logger log = LogManager.getLogger(Token.class);
 
 	private GUID id = new GUID();
 

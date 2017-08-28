@@ -31,13 +31,12 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppUtil;
@@ -56,10 +55,8 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 
-import org.apache.log4j.Logger;
-
 public class FogUtil {
-	private static final Logger log = Logger.getLogger(FogUtil.class);
+	private static final Logger log = LogManager.getLogger(FogUtil.class);
 
 	public static Area calculateVisibility(int x, int y, Area vision, AreaTree topology) {
 		CodeTimer timer = new CodeTimer("calculateVisibility");
@@ -76,15 +73,15 @@ public class FogUtil {
 		int skippedAreas = 0;
 
 		// Jamz: Updated comparison for VisibleAreaSegment, hopefully this fixes the exceptions
-		// If exception still happens, this JVM option can be used as a temp fix: -Djava.util.Arrays.useLegacyMergeSort=true
+		// If exception still happens, this JVM option can be used as a temp fix:
+		// -Djava.util.Arrays.useLegacyMergeSort=true
 		// http://dertompson.com/2012/11/23/sort-algorithm-changes-in-java-7/
 		// http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7075600
 		List<VisibleAreaSegment> segmentList = new ArrayList<VisibleAreaSegment>(ocean.getVisibleAreaSegments(origin));
 		Collections.sort(segmentList);
 
 		List<Area> clearedAreaList = new LinkedList<Area>();
-		nextSegment:
-		for (VisibleAreaSegment segment : segmentList) {
+		nextSegment: for (VisibleAreaSegment segment : segmentList) {
 			Rectangle r = segment.getPath().getBounds();
 			for (Area clearedArea : clearedAreaList) {
 				if (clearedArea.contains(r)) {
@@ -150,8 +147,7 @@ public class FogUtil {
 				if (token.getLastPath() == null)
 					return;
 
-				List<CellPoint> wayPointList = (List<CellPoint>) token
-						.getLastPath().getWayPointList();
+				List<CellPoint> wayPointList = (List<CellPoint>) token.getLastPath().getWayPointList();
 
 				final Token tokenClone = token.clone();
 
@@ -167,8 +163,7 @@ public class FogUtil {
 					tokenClone.setY(zp.y);
 
 					renderer.flush(tokenClone);
-					Area tokenVision = renderer.getZoneView()
-							.getVisibleArea(tokenClone);
+					Area tokenVision = renderer.getZoneView().getVisibleArea(tokenClone);
 					if (tokenVision != null) {
 						Set<GUID> filteredToks = new HashSet<GUID>();
 						filteredToks.add(tokenClone.getId());
@@ -211,8 +206,7 @@ public class FogUtil {
 			token.setY(zp.y);
 			renderer.flush(token);
 
-			Area tokenVision = renderer.getZoneView()
-					.getVisibleArea(token);
+			Area tokenVision = renderer.getZoneView().getVisibleArea(token);
 			if (tokenVision != null) {
 				Set<GUID> filteredToks = new HashSet<GUID>();
 				filteredToks.add(token.getId());
@@ -227,8 +221,9 @@ public class FogUtil {
 	}
 
 	/**
-	 * This function is called by Meta-Shift-O, the token right-click, Expose -> only Currently visible menu, from the Client/Server methods calls from
-	 * net.rptools.maptool.server.ServerMethodHandler.exposePCArea(GUID), and the macro exposePCOnlyArea().
+	 * This function is called by Meta-Shift-O, the token right-click, Expose -> only Currently visible menu, from the
+	 * Client/Server methods calls from net.rptools.maptool.server.ServerMethodHandler.exposePCArea(GUID), and the macro
+	 * exposePCOnlyArea().
 	 * 
 	 * 
 	 * @author updated Jamz
@@ -281,14 +276,15 @@ public class FogUtil {
 		// System.out.println("tokList: " + tokList.toString());
 
 		/*
-		 * TODO: Jamz: May need to add back the isUseIndividualViews() logic later after testing... String playerName = MapTool.getPlayer().getName(); boolean isGM = MapTool.getPlayer().getRole() ==
-		 * Role.GM;
+		 * TODO: Jamz: May need to add back the isUseIndividualViews() logic later after testing... String playerName =
+		 * MapTool.getPlayer().getName(); boolean isGM = MapTool.getPlayer().getRole() == Role.GM;
 		 * 
 		 * for (Token token : tokList) { boolean owner = token.isOwner(playerName) || isGM;
 		 * 
 		 * //System.out.println("token: " + token.getName() + ", owner: " + owner);
 		 * 
-		 * if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner) { continue; } tokenSet.add(token.getId()); }
+		 * if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner) { continue;
+		 * } tokenSet.add(token.getId()); }
 		 */
 
 		renderer.getZone().clearExposedArea(tokenSet);
@@ -336,15 +332,17 @@ public class FogUtil {
 			}
 
 			/*
-			 * Lee: this assumes that all tokens that pass through the checks above stored CellPoints. Well, they don't, not in the context of a snapped to grid follower following an unsnapped key
-			 * token. Commenting out and replacing... for (CellPoint cell : lastPath.getCellPath()) {
+			 * Lee: this assumes that all tokens that pass through the checks above stored CellPoints. Well, they don't,
+			 * not in the context of a snapped to grid follower following an unsnapped key token. Commenting out and
+			 * replacing... for (CellPoint cell : lastPath.getCellPath()) {
 			 */
 			final ExposedAreaMetaData metaCopy = meta;
 			final Token tokenClone = new Token(token);
 			final ZoneView zoneView = renderer.getZoneView();
 
 			// Lee: get path according to zone's way point exposure toggle...
-			List<CellPoint> processPath = zone.getWaypointExposureToggle() ? lastPath.getWayPointList() : lastPath.getCellPath();
+			List<CellPoint> processPath = zone.getWaypointExposureToggle() ? lastPath.getWayPointList()
+					: lastPath.getCellPath();
 
 			int stepCount = processPath.size();
 			// System.out.println("Path size = " + stepCount);
@@ -378,8 +376,8 @@ public class FogUtil {
 	}
 
 	/**
-	 * Find the center point of a vision TODO: This is a horrible horrible method. the API is just plain disgusting. But it'll work to consolidate all the places this has to be done until we can
-	 * encapsulate it into the vision itself
+	 * Find the center point of a vision TODO: This is a horrible horrible method. the API is just plain disgusting. But
+	 * it'll work to consolidate all the places this has to be done until we can encapsulate it into the vision itself
 	 */
 	public static Point calculateVisionCenter(Token token, Zone zone) {
 		Grid grid = zone.getGrid();
@@ -414,7 +412,8 @@ public class FogUtil {
 		// Make sure the the center point is not contained inside the blocked area
 		topology.subtract(new Area(new Rectangle(topSize / 2 - 200, topSize / 2 - 200, 400, 400)));
 
-		final Area vision = new Area(new Rectangle(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE));
+		final Area vision = new Area(
+				new Rectangle(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE));
 
 		int pointCount = 0;
 		for (PathIterator iter = topology.getPathIterator(null); !iter.isDone(); iter.next()) {
@@ -478,7 +477,8 @@ public class FogUtil {
 
 				Graphics2D g2d = (Graphics2D) g;
 
-				AffineTransform at = AffineTransform.getScaleInstance((size.width / 2) / (double) topSize, (size.height) / (double) topSize);
+				AffineTransform at = AffineTransform.getScaleInstance((size.width / 2) / (double) topSize,
+						(size.height) / (double) topSize);
 				if (topImage == null) {
 					Area top = topology.createTransformedArea(at);
 					topImage = new BufferedImage(size.width / 2, size.height, BufferedImage.OPAQUE);

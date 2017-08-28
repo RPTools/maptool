@@ -38,10 +38,11 @@ import javax.swing.event.ChangeListener;
 
 import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class FTPClient {
-	private static final Logger log = Logger.getLogger(FTPClient.class);
+	private static final Logger log = LogManager.getLogger(FTPClient.class);
 
 	protected FTPClientConn cconn;
 

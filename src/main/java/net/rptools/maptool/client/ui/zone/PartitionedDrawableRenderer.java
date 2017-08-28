@@ -32,12 +32,13 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 /**
  */
 public class PartitionedDrawableRenderer implements DrawableRenderer {
-	private static Logger log = Logger.getLogger(PartitionedDrawableRenderer.class);
+	private static Logger log = LogManager.getLogger(PartitionedDrawableRenderer.class);
 	private static boolean messageLogged = false;
 
 	private static final int CHUNK_SIZE = 256;

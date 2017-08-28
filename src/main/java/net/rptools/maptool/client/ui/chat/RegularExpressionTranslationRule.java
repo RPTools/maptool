@@ -10,10 +10,11 @@ package net.rptools.maptool.client.ui.chat;
 
 import java.util.regex.Pattern;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class RegularExpressionTranslationRule extends AbstractChatTranslationRule {
-	private static final Logger log = Logger.getLogger(RegularExpressionTranslationRule.class);
+	private static final Logger log = LogManager.getLogger(RegularExpressionTranslationRule.class);
 	private Pattern pattern;
 	private final String replaceWith;
 

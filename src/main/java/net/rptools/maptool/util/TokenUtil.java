@@ -14,12 +14,13 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.awt.image.PixelGrabber;
 
-import net.rptools.maptool.model.Token;
-
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import net.rptools.maptool.model.Token;
+
 public class TokenUtil {
-	private static final Logger log = Logger.getLogger(TokenUtil.class);
+	private static final Logger log = LogManager.getLogger(TokenUtil.class);
 
 	public static int getIndexNearestTo(int[] array, int value) {
 		int delta = -1;

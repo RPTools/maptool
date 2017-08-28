@@ -19,12 +19,13 @@ import javax.swing.JOptionPane;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.jidesoft.dialog.JideOptionPane;
 
 public class MapToolEventQueue extends EventQueue {
-	private static final Logger log = Logger.getLogger(MapToolEventQueue.class);
+	private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
 	private static final JideOptionPane optionPane = new JideOptionPane(I18N.getString("MapToolEventQueue.details"), JOptionPane.ERROR_MESSAGE, JideOptionPane.CLOSE_OPTION); //$NON-NLS-1$
 
 	@Override
@@ -46,7 +47,8 @@ public class MapToolEventQueue extends EventQueue {
 				// Displaying the error message using the JideOptionPane has just failed.
 				// Fallback to standard swing dialog.
 				log.error(thrown, thrown);
-				JOptionPane.showMessageDialog(null, toString(thrown), I18N.getString("MapToolEventQueue.unexpectedError"), JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, toString(thrown),
+						I18N.getString("MapToolEventQueue.unexpectedError"), JOptionPane.ERROR_MESSAGE);
 			} finally {
 				System.out.println("INSERT SENTRY LOG HERE!");
 				log.debug("SENTRY TEST :: Debug message");

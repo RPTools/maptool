@@ -10,6 +10,7 @@ package net.rptools.maptool.client.ui;
 
 import net.rptools.maptool.client.MapTool;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.jidesoft.docking.event.DockableFrameEvent;
@@ -25,7 +26,7 @@ import com.jidesoft.docking.event.DockableFrameListener;
  * 
  */
 public class MapToolDockListener implements DockableFrameListener {
-	private static final Logger log = Logger.getLogger(MapToolDockListener.class);
+	private static final Logger log = LogManager.getLogger(MapToolDockListener.class);
 
 	public void dockableFrameActivated(DockableFrameEvent dfe) {
 		showEvent(dfe.toString());

@@ -42,6 +42,7 @@ import net.rptools.lib.GUID;
 import net.rptools.lib.ModelVersionManager;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.thoughtworks.xstream.XStream;
@@ -78,7 +79,7 @@ public class PackedFile {
 	private static final String PROPERTY_FILE = "properties.xml";
 	private static final String CONTENT_FILE = "content.xml";
 
-	private static final Logger log = Logger.getLogger(PackedFile.class);
+	private static final Logger log = LogManager.getLogger(PackedFile.class);
 
 	private static File tmpDir = new File(System.getProperty("java.io.tmpdir")); // Shared temporary directory
 

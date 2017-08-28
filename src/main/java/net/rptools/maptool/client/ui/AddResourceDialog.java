@@ -45,6 +45,7 @@ import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.language.I18N;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jdesktop.swingworker.SwingWorker;
 
@@ -52,7 +53,7 @@ import com.jidesoft.swing.FolderChooser;
 
 public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
-	private static final Logger log = Logger.getLogger(AddResourceDialog.class);
+	private static final Logger log = LogManager.getLogger(AddResourceDialog.class);
 
 	private static final String LIBRARY_URL = "http://library.rptools.net/1.3";
 	private static final String LIBRARY_LIST_URL = LIBRARY_URL + "/listArtPacks";

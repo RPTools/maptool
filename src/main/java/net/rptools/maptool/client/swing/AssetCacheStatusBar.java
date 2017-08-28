@@ -20,6 +20,7 @@ import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import net.rptools.lib.image.ImageUtil;
@@ -30,7 +31,7 @@ import net.rptools.maptool.model.AssetManager;
 
 public class AssetCacheStatusBar extends JLabel {
 	private static final long serialVersionUID = -9151734515078030778L;
-	private static final Logger LOGGER = Logger.getLogger(AssetCacheStatusBar.class);
+	private static final Logger LOGGER = LogManager.getLogger(AssetCacheStatusBar.class);
 	private static final File CACHE_DIR = AppUtil.getAppHome("assetcache");
 	private static final long POLLING_INTERVAL = 7000;
 	private static long lastChecked = 0;

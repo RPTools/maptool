@@ -26,10 +26,11 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.ImageManager;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class ImageLoaderCache {
-	private static final Logger log = Logger.getLogger(ImageLoaderCache.class);
+	private static final Logger log = LogManager.getLogger(ImageLoaderCache.class);
 
 	private final Map<String, Image> imageMap = new HashMap<String, Image>();
 

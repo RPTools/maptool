@@ -15,11 +15,12 @@ import java.io.IOException;
 
 import javax.swing.Timer;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.util.PersistenceUtil;
-
-import org.apache.log4j.Logger;
 
 /**
  * @author tylere
@@ -27,9 +28,10 @@ import org.apache.log4j.Logger;
  *         Attempts to recover campaigns when the application crashes.
  */
 public class AutoSaveManager implements ActionListener {
-	private static final Logger log = Logger.getLogger(AutoSaveManager.class);
+	private static final Logger log = LogManager.getLogger(AutoSaveManager.class);
 	private Timer autoSaveTimer;
-	public static final File AUTOSAVE_FILE = new File(AppUtil.getAppHome("autosave"), "AutoSave" + AppConstants.CAMPAIGN_FILE_EXTENSION); //$NON-NLS-1$
+	public static final File AUTOSAVE_FILE = new File(AppUtil.getAppHome("autosave"), //$NON-NLS-1$
+			"AutoSave" + AppConstants.CAMPAIGN_FILE_EXTENSION);
 
 	public void start() {
 		restart();
@@ -65,7 +67,8 @@ public class AutoSaveManager implements ActionListener {
 	}
 
 	/**
-	 * Applications can use this to pause the timer. The {@link #restart()} method can be called at any time to reset and start the timer.
+	 * Applications can use this to pause the timer. The {@link #restart()} method can be called at any time to reset
+	 * and start the timer.
 	 */
 	public void pause() {
 		if (autoSaveTimer != null && autoSaveTimer.isRunning())
@@ -105,7 +108,8 @@ public class AutoSaveManager implements ActionListener {
 					long startSave = System.currentTimeMillis();
 					try {
 						PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE, null);
-						MapTool.getFrame().setStatusMessage(I18N.getText("AutoSaveManager.status.autoSaveComplete", System.currentTimeMillis() - startSave));
+						MapTool.getFrame().setStatusMessage(I18N.getText("AutoSaveManager.status.autoSaveComplete",
+								System.currentTimeMillis() - startSave));
 					} catch (IOException ioe) {
 						MapTool.showError("AutoSaveManager.failed", ioe);
 					} catch (Throwable t) {
@@ -123,7 +127,8 @@ public class AutoSaveManager implements ActionListener {
 			// the flag. For safety's sake I retrieve the current value and report it if it's true, but
 			// we shouldn't be able to get here in that case...
 			if (AppState.isSaving()) {
-				MapTool.showError(I18N.getString("AutoSaveManager.failed") + "<br/>\nand AppState.isSaving() is true!", t);
+				MapTool.showError(I18N.getString("AutoSaveManager.failed") + "<br/>\nand AppState.isSaving() is true!",
+						t);
 				AppState.setIsSaving(false);
 			} else {
 				MapTool.showError("AutoSaveManager.failed", t);

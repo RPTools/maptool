@@ -17,10 +17,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
-
-import org.apache.log4j.Logger;
 
 /**
  * This supports token states flowing from one box to the next when multiple states are set on the same token.
@@ -29,7 +30,7 @@ import org.apache.log4j.Logger;
  */
 public class TokenOverlayFlow {
 
-	private static final Logger log = Logger.getLogger(TokenOverlayFlow.class);
+	private static final Logger log = LogManager.getLogger(TokenOverlayFlow.class);
 
 	/*---------------------------------------------------------------------------------------------
 	 * Instance Variables
@@ -51,7 +52,8 @@ public class TokenOverlayFlow {
 	private final double size;
 
 	/**
-	 * This map contains the list of states for each token in the order they are drawn. It's done this way so that the states don't jump around as they are added or removed.
+	 * This map contains the list of states for each token in the order they are drawn. It's done this way so that the
+	 * states don't jump around as they are added or removed.
 	 */
 	private final Map<GUID, List<String>> savedStates = new HashMap<GUID, List<String>>();
 
@@ -87,7 +89,8 @@ public class TokenOverlayFlow {
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o changing the order. It also removes any unused states.
+	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o
+	 * changing the order. It also removes any unused states.
 	 * 
 	 * @param bounds
 	 *            The token's bounds. All states are drawn inside this area.
@@ -144,11 +147,13 @@ public class TokenOverlayFlow {
 		int col = gridSize - 1 - (index % gridSize); // Start at right
 
 		// Build the rectangle from the passed bounds
-		return new Rectangle2D.Double(offsets[col] * bounds.width + bounds.x, offsets[row] * bounds.height + bounds.y, size * bounds.width, size * bounds.height);
+		return new Rectangle2D.Double(offsets[col] * bounds.width + bounds.x, offsets[row] * bounds.height + bounds.y,
+				size * bounds.width, size * bounds.height);
 	}
 
 	/**
-	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o changing the order. It also removes any unused states.
+	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o
+	 * changing the order. It also removes any unused states.
 	 * 
 	 * @param bounds
 	 *            The token's bounds. All states are drawn inside this area.
@@ -160,7 +165,8 @@ public class TokenOverlayFlow {
 	 */
 	public Rectangle getStateBounds(Rectangle bounds, Token token, String state) {
 		Rectangle2D r = getStateBounds2D(bounds, token, state);
-		return new Rectangle((int) Math.round(r.getX()), (int) Math.round(r.getY()), (int) Math.round(r.getWidth()), (int) Math.round(r.getHeight()));
+		return new Rectangle((int) Math.round(r.getX()), (int) Math.round(r.getY()), (int) Math.round(r.getWidth()),
+				(int) Math.round(r.getHeight()));
 	}
 
 	/*---------------------------------------------------------------------------------------------

@@ -113,6 +113,7 @@ import net.rptools.maptool.util.SysInfo;
 import net.rptools.maptool.util.UPnPUtil;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jdesktop.swingworker.SwingWorker;
 
@@ -132,7 +133,7 @@ import com.jidesoft.docking.DockableFrame;
  * accomplish the effect of the Action.
  */
 public class AppActions {
-	private static final Logger log = Logger.getLogger(AppActions.class);
+	private static final Logger log = LogManager.getLogger(AppActions.class);
 
 	private static Set<Token> tokenCopySet = null;
 	public static final int menuShortcut = getMenuShortcutKeyMask();

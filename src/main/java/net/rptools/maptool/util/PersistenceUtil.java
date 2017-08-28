@@ -61,6 +61,7 @@ import net.rptools.maptool.model.transform.campaign.TokenPropertyMapTransform;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.caucho.hessian.io.HessianInput;
@@ -71,7 +72,7 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * @author trevor
  */
 public class PersistenceUtil {
-	private static final Logger log = Logger.getLogger(PersistenceUtil.class);
+	private static final Logger log = LogManager.getLogger(PersistenceUtil.class);
 
 	public static final String PROP_VERSION = "version"; //$NON-NLS-1$
 	public static final String PROP_CAMPAIGN_VERSION = "campaignVersion"; //$NON-NLS-1$

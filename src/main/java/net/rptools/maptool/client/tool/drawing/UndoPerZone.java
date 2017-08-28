@@ -20,6 +20,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.Pen;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 /**
@@ -33,7 +34,7 @@ import org.apache.log4j.Logger;
  * @version $Revision: 5828 $ $Date: 2011-11-26 18:29:24 -0500 (Sat, 26 Nov 2011) $ $Author: azhrei_fje $
  */
 public class UndoPerZone implements ModelChangeListener {
-	private static final Logger log = Logger.getLogger(UndoPerZone.class);
+	private static final Logger log = LogManager.getLogger(UndoPerZone.class);
 
 	/**
 	 * Swing's undo/redo support

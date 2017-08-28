@@ -20,6 +20,7 @@ import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import net.rptools.lib.image.ImageUtil;
@@ -28,7 +29,7 @@ import net.rptools.maptool.language.I18N;
 
 public class AppHomeDiskSpaceStatusBar extends JLabel {
 	private static final long serialVersionUID = 3149155977860280954L;
-	private static final Logger LOGGER = Logger.getLogger(AppHomeDiskSpaceStatusBar.class);
+	private static final Logger LOGGER = LogManager.getLogger(AppHomeDiskSpaceStatusBar.class);
 	private static final File CACHE_DIR = AppUtil.getAppHome();
 	private static final long POLLING_INTERVAL = 10000;
 	private static long lastChecked = 0;

@@ -20,6 +20,8 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
+
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -32,7 +34,7 @@ import java.util.regex.Pattern;
  */
 public class MacroManager {
 
-	private static final Logger log = Logger.getLogger(MacroManager.class);
+	private static final Logger log = LogManager.getLogger(MacroManager.class);
 
 	private static final int MAX_RECURSE_COUNT = 10;
 

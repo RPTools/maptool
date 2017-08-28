@@ -24,11 +24,12 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.util.ImageManager;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class LookupTableImagePanelModel implements ImagePanelModel {
 
-	private static final Logger log = Logger.getLogger(LookupTableImagePanelModel.class);
+	private static final Logger log = LogManager.getLogger(LookupTableImagePanelModel.class);
 
 	private final ImageObserver[] imageObservers;
 

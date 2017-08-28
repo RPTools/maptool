@@ -39,6 +39,7 @@ import javax.swing.SwingWorker;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import net.rptools.lib.FileUtil;
@@ -59,7 +60,7 @@ import net.rptools.maptool.util.PersistenceUtil;
 
 public class ImageFileImagePanelModel implements ImagePanelModel {
 
-	private static final Logger log = Logger.getLogger(ImageFileImagePanelModel.class);
+	private static final Logger log = LogManager.getLogger(ImageFileImagePanelModel.class);
 	private static final Color TOKEN_BG_COLOR = new Color(215, 215, 215);
 	private static Image rptokenDecorationImage;
 	private static Image herolabDecorationImage;

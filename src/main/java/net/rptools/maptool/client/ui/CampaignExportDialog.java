@@ -21,25 +21,28 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import com.jeta.forms.components.panel.FormPanel;
+
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.CampaignExport;
 
-import org.apache.log4j.Logger;
-
-import com.jeta.forms.components.panel.FormPanel;
-
 /**
  * Creates a dialog for saving campaigns as a previous version
  * <p>
- * This uses a modal dialog based on an Abeille form. It allows the user to select a version of MapTool to save the campaign file as for backward compatibility.
+ * This uses a modal dialog based on an Abeille form. It allows the user to select a version of MapTool to save the
+ * campaign file as for backward compatibility.
  * 
  * @return a dialog box
  */
 @SuppressWarnings("serial")
 public class CampaignExportDialog extends JDialog {
-	private static final Logger log = Logger.getLogger(CampaignExportDialog.class);
+	private static final Logger log = LogManager.getLogger(CampaignExportDialog.class);
 
 	private static FormPanel mainPanel;
 	private static JEditorPane versionNotesText;
