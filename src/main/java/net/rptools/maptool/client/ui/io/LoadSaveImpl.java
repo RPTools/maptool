@@ -41,8 +41,7 @@ public class LoadSaveImpl {
 
 	/**
 	 * <p>
-	 * This method is used by other subsystems to register with us so we know they exist! This allows us to call them
-	 * when the user wants to load/save their data.
+	 * This method is used by other subsystems to register with us so we know they exist! This allows us to call them when the user wants to load/save their data.
 	 * </p>
 	 * 
 	 * @param dt

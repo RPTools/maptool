@@ -125,13 +125,7 @@ public class MapTool {
 	private static SentryClient sentry;
 
 	/**
-	 * Contains just the version number of MapTool, such as <code>1.3.b49</code> .
-	 */
-	private static final String VERSION_TXT = "net/rptools/maptool/client/version.txt";
-
-	/**
-	 * Specifies the properties file that holds sound information. Only two sounds currently: <b>Dink</b> and
-	 * <b>Clink</b>.
+	 * Specifies the properties file that holds sound information. Only two sounds currently: <b>Dink</b> and <b>Clink</b>.
 	 */
 	private static final String SOUND_PROPERTIES = "net/rptools/maptool/client/sounds.properties";
 	public static final String SND_INVALID_OPERATION = "invalidOperation";
@@ -147,8 +141,7 @@ public class MapTool {
 	public static boolean WINDOWS = (System.getProperty("os.name").toLowerCase().startsWith("windows"));
 
 	/**
-	 * Version of Java being used. Note that this is the "specification version" , so expect numbers like 1.4, 1.5, and
-	 * 1.6.
+	 * Version of Java being used. Note that this is the "specification version" , so expect numbers like 1.4, 1.5, and 1.6.
 	 */
 	public static Double JAVA_VERSION;
 
@@ -213,8 +206,7 @@ public class MapTool {
 	}
 
 	/**
-	 * This method looks up the message key in the properties file and returns the resultant text with the detail
-	 * message from the <code>Throwable</code> appended to the end.
+	 * This method looks up the message key in the properties file and returns the resultant text with the detail message from the <code>Throwable</code> appended to the end.
 	 *
 	 * @param msgKey
 	 *            the string to use when calling {@link I18N#getText(String)}
@@ -235,15 +227,13 @@ public class MapTool {
 	}
 
 	/**
-	 * This method is the base method for putting a dialog box up on the screen that might be an error, a warning, or
-	 * just an information message. Do not use this method if the desired result is a simple confirmation box (use
-	 * {@link #confirm(String, Object...)} instead).
+	 * This method is the base method for putting a dialog box up on the screen that might be an error, a warning, or just an information message. Do not use this method if the desired result is a
+	 * simple confirmation box (use {@link #confirm(String, Object...)} instead).
 	 *
 	 * @param message
 	 *            the key in the properties file to put in the body of the dialog (formatted using <code>params</code>)
 	 * @param titleKey
-	 *            the key in the properties file to use when creating the title of the dialog window (formatted using
-	 *            <code>params</code>)
+	 *            the key in the properties file to use when creating the title of the dialog window (formatted using <code>params</code>)
 	 * @param messageType
 	 *            JOptionPane.{ERROR|WARNING|INFORMATION}_MESSAGE
 	 * @param params
@@ -255,19 +245,15 @@ public class MapTool {
 	}
 
 	/**
-	 * Same as {@link #showMessage(String, String, int, Object...)} except that <code>messages</code> is stored into a
-	 * JList and that component is then used as the content of the dialog box. This allows multiple strings to be
-	 * displayed in a manner consistent with other message dialogs.
+	 * Same as {@link #showMessage(String, String, int, Object...)} except that <code>messages</code> is stored into a JList and that component is then used as the content of the dialog box. This
+	 * allows multiple strings to be displayed in a manner consistent with other message dialogs.
 	 *
 	 * @param messages
-	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is
-	 *            performed!
+	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is performed!
 	 * @param titleKey
-	 *            the key in the properties file to use when creating the title of the dialog window (formatted using
-	 *            <code>params</code>)
+	 *            the key in the properties file to use when creating the title of the dialog window (formatted using <code>params</code>)
 	 * @param messageType
-	 *            one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>JOptionPane.WARNING_MESSAGE</code>,
-	 *            <code>JOptionPane.INFORMATION_MESSAGE</code>
+	 *            one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE</code>
 	 * @param params
 	 *            optional parameters to use when formatting the title text from the properties file
 	 */
@@ -278,21 +264,18 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays the messages provided as <code>messages</code> by calling
-	 * {@link #showMessage(Object[], String, int, Object...)} and passing <code>"msg.title.messageDialogFeedback"</code>
-	 * and <code>JOptionPane.ERROR_MESSAGE</code> as parameters.
+	 * Displays the messages provided as <code>messages</code> by calling {@link #showMessage(Object[], String, int, Object...)} and passing <code>"msg.title.messageDialogFeedback"</code> and
+	 * <code>JOptionPane.ERROR_MESSAGE</code> as parameters.
 	 *
 	 * @param messages
-	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is
-	 *            performed!
+	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is performed!
 	 */
 	public static void showFeedback(Object[] messages) {
 		showMessage(messages, "msg.title.messageDialogFeedback", JOptionPane.ERROR_MESSAGE);
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showError(String, Throwable)} and passing <code>null</code> for the
-	 * second parameter.
+	 * Displays a dialog box by calling {@link #showError(String, Throwable)} and passing <code>null</code> for the second parameter.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -302,12 +285,10 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted by calling
-	 * {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using the
-	 * {@link Logger#error(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
+	 * the {@link Logger#error(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogError"</code> , and the dialog type is
-	 * <code>JOptionPane.ERROR_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogError"</code> , and the dialog type is <code>JOptionPane.ERROR_MESSAGE</code>.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -321,8 +302,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showWarning(String, Throwable)} and passing <code>null</code> for the
-	 * second parameter.
+	 * Displays a dialog box by calling {@link #showWarning(String, Throwable)} and passing <code>null</code> for the second parameter.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -332,12 +312,10 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted by calling
-	 * {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using the
-	 * {@link Logger#warn(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
+	 * the {@link Logger#warn(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogWarning"</code>, and the dialog type is
-	 * <code>JOptionPane.WARNING_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogWarning"</code>, and the dialog type is <code>JOptionPane.WARNING_MESSAGE</code>.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -351,8 +329,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showInformation(String, Throwable)} and passing <code>null</code> for
-	 * the second parameter.
+	 * Displays a dialog box by calling {@link #showInformation(String, Throwable)} and passing <code>null</code> for the second parameter.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -362,12 +339,10 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted by calling
-	 * {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using the
-	 * {@link Logger#info(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
+	 * the {@link Logger#info(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogInfo"</code>, and the dialog type is
-	 * <code>JOptionPane.INFORMATION_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogInfo"</code>, and the dialog type is <code>JOptionPane.INFORMATION_MESSAGE</code>.
 	 *
 	 * @param msgKey
 	 *            the key to use when calling {@link I18N#getText(String)}
@@ -381,8 +356,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values
-	 * as parameters to the formatting of the key lookup.
+	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values as parameters to the formatting of the key lookup.
 	 *
 	 * @param message
 	 *            key from the properties file (preferred) or hard-coded string to display
@@ -400,8 +374,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values
-	 * as parameters to the formatting of the key lookup.
+	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values as parameters to the formatting of the key lookup.
 	 *
 	 * @param title
 	 * @param buttons
@@ -418,8 +391,7 @@ public class MapTool {
 	}
 
 	/**
-	 * This method is specific to deleting a token, but it can be used as a basis for any other method which wants to be
-	 * turned off via a property.
+	 * This method is specific to deleting a token, but it can be used as a basis for any other method which wants to be turned off via a property.
 	 *
 	 * @return true if the token should be deleted.
 	 */
@@ -492,8 +464,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Launch the platform's web browser and ask it to open the given URL. Note that this should not be called from any
-	 * uncontrolled macros as there are both security and denial-of-service attacks possible.
+	 * Launch the platform's web browser and ask it to open the given URL. Note that this should not be called from any uncontrolled macros as there are both security and denial-of-service attacks
+	 * possible.
 	 *
 	 * @param url
 	 */
@@ -633,8 +605,7 @@ public class MapTool {
 	}
 
 	/**
-	 * For Multi-monitor support, allows you to move the frame to a specific monitor. It will also set the height, width
-	 * and x, y position of the frame.
+	 * For Multi-monitor support, allows you to move the frame to a specific monitor. It will also set the height, width and x, y position of the frame.
 	 *
 	 * @author Jamz
 	 * @since 1.4.1.0
@@ -873,8 +844,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM,
-	 * ...). The <code>targets</code> is expected do be in a string list built with <code>separator</code>.
+	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM, ...). The <code>targets</code> is expected do be in a string list built with
+	 * <code>separator</code>.
 	 *
 	 * @param message
 	 *            message to be sent
@@ -891,8 +862,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM,
-	 * ...).
+	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM, ...).
 	 *
 	 * @param message
 	 *            message to be sent
@@ -1261,11 +1231,9 @@ public class MapTool {
 	/**
 	 * Check to see if we're running on Java 6+.
 	 * <p>
-	 * While MapTool itself doesn't use any Java 6-specific features, we use a couple dozen third-party libraries and a
-	 * search of those JAR files indicate that <i>they DO use</i> Java 6. So it's best if we warn users that they might
-	 * be going along happily and suddenly hit a Java runtime error! It might even be something they do every time they
-	 * run the program, but some piece of data was different and the library took a different path and the Java 6-only
-	 * method was invoked...
+	 * While MapTool itself doesn't use any Java 6-specific features, we use a couple dozen third-party libraries and a search of those JAR files indicate that <i>they DO use</i> Java 6. So it's best
+	 * if we warn users that they might be going along happily and suddenly hit a Java runtime error! It might even be something they do every time they run the program, but some piece of data was
+	 * different and the library took a different path and the Java 6-only method was invoked...
 	 * <p>
 	 * This method uses the system property <b>java.specification.version</b> as it seemed the easiest thing to test. :)
 	 */
@@ -1286,9 +1254,8 @@ public class MapTool {
 	}
 
 	/**
-	 * If we're running on OSX we should call this method to download and install the MapTool logo from the main web
-	 * site. We cache this image so that it appears correctly if the application is later executed in "offline" mode, so
-	 * to speak.
+	 * If we're running on OSX we should call this method to download and install the MapTool logo from the main web site. We cache this image so that it appears correctly if the application is later
+	 * executed in "offline" mode, so to speak.
 	 */
 	private static void macOSXicon() {
 		// If we're running on OSX, add the dock icon image
@@ -1319,8 +1286,8 @@ public class MapTool {
 			}
 		}
 		/*
-		 * Unfortunately the next line doesn't allow Eclipse to compile the code on anything but a Mac. Too bad because
-		 * there's no problem at runtime since this code wouldn't be executed an any machine *except* a Mac. Sigh.
+		 * Unfortunately the next line doesn't allow Eclipse to compile the code on anything but a Mac. Too bad because there's no problem at runtime since this code wouldn't be executed an any
+		 * machine *except* a Mac. Sigh.
 		 *
 		 * com.apple.eawt.Application appl = com.apple.eawt.Application.getApplication();
 		 */
@@ -1366,9 +1333,8 @@ public class MapTool {
 	}
 
 	/**
-	 * Return whether the campaign file has changed. Only checks to see if there is a single empty map with the default
-	 * name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". We really should check against things like
-	 * campaign property changes as well, including campaign macros...
+	 * Return whether the campaign file has changed. Only checks to see if there is a single empty map with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". We really
+	 * should check against things like campaign property changes as well, including campaign macros...
 	 */
 	public static boolean isCampaignDirty() {
 		// TODO: This is a very naive check, but it's better than nothing
@@ -1447,8 +1413,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Search for command line arguments for options. Expecting arguments specified as -parameter=value pair and returns
-	 * a string.
+	 * Search for command line arguments for options. Expecting arguments specified as -parameter=value pair and returns a string.
 	 *
 	 * Examples: -version=1.4.0.1 -user=Jamz
 	 *
@@ -1514,8 +1479,7 @@ public class MapTool {
 	}
 
 	/**
-	 * Search for command line arguments for options. Expecting arguments specified as -parameter=value pair and returns
-	 * a string.
+	 * Search for command line arguments for options. Expecting arguments specified as -parameter=value pair and returns a string.
 	 *
 	 * Examples: -monitor=1 -x=0 -y=0 -w=1200 -h=960
 	 *
@@ -1574,7 +1538,7 @@ public class MapTool {
 	 * An example method that throws an exception.
 	 */
 	static void unsafeMethod() {
-		throw new UnsupportedOperationException("You shouldn't call this!");
+		throw new UnsupportedOperationException("You shouldn't call this either!");
 	}
 
 	/**
@@ -1597,10 +1561,9 @@ public class MapTool {
 		Sentry.getContext().addTag("tagName", "tagValue");
 
 		/*
-		 * This sends a simple event to Sentry using the statically stored instance that was created in the ``main``
-		 * method.
+		 * This sends a simple event to Sentry using the statically stored instance that was created in the ``main`` method.
 		 */
-		Sentry.capture("This is a logWithStaticAPI test");
+		Sentry.capture("This is another logWithStaticAPI test");
 
 		try {
 			unsafeMethod();
@@ -1611,42 +1574,15 @@ public class MapTool {
 		}
 	}
 
-	/**
-	 * Examples that use the SentryClient instance directly.
-	 */
-	static void logWithInstanceAPI() {
-		// Retrieve the current context.
-		Context context = sentry.getContext();
-
-		// Record a breadcrumb in the current context. By default the last 100 breadcrumbs are kept.
-		context.recordBreadcrumb(new BreadcrumbBuilder().setMessage("User made an action").build());
-
-		// Set the user in the current context.
-		context.setUser(new UserBuilder().setEmail("hello@sentry.io").build());
-
-		// This sends a simple event to Sentry.
-		sentry.sendMessage("This is a logWithInstanceAPI test");
-
-		try {
-			unsafeMethod();
-		} catch (Exception e) {
-			// This sends an exception event to Sentry.
-			sentry.sendException(e);
-		}
-	}
-
 	public static void main(String[] args) {
 		/*
-		 * It is recommended that you use the DSN detection system, which will check the environment variable
-		 * "SENTRY_DSN", the Java System Property "sentry.dsn", or the "sentry.properties" file in your classpath. This
-		 * makes it easier to provide and adjust your DSN without needing to change your code. See the configuration
-		 * page for more information.
+		 * It is recommended that you use the DSN detection system, which will check the environment variable "SENTRY_DSN", the Java System Property "sentry.dsn", or the "sentry.properties" file in
+		 * your classpath. This makes it easier to provide and adjust your DSN without needing to change your code. See the configuration page for more information.
 		 */
-		Sentry.init();
+		Sentry.init("https://96fe58677c3348bcb6127a349007b9ca:d2242adc4af146bc899db04f779a264c@sentry.io/154119");
 
 		/*
-		 * It is possible to go around the static ``Sentry`` API, which means you are responsible for making the
-		 * SentryClient instance available to your code.
+		 * It is possible to go around the static ``Sentry`` API, which means you are responsible for making the SentryClient instance available to your code.
 		 */
 		sentry = SentryClientFactory.sentryClient();
 
@@ -1656,7 +1592,6 @@ public class MapTool {
 
 		// MapTool myClass = new MapTool();
 		logWithStaticAPI();
-		logWithInstanceAPI();
 
 		// Jamz: Overwrite version for testing if passed as command line argument using -v or -version
 		Options cmdOptions = new Options();
@@ -1726,7 +1661,7 @@ public class MapTool {
 		System.setProperty("swing.aatext", "true");
 		// System.setProperty("sun.java2d.opengl", "true");
 
-		final SplashScreen splash = new SplashScreen((isDevelopment()) ? "v" + getVersion() : getVersion());
+		final SplashScreen splash = new SplashScreen((isDevelopment()) ? getVersion() : "v" + getVersion());
 
 		// Protocol handlers
 		// cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
@@ -1818,9 +1753,8 @@ public class MapTool {
 		/**
 		 * This is a tweak that makes the Chinese version work better.
 		 * <p>
-		 * Consider reviewing <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en.
-		 * wikipedia.org/wiki/CJK_characters</a> before making changes. And http://www.scarfboy.com/coding/unicode-tool
-		 * is also a really cool site.
+		 * Consider reviewing <a href="http://en.wikipedia.org/wiki/CJK_characters" >http://en. wikipedia.org/wiki/CJK_characters</a> before making changes. And
+		 * http://www.scarfboy.com/coding/unicode-tool is also a really cool site.
 		 */
 		if (Locale.CHINA.equals(Locale.getDefault())) {
 			// The following font name appears to be "Sim Sun". It can be downloaded

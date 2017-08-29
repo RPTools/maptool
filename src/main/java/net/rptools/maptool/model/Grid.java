@@ -44,10 +44,8 @@ import net.rptools.maptool.model.Zone.Event;
 public abstract class Grid implements Cloneable {
 	private static final Logger log = LogManager.getLogger(Grid.class);
 	/**
-	 * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm for determining
-	 * whether a given square cell can be entered due to fog blocking the cell is based on the cell being split into
-	 * 3x3, then the center further being split into 3x3; thus at least 9 pixels horizontally and vertically are
-	 * required.
+	 * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm for determining whether a given square cell can be entered due to fog blocking the cell is based
+	 * on the cell being split into 3x3, then the center further being split into 3x3; thus at least 9 pixels horizontally and vertically are required.
 	 */
 	public static final int MIN_GRID_SIZE = 9;
 	public static final int MAX_GRID_SIZE = 350;
@@ -77,11 +75,9 @@ public abstract class Grid implements Cloneable {
 	}
 
 	/**
-	 * Set the facing options for tokens/objects on a grid. Each grid type can providing facings to the edges, the
-	 * vertices, both, or neither.
+	 * Set the facing options for tokens/objects on a grid. Each grid type can providing facings to the edges, the vertices, both, or neither.
 	 * 
-	 * If both are false, tokens on that grid will not be able to rotate with the mouse and keyboard controls for
-	 * setting facing.
+	 * If both are false, tokens on that grid will not be able to rotate with the mouse and keyboard controls for setting facing.
 	 * 
 	 * @param faceEdges
 	 *            - Tokens can face edges.
@@ -179,13 +175,10 @@ public abstract class Grid implements Cloneable {
 	}
 
 	/**
-	 * @return The offset required to translate from the center of a cell to the top right (x_min, y_min) of the cell's
-	 *         bounding rectangle. Used for non-square grids only.<br>
+	 * @return The offset required to translate from the center of a cell to the top right (x_min, y_min) of the cell's bounding rectangle. Used for non-square grids only.<br>
 	 *         <br>
-	 *         Why? Because mySquareGrid.convert(CellPoint cp) returns a ZonePoint in the top right corner(x_min, y_min)
-	 *         of the square-cell, whereas myHexGrid.convert(CellPoint cp) returns a ZonePoint in the center of the
-	 *         hex-cell. Thus adding the CellOffset allows us to position the ZonePoint returned by
-	 *         myHexGrid.convert(CellPoint cp) in an equivalent position to that returned by
+	 *         Why? Because mySquareGrid.convert(CellPoint cp) returns a ZonePoint in the top right corner(x_min, y_min) of the square-cell, whereas myHexGrid.convert(CellPoint cp) returns a ZonePoint
+	 *         in the center of the hex-cell. Thus adding the CellOffset allows us to position the ZonePoint returned by myHexGrid.convert(CellPoint cp) in an equivalent position to that returned by
 	 *         mySquareGrid.convert(CellPoint cp)....I think ;)
 	 */
 	public Dimension getCellOffset() {
@@ -489,18 +482,16 @@ public abstract class Grid implements Cloneable {
 	private static final DirectionCalculator calculator = new DirectionCalculator();
 
 	/**
-	 * Tests the grid cell location to determine whether a token is allowed to move into it when such movement is
-	 * player-initiated. (The GM may always move a token into a given grid cell.) This implementation only handles
-	 * square grids. When a hex and/or gridless implementation is created, this method should be refactored to the
-	 * {@link SquareGrid} class and this method changed to always return <code>true</code>.
+	 * Tests the grid cell location to determine whether a token is allowed to move into it when such movement is player-initiated. (The GM may always move a token into a given grid cell.) This
+	 * implementation only handles square grids. When a hex and/or gridless implementation is created, this method should be refactored to the {@link SquareGrid} class and this method changed to
+	 * always return <code>true</code>.
 	 * <p>
 	 * Theory of operation:
 	 * <ol>
 	 * <li>Break the area to check into a 3x3 set of pieces.
 	 * <li>Determine which direction the token is coming from.
-	 * <li>For the three pieces of the 3x3 set which are closest to that incoming direction, if all of the three contain
-	 * fog, the cell cannot be entered. Return <code>false</code>. Otherwise, at least one does not contain fog. Proceed
-	 * to the next step.
+	 * <li>For the three pieces of the 3x3 set which are closest to that incoming direction, if all of the three contain fog, the cell cannot be entered. Return <code>false</code>. Otherwise, at least
+	 * one does not contain fog. Proceed to the next step.
 	 * <li>Select the region encompassed by the center of the 3x3 set of pieces.
 	 * <li>Break this region into another 3x3 set of pieces.
 	 * <li>If at least 6 of these pieces are fog-free, then the space is open. Return <code>true</code>.
@@ -634,9 +625,8 @@ public abstract class Grid implements Cloneable {
 	}
 
 	/**
-	 * Divides the specified region into one of nine parts, where the column and row range from 0..2. The destination
-	 * Rectangle must already exist (no check for this is made) and it must not be a reference to the same object as the
-	 * region to divide (also not checked).
+	 * Divides the specified region into one of nine parts, where the column and row range from 0..2. The destination Rectangle must already exist (no check for this is made) and it must not be a
+	 * reference to the same object as the region to divide (also not checked).
 	 * 
 	 * @param regionToDivide
 	 *            region to subdivide

@@ -81,7 +81,8 @@ public class FogUtil {
 		Collections.sort(segmentList);
 
 		List<Area> clearedAreaList = new LinkedList<Area>();
-		nextSegment: for (VisibleAreaSegment segment : segmentList) {
+		nextSegment:
+		for (VisibleAreaSegment segment : segmentList) {
 			Rectangle r = segment.getPath().getBounds();
 			for (Area clearedArea : clearedAreaList) {
 				if (clearedArea.contains(r)) {
@@ -221,9 +222,8 @@ public class FogUtil {
 	}
 
 	/**
-	 * This function is called by Meta-Shift-O, the token right-click, Expose -> only Currently visible menu, from the
-	 * Client/Server methods calls from net.rptools.maptool.server.ServerMethodHandler.exposePCArea(GUID), and the macro
-	 * exposePCOnlyArea().
+	 * This function is called by Meta-Shift-O, the token right-click, Expose -> only Currently visible menu, from the Client/Server methods calls from
+	 * net.rptools.maptool.server.ServerMethodHandler.exposePCArea(GUID), and the macro exposePCOnlyArea().
 	 * 
 	 * 
 	 * @author updated Jamz
@@ -276,15 +276,14 @@ public class FogUtil {
 		// System.out.println("tokList: " + tokList.toString());
 
 		/*
-		 * TODO: Jamz: May need to add back the isUseIndividualViews() logic later after testing... String playerName =
-		 * MapTool.getPlayer().getName(); boolean isGM = MapTool.getPlayer().getRole() == Role.GM;
+		 * TODO: Jamz: May need to add back the isUseIndividualViews() logic later after testing... String playerName = MapTool.getPlayer().getName(); boolean isGM = MapTool.getPlayer().getRole() ==
+		 * Role.GM;
 		 * 
 		 * for (Token token : tokList) { boolean owner = token.isOwner(playerName) || isGM;
 		 * 
 		 * //System.out.println("token: " + token.getName() + ", owner: " + owner);
 		 * 
-		 * if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner) { continue;
-		 * } tokenSet.add(token.getId()); }
+		 * if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner) { continue; } tokenSet.add(token.getId()); }
 		 */
 
 		renderer.getZone().clearExposedArea(tokenSet);
@@ -332,9 +331,8 @@ public class FogUtil {
 			}
 
 			/*
-			 * Lee: this assumes that all tokens that pass through the checks above stored CellPoints. Well, they don't,
-			 * not in the context of a snapped to grid follower following an unsnapped key token. Commenting out and
-			 * replacing... for (CellPoint cell : lastPath.getCellPath()) {
+			 * Lee: this assumes that all tokens that pass through the checks above stored CellPoints. Well, they don't, not in the context of a snapped to grid follower following an unsnapped key
+			 * token. Commenting out and replacing... for (CellPoint cell : lastPath.getCellPath()) {
 			 */
 			final ExposedAreaMetaData metaCopy = meta;
 			final Token tokenClone = new Token(token);
@@ -376,8 +374,8 @@ public class FogUtil {
 	}
 
 	/**
-	 * Find the center point of a vision TODO: This is a horrible horrible method. the API is just plain disgusting. But
-	 * it'll work to consolidate all the places this has to be done until we can encapsulate it into the vision itself
+	 * Find the center point of a vision TODO: This is a horrible horrible method. the API is just plain disgusting. But it'll work to consolidate all the places this has to be done until we can
+	 * encapsulate it into the vision itself
 	 */
 	public static Point calculateVisionCenter(Token token, Zone zone) {
 		Grid grid = zone.getGrid();

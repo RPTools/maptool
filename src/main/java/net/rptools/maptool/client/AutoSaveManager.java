@@ -67,8 +67,7 @@ public class AutoSaveManager implements ActionListener {
 	}
 
 	/**
-	 * Applications can use this to pause the timer. The {@link #restart()} method can be called at any time to reset
-	 * and start the timer.
+	 * Applications can use this to pause the timer. The {@link #restart()} method can be called at any time to reset and start the timer.
 	 */
 	public void pause() {
 		if (autoSaveTimer != null && autoSaveTimer.isRunning())

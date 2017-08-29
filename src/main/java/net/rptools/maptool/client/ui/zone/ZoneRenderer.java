@@ -313,9 +313,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	/**
-	 * I _hate_ this method. But couldn't think of a better way to tell the drawable renderer that a new image had
-	 * arrived TODO: FIX THIS ! Perhaps add a new app listener for when new images show up, add the drawable renderer as
-	 * a listener
+	 * I _hate_ this method. But couldn't think of a better way to tell the drawable renderer that a new image had arrived TODO: FIX THIS ! Perhaps add a new app listener for when new images show up,
+	 * add the drawable renderer as a listener
 	 */
 	public void flushDrawableRenderer() {
 		backgroundDrawableRenderer.flush();
@@ -411,8 +410,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		boolean vblTokenMoved = false; // If any token has VBL we need to reset FoW
 
 		/*
-		 * Lee: if the lead token is snapped-to-grid and has not moved, every follower should return to where they were.
-		 * Flag set at PointerTool and StampTool's stopTokenDrag() Handling the rest here.
+		 * Lee: if the lead token is snapped-to-grid and has not moved, every follower should return to where they were. Flag set at PointerTool and StampTool's stopTokenDrag() Handling the rest here.
 		 */
 		Set<GUID> selectionSet = set.getTokens();
 
@@ -462,10 +460,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				int cellOffY = originPoint.y - tokenCell.y;
 
 				/*
-				 * Lee: the problem now is to keep the precise coordinate computations for unsnapped tokens following a
-				 * snapped key token. The derived path in the following section contains rounded down values because the
-				 * integer cell values were passed. If these were double in nature, the precision would be kept, but
-				 * that would be too difficult to change at this stage...
+				 * Lee: the problem now is to keep the precise coordinate computations for unsnapped tokens following a snapped key token. The derived path in the following section contains rounded
+				 * down values because the integer cell values were passed. If these were double in nature, the precision would be kept, but that would be too difficult to change at this stage...
 				 */
 
 				token.applyMove(set, path, set.getOffsetX(), set.getOffsetY(), keyToken, cellOffX, cellOffY);
@@ -787,8 +783,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	/**
-	 * The returned {@link PlayerView} contains a list of tokens that includes all selected tokens that this player owns
-	 * and that have their <code>HasSight</code> checkbox enabled.
+	 * The returned {@link PlayerView} contains a list of tokens that includes all selected tokens that this player owns and that have their <code>HasSight</code> checkbox enabled.
 	 * 
 	 * @param role
 	 * @return
@@ -816,9 +811,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	/**
-	 * Get a bounding box, in Zone coordinates, of all the elements in the zone. This method was created by copying
-	 * renderZone() and then replacing each bit of rendering with a routine to simply aggregate the extents of the
-	 * object that would have been rendered.
+	 * Get a bounding box, in Zone coordinates, of all the elements in the zone. This method was created by copying renderZone() and then replacing each bit of rendering with a routine to simply
+	 * aggregate the extents of the object that would have been rendered.
 	 * 
 	 * @return a new Rectangle with the bounding box of all the elements in the Zone
 	 */
@@ -945,9 +939,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	/**
-	 * This method clears {@link #renderedAuraMap}, {@link #renderedLightMap}, {@link #visibleScreenArea}, and
-	 * {@link #lastView}. It also flushes the {@link #zoneView} and sets the {@link #flushFog} flag so that fog will be
-	 * recalculated.
+	 * This method clears {@link #renderedAuraMap}, {@link #renderedLightMap}, {@link #visibleScreenArea}, and {@link #lastView}. It also flushes the {@link #zoneView} and sets the {@link #flushFog}
+	 * flag so that fog will be recalculated.
 	 */
 	public void invalidateCurrentViewCache() {
 		flushFog = true;
@@ -962,9 +955,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	/**
-	 * This is the top-level method of the rendering pipeline that coordinates all other calls.
-	 * {@link #paintComponent(Graphics)} calls this method, then adds the two optional strings, "Map not visible to
-	 * players" and "Player View" as appropriate.
+	 * This is the top-level method of the rendering pipeline that coordinates all other calls. {@link #paintComponent(Graphics)} calls this method, then adds the two optional strings, "Map not
+	 * visible to players" and "Player View" as appropriate.
 	 * 
 	 * @param g2d
 	 *            Graphics2D object normally passed in by {@link #paintComponent(Graphics)}
@@ -1115,9 +1107,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		}
 
 		/**
-		 * The following sections used to handle rendering of the Hidden (i.e. "GM") layer followed by the Token layer.
-		 * The problem was that we want all drawables to appear below all tokens, and the old configuration performed
-		 * the rendering in the following order:
+		 * The following sections used to handle rendering of the Hidden (i.e. "GM") layer followed by the Token layer. The problem was that we want all drawables to appear below all tokens, and the
+		 * old configuration performed the rendering in the following order:
 		 * <ol>
 		 * <li>Render Hidden-layer tokens
 		 * <li>Render Hidden-layer drawables
@@ -1180,8 +1171,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		}
 
 		/**
-		 * FJE It's probably not appropriate for labels to be above everything, including tokens. Above drawables, yes.
-		 * Above tokens, no. (Although in that case labels could be completely obscured. Hm.)
+		 * FJE It's probably not appropriate for labels to be above everything, including tokens. Above drawables, yes. Above tokens, no. (Although in that case labels could be completely obscured.
+		 * Hm.)
 		 */
 		// Drawing labels is slooooow. :(
 		// Perhaps we should draw the fog first and use hard fog to determine whether labels need to be drawn?
@@ -1343,7 +1334,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				List<Area> sourceList = new LinkedList<Area>(areaList);
 				areaList.clear();
 
-				outter: while (sourceList.size() > 0) {
+				outter:
+				while (sourceList.size() > 0) {
 					Area area = sourceList.remove(0);
 
 					for (ListIterator<Area> iter = sourceList.listIterator(); iter.hasNext();) {
@@ -1449,8 +1441,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	/**
-	 * This outlines the area visible to the token under the cursor, clipped to the current fog-of-war. This is
-	 * appropriate for the player view, but the GM sees everything.
+	 * This outlines the area visible to the token under the cursor, clipped to the current fog-of-war. This is appropriate for the player view, but the GM sees everything.
 	 */
 	private void renderPlayerVisionOverlay(Graphics2D g, PlayerView view) {
 		Graphics2D g2 = (Graphics2D) g.create();
@@ -1511,9 +1502,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		// System.err.println(", strictOwnership: " + strictOwnership);
 
 		/*
-		 * The vision arc and optional halo-filled visible area shouldn't be shown to everyone. If we are in GM view, or
-		 * if we are the owner of the token in question, or if the token is a PC and strict token ownership is off...
-		 * then the vision arc should be displayed.
+		 * The vision arc and optional halo-filled visible area shouldn't be shown to everyone. If we are in GM view, or if we are the owner of the token in question, or if the token is a PC and
+		 * strict token ownership is off... then the vision arc should be displayed.
 		 */
 		if (showVisionAndHalo) {
 			AffineTransform af = new AffineTransform();
@@ -2086,9 +2076,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 								: set.gridlessPath;
 						List<? extends AbstractPoint> thePoints = path.getCellPath();
 						/*
-						 * now that we have the last point, we can check to see if it's gridless or not. If not
-						 * gridless, get the last point the token was at and see if the token's footprint is inside the
-						 * visible area to show the label.
+						 * now that we have the last point, we can check to see if it's gridless or not. If not gridless, get the last point the token was at and see if the token's footprint is inside
+						 * the visible area to show the label.
 						 */
 						if (thePoints.isEmpty()) {
 							showLabels = false;
@@ -2333,8 +2322,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	/**
-	 * Get a list of tokens currently visible on the screen. The list is ordered by location starting in the top left
-	 * and going to the bottom right.
+	 * Get a list of tokens currently visible on the screen. The list is ordered by location starting in the top left and going to the bottom right.
 	 * 
 	 * @return
 	 */
@@ -2824,10 +2812,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			// Halo (SQUARE)
 			// XXX Why are square halos drawn separately?!
 			/*
-			 * if (token.hasHalo() && token.getShape() == Token.TokenShape.SQUARE) { Stroke oldStroke = g.getStroke();
-			 * clippedG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
-			 * clippedG.setColor(token.getHaloColor()); clippedG.draw(new Rectangle2D.Double(location.x, location.y,
-			 * location.scaledWidth, location.scaledHeight)); clippedG.setStroke(oldStroke); }
+			 * if (token.hasHalo() && token.getShape() == Token.TokenShape.SQUARE) { Stroke oldStroke = g.getStroke(); clippedG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
+			 * clippedG.setColor(token.getHaloColor()); clippedG.draw(new Rectangle2D.Double(location.x, location.y, location.scaledWidth, location.scaledHeight)); clippedG.setStroke(oldStroke); }
 			 */
 
 			// Facing ?
@@ -3435,8 +3421,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	/**
-	 * Returns the label at screen location x, y (not cell location). To get the token at a cell location, use
-	 * getGameMap() and use that.
+	 * Returns the label at screen location x, y (not cell location). To get the token at a cell location, use getGameMap() and use that.
 	 * 
 	 * @param x
 	 * @param y
@@ -3738,8 +3723,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		public int offsetY;
 
 		/**
-		 * Construct a TokenLocation object that caches where images are stored and what their size is so that the next
-		 * rendering pass can use that information to optimize the drawing.
+		 * Construct a TokenLocation object that caches where images are stored and what their size is so that the next rendering pass can use that information to optimize the drawing.
 		 * 
 		 * @param bounds
 		 * @param origBounds
@@ -3981,8 +3965,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	}
 
 	/**
-	 * Checks to see if token has an image table and references that if the token has a facing otherwise uses basic
-	 * image
+	 * Checks to see if token has an image table and references that if the token has a facing otherwise uses basic image
 	 * 
 	 * @param token
 	 * @return BufferedImage
@@ -4102,13 +4085,11 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 	// };
 
 	/**
-	 * Our goal with this method (which overrides the parent's method) is to create a custom mouse pointer that
-	 * represents a group of tokens selected on the map. The idea is to provide some feedback to the user that they have
-	 * more than one token selected at the current time.
+	 * Our goal with this method (which overrides the parent's method) is to create a custom mouse pointer that represents a group of tokens selected on the map. The idea is to provide some feedback
+	 * to the user that they have more than one token selected at the current time.
 	 * <p>
-	 * Unfortunately, while our custom cursor appears to be created correctly, it is never properly applied as the mouse
-	 * pointer so there is no visual effect. Hence it's currently commented out by using an "if (false)" around the code
-	 * block.
+	 * Unfortunately, while our custom cursor appears to be created correctly, it is never properly applied as the mouse pointer so there is no visual effect. Hence it's currently commented out by
+	 * using an "if (false)" around the code block.
 	 * 
 	 * @see java.awt.Component#setCursor(java.awt.Cursor)
 	 */

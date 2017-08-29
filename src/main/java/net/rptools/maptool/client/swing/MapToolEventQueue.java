@@ -18,11 +18,17 @@ import javax.swing.JOptionPane;
 
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.SysInfo;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.jidesoft.dialog.JideOptionPane;
+
+import io.sentry.Sentry;
+import io.sentry.event.BreadcrumbBuilder;
+import io.sentry.event.User;
+import io.sentry.event.UserBuilder;
 
 public class MapToolEventQueue extends EventQueue {
 	private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
@@ -37,20 +43,20 @@ public class MapToolEventQueue extends EventQueue {
 			optionPane.setTitle(I18N.getString("MapToolEventQueue.stackOverflow.title")); //$NON-NLS-1$
 			optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
 			displayPopup();
+			reportToSentryIO(soe);
 		} catch (Throwable t) {
 			log.error(t, t);
 			optionPane.setTitle(I18N.getString("MapToolEventQueue.unexpectedError")); //$NON-NLS-1$
 			optionPane.setDetails(toString(t));
 			try {
 				displayPopup();
+				reportToSentryIO(t);
 			} catch (Throwable thrown) {
-				// Displaying the error message using the JideOptionPane has just failed.
-				// Fallback to standard swing dialog.
+				// Displaying the error message using the JideOptionPane has just failed. Fallback to standard swing dialog.
 				log.error(thrown, thrown);
-				JOptionPane.showMessageDialog(null, toString(thrown),
-						I18N.getString("MapToolEventQueue.unexpectedError"), JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, toString(thrown), I18N.getString("MapToolEventQueue.unexpectedError"), JOptionPane.ERROR_MESSAGE);
+				reportToSentryIO(thrown);
 			} finally {
-				System.out.println("INSERT SENTRY LOG HERE!");
 				log.debug("SENTRY TEST :: Debug message");
 				log.info("SENTRY TEST :: Info message");
 				log.warn("SENTRY TEST :: Warn message");
@@ -72,5 +78,35 @@ public class MapToolEventQueue extends EventQueue {
 		t.printStackTrace(ps);
 		ps.close();
 		return out.toString();
+	}
+
+	private static void reportToSentryIO(Throwable thrown) {
+		log.info("Logging stacktrace to Sentry.IO!");
+
+		// Note that all fields set on the context are optional. Context data is copied onto all future events in the current context (until the context is cleared).
+
+		// Record a breadcrumb in the current context. By default the last 100 breadcrumbs are kept.
+		// TODO: We could use this to record user actions to get a hint on what user was doing before exception was thrown...
+		// Sentry.getContext().recordBreadcrumb(new BreadcrumbBuilder().setMessage("User made an action").build());
+
+		UserBuilder user = new UserBuilder();
+		user.setUsername(MapTool.getPlayer().getName());
+		user.setId(MapTool.getClientId());
+		user.setEmail(MapTool.getPlayer().getName().replaceAll(" ", "_") + "@nerps.net"); // Lets prompt for this?
+
+		// Set the user in the current context.
+		Sentry.getContext().setUser(user.build());
+
+		Sentry.getContext().addTag("version", MapTool.getVersion());
+		Sentry.getContext().addTag("role", MapTool.getPlayer().getRole().toString());
+		Sentry.getContext().addTag("hosting", String.valueOf(MapTool.isHostingServer()));
+
+		Sentry.getContext().addExtra("System Info", new SysInfo().getSysInfoJSON());
+
+		if (MapTool.isHostingServer())
+			Sentry.getContext().addExtra("Server Policy", MapTool.getServerPolicy().toJSON());
+
+		// Send the event!
+		Sentry.capture(thrown);
 	}
 }

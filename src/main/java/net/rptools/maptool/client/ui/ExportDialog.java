@@ -57,8 +57,7 @@ import net.rptools.maptool.util.ImageManager;
 /**
  * Creates a dialog for performing a screen capture to a PNG file.
  * <p>
- * This uses a modal dialog based on an Abeille form. It creates a PNG file at the resolution of the 'board' image/tile.
- * The file can be saved to disk or sent to an FTP location.
+ * This uses a modal dialog based on an Abeille form. It creates a PNG file at the resolution of the 'board' image/tile. The file can be saved to disk or sent to an FTP location.
  * 
  * @return a dialog box
  */
@@ -255,9 +254,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 		}
 
 		/**
-		 * Stores the form this is attached to, so we don't have to store duplicate data locally (like selected and
-		 * enabled). Also perform some error checking, since we _are_ duplicating the description of the form itself
-		 * (like what buttons it has).
+		 * Stores the form this is attached to, so we don't have to store duplicate data locally (like selected and enabled). Also perform some error checking, since we _are_ duplicating the
+		 * description of the form itself (like what buttons it has).
 		 * 
 		 * @param form
 		 *            The FormPanel this dialog is part of.
@@ -325,14 +323,12 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * Ensures that the user can only check/uncheck boxes as appropriate. For example, if "fog" is not enabled on the
-	 * map, it cannot be enabled for export.
+	 * Ensures that the user can only check/uncheck boxes as appropriate. For example, if "fog" is not enabled on the map, it cannot be enabled for export.
 	 * <p>
 	 * This should get called during initialization and whenever the radio buttons change.
 	 * <p>
-	 * The GM and Players have different rules, to prevent players from gaining knowledge they should not have using the
-	 * screenshot (such as revealing things under other things by disabling layers). Players can basically only turn off
-	 * tokens, to get an 'empty' version of the map.
+	 * The GM and Players have different rules, to prevent players from gaining knowledge they should not have using the screenshot (such as revealing things under other things by disabling layers).
+	 * Players can basically only turn off tokens, to get an 'empty' version of the map.
 	 */
 	public static void enforceButtonRules() {
 		if (!MapTool.getPlayer().isGM()) {
@@ -524,9 +520,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * This is the top-level screen-capture routine. It sends the resulting PNG image to the location previously
-	 * selected by the user. TODO: It currently calls {@link MapTool#takeMapScreenShot()} for "normal" screenshots, but
-	 * that's just until this code is considered stable enough.
+	 * This is the top-level screen-capture routine. It sends the resulting PNG image to the location previously selected by the user. TODO: It currently calls {@link MapTool#takeMapScreenShot()} for
+	 * "normal" screenshots, but that's just until this code is considered stable enough.
 	 * 
 	 * @throws Exception
 	 */
@@ -662,8 +657,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * Turn off all JToggleButtons on the form. We don't care if we turn off fields that are normally turned on, since
-	 * {@link #enforceButtonRules()} will turn them back on as appropriate.
+	 * Turn off all JToggleButtons on the form. We don't care if we turn off fields that are normally turned on, since {@link #enforceButtonRules()} will turn them back on as appropriate.
 	 */
 	private void resetExportSettings() {
 		FormAccessor fa = interactPanel.getFormAccessor();
@@ -748,11 +742,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 	}
 
 	/**
-	 * Finds the extents of the map, sets up zone to be captured. If the user is the GM, the extents include every
-	 * object and everything that has any area, such as 'fog' and 'visibility' objects.
+	 * Finds the extents of the map, sets up zone to be captured. If the user is the GM, the extents include every object and everything that has any area, such as 'fog' and 'visibility' objects.
 	 * <p>
-	 * If a background tiling texture is used, the image is aligned to it, so that it can be used on re-import as a new
-	 * base map image.
+	 * If a background tiling texture is used, the image is aligned to it, so that it can be used on re-import as a new base map image.
 	 * <p>
 	 * If the user is a player (or GM posing as a player), the extents only go as far as the revealed fog-of-war.
 	 * <p>

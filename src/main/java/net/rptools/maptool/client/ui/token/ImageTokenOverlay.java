@@ -77,8 +77,7 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
 	}
 
 	/**
-	 * @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D,
-	 *      net.rptools.maptool.model.Token, java.awt.Rectangle)
+	 * @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token, java.awt.Rectangle)
 	 */
 	@Override
 	public void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {

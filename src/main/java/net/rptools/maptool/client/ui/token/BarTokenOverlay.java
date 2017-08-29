@@ -131,8 +131,7 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#paintOverlay(java.awt.Graphics2D,
-	 *      net.rptools.maptool.model.Token, java.awt.Rectangle, java.lang.Object)
+	 * @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token, java.awt.Rectangle, java.lang.Object)
 	 */
 	@Override
 	public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value) {
@@ -163,14 +162,13 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
 	 * Paint the overlay for the passed token.
 	 * 
 	 * @param g
-	 *            Graphics used to paint. It is already translated so that 0,0 is the upper left corner of the token. It
-	 *            is also clipped so that the overlay can not draw out of the token's bounding box.
+	 *            Graphics used to paint. It is already translated so that 0,0 is the upper left corner of the token. It is also clipped so that the overlay can not draw out of the token's bounding
+	 *            box.
 	 * @param token
 	 *            The token being painted.
 	 * @param bounds
-	 *            The bounds of the actual token. This will be different than the clip since the clip also has to take
-	 *            into account the edge of the window. If you draw based on the clip it will be off for partial token
-	 *            painting.
+	 *            The bounds of the actual token. This will be different than the clip since the clip also has to take into account the edge of the window. If you draw based on the clip it will be off
+	 *            for partial token painting.
 	 * @param value
 	 *            A value between 0 and 1 inclusive used to paint the bar.
 	 */

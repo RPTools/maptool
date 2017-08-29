@@ -52,8 +52,7 @@ public class TokenOverlayFlow {
 	private final double size;
 
 	/**
-	 * This map contains the list of states for each token in the order they are drawn. It's done this way so that the
-	 * states don't jump around as they are added or removed.
+	 * This map contains the list of states for each token in the order they are drawn. It's done this way so that the states don't jump around as they are added or removed.
 	 */
 	private final Map<GUID, List<String>> savedStates = new HashMap<GUID, List<String>>();
 
@@ -89,8 +88,7 @@ public class TokenOverlayFlow {
 	 *-------------------------------------------------------------------------------------------*/
 
 	/**
-	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o
-	 * changing the order. It also removes any unused states.
+	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o changing the order. It also removes any unused states.
 	 * 
 	 * @param bounds
 	 *            The token's bounds. All states are drawn inside this area.
@@ -152,8 +150,7 @@ public class TokenOverlayFlow {
 	}
 
 	/**
-	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o
-	 * changing the order. It also removes any unused states.
+	 * Calculate the bounds to paint the passed state. It takes into account states that have already been set w/o changing the order. It also removes any unused states.
 	 * 
 	 * @param bounds
 	 *            The token's bounds. All states are drawn inside this area.

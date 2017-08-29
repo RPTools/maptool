@@ -27,8 +27,8 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 
 /**
- * All of the tokens currently being shown in the initiative list. It includes a reference to all the tokens in order, a
- * reference to the current token, a displayable initiative value and a hold state for each token.
+ * All of the tokens currently being shown in the initiative list. It includes a reference to all the tokens in order, a reference to the current token, a displayable initiative value and a hold state
+ * for each token.
  * 
  * @author Jay
  */
@@ -69,9 +69,8 @@ public class InitiativeList implements Serializable {
 	private GUID zoneId;
 
 	/**
-	 * Hold the update when this variable is greater than 0. Some methods need to call {@link #updateServer()} when they
-	 * are called, but they also get called by other methods that update the server. This keeps it from happening
-	 * multiple times.
+	 * Hold the update when this variable is greater than 0. Some methods need to call {@link #updateServer()} when they are called, but they also get called by other methods that update the server.
+	 * This keeps it from happening multiple times.
 	 */
 	private transient int holdUpdate;
 
@@ -468,10 +467,8 @@ public class InitiativeList implements Serializable {
 	}
 
 	/**
-	 * Sort the tokens by their initiative state from largest to smallest. If the initiative state string can be
-	 * converted into a {@link Double} that is done first. All values converted to {@link Double}s are always considered
-	 * bigger than the {@link String} values. The {@link String} values are considered bigger than any <code>null</code>
-	 * values.
+	 * Sort the tokens by their initiative state from largest to smallest. If the initiative state string can be converted into a {@link Double} that is done first. All values converted to
+	 * {@link Double}s are always considered bigger than the {@link String} values. The {@link String} values are considered bigger than any <code>null</code> values.
 	 */
 	public void sort() {
 		startUnitOfWork();

@@ -35,8 +35,7 @@ import net.rptools.maptool.util.CampaignExport;
 /**
  * Creates a dialog for saving campaigns as a previous version
  * <p>
- * This uses a modal dialog based on an Abeille form. It allows the user to select a version of MapTool to save the
- * campaign file as for backward compatibility.
+ * This uses a modal dialog based on an Abeille form. It allows the user to select a version of MapTool to save the campaign file as for backward compatibility.
  * 
  * @return a dialog box
  */

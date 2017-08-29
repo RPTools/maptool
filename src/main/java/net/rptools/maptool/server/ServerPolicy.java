@@ -8,11 +8,17 @@
  */
 package net.rptools.maptool.server;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.sf.json.JSONObject;
 
 public class ServerPolicy {
 	private boolean strictTokenMovement;
@@ -161,5 +167,36 @@ public class ServerPolicy {
 	 */
 	public void setIncludeOwnedNPCs(boolean includeOwnedNPCs) {
 		this.includeOwnedNPCs = includeOwnedNPCs;
+	}
+
+	/**
+	 * Retrieves the server side preferences as a json object.
+	 * 
+	 * @return the server side preferences
+	 */
+	public JSONObject toJSON() {
+		Map<String, Object> sinfo = new HashMap<String, Object>();
+
+		sinfo.put("tooltips for default roll format", getUseToolTipsForDefaultRollFormat() ? BigDecimal.ONE : BigDecimal.ZERO);
+		sinfo.put("players can reveal", getPlayersCanRevealVision() ? BigDecimal.ONE : BigDecimal.ZERO);
+		sinfo.put("movement locked", isMovementLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
+		sinfo.put("restricted impersonation", isRestrictedImpersonation() ? BigDecimal.ONE : BigDecimal.ZERO);
+		sinfo.put("individual views", isUseIndividualViews() ? BigDecimal.ONE : BigDecimal.ZERO);
+		sinfo.put("strict token management", useStrictTokenManagement() ? BigDecimal.ONE : BigDecimal.ZERO);
+		sinfo.put("players receive campaign macros", playersReceiveCampaignMacros() ? BigDecimal.ONE : BigDecimal.ZERO);
+
+		WalkerMetric metric = MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : getMovementMetric();
+		sinfo.put("movement metric", metric.toString());
+
+		sinfo.put("timeInMs", getSystemTime());
+		sinfo.put("timeDate", getTimeDate());
+
+		sinfo.put("gm", MapTool.getGMs());
+
+		InitiativePanel ip = MapTool.getFrame().getInitiativePanel();
+		if (ip != null) {
+			sinfo.put("initiative owner permissions", ip.isOwnerPermissions() ? BigDecimal.ONE : BigDecimal.ZERO);
+		}
+		return JSONObject.fromObject(sinfo);
 	}
 }

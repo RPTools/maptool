@@ -35,11 +35,9 @@ import net.rptools.maptool.model.AssetAvailableListener;
 import net.rptools.maptool.model.AssetManager;
 
 /**
- * The ImageManager class keeps a cache of loaded images. This class can be used to load the raw image data from an
- * asset. The loading of the raw image data into a usable class is done in the background by one of two threads. The
- * ImageManager will return a "?" (UNKNOWN_IMAGE) if the asset is still downloading or the asset image is still being
- * loaded, and a "X" (BROKEN_IMAGE) if the asset or image is invalid. Small images are loaded using a different thread
- * pool from large images, and allows small images to load quicker.
+ * The ImageManager class keeps a cache of loaded images. This class can be used to load the raw image data from an asset. The loading of the raw image data into a usable class is done in the
+ * background by one of two threads. The ImageManager will return a "?" (UNKNOWN_IMAGE) if the asset is still downloading or the asset image is still being loaded, and a "X" (BROKEN_IMAGE) if the
+ * asset or image is invalid. Small images are loaded using a different thread pool from large images, and allows small images to load quicker.
  * 
  * @author RPTools Team.
  */
@@ -51,8 +49,7 @@ public class ImageManager {
 	private static final Map<MD5Key, byte[]> textureMap = new HashMap<MD5Key, byte[]>();
 
 	/**
-	 * The unknown image, a "?" is used for all situations where the image will eventually appear e.g. asset download,
-	 * and image loading.
+	 * The unknown image, a "?" is used for all situations where the image will eventually appear e.g. asset download, and image loading.
 	 */
 	private static final String UNKNOWN_IMAGE_PNG = "net/rptools/maptool/client/image/unknown.png";
 	public static BufferedImage TRANSFERING_IMAGE;
@@ -95,8 +92,8 @@ public class ImageManager {
 	}
 
 	/**
-	 * Remove all images from the image cache. The observers and image load hints are not flushed. The same observers
-	 * will be notified when the image is reloaded, and the same hints will be used for loading.
+	 * Remove all images from the image cache. The observers and image load hints are not flushed. The same observers will be notified when the image is reloaded, and the same hints will be used for
+	 * loading.
 	 */
 	public static void flush() {
 		imageMap.clear();
@@ -114,8 +111,7 @@ public class ImageManager {
 	}
 
 	/**
-	 * Flush all images that are <b>not</b> in the provided set. This presumes that the images in the exception set will
-	 * still be in use after the flush.
+	 * Flush all images that are <b>not</b> in the provided set. This presumes that the images in the exception set will still be in use after the flush.
 	 */
 	public static void flush(Set<MD5Key> exceptionSet) {
 		synchronized (imageLoaderMutex) {
