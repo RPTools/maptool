@@ -16,23 +16,21 @@ import java.io.PrintStream;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.util.SysInfo;
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.jidesoft.dialog.JideOptionPane;
 
 import io.sentry.Sentry;
-import io.sentry.event.BreadcrumbBuilder;
-import io.sentry.event.User;
 import io.sentry.event.UserBuilder;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.SysInfo;
 
 public class MapToolEventQueue extends EventQueue {
 	private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
-	private static final JideOptionPane optionPane = new JideOptionPane(I18N.getString("MapToolEventQueue.details"), JOptionPane.ERROR_MESSAGE, JideOptionPane.CLOSE_OPTION); //$NON-NLS-1$
+	private static final JideOptionPane optionPane = new JideOptionPane(I18N.getString("MapToolEventQueue.details"), //$NON-NLS-1$
+			JOptionPane.ERROR_MESSAGE, JideOptionPane.CLOSE_OPTION);
 
 	@Override
 	protected void dispatchEvent(AWTEvent event) {
@@ -52,9 +50,11 @@ public class MapToolEventQueue extends EventQueue {
 				displayPopup();
 				reportToSentryIO(t);
 			} catch (Throwable thrown) {
-				// Displaying the error message using the JideOptionPane has just failed. Fallback to standard swing dialog.
+				// Displaying the error message using the JideOptionPane has just failed. Fallback to standard swing
+				// dialog.
 				log.error(thrown, thrown);
-				JOptionPane.showMessageDialog(null, toString(thrown), I18N.getString("MapToolEventQueue.unexpectedError"), JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, toString(thrown),
+						I18N.getString("MapToolEventQueue.unexpectedError"), JOptionPane.ERROR_MESSAGE);
 				reportToSentryIO(thrown);
 			} finally {
 				log.debug("SENTRY TEST :: Debug message");
@@ -83,10 +83,12 @@ public class MapToolEventQueue extends EventQueue {
 	private static void reportToSentryIO(Throwable thrown) {
 		log.info("Logging stacktrace to Sentry.IO!");
 
-		// Note that all fields set on the context are optional. Context data is copied onto all future events in the current context (until the context is cleared).
+		// Note that all fields set on the context are optional. Context data is copied onto all future events in the
+		// current context (until the context is cleared).
 
 		// Record a breadcrumb in the current context. By default the last 100 breadcrumbs are kept.
-		// TODO: We could use this to record user actions to get a hint on what user was doing before exception was thrown...
+		// TODO: We could use this to record user actions to get a hint on what user was doing before exception was
+		// thrown...
 		// Sentry.getContext().recordBreadcrumb(new BreadcrumbBuilder().setMessage("User made an action").build());
 
 		UserBuilder user = new UserBuilder();

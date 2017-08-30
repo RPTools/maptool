@@ -72,7 +72,6 @@ import de.muntjak.tinylookandfeel.util.SBReference;
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
-import io.sentry.context.Context;
 import io.sentry.event.BreadcrumbBuilder;
 import io.sentry.event.UserBuilder;
 import net.rptools.clientserver.hessian.client.ClientConnection;
@@ -1511,29 +1510,6 @@ public class MapTool {
 		return -1;
 	}
 
-	// private static void initSentry() {
-	// /*
-	// * It is recommended that you use the DSN detection system, which will check the environment variable
-	// "SENTRY_DSN", the Java System Property "sentry.dsn", or the "sentry.properties" file in
-	// * your classpath. This makes it easier to provide and adjust your DSN without needing to change your code. See
-	// the configuration page for more information.
-	// */
-	// Sentry.init();
-	//
-	// // You can also manually provide the DSN to the ``init`` method.
-	// // String dsn = args[0];
-	// // Sentry.init(dsn);
-	//
-	// /*
-	// * It is possible to go around the static ``Sentry`` API, which means you are responsible for making the
-	// SentryClient instance available to your code.
-	// */
-	// // sentry = SentryClientFactory.sentryClient();
-	//
-	// logWithStaticAPI();
-	// // myClass.logWithInstanceAPI();
-	// }
-
 	/**
 	 * An example method that throws an exception.
 	 */
@@ -1579,7 +1555,10 @@ public class MapTool {
 		 * It is recommended that you use the DSN detection system, which will check the environment variable "SENTRY_DSN", the Java System Property "sentry.dsn", or the "sentry.properties" file in
 		 * your classpath. This makes it easier to provide and adjust your DSN without needing to change your code. See the configuration page for more information.
 		 */
-		Sentry.init("https://96fe58677c3348bcb6127a349007b9ca:d2242adc4af146bc899db04f779a264c@sentry.io/154119");
+		Sentry.init(); // "https://96fe58677c3348bcb6127a349007b9ca:d2242adc4af146bc899db04f779a264c@sentry.io/154119"
+
+		// /MapTool/src/main/java/net/rptools/maptool/client/MapTool.java
+		// /MapTool/src/main/resources/net/rptools/maptool/client/sentry.properties
 
 		/*
 		 * It is possible to go around the static ``Sentry`` API, which means you are responsible for making the SentryClient instance available to your code.
@@ -1590,7 +1569,7 @@ public class MapTool {
 		sentry.setRelease(getVersion());
 		sentry.setEnvironment("Development");
 
-		// MapTool myClass = new MapTool();
+		// purely for testing...
 		logWithStaticAPI();
 
 		// Jamz: Overwrite version for testing if passed as command line argument using -v or -version

@@ -13,11 +13,13 @@ import javax.swing.JOptionPane;
 
 public class LaunchInstructions {
 
-	private static final String USAGE = "<html><body width=\"400\">You are running MapTool with insufficient memory allocated (%dMB).<br><br>" +
-			"You may experience odd behavior, especially when connecting to or hosting a server.<br><br>  " +
-			"MapTool will launch anyway, but it is recommended that you use one of the 'Launch' scripts instead.</body></html>";
+	private static final String USAGE = "<html><body width=\"400\">You are running MapTool with insufficient memory allocated (%dMB).<br><br>"
+			+ "You may experience odd behavior, especially when connecting to or hosting a server.<br><br>  "
+			+ "MapTool will launch anyway, but it is recommended that you increase the maximum memory allocated or don't set a limit.</body></html>";
 
 	public static void main(String[] args) {
+		// Sentry.init();
+
 		long mem = Runtime.getRuntime().maxMemory();
 		String msg = new String(String.format(USAGE, mem / (1024 * 1024)));
 

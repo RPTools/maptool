@@ -254,7 +254,7 @@ task deploy(dependsOn: uberJar) {
 				"-Bwin.menuGroup=RPTools",
 				"-BshortcutHint=true",
 				"-BappVersion=" + version,
-				"-BuserJvmOptions=-Xss=4m"
+				"-BuserJvmOptions=-Xss=4M"
 		}
 	}
 }
