@@ -82,6 +82,7 @@ public class MapToolEventQueue extends EventQueue {
 
 	private static void reportToSentryIO(Throwable thrown) {
 		log.info("Logging stacktrace to Sentry.IO!");
+		System.out.println("Logging stacktrace to Sentry.IO! :: " + thrown.getLocalizedMessage());
 
 		// Note that all fields set on the context are optional. Context data is copied onto all future events in the
 		// current context (until the context is cleared).
@@ -99,6 +100,7 @@ public class MapToolEventQueue extends EventQueue {
 		// Set the user in the current context.
 		Sentry.getContext().setUser(user.build());
 
+		Sentry.getContext().addTag("os", System.getProperty("os.name"));
 		Sentry.getContext().addTag("version", MapTool.getVersion());
 		Sentry.getContext().addTag("role", MapTool.getPlayer().getRole().toString());
 		Sentry.getContext().addTag("hosting", String.valueOf(MapTool.isHostingServer()));

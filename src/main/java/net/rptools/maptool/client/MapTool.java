@@ -1570,7 +1570,7 @@ public class MapTool {
 		sentry.setEnvironment("Development");
 
 		// purely for testing...
-		logWithStaticAPI();
+		// logWithStaticAPI();
 
 		// Jamz: Overwrite version for testing if passed as command line argument using -v or -version
 		Options cmdOptions = new Options();
