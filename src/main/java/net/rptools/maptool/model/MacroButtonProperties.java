@@ -30,8 +30,8 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This (data)class is used by all Macro Buttons, including campaign, global and token macro buttons.

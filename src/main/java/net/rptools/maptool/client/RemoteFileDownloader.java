@@ -20,7 +20,7 @@ import java.net.URLConnection;
 
 import javax.swing.ProgressMonitor;
 
-import net.rptools.lib.GUID;
+import net.rptools.maptool.model.GUID;
 
 public class RemoteFileDownloader {
 	private final URL url;

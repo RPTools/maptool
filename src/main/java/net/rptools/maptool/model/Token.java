@@ -34,8 +34,8 @@ import java.util.Set;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;

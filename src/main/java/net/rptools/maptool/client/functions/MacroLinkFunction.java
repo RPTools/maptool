@@ -42,8 +42,8 @@ import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class MacroLinkFunction extends AbstractFunction {
 	private static final Logger log = LogManager.getLogger(MacroLinkFunction.class);

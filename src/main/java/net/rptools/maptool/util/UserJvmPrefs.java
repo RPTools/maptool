@@ -15,20 +15,25 @@ import java.util.Map;
 
 import javax.swing.table.DefaultTableModel;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import jdk.packager.services.UserJvmOptionsService;
 
 public class UserJvmPrefs {
+	private static final Logger log = LogManager.getLogger(UserJvmPrefs.class);
+
 	public static DefaultTableModel getJvmOptionsTableModel() {
 		RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
 		List<String> arguments = runtimeMxBean.getInputArguments();
-		System.out.println("JVM Args :: " + arguments);
+		log.debug("JVM Args :: " + arguments);
 
 		UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
 		Map<String, String> userOptions = ujo.getUserJVMOptions();
 
 		// print out all the options currently set
 		for (Map.Entry<String, String> entry : userOptions.entrySet()) {
-			System.out.println("getUserJVMDefaults key:" + entry.getKey() + " value:" + entry.getValue());
+			log.debug("getUserJVMDefaults key:" + entry.getKey() + " value:" + entry.getValue());
 		}
 
 		// if we haven't marked the first run, do so now

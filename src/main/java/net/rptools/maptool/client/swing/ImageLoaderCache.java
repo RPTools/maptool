@@ -26,8 +26,8 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.ImageManager;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ImageLoaderCache {
 	private static final Logger log = LogManager.getLogger(ImageLoaderCache.class);

@@ -85,7 +85,8 @@ public class LargeImage {
 		if (currentView != null && currentView.equals(view) && currentViewBuffer != null && this.scale == scale) {
 			return currentViewBuffer;
 		}
-		if (currentViewBuffer == null || currentViewBuffer.getWidth() != view.width || currentViewBuffer.getHeight() != view.height) {
+		if (currentViewBuffer == null || currentViewBuffer.getWidth() != view.width
+				|| currentViewBuffer.getHeight() != view.height) {
 			currentViewBuffer = new BufferedImage(view.width, view.height, Transparency.OPAQUE);
 		}
 		Graphics2D g = currentViewBuffer.createGraphics();
@@ -111,7 +112,8 @@ public class LargeImage {
 				}
 				int x = (int) (col * CHUNK_SIZE * scale - xOffset);
 				int y = (int) (row * CHUNK_SIZE * scale - yOffset);
-				g.drawImage(chunk, x, y, (int) Math.ceil(CHUNK_SIZE * scale), (int) Math.ceil(CHUNK_SIZE * scale), null);
+				g.drawImage(chunk, x, y, (int) Math.ceil(CHUNK_SIZE * scale), (int) Math.ceil(CHUNK_SIZE * scale),
+						null);
 			}
 		}
 		flushChunkCache();
@@ -127,16 +129,15 @@ public class LargeImage {
 				loadedChunkMap.remove(num);
 			}
 		}
+
 		usedChunkList.clear();
-		// System.out.println(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
 	}
 
 	private BufferedImage getChunk(int col, int row, double scale) {
 		int scaleIndex = getScaleIndex(scale);
 		int chunkId = getChunkId(col, row, scaleIndex);
 
-		if (col >= getChunkCountX(scaleIndex) || row >= getChunkCountY(scaleIndex) ||
-				col < 0 || row < 0) {
+		if (col >= getChunkCountX(scaleIndex) || row >= getChunkCountY(scaleIndex) || col < 0 || row < 0) {
 			return null;
 		}
 		usedChunkList.add(chunkId);
@@ -189,7 +190,8 @@ public class LargeImage {
 	}
 
 	private int getScaleCount() {
-		return (int) Math.max(Math.ceil(info.width / (CHUNK_SIZE * SCALE_CHUNK_INTERVAL)), Math.ceil(info.height / (CHUNK_SIZE * SCALE_CHUNK_INTERVAL)));
+		return (int) Math.max(Math.ceil(info.width / (CHUNK_SIZE * SCALE_CHUNK_INTERVAL)),
+				Math.ceil(info.height / (CHUNK_SIZE * SCALE_CHUNK_INTERVAL)));
 	}
 
 	private void chunkize(BufferedImage image) throws IOException {
@@ -210,7 +212,8 @@ public class LargeImage {
 					int width = (int) Math.min(scaledChunkSize, image.getWidth() - col * scaledChunkSize);
 					int height = (int) Math.min(scaledChunkSize, image.getHeight() - row * scaledChunkSize);
 
-					BufferedImage chunkImage = image.getSubimage((int) (col * scaledChunkSize), (int) (row * scaledChunkSize), width, height);
+					BufferedImage chunkImage = image.getSubimage((int) (col * scaledChunkSize),
+							(int) (row * scaledChunkSize), width, height);
 
 					Graphics2D g = tmpImage.createGraphics();
 					g.drawImage(chunkImage, 0, 0, CHUNK_SIZE, CHUNK_SIZE, null);

@@ -13,8 +13,8 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIDefinition;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
 
 import javax.script.*;

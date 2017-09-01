@@ -21,8 +21,8 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.regex.Matcher;

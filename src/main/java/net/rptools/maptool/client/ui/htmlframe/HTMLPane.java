@@ -14,8 +14,8 @@ import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.commandpanel.MessagePanel;
 import net.rptools.parser.ParserException;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;

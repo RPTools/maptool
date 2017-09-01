@@ -36,16 +36,16 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import net.rptools.lib.CodeTimer;
-import net.rptools.lib.FileUtil;
-import net.rptools.lib.GUID;
-import net.rptools.lib.ModelVersionManager;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.thoughtworks.xstream.XStream;
+
+import net.rptools.lib.CodeTimer;
+import net.rptools.lib.FileUtil;
+import net.rptools.lib.ModelVersionManager;
+import net.rptools.maptool.model.GUID;
 
 /**
  * Represents a container of content/files within a single actual file.
@@ -303,12 +303,14 @@ public class PackedFile {
 				Enumeration<? extends ZipEntry> entries = zFile.entries();
 				while (entries.hasMoreElements()) {
 					ZipEntry entry = entries.nextElement();
-					if (!entry.isDirectory() && !addedFileSet.contains(entry.getName()) && !removedFileSet.contains(entry.getName())
-							&& !CONTENT_FILE.equals(entry.getName()) && !PROPERTY_FILE.equals(entry.getName())) {
+					if (!entry.isDirectory() && !addedFileSet.contains(entry.getName())
+							&& !removedFileSet.contains(entry.getName()) && !CONTENT_FILE.equals(entry.getName())
+							&& !PROPERTY_FILE.equals(entry.getName())) {
 						// if (entry.getName().endsWith(".png") ||
 						// entry.getName().endsWith(".gif") ||
 						// entry.getName().endsWith(".jpeg"))
-						// zout.setLevel(Deflater.NO_COMPRESSION); // none needed for images as they are already compressed
+						// zout.setLevel(Deflater.NO_COMPRESSION); // none needed for images as they are already
+						// compressed
 						// else
 						// zout.setLevel(Deflater.BEST_COMPRESSION); // fast compression
 						zout.putNextEntry(entry);

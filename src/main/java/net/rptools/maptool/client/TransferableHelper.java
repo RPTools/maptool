@@ -29,9 +29,8 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -73,7 +72,8 @@ public class TransferableHelper extends TransferHandler {
 	 * <p>
 	 * The best type of object to get is this one -- a URL -- since the representation of URLs is universal
 	 */
-	private static final DataFlavor URL_FLAVOR_URI = new DataFlavor("application/x-java-url; class=java.net.URL", "Image"); //$NON-NLS-1$
+	private static final DataFlavor URL_FLAVOR_URI = new DataFlavor("application/x-java-url; class=java.net.URL", //$NON-NLS-1$
+			"Image");
 	/**
 	 * <b>image/x-java-image; class=java.awt.Image</b>
 	 * <p>
@@ -91,18 +91,13 @@ public class TransferableHelper extends TransferHandler {
 	 * Data flavors that this handler will support.
 	 */
 	// @formatter:off
-	public static final DataFlavor[] SUPPORTED_FLAVORS = {
-		TransferableAsset.dataFlavor,
-		TransferableAssetReference.dataFlavor,
-		URL_FLAVOR_URI,		// Prefer the real one (although this list isn't necessarily scanned in order)
-		X_JAVA_IMAGE,
-		URL_FLAVOR_PLAIN,
-		DataFlavor.javaFileListFlavor,
-		URI_LIST_FLAVOR,
-		TransferableToken.dataFlavor,
-		MapToolTokenTransferData.MAP_TOOL_TOKEN_LIST_FLAVOR,	// Is this appropriate? never used herein...
-		GroupTokenTransferData.GROUP_TOKEN_LIST_FLAVOR,
-	};
+	public static final DataFlavor[] SUPPORTED_FLAVORS = { TransferableAsset.dataFlavor,
+			TransferableAssetReference.dataFlavor, URL_FLAVOR_URI, // Prefer the real one (although this list isn't
+																	// necessarily scanned in order)
+			X_JAVA_IMAGE, URL_FLAVOR_PLAIN, DataFlavor.javaFileListFlavor, URI_LIST_FLAVOR,
+			TransferableToken.dataFlavor, MapToolTokenTransferData.MAP_TOOL_TOKEN_LIST_FLAVOR, // Is this appropriate?
+																								// never used herein...
+			GroupTokenTransferData.GROUP_TOKEN_LIST_FLAVOR, };
 	// @formatter:on
 
 	/**
@@ -182,11 +177,15 @@ public class TransferableHelper extends TransferHandler {
 			 */
 
 			// LOCAL FILESYSTEM
-			// Used by Linux when files are dragged from the desktop. Other systems don't use this so we're safe checking for it first.
-			// (Except Mac OS X 10.11 does appear to use it now, but textURIListToFileList() will fail as the URIs can't be converted
-			// to URLs. This is why we check for the empty 'list' -- if it's empty, we can't use this conversion and we want 'o' to be
+			// Used by Linux when files are dragged from the desktop. Other systems don't use this so we're safe
+			// checking for it first.
+			// (Except Mac OS X 10.11 does appear to use it now, but textURIListToFileList() will fail as the URIs can't
+			// be converted
+			// to URLs. This is why we check for the empty 'list' -- if it's empty, we can't use this conversion and we
+			// want 'o' to be
 			// null for the following checks.)
-			// Note that "text/uri-list" is considered a JRE bug and it should be converting the event into "text/x-java-file-list", but
+			// Note that "text/uri-list" is considered a JRE bug and it should be converting the event into
+			// "text/x-java-file-list", but
 			// until it does...
 			if (o == null && transferable.isDataFlavorSupported(URI_LIST_FLAVOR)) {
 				if (log.isInfoEnabled())
@@ -201,7 +200,8 @@ public class TransferableHelper extends TransferHandler {
 			}
 
 			// LOCAL FILESYSTEM
-			// Used by OSX (and Windows?) when files are dragged from the desktop: 'text/java-file-list; java.util.List<java.io.File>'
+			// Used by OSX (and Windows?) when files are dragged from the desktop: 'text/java-file-list;
+			// java.util.List<java.io.File>'
 			if (o == null && transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
 				if (log.isInfoEnabled())
 					log.info("Selected: " + DataFlavor.javaFileListFlavor);
@@ -232,7 +232,8 @@ public class TransferableHelper extends TransferHandler {
 			}
 
 			// DIRECT/BROWSER
-			// It may be that the dropped object is a URL but is 'text/plain; java.lang.String' and URLs are better than other file types...
+			// It may be that the dropped object is a URL but is 'text/plain; java.lang.String' and URLs are better than
+			// other file types...
 			if (o == null && transferable.isDataFlavorSupported(URL_FLAVOR_PLAIN)) {
 				if (log.isInfoEnabled())
 					log.info("Selected: " + URL_FLAVOR_PLAIN);
@@ -292,7 +293,8 @@ public class TransferableHelper extends TransferHandler {
 		return list;
 	}
 
-	private static Asset handleImage(URL url, String type, Transferable transferable) throws IOException, UnsupportedFlavorException {
+	private static Asset handleImage(URL url, String type, Transferable transferable)
+			throws IOException, UnsupportedFlavorException {
 		BufferedImage image = null;
 		Asset asset = null;
 		try {
@@ -411,7 +413,8 @@ public class TransferableHelper extends TransferHandler {
 			} // endfor
 			if (tokens.size() != tokenMaps.size()) {
 				final int missingTokens = tokenMaps.size() - tokens.size();
-				final String message = I18N.getText("TransferableHelper.warning.tokensAddedAndExcluded", tokens.size(), missingTokens); //$NON-NLS-1$
+				final String message = I18N.getText("TransferableHelper.warning.tokensAddedAndExcluded", tokens.size(), //$NON-NLS-1$
+						missingTokens);
 				// if (EventQueue.isDispatchThread())
 				// System.out.println("Yes, we are on the EDT already.");
 				SwingUtilities.invokeLater(new Runnable() {
@@ -429,12 +432,16 @@ public class TransferableHelper extends TransferHandler {
 	}
 
 	public static boolean isSupportedAssetFlavor(Transferable transferable) {
-		return transferable.isDataFlavorSupported(TransferableAsset.dataFlavor) || transferable.isDataFlavorSupported(TransferableAssetReference.dataFlavor)
-				|| transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor) || transferable.isDataFlavorSupported(URI_LIST_FLAVOR) || transferable.isDataFlavorSupported(URL_FLAVOR_PLAIN);
+		return transferable.isDataFlavorSupported(TransferableAsset.dataFlavor)
+				|| transferable.isDataFlavorSupported(TransferableAssetReference.dataFlavor)
+				|| transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+				|| transferable.isDataFlavorSupported(URI_LIST_FLAVOR)
+				|| transferable.isDataFlavorSupported(URL_FLAVOR_PLAIN);
 	}
 
 	public static boolean isSupportedTokenFlavor(Transferable transferable) {
-		return transferable.isDataFlavorSupported(GroupTokenTransferData.GROUP_TOKEN_LIST_FLAVOR) || transferable.isDataFlavorSupported(TransferableToken.dataFlavor);
+		return transferable.isDataFlavorSupported(GroupTokenTransferData.GROUP_TOKEN_LIST_FLAVOR)
+				|| transferable.isDataFlavorSupported(TransferableToken.dataFlavor);
 	}
 
 	/**
@@ -513,7 +520,8 @@ public class TransferableHelper extends TransferHandler {
 	// System.setOut(old);
 	// }
 
-	private static final Class<?> validTypes[] = { java.lang.String.class, java.net.URL.class, java.util.List.class, java.awt.Image.class, };
+	private static final Class<?> validTypes[] = { java.lang.String.class, java.net.URL.class, java.util.List.class,
+			java.awt.Image.class, };
 
 	/**
 	 * @see javax.swing.TransferHandler#importData(javax.swing.JComponent, java.awt.datatransfer.Transferable)
@@ -556,17 +564,12 @@ public class TransferableHelper extends TransferHandler {
 			if (t.isDataFlavorSupported(TransferableToken.dataFlavor)) {
 				try {
 					// Make a copy so that it gets a new unique GUID
-					tokens = Collections.singletonList(new Token((Token) t.getTransferData(TransferableToken.dataFlavor)));
+					tokens = Collections
+							.singletonList(new Token((Token) t.getTransferData(TransferableToken.dataFlavor)));
 					// A token from the Resource Library is already fully configured.
 					configureTokens = Collections.singletonList(new Boolean(false));
 				} catch (Exception e) {
-					// There's no reason to trap the individual exceptions when a single catch suffices.
-					if (log.isEnabledFor(Level.ERROR))
-						log.error("while using TransferableToken.dataFlavor", e); //$NON-NLS-1$
-					// } catch (UnsupportedFlavorException ufe) {
-					// ufe.printStackTrace();
-					// } catch (IOException ioe) {
-					// ioe.printStackTrace();
+					log.error("while using TransferableToken.dataFlavor", e); //$NON-NLS-1$
 				}
 			} else if (t.isDataFlavorSupported(GroupTokenTransferData.GROUP_TOKEN_LIST_FLAVOR)) {
 				tokens = getTokens(t);

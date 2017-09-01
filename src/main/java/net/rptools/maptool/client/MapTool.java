@@ -60,8 +60,10 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.appender.FileAppender;
 
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
@@ -160,7 +162,9 @@ public class MapTool {
 	private static final Dimension THUMBNAIL_SIZE = new Dimension(500, 500);
 
 	private static ThumbnailManager thumbnailManager;
-	private static String version;
+	private static String version = "DEVELOPMENT";;
+	private static String vendor = "Nerps!";
+
 	private static Campaign campaign;
 
 	private static ObservableList<Player> playerList;
@@ -716,16 +720,6 @@ public class MapTool {
 	}
 
 	public static String getVersion() {
-		if (version == null) {
-			System.out.println("Version from manifest is: " + MapTool.class.getPackage().getImplementationVersion());
-			System.out.println("Vendor from manifest is: " + MapTool.class.getPackage().getImplementationVendor());
-
-			if (MapTool.class.getPackage().getImplementationVersion() != null) {
-				version = MapTool.class.getPackage().getImplementationVersion().trim();
-			} else {
-				version = "DEVELOPMENT";
-			}
-		}
 		return version;
 	}
 
@@ -1166,32 +1160,6 @@ public class MapTool {
 		}
 	}
 
-	private static void configureLogging() {
-		String logging = null;
-		try {
-			logging = new String(FileUtil.loadResource("net/rptools/maptool/client/logging.xml"), "UTF-8");
-		} catch (IOException ioe) {
-			System.err.println("Could not load logging configuration file: " + ioe);
-			return;
-		}
-		File localLoggingConfigFile = new File(AppUtil.getAppHome(), "logging.xml");
-		String localConfig = "";
-		if (localLoggingConfigFile.exists()) {
-			try {
-				localConfig = FileUtils.readFileToString(localLoggingConfigFile, "UTF-8");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		logging = logging.replace("INSERT_LOCAL_CONFIG_HERE", localConfig);
-		logging = logging.replace("${appHome}", AppUtil.getAppHome().getAbsolutePath().replace('\\', '/'));
-
-		// Configure
-		// new DOMConfigurator().doConfigure(new ByteArrayInputStream(logging.getBytes()),
-		// LogManager.getLoggerRepository());
-		log.info("DOMConfigurator configuration disabled, no custom logging currently implemented. -Jamz");
-	}
-
 	private static final void configureJide() {
 		LookAndFeelFactory.UIDefaultsCustomizer uiDefaultsCustomizer = new LookAndFeelFactory.UIDefaultsCustomizer() {
 			public void customize(UIDefaults defaults) {
@@ -1207,8 +1175,8 @@ public class MapTool {
 				defaults.put("OptionPane.bannerForeground",
 						painter != null ? painter.getOptionPaneBannerForeground() : null); // you should adjust this if
 																							// banner background is not
-																							// the default
-																							// gradient paint
+																							// the default gradient
+																							// paint
 				defaults.put("OptionPane.bannerBorder", null); // use default border
 
 				// set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want gradient
@@ -1244,7 +1212,7 @@ public class MapTool {
 			JAVA_VERSION = 1.5;
 		} else {
 			JAVA_VERSION = Double.valueOf(version);
-			if (JAVA_VERSION < 1.6) {
+			if (JAVA_VERSION < 1.8) {
 				keepgoing = confirm("msg.error.wrongJavaVersion", version);
 			}
 		}
@@ -1520,7 +1488,7 @@ public class MapTool {
 	/**
 	 * Examples using the (recommended) static API.
 	 */
-	static void logWithStaticAPI() {
+	static void testSentryAPI() {
 		// Note that all fields set on the context are optional. Context data is copied onto
 		// all future events in the current context (until the context is cleared).
 
@@ -1550,27 +1518,34 @@ public class MapTool {
 		}
 	}
 
+	public static String getLoggerFileName() {
+		org.apache.logging.log4j.core.Logger loggerImpl = (org.apache.logging.log4j.core.Logger) log;
+		Appender appender = loggerImpl.getAppenders().get("LogFile");
+
+		if (appender != null)
+			return ((FileAppender) appender).getFileName();
+		else
+			return "NOT_CONFIGURED";
+	}
+
 	public static void main(String[] args) {
-		/*
-		 * It is recommended that you use the DSN detection system, which will check the environment variable "SENTRY_DSN", the Java System Property "sentry.dsn", or the "sentry.properties" file in
-		 * your classpath. This makes it easier to provide and adjust your DSN without needing to change your code. See the configuration page for more information.
-		 */
-		Sentry.init(); // "https://96fe58677c3348bcb6127a349007b9ca:d2242adc4af146bc899db04f779a264c@sentry.io/154119"
+		log.info("AppHome System Property: " + System.getProperty("appHome"));
+		log.info("Logging to: " + getLoggerFileName());
 
-		// /MapTool/src/main/java/net/rptools/maptool/client/MapTool.java
-		// /MapTool/src/main/resources/net/rptools/maptool/client/sentry.properties
+		if (MapTool.class.getPackage().getImplementationVersion() != null) {
+			version = MapTool.class.getPackage().getImplementationVersion().trim();
+			log.info("setting MapTool version from manifest: " + version);
+		}
 
-		/*
-		 * It is possible to go around the static ``Sentry`` API, which means you are responsible for making the SentryClient instance available to your code.
-		 */
+		if (MapTool.class.getPackage().getImplementationVendor() != null) {
+			vendor = MapTool.class.getPackage().getImplementationVendor().trim();
+			log.info("setting MapTool vendor from manifest:  " + vendor);
+		}
+
+		// Initialize Sentry.io logging
+		Sentry.init();
 		sentry = SentryClientFactory.sentryClient();
-
-		// Set MapTool version
-		sentry.setRelease(getVersion());
-		sentry.setEnvironment("Development");
-
-		// purely for testing...
-		// logWithStaticAPI();
+		// testSentryAPI(); // purely for testing...
 
 		// Jamz: Overwrite version for testing if passed as command line argument using -v or -version
 		Options cmdOptions = new Options();
@@ -1605,8 +1580,21 @@ public class MapTool {
 
 		// List out passed in arguments
 		for (String arg : args) {
-			System.out.println("arg: " + arg);
+			log.info("argument passed via command line: " + arg);
 		}
+
+		if (cmdOptions.hasOption("version"))
+			log.info("overriding MapTool version from command line to: " + version);
+		else
+			log.info("MapTool version: " + version);
+
+		log.info("MapTool vendor: " + vendor);
+
+		// Set MapTool version
+		sentry.setRelease(getVersion());
+		// sentry.setEnvironment("Development");
+		sentry.addTag("os", System.getProperty("os.name"));
+		sentry.addTag("version", MapTool.getVersion());
 
 		if (MAC_OS_X) {
 			// On OSX the menu bar at the top of the screen can be enabled at any time, but the
@@ -1632,13 +1620,11 @@ public class MapTool {
 			JOptionPane.showMessageDialog(frame, t.getMessage(), errorCreatingDir, JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 		}
-		verifyJavaVersion();
 
-		configureLogging();
+		verifyJavaVersion();
 
 		// System properties
 		System.setProperty("swing.aatext", "true");
-		// System.setProperty("sun.java2d.opengl", "true");
 
 		final SplashScreen splash = new SplashScreen((isDevelopment()) ? getVersion() : "v" + getVersion());
 

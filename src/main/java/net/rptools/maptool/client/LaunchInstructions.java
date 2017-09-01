@@ -12,13 +12,13 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 public class LaunchInstructions {
-
 	private static final String USAGE = "<html><body width=\"400\">You are running MapTool with insufficient memory allocated (%dMB).<br><br>"
 			+ "You may experience odd behavior, especially when connecting to or hosting a server.<br><br>  "
 			+ "MapTool will launch anyway, but it is recommended that you increase the maximum memory allocated or don't set a limit.</body></html>";
 
 	public static void main(String[] args) {
-		// Sentry.init();
+		// This is to initialize the log4j to set the path for logs. Just calling AppUtil sets the System.property
+		AppUtil.getAppHome();
 
 		long mem = Runtime.getRuntime().maxMemory();
 		String msg = new String(String.format(USAGE, mem / (1024 * 1024)));
@@ -30,6 +30,7 @@ public class LaunchInstructions {
 		if (mem < 200 * 1024 * 1024) {
 			JOptionPane.showMessageDialog(new JFrame(), msg, "Usage", JOptionPane.INFORMATION_MESSAGE);
 		}
+
 		MapTool.main(args);
 	}
 }

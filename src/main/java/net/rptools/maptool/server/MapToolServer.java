@@ -17,8 +17,8 @@ import java.util.Random;
 
 import javax.swing.SwingUtilities;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;

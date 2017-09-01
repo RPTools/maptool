@@ -28,8 +28,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jidesoft.swing.CheckBoxListWithSelectable;

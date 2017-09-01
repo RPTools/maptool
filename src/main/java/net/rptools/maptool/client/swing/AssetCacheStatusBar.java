@@ -20,8 +20,8 @@ import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppUtil;
@@ -31,7 +31,7 @@ import net.rptools.maptool.model.AssetManager;
 
 public class AssetCacheStatusBar extends JLabel {
 	private static final long serialVersionUID = -9151734515078030778L;
-	private static final Logger LOGGER = LogManager.getLogger(AssetCacheStatusBar.class);
+	private static final Logger log = LogManager.getLogger(AssetCacheStatusBar.class);
 	private static final File CACHE_DIR = AppUtil.getAppHome("assetcache");
 	private static final long POLLING_INTERVAL = 7000;
 	private static long lastChecked = 0;
@@ -54,7 +54,7 @@ public class AssetCacheStatusBar extends JLabel {
 			@Override
 			public void mouseClicked(java.awt.event.MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					LOGGER.info("Clearing asset cache...");
+					log.info("Clearing asset cache...");
 					AssetManager.clearCache();
 					update();
 					MapTool.getFrame().getAppHomeDiskSpaceStatusBar().update();
@@ -83,7 +83,7 @@ public class AssetCacheStatusBar extends JLabel {
 			monitor.addObserver(observer);
 			monitor.start();
 		} catch (Exception e) {
-			LOGGER.error("Unable to register file change listener for " + CACHE_DIR.getAbsolutePath());
+			log.warn("Unable to register file change listener for " + CACHE_DIR.getAbsolutePath());
 		}
 	}
 
@@ -96,7 +96,7 @@ public class AssetCacheStatusBar extends JLabel {
 		if (System.currentTimeMillis() - lastChecked >= POLLING_INTERVAL) {
 			setText(AppUtil.getDiskSpaceUsed(CACHE_DIR));
 			lastChecked = System.currentTimeMillis();
-			LOGGER.info("AssetCacheStatusBar updated...");
+			log.info("AssetCacheStatusBar updated...");
 		}
 	}
 }

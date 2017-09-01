@@ -25,8 +25,8 @@ import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;

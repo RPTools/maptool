@@ -48,8 +48,8 @@ import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.UPNPResponseException;
 import net.sf.json.JSONObject;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Retrieves certain characteristics of the execution environment for the purposes of problem determination and diagnostics. This class is invoked via the Help menu, Gather Debug Info... menu option.
