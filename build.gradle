@@ -45,7 +45,7 @@ ext {
 
 run {
 	args = [ '-v='+version, '-debug', '-fullscreen' ]
-	applicationDefaultJvmArgs = [ "-Djava.library.path=lib", "-Dsentry.environment=Development" ]
+	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development" ]
 }
 
 spotless {
