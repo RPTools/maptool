@@ -76,6 +76,7 @@ import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
 import io.sentry.event.BreadcrumbBuilder;
 import io.sentry.event.UserBuilder;
+import javafx.collections.transformation.SortedList;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
@@ -1557,6 +1558,7 @@ public class MapTool {
 		cmdOptions.addOption("h", "height", true, "override MapTool window height");
 		cmdOptions.addOption("x", "xpos", true, "override MapTool window starting x coordinate");
 		cmdOptions.addOption("y", "ypos", true, "override MapTool window starting y coordinate");
+		cmdOptions.addOption("m", "macros", false, "display defined list of macro functions");
 
 		// For libGDX testing
 		cmdOptions.addOption("l", "libgdx", false, "start & show libGDX application window");
@@ -1571,6 +1573,8 @@ public class MapTool {
 		windowHeight = getCommandLineOption(cmdOptions, "height", windowHeight, args);
 		windowX = getCommandLineOption(cmdOptions, "xpos", windowX, args);
 		windowY = getCommandLineOption(cmdOptions, "ypos", windowY, args);
+
+		boolean listMacros = getCommandLineOption(cmdOptions, "macros", args);
 
 		// Jamz: Just a little console log formatter for system.out to hyperlink messages to source.
 		if (debug)
@@ -1595,6 +1599,18 @@ public class MapTool {
 		// sentry.setEnvironment("Development");
 		sentry.addTag("os", System.getProperty("os.name"));
 		sentry.addTag("version", MapTool.getVersion());
+
+		if (listMacros) {
+			String logOutput = null;
+			List<String> macroList = parser.listAllMacroFunctions();
+			Collections.sort(macroList);
+
+			for (String macro : macroList) {
+				logOutput += "\n" + macro;
+			}
+
+			log.info("Current list of Macro Functions: " + logOutput);
+		}
 
 		if (MAC_OS_X) {
 			// On OSX the menu bar at the top of the screen can be enabled at any time, but the

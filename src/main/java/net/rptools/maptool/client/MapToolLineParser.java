@@ -10,6 +10,7 @@ package net.rptools.maptool.client;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -118,6 +119,16 @@ public class MapToolLineParser {
 
 	private enum ScanState {
 		SEARCHING_FOR_ROLL, SEARCHING_FOR_QUOTE, SEARCHING_FOR_CLOSE_BRACKET, SKIP_NEXT_CHAR
+	}
+
+	public List<String> listAllMacroFunctions() {
+		List<String> functionList = new ArrayList<String>();
+
+		for (Function function : mapToolParserFunctions) {
+			functionList.addAll(Arrays.asList(function.getAliases()));
+		}
+
+		return functionList;
 	}
 
 	// Class to hold the inline rolls and where they start and end.

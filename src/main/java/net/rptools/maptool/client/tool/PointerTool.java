@@ -865,14 +865,16 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 					continue;
 				}
 
+				// Rolled back change from commit 3d5f619 because of reported bug by dorpond
+				// https://github.com/JamzTheMan/maptool/commit/3d5f619dff6e61c605ee532ac3c86a3860e91864
 				if (useTokenExposedArea) {
-					if (token.getHasSight()) {
-						ExposedAreaMetaData meta = zone.getExposedAreaMetaData(token.getExposedAreaGUID());
-						tokenFog.add(meta.getExposedAreaHistory());
-					} else {
-						// Jamz: Allow a token without site to move within the current PlayerView
-						tokenFog.add(renderer.getZoneView().getVisibleArea(new PlayerView(Role.PLAYER)));
-					}
+					// if (token.getHasSight()) {
+					ExposedAreaMetaData meta = zone.getExposedAreaMetaData(token.getExposedAreaGUID());
+					tokenFog.add(meta.getExposedAreaHistory());
+					// } else {
+					// // Jamz: Allow a token without site to move within the current PlayerView
+					// tokenFog.add(renderer.getZoneView().getVisibleArea(new PlayerView(Role.PLAYER)));
+					// }
 				}
 
 				Rectangle tokenSize = token.getBounds(zone);
