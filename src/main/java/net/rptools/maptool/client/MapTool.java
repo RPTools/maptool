@@ -76,7 +76,6 @@ import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
 import io.sentry.event.BreadcrumbBuilder;
 import io.sentry.event.UserBuilder;
-import javafx.collections.transformation.SortedList;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
@@ -1282,9 +1281,7 @@ public class MapTool {
 				setDockIconBadge.invoke(appl, new Object[] { vers });
 			}
 		} catch (Exception e) {
-			log.info(
-					"Cannot find/invoke methods on com.apple.eawt.Application; use -X command line options to set dock bar attributes",
-					e);
+			log.info("Cannot find/invoke methods on com.apple.eawt.Application; use -X command line options to set dock bar attributes", e);
 		}
 	}
 

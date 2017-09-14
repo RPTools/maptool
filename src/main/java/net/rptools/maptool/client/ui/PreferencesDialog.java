@@ -16,6 +16,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -33,7 +34,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableModel;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
@@ -45,11 +48,13 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UserJvmPrefs;
+import net.rptools.maptool.util.UserJvmPrefs.JVM_OPTION;
 
 import com.jeta.forms.components.colors.JETAColorWell;
 import com.jeta.forms.components.panel.FormPanel;
 
 public class PreferencesDialog extends JDialog {
+	private static final Logger log = LogManager.getLogger(PreferencesDialog.class);
 
 	/**
 	 * @author frank
@@ -179,6 +184,17 @@ public class PreferencesDialog extends JDialog {
 	private final JTextField fileSyncPath;
 	private final JButton fileSyncPathButton;
 
+	// Startup
+	private final JTextField jvmXmxTextField;
+	private final JTextField jvmXmsTextField;
+	private final JTextField jvmXssTextField;
+
+	private final JCheckBox jvmAssertionsCheckbox;
+	private final JCheckBox jvmDirect3dCheckbox;
+	private final JCheckBox jvmOpenGLCheckbox;
+	private final JCheckBox jvmInitAwtCheckbox;
+	private final JCheckBox jvmEnableHidpiCheckbox;
+
 	public PreferencesDialog() {
 		super(MapTool.getFrame(), "Preferences", true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -195,8 +211,6 @@ public class PreferencesDialog extends JDialog {
 				MapTool.getEventDispatcher().fireEvent(MapTool.PreferencesEvent.Changed);
 			}
 		});
-
-		DefaultTableModel test = UserJvmPrefs.getJvmOptionsTableModel();
 
 		forceFacingArrowCheckBox = panel.getCheckBox("forceFacingArrow");
 		showStatSheetCheckBox = panel.getCheckBox("showStatSheet");
@@ -266,6 +280,16 @@ public class PreferencesDialog extends JDialog {
 		typingNotificationDuration = panel.getSpinner("typingNotificationDuration");
 		fileSyncPath = panel.getTextField("fileSyncPath");
 		fileSyncPathButton = (JButton) panel.getButton("fileSyncPathButton");
+
+		jvmXmxTextField = panel.getTextField("jvmXmxTextField");
+		jvmXmsTextField = panel.getTextField("jvmXmsTextField");
+		jvmXssTextField = panel.getTextField("jvmXssTextField");
+
+		jvmAssertionsCheckbox = panel.getCheckBox("jvmAssertionsCheckbox");
+		jvmDirect3dCheckbox = panel.getCheckBox("jvmDirect3dCheckbox");
+		jvmOpenGLCheckbox = panel.getCheckBox("jvmOpenGLCheckbox");
+		jvmInitAwtCheckbox = panel.getCheckBox("jvmInitAwtCheckbox");
+		jvmEnableHidpiCheckbox = panel.getCheckBox("jvmEnableHidpiCheckbox");
 
 		setInitialState();
 
@@ -615,6 +639,80 @@ public class PreferencesDialog extends JDialog {
 				}
 			}
 		});
+		jvmXmxTextField.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				if (!e.isTemporary()) {
+					String jvmXmx = jvmXmxTextField.getText().trim();
+
+					if (UserJvmPrefs.verifyJvmOptions(jvmXmx)) {
+						UserJvmPrefs.setJvmOption(JVM_OPTION.MAX_MEM, jvmXmx);
+					} else {
+						jvmXmxTextField.setText(JVM_OPTION.MAX_MEM.getDefaultValue());
+						UserJvmPrefs.setJvmOption(JVM_OPTION.MAX_MEM, JVM_OPTION.MAX_MEM.getDefaultValue());
+						log.warn("Invalid JVM Xmx paramater entered: " + jvmXmx);
+					}
+				}
+			}
+		});
+		jvmXmsTextField.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				if (!e.isTemporary()) {
+					String jvmXms = jvmXmsTextField.getText().trim();
+
+					if (UserJvmPrefs.verifyJvmOptions(jvmXms)) {
+						UserJvmPrefs.setJvmOption(JVM_OPTION.MIN_MEM, jvmXms);
+					} else {
+						jvmXmsTextField.setText(JVM_OPTION.MIN_MEM.getDefaultValue());
+						UserJvmPrefs.setJvmOption(JVM_OPTION.MIN_MEM, JVM_OPTION.MIN_MEM.getDefaultValue());
+						log.warn("Invalid JVM Xms paramater entered: " + jvmXms);
+					}
+				}
+			}
+		});
+		jvmXssTextField.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				if (!e.isTemporary()) {
+					String jvmXss = jvmXssTextField.getText().trim();
+
+					if (UserJvmPrefs.verifyJvmOptions(jvmXss)) {
+						UserJvmPrefs.setJvmOption(JVM_OPTION.STACK_SIZE, jvmXss);
+					} else {
+						jvmXssTextField.setText(JVM_OPTION.STACK_SIZE.getDefaultValue());
+						UserJvmPrefs.setJvmOption(JVM_OPTION.STACK_SIZE, JVM_OPTION.STACK_SIZE.getDefaultValue());
+						log.warn("Invalid JVM Xss paramater entered: " + jvmXss);
+					}
+				}
+			}
+		});
+
+		jvmAssertionsCheckbox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				UserJvmPrefs.setJvmOption(JVM_OPTION.ASSERTIONS, jvmAssertionsCheckbox.isSelected());
+			}
+		});
+		jvmDirect3dCheckbox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				UserJvmPrefs.setJvmOption(JVM_OPTION.JAVA2D_D3D, jvmDirect3dCheckbox.isSelected());
+			}
+		});
+		jvmOpenGLCheckbox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				UserJvmPrefs.setJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION, jvmOpenGLCheckbox.isSelected());
+			}
+		});
+		jvmInitAwtCheckbox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				UserJvmPrefs.setJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION, jvmInitAwtCheckbox.isSelected());
+			}
+		});
+		jvmEnableHidpiCheckbox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// UserJvmPrefs.setJvmOption(TBD, jvmEnableHidpiCheckbox.isSelected());
+			}
+		});
 
 		chatNotificationShowBackground.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -770,6 +868,17 @@ public class PreferencesDialog extends JDialog {
 		showInitGainMessage.setSelected(AppPreferences.isShowInitGainMessage());
 		upnpDiscoveryTimeoutTextField.setText(Integer.toString(AppPreferences.getUpnpDiscoveryTimeout()));
 		fileSyncPath.setText(AppPreferences.getFileSyncPath());
+
+		// get JVM User Defaults/User override preferences
+		jvmXmxTextField.setText(UserJvmPrefs.getJvmOption(JVM_OPTION.MAX_MEM));
+		jvmXmsTextField.setText(UserJvmPrefs.getJvmOption(JVM_OPTION.MIN_MEM));
+		jvmXssTextField.setText(UserJvmPrefs.getJvmOption(JVM_OPTION.STACK_SIZE));
+
+		jvmAssertionsCheckbox.setSelected(UserJvmPrefs.hasJvmOption(JVM_OPTION.ASSERTIONS));
+		jvmDirect3dCheckbox.setSelected(UserJvmPrefs.hasJvmOption(JVM_OPTION.JAVA2D_D3D));
+		jvmOpenGLCheckbox.setSelected(UserJvmPrefs.hasJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION));
+		jvmInitAwtCheckbox.setSelected(UserJvmPrefs.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
+		// jvmEnableHidpiCheckbox.setSelected(UserJvmPrefs.hasJvmOption(TBD));
 
 		Integer rawVal = AppPreferences.getTypingNotificationDuration();
 		Integer typingVal = null;
