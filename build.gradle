@@ -246,6 +246,7 @@ task deploy(dependsOn: uberJar) {
 				"-appclass", mainClassName,
 				"-srcdir", "build/libs", //sourceSets.main.java.srcDirs
 				"-srcfiles", "MapTool-"+version+".jar",
+				// "-srcfiles", "../../package/windows/MapTool.exe.manifest",
 				"-outdir", "releases/release-"+version,
 				"-outfile", project.name,
 				"-name", project.name,
@@ -253,10 +254,11 @@ task deploy(dependsOn: uberJar) {
 				"-vendor", vendor,
 				"-BsystemWide=false",
 				"-BmenuHint=true",
-				"-Bwin.menuGroup=RPTools",
+				"-Bwin.menuGroup=" + vendor,
 				"-BshortcutHint=true",
 				"-BappVersion=" + version,
-				"-BuserJvmOptions=-Xss=4M"
+				"-BjvmProperties=MAPTOOL_DATADIR=.maptool-" + vendor
+				//"-BuserJvmOptions=-Xss=4M"
 		}
 	}
 }
