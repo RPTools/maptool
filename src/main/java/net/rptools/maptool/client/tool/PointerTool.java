@@ -32,7 +32,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,6 +48,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -74,7 +76,6 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.MovementKey;
 import net.rptools.maptool.model.Player;
-import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
@@ -94,6 +95,7 @@ import net.rptools.maptool.util.TokenUtil;
  */
 public class PointerTool extends DefaultTool implements ZoneOverlay {
 	private static final long serialVersionUID = 8606021718606275084L;
+	private static final Logger log = LogManager.getLogger(PointerTool.class);
 
 	private boolean isShowingTokenStackPopup;
 	private boolean isShowingPointer;
@@ -857,6 +859,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			Grid grid = zone.getGrid();
 			// Loop through all tokens. As soon as one of them is blocked, stop processing and return false.
 			// Jamz: Option this for lead token only? It's annoying dragging a group when one token has limited vision...
+			// Or if ANY token in group can move, finish move?
 			for (Iterator<GUID> iter = tokenSet.iterator(); !isBlocked && iter.hasNext();) {
 				Area tokenFog = new Area(zoneFog);
 				GUID tokenGUID = iter.next();
@@ -1253,8 +1256,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				if (token == null) {
 					return;
 				}
-				// Need a key token to orient the move from, just arbitraily
-				// pick the first one
+				// Need a key token to orient the move from, just arbitrarily pick the first one
 				if (keyToken == null) {
 					keyToken = token;
 				}

@@ -337,13 +337,14 @@ public class FogUtil {
 			final ExposedAreaMetaData metaCopy = meta;
 			final Token tokenClone = new Token(token);
 			final ZoneView zoneView = renderer.getZoneView();
+			Area visionArea = new Area();
 
 			// Lee: get path according to zone's way point exposure toggle...
 			List<CellPoint> processPath = zone.getWaypointExposureToggle() ? lastPath.getWayPointList()
 					: lastPath.getCellPath();
 
 			int stepCount = processPath.size();
-			// System.out.println("Path size = " + stepCount);
+			log.debug("Path size = " + stepCount);
 
 			for (final Object cell : processPath) {
 				if (cell instanceof CellPoint) {
@@ -352,19 +353,29 @@ public class FogUtil {
 					tokenClone.setX(zp.x);
 					tokenClone.setY(zp.y);
 					metaCopy.addToExposedAreaHistory(zoneView.getVisibleArea(tokenClone));
-					zoneView.flush(tokenClone);
+					// zoneView.flush(tokenClone);
 					// timer.start("expose" + cell.toString());
 				}
+
+				Area currVisionArea = zoneView.getVisibleArea(tokenClone);
+				if (currVisionArea != null) {
+					visionArea.add(currVisionArea);
+					meta.addToExposedAreaHistory(currVisionArea);
+				}
+				zoneView.flush(tokenClone);
 			}
 
 			timer.stop("exposeLastPath-" + token.getName());
 			renderer.flush(tokenClone);
 			renderer.flush(token); // calls ZoneView.flush() -- too bad, I'd like to eliminate it...
+
+			zone.exposeArea(visionArea, token);
+
 			filteredToks.clear();
 			filteredToks.add(token.getId());
 			zone.putToken(token);
+			MapTool.serverCommand().exposeFoW(zone.getId(), visionArea, filteredToks);
 			MapTool.serverCommand().updateExposedAreaMeta(zone.getId(), exposedGUID, metaCopy);
-
 		}
 
 		String results = timer.toString();

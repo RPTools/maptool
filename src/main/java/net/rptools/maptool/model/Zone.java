@@ -152,7 +152,7 @@ public class Zone extends BaseModel {
 	// Lee: adding extra property to determine FoW exposure method
 	// Jamz: Changed to transient to allow backwards compatibility of campaign
 	// files & changed default to on
-	private transient boolean exposeFogAtWaypoints = true;
+	private transient boolean exposeFogAtWaypoints = false;
 
 	private String name;
 	private boolean isVisible;

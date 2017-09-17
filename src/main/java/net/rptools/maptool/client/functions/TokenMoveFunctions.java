@@ -299,9 +299,8 @@ public class TokenMoveFunctions extends AbstractFunction {
 	}
 
 	private JSONArray pathPointsToJSONArray(final List<Map<String, Integer>> pathPoints) {
-		if (log.isInfoEnabled()) {
-			log.info("DEVELOPMENT: in pathPointsToJSONArrayt.  Converting list to JSONArray");
-		}
+		log.debug("...in pathPointsToJSONArrayt.  Converting list to JSONArray");
+
 		JSONArray jsonArr = new JSONArray();
 		if (pathPoints == null || pathPoints.isEmpty()) {
 			return jsonArr;
@@ -322,9 +321,9 @@ public class TokenMoveFunctions extends AbstractFunction {
 				pointObj.element("y2", entry.get("y2"));
 				jsonArr.add(pointObj);
 			}
-		if (log.isInfoEnabled()) {
-			log.info("DEVELOPMENT: in pathPointsToJSONArrayt.  return JSONArray");
-		}
+
+		log.debug("...in pathPointsToJSONArrayt.  return JSONArray");
+
 		return jsonArr;
 	}
 
@@ -334,13 +333,11 @@ public class TokenMoveFunctions extends AbstractFunction {
 			Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 			AbstractPoint zp = null;
 
-			if (log.isInfoEnabled()) {
-				log.info("DEVELOPMENT: in getLastPathList.  Loop over each path elements");
-			}
+			log.debug("...in getLastPathList.  Loop over each path elements");
+
 			for (Object pathCells : path.getCellPath()) {
-				if (log.isInfoEnabled()) {
-					log.info("DEVELOPMENT: in getLastPathList.  Converting each path item to a cell point or zone point.");
-				}
+				log.debug("...in getLastPathList.  Converting each path item to a cell point or zone point.");
+
 				if (pathCells instanceof CellPoint) {
 					CellPoint cp = (CellPoint) pathCells;
 					if (useDistancePerCell) {
@@ -352,9 +349,8 @@ public class TokenMoveFunctions extends AbstractFunction {
 					zp = (ZonePoint) pathCells;
 				}
 				if (zp != null) {
-					if (log.isInfoEnabled()) {
-						log.info("DEVELOPMENT: in getLastPathList.  Got a point, adding to list.");
-					}
+					log.debug("...in getLastPathList.  Got a point, adding to list.");
+
 					Map<String, Integer> tokenLocationPoint = new HashMap<String, Integer>();
 					tokenLocationPoint.put("x", Integer.valueOf(zp.x));
 					tokenLocationPoint.put("y", Integer.valueOf(zp.y));
