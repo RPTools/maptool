@@ -41,4 +41,7 @@ workbench.xmi
 build-resources/rptools-keystore
 /gradle.properties
 /releases/
+<<<<<<< HEAD
 /Old class compares/
+=======
+>>>>>>> branch '1.4.4.0' of https://github.com/JamzTheMan/maptool.git
