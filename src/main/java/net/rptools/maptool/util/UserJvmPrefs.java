@@ -8,7 +8,6 @@
  */
 package net.rptools.maptool.util;
 
-import net.rptools.maptool.client.AppConstants;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.List;
@@ -33,16 +32,8 @@ public class UserJvmPrefs {
 	private static final Pattern UNIT_PATTERN = Pattern.compile("([0-9]+)[g|G|m|M|k|K]"); // Valid JVM memory units
 
 	public enum JVM_OPTION {
-		MAX_MEM("-Xmx", ""),
-		MIN_MEM("-Xms", ""),
-		STACK_SIZE("-Xss", ""),
-		ASSERTIONS("-ea", ""),
-		DATADIR("-DMAPTOOL_DATADIR", ""),
-		LOCALE_LANGUAGE("-Duser.language", ""),
-		LOCALE_COUNTRY("-Duser.country", ""),
-		JAVA2D_D3D("-Dsun.java2d.d3d", "=false"),
-		JAVA2D_OPENGL_OPTION("-Dsun.java2d.opengl", "=True"),
-		MACOSX_EMBEDDED_OPTION("-Djavafx.macosx.embedded", "=true");
+		MAX_MEM("-Xmx", ""), MIN_MEM("-Xms", ""), STACK_SIZE("-Xss", ""), ASSERTIONS("-ea", ""), DATADIR("-DMAPTOOL_DATADIR", ""), LOCALE_LANGUAGE("-Duser.language", ""), LOCALE_COUNTRY(
+				"-Duser.country", ""), JAVA2D_D3D("-Dsun.java2d.d3d=", "false"), JAVA2D_OPENGL_OPTION("-Dsun.java2d.opengl=", "True"), MACOSX_EMBEDDED_OPTION("-Djavafx.macosx.embedded=", "true");
 
 		private final String command, defaultValue;
 

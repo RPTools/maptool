@@ -46,7 +46,7 @@ ext {
 run {
 	args = [ '-v='+version ]
 	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development" ]
-	
+
 	if(System.getProperty("exec.args") != null) {
 		args System.getProperty("exec.args").split()
 	}
