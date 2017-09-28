@@ -256,11 +256,14 @@ task deploy(dependsOn: uberJar) {
 				"-name", project.name,
 				"-title", project.name,
 				"-vendor", vendor,
+				"-BAssociations=cmpgn",
+				"-BinstalldirChooser=true",
 				"-BsystemWide=false",
 				"-BmenuHint=true",
 				"-Bwin.menuGroup=" + vendor,
 				"-BshortcutHint=true",
 				"-BappVersion=" + version,
+				"-Bwin.msi.productVersion=1.4.4",
 				"-BjvmProperties=MAPTOOL_DATADIR=.maptool-" + vendor
 				//"-BuserJvmOptions=-Xss=4M"
 		}
