@@ -32,7 +32,7 @@ targetCompatibility = 1.8
 
 // Don't fail build if tests fail until tests are cleaned up
 test.ignoreFailures = true
-	
+
 // Used by gradle assemble & run tasks
 mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
 applicationDefaultJvmArgs = ["-Xss4M"]
