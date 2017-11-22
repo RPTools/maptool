@@ -267,11 +267,20 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 		if (ADD.equals(name)) {
 			BooleanTokenOverlay overlay = createTokenOverlay(null);
 			if (overlay != null) {
-				// model.addElement(overlay);
-				// Jamz: Lets insert the new state at the current index instead of at the bottom, we'll push the current element down one
-				Object oldElement = model.remove(selected);
-				model.insertElementAt(overlay, selected);
-				getNames().add(overlay.getName());
+				if (selected == -1) {
+					model.addElement(overlay);
+					getNames().add(overlay.getName());
+					selected = model.size() - 1;
+					System.out.println("selected = " + selected);
+				} else {
+					// model.addElement(overlay);
+					// Jamz: Lets insert the new state at the current index instead of at the bottom, we'll push the current element down one
+					Object oldElement = model.remove(selected);
+					model.insertElementAt(overlay, selected);
+					getNames().add(overlay.getName());
+					model.insertElementAt(oldElement, selected + 1);
+				}
+
 				formPanel.setText(NAME, "");
 				formPanel.setText(GROUP, "");
 				formPanel.setSelected(MOUSEOVER, false);
@@ -280,10 +289,11 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 				formPanel.setSelected(SHOW_GM, true);
 				formPanel.setSelected(SHOW_OWNER, true);
 				formPanel.setSelected(SHOW_OTHERS, true);
-				model.insertElementAt(oldElement, selected + 1);
+
 				list.ensureIndexIsVisible(selected);
 				list.setSelectedIndex(selected);
-			} // endif
+
+			}
 
 			// Delete selected state
 		} else if (DELETE.equals(name)) {
@@ -337,7 +347,7 @@ public class TokenStatesController implements ActionListener, DocumentListener, 
 		DefaultListModel<Object> model = (DefaultListModel<Object>) list.getModel();
 		int selected = list.getSelectedIndex();
 
-		if (INDEX.equals(name)) {
+		if (INDEX.equals(name) && selected != -1) {
 			int value = (int) ((JSpinner) e.getSource()).getValue();
 			if (selected != value) {
 				if (value < 0)
