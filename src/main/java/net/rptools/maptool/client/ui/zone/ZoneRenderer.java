@@ -1062,11 +1062,11 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		}
 		if (Zone.Layer.BACKGROUND.isEnabled()) {
 			List<DrawnElement> drawables = zone.getBackgroundDrawnElements();
-			if (!drawables.isEmpty()) {
-				timer.start("drawableBackground");
-				renderDrawableOverlay(g2d, backgroundDrawableRenderer, view, drawables);
-				timer.stop("drawableBackground");
-			}
+			// if (!drawables.isEmpty()) {
+			timer.start("drawableBackground");
+			renderDrawableOverlay(g2d, backgroundDrawableRenderer, view, drawables);
+			timer.stop("drawableBackground");
+			// }
 			List<Token> background = zone.getBackgroundStamps(false);
 			if (!background.isEmpty()) {
 				timer.start("tokensBackground");
@@ -1077,11 +1077,11 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		if (Zone.Layer.OBJECT.isEnabled()) {
 			// Drawables on the object layer are always below the grid, and...
 			List<DrawnElement> drawables = zone.getObjectDrawnElements();
-			if (!drawables.isEmpty()) {
-				timer.start("drawableObjects");
-				renderDrawableOverlay(g2d, objectDrawableRenderer, view, drawables);
-				timer.stop("drawableObjects");
-			}
+			// if (!drawables.isEmpty()) {
+			timer.start("drawableObjects");
+			renderDrawableOverlay(g2d, objectDrawableRenderer, view, drawables);
+			timer.stop("drawableObjects");
+			// }
 		}
 		timer.start("grid");
 		renderGrid(g2d, view);
@@ -1125,19 +1125,20 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		 */
 		if (Zone.Layer.TOKEN.isEnabled()) {
 			List<DrawnElement> drawables = zone.getDrawnElements();
-			if (!drawables.isEmpty()) {
-				timer.start("drawableTokens");
-				renderDrawableOverlay(g2d, tokenDrawableRenderer, view, drawables);
-				timer.stop("drawableTokens");
-			}
+			// if (!drawables.isEmpty()) {
+			timer.start("drawableTokens");
+			renderDrawableOverlay(g2d, tokenDrawableRenderer, view, drawables);
+			timer.stop("drawableTokens");
+			// }
+
 			if (view.isGMView()) {
 				if (Zone.Layer.GM.isEnabled()) {
 					drawables = zone.getGMDrawnElements();
-					if (!drawables.isEmpty()) {
-						timer.start("drawableGM");
-						renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
-						timer.stop("drawableGM");
-					}
+					// if (!drawables.isEmpty()) {
+					timer.start("drawableGM");
+					renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
+					timer.stop("drawableGM");
+					// }
 					List<Token> stamps = zone.getGMStamps(false);
 					if (!stamps.isEmpty()) {
 						timer.start("tokensGM");
@@ -1823,14 +1824,13 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		return !isLoaded;
 	}
 
-	protected void renderDrawableOverlay(Graphics g, DrawableRenderer renderer, PlayerView view,
-			List<DrawnElement> drawnElements) {
+	protected void renderDrawableOverlay(Graphics g, DrawableRenderer renderer, PlayerView view, List<DrawnElement> drawnElements) {
 		Rectangle viewport = new Rectangle(zoneScale.getOffsetX(), zoneScale.getOffsetY(), getSize().width,
 				getSize().height);
-		List<DrawnElement> list = new ArrayList<DrawnElement>();
-		list.addAll(drawnElements);
+		// List<DrawnElement> list = new ArrayList<DrawnElement>();
+		// list.addAll(drawnElements);
 
-		renderer.renderDrawables(g, list, viewport, getScale());
+		renderer.renderDrawables(g, drawnElements, viewport, getScale());
 	}
 
 	protected void renderBoard(Graphics2D g, PlayerView view) {

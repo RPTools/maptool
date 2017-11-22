@@ -31,7 +31,7 @@ public class AppHomeDiskSpaceStatusBar extends JLabel {
 	private static final long serialVersionUID = 3149155977860280954L;
 	private static final Logger LOGGER = LogManager.getLogger(AppHomeDiskSpaceStatusBar.class);
 	private static final File CACHE_DIR = AppUtil.getAppHome();
-	private static final long POLLING_INTERVAL = 10000;
+	private static final long POLLING_INTERVAL = 60000;
 	private static long lastChecked = 0;
 	private static Icon diskSpaceIcon;
 

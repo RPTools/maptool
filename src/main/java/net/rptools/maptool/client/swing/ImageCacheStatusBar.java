@@ -32,7 +32,7 @@ public class ImageCacheStatusBar extends JLabel {
 	private static final long serialVersionUID = -9102370395342902494L;
 	private static final Logger LOGGER = LogManager.getLogger(ImageCacheStatusBar.class);
 	private static final File CACHE_DIR = AppUtil.getAppHome("imageThumbs");
-	private static final long POLLING_INTERVAL = 5000;
+	private static final long POLLING_INTERVAL = 60000;
 	private static long lastChecked = 0;
 	private static Icon imageCacheIcon;
 

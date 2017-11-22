@@ -56,10 +56,6 @@ public class MapToolEventQueue extends EventQueue {
 				JOptionPane.showMessageDialog(null, toString(thrown),
 						I18N.getString("MapToolEventQueue.unexpectedError"), JOptionPane.ERROR_MESSAGE);
 				reportToSentryIO(thrown);
-			} finally {
-				log.debug("SENTRY TEST :: Debug message");
-				log.info("SENTRY TEST :: Info message");
-				log.warn("SENTRY TEST :: Warn message");
 			}
 		}
 	}

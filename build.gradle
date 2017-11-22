@@ -104,7 +104,7 @@ dependencies {
 	compile 'org.hibernate:antlr:2.7.5H3'
 	compile 'commons-beanutils:commons-beanutils-core:1.8.3'
 	compile 'org.ow2.util.bundles:commons-collections-3.2.1:1.0.0'
-	compile 'commons-io:commons-io:2.4'
+	compile 'commons-io:commons-io:2.5'
 	compile 'commons-jxpath:commons-jxpath:1.3'
 	compile 'commons-lang:commons-lang:2.6'
 	compile 'commons-net:commons-net:3.2'
