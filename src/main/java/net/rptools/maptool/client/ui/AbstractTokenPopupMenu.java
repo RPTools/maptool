@@ -44,6 +44,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.JTextComponent;
 
 import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.FacingTool;
@@ -498,8 +499,10 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 				else
 					tokenNameGM = token.getGMName();
 
-				final File defaultFile = FileUtil.cleanFileName(tokenName, "");
-				final File defaultFileGM = FileUtil.cleanFileName(tokenNameGM, "");
+				final File defaultFile = FileUtil.cleanFileName(AppPreferences.getSaveDir().getPath(), tokenName, "");
+				final File defaultFileGM = FileUtil.cleanFileName(AppPreferences.getSaveDir().getPath(), tokenNameGM, "");
+
+				// chooser.setCurrentDirectory(AppPreferences.getSaveDir());
 
 				final JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
 				chooser.resetChoosableFileFilters();
@@ -508,15 +511,19 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 				chooser.addChoosableFileFilter(tokenFilterGM);
 				chooser.addChoosableFileFilter(tokenFilterImage);
 				chooser.addChoosableFileFilter(tokenFilterPortrait);
-
 				chooser.setSelectedFile(defaultFile);
+
 				chooser.addPropertyChangeListener(new PropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent evt) {
 						if (evt.getPropertyName() == JFileChooser.FILE_FILTER_CHANGED_PROPERTY && showSaveDialog) {
-							if (chooser.getFileFilter() == tokenFilterGM) {
-								chooser.setSelectedFile(defaultFileGM);
+							if (chooser.getFileFilter() != tokenFilter) {
+								File newFileName = new File(chooser.getCurrentDirectory(), tokenNameGM);
+								System.out.println("newFileName 1: " + newFileName);
+								chooser.setSelectedFile(newFileName);
 							} else {
-								chooser.setSelectedFile(defaultFile);
+								File newFileName = new File(chooser.getCurrentDirectory(), tokenName);
+								System.out.println("newFileName 1: " + newFileName);
+								chooser.setSelectedFile(newFileName);
 							}
 						}
 					}
@@ -542,9 +549,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					}
 
 					if (saveAsGmName) {
-						tokenSaveFile = FileUtil.cleanFileName(saveDirectory.getAbsolutePath() + "\\" + tokenNameGM, "");
+						tokenSaveFile = FileUtil.cleanFileName(saveDirectory.getAbsolutePath(), tokenNameGM, "");
 					} else {
-						tokenSaveFile = FileUtil.cleanFileName(saveDirectory.getAbsolutePath() + "\\" + tokenName, "");
+						tokenSaveFile = FileUtil.cleanFileName(saveDirectory.getAbsolutePath(), tokenName, "");
 					}
 				}
 
@@ -601,6 +608,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 					MapTool.showError("Could not save token: " + ioe);
 				}
 			}
+
+			if (saveDirectory != null)
+				AppPreferences.setSaveDir(saveDirectory);
 		}
 	}
 

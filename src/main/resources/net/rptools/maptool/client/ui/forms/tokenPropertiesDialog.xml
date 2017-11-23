@@ -1297,7 +1297,7 @@
                               <at name="actionCommand">Hide Preview</at>
                               <at name="name">hideTokenCheckbox</at>
                               <at name="width">81</at>
-                              <at name="text">Hide Preivew</at>
+                              <at name="text">Hide Preview</at>
                               <at name="toolTipText">Show the token image under the VBL.</at>
                               <at name="height">16</at>
                              </object>
@@ -3893,7 +3893,7 @@
                                    </at>
                                    <at name="name">tokenOpacityLabel</at>
                                    <at name="width">16</at>
-                                   <at name="text">1.0</at>
+                                   <at name="text">100%</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>

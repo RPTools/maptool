@@ -147,8 +147,8 @@ public class FileUtil {
 	 *            file extension
 	 * @return the File object with new name
 	 */
-	public static File cleanFileName(String fileName, String extension) {
-		File newFileName = new File(fileName + extension);
+	public static File cleanFileName(String path, String fileName, String extension) {
+		File newFileName = new File(path, fileName + extension);
 
 		try {
 			newFileName = newFileName.getCanonicalFile();
@@ -167,5 +167,9 @@ public class FileUtil {
 		}
 
 		return newFileName;
+	}
+
+	public static File cleanFileName(String fileName, String extension) {
+		return cleanFileName(null, fileName, extension);
 	}
 }
