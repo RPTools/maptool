@@ -314,9 +314,9 @@ public class CampaignPropertiesDialog extends JDialog {
 						{
 							lastArc = light.getArcAngle();
 							shape = "cone arc=" + StringUtil.formatDecimal(lastArc);
+							if (light.getFacingOffset() != 0)
+								builder.append(" offset=").append(StringUtil.formatDecimal(light.getFacingOffset())).append(' ');
 						}
-							// else
-							// shape = "cone";
 							break;
 						}
 						if (!lastShape.equals(shape))
@@ -508,7 +508,7 @@ public class CampaignPropertiesDialog extends JDialog {
 	 * <li>Within a group, any line without a colon (":") is ignored.
 	 * <li>Remaining lines are of the following format:
 	 * <p>
-	 * <b> <code>[Gm | Owner] [Circle+ | Square | Cone] [Normal+ | Aura] [Arc=angle] distance [#rrggbb]</code> </b>
+	 * <b> <code>[Gm | Owner] [Circle+ | Square | Cone] [Normal+ | Aura] [Arc=angle] [Offset=angle] distance [#rrggbb]</code> </b>
 	 * </p>
 	 * <p>
 	 * Brackets indicate optional components. A plus sign follows any default value for a given field. Fields starting with an uppercase letter are literal text (although they are case-insensitive).
@@ -559,6 +559,7 @@ public class CampaignPropertiesDialog extends JDialog {
 				LightSource lightSource = new LightSource(name);
 				ShapeType shape = ShapeType.CIRCLE; // TODO: Make a preference for default shape
 				double arc = 0;
+				double offset = 0;
 				boolean gmOnly = false;
 				boolean owner = false;
 				String distance = null;
@@ -611,6 +612,18 @@ public class CampaignPropertiesDialog extends JDialog {
 						// Expected when not defining a shape
 					}
 
+					// Facing offset designation
+					if (arg.toUpperCase().startsWith("OFFSET=")) {
+						try {
+							offset = Integer.parseInt(arg.substring(7));
+							continue;
+						} catch (NullPointerException noe) {
+							errlog.add(I18N.getText(
+									"msg.error.mtprops.light.offset",
+									reader.getLineNumber(), arg));
+						}
+					}
+
 					// Parameters
 					split = arg.indexOf('=');
 					if (split > 0) {
@@ -644,7 +657,7 @@ public class CampaignPropertiesDialog extends JDialog {
 					}
 					owner = gmOnly == true ? false : owner;
 					try {
-						Light t = new Light(shape, 0, StringUtil.parseDecimal(distance), arc, color != null ? new DrawableColorPaint(color) : null, gmOnly, owner);
+						Light t = new Light(shape, offset, StringUtil.parseDecimal(distance), arc, color != null ? new DrawableColorPaint(color) : null, gmOnly, owner);
 						lightSource.add(t);
 					} catch (ParseException pe) {
 						errlog.add(I18N.getText("msg.error.mtprops.light.distance", reader.getLineNumber(), distance));
@@ -790,7 +803,7 @@ public class CampaignPropertiesDialog extends JDialog {
 				"Aura\n" +
 				"----\n" +
 				"Arc 120deg OWNERonly - 20 : owner aura arc=120 22.5#115511\n" +
-				"Arc 60deg - 60 : aura cone arc=60 62.5#77ffaa\n" +
+				"Arc 60deg - 60 : aura cone arc=60 facing=15 62.5#77ffaa\n" +
 				"Circle - 20 : aura circle 22.5#220000\n" +
 				"Circle GM+Owner : aura circle GM Owner 62.5#ff8080\n" +
 				"Circle GMonly : aura circle GM 62.5#ff8080\n" +
