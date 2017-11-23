@@ -14,6 +14,7 @@ import net.rptools.lib.io.PackedFile;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.LightSource;
+import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -70,6 +71,9 @@ public class CampaignExport {
 				pakFile.getXStream().omitField(Token.class, "vblAlphaSensitivity");
 				pakFile.getXStream().omitField(Token.class, "isAlwaysVisible");
 				pakFile.getXStream().omitField(Token.class, "alwaysVisibleTolerance");
+				pakFile.getXStream().omitField(Token.class, "tokenOpacity");
+				pakFile.getXStream().omitField(Token.class, "heroLabData");
+				pakFile.getXStream().omitField(MacroButtonProperties.class, "macroUUID");
 
 				// DrawnElement was added in 1.4.0.1
 				// FIXME: Stripping the class still leaves an empty XML tag so unable to export to 1.4.0.0 at this time :(

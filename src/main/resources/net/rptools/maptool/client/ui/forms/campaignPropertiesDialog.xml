@@ -1079,10 +1079,10 @@
                               </at>
                               <at name="width">851</at>
                               <at name="name"/>
-                              <at name="text">&lt;html&gt;&lt;b&gt;Format:&lt;/b&gt; &amp;nbsp&amp;nbsp&amp;nbsp;Name : options &lt;p&gt;&lt;p&gt; Each sight type can have zero or more options.  Having zero options implies using defaults for all values (e.g. Normal vision).  use spaces between each option &lt;p&gt;&lt;p&gt; &lt;b&gt;
+                              <at name="text">&lt;html&gt;&lt;b&gt;Format:&lt;/b&gt; &amp;nbsp&amp;nbsp&amp;nbsp;Name : options &lt;p&gt;&lt;p&gt; Each sight type can have zero or more options,  use spaces between each option.  Having zero options implies using defaults for all values (e.g. Normal vision).&lt;p&gt;&lt;p&gt; &lt;b&gt;
 
 Options:&lt;/b&gt; &lt;p&gt;&lt;p&gt; 
-shape - shape may be circle, square, or cone
+shape - shape may be circle, square, or cone&lt;br&gt;
 distance=y - Distance is the range at which this vision type ends.  Can be a decimal value. Ex: distance=10&lt;br&gt;
 arc=y -  When used with the cone shape, it signifies how large a field of vision the token has.  Can be an interger value. Ex: arc=120&lt;br&gt;
 offset=y -  When used with the cone shape, it signifies how much offest the cone begins from the center of the tokens facing.  Can be an interger value. Ex: offset=120&lt;br&gt;
