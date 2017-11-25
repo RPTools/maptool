@@ -416,12 +416,11 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 */
 		if (functionName.equals("bringToFront")) {
 			checkNumberOfParameters(functionName, parameters, 0, 1);
-			Set<GUID> tokens = new HashSet<GUID>();
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
-			tokens.add(token.getId());
-			MapTool.serverCommand().bringTokensToFront(zone.getId(), tokens);
-			zone.putToken(token);
-			return "";
+			token.setZOrder(zone.getLargestZOrder() + 1);
+			MapTool.serverCommand().putToken(zone.getId(), token);
+
+			return BigDecimal.valueOf(token.getZOrder());
 		}
 
 		/*
@@ -429,12 +428,11 @@ public class TokenPropertyFunctions extends AbstractFunction {
 		 */
 		if (functionName.equals("sendToBack")) {
 			checkNumberOfParameters(functionName, parameters, 0, 1);
-			Set<GUID> tokens = new HashSet<GUID>();
 			Token token = getTokenFromParam(resolver, functionName, parameters, 0);
-			tokens.add(token.getId());
-			MapTool.serverCommand().sendTokensToBack(zone.getId(), tokens);
-			zone.putToken(token);
-			return "";
+			token.setZOrder(zone.getSmallestZOrder() - 1);
+			MapTool.serverCommand().putToken(zone.getId(), token);
+
+			return BigDecimal.valueOf(token.getZOrder());
 		}
 
 		/*
