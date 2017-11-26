@@ -14,6 +14,7 @@ import net.rptools.maptool.client.ReadOnlyLuaTable;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
+import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
@@ -218,6 +219,17 @@ public class MapToolGlobals extends Globals {
 				o.rawset("increments", LuaValue.valueOf(((BarTokenOverlay) over).getIncrements()));
 				o.rawset("side", valOf(((BarTokenOverlay) over).getSide()));
 			}
+		}
+		if (over instanceof ImageTokenOverlay) {
+			StringBuilder assetId = new StringBuilder("asset://");
+			assetId.append(((ImageTokenOverlay) over).getAssetId().toString());
+//			if (size != null) {
+//				assetId.append("-");
+//				// Constrain it slightly, so its between 1 and 500 :)
+//				int i = Math.max(Math.min(size.intValue(), 500), 1);
+//				assetId.append(i);
+//			}
+			o.rawset("image", assetId.toString());
 		}
 		return o;
 	}

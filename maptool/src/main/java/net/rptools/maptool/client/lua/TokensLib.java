@@ -192,7 +192,7 @@ public class TokensLib extends TwoArgFunction {
 				}
 			}
 			if (token != null) {
-				return new MapToolTokenProperty(token, name.checkjstring(), MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(token.getToken().getPropertyType()));
+				return new MapToolTokenProperty(token, name.checkjstring());
 			}
 			return NIL;
 		} catch (ParserException e) {

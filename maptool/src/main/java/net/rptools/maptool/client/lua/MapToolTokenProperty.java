@@ -26,17 +26,18 @@ public class MapToolTokenProperty extends LuaTable {
 	private MapToolToken token;
 	private String property;
 
-	public MapToolTokenProperty(MapToolToken token, String property, List<TokenProperty> defaultprops) {
-		if (defaultprops != null) {
-			for (TokenProperty propy : defaultprops) {
-				if (property.equalsIgnoreCase(propy.getName()) || property.equalsIgnoreCase(propy.getShortName())) {
-					super.rawset(LuaValue.valueOf("default"), LuaConverters.fromObj(propy.getDefaultValue()));
-					super.rawset(LuaValue.valueOf("name"), LuaValue.valueOf(propy.getName()));
-					property = propy.getName();
-					break;
-				}
-			}
-		}
+	public MapToolTokenProperty(MapToolToken token, String property) {
+//			, List<TokenProperty> defaultprops) {
+//		if (defaultprops != null) {
+//			for (TokenProperty propy : defaultprops) {
+//				if (property.equalsIgnoreCase(propy.getName()) || property.equalsIgnoreCase(propy.getShortName())) {
+//					super.rawset(LuaValue.valueOf("default"), LuaConverters.fromObj(propy.getDefaultValue()));
+//					super.rawset(LuaValue.valueOf("name"), LuaValue.valueOf(propy.getName()));
+//					property = propy.getName();
+//					break;
+//				}
+//			}
+//		}
 		super.rawset(LuaValue.valueOf("raw"), LuaValue.valueOf(""));
 		super.rawset(LuaValue.valueOf("value"), LuaValue.valueOf(""));
 		super.rawset(LuaValue.valueOf("converted"), LuaValue.valueOf(""));
@@ -93,6 +94,20 @@ public class MapToolTokenProperty extends LuaTable {
 	public LuaValue rawget(LuaValue key) {
 		if (key.isstring()) {
 			switch (key.tojstring()) {
+			case "default": {
+				List<TokenProperty> tokenPropertyList = MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(token.getToken().getPropertyType());
+				if (tokenPropertyList == null) {
+					return LuaValue.NIL;
+				}
+				for (TokenProperty propy : tokenPropertyList) {
+					if (property.equalsIgnoreCase(propy.getName()) || property.equalsIgnoreCase(propy.getShortName())) {
+						super.rawset(LuaValue.valueOf("default"), LuaConverters.fromObj(propy.getDefaultValue()));
+						super.rawset(LuaValue.valueOf("name"), LuaValue.valueOf(propy.getName()));
+						property = propy.getName();
+						break;
+					}
+				}
+			}
 			case "raw":
 				if (!token.isSelfOrTrustedOrLib()) {
 					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getPropertyRaw")));

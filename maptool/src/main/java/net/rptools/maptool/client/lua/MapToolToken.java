@@ -33,6 +33,7 @@ import net.rptools.maptool.client.lua.token.ImageFunc;
 import net.rptools.maptool.client.lua.token.IsOwnedByAll;
 import net.rptools.maptool.client.lua.token.IsOwner;
 import net.rptools.maptool.client.lua.token.LastPath;
+import net.rptools.maptool.client.lua.token.Location;
 import net.rptools.maptool.client.lua.token.MatchingProperties;
 import net.rptools.maptool.client.lua.token.MatchingProps;
 import net.rptools.maptool.client.lua.token.Move;
@@ -91,6 +92,7 @@ public class MapToolToken extends LuaTable implements IRepresent {
 	private static final String NPC = "npc";
 	private static final String TYPE = "type";
 	private static final String MACROS = "macros";
+	
 	//	private static final String DRAW_ORDER2 = "z";
 	//	private static final String X = "x";
 	//	private static final String Y = "y";
@@ -128,6 +130,7 @@ public class MapToolToken extends LuaTable implements IRepresent {
 	private static final String F_MOVEDOVERTOKEN = "movedovertoken";
 	private static final String F_MOVEDOVERPOINTS = "movedoverpoints";
 	private static final String F_MATCHINGPROPS = "matchingproperties";
+	private static final String F_LOCATION = "location";
 	//TODO trusted Macro und so
 	private boolean isSelf = false;
 	private Token token;
@@ -694,6 +697,8 @@ public class MapToolToken extends LuaTable implements IRepresent {
 						return LuaValue.NIL;
 					}
 				};
+			case F_LOCATION:
+				return new Location(this);
 			case F_MOVE:
 				return new Move(this);
 			case F_DISTANCE:

@@ -788,7 +788,7 @@ println ("Distance: ", token.getDistance(10,10, true, "MANHATTAN"))
 ```
 
 #### Macro Functions getExposedTokenNames() and getExposedTokens()
-The maps library has an exposed() function that collect all exposed tokens, which can be used to create these functions
+The tokens library has an exposed() function that collect all exposed tokens, which can be used to create these functions
 ```lua
 --{assert(0, "LUA")}--
 function getExposedTokenNames()
@@ -1203,7 +1203,7 @@ println(token.notes)
 ```
 
 #### Macro Functions getNPCNames() and getNPC()
-The maps library has an npc() function that collect all NPCs, which can be used to create these functions
+The tokens library has an npc() function that collect all NPCs, which can be used to create these functions
 ```lua
 --{assert(0, "LUA")}--
 function getNPCNames()
@@ -1234,7 +1234,7 @@ end
 ```
 
 #### Macro Functions getOwnedNames() and getOwned()
-The maps library has an ownedBy() function that collect all tokens owned by a player, which can be used to create these functions
+The tokens library has an ownedBy() function that collect all tokens owned by a player, which can be used to create these functions
 ```lua
 --{assert(0, "LUA")}--
 function getOwnedNames(player)
@@ -1281,7 +1281,7 @@ end
 ```
 
 #### Macro Functions getPCNames() and getPC()
-The maps library has an pc() function that collect all PCs, which can be used to create these functions
+The tokens library has an pc() function that collect all PCs, which can be used to create these functions
 ```lua
 --{assert(0, "LUA")}--
 function getPCNames()
@@ -1318,6 +1318,417 @@ The player name can be retrieved from the chat library
 println(chat.player)
 chat.broadcast("Hello, I'm "..chat.player..". Nice to meet you.")
 ```
+
+#### Macro Function getProperty(), getRawProperty() and getPropertyDefault()
+The Properties are mapped in the properties table of any token. Each Property has multiple options, like the value, default and name. There is also converted which converts any JSON content in the property into LUA objects
+```lua
+--{assert(0, "LUA")}--
+token.properties.HP.value = 20
+println(token.properties.HP.raw)
+println(token.properties.HP.value)
+println(token.properties.HP.default)
+token.properties.HP.reset()
+println(token.properties.HP.value)
+token.properties.HP.value = "{a: \"b\"}"
+println(token.properties.HP.converted.a)
+token.properties.HP.value = "{1d6}"
+println(token.properties.HP.raw)
+println(token.properties.HP.value)
+```
+
+#### Macro Function getPropertyNames() and getPropertyNamesRaw()
+There are no direct functions for this, however all properties can be listed by iterating through token.properties
+
+```lua
+--{assert(0, "LUA")}--
+for key, value in pairs(token.properties) do
+  println(key, " = ", value, " object = ", token.properties[key])
+end
+```
+
+Functions to replace these can be easily created
+```lua
+--{assert(0, "LUA")}--
+function getPropertyNames(tok)
+  tok = tok or token
+  local result = {}
+  for key in pairs(tok.properties) do
+    table.insert(result, key:lower())
+  end
+  return result
+end
+
+function getPropertyNamesRaw(tok)
+  tok = tok or token
+  local result = {}
+  for key in pairs(tok.properties) do
+    table.insert(result, key)
+  end
+  return result
+end
+
+println(toStr(getPropertyNamesRaw()))
+println(toStr(getPropertyNames()))
+println(toStr(getPropertyNames(token)))
+println(toStr(token.getMatchingProperties(".*")))
+println(toStr(token.getMatchingProperties(".*", true)))
+```
+
+#### Macro Function getPropertyType()
+The Property Type is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.propertyType)
+```
+
+#### Macro Function getSelected() and getSelectedNames()
+The tokens library has an selected() function that collect all selected tokens, which can be used to create these functions
+```lua
+--{assert(0, "LUA")}--
+function getSelectedNames()
+  local result = {}
+  for index, tok in ipairs(tokens.selected()) do
+    table.insert(result, tok.name)
+  end
+  return result
+end
+
+function getSelected()
+  local result = {}
+  for index, tok in ipairs(tokens.selected()) do
+    table.insert(result, tok.id)
+  end
+  return result
+end
+
+println(toJSON(getSelectedNames()))
+println(toStr(getSelected()))
+```
+Usually one would want to work with the token objects instead
+```lua
+--{assert(0, "LUA")}--
+for index, tok in ipairs(tokens.selected()) do
+  println(tok.name, " is ", tok.label)
+end
+```
+
+#### Macro Function getSightType()
+The Sight Type is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.sightType)
+```
+
+#### Macro Function getSize()
+The Size is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.size)
+```
+
+#### Macro Function getSpeech() and getSpeechNames()
+The speech table of a token contains this information
+```lua
+--{assert(0, "LUA")}--
+for name, value in pairs(token.speech) do
+  println(name, " says: ", value)
+end
+```
+
+The functions can be created as such:
+
+```lua
+--{assert(0, "LUA")}--
+function getSpeech(name, tok)
+  tok = tok or token
+  return tok.speech[name]
+end
+
+function getSpeechNames(tok)
+  tok = tok or token
+  local result = {}
+  for key in pairs(tok.speech) do
+    table.insert(result, key)
+  end
+  return result
+end
+
+println(toStr(getSpeechNames()))
+println(getSpeech(name))
+```
+
+#### Macro Function getState()
+The states are a table on any token
+```lua
+--{assert(0, "LUA")}--
+println(token.states.Bloodied)
+```
+
+#### Macro Function getStateImage()
+The state image can be extracted from the campaign properties
+```lua
+--{assert(0, "LUA")}--
+println("<img src = \"", campaign.allStates.Bloodied.image, "\">")
+println("<img src = \"", campaign.allStates.Bloodied.image, "-300", "\">")
+```
+
+With this, the getStateImage function with scaling can be implemented
+```lua
+--{assert(0, "LUA")}--
+function getStateImage(name, scale)
+  local state = campaign.allStates[name]
+  if state == nil then error("State not defined") end
+  if state.image == nil then error("State is not an Image") end
+  if type(scale) == "number" then 
+    if scale < 1 then scale = 1 end
+    if scale > 500 then scale = 500 end
+    return state.image.."-"..math.floor(scale)
+  end
+  return state.image
+end
+
+println("<img src = \"", getStateImage("Bloodied", 300) , "\">")
+```
+
+#### Macro Function getStrProp()
+Lua has no dedicated String Property and String List function, they have to be converted with [fromStr](#fromstr) to an acutal Lua-Table
+```lua
+--{assert(0, "LUA")}--
+println(fromStr("a=blah; b=doh; c=meh")["a"]);
+println(fromStr("a=blah; b=doh; c=meh")["b"]);
+println(fromStr("a=blah, b=doh, c=meh", nil, ",")["c"]); --Change seperator to ","
+``` 
+
+#### Macro Function getTokenDrawOrder()
+The Draw Order is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.drawOrder)
+```
+
+#### Macro Function getTokenFacing()
+The Facing is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.facing)
+```
+
+#### Macro Function getTokenGMName()
+The GM Name is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.gmName)
+```
+
+#### Macro Function getTokenHalo()
+The Halo is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.halo)
+```
+
+#### Macro Function getTokenHalo()
+The Halo is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.halo)
+```
+
+#### Macro Function getTokenHandout()
+The Handout Picture is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.handout)
+```
+
+#### Macro Function getTokenHandout()
+The Handout Picture is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.handout)
+```
+
+#### Macro Function getTokenHeight()
+The Height is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.height)
+```
+
+#### Macro Function getTokenImage()
+The Image is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.image)
+```
+
+#### Macro Function getTokenLabel()
+The Label is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.label)
+```
+
+#### Macro Function getTokenNames() and getTokens()
+The tokens library has an find() function that collect all tokens matching the same condition these functions user, which can be used to create them.
+The condtion can be specified as a lua tables instead of JSON
+```lua
+--{assert(0, "LUA")}--
+function getTokenNames(condition)
+  local result = {}
+  for index, tok in ipairs(tokens.find(condition)) do
+    table.insert(result, tok.name)
+  end
+  return result
+end
+
+function getTokens(condition)
+  local result = {}
+  for index, tok in ipairs(tokens.find(condition)) do
+    table.insert(result, tok.id)
+  end
+  return result
+end
+
+println(toJSON(getTokenNames({layer = {"TOKEN", "HIDDEN", "OBJECT", "BACKGROUND"}})))
+println(toStr(getTokens()))
+```
+Usually one would want to work with the token objects instead
+```lua
+--{assert(0, "LUA")}--
+for index, tok in ipairs(tokens.find({ range = {upto = 2, distancePerCell = 0}, npc = 1, unsetStates = {"Dead"} })) do
+  println(tok.name, " is ", tok.label)
+end
+```
+
+#### Macro Function getTokenPortrait()
+The Portrait Image is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.portrait)
+```
+
+#### Macro Function getTokenStates()
+This information can be extracted from the campaign properties
+```lua
+--{assert(0, "LUA")}--
+for name in pairs(campaign.allStates) do
+  println(name)
+end
+for name in pairs(campaign.states[group]) do
+  println(name)
+end
+```
+
+
+#### Macro Function getTokenShape()
+The Shape is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.shape)
+```
+
+#### Macro Function getTokenWidth()
+The Width is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.width)
+```
+
+#### Macro Function getTokenX() and getTokenY()
+These coordiantes can be gotten from the location(units) of any Token
+```lua
+--{assert(0, "LUA")}--
+println(token.location().x) --or location(true): Pixels
+println(token.location(false).y) --Cells
+```
+
+#### Macro Function getVBL() 
+There are two functions for this in the VBL library: get() and getSimple(), where getSimple() retruns the same as the format of getVBL(shape, format) being 1.
+The functions take and return Lua Tables instead of JSON
+```lua
+--{assert(0, "LUA")}--
+println(toJSON(VBL.get({shape="rectangle",x=50,y=50,w=100,h=200,r=45,fill=1,thickness=1,scale=0})))
+println(toJSON(VBL.getSimple({shape="rectangle",x=50,y=50,w=100,h=200,r=45,fill=1,thickness=1,scale=0})))
+```
+
+#### Macro Function getVisible()
+Visible is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.visible)
+```
+
+#### Macro Function getVisibleMapNames()
+The visible table in the maps object has all visible maps
+
+--{assert(0, "LUA")}--
+for name in pairs(maps.visible) do
+  println(name)
+end
+
+#### Macro Function getVisibleTokens() and getVisibleTokenNames()
+The tokens library has an visible() function that collect all visible tokens, which can be used to create these functions
+```lua
+--{assert(0, "LUA")}--
+function getVisibleTokenNames()
+  local result = {}
+  for index, tok in ipairs(tokens.visible()) do
+    table.insert(result, tok.name)
+  end
+  return result
+end
+
+function getVisibleTokens()
+  local result = {}
+  for index, tok in ipairs(tokens.visible()) do
+    table.insert(result, tok.id)
+  end
+  return result
+end
+
+println(toJSON(getVisibleTokenNames()))
+println(toStr(getVisibleTokens()))
+```
+Usually one would want to work with the token objects instead
+```lua
+--{assert(0, "LUA")}--
+for index, tok in ipairs(tokens.visible()) do
+  println(tok.name, " is ", tok.label)
+end
+```
+
+#### Macro Function getWithState() and getWithStateNames()
+The tokens library has an withState() function that collect all tokens with a state, which can be used to create these functions
+```lua
+--{assert(0, "LUA")}--
+function getWithStateNames(state)
+  local result = {}
+  for index, tok in ipairs(tokens.withState(state)) do
+    table.insert(result, tok.name)
+  end
+  return result
+end
+
+function getWithState(state)
+  local result = {}
+  for index, tok in ipairs(tokens.withState(state)) do
+    table.insert(result, tok.id)
+  end
+  return result
+end
+
+println(toJSON(getWithStateNames("Prone")))
+println(toStr(getWithState("Dead")))
+```
+Usually one would want to work with the token objects instead
+```lua
+--{assert(0, "LUA")}--
+for index, tok in ipairs(tokens.withState(state)) do
+  println(tok.name, " is ", tok.label)
+end
+```
+
 ### Roll-Options
 
 

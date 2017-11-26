@@ -24,17 +24,17 @@ import org.luaj.vm2.Varargs;
  */
 public class TokenProperties extends LuaTable {
 	private MapToolToken token;
-	private List<TokenProperty> propmap;
+	//private List<TokenProperty> propmap;
 	private Pattern pattern;
 
 	public TokenProperties(MapToolToken mapToolToken) {
 		this.token = mapToolToken;
-		propmap = MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(token.getToken().getPropertyType());
+		//propmap = MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(token.getToken().getPropertyType());
 	}
 	
 	public TokenProperties(MapToolToken mapToolToken, String pattern) {
 		this.token = mapToolToken;
-		propmap = MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(token.getToken().getPropertyType());
+		//propmap = MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(token.getToken().getPropertyType());
 		this.pattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
 	}
 
@@ -65,8 +65,10 @@ public class TokenProperties extends LuaTable {
 	public LuaValue rawget(LuaValue key) {
 		if (!token.isSelfOrTrustedOrLib()) {
 			throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
+		
 		}
-		return new MapToolTokenProperty(token, key.checkjstring(), propmap);
+		return new MapToolTokenProperty(token, key.checkjstring());
+		//return new MapToolTokenProperty(token, key.checkjstring(), propmap);
 	}
 
 	@Override
