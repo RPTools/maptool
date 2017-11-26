@@ -525,6 +525,8 @@ public class ZoneView implements ModelChangeListener {
 		}
 		// TODO: This fixes a bug with changing vision type, I don't like it though, it needs to be optimized back out
 		lightSourceCache.clear();
+		// TODO: This fixes a similar bug with turning lights off after moving a different npc token, I don't like it either...
+		tokenVisionCache.clear();
 	}
 
 	private void calculateVisibleArea(PlayerView view) {
@@ -598,6 +600,8 @@ public class ZoneView implements ModelChangeListener {
 						tokenChangedVBL = true;
 					flush(token);
 				}
+				// Ug, stupid hack here, can't find a bug where if a NPC token is moved before lights are cleared on another token, changes aren't pushed to client?
+				// tokenVisionCache.clear();
 			}
 
 			if (evt == Zone.Event.TOKEN_ADDED || evt == Zone.Event.TOKEN_CHANGED) {
