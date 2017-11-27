@@ -68,6 +68,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.InputFunction.InputType.OptionException;
+import net.rptools.maptool.client.functions.InputFunction.InputType.OptionMap;
 import net.rptools.maptool.client.ui.htmlframe.HTMLPane;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -157,7 +158,7 @@ public class InputFunction extends AbstractFunction {
 	/********************************************************************
 	 * Enum of input types; also stores their default option values.
 	 ********************************************************************/
-	public enum InputType {
+	public static enum InputType {
 		// The regexp for the option strings is strict: no spaces, and trailing semicolon required.
 		// @formatter: off
 		TEXT(false, false, "WIDTH=16;SPAN=FALSE;"), LIST(true, false, "VALUE=NUMBER;TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SELECT=0;SPAN=FALSE;"), CHECK(false, false, "SPAN=FALSE;"), RADIO(true, false,
@@ -305,11 +306,12 @@ public class InputFunction extends AbstractFunction {
 	 * Variable Specifier structure - holds extracted bits of info for a
 	 * variable.
 	 **********************************************************************************/
-	final class VarSpec {
+	public static final class VarSpec {
 		public String name, value, prompt;
 		public InputType inputType;
 		public InputType.OptionMap optionValues;
 		public List<String> valueList; // used for types with composite "value" properties
+		public List<Object> objectList; //only used for result type = object in LUA
 
 		public VarSpec(String name, String value, String prompt, InputType inputType, String options) throws InputType.OptionException {
 			initialize(name, value, prompt, inputType, options);
@@ -360,6 +362,26 @@ public class InputFunction extends AbstractFunction {
 			if (inputType != null && inputType.isValueComposite)
 				this.valueList = parseStringList(this.value);
 		}
+		
+		public VarSpec(InputType inputType, String name, String value, String prompt, OptionMap options) {
+			this.name = name;
+			this.value = value;
+			this.prompt = prompt;
+			this.inputType = inputType;
+			this.optionValues = options;
+			if (inputType != null && inputType.isValueComposite)
+				this.valueList = parseStringList(this.value);
+		}
+		
+		public VarSpec(InputType inputType, String name, List<String> values, String prompt, OptionMap options, List<Object> objectlist) {
+			this.name = name;
+			this.value = StringUtils.join(values,",");
+			this.valueList = values;
+			this.prompt = prompt;
+			this.inputType = inputType;
+			this.optionValues = options;
+			this.objectList = objectlist;
+		}
 
 		/**
 		 * Parses a string into a list of values, for composite types. <br>
@@ -398,7 +420,7 @@ public class InputFunction extends AbstractFunction {
 	 * control layout.
 	 */
 	@SuppressWarnings("serial")
-	final class ColumnPanel extends JPanel {
+	public static final class ColumnPanel extends JPanel {
 		public VarSpec tabVarSpec; // VarSpec for this subpanel's tab, if any
 		public List<VarSpec> varSpecs;
 		public List<JComponent> labels; // the labels in the left column
@@ -819,7 +841,7 @@ public class InputFunction extends AbstractFunction {
 	 * provide scrolling support.
 	 */
 	@SuppressWarnings("serial")
-	final class ColumnPanelHost extends JScrollPane {
+	public static final class ColumnPanelHost extends JScrollPane {
 		ScrollingPanel panel;
 		ColumnPanel columnPanel;
 
@@ -897,12 +919,12 @@ public class InputFunction extends AbstractFunction {
 	}
 
 	@SuppressWarnings("serial")
-	final class InputPanel extends JPanel {
+	public static final class InputPanel extends JPanel {
 		public List<ColumnPanel> columnPanels;
 		public JTabbedPane tabPane = null;
 		public int initialTab = 0; // Which one is first visible
 
-		InputPanel(List<VarSpec> varSpecs) throws ParameterException {
+		public InputPanel(List<VarSpec> varSpecs) throws ParameterException {
 			ColumnPanel curcp;
 			columnPanels = new ArrayList<ColumnPanel>();
 
@@ -1005,11 +1027,8 @@ public class InputFunction extends AbstractFunction {
 
 	}
 
-	// The function that does all the work
-	@Override
-	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws EvaluationException, ParserException {
-		// Extract the list of specifier strings from the parameters
-		// "name | value | prompt | inputType | options"
+	
+	public static List<VarSpec> createVarSpecs(List<Object> parameters) throws EvaluationException, ParserException {
 		List<String> varStrings = new ArrayList<String>();
 		for (Object param : parameters) {
 			String paramStr = (String) param;
@@ -1040,17 +1059,10 @@ public class InputFunction extends AbstractFunction {
 			}
 			varSpecs.add(vs);
 		}
-
-		// Check if any variables were defined
-		if (varSpecs.isEmpty())
-			return BigDecimal.ONE; // No work to do, so treat it as a successful invocation.
-
-		// UI step 1 - First, see if a token is in context.
-		VariableResolver varRes = parser.getVariableResolver();
-		Token tokenInContext = null;
-		if (varRes instanceof MapToolVariableResolver) {
-			tokenInContext = ((MapToolVariableResolver) varRes).getTokenInContext();
-		}
+		return varSpecs;
+	}
+	
+	public static String createTitle(Token tokenInContext) {
 		String dialogTitle = "Input Values";
 		if (tokenInContext != null) {
 			String name = tokenInContext.getName(), gm_name = tokenInContext.getGMName();
@@ -1064,6 +1076,27 @@ public class InputFunction extends AbstractFunction {
 
 			dialogTitle = dialogTitle + extra;
 		}
+		return dialogTitle;
+	}
+	
+	// The function that does all the work
+	@Override
+	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws EvaluationException, ParserException {
+		// Extract the list of specifier strings from the parameters
+		// "name | value | prompt | inputType | options"
+		
+		List<VarSpec> varSpecs = createVarSpecs(parameters);
+		// Check if any variables were defined
+		if (varSpecs.isEmpty())
+			return BigDecimal.ONE; // No work to do, so treat it as a successful invocation.
+
+		// UI step 1 - First, see if a token is in context.
+		VariableResolver varRes = parser.getVariableResolver();
+		Token tokenInContext = null;
+		if (varRes instanceof MapToolVariableResolver) {
+			tokenInContext = ((MapToolVariableResolver) varRes).getTokenInContext();
+		}
+		
 
 		// UI step 2 - build the panel with the input fields
 		InputPanel ip = new InputPanel(varSpecs);
@@ -1079,7 +1112,7 @@ public class InputFunction extends AbstractFunction {
 
 		// UI step 3 - show the dialog
 		JOptionPane jop = new JOptionPane(ip, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-		JDialog dlg = jop.createDialog(MapTool.getFrame(), dialogTitle);
+		JDialog dlg = jop.createDialog(MapTool.getFrame(), createTitle(tokenInContext));
 
 		// Set up callbacks needed for desired runtime behavior
 		dlg.addComponentListener(new FixupComponentAdapter(ip));
@@ -1221,7 +1254,7 @@ public class InputFunction extends AbstractFunction {
 	 * Gets icon from the asset manager. Code copied and modified from
 	 * EditTokenDialog.java
 	 */
-	private ImageIcon getIcon(String id, int size, ImageObserver io) {
+	private static ImageIcon getIcon(String id, int size, ImageObserver io) {
 		// Extract the MD5Key from the URL
 		if (id == null)
 			return null;
@@ -1249,7 +1282,7 @@ public class InputFunction extends AbstractFunction {
 	}
 
 	/** JLabel variant that listens for new image data, and redraws its icon. */
-	public class UpdatingLabel extends JLabel {
+	public static class UpdatingLabel extends JLabel {
 		private String macroLink;
 
 		@Override
@@ -1286,7 +1319,7 @@ public class InputFunction extends AbstractFunction {
 	}
 
 	/** Custom renderer to display icons and text inside a combo box */
-	private class ComboBoxRenderer implements ListCellRenderer {
+	private static class ComboBoxRenderer implements ListCellRenderer {
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 			JLabel label = null;
 			if (value instanceof JLabel) {
@@ -1304,7 +1337,7 @@ public class InputFunction extends AbstractFunction {
 	}
 
 	/** Adjusts the runtime behavior of components */
-	public class FixupComponentAdapter extends ComponentAdapter {
+	public static class FixupComponentAdapter extends ComponentAdapter {
 		final InputPanel ip;
 
 		public FixupComponentAdapter(InputPanel ip) {
@@ -1319,7 +1352,7 @@ public class InputFunction extends AbstractFunction {
 	}
 
 	/** Class found on web to work around a STUPID SWING BUG with JComboBox */
-	public class NoEqualString {
+	public static class NoEqualString {
 		private final String text;
 
 		public NoEqualString(String txt) {

@@ -10,6 +10,7 @@ import net.rptools.maptool.client.lua.token.ResetProperty;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 
 import org.luaj.vm2.LuaError;
@@ -123,6 +124,17 @@ public class MapToolTokenProperty extends LuaTable {
 					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
 				}
 				return LuaConverters.fromJson(token.getToken().getEvaluatedProperty(property));
+			case "defined":
+				if (!token.isSelfOrTrustedOrLib()) {
+					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
+				}
+				return LuaValue.valueOf(token.getToken().getPropertyMap().containsKey(property));
+			case "exists":
+				if (!token.isSelfOrTrustedOrLib()) {
+					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
+				}
+				Object o = token.getToken().getEvaluatedProperty(property);
+				return LuaValue.valueOf(o != null && !StringUtil.isEmpty(o.toString()));
 			}
 		}
 		return super.rawget(key);

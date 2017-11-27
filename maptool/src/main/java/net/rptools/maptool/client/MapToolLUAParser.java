@@ -19,6 +19,7 @@ import net.rptools.maptool.client.lua.MapToolMacro;
 import net.rptools.maptool.client.lua.MapToolMaps;
 import net.rptools.maptool.client.lua.MapToolTables;
 import net.rptools.maptool.client.lua.MapToolToken;
+import net.rptools.maptool.client.lua.MathLib;
 import net.rptools.maptool.client.lua.TokensLib;
 import net.rptools.maptool.client.lua.UILib;
 import net.rptools.maptool.client.lua.VBLLib;
@@ -30,6 +31,7 @@ import net.rptools.maptool.client.lua.misc.Export;
 import net.rptools.maptool.client.lua.misc.FromJson;
 import net.rptools.maptool.client.lua.misc.FromStr;
 import net.rptools.maptool.client.lua.misc.Info;
+import net.rptools.maptool.client.lua.misc.Input;
 import net.rptools.maptool.client.lua.misc.IsGM;
 import net.rptools.maptool.client.lua.misc.Print;
 import net.rptools.maptool.client.lua.misc.Println;
@@ -87,8 +89,8 @@ public class MapToolLUAParser {
 			user_globals.load(new Bit32Lib());
 			user_globals.load(new FunctionalTableLib());
 			user_globals.load(new ExtendedStringLib(res));
-			user_globals.load(new JseMathLib());
-			user_globals.load(new JseMathLib());
+			user_globals.load(new MathLib());
+			//user_globals.load(new JseMathLib());
 			user_globals.load(new TokensLib(res));
 			user_globals.load(new UILib());
 			user_globals.load(new DiceLib());
@@ -115,6 +117,7 @@ public class MapToolLUAParser {
 			user_globals.set("functionsRaw", new MapToolFunctions(res, false));
 			user_globals.set("initiative", new MapToolIniative(res));
 			user_globals.set("getInfo", new Info());
+			user_globals.set("input", new Input(tokenInContext));
 			user_globals.set("_LUA_HEADER", LUA_HEADER);
 	
 			bo = new ByteArrayOutputStream();

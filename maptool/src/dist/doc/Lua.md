@@ -1767,6 +1767,125 @@ The hasMacro() function can be called on any token:
 println(token.hasMacro("(new)"));
 ```
 
+#### Macro Function hasProperty()
+Each property of any token can be checked for existence and definedness, whereas exists is equal to hasProperty and definedness checks if the property has ever been defined in the Token
+```lua
+--{assert(0, "LUA")}--
+token.properties.HP = 10
+println(token.properties.HP.exists)
+println(token.properties.HP.defined)
+token.properties.HP = nil -- or ""
+println(token.properties.HP.exists)
+println(token.properties.HP.defined)
+token.properties.HP.reset()
+println(token.properties.HP.exists)
+println(token.properties.HP.defined)
+println(token.properties.UNKNOWN.exists)
+println(token.properties.UNKNOWN.defined)
+```
+
+#### Macro Function hasSight()
+Sight is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.sight)
+```
+
+#### Macro Functions hero(), heroStun(), heroBody()
+There functions are part of the dice library, since they are linked together, the hero function results a table with stun and body instead
+```lua
+--{assert(0, "LUA")}--
+local result = dice.hero(3,6)
+println(result.stun, "/", result.body)
+```
+
+#### Macro Function hex()
+The lua function string.format can be used to convert into many formats, including hexadecimal (%x), the function tonumber can convert from any base, including hex
+```lua
+--{assert(0, "LUA")}--
+println(string.format("%x",100)) -- 64 == hex(100)
+println(tonumber(64, 16)) -- 100
+```
+
+#### Macro Function hypot() or hypotenuse()
+This function has been added to the math lib
+```lua
+--{assert(0, "LUA")}--
+println(math.hypot(10,20))
+```
+
+#### Macro Function if()
+if is a lua language construct. Lua also supports a somewhat ternary operator with EXPR and TRUE or FALSE. [http://lua-users.org/wiki/TernaryOperator]
+Note, lua will not evaluate both expressions unlike the macro language does
+
+```lua
+--{assert(0, "LUA")}--
+a = 10
+b = 20
+if a > b then
+  println("A is larger than B")
+else
+  println("A is not larger than B")
+end
+
+println(a>b and "A is larger than B" or "A is not larger than B") -- ternary, will not work if the part in "A is larger than B" is false/nil
+
+#### Macro Function indexValueStrProp()
+Lua has no dedicated String Property and String List function, they have to be converted with [fromStr](#fromstr) to an acutal Lua-Table. During conversion, the order is preserved, so a indexValueStrProp function can be created like this
+
+```lua
+--{assert(0, "LUA")}--
+function indexValueStrProp(prop, index) 
+  if type(prop) ~= "table" then
+    prop = fromStr(prop)
+  end
+  for key, value in pairs(prop) do
+    if index == 0 then 
+      return value
+    end
+    index = index-1
+  end
+  return nil
+end
+
+println(indexValueStrProp("a=blah; b=doh; c=meh", 1));
+println(indexValueStrProp(fromStr("a=blah; b=doh; c=meh"), 2));
+println(indexValueStrProp(fromStr("a=blah, b=doh, c=meh", nil, ","), 0)); --Change seperator to ","
+```
+
+#### Macro Function initiativeSize()
+This information is stored in the size property of the initiative object
+```lua
+--{assert(0, "LUA")}--
+println(initiative.size)
+println(table.length(initiative.tokens)) -- The same
+```
+
+### Macro Function input()
+Input is available as a global function, however there are some slight changes. Instead of just setting global variables, input will return them as a Lua Table (or NIL on a failure/abort)
+The parameters can also be given as a Lua Table of Lua Tables (or multiple Lua Tables), for this, the name, content, prompt and options are all in the same table, and everything but the options has to be written in lowercase
+
+```lua
+--{assert(0, "LUA")}--
+println(toJSON(input("AtkBonus", "DmgBonus", "CombatAdvantage")))
+println(toJSON(input("tab0 | Info || TAB", "Name ## Rank ## Serial number | 1,2,3 || LIST","tab1 | Abilities || TAB","Strength ## Dexterity ## Wisdom")))
+println(toJSON(input(
+	{name="tab0", content = "Info", type="TAB"},
+	{name="Name", width = 89},  --options are just included in there
+	{name="Rank"},
+	{name="Serial number", type="LIST", content = {1, 2, 3}},  -- allows for way better handling of string values with , |  or ##
+	"tab1 | Abilities || TAB","Strength ## Dexterity ## Wisdom"))) -- Mixed input is also allowed
+```
+the LIST also supports tokens as content for LIST and RADIO
+
+```lua
+--{assert(0, "LUA")}-- 
+local selected = input({name = "Token", type = "LIST", content = tokens.visible(), value="object"}) -- VALUE=OBJECT is also a new option
+println(selected.Token.label) --The selected item is still a token object
+println("<img src=\"",selected.Token.image,"\">")
+println(toJSON(selected))
+```
+
 ### Roll-Options
 
 

@@ -86,6 +86,14 @@ public class MapToolIniative extends LuaTable {
 				return valueOf(list.getRound());
 			} else if (key.checkjstring().equals("map")) {
 				return valueOf(list.getZone().getName());
+			}  else if (key.checkjstring().equals("size")) {
+				int count = 0;
+				for (TokenInitiative ti : list.getTokens()) {
+					if (!MapTool.getParser().isMacroTrusted() && !InitiativeListModel.isTokenVisible(ti.getToken(), hideNPCs))
+						continue;
+					count++;
+				}
+				return valueOf(count);
 			} else if (key.checkjstring().equals("tokens")) {
 				LuaTable table = new LuaTable();
 				for (TokenInitiative ti : list.getTokens()) {
