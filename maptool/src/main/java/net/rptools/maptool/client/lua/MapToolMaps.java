@@ -5,6 +5,8 @@ package net.rptools.maptool.client.lua;
 
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.lua.misc.Goto;
+import net.rptools.maptool.client.lua.misc.SetViewArea;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Zone;
 
@@ -43,7 +45,8 @@ public class MapToolMaps extends LuaTable {
 
 	public void rawset(LuaValue key, LuaValue value) {
 		if (key.isstring()) {
-			if (key.checkjstring().equals("current")) {
+			String k = key.checkjstring();
+			if (k.equals("current")) {
 				if (value instanceof MapToolMap) {
 					Zone zone = ((MapToolMap) value).getZone();
 					for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
@@ -55,9 +58,12 @@ public class MapToolMaps extends LuaTable {
 				} else {
 					error("not a map");
 				}
+			} else if (k.equals("zoom")) {
+				MapTool.getFrame().getCurrentZoneRenderer().setScale(value.checkdouble());
+				return;
 			}
 		}
-		error("table is read-only, except for current");
+		error("table is read-only, except for current and zoom");
 	}
 
 	public LuaValue remove(int pos) {
@@ -67,8 +73,15 @@ public class MapToolMaps extends LuaTable {
 	@Override
 	public LuaValue rawget(LuaValue key) {
 		if (key.isstring()) {
-			if (key.checkjstring().equals("current")) {
+			String k = key.checkjstring();
+			if (k.equals("current")) {
 				return new MapToolMap(MapTool.getFrame().getCurrentZoneRenderer().getZone(), resolver);
+			} else if (k.equals("zoom")) {
+				return LuaValue.valueOf(MapTool.getFrame().getCurrentZoneRenderer().getScale());
+			} else if (k.equals("goTo")) {
+				return new Goto();
+			} else if (k.equals("setViewArea")) {
+				return new SetViewArea();
 			}
 		}
 		return super.rawget(key);

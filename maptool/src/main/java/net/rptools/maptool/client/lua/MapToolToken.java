@@ -29,6 +29,7 @@ import net.rptools.maptool.client.lua.token.CreateMacro;
 import net.rptools.maptool.client.lua.token.Distance;
 import net.rptools.maptool.client.lua.token.GetOwners;
 import net.rptools.maptool.client.lua.token.HasLights;
+import net.rptools.maptool.client.lua.token.HasMacro;
 import net.rptools.maptool.client.lua.token.ImageFunc;
 import net.rptools.maptool.client.lua.token.IsOwnedByAll;
 import net.rptools.maptool.client.lua.token.IsOwner;
@@ -111,6 +112,7 @@ public class MapToolToken extends LuaTable implements IRepresent {
 	private static final String F_FORCE_LAYER = "setlayernoforce";
 	private static final String LIGHTS = "lights";
 	private static final String F_HAS_LIGHTS = "haslights";
+	private static final String F_HAS_MACRO = "hasmacro";
 	private static final String F_HAS_LIGHTSOURCE = "haslightsource";
 	private static final String F_CLEAR_LIGHTS = "clearlights";
 	private static final String F_MATCH_PROPS = "getmatchingproperties";
@@ -715,6 +717,8 @@ public class MapToolToken extends LuaTable implements IRepresent {
 				return new MovedOverToken(this);
 			case F_MATCHINGPROPS:
 				return new MatchingProps(this);
+			case F_HAS_MACRO:
+				return new HasMacro(this);
 			}
 		} catch (ParserException e) {
 			throw new LuaError(e);

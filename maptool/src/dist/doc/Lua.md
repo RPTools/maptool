@@ -1729,6 +1729,44 @@ for index, tok in ipairs(tokens.withState(state)) do
 end
 ```
 
+#### Macro Function getZoom()
+The zoom is in the maps object
+```lua
+--{assert(0, "LUA")}--
+println(maps.zoom)
+```
+
+#### Macro Function goto()
+The goTo function can be called on the maps object. (goto is a reserved word in Lua, so it is called goTo)
+```lua
+--{assert(0, "LUA")}--
+maps.goTo(token)
+maps.goTo(0, 1)
+```
+
+#### Macro Function hasImpersonated()
+The impersonated() function of the tokens libraray returns the currently impersonated token object and can be checked for nil
+```lua
+--{assert(0, "LUA")}--
+println("Impersonated : ", tokens.impersonated() ~= nil) -- hasImpersonated()
+```
+
+#### Macro Function hasLightSource()
+The hasLightSource() function can be called on any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.hasLightSource())
+println(token.hasLightSource("Generic"))
+println(token.hasLightSource("Generic", "10"))
+```
+
+#### Macro Function hasMacro()
+The hasMacro() function can be called on any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.hasMacro("(new)"));
+```
+
 ### Roll-Options
 
 
