@@ -116,6 +116,7 @@ import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.UPnPUtil;
+import net.rptools.maptool.util.UserJvmPrefs;
 import net.rptools.maptool.webapi.MTWebAppServer;
 import net.tsc.servicediscovery.ServiceAnnouncer;
 
@@ -1556,6 +1557,7 @@ public class MapTool {
 		cmdOptions.addOption("x", "xpos", true, "override MapTool window starting x coordinate");
 		cmdOptions.addOption("y", "ypos", true, "override MapTool window starting y coordinate");
 		cmdOptions.addOption("m", "macros", false, "display defined list of macro functions");
+		cmdOptions.addOption("r", "reset", false, "reset startup options to defaults");
 
 		// For libGDX testing
 		cmdOptions.addOption("l", "libgdx", false, "start & show libGDX application window");
@@ -1570,6 +1572,9 @@ public class MapTool {
 		windowHeight = getCommandLineOption(cmdOptions, "height", windowHeight, args);
 		windowX = getCommandLineOption(cmdOptions, "xpos", windowX, args);
 		windowY = getCommandLineOption(cmdOptions, "ypos", windowY, args);
+
+		if (getCommandLineOption(cmdOptions, "reset", args))
+			UserJvmPrefs.resetJvmOptions();
 
 		boolean listMacros = getCommandLineOption(cmdOptions, "macros", args);
 

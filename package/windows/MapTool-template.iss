@@ -3,30 +3,30 @@
 [Setup]
 AppId={{net.rptools.maptool.client}}
 AppName=MapTool
-AppVersion=1.4.3.21
-AppVerName=MapTool 1.4.3.21
+AppVersion=1.4.4.0
+AppVerName=MapTool 1.4.4.0
 AppPublisher=Nerps
 AppComments=MapTool
 AppCopyright=Copyright (C) 2017
 ;AppPublisherURL=http://java.com/
 ;AppSupportURL=http://java.com/
 ;AppUpdatesURL=http://java.com/
-DefaultDirName={pf}\MapTool
+DefaultDirName={localappdata}\MapTool
 DisableStartupPrompt=Yes
-DisableDirPage=Yes
+DisableDirPage=No
 DisableProgramGroupPage=Yes
 DisableReadyPage=Yes
 DisableFinishedPage=Yes
 DisableWelcomePage=Yes
-DefaultGroupName=RPTools
+DefaultGroupName=Nerps
 ;Optional License
-LicenseFile=
+LicenseFile=COPYING.AFFERO
 ;WinXP or above
 MinVersion=0,5.1 
-OutputBaseFilename=MapTool-1.4.3.21
+OutputBaseFilename=MapTool-1.4.4.0
 Compression=lzma
 SolidCompression=yes
-PrivilegesRequired=admin
+PrivilegesRequired=lowest
 SetupIconFile=MapTool\MapTool.ico
 UninstallDisplayIcon={app}\MapTool.ico
 UninstallDisplayName=MapTool
@@ -41,7 +41,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Files]
 Source: "MapTool\MapTool.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "MapTool\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "MapTool\MapTool.exe.manifest"; DestDir: "{app}"
+Source: "MapTool\app\MapTool.exe.manifest"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
 
 [Icons]
 Name: "{group}\MapTool"; Filename: "{app}\MapTool.exe"; IconFilename: "{app}\MapTool.ico"; Check: returnTrue()
@@ -51,7 +52,7 @@ Name: "{commondesktop}\MapTool"; Filename: "{app}\MapTool.exe";  IconFilename: "
 [Run]
 Filename: "{app}\MapTool.exe"; Parameters: "-Xappcds:generatecache"; Check: returnFalse()
 Filename: "{app}\MapTool.exe"; Description: "{cm:LaunchProgram,MapTool}"; Flags: nowait postinstall skipifsilent; Check: returnTrue()
-Filename: "{app}\MapTool.exe"; Parameters: "-install -svcName ""MapTool"" -svcDesc ""Something about MapTool here..."" -mainExe ""MapTool.exe""  "; Check: returnFalse()
+Filename: "{app}\MapTool.exe"; Parameters: "-install -svcName ""MapTool"" -svcDesc ""MapTool"" -mainExe ""MapTool.exe""  "; Check: returnFalse()
 
 [UninstallRun]
 Filename: "{app}\MapTool.exe "; Parameters: "-uninstall -svcName MapTool -stopOnUninstall"; Check: returnFalse()

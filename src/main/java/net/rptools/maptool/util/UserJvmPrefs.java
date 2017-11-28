@@ -21,10 +21,13 @@ import org.apache.logging.log4j.Logger;
 import jdk.packager.services.UserJvmOptionsService;
 
 /*
+ * User Preferences are stored here:
  * 
- * User Preferences are stored here: Mac ~/Library/Application Support/[app.preferences.id]/packager/jvmuserargs.cfg Windows
- * C:\Users[username]\AppData\Roaming[app.preferences.id]\packager\jvmuserargs.cfg Linux ~/.local/[app.preferences.id]/packager/jvmuserargs.cfg
+ * Mac: ~/Library/Application Support/[app.preferences.id]/packager/jvmuserargs.cfg
  * 
+ * Windows: C:\Users[username]\AppData\Roaming[app.preferences.id]\packager\jvmuserargs.cfg
+ * 
+ * Linux: ~/.local/[app.preferences.id]/packager/jvmuserargs.cfg
  */
 public class UserJvmPrefs {
 	private static final Logger log = LogManager.getLogger(UserJvmPrefs.class);
@@ -42,20 +45,31 @@ public class UserJvmPrefs {
 			this.defaultValue = defaultValue;
 		}
 
-		// public String getCommand() {
-		// return command;
-		// }
-		//
 		public String getDefaultValue() {
 			return defaultValue;
 		}
+	}
+
+	public static void resetJvmOptions() {
+		log.info("Reseting all startup options to defaults!");
+
+		setJvmOption(JVM_OPTION.MAX_MEM, "");
+		setJvmOption(JVM_OPTION.MIN_MEM, "");
+		setJvmOption(JVM_OPTION.STACK_SIZE, "");
+		setJvmOption(JVM_OPTION.ASSERTIONS, "");
+		setJvmOption(JVM_OPTION.DATADIR, "");
+		setJvmOption(JVM_OPTION.LOCALE_LANGUAGE, "");
+		setJvmOption(JVM_OPTION.LOCALE_COUNTRY, "");
+		setJvmOption(JVM_OPTION.JAVA2D_D3D, "");
+		setJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION, "");
+		setJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION, "");
 	}
 
 	public static String getJvmOption(JVM_OPTION option) {
 		// For testing only
 		RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
 		List<String> arguments = runtimeMxBean.getInputArguments();
-		log.info("TEST - JVM Args :: " + arguments);
+		log.info("get JVM Args :: " + arguments);
 
 		UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
 		Map<String, String> userOptions = ujo.getUserJVMOptions();
@@ -77,7 +91,7 @@ public class UserJvmPrefs {
 		// For testing only
 		RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
 		List<String> arguments = runtimeMxBean.getInputArguments();
-		log.info("TEST - JVM Args :: " + arguments);
+		log.info("Has JVM Args :: " + arguments);
 
 		UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
 		Map<String, String> userOptions = ujo.getUserJVMOptions();
@@ -137,85 +151,4 @@ public class UserJvmPrefs {
 				return true;
 		}
 	}
-
-	// public static String getJvmOption(String key) {
-	// // For testing only
-	// RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-	// List<String> arguments = runtimeMxBean.getInputArguments();
-	// log.info("TEST - JVM Args :: " + arguments);
-	//
-	// UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
-	// Map<String, String> userOptions = ujo.getUserJVMOptions();
-	//
-	// // If user option is set, return it
-	// if (userOptions.containsKey(key))
-	// return userOptions.get(key);
-	//
-	// // Else, look for default value
-	// Map<String, String> defaults = ujo.getUserJVMOptionDefaults();
-	// if (defaults.containsKey(key))
-	// return defaults.get(key);
-	//
-	// // No user option of default found..
-	// return "";
-	// }
-
-	// public static void setJvmOption(String key, String value) {
-	// UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
-	// Map<String, String> userOptions = ujo.getUserJVMOptions();
-	//
-	// if (value.isEmpty())
-	// userOptions.remove(key);
-	// else
-	// userOptions.put(key, value);
-	//
-	// ujo.setUserJVMOptions(userOptions);
-	// }
-
-	// public static Map<String, String> getJvmOptionsMap() {
-	// // For testing only
-	// RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-	// List<String> arguments = runtimeMxBean.getInputArguments();
-	// log.info("TEST - JVM Args :: " + arguments);
-	//
-	// UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
-	// Map<String, String> userOptions = ujo.getUserJVMOptions();
-	//
-	// // print out all the options currently set
-	// for (Map.Entry<String, String> entry : userOptions.entrySet()) {
-	// log.debug("current defaults getUserJVMDefaults() key: " + entry.getKey() + ", value: " + entry.getValue());
-	// }
-	//
-	// // if we haven't marked the first run, do so now
-	// if (!userOptions.containsKey("-DfirstRunMs=")) {
-	// userOptions.put("-DfirstRunMs=", Long.toString(System.currentTimeMillis()));
-	// }
-	//
-	// // add the last run
-	// userOptions.put("-DlastRunMs=", Long.toString(System.currentTimeMillis()));
-	//
-	// // Set default Xss for testing
-	// // userOptions.putIfAbsent("-Xss", "6M");
-	//
-	// // save the changes
-	// ujo.setUserJVMOptions(userOptions);
-	//
-	// // create a table row with Key, Current Value, and Default Value
-	// DefaultTableModel model = new DefaultTableModel();
-	// model.addColumn("Key");
-	// model.addColumn("Effective");
-	// model.addColumn("Default");
-	//
-	// Map<String, String> defaults = ujo.getUserJVMOptionDefaults();
-	// for (Map.Entry<String, String> entry : userOptions.entrySet()) {
-	// // get the default, it may be null
-	// String def = defaults.get(entry.getKey());
-	//
-	// model.addRow(new Object[] { entry.getKey(), entry.getValue(), def == null ? "<no default>" : def });
-	//
-	// log.info("getJvmOptionsTableModel() key: " + entry.getKey() + ", value: " + entry.getValue() + ", default: " + (def == null ? "<no default>" : def));
-	// }
-	//
-	// return defaults;
-	// }
 }

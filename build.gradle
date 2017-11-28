@@ -99,20 +99,25 @@ dependencies {
 	compile 'io.sentry:sentry:1.5.0'
 	compile 'io.sentry:sentry-log4j2:1.5.2'
 
+	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1' // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
+	// compile 'org.ow2.util.bundles:commons-collections-3.2.1:1.0.0'
+
 	compile 'net.java.abeille:abeille-formsrt:2.0'
 	compile 'net.rptools.clientserver:clientserver:1.4.0.+'
 	compile 'org.hibernate:antlr:2.7.5H3'
+
 	compile 'commons-beanutils:commons-beanutils-core:1.8.3'
-	compile 'org.ow2.util.bundles:commons-collections-3.2.1:1.0.0'
 	compile 'commons-io:commons-io:2.5'
 	compile 'commons-jxpath:commons-jxpath:1.3'
 	compile 'commons-lang:commons-lang:2.6'
 	compile 'commons-net:commons-net:3.2'
 	compile 'commons-cli:commons-cli:1.3'
+
 	compile 'net.rptools.decktool:decktool:1.0.b1'
 	compile 'net.rptools.dicelib:dicelib:1.4.0.+'
-	compile 'net.sf.ezmorph:ezmorph:1.0.5'
-	compile 'com.caucho.hessian:hessian:3.1.6'
+	compile 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
+	compile 'net.rptools.parser:parser:1.4.0.+'
+
 	compile 'jide-common:jide-common:3.2.3'
 	compile 'jide-components:jide-components:3.2.3'
 	compile 'jide-dialogs:jide-dialogs:3.2.3'
@@ -121,11 +126,23 @@ dependencies {
 	compile 'jide-grids:jide-grids:3.2.3'
 	compile 'jide-properties:jide-properties:3.2.3'
 	compile 'jide-shortcut:jide-shortcut:3.2.3'
+
+	compile 'org.eclipse.jetty:jetty-server:9.3.0.M0'
+	compile 'org.eclipse.jetty:jetty-servlet:9.3.0.M0'
+	compile 'org.eclipse.jetty:jetty-webapp:9.3.0.M0'
+	compile 'org.eclipse.jetty:jetty-continuation:9.3.0.M1'
+	compile 'org.eclipse.jetty.websocket:websocket-server:9.3.0.M1'
+	compile 'org.eclipse.jetty.websocket:websocket-client:9.3.0.M1'
+	compile 'org.eclipse.jetty.websocket:websocket-servlet:9.3.0.M1'
+	compile 'org.eclipse.jetty.websocket:websocket-api:9.3.0.M1'
+
+	compile 'net.sf.ezmorph:ezmorph:1.0.5'
+	compile 'net.sf.json-lib:json-lib:2.4:jdk15'
+
+	compile 'org.reflections:reflections:0.9.10'
+	compile 'com.caucho.hessian:hessian:3.1.6'
 	compile 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
 	compile 'rhino:js:1.7R1'
-	compile 'net.sf.json-lib:json-lib:2.4:jdk15'
-	compile 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
-	compile 'net.rptools.parser:parser:1.4.0.+'
 	compile 'ca.odell.renderpack:renderpack:1.2004'
 	compile 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
 	compile 'org.swinglabs:swing-worker:1.1'
@@ -136,15 +153,6 @@ dependencies {
 	compile 'com.thoughtworks.xstream:xstream:1.4.9'
 	compile 'yasb:yasb:0.2-21012007'
 	compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
-	compile 'org.eclipse.jetty:jetty-server:9.3.0.M0'
-	compile 'org.eclipse.jetty:jetty-servlet:9.3.0.M0'
-	compile 'org.eclipse.jetty:jetty-webapp:9.3.0.M0'
-	compile 'org.eclipse.jetty:jetty-continuation:9.3.0.M1'
-	compile 'org.eclipse.jetty.websocket:websocket-server:9.3.0.M1'
-	compile 'org.eclipse.jetty.websocket:websocket-client:9.3.0.M1'
-	compile 'org.eclipse.jetty.websocket:websocket-servlet:9.3.0.M1'
-	compile 'org.eclipse.jetty.websocket:websocket-api:9.3.0.M1'
-	compile 'org.reflections:reflections:0.9.10'
 
 	// For PDF image extraction
 	compile 'org.apache.pdfbox:pdfbox:2.0.0'
@@ -234,9 +242,18 @@ task uberJar(type: Jar) {
 	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
 }
 
-task deploy(dependsOn: uberJar) {
+// Currently includes license, manifest (for Hdpi) and msvcr100.dll (due to packaging bug)
+task copyPackageExtras(type: Copy) {
+	from('package/extras/')
+	into('build/libs/')
+	include('*')
+}
+
+task deploy(dependsOn: [uberJar, copyPackageExtras]) {
 	group = 'distribution'
 	description = 'Create native installers'
+
+	tasks.findByName('copyPackageExtras').mustRunAfter 'uberJar'
 
 	doLast {
 		// Using the -deploy Command with Bundler Arguments
@@ -251,9 +268,10 @@ task deploy(dependsOn: uberJar) {
 				"-deploy", "-v",
 				"-native", "installer",
 				"-appclass", mainClassName,
-				"-srcdir", "build/libs", //sourceSets.main.java.srcDirs
-				"-srcfiles", "MapTool-"+version+".jar",
-				// "-srcfiles", "../../package/windows/MapTool.exe.manifest",
+				"-srcdir", "build/libs",
+				"-srcfiles", jar.archiveName,
+				"-srcfiles", "COPYING.AFFERO",
+				"-srcfiles", "MapTool.exe.manifest",
 				"-outdir", "releases/release-"+version,
 				"-outfile", project.name,
 				"-name", project.name,
@@ -267,6 +285,10 @@ task deploy(dependsOn: uberJar) {
 				"-BshortcutHint=true",
 				"-BappVersion=" + version,
 				"-Bwin.msi.productVersion=1.4.4",
+				"-BlicenseFile=COPYING.AFFERO",
+				"-BlicenseType=GNU AFFERO GENERAL PUBLIC LICENSE",
+				"-Bcategory=Graphics",
+				"-Bemail=maptool@nerps.net",
 				"-BjvmProperties=MAPTOOL_DATADIR=.maptool-" + vendor
 				//"-BuserJvmOptions=-Xss=4M"
 		}
