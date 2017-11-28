@@ -109,7 +109,7 @@ public class MapToolLUAParser {
 			user_globals.set("export", new Export(res));
 			user_globals.set("token", new MapToolToken(tokenInContext, true, res));
 			user_globals.set("tokenProperties", LuaValue.NIL);
-			user_globals.set("macro", new MapToolMacro(res, tokenInContext, globals, context));
+			user_globals.set("macro", new MapToolMacro(res, tokenInContext, user_globals, context));
 			user_globals.set("isGM", new IsGM());
 			user_globals.set("maps", new MapToolMaps(res));
 			user_globals.set("tables", new MapToolTables());

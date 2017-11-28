@@ -135,6 +135,11 @@ public class MapToolTokenProperty extends LuaTable {
 				}
 				Object o = token.getToken().getEvaluatedProperty(property);
 				return LuaValue.valueOf(o != null && !StringUtil.isEmpty(o.toString()));
+			case "empty":
+				if (!token.isSelfOrTrustedOrLib()) {
+					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
+				}
+				return LuaValue.valueOf(!token.getToken().getPropertyMap().containsKey(property) || token.getToken().getPropertyMap().get(property) == null);
 			}
 		}
 		return super.rawget(key);

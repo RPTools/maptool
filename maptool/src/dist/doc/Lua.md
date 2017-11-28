@@ -215,6 +215,7 @@ Lua uses normal integer and floating point values for its numbers, while the Mac
 ## How do I do in LUA?
 ### Macro-Functions
 #### Macro-Function abort()
+This function is part the Macro library
 ```lua
 --{assert(0, "LUA")}--
 macro.abort(isGM()) -- abort when not GM (boolean is false)
@@ -1768,7 +1769,7 @@ println(token.hasMacro("(new)"));
 ```
 
 #### Macro Function hasProperty()
-Each property of any token can be checked for existence and definedness, whereas exists is equal to hasProperty and definedness checks if the property has ever been defined in the Token
+Each property of any token can be checked for existence and definedness, whereas exists is equal to hasProperty and definedness checks if the property has ever been defined in the Token (not the opposite of isPropertyEmpty)
 ```lua
 --{assert(0, "LUA")}--
 token.properties.HP = 10
@@ -1884,6 +1885,121 @@ local selected = input({name = "Token", type = "LIST", content = tokens.visible(
 println(selected.Token.label) --The selected item is still a token object
 println("<img src=\"",selected.Token.image,"\">")
 println(toJSON(selected))
+```
+
+#### Macro Function isBarVisible()
+There is no function for this, but any bar that is visible on a token has a non nil value
+
+```lua
+--{assert(0, "LUA")}-- 
+if token.bars.Health == nil then
+  println("Healtbar not visible")
+else
+  println("Healtbar visible")
+end
+```
+
+#### Macro Functions isDialogVisible() and isFrameVisible()
+These functions are part of the UI library
+```lua
+--{assert(0, "LUA")}-- 
+println(UI.isDialogVisible("Name"))
+println(UI.isFrameVisible("Name"))
+```
+
+#### Macro Function isFunctionDefined()
+There is no function is Lua for this, but the functions table holds all user defined functions. The table can be used to check for the existance
+
+```lua
+--{assert(0, "LUA")}-- 
+if functions.name ~= nil then -- function is defined
+  functions.name("parameter")
+else
+  println("No user defined function \"name\" found")
+end
+```
+
+#### Macro Function isGM()
+This macro is part of the Macro library.
+```lua
+--{assert(0, "LUA")}--
+macro.abort(isGM()) -- abort when not GM
+```
+
+#### Macro Function isNPC()
+NPC-ness is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.npc) --true/false
+```
+
+#### Macro Function isNumber()
+Type checking can be done with the lua language type() operator
+```lua
+--{assert(0, "LUA")}--
+local x=10
+println(x, ": ", type(x) == "number")
+x = "abc"
+println(x, ": ", type(x) == "number")
+x = "10"
+println(x, ": ", type(x) == "number")
+x = tonumber(x)
+println(x, ": ", type(x) == "number")
+```
+
+#### Macro Function isOwnedByAll()
+Owned By All is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.ownedByAll)
+```
+
+#### Macro Function isOwner()
+This function can be called on any token
+```lua
+--{assert(0, "LUA")}--
+println(token.isOwner(chat.name))
+```
+
+#### Macro Function isPC()
+PC-ness is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.pc) --true/false
+```
+
+#### Macro Function isPropertyEmpty()
+Each property of any token can be checked for emptyness using .empty
+```lua
+--{assert(0, "LUA")}--
+token.properties.HP = 10
+println(token.properties.HP.empty)
+token.properties.HP = nil -- or ""
+println(token.properties.HP.empty)
+token.properties.HP.reset()
+println(token.properties.HP.empty)
+println(token.properties.UNKNOWN.empty)
+```
+
+#### Macro Function isSnapToGrid()
+Snap To Grid is a property of any token:
+```lua
+--{assert(0, "LUA")}--
+println(token.snapToGrid)
+```
+
+#### Macro Function isTrusted()
+This function is part of the macro library
+```lua
+--{assert(0, "LUA")}--
+println(macro.isTrusted())
+```
+
+#### Macro Function isVisible()
+This function can be called on any token
+```lua
+--{assert(0, "LUA")}--
+println(token.isVisible(10, 0))
 ```
 
 ### Roll-Options

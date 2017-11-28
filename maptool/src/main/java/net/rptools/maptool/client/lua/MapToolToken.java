@@ -31,8 +31,8 @@ import net.rptools.maptool.client.lua.token.GetOwners;
 import net.rptools.maptool.client.lua.token.HasLights;
 import net.rptools.maptool.client.lua.token.HasMacro;
 import net.rptools.maptool.client.lua.token.ImageFunc;
-import net.rptools.maptool.client.lua.token.IsOwnedByAll;
 import net.rptools.maptool.client.lua.token.IsOwner;
+import net.rptools.maptool.client.lua.token.IsVisible;
 import net.rptools.maptool.client.lua.token.LastPath;
 import net.rptools.maptool.client.lua.token.Location;
 import net.rptools.maptool.client.lua.token.MatchingProperties;
@@ -118,7 +118,7 @@ public class MapToolToken extends LuaTable implements IRepresent {
 	private static final String F_MATCH_PROPS = "getmatchingproperties";
 	private static final String F_GET_OWNERS = "getowners";
 	private static final String F_SET_OWNERS = "setowner";
-	private static final String F_IS_OWNED_BY_ALL = "isownedbyall";
+	private static final String OWNED_BY_ALL = "ownedbyall";
 	private static final String F_IS_OWNER = "isowner";
 	private static final String F_IMAGE = "getimage";
 	private static final String F_HANDOUT = "gethandout";
@@ -133,6 +133,7 @@ public class MapToolToken extends LuaTable implements IRepresent {
 	private static final String F_MOVEDOVERPOINTS = "movedoverpoints";
 	private static final String F_MATCHINGPROPS = "matchingproperties";
 	private static final String F_LOCATION = "location";
+	private static final String F_IS_VISIBLE = "isvisible";
 	//TODO trusted Macro und so
 	private boolean isSelf = false;
 	private Token token;
@@ -440,6 +441,14 @@ public class MapToolToken extends LuaTable implements IRepresent {
 				MapTool.serverCommand().putToken(zone.getId(), token);
 				zone.putToken(token);
 				return;
+			case OWNED_BY_ALL:
+				if (!isSelf && !MapTool.getParser().isMacroTrusted()) {
+					throw new ParserException(I18N.getText("macro.function.general.noPerm", "token.ownedByAll"));
+				}
+				token.setOwnedByAll(value.checkboolean());
+				MapTool.serverCommand().putToken(zone.getId(), token);
+				zone.putToken(token);
+				return;
 			default:
 				error("table is read-only");
 			}
@@ -535,6 +544,11 @@ public class MapToolToken extends LuaTable implements IRepresent {
 					return LuaValue.valueOf(((Number) v).intValue() > 0);
 				}
 				return LuaValue.valueOf(v.toString());
+			case OWNED_BY_ALL:
+				if (!isSelf && !MapTool.getParser().isMacroTrusted()) {
+					throw new ParserException(I18N.getText("macro.function.general.noPerm", "token.ownedByAll"));
+				}
+				return LuaValue.valueOf(token.isOwnedByAll());
 			case LAYER:
 				if (!isSelf && !MapTool.getParser().isMacroTrusted()) {
 					throw new ParserException(I18N.getText("macro.function.general.noPerm", "token.layer"));
@@ -683,8 +697,8 @@ public class MapToolToken extends LuaTable implements IRepresent {
 				return new SetOwner(this);
 			case F_IS_OWNER:
 				return new IsOwner(this);
-			case F_IS_OWNED_BY_ALL:
-				return new IsOwnedByAll(this);
+//			case F_IS_OWNED_BY_ALL:
+//				return new IsOwnedByAll(this);
 			case F_IMAGE:
 				return new ImageFunc(this, imageType.TOKEN_IMAGE);
 			case F_PORTRAIT:
@@ -719,6 +733,8 @@ public class MapToolToken extends LuaTable implements IRepresent {
 				return new MatchingProps(this);
 			case F_HAS_MACRO:
 				return new HasMacro(this);
+			case F_IS_VISIBLE:
+				return new IsVisible(this);
 			}
 		} catch (ParserException e) {
 			throw new LuaError(e);

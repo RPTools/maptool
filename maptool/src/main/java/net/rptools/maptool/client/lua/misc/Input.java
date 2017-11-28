@@ -238,8 +238,7 @@ public class Input extends VarArgFunction {
 						break;
 					}
 					case CHECK: {
-						Integer value = ((JCheckBox) comp).isSelected() ? 1 : 0;
-						newValue = valueOf(value);
+						newValue = valueOf(((JCheckBox) comp).isSelected());
 						break;
 					}
 					case RADIO: {

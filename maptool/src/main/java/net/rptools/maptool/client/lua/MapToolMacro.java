@@ -58,8 +58,8 @@ public class MapToolMacro extends LuaTable {
 		super.rawset(LuaValue.valueOf("evalUntrustedRaw"), new Exec(resolver, false, false, false));
 		super.rawset(LuaValue.valueOf("call"), new MacroCall(resolver, this.tokenInContext, null, true));
 		super.rawset(LuaValue.valueOf("run"), new MacroCall(resolver, this.tokenInContext, this.globals, true));
-		super.rawset(LuaValue.valueOf("call"), new MacroCall(resolver, this.tokenInContext, null, false));
-		super.rawset(LuaValue.valueOf("run"), new MacroCall(resolver, this.tokenInContext, this.globals, false));
+		super.rawset(LuaValue.valueOf("callRaw"), new MacroCall(resolver, this.tokenInContext, null, false));
+		super.rawset(LuaValue.valueOf("runRaw"), new MacroCall(resolver, this.tokenInContext, this.globals, false));
 		super.rawset(LuaValue.valueOf("isTrusted"), new IsTrusted());
 		super.rawset(LuaValue.valueOf("name"), valOf(this.context != null ? this.context.getName() : "Chat"));
 		super.rawset(LuaValue.valueOf("location"), valOf(this.context != null ? this.context.getSouce() : "Chat"));
