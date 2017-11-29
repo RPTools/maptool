@@ -1941,6 +1941,11 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token))
 					continue;
 
+				// ... or there are no lights/visibleScreen and you are not the owner or gm and there is fow or vision
+				if (!view.isGMView() && !AppUtil.playerOwns(token) && visibleScreenArea == null && zone.hasFog() && zoneView.isUsingVision()) {
+					continue;
+				}
+
 				// ... or if it doesn't have an image to display. (Hm, should still show *something*?)
 				Asset asset = AssetManager.getAsset(token.getImageAssetId());
 				if (asset == null)
@@ -1978,13 +1983,11 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						// System.out.println("Adding Clip: " + MapTool.getPlayer().getName());
 					}
 				}
-				// Show path only on the key token
-				if (token == keyToken) {
-					if (!token.isStamp()) {
-						renderPath(g, walker != null ? walker.getPath() : set.gridlessPath,
-								token.getFootprint(zone.getGrid()));
-					}
+				// Show path only on the key token on token layer that are visible to the owner or gm while fow and vision is on
+				if (token == keyToken && !token.isStamp()) {
+					renderPath(g, walker != null ? walker.getPath() : set.gridlessPath, token.getFootprint(zone.getGrid()));
 				}
+
 				// handle flipping
 				BufferedImage workImage = image;
 				if (token.isFlippedX() || token.isFlippedY()) {
@@ -2041,11 +2044,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
 					at.rotate(Math.toRadians(-token.getFacing() - 90),
 							scaledWidth / 2 - token.getAnchor().x * scale - offsetx,
-							scaledHeight / 2 - token.getAnchor().y * scale - offsety); // facing
-																						// defaults
-																						// to down,
-																						// or -90
-																						// degrees
+							scaledHeight / 2 - token.getAnchor().y * scale - offsety); // facing defaults to down, or -90 degrees
 				}
 				if (token.isSnapToScale()) {
 					at.scale((double) imgSize.width / workImage.getWidth(),
@@ -2060,6 +2059,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 								(double) scaledHeight / workImage.getHeight());
 					}
 				}
+
 				g.drawImage(workImage, at, this);
 
 				// Other details
@@ -2099,10 +2099,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 						boolean hasFog = zone.hasFog();
 						boolean fogIntersects = exposedFogArea.intersects(bounds);
 						showLabels = showLabels || (visibleScreenArea == null && !hasFog); // no vision - fog
-						showLabels = showLabels || (visibleScreenArea == null && hasFog && fogIntersects); // no vision
-																											// + fog
-						showLabels = showLabels
-								|| (visibleScreenArea != null && visibleScreenArea.intersects(bounds) && fogIntersects); // vision
+						showLabels = showLabels || (visibleScreenArea == null && hasFog && fogIntersects); // no vision + fog
+						showLabels = showLabels || (visibleScreenArea != null && visibleScreenArea.intersects(bounds) && fogIntersects); // vision
 					}
 					if (showLabels) {
 						// if the token is visible on the screen it will be in the location cache
