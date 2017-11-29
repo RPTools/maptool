@@ -249,7 +249,22 @@ task copyPackageExtras(type: Copy) {
 	include('*')
 }
 
-task deploy(dependsOn: [uberJar, copyPackageExtras]) {
+task prepareInnoSetup(type: Copy) {
+	from("package/windows/MapTool.iss.template")
+	into("package/windows/")
+	rename("MapTool.iss.template", "MapTool.iss")
+	def tokens = [
+		AppName: "${project.name}",
+		AppVersion: "${version}",
+		Vendor: "${vendor}",
+		WizardImage: "${project.projectDir.absolutePath}/package/windows/${project.name}-setup.bmp",
+		Slash: "\\",
+	]
+	expand(tokens)
+	inputs.properties(tokens)
+}
+
+task deploy(dependsOn: [uberJar, copyPackageExtras, prepareInnoSetup]) {
 	group = 'distribution'
 	description = 'Create native installers'
 
@@ -272,6 +287,7 @@ task deploy(dependsOn: [uberJar, copyPackageExtras]) {
 				"-srcfiles", jar.archiveName,
 				"-srcfiles", "COPYING.AFFERO",
 				"-srcfiles", "MapTool.exe.manifest",
+				"-srcfiles", "msvcr100.dll",
 				"-outdir", "releases/release-"+version,
 				"-outfile", project.name,
 				"-name", project.name,

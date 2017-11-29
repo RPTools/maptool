@@ -1,3 +1,6 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/o4hmpca4mert1k0i/branch/1.4.4.0?svg=true)](https://ci.appveyor.com/project/JamzTheMan/maptool/branch/1.4.4.0)
+[![Build Status](https://travis-ci.org/JamzTheMan/maptool.svg?branch=1.4.4.0)](https://travis-ci.org/JamzTheMan/maptool)
+
 MapTool
 =======
 
