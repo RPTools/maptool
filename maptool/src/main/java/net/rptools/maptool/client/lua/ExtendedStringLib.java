@@ -41,6 +41,7 @@ public class ExtendedStringLib extends StringLib {
 		table.set("formatM", new Format(res));
 		table.set("split", new ToTable());
 		table.set("toTable", new ToTable());
+		table.set("substring", new SubString());
 		LuaString.s_metatable = tableOf( new LuaValue[] { INDEX, table } );
 		return result;
 	}
@@ -50,6 +51,16 @@ public class ExtendedStringLib extends StringLib {
 			return LuaValue.valueOf(string.checkjstring().endsWith(find.checkjstring()));
 		}
 	}
+	
+	static class SubString extends ThreeArgFunction {
+		public LuaValue call(LuaValue string, LuaValue start, LuaValue end) {
+			if (!end.isnil()) {
+				return LuaValue.valueOf(string.checkjstring().substring(start.checkint(), end.checkint()));
+			}
+			return LuaValue.valueOf(string.checkjstring().substring(start.checkint()));
+		}
+	}
+	
 	static class StartsWith extends TwoArgFunction {
 		public LuaValue call(LuaValue string, LuaValue find) {
 			return LuaValue.valueOf(string.checkjstring().startsWith(find.checkjstring()));
@@ -98,7 +109,7 @@ public class ExtendedStringLib extends StringLib {
 		public LuaValue invoke(Varargs args) {
 			LuaValue string = args.arg(1);
 			List<Object> list = new ArrayList<Object>();
-			for (int i = 2; i < args.narg(); i++) {
+			for (int i = 2; i <= args.narg(); i++) {
 				list.add(LuaConverters.toObj(args.arg(i)));
 			}
 			try {

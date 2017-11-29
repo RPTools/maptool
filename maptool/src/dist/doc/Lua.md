@@ -441,8 +441,8 @@ Lua has no dedicated String Property and String List function, they have to be c
 ```lua
 --{assert(0, "LUA")}--
 println(table.length(fromStr("a=blah; b=doh; c=meh")));
-println(table.length(fromStr("a=blah, b=doh, c=meh")));
-println(table.length(fromStr("a=blah, b=doh, c=meh", nil, ","))); --Change seperator to ","
+println(table.length(fromStr("a=blah, b=doh, c=meh"), nil, ";")); --Force the input to be treated as a property list
+println(table.length(fromStr("a=blah, b=doh, c=meh", nil, ","))); --Change seperator to "," and force the input to be treated as a property list
 ```
 #### Macro Functions countsuccess() and success()
 The dice library has all dice roll functions
@@ -568,7 +568,6 @@ VBL.erase(rectangle, cross, circle, polygon) --No array needed. convert arrays w
 ```
 ### Macro Function eval()
 This function can be used as normal, but for variables to be available in the macro code, they have to be exported first
-endsWith() has been added to the string library
 ```lua
 --{assert(0, "LUA")}--
 export("Bonus", 10)
@@ -1851,7 +1850,7 @@ end
 
 println(indexValueStrProp("a=blah; b=doh; c=meh", 1));
 println(indexValueStrProp(fromStr("a=blah; b=doh; c=meh"), 2));
-println(indexValueStrProp(fromStr("a=blah, b=doh, c=meh", nil, ","), 0)); --Change seperator to ","
+println(indexValueStrProp(fromStr("a=blah, b=doh, c=meh", nil, ","), 0)); --Change seperator to "," and force the input to be treated as a props list
 ```
 
 #### Macro Function initiativeSize()

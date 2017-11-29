@@ -79,7 +79,7 @@ public class PrintRoll extends VarArgFunction {
 				break;
 			case WHISPER:
 				outputOpts.add("w");
-				for (int i = 2; i < args.narg(); i++) {
+				for (int i = 2; i <= args.narg(); i++) {
 					LuaValue arg = args.arg(i);
 					if (arg.istable()) {
 						for (LuaValue name : LuaConverters.arrayIterate(arg.checktable())) {

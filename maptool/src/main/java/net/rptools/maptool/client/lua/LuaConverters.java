@@ -412,9 +412,9 @@ public class LuaConverters {
 	
 	
 	
-	public static LuaValue fromStr(String val, String listSep, String propSep) {
+	public static LuaValue fromStr(String val, String listSep, String propSep, boolean forceList, boolean forceProps) {
 		String str = val;
-		if (str.contains("=") || str.contains(propSep) || str.matches("[^=]+\\.[0-9A-F]{2}.+")) {
+		if (forceProps || (!forceList && (str.contains("=") || str.contains(propSep) || str.matches("[^=]+\\.[0-9A-F]{2}.+")))) {
 			LuaTable result = new InsertionOrderLuaTable();
 			Map<String, String> parse = parse(str, propSep);
 			if (!parse.isEmpty()) {
@@ -426,15 +426,15 @@ public class LuaConverters {
 						} catch (LuaError le) {
 						}
 					}
-					result.set(key, fromStr(trydecode(e.getValue()), listSep, propSep));
+					result.set(key, fromStr(trydecode(e.getValue()), listSep, propSep, forceList, false));
 				}
 				return result;
 			}
 		} 
-		if (str.contains(listSep)) {
+		if (forceList || str.contains(listSep)) {
 			LuaTable result = new LuaTable();
 			for (String e: StringUtils.splitByWholeSeparator(str, listSep)) {
-				result.insert(0, fromStr(trydecode(e), listSep, propSep));
+				result.insert(0, fromStr(trydecode(e.trim()), listSep, propSep, false, false));
 			}
 			return result;
 		}

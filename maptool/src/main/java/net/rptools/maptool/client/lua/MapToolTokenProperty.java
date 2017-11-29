@@ -3,6 +3,7 @@
  */
 package net.rptools.maptool.client.lua;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import net.rptools.maptool.client.MapTool;
@@ -90,6 +91,19 @@ public class MapToolTokenProperty extends LuaTable {
 	public LuaValue remove(int pos) {
 		return error("table is read-only");
 	}
+	
+	private static Object maybeNumber(Object val) {
+		if (val instanceof String) {
+			// try to convert to a number
+			try {
+				return new BigDecimal(val.toString());
+			} catch (Exception e) {
+				return val;
+			}
+		} else {
+			return val;
+		}
+	}
 
 	@Override
 	public LuaValue rawget(LuaValue key) {
@@ -118,12 +132,12 @@ public class MapToolTokenProperty extends LuaTable {
 				if (!token.isSelfOrTrustedOrLib()) {
 					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
 				}
-				return LuaConverters.fromObj(token.getToken().getEvaluatedProperty(property));
+				return LuaConverters.fromObj(maybeNumber(token.getToken().getEvaluatedProperty(property)));
 			case "converted":
 				if (!token.isSelfOrTrustedOrLib()) {
 					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
 				}
-				return LuaConverters.fromJson(token.getToken().getEvaluatedProperty(property));
+				return LuaConverters.fromJson(maybeNumber(token.getToken().getEvaluatedProperty(property)));
 			case "defined":
 				if (!token.isSelfOrTrustedOrLib()) {
 					throw new LuaError(new ParserException(I18N.getText("macro.function.general.noPerm", "token.getProperty")));
