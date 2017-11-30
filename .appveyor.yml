@@ -5,7 +5,7 @@ skip_non_tags: true
 image: Visual Studio 2017
 platform: x64
 build_script:
-- ps: ./gradlew.bat deploy
+- gradlew.bat deploy
 artifacts:
 - path: releases\release-*\bundles\MapTool-*.exe
   name: MapTool-Install
