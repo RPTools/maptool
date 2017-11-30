@@ -9,7 +9,6 @@
 package net.rptools.lib;
 
 import java.io.*;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.text.*;
@@ -20,9 +19,7 @@ import javax.swing.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.util.HTTPUtil;
 import net.sf.json.JSONObject;
 
 /**
