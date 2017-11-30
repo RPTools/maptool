@@ -1,12 +1,11 @@
-version: '{branch}'
+version: '{branch}.{build}'
 pull_requests:
   do_not_increment_build_number: true
 skip_non_tags: true
 image: Visual Studio 2017
-shallow_clone: true
 platform: x64
 build_script:
-- gradlew.bat deploy
+- ps: ./gradlew.bat deploy
 artifacts:
 - path: releases\release-*\bundles\MapTool-*.exe
   name: MapTool-Install
@@ -19,7 +18,8 @@ deploy:
     secure: HXIHe/F7K2yGOZ0I56DW5PevrQDe+zjyunjORGKYaUGxFtvPYPcmOdjZT69tzHcS
   artifact: MapTool-Install, MapTool-Jar
   draft: true
-  force_update: true
+  prerelease: true
+  force_update: false
 notifications:
 - provider: Slack
   incoming_webhook: https://hooks.slack.com/services/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
