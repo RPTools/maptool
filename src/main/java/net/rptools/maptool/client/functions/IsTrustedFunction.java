@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;

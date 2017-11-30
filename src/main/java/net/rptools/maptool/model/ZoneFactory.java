@@ -14,7 +14,6 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;

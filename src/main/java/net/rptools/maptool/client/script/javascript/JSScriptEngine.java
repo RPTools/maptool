@@ -18,9 +18,7 @@ import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
 
 import javax.script.*;
-import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 
 public class JSScriptEngine {
 

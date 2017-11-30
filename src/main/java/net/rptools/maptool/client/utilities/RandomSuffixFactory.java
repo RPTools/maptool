@@ -12,10 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.management.RuntimeErrorException;
-
-import net.rptools.maptool.client.MapTool;
-
 /**
  * This class produces a numeric suffix in the range of 1 to 256 intended to uniquely identify a token on the map. The class remembers previous token names and will never return the same value for any
  * given name. If all possible 256 suffixes have been used then the class simply starts over but using an offset of 256.

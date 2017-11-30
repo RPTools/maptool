@@ -12,14 +12,11 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
-import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.io.IOException;
-import java.util.List;
-
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 

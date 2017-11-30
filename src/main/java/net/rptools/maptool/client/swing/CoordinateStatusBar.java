@@ -9,15 +9,7 @@
 package net.rptools.maptool.client.swing;
 
 import java.awt.Dimension;
-import java.awt.event.MouseAdapter;
-import java.text.DecimalFormat;
-
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 
 /**

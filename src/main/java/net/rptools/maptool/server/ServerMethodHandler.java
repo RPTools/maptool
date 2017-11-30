@@ -42,7 +42,6 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.server.ServerCommand.COMMAND;
 import net.rptools.maptool.transfer.AssetProducer;
 
 /**

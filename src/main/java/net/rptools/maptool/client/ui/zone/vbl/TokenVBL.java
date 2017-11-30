@@ -9,7 +9,6 @@
 package net.rptools.maptool.client.ui.zone.vbl;
 
 import java.awt.Color;
-import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.Area;

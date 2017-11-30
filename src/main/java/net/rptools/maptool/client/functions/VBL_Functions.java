@@ -27,7 +27,6 @@ import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.IsometricGrid;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;

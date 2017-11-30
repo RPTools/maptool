@@ -14,13 +14,11 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.SwingUtilities;
 
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 
 public class StatSheet {

@@ -49,7 +49,6 @@ import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.Event;
 import net.rptools.maptool.model.Zone.Filter;
 
 public class ZoneView implements ModelChangeListener {

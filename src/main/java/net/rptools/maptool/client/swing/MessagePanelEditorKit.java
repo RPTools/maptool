@@ -8,10 +8,6 @@
  */
 package net.rptools.maptool.client.swing;
 
-import java.awt.Image;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.Element;

@@ -14,8 +14,6 @@ import java.text.DecimalFormat;
 
 import javax.swing.JProgressBar;
 
-import org.apache.commons.io.FileUtils;
-
 import net.rptools.maptool.util.FileUtil;
 
 /**

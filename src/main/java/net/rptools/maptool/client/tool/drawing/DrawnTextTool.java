@@ -17,21 +17,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.ImageIcon;
 import javax.swing.KeyStroke;
 import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-
 import net.rptools.maptool.client.swing.TwoToneTextPane;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.drawing.DrawnLabel;
 import net.rptools.maptool.model.drawing.Pen;
 

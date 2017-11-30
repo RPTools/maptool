@@ -9,14 +9,10 @@
 package net.rptools.maptool.client.utilities;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import junit.framework.TestCase;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**

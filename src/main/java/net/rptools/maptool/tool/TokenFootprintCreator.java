@@ -12,7 +12,6 @@ import java.awt.Point;
 import java.util.Arrays;
 import java.util.List;
 
-import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TokenFootprint;
 
 import com.thoughtworks.xstream.XStream;

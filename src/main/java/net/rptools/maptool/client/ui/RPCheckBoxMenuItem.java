@@ -8,12 +8,9 @@
  */
 package net.rptools.maptool.client.ui;
 
-import java.beans.PropertyChangeListener;
-
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 

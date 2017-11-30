@@ -8,11 +8,6 @@
  */
 package net.rptools.maptool.util;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.util.HashSet;
-import java.util.Set;
-
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.HexGrid;
 import net.rptools.maptool.model.HexGridHorizontal;
