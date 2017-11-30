@@ -259,7 +259,7 @@ task uberJar(type: Jar) {
 
 // Currently includes license, manifest (for Hdpi) and msvcr100.dll (due to packaging bug)
 task copyPackageExtras(type: Copy) {
-	from('package/extras/')
+	from('package/license/')
 	into('build/libs/')
 	include('*')
 }
@@ -273,6 +273,8 @@ task prepareInnoSetup(type: Copy) {
 		AppVersion: "${version}",
 		Vendor: "${vendor}",
 		WizardImage: "${project.projectDir.absolutePath}/package/windows/${project.name}-setup.bmp",
+		InstallDLL: "${project.projectDir.absolutePath}/package/windows/msvcr100.dll",
+		InstallManifest: "${project.projectDir.absolutePath}/package/windows/MapTool.exe.manifest",
 		Slash: "\\",
 	]
 	expand(tokens)
@@ -301,8 +303,6 @@ task deploy(dependsOn: [uberJar, copyPackageExtras, prepareInnoSetup]) {
 				"-srcdir", "build/libs",
 				"-srcfiles", jar.archiveName,
 				"-srcfiles", "COPYING.AFFERO",
-				"-srcfiles", "MapTool.exe.manifest",
-				"-srcfiles", "msvcr100.dll",
 				"-outdir", "releases/release-"+version,
 				"-outfile", project.name,
 				"-name", project.name,

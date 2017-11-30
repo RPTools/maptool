@@ -42,8 +42,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Files]
 Source: "MapTool/MapTool.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "MapTool/*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "MapTool/app/MapTool.exe.manifest"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "MapTool/app/msvcr100.dll"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: ${InstallManifest}; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: ${InstallDLL}; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}${Slash}MapTool"; Filename: "{app}/MapTool.exe"; IconFilename: "{app}/MapTool.ico"; Check: returnTrue()
