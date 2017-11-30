@@ -13,7 +13,7 @@ addons:
     - oracle-java8-installer
     - fakeroot
 script: 
-  - "./gradlew build -x test"
+  - ./gradlew build -x test
 notifications:
   slack: nerps:JumMHisqOlXac7be25Ca8FbN
 before_cache:
@@ -24,7 +24,7 @@ cache:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
 before_deploy:
-  script: "./gradlew deploy"
+  script: ./gradlew deploy
 deploy:
   provider: releases
   api_key:
@@ -33,8 +33,10 @@ deploy:
   file: releases/release-*/bundles/*
   overwrite: true
   skip_cleanup: true
+  target_commitish: $TRAVIS_COMMIT
+  tag_name: $TRAVIS_TAG
   draft: true
   on:
-    repo: JamzTheMan/maptool
+    repo: JamzTheMan/MapTool
     tags: true
     all_branches: true

@@ -10,6 +10,7 @@ buildscript {
 	dependencies {
 		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.4.1"
 		classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
+		classpath 'org.ajoberstar:grgit:1.1.0'	// Access Git from build script
 	}
 
 	repositories {
@@ -40,6 +41,10 @@ applicationDefaultJvmArgs = ["-Xss4M"]
 // Custom properties
 ext {
 	vendor = "Nerps" // Change to RPTools for official builds
+	git = org.ajoberstar.grgit.Grgit.open(file('.'))
+	revision = git.head().abbreviatedId
+	revisionFull = git.head().id
+	branch = git.branch.getCurrent().getName()
 	gdxVersion = '1.9.6'
 	box2DLightsVersion = '1.4'
 	//aiVersion = '1.8.0'
@@ -100,7 +105,11 @@ dependencies {
 	compile 'io.sentry:sentry-log4j2:1.5.2'
 
 	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1' // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
-	// compile 'org.ow2.util.bundles:commons-collections-3.2.1:1.0.0'
+
+	// Get release info from GitHub using API v3
+	// compile group: 'org.eclipse.mylyn.github', name: 'org.eclipse.egit.github.core', version: '4.9.0.201710071750-r' // https://mvnrepository.com/artifact/org.eclipse.mylyn.github/org.eclipse.egit.github.core
+	// compile group: 'org.kohsuke', name: 'github-api', version: '1.90' // https://mvnrepository.com/artifact/org.kohsuke/github-api
+
 
 	compile 'net.java.abeille:abeille-formsrt:2.0'
 	compile 'net.rptools.clientserver:clientserver:1.4.0.+'
@@ -225,6 +234,9 @@ task uberJar(type: Jar) {
 		attributes 'Implementation-Title': project.name,
 		'Implementation-Version': version,
 		'Implementation-Vendor': vendor,
+		'Git-Commit': revision,
+		'Git-Commit-SHA': revisionFull,
+		'Git-Branch': branch,
 		'Built-By': System.getProperty('user.name'),
 		'Built-Date': new Date(),
 		'Built-JDK': System.getProperty('java.version'),

@@ -30,6 +30,9 @@ import java.util.Map;
 
 // Jamz: There appears to be a webdownloader(url) function already, replace?
 public class HTTPUtil {
+	public static String getJsonPaylod(String requestURL) throws IOException {
+		return parseSingleLineRespone(sendGetRequest(requestURL));
+	}
 
 	/**
 	 * Makes an HTTP request using GET method to the specified URL and returns an input stream that wraps server's response.
