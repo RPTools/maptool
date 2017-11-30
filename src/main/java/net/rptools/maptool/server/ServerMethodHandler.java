@@ -55,6 +55,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 		this.server = server;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void handleMethod(String id, String method, Object... parameters) {
 		ServerCommand.COMMAND cmd = Enum.valueOf(ServerCommand.COMMAND.class, method);
 		// System.out.println("ServerMethodHandler#handleMethod: " + id + " - " + cmd.name());

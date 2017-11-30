@@ -76,7 +76,7 @@ public class TokenPanelTransferHandler extends TransferHandler {
 	@Override
 	protected Transferable createTransferable(JComponent aC) {
 		if (aC instanceof JList) {
-			Object[] selectedValues = ((JList) aC).getSelectedValues();
+			Object[] selectedValues = ((JList) aC).getSelectedValuesList().toArray();
 			return new TokenPanelTransferable(selectedValues);
 		} // endif
 		return null;

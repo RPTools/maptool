@@ -108,7 +108,7 @@ public class UIBuilder extends JDialog {
 		private MutableTreeNode last_start = null, last_root = null;
 		private String last_dir = null;
 
-		@SuppressWarnings({ "unchecked", "unused" })
+		@SuppressWarnings({ "unused" })
 		public void addNode(String dir, MaptoolNode node, MutableTreeNode start) {
 			MutableTreeNode firstChangedNode = null;
 			if (start == null)

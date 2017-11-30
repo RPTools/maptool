@@ -121,6 +121,7 @@ public class TokenLocationFunctions extends AbstractFunction {
 	 * @return a message detailing the number of tokens moved.
 	 * @throws ParserException
 	 */
+	@SuppressWarnings("unchecked")
 	private String tokenMoveMap(boolean fromCurrentMap, List<Object> args) throws ParserException {
 		String functionName = fromCurrentMap ? "moveTokenToMap" : "moveTokenFromMap";
 		if (args.size() < 2) {

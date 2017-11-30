@@ -210,6 +210,7 @@ public class AbeillePanel<T> extends JPanel {
 			super.viewToModel(dataSource);
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void bind(Property property, Component view, UpdateTime updateTime) {
 			// System.out.println("bind:" + view.getName() + " - " + view);

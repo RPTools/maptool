@@ -52,6 +52,7 @@ import org.jdesktop.swingworker.SwingWorker;
 import com.jidesoft.swing.FolderChooser;
 
 public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
+	private static final long serialVersionUID = -1709712124453405062L;
 
 	private static final Logger log = LogManager.getLogger(AddResourceDialog.class);
 
@@ -290,7 +291,8 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 			break;
 
 		case RPTOOLS:
-			Object[] selectedRows = getLibraryList().getSelectedValues();
+			Object[] selectedRows = getLibraryList().getSelectedValuesList().toArray();
+
 			if (selectedRows == null || selectedRows.length == 0) {
 				MapTool.showMessage("dialog.addresource.warn.mustselectone", "Error", JOptionPane.ERROR_MESSAGE);
 				return false;
@@ -318,7 +320,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 					try {
 						RemoteFileDownloader downloader = new RemoteFileDownloader(new URL(row.path));
 						File tmpFile = downloader.read();
-						AppSetup.installLibrary(row.name, tmpFile.toURL());
+						AppSetup.installLibrary(row.name, tmpFile.toURI().toURL());
 						tmpFile.delete();
 					} catch (IOException e) {
 						log.error("Error downloading library: " + e, e);

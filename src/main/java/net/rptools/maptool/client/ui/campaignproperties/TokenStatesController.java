@@ -88,6 +88,7 @@ import com.jeta.forms.store.properties.ListItemProperty;
  * 
  * @author Jay
  */
+@SuppressWarnings("unchecked")
 public class TokenStatesController implements ActionListener, DocumentListener, ListSelectionListener, ItemListener, ChangeListener {
 
 	/** Panel containing the campaign properties form panel */

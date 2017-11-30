@@ -153,6 +153,7 @@ public class InitiativeListModel extends AbstractListModel implements PropertyCh
 	/**
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
+	@SuppressWarnings("unchecked")
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		// Handle by property name

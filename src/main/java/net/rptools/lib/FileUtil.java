@@ -95,13 +95,12 @@ public class FileUtil {
 			if (is == null) {
 				throw new IOException("Resource \"" + resource + "\" cannot be opened as stream.");
 			}
-			return IOUtils.toByteArray(new InputStreamReader(is, "UTF-8"));
+			return IOUtils.toByteArray(new InputStreamReader(is, "UTF-8"), "UTF-8");
 		} finally {
 			IOUtils.closeQuietly(is);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public static List<String> getLines(File file) throws IOException {
 		List<String> list;
 		FileReader fr = new FileReader(file);

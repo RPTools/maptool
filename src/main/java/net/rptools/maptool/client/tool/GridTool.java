@@ -113,6 +113,7 @@ public class GridTool extends DefaultTool {
 
 		JButton closeButton = (JButton) controlPanel.getComponentByName("closeButton");
 		closeButton.addActionListener(new ActionListener() {
+			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent e) {
 				resetTool();
 				// Lee: just to make the light sources snap to their owners after the tool is closed

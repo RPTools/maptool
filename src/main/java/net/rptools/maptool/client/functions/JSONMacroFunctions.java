@@ -20,6 +20,7 @@ import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+@SuppressWarnings("unchecked")
 public class JSONMacroFunctions extends AbstractFunction {
 	public enum JSONObjectType {
 		OBJECT, ARRAY, UNKNOWN

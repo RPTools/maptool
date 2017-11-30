@@ -371,6 +371,7 @@ public class MacroLinkFunction extends AbstractFunction {
 	 * @param setVars
 	 *            should the variables be set in the macro context as well as passed in as macro.args.
 	 */
+	@SuppressWarnings("unchecked")
 	public void runMacroLink(String link, boolean setVars) {
 		if (link == null || link.length() == 0) {
 			return;

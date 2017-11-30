@@ -72,6 +72,7 @@ public class Path<T extends AbstractPoint> {
 		return temp != null ? temp : cellList.get(cellList.size() - 1);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Path<T> derive(SelectionSet set, Token keyToken, Token followerToken,
 			int cellOffsetX, int cellOffsetY, ZonePoint startPoint,
 			ZonePoint endPoint) {

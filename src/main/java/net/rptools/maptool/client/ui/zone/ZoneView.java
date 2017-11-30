@@ -579,6 +579,7 @@ public class ZoneView implements ModelChangeListener {
 
 	////
 	// MODEL CHANGE LISTENER
+	@SuppressWarnings("unchecked")
 	public void modelChanged(ModelChangeEvent event) {
 		Object evt = event.getEvent();
 		if (event.getModel() instanceof Zone) {

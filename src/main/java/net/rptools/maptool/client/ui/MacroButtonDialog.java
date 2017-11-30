@@ -94,7 +94,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 	private ReplaceToolBar replaceToolBar;
 	private JLabel status;
 
-	private static HashSet<String> openMacroList = new HashSet(4);
+	@SuppressWarnings("unchecked") private static HashSet<String> openMacroList = new HashSet(4);
 
 	public MacroButtonDialog() {
 		super(MapTool.getFrame(), "", true);

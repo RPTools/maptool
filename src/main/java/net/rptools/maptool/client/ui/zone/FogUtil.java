@@ -129,6 +129,7 @@ public class FogUtil {
 
 	// Jamz: Added boolean exposeCurrentOnly
 	// @SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	public static void exposeVisibleArea(final ZoneRenderer renderer, Set<GUID> tokenSet, boolean exposeCurrentOnly) {
 		final Zone zone = renderer.getZone();
 

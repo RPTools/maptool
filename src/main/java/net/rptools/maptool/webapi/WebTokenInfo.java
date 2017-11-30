@@ -275,6 +275,7 @@ public class WebTokenInfo {
 
 		final JSONObject props = data.getJSONObject("properties");
 		EventQueue.invokeLater(new Runnable() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void run() {
 				Set<String> pnames = props.keySet();

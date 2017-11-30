@@ -150,6 +150,7 @@ public class TransferableHelper extends TransferHandler {
 	/**
 	 * Takes a drop event and returns an asset from it. Returns null if an asset could not be obtained.
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<Object> getAsset(Transferable transferable) {
 		List<Object> assets = new ArrayList<Object>();
 		try {

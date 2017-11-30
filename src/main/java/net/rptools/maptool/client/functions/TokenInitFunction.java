@@ -98,6 +98,7 @@ public class TokenInitFunction extends AbstractTokenAccessorFunction {
 	 * @throws ParserException
 	 *             Token isn't in initiative.
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<TokenInitiative> getTokenInitiatives(Token token) throws ParserException {
 		Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 		List<Integer> list = zone.getInitiativeList().indexOf(token);
