@@ -45,7 +45,7 @@ applicationDefaultJvmArgs = ["-Xss4M"]
 // Custom properties
 ext {
 	vendor = "Nerps" // Change to RPTools for official builds
-	git = org.ajoberstar.grgit.Grgit.open()
+	git = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
 	revision = git.head().abbreviatedId
 	revisionFull = git.head().id
 	branch = git.branch.getCurrent().getName()
