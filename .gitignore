@@ -23,6 +23,9 @@ target/
 build/
 out/
 
+# Automatically Generated
+################################################################################
+package/windows/MapTool.iss
 
 
 # IDEs

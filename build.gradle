@@ -7,7 +7,6 @@ buildscript {
 	dependencies {
 		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.4.1"
 		classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
-		// classpath 'org.ajoberstar:grgit:2.1.0'	// Access Git from build script
 	}
 
 	repositories {
@@ -15,8 +14,9 @@ buildscript {
 	}
 }
 
+// Access Git info from build script
 plugins {
-  id "org.ajoberstar.grgit" version "2.1.0"
+	id "org.ajoberstar.grgit" version "2.1.0"
 }
 
 // Apply the java plugin to add support for Java
@@ -26,7 +26,6 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'com.diffplug.gradle.spotless'
 apply plugin: 'javafx-gradle-plugin'
-// apply plugin: "org.ajoberstar.grgit"
 
 // Current Build version
 version = '1.4.4.0'
@@ -46,7 +45,7 @@ applicationDefaultJvmArgs = ["-Xss4M"]
 // Custom properties
 ext {
 	vendor = "Nerps" // Change to RPTools for official builds
-	git = org.ajoberstar.grgit.Grgit.open(file('.'))
+	git = org.ajoberstar.grgit.Grgit.open()
 	revision = git.head().abbreviatedId
 	revisionFull = git.head().id
 	branch = git.branch.getCurrent().getName()
