@@ -9,16 +9,17 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Set;
 
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
@@ -165,16 +166,16 @@ public class LuaConverters {
 
 	public static LuaValue fromJson(Object obj) {
 		if (obj instanceof JSONObject) {
-			return fromJson((JSONObject) obj, new HashSet<Object>());
+			return fromJson((JSONObject) obj, Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>()));
 		} else if (obj instanceof JSONArray) {
-			return fromJson((JSONArray) obj, new HashSet<Object>());
+			return fromJson((JSONArray) obj, Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>()));
 		}
 		if (obj instanceof String) {
 			Object im = JSONMacroFunctions.convertToJSON((String) obj);
 			if (im instanceof JSONObject) {
-				return fromJson((JSONObject) im, new HashSet<Object>());
+				return fromJson((JSONObject) im, Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>()));
 			} else if (im instanceof JSONArray) {
-				return fromJson((JSONArray) im, new HashSet<Object>());
+				return fromJson((JSONArray) im, Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>()));
 			}
 		}
 		return fromObj(obj);
@@ -182,7 +183,7 @@ public class LuaConverters {
 	}
 
 	public static LuaTable fromJson(JSONObject obj) {
-		return fromJson(obj, new HashSet<Object>());
+		return fromJson(obj, Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>()));
 	}
 
 	private static LuaTable fromJson(JSONObject obj, Set<Object> seen) {
@@ -210,7 +211,7 @@ public class LuaConverters {
 	}
 
 	public static LuaTable fromJson(JSONArray obj) {
-		return fromJson(obj, new HashSet<Object>());
+		return fromJson(obj, Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>()));
 	}
 
 	private static LuaTable fromJson(JSONArray obj, Set<Object> seen) {
@@ -239,7 +240,7 @@ public class LuaConverters {
 		if (val.isboolean()) {
 			return val.toboolean() ? BigDecimal.ONE : BigDecimal.ZERO;
 		}
-		return toJson(val, new HashSet<LuaValue>());
+		return toJson(val, Collections.newSetFromMap(new IdentityHashMap<LuaValue, Boolean>()));
 	}
 
 	private static Object toJson(LuaValue val, Set<LuaValue> seen) {
@@ -304,7 +305,7 @@ public class LuaConverters {
 	}
 
 	public static String toStr(LuaValue val, String listSep, String propSep) {
-		return toStr(val, new HashSet<LuaValue>(), listSep, propSep);
+		return toStr(val, Collections.newSetFromMap(new IdentityHashMap<LuaValue, Boolean>()), listSep, propSep);
 	}
 	
 	private static String toStr(LuaValue val, Set<LuaValue> seen, String listSep, String propSep) {

@@ -42,7 +42,7 @@ public class MapToolMacro extends LuaTable {
 			args = resolver.getVariable("macro.args", VariableModifiers.None);
 		} catch (ParserException e) {
 		}
-		super.rawset(LuaValue.valueOf("args"), args == null ? LuaValue.NIL : LuaConverters.fromJson(ObjectUtils.toString(args)));
+		super.rawset(LuaValue.valueOf("args"), args == null ? LuaValue.NIL : LuaConverters.fromJson(args));
 		super.rawset(LuaValue.valueOf("abort"), new Abort());
 		super.rawset(LuaValue.valueOf("arg"), new Arg(resolver));
 		super.rawset(LuaValue.valueOf("link"), new Link(true));

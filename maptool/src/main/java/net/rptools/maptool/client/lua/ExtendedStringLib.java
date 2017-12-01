@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.StringFunctions;
+import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 
@@ -35,6 +36,7 @@ public class ExtendedStringLib extends StringLib {
 		table.set("replace", new Replace());
 		table.set("indexOf", new IndexOf());
 		table.set("lastIndexOf", new LastIndexOf());
+		table.set("contains", new Contains());
 		table.set("matches", new Matches());
 		table.set("trim", new Trim());
 		table.set("strfind", new StrFind());
@@ -42,6 +44,8 @@ public class ExtendedStringLib extends StringLib {
 		table.set("split", new ToTable());
 		table.set("toTable", new ToTable());
 		table.set("substring", new SubString());
+		table.set("upper", new Upper());
+		table.set("lower", new Lower());
 		LuaString.s_metatable = tableOf( new LuaValue[] { INDEX, table } );
 		return result;
 	}
@@ -64,6 +68,11 @@ public class ExtendedStringLib extends StringLib {
 	static class StartsWith extends TwoArgFunction {
 		public LuaValue call(LuaValue string, LuaValue find) {
 			return LuaValue.valueOf(string.checkjstring().startsWith(find.checkjstring()));
+		}
+	}
+	static class Contains extends TwoArgFunction {
+		public LuaValue call(LuaValue string, LuaValue match) {
+			return LuaValue.valueOf(string.checkjstring().contains(match.checkjstring()));
 		}
 	}
 	static class Matches extends TwoArgFunction {
@@ -182,5 +191,34 @@ public class ExtendedStringLib extends StringLib {
 			return varargsOf(m.group() == null ? NIL : valueOf(m.group()), valueOf(m.start()), valueOf(m.end()));
 		}
 		
+	}
+	static class Upper extends TwoArgFunction {
+		@Override
+		public LuaValue call(LuaValue arg1, LuaValue arg2) {
+			if (arg2.isint()) {
+				String str = arg1.checkjstring();
+				int len = arg2.checkint();
+				len = Math.min(len, str.length());
+				return valueOf(str.substring(0, len).toUpperCase() + str.substring(len));
+				
+			} else {
+				return valueOf(arg1.checkjstring().toUpperCase());
+			}
+		}
+	}
+	
+	static class Lower extends TwoArgFunction {
+		@Override
+		public LuaValue call(LuaValue arg1, LuaValue arg2) {
+			if (arg2.isint()) {
+				String str = arg1.checkjstring();
+				int len = arg2.checkint();
+				len = Math.min(len, str.length());
+				return valueOf(str.substring(0, len).toLowerCase() + str.substring(len));
+				
+			} else {
+				return valueOf(arg1.checkjstring().toLowerCase());
+			}
+		}
 	}
 }

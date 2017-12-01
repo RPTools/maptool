@@ -68,7 +68,7 @@ public class MapToolTokenProperty extends LuaTable {
 				}
 				if (token.isLib()) {
 					try {
-						token.getToken().setProperty(property, LuaConverters.toJson(value));
+						token.getToken().setProperty(property, LuaConverters.toJson(value).toString());
 						Zone z;
 						z = MapTool.getParser().getTokenMacroLibZone(token.getToken().getName());
 						MapTool.serverCommand().putToken(z.getId(), token.getToken());
@@ -78,7 +78,7 @@ public class MapToolTokenProperty extends LuaTable {
 					}
 				} else {
 					Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-					token.getToken().setProperty(property, LuaConverters.toJson(value));
+					token.getToken().setProperty(property, LuaConverters.toJson(value).toString());
 					MapTool.serverCommand().putToken(zone.getId(), token.getToken());
 					zone.putToken(token.getToken());
 					return;
