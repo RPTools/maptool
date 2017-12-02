@@ -11,8 +11,6 @@ package net.rptools.maptool.client;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import net.rptools.lib.AppLoader;
-
 public class LaunchInstructions {
 	private static final String USAGE = "<html><body width=\"400\">You are running MapTool with insufficient memory allocated (%dMB).<br><br>"
 			+ "You may experience odd behavior, especially when connecting to or hosting a server.<br><br>  "
@@ -33,9 +31,8 @@ public class LaunchInstructions {
 			JOptionPane.showMessageDialog(new JFrame(), msg, "Usage", JOptionPane.INFORMATION_MESSAGE);
 		}
 
-		System.out.println("New version detected? " + AppLoader.checkForUpdatesUsingCommit());
-		// System.exit(99);
-
 		MapTool.main(args);
+
+		AppUpdate.gitHubReleases();
 	}
 }

@@ -404,6 +404,11 @@ public class AppPreferences {
 	private static final String KEY_FILE_SYNC_PATH = "fileSyncPath";
 	private static final String DEFAULT_FILE_SYNC_PATH = "";
 
+	private static final String SKIP_AUTO_UPDATE = "skipAutoUpdate";
+	private static final boolean DEFAULT_SKIP_AUTO_UPDATE = false;
+	private static final String SKIP_AUTO_UPDATE_COMMIT = "skipAutoUpdateCommit";
+	private static final String DEFAULT_SKIP_AUTO_UPDATE_COMMIT = "";
+
 	public static void setTypingNotificationDuration(int ms) {
 		prefs.putInt(KEY_TYPING_NOTIFICATION_DURATION, ms);
 		MapTool.getFrame().setChatNotifyDuration(ms);
@@ -791,6 +796,22 @@ public class AppPreferences {
 
 	public static void setFileSyncPath(String path) {
 		prefs.put(KEY_FILE_SYNC_PATH, path);
+	}
+
+	public static boolean getSkipAutoUpdate() {
+		return prefs.getBoolean(SKIP_AUTO_UPDATE, DEFAULT_SKIP_AUTO_UPDATE);
+	}
+
+	public static void setSkipAutoUpdate(boolean value) {
+		prefs.putBoolean(SKIP_AUTO_UPDATE, value);
+	}
+
+	public static String getSkipAutoUpdateCommit() {
+		return prefs.get(SKIP_AUTO_UPDATE_COMMIT, DEFAULT_SKIP_AUTO_UPDATE_COMMIT);
+	}
+
+	public static void setSkipAutoUpdateCommit(String commit) {
+		prefs.put(SKIP_AUTO_UPDATE_COMMIT, commit);
 	}
 
 	public static WalkerMetric getMovementMetric() {
