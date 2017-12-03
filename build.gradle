@@ -257,6 +257,14 @@ task uberJar(type: Jar) {
 	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
 }
 
+// For logging Git Commit during CI
+task displayGitInfo {
+	doLast {
+		println 'Git-Branch: ' + branch
+		println 'Git-Commit-SHA: ' + revisionFull
+	}
+}
+
 // Currently includes license, manifest (for Hdpi) and msvcr100.dll (due to packaging bug)
 task copyPackageExtras(type: Copy) {
 	from('package/license/')
@@ -281,7 +289,7 @@ task prepareInnoSetup(type: Copy) {
 	inputs.properties(tokens)
 }
 
-task deploy(dependsOn: [uberJar, copyPackageExtras, prepareInnoSetup]) {
+task deploy(dependsOn: [displayGitInfo, uberJar, copyPackageExtras, prepareInnoSetup]) {
 	group = 'distribution'
 	description = 'Create native installers'
 
