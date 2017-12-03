@@ -4,10 +4,21 @@
 MapTool
 =======
 
-Welcome to the MapTool 1.4 repository. The old version (1.3) still resides on [SourceForge](http://sourceforge.net/p/rptools/svn/HEAD/tree/) but should only be updated with major bug fixes.
+Welcome to my fork of MapTool, now infused with Nerps!. The old version (1.3) still resides on [SourceForge](http://sourceforge.net/p/rptools/svn/HEAD/tree/) but should only be updated with major bug fixes.
+
+
+What's with the Infused with Nerps?
+-----
+It's simply my way of telling you, the user, this is my fork of MapTool and not the official RPTools version.  I've been a passionate user and contributer of MapTool for over 7 years now. I enjoy coding in Java as a hobby and use MapTool in my weekly game (currently Pathfinder) and plan to do so indefinetly. _My gaming group has been going strong since 1991!_
+
+Why am I telling random people on the internet this? So you know this is not just some one off fork that will be dead in 6 months. If there is a bug and it's hampering my game...or there is some enhancement that I simply must have to make my game better, I'm going to code it. And as a byproduct, you the user also get those fixes/enhancements for the low low price of *free*!
+
+Lastly, all code I write is for fun and as such, open source for consumption upstream to RPTools. Feel free to fork from the main repository or mine and submit contributions! If you find any bug/flaws or have a really cool idea for an enhancement, feel free to create an issue on GitHub. It's the best way to catch my attention! You can also join fellow users on Discord: https://discord.gg/gevEtpC
+
+___
 
 So what is MapTool?
--------------------
+-----
 
 MapTool is much more than just a mapping program. Included are not only powerful tools for the creation of detailed maps, but also a chat function, detailed token management (allowing you to track properties of the units placed on the map and display health and status information), and an initiative tracker. Functions not being used can be hidden out of sight. These features enable your computer screen to function as a virtual table top, filling the role of battlemats and dry-erase markers and providing for infinitely scrollable maps and the ability to use a large-screen TV or video projector.  It is "game system agnostic", meaning that while MapTool has special support for some game systems (like hexes for GURPS or square templates for D&D 4E) there is no requirement for you to use these features.
 
@@ -18,7 +29,7 @@ And we don't stop there! Not content with just emulating the tabletop, we seek t
 Requirements
 ------------
 
-- MapTool 1.4 requires [Java 1.7+](https://java.com/en/download/)
+- MapTool 1.4.4.x comes with it's own JRE. Only download and install java if you want to run the JAR file manually. [Java 1.8+](https://java.com/en/download/)
 - Building MapTool requires the Java Development Kit (JDK): [How To Install JDK](doc/How_To_Install_JDK.md)
 
 Resources
@@ -46,20 +57,33 @@ For Windows, remember to flip the slash:
 .\gradlew build
 ```
 
-Building the Distributable Zip
-------------------------------
-
+Running Maptool from source
+----------------
 ```Shell
-./gradlew clean release
+./gradlew run
 ```
 
 For Windows, remember to flip the slash:
 
 ```Shell
-.\gradlew clean release
+.\gradlew run
 ```
 
-This will create a `.zip` file for use on all systems as well as a zipped `.app` for Mac OS X in the `maptool/build/` directory. The build number will be based on the latest tag and latest commit.
+Building a Native Executable
+------------------------------
+
+```Shell
+./gradlew clean deploy
+```
+
+For Windows, remember to flip the slash:
+
+```Shell
+.\gradlew clean deploy
+```
+
+This will create an installable file for use on your operating system. Look in the 'releases' folder for the ouput. *Note: Additional requirements may be needed, ie Inno setup. See the offical documentation for more information:* https://docs.oracle.com/javase/8/docs/technotes/guides/deploy/self-contained-packaging.html
+
 
 Developers
 ----------
