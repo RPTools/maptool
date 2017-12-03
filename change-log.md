@@ -14,8 +14,8 @@ Enhancements
 * [#22][i22] - Darkvision changed to Darkvision: circle r60 (removed distance=62.5)
 * [#25][i25] - Cone lights now accept 'offset=x' as an option just like vision
 * [#33][i33] - Java stack traces are sent automatically to Sentry.io for aggregation and notification. No private info is gathered or sent. This lets me know if an unreported bug shows up and how critical may be so I can get it fixed quicker and with minimal info needed from users.
-	
-	  
+
+
 Bug Fixes
 -----
 * [#5][i5]  - Adding new state causes java.lang.ArrayIndexOutOfBoundsException no more!
