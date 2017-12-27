@@ -181,7 +181,7 @@ public class IsometricGrid extends Grid {
 	public ZonePoint convert(CellPoint cp) {
 		double mapX = (cp.x - cp.y) * getCellWidthHalf();
 		double mapY = (cp.x + cp.y) * getCellHeightHalf();
-		return new ZonePoint((int) (mapX)+ getOffsetX(), (int) (mapY)+ getOffsetY());
+		return new ZonePoint((int) (mapX) + getOffsetX(), (int) (mapY) + getOffsetY());
 	}
 
 	@Override
@@ -196,7 +196,7 @@ public class IsometricGrid extends Grid {
 	public Rectangle getBounds(CellPoint cp) {
 		double mapX = (cp.x - cp.y) * getCellWidthHalf();
 		double mapY = (cp.x + cp.y) * getCellHeightHalf();
-		return new Rectangle((int)mapX - getSize(), (int)mapY , getSize() * 2, getSize());
+		return new Rectangle((int) mapX - getSize(), (int) mapY, getSize() * 2, getSize());
 	}
 
 	@Override
