@@ -15,12 +15,14 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
@@ -289,8 +291,20 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
 			}
 		}
 		if (e.getActionCommand().equals("Close")) {
-			closeRequest();
+			if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+				showSource();
+			} else {
+				closeRequest();
+			}
 		}
+	}
+
+	/**
+	 * Provide access to the complete (HTML) text of the dialog.
+	 */
+	private void showSource() {
+		String text = panel.getPaneText();
+		JOptionPane.showMessageDialog(null, text, "HTML Source", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	public void closeRequest() {

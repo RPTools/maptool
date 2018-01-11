@@ -120,4 +120,11 @@ public class HTMLPanel extends JPanel {
 		}
 		revalidate();
 	}
+
+	/**
+	 * Get the pane's text.
+	 */
+	public String getPaneText() {
+		return pane.getText();
+	}
 }
