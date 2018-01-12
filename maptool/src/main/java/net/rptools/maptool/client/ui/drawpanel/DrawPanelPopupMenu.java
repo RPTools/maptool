@@ -13,6 +13,7 @@
 
 package net.rptools.maptool.client.ui.drawpanel;
 
+import java.awt.Component;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -27,6 +28,7 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
@@ -73,11 +75,13 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		add(new MergeDrawingsAction());
 		addGMItem(new JSeparator());
 		add(new DeleteDrawingAction());
-		// TODO add properties action as stage two
 		//add(new JSeparator());
 		add(new GetPropertiesAction());
 		add(new SetPropertiesAction());
 		add(new GetDrawingId());
+		//SetGroupName
+		if (isDrawnElementGroup(elementUnderMouse))
+			add(new SetGroupName());
 	}
 
 	private boolean isDrawnElementGroup(Object object) {
@@ -97,6 +101,25 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), id));
 		}
 
+	}
+
+	public class SetGroupName extends AbstractAction {
+		public SetGroupName() {
+			super("Set Group Name");
+			enabled = isDrawnElementGroup(elementUnderMouse);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+			DrawablesGroup group = (DrawablesGroup) elementUnderMouse.getDrawable();
+			String groupName = (String) JOptionPane.showInputDialog(MapTool.getFrame(),
+					"Enter a name for the group", "Group Name",
+					JOptionPane.QUESTION_MESSAGE,
+					null, null, group.getGroupName());
+			if (groupName != null)
+				group.setGroupName(groupName);
+			MapTool.getFrame().updateDrawTree();
+		}
 	}
 
 	public class GetPropertiesAction extends AbstractAction {

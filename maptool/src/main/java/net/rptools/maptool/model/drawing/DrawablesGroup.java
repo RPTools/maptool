@@ -24,14 +24,29 @@ import java.util.List;
  *
  */
 public class DrawablesGroup extends AbstractDrawing {
+	private String groupName;
 	private List<DrawnElement> drawableList;
+
+	public DrawablesGroup(List<DrawnElement> drawableList, String groupName) {
+		this.drawableList = drawableList;
+		this.groupName = groupName;
+	}
 
 	public DrawablesGroup(List<DrawnElement> drawableList) {
 		this.drawableList = drawableList;
+		this.groupName = null;
 	}
 
 	public List<DrawnElement> getDrawableList() {
 		return drawableList;
+	}
+
+	public String getGroupName() {
+		return groupName != null ? groupName : "";
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 
 	@Override

@@ -55,7 +55,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 			DrawnElement de = (DrawnElement) value;
 			text = de.getDrawable().toString();
 			if (de.getDrawable() instanceof DrawablesGroup) {
-				text = "Group";
+				text = getGroupLabel((DrawablesGroup) de.getDrawable());
 			} else if (de.getDrawable() instanceof ShapeDrawable) {
 				ShapeDrawable sd = (ShapeDrawable) de.getDrawable();
 				key = String.format("panel.DrawExplorer.%s.%s", sd.getClass().getSimpleName(), sd.getShape().getClass().getSimpleName());
@@ -85,6 +85,12 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 		rowWidth = (icon != null ? icon.getIconWidth() + 2 : 0) + SwingUtilities.computeStringWidth(getFontMetrics(getFont()), text);
 
 		return this;
+	}
+
+	private String getGroupLabel(DrawablesGroup drawablesGroup) {
+		if ("".equals(drawablesGroup.getGroupName()))
+			return "Group";
+		return String.format("Group: %s", drawablesGroup.getGroupName());
 	}
 
 	private String addPenText(Pen pen, String text) {
