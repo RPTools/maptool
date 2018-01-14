@@ -14,6 +14,9 @@ package net.rptools.maptool.client.ui.htmlframe;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.WindowAdapter;
@@ -300,11 +303,14 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
 	}
 
 	/**
-	 * Provide access to the complete (HTML) text of the dialog.
+	 * Provide access to the complete (HTML) text of the dialog. Also copies to clipboard.
+	 * @see HtmlFrame.showSource
 	 */
 	private void showSource() {
 		String text = panel.getPaneText();
 		JOptionPane.showMessageDialog(null, text, "HTML Source", JOptionPane.INFORMATION_MESSAGE);
+		Clipboard clipBoard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipBoard.setContents(new StringSelection(text), null);
 	}
 
 	public void closeRequest() {
