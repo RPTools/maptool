@@ -13,7 +13,6 @@
 
 package net.rptools.maptool.client.ui.drawpanel;
 
-import java.awt.Component;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
