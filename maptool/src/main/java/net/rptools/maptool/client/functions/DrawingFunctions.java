@@ -20,7 +20,10 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.drawing.AbstractDrawing;
+import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
+import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;;
@@ -29,7 +32,8 @@ public class DrawingFunctions extends AbstractFunction {
 	private static final DrawingFunctions instance = new DrawingFunctions();
 
 	private DrawingFunctions() {
-		super(2, 3, "getDrawingLayer", "setDrawingLayer", "bringDrawingToFront", "sendDrawingToBack");
+		super(2, 3, "getDrawingLayer", "setDrawingLayer", "bringDrawingToFront", "sendDrawingToBack",
+				"setDrawingOpacity", "getDrawingPen", "setDrawingPen", "findDrawings");
 	}
 
 	public static DrawingFunctions getInstance() {
@@ -68,7 +72,7 @@ public class DrawingFunctions extends AbstractFunction {
 			String id = parameters.get(1).toString();
 			Zone map = getNamedMap(functionName, mapName).getZone();
 			GUID guid = getGUID(functionName, id);
-			BringToFront(map, guid);
+			bringToFront(map, guid);
 			return "";
 		} else if ("sendDrawingToBack".equalsIgnoreCase(functionName)) {
 			checkNumberOfParameters(functionName, parameters, 2, 2);
@@ -76,13 +80,99 @@ public class DrawingFunctions extends AbstractFunction {
 			String id = parameters.get(1).toString();
 			Zone map = getNamedMap(functionName, mapName).getZone();
 			GUID guid = getGUID(functionName, id);
-			SendToBack(map, guid);
+			sendToBack(map, guid);
 			return "";
+		} else if ("setDrawingOpacity".equalsIgnoreCase(functionName)) {
+			checkNumberOfParameters(functionName, parameters, 3, 3);
+			String mapName = parameters.get(0).toString();
+			String id = parameters.get(1).toString();
+			String opacity = parameters.get(2).toString();
+			Zone map = getNamedMap(functionName, mapName).getZone();
+			GUID guid = getGUID(functionName, id);
+			float op = getFloatPercent(functionName, opacity);
+			setDrawingOpacity(map, guid, op);
+			return "";
+		} else if ("getDrawingPen".equalsIgnoreCase(functionName)) {
+			checkNumberOfParameters(functionName, parameters, 2, 2);
+			String mapName = parameters.get(0).toString();
+			String id = parameters.get(1).toString();
+			Zone map = getNamedMap(functionName, mapName).getZone();
+			GUID guid = getGUID(functionName, id);
+			List<DrawnElement> drawableList = map.getAllDrawnElements();
+			Iterator<DrawnElement> iter = drawableList.iterator();
+			while (iter.hasNext()) {
+				DrawnElement de = iter.next();
+				if (de.getDrawable().getId().equals(guid)) {
+					return de.getPen();
+				}
+			}
+		} else if ("setDrawingPen".equalsIgnoreCase(functionName)) {
+			checkNumberOfParameters(functionName, parameters, 3, 3);
+			String mapName = parameters.get(0).toString();
+			String id = parameters.get(1).toString();
+			Pen pen = (Pen) parameters.get(2);
+			Zone map = getNamedMap(functionName, mapName).getZone();
+			GUID guid = getGUID(functionName, id);
+			List<DrawnElement> drawableList = map.getAllDrawnElements();
+			Iterator<DrawnElement> iter = drawableList.iterator();
+			while (iter.hasNext()) {
+				DrawnElement de = iter.next();
+				if (de.getDrawable().getId().equals(guid)) {
+					de.setPen(pen);
+				}
+			}
+			return "";
+		} else if ("findDrawings".equalsIgnoreCase(functionName)) {
+			// findDrawings(map, name, delim)
+			checkNumberOfParameters(functionName, parameters, 2, 3);
+			String mapName = parameters.get(0).toString();
+			String drawingName = parameters.get(1).toString();
+			String delim = parameters.size() > 2 ? parameters.get(2).toString() : ",";
+			Zone map = getNamedMap(functionName, mapName).getZone();
+			List<DrawnElement> drawableList = map.getAllDrawnElements();
+			Iterator<DrawnElement> iter = drawableList.iterator();
+			String result = "";
+			while (iter.hasNext()) {
+				DrawnElement de = iter.next();
+				if (de.getDrawable() instanceof AbstractDrawing) {
+					if (drawingName.equals(((AbstractDrawing) de.getDrawable()).getName())) {
+						result = result + (result == "" ? "" : delim) + de.getDrawable().getId();
+					}
+				}
+			}
+			return result;
 		}
 		return null;
 	}
 
-	public void BringToFront(Zone map, GUID guid) {
+	public void setDrawingOpacity(Zone map, GUID guid, float op) {
+		List<DrawnElement> drawableList = map.getAllDrawnElements();
+		Iterator<DrawnElement> iter = drawableList.iterator();
+		while (iter.hasNext()) {
+			DrawnElement de = iter.next();
+			if (de.getDrawable().getId().equals(guid)) {
+				setOpacity(map, de, op);
+			}
+		}
+		MapTool.getFrame().updateDrawTree();
+		MapTool.getFrame().refresh();
+	}
+
+	private void setOpacity(Zone map, DrawnElement d, float op) {
+		if (d.getDrawable() instanceof DrawablesGroup) {
+			DrawablesGroup dg = (DrawablesGroup) d.getDrawable();
+			for (DrawnElement de : dg.getDrawableList()) {
+				setOpacity(map, de, op);
+			}
+		} else {
+			Pen pen = d.getPen();
+			pen.setOpacity(op);
+			d.setPen(pen);
+			MapTool.serverCommand().updateDrawing(map.getId(), pen, d);
+		}
+	}
+
+	public void bringToFront(Zone map, GUID guid) {
 		List<DrawnElement> drawableList = map.getAllDrawnElements();
 		Iterator<DrawnElement> iter = drawableList.iterator();
 		while (iter.hasNext()) {
@@ -98,7 +188,7 @@ public class DrawingFunctions extends AbstractFunction {
 		MapTool.getFrame().refresh();
 	}
 
-	public void SendToBack(Zone map, GUID guid) {
+	public void sendToBack(Zone map, GUID guid) {
 		List<DrawnElement> drawableList = map.getAllDrawnElements();
 		Iterator<DrawnElement> iter = drawableList.iterator();
 		while (iter.hasNext()) {
@@ -200,6 +290,7 @@ public class DrawingFunctions extends AbstractFunction {
 
 	/**
 	 * Validates the GUID
+	 * @param  functionName String Name of the calling function. Used for error messages.
 	 * @param  id String value of GUID
 	 * @return GUID
 	 * @throws ParserException thrown on invalid GUID
@@ -209,6 +300,24 @@ public class DrawingFunctions extends AbstractFunction {
 			return GUID.valueOf(id);
 		} catch (Exception e) {
 			throw new ParserException(I18N.getText("macro.function.general.argumentKeyTypeG", functionName, id));
+		}
+	}
+
+	/**
+	 * Validates the float
+	 * @param  functionName String Name of the calling function. Used for error messages.
+	 * @param  f String value of percentage
+	 * @return float
+	 * @throws ParserException thrown on invalid foat
+	 */
+	private float getFloatPercent(String functionName, String f) throws ParserException {
+		try {
+			Float per = Float.parseFloat(f);
+			while (per > 1)
+				per = per / 100;
+			return per;
+		} catch (Exception e) {
+			throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", functionName, f));
 		}
 	}
 }

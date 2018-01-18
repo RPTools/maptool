@@ -68,9 +68,9 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 		addGMItem(createChangeToMenu(Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
 		addGMItem(createArrangeMenu());
-		if (isDrawnElementGroup(elementUnderMouse))
+		if (isDrawnElementGroup(elementUnderMouse)) {
 			add(new UngroupDrawingsAction());
-		else
+		} else
 			add(new GroupDrawingsAction());
 		add(new MergeDrawingsAction());
 		addGMItem(new JSeparator());
@@ -78,10 +78,8 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		//add(new JSeparator());
 		add(new GetPropertiesAction());
 		add(new SetPropertiesAction());
+		add(new SetDrawingName());
 		add(new GetDrawingId());
-		//SetGroupName
-		if (isDrawnElementGroup(elementUnderMouse))
-			add(new SetGroupName());
 	}
 
 	private boolean isDrawnElementGroup(Object object) {
@@ -103,21 +101,21 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 	}
 
-	public class SetGroupName extends AbstractAction {
-		public SetGroupName() {
-			super("Set Group Name");
-			enabled = isDrawnElementGroup(elementUnderMouse);
+	public class SetDrawingName extends AbstractAction {
+		public SetDrawingName() {
+			super("Set Name");
 		}
 
 		public void actionPerformed(ActionEvent e) {
-
-			DrawablesGroup group = (DrawablesGroup) elementUnderMouse.getDrawable();
+			String drawType = "Drawing";
+			if (elementUnderMouse.getDrawable() instanceof DrawnElement)
+				drawType = "Group";
+			AbstractDrawing group = (AbstractDrawing) elementUnderMouse.getDrawable();
 			String groupName = (String) JOptionPane.showInputDialog(MapTool.getFrame(),
-					"Enter a name for the group", "Group Name",
+					"Enter a name for the " + drawType, drawType + " Name",
 					JOptionPane.QUESTION_MESSAGE,
-					null, null, group.getGroupName());
-			if (groupName != null)
-				group.setGroupName(groupName);
+					null, null, group.getName());
+			group.setName(groupName == "" ? null : groupName);
 			MapTool.getFrame().updateDrawTree();
 		}
 	}
