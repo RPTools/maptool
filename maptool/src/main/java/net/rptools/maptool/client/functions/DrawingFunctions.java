@@ -11,6 +11,7 @@
 
 package net.rptools.maptool.client.functions;
 
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,8 +45,8 @@ public class DrawingFunctions extends AbstractFunction {
 	private DrawingFunctions() {
 		super(2, 3, "getDrawingLayer", "setDrawingLayer", "bringDrawingToFront", "sendDrawingToBack",
 				"getDrawingOpacity", "setDrawingOpacity", "getDrawingProperties", "setDrawingProperties",
-				"setPenColor", "getPenColor", "setFillColor", "getFillColor",
-				"findDrawings", "refreshDrawing");
+				"setPenColor", "getPenColor", "setFillColor", "getFillColor", "getDrawingEraser",
+				"setDrawingEraser", "findDrawings", "refreshDrawing");
 	}
 
 	@Override
@@ -115,24 +116,6 @@ public class DrawingFunctions extends AbstractFunction {
 			GUID guid = getGUID(functionName, id);
 			setPen(functionName, map, guid, pen);
 			return "";
-		} else if ("findDrawings".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 2, 3);
-			String mapName = parameters.get(0).toString();
-			String drawingName = parameters.get(1).toString();
-			String delim = parameters.size() > 2 ? parameters.get(2).toString() : ",";
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			List<DrawnElement> drawableList = map.getAllDrawnElements();
-			Iterator<DrawnElement> iter = drawableList.iterator();
-			String result = "";
-			while (iter.hasNext()) {
-				DrawnElement de = iter.next();
-				if (de.getDrawable() instanceof AbstractDrawing) {
-					if (drawingName.equals(((AbstractDrawing) de.getDrawable()).getName())) {
-						result = result + (result == "" ? "" : delim) + de.getDrawable().getId();
-					}
-				}
-			}
-			return result;
 		} else if ("getPenColor".equalsIgnoreCase(functionName)) {
 			checkNumberOfParameters(functionName, parameters, 2, 2);
 			String mapName = parameters.get(0).toString();
@@ -177,6 +160,41 @@ public class DrawingFunctions extends AbstractFunction {
 				getPen(functionName, map, guid).setBackgroundPaint(paintFromString(paint));
 			}
 			return "";
+		} else if ("getDrawingEraser".equalsIgnoreCase(functionName)) {
+			checkNumberOfParameters(functionName, parameters, 2, 2);
+			String mapName = parameters.get(0).toString();
+			String id = parameters.get(1).toString();
+			Zone map = getNamedMap(functionName, mapName).getZone();
+			GUID guid = getGUID(functionName, id);
+			return getPen(functionName, map, guid).isEraser() ? BigDecimal.ONE : BigDecimal.ZERO;
+		} else if ("setDrawingEraser".equalsIgnoreCase(functionName)) {
+			checkNumberOfParameters(functionName, parameters, 3, 3);
+			String mapName = parameters.get(0).toString();
+			String id = parameters.get(1).toString();
+			boolean eraser = parseBoolean(functionName, parameters, 2);
+			Zone map = getNamedMap(functionName, mapName).getZone();
+			GUID guid = getGUID(functionName, id);
+			Pen p = getPen(functionName, map, guid);
+			p.setEraser(eraser);
+			return "";
+		} else if ("findDrawings".equalsIgnoreCase(functionName)) {
+			checkNumberOfParameters(functionName, parameters, 2, 3);
+			String mapName = parameters.get(0).toString();
+			String drawingName = parameters.get(1).toString();
+			String delim = parameters.size() > 2 ? parameters.get(2).toString() : ",";
+			Zone map = getNamedMap(functionName, mapName).getZone();
+			List<DrawnElement> drawableList = map.getAllDrawnElements();
+			Iterator<DrawnElement> iter = drawableList.iterator();
+			String result = "";
+			while (iter.hasNext()) {
+				DrawnElement de = iter.next();
+				if (de.getDrawable() instanceof AbstractDrawing) {
+					if (drawingName.equals(((AbstractDrawing) de.getDrawable()).getName())) {
+						result = result + (result == "" ? "" : delim) + de.getDrawable().getId();
+					}
+				}
+			}
+			return result;
 		} else if ("refreshDrawing".equalsIgnoreCase(functionName)) {
 			checkNumberOfParameters(functionName, parameters, 2, 2);
 			String mapName = parameters.get(0).toString();
@@ -363,6 +381,8 @@ public class DrawingFunctions extends AbstractFunction {
 		if (paint.toLowerCase().startsWith("asset://")) {
 			String id = paint.substring(8);
 			return new DrawableTexturePaint(new MD5Key(id));
+		} else if (paint.length() == 32) {
+			return new DrawableTexturePaint(new MD5Key(paint));
 		} else {
 			return new DrawableColorPaint(MapToolUtil.getColor(paint));
 		}
@@ -376,6 +396,14 @@ public class DrawingFunctions extends AbstractFunction {
 			return "asset://" + ((DrawableTexturePaint) drawablePaint).getAsset().getId();
 		}
 		return "";
+	}
+
+	private boolean parseBoolean(String functionName, List<Object> args, int param) throws ParserException {
+		try {
+			return AbstractTokenAccessorFunction.getBooleanValue(args.get(param));
+		} catch (NumberFormatException ne) {
+			throw new ParserException(I18N.getText("macro.function.general.argumentTypeInvalid", functionName, param, args.get(param).toString()));
+		}
 	}
 
 	public void sendToBack(Zone map, GUID guid) {
