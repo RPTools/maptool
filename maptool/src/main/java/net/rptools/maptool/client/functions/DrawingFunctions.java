@@ -45,7 +45,7 @@ public class DrawingFunctions extends AbstractFunction {
 		super(2, 3, "getDrawingLayer", "setDrawingLayer", "bringDrawingToFront", "sendDrawingToBack",
 				"getDrawingOpacity", "setDrawingOpacity", "getDrawingProperties", "setDrawingProperties",
 				"setPenColor", "getPenColor", "setFillColor", "getFillColor",
-				"findDrawings");
+				"findDrawings", "refreshDrawing");
 	}
 
 	@Override
@@ -177,6 +177,16 @@ public class DrawingFunctions extends AbstractFunction {
 				getPen(functionName, map, guid).setBackgroundPaint(paintFromString(paint));
 			}
 			return "";
+		} else if ("refreshDrawing".equalsIgnoreCase(functionName)) {
+			checkNumberOfParameters(functionName, parameters, 2, 2);
+			String mapName = parameters.get(0).toString();
+			String id = parameters.get(1).toString();
+			Zone map = getNamedMap(functionName, mapName).getZone();
+			GUID guid = getGUID(functionName, id);
+			DrawnElement de = getDrawnElement(functionName, map, guid);
+			MapTool.getFrame().updateDrawTree();
+			MapTool.serverCommand().updateDrawing(map.getId(), de.getPen(), de);
+			return "";
 		}
 		return null;
 	}
@@ -257,12 +267,16 @@ public class DrawingFunctions extends AbstractFunction {
 	 * @throws   ParserException if the drawing is not found.
 	 */
 	private Drawable getDrawable(String functionName, Zone map, GUID guid) throws ParserException {
+		return getDrawnElement(functionName, map, guid).getDrawable();
+	}
+
+	private DrawnElement getDrawnElement(String functionName, Zone map, GUID guid) throws ParserException {
 		List<DrawnElement> drawableList = map.getAllDrawnElements();
 		Iterator<DrawnElement> iter = drawableList.iterator();
 		while (iter.hasNext()) {
 			DrawnElement de = iter.next();
 			if (de.getDrawable().getId().equals(guid)) {
-				return de.getDrawable();
+				return de;
 			}
 		}
 		throw new ParserException(I18N.getText("macro.function.drawingFunction.unknownDrawing", functionName, guid.toString()));
@@ -342,15 +356,7 @@ public class DrawingFunctions extends AbstractFunction {
 	 * @throws   ParserException if the drawing is not found.
 	 */
 	private Pen getPen(String functionName, Zone map, GUID guid) throws ParserException {
-		List<DrawnElement> drawableList = map.getAllDrawnElements();
-		Iterator<DrawnElement> iter = drawableList.iterator();
-		while (iter.hasNext()) {
-			DrawnElement de = iter.next();
-			if (de.getDrawable().getId().equals(guid)) {
-				return de.getPen();
-			}
-		}
-		throw new ParserException(I18N.getText("macro.function.drawingFunction.unknownDrawing", functionName, guid.toString()));
+		return getDrawnElement(functionName, map, guid).getPen();
 	}
 
 	private DrawablePaint paintFromString(String paint) {
