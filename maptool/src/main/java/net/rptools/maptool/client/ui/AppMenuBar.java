@@ -12,6 +12,8 @@
 package net.rptools.maptool.client.ui;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -80,7 +82,7 @@ public class AppMenuBar extends JMenuBar {
 		fileMenu.add(new JMenuItem(AppActions.SHOW_CONNECTION_INFO));
 		fileMenu.addSeparator();
 		fileMenu.add(createRecentCampaignMenu());
-		if (!MapTool.MAC_OS_X) {
+		if (!AppUtil.MAC_OS_X) {
 			fileMenu.addSeparator();
 			fileMenu.add(new JMenuItem(AppActions.EXIT));
 		}
@@ -95,6 +97,7 @@ public class AppMenuBar extends JMenuBar {
 
 		menu.addSeparator();
 
+		menu.add(new JMenuItem(AppActions.EXPORT_CAMPAIGN_AS));
 		menu.add(new JMenuItem(AppActions.EXPORT_CAMPAIGN_REPO));
 		//		menu.add(new JMenuItem(AppActions.UPDATE_CAMPAIGN_REPO));
 
@@ -111,8 +114,30 @@ public class AppMenuBar extends JMenuBar {
 		menu.addSeparator();
 
 		// MAP TOGGLES
+		// Lee: modifying due to the waypoint exposure toggle's dependency to this.
 		menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_CURRENT_ZONE_VISIBILITY, menu));
-		menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_FOG, menu));
+		// menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_FOG, menu));
+
+		RPCheckBoxMenuItem fowToggleMenuItem = new RPCheckBoxMenuItem(AppActions.TOGGLE_FOG, menu);
+		final RPCheckBoxMenuItem fowRevealToggleMenuItem = new RPCheckBoxMenuItem(AppActions.TOGGLE_WAYPOINT_FOG_REVEAL, menu);
+
+		fowToggleMenuItem.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED)
+					fowRevealToggleMenuItem.setEnabled(true);
+				else {
+					MapTool.getFrame().getCurrentZoneRenderer().getZone().setWaypointExposureToggle(false);
+					fowRevealToggleMenuItem.setEnabled(false);
+				}
+			}
+		});
+
+		menu.add(new JMenuItem(AppActions.RESTORE_FOG));
+
+		menu.add(fowToggleMenuItem);
+		fowRevealToggleMenuItem.setEnabled(fowToggleMenuItem.isSelected());
+		menu.add(fowRevealToggleMenuItem);
+
 		menu.add(createVisionTypeMenu());
 
 		menu.addSeparator();
@@ -172,7 +197,7 @@ public class AppMenuBar extends JMenuBar {
 		menu.addSeparator();
 
 		menu.add(new JMenuItem(AppActions.CAMPAIGN_PROPERTIES));
-		if (!MapTool.MAC_OS_X)
+		if (!AppUtil.MAC_OS_X)
 			menu.add(new JMenuItem(AppActions.SHOW_PREFERENCES));
 
 		return menu;
@@ -295,7 +320,7 @@ public class AppMenuBar extends JMenuBar {
 			menu.addSeparator();
 		}
 		menu.add(new JMenuItem(AppActions.GATHER_DEBUG_INFO));
-		if (!MapTool.MAC_OS_X) {
+		if (!AppUtil.MAC_OS_X) {
 			menu.addSeparator();
 			menu.add(new JMenuItem(AppActions.SHOW_ABOUT));
 		}

@@ -35,7 +35,7 @@ import net.rptools.maptool.transfer.ConsumerListener;
 /**
  * This dialog is used to display all of the assets being transferred
  */
-public class TransferProgressDialog extends AbeillePanel<Token>implements ConsumerListener {
+public class TransferProgressDialog extends AbeillePanel<Token> implements ConsumerListener {
 
 	private GenericDialog dialog;
 

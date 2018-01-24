@@ -24,7 +24,7 @@ import javax.swing.JMenu;
 import javax.swing.KeyStroke;
 
 import net.rptools.maptool.client.AppActions;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.AppUtil;
 
 import org.apache.log4j.Logger;
 
@@ -72,7 +72,7 @@ public class I18N {
 	public static JMenu createMenu(String key) {
 		JMenu menu = new JMenu(getText(key));
 		int mnemonic = getMnemonic(key);
-		if (mnemonic != -1 && !MapTool.MAC_OS_X) {
+		if (mnemonic != -1 && !AppUtil.MAC_OS_X) {
 			menu.setMnemonic(mnemonic);
 		}
 		// Should we set the SHORT_DESCRIPTION and use it as a tooltip?

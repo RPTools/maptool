@@ -13,6 +13,7 @@ package net.rptools.maptool.client.ui.assetpanel;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Paint;
 import java.awt.datatransfer.Transferable;
@@ -23,10 +24,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.FileImageInputStream;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.SwingWorker;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.Logger;
 
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.image.ImageUtil;
@@ -43,6 +53,7 @@ import net.rptools.maptool.util.PersistenceUtil;
 
 public class ImageFileImagePanelModel implements ImagePanelModel {
 
+	private static final Logger log = Logger.getLogger(ImageFileImagePanelModel.class);
 	private static final Color TOKEN_BG_COLOR = new Color(255, 250, 205);
 	private static Image rptokenDecorationImage;
 
@@ -54,7 +65,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 		}
 	}
 
-	private final Directory dir;
+	private Directory dir;
 	private static String filter;
 	private boolean global;
 	private static List<File> fileList;
@@ -65,8 +76,13 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 		refresh();
 	}
 
+	public void rescan(Directory dir) {
+		this.dir = dir;
+		refresh();
+	}
+
 	public void setFilter(String filter) {
-		this.filter = filter.toUpperCase();
+		ImageFileImagePanelModel.filter = filter.toUpperCase();
 		refresh();
 	}
 
@@ -127,6 +143,77 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 		}
 
 		return asset != null ? new TransferableAsset(asset) : null;
+	}
+
+	// 
+	/**
+	 * Gets image dimensions for given file without ImageIO overhead...
+	 * 
+	 * @param imgFile
+	 *            image file
+	 * @return dimensions of image
+	 * @throws IOException
+	 *             if the file is not a known image
+	 */
+	public static Dimension getImageDimension(File imgFile) throws IOException {
+		int pos = imgFile.getName().lastIndexOf(".");
+		if (pos == -1)
+			throw new IOException("No extension for file: " + imgFile.getAbsolutePath());
+
+		String suffix = imgFile.getName().substring(pos + 1);
+		Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix);
+
+		if (iter.hasNext()) {
+			ImageReader reader = iter.next();
+			try {
+				ImageInputStream stream = new FileImageInputStream(imgFile);
+				reader.setInput(stream);
+				int width = reader.getWidth(reader.getMinIndex());
+				int height = reader.getHeight(reader.getMinIndex());
+				return new Dimension(width, height);
+			} catch (IOException e) {
+				log.warn("Error reading: " + imgFile.getAbsolutePath(), e);
+			} finally {
+				reader.dispose();
+			}
+		}
+
+		throw new IOException("Not a known image file: " + imgFile.getAbsolutePath());
+	}
+
+	// Jamz: Added second method to return a caption with more image details for use
+	//		 with the ImagePanel/Asset window
+	public String getCaption(int index, boolean withDimensions) {
+		if (index < 0 || index >= fileList.size()) {
+			return null;
+		}
+
+		//String name = fileList.get(index).getName();
+		File file = fileList.get(index);
+		String name = FileUtil.getNameWithoutExtension(file.getName());
+		String caption = "<html><b>" + name + "</b></html>";
+
+		if (!file.getName().toLowerCase().endsWith(Token.FILE_EXTENSION) && !file.getName().toLowerCase().endsWith(".pdf")) {
+			try {
+				Dimension imageDim = getImageDimension(fileList.get(index));
+				int width = imageDim.width;
+				int height = imageDim.height;
+				String fileSize = FileUtils.byteCountToDisplaySize(file.length());
+				String fileType = FilenameUtils.getExtension(file.getName());
+
+				caption = "<html>" +
+						"<b>" + name + "</b>" +
+						"<br>Dimensions: " + width + " x " + height +
+						"<br>Type: " + fileType +
+						"<br>Size: " + fileSize +
+						"</html>";
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		return caption;
 	}
 
 	public String getCaption(int index) {

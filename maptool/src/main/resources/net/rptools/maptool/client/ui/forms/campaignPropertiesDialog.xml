@@ -1355,7 +1355,7 @@ r# - Range of personal light.  The token will have a light source centered on th
         &lt;td&gt;
           &lt;pre&gt;Group name
 ----------
-name &lt;b&gt;:&lt;/b&gt; &lt;i&gt;type&lt;/i&gt; &lt;i&gt;shape&lt;/i&gt; &lt;b&gt;OPTIONS&lt;/b&gt; range &lt;b&gt;#&lt;/b&gt;rrggbb
+name &lt;b&gt;:&lt;/b&gt; &lt;i&gt;type&lt;/i&gt; &lt;i&gt;shape&lt;/i&gt; &lt;b&gt;OPTIONS&lt;/b&gt; range &lt;b&gt;#&lt;/b&gt;rrggbb &lt;i&gt;lumens=x&lt;/i&gt;
 &amp;lt;blank line&amp;gt;&lt;/pre&gt;
         &lt;/td&gt;
       &lt;/tr&gt;
@@ -1382,8 +1382,15 @@ name &lt;b&gt;:&lt;/b&gt; &lt;i&gt;type&lt;/i&gt; &lt;i&gt;shape&lt;/i&gt; &lt;b
       units (defined when the map is created). Units are measured from the 
       centerpoint of the grid cell, hence the extra 2 &amp;#189; feet added in the 
       below example to make neat squares. Can have an optional &lt;i&gt;#rrggbb&lt;/i&gt; 
-      hex color component appended to it as per typical CSS rules.&lt;br&gt;&lt;b&gt;OPTIONS:&lt;/b&gt; 
-      The only valid options are &lt;b&gt;GM&lt;/b&gt; and &lt;b&gt;OWNER&lt;/b&gt; and they apply 
+      hex color component appended to it as per typical CSS rules.&lt;br&gt;
+      &lt;b&gt;lumens:&lt;/b&gt; An optional setting for the light with x equaling an integer that may be negative. 
+      If set to a negative number, the light will instead act as darkness and subtract it's area from the FoW. 
+      Lights are processed in order of their absolute value of lumens. eg. Darkness with lumens=-20 will cover over any 
+      light with lumens &amp;lt;= 20 and any light with lumens &amp;gt;= 21 will expose through anything with a lumens value of -1 to -20.&lt;br&gt;
+      &lt;i&gt;*Note:&lt;/i&gt; Personal Lights defined in &lt;i&gt;Sight&lt;/i&gt; have a lumens value of 100. So a typical 
+      sight defined for Darkvision will see through anything with a lumens value if -1 through -99. To overcome Darkvision, 
+      use lumens values &amp;lt;= -100.&lt;br&gt;
+      OPTIONS:&lt;/b&gt; The only valid options are &lt;b&gt;GM&lt;/b&gt; and &lt;b&gt;OWNER&lt;/b&gt; and they apply 
       only to auras (see below).
     &lt;/p&gt;
     &lt;br&gt;
@@ -1406,8 +1413,15 @@ Lamp - 15 : 17.5 32.5#000000
 Torch - 20 : 22.5 42.5#000000 
 Lantern, bullseye - 60 : cone arc=60 62.5 122.5#000000 
 Lantern, bullseye (leaks light) - 60 : cone arc=60 62.5 122.5#000000 circle 2.5#000000
-Nightvision goggles - 40 : cone arc=30 42.5#00e000 
-&amp;lt;blank line&amp;gt;&lt;/pre&gt;
+Daylight Spell - 60 : 62.5 122.5#000000 lumens=50
+Nightvision goggles - 40 : cone arc=30 42.5#00e000 lumens=30
+&amp;lt;blank line&amp;gt;
+Magical Darkness
+----
+Deeper Darkness - 60: circle 62.5 lumens=-130
+Darkness - 20 (CL2): circle 22.5 lumens=-20
+Darkness - 20 (CL4): circle 22.5 lumens=-40
+          &lt;/pre&gt;
         &lt;/td&gt;
       &lt;/tr&gt;
     &lt;/table&gt;

@@ -18,14 +18,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 
 /**
  * This class provides utility functions for maptool client.
@@ -41,8 +42,19 @@ public class AppUtil {
 	private static final String CLIENT_ID_FILE = "client-id";
 
 	/**
-	 * Returns a File object for USER_HOME if USER_HOME is non-null, otherwise null.
-	 * 
+	 * Returns true if currently running on a Windows based operating system.
+	 */
+	public static boolean WINDOWS = (System.getProperty("os.name").toLowerCase().startsWith("windows"));
+
+	/**
+	 * Returns true if currently running on a Mac OS X based operating system.
+	 */
+	public static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
+
+	/**
+	 * Returns a File object for USER_HOME if USER_HOME is non-null, otherwise
+	 * null.
+	 *
 	 * @return the users home directory as a File object
 	 */
 	private static File getUserHome() {
@@ -50,13 +62,14 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns a {@link File} path that points to the AppHome base directory along with the subpath denoted in the
-	 * "subdir" argument.
+	 * Returns a {@link File} path that points to the AppHome base directory
+	 * along with the subpath denoted in the "subdir" argument.
 	 * <p>
-	 * For example <code>getAppHome("cache")</code> will return the path <code>{APPHOME}/cache</code>.
+	 * For example <code>getAppHome("cache")</code> will return the path
+	 * <code>{APPHOME}/cache</code>.
 	 * <p>
 	 * As a side-effect the function creates the directory pointed to by File.
-	 * 
+	 *
 	 * @param subdir
 	 *            of the maptool home directory
 	 * @return the maptool data directory name subdir
@@ -93,7 +106,8 @@ public class AppUtil {
 	}
 
 	/**
-	 * Determine the actual directory to store data files, derived from the environment
+	 * Determine the actual directory to store data files, derived from the
+	 * environment
 	 */
 	// Package protected for testing
 	static File getDataDir() {
@@ -119,15 +133,17 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns a File path representing the base directory to store local data. By default this is a ".maptool"
-	 * directory in the user's home directory.
+	 * Returns a File path representing the base directory to store local data.
+	 * By default this is a ".maptool" directory in the user's home directory.
 	 * <p>
-	 * If you want to change the dir for data storage you can set the system property MAPTOOL_DATADIR. If the value of
-	 * the MAPTOOL_DATADIR has any file separator characters in it, it will assume you are using an absolute path. If
-	 * the path does not include a file separator it will use it as a subdirectory in the user's home directory
+	 * If you want to change the dir for data storage you can set the system
+	 * property MAPTOOL_DATADIR. If the value of the MAPTOOL_DATADIR has any
+	 * file separator characters in it, it will assume you are using an absolute
+	 * path. If the path does not include a file separator it will use it as a
+	 * subdirectory in the user's home directory
 	 * <p>
 	 * As a side-effect the function creates the directory pointed to by File.
-	 * 
+	 *
 	 * @return the maptool data directory
 	 */
 	public static File getAppHome() {
@@ -135,8 +151,9 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns a File object for the maptool tmp directory, or null if the users home directory could not be determined.
-	 * 
+	 * Returns a File object for the maptool tmp directory, or null if the users
+	 * home directory could not be determined.
+	 *
 	 * @return the maptool tmp directory
 	 */
 	public static File getTmpDir() {
@@ -144,9 +161,10 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns true if the player owns the token, otherwise false. If the player is GM this function always returns
-	 * true. If strict token management is disabled then this function always returns true.
-	 * 
+	 * Returns true if the player owns the token, otherwise false. If the player
+	 * is GM this function always returns true. If strict token management is
+	 * disabled then this function always returns true.
+	 *
 	 * @param token
 	 * @return true if the player owns the token
 	 */
@@ -162,9 +180,25 @@ public class AppUtil {
 	}
 
 	/**
-	 * Returns true if the token is visible in the zone. If the view is the GM view then this function always returns
-	 * true.
-	 * 
+	 * Returns true if the token is visible in the zone. If the view is the GM
+	 * view then this function always returns true.
+	 *
+	 * @param token
+	 * @return true if the GM "owns" the token
+	 */
+	public static boolean gmOwns(Token token) {
+		Player player = MapTool.getPlayer();
+
+		if (!MapTool.getServerPolicy().useStrictTokenManagement()) {
+			return true;
+		}
+		return (token.isOwner(player.getName()) && !token.isOwnedByAll()) || !token.hasOwners();
+	}
+
+	/**
+	 * Returns true if the token is visible in the zone. If the view is the GM
+	 * view then this function always returns true.
+	 *
 	 * @param zone
 	 *            to check for visibility
 	 * @param token
@@ -178,6 +212,33 @@ public class AppUtil {
 			return true;
 		}
 		return zone.isTokenVisible(token);
+	}
+
+	/**
+	 * Returns the disk spaced used in a given directory in a human readable
+	 * format automatically adjusting to kb/mb/gb etc.
+	 *
+	 * @author Jamz
+	 * @since 1.4.0.1
+	 *
+	 * @return String of disk usage info
+	 */
+	public static String getDiskSpaceUsed(File directory) {
+		return FileUtils.byteCountToDisplaySize(FileUtils.sizeOfDirectory(directory)) + " ";
+	}
+
+	/**
+	 * Returns the free disk spaced for a given directory in a human readable
+	 * format automatically adjusting to kb/mb/gb etc.
+	 *
+	 * @author Jamz
+	 * @since 1.4.0.1
+	 *
+	 * @param directory
+	 * @return String of free disk space
+	 */
+	public static String getFreeDiskSpace(File directory) {
+		return FileUtils.byteCountToDisplaySize(directory.getFreeSpace()) + " ";
 	}
 
 	public static String readClientId() {
@@ -198,6 +259,5 @@ public class AppUtil {
 			}
 		}
 		return clientId;
-
 	}
 }

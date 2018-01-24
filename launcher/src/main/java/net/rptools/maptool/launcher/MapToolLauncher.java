@@ -26,6 +26,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -39,15 +40,20 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.LineNumberReader;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
@@ -58,6 +64,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -87,13 +94,20 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
+import jwrapper.jwutils.JWSystem;
 import net.rptools.maptool.launcher.PathUtils.PathResolutionException;
 
 /**
  * Generic launcher for MapTool.
  * 
  * Prompts user for the various memory settings to use when starting MapTool and
- * then launches it with those settings preserving them in the mt.cfg file for
+ * then launches it with those settings preserving them in the launch.properties file for
  * use later.
  * 
  * @authors Phergus, Lee, Azhrei
@@ -113,8 +127,14 @@ public class MapToolLauncher extends JFrame {
 	private static final String MAC_TITLE_FIX = "-Xdock:name=MapTool"; // $NON-NLS-1$
 	private static final String LOCALE_LANGUAGE_OPTION = "-Duser.language="; //$NON-NLS-1$
 	private static final String LOCALE_COUNTRY_OPTION = "-Duser.country="; //$NON-NLS-1$
+	private static final String JAVA2D_D3D_OPTION = "-Dsun.java2d.d3d=false"; //$NON-NLS-1$
+	private static final String JAVA2D_OPENGL_OPTION = "-Dsun.java2d.opengl=True"; // Jamz: capital T in true sets verbose on//$NON-NLS-1$
+	private static final String MACOSX_EMBEDDED_OPTION = "-Djavafx.macosx.embedded=true"; //$NON-NLS-1$
 
-	private static final int DEFAULT_MAXMEM = 512;
+	private static final String LAUNCH_CONFIG = "launch.properties"; // Jamz: the new home for launch.properties
+	private static final String LAUNCH_RESOURCE = "/net/rptools/maptool/launcher/config/launch.properties"; // Jamz: default config for current release
+
+	private static final int DEFAULT_MAXMEM = 1024;
 	private static final int DEFAULT_MINMEM = 64;
 	private static final int DEFAULT_STACKSIZE = 2;
 
@@ -124,6 +144,9 @@ public class MapToolLauncher extends JFrame {
 
 	private static boolean promptUser = true;
 	private static boolean startConsole = false;
+
+	private static boolean skipPrompt = false;
+	private static boolean forcePrompt = false;
 
 	// Lee: path info
 	// FIXME Change 'javaDir' from String to File
@@ -151,6 +174,7 @@ public class MapToolLauncher extends JFrame {
 	private static String mapToolDataDir = EMPTY;
 	private static File mapToolJarDir;
 	private static String mapToolLocale = EMPTY;
+	private static String launcherVersion = "";
 
 	private static List<LoggingConfig> logConfigs = null;
 	private static Map<String, String> originalSettings;
@@ -173,6 +197,7 @@ public class MapToolLauncher extends JFrame {
 		"LOGGING", //$NON-NLS-1$
 		"LOCALE", //$NON-NLS-1$
 		"JAVA_DIRECTORY", //$NON-NLS-1$
+		"MAPTOOL_VERSION"
 	};
 	private static final String[][] invocationCommands = new String[][] {
 		new String[] { }, // empty array means nothing to add as a command line prefix when Console option enabled
@@ -182,11 +207,14 @@ public class MapToolLauncher extends JFrame {
 	};
 	// @formatter:on
 
-	private File cfgFile = null;
+	private File launchConfigFile = null;
 
-	private static ImageIcon icon;
+	private static ImageIcon mapToolIcon;
+	private static ImageIcon launchIcon;
+	private static ImageIcon launchArrowIcon;
 
 	private static final JButton jbLaunch = new JButton();
+
 	// Lee: to set the executable - to counteract the wildcard bug in Java 7u10+
 	private static final JButton jbMTJar = new JButton();
 	// Lee: path to JVM
@@ -201,8 +229,13 @@ public class MapToolLauncher extends JFrame {
 
 	// Lee: check box series for troubleshooting tab
 	private static final JCheckBox jcbEnableAssertions = new JCheckBox();
+	private static final JCheckBox jcbDisable_java2d_d3d = new JCheckBox();
+	private static final JCheckBox jcbEnable_java2d_opengl = new JCheckBox();
+	private static final JCheckBox jcbEnable_macosx_embedded = new JCheckBox();
 
 	private static final JLabel jlMTLogo = new JLabel();
+	private static final JLabel jlLaunchLogo = new JLabel();
+	private static final JLabel jlArrowLogo = new JLabel();
 
 	private static final InfoTextField jtfCommand = new InfoTextField();
 	private static final InfoTextField jtfArgs = new InfoTextField();
@@ -218,22 +251,51 @@ public class MapToolLauncher extends JFrame {
 	 * @throws IOException
 	 */
 	public MapToolLauncher() throws IOException, URISyntaxException {
+		launcherVersion = CopiedFromOtherJars.getVersion();
+
 		final File dir = new File(MapToolLauncher.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 		currentDir = mapToolJarDir = dir.getParentFile();
 
-		File fromDir = new File(currentDir, "translations");
-		locales = CopiedFromOtherJars.getListOfLanguages(fromDir);
+		locales = CopiedFromOtherJars.getListOfLanguages();
 
-		cfgFile = new File(currentDir, "mt.cfg"); //$NON-NLS-1$
-		icon = new ImageIcon(getClass().getResource("MapToolLogo90x90.png")); //$NON-NLS-1$
+		mapToolIcon = new ImageIcon(getClass().getResource("MapTool_256x256.png")); //$NON-NLS-1$
+		launchIcon = new ImageIcon(getClass().getResource("MapTool_Launcher_256x256.png")); //$NON-NLS-1$
+		launchArrowIcon = new ImageIcon(getClass().getResource("Launch_Arrow_256x256.png")); //$NON-NLS-1$
 		// This must be done before calling any methods of CopiedFromOtherJars or the LOCALE setting won't work.
-		readCfgFile();
+
+		findDataDir();
 
 		final File dataDirPath = new File(mapToolDataDir);
-		if (!dataDirPath.exists())
+		if (!dataDirPath.exists()) {
 			promptUser = true;
+			skipPrompt = false;
+			dataDirPath.mkdirs();
+		}
 
-		if (promptUser) {
+		// Check and create config dir if missing
+		final File configDirPath = new File(mapToolDataDir, "config");
+		if (!configDirPath.exists()) {
+			configDirPath.mkdirs();
+		}
+
+		// Lets test the current directory first, lets lets a local JAR copy to run independently of config stored in .maptool directory, .eg to run multiple versions of MT
+		launchConfigFile = new File(currentDir, LAUNCH_CONFIG); //$NON-NLS-1$
+		if (launchConfigFile.exists()) {
+			readCfgFile();
+		} else {
+			// OK, no config in current dir. Lets see if the config is in the .maptool dataDir. We're storing it there so it persists across jWrapper installations
+			launchConfigFile = new File(mapToolDataDir + "/config", LAUNCH_CONFIG); //$NON-NLS-1$
+			if (launchConfigFile.exists()) {
+				readCfgFile();
+			} else {
+				// OK so the config doesn't exist, probably a new install, lets load from resource bundle and copy it over...
+				copyResource(LAUNCH_RESOURCE, launchConfigFile);
+				readCfgFile();
+			}
+		}
+
+		if ((promptUser && !skipPrompt) || forcePrompt) {
+			setVisible(true);
 			initComponents();
 			if (mapToolJarName.equalsIgnoreCase(CopiedFromOtherJars.getText("msg.info.selectMapToolJar"))) {
 				jbMTJar.requestFocusInWindow();
@@ -254,11 +316,62 @@ public class MapToolLauncher extends JFrame {
 
 			// Make a list of all XML files in the current directory.  We're going to copy new ones
 			// to the data directory when the Launch button is activated.
-			copyXmlFiles(logConfigs, dataDirPath);
+			//copyXmlFiles(logConfigs, dataDirPath);
 
 			setVisible(false);
 			launchMapTool();
 			System.exit(0);
+		}
+	}
+
+	/**
+	 * Returns a given property from a resource
+	 * 
+	 * @author Jamz
+	 * @since 1.4.1.0
+	 * 
+	 * @param resource
+	 * @param propKey
+	 * @return String property
+	 */
+	private String getResourceProperty(String resource, String propKey) {
+		Properties prop = new Properties();
+		InputStream in = getClass().getResourceAsStream(resource);
+		try {
+			prop.load(in);
+			in.close();
+			return prop.getProperty(propKey);
+		} catch (IOException e) {
+			logMsg(Level.SEVERE, "Error loading property from resource {0}", "msg.error.loggingUnwritable", propKey, e);
+		}
+
+		return EMPTY;
+	}
+
+	/**
+	 * Copies default resources over to users .maptool/config directory
+	 * 
+	 * @author Jamz
+	 * @throws IOException 
+	 * @since 1.4.1.0
+	 *
+	 */
+	private void copyResource(String resource, File fileDestination) {
+		try {
+			InputStream in = getClass().getResourceAsStream(resource);
+			OutputStream out = new FileOutputStream(fileDestination);
+
+			byte[] buffer = new byte[1024];
+			int len = in.read(buffer);
+			while (len != -1) {
+				out.write(buffer, 0, len);
+				len = in.read(buffer);
+			}
+
+			in.close();
+			out.close();
+		} catch (IOException e) {
+			logMsg(Level.SEVERE, "Error copying xml logging resource {0}", "msg.error.loggingUnwritable", fileDestination, e);
 		}
 	}
 
@@ -293,14 +406,17 @@ public class MapToolLauncher extends JFrame {
 			// Lee: launch normally
 			cmdArgs = getLaunchCommand(invocationCommands[0], mapToolJarDir);
 		}
+
+		System.out.println("command: " + cmdArgs.toString());
 		pb = new ProcessBuilder(cmdArgs);
 		logMsg(Level.INFO, "Setting current directory to: {0}.  Command line is {1}.", null, new Object[] { mapToolJarDir, cmdArgs.toString() });
 		try {
 			pb.directory(mapToolJarDir);
 			// This is a great idea, but .redirectOutput() requires Java 1.7+ so it won't build for
 			// J6 and hence users with the Java provided by Apple can't use the launcher. :(
-			//			if (log != null)
-			//				pb.redirectOutput(log).redirectErrorStream(true);
+			// Jamz: We're using Java 1.8+ now so this should be safe...lets check anyway...
+			if (log != null && getJavaVersion() >= 1.7)
+				pb.redirectOutput(log).redirectErrorStream(true);
 			pb.start();
 		} catch (final IOException ex) {
 			logMsg(Level.SEVERE, "Error starting MapTool instance; dir={0}, cmd={1}\n{2}", "msg.error.startingMapTool", mapToolJarDir, cmdArgs, ex);
@@ -315,10 +431,50 @@ public class MapToolLauncher extends JFrame {
 		// BASIC:  Top panel
 		final JPanel logoPanel = new JPanel();
 		logoPanel.setLayout(new FlowLayout());
-		logoPanel.setBorder(new TitledBorder(new LineBorder(Color.BLACK), CopiedFromOtherJars.getText("msg.logoPanel.border"))); //$NON-NLS-1$
+		logoPanel.setPreferredSize(new Dimension(450, 140));
+		logoPanel.setBorder(new LineBorder(Color.BLACK)); //$NON-NLS-1$
 
-		jlMTLogo.setIcon(icon);
+		jlLaunchLogo.setIcon(CopiedFromOtherJars.resizeImage(launchIcon, 128, 128));
+		logoPanel.add(jlLaunchLogo);
+
+		jlArrowLogo.setIcon(CopiedFromOtherJars.resizeImage(launchArrowIcon, 128, 128));
+		logoPanel.add(jlArrowLogo);
+
+		jlMTLogo.setIcon(CopiedFromOtherJars.resizeImage(mapToolIcon, 128, 128));
 		logoPanel.add(jlMTLogo);
+
+		logoPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		logoPanel.setToolTipText(CopiedFromOtherJars.getText("msg.logoPanel.tooltip"));
+		logoPanel.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				try {
+					jbLaunchActionPerformed(null);
+				} catch (final Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				//setCursor(new Cursor(Cursor.HAND_CURSOR));
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+			}
+		});
 
 		// BASIC:  Middle panel
 		final JPanel memPanel = new JPanel();
@@ -415,6 +571,7 @@ public class MapToolLauncher extends JFrame {
 
 		jbMTJar.setText(jbMTJarText);
 		jbMTJar.setToolTipText(CopiedFromOtherJars.getText("msg.tooltip.registerMapToolJar")); //$NON-NLS-1$
+		jbMTJar.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		jbMTJar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -557,6 +714,10 @@ public class MapToolLauncher extends JFrame {
 				if (!jtfArgs.getText().trim().equals(extraArgs)) {
 					extraArgs = jtfArgs.getText();
 					jcbEnableAssertions.setSelected(extraArgs.contains(ASSERTIONS_OPTION));
+					jcbDisable_java2d_d3d.setSelected(extraArgs.contains(JAVA2D_D3D_OPTION));
+					jcbEnable_java2d_opengl.setSelected(extraArgs.contains(JAVA2D_OPENGL_OPTION));
+					jcbEnable_macosx_embedded.setSelected(extraArgs.contains(MACOSX_EMBEDDED_OPTION));
+
 					if (extraArgs.contains(DATADIR_OPTION)) {
 						extraArgs = cleanExtraArgs(extraArgs);
 					}
@@ -703,9 +864,66 @@ public class MapToolLauncher extends JFrame {
 				updateCommand();
 			}
 		});
+		jcbDisable_java2d_d3d.setAlignmentX(Component.LEFT_ALIGNMENT);
+		jcbDisable_java2d_d3d.setText(CopiedFromOtherJars.getText("msg.info.disable_java2d_d3d")); //$NON-NLS-1$
+		jcbDisable_java2d_d3d.setToolTipText(CopiedFromOtherJars.getText("msg.tooltip.disable_java2d_d3d")); //$NON-NLS-1$
+		jcbDisable_java2d_d3d.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					if (!extraArgs.contains(JAVA2D_D3D_OPTION)) {
+						extraArgs = (JAVA2D_D3D_OPTION + " " + extraArgs); //$NON-NLS-1$
+					}
+				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					extraArgs = extraArgs.replace(JAVA2D_D3D_OPTION, ""); //$NON-NLS-1$
+				}
+				extraArgs = extraArgs.trim();
+				jtfArgs.setText(extraArgs);
+				updateCommand();
+			}
+		});
+		jcbEnable_java2d_opengl.setAlignmentX(Component.LEFT_ALIGNMENT);
+		jcbEnable_java2d_opengl.setText(CopiedFromOtherJars.getText("msg.info.enable_java2d_opengl")); //$NON-NLS-1$
+		jcbEnable_java2d_opengl.setToolTipText(CopiedFromOtherJars.getText("msg.tooltip.enable_java2d_opengl")); //$NON-NLS-1$
+		jcbEnable_java2d_opengl.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					if (!extraArgs.contains(JAVA2D_OPENGL_OPTION)) {
+						extraArgs = (JAVA2D_OPENGL_OPTION + " " + extraArgs); //$NON-NLS-1$
+					}
+				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					extraArgs = extraArgs.replace(JAVA2D_OPENGL_OPTION, ""); //$NON-NLS-1$
+				}
+				extraArgs = extraArgs.trim();
+				jtfArgs.setText(extraArgs);
+				updateCommand();
+			}
+		});
+		jcbEnable_macosx_embedded.setAlignmentX(Component.LEFT_ALIGNMENT);
+		jcbEnable_macosx_embedded.setText(CopiedFromOtherJars.getText("msg.info.enable_macosx_embedded")); //$NON-NLS-1$
+		jcbEnable_macosx_embedded.setToolTipText(CopiedFromOtherJars.getText("msg.tooltip.enable_macosx_embedded")); //$NON-NLS-1$
+		jcbEnable_macosx_embedded.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					if (!extraArgs.contains(MACOSX_EMBEDDED_OPTION)) {
+						extraArgs = (MACOSX_EMBEDDED_OPTION + " " + extraArgs); //$NON-NLS-1$
+					}
+				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+					extraArgs = extraArgs.replace(MACOSX_EMBEDDED_OPTION, ""); //$NON-NLS-1$
+				}
+				extraArgs = extraArgs.trim();
+				jtfArgs.setText(extraArgs);
+				updateCommand();
+			}
+		});
 		p.add(logPanel, BorderLayout.NORTH);
 		Box other = new Box(BoxLayout.PAGE_AXIS);
 		other.add(jcbEnableAssertions);
+		other.add(jcbDisable_java2d_d3d);
+		other.add(jcbEnable_java2d_opengl);
+		other.add(jcbEnable_macosx_embedded);
 		other.add(Box.createVerticalGlue());
 		p.add(other, BorderLayout.CENTER);
 		return p;
@@ -716,9 +934,8 @@ public class MapToolLauncher extends JFrame {
 	 * components.
 	 */
 	private void initComponents() {
-		// Lee: for aesthetics and Linux won't display window controls on an untitled window.
-		final String version = CopiedFromOtherJars.getVersion();
-		setTitle(CopiedFromOtherJars.getText("msg.title.mainWindow", version)); //$NON-NLS-1$
+		// Lee: for esthetics and Linux won't display window controls on an untitled window.
+		setTitle(CopiedFromOtherJars.getText("msg.title.mainWindow", launcherVersion)); //$NON-NLS-1$
 
 		if (jbPathText == null)
 			jbPathText = CopiedFromOtherJars.getText("msg.info.setJavaVersion"); //$NON-NLS-1$
@@ -745,7 +962,7 @@ public class MapToolLauncher extends JFrame {
 
 		// Lee: user must register MT executable
 		jbLaunch.setEnabled(!mapToolJarName.equalsIgnoreCase(CopiedFromOtherJars.getText("msg.info.selectMapToolJar"))); //$NON-NLS-1$
-
+		jbLaunch.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		jbLaunch.setText(CopiedFromOtherJars.getText("msg.info.launchMapTool")); //$NON-NLS-1$
 		jbLaunch.addActionListener(new ActionListener() {
 			@Override
@@ -830,7 +1047,7 @@ public class MapToolLauncher extends JFrame {
 		// Set width to width of largest tab * number of tabs, then add 20%.
 		d.width = d.width * 120 / 100 * mtlOptions.getTabCount();
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		setIconImage(icon.getImage());
+		setIconImage(launchIcon.getImage());
 
 		// To prevent the tabs from wrapping or scrolling
 		setMinimumSize(new Dimension(d.width, getSize().height));
@@ -970,7 +1187,7 @@ public class MapToolLauncher extends JFrame {
 			minMemStr, maxMemStr, stackSizeStr,
 			extraArgs,
 			path != null ? DATADIR_OPTION + path : EMPTY,
-			IS_MAC ? MAC_TITLE_FIX+mapToolVersion : EMPTY,
+			IS_MAC ? (MAC_TITLE_FIX+mapToolVersion).replaceAll(" ", "") : EMPTY,
 			localeToOptions(mapToolLocale),
 			jarCommand, mapToolJarName, mtArg
 		};
@@ -1091,6 +1308,18 @@ public class MapToolLauncher extends JFrame {
 			}
 		}
 		dir = values.get("JAVA_DIRECTORY"); //$NON-NLS-1$
+
+		// Jamz: If dir is not set in cfg, lets try and get it from jWrapper using jWrappers packaged JRE
+		if (dir == null || dir.isEmpty()) {
+			try {
+				dir = JWSystem.getMyJreHome().getAbsolutePath();
+				dir += File.separator + "bin";
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 		if (dir != null && !dir.isEmpty()) {
 			jbPathText = CopiedFromOtherJars.getText("msg.info.resetToDefaultJava"); //$NON-NLS-1$
 			// Returns 'null' when a relative name is passed in
@@ -1145,6 +1374,9 @@ public class MapToolLauncher extends JFrame {
 			extraArgs = cleanExtraArgs(extraArgs);
 			// This doesn't really work since we're not enforcing a word boundary on either side...
 			jcbEnableAssertions.setSelected(extraArgs.contains(ASSERTIONS_OPTION));
+			jcbDisable_java2d_d3d.setSelected(extraArgs.contains(JAVA2D_D3D_OPTION));
+			jcbEnable_java2d_opengl.setSelected(extraArgs.contains(JAVA2D_OPENGL_OPTION));
+			jcbEnable_macosx_embedded.setSelected(extraArgs.contains(MACOSX_EMBEDDED_OPTION));
 		} else {
 			extraArgs = EMPTY;
 		}
@@ -1206,8 +1438,35 @@ public class MapToolLauncher extends JFrame {
 		}
 	}
 
+	// For new home of launch.properties we need to establish maptool's datadir earlier now...
+	private void findDataDir() {
+		String dir = null;
+		File f;
+
+		// If overridden on the command line, use that one in preference to what is currently in the file.
+		// Note that this new value will be written back to the config file if/when the config file is saved.
+		if (System.getProperty("MAPTOOL_DATADIR") != null) {
+			dir = System.getProperty("MAPTOOL_DATADIR"); //$NON-NLS-1$
+		}
+		// If still no value, create one based on the user's home directory and the ".maptool" subdirectory.
+		if (dir == null || dir.isEmpty()) {
+			dir = System.getProperty("user.home") + File.separatorChar + ".maptool"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+		// Returns 'null' when a relative name is passed in
+		String normalDir = PathUtils.normalizeNoEndSeparator(dir);
+		if (normalDir == null || normalDir.isEmpty()) {
+			normalDir = PathUtils.normalizeNoEndSeparator(mapToolJarDir + File.separator + dir);
+		}
+		f = new File(normalDir);
+		mapToolDataDir = f.getAbsolutePath();
+		if (f.isDirectory()) {
+			logMsg(Level.INFO, "MAPTOOL_DATADIR={0}", null, f.getPath());
+		}
+	}
+
 	/**
-	 * Reads from a file named mt.cfg in the same directory to get the following
+	 * Reads from a file named launch.properties in the same directory to get the following
 	 * options. Each option is placed on a single line followed by an equal sign
 	 * ('=') and then the appropriate value. The default values are coded below.
 	 * 
@@ -1225,14 +1484,14 @@ public class MapToolLauncher extends JFrame {
 		values.put("MINMEM", Integer.toString(minMemVal)); //$NON-NLS-1$
 		values.put("STACKSIZE", Integer.toString(stackSizeVal)); //$NON-NLS-1$
 		values.put("PROMPT", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		values.put("MAPTOOL_VERSION", launcherVersion); //$NON-NLS-1$
 
 		final List<String> errors = new ArrayList<String>();
-		if (cfgFile.isFile() && cfgFile.length() > 0) {
+		if (launchConfigFile.isFile() && launchConfigFile.length() > 0) {
 			rv = true; // Assume that something was found.
-
 			LineNumberReader lnbr = null;
 			try {
-				lnbr = new LineNumberReader(new BufferedReader(new FileReader(cfgFile)));
+				lnbr = new LineNumberReader(new BufferedReader(new FileReader(launchConfigFile)));
 				try {
 					String line = lnbr.readLine();
 					while (line != null) {
@@ -1242,35 +1501,80 @@ public class MapToolLauncher extends JFrame {
 							if (arg.length == 2) {
 								values.put(arg[0].toUpperCase().trim(), arg[1].trim());
 							} else {
-								errors.add(CopiedFromOtherJars.getText("msg.error.configBadFormat", cfgFile, lnbr.getLineNumber(), line)); //$NON-NLS-1$
+								errors.add(CopiedFromOtherJars.getText("msg.error.configBadFormat", launchConfigFile, lnbr.getLineNumber(), line)); //$NON-NLS-1$
 							}
 						}
 						line = lnbr.readLine();
 					}
 				} catch (final IOException ex) {
-					logMsg(Level.SEVERE, "Error reading configuration file: {0}", "msg.error.configIOError", cfgFile); //$NON-NLS-1$ $NON-NLS-2$
+					logMsg(Level.SEVERE, "Error reading configuration file: {0}", "msg.error.configIOError", launchConfigFile); //$NON-NLS-1$ $NON-NLS-2$
 				}
 			} catch (final FileNotFoundException ex) {
 				// This shouldn't happen since we specifically used cfgFile.isFIle(), above, and that can't be true
 				// unless the file actually exists.
-				logMsg(Level.SEVERE, "Configuration file {0} not found.", "msg.error.configFileNotFound", cfgFile); //$NON-NLS-1$ $NON-NLS-2$
+				logMsg(Level.SEVERE, "Configuration file {0} not found.", "msg.error.configFileNotFound", launchConfigFile); //$NON-NLS-1$ $NON-NLS-2$
 			} finally {
 				try {
 					lnbr.close();
 				} catch (final IOException ex) {
-					logMsg(Level.SEVERE, "Error closing configuration file {0}.", "msg.error.configClosing", cfgFile); //$NON-NLS-1$ $NON-NLS-2$
+					logMsg(Level.SEVERE, "Error closing configuration file {0}.", "msg.error.configClosing", launchConfigFile); //$NON-NLS-1$ $NON-NLS-2$
 				}
 			}
 		} else {
-			logMsg(Level.INFO, "Configuration file not found; using built-in defaults", "msg.error.configNotFound", cfgFile); //$NON-NLS-1$ $NON-NLS-2$
+			logMsg(Level.INFO, "Configuration file not found; using built-in defaults", "msg.error.configNotFound", launchConfigFile); //$NON-NLS-1$ $NON-NLS-2$
 		}
+		// Build a list of all XML files found in the .maptool/logging directory, if it exists, otherwise
 		// Build a list of all XML files in the same directory as the launcher.  This list of
 		// filenames will be used to validate the LOGGING parameter from the configuration file.
-		File logging = new File(currentDir, "logging"); //$NON-NLS-1$
+		File logging = new File(mapToolDataDir, "logging"); //$NON-NLS-1$
 		if (!logging.isDirectory()) {
 			logging = currentDir;
 		}
 		logConfigs = buildLoggingFileList(logging);
+
+		if (logConfigs.isEmpty()) {
+			// No logging files found in currentDirectory or in the .maptool/logging directory
+			// Probably a new installation so lets copy some defaults over...
+			logging = new File(mapToolDataDir, "logging");
+			if (!logging.mkdirs() && !logging.exists()) {
+				logMsg(Level.SEVERE, "Failed to create MAPTOOL_LOGGING DIR: " + logging, null);
+			} else {
+				copyResource("/net/rptools/maptool/launcher/logging/fileio-logging.xml", new File(logging, "fileio-logging.xml"));
+				copyResource("/net/rptools/maptool/launcher/logging/general.xml", new File(logging, "general.xml"));
+				copyResource("/net/rptools/maptool/launcher/logging/imageio-logging.xml", new File(logging, "imageio-logging.xml"));
+				copyResource("/net/rptools/maptool/launcher/logging/macros-logging.xml", new File(logging, "macros-logging.xml"));
+				copyResource("/net/rptools/maptool/launcher/logging/parser-logging.xml", new File(logging, "parser-logging.xml"));
+
+				logConfigs = buildLoggingFileList(logging);
+			}
+		}
+
+		// Check if version changed
+		if (!launcherVersion.equals(values.get("MAPTOOL_VERSION"))) {
+			// We have a version change...
+			values.put("MAPTOOL_VERSION", getResourceProperty(LAUNCH_RESOURCE, "MAPTOOL_VERSION"));
+			values.put("MAPTOOL_DIRECTORY", getResourceProperty(LAUNCH_RESOURCE, "MAPTOOL_DIRECTORY"));
+			values.put("EXECUTABLE", getResourceProperty(LAUNCH_RESOURCE, "EXECUTABLE"));
+
+			// Lets see if the jWrapper JRE changed. If we detect a non-jWrapper JRE then skip it, the user manually set the JRE
+			try {
+				String currentJRE = values.get("JAVA_DIRECTORY");
+				if (currentJRE != null) {
+					if (currentJRE.contains("JWrapper-MapTool")) {
+						String dir = JWSystem.getMyJreHome().getAbsolutePath();
+						dir += File.separator + "bin";
+
+						if (!dir.equals(currentJRE)) {
+							// We have a JRE version change
+							values.put("JAVA_DIRECTORY", dir);
+						}
+					}
+				}
+			} catch (Exception e) {
+				logMsg(Level.SEVERE, "Error obtaining the jWrapper JRE value.", "msg.error.jWrapperJREunavailable", EMPTY, e);
+				e.printStackTrace();
+			}
+		}
 
 		// Now process the records just read in (or the defaults).  Errors are accumulated into 'errors'.
 		parseCfgValues(values, errors);
@@ -1387,9 +1691,10 @@ public class MapToolLauncher extends JFrame {
 		final List<String> notCopied = new LinkedList<String>();
 		for (final LoggingConfig config : fileList) {
 			final File srcFile = config.fname;
+			System.out.println(srcFile.toString());
 			final File destFile = new File(toDir, srcFile.getName());
 			final long srcTime = srcFile.lastModified();
-			if (!destFile.exists() || srcTime > destFile.lastModified() || srcTime > cfgFile.lastModified()) {
+			if (!destFile.exists() || srcTime > destFile.lastModified() || srcTime > launchConfigFile.lastModified()) {
 				if (!CopiedFromOtherJars.copyFile(srcFile, destFile)) {
 					notCopied.add(CopiedFromOtherJars.getText("msg.info.notCopiedTo", srcFile.getName(), toDir.getPath())); //$NON-NLS-1$
 				}
@@ -1418,17 +1723,22 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	private void createLogConfig() {
-		final File logconf = new File(mapToolDataDir, "logging.xml"); //$NON-NLS-1$
-		logconf.delete();
-
 		String loggingNow = getLoggingString();
 		String val = originalSettings.get("LOGGING");
+
+		// Settings did not change, existing logging.xml file will be used
+		// Jamz: Not sure I like this logic, originally it deleted the file first but did not recreate it
+		// unless settings changed. I moved the delete below this check but there's no guarantee that 
+		// the file hasn't been changed/deleted outside this program....
 		if (val == null)
 			val = EMPTY;
 		if (val.equalsIgnoreCase(loggingNow))
 			return;
 
+		final File logconf = new File(mapToolDataDir, "logging.xml"); //$NON-NLS-1$
+		logconf.delete();
 		BufferedWriter bw;
+
 		try {
 			bw = new BufferedWriter(new FileWriter(logconf));
 		} catch (final IOException e) {
@@ -1436,8 +1746,10 @@ public class MapToolLauncher extends JFrame {
 			return;
 		}
 		try {
+			System.out.println("logConfigs size: " + logConfigs.size());
 			for (final LoggingConfig config : logConfigs) {
 				if (config.chkbox.isSelected()) {
+					System.out.println("config.chkbox: " + config.chkbox.getText() + " is checked");
 					appendFileToWriter(config.fname, bw);
 				}
 			}
@@ -1554,6 +1866,7 @@ public class MapToolLauncher extends JFrame {
 		values.put("MAPTOOL_DIRECTORY", relDir); //$NON-NLS-1$
 
 		values.put("EXECUTABLE", mapToolJarName); //$NON-NLS-1$
+		values.put("MAPTOOL_VERSION", launcherVersion); //$NON-NLS-1$
 
 		baseDir = mapToolJarDir.getAbsolutePath() + File.separator;
 		if (mapToolDataDir != null && !mapToolDataDir.isEmpty()) {
@@ -1613,7 +1926,7 @@ public class MapToolLauncher extends JFrame {
 		BufferedWriter br = null;
 		Exception ex = null;
 		try {
-			br = new BufferedWriter(new FileWriter(cfgFile));
+			br = new BufferedWriter(new FileWriter(launchConfigFile));
 			br.write(CopiedFromOtherJars.getText("msg.info.comment.01")); //$NON-NLS-1$
 			br.write(CopiedFromOtherJars.getText("msg.info.comment.02")); //$NON-NLS-1$
 			br.write(CopiedFromOtherJars.getText("msg.info.comment.03")); //$NON-NLS-1$
@@ -1644,7 +1957,7 @@ public class MapToolLauncher extends JFrame {
 				ex = e;
 			}
 			if (ex != null) {
-				logMsg(Level.SEVERE, "Configuration file {0} is unwritable", "msg.error.configUnwritable", cfgFile, ex);
+				logMsg(Level.SEVERE, "Configuration file {0} is unwritable", "msg.error.configUnwritable", launchConfigFile, ex);
 			}
 		}
 		if (!values.isEmpty())
@@ -1707,16 +2020,56 @@ public class MapToolLauncher extends JFrame {
 	}
 
 	/**
+	 * Search for command line arguments for options. Expecting arguments
+	 * formatted as a switch
+	 * 
+	 * Examples: -f or -force_prompt
+	 * 
+	 * @author Jamz
+	 * @since 1.4.1.0
+	 * 
+	 * @param options
+	 *            {@link org.apache.commons.cli.Options}
+	 * @param searchValue
+	 *            Option string to search for, ie -force_prompt
+	 * @param args
+	 *            String array of passed in args
+	 * @return A boolean value of true if option parameter found
+	 */
+	private static boolean getCommandLineOption(Options options, String searchValue, String[] args) {
+		CommandLineParser parser = new DefaultParser();
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+			if (cmd.hasOption(searchValue)) {
+				return true;
+			}
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return false;
+	}
+
+	/**
 	 * @param args
 	 *            the command line arguments
 	 */
 	public static void main(String args[]) {
 		log.setLevel(Level.WARNING);
+
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					new MapToolLauncher().setVisible(true);
+					Options cmdOptions = new Options();
+					cmdOptions.addOption("s", "skip_prompt", false, "Tell the launcher to skip display prompt.");
+					cmdOptions.addOption("f", "force_prompt", false, "Tell the launcher to force display prompt.");
+
+					skipPrompt = getCommandLineOption(cmdOptions, "skip_prompt", args);
+					forcePrompt = getCommandLineOption(cmdOptions, "force_prompt", args);
+
+					new MapToolLauncher();
 				} catch (final IOException e) {
 					logMsg(Level.SEVERE, "IOException starting MapToolLauncher", "msg.error.startingMapTool", e); //$NON-NLS-1$ $NON-NLS-2$
 				} catch (final URISyntaxException e) {
@@ -1737,5 +2090,13 @@ public class MapToolLauncher extends JFrame {
 				e.consume();
 			}
 		}
+	}
+
+	static double getJavaVersion() {
+		String version = System.getProperty("java.version");
+		int pos = version.indexOf('.');
+		pos = version.indexOf('.', pos + 1);
+		return Double.parseDouble(version.substring(0, pos));
+
 	}
 }

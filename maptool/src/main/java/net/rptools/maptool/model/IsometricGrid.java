@@ -405,4 +405,51 @@ public class IsometricGrid extends Grid {
 		bGr.dispose();
 		return bimg;
 	}
+
+	/**
+	 * Take a rectangular Area, rotate it 45 degrees then reduce its resulting height by half.
+	 * 
+	 * @param planArea
+	 * @return Area in isometric format
+	 */
+	public static Area isoArea(Area planArea) {
+		int nSize = (planArea.getBounds().width + planArea.getBounds().height);
+
+		return resize(rotate(planArea), nSize, nSize / 2);
+		//return rotate(planArea);
+	}
+
+	private static Area rotate(Area planArea) {
+		double sin = Math.abs(Math.sin(Math.toRadians(45)));
+		double cos = Math.abs(Math.cos(Math.toRadians(45)));
+
+		int w = planArea.getBounds().width, h = planArea.getBounds().height;
+
+		int neww = (int) Math.floor(w * cos + h * sin);
+		int newh = (int) Math.floor(h * cos + w * sin);
+
+		double scaleX = neww / w;
+		double scaleY = newh / h;
+
+		int tx = (neww - w) / 2;
+		int ty = (newh - h) / 2;
+
+		// Rotate Area 45 degrees
+		AffineTransform atArea = AffineTransform.getScaleInstance(scaleX, scaleY);
+		atArea.concatenate(AffineTransform.getTranslateInstance(tx, ty));
+		atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(45), w / 2, h / 2));
+
+		return new Area(atArea.createTransformedShape(planArea));
+	}
+
+	private static Area resize(Area planArea, int newWidth, int newHeight) {
+		// Resize into a Area
+		double w = planArea.getBounds().width, h = planArea.getBounds().height;
+		double scaleX = newWidth / w;
+		double scaleY = newHeight / h;
+
+		AffineTransform atArea = AffineTransform.getScaleInstance(scaleX, scaleY);
+
+		return new Area(atArea.createTransformedShape(planArea));
+	}
 }

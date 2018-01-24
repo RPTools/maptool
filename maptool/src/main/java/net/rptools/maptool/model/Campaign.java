@@ -22,9 +22,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.CampaignExportDialog;
 import net.rptools.maptool.client.ui.ExportDialog;
 import net.rptools.maptool.client.ui.ToolbarPanel;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
@@ -56,6 +59,7 @@ public class Campaign {
 	@SuppressWarnings("unused")
 	private transient static ExportDialog exportInfo = null; // transient so it is not written out; entire element ignore when reading
 	private static ExportDialog exportDialog; // this is the new export dialog (different name for upward compatibility)
+	private static CampaignExportDialog campaignExportDialog;
 
 	// Static data isn't written to the campaign file when saved; these two fields hold the output location and type, and the
 	// settings of all JToggleButton objects (JRadioButtons and JCheckBoxes).
@@ -80,7 +84,7 @@ public class Campaign {
 	private Map<String, LookupTable> lookupTableMap;
 
 	// DEPRECATED: as of 1.3b19 here to support old serialized versions
-	private Map<GUID, LightSource> lightSourceMap;
+	// private Map<GUID, LightSource> lightSourceMap;
 
 	/**
 	 * This flag indicates whether the manual fog tools have been used in this campaign while a server is not running.
@@ -525,5 +529,21 @@ public class Campaign {
 		exportDialog = d;
 		exportSettings = d.getExportSettings();
 		exportLocation = d.getExportLocation();
+	}
+
+	public CampaignExportDialog getExportCampaignDialog() {
+		if (campaignExportDialog == null) {
+			try {
+				campaignExportDialog = new CampaignExportDialog();
+			} catch (Exception e) {
+				return null;
+			}
+		}
+
+		return campaignExportDialog;
+	}
+
+	public void setExportCampaignDialog(CampaignExportDialog d) {
+		campaignExportDialog = d;
 	}
 }

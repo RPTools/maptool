@@ -76,6 +76,10 @@ public class LookupTableImagePanelModel implements ImagePanelModel {
 	}
 
 	public String getCaption(int index) {
+		return getCaption(index, false);
+	}
+
+	public String getCaption(int index, boolean withDimensions) {
 		if (index < 0) {
 			return "";
 		}

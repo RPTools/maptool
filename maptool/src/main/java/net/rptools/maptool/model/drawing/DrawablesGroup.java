@@ -26,8 +26,14 @@ import java.util.List;
 public class DrawablesGroup extends AbstractDrawing {
 	private List<DrawnElement> drawableList;
 
+	public DrawablesGroup(List<DrawnElement> drawableList, String groupName) {
+		this.drawableList = drawableList;
+		setName(groupName);
+	}
+
 	public DrawablesGroup(List<DrawnElement> drawableList) {
 		this.drawableList = drawableList;
+		setName(null);
 	}
 
 	public List<DrawnElement> getDrawableList() {

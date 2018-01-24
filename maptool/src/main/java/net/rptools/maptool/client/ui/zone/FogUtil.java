@@ -34,6 +34,9 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -66,10 +69,6 @@ public class FogUtil {
 		vision = new Area(vision);
 		vision.transform(AffineTransform.getTranslateInstance(x, y));
 
-		// sanity check
-		//		if (topology.contains(x, y)) {
-		//			return null;
-		//		}
 		Point origin = new Point(x, y);
 
 		AreaOcean ocean = topology.getOceanAt(origin);
@@ -78,6 +77,10 @@ public class FogUtil {
 		}
 		int skippedAreas = 0;
 
+		// Jamz: Updated comparison for VisibleAreaSegment, hopefully this fixes the exceptions
+		// If exception still happens, this JVM option can be used as a temp fix: -Djava.util.Arrays.useLegacyMergeSort=true
+		// http://dertompson.com/2012/11/23/sort-algorithm-changes-in-java-7/
+		// http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7075600
 		List<VisibleAreaSegment> segmentList = new ArrayList<VisibleAreaSegment>(ocean.getVisibleAreaSegments(origin));
 		Collections.sort(segmentList);
 
@@ -108,9 +111,6 @@ public class FogUtil {
 			clearedAreaList.add(intersectedArea != null ? intersectedArea : area);
 		}
 
-		//		blockCount = segmentList.size();
-		//		int metaBlockCount = clearedAreaList.size();
-
 		while (clearedAreaList.size() > 1) {
 			Area a1 = clearedAreaList.remove(0);
 			Area a2 = clearedAreaList.remove(0);
@@ -122,47 +122,19 @@ public class FogUtil {
 		if (clearedAreaList.size() > 0) {
 			vision.subtract(clearedAreaList.get(0));
 		}
-		//		System.out.println("Blocks: " + blockCount + " Skipped: " + skippedAreas + " metaBlocks: " + metaBlockCount );
-		//		System.out.println(timer);
 
 		// For simplicity, this catches some of the edge cases
 		return vision;
 	}
 
-	//  @formatter:off
-/*
-	private static class RelativeLine {
-		private final Line2D line;
-		private final double distance;
-
-		public RelativeLine(Line2D line, double distance) {
-			this.line = line;
-			this.distance = distance;
-		}
+	public static void exposeVisibleArea(final ZoneRenderer renderer, Set<GUID> tokenSet) {
+		exposeVisibleArea(renderer, tokenSet, true);
 	}
 
-	private static Area createBlockArea(Point2D origin, Line2D line) {
-		Point2D p1 = line.getP1();
-		Point2D p2 = line.getP2();
-
-		Point2D p1out = GraphicsUtil.getProjectedPoint(origin, p1, Integer.MAX_VALUE / 2);
-		Point2D p2out = GraphicsUtil.getProjectedPoint(origin, p2, Integer.MAX_VALUE / 2);
-
-		// TODO: Remove the (float) when we move to jdk6
-		GeneralPath path = new GeneralPath();
-		path.moveTo((float) p1.getX(), (float) p1.getY());
-		path.lineTo((float) p2.getX(), (float) p2.getY());
-		path.lineTo((float) p2out.getX(), (float) p2out.getY());
-		path.lineTo((float) p1out.getX(), (float) p1out.getY());
-		path.closePath();
-
-		return new Area(path);
-	}
-*/
-	//  @formatter:on
-
-	public static void exposeVisibleArea(ZoneRenderer renderer, Set<GUID> tokenSet) {
-		Zone zone = renderer.getZone();
+	// Jamz: Added boolean exposeCurrentOnly
+	//@SuppressWarnings("unchecked")
+	public static void exposeVisibleArea(final ZoneRenderer renderer, Set<GUID> tokenSet, boolean exposeCurrentOnly) {
+		final Zone zone = renderer.getZone();
 
 		for (GUID tokenGUID : tokenSet) {
 			Token token = zone.getToken(tokenGUID);
@@ -175,67 +147,162 @@ public class FogUtil {
 			if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
 				continue;
 			}
-			renderer.flush(token);
-			Area tokenVision = renderer.getVisibleArea(token);
-			if (tokenVision != null) {
-				Set<GUID> filteredToks = new HashSet<GUID>();
-				filteredToks.add(token.getId());
-				zone.exposeArea(tokenVision, filteredToks);
-				MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
+
+			if (zone.getWaypointExposureToggle() && !exposeCurrentOnly) {
+				if (token.getLastPath() == null)
+					return;
+
+				List<CellPoint> wayPointList = (List<CellPoint>) token
+						.getLastPath().getWayPointList();
+
+				final Token tokenClone = token.clone();
+
+				for (final Object cell : wayPointList) {
+					ZonePoint zp = null;
+					if (cell instanceof CellPoint) {
+						zp = zone.getGrid().convert((CellPoint) cell);
+					} else {
+						zp = (ZonePoint) cell;
+					}
+
+					tokenClone.setX(zp.x);
+					tokenClone.setY(zp.y);
+
+					renderer.flush(tokenClone);
+					Area tokenVision = renderer.getZoneView()
+							.getVisibleArea(tokenClone);
+					if (tokenVision != null) {
+						Set<GUID> filteredToks = new HashSet<GUID>();
+						filteredToks.add(tokenClone.getId());
+						zone.exposeArea(tokenVision, tokenClone);
+						MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
+					}
+				}
+				//System.out.println("2. Token: " + token.getGMName() + " - ID: " + token.getId());
+				renderer.flush(token);
+			} else {
+				renderer.flush(token);
+				Area tokenVision = renderer.getVisibleArea(token);
+				if (tokenVision != null) {
+					Set<GUID> filteredToks = new HashSet<GUID>();
+					filteredToks.add(token.getId());
+					zone.exposeArea(tokenVision, filteredToks);
+					MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
+				}
 			}
 		}
 	}
 
+	/**
+	 * This function is called by Meta-Shift-O, the token right-click, Expose -> only Currently visible menu,
+	 * from the Client/Server methods calls from net.rptools.maptool.server.ServerMethodHandler.exposePCArea(GUID),
+	 * and the macro exposePCOnlyArea().
+	 * 
+	 * 
+	 * @author updated Jamz
+	 * @since updated 1.4.0.1
+	 * 
+	 * @param renderer
+	 */
 	public static void exposePCArea(ZoneRenderer renderer) {
 		Set<GUID> tokenSet = new HashSet<GUID>();
-		List<Token> tokList = renderer.getZone().getPlayerTokens();
+		List<Token> tokList = renderer.getZone().getPlayerTokensWithSight();
+
 		String playerName = MapTool.getPlayer().getName();
 		boolean isGM = MapTool.getPlayer().getRole() == Role.GM;
 
 		for (Token token : tokList) {
-			if (!token.getHasSight()) {
+			boolean owner = token.isOwner(playerName) || isGM;
+
+			if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner) {
 				continue;
 			}
+
+			tokenSet.add(token.getId());
+		}
+
+		renderer.getZone().clearExposedArea(tokenSet);
+		// this was .clearExposedArea(), changed to expose current area only vs last path
+		exposeVisibleArea(renderer, tokenSet, true);
+	}
+
+	// Jamz: Expose not just PC tokens but also any NPC tokens the player owns
+	/**
+	 * This function is called by Meta-Shift-F and the macro exposeAllOwnedArea()
+	 * 
+	 * Changed base function to select tokens now on ownership and based on TokenSelection menu buttons.
+	 * 
+	 * @author Jamz
+	 * @since 1.4.0.1
+	 * 
+	 * @param renderer
+	 */
+	public static void exposeAllOwnedArea(ZoneRenderer renderer) {
+		Set<GUID> tokenSet = new HashSet<GUID>();
+
+		// Jamz: Possibly pass a variable to override buttons? Also, maybe add a return a list of ID's
+		List<Token> tokList = renderer.getZone().getOwnedTokensWithSight(MapTool.getPlayer());
+
+		for (Token token : tokList)
+			tokenSet.add(token.getId());
+
+		//System.out.println("tokList: " + tokList.toString());
+
+		/* TODO: Jamz: May need to add back the isUseIndividualViews() logic later after testing...
+		String playerName = MapTool.getPlayer().getName();
+		boolean isGM = MapTool.getPlayer().getRole() == Role.GM;
+		
+		for (Token token : tokList) {
 			boolean owner = token.isOwner(playerName) || isGM;
-			if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner) {
+			
+			//System.out.println("token: " + token.getName() + ", owner: " + owner);
+			
+			if ((!MapTool.isPersonalServer()
+					|| MapTool.getServerPolicy().isUseIndividualViews())
+					&& !owner) {
 				continue;
 			}
 			tokenSet.add(token.getId());
 		}
-		renderer.getZone().clearExposedArea(); // Was clearExposedArea(tokenSet)
-		exposeVisibleArea(renderer, tokenSet);
+		*/
+
+		renderer.getZone().clearExposedArea(tokenSet);
+		exposeVisibleArea(renderer, tokenSet, true); //Jamz: TODO: Clearing is working but re-exposure is not...working now?
 	}
 
-	public static void exposeLastPath(ZoneRenderer renderer, Set<GUID> tokenSet) {
-		Zone zone = renderer.getZone();
-		Grid grid = zone.getGrid();
+	public static void restoreFoW(final ZoneRenderer renderer) {
+		//System.out.println("Zone ID: " + renderer.getZone().getId());
+
+		renderer.getZone().clearExposedArea();
+		renderer.flush();
+		MapTool.serverCommand().clearExposedArea(renderer.getZone().getId());
+	}
+
+	public static void exposeLastPath(final ZoneRenderer renderer, final Set<GUID> tokenSet) {
+		final Zone zone = renderer.getZone();
+		final Grid grid = zone.getGrid();
 		GridCapabilities caps = grid.getCapabilities();
-		ZoneView zoneView = renderer.getZoneView();
 
 		if (!caps.isPathingSupported() || !caps.isSnapToGridSupported()) {
 			return;
 		}
-		Set<GUID> filteredToks = new HashSet<GUID>(2);
-		for (GUID tokenGUID : tokenSet) {
-			Token token = zone.getToken(tokenGUID);
-			if (token == null) {
-				continue;
-			}
-			if (!token.getHasSight()) {
-				continue;
-			}
-			if (!token.isSnapToGrid()) {
-				// We don't support this currently
-				log.warn("Exposing a token's path is not supported for non-SnapToGrid tokens and maps");
-				continue;
-			}
+		final Set<GUID> filteredToks = new HashSet<GUID>(2);
+
+		// Lee: putting a cap on the pool to avoid runaway performance costs
+		ExecutorService workPool = Executors.newFixedThreadPool(15);
+
+		for (final GUID tokenGUID : tokenSet) {
+
+			final Token token = zone.getToken(tokenGUID);
+
 			@SuppressWarnings("unchecked")
 			Path<CellPoint> lastPath = (Path<CellPoint>) token.getLastPath();
-			if (lastPath == null) {
-				continue;
-			}
-			Area visionArea = new Area();
-			Token tokenClone = new Token(token);
+
+			if (lastPath == null)
+				return;
+
+			final Area visionArea = new Area();
+
 			Map<GUID, ExposedAreaMetaData> fullMeta = zone.getExposedAreaMetaData();
 			GUID exposedGUID = token.getExposedAreaGUID();
 			ExposedAreaMetaData meta = fullMeta.get(exposedGUID);
@@ -245,40 +312,78 @@ public class FogUtil {
 				fullMeta.put(exposedGUID, meta);
 			}
 
-			List<CellPoint> lp = lastPath.getCellPath();
+			/*
+			 * Lee: this assumes that all tokens that pass through the checks
+			 * above stored CellPoints. Well, they don't, not in the context of
+			 * a snapped to grid follower following an unsnapped key token.
+			 * Commenting out and replacing... for (CellPoint cell :
+			 * lastPath.getCellPath()) {
+			 */
+			final ExposedAreaMetaData metaCopy = meta;
+			final Token tokenClone = new Token(token);
+			final ZoneView zoneView = renderer.getZoneView();
 
-			/* Lee: this assumes that all tokens that pass through the checks above stored CellPoints. 
-			   Well, they don't, not in the context of a snapped to grid follower following an unsnapped key 
-				token. Commenting out and replacing...*/
-			//			for (CellPoint cell : lastPath.getCellPath()) {
-			for (Object cell : lastPath.getCellPath()) {
+			// Lee: get path according to zone's way point exposure toggle...
+			List<CellPoint> processPath = zone.getWaypointExposureToggle() ? lastPath.getWayPointList() : lastPath.getCellPath();
 
-				/*Lee: quick fix for a bug that happens when a snapped PC token with vision is following an 
-				 unsnapped key token.*/
-				if (cell instanceof CellPoint) {
-					ZonePoint zp = grid.convert((CellPoint) cell);
-					tokenClone.setX(zp.x);
-					tokenClone.setY(zp.y);
-				}
+			int stepCount = processPath.size();
+			final CountDownLatch stepsCountDownLatch = new CountDownLatch(stepCount);
 
-				Area currVisionArea = zoneView.getVisibleArea(tokenClone);
-				if (currVisionArea != null) {
-					visionArea.add(currVisionArea);
-					meta.addToExposedAreaHistory(currVisionArea);
-				}
-				zoneView.flush(tokenClone);
+			// Lee: parallelize the task of revealing each step's FoW
+			for (final Object cell : processPath) {
+				workPool.submit(new Runnable() {
+
+					public void run() {
+						Area proc = new Area();
+						try {
+							/*
+							 * Lee: quick fix for a bug that happens when a
+							 * snapped PC token with vision is following an
+							 * unsnapped key token.
+							 */
+							if (cell instanceof CellPoint) {
+								ZonePoint zp = grid.convert((CellPoint) cell);
+								tokenClone.setX(zp.x);
+								tokenClone.setY(zp.y);
+							}
+
+							proc = zoneView.getVisibleArea(tokenClone);
+							zoneView.flush(tokenClone);
+
+							stepsCountDownLatch.countDown();
+
+						} finally {
+							// Lee: adding results to the cumulative area and
+							// history, skipping adding areas already traversed
+							visionArea.add(proc);
+							metaCopy.addToExposedAreaHistory(proc);
+						}
+					}
+
+				});
+			}
+
+			try {
+				stepsCountDownLatch.await();
+			} catch (InterruptedException e) {
+				// TODO: something
+				e.printStackTrace();
 			}
 
 			renderer.flush(token); // calls ZoneView.flush() -- too bad, I'd like to eliminate it...
 
 			filteredToks.clear();
 			filteredToks.add(token.getId());
-			//			zone.exposeArea(visionArea, filteredToks);
+
 			zone.exposeArea(visionArea, token);
+
+			// Lee: will use optimized putTokens outside the loop instead
 			zone.putToken(token);
 			MapTool.serverCommand().exposeFoW(zone.getId(), visionArea, filteredToks);
 			MapTool.serverCommand().updateExposedAreaMeta(zone.getId(), exposedGUID, meta);
 		}
+
+		workPool.shutdown();
 	}
 
 	/**

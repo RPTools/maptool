@@ -34,6 +34,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -122,6 +123,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 					public void layerSelected(Layer layer) {
 						if (renderer != null) {
 							renderer.setActiveLayer(layer);
+							MapTool.getFrame().setLastSelectedLayer(layer);
+
 							if (layer == Zone.Layer.TOKEN) {
 								MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
 							}
@@ -133,6 +136,10 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
+	}
+
+	public void updateLayerSelectionView() {
+		layerSelectionDialog.updateViewList();
 	}
 
 	@Override
@@ -150,6 +157,11 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 	protected void attachTo(ZoneRenderer renderer) {
 		MapTool.getFrame().showControlPanel(layerSelectionDialog);
 		super.attachTo(renderer);
+
+		// Jamz: Lets remember token selections during Tool class switches which causes setActiveLayer(layer) to be called which normally calls selectedTokenSet.clear()
+		if (renderer.getSelectedTokenSet().size() > 0) {
+			renderer.setKeepSelectedTokenSet(true);
+		}
 
 		layerSelectionDialog.updateViewList();
 	}
@@ -537,7 +549,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 		mouseX = e.getX();
 		mouseY = e.getY();
 
-		if (renderer.isAutoResizeStamp()) {
+		if (renderer.isAutoResizeStamp() && SwingUtilities.isLeftMouseButton(e)) {
 			int x1 = dragStartX;
 			int y1 = dragStartY;
 
@@ -799,24 +811,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 			}
 		});
 		// TODO: Optimize this by making it non anonymous
-		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), new AbstractAction() {
-			public void actionPerformed(java.awt.event.ActionEvent e) {
-				ZoneRenderer renderer = (ZoneRenderer) e.getSource();
-
-				Set<GUID> selectedTokenSet = renderer.getSelectedTokenSet();
-
-				for (GUID tokenGUID : selectedTokenSet) {
-					Token token = renderer.getZone().getToken(tokenGUID);
-
-					if (AppUtil.playerOwns(token)) {
-						renderer.getZone().removeToken(tokenGUID);
-						MapTool.serverCommand().removeToken(renderer.getZone().getId(), tokenGUID);
-					}
-				}
-				renderer.clearSelectedTokens();
-			}
-		});
-
+		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), ToolHelper.getDeleteTokenAction());
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, 0), new AbstractAction() {
 			public void actionPerformed(ActionEvent e) {
 				if (!isDraggingToken) {
