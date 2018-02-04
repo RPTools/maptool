@@ -29,6 +29,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,6 +65,8 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -889,6 +892,26 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		splitPane.setTopComponent(new JScrollPane(tree));
 		splitPane.setBottomComponent(drawablesPanel);
 		splitPane.setDividerLocation(100);
+		// Add tree selection listener
+		tree.addTreeSelectionListener(new TreeSelectionListener() {
+			@Override
+			public void valueChanged(TreeSelectionEvent e) {
+				TreePath path = e.getPath();
+				if (path == null) {
+					return;
+				}
+				int[] treeRows = tree.getSelectionRows();
+				java.util.Arrays.sort(treeRows);
+				drawablesPanel.clearSelectedIds();
+				for (int i = 0; i < treeRows.length; i++) {
+					TreePath p = tree.getPathForRow(treeRows[i]);
+					if (p.getLastPathComponent() instanceof DrawnElement) {
+						DrawnElement de = (DrawnElement) p.getLastPathComponent();
+						drawablesPanel.addSelectedId(de.getDrawable().getId());
+					}
+				}
+			}
+		});
 		// Add mouse Event for right click menu
 		tree.addMouseListener(new MouseAdapter() {
 			@Override
@@ -910,7 +933,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 							getCurrentZoneRenderer().centerOn(new ZonePoint((int) de.getDrawable().getBounds().getCenterX(), (int) de.getDrawable().getBounds().getCenterY()));
 						}
 					}
-
+					/*
 					int[] treeRows = tree.getSelectionRows();
 					java.util.Arrays.sort(treeRows);
 					drawablesPanel.clearSelectedIds();
@@ -920,7 +943,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 							DrawnElement de = (DrawnElement) p.getLastPathComponent();
 							drawablesPanel.addSelectedId(de.getDrawable().getId());
 						}
-					}
+					} */
 				}
 				if (SwingUtilities.isRightMouseButton(e)) {
 					if (!isRowSelected(tree.getSelectionRows(), rowIndex) && !SwingUtil.isShiftDown(e)) {
