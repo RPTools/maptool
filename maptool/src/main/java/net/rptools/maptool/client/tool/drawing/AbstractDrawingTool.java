@@ -21,6 +21,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
+import java.util.List;
 
 import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.SwingUtil;
@@ -33,6 +34,7 @@ import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListen
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.ZonePoint;
@@ -209,6 +211,17 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 			sp = ScreenPoint.fromZonePoint(renderer, zp);
 		}
 		return zp;
+	}
+
+	protected Area getTokenTopology() {
+		List<Token> vblTokens = MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithVBL();
+
+		Area tokenTopolgy = new Area();
+		for (Token vblToken : vblTokens) {
+			tokenTopolgy.add(vblToken.getTransformedVBL());
+		}
+
+		return tokenTopolgy;
 	}
 
 	public abstract void paintOverlay(ZoneRenderer renderer, Graphics2D g);

@@ -44,6 +44,7 @@ public class StampPopupMenu extends AbstractTokenPopupMenu {
 
 		addToggledItem(new SnapToGridAction(tokenUnderMouse.isSnapToGrid(), renderer), tokenUnderMouse.isSnapToGrid());
 		addToggledGMItem(new VisibilityAction(), tokenUnderMouse.isVisible());
+		addToggledGMItem(new AlwaysVisibleAction(tokenUnderMouse.isAlwaysVisible(), renderer), tokenUnderMouse.isAlwaysVisible());
 
 		add(new JSeparator());
 

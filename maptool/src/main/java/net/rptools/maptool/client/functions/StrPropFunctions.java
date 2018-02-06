@@ -41,8 +41,7 @@ public class StrPropFunctions extends AbstractFunction {
 	private static final Pattern keyValueParser = Pattern.compile(keyValuePatt);
 
 	public StrPropFunctions() {
-		super(1, UNLIMITED_PARAMETERS, "getStrProp", "setStrProp", "deleteStrProp", "varsFromStrProp", "strPropFromVars",
-				"countStrProp", "indexKeyStrProp", "indexValueStrProp", "formatStrProp");
+		super(1, UNLIMITED_PARAMETERS, "getStrProp", "setStrProp", "deleteStrProp", "varsFromStrProp", "strPropFromVars", "countStrProp", "indexKeyStrProp", "indexValueStrProp", "formatStrProp");
 	}
 
 	/** The singleton instance. */
@@ -70,8 +69,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 * @param delim
 	 *            is the setting delimiter to use
 	 */
-	public static void parse(String props, Map<String, String> map,
-			List<String> oldKeys, List<String> oldKeysNormalized, String delim) {
+	public static void parse(String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized, String delim) {
 		String delimPatt;
 		if (delim.equals("")) {
 			delimPatt = ";";
@@ -172,9 +170,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 * @return The matching value for <code>key</code>, or <code>""</code> if
 	 *         not found. The value is converted to a number if possible.
 	 */
-	public Object getStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
-			List<String> oldKeys, List<String> oldKeysNormalized)
-					throws ParserException {
+	public Object getStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized) throws ParserException {
 		Object retval = "";
 		String delim = ";";
 		String userKey;
@@ -208,9 +204,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 *            A string or number to assign to <code>key</code>
 	 * @return The new property string.
 	 */
-	public Object setStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
-			List<String> oldKeys, List<String> oldKeysNormalized)
-					throws ParserException {
+	public Object setStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized) throws ParserException {
 		Object retval = "";
 		String delim = ";";
 		String userKey, userValue;
@@ -254,9 +248,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 * @return The new property string. (If <code>key</code> is not found, no
 	 *         changes are made.)
 	 */
-	public Object deleteStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
-			List<String> oldKeys, List<String> oldKeysNormalized)
-					throws ParserException {
+	public Object deleteStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized) throws ParserException {
 		Object retval = "";
 		String delim = ";";
 		String userKey;
@@ -334,9 +326,8 @@ public class StrPropFunctions extends AbstractFunction {
 	 * @return The number of assignments made (keys with spaces in their names
 	 *         are ignored and don't appear in the count)
 	 */
-	public Object varsFromStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
-			List<String> oldKeys, List<String> oldKeysNormalized, Parser parser)
-					throws ParserException {
+	public Object varsFromStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized, Parser parser)
+			throws ParserException {
 		Object retval = "";
 		String delim = ";";
 		int option; // 0-none, 1-suffixed, 2-unsuffixed
@@ -409,9 +400,8 @@ public class StrPropFunctions extends AbstractFunction {
 	 *            the variable names when fetching values.
 	 * @return A property string containing the settings of all the variables.
 	 */
-	public Object strPropFromVars(List<Object> parameters, String lastParam, String props, Map<String, String> map,
-			List<String> oldKeys, List<String> oldKeysNormalized, Parser parser)
-					throws ParserException {
+	public Object strPropFromVars(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized, Parser parser)
+			throws ParserException {
 		Object retval = null;
 		String delim = ";";
 
@@ -450,9 +440,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 * 
 	 * @return The number of property entries in the string.
 	 */
-	public Object countStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
-			List<String> oldKeys, List<String> oldKeysNormalized)
-					throws ParserException {
+	public Object countStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized) throws ParserException {
 		Object retval = "";
 		String delim = ";";
 
@@ -475,9 +463,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 *            A number from 0 to (length-1). Ignored if out of range.
 	 * @return The key for the setting at position <code>index</code>
 	 */
-	public Object indexKeyStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
-			List<String> oldKeys, List<String> oldKeysNormalized)
-					throws ParserException {
+	public Object indexKeyStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized) throws ParserException {
 		Object retval = "";
 		String delim = ";";
 
@@ -506,9 +492,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 * @return The value (converted to a number if possible) for the setting at
 	 *         position <code>index</code>
 	 */
-	public Object indexValueStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
-			List<String> oldKeys, List<String> oldKeysNormalized)
-					throws ParserException {
+	public Object indexValueStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized) throws ParserException {
 		String value = "";
 		Object retval = null;
 		String delim = ";";
@@ -554,16 +538,13 @@ public class StrPropFunctions extends AbstractFunction {
 	 *            Placed between each output item.
 	 * @return A string containing the formatted property string.
 	 */
-	public Object formatStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map,
-			List<String> oldKeys, List<String> oldKeysNormalized)
-					throws ParserException {
+	public Object formatStrProp(List<Object> parameters, String lastParam, String props, Map<String, String> map, List<String> oldKeys, List<String> oldKeysNormalized) throws ParserException {
 		Object retval = null;
 		String delim = ";";
 
 		int minParams = 4;
 		int maxParams = minParams + 1;
-		checkVaryingParameters("formatStrProp()", minParams, maxParams, parameters,
-				new Class[] { String.class, String.class, String.class, String.class, String.class });
+		checkVaryingParameters("formatStrProp()", minParams, maxParams, parameters, new Class[] { String.class, String.class, String.class, String.class, String.class });
 		if (parameters.size() == maxParams)
 			delim = lastParam;
 		parse(props, map, oldKeys, oldKeysNormalized, delim);
@@ -616,9 +597,7 @@ public class StrPropFunctions extends AbstractFunction {
 	 * Checks number and types of parameters (pass null type to suppress
 	 * typechecking for that slot).
 	 */
-	public void checkVaryingParameters(
-			String funcName, int minParams, int maxParams, List<Object> parameters, Class<?>[] expected)
-					throws ParameterException {
+	public void checkVaryingParameters(String funcName, int minParams, int maxParams, List<Object> parameters, Class<?>[] expected) throws ParameterException {
 		if (parameters.size() < minParams || parameters.size() > maxParams) {
 			if (minParams == maxParams) {
 				throw new ParameterException(I18N.getText("macro.function.strLst.incorrectParamExact", funcName, minParams));
@@ -633,8 +612,8 @@ public class StrPropFunctions extends AbstractFunction {
 
 		for (int i = 0; i < numToCheck; i++) {
 			if (expected[i] != null && !(expected[i].isInstance(parameters.get(i))))
-				throw new ParameterException(I18N.getText("macro.function.strLst.incorrectParamExact", funcName, i + 1, expected[i].getSimpleName(),
-						parameters.get(i), parameters.get(i).getClass().getSimpleName()));
+				throw new ParameterException(
+						I18N.getText("macro.function.strLst.incorrectParamExact", funcName, i + 1, expected[i].getSimpleName(), parameters.get(i), parameters.get(i).getClass().getSimpleName()));
 		}
 	}
 }

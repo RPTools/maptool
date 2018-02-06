@@ -2,10 +2,10 @@
  * This software copyright by various authors including the RPTools.net
  * development team, and licensed under the LGPL Version 3 or, at your option,
  * any later version.
- * 
+ *
  * Portions of this software were originally covered under the Apache Software
  * License, Version 1.1 or Version 2.0.
- * 
+ *
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
@@ -32,6 +32,9 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.transferable.FileTransferableHandler;
@@ -45,9 +48,6 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.StringUtil;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 /**
  * A helper class for converting Transferable objects into their respective data
@@ -63,7 +63,7 @@ import org.apache.log4j.Logger;
  * operation at a time -- how could there be more? -- so a global structure is
  * used to record drag information and some of the fields are queried from the
  * peer component which may be time-sensitive.)
- * 
+ *
  * @author tcroft
  */
 public class TransferableHelper extends TransferHandler {
@@ -128,7 +128,7 @@ public class TransferableHelper extends TransferHandler {
 	 * example, in the query string of a URL it would stop looking at an equal
 	 * sign ("="), an ampersand ("&amp;"), a question mark ("?"), or a number
 	 * sign ("#").
-	 * 
+	 *
 	 * @throws URISyntaxException
 	 */
 	private static String findName(URL url) {
@@ -209,6 +209,9 @@ public class TransferableHelper extends TransferHandler {
 
 			// LOCAL FILESYSTEM
 			// Used by Linux when files are dragged from the desktop.  Other systems don't use this so we're safe checking for it first.
+			// (Except Mac OS X 10.11 does appear to use it now, but textURIListToFileList() will fail as the URIs can't be converted
+			// to URLs.  This is why we check for the empty 'list' -- if it's empty, we can't use this conversion and we want 'o' to be
+			// null for the following checks.)
 			// Note that "text/uri-list" is considered a JRE bug and it should be converting the event into "text/x-java-file-list", but
 			// until it does...
 			if (o == null && transferable.isDataFlavorSupported(URI_LIST_FLAVOR)) {
@@ -216,7 +219,11 @@ public class TransferableHelper extends TransferHandler {
 					log.info("Selected: " + URI_LIST_FLAVOR);
 				String data = (String) transferable.getTransferData(URI_LIST_FLAVOR);
 				List<URL> list = textURIListToFileList(data);
-				o = handleURLList(list);
+				if (!list.isEmpty()) {
+					List<Object> urls = handleURLList(list);
+					if (!urls.isEmpty())
+						o = urls;
+				}
 			}
 
 			// LOCAL FILESYSTEM
@@ -225,7 +232,11 @@ public class TransferableHelper extends TransferHandler {
 				if (log.isInfoEnabled())
 					log.info("Selected: " + DataFlavor.javaFileListFlavor);
 				List<URL> list = new FileTransferableHandler().getTransferObject(transferable);
-				o = handleURLList(list);
+				if (!list.isEmpty()) {
+					List<Object> urls = handleURLList(list);
+					if (!urls.isEmpty())
+						o = urls;
+				}
 			}
 
 			// DIRECT/BROWSER
@@ -256,7 +267,7 @@ public class TransferableHelper extends TransferHandler {
 				o = handleImage(url, "URL_FLAVOR_PLAIN", transferable);
 			}
 			if (o != null) {
-				if (o instanceof List)
+				if (o instanceof List<?>)
 					assets = (List<Object>) o;
 				else
 					assets.add(o);
@@ -404,7 +415,7 @@ public class TransferableHelper extends TransferHandler {
 
 	/**
 	 * Get the tokens from a token list data flavor.
-	 * 
+	 *
 	 * @param transferable
 	 *            The data that was dropped.
 	 * @return The tokens from the data or <code>null</code> if this isn't the
@@ -484,7 +495,7 @@ public class TransferableHelper extends TransferHandler {
 	 * Theoretically at least one should always work. But this can backfire as
 	 * some data sources may not support retreiving the object more than once.
 	 * (Think of a data source such as unidirectional pipe.)
-	 * 
+	 *
 	 * @param t
 	 *            Transferable to check
 	 * @return a list of all DataFlavor objects that succeeded

@@ -20,7 +20,7 @@ import java.lang.annotation.RetentionPolicy;
 public @interface MacroDefinition {
 	String name();
 
-	String[]aliases() default {};
+	String[] aliases() default {};
 
 	String description();
 

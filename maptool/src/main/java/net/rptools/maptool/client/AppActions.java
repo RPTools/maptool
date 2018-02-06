@@ -53,6 +53,12 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import org.jdesktop.swingworker.SwingWorker;
+
+import com.jidesoft.docking.DockableFrame;
+
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -60,6 +66,7 @@ import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.GridTool;
 import net.rptools.maptool.client.ui.AddResourceDialog;
 import net.rptools.maptool.client.ui.AppMenuBar;
+import net.rptools.maptool.client.ui.CampaignExportDialog;
 import net.rptools.maptool.client.ui.ClientConnectionPanel;
 import net.rptools.maptool.client.ui.ConnectToServerDialog;
 import net.rptools.maptool.client.ui.ConnectToServerDialogPreferences;
@@ -84,6 +91,7 @@ import net.rptools.maptool.client.ui.io.LoadSaveImpl;
 import net.rptools.maptool.client.ui.io.ProgressBarList;
 import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
+import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
@@ -114,29 +122,23 @@ import net.rptools.maptool.util.PersistenceUtil.PersistedMap;
 import net.rptools.maptool.util.SysInfo;
 import net.rptools.maptool.util.UPnPUtil;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
-import org.jdesktop.swingworker.SwingWorker;
-
-import com.jidesoft.docking.DockableFrame;
-
 /**
  * This class acts as a container for a wide variety of {@link Action}s that are
  * used throughout the application. Most of these are added to the main frame
  * menu, but some are added dynamically as needed, sometimes to the frame menu
  * but also to the context menu (the "right-click menu").
- *
+ * <p>
  * Each object instantiated from {@link DefaultClientAction} should have an
  * initializer that calls {@link ClientAction#init(String)} and passes the base
  * message key from the properties file. This base message key will be used to
  * locate the text that should appear on the menu item as well as the
  * accelerator, mnemonic, and short description strings. (See the {@link I18N}
  * class for more details on how the key is used.
- *
+ * <p>
  * In addition, each object should override {@link ClientAction#isAvailable()}
  * and return true if the application is in a state where the Action should be
  * enabled. (The default is <code>true</code>.)
- *
+ * <p>
  * Last is the {@link ClientAction#execute(ActionEvent)} method. It is passed
  * the {@link ActionEvent} object that triggered this Action as a parameter. It
  * should perform the necessary work to accomplish the effect of the Action.
@@ -218,6 +220,21 @@ public class AppActions {
 				} catch (Exception ex) {
 					MapTool.showError("msg.error.failedExportingImage", ex);
 				}
+			}
+		}
+	};
+
+	public static final Action EXPORT_CAMPAIGN_AS = new AdminClientAction() {
+		{
+			init("action.exportCampaignAs");
+		}
+
+		@Override
+		public void execute(ActionEvent e) {
+			try {
+				doCampaignExport();
+			} catch (Exception ex) {
+				MapTool.showError("Cannot create the ExportCampaignDialog object", ex);
 			}
 		}
 	};
@@ -1116,6 +1133,26 @@ public class AppActions {
 		}
 	};
 
+	// Jamz: Force a directory to rsscan
+	public static final Action RESCAN_NODE = new DefaultClientAction() {
+		{
+			init("action.rescanNode");
+		}
+
+		@Override
+		public void execute(ActionEvent e) {
+			AssetPanel assetPanel = MapTool.getFrame().getAssetPanel();
+			Directory dir = assetPanel.getSelectedAssetRoot();
+
+			if (dir == null) {
+				MapTool.showError("msg.error.mustSelectAssetGroupFirst");
+				return;
+			}
+
+			assetPanel.rescanImagePanelDir(dir);
+		}
+	};
+
 	public static final Action BOOT_CONNECTED_PLAYER = new DefaultClientAction() {
 		{
 			init("action.bootConnectedPlayer");
@@ -1568,6 +1605,45 @@ public class AppActions {
 		}
 	};
 
+	// Lee: this sets the revealing of FoW only at waypoints.
+	public static final Action TOGGLE_WAYPOINT_FOG_REVEAL = new ZoneAdminClientAction() {
+		{
+			init("action.revealFogAtWaypoints");
+		}
+
+		@Override
+		public boolean isAvailable() {
+			return ((ZoneAdminClientAction) TOGGLE_FOG).isSelected();
+		}
+
+		@Override
+		public boolean isSelected() {
+			if (isAvailable())
+				return MapTool.getFrame().getCurrentZoneRenderer().getZone().getWaypointExposureToggle();
+			return false;
+		}
+
+		@Override
+		public void execute(ActionEvent e) {
+			MapTool.getFrame().getCurrentZoneRenderer().getZone().setWaypointExposureToggle(!this.isSelected());
+		}
+	};
+
+	public static final Action RESTORE_FOG = new ZoneAdminClientAction() {
+		{
+			init("action.restoreFogOfWar");
+		}
+
+		@Override
+		public void execute(ActionEvent e) {
+			if (!MapTool.confirm("msg.confirm.restoreFoW")) {
+				return;
+			}
+
+			FogUtil.restoreFoW(MapTool.getFrame().getCurrentZoneRenderer());
+		}
+	};
+
 	public static class SetVisionType extends ZoneAdminClientAction {
 		private final VisionType visionType;
 
@@ -1668,13 +1744,28 @@ public class AppActions {
 			init("action.newCampaign");
 		}
 
+		/**
+		 * Displays a modal dialog asking Yes/No whether a new campaign should
+		 * be started; this is here because MapTool doesn't have a confirmImpl()
+		 * that allows the default button to be selected via a parameter.
+		 * 
+		 * @return true if the select button is Yes, false for anything else
+		 */
+		private boolean confirmNewCampaign() {
+			String msg = I18N.getText("msg.confirm.newCampaign");
+			log.debug(msg);
+			Object[] options = { I18N.getText("msg.title.messageDialog.yes"), I18N.getText("msg.title.messageDialog.no") };
+			String title = I18N.getText("msg.title.messageDialogConfirm");
+			int val = JOptionPane.showOptionDialog(MapTool.getFrame(), msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[1]);
+
+			return val == JOptionPane.YES_OPTION;
+		}
+
 		@Override
 		public void execute(ActionEvent e) {
 
-			if (!MapTool.confirm("msg.confirm.newCampaign")) {
-
+			if (!confirmNewCampaign())
 				return;
-			}
 
 			Campaign campaign = CampaignFactory.createBasicCampaign();
 			AppState.setCampaignFile(null);
@@ -2203,6 +2294,10 @@ public class AppActions {
 	};
 
 	private static void doSaveCampaign(final Campaign campaign, final File file, final Observer callback) {
+		doSaveCampaign(campaign, file, callback, null);
+	}
+
+	private static void doSaveCampaign(final Campaign campaign, final File file, final Observer callback, final String campaignVersion) {
 		MapTool.getFrame().showFilledGlassPane(new StaticMessageDialog(I18N.getText("msg.info.campaignSaving")));
 		new SwingWorker<Object, Object>() {
 			@Override
@@ -2215,7 +2310,7 @@ public class AppActions {
 					MapTool.getAutoSaveManager().pause();
 
 					long start = System.currentTimeMillis();
-					PersistenceUtil.saveCampaign(campaign, file);
+					PersistenceUtil.saveCampaign(campaign, file, campaignVersion);
 					AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
 					MapTool.getFrame().setStatusMessage(I18N.getString("msg.info.campaignSaved"));
 
@@ -2266,10 +2361,36 @@ public class AppActions {
 			if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
 				return;
 			}
-			if (campaignFile.getName().indexOf(".") < 0) {
-				campaignFile = new File(campaignFile.getAbsolutePath() + AppConstants.CAMPAIGN_FILE_EXTENSION);
+
+			String _extension = AppConstants.CAMPAIGN_FILE_EXTENSION;
+
+			if (!campaignFile.getName().toLowerCase().endsWith(_extension)) {
+				campaignFile = new File(campaignFile.getAbsolutePath() + _extension);
 			}
+
 			doSaveCampaign(campaign, campaignFile, callback);
+
+			AppState.setCampaignFile(campaignFile);
+			AppPreferences.setSaveDir(campaignFile.getParentFile());
+			AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
+			MapTool.getFrame().setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
+		}
+	}
+
+	public static void doCampaignExport() {
+		CampaignExportDialog dialog = MapTool.getCampaign().getExportCampaignDialog();
+		dialog.setVisible(true);
+		MapTool.getCampaign().setExportCampaignDialog(dialog);
+
+		if (dialog.getSaveStatus() == JFileChooser.APPROVE_OPTION) {
+			Campaign campaign = MapTool.getCampaign();
+			File campaignFile = dialog.getCampaignFile();
+
+			if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
+				return;
+			}
+
+			doSaveCampaign(campaign, campaignFile, null, dialog.getVersionText());
 
 			AppState.setCampaignFile(campaignFile);
 			AppPreferences.setSaveDir(campaignFile.getParentFile());
@@ -2298,7 +2419,9 @@ public class AppActions {
 			if (chooser.showSaveDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
 				try {
 					File mapFile = chooser.getSelectedFile();
-					if (mapFile.getName().indexOf(".") < 0) {
+					// Jamz: Bug fix, would not add extension if map name had a . in it...
+					// Lets do a better job and actually check the end of the file name for the extension
+					if (!mapFile.getName().toLowerCase().endsWith(AppConstants.MAP_FILE_EXTENSION)) {
 						mapFile = new File(mapFile.getAbsolutePath() + AppConstants.MAP_FILE_EXTENSION);
 					}
 					PersistenceUtil.saveMap(zr.getZone(), mapFile);
@@ -2364,14 +2487,10 @@ public class AppActions {
 					}
 					JButton b = new JButton("Help", icon);
 					Object[] options = { b, "Yes", "No" };
-					int result = JOptionPane.showOptionDialog(
-							MapTool.getFrame(),
+					int result = JOptionPane.showOptionDialog(MapTool.getFrame(),
 							// FIXME This string doesn't render as HTML properly -- no BOLD shows up?!
 							"<html>This is an <b>experimental</b> feature.  Save your campaign before using this feature (you are a GM logged in remotely).",
-							I18N.getText("msg.title.messageDialogConfirm"),
-							JOptionPane.DEFAULT_OPTION,
-							JOptionPane.WARNING_MESSAGE, null,
-							options, options[2]);
+							I18N.getText("msg.title.messageDialogConfirm"), JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[2]);
 					if (result == 1)
 						setSeenWarning(true); // Yes
 					else {

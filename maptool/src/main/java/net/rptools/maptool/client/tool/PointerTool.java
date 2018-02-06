@@ -35,6 +35,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
+import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -64,11 +65,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
-import net.rptools.maptool.client.ui.StampPopupMenu;
-import net.rptools.maptool.client.ui.TokenLocation;
-import net.rptools.maptool.client.ui.TokenPopupMenu;
-import net.rptools.maptool.client.ui.Tool;
-import net.rptools.maptool.client.ui.Toolbox;
+import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
@@ -116,6 +113,9 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	private Area hoverTokenBounds;
 	private String hoverTokenNotes;
 
+	// Track token interactions to hide statsheets when doing other stuff
+	private boolean mouseButtonDown = false;
+
 	private Token tokenBeingDragged;
 	private Token tokenUnderMouse;
 	private Token markerUnderMouse;
@@ -153,6 +153,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			public void layerSelected(Layer layer) {
 				if (renderer != null) {
 					renderer.setActiveLayer(layer);
+					MapTool.getFrame().setLastSelectedLayer(layer);
+
 					if (layer != Zone.Layer.TOKEN) {
 						MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
 					}
@@ -165,14 +167,15 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	protected void attachTo(ZoneRenderer renderer) {
 		super.attachTo(renderer);
 
-		// XXX Can we simply remove this?  Would that leave the layer the same when the PointerTool is made active after using another tool?
-		renderer.setActiveLayer(Zone.Layer.TOKEN);
-
 		if (MapTool.getPlayer().isGM()) {
 			MapTool.getFrame().showControlPanel(layerSelectionDialog);
 		}
 		htmlRenderer.attach(renderer);
 		layerSelectionDialog.updateViewList();
+
+		if (MapTool.getFrame().getLastSelectedLayer() != Zone.Layer.TOKEN) {
+			MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
+		}
 	}
 
 	/**
@@ -261,11 +264,18 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				if (token == null) {
 					continue;
 				}
-				if (token.getType() == Token.Type.PC) {
+				// Jamz: Changed to allow NPC FoW
+				//if (token.getType() == Token.Type.PC) {
+				if (MapTool.getPlayer().isGM() || token.isOwner(MapTool.getPlayer().getName())) {
 					exposeSet.add(tokenGUID);
 				}
 			}
-			FogUtil.exposeLastPath(renderer, exposeSet);
+
+			// Lee: fog exposure according to reveal type
+			if (zone.getWaypointExposureToggle())
+				FogUtil.exposeVisibleArea(renderer, exposeSet, false);
+			else
+				FogUtil.exposeLastPath(renderer, exposeSet);
 		}
 	}
 
@@ -400,6 +410,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	public void mousePressed(MouseEvent e) {
 		super.mousePressed(e);
 
+		mouseButtonDown = true;
+
 		if (isShowingHover) {
 			isShowingHover = false;
 			hoverTokenBounds = null;
@@ -429,6 +441,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
 		// Properties
 		if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+			mouseButtonDown = false;
 			List<Token> tokenList = renderer.getTokenStackAt(mouseX, mouseY);
 			if (tokenList != null) {
 				// Stack
@@ -500,6 +513,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		mouseButtonDown = false;
+
 		if (isShowingTokenStackPopup) {
 			if (tokenStackPanel.contains(e.getX(), e.getY())) {
 				tokenStackPanel.handleMouseReleased(e);
@@ -1010,29 +1025,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		});
 
 		// TODO: Optimize this by making it non anonymous
-		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), new AbstractAction() {
-			private static final long serialVersionUID = 1L;
-
-			public void actionPerformed(java.awt.event.ActionEvent e) {
-				ZoneRenderer renderer = (ZoneRenderer) e.getSource();
-
-				// Check to see if this is the required action
-				if (!MapTool.confirmTokenDelete()) {
-					return;
-				}
-				Set<GUID> selectedTokenSet = renderer.getSelectedTokenSet();
-
-				for (GUID tokenGUID : selectedTokenSet) {
-					Token token = renderer.getZone().getToken(tokenGUID);
-
-					if (AppUtil.playerOwns(token)) {
-						renderer.getZone().removeToken(tokenGUID);
-						MapTool.serverCommand().removeToken(renderer.getZone().getId(), tokenGUID);
-					}
-				}
-				renderer.clearSelectedTokens();
-			}
-		});
+		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), ToolHelper.getDeleteTokenAction());
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true), new StopPointerActionListener());
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.CTRL_MASK, true), new StopPointerActionListener());
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.SHIFT_MASK, true), new StopPointerActionListener());
@@ -1138,10 +1131,24 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				//  Only let the GM's do this
 				if (MapTool.getPlayer().isGM()) {
 					FogUtil.exposePCArea(renderer);
-					MapTool.serverCommand().exposePCArea(renderer.getZone().getId());
+					// Jamz: This doesn't seem to be needed 
+					//MapTool.serverCommand().exposePCArea(renderer.getZone().getId());
 				}
 			}
 		});
+		actionMap.put(
+				KeyStroke.getKeyStroke(KeyEvent.VK_F,
+						AppActions.menuShortcut | InputEvent.SHIFT_DOWN_MASK),
+				new AbstractAction() {
+					private static final long serialVersionUID = 1L;
+
+					public void actionPerformed(ActionEvent e) {
+						// Only let the GM's do this
+						if (MapTool.getPlayer().isGM()) {
+							FogUtil.exposeAllOwnedArea(renderer);
+						}
+					}
+				});
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, AppActions.menuShortcut), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
@@ -1469,9 +1476,11 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 					statsG.dispose();
 				}
 			}
-			if (statSheet != null) {
-				g.drawImage(statSheet, 5, viewSize.height - statSheet.getHeight() - 5, this);
-			}
+
+		}
+		// Jamz: Statsheet was still showing on drag, added other tests to hide statsheet as well
+		if (statSheet != null && !isDraggingToken && !mouseButtonDown) {
+			g.drawImage(statSheet, 5, viewSize.height - statSheet.getHeight() - 5, this);
 		}
 
 		// Hovers

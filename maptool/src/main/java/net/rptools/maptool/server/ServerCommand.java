@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
@@ -31,14 +32,15 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
+import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 
 public interface ServerCommand {
 	public static enum COMMAND {
-		bootPlayer, setCampaign, getZone, putZone, removeZone, putAsset, getAsset, removeAsset, putToken, removeToken, draw, clearAllDrawings, setZoneGridSize, message, undoDraw, showPointer, movePointer, hidePointer, startTokenMove, stopTokenMove, toggleTokenMoveWaypoint, updateTokenMove, setZoneVisibility, enforceZoneView, setZoneHasFoW, exposeFoW, hideFoW, setFoW, putLabel, removeLabel, sendTokensToBack, bringTokensToFront, enforceZone, setServerPolicy, addTopology, removeTopology, renameZone, heartbeat, updateCampaign, updateInitiative, updateTokenInitiative, setVisionType, updateCampaignMacros, setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be depended on for general purpose token movement
+		bootPlayer, setCampaign, getZone, putZone, removeZone, putAsset, getAsset, removeAsset, putToken, removeToken, draw, updateDrawing, clearAllDrawings, setZoneGridSize, message, undoDraw, showPointer, movePointer, hidePointer, startTokenMove, stopTokenMove, toggleTokenMoveWaypoint, updateTokenMove, setZoneVisibility, enforceZoneView, setZoneHasFoW, exposeFoW, hideFoW, setFoW, putLabel, removeLabel, sendTokensToBack, bringTokensToFront, enforceZone, setServerPolicy, addTopology, removeTopology, renameZone, heartbeat, updateCampaign, updateInitiative, updateTokenInitiative, setVisionType, updateCampaignMacros, setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be depended on for general purpose token movement
 		setLiveTypingLabel, // Experimental
 		enforceNotification, // Override toggle button to show typing notifications
-		exposePCArea, setBoard, updateExposedAreaMeta
+		exposePCArea, setBoard, updateExposedAreaMeta, clearExposedArea
 	};
 
 	public void bootPlayer(String player);
@@ -82,6 +84,8 @@ public interface ServerCommand {
 	public void removeLabel(GUID zoneGUID, GUID labelGUID);
 
 	public void draw(GUID zoneGUID, Pen pen, Drawable drawable);
+
+	public void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement);
 
 	public void undoDraw(GUID zoneGUID, GUID drawableGUID);
 
@@ -136,4 +140,6 @@ public interface ServerCommand {
 	public void exposePCArea(GUID zoneGUID);
 
 	public void updateExposedAreaMeta(GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta);
+
+	public void clearExposedArea(GUID zoneGUID);
 }

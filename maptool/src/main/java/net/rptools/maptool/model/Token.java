@@ -12,11 +12,14 @@
 package net.rptools.maptool.model;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Transparency;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
@@ -37,10 +40,12 @@ import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.JSONMacroFunctions;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -52,13 +57,16 @@ import org.apache.log4j.Logger;
  * This object represents the placeable objects on a map. For example an icon that represents a character would exist as
  * an {@link Asset} (the image itself) and a location and scale.
  */
-public class Token extends BaseModel {
+
+// Lee: made tokens cloneable
+public class Token extends BaseModel implements Cloneable {
 	private static final Logger log = Logger.getLogger(Token.class);
 
 	private GUID id = new GUID();
 
 	public static final String FILE_EXTENSION = "rptok";
 	public static final String FILE_THUMBNAIL = "thumbnail";
+	public static final String FILE_THUMBNAIL_LARGE = "thumbnail_large";
 
 	public static final String NAME_USE_FILENAME = "Use Filename";
 	public static final String NAME_USE_CREATURE = "Use \"Creature\"";
@@ -114,11 +122,15 @@ public class Token extends BaseModel {
 	private int lastY;
 	private Path<? extends AbstractPoint> lastPath;
 
+	// Lee: for use in added path calculations
+	transient private ZonePoint tokenOrigin = null;
 	private boolean snapToScale = true; // Whether the scaleX and scaleY represent snap-to-grid measurements
 
 	// These are the original image width and height
 	private int width;
 	private int height;
+	private int isoWidth;
+	private int isoHeight;
 
 	private double scaleX = 1;
 	private double scaleY = 1;
@@ -129,6 +141,11 @@ public class Token extends BaseModel {
 
 	private boolean isVisible = true;
 	private boolean visibleOnlyToOwner = false;
+
+	private int vblAlphaSensitivity = -1;
+	private int alwaysVisibleTolerance = 2; // Default for # of regions (out of 9) that must be seen before token is shown over FoW
+	private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
+	private Area vbl;
 
 	private String name;
 	private Set<String> ownerList;
@@ -226,6 +243,8 @@ public class Token extends BaseModel {
 		snapToScale = token.snapToScale;
 		width = token.width;
 		height = token.height;
+		isoWidth = token.isoWidth;
+		isoHeight = token.isoHeight;
 		scaleX = token.scaleX;
 		scaleY = token.scaleY;
 		facing = token.facing;
@@ -236,6 +255,12 @@ public class Token extends BaseModel {
 		snapToGrid = token.snapToGrid;
 		isVisible = token.isVisible;
 		visibleOnlyToOwner = token.visibleOnlyToOwner;
+
+		vblAlphaSensitivity = token.vblAlphaSensitivity;
+		alwaysVisibleTolerance = token.alwaysVisibleTolerance;
+		isAlwaysVisible = token.isAlwaysVisible;
+		vbl = token.vbl;
+
 		name = token.name;
 		notes = token.notes;
 		gmName = token.gmName;
@@ -260,6 +285,12 @@ public class Token extends BaseModel {
 		propertyType = token.propertyType;
 		hasImageTable = token.hasImageTable;
 		imageTableName = token.imageTableName;
+
+		if (isoWidth == 0)
+			isoWidth = width;
+
+		if (isoHeight == 0)
+			isoHeight = height;
 
 		ownerType = token.ownerType;
 		if (token.ownerList != null) {
@@ -337,10 +368,35 @@ public class Token extends BaseModel {
 		macroMap = null;
 		//		macroPropertiesMap = null;
 		ownerList = null;
-		//		propertyMapCI = null;
-		//		propertyType = "Basic";
-		sightType = MapTool.getCampaign().getCampaignProperties().getDefaultSightType();
-		//		state = null;
+		// propertyMapCI = null;
+		// propertyType = "Basic";
+		/**
+		 * Lee: why shouldn't propertyType be set to what the framework uses? In
+		 * case of multiple propertyType, give a choice; or incorporate in the
+		 * Campaign Properties window a marker for what is default for new
+		 * tokens.
+		 */
+
+		propertyType = getPropertyType();
+
+		/**
+		 * Jamz: Like propertyType, why shouldn't sight be kept if it
+		 * matches exists? Many creatures with DarkVision get reset and it
+		 * makes it painful. I'm turning off this reset for now. If there are
+		 * complaints/reasons, maybe the Import Dialog needs to be expanded to include
+		 * checkboxes for these items...
+		 */
+
+		// Try and silently catch any errors if there is an issue with sightType...
+		try {
+			if (!MapTool.getCampaign().getCampaignProperties().getSightTypeMap().containsKey(sightType))
+				sightType = MapTool.getCampaign().getCampaignProperties().getDefaultSightType();
+		} catch (Exception e) {
+			sightType = MapTool.getCampaign().getCampaignProperties().getDefaultSightType();
+			e.printStackTrace();
+		}
+
+		// state = null;
 		visionList = null;
 	}
 
@@ -360,19 +416,31 @@ public class Token extends BaseModel {
 	}
 
 	public void setWidth(int width) {
-		this.width = width;
+		if (isFlippedIso())
+			isoWidth = width;
+		else
+			this.width = width;
 	}
 
 	public void setHeight(int height) {
-		this.height = height;
+		if (isFlippedIso())
+			isoHeight = height;
+		else
+			this.height = height;
 	}
 
 	public int getWidth() {
-		return width;
+		if (isFlippedIso() && isoWidth != 0)
+			return isoWidth;
+		else
+			return width;
 	}
 
 	public int getHeight() {
-		return height;
+		if (isFlippedIso() && isoHeight != 0)
+			return isoHeight;
+		else
+			return height;
 	}
 
 	public boolean isMarker() {
@@ -449,6 +517,8 @@ public class Token extends BaseModel {
 		case OBJECT:
 		case GM:
 			return true;
+		default:
+			break;
 		}
 		return false;
 	}
@@ -516,6 +586,13 @@ public class Token extends BaseModel {
 
 	public Integer getFacing() {
 		return facing;
+	}
+
+	public Integer getFacingInDegrees() {
+		if (facing == null)
+			return 0;
+		else
+			return -(facing + 90);
 	}
 
 	public boolean getHasSight() {
@@ -834,10 +911,28 @@ public class Token extends BaseModel {
 		this.y = y;
 	}
 
-	public void applyMove(int xOffset, int yOffset, Path<? extends AbstractPoint> path) {
+	// Lee: added functions necessary for path computations
+	public void setOriginPoint(ZonePoint p) {
+		tokenOrigin = p;
+	}
+
+	public ZonePoint getOriginPoint() {
+		if (tokenOrigin == null)
+			tokenOrigin = new ZonePoint(getX(), getY());
+
+		return tokenOrigin;
+	}
+
+	/**
+	 * Lee: changing this to apply new X and Y values (as end point) for the
+	 * token BEFORE its path is computed. Path to be saved will be computed here
+	 * instead of in ZoneRenderer
+	 */
+
+	public void applyMove(SelectionSet set, Path<? extends AbstractPoint> followerPath, int xOffset, int yOffset, Token keyToken, int cellOffX, int cellOffY) {
 		setX(x + xOffset);
 		setY(y + yOffset);
-		lastPath = path;
+		lastPath = followerPath != null ? followerPath.derive(set, keyToken, this, cellOffX, cellOffY, getOriginPoint(), new ZonePoint(getX(), getY())) : null;
 	}
 
 	public void setLastPath(Path<? extends AbstractPoint> path) {
@@ -910,6 +1005,142 @@ public class Token extends BaseModel {
 		this.visibleOnlyToOwner = visibleOnlyToOwner;
 	}
 
+	public boolean isAlwaysVisible() {
+		return isAlwaysVisible;
+	}
+
+	public void setAlwaysVisibleTolerance(int tolerance) {
+		if (tolerance < 1)
+			tolerance = 1;
+
+		if (tolerance > 9)
+			tolerance = 9;
+
+		alwaysVisibleTolerance = tolerance;
+	}
+
+	public int getAlwaysVisibleTolerance() {
+		if (alwaysVisibleTolerance <= 0)
+			return 2;
+		else
+			return alwaysVisibleTolerance;
+	}
+
+	public void setAlphaSensitivity(int tolerance) {
+		vblAlphaSensitivity = tolerance;
+	}
+
+	public int getAlphaSensitivity() {
+		return vblAlphaSensitivity;
+	}
+
+	public void setVBL(Area vbl) {
+		this.vbl = vbl;
+		if (vbl == null)
+			vblAlphaSensitivity = -1;
+	}
+
+	public Area getVBL() {
+		return vbl;
+	}
+
+	public Area getTransformedVBL() {
+		return getTransformedVBL(vbl);
+	}
+
+	/**
+	 * This method returns the vbl stored on the token with AffineTransformations applied
+	 * for scale, position, rotation, & flipping.
+	 * 
+	 * @author Jamz
+	 * @since 1.4.1.5
+	 * 
+	 * @return
+	 */
+	public Area getTransformedVBL(Area areaToTransform) {
+		Rectangle footprintBounds = getBounds(MapTool.getFrame().getCurrentZoneRenderer().getZone());
+		Dimension imgSize = new Dimension(getWidth(), getHeight());
+		SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
+
+		// Lets account for ISO images
+		double iso_ho = 0;
+		if (getShape() == TokenShape.FIGURE) {
+			double th = getHeight() * Double.valueOf(footprintBounds.width) / getWidth();
+			iso_ho = footprintBounds.height - th;
+			footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y - (int) iso_ho, footprintBounds.width, (int) th);
+		}
+
+		// Lets figure in offset if image is not free size/native size aka snapToScale
+		int offsetx = 0;
+		int offsety = 0;
+		if (isSnapToScale()) {
+			offsetx = (int) (imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 : 0);
+			offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 : 0);
+		}
+		double tx = footprintBounds.x + offsetx;
+		double ty = footprintBounds.y + offsety + iso_ho;
+
+		// Apply the coordinate translation
+		AffineTransform atArea = AffineTransform.getTranslateInstance(tx, ty);
+
+		double rx, ry;
+		if (isSnapToScale()) {
+			// Find the center x,y coords of the rectangle
+			rx = (getWidth() / 2) - (getAnchor().getX() / 2);
+			ry = (getHeight() / 2) - (getAnchor().getY() / 2);
+
+			// Apply the scale transformation
+			atArea.concatenate(AffineTransform.getScaleInstance(((double) imgSize.width) / getWidth(), ((double) imgSize.height) / getHeight()));
+
+			// Apply the rotation transformation...
+			if (getShape() == Token.TokenShape.TOP_DOWN)
+				atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
+		} else {
+			// Find the center x,y coords of the rectangle
+			rx = ((getWidth() / 2) - (getAnchor().getX() / scaleX)) * scaleX;
+			ry = ((getHeight() / 2) - (getAnchor().getY() / scaleY)) * scaleY;
+
+			// Apply the rotation transformation...
+			if (getShape() == Token.TokenShape.TOP_DOWN)
+				atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
+
+			// Apply the scale transformation
+			atArea.concatenate(AffineTransform.getScaleInstance(scaleX, scaleY));
+		}
+
+		// Lets account for flipped images...
+		if (isFlippedX) {
+			atArea.concatenate(AffineTransform.getScaleInstance(-1.0, 1.0));
+			atArea.concatenate(AffineTransform.getTranslateInstance(-getWidth(), 0));
+		}
+
+		if (isFlippedY) {
+			atArea.concatenate(AffineTransform.getScaleInstance(1.0, -1.0));
+			atArea.concatenate(AffineTransform.getTranslateInstance(0, -getHeight()));
+		}
+
+		if (isFlippedIso()) {
+			return new Area(atArea.createTransformedShape(IsometricGrid.isoArea(areaToTransform)));
+		}
+
+		return new Area(atArea.createTransformedShape(areaToTransform));
+	}
+
+	public boolean hasVBL() {
+		if (vbl != null)
+			return true;
+		else
+			return false;
+	}
+
+	public void setIsAlwaysVisible(boolean isAlwaysVisible) {
+		this.isAlwaysVisible = isAlwaysVisible;
+	}
+
+	public void toggleIsAlwaysVisible() {
+		isAlwaysVisible = !isAlwaysVisible;
+	}
+
 	public String getName() {
 		return name != null ? name : "";
 	}
@@ -929,8 +1160,8 @@ public class Token extends BaseModel {
 
 		// Sizing
 		if (!isSnapToScale()) {
-			w = this.width * getScaleX();
-			h = this.height * getScaleY();
+			w = getWidth() * getScaleX();
+			h = getHeight() * getScaleY();
 		} else {
 			w = footprintBounds.width * footprint.getScale() * sizeScale;
 			h = footprintBounds.height * footprint.getScale() * sizeScale;
@@ -1216,8 +1447,8 @@ public class Token extends BaseModel {
 
 	public void deleteMacroButtonProperty(MacroButtonProperties prop) {
 		getMacroPropertiesMap(false).remove(prop.getIndex());
-		MapTool.getFrame().resetTokenPanels();
 		MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+		MapTool.getFrame().resetTokenPanels(); // switched with above line to resolve panel render timing problem.
 
 		// Lets the token macro panels update only if a macro changes
 		fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
@@ -1520,22 +1751,26 @@ public class Token extends BaseModel {
 
 	public void deleteMacroGroup(String macroGroup, Boolean secure) {
 		List<MacroButtonProperties> tempMacros = new ArrayList<MacroButtonProperties>(getMacroList(true));
+
 		for (MacroButtonProperties nextProp : tempMacros) {
 			if (macroGroup.equals(nextProp.getGroup())) {
 				getMacroPropertiesMap(secure).remove(nextProp.getIndex());
 			}
 		}
-		MapTool.getFrame().resetTokenPanels();
 		MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+		MapTool.getFrame().resetTokenPanels();
 	}
 
 	public void deleteAllMacros(Boolean secure) {
 		List<MacroButtonProperties> tempMacros = new ArrayList<MacroButtonProperties>(getMacroList(true));
 		for (MacroButtonProperties nextProp : tempMacros) {
-			getMacroPropertiesMap(secure).remove(nextProp.getIndex());
+			// Lee: maybe erasing the command will suffice to fix the hotkey bug.
+			nextProp.setCommand("");
+			getMacroPropertiesMap(secure).remove(nextProp.getIndex()); // switched with above line to resolve panel render timing problem.
 		}
-		MapTool.getFrame().resetTokenPanels();
+
 		MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+		MapTool.getFrame().resetTokenPanels();
 	}
 
 	public static final Comparator<Token> COMPARE_BY_NAME = new Comparator<Token>() {
@@ -1593,5 +1828,18 @@ public class Token extends BaseModel {
 	 */
 	public GUID getExposedAreaGUID() {
 		return exposedAreaGUID;
+	}
+
+	/**
+	 * Lee: this is handy, putting it in...
+	 * 
+	 * @return cloned token
+	 */
+	public Token clone() {
+		try {
+			return (Token) super.clone();
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
 	}
 }

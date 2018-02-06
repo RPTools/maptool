@@ -139,9 +139,9 @@ public class AreaData {
 					areaMeta.addPoint(coords[0], coords[1]);
 					break;
 				}
-					// NOT SUPPORTED
-					//				case PathIterator.SEG_CUBICTO: coordCount = 3; break;
-					//				case PathIterator.SEG_QUADTO: coordCount = 2;break;
+				// NOT SUPPORTED
+				//				case PathIterator.SEG_CUBICTO: coordCount = 3; break;
+				//				case PathIterator.SEG_QUADTO: coordCount = 2;break;
 				}
 			}
 		}

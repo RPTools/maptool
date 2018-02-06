@@ -37,7 +37,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.SwingConstants;
 
 public class AutoResizeStampDialog extends JDialog {
-	private static final Logger jamz = Logger.getLogger(AutoResizeStampDialog.class);
+	private static final Logger log = Logger.getLogger(AutoResizeStampDialog.class);
 
 	private static final long serialVersionUID = 3443156494702113624L;
 	private final JPanel contentPanel = new JPanel();
@@ -60,7 +60,7 @@ public class AutoResizeStampDialog extends JDialog {
 		final JSpinner spinnerPixelWidthAnchor = new JSpinner();
 		final JSpinner spinnerPixelHeightAnchor = new JSpinner();
 		final JCheckBox chckbxAdjustHorizontalAnchor = new JCheckBox(I18N.getText("dialog.resizeStamp.checkbox.horizontal.anchor"));
-		final JCheckBox chckbxAdjustVerticalAnchor = new JCheckBox(I18N.getText("dialog.resizeStamp.checkbox.horizontal.anchor"));
+		final JCheckBox chckbxAdjustVerticalAnchor = new JCheckBox(I18N.getText("dialog.resizeStamp.checkbox.vertical.anchor"));
 
 		setModal(true);
 		setResizable(false);
@@ -75,23 +75,18 @@ public class AutoResizeStampDialog extends JDialog {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 
 		JLabel lblCellWidthSelected = new JLabel(I18N.getText("dialog.resizeStamp.label.width.selected"));
-
 		JLabel lblCellHeightSelected = new JLabel(I18N.getText("dialog.resizeStamp.label.height.selected"));
 
 		spinnerCellWidthSelected.setModel(new SpinnerNumberModel(1, 1, 100, 1));
-
 		spinnerCellHeightSelected.setModel(new SpinnerNumberModel(1, 1, 100, 1));
 
 		JLabel lblPixelWidthSelected = new JLabel(I18N.getText("dialog.resizeStamp.label.width"));
-
 		JLabel lblPixelHeightSelected = new JLabel(I18N.getText("dialog.resizeStamp.label.height"));
 
 		spinnerPixelWidthSelected.setModel(new SpinnerNumberModel(selectedWidth, 1, 5000, 1));
-
 		spinnerPixelHeightSelected.setModel(new SpinnerNumberModel(selectedHeight, 1, 5000, 1));
 
 		JLabel lblPx = new JLabel(I18N.getText("dialog.resizeStamp.label.px"));
-
 		JLabel lblPx2 = new JLabel(I18N.getText("dialog.resizeStamp.label.px"));
 
 		chckbxAdjustHorizontalAnchor.addActionListener(new ActionListener() {
@@ -109,17 +104,13 @@ public class AutoResizeStampDialog extends JDialog {
 		chckbxAdjustVerticalAnchor.setSelected(true);
 
 		spinnerPixelWidthAnchor.setModel(new SpinnerNumberModel(anchorX, -500, 500, 1));
-		spinnerPixelWidthAnchor
-				.setToolTipText(I18N.getText("dialog.resizeStamp.toolTip"));
+		spinnerPixelWidthAnchor.setToolTipText(I18N.getText("dialog.resizeStamp.toolTip"));
 
 		spinnerPixelHeightAnchor.setModel(new SpinnerNumberModel(anchorY, -500, 500, 1));
-		spinnerPixelHeightAnchor
-				.setToolTipText(I18N.getText("dialog.resizeStamp.toolTip"));
+		spinnerPixelHeightAnchor.setToolTipText(I18N.getText("dialog.resizeStamp.toolTip"));
 
 		JLabel lblPx3 = new JLabel(I18N.getText("dialog.resizeStamp.label.px"));
-
 		JLabel lblPx4 = new JLabel(I18N.getText("dialog.resizeStamp.label.px"));
-
 		JLabel lblStampDimensions = new JLabel(I18N.getText("dialog.resizeStamp.label.stampDimensions"));
 
 		JLabel lblX = new JLabel(stampWidth + " x " + stampHeight);

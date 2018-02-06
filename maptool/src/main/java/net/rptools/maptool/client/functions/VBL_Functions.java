@@ -12,7 +12,9 @@
 package net.rptools.maptool.client.functions;
 
 import java.awt.BasicStroke;
+import java.awt.Dimension;
 import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
@@ -22,9 +24,14 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.IsometricGrid;
+import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -51,7 +58,7 @@ public class VBL_Functions extends AbstractFunction {
 	private static final String[] paramScale = new String[] { "sx", "sy" };
 
 	private VBL_Functions() {
-		super(0, 2, "drawVBL", "eraseVBL", "getVBL");
+		super(0, 2, "drawVBL", "eraseVBL", "getVBL", "getTokenVBL", "setTokenVBL", "transferVBL");
 	}
 
 	public static VBL_Functions getInstance() {
@@ -59,7 +66,7 @@ public class VBL_Functions extends AbstractFunction {
 	}
 
 	private static enum Shape {
-		RECTANGLE, POLYGON, CROSS, CIRCLE
+		RECTANGLE, POLYGON, CROSS, CIRCLE, AUTO, NONE
 	};
 
 	@Override
@@ -85,8 +92,6 @@ public class VBL_Functions extends AbstractFunction {
 			}
 
 			JSONArray vblArray = JSONArray.fromObject(j);
-			// System.out.println("# of Objects: " + vblArray.size());
-			// System.out.println("JSONArray: " + vblArray.toString(3));
 
 			for (int i = 0; i < vblArray.size(); i++) {
 				JSONObject vblObject = vblArray.getJSONObject(i);
@@ -104,6 +109,10 @@ public class VBL_Functions extends AbstractFunction {
 					break;
 				case CIRCLE:
 					drawCircleVBL(renderer, vblObject, erase);
+					break;
+				case NONE:
+					break;
+				default:
 					break;
 				}
 			}
@@ -128,6 +137,7 @@ public class VBL_Functions extends AbstractFunction {
 			if (!(j instanceof JSONObject || j instanceof JSONArray)) {
 				throw new ParserException(I18N.getText("macro.function.json.unknownType", j == null ? parameters.get(0).toString() : j.toString(), functionName));
 			}
+
 			JSONArray vblArray = JSONArray.fromObject(j);
 			Area vblArea = null;
 			for (int i = 0; i < vblArray.size(); i++) {
@@ -140,7 +150,220 @@ public class VBL_Functions extends AbstractFunction {
 			}
 			return getAreaPoints(vblArea, simpleJSON);
 		}
+
+		if (functionName.equals("getTokenVBL")) {
+			Token token;
+
+			if (parameters.size() == 1) {
+				token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.unknownToken", "getTokenVBL", parameters.get(0).toString()));
+				}
+			} else if (parameters.size() == 0) {
+				MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+				token = res.getTokenInContext();
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
+				}
+			} else {
+				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", "getTokenVBL", 1, parameters.size()));
+			}
+
+			Area vblArea = token.getVBL();
+			if (vblArea != null)
+				return getAreaPoints(vblArea, false);
+			else
+				return "";
+
+		}
+
+		if (functionName.equals("setTokenVBL")) {
+			Token token = null;
+
+			if (parameters.size() > 2)
+				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+
+			if (parameters.isEmpty())
+				throw new ParserException(I18N.getText("macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+
+			if (!MapTool.getParser().isMacroPathTrusted())
+				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+
+			Object jsonArea = JSONMacroFunctions.asJSON(parameters.get(0).toString().toLowerCase());
+
+			if (parameters.size() == 2) {
+				token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
+
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.unknownToken", "getTokenVBL", parameters.get(0).toString()));
+				}
+
+				if (!(jsonArea instanceof JSONObject || jsonArea instanceof JSONArray)) {
+					throw new ParserException(I18N.getText("macro.function.json.unknownType", jsonArea == null ? parameters.get(0).toString() : jsonArea.toString(), functionName));
+				}
+			} else if (parameters.size() == 1) {
+				MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+				token = res.getTokenInContext();
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
+				}
+				if (!(jsonArea instanceof JSONObject || jsonArea instanceof JSONArray)) {
+					throw new ParserException(I18N.getText("macro.function.json.unknownType", jsonArea == null ? parameters.get(0).toString() : jsonArea.toString(), functionName));
+				}
+			}
+
+			Area tokenVBL = new Area();
+			JSONArray vblArray = JSONArray.fromObject(jsonArea);
+			for (int i = 0; i < vblArray.size(); i++) {
+				JSONObject vblObject = vblArray.getJSONObject(i);
+
+				Shape vblShape = Shape.valueOf(vblObject.getString("shape").toUpperCase());
+				switch (vblShape) {
+				case RECTANGLE:
+					tokenVBL.add(drawRectangleVBL(null, vblObject, false));
+					break;
+				case POLYGON:
+					tokenVBL.add(drawPolygonVBL(null, vblObject, false));
+					break;
+				case CROSS:
+					tokenVBL.add(drawCrossVBL(null, vblObject, false));
+					break;
+				case CIRCLE:
+					tokenVBL.add(drawCircleVBL(null, vblObject, false));
+					break;
+				case AUTO:
+					int alpha = getJSONint(vblObject, "alpha", "setTokenVBL[Auto]");
+					if (alpha < 0 || alpha > 255)
+						throw new ParserException(I18N.getText("macro.function.input.illegalArgumentType", alpha, "0-255"));
+					System.out.println("Alpha: " + alpha);
+					tokenVBL = TokenVBL.createVblArea(token, alpha);
+					break;
+				case NONE:
+					tokenVBL = null;
+					break;
+
+				}
+			}
+
+			token.setVBL(tokenVBL);
+		}
+
+		if (functionName.equals("transferVBL")) {
+			Token token = null;
+
+			if (parameters.size() > 2)
+				throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+
+			if (parameters.isEmpty())
+				throw new ParserException(I18N.getText("macro.function.general.notenoughparms", functionName, 1, parameters.size()));
+
+			if (!MapTool.getParser().isMacroPathTrusted())
+				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+
+			if (parameters.size() == 2) {
+				token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
+
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.unknownToken", "getTokenVBL", parameters.get(0).toString()));
+				}
+			} else if (parameters.size() == 1) {
+				MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+				token = res.getTokenInContext();
+				if (token == null) {
+					throw new ParserException(I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
+				}
+			}
+
+			Object val = parameters.get(0);
+			boolean vblFromToken;
+
+			if (val instanceof Integer) {
+				vblFromToken = ((Integer) val).intValue() != 0;
+			} else if (val instanceof Boolean) {
+				vblFromToken = ((Boolean) val).booleanValue();
+			} else {
+				try {
+					vblFromToken = Integer.parseInt(val.toString()) != 0;
+				} catch (NumberFormatException e) {
+					vblFromToken = Boolean.parseBoolean(val.toString());
+				}
+			}
+
+			if (vblFromToken) {
+				renderVBL(renderer, token.getTransformedVBL(), false);
+			} else {
+				Rectangle footprintBounds = token.getBounds(renderer.getZone());
+				Area newTokenVBL = new Area(footprintBounds);
+				Dimension imgSize = new Dimension(token.getWidth(), token.getHeight());
+				SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
+				AffineTransform atArea = new AffineTransform();
+
+				double tx, ty, sx, sy;
+
+				// Prepare to reverse all the current token transformations so we can store a
+				// raw untransformed version on the Token
+				if (token.isSnapToScale()) {
+					tx = -newTokenVBL.getBounds().getX() - (int) ((footprintBounds.getWidth() - imgSize.getWidth()) / 2);
+					ty = -newTokenVBL.getBounds().getY() - (int) ((footprintBounds.getHeight() - imgSize.getHeight()) / 2);
+					sx = 1 / (imgSize.getWidth() / token.getWidth());
+					sy = 1 / (imgSize.getHeight() / token.getHeight());
+
+					atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
+				} else {
+					tx = -newTokenVBL.getBounds().getX();
+					ty = -newTokenVBL.getBounds().getY();
+					sx = 1 / token.getScaleX();
+					sy = 1 / token.getScaleY();
+
+					atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
+				}
+
+				if (token.getShape() == Token.TokenShape.TOP_DOWN && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
+					// Get the center of the token bounds
+					double rx = newTokenVBL.getBounds2D().getCenterX();
+					double ry = newTokenVBL.getBounds2D().getCenterY();
+
+					// Rotate the area to match the token facing
+					AffineTransform captureArea = AffineTransform.getRotateInstance(Math.toRadians(token.getFacingInDegrees()), rx, ry);
+					newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
+
+					// Capture the VBL via intersection
+					newTokenVBL.intersect(renderer.getZone().getTopology());
+
+					// Rotate the area back to prep to store on Token
+					captureArea = AffineTransform.getRotateInstance(-Math.toRadians(token.getFacingInDegrees()), rx, ry);
+					newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
+				} else {
+					// Token will not be rotated so lets just capture the VBL
+					newTokenVBL.intersect(renderer.getZone().getTopology());
+				}
+
+				// Translate the capture to zero out the x,y to store on the Token
+				atArea.concatenate(AffineTransform.getTranslateInstance(tx, ty));
+				newTokenVBL = new Area(atArea.createTransformedShape(newTokenVBL));
+
+				// Lets account for flipped images...
+				atArea = new AffineTransform();
+				if (token.isFlippedX()) {
+					atArea.concatenate(AffineTransform.getScaleInstance(-1.0, 1.0));
+					atArea.concatenate(AffineTransform.getTranslateInstance(-token.getWidth(), 0));
+				}
+
+				if (token.isFlippedY()) {
+					atArea.concatenate(AffineTransform.getScaleInstance(1.0, -1.0));
+					atArea.concatenate(AffineTransform.getTranslateInstance(0, -token.getHeight()));
+				}
+
+				// Do any final transformations for flipped images
+				newTokenVBL = new Area(atArea.createTransformedShape(newTokenVBL));
+
+				// Transform the VBL capture and store on the Token
+				token.setVBL(newTokenVBL);
+			}
+		}
+
 		return "";
+
 	}
 
 	/**
@@ -154,11 +377,12 @@ public class VBL_Functions extends AbstractFunction {
 	 *            needed to draw a rectangle.
 	 * @param erase
 	 *            Set to true to erase the rectangle in VBL, otherwise draw it
+	 * @return 
 	 * @throws ParserException
 	 *             If the minimum required parameters are not present in the
 	 *             JSON, throw ParserException
 	 */
-	private void drawRectangleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
+	private Area drawRectangleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Rectangle]";
 		// Required Parameters
 		String requiredParms[] = { "x", "y", "w", "h" };
@@ -249,8 +473,7 @@ public class VBL_Functions extends AbstractFunction {
 		if (!atArea.isIdentity())
 			area.transform(atArea);
 
-		// Send to the engine to render
-		renderVBL(renderer, area, erase);
+		return renderVBL(renderer, area, erase);
 	}
 
 	private void applyTranslate(String funcname, AffineTransform at, JSONObject vblObject, String[] params) throws ParserException {
@@ -280,11 +503,12 @@ public class VBL_Functions extends AbstractFunction {
 	 *            needed to draw a rectangle.
 	 * @param erase
 	 *            Set to true to erase the rectangle in VBL, otherwise draw it
+	 * @return 
 	 * @throws ParserException
 	 *             If the minimum required parameters are not present in the
 	 *             JSON, throw ParserException
 	 */
-	private void drawPolygonVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
+	private Area drawPolygonVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Polygon]";
 		String requiredParms[] = { "points" };
 		if (!jsonKeysExist(vblObject, requiredParms, funcname))
@@ -326,7 +550,7 @@ public class VBL_Functions extends AbstractFunction {
 
 				if (path.getCurrentPoint() == null) {
 					path.moveTo(x, y);
-				} else if (lastX != x && lastY != y) {
+				} else if (!(lastX == x && lastY == y)) {
 					path.lineTo(x, y);
 					lastX = x;
 					lastY = y;
@@ -383,8 +607,7 @@ public class VBL_Functions extends AbstractFunction {
 		if (!atArea.isIdentity())
 			area.transform(atArea);
 
-		// Send to the engine to render
-		renderVBL(renderer, area, erase);
+		return renderVBL(renderer, area, erase);
 	}
 
 	/**
@@ -405,7 +628,7 @@ public class VBL_Functions extends AbstractFunction {
 	 *             If the minimum required parameters are not present in the
 	 *             JSON, throw ParserException
 	 */
-	private void drawCrossVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
+	private Area drawCrossVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Cross]";
 		// Required Parameters
 		String requiredParms[] = { "x", "y", "w", "h" };
@@ -473,8 +696,7 @@ public class VBL_Functions extends AbstractFunction {
 		if (!atArea.isIdentity())
 			area.transform(atArea);
 
-		// Send to the engine to render
-		renderVBL(renderer, area, erase);
+		return renderVBL(renderer, area, erase);
 	}
 
 	/**
@@ -488,11 +710,12 @@ public class VBL_Functions extends AbstractFunction {
 	 *            needed to draw a rectangle.
 	 * @param erase
 	 *            Set to true to erase the rectangle in VBL, otherwise draw it
+	 * @return 
 	 * @throws ParserException
 	 *             If the minimum required parameters are not present in the
 	 *             JSON, throw ParserException
 	 */
-	private void drawCircleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
+	private Area drawCircleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase) throws ParserException {
 		String funcname = "drawVBL[Circle]";
 		// Required Parameters
 		String requiredParms[] = { "x", "y", "radius", "sides" };
@@ -571,8 +794,7 @@ public class VBL_Functions extends AbstractFunction {
 		if (!atArea.isIdentity())
 			area.transform(atArea);
 
-		// Send to the engine to render
-		renderVBL(renderer, area, erase);
+		return renderVBL(renderer, area, erase);
 	}
 
 	/**
@@ -854,7 +1076,10 @@ public class VBL_Functions extends AbstractFunction {
 	 * @param erase
 	 *            Set to true to erase the VBL, otherwise draw it
 	 */
-	private void renderVBL(ZoneRenderer renderer, Area area, boolean erase) {
+	private Area renderVBL(ZoneRenderer renderer, Area area, boolean erase) {
+		if (renderer == null)
+			return area;
+
 		if (erase) {
 			renderer.getZone().removeTopology(area);
 			MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
@@ -862,6 +1087,8 @@ public class VBL_Functions extends AbstractFunction {
 			renderer.getZone().addTopology(area);
 			MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
 		}
+
 		renderer.repaint();
+		return null;
 	}
 }

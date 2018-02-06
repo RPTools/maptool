@@ -1,3 +1,16 @@
+/*
+ * This software Copyright by the RPTools.net development team, and licensed
+ * under the GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool 2 Source Code is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this source Code. If not, see <http://www.gnu.org/licenses/>
+ */
+
 package net.rptools.maptool.client.ui.drawpanel;
 
 import java.awt.Color;
@@ -13,7 +26,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.drawing.AbstractDrawing;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
+import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.LineSegment;
@@ -59,10 +74,10 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 				text = I18N.getText(key, at.getRadius());
 				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			}
-			text = addPenText(de.getPen(), text);
+			text = addText(de.getPen(), text, de.getDrawable());
 		} else if (value instanceof DrawPanelTreeModel.View) {
 			DrawPanelTreeModel.View view = (DrawPanelTreeModel.View) value;
-			text = view.getLayer().name();
+			text = view.getLayer().toString();
 		} else {
 			//setLeafIcon(null);
 		}
@@ -74,7 +89,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 		return this;
 	}
 
-	private String addPenText(Pen pen, String text) {
+	private String addText(Pen pen, String text, Drawable drawing) {
 		if (pen == null)
 			return text;
 		String result = text;
@@ -84,12 +99,22 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 			int perc = (int) (pen.getOpacity() * 100);
 			result = result + String.format(" opacity %s%%", perc);
 		}
+		if (drawing instanceof AbstractDrawing) {
+			String dName = ((AbstractDrawing) drawing).getName();
+			if (dName != null && !"".equals(dName))
+				result = result + ": " + dName;
+		}
 		return result;
 	}
 
 	private Icon setDrawPanelIcon(String key, boolean eraser) {
 		try {
 			switch (key) {
+			case "panel.DrawExplorer.ShapeDrawable.Area":
+				if (eraser)
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly-erase.png")));
+				else
+					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly.png")));
 			case "panel.DrawExplorer.ShapeDrawable.Polygon":
 				if (eraser)
 					return new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/drawpanel-poly-erase.png")));

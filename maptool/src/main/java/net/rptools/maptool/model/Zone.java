@@ -96,6 +96,10 @@ public class Zone extends BaseModel {
 		}
 	}
 
+	public enum TokenSelection {
+		PC, NPC, ALL, GM
+	}
+
 	public static final int DEFAULT_TOKEN_VISION_DISTANCE = 250; // In units
 	public static final int DEFAULT_PIXELS_CELL = 50;
 	public static final int DEFAULT_UNITS_PER_CELL = 5;
@@ -150,10 +154,16 @@ public class Zone extends BaseModel {
 	private boolean drawBoard = true;
 	private boolean boardChanged = false;
 
+	// Lee: adding extra property to determine FoW exposure method
+	// Jamz: Changed to transient to allow backwards compatibility of campaign
+	// files & changed default to on
+	private transient boolean exposeFogAtWaypoints = true;
+
 	private String name;
 	private boolean isVisible;
 
 	private VisionType visionType = VisionType.OFF;
+	private TokenSelection tokenSelection = TokenSelection.ALL;
 
 	// These are transitionary properties, very soon the width and height won't matter
 	private int height;
@@ -196,6 +206,14 @@ public class Zone extends BaseModel {
 
 	public void setVisionType(VisionType visionType) {
 		this.visionType = visionType;
+	}
+
+	public TokenSelection getTokenSelection() {
+		return tokenSelection;
+	}
+
+	public void setTokenSelection(TokenSelection tokenSelection) {
+		this.tokenSelection = tokenSelection;
 	}
 
 	/**
@@ -562,25 +580,31 @@ public class Zone extends BaseModel {
 		if (token == null) {
 			return false;
 		}
+
 		// Base case, nothing is visible
 		if (!token.isVisible()) {
 			return false;
 		}
+
 		// Base case, everything is visible
 		if (!hasFog()) {
 			return true;
 		}
+
+		// Token is visible to owner only and client isn't that player
 		if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
 			return false;
 		}
+
 		// Token is visible, and there is fog
 		Rectangle tokenSize = token.getBounds(this);
 		Area combined = new Area(exposedArea);
 		PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
 		if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != VisionType.OFF) {
 			List<Token> toks = view.getTokens();
+
+			// Jamz: Lets change the logic a bit looking for ownerships
 			if (toks != null && !toks.isEmpty()) {
-				// Should this use FindTokenFunctions.OwnedFilter and zone.getTokenList()?
 				for (Token tok : toks) {
 					if (!AppUtil.playerOwns(tok)) {
 						continue;
@@ -648,10 +672,15 @@ public class Zone extends BaseModel {
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
 	}
 
+	public void tokenTopologyChanged() {
+		fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+	}
+
 	public Area getTopology() {
 		return topology;
 	}
 
+	// Clears FoW for ALL tokens, including NPC's
 	public void clearExposedArea() {
 		exposedArea = new Area();
 		// There used to be a foreach loop here that iterated over getTokens() and called .clear() -- why?!
@@ -659,20 +688,25 @@ public class Zone extends BaseModel {
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
 	}
 
-	/* Back out this function
-	 * Possible cause of FOW issues
-	 * See http://forums.rptools.net/viewtopic.php?f=86&t=26469
-	 * 
+	// clear only exposed area for tokenSet, eg only PC's
 	public void clearExposedArea(Set<GUID> tokenSet) {
-		//Jamz: Clear FoW for set tokens only, for use by ExposeVisibleAreaOnlyAction Menu action and exposePCOnlyArea() macro
+		// Jamz: Clear FoW for set tokens only, for use by
+		// ExposeVisibleAreaOnlyAction Menu action and exposePCOnlyArea() macro
+
 		for (GUID tea : tokenSet) {
-			ExposedAreaMetaData meta = exposedAreaMeta.get(tea);
-			if (meta != null)
+			ExposedAreaMetaData meta = getExposedAreaMetaData(tea);
+			if (meta != null) {
 				meta.clearExposedAreaHistory();
+				Token token = getToken(tea);
+				ZoneRenderer zr = MapTool.getFrame().getZoneRenderer(this.getId());
+				zr.flush(token);
+				setExposedAreaMetaData(token.getExposedAreaGUID(), meta);
+				MapTool.serverCommand().updateExposedAreaMeta(getId(), token.getExposedAreaGUID(), meta);
+			}
 		}
-	
+
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
-	} */
+	}
 
 	public void exposeArea(Area area, Token tok) {
 		if (area == null || area.isEmpty()) {
@@ -714,6 +748,7 @@ public class Zone extends BaseModel {
 		if (getVisionType() == VisionType.OFF) {
 			// Why is this done here and then again below???
 			// And just because Vision==Off doesn't mean we aren't doing IF...
+			// Jamz: if this exposedArea isn't done then it breaks getExposedTokens when vision is off...
 			exposedArea.add(area);
 		}
 		if (selectedToks != null && !selectedToks.isEmpty() && (MapTool.getServerPolicy().isUseIndividualFOW() || MapTool.isPersonalServer())) {
@@ -792,7 +827,7 @@ public class Zone extends BaseModel {
 		if (getVisionType() == VisionType.OFF) {
 			exposedArea.subtract(area);
 		}
-		if (selectedToks != null && !selectedToks.isEmpty() && MapTool.getServerPolicy().isUseIndividualFOW()) {
+		if (selectedToks != null && !selectedToks.isEmpty() && (MapTool.getServerPolicy().isUseIndividualFOW() || MapTool.isPersonalServer())) {
 			List<Token> allToks = new ArrayList<Token>();
 
 			for (GUID guid : selectedToks) {
@@ -928,6 +963,28 @@ public class Zone extends BaseModel {
 			drawables.add(drawnElement);
 		}
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
+	}
+
+	public void updateDrawable(DrawnElement drawnElement, Pen pen) {
+		if (drawnElement.getDrawable().getLayer() == Layer.OBJECT) {
+			updatePen(objectDrawables, drawnElement, pen);
+		} else if (drawnElement.getDrawable().getLayer() == Layer.BACKGROUND) {
+			updatePen(backgroundDrawables, drawnElement, pen);
+		} else if (drawnElement.getDrawable().getLayer() == Layer.GM) {
+			updatePen(gmDrawables, drawnElement, pen);
+		} else {
+			updatePen(drawables, drawnElement, pen);
+		}
+		fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
+	}
+
+	private void updatePen(List<DrawnElement> elementList, DrawnElement drawnElement, Pen pen) {
+		for (DrawnElement de : elementList) {
+			if (de.getDrawable().getId().equals(drawnElement.getDrawable().getId())) {
+				de.setPen(new Pen(pen));
+				break;
+			}
+		}
 	}
 
 	public void addDrawableRear(DrawnElement drawnElement) {
@@ -1251,23 +1308,77 @@ public class Zone extends BaseModel {
 		return Collections.unmodifiableList(copy);
 	}
 
+	public List<Token> removeTokens(List<Token> tokensToKeep, List<Token> tokensToRemove) {
+		ArrayList<Token> originalList = new ArrayList<Token>(tokensToKeep);
+		originalList.removeAll(tokensToRemove);
+
+		return Collections.unmodifiableList(originalList);
+	}
+
 	/**
 	 * This is the list of non-stamp tokens, both pc and npc
+	 * 
 	 */
 	public List<Token> getTokens() {
+		return getTokens(true);
+	}
+
+	public List<Token> getTokens(boolean getAlwaysVisible) {
 		return getTokensFiltered(new Filter() {
 			@Override
 			public boolean matchToken(Token t) {
-				return !t.isStamp();
+				if (getAlwaysVisible)
+					return !t.isStamp();
+				else
+					return !t.isStamp() && !t.isAlwaysVisible();
+			}
+		});
+	}
+
+	public List<Token> getGMStamps() {
+		return getGMStamps(true);
+	}
+
+	public List<Token> getGMStamps(boolean getAlwaysVisible) {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				if (getAlwaysVisible)
+					return t.isGMStamp();
+				else
+					return t.isGMStamp() && !t.isAlwaysVisible();
 			}
 		});
 	}
 
 	public List<Token> getStampTokens() {
+		return getStampTokens(true);
+	}
+
+	public List<Token> getStampTokens(boolean getAlwaysVisible) {
 		return getTokensFiltered(new Filter() {
 			@Override
 			public boolean matchToken(Token t) {
-				return t.isObjectStamp();
+				if (getAlwaysVisible)
+					return t.isObjectStamp();
+				else
+					return t.isObjectStamp() && !t.isAlwaysVisible();
+			}
+		});
+	}
+
+	public List<Token> getBackgroundStamps() {
+		return getBackgroundStamps(true);
+	}
+
+	public List<Token> getBackgroundStamps(boolean getAlwaysVisible) {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				if (getAlwaysVisible)
+					return t.isBackgroundStamp();
+				else
+					return t.isBackgroundStamp() && !t.isAlwaysVisible();
 			}
 		});
 	}
@@ -1290,29 +1401,98 @@ public class Zone extends BaseModel {
 		});
 	}
 
+	public List<Token> getTokensAlwaysVisible() {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				return t.isAlwaysVisible();
+			}
+		});
+	}
+
+	public List<Token> getTokensWithVBL() {
+		return getTokensFiltered(new Filter() {
+			@Override
+			public boolean matchToken(Token t) {
+				return t.hasVBL();
+			}
+		});
+	}
+
+	/**
+	 * This method is called when no tokens are selected and it determines which tokens FoW to show.
+	 * New buttons were added to select what type of tokens, by ownership, should be shown and driven
+	 * by the  TokenSelection enum.
+	 * 
+	 * @author updated by Jamz
+	 * @since updated 1.4.1.0
+	 * 
+	 * @param Player p
+	 * @return
+	 */
+	public List<Token> getOwnedTokensWithSight(Player p) {
+		return getTokensFiltered(new Filter() {
+			public boolean matchToken(Token t) {
+				//System.out.println("isOwnedByAll(): " + t.getName() + ":" + t.isOwnedByAll());
+				//System.out.println("AppUtil.playerOwns(t): " + t.getName() + ":" + AppUtil.playerOwns(t));
+				//return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
+
+				if (tokenSelection == null)
+					tokenSelection = TokenSelection.ALL;
+				//System.out.println("TokenSelection: " + tokenSelection);
+				switch (tokenSelection) {
+				case ALL: // Show FoW for ANY Token I own
+					return t.getHasSight() && AppUtil.playerOwns(t);
+				case NPC: // Show FoW for only NPC Tokens I own
+					return t.getHasSight() && t.getType() == Token.Type.NPC && (t.isOwnedByAll() || AppUtil.playerOwns(t));
+				case PC: // Show FoW for only PC Tokens I own
+					return t.getHasSight() && t.getType() == Token.Type.PC && (t.isOwnedByAll() || AppUtil.playerOwns(t));
+				case GM: // Show FoW for ANY Token the GM "username" explicitly owns OR has no ownership
+					return t.getHasSight() && AppUtil.gmOwns(t);
+				default: // Show FoW for ANY Token I own
+					return t.getHasSight() && AppUtil.playerOwns(t);
+				}
+			}
+		});
+	}
+
+	// Jamz: For FogUtil.exposePCArea to skip sight test.
+	public List<Token> getPlayerTokensWithSight() {
+		return getTokensFiltered(new Filter() {
+			public boolean matchToken(Token t) {
+				return t.getType() == Token.Type.PC && t.getHasSight();
+			}
+		});
+	}
+
+	// Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by All", 
+	// or "Owned" by the current player; in theory, NPC tokens the Player control.
+	public List<Token> getTokensOwnedByAllWithSight() {
+		return getTokensFiltered(new Filter() {
+			//String playerId = MapTool.getPlayer().getName();
+			public boolean matchToken(Token t) {
+				return (t.getHasSight() && (t.getType() == Token.Type.PC && (t.isOwnedByAll() || AppUtil.playerOwns(t))));
+			}
+		});
+	}
+
+	// Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by All", 
+	// or "Owned" by the current player; in theory, NPC tokens the Player control.
+	public List<Token> getTokensOwnedByAllWithSight(Player p) {
+		return getTokensFiltered(new Filter() {
+			String playerId = MapTool.getPlayer().getName();
+
+			public boolean matchToken(Token t) {
+				return (t.getHasSight() && (t.getType() == Token.Type.PC || t.isOwnedByAll() || t.isOwner(playerId)));
+			}
+		});
+	}
+
 	public List<Token> getPlayerOwnedTokensWithSight(Player p) {
 		return getTokensFiltered(new Filter() {
 			@Override
 			public boolean matchToken(Token t) {
 				return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
-			}
-		});
-	}
-
-	public List<Token> getBackgroundStamps() {
-		return getTokensFiltered(new Filter() {
-			@Override
-			public boolean matchToken(Token t) {
-				return t.isBackgroundStamp();
-			}
-		});
-	}
-
-	public List<Token> getGMStamps() {
-		return getTokensFiltered(new Filter() {
-			@Override
-			public boolean matchToken(Token t) {
-				return t.isGMStamp();
 			}
 		});
 	}
@@ -1603,5 +1783,24 @@ public class Zone extends BaseModel {
 		}
 		exposedAreaMeta.put(tokenExposedAreaGUID, meta);
 		fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+	}
+
+	/**
+	 * Lee: gets setting to expose fog normally or only at way points
+	 * 
+	 * @return boolean for exposure method
+	 */
+	public boolean getWaypointExposureToggle() {
+		return exposeFogAtWaypoints;
+	}
+
+	/**
+	 * Lee: Tells fog utilities to expose fog normally or only at way points
+	 * 
+	 * @param boolean
+	 *            toggle for exposure method
+	 */
+	public void setWaypointExposureToggle(boolean toggle) {
+		exposeFogAtWaypoints = toggle;
 	}
 }

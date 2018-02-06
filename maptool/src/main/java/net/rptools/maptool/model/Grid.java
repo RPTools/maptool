@@ -528,6 +528,41 @@ public abstract class Grid implements Cloneable {
 	}
 
 	/**
+	 * Check the region by subdividing into 3x3 and checking to see if at least 6 are open.
+	 * 
+	 * @param regionToCheck
+	 *            rectangular region to check for hard fog
+	 * @param fog
+	 *            defines areas where fog is currently covering the background
+	 * @param tolerance 
+	 * @return
+	 */
+	public boolean checkRegion(Rectangle regionToCheck, Area fog, int tolerance) {
+		Rectangle bounds = new Rectangle();
+
+		int closedSpace = 0;
+		int openSpace = 0;
+		for (int dy = 0; dy < 3; dy++) {
+			for (int dx = 0; dx < 3; dx++) {
+				oneThird(regionToCheck, dx, dy, bounds);
+				if (bounds.width < 1 || bounds.height < 1)
+					continue;
+				if (!fog.intersects(bounds)) {
+					if (++closedSpace > (9 - tolerance))
+						return false;
+				} else {
+					if (++openSpace > tolerance)
+						return true;
+				}
+			}
+		}
+
+		if (log.isInfoEnabled())
+			log.info("Center region of size " + regionToCheck.getSize() + " contains neither " + (9 - tolerance) + "+ closed spaces nor " + tolerance + "+ open spaces?!");
+		return openSpace >= closedSpace;
+	}
+
+	/**
 	 * Divides the specified region into one of nine parts, where the column and row range from 0..2. The destination
 	 * Rectangle must already exist (no check for this is made) and it must not be a reference to the same object as the
 	 * region to divide (also not checked).

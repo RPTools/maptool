@@ -60,13 +60,17 @@ public class AppStyle {
 	public static Color topologyAddColor = new Color(255, 0, 0, 128);
 	public static Color topologyRemoveColor = new Color(255, 255, 255, 128);
 
+	public static Color tokenTopologyColor = new Color(255, 255, 0, 128);
+	public static Color tokenTopologyAddColor = new Color(255, 0, 0, 128);
+	public static Color tokenTopologyRemoveColor = new Color(255, 255, 255, 128);
+
 	public static BufferedImage boundedBackgroundTile;
 
 	public static BufferedImage cancelButton;
 	public static BufferedImage addButton;
 
 	public static BufferedImage panelTexture;
-
+	public static BufferedImage squaresTexture;
 	public static BufferedImage lookupTableDefaultImage;
 
 	public static BufferedImage resourceLibraryImage;
@@ -106,6 +110,7 @@ public class AppStyle {
 
 			boundedBackgroundTile = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/Black.png");
 			panelTexture = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/panelTexture.jpg");
+			squaresTexture = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/squaresTexture.png");
 
 			cancelButton = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/cancel_sm.png");
 			addButton = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/add_sm.png");

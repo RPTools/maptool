@@ -79,7 +79,27 @@ public class AssetManager {
 	}
 
 	/**
-	 * Remove all existing repositories and load all the repositories from the currently loaded campaign.
+	 * Brute force clear asset cache... TODO: Create preferences and filter to
+	 * clear cache automatically by age of asset
+	 * 
+	 * @author Jamz
+	 * @since 1.4.0.1
+	 *
+	 */
+	public static void clearCache() {
+		try {
+			if (cacheDir != null) {
+				FileUtils.cleanDirectory(cacheDir);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Remove all existing repositories and load all the repositories from the
+	 * currently loaded campaign.
 	 */
 	public static void updateRepositoryList() {
 		assetLoader.removeAllRepositories();
@@ -450,10 +470,15 @@ public class AssetManager {
 						OutputStream out = new FileOutputStream(assetFile);
 						out.write(asset.getImage());
 						out.close();
-
+						// Jamz: Lets update the status bar with asset cache disk usage
+						MapTool.getFrame().getAssetCacheStatusBar().update(AppUtil.getDiskSpaceUsed(cacheDir));
+						MapTool.getFrame().getAppHomeDiskSpaceStatusBar().update();
 					} catch (IOException ioe) {
 						log.error("Could not persist asset while writing image data", ioe);
 						return;
+					} catch (NullPointerException npe) {
+						// Not an issue, will update once th frame is finished loading...
+						log.warn("Could not update statusbar while MapTool frame is loading.", npe);
 					}
 				}
 			}.start();

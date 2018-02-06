@@ -108,7 +108,7 @@ public class AutoSaveManager implements ActionListener {
 					pause();
 					long startSave = System.currentTimeMillis();
 					try {
-						PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE);
+						PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE, null);
 						MapTool.getFrame().setStatusMessage(I18N.getText("AutoSaveManager.status.autoSaveComplete", System.currentTimeMillis() - startSave));
 					} catch (IOException ioe) {
 						MapTool.showError("AutoSaveManager.failed", ioe);
