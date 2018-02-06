@@ -127,18 +127,18 @@ import net.rptools.maptool.util.UPnPUtil;
  * used throughout the application. Most of these are added to the main frame
  * menu, but some are added dynamically as needed, sometimes to the frame menu
  * but also to the context menu (the "right-click menu").
- *
+ * <p>
  * Each object instantiated from {@link DefaultClientAction} should have an
  * initializer that calls {@link ClientAction#init(String)} and passes the base
  * message key from the properties file. This base message key will be used to
  * locate the text that should appear on the menu item as well as the
  * accelerator, mnemonic, and short description strings. (See the {@link I18N}
  * class for more details on how the key is used.
- *
+ * <p>
  * In addition, each object should override {@link ClientAction#isAvailable()}
  * and return true if the application is in a state where the Action should be
  * enabled. (The default is <code>true</code>.)
- *
+ * <p>
  * Last is the {@link ClientAction#execute(ActionEvent)} method. It is passed
  * the {@link ActionEvent} object that triggered this Action as a parameter. It
  * should perform the necessary work to accomplish the effect of the Action.

@@ -2,10 +2,10 @@
  * This software copyright by various authors including the RPTools.net
  * development team, and licensed under the LGPL Version 3 or, at your option,
  * any later version.
- * 
+ *
  * Portions of this software were originally covered under the Apache Software
  * License, Version 1.1 or Version 2.0.
- * 
+ *
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
@@ -14,6 +14,7 @@ package net.rptools.maptool.client.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.GraphicsConfiguration;
 import java.awt.GridBagConstraints;
@@ -22,6 +23,13 @@ import java.awt.GridLayout;
 import java.awt.IllegalComponentStateException;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.desktop.AboutEvent;
+import java.awt.desktop.AboutHandler;
+import java.awt.desktop.PreferencesEvent;
+import java.awt.desktop.PreferencesHandler;
+import java.awt.desktop.QuitEvent;
+import java.awt.desktop.QuitHandler;
+import java.awt.desktop.QuitResponse;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -29,7 +37,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,6 +79,13 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.collections.map.LinkedMap;
+import org.apache.log4j.Logger;
+import org.xml.sax.SAXException;
+
+import com.jidesoft.docking.DefaultDockableHolder;
+import com.jidesoft.docking.DockableFrame;
+
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.lib.FileUtil;
@@ -103,8 +117,6 @@ import net.rptools.maptool.client.swing.ProgressStatusBar;
 import net.rptools.maptool.client.swing.SpacerStatusBar;
 import net.rptools.maptool.client.swing.StatusPanel;
 import net.rptools.maptool.client.swing.ZoomStatusBar;
-import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
@@ -130,22 +142,15 @@ import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
-import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.ImageManager;
-
-import org.apache.commons.collections.map.LinkedMap;
-import org.apache.log4j.Logger;
-import org.xml.sax.SAXException;
-
-import com.jidesoft.docking.DefaultDockableHolder;
-import com.jidesoft.docking.DockableFrame;
 
 /**
  */
@@ -417,28 +422,39 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	public void registerForMacOSXEvents() {
 		try {
-			OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("macOSXExit", (Class[]) null));
-			OSXAdapter.setAboutHandler(this, getClass().getDeclaredMethod("macOSXAbout", (Class[]) null));
-			OSXAdapter.setPreferencesHandler(this, getClass().getDeclaredMethod("macOSXPreferences", (Class[]) null));
+			Desktop.getDesktop().setQuitHandler(new QuitHandler() {
+				@Override
+				public void handleQuitRequestWith(QuitEvent arg0, QuitResponse arg1) {
+					((ClientAction) AppActions.EXIT).execute(null);
+					/*
+					 * Always tell the OS to cancel the quit operation -- we're
+					 * doing it ourselves. Unfortunately, if the user was trying
+					 * to logout, the logout operation is now cancelled, too! We
+					 * can't use performQuit() because that is documented to
+					 * call System.exit(0) and we may not be done with what
+					 * we're doing. That just leaves not calling either one --
+					 * that may turn out to be the best option in the long run.
+					 */
+					arg1.cancelQuit();
+				}
+			});
+			Desktop.getDesktop().setAboutHandler(new AboutHandler() {
+				@Override
+				public void handleAbout(AboutEvent arg0) {
+					((ClientAction) AppActions.SHOW_ABOUT).execute(null);
+				}
+			});
+			Desktop.getDesktop().setPreferencesHandler(new PreferencesHandler() {
+				@Override
+				public void handlePreferences(PreferencesEvent arg0) {
+					((ClientAction) AppActions.SHOW_PREFERENCES).execute(null);
+				}
+			});
 		} catch (Exception e) {
-			String msg = "Error while loading the OSXAdapter";
+			String msg = "Error while configuring Desktop interaction";
 			log.error(msg, e);
 			System.err.println(msg);
 		}
-	}
-
-	public void macOSXAbout() {
-		((ClientAction) AppActions.SHOW_ABOUT).execute(null);
-	}
-
-	public boolean macOSXExit() {
-		((ClientAction) AppActions.EXIT).execute(null);
-		// Always return false to abort exit from os.  Above call will close app normally if user accepts
-		return false;
-	}
-
-	public void macOSXPreferences() {
-		((ClientAction) AppActions.SHOW_PREFERENCES).execute(null);
 	}
 
 	public DragImageGlassPane getDragImageGlassPane() {
@@ -462,7 +478,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		 * means that any code using MTFrame enums that are converted to Strings
 		 * need to be checked so that when the return value is used as the NAME
 		 * of an Action, the property name is retrieved instead. Ugh. :(
-		 * 
+		 *
 		 * We'll need two additional methods: getPropName() and
 		 * getDisplayName(). Perhaps toString() could call getDisplayName(), but
 		 * it might be much simpler to debug if toString() weren't used. In that
@@ -526,11 +542,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 		try {
 			getDockingManager().loadInitialLayout(MapToolFrame.class.getClassLoader().getResourceAsStream(INITIAL_LAYOUT_XML));
-		} catch (ParserConfigurationException e) {
-			MapTool.showError("msg.error.layoutParse", e);
-		} catch (SAXException s) {
-			MapTool.showError("msg.error.layoutParse", s);
-		} catch (IOException e) {
+		} catch (ParserConfigurationException | SAXException | IOException e) {
 			MapTool.showError("msg.error.layoutParse", e);
 		}
 		getDockingManager().loadLayoutDataFromFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
@@ -934,16 +946,17 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 						}
 					}
 					/*
-					int[] treeRows = tree.getSelectionRows();
-					java.util.Arrays.sort(treeRows);
-					drawablesPanel.clearSelectedIds();
-					for (int i = 0; i < treeRows.length; i++) {
-						TreePath p = tree.getPathForRow(treeRows[i]);
-						if (p.getLastPathComponent() instanceof DrawnElement) {
-							DrawnElement de = (DrawnElement) p.getLastPathComponent();
-							drawablesPanel.addSelectedId(de.getDrawable().getId());
-						}
-					} */
+					 * int[] treeRows = tree.getSelectionRows();
+					 * java.util.Arrays.sort(treeRows);
+					 * drawablesPanel.clearSelectedIds(); for (int i = 0; i <
+					 * treeRows.length; i++) { TreePath p =
+					 * tree.getPathForRow(treeRows[i]); if
+					 * (p.getLastPathComponent() instanceof DrawnElement) {
+					 * DrawnElement de = (DrawnElement)
+					 * p.getLastPathComponent();
+					 * drawablesPanel.addSelectedId(de.getDrawable().getId()); }
+					 * }
+					 */
 				}
 				if (SwingUtilities.isRightMouseButton(e)) {
 					if (!isRowSelected(tree.getSelectionRows(), rowIndex) && !SwingUtil.isShiftDown(e)) {
@@ -1365,7 +1378,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	/**
 	 * Get the paintDrawingMeasurements for this MapToolClient.
-	 * 
+	 *
 	 * @return Returns the current value of paintDrawingMeasurements.
 	 */
 	public boolean isPaintDrawingMeasurement() {
@@ -1374,7 +1387,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	/**
 	 * Set the value of paintDrawingMeasurements for this MapToolClient.
-	 * 
+	 *
 	 * @param aPaintDrawingMeasurements
 	 *            The paintDrawingMeasurements to set.
 	 */
