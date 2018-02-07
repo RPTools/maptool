@@ -70,6 +70,13 @@ public class DrawingMiscFunctions extends DrawingFunctions {
 		return null;
 	}
 
+	/**
+	 * Searches the list of drawn elements for items with a matching name
+	 * @param  drawableList List of drawables.
+	 * @param  name String value for the search
+	 * 
+	 * @return List<String> of ids
+	 */
 	private List<String> findDrawings(List<DrawnElement> drawableList, String name) {
 		List<String> drawingList = new LinkedList<String>();
 		Iterator<DrawnElement> iter = drawableList.iterator();

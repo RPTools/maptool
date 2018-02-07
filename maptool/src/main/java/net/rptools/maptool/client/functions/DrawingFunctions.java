@@ -45,7 +45,14 @@ public class DrawingFunctions extends AbstractFunction {
 		return null;
 	}
 
-	public void bringToFront(Zone map, GUID guid) {
+	/**
+	 * Moves a specified drawing on a specified map to the top of the drawing stack.
+	 *
+	 * @param    map             the zone that should contain the drawing
+	 * @param    guid            the id of the drawing.
+	 * @throws   ParserException    if there were more or less parameters than allowed
+	 */
+	protected void bringToFront(Zone map, GUID guid) {
 		List<DrawnElement> drawableList = map.getAllDrawnElements();
 		Iterator<DrawnElement> iter = drawableList.iterator();
 		while (iter.hasNext()) {
@@ -152,13 +159,29 @@ public class DrawingFunctions extends AbstractFunction {
 	 * @param  functionName String Name of the calling function. Used for error messages.
 	 * @param  f String value of percentage
 	 * @return float
-	 * @throws ParserException thrown on invalid foat
+	 * @throws ParserException thrown on invalid float
 	 */
 	protected float getFloatPercent(String functionName, String f) throws ParserException {
 		try {
 			Float per = Float.parseFloat(f);
 			while (per > 1)
 				per = per / 100;
+			return per;
+		} catch (Exception e) {
+			throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", functionName, f));
+		}
+	}
+
+	/**
+	 * Validates the float
+	 * @param  functionName String Name of the calling function. Used for error messages.
+	 * @param  f String value of float
+	 * @return float
+	 * @throws ParserException thrown on invalid float
+	 */
+	protected float getFloat(String functionName, String f) throws ParserException {
+		try {
+			Float per = Float.parseFloat(f);
 			return per;
 		} catch (Exception e) {
 			throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", functionName, f));
@@ -212,18 +235,25 @@ public class DrawingFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Looks for a drawing on a specific map that matches a specific id.
+	 * Looks for a drawing on a specific map that matches a specific id and returns its pen.
 	 * Throws a <code>ParserException</code> if the drawing is not found.
 	 *
 	 * @param    functionName    this is used in the exception message
 	 * @param    map             the zone that should contain the drawing
 	 * @param    guid            the id of the drawing.
+	 * @return   Pen             Pen of the drawing.
 	 * @throws   ParserException if the drawing is not found.
 	 */
 	protected Pen getPen(String functionName, Zone map, GUID guid) throws ParserException {
 		return getDrawnElement(functionName, map, guid).getPen();
 	}
 
+	/**
+	 * Parses a string into either a Color Paint or Texture Paint.
+	 *
+	 * @param    paint           String containing the paint description.
+	 * @return   Pen             DrawableTexturePaint or DrawableColorPaint.
+	 */
 	protected DrawablePaint paintFromString(String paint) {
 		if (paint.toLowerCase().startsWith("asset://")) {
 			String id = paint.substring(8);
@@ -245,6 +275,15 @@ public class DrawingFunctions extends AbstractFunction {
 		return "";
 	}
 
+	/**
+	 * Parses a string to a boolean.
+	 * Throws a <code>ParserException</code> if the drawing is not found.
+	 *
+	 * @param    functionName    this is used in the exception message.
+	 * @param    args            List of parameters passed to the function.
+	 * @param    param           int reference to the boolean parameter.
+	 * @throws   ParserException if the parameter fails to parse.
+	 */
 	protected boolean parseBoolean(String functionName, List<Object> args, int param) throws ParserException {
 		try {
 			return AbstractTokenAccessorFunction.getBooleanValue(args.get(param));
@@ -253,7 +292,7 @@ public class DrawingFunctions extends AbstractFunction {
 		}
 	}
 
-	public void sendToBack(Zone map, GUID guid) {
+	protected void sendToBack(Zone map, GUID guid) {
 		List<DrawnElement> drawableList = map.getAllDrawnElements();
 		Iterator<DrawnElement> iter = drawableList.iterator();
 		while (iter.hasNext()) {
@@ -272,17 +311,13 @@ public class DrawingFunctions extends AbstractFunction {
 		MapTool.getFrame().refresh();
 	}
 
-	public void setDrawingOpacity(Zone map, GUID guid, float op) {
-		List<DrawnElement> drawableList = map.getAllDrawnElements();
-		Iterator<DrawnElement> iter = drawableList.iterator();
-		while (iter.hasNext()) {
-			DrawnElement de = iter.next();
-			if (de.getDrawable().getId().equals(guid)) {
-				setOpacity(map, de, op);
-			}
+	protected void setDrawingOpacity(String functionName, Zone map, GUID guid, float op) throws ParserException {
+		DrawnElement de = getDrawnElement(functionName, map, guid);
+		if (de != null) {
+			setOpacity(map, de, op);
+			MapTool.getFrame().updateDrawTree();
+			MapTool.getFrame().refresh();
 		}
-		MapTool.getFrame().updateDrawTree();
-		MapTool.getFrame().refresh();
 	}
 
 	private void setOpacity(Zone map, DrawnElement d, float op) {
@@ -315,13 +350,10 @@ public class DrawingFunctions extends AbstractFunction {
 			throw new ParserException(I18N.getText("macro.function.drawingFunction.invalidPen", functionName));
 		Pen p = new Pen((Pen) pen);
 		List<DrawnElement> drawableList = map.getAllDrawnElements();
-		Iterator<DrawnElement> iter = drawableList.iterator();
-		while (iter.hasNext()) {
-			DrawnElement de = iter.next();
-			if (de.getDrawable().getId().equals(guid)) {
-				de.setPen(p);
-				return;
-			}
+		DrawnElement de = findDrawnElement(drawableList, guid);
+		if (de != null) {
+			de.setPen(p);
+			return;
 		}
 		throw new ParserException(I18N.getText("macro.function.drawingFunction.unknownDrawing", functionName, guid.toString()));
 	}

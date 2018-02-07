@@ -28,7 +28,7 @@ public class DrawingSetterFunctions extends DrawingFunctions {
 	}
 
 	private DrawingSetterFunctions() {
-		super(3, 3, "setDrawingLayer", "setDrawingOpacity", "setDrawingProperties", "setPenColor", "setFillColor", "setDrawingEraser");
+		super(3, 3, "setDrawingLayer", "setDrawingOpacity", "setDrawingProperties", "setPenColor", "setFillColor", "setDrawingEraser", "setPenWidth");
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class DrawingSetterFunctions extends DrawingFunctions {
 		} else if ("setDrawingOpacity".equalsIgnoreCase(functionName)) {
 			String opacity = parameters.get(2).toString();
 			float op = getFloatPercent(functionName, opacity);
-			setDrawingOpacity(map, guid, op);
+			setDrawingOpacity(functionName, map, guid, op);
 			return "";
 		} else if ("setDrawingProperties".equalsIgnoreCase(functionName)) {
 			Pen pen = (Pen) parameters.get(2);
@@ -73,6 +73,11 @@ public class DrawingSetterFunctions extends DrawingFunctions {
 			boolean eraser = parseBoolean(functionName, parameters, 2);
 			Pen p = getPen(functionName, map, guid);
 			p.setEraser(eraser);
+			return "";
+		} else if ("setPenWidth".equalsIgnoreCase(functionName)) {
+			String penWidth = parameters.get(2).toString();
+			float pw = getFloat(functionName, penWidth);
+			getPen(functionName, map, guid).setThickness(pw);
 			return "";
 		}
 		return null;

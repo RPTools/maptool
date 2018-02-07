@@ -27,8 +27,7 @@ public class DrawingGetterFunctions extends DrawingFunctions {
 	}
 
 	private DrawingGetterFunctions() {
-		super(2, 2, "getDrawingLayer", "getDrawingOpacity", "getDrawingProperties", "getPenColor",
-				"getFillColor", "getDrawingEraser");
+		super(2, 2, "getDrawingLayer", "getDrawingOpacity", "getDrawingProperties", "getPenColor", "getFillColor", "getDrawingEraser", "getPenWidth");
 	}
 
 	@Override
@@ -53,6 +52,8 @@ public class DrawingGetterFunctions extends DrawingFunctions {
 			return result;
 		} else if ("getDrawingEraser".equalsIgnoreCase(functionName)) {
 			return getPen(functionName, map, guid).isEraser() ? BigDecimal.ONE : BigDecimal.ZERO;
+		} else if ("getPenWidth".equalsIgnoreCase(functionName)) {
+			return getPen(functionName, map, guid).getThickness();
 		}
 		return null;
 	}
