@@ -10,9 +10,17 @@ matrix:
             packages:
                 - oracle-java9-installer
                 - fakeroot
-      - os: osx
+        env: VERSION=4.3.1
         before_install:
             - ./.travis/installer.sh "$TRAVIS_OS_NAME"
+            - export GRADLE_HOME="$PWD/gradle-$VERSION"
+            - export PATH="$GRADLE_HOME/bin:$PATH"
+      - os: osx
+        env: VERSION=4.3.1
+        before_install:
+            - ./.travis/installer.sh "$TRAVIS_OS_NAME"
+            - export GRADLE_HOME="$PWD/gradle-$VERSION"
+            - export PATH="$GRADLE_HOME/bin:$PATH"
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
