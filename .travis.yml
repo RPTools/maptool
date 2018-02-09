@@ -1,17 +1,16 @@
 language: java
 script: gradle build
-os:
-    - linux
-    - osx
-jdk:
-    - oraclejdk9
-addons:
-  apt:
-    packages:
-        - oracle-java9-installer
 
-before_install:
-    - ./.travis/installer.sh "$TRAVIS_OS_NAME"
+matrix:
+    include:
+      - os: linux
+        jdk: oraclejdk9
+        addons:
+          apt:
+            packages: oracle-java9-installer
+      - os: osx
+        before_install:
+            - ./.travis/installer.sh "$TRAVIS_OS_NAME"
 
 notifications:
   slack:

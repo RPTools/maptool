@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+set -ev
 case "$1" in
     osx)    COOKIE1="gpw_e24=http%3A%2F%2Fwww.oracle.com%2F"
             COOKIE2="oraclelicense=accept-securebackup-cookie"
@@ -13,3 +14,4 @@ case "$1" in
             echo "Completed JDK installation..."
             ;;
 esac
+exit 0
