@@ -1,5 +1,5 @@
 language: java
-script: gradle build
+script: ./gradlew build
 
 matrix:
     include:
@@ -7,10 +7,20 @@ matrix:
         jdk: oraclejdk9
         addons:
           apt:
-            packages: oracle-java9-installer
+            packages:
+                - oracle-java9-installer
+                - fakeroot
       - os: osx
         before_install:
             - ./.travis/installer.sh "$TRAVIS_OS_NAME"
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
 
 notifications:
   slack:
