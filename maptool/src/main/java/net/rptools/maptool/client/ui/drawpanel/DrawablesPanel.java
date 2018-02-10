@@ -121,7 +121,7 @@ public class DrawablesPanel extends JComponent {
 			Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds());
 			// Handle pen size
 			Pen pen = element.getPen();
-			int penSize = (int) (pen.getThickness() / 2 + 1);
+			int penSize = (int) pen.getThickness();
 			drawnBounds.setRect(drawnBounds.getX() - penSize, drawnBounds.getY() - penSize, drawnBounds.getWidth() + (penSize * 2), drawnBounds.getHeight() + (penSize * 2));
 			if (bounds == null)
 				bounds = drawnBounds;

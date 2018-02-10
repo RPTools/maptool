@@ -26,12 +26,14 @@ import java.util.List;
 public class LineSegment extends AbstractDrawing {
 	private final List<Point> points = new ArrayList<Point>();
 	private Float width;
+	private boolean squareCap;
 	private transient int lastPointCount = -1;
 	private transient Rectangle cachedBounds;
 	private transient Area area;
 
-	public LineSegment(float width) {
+	public LineSegment(float width, boolean squareCap) {
 		this.width = width;
+		this.squareCap = squareCap;
 	}
 
 	/**
@@ -54,7 +56,7 @@ public class LineSegment extends AbstractDrawing {
 
 	private Area createLineArea() {
 		GeneralPath gp = null;
-		for (Point point : points) {
+		for (Point point : trimPoints(points)) {
 			if (gp == null) {
 				gp = new GeneralPath();
 				gp.moveTo(point.x, point.y);
@@ -62,7 +64,7 @@ public class LineSegment extends AbstractDrawing {
 			}
 			gp.lineTo(point.x, point.y);
 		}
-		BasicStroke stroke = new BasicStroke(width != null ? width : 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+		BasicStroke stroke = new BasicStroke(width != null ? width : 2, getStrokeCap(), getStrokeJoin());
 		return new Area(stroke.createStrokedShape(gp));
 	}
 
@@ -106,5 +108,37 @@ public class LineSegment extends AbstractDrawing {
 		cachedBounds = bounds;
 		lastPointCount = points.size();
 		return bounds;
+	}
+
+	public int getStrokeCap() {
+		if (squareCap)
+			return BasicStroke.CAP_SQUARE;
+		else
+			return BasicStroke.CAP_ROUND;
+	}
+
+	public int getStrokeJoin() {
+		if (squareCap)
+			return BasicStroke.JOIN_MITER;
+		else
+			return BasicStroke.JOIN_ROUND;
+	}
+
+	/**
+	 * Due to mouse movement, a user drawn line often has a duplicated
+	 * point at the end. To draw a clean line this should be removed.
+	 *  
+	 * @param points
+	 * @return
+	 */
+	private List<Point> trimPoints(List<Point> points) {
+		if (points.size() < 2)
+			return points;
+		if (points.get(points.size() - 1).equals(points.get(points.size() - 2))) {
+			List<Point> trimPoints = new ArrayList<Point>(points);
+			trimPoints.remove(points.size() - 1);
+			return trimPoints;
+		}
+		return points;
 	}
 }

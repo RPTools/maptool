@@ -200,6 +200,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 		} else {
 			pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
 		}
+		pen.setSquareCap(picker.isSquareCapSelected());
 		return pen;
 	}
 

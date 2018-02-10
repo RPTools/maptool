@@ -54,7 +54,7 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
 	}
 
 	protected void startLine(MouseEvent e) {
-		line = new LineSegment(getPen().getThickness());
+		line = new LineSegment(getPen().getThickness(), getPen().getSquareCap());
 		addPoint(e);
 	}
 
