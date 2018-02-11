@@ -36,4 +36,7 @@ out/
 
 # Keystore
 build-resources/rptools-keystore
-build-resources/jWrapper
+
+# Generated
+build-resources/jWrapper/JWrapperLaunchTemp
+build-resources/jWrapper/jwrapper.xml
