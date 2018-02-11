@@ -1,7 +1,7 @@
 MapTool
 =======
 
-Welcome to the MapTool 1.4 repository. The old version (1.3) still resides on [SourceForge](http://sourceforge.net/p/rptools/svn/HEAD/tree/) but should only be updated with major bug fixes.
+Welcome to the MapTool 1.4 repository. The old version (1.3) still resides on [SourceForge](http://sourceforge.net/p/rptools/svn/HEAD/tree/) but will not be updated going forward.
 
 So what is MapTool? 
 -------------------
@@ -15,8 +15,15 @@ And we don't stop there! Not content with just emulating the tabletop, we seek t
 Requirements
 ------------
 
-- MapTool 1.4 requires [Java 1.7+](https://java.com/en/download/)
+- MapTool 1.4 requires [Java 1.7+](https://java.com/en/download/) although current iterations have an embedded JRE that will install along with MapTool
 - Building MapTool requires the Java Development Kit (JDK): [How To Install JDK](doc/How_To_Install_JDK.md)
+
+Version Numbers
+---------------
+
+The RPTools team intends to use the "1.4" moniker until such time as changes are made that break backward compatibility with reading user data files (campaigns, maps, tokens, etc).  At that point, the version number will be bumped to "1.5".  (Note that the format of exported data may change without bumping the version number, as long as the older file format can still be read and used.)  In any case, the next digit will be even-numbered for stable releases and odd-numbered for development builds.
+
+All of the exciting new features will be happening in the development builds.  Major bugs or security fixes will be ported between the stable and development branches so that they are available in both.
 
 Resources
 ---------
@@ -25,41 +32,63 @@ Resources
  - **Forums:**  http://forums.rptools.net 
  - **Wiki:**    http://lmwcs.com/rptools/wiki/Main_Page 
 
-Building Maptool
-----------------
+Configuration Steps Prior to Building MapTool
+---------------------------------------------
 
 First, [install the JDK](doc/How_To_Install_JDK.md).
 
-[Gradle](http://gradle.org/) is used to build MapTool 1.4. You do not need Gradle installed to perform the build as the repository has a small wrapper that will download and install it in a subdirectory for you. This means that the first time you do a build you will need to be connected to the internet and it will take a while
-as it downloads everything it needs.
+Second, clone the GitHub repository (this one or one that you have forked) to your local system.  If you are cloning your own fork, change the URL as appropriate.
 
-```Shell
-./gradlew build  
+```
+git clone git@github.com:RPTools/maptool.git
 ```
 
-For Windows, remember to flip the slash:
+From here on, it is expected that you are running these commands from within the directory that was created when you cloned the repository (referred to as the _working directory_ in Git-speak).
 
-```Shell
-.\gradlew build  
+[Gradle](http://gradle.org/) is used to build MapTool 1.4. You do not need Gradle installed to perform the build as the repository has a small wrapper that will download and install it in a subdirectory for you. This means that the first time you run Gradle, you will need to be connected to the Internet and it will take a while as it downloads everything it needs.
+
+(Note that Java 9 requires Gradle 4.x+ -- older versions of Gradle _will not work_!)
+
+* On Linux and macOS (and other Unix systems):
+```
+./gradlew --version=4.5.1 --distribution-type=bin
+```
+
+* On Windows, remember to use the backslash instead:
+```
+.\gradlew --version=4.5.1 --distribution-type=bin
+```
+
+Building MapTool
+----------------
+
+* On Linux and macOS (and other Unix systems):
+```
+./gradlew build
+```
+
+* On Windows, remember to use the backslash instead:
+```
+.\gradlew build
 ```
 
 Building the Distributable Zip
 ------------------------------
 
-```Shell
+* On Linux and macOS (and other Unix systems):
+```
 ./gradlew clean release
 ```
 
-For Windows, remember to flip the slash:
-
-```Shell
+* On Windows, remember to use the backslash instead:
+```
 .\gradlew clean release 
 ```
 
-This will create a `.zip` file for use on all systems as well as a zipped `.app` for Mac OS X in the `maptool/build/` directory. The build number will be based on the latest tag and latest commit.
+This will create a `.zip` file for use on all systems (as well as a zipped `.app` for macOS) in the `maptool/build/` subdirectory. The build number will be based on the latest tag and latest commit.
 
-Developers
-----------
+Contributors
+------------
 
 Please follow our [Code Style and Guidelines](doc/Code_Style_and_Guidelines.md) when submitting patches and pull requests.
 
@@ -67,5 +96,5 @@ Please follow our [Code Style and Guidelines](doc/Code_Style_and_Guidelines.md) 
 Optional
 --------
 
-- [How To Setup User Interface (UI) Tools for Maptool](doc/How_To_Setup_UI_Tools.md)
 - [How To Setup Eclipse for MapTool](doc/How_To_Setup_Eclipse.md)
+- [How To Setup User Interface (UI) Tools for MapTool](doc/How_To_Setup_UI_Tools.md)

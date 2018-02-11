@@ -19,7 +19,6 @@ Thumbs.db
 *.log
 *~
 target/
-build/
 out/
 
 
@@ -37,3 +36,4 @@ out/
 
 # Keystore
 build-resources/rptools-keystore
+build-resources/jWrapper
