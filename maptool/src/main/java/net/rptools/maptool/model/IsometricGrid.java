@@ -115,7 +115,7 @@ public class IsometricGrid extends Grid {
 		 * Given a facing from a plan map turn it into isometric map equivalent i.e 45 degree converts to 30 degree
 		 */
 		double iso = Math.asin((Math.sin(facing) / 2) / Math.cos(facing));
-		System.out.println("in=" + facing + " out=" + iso);
+		//System.out.println("in=" + facing + " out=" + iso);
 		return iso;
 	}
 
@@ -219,7 +219,7 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	public void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap) {
-		System.out.println("install iso movement keys");
+		//System.out.println("install iso movement keys");
 		if (movementKeys == null) {
 			movementKeys = new HashMap<KeyStroke, Action>(18); // This is 13/0.75, rounded up
 			int size = getSize();
@@ -242,7 +242,7 @@ public class IsometricGrid extends Grid {
 
 	@Override
 	public void uninstallMovementKeys(Map<KeyStroke, Action> actionMap) {
-		System.out.println("uninstall iso movement keys");
+		//System.out.println("uninstall iso movement keys");
 		if (movementKeys != null) {
 			for (KeyStroke key : movementKeys.keySet()) {
 				actionMap.remove(key);

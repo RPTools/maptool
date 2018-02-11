@@ -56,7 +56,7 @@ public class LineSegment extends AbstractDrawing {
 
 	private Area createLineArea() {
 		GeneralPath gp = null;
-		for (Point point : trimPoints(points)) {
+		for (Point point : points) { // trim points?
 			if (gp == null) {
 				gp = new GeneralPath();
 				gp.moveTo(point.x, point.y);
@@ -126,12 +126,30 @@ public class LineSegment extends AbstractDrawing {
 
 	/**
 	 * Due to mouse movement, a user drawn line often has a duplicated
+	 * point at junctions and at the end. To draw a clean line these 
+	 * should be removed.
+	 *  
+	 * So only add a point if it is not a duplicate of the immediately 
+	 * preceding point.
+	 * 
+	 */
+	public void addPoint(Point point) {
+		if (points.size() > 1) {
+			if (points.get(points.size() - 1).equals(point)) {
+				return;
+			}
+		}
+		points.add(point);
+	}
+
+	/**
+	 * Due to mouse movement, a user drawn line often has a duplicated
 	 * point at the end. To draw a clean line this should be removed.
 	 *  
 	 * @param points
 	 * @return
 	 */
-	private List<Point> trimPoints(List<Point> points) {
+	private List<Point> trimPointsA(List<Point> points) {
 		if (points.size() < 2)
 			return points;
 		if (points.get(points.size() - 1).equals(points.get(points.size() - 2))) {

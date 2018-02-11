@@ -68,7 +68,7 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
 			return null; // Escape has been pressed
 		Point ret = new Point(zp.x, zp.y);
 
-		line.getPoints().add(ret);
+		line.addPoint(ret);
 		currentX = zp.x;
 		currentY = zp.y;
 

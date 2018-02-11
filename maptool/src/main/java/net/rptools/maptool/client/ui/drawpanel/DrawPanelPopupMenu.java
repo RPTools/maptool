@@ -14,9 +14,11 @@
 package net.rptools.maptool.client.ui.drawpanel;
 
 import java.awt.Paint;
+import java.awt.Point;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +48,7 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
+import net.rptools.maptool.model.drawing.LineSegment;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
 
@@ -136,6 +139,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 				cp.setPenWidth((int) p.getThickness());
 				cp.setTranslucency((int) (p.getOpacity() * 100));
 				cp.setEraseSelected(p.isEraser());
+				cp.setSquareCapSelected(p.getSquareCap());
 			}
 		}
 	}
@@ -177,6 +181,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			p.setOpacity(cp.getOpacity());
 			p.setThickness(cp.getStrokeWidth());
 			p.setEraser(cp.isEraseSelected());
+			p.setSquareCap(cp.isSquareCapSelected());
 			MapTool.getFrame().updateDrawTree();
 			MapTool.serverCommand().updateDrawing(renderer.getZone().getId(), p, elementUnderMouse);
 		}
