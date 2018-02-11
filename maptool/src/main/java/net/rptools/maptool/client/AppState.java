@@ -147,13 +147,13 @@ public class AppState {
 		showLightSources = show;
 	}
 
-	public synchronized static void setIsSaving(boolean saving) {
+	public static void setIsSaving(boolean saving) {
 		if (log.isDebugEnabled())
 			log.debug("AppState.isSaving was " + isSaving + "; setting to " + saving); //$NON-NLS-1$
 		isSaving = saving;
 	}
 
-	public synchronized static boolean isSaving() {
+	public static boolean isSaving() {
 		if (log.isDebugEnabled())
 			log.debug("AppState.isSaving is " + isSaving); //$NON-NLS-1$
 		return isSaving;
