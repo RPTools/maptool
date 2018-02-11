@@ -127,7 +127,7 @@ public class AutoSaveManager implements ActionListener {
 					try {
 						if (log.isDebugEnabled())
 							log.debug("AppState.isSaving() is true; writing file..."); //$NON-NLS-1$
-						PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE, null);
+						PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE);
 						long totalTime = System.currentTimeMillis() - startSave;
 						if (log.isDebugEnabled())
 							log.debug("File IO complete; time required(ms): " + totalTime); //$NON-NLS-1$
