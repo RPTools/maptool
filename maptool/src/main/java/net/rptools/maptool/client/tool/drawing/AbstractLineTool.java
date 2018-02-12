@@ -68,7 +68,8 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
 			return null; // Escape has been pressed
 		Point ret = new Point(zp.x, zp.y);
 
-		line.addPoint(ret);
+		line.getPoints().add(ret);
+
 		currentX = zp.x;
 		currentY = zp.y;
 
@@ -93,7 +94,7 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
 		addPoint(e);
 
 		Drawable drawable = line;
-		if (isBackgroundFill(e) && line.getPoints().size() > 3) { // TODO: There's a bug where the last point is duplicated, hence 3 points
+		if (isBackgroundFill(e) && line.getPoints().size() > 2) {
 			drawable = new ShapeDrawable(getPolygon(line));
 		}
 		completeDrawable(renderer.getZone().getId(), getPen(), drawable);
@@ -103,10 +104,20 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
 		currentY = -1;
 	}
 
+
+	/**
+	 * Due to mouse movement, a user drawn line often has duplicated points, 
+	 * especially at the end. To draw a clean line with miter joints these 
+	 * duplicates should be removed.
+	 *  
+	 */
 	protected Polygon getPolygon(LineSegment line) {
 		Polygon polygon = new Polygon();
+		Point lastPoint = null;
 		for (Point point : line.getPoints()) {
-			polygon.addPoint(point.x, point.y);
+			if (!point.equals(lastPoint))
+				polygon.addPoint(point.x, point.y);
+			lastPoint = point;
 		}
 		return polygon;
 	}
