@@ -8,9 +8,7 @@ buildscript {
 	repositories {
 		mavenCentral()
 		jcenter()
-		maven {
-			url "https://plugins.gradle.org/m2/"
-		}
+		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	dependencies {
 		classpath 'org.ajoberstar:gradle-git:0.11.2'
@@ -123,6 +121,7 @@ allprojects {
 	repositories {
 		mavenCentral()
 		maven { url = 'http://maptool.craigs-stuff.net/repo/' }
+		maven { url "https://jitpack.io" }
 		mavenLocal()
 	}
 
@@ -302,6 +301,7 @@ project(':maptool') {
 		compile 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
 		compile 'net.rptools.parser:parser:1.4.0.+'
 		compile 'ca.odell.renderpack:renderpack:1.2004'
+		compile 'com.github.Jaggeroth:rplib:1.4.1-penplay'
 		compile 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
 		compile 'org.swinglabs:swing-worker:1.1'
 		compile 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
