@@ -104,7 +104,6 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
 		currentY = -1;
 	}
 
-
 	/**
 	 * Due to mouse movement, a user drawn line often has duplicated points, 
 	 * especially at the end. To draw a clean line with miter joints these 
