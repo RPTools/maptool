@@ -242,6 +242,8 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 		if (!hasPaint(pen)) {
 			return;
 		}
+		if (drawable.getBounds() == null)
+			return;
 		drawable.setLayer(selectedLayer);
 
 		// Send new textures

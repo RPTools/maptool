@@ -55,6 +55,8 @@ public class LineSegment extends AbstractDrawing {
 	}
 
 	private Area createLineArea() {
+		if (points.size() < 1)
+			return null;
 		GeneralPath gp = null;
 		for (Point point : points) { // trim points?
 			if (gp == null) {
@@ -76,7 +78,8 @@ public class LineSegment extends AbstractDrawing {
 			width = ((BasicStroke) g.getStroke()).getLineWidth();
 		}
 		Area area = getArea();
-		g.fill(area);
+		if (area != null)
+			g.fill(area);
 	}
 
 	@Override
@@ -93,6 +96,8 @@ public class LineSegment extends AbstractDrawing {
 		if (lastPointCount == points.size()) {
 			return cachedBounds;
 		}
+		if (points.size() < 1)
+			return null;
 		Rectangle bounds = new Rectangle(points.get(0));
 		for (Point point : points) {
 			bounds.add(point);

@@ -118,6 +118,10 @@ public class DrawablesPanel extends JComponent {
 	private Rectangle getBounds(List<DrawnElement> drawableList) {
 		Rectangle bounds = null;
 		for (DrawnElement element : drawableList) {
+			// Empty drawables are created by right clicking during the draw process
+			// and need to be skipped.
+			if (element.getDrawable().getBounds() == null)
+				continue;
 			Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds());
 			// Handle pen size
 			Pen pen = element.getPen();
