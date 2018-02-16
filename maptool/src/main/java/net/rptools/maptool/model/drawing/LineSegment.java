@@ -115,6 +115,14 @@ public class LineSegment extends AbstractDrawing {
 		return bounds;
 	}
 
+	public Float getWidth() {
+		return width;
+	}
+
+	public boolean isSquareCap() {
+		return squareCap;
+	}
+
 	public int getStrokeCap() {
 		if (squareCap)
 			return BasicStroke.CAP_SQUARE;

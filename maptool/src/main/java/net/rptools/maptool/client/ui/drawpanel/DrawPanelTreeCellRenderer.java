@@ -66,7 +66,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 			} else if (de.getDrawable() instanceof LineSegment) {
 				LineSegment ls = (LineSegment) de.getDrawable();
 				key = String.format("panel.DrawExplorer.%s.Line", ls.getClass().getSimpleName());
-				text = I18N.getText(key, ls.getPoints().size() - 1, de.getPen().getThickness());
+				text = I18N.getText(key, ls.getPoints().size(), de.getPen().getThickness());
 				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			} else if (de.getDrawable() instanceof AbstractTemplate) {
 				AbstractTemplate at = (AbstractTemplate) de.getDrawable();
