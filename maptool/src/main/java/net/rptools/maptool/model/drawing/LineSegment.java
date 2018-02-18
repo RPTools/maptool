@@ -75,8 +75,9 @@ public class LineSegment extends AbstractDrawing {
 		if (width == null) {
 			// Handle legacy values
 			area = null; // reset, build with new value
-			width = ((BasicStroke) g.getStroke()).getLineWidth();
 		}
+		width = ((BasicStroke) g.getStroke()).getLineWidth();
+		squareCap = ((BasicStroke) g.getStroke()).getEndCap() == BasicStroke.CAP_SQUARE;
 		Area area = getArea();
 		if (area != null)
 			g.fill(area);
