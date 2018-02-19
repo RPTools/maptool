@@ -20,7 +20,6 @@ import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
-import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -57,10 +56,10 @@ import net.rptools.maptool.model.drawing.ShapeDrawable;
 public class DrawPanelPopupMenu extends JPopupMenu {
 
 	private static final long serialVersionUID = 8889082158114727461L;
-	private final ZoneRenderer renderer;
 	private final DrawnElement elementUnderMouse;
-	int x, y;
+	private final ZoneRenderer renderer;
 	Set<GUID> selectedDrawSet;
+	int x, y;
 
 	public DrawPanelPopupMenu(Set<GUID> selectedDrawSet, int x, int y, ZoneRenderer renderer, DrawnElement elementUnderMouse) {
 		super();
@@ -89,151 +88,70 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		add(createShapeVblMenu());
 	}
 
-	private boolean isDrawnElementGroup(Object object) {
-		if (object instanceof DrawnElement)
-			return ((DrawnElement) object).getDrawable() instanceof DrawablesGroup;
-		return false;
+	private class BringToFrontAction extends AbstractAction {
+		public void actionPerformed(ActionEvent e) {
+			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
+			Iterator<DrawnElement> iter = drawableList.iterator();
+			while (iter.hasNext()) {
+				DrawnElement de = iter.next();
+				if (selectedDrawSet.contains(de.getDrawable().getId())) {
+					renderer.getZone().removeDrawable(de.getDrawable().getId());
+					MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
+					renderer.getZone().addDrawable(new DrawnElement(de.getDrawable(), de.getPen()));
+					MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
+				}
+			}
+			MapTool.getFrame().updateDrawTree();
+			MapTool.getFrame().refresh();
+		}
 	}
+	
+	private class ChangeTypeAction extends AbstractAction {
+		private final Zone.Layer layer;
 
-	protected JMenu createPathVblMenu() {
-		JMenu pathVblMenu = new JMenu("Path to VBL");
-		pathVblMenu.add(new JMenuItem(new VblPathAction(false)));
-		pathVblMenu.add(new JMenuItem(new VblPathAction(true)));
-		return pathVblMenu;
-	}
-
-	public class VblPathAction extends AbstractAction {
-		private final boolean isEraser;
-
-		public VblPathAction(boolean isEraser) {
-			super((isEraser ? "Remove from " : "Add to ") + "VBL");
-			enabled = hasPath(elementUnderMouse);
-			this.isEraser = isEraser;
+		public ChangeTypeAction(Zone.Layer layer) {
+			putValue(Action.NAME, layer.toString());
+			this.layer = layer;
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			VblPath(elementUnderMouse.getDrawable(), isEraser);
+			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
+			Iterator<DrawnElement> iter = drawableList.iterator();
+			while (iter.hasNext()) {
+				DrawnElement de = iter.next();
+				if (de.getDrawable().getLayer() != this.layer && selectedDrawSet.contains(de.getDrawable().getId())) {
+					renderer.getZone().removeDrawable(de.getDrawable().getId());
+					MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
+					de.getDrawable().setLayer(this.layer);
+					renderer.getZone().addDrawable(de);
+					MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
+				}
+			}
+			MapTool.getFrame().updateDrawTree();
+			MapTool.getFrame().refresh();
 		}
-
 	}
-
-	protected JMenu createShapeVblMenu() {
-		JMenu shapeVblMenu = new JMenu("Shape to VBL");
-		shapeVblMenu.add(new JMenuItem(new VblShapeAction(false)));
-		shapeVblMenu.add(new JMenuItem(new VblShapeAction(true)));
-		return shapeVblMenu;
-	}
-
-	public class VblShapeAction extends AbstractAction {
-		private final boolean isEraser;
-
-		public VblShapeAction(boolean isEraser) {
-			super((isEraser ? "Remove from " : "Add to ") + "VBL");
-			enabled = hasPath(elementUnderMouse);
-			this.isEraser = isEraser;
+	
+	private class DeleteDrawingAction extends AbstractAction {
+		public DeleteDrawingAction() {
+			super("Delete");
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			VblShape(elementUnderMouse.getDrawable(), isEraser);
-		}
-
-	}
-
-	/**
-	 * Takes a drawable and adds or removes its path from the VBL
-	 * @param drawable
-	 * @param isEraser
-	 */
-	private void VblPath(Drawable drawable, boolean isEraser) {
-		Area area = new Area();
-
-		if (drawable instanceof LineSegment) {
-			LineSegment line = (LineSegment) drawable;
-			BasicStroke stroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-
-			Path2D path = new Path2D.Double();
-			Point lastPoint = null;
-
-			for (Point point : line.getPoints()) {
-				if (path.getCurrentPoint() == null) {
-					path.moveTo(point.x, point.y);
-				} else if (!point.equals(lastPoint)) {
-					path.lineTo(point.x, point.y);
-					lastPoint = point;
-				}
+			// check to see if this is the required action
+			if (!MapTool.confirmDrawDelete()) {
+				return;
 			}
-
-			area.add(new Area(stroke.createStrokedShape(path)));
-		} else {
-			BasicStroke stroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-			area.add(new Area(stroke.createStrokedShape(((ShapeDrawable) drawable).getShape())));
-		}
-		if (isEraser) {
-			renderer.getZone().removeTopology(area);
-			MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
-		} else {
-			renderer.getZone().addTopology(area);
-			MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
-		}
-		renderer.repaint();
-	}
-
-	/**
-	 * Takes a drawable and adds or removes its shape from the VBL
-	 * @param drawable
-	 * @param isEraser
-	 */
-	private void VblShape(Drawable drawable, boolean isEraser) {
-		Area area = new Area();
-
-		if (drawable instanceof LineSegment) {
-			LineSegment line = (LineSegment) drawable;
-			BasicStroke stroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-
-			Path2D path = new Path2D.Double();
-			Point lastPoint = null;
-
-			for (Point point : line.getPoints()) {
-				if (path.getCurrentPoint() == null) {
-					path.moveTo(point.x, point.y);
-				} else if (!point.equals(lastPoint)) {
-					path.lineTo(point.x, point.y);
-					lastPoint = point;
-				}
+			for (GUID id : selectedDrawSet) {
+				MapTool.serverCommand().undoDraw(renderer.getZone().getId(), id);
 			}
-
-			area.add(new Area(stroke.createStrokedShape(path)));
-		} else {
-			area = new Area(((ShapeDrawable) drawable).getShape());
+			renderer.repaint();
+			MapTool.getFrame().updateDrawTree();
+			MapTool.getFrame().refresh();
 		}
-		if (isEraser) {
-			renderer.getZone().removeTopology(area);
-			MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
-		} else {
-			renderer.getZone().addTopology(area);
-			MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
-		}
-		renderer.repaint();
 	}
-
-	/**
-	 * Tests to see if the selected object has a drawn path
-	 * @param drawnElement
-	 * @return boolean
-	 */
-	private boolean hasPath(DrawnElement drawnElement) {
-		if (drawnElement.getDrawable() instanceof LineSegment)
-			return true;
-		if (drawnElement.getDrawable() instanceof ShapeDrawable) {
-			ShapeDrawable sd = (ShapeDrawable) drawnElement.getDrawable();
-			if ("Float".equalsIgnoreCase(sd.getShape().getClass().getSimpleName()))
-				return false;
-			return true;
-		}
-		return false;
-	}
-
-	public class GetDrawingId extends AbstractAction {
+	
+	private class GetDrawingId extends AbstractAction {
 		public GetDrawingId() {
 			super("Get Drawing Id");
 		}
@@ -245,27 +163,8 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		}
 
 	}
-
-	public class SetDrawingName extends AbstractAction {
-		public SetDrawingName() {
-			super("Set Name");
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			String drawType = "Drawing";
-			if (elementUnderMouse.getDrawable() instanceof DrawnElement)
-				drawType = "Group";
-			AbstractDrawing group = (AbstractDrawing) elementUnderMouse.getDrawable();
-			String groupName = (String) JOptionPane.showInputDialog(MapTool.getFrame(),
-					"Enter a name for the " + drawType, drawType + " Name",
-					JOptionPane.QUESTION_MESSAGE,
-					null, null, group.getName());
-			group.setName(groupName == "" ? null : groupName);
-			MapTool.getFrame().updateDrawTree();
-		}
-	}
-
-	public class GetPropertiesAction extends AbstractAction {
+	
+	private class GetPropertiesAction extends AbstractAction {
 		public GetPropertiesAction() {
 			super("Get Properties");
 		}
@@ -287,65 +186,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		}
 	}
 
-	private Paint getPaint(DrawablePaint paint, AbstractDrawing ad) {
-		if (paint instanceof DrawableColorPaint) {
-			return paint.getPaint(ad);
-		}
-		if (paint instanceof DrawableTexturePaint) {
-			DrawableTexturePaint dtp = (DrawableTexturePaint) paint;
-			return new AssetPaint(dtp.getAsset());
-		}
-		return null;
-	}
-
-	public class SetPropertiesAction extends AbstractAction {
-		public SetPropertiesAction() {
-			super("Set Properties");
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			ColorPicker cp = MapTool.getFrame().getColorPicker();
-			Pen p = elementUnderMouse.getPen();
-			if (cp.getForegroundPaint() != null) {
-				p.setPaint(DrawablePaint.convertPaint(cp.getForegroundPaint()));
-				p.setForegroundMode(0);
-			} else {
-				p.setPaint(null);
-				p.setForegroundMode(1);
-			}
-			if (cp.getBackgroundPaint() != null) {
-				p.setBackgroundPaint(DrawablePaint.convertPaint(cp.getBackgroundPaint()));
-				p.setBackgroundMode(0);
-			} else {
-				p.setBackgroundPaint(null);
-				p.setBackgroundMode(1);
-			}
-			p.setThickness(cp.getStrokeWidth());
-			p.setOpacity(cp.getOpacity());
-			p.setThickness(cp.getStrokeWidth());
-			p.setEraser(cp.isEraseSelected());
-			p.setSquareCap(cp.isSquareCapSelected());
-			MapTool.getFrame().updateDrawTree();
-			MapTool.serverCommand().updateDrawing(renderer.getZone().getId(), p, elementUnderMouse);
-		}
-	}
-
-	public class UngroupDrawingsAction extends AbstractAction {
-		public UngroupDrawingsAction() {
-			super("Ungroup");
-			enabled = selectedDrawSet.size() == 1 && isDrawnElementGroup(elementUnderMouse);
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			MapTool.serverCommand().undoDraw(renderer.getZone().getId(), elementUnderMouse.getDrawable().getId());
-			DrawablesGroup dg = (DrawablesGroup) ((DrawnElement) elementUnderMouse).getDrawable();
-			for (DrawnElement de : dg.getDrawableList()) {
-				MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
-			}
-		}
-	}
-
-	public class GroupDrawingsAction extends AbstractAction {
+	private class GroupDrawingsAction extends AbstractAction {
 		public GroupDrawingsAction() {
 			super("Group Drawings");
 			enabled = selectedDrawSet.size() > 1;
@@ -393,7 +234,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		}
 	}
 
-	public class MergeDrawingsAction extends AbstractAction {
+	private class MergeDrawingsAction extends AbstractAction {
 		public MergeDrawingsAction() {
 			super("Merge Drawings");
 			enabled = selectedDrawSet.size() > 1;
@@ -436,109 +277,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		}
 	}
 
-	public class DeleteDrawingAction extends AbstractAction {
-		public DeleteDrawingAction() {
-			super("Delete");
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			// check to see if this is the required action
-			if (!MapTool.confirmDrawDelete()) {
-				return;
-			}
-			for (GUID id : selectedDrawSet) {
-				MapTool.serverCommand().undoDraw(renderer.getZone().getId(), id);
-			}
-			renderer.repaint();
-			MapTool.getFrame().updateDrawTree();
-			MapTool.getFrame().refresh();
-		}
-	}
-
-	protected void addGMItem(JMenu menu) {
-		if (menu == null) {
-			return;
-		}
-		if (MapTool.getPlayer().isGM()) {
-			add(menu);
-		}
-	}
-
-	protected void addGMItem(JSeparator separator) {
-		if (separator == null) {
-			return;
-		}
-		if (MapTool.getPlayer().isGM())
-			add(separator);
-	}
-
-	protected JMenu createChangeToMenu(Zone.Layer... types) {
-		JMenu changeTypeMenu = new JMenu("Change to");
-		for (Zone.Layer layer : types) {
-			changeTypeMenu.add(new JMenuItem(new ChangeTypeAction(layer)));
-		}
-		return changeTypeMenu;
-	}
-
-	public class ChangeTypeAction extends AbstractAction {
-		private final Zone.Layer layer;
-
-		public ChangeTypeAction(Zone.Layer layer) {
-			putValue(Action.NAME, layer.toString());
-			this.layer = layer;
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
-			Iterator<DrawnElement> iter = drawableList.iterator();
-			while (iter.hasNext()) {
-				DrawnElement de = iter.next();
-				if (de.getDrawable().getLayer() != this.layer && selectedDrawSet.contains(de.getDrawable().getId())) {
-					renderer.getZone().removeDrawable(de.getDrawable().getId());
-					MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
-					de.getDrawable().setLayer(this.layer);
-					renderer.getZone().addDrawable(de);
-					MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
-				}
-			}
-			MapTool.getFrame().updateDrawTree();
-			MapTool.getFrame().refresh();
-		}
-	}
-
-	protected JMenu createArrangeMenu() {
-		JMenu arrangeMenu = new JMenu("Arrange");
-		JMenuItem bringToFrontMenuItem = new JMenuItem("Bring to Front");
-		bringToFrontMenuItem.addActionListener(new BringToFrontAction());
-
-		JMenuItem sendToBackMenuItem = new JMenuItem("Send to Back");
-		sendToBackMenuItem.addActionListener(new SendToBackAction());
-
-		arrangeMenu.add(bringToFrontMenuItem);
-		arrangeMenu.add(sendToBackMenuItem);
-
-		return arrangeMenu;
-	}
-
-	public class BringToFrontAction extends AbstractAction {
-		public void actionPerformed(ActionEvent e) {
-			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
-			Iterator<DrawnElement> iter = drawableList.iterator();
-			while (iter.hasNext()) {
-				DrawnElement de = iter.next();
-				if (selectedDrawSet.contains(de.getDrawable().getId())) {
-					renderer.getZone().removeDrawable(de.getDrawable().getId());
-					MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
-					renderer.getZone().addDrawable(new DrawnElement(de.getDrawable(), de.getPen()));
-					MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
-				}
-			}
-			MapTool.getFrame().updateDrawTree();
-			MapTool.getFrame().refresh();
-		}
-	}
-
-	public class SendToBackAction extends AbstractAction {
+	private class SendToBackAction extends AbstractAction {
 		public void actionPerformed(ActionEvent e) {
 			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
 			Iterator<DrawnElement> iter = drawableList.iterator();
@@ -559,7 +298,227 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		}
 	}
 
+	private class SetDrawingName extends AbstractAction {
+		public SetDrawingName() {
+			super("Set Name");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			String drawType = "Drawing";
+			if (elementUnderMouse.getDrawable() instanceof DrawnElement)
+				drawType = "Group";
+			AbstractDrawing group = (AbstractDrawing) elementUnderMouse.getDrawable();
+			String groupName = (String) JOptionPane.showInputDialog(MapTool.getFrame(),
+					"Enter a name for the " + drawType, drawType + " Name",
+					JOptionPane.QUESTION_MESSAGE,
+					null, null, group.getName());
+			group.setName(groupName == "" ? null : groupName);
+			MapTool.getFrame().updateDrawTree();
+		}
+	}
+
+	private class SetPropertiesAction extends AbstractAction {
+		public SetPropertiesAction() {
+			super("Set Properties");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			ColorPicker cp = MapTool.getFrame().getColorPicker();
+			Pen p = elementUnderMouse.getPen();
+			if (cp.getForegroundPaint() != null) {
+				p.setPaint(DrawablePaint.convertPaint(cp.getForegroundPaint()));
+				p.setForegroundMode(0);
+			} else {
+				p.setPaint(null);
+				p.setForegroundMode(1);
+			}
+			if (cp.getBackgroundPaint() != null) {
+				p.setBackgroundPaint(DrawablePaint.convertPaint(cp.getBackgroundPaint()));
+				p.setBackgroundMode(0);
+			} else {
+				p.setBackgroundPaint(null);
+				p.setBackgroundMode(1);
+			}
+			p.setThickness(cp.getStrokeWidth());
+			p.setOpacity(cp.getOpacity());
+			p.setThickness(cp.getStrokeWidth());
+			p.setEraser(cp.isEraseSelected());
+			p.setSquareCap(cp.isSquareCapSelected());
+			MapTool.getFrame().updateDrawTree();
+			MapTool.serverCommand().updateDrawing(renderer.getZone().getId(), p, elementUnderMouse);
+		}
+	}
+
+	private class UngroupDrawingsAction extends AbstractAction {
+		public UngroupDrawingsAction() {
+			super("Ungroup");
+			enabled = selectedDrawSet.size() == 1 && isDrawnElementGroup(elementUnderMouse);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			MapTool.serverCommand().undoDraw(renderer.getZone().getId(), elementUnderMouse.getDrawable().getId());
+			DrawablesGroup dg = (DrawablesGroup) ((DrawnElement) elementUnderMouse).getDrawable();
+			for (DrawnElement de : dg.getDrawableList()) {
+				MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
+			}
+		}
+	}
+
+	/**
+	 * Menu items for VBL section.
+	 * Calls VblTool
+	 * @param pathOnly - boolean, just path if true, otherwise fill shape.
+	 * @param isEraser - boolean, erase VBL if true.
+	 */
+	private class VblAction extends AbstractAction {
+		private final boolean isEraser;
+		private final boolean pathOnly;
+
+		public VblAction(boolean pathOnly, boolean isEraser) {
+			super((isEraser ? "Remove from " : "Add to ") + "VBL");
+			enabled = hasPath(elementUnderMouse);
+			this.isEraser = isEraser;
+			this.pathOnly = pathOnly;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			VblTool(elementUnderMouse.getDrawable(), pathOnly, isEraser);
+		}
+
+	}
+
+	private void addGMItem(JMenu menu) {
+		if (menu == null) {
+			return;
+		}
+		if (MapTool.getPlayer().isGM()) {
+			add(menu);
+		}
+	}
+
+	private void addGMItem(JSeparator separator) {
+		if (separator == null) {
+			return;
+		}
+		if (MapTool.getPlayer().isGM())
+			add(separator);
+	}
+
+	private JMenu createArrangeMenu() {
+		JMenu arrangeMenu = new JMenu("Arrange");
+		JMenuItem bringToFrontMenuItem = new JMenuItem("Bring to Front");
+		bringToFrontMenuItem.addActionListener(new BringToFrontAction());
+
+		JMenuItem sendToBackMenuItem = new JMenuItem("Send to Back");
+		sendToBackMenuItem.addActionListener(new SendToBackAction());
+
+		arrangeMenu.add(bringToFrontMenuItem);
+		arrangeMenu.add(sendToBackMenuItem);
+
+		return arrangeMenu;
+	}
+
+	private JMenu createChangeToMenu(Zone.Layer... types) {
+		JMenu changeTypeMenu = new JMenu("Change to");
+		for (Zone.Layer layer : types) {
+			changeTypeMenu.add(new JMenuItem(new ChangeTypeAction(layer)));
+		}
+		return changeTypeMenu;
+	}
+
+	private JMenu createPathVblMenu() {
+		JMenu pathVblMenu = new JMenu("Path to VBL");
+		pathVblMenu.add(new JMenuItem(new VblAction(true, false)));
+		pathVblMenu.add(new JMenuItem(new VblAction(true, true)));
+		return pathVblMenu;
+	}
+
+	private JMenu createShapeVblMenu() {
+		JMenu shapeVblMenu = new JMenu("Shape to VBL");
+		shapeVblMenu.add(new JMenuItem(new VblAction(false, false)));
+		shapeVblMenu.add(new JMenuItem(new VblAction(false, true)));
+		return shapeVblMenu;
+	}
+
+	private Paint getPaint(DrawablePaint paint, AbstractDrawing ad) {
+		if (paint instanceof DrawableColorPaint) {
+			return paint.getPaint(ad);
+		}
+		if (paint instanceof DrawableTexturePaint) {
+			DrawableTexturePaint dtp = (DrawableTexturePaint) paint;
+			return new AssetPaint(dtp.getAsset());
+		}
+		return null;
+	}
+
+	/**
+	 * Tests to see if the selected object has a drawn path
+	 * @param drawnElement
+	 * @return boolean
+	 */
+	private boolean hasPath(DrawnElement drawnElement) {
+		if (drawnElement.getDrawable() instanceof LineSegment)
+			return true;
+		if (drawnElement.getDrawable() instanceof ShapeDrawable) {
+			ShapeDrawable sd = (ShapeDrawable) drawnElement.getDrawable();
+			if ("Float".equalsIgnoreCase(sd.getShape().getClass().getSimpleName()))
+				return false;
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isDrawnElementGroup(Object object) {
+		if (object instanceof DrawnElement)
+			return ((DrawnElement) object).getDrawable() instanceof DrawablesGroup;
+		return false;
+	}
+
 	public void showPopup(JComponent component) {
 		show(component, x, y);
+	}
+
+	/**
+	 * Takes a drawable and adds or removes its shape or path from the VBL
+	 * @param drawable
+	 * @param pathOnly - boolean, just path if true, otherwise fill shape.
+	 * @param isEraser - boolean, erase VBL if true.
+	 */
+	private void VblTool(Drawable drawable, boolean pathOnly, boolean isEraser) {
+		Area area = new Area();
+
+		if (drawable instanceof LineSegment) {
+			LineSegment line = (LineSegment) drawable;
+			BasicStroke stroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+
+			Path2D path = new Path2D.Double();
+			Point lastPoint = null;
+
+			for (Point point : line.getPoints()) {
+				if (path.getCurrentPoint() == null) {
+					path.moveTo(point.x, point.y);
+				} else if (!point.equals(lastPoint)) {
+					path.lineTo(point.x, point.y);
+					lastPoint = point;
+				}
+			}
+
+			area.add(new Area(stroke.createStrokedShape(path)));
+		} else {
+			if (pathOnly) {
+				BasicStroke stroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+				area.add(new Area(stroke.createStrokedShape(((ShapeDrawable) drawable).getShape())));
+			} else {
+				area = new Area(((ShapeDrawable) drawable).getShape());
+			}
+		}
+		if (isEraser) {
+			renderer.getZone().removeTopology(area);
+			MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
+		} else {
+			renderer.getZone().addTopology(area);
+			MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
+		}
+		renderer.repaint();
 	}
 }
