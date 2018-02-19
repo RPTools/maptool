@@ -105,7 +105,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			MapTool.getFrame().refresh();
 		}
 	}
-	
+
 	private class ChangeTypeAction extends AbstractAction {
 		private final Zone.Layer layer;
 
@@ -131,7 +131,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			MapTool.getFrame().refresh();
 		}
 	}
-	
+
 	private class DeleteDrawingAction extends AbstractAction {
 		public DeleteDrawingAction() {
 			super("Delete");
@@ -150,7 +150,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			MapTool.getFrame().refresh();
 		}
 	}
-	
+
 	private class GetDrawingId extends AbstractAction {
 		public GetDrawingId() {
 			super("Get Drawing Id");
@@ -163,7 +163,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		}
 
 	}
-	
+
 	private class GetPropertiesAction extends AbstractAction {
 		public GetPropertiesAction() {
 			super("Get Properties");
@@ -382,7 +382,14 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			VblTool(elementUnderMouse.getDrawable(), pathOnly, isEraser);
+			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
+			Iterator<DrawnElement> iter = drawableList.iterator();
+			while (iter.hasNext()) {
+				DrawnElement de = iter.next();
+				if (selectedDrawSet.contains(de.getDrawable().getId())) {
+					VblTool(de.getDrawable(), pathOnly, isEraser);
+				}
+			}
 		}
 
 	}
