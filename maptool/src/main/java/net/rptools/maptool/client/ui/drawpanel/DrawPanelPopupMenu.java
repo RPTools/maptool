@@ -13,10 +13,14 @@
 
 package net.rptools.maptool.client.ui.drawpanel;
 
+import java.awt.BasicStroke;
 import java.awt.Paint;
+import java.awt.Point;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Area;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +50,7 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
+import net.rptools.maptool.model.drawing.LineSegment;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
 
@@ -79,11 +84,152 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		add(new SetPropertiesAction());
 		add(new SetDrawingName());
 		add(new GetDrawingId());
+		addGMItem(new JSeparator());
+		add(createPathVblMenu());
+		add(createShapeVblMenu());
 	}
 
 	private boolean isDrawnElementGroup(Object object) {
 		if (object instanceof DrawnElement)
 			return ((DrawnElement) object).getDrawable() instanceof DrawablesGroup;
+		return false;
+	}
+
+	protected JMenu createPathVblMenu() {
+		JMenu pathVblMenu = new JMenu("Path to VBL");
+		pathVblMenu.add(new JMenuItem(new VblPathAction(false)));
+		pathVblMenu.add(new JMenuItem(new VblPathAction(true)));
+		return pathVblMenu;
+	}
+
+	public class VblPathAction extends AbstractAction {
+		private final boolean isEraser;
+
+		public VblPathAction(boolean isEraser) {
+			super((isEraser ? "Remove from " : "Add to ") + "VBL");
+			enabled = hasPath(elementUnderMouse);
+			this.isEraser = isEraser;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			VblPath(elementUnderMouse.getDrawable(), isEraser);
+		}
+
+	}
+
+	protected JMenu createShapeVblMenu() {
+		JMenu shapeVblMenu = new JMenu("Shape to VBL");
+		shapeVblMenu.add(new JMenuItem(new VblShapeAction(false)));
+		shapeVblMenu.add(new JMenuItem(new VblShapeAction(true)));
+		return shapeVblMenu;
+	}
+
+	public class VblShapeAction extends AbstractAction {
+		private final boolean isEraser;
+
+		public VblShapeAction(boolean isEraser) {
+			super((isEraser ? "Remove from " : "Add to ") + "VBL");
+			enabled = hasPath(elementUnderMouse);
+			this.isEraser = isEraser;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			VblShape(elementUnderMouse.getDrawable(), isEraser);
+		}
+
+	}
+
+	/**
+	 * Takes a drawable and adds or removes its path from the VBL
+	 * @param drawable
+	 * @param isEraser
+	 */
+	private void VblPath(Drawable drawable, boolean isEraser) {
+		Area area = new Area();
+
+		if (drawable instanceof LineSegment) {
+			LineSegment line = (LineSegment) drawable;
+			BasicStroke stroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+
+			Path2D path = new Path2D.Double();
+			Point lastPoint = null;
+
+			for (Point point : line.getPoints()) {
+				if (path.getCurrentPoint() == null) {
+					path.moveTo(point.x, point.y);
+				} else if (!point.equals(lastPoint)) {
+					path.lineTo(point.x, point.y);
+					lastPoint = point;
+				}
+			}
+
+			area.add(new Area(stroke.createStrokedShape(path)));
+		} else {
+			BasicStroke stroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+			area.add(new Area(stroke.createStrokedShape(((ShapeDrawable) drawable).getShape())));
+		}
+		if (isEraser) {
+			renderer.getZone().removeTopology(area);
+			MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
+		} else {
+			renderer.getZone().addTopology(area);
+			MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
+		}
+		renderer.repaint();
+	}
+
+	/**
+	 * Takes a drawable and adds or removes its shape from the VBL
+	 * @param drawable
+	 * @param isEraser
+	 */
+	private void VblShape(Drawable drawable, boolean isEraser) {
+		Area area = new Area();
+
+		if (drawable instanceof LineSegment) {
+			LineSegment line = (LineSegment) drawable;
+			BasicStroke stroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+
+			Path2D path = new Path2D.Double();
+			Point lastPoint = null;
+
+			for (Point point : line.getPoints()) {
+				if (path.getCurrentPoint() == null) {
+					path.moveTo(point.x, point.y);
+				} else if (!point.equals(lastPoint)) {
+					path.lineTo(point.x, point.y);
+					lastPoint = point;
+				}
+			}
+
+			area.add(new Area(stroke.createStrokedShape(path)));
+		} else {
+			area = new Area(((ShapeDrawable) drawable).getShape());
+		}
+		if (isEraser) {
+			renderer.getZone().removeTopology(area);
+			MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
+		} else {
+			renderer.getZone().addTopology(area);
+			MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
+		}
+		renderer.repaint();
+	}
+
+	/**
+	 * Tests to see if the selected object has a drawn path
+	 * @param drawnElement
+	 * @return boolean
+	 */
+	private boolean hasPath(DrawnElement drawnElement) {
+		if (drawnElement.getDrawable() instanceof LineSegment)
+			return true;
+		if (drawnElement.getDrawable() instanceof ShapeDrawable) {
+			ShapeDrawable sd = (ShapeDrawable) drawnElement.getDrawable();
+			if ("Float".equalsIgnoreCase(sd.getShape().getClass().getSimpleName()))
+				return false;
+			return true;
+		}
 		return false;
 	}
 

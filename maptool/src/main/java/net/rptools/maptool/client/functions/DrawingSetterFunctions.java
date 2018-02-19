@@ -28,7 +28,7 @@ public class DrawingSetterFunctions extends DrawingFunctions {
 	}
 
 	private DrawingSetterFunctions() {
-		super(3, 3, "setDrawingLayer", "setDrawingOpacity", "setDrawingProperties", "setPenColor", "setFillColor", "setDrawingEraser", "setPenWidth");
+		super(3, 3, "setDrawingLayer", "setDrawingOpacity", "setDrawingProperties", "setPenColor", "setFillColor", "setDrawingEraser", "setPenWidth", "setLineCap");
 	}
 
 	@Override
@@ -78,6 +78,11 @@ public class DrawingSetterFunctions extends DrawingFunctions {
 			String penWidth = parameters.get(2).toString();
 			float pw = getFloat(functionName, penWidth);
 			getPen(functionName, map, guid).setThickness(pw);
+			return "";
+		} else if ("setLineCap".equalsIgnoreCase(functionName)) {
+			boolean squareCap = parseBoolean(functionName, parameters, 2);
+			Pen p = getPen(functionName, map, guid);
+			p.setSquareCap(squareCap);
 			return "";
 		}
 		return null;
