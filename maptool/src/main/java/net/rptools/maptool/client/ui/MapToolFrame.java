@@ -957,7 +957,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 						public void run() {
 							DrawnElement firstElement = null;
 							Set<GUID> selectedDrawSet = new HashSet<GUID>();
+							boolean topLevelOnly = true;
 							for (TreePath path : tree.getSelectionPaths()) {
+								if (path.getPathCount() != 3)
+									topLevelOnly = false;
 								if (path.getLastPathComponent() instanceof DrawnElement) {
 									DrawnElement de = (DrawnElement) path.getLastPathComponent();
 									if (firstElement == null) {
@@ -968,7 +971,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 							}
 							if (!selectedDrawSet.isEmpty()) {
 								try {
-									new DrawPanelPopupMenu(selectedDrawSet, x, y, getCurrentZoneRenderer(), firstElement).showPopup(tree);
+									new DrawPanelPopupMenu(selectedDrawSet, x, y, getCurrentZoneRenderer(), firstElement, topLevelOnly).showPopup(tree);
 								} catch (IllegalComponentStateException icse) {
 									log.info(tree.toString(), icse);
 								}

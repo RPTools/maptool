@@ -58,16 +58,18 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 	private static final long serialVersionUID = 8889082158114727461L;
 	private final DrawnElement elementUnderMouse;
 	private final ZoneRenderer renderer;
+	private final boolean topLevelOnly;
 	Set<GUID> selectedDrawSet;
 	int x, y;
 
-	public DrawPanelPopupMenu(Set<GUID> selectedDrawSet, int x, int y, ZoneRenderer renderer, DrawnElement elementUnderMouse) {
+	public DrawPanelPopupMenu(Set<GUID> selectedDrawSet, int x, int y, ZoneRenderer renderer, DrawnElement elementUnderMouse, boolean topLevelOnly) {
 		super();
 		this.selectedDrawSet = selectedDrawSet;
 		this.x = x;
 		this.y = y;
 		this.renderer = renderer;
 		this.elementUnderMouse = elementUnderMouse;
+		this.topLevelOnly = topLevelOnly;
 
 		addGMItem(createChangeToMenu(Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
 		addGMItem(createArrangeMenu());
@@ -383,15 +385,29 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 		public void actionPerformed(ActionEvent e) {
 			List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
-			Iterator<DrawnElement> iter = drawableList.iterator();
-			while (iter.hasNext()) {
-				DrawnElement de = iter.next();
-				if (selectedDrawSet.contains(de.getDrawable().getId())) {
+			for (GUID guid : selectedDrawSet) {
+				DrawnElement de = findDrawnElement(drawableList, guid);
+				if (de != null)
 					VblTool(de.getDrawable(), pathOnly, isEraser);
-				}
 			}
 		}
 
+	}
+
+	private DrawnElement findDrawnElement(List<DrawnElement> drawableList, GUID guid) {
+		Iterator<DrawnElement> iter = drawableList.iterator();
+		while (iter.hasNext()) {
+			DrawnElement de = iter.next();
+			if (de.getDrawable().getId().equals(guid)) {
+				return de;
+			}
+			if (de.getDrawable() instanceof DrawablesGroup) {
+				DrawnElement result = findDrawnElement(((DrawablesGroup) de.getDrawable()).getDrawableList(), guid);
+				if (result != null)
+					return result;
+			}
+		}
+		return null;
 	}
 
 	private void addGMItem(JMenu menu) {
@@ -413,6 +429,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 	private JMenu createArrangeMenu() {
 		JMenu arrangeMenu = new JMenu("Arrange");
+		arrangeMenu.setEnabled(topLevelOnly);
 		JMenuItem bringToFrontMenuItem = new JMenuItem("Bring to Front");
 		bringToFrontMenuItem.addActionListener(new BringToFrontAction());
 
@@ -427,6 +444,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 	private JMenu createChangeToMenu(Zone.Layer... types) {
 		JMenu changeTypeMenu = new JMenu("Change to");
+		changeTypeMenu.setEnabled(topLevelOnly);
 		for (Zone.Layer layer : types) {
 			changeTypeMenu.add(new JMenuItem(new ChangeTypeAction(layer)));
 		}
