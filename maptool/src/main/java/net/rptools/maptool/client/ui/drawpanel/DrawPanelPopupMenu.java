@@ -453,6 +453,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 	private JMenu createPathVblMenu() {
 		JMenu pathVblMenu = new JMenu("Path to VBL");
+		pathVblMenu.setEnabled(hasPath(elementUnderMouse));
 		pathVblMenu.add(new JMenuItem(new VblAction(true, false)));
 		pathVblMenu.add(new JMenuItem(new VblAction(true, true)));
 		return pathVblMenu;
@@ -460,6 +461,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 	private JMenu createShapeVblMenu() {
 		JMenu shapeVblMenu = new JMenu("Shape to VBL");
+		shapeVblMenu.setEnabled(hasPath(elementUnderMouse));
 		shapeVblMenu.add(new JMenuItem(new VblAction(false, false)));
 		shapeVblMenu.add(new JMenuItem(new VblAction(false, true)));
 		return shapeVblMenu;

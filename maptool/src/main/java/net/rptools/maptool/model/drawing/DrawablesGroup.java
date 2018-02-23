@@ -16,6 +16,8 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.List;
 
+import net.rptools.maptool.model.Zone;
+
 /**
  * 
  * @author Jagged
@@ -85,4 +87,11 @@ public class DrawablesGroup extends AbstractDrawing {
 		// This should never be called
 	}
 
+	@Override
+	public void setLayer(Zone.Layer layer) {
+		super.setLayer(layer);
+		for (DrawnElement element : drawableList) {
+			element.getDrawable().setLayer(layer);
+		}
+	}
 }
