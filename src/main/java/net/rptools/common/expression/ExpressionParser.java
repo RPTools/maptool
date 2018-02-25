@@ -112,6 +112,22 @@ public class ExpressionParser {
 			new String[] { "\\b(\\d+)[sS][rR]4[gG](\\d+)\\b", "sr4($1, $2)" },
 			new String[] { "\\b(\\d+)[sS][rR]4\\b", "sr4($1)" },
 
+			// Subtract X with minimum of Y
+			new String[] { "\\b(\\d+)[dD](\\d+)[sS](\\d+)[lL](\\d+)\\b", "rollSubWithLower($1, $2, $3, $4)" },
+			new String[] { "\\b[dD](\\d+)[sS](\\d+)[lL](\\d+)\\b", "rollSubWithLower(1, $1, $2, $3)" },
+
+			// Add X with maximum of Y
+			new String[] { "\\b(\\d+)[dD](\\d+)[aA](\\d+)[uU](\\d+)\\b", "rollAddWithUpper($1, $2, $3, $4)" },
+			new String[] { "\\b[dD](\\d+)[aA](\\d+)[uU](\\d+)\\b", "rollAddWithUpper(1, $1, $2, $3)" },
+
+			// Roll with a minimum value per roll (e.g. treat 1s as 2s)
+			new String[] { "\\b(\\d+)[dD](\\d+)[lL](\\d+)\\b", "rollWithLower($1, $2, $3)" },
+			new String[] { "\\b[dD](\\d+)[lL](\\d+)\\b", "rollWithLower(1, $1, $2)" },
+
+			// Roll with a maximum value per roll (e.g. treat 6s as 5s)
+			new String[] { "\\b(\\d+)[dD](\\d+)[uU](\\d+)\\b", "rollWithUpper($1, $2, $3)" },
+			new String[] { "\\b[dD](\\d+)[uU](\\d+)\\b", "rollWithUpper(1, $1, $2)" },
+
 	};
 
 	private final Parser parser;

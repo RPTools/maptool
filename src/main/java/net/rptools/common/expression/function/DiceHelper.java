@@ -180,4 +180,15 @@ public class DiceHelper {
 
 		return result;
 	}
+
+	public static int rollModWithBounds(int times, int sides, int sub, int lower, int upper) {
+		int result = 0;
+
+		for (int i = 0; i < times; i++) {
+			result += Math.min(Math.max(rollDice(1, sides) - sub, lower), upper);
+		}
+
+		return result;
+	}
+
 }
