@@ -244,7 +244,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 				List<DrawnElement> zoneList = renderer.getZone().getDrawnElements(elementUnderMouse.getDrawable().getLayer());
 				for (GUID id : selectedDrawSet) {
 					DrawnElement de = renderer.getZone().getDrawnElement(id);
-					if (!zoneList.contains(de)) {
+					if (!zoneList.contains(de) || isDrawnElementGroup(de)) {
 						enabled = false;
 						break;
 					}
@@ -256,7 +256,6 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			if (selectedDrawSet.size() > 1 && elementUnderMouse != null) {
 				// only bother doing stuff if more than one selected
 				List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
-				List<DrawnElement> groupList = new ArrayList<DrawnElement>();
 				Iterator<DrawnElement> iter = drawableList.iterator();
 				Area a = elementUnderMouse.getDrawable().getArea();
 				while (iter.hasNext()) {
@@ -270,13 +269,25 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 					}
 				}
 				Shape s = (Shape) a;
-				DrawnElement de = new DrawnElement(new ShapeDrawable(s), elementUnderMouse.getPen());
+				Pen newPen = new Pen(elementUnderMouse.getPen()); //elementUnderMouse.getPen();
+				if (elementUnderMouse.getDrawable() instanceof LineSegment)
+					newPen = invertPen(newPen);
+				DrawnElement de = new DrawnElement(new ShapeDrawable(s), newPen);
 				de.getDrawable().setLayer(elementUnderMouse.getDrawable().getLayer());
-				MapTool.serverCommand().draw(renderer.getZone().getId(), de.getPen(), de.getDrawable());
+				MapTool.serverCommand().draw(renderer.getZone().getId(), newPen, de.getDrawable());
 				MapTool.getFrame().updateDrawTree();
 				MapTool.getFrame().refresh();
 			}
 		}
+	}
+
+	private Pen invertPen(Pen pen) {
+		Pen newPen = new Pen(pen);
+		newPen.setBackgroundPaint(pen.getPaint());
+		newPen.setBackgroundMode(pen.getForegroundMode());
+		newPen.setPaint(pen.getBackgroundPaint());
+		newPen.setForegroundMode(pen.getBackgroundMode());
+		return newPen;
 	}
 
 	private class SendToBackAction extends AbstractAction {
@@ -515,21 +526,8 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		Area area = new Area();
 
 		if (drawable instanceof LineSegment) {
-			LineSegment line = (LineSegment) drawable;
+			Path2D path = getPath(drawable);
 			BasicStroke stroke = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-
-			Path2D path = new Path2D.Double();
-			Point lastPoint = null;
-
-			for (Point point : line.getPoints()) {
-				if (path.getCurrentPoint() == null) {
-					path.moveTo(point.x, point.y);
-				} else if (!point.equals(lastPoint)) {
-					path.lineTo(point.x, point.y);
-					lastPoint = point;
-				}
-			}
-
 			area.add(new Area(stroke.createStrokedShape(path)));
 		} else {
 			if (pathOnly) {
@@ -547,5 +545,24 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 			MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
 		}
 		renderer.repaint();
+	}
+
+	private Path2D getPath(Drawable drawable) {
+		if (drawable instanceof LineSegment) {
+			LineSegment line = (LineSegment) drawable;
+			Path2D path = new Path2D.Double();
+			Point lastPoint = null;
+
+			for (Point point : line.getPoints()) {
+				if (path.getCurrentPoint() == null) {
+					path.moveTo(point.x, point.y);
+				} else if (!point.equals(lastPoint)) {
+					path.lineTo(point.x, point.y);
+					lastPoint = point;
+				}
+			}
+			return path;
+		}
+		return null;
 	}
 }
