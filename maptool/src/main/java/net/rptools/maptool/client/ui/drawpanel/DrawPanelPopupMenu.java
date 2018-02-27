@@ -269,7 +269,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 					}
 				}
 				Shape s = (Shape) a;
-				Pen newPen = new Pen(elementUnderMouse.getPen()); //elementUnderMouse.getPen();
+				Pen newPen = new Pen(elementUnderMouse.getPen());
 				if (elementUnderMouse.getDrawable() instanceof LineSegment)
 					newPen = invertPen(newPen);
 				DrawnElement de = new DrawnElement(new ShapeDrawable(s), newPen);

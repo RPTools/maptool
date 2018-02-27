@@ -102,7 +102,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 		if (drawing instanceof AbstractDrawing) {
 			String dName = ((AbstractDrawing) drawing).getName();
 			if (dName != null && !"".equals(dName))
-				result = result + ": " + dName;
+				result = dName + ": " + result;
 		}
 		return result;
 	}
