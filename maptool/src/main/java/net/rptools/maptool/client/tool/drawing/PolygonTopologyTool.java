@@ -126,6 +126,7 @@ public class PolygonTopologyTool extends LineTool implements MouseMotionListener
 		pen.setForegroundMode(Pen.MODE_TRANSPARENT);
 		pen.setBackgroundMode(Pen.MODE_SOLID);
 		pen.setThickness(1.0f);
+		pen.setOpacity(AppStyle.topologyRemoveColor.getAlpha() / 255.0f);
 		pen.setPaint(new DrawableColorPaint(isEraser() ? AppStyle.topologyRemoveColor : AppStyle.topologyAddColor));
 		return pen;
 	}

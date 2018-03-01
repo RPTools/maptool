@@ -62,6 +62,7 @@ public class PolyLineTopologyTool extends PolygonTopologyTool implements MouseMo
 		pen.setForegroundMode(Pen.MODE_SOLID);
 		pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
 		pen.setThickness(2.0f);
+		pen.setOpacity(AppStyle.topologyRemoveColor.getAlpha() / 255.0f);
 		pen.setPaint(new DrawableColorPaint(isEraser() ? AppStyle.topologyRemoveColor : AppStyle.topologyAddColor));
 
 		return pen;
