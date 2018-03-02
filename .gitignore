@@ -1,4 +1,4 @@
-.gradle
+.gradle/
 build/
 /bin/
 
@@ -19,7 +19,6 @@ Thumbs.db
 *.log
 *~
 target/
-build/
 out/
 
 
@@ -37,3 +36,8 @@ out/
 
 # Keystore
 build-resources/rptools-keystore
+
+# Generated
+build-resources/jWrapper/
+#build-resources/jWrapper/JWrapperLaunchTemp
+#build-resources/jWrapper/jwrapper.xml

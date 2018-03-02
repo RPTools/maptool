@@ -1668,13 +1668,27 @@ public class AppActions {
 			init("action.newCampaign");
 		}
 
+		/**
+		 * Displays a modal dialog asking Yes/No whether a new campaign should
+		 * be started; this is here because MapTool doesn't have a confirmImpl()
+		 * that allows the default button to be selected via a parameter.
+		 *
+		 * @return true if the select button is Yes, false for anything else
+		 */
+		private boolean confirmNewCampaign() {
+			String msg = I18N.getText("msg.confirm.newCampaign");
+			log.debug(msg);
+			Object[] options = { I18N.getText("msg.title.messageDialog.yes"), I18N.getText("msg.title.messageDialog.no") };
+			String title = I18N.getText("msg.title.messageDialogConfirm");
+			int val = JOptionPane.showOptionDialog(MapTool.getFrame(), msg, title, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[1]);
+
+			return val == JOptionPane.YES_OPTION;
+		}
+
 		@Override
 		public void execute(ActionEvent e) {
-
-			if (!MapTool.confirm("msg.confirm.newCampaign")) {
-
+			if (!confirmNewCampaign())
 				return;
-			}
 
 			Campaign campaign = CampaignFactory.createBasicCampaign();
 			AppState.setCampaignFile(null);
@@ -2203,16 +2217,22 @@ public class AppActions {
 	};
 
 	private static void doSaveCampaign(final Campaign campaign, final File file, final Observer callback) {
-		MapTool.getFrame().showFilledGlassPane(new StaticMessageDialog(I18N.getText("msg.info.campaignSaving")));
+		doSaveCampaign(campaign, file, callback, null);
+	}
+
+	private static void doSaveCampaign(final Campaign campaign, final File file, final Observer callback, final String campaignVersion) {
 		new SwingWorker<Object, Object>() {
 			@Override
 			protected Object doInBackground() throws Exception {
-				if (AppState.isSaving()) {
-					return "Campaign currently being auto-saved.  Try again later."; // string error message
-				}
 				try {
-					AppState.setIsSaving(true);
-					MapTool.getAutoSaveManager().pause();
+					synchronized (AppState.class) {
+						if (AppState.isSaving()) {
+							return "Campaign currently being auto-saved.  Try again later."; // string error message
+						}
+						AppState.setIsSaving(true);
+						MapTool.getAutoSaveManager().pause();
+					}
+					MapTool.getFrame().showFilledGlassPane(new StaticMessageDialog(I18N.getText("msg.info.campaignSaving")));
 
 					long start = System.currentTimeMillis();
 					PersistenceUtil.saveCampaign(campaign, file);
@@ -2231,8 +2251,10 @@ public class AppActions {
 				} catch (Throwable t) {
 					MapTool.showError("msg.error.failedSaveCampaign", t);
 				} finally {
-					AppState.setIsSaving(false);
-					MapTool.getAutoSaveManager().restart();
+					synchronized (AppState.class) {
+						AppState.setIsSaving(false);
+						MapTool.getAutoSaveManager().restart();
+					}
 				}
 				return "Failed due to exception"; // string error message
 			}
@@ -2273,7 +2295,6 @@ public class AppActions {
 
 			AppState.setCampaignFile(campaignFile);
 			AppPreferences.setSaveDir(campaignFile.getParentFile());
-			AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
 			MapTool.getFrame().setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
 		}
 	}

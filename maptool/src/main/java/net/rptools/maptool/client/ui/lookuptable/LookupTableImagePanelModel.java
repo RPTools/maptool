@@ -21,13 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import net.rptools.lib.swing.ImagePanelModel;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.util.ImageManager;
-
-import org.apache.log4j.Logger;
 
 public class LookupTableImagePanelModel implements ImagePanelModel {
 
@@ -100,11 +100,13 @@ public class LookupTableImagePanelModel implements ImagePanelModel {
 		return idList;
 	}
 
-	/**Retrieves a Map containing tables and their names from campaign
+	/**
+	 * Retrieves a Map containing tables and their names from campaign
 	 * properties.
-	 * @return Map&ltString, LookupTable&gt -- If the client belongs to a GM, all tables will
-	 * be returned.  If the client belongs to a player, only non-
-	 * hidden tables will be returned.
+	 *
+	 * @return Map&ltString, LookupTable&gt -- If the client belongs to a GM,
+	 *         all tables will be returned. If the client belongs to a player,
+	 *         only non- hidden tables will be returned.
 	 */
 	private Map<String, LookupTable> getFilteredLookupTable() {
 		if (MapTool.getPlayer() == null) {
@@ -120,5 +122,25 @@ public class LookupTableImagePanelModel implements ImagePanelModel {
 			}
 		}
 		return lookupTables;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see net.rptools.lib.swing.ImagePanelModel#getCaption(int, boolean)
+	 */
+	@Override
+	public String getCaption(int index, boolean withDimensions) {
+		Object id = getID(index);
+		Image i = getImage(id);
+		if (i == null) {
+			return null;
+		}
+		LookupTable table = getFilteredLookupTable().get(id);
+
+		String name = table.getName();
+		int h = i.getHeight(null);
+		int w = i.getWidth(null);
+		return String.format("<html>%s<br>%dx%d", name, w, h);
 	}
 }

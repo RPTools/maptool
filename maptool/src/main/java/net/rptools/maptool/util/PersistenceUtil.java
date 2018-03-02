@@ -2,16 +2,14 @@
  * This software copyright by various authors including the RPTools.net
  * development team, and licensed under the LGPL Version 3 or, at your option,
  * any later version.
- * 
+ *
  * Portions of this software were originally covered under the Apache Software
  * License, Version 1.1 or Version 2.0.
- * 
+ *
  * See the file LICENSE elsewhere in this distribution for license details.
  */
 
 package net.rptools.maptool.util;
-
-import javax.imageio.ImageIO;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -25,6 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +34,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+
+import com.caucho.hessian.io.HessianInput;
+// import com.google.common.io.Files;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.ConversionException;
 
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
@@ -61,14 +72,6 @@ import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
 import net.rptools.maptool.model.transform.campaign.TokenPropertyMapTransform;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-
-import com.caucho.hessian.io.HessianInput;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
  * @author trevor
@@ -215,7 +218,7 @@ public class PersistenceUtil {
 	/**
 	 * Determines whether the incoming map name is unique. If it is, it's
 	 * returned as-is. If it's not unique, a newly generated name is returned.
-	 * 
+	 *
 	 * @param n
 	 *            name from imported map
 	 * @return new name to use for the map
@@ -324,27 +327,40 @@ public class PersistenceUtil {
 			pakFile = null;
 		}
 
-		// Copy to the new location
-		// Not the fastest solution in the world if renameTo() fails, but worth the safety net it provides
+		/*
+		 * Copy to the new location. Not the fastest solution in the world if
+		 * renameTo() fails, but worth the safety net it provides. (Jamz had
+		 * issues with renameTo() keeping DropBox files locked on Windows.
+		 * Changed to use Files.move() from Java 7.)
+		 */
 		saveTimer.start("Backup");
 		File bakFile = new File(tmpDir.getAbsolutePath(), campaignFile.getName() + ".bak");
 		bakFile.delete();
 		if (campaignFile.exists()) {
-			if (!campaignFile.renameTo(bakFile)) {
-				saveTimer.start("Backup campaignFile");
-				FileUtil.copyFile(campaignFile, bakFile);
-				campaignFile.delete();
-				saveTimer.stop("Backup campaignFile");
+			saveTimer.start("Backup campaign file: " + campaignFile);
+			try {
+				Files.move(campaignFile.toPath(), bakFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			} catch (Exception ex) {
+				try {
+					FileUtil.copyFile(campaignFile, bakFile);
+				} catch (Exception e) {
+					MapTool.showError("msg.error.failedSaveCampaign");
+					return;
+				}
+			} finally {
+				saveTimer.stop("Backup campaign file: " + campaignFile);
 			}
 		}
-		if (!tmpFile.renameTo(campaignFile)) {
-			saveTimer.start("Backup tmpFile");
-			FileUtil.copyFile(tmpFile, campaignFile);
-			tmpFile.delete();
-			saveTimer.stop("Backup tmpFile");
+
+		saveTimer.start("Backup tmpFile to campaign file");
+		try {
+			Files.move(tmpFile.toPath(), campaignFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		} catch (Exception e) {
+			FileUtil.copyFile(campaignFile, bakFile);
+			tmpFile.delete(); // Only delete if the copy didn't throw an exception
 		}
-		if (bakFile.exists())
-			bakFile.delete();
+		saveTimer.stop("Backup tmpFile to campaign file");
+		bakFile.delete();
 		saveTimer.stop("Backup");
 
 		// Save the campaign thumbnail
@@ -390,7 +406,7 @@ public class PersistenceUtil {
 
 	/**
 	 * Gets a file pointing to where the campaign's thumbnail image should be.
-	 * 
+	 *
 	 * @param fileName
 	 *            The campaign's file name.
 	 */
@@ -728,7 +744,7 @@ public class PersistenceUtil {
 	/**
 	 * Answers the question, "Can this version of MapTool load an XML file with
 	 * a version string of <code>progVersion</code>?"
-	 * 
+	 *
 	 * @param progVersion
 	 *            version string read from the XML file
 	 * @return <code>true</code> if this MT can read the file based on the

@@ -14,19 +14,18 @@ package net.rptools.maptool.client;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 
 import javax.swing.Timer;
+
+import org.apache.log4j.Logger;
 
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.util.PersistenceUtil;
 
-import org.apache.log4j.Logger;
-
 /**
  * @author tylere
- * 
+ *
  *         Attempts to recover campaigns when the application crashes.
  */
 public class AutoSaveManager implements ActionListener {
@@ -39,7 +38,8 @@ public class AutoSaveManager implements ActionListener {
 	}
 
 	/**
-	 * Queries the auto-save increment from {@link AppPreferences} and starts a new timer.
+	 * Queries the auto-save increment from {@link AppPreferences} and starts a
+	 * new timer.
 	 */
 	public void restart() {
 		int interval = AppPreferences.getAutoSaveIncrement();
@@ -53,14 +53,21 @@ public class AutoSaveManager implements ActionListener {
 			if (interval <= 0) { // auto-save is turned off with <= 0
 				return;
 			} else {
+				if (log.isDebugEnabled())
+					log.debug("Autosave timer doesn't exist; creating new one.  Delay(ms) = " + delay); //$NON-NLS-1$
 				autoSaveTimer = new Timer(delay, this);
 				autoSaveTimer.start(); // Start it running...
 			}
 		} else {
 			if (interval <= 0) {
+				if (log.isDebugEnabled())
+					log.debug("Autosave timer exists; stop it and remove it."); //$NON-NLS-1$
 				autoSaveTimer.stop(); // auto-save is off; stop the Timer first
 				autoSaveTimer = null;
 			} else {
+				if (log.isDebugEnabled())
+					log.debug("Autosave timer exists; set delay and restart.  Delay(ms) = " + delay); //$NON-NLS-1$
+				autoSaveTimer.setInitialDelay(delay);
 				autoSaveTimer.setDelay(delay);
 				autoSaveTimer.restart(); // Set the new delay and restart the Timer
 			}
@@ -68,22 +75,20 @@ public class AutoSaveManager implements ActionListener {
 	}
 
 	/**
-	 * Applications can use this to pause the timer. The {@link #restart()} method can be called at any time to reset
-	 * and start the timer.
+	 * Applications can use this to pause the timer. The {@link #restart()}
+	 * method can be called at any time to reset and start the timer.
 	 */
 	public void pause() {
-		if (autoSaveTimer != null && autoSaveTimer.isRunning())
+		if (autoSaveTimer != null && autoSaveTimer.isRunning()) {
+			if (log.isDebugEnabled())
+				log.debug("Stopping autosave timer..."); //$NON-NLS-1$
 			autoSaveTimer.stop();
+		}
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		// Don't autosave if we don't "own" the campaign
 		if (!MapTool.isHostingServer() && !MapTool.isPersonalServer()) {
-			return;
-		}
-
-		if (AppState.isSaving()) {
-			log.debug("Canceling autosave because user has initiated save operation"); //$NON-NLS-1$
 			return;
 		}
 		try {
@@ -104,33 +109,64 @@ public class AutoSaveManager implements ActionListener {
 			// TODO: Replace this with a swing worker
 			new Thread(null, new Runnable() {
 				public void run() {
-					AppState.setIsSaving(true);
-					pause();
+					if (log.isDebugEnabled())
+						log.debug("Beginning autosave process..."); //$NON-NLS-1$
+					synchronized (AppState.class) {
+						if (AppState.isSaving()) {
+							// Can't autosave right now because the user is manually saving.
+							// The manual save will remove existing autosaves (?) so there's nothing
+							// for us to do.  Just return.
+							if (log.isDebugEnabled())
+								log.debug("Canceling autosave because user has initiated save operation"); //$NON-NLS-1$
+							return;
+						}
+						AppState.setIsSaving(true);
+						pause();
+					}
 					long startSave = System.currentTimeMillis();
 					try {
+						if (log.isDebugEnabled())
+							log.debug("AppState.isSaving() is true; writing file..."); //$NON-NLS-1$
 						PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE);
-						MapTool.getFrame().setStatusMessage(I18N.getText("AutoSaveManager.status.autoSaveComplete", System.currentTimeMillis() - startSave));
-					} catch (IOException ioe) {
+						long totalTime = System.currentTimeMillis() - startSave;
+						if (log.isDebugEnabled())
+							log.debug("File IO complete; time required(ms): " + totalTime); //$NON-NLS-1$
+						MapTool.getFrame().setStatusMessage(I18N.getText("AutoSaveManager.status.autoSaveComplete", totalTime));
+					} catch (Throwable ioe) {
+						if (log.isDebugEnabled())
+							log.debug("Exception occurred: " + ioe); //$NON-NLS-1$
 						MapTool.showError("AutoSaveManager.failed", ioe);
-					} catch (Throwable t) {
-						MapTool.showError("AutoSaveManager.failed", t);
 					} finally {
-						AppState.setIsSaving(false);
+						if (log.isDebugEnabled())
+							log.debug("Resetting AppState.isSaving() to false..."); //$NON-NLS-1$
+						synchronized (AppState.class) {
+							AppState.setIsSaving(false);
+							restart();
+						}
+						if (log.isDebugEnabled())
+							log.debug("Autosave complete."); //$NON-NLS-1$
 					}
 				}
 			}, "AutoSaveThread").start();
 		} catch (Throwable t) {
-			// If this routine fails, be sure the isSaving is turned off.  This should not be necessary:
-			// If the exception occurs anywhere before the .start() method of Thread, the boolean
-			// does not need to be reset anyway.  And if the .start() method is successful, this code
-			// will never be invoked, in which case the .run() method will decide when to set/reset
-			// the flag.  For safety's sake I retrieve the current value and report it if it's true, but
-			// we shouldn't be able to get here in that case...
-			if (AppState.isSaving()) {
-				MapTool.showError(I18N.getString("AutoSaveManager.failed") + "<br/>\nand AppState.isSaving() is true!", t);
-				AppState.setIsSaving(false);
-			} else {
-				MapTool.showError("AutoSaveManager.failed", t);
+			/*
+			 * If this routine fails, be sure the isSaving flag is turned off.
+			 * This should not be necessary: If the exception occurs anywhere
+			 * before the .start() method of Thread, the boolean does not need
+			 * to be reset. And if the .start() method is successful, this code
+			 * will never be invoked (exceptions thrown in the thread will not
+			 * propagate back to here), in which case the .run() method will
+			 * decide when to set/reset the flag. For safety's sake I retrieve
+			 * the current value and report it if it's true, but we shouldn't be
+			 * able to get here in that case...
+			 */
+			synchronized (AppState.class) {
+				if (AppState.isSaving()) {
+					MapTool.showError(I18N.getString("AutoSaveManager.failed") + "<br/>\nand AppState.isSaving() is true!", t);
+					AppState.setIsSaving(false);
+				} else {
+					MapTool.showError("AutoSaveManager.failed", t);
+				}
 			}
 		}
 	}

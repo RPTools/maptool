@@ -166,8 +166,9 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	}
 
 	/**
-	 * Determines which images to display based on the setting of the Global vs. Local flag (<code>global</code> ==
-	 * <b>true</b> means to search subdirectories as well as parent directory) and the filter text.
+	 * Determines which images to display based on the setting of the Global vs.
+	 * Local flag (<code>global</code> == <b>true</b> means to search
+	 * subdirectories as well as parent directory) and the filter text.
 	 */
 	private void refresh() {
 		fileList = new ArrayList<File>();
@@ -181,10 +182,12 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 			// assert global;
 
 			/*
-			 * Jamz: In the meantime, doing raw search and only search subdirectories if some criteria is filled in.
-			 * Didn't feel like hacking up AssetManager at this stage of development.
-			 * For now limiting global search to prevent very large arrays of 1000's of files which the panel
-			 * has a hard time rendering (even without global searches, it lags on large file lists).
+			 * Jamz: In the meantime, doing raw search and only search
+			 * subdirectories if some criteria is filled in. Didn't feel like
+			 * hacking up AssetManager at this stage of development. For now
+			 * limiting global search to prevent very large arrays of 1000's of
+			 * files which the panel has a hard time rendering (even without
+			 * global searches, it lags on large file lists).
 			 */
 
 			try {
@@ -271,11 +274,12 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 			MapTool.getFrame().getAssetPanel().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		}
 
-		/* 
-		 * Jamz: Return all assets in subdirectories and each to fileList
-		 *       This will spawn SwingWorkers for each subdir and is as such "multi-threaded"
-		 *       although not a true "Thread". It will cancel remaining workers once limit
-		 *       is reached. It searches through thousands of files very quickly.
+		/*
+		 * Jamz: Return all assets in subdirectories and each to fileList This
+		 * will spawn SwingWorkers for each subdir and is as such
+		 * "multi-threaded" although not a true "Thread". It will cancel
+		 * remaining workers once limit is reached. It searches through
+		 * thousands of files very quickly.
 		 */
 		private void listFilesInSubDirectories() {
 			publish(fileList.size());
@@ -321,4 +325,22 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 			return o1.getName().compareToIgnoreCase(o2.getName());
 		}
 	};
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see net.rptools.lib.swing.ImagePanelModel#getCaption(int, boolean)
+	 */
+	@Override
+	public String getCaption(int index, boolean withDimensions) {
+		if (index < 0 || index >= fileList.size()) {
+			return null;
+		}
+		File f = fileList.get(index);
+		String name = FileUtil.getNameWithoutExtension(f.getName());
+		Image i = getImage(index);
+		int h = i.getHeight(null);
+		int w = i.getWidth(null);
+		return String.format("<html>%s<br>%dx%d", name, w, h);
+	}
 }
