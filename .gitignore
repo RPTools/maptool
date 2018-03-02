@@ -1,4 +1,4 @@
-.gradle
+.gradle/
 build/
 /bin/
 
@@ -38,5 +38,6 @@ out/
 build-resources/rptools-keystore
 
 # Generated
-build-resources/jWrapper/JWrapperLaunchTemp
-build-resources/jWrapper/jwrapper.xml
+build-resources/jWrapper/
+#build-resources/jWrapper/JWrapperLaunchTemp
+#build-resources/jWrapper/jwrapper.xml

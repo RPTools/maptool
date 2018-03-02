@@ -51,13 +51,16 @@ From here on, it is expected that you are running these commands from within the
 
 * On Linux and macOS (and other Unix systems):
 ```
-./gradlew --version=4.5.1 --distribution-type=bin
+./gradlew wrapper --gradle-version=4.5.1 --distribution-type=bin
 ```
 
 * On Windows, remember to use the backslash instead:
 ```
-.\gradlew --version=4.5.1 --distribution-type=bin
+.\gradlew wrapper --gradle-version=4.5.1 --distribution-type=bin
 ```
+
+You now have Gradle updated to version 4.5.1 with any updates applied to
+the wrapper script itself as well.
 
 Building MapTool
 ----------------

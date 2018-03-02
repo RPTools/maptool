@@ -5,7 +5,9 @@ Build instructions
 ------------------
 Gradle is used to build MapTool and the build process is siginificanly
 easier than 1.3. Since the gradle wrapper is being used there is no
-need to download and install gradle to perform the build.
+need to download and install gradle to perform the build.  (Although
+Gradle 4.x is needed for Java 9.  See the README.md in the top-level
+MapTool directory for Gradle instructions.)
 
 To run
 ./gradlew maptool:run
