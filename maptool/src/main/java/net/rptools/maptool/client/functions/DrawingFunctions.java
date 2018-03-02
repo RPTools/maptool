@@ -11,7 +11,6 @@
 
 package net.rptools.maptool.client.functions;
 
-import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,7 +22,6 @@ import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.drawing.AbstractDrawing;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -36,180 +34,25 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 
 public class DrawingFunctions extends AbstractFunction {
-	private static final DrawingFunctions instance = new DrawingFunctions();
 
-	public static DrawingFunctions getInstance() {
-		return instance;
-	}
-
-	private DrawingFunctions() {
-		super(2, 3, "getDrawingLayer", "setDrawingLayer", "bringDrawingToFront", "sendDrawingToBack",
-				"getDrawingOpacity", "setDrawingOpacity", "getDrawingProperties", "setDrawingProperties",
-				"setPenColor", "getPenColor", "setFillColor", "getFillColor", "getDrawingEraser",
-				"setDrawingEraser", "findDrawings", "refreshDrawing");
+	public DrawingFunctions(int minParameters, int maxParameters, String... aliases) {
+		super(minParameters, maxParameters, aliases);
 	}
 
 	@Override
 	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
-		checkTrusted(functionName);
-		if ("getDrawingLayer".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 2, 2);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			return getDrawable(functionName, map, guid).getLayer();
-		} else if ("setDrawingLayer".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 3, 3);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			Layer layer = getLayer(parameters.get(2).toString());
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			return changeLayer(map, layer, guid);
-		} else if ("bringDrawingToFront".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 2, 2);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			bringToFront(map, guid);
-			return "";
-		} else if ("sendDrawingToBack".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 2, 2);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			sendToBack(map, guid);
-			return "";
-		} else if ("getDrawingOpacity".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 2, 2);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			return getPen(functionName, map, guid).getOpacity();
-		} else if ("setDrawingOpacity".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 3, 3);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			String opacity = parameters.get(2).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			float op = getFloatPercent(functionName, opacity);
-			setDrawingOpacity(map, guid, op);
-			return "";
-		} else if ("getDrawingProperties".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 2, 2);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			return getPen(functionName, map, guid);
-		} else if ("setDrawingProperties".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 3, 3);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			Pen pen = (Pen) parameters.get(2);
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			setPen(functionName, map, guid, pen);
-			return "";
-		} else if ("getPenColor".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 2, 2);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			String result = paintToString(getPen(functionName, map, guid).getPaint());
-			return result;
-		} else if ("setPenColor".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 3, 3);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			String paint = parameters.get(2).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			if ("".equalsIgnoreCase(paint))
-				getPen(functionName, map, guid).setForegroundMode(Pen.MODE_TRANSPARENT);
-			else {
-				getPen(functionName, map, guid).setForegroundMode(Pen.MODE_SOLID);
-				getPen(functionName, map, guid).setPaint(paintFromString(paint));
-			}
-			return "";
-		} else if ("getFillColor".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 2, 2);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			String result = paintToString(getPen(functionName, map, guid).getBackgroundPaint());
-			return result;
-		} else if ("setFillColor".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 3, 3);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			String paint = parameters.get(2).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			if ("".equalsIgnoreCase(paint))
-				getPen(functionName, map, guid).setBackgroundMode(Pen.MODE_TRANSPARENT);
-			else {
-				getPen(functionName, map, guid).setBackgroundMode(Pen.MODE_SOLID);
-				getPen(functionName, map, guid).setBackgroundPaint(paintFromString(paint));
-			}
-			return "";
-		} else if ("getDrawingEraser".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 2, 2);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			return getPen(functionName, map, guid).isEraser() ? BigDecimal.ONE : BigDecimal.ZERO;
-		} else if ("setDrawingEraser".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 3, 3);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			boolean eraser = parseBoolean(functionName, parameters, 2);
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			Pen p = getPen(functionName, map, guid);
-			p.setEraser(eraser);
-			return "";
-		} else if ("findDrawings".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 2, 3);
-			String mapName = parameters.get(0).toString();
-			String drawingName = parameters.get(1).toString();
-			String delim = parameters.size() > 2 ? parameters.get(2).toString() : ",";
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			List<DrawnElement> drawableList = map.getAllDrawnElements();
-			Iterator<DrawnElement> iter = drawableList.iterator();
-			String result = "";
-			while (iter.hasNext()) {
-				DrawnElement de = iter.next();
-				if (de.getDrawable() instanceof AbstractDrawing) {
-					if (drawingName.equals(((AbstractDrawing) de.getDrawable()).getName())) {
-						result = result + (result == "" ? "" : delim) + de.getDrawable().getId();
-					}
-				}
-			}
-			return result;
-		} else if ("refreshDrawing".equalsIgnoreCase(functionName)) {
-			checkNumberOfParameters(functionName, parameters, 2, 2);
-			String mapName = parameters.get(0).toString();
-			String id = parameters.get(1).toString();
-			Zone map = getNamedMap(functionName, mapName).getZone();
-			GUID guid = getGUID(functionName, id);
-			DrawnElement de = getDrawnElement(functionName, map, guid);
-			MapTool.getFrame().updateDrawTree();
-			MapTool.serverCommand().updateDrawing(map.getId(), de.getPen(), de);
-			return "";
-		}
+		// This class should never be called.
 		return null;
 	}
 
-	public void bringToFront(Zone map, GUID guid) {
+	/**
+	 * Moves a specified drawing on a specified map to the top of the drawing stack.
+	 *
+	 * @param    map             the zone that should contain the drawing
+	 * @param    guid            the id of the drawing.
+	 * @throws   ParserException    if there were more or less parameters than allowed
+	 */
+	protected void bringToFront(Zone map, GUID guid) {
 		List<DrawnElement> drawableList = map.getAllDrawnElements();
 		Iterator<DrawnElement> iter = drawableList.iterator();
 		while (iter.hasNext()) {
@@ -225,7 +68,7 @@ public class DrawingFunctions extends AbstractFunction {
 		MapTool.getFrame().refresh();
 	}
 
-	private Layer changeLayer(Zone map, Layer layer, GUID guid) {
+	protected Layer changeLayer(Zone map, Layer layer, GUID guid) {
 		List<DrawnElement> drawableList = map.getAllDrawnElements();
 		Iterator<DrawnElement> iter = drawableList.iterator();
 		while (iter.hasNext()) {
@@ -254,7 +97,7 @@ public class DrawingFunctions extends AbstractFunction {
 	 * @param    max             the maximum amount of parameters (inclusive)
 	 * @throws   ParserException    if there were more or less parameters than allowed
 	 */
-	private void checkNumberOfParameters(String functionName, List<Object> parameters, int min, int max) throws ParserException {
+	protected void checkNumberOfParameters(String functionName, List<Object> parameters, int min, int max) throws ParserException {
 		int numberOfParameters = parameters.size();
 		if (numberOfParameters < min) {
 			throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, min, numberOfParameters));
@@ -269,7 +112,7 @@ public class DrawingFunctions extends AbstractFunction {
 	 * @param functionName     Name of the macro function
 	 * @throws ParserException Returns trust error message and function name 
 	 */
-	private void checkTrusted(String functionName) throws ParserException {
+	protected void checkTrusted(String functionName) throws ParserException {
 		if (!MapTool.getParser().isMacroTrusted()) {
 			throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 		}
@@ -284,20 +127,31 @@ public class DrawingFunctions extends AbstractFunction {
 	 * @param    guid            the id of the drawing.
 	 * @throws   ParserException if the drawing is not found.
 	 */
-	private Drawable getDrawable(String functionName, Zone map, GUID guid) throws ParserException {
+	protected Drawable getDrawable(String functionName, Zone map, GUID guid) throws ParserException {
 		return getDrawnElement(functionName, map, guid).getDrawable();
 	}
 
-	private DrawnElement getDrawnElement(String functionName, Zone map, GUID guid) throws ParserException {
-		List<DrawnElement> drawableList = map.getAllDrawnElements();
+	protected DrawnElement getDrawnElement(String functionName, Zone map, GUID guid) throws ParserException {
+		DrawnElement drawnElement = findDrawnElement(map.getAllDrawnElements(), guid);
+		if (drawnElement != null)
+			return drawnElement;
+		throw new ParserException(I18N.getText("macro.function.drawingFunction.unknownDrawing", functionName, guid.toString()));
+	}
+
+	private DrawnElement findDrawnElement(List<DrawnElement> drawableList, GUID guid) {
 		Iterator<DrawnElement> iter = drawableList.iterator();
 		while (iter.hasNext()) {
 			DrawnElement de = iter.next();
 			if (de.getDrawable().getId().equals(guid)) {
 				return de;
 			}
+			if (de.getDrawable() instanceof DrawablesGroup) {
+				DrawnElement result = findDrawnElement(((DrawablesGroup) de.getDrawable()).getDrawableList(), guid);
+				if (result != null)
+					return result;
+			}
 		}
-		throw new ParserException(I18N.getText("macro.function.drawingFunction.unknownDrawing", functionName, guid.toString()));
+		return null;
 	}
 
 	/**
@@ -305,13 +159,29 @@ public class DrawingFunctions extends AbstractFunction {
 	 * @param  functionName String Name of the calling function. Used for error messages.
 	 * @param  f String value of percentage
 	 * @return float
-	 * @throws ParserException thrown on invalid foat
+	 * @throws ParserException thrown on invalid float
 	 */
-	private float getFloatPercent(String functionName, String f) throws ParserException {
+	protected float getFloatPercent(String functionName, String f) throws ParserException {
 		try {
 			Float per = Float.parseFloat(f);
 			while (per > 1)
 				per = per / 100;
+			return per;
+		} catch (Exception e) {
+			throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", functionName, f));
+		}
+	}
+
+	/**
+	 * Validates the float
+	 * @param  functionName String Name of the calling function. Used for error messages.
+	 * @param  f String value of float
+	 * @return float
+	 * @throws ParserException thrown on invalid float
+	 */
+	protected float getFloat(String functionName, String f) throws ParserException {
+		try {
+			Float per = Float.parseFloat(f);
 			return per;
 		} catch (Exception e) {
 			throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", functionName, f));
@@ -325,7 +195,7 @@ public class DrawingFunctions extends AbstractFunction {
 	 * @return GUID
 	 * @throws ParserException thrown on invalid GUID
 	 */
-	private GUID getGUID(String functionName, String id) throws ParserException {
+	protected GUID getGUID(String functionName, String id) throws ParserException {
 		try {
 			return GUID.valueOf(id);
 		} catch (Exception e) {
@@ -338,7 +208,7 @@ public class DrawingFunctions extends AbstractFunction {
 	 * @param  layer String naming the layer
 	 * @return Layer
 	 */
-	private Layer getLayer(String layer) {
+	protected Layer getLayer(String layer) {
 		if ("GM".equalsIgnoreCase(layer))
 			return Layer.GM;
 		else if ("OBJECT".equalsIgnoreCase(layer))
@@ -355,7 +225,7 @@ public class DrawingFunctions extends AbstractFunction {
 	 * @return             ZoneRenderer The map/zone.
 	 * @throws ParserException  if the map is not found
 	 */
-	private ZoneRenderer getNamedMap(String functionName, String mapName) throws ParserException {
+	protected ZoneRenderer getNamedMap(String functionName, String mapName) throws ParserException {
 		for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
 			if (mapName.equals(zr.getZone().getName())) {
 				return zr;
@@ -365,19 +235,26 @@ public class DrawingFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Looks for a drawing on a specific map that matches a specific id.
+	 * Looks for a drawing on a specific map that matches a specific id and returns its pen.
 	 * Throws a <code>ParserException</code> if the drawing is not found.
 	 *
 	 * @param    functionName    this is used in the exception message
 	 * @param    map             the zone that should contain the drawing
 	 * @param    guid            the id of the drawing.
+	 * @return   Pen             Pen of the drawing.
 	 * @throws   ParserException if the drawing is not found.
 	 */
-	private Pen getPen(String functionName, Zone map, GUID guid) throws ParserException {
+	protected Pen getPen(String functionName, Zone map, GUID guid) throws ParserException {
 		return getDrawnElement(functionName, map, guid).getPen();
 	}
 
-	private DrawablePaint paintFromString(String paint) {
+	/**
+	 * Parses a string into either a Color Paint or Texture Paint.
+	 *
+	 * @param    paint           String containing the paint description.
+	 * @return   Pen             DrawableTexturePaint or DrawableColorPaint.
+	 */
+	protected DrawablePaint paintFromString(String paint) {
 		if (paint.toLowerCase().startsWith("asset://")) {
 			String id = paint.substring(8);
 			return new DrawableTexturePaint(new MD5Key(id));
@@ -388,7 +265,7 @@ public class DrawingFunctions extends AbstractFunction {
 		}
 	}
 
-	private String paintToString(DrawablePaint drawablePaint) {
+	protected String paintToString(DrawablePaint drawablePaint) {
 		if (drawablePaint instanceof DrawableColorPaint) {
 			return "#" + Integer.toHexString(((DrawableColorPaint) drawablePaint).getColor()).substring(2);
 		}
@@ -398,7 +275,16 @@ public class DrawingFunctions extends AbstractFunction {
 		return "";
 	}
 
-	private boolean parseBoolean(String functionName, List<Object> args, int param) throws ParserException {
+	/**
+	 * Parses a string to a boolean.
+	 * Throws a <code>ParserException</code> if the drawing is not found.
+	 *
+	 * @param    functionName    this is used in the exception message.
+	 * @param    args            List of parameters passed to the function.
+	 * @param    param           int reference to the boolean parameter.
+	 * @throws   ParserException if the parameter fails to parse.
+	 */
+	protected boolean parseBoolean(String functionName, List<Object> args, int param) throws ParserException {
 		try {
 			return AbstractTokenAccessorFunction.getBooleanValue(args.get(param));
 		} catch (NumberFormatException ne) {
@@ -406,7 +292,7 @@ public class DrawingFunctions extends AbstractFunction {
 		}
 	}
 
-	public void sendToBack(Zone map, GUID guid) {
+	protected void sendToBack(Zone map, GUID guid) {
 		List<DrawnElement> drawableList = map.getAllDrawnElements();
 		Iterator<DrawnElement> iter = drawableList.iterator();
 		while (iter.hasNext()) {
@@ -425,17 +311,13 @@ public class DrawingFunctions extends AbstractFunction {
 		MapTool.getFrame().refresh();
 	}
 
-	public void setDrawingOpacity(Zone map, GUID guid, float op) {
-		List<DrawnElement> drawableList = map.getAllDrawnElements();
-		Iterator<DrawnElement> iter = drawableList.iterator();
-		while (iter.hasNext()) {
-			DrawnElement de = iter.next();
-			if (de.getDrawable().getId().equals(guid)) {
-				setOpacity(map, de, op);
-			}
+	protected void setDrawingOpacity(String functionName, Zone map, GUID guid, float op) throws ParserException {
+		DrawnElement de = getDrawnElement(functionName, map, guid);
+		if (de != null) {
+			setOpacity(map, de, op);
+			MapTool.getFrame().updateDrawTree();
+			MapTool.getFrame().refresh();
 		}
-		MapTool.getFrame().updateDrawTree();
-		MapTool.getFrame().refresh();
 	}
 
 	private void setOpacity(Zone map, DrawnElement d, float op) {
@@ -463,18 +345,15 @@ public class DrawingFunctions extends AbstractFunction {
 	 * @param    pen             the replacement pen.
 	 * @throws   ParserException if the drawing is not found.
 	 */
-	private void setPen(String functionName, Zone map, GUID guid, Object pen) throws ParserException {
+	protected void setPen(String functionName, Zone map, GUID guid, Object pen) throws ParserException {
 		if (!(pen instanceof Pen))
 			throw new ParserException(I18N.getText("macro.function.drawingFunction.invalidPen", functionName));
 		Pen p = new Pen((Pen) pen);
 		List<DrawnElement> drawableList = map.getAllDrawnElements();
-		Iterator<DrawnElement> iter = drawableList.iterator();
-		while (iter.hasNext()) {
-			DrawnElement de = iter.next();
-			if (de.getDrawable().getId().equals(guid)) {
-				de.setPen(p);
-				return;
-			}
+		DrawnElement de = findDrawnElement(drawableList, guid);
+		if (de != null) {
+			de.setPen(p);
+			return;
 		}
 		throw new ParserException(I18N.getText("macro.function.drawingFunction.unknownDrawing", functionName, guid.toString()));
 	}
