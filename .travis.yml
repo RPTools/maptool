@@ -20,13 +20,13 @@ matrix:
             packages:
                 - oracle-java9-installer
                 - fakeroot
-        env: VERSION=4.3.1
+        env: VERSION=4.5.1
         before_install:
             - ./.travis/installer.sh "$TRAVIS_OS_NAME"
             - export GRADLE_HOME="$PWD/gradle-$VERSION"
             - export PATH="$GRADLE_HOME/bin:$PATH"
       - os: osx
-        env: VERSION=4.3.1
+        env: VERSION=4.5.1
         before_install:
             - ./.travis/installer.sh "$TRAVIS_OS_NAME"
             - javac -J-Xmx32m -version
@@ -70,6 +70,6 @@ notifications:
 #  tag_name: $TRAVIS_TAG
 #  draft: true
 #  on:
-#    repo: JamzTheMan/TokenTool
+#    repo: RPTools/TokenTool
 #    tags: true
 #    all_branches: true
