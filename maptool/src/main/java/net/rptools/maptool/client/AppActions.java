@@ -1158,7 +1158,7 @@ public class AppActions {
 
 	public static final Action WHISPER_PLAYER = new DefaultClientAction() {
 		{
-			init("Whisper");
+			init("whisper.command");
 		}
 
 		@Override
