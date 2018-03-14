@@ -159,12 +159,12 @@ public class OSXAdapter {
 				// We could also modify the popup menu that displays when the user right-clicks the dock image...
 				// And we could use the tb.setProgressValue() call to represent campaign loading/saving...
 
-//				if (MapToolUtil.isDebugEnabled()) {
-//					String vers = MapTool.getVersion();
-//					vers = vers.substring(vers.length() - 2);
-//					vers = vers.replaceAll("[^0-9]", "0"); // Convert all non-digits to zeroes
-//					tb.setIconBadge(vers);
-//				}
+				//				if (MapToolUtil.isDebugEnabled()) {
+				//					String vers = MapTool.getVersion();
+				//					vers = vers.substring(vers.length() - 2);
+				//					vers = vers.replaceAll("[^0-9]", "0"); // Convert all non-digits to zeroes
+				//					tb.setIconBadge(vers);
+				//				}
 			} catch (Exception e) {
 				log.info("Error accessing the Taskbar API?!", e);
 			}
