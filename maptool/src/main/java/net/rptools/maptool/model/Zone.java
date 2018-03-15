@@ -1561,8 +1561,12 @@ public class Zone extends BaseModel {
 			@Override
 			public int compare(Token o1, Token o2) {
 				/**
-				 * If either token is a figure, get the footprint and find the lowest point but if the same, 
-				 * return the smallest, else use normal z order
+				 * It is an assumption of this comparator that all tokens are being sorted using isometric logic.
+				 * 
+				 * Get the footprint (dependent on Grid) and find the centre of the footprint.
+				 * If the same, place tokens above objects.
+				 * Otherwise use height to place the smallest in front.
+				 * If still equal use normal z order.
 				 */
 				int v1 = getFigureZOrder(o1);
 				int v2 = getFigureZOrder(o2);
