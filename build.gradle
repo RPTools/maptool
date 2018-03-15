@@ -6,11 +6,10 @@ import org.gradle.api.tasks.JavaExec
 
 buildscript {
 	repositories {
-		mavenCentral()
+		mavenLocal()
 		jcenter()
-		maven {
-			url "https://plugins.gradle.org/m2/"
-		}
+		mavenCentral()
+		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	dependencies {
 		classpath 'org.ajoberstar:gradle-git:0.11.2'
@@ -121,9 +120,10 @@ def getLocalProperty(property) {
 
 allprojects {
 	repositories {
-		mavenCentral()
-		maven { url = 'http://maptool.craigs-stuff.net/repo/' }
 		mavenLocal()
+		jcenter()
+		mavenCentral()
+		maven { url 'http://maptool.craigs-stuff.net/repo/' }
 	}
 
 	group = 'net.rptools.maptool'
@@ -140,8 +140,8 @@ subprojects {
 	apply plugin: "com.diffplug.gradle.spotless"
 	apply plugin: 'eclipse'
 
-	sourceCompatibility = 1.9
-	targetCompatibility = 1.9
+	sourceCompatibility = 9
+	targetCompatibility = 9
 
 	// Don't fail build if tests fail until tests are cleaned up
 	test.ignoreFailures = true
@@ -202,11 +202,11 @@ project(':launcher') {
 				'buildNumber': getVersionName()
 			])
 		}
-		
+
 		from(sourceSets.main.resources.srcDirs) {
 			exclude '**/*.properties'
 		}
-		
+
 		copy{
 			from ('build-resources/config') {
 				include 'launch-template.properties'
@@ -258,8 +258,8 @@ project(':launcher') {
 		with jar
 	}
 
-	task deleteBuild(type: Delete) { 
-		delete 'build/' 
+	task deleteBuild(type: Delete) {
+		delete 'build/'
 		outputs.upToDateWhen {
 			false
 		}
@@ -272,6 +272,10 @@ project(':maptool') {
 	ext.distSource = projectDir.getPath() + '/src/dist/'
 
 	dependencies {
+        // Our own library on bintray.  May be rolled into MT at some
+        // point.
+        compile 'net.rptools.rplib:rplib:1.4.1.7'
+
 		compile 'net.java.abeille:abeille-formsrt:2.0'
 		compile 'net.rptools.clientserver:clientserver:1.4.0.+'
 		compile 'org.hibernate:antlr:2.7.5H3'
@@ -399,7 +403,7 @@ project(':maptool') {
 		with jar
 	}
 
-	task deleteBuild(type: Delete) { 
+	task deleteBuild(type: Delete) {
 		delete 'build/'
 		outputs.upToDateWhen {
 			false
@@ -432,7 +436,8 @@ project(':maptool') {
 				Node classpathJreNode = node.find {
 					it.@kind == 'con' &&
 					it.@path.contains('JRE_CONTAINER') &&
-					it.@path.contains('JavaSE-1.8')
+					(it.@path.contains('JavaSE-1.8') ||
+					 it.@path.contains('JavaSE-9'))
 				}
 				// Only append if node is not null, eg
 				// if it found the proper node entry.
@@ -465,7 +470,7 @@ task showBuildVersion << {
 task wrapper(type: Wrapper) {
 	description = "Updates Gradle wrapper."
 	group = "Distribution"
-	gradleVersion='3.2.1'
+	gradleVersion='4.5.1'
 }
 
 task copySubProjectFiles(type: Sync) {
@@ -565,12 +570,14 @@ task renameJwrapperReleases(dependsOn: ['createJwrapperRelease'], type: Copy) {
 		include 'MapTool-*64-offline*'
 	}
 	into getLocalProperty('releaseDir') + "-" + getVersionName()
-	
-	rename('MapTool-windows64-offline.exe', 'MapTool-windows64-' + getVersionName() + '.exe')
-	rename('MapTool-linux64-offline.tar', 'MapTool-linux64-' + getVersionName() + '.tar')
-	rename('MapTool-macos64-offline.dmg', 'MapTool-macos64-' + getVersionName() + '.dmg')
-	
-	
+
+    rename {
+        String fn -> fn.replace('offline', getVersionName())
+    }
+	//rename('MapTool-windows64-offline.exe', 'MapTool-windows64-' + getVersionName() + '.exe')
+	//rename('MapTool-linux64-offline.tar', 'MapTool-linux64-' + getVersionName() + '.tar')
+	//rename('MapTool-macos64-offline.dmg', 'MapTool-macos64-' + getVersionName() + '.dmg')
+
 	// We really shouldn't need 32 bit releases. There is the standard jar release for those odd ball needs
 	// Unfortunately we can not tell JWrapper to skip them.
 	// rename('MapTool-windows32-offline.exe', 'MapTool-windows32-' + getVersionName() + '.exe')
@@ -580,7 +587,7 @@ task renameJwrapperReleases(dependsOn: ['createJwrapperRelease'], type: Copy) {
 	outputs.upToDateWhen {
 		false
 	}
-	
+
 	doLast {
 		println 'Renaming and moving MapTool jWrapper Release to: ' + getLocalProperty('releaseDir') + "-" + getVersionName()
 	}
