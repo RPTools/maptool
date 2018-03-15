@@ -140,8 +140,8 @@ subprojects {
 	apply plugin: "com.diffplug.gradle.spotless"
 	apply plugin: 'eclipse'
 
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
+	sourceCompatibility = 1.9
+	targetCompatibility = 1.9
 
 	// Don't fail build if tests fail until tests are cleaned up
 	test.ignoreFailures = true

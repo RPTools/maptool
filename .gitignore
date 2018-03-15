@@ -1,6 +1,11 @@
-.gradle
 build/
 /bin/
+
+# We're factoring out Gradle.  Maybe we shouldn't?  Since we need Gradle
+# 4.x for Java 9, and since "./gradlew wrapper" only grabs 3.x (as of
+# 2018-02), maybe it should be part of the repo -- at least for the
+# short term?  Something to think about, anyway...
+.gradle
 
 
 # OS generated files
@@ -20,7 +25,6 @@ Thumbs.db
 *.log
 *~
 target/
-build/
 out/
 
 
@@ -40,7 +44,6 @@ workbench.xmi
 # Keystore
 build-resources/rptools-keystore
 /gradle.properties
-
 
 # Generated
 build-resources/jWrapper/JWrapperLaunchTemp

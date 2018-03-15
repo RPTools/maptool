@@ -19,7 +19,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.event.WindowAdapter;
@@ -29,8 +28,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -79,7 +76,6 @@ import net.rptools.lib.DebugStream;
 import net.rptools.lib.EventDispatcher;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.TaskBarFlasher;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
@@ -91,6 +87,7 @@ import net.rptools.maptool.client.swing.SplashScreen;
 import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -1427,7 +1424,7 @@ public class MapTool {
 				menuBar = new AppMenuBar();
 				lafname = "net.rptools.maptool.client.TinyLookAndFeelMac";
 				UIManager.setLookAndFeel(lafname);
-				macOSXicon();
+				OSXAdapter.macOSXicon();
 			}
 			// If running on Windows based OS, CJK font is broken when using TinyLAF.
 			//			else if (WINDOWS) {
@@ -1534,13 +1531,11 @@ public class MapTool {
 	/**
 	 * Check to see if we're running on Java 6+.
 	 * <p>
-	 * While MapTool itself doesn't use any Java 6-specific features, we use a
-	 * couple dozen third-party libraries and a search of those JAR files
-	 * indicate that <i>they DO use</i> Java 6. So it's best if we warn users
-	 * that they might be going along happily and suddenly hit a Java runtime
-	 * error! It might even be something they do every time they run the
-	 * program, but some piece of data was different and the library took a
-	 * different path and the Java 6-only method was invoked...
+	 * It used to be that MapTool tried to stick to Java 5 as a compatibility
+	 * thing. But with the way Oracle is now pushing out releases of Java, how
+	 * frequently some of the third-party JARs are being updated, and how the
+	 * new <b>javapackager</b> includes a JRE, we have less need of worrying
+	 * about the version as we're providing one in our download package...
 	 * <p>
 	 * This method uses the system property <b>java.specification.version</b> as
 	 * it seemed the easiest thing to test. :)
@@ -1559,71 +1554,6 @@ public class MapTool {
 		}
 		if (!keepgoing)
 			System.exit(1);
-	}
-
-	/**
-	 * If we're running on OSX we should call this method to download and
-	 * install the MapTool logo from the main web site. We cache this image so
-	 * that it appears correctly if the application is later executed in
-	 * "offline" mode, so to speak.
-	 */
-	private static void macOSXicon() {
-		// If we're running on OSX, add the dock icon image
-		// -- and change our application name to just "MapTool" (not currently)
-		// We wait until after we call initialize() so that the asset and image managers
-		// are configured.
-		Image img = null;
-		File logoFile = new File(AppUtil.getAppHome("config"), "maptool-dock-icon.png");
-		URL logoURL = null;
-		try {
-			logoURL = new URL("http://www.rptools.net/images/logo/RPTools_Map_Logo.png");
-		} catch (MalformedURLException e) {
-			showError("Attemping to form URL -- shouldn't happen as URL is hard-coded", e);
-		}
-		try {
-			img = ImageUtil.bytesToImage(FileUtils.readFileToByteArray(logoFile));
-		} catch (IOException e) {
-			log.debug("Attemping to read cached icon: " + logoFile, e);
-			try {
-				img = ImageUtil.bytesToImage(FileUtil.getBytes(logoURL));
-				// If we did download the logo, save it to the 'config' dir for later use.
-				BufferedImage bimg = ImageUtil.createCompatibleImage(img, img.getWidth(null), img.getHeight(null), null);
-				FileUtils.writeByteArrayToFile(logoFile, ImageUtil.imageToBytes(bimg, "png"));
-				img = bimg;
-			} catch (IOException e1) {
-				log.warn("Cannot read '" + logoURL + "' or  cached '" + logoFile + "'; no dock icon", e1);
-			}
-		}
-		/*
-		 * Unfortunately the next line doesn't allow Eclipse to compile the code
-		 * on anything but a Mac. Too bad because there's no problem at runtime
-		 * since this code wouldn't be executed an any machine *except* a Mac.
-		 * Sigh.
-		 *
-		 * com.apple.eawt.Application appl =
-		 * com.apple.eawt.Application.getApplication();
-		 */
-		try {
-			Class<?> appClass = Class.forName("com.apple.eawt.Application");
-			Method getApplication = appClass.getDeclaredMethod("getApplication", (Class[]) null);
-			Object appl = getApplication.invoke(null, (Object[]) null);
-			Method setDockIconImage = appl.getClass().getDeclaredMethod("setDockIconImage", new Class[] { java.awt.Image.class });
-			// If we couldn't grab the image for some reason, don't set the dock bar icon!  Duh!
-			if (img != null)
-				setDockIconImage.invoke(appl, new Object[] { img });
-
-			if (MapToolUtil.isDebugEnabled()) {
-				// For some reason Mac users don't like the dock badge icon.  But from a development standpoint I like seeing the
-				// version number in the dock bar.  So we'll only include it when running with MAPTOOL_DEV on the command line.
-				Method setDockIconBadge = appl.getClass().getDeclaredMethod("setDockIconBadge", new Class[] { java.lang.String.class });
-				String vers = getVersion();
-				vers = vers.substring(vers.length() - 2);
-				vers = vers.replaceAll("[^0-9]", "0"); // Convert all non-digits to zeroes
-				setDockIconBadge.invoke(appl, new Object[] { vers });
-			}
-		} catch (Exception e) {
-			log.info("Cannot find/invoke methods on com.apple.eawt.Application; use -X command line options to set dock bar attributes", e);
-		}
 	}
 
 	private static void postInitialize() {

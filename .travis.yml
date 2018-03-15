@@ -1,11 +1,75 @@
+# Language is set to Java and we build using the Gradle wrapper.
+# It would be nice if we could just run "gradlew wrapper" and let it
+# update itself, but it currently downloads the stable release of
+# gradle-3.2 and we need 4.x+ for the build to work with Java 9 (the
+# older version can't parse the 'x.y.z' version string from Java 9).
 language: java
-script: gradle build
-jdk:
-- oraclejdk8
-addons:
-  apt:
-    packages:
-    - oracle-java8-installer
+script: ./gradlew build
+
+# We have ./.travis/installer.sh to do any installation that is required
+# that can't be done using builtin Travis tools.  For both Linux and
+# macOS, that means Gradle 4.x, but for macOS it also means downloading
+# and installing the Java 9 JDK.  See the contents of the script for
+# version number information.
+matrix:
+    include:
+      - os: linux
+        jdk: oraclejdk9
+        addons:
+          apt:
+            packages:
+                - oracle-java9-installer
+                - fakeroot
+        env: VERSION=4.5.1
+        before_install:
+            - ./.travis/installer.sh "$TRAVIS_OS_NAME"
+            - export GRADLE_HOME="$PWD/gradle-$VERSION"
+            - export PATH="$GRADLE_HOME/bin:$PATH"
+      - os: osx
+        env: VERSION=4.5.1
+        before_install:
+            - ./.travis/installer.sh "$TRAVIS_OS_NAME"
+            - javac -J-Xmx32m -version
+            - export GRADLE_HOME="$PWD/gradle-$VERSION"
+            - export PATH="$GRADLE_HOME/bin:$PATH"
+
+# Shamelessly copied from Jamz's TokenTool configuration file. :)
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+
 notifications:
   slack:
     secure: Issnni/GrSCwmvwAC/JRdLAZe3863ahnY46muQnt2yhgmcT9ygWsjkyCewwPtkfb0sFT+PRmymeOrMwFJk/4DaCr8F0kFY6bbSICWzy5ovrbJypCqsrS6am0GTxWvGkwcYyihh94HW6mIR+siiJF0s0S6J4nzWqW0h8T7p3iZNY38FlZImaAH4xXI9t3kJ1uuZ4QvI7d738rwaGHDRy1uhCF465oWDgaRujM4R6PZPf/lJE8JQRquULjYdHwdzIy/57zNX8/knrpbMpN3mpBjMdoM7RQKkW22eQfwGwVzx/1NZBPcOn2BAYL5rMVpRPQOnqf2dO8uzP+z5MbtQ7j588BfRuvQ3AVYlJgLIrltMmb6S+XQmHG9wiQ9efhH7/1Nbv+MchHujUGym/cVIbrWhWKJbfVg7zP9QiMDQdP24rVE2OjL6Fg1YI/81faFlOPKRx0JwLCAnfmwxudc7H6vb4jaWmrPWYbA5n67ZPEAb7RkFTG1ZQu6XBioIsvz8HjiRegL3hPpHSScEyK6TZCkcFIawPIauM6en5uD+nfZ7RI7AtG8IK8dSyJoV+PxNMRQHqwQHSUQSa4xd2uJlNSKej9pQwmtTL4qVsW4UqPt/wyZMRIBweOedwFvCkG5rupEGo7WouiVymnLH2BUlLuI3TpJDL9oeH1EZKlFYltzlY=
+
+# This is all copied from Jamz's configuration for TokenTool.
+# I can guess at some of it, but I haven't read the docs for the
+# deployment configuration so much of it is Greek to me.  Still,
+# putting it here means I don't have to go look it up later when I want
+# to play with it.
+#
+# And of course, the 'deploy' task needs to be added to build.gradle. 
+# It looks pretty simple for TokenTool, but it has three dependencies
+# that I haven't investigated...
+#
+#before_deploy:
+#  - ./gradlew deploy
+#deploy:
+#  provider: releases
+#  api_key:
+#    secure: <SECURE_KEY_TEXT_GOES_HERE>
+#  file_glob: true
+#  file: releases/release-*/bundles/*
+#  overwrite: true
+#  skip_cleanup: true
+#  target_commitish: $TRAVIS_COMMIT
+#  tag_name: $TRAVIS_TAG
+#  draft: true
+#  on:
+#    repo: RPTools/TokenTool
+#    tags: true
+#    all_branches: true
