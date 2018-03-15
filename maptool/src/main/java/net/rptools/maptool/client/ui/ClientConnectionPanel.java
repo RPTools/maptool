@@ -52,6 +52,8 @@ public class ClientConnectionPanel extends JList {
 	private JPopupMenu createPopupMenu() {
 		JPopupMenu menu = new JPopupMenu();
 		menu.add(new JMenuItem(AppActions.BOOT_CONNECTED_PLAYER));
+		menu.add(new JMenuItem(AppActions.WHISPER_PLAYER));
+
 		return menu;
 	}
 }
