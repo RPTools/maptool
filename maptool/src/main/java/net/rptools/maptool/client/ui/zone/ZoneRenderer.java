@@ -1228,7 +1228,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			// and figure tokens need sorting via alternative logic.
 			List<Token> tokens = zone.getFigureTokens();
 			List<Token> sortedTokens = new ArrayList<Token>(tokens);
-		    Collections.sort(sortedTokens, zone.getFigureZOrderComparator());
+			Collections.sort(sortedTokens, zone.getFigureZOrderComparator());
 			if (!tokens.isEmpty()) {
 				timer.start("tokens - figures");
 				renderTokens(g2d, sortedTokens, view, true);
