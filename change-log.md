@@ -1,3 +1,11 @@
+MapTool 1.4.4.1 - _Infused with Nerps!_
+=====
+This update has no functional changes to MapTool and only updates the underlying JRE used to Java
+The update has a few improvements from Java 8 but mainly brings a much better HDPI experience under Linux & Windows! Scaling of graphics and text are cleaner and not pixelated or blurry as it was under Java 8.
+
+Since this is only updates the JRE, if you have any issues you should be able to roll back to 1.4.4.0 without issue and any issues should be related to the Java 9 and we can tackle them as such. If you have any issues, please open an issue on GitHub and I will look into it.
+
+
 MapTool 1.4.4.0 - _Infused with Nerps!_
 =====
 I'm excited to bring to you the next version of MapTool Nerps! And along with it, a brand new packaging scheme using Oracle's javapackager to create native installer packages and with it, no more Launcher application. *_See Edit -> Preferences -> Startup to adjust JVM parameters._

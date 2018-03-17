@@ -52,7 +52,8 @@ public class ScrollableFlowPanel extends JPanel implements Scrollable {
 
 	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
 		int hundredth = (orientation == SwingConstants.VERTICAL
-				? getParent().getHeight() : getParent().getWidth()) / 100;
+				? getParent().getHeight()
+				: getParent().getWidth()) / 100;
 		return (hundredth == 0 ? 1 : hundredth);
 	}
 

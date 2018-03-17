@@ -2,10 +2,11 @@
 * For more details take a look at the Java Quickstart chapter in the Gradle
 * user guide available at https://docs.gradle.org/4.1/userguide/tutorial_java_projects.html
 */
+import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 buildscript {
 	dependencies {
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.4.1"
+		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.8.0"
 		classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
 	}
 
@@ -28,12 +29,12 @@ apply plugin: 'com.diffplug.gradle.spotless'
 apply plugin: 'javafx-gradle-plugin'
 
 // Current Build version
-version = '1.4.4.0'
+version = '1.4.4.1'
 
 // Definitions
 defaultTasks 'clean', 'build'
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.9
+targetCompatibility = 1.9
 
 // Don't fail build if tests fail until tests are cleaned up
 test.ignoreFailures = true
@@ -79,6 +80,34 @@ spotless {
 	}
 }
 
+// Set eclipse natures, access rules, and other settings
+// https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseProject.html
+// https://discuss.gradle.org/t/buildship-1-0-18-is-now-available/19012
+eclipse {
+	project {
+		natures 'org.eclipse.buildship.core.gradleprojectnature'
+		buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
+	}
+
+	classpath {
+		file {
+			withXml {
+				def node = it.asNode()
+				node.appendNode('classpathentry', [kind: 'con', path: 'org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER'])
+			}
+			whenMerged {
+				entries.each { source ->
+					if (source.kind == 'con' && source.path.startsWith('org.eclipse.jdt.launching.JRE_CONTAINER')) {
+						source.accessRules.add(new AccessRule('0', 'javafx/**'))
+						source.accessRules.add(new AccessRule('0', 'jdk/nashorn/api/**'))
+					}
+				}
+			}
+		}
+	}
+}
+
+
 // In this section you declare where to find the dependencies of your project
 repositories {
 	// Use 'jcenter' for resolving your dependencies.
@@ -94,7 +123,7 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// For UserJvmOptionsService; native to os...
-	compile files("${System.properties['java.home']}/../lib/packager.jar")
+	// compile files("${System.properties['java.home']}/../lib/packager.jar")
 
 	// For Sentry bug reporting
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.2'
@@ -204,29 +233,6 @@ dependencies {
 	testCompile 'junit:junit:4.12'
 }
 
-// Adjust access rule in Eclipse for Nashorn
-eclipse.classpath.file {
-	whenMerged {
-		withXml { classpathXml ->
-			def classpathXmlNode = classpathXml.asNode()
-			Node classpathJreNode = node.find {
-				it.@kind == 'con' &&
-				it.@path.contains('JRE_CONTAINER') &&
-				it.@path.contains('JavaSE-1.8')
-			}
-			// Only append if node is not null, eg
-			// if it found the proper node entry.
-			if (classpathJreNode) {
-				classpathJreNode
-					.appendNode('accessrules')
-					.appendNode('accessrule', [
-						kind: 'accessible',
-						pattern: 'jdk/nashorn/api/**'
-					])
-			}
-		}
-	}
-}
 
 
 task uberJar(type: Jar) {
@@ -281,8 +287,6 @@ task prepareInnoSetup(type: Copy) {
 		AppVersion: "${version}",
 		Vendor: "${vendor}",
 		WizardImage: "${project.projectDir.absolutePath}/package/windows/${project.name}-setup.bmp",
-		InstallDLL: "${project.projectDir.absolutePath}/package/windows/msvcr100.dll",
-		InstallManifest: "${project.projectDir.absolutePath}/package/windows/MapTool.exe.manifest",
 		Slash: "\\",
 	]
 	expand(tokens)
@@ -304,18 +308,19 @@ task deploy(dependsOn: [displayGitInfo, uberJar, copyPackageExtras, prepareInnoS
 		def javapackager_deploy = exec {
 			workingDir "${project.projectDir.absolutePath}"
 
+			println workingDir
+
 			commandLine "javapackager",
 				"-deploy", "-v",
 				"-native", "installer",
 				"-appclass", mainClassName,
 				"-srcdir", "build/libs",
-				"-srcfiles", jar.archiveName,
-				"-srcfiles", "COPYING.AFFERO",
 				"-outdir", "releases/release-"+version,
 				"-outfile", project.name,
 				"-name", project.name,
 				"-title", project.name,
 				"-vendor", vendor,
+				"-BdropinResourcesRoot=.",
 				"-BAssociations=cmpgn",
 				"-BinstalldirChooser=true",
 				"-BsystemWide=false",
@@ -326,10 +331,12 @@ task deploy(dependsOn: [displayGitInfo, uberJar, copyPackageExtras, prepareInnoS
 				"-Bwin.msi.productVersion=1.4.4",
 				"-BlicenseFile=COPYING.AFFERO",
 				"-BlicenseType=GNU AFFERO GENERAL PUBLIC LICENSE",
-				"-Bcategory=Graphics",
+				"-Bcategory=Games",
 				"-Bemail=maptool@nerps.net",
 				"-BjvmProperties=MAPTOOL_DATADIR=.maptool-" + vendor
 				//"-BuserJvmOptions=-Xss=4M"
+
+				println commandLine
 		}
 	}
 }
@@ -337,4 +344,8 @@ task deploy(dependsOn: [displayGitInfo, uberJar, copyPackageExtras, prepareInnoS
 jfx {
 	// minimal requirement for jfxJar-task
 	mainClass = mainClassName
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '4.6'
 }
