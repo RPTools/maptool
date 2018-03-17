@@ -5,6 +5,7 @@ The update has a few improvements from Java 8 but mainly brings a much better HD
 
 Since this is only updates the JRE, if you have any issues you should be able to roll back to 1.4.4.0 without issue and any issues should be related to the Java 9 and we can tackle them as such. If you have any issues, please open an issue on GitHub and I will look into it.
 
+___
 
 MapTool 1.4.4.0 - _Infused with Nerps!_
 =====
@@ -12,7 +13,6 @@ I'm excited to bring to you the next version of MapTool Nerps! And along with it
 
 The Nerps build now uses it's own datadir in your app folder (.maptool-nerps) so you can run it side by side without interference of the main RPTools branch/distribution!
 
-___
 
 Enhancements
 -----
