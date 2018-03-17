@@ -1572,9 +1572,9 @@ public class Zone extends BaseModel {
 				int v2 = getFigureZOrder(o2);
 				if ((v1 - v2) != 0)
 					return v1 - v2;
-				if (o1.isStamp() && o2.isToken())
+				if (!o1.isToken() && o2.isToken())
 					return -1;
-				if (o2.isStamp() && o1.isToken())
+				if (!o2.isToken() && o1.isToken())
 					return +1;
 				if (o1.getHeight() != o2.getHeight()) {
 					// Larger tokens at the same position, go behind
