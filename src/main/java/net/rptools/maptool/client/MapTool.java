@@ -16,7 +16,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.event.WindowAdapter;
@@ -25,8 +24,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -59,7 +56,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Appender;
@@ -82,7 +78,6 @@ import net.rptools.lib.DebugStream;
 import net.rptools.lib.EventDispatcher;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.TaskBarFlasher;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
@@ -95,6 +90,7 @@ import net.rptools.maptool.client.swing.SplashScreen;
 import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -131,16 +127,6 @@ public class MapTool {
 	 */
 	private static final String SOUND_PROPERTIES = "net/rptools/maptool/client/sounds.properties";
 	public static final String SND_INVALID_OPERATION = "invalidOperation";
-
-	/**
-	 * Returns true if currently running on a Mac OS X based operating system.
-	 */
-	public static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
-
-	/**
-	 * Returns true if currently running on a Windows based operating system.
-	 */
-	public static boolean WINDOWS = (System.getProperty("os.name").toLowerCase().startsWith("windows"));
 
 	/**
 	 * Version of Java being used. Note that this is the "specification version" , so expect numbers like 1.4, 1.5, and 1.6.
@@ -905,8 +891,7 @@ public class MapTool {
 		for (Zone zone : campaign.getZones()) {
 			ZoneRenderer renderer = ZoneRendererFactory.newRenderer(zone);
 			clientFrame.addZoneRenderer(renderer);
-			if ((currRenderer == null || zone.getId().equals(defaultRendererId))
-					&& (getPlayer().isGM() || zone.isVisible())) {
+			if ((currRenderer == null || zone.getId().equals(defaultRendererId)) && (getPlayer().isGM() || zone.isVisible())) {
 				currRenderer = renderer;
 			}
 			eventDispatcher.fireEvent(ZoneEvent.Added, campaign, null, zone);
@@ -1168,16 +1153,12 @@ public class MapTool {
 				defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
 
 				defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default is true
-				defaults.put("OptionPane.bannerIcon", new ImageIcon(MapTool.class.getClassLoader()
-						.getResource("net/rptools/maptool/client/image/maptool_icon.png")));
+				defaults.put("OptionPane.bannerIcon", new ImageIcon(MapTool.class.getClassLoader().getResource("net/rptools/maptool/client/image/maptool_icon.png")));
 				defaults.put("OptionPane.bannerFontSize", 13);
 				defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
 				defaults.put("OptionPane.bannerMaxCharsPerLine", 60);
-				defaults.put("OptionPane.bannerForeground",
-						painter != null ? painter.getOptionPaneBannerForeground() : null); // you should adjust this if
-																							// banner background is not
-																							// the default gradient
-																							// paint
+				defaults.put("OptionPane.bannerForeground", painter != null ? painter.getOptionPaneBannerForeground() : null); // you should adjust this if banner background is not the default
+																																// gradient paint
 				defaults.put("OptionPane.bannerBorder", null); // use default border
 
 				// set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want gradient
@@ -1185,8 +1166,7 @@ public class MapTool {
 				defaults.put("OptionPane.bannerBackgroundLt", painter != null ? painter.getOptionPaneBannerLt() : null);
 				defaults.put("OptionPane.bannerBackgroundDirection", Boolean.TRUE); // default is true
 
-				// optionally, you can set a Paint object for BannerPanel. If so, the three UIDefaults related to banner
-				// background above will be ignored.
+				// optionally, you can set a Paint object for BannerPanel. If so, the three UIDefaults related to banner background above will be ignored.
 				defaults.put("OptionPane.bannerBackgroundPaint", null);
 
 				defaults.put("OptionPane.buttonAreaBorder", BorderFactory.createEmptyBorder(6, 6, 6, 6));
@@ -1219,71 +1199,6 @@ public class MapTool {
 		}
 		if (!keepgoing)
 			System.exit(1);
-	}
-
-	/**
-	 * If we're running on OSX we should call this method to download and install the MapTool logo from the main web site. We cache this image so that it appears correctly if the application is later
-	 * executed in "offline" mode, so to speak.
-	 */
-	private static void macOSXicon() {
-		// If we're running on OSX, add the dock icon image
-		// -- and change our application name to just "MapTool" (not currently)
-		// We wait until after we call initialize() so that the asset and image managers
-		// are configured.
-		Image img = null;
-		File logoFile = new File(AppUtil.getAppHome("config"), "maptool-dock-icon.png");
-		URL logoURL = null;
-		try {
-			logoURL = new URL("http://www.rptools.net/images/logo/RPTools_Map_Logo.png");
-		} catch (MalformedURLException e) {
-			showError("Attemping to form URL -- shouldn't happen as URL is hard-coded", e);
-		}
-		try {
-			img = ImageUtil.bytesToImage(FileUtils.readFileToByteArray(logoFile));
-		} catch (IOException e) {
-			log.debug("Attemping to read cached icon: " + logoFile, e);
-			try {
-				img = ImageUtil.bytesToImage(FileUtil.getBytes(logoURL));
-				// If we did download the logo, save it to the 'config' dir for later use.
-				BufferedImage bimg = ImageUtil.createCompatibleImage(img, img.getWidth(null), img.getHeight(null),
-						null);
-				FileUtils.writeByteArrayToFile(logoFile, ImageUtil.imageToBytes(bimg, "png"));
-				img = bimg;
-			} catch (IOException e1) {
-				log.warn("Cannot read '" + logoURL + "' or  cached '" + logoFile + "'; no dock icon", e1);
-			}
-		}
-		/*
-		 * Unfortunately the next line doesn't allow Eclipse to compile the code on anything but a Mac. Too bad because there's no problem at runtime since this code wouldn't be executed an any
-		 * machine *except* a Mac. Sigh.
-		 *
-		 * com.apple.eawt.Application appl = com.apple.eawt.Application.getApplication();
-		 */
-		try {
-			Class<?> appClass = Class.forName("com.apple.eawt.Application");
-			Method getApplication = appClass.getDeclaredMethod("getApplication", (Class[]) null);
-			Object appl = getApplication.invoke(null, (Object[]) null);
-			Method setDockIconImage = appl.getClass().getDeclaredMethod("setDockIconImage",
-					new Class[] { java.awt.Image.class });
-			// If we couldn't grab the image for some reason, don't set the dock bar icon! Duh!
-			if (img != null)
-				setDockIconImage.invoke(appl, new Object[] { img });
-
-			if (MapToolUtil.isDebugEnabled()) {
-				// For some reason Mac users don't like the dock badge icon. But from a development standpoint I like
-				// seeing the
-				// version number in the dock bar. So we'll only include it when running with MAPTOOL_DEV on the command
-				// line.
-				Method setDockIconBadge = appl.getClass().getDeclaredMethod("setDockIconBadge",
-						new Class[] { java.lang.String.class });
-				String vers = getVersion();
-				vers = vers.substring(vers.length() - 2);
-				vers = vers.replaceAll("[^0-9]", "0"); // Convert all non-digits to zeroes
-				setDockIconBadge.invoke(appl, new Object[] { vers });
-			}
-		} catch (Exception e) {
-			log.info("Cannot find/invoke methods on com.apple.eawt.Application; use -X command line options to set dock bar attributes", e);
-		}
 	}
 
 	private static void postInitialize() {
@@ -1614,7 +1529,7 @@ public class MapTool {
 			log.info("Current list of Macro Functions: " + logOutput);
 		}
 
-		if (MAC_OS_X) {
+		if (AppUtil.MAC_OS_X) {
 			// On OSX the menu bar at the top of the screen can be enabled at any time, but the
 			// title (ie. name of the application) has to be set before the GUI is initialized (by
 			// creating a frame, loading a splash screen, etc). So we do it here.
@@ -1670,12 +1585,12 @@ public class MapTool {
 			// allows the system to set up system defaults before we go and modify things.
 			// That is, please don't move these lines around unless you test the result on windows and mac
 			String lafname;
-			if (MAC_OS_X) {
+			if (AppUtil.MAC_OS_X) {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				menuBar = new AppMenuBar();
 				lafname = "net.rptools.maptool.client.TinyLookAndFeelMac";
 				UIManager.setLookAndFeel(lafname);
-				macOSXicon();
+				OSXAdapter.macOSXicon();
 			}
 			// If running on Windows based OS, CJK font is broken when using TinyLAF.
 			// else if (WINDOWS) {

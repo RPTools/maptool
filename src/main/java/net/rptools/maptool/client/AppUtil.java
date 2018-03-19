@@ -43,6 +43,16 @@ public class AppUtil {
 	private static final String CLIENT_ID_FILE = "client-id";
 
 	/**
+	 * Returns true if currently running on a Windows based operating system.
+	 */
+	public static boolean WINDOWS = (System.getProperty("os.name").toLowerCase().startsWith("windows"));
+
+	/**
+	 * Returns true if currently running on a Mac OS X based operating system.
+	 */
+	public static boolean MAC_OS_X = (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
+
+	/**
 	 * Returns a File object for USER_HOME if USER_HOME is non-null, otherwise null.
 	 * 
 	 * @return the users home directory as a File object
