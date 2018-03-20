@@ -1,6 +1,6 @@
 MapTool 1.4.4.2 - _Infused with Nerps!_
 =====
-This is a hotfix release to correct issues with Java 9 and macOS as reported via github.
+This is a hotfix release to correct issues with Java 9 and macOS as reported via github as well as fixing the auto update check.
 
 Bug Fixes
 -----
