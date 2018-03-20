@@ -47,7 +47,7 @@ public class AppUpdate {
 
 		// Get current commit from JAR Manifest
 		jarCommit = getCommitSHA();
-		
+
 		// If we don't have a commit attribute from JAR, we're done!
 		if (jarCommit == null)
 			return false;
