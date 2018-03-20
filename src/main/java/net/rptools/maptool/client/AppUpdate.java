@@ -24,10 +24,12 @@ import net.sf.json.JSONObject;
 public class AppUpdate {
 	private static final Logger log = LogManager.getLogger(AppUpdate.class);
 
-	static final String GIT_HUB_API_URL = "https://api.github.com/repos/JamzTheMan/MapTool/releases/latest";
+	// TODO: Move this to a .properties config
+	static final String GIT_HUB_API_URL = "https://api.github.com/repos/JamzTheMan/MapTool/releases/latest?access_token=";
+	static final String GIT_HUB_OAUTH_TOKEN = "60a5595a0b90510f8d0fbe686e21be6ed1c0b787"; // Grants read-only access to public information
 
 	public static boolean gitHubReleases() {
-		AppPreferences.setSkipAutoUpdate(false);
+		// AppPreferences.setSkipAutoUpdate(false); // For testing only
 		if (AppPreferences.getSkipAutoUpdate())
 			return false;
 
@@ -43,25 +45,15 @@ public class AppUpdate {
 		else if (AppUtil.MAC_OS_X)
 			DOWNLOAD_EXTENSION = ".pkg"; // Better default than .dmg?
 
-		// Attempt to get current commit out of JAR Manifest, if null is return, most likely ran from IDE/non-JAR version so skip
-		URLClassLoader cl = (URLClassLoader) MapTool.class.getClassLoader();
-		try {
-			URL url = cl.findResource("META-INF/MANIFEST.MF");
-			Manifest manifest = new Manifest(url.openStream());
-
-			Attributes attr = manifest.getMainAttributes();
-			jarCommit = attr.getValue("Git-Commit-SHA");
-			log.info("Git-Commit-SHA from Manifest: " + jarCommit);
-		} catch (IOException e) {
-			log.error("No Git-Commit-SHA attribute found in MANIFEST.MF, skip looking for updates...", e);
-		}
-
+		// Get current commit from JAR Manifest
+		jarCommit = getCommitSHA();
+		
 		// If we don't have a commit attribute from JAR, we're done!
 		if (jarCommit == null)
 			return false;
 
 		try {
-			response = HTTPUtil.getJsonPaylod(GIT_HUB_API_URL);
+			response = HTTPUtil.getJsonPaylod(GIT_HUB_API_URL + GIT_HUB_OAUTH_TOKEN);
 			log.debug("Response: " + response);
 		} catch (IOException e) {
 			log.error("Unable to reach " + GIT_HUB_API_URL, e.getLocalizedMessage());
@@ -117,7 +109,30 @@ public class AppUpdate {
 		return false;
 	}
 
-	static boolean showMessage(String aTitle, String commit) {
+	public static String getCommitSHA() {
+		String jarCommit = "";
+
+		// Attempt to get current commit out of JAR Manifest, if null is return, most likely ran from IDE/non-JAR version so skip
+		// URLClassLoader cl = (URLClassLoader) MapTool.class.getClassLoader();
+		ClassLoader cl = MapTool.class.getClassLoader();
+
+		try {
+			// URL url = cl.findResource("META-INF/MANIFEST.MF");
+			URL url = cl.getResource("META-INF/MANIFEST.MF");
+			Manifest manifest = new Manifest(url.openStream());
+
+			Attributes attr = manifest.getMainAttributes();
+			jarCommit = attr.getValue("Git-Commit-SHA");
+			log.info("Git-Commit-SHA from Manifest: " + jarCommit);
+		} catch (IOException e) {
+			log.error("No Git-Commit-SHA attribute found in MANIFEST.MF, skip looking for updates...", e);
+			return null;
+		}
+
+		return jarCommit;
+	}
+
+	private static boolean showMessage(String aTitle, String commit) {
 		JCheckBox dontAskCheckbox = new JCheckBox("Never check for updates again!");
 
 		String title = "Update Available";
@@ -139,7 +154,7 @@ public class AppUpdate {
 		return (result == JOptionPane.YES_OPTION);
 	}
 
-	static void downloadFile(URL assetDownloadURL, long assetDownloadSize) {
+	private static void downloadFile(URL assetDownloadURL, long assetDownloadSize) {
 		final JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
 		chooser.setSelectedFile(new File(assetDownloadURL.getFile()));
 
