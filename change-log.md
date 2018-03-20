@@ -5,8 +5,10 @@ This is a hotfix release to correct issues with Java 9 and macOS as reported via
 Bug Fixes
 -----
 * [#54][i54]  - Missing Preferences menu option on OS X
+* [#59][i59]  - App does not check for new versions in 1.4.4.1
 
 [i54]: https://github.com/JamzTheMan/MapTool/issues/54
+[i59]: https://github.com/JamzTheMan/MapTool/issues/59
 
 ___
 
