@@ -1225,10 +1225,13 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 			}
 
 			// if there is fog or vision we may need to re-render figure type tokens
+			// and figure tokens need sorting via alternative logic.
 			List<Token> tokens = zone.getFigureTokens();
+			List<Token> sortedTokens = new ArrayList<Token>(tokens);
+			Collections.sort(sortedTokens, zone.getFigureZOrderComparator());
 			if (!tokens.isEmpty()) {
 				timer.start("tokens - figures");
-				renderTokens(g2d, tokens, view, true);
+				renderTokens(g2d, sortedTokens, view, true);
 				timer.stop("tokens - figures");
 			}
 

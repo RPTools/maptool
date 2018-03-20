@@ -1111,7 +1111,7 @@ public class Zone extends BaseModel {
 		// LATER: optimize this
 		tokenOrderedList.remove(token);
 		tokenOrderedList.add(token);
-		Collections.sort(tokenOrderedList, getZOrderComparator());
+		Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
 
 		if (newToken) {
 			fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, token));
@@ -1151,7 +1151,7 @@ public class Zone extends BaseModel {
 		}
 		tokenOrderedList.removeAll(tokens);
 		tokenOrderedList.addAll(tokens);
-		Collections.sort(tokenOrderedList, getZOrderComparator());
+		Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
 
 		if (!addedTokens.isEmpty())
 			fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, addedTokens));
@@ -1536,7 +1536,6 @@ public class Zone extends BaseModel {
 		public boolean matchToken(Token t);
 	}
 
-	@Deprecated
 	public static final Comparator<Token> TOKEN_Z_ORDER_COMPARATOR = new TokenZOrderComparator();
 
 	public static class TokenZOrderComparator implements Comparator<Token> {
@@ -1554,30 +1553,32 @@ public class Zone extends BaseModel {
 	}
 
 	/**
-	 * Need to replace static TOKEN_Z_ORDER_COMPARATOR comparator with instantiated version so that grid is available
-	 * and can access token footprint
+	 * Replaces the static TOKEN_Z_ORDER_COMPARATOR comparator with instantiated version so that grid is available
+	 * and can access token footprint. Only used when Rendering just Figure Tokens.
 	 **/
-	public Comparator<Token> getZOrderComparator() {
+	public Comparator<Token> getFigureZOrderComparator() {
 		return new Comparator<Token>() {
 			@Override
 			public int compare(Token o1, Token o2) {
 				/**
-				 * If either token is a figure, get the footprint and find the lowest point but if the same, 
-				 * return the smallest, else use normal z order
+				 * It is an assumption of this comparator that all tokens are being sorted using isometric logic.
+				 * 
+				 * Get the footprint (dependent on Grid) and find the centre of the footprint.
+				 * If the same, place tokens above objects.
+				 * Otherwise use height to place the smallest in front.
+				 * If still equal use normal z order.
 				 */
-				if (o1.getShape() == Token.TokenShape.FIGURE || o2.getShape() == Token.TokenShape.FIGURE) {
-					int v1 = getFigureZOrder(o1);
-					int v2 = getFigureZOrder(o2);
-					if ((v1 - v2) != 0)
-						return v1 - v2;
-					if (o1.isStamp() && o2.isToken())
-						return -1;
-					if (o2.isStamp() && o1.isToken())
-						return +1;
-					if (o1.getHeight() != o2.getHeight()) {
-						// Larger tokens at the same position, go behind
-						return o2.getHeight() - o1.getHeight();
-					}
+				int v1 = getFigureZOrder(o1);
+				int v2 = getFigureZOrder(o2);
+				if ((v1 - v2) != 0)
+					return v1 - v2;
+				if (!o1.isToken() && o2.isToken())
+					return -1;
+				if (!o2.isToken() && o1.isToken())
+					return +1;
+				if (o1.getHeight() != o2.getHeight()) {
+					// Larger tokens at the same position, go behind
+					return o2.getHeight() - o1.getHeight();
 				}
 				int lval = o1.getZOrder();
 				int rval = o2.getZOrder();
