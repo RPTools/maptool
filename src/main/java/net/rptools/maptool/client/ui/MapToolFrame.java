@@ -11,6 +11,7 @@ package net.rptools.maptool.client.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.GraphicsConfiguration;
 import java.awt.GridBagConstraints;
@@ -19,6 +20,13 @@ import java.awt.GridLayout;
 import java.awt.IllegalComponentStateException;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.desktop.AboutEvent;
+import java.awt.desktop.AboutHandler;
+import java.awt.desktop.PreferencesEvent;
+import java.awt.desktop.PreferencesHandler;
+import java.awt.desktop.QuitEvent;
+import java.awt.desktop.QuitHandler;
+import java.awt.desktop.QuitResponse;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -61,6 +69,8 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -383,7 +393,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 		glassPaneComposite.setVisible(true);
 
-		if (!MapTool.MAC_OS_X)
+		if (!AppUtil.MAC_OS_X)
 			removeWindowsF10();
 		else
 			registerForMacOSXEvents();
@@ -410,28 +420,35 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	public void registerForMacOSXEvents() {
 		try {
-			OSXAdapter.setQuitHandler(this, getClass().getDeclaredMethod("macOSXExit", (Class[]) null));
-			OSXAdapter.setAboutHandler(this, getClass().getDeclaredMethod("macOSXAbout", (Class[]) null));
-			OSXAdapter.setPreferencesHandler(this, getClass().getDeclaredMethod("macOSXPreferences", (Class[]) null));
+			Desktop.getDesktop().setQuitHandler(new QuitHandler() {
+				@Override
+				public void handleQuitRequestWith(QuitEvent arg0, QuitResponse arg1) {
+					((ClientAction) AppActions.EXIT).execute(null);
+					/*
+					 * Always tell the OS to cancel the quit operation -- we're doing it ourselves. Unfortunately, if the user was trying to logout, the logout operation is now cancelled, too! We
+					 * can't use performQuit() because that is documented to call System.exit(0) and we may not be done with what we're doing. That just leaves not calling either one -- that may turn
+					 * out to be the best option in the long run.
+					 */
+					arg1.cancelQuit();
+				}
+			});
+			Desktop.getDesktop().setAboutHandler(new AboutHandler() {
+				@Override
+				public void handleAbout(AboutEvent arg0) {
+					((ClientAction) AppActions.SHOW_ABOUT).execute(null);
+				}
+			});
+			Desktop.getDesktop().setPreferencesHandler(new PreferencesHandler() {
+				@Override
+				public void handlePreferences(PreferencesEvent arg0) {
+					((ClientAction) AppActions.SHOW_PREFERENCES).execute(null);
+				}
+			});
 		} catch (Exception e) {
-			String msg = "Error while loading the OSXAdapter";
+			String msg = "Error while configuring Desktop interaction";
 			log.error(msg, e);
 			System.err.println(msg);
 		}
-	}
-
-	public void macOSXAbout() {
-		((ClientAction) AppActions.SHOW_ABOUT).execute(null);
-	}
-
-	public boolean macOSXExit() {
-		((ClientAction) AppActions.EXIT).execute(null);
-		// Always return false to abort exit from os. Above call will close app normally if user accepts
-		return false;
-	}
-
-	public void macOSXPreferences() {
-		((ClientAction) AppActions.SHOW_PREFERENCES).execute(null);
 	}
 
 	public DragImageGlassPane getDragImageGlassPane() {
@@ -511,11 +528,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 		try {
 			getDockingManager().loadInitialLayout(MapToolFrame.class.getClassLoader().getResourceAsStream(INITIAL_LAYOUT_XML));
-		} catch (ParserConfigurationException e) {
-			MapTool.showError("msg.error.layoutParse", e);
-		} catch (SAXException s) {
-			MapTool.showError("msg.error.layoutParse", s);
-		} catch (IOException e) {
+		} catch (ParserConfigurationException | SAXException | IOException e) {
 			MapTool.showError("msg.error.layoutParse", e);
 		}
 		getDockingManager().loadLayoutDataFromFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
@@ -877,6 +890,26 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		splitPane.setTopComponent(new JScrollPane(tree));
 		splitPane.setBottomComponent(drawablesPanel);
 		splitPane.setDividerLocation(100);
+		// Add tree selection listener
+		tree.addTreeSelectionListener(new TreeSelectionListener() {
+			@Override
+			public void valueChanged(TreeSelectionEvent e) {
+				TreePath path = e.getPath();
+				if (path == null) {
+					return;
+				}
+				int[] treeRows = tree.getSelectionRows();
+				java.util.Arrays.sort(treeRows);
+				drawablesPanel.clearSelectedIds();
+				for (int i = 0; i < treeRows.length; i++) {
+					TreePath p = tree.getPathForRow(treeRows[i]);
+					if (p.getLastPathComponent() instanceof DrawnElement) {
+						DrawnElement de = (DrawnElement) p.getLastPathComponent();
+						drawablesPanel.addSelectedId(de.getDrawable().getId());
+					}
+				}
+			}
+		});
 		// Add mouse Event for right click menu
 		tree.addMouseListener(new MouseAdapter() {
 			@Override
@@ -898,17 +931,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 							getCurrentZoneRenderer().centerOn(new ZonePoint((int) de.getDrawable().getBounds().getCenterX(), (int) de.getDrawable().getBounds().getCenterY()));
 						}
 					}
-
-					int[] treeRows = tree.getSelectionRows();
-					java.util.Arrays.sort(treeRows);
-					drawablesPanel.clearSelectedIds();
-					for (int i = 0; i < treeRows.length; i++) {
-						TreePath p = tree.getPathForRow(treeRows[i]);
-						if (p.getLastPathComponent() instanceof DrawnElement) {
-							DrawnElement de = (DrawnElement) p.getLastPathComponent();
-							drawablesPanel.addSelectedId(de.getDrawable().getId());
-						}
-					}
+					/*
+					 * int[] treeRows = tree.getSelectionRows(); java.util.Arrays.sort(treeRows); drawablesPanel.clearSelectedIds(); for (int i = 0; i < treeRows.length; i++) { TreePath p =
+					 * tree.getPathForRow(treeRows[i]); if (p.getLastPathComponent() instanceof DrawnElement) { DrawnElement de = (DrawnElement) p.getLastPathComponent();
+					 * drawablesPanel.addSelectedId(de.getDrawable().getId()); } }
+					 */
 				}
 				if (SwingUtilities.isRightMouseButton(e)) {
 					if (!isRowSelected(tree.getSelectionRows(), rowIndex) && !SwingUtil.isShiftDown(e)) {
@@ -1359,14 +1386,14 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 		// Under mac os x this does not properly hide the menu bar so adjust top and height
 		// so menu bar does not overlay screen.
-		if (MapTool.MAC_OS_X) {
+		if (AppUtil.MAC_OS_X) {
 			fullScreenFrame.setBounds(bounds.x, bounds.y + 21, bounds.width, bounds.height - 21);
 		} else {
 			fullScreenFrame.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
 		}
 		fullScreenFrame.setJMenuBar(menuBar);
 		// Menu bar is visible anyways on MAC so leave menu items on it
-		if (!MapTool.MAC_OS_X)
+		if (!AppUtil.MAC_OS_X)
 			menuBar.setVisible(false);
 
 		fullScreenFrame.setVisible(true);

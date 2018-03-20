@@ -1,3 +1,9 @@
+MapTool 1.4.4.2 - _Infused with Nerps!_
+=====
+This is a hotfix release to correct issues with Java 9 and macOS as reported via github issue #54: Missing Preferences menu option on OS X.
+
+___
+
 MapTool 1.4.4.1 - _Infused with Nerps!_
 =====
 This update has no functional changes to MapTool and only updates the underlying JRE used to Java

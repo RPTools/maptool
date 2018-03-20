@@ -38,9 +38,9 @@ public class AppUpdate {
 		// Default for Linux?
 		String DOWNLOAD_EXTENSION = ".deb";
 
-		if (MapTool.WINDOWS)
+		if (AppUtil.WINDOWS)
 			DOWNLOAD_EXTENSION = ".exe";
-		else if (MapTool.MAC_OS_X)
+		else if (AppUtil.MAC_OS_X)
 			DOWNLOAD_EXTENSION = ".pkg"; // Better default than .dmg?
 
 		// Attempt to get current commit out of JAR Manifest, if null is return, most likely ran from IDE/non-JAR version so skip
