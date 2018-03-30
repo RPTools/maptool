@@ -37,28 +37,22 @@ cache:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
 
-# This is all copied from Jamz's configuration for TokenTool.
-# I can guess at some of it, but I haven't read the docs for the
-# deployment configuration so much of it is Greek to me.  Still,
-# putting it here means I don't have to go look it up later when I want
-# to play with it.
-#
-# And of course, the 'deploy' task needs to be added to build.gradle. 
-# It looks pretty simple for TokenTool, but it has three dependencies
-# that I haven't investigated...
-
+# This will cause a deploy back to GitHub for any tagged commit.  Note
+# that tagging from the command line seems to require the "-a" option
+# when tagging in order to trigger Travis to deploy.  Use the Travis
+# "Settings" for your repo to add the DEPLOYMENT_KEY variable; the value
+# should be GitHub's _personal OAuth token_.
 before_deploy:
   - ./gradlew deploy
 deploy:
   provider: releases
-  api_key:
-    secure: $DEPLOYMENT_KEY
+  api_key: $DEPLOYMENT_KEY
   file_glob: true
   file: releases/release-*/*
   overwrite: true
   skip_cleanup: true
-  target_commitish: $TRAVIS_COMMIT
-  tag_name: $TRAVIS_TAG
+  # The 'draft' tag prevents the release from being public unless/until
+  # the release is edited at github.com and the state changed.
   draft: true
   on:
     repo: RPTools/maptool
