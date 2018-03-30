@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Flag any non-zero exit status as script failure and abort!
-set -ev
+set -vex
 
 # If there is no version, FAIL!
 VERSION=${VERSION:?"Must set 'VERSION' in .travis.yml!"}
