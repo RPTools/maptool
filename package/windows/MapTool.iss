@@ -1,18 +1,18 @@
 ;This file will be executed next to the application bundle image
-;i.e. current directory will contain folder MapTool with application files
+;I.e. current directory will contain folder MapTool with application files
 
 [Setup]
 AppId={{net.rptools.maptool}}
-AppName=RPTools
+AppName=MapTool
 AppVersion=1.4.1.9
-AppVerName=RPTools 1.4.1.9
+AppVerName=MapTool 1.4.1.9
 AppPublisher=RPTools
-AppComments=RPTools by RPTools
+AppComments=MapTool by RPTools
 AppCopyright=Copyright (C) 2018
 AppPublisherURL=http://maptool.nerps.net/
 AppSupportURL=http://forums.rptools.net/viewtopic.php?f=60&t=23681
 ;AppUpdatesURL=http://java.com/
-DefaultDirName={localappdata}/RPTools
+DefaultDirName={localappdata}/MapTool
 DisableStartupPrompt=Yes
 DisableDirPage=Auto
 DisableProgramGroupPage=Yes
@@ -24,16 +24,16 @@ DefaultGroupName=RPTools
 LicenseFile=COPYING.AFFERO
 ;WinXP or above
 MinVersion=0,5.1 
-OutputBaseFilename=RPTools-1.4.1.9
+OutputBaseFilename=MapTool-1.4.1.9
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=lowest
-SetupIconFile=RPTools/RPTools.ico
-UninstallDisplayIcon={app}/RPTools.ico
-UninstallDisplayName=RPTools
+SetupIconFile=MapTool/MapTool.ico
+UninstallDisplayIcon={app}/MapTool.ico
+UninstallDisplayName=MapTool
 WizardImageStretch=Yes
-WizardSmallImageFile=RPTools-setup-icon.bmp
-WizardImageFile=/Users/frank/git/RPTools/package/windows/RPTools-setup.bmp
+WizardSmallImageFile=MapTool-setup-icon.bmp
+WizardImageFile=/Users/frank/git/RPTools/package/windows/MapTool-setup.bmp
 ArchitecturesInstallIn64BitMode=x64
 ChangesAssociations=yes
 
