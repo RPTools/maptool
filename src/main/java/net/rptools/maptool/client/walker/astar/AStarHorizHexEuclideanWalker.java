@@ -11,28 +11,32 @@ package net.rptools.maptool.client.walker.astar;
 import net.rptools.maptool.model.Zone;
 
 public class AStarHorizHexEuclideanWalker extends AbstractAStarHexEuclideanWalker {
+
 	public AStarHorizHexEuclideanWalker(Zone zone) {
 		super(zone);
 		initNeighborMaps();
 	}
 
-	// @formatter:off
 	@Override
 	protected void initNeighborMaps() {
-		oddNeighborMap = new int[][] 
-	      { { 0, -1, 1 },	{ 0, 0, 0 },		{ 1, -1, 1 }, 
-			{ -1, 0, 1 },						{ 1, 0, 1 }, 
-			{ 0, 1, 1 },		{ 0, 0, 0 },		{ 1, 1, 1 } };
+		// @formatter:off
+		oddNeighborMap = new int[][] { 
+			{ 0, -1, 1 },	{ 0, 0, 0 },	{ 1, -1, 1 }, 
+			{ -1, 0, 1 },					{ 1,  0, 1 }, 
+			{ 0,  1, 1 },	{ 0, 0, 0 },	{ 1,  1, 1 }
+		};
 		
-		evenNeighborMap = new int[][] 
-  	      { { -1, -1, 1 },	{ 0, 0, 0 },		{ 0, -1, 1 }, 
-			{ -1, 0, 1 },						{ 1, 0, 1 }, 
-			{ -1, 1, 1 },	{ 0, 0, 0 },		{ 0, 1, 1 } };
+		evenNeighborMap = new int[][] { 
+			{ -1, -1, 1 },	{ 0, 0, 0 },	{ 0, -1, 1 }, 
+			{ -1,  0, 1 },					{ 1,  0, 1 }, 
+			{ -1,  1, 1 },	{ 0, 0, 0 },	{ 0,  1, 1 }
+		};
+		// @formatter:on
 	}
-	// @formatter:on
 
 	@Override
 	protected int[][] getNeighborMap(int x, int y) {
 		return y % 2 == 0 ? evenNeighborMap : oddNeighborMap;
 	}
+
 }

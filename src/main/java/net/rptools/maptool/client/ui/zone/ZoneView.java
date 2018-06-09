@@ -9,8 +9,11 @@
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.Point;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +32,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingWorker;
+
+import org.apache.commons.lang.time.StopWatch;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.locationtech.jts.awt.ShapeReader;
+import org.locationtech.jts.awt.ShapeWriter;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+
+import com.google.common.base.Stopwatch;
 
 import java.util.Set;
 import java.util.SortedMap;
@@ -52,6 +65,8 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Filter;
 
 public class ZoneView implements ModelChangeListener {
+	private static final Logger log = LogManager.getLogger(ZoneView.class);
+
 	private final Zone zone;
 
 	// VISION
@@ -77,6 +92,7 @@ public class ZoneView implements ModelChangeListener {
 	public Area getVisibleArea(PlayerView view) {
 		calculateVisibleArea(view);
 		ZoneView.VisibleAreaMeta visible = visibleAreaMap.get(view);
+
 		// if (visible == null)
 		// System.out.println("ZoneView: visible == null. Please report this on our forum @ forum.rptools.net. Thank you!");
 		return visible != null ? visible.visibleArea : new Area();
@@ -86,12 +102,16 @@ public class ZoneView implements ModelChangeListener {
 		return zone.getVisionType() != Zone.VisionType.OFF;
 	}
 
-	public synchronized AreaTree getTopology() {
-		return getTopology(true);
+	// Returns the current combined VBL (base VBL + TokenVBL)
+	public synchronized AreaTree getTopologyTree() {
+		return getTopologyTree(true);
 	}
 
-	public synchronized AreaTree getTopology(boolean useTokenVBL) {
+	// topologyTree is "cached" and should only regenerate when topologyTree is null which should happen on flush calls
+	public synchronized AreaTree getTopologyTree(boolean useTokenVBL) {
 		if (tokenTopolgy == null && useTokenVBL) {
+			log.debug("ZoneView topologyTree is null, generating...");
+
 			tokenTopolgy = new Area(zone.getTopology());
 			List<Token> vblTokens = MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithVBL();
 
@@ -177,7 +197,7 @@ public class ZoneView implements ModelChangeListener {
 		if (sight.getMultiplier() != 1 && lightSource.getLumens() >= 0) {
 			lightSourceArea.transform(AffineTransform.getScaleInstance(sight.getMultiplier(), sight.getMultiplier()));
 		}
-		Area visibleArea = FogUtil.calculateVisibility(p.x, p.y, lightSourceArea, getTopology());
+		Area visibleArea = FogUtil.calculateVisibility(p.x, p.y, lightSourceArea, getTopologyTree());
 
 		if (visibleArea == null) {
 			return null;
@@ -236,6 +256,7 @@ public class ZoneView implements ModelChangeListener {
 		if (token == null || !token.getHasSight()) {
 			return null;
 		}
+
 		// Cache ?
 		Area tokenVisibleArea = tokenVisionCache.get(token.getId());
 		// System.out.println("tokenVisionCache size? " + tokenVisionCache.size());
@@ -255,10 +276,12 @@ public class ZoneView implements ModelChangeListener {
 		if (tokenVisibleArea == null) {
 			Point p = FogUtil.calculateVisionCenter(token, zone);
 			Area visibleArea = sight.getVisionShape(token, zone);
-			tokenVisibleArea = FogUtil.calculateVisibility(p.x, p.y, visibleArea, getTopology());
+			tokenVisibleArea = FogUtil.calculateVisibility(p.x, p.y, visibleArea, getTopologyTree());
 
 			tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
 		}
+
+		// Stopwatch stopwatch = Stopwatch.createStarted();
 
 		// Combine in the visible light areas
 		// Jamz TODO: add condition for daylight and darkness! Currently no darkness in daylight
@@ -281,6 +304,8 @@ public class ZoneView implements ModelChangeListener {
 				lightSourceTokens.add(token);
 			}
 
+			// stopwatch.reset();
+			// stopwatch.start();
 			// Jamz: Iterate through all tokens and combine light areas by lumens
 			CombineLightsSwingWorker workerThread = new CombineLightsSwingWorker(token, lightSourceTokens);
 			workerThread.execute();
@@ -293,6 +318,8 @@ public class ZoneView implements ModelChangeListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
+			// log.info("CombineLightsSwingWorker: \t" + stopwatch);
 
 			// Check for personal vision and add to overall light map
 			if (sight.hasPersonalLightSource()) {
@@ -331,6 +358,9 @@ public class ZoneView implements ModelChangeListener {
 
 		allLightAreaMap.clear(); // Dispose of object, only needed for the scope of this method
 		tokenVisionCache.put(token.getId(), tokenVisibleArea);
+
+		// log.info("getVisibleArea: \t\t" + stopwatch);
+
 		return tokenVisibleArea;
 	}
 
@@ -389,13 +419,22 @@ public class ZoneView implements ModelChangeListener {
 			TreeMap<Double, Area> lightArea = getLightSourceArea(baseToken, lightSourceToken);
 
 			for (Entry<Double, Area> light : lightArea.entrySet()) {
-				Area tempArea = light.getValue();
+				// Area tempArea = light.getValue();
+				Path2D path = new Path2D.Double();
+				path.append(light.getValue().getPathIterator(null, 1), false);
 
 				synchronized (allLightAreaMap) {
-					if (allLightAreaMap.containsKey(light.getKey()))
-						tempArea.add(allLightAreaMap.get(light.getKey()));
+					if (allLightAreaMap.containsKey(light.getKey())) {
+						// Area allLight = allLightAreaMap.get(light.getKey());
+						// tempArea.add(allLight);
 
-					allLightAreaMap.put(light.getKey(), tempArea);
+						// Path2D is faster than Area it looks like
+						path.append(allLightAreaMap.get(light.getKey()).getPathIterator(null, 1), false);
+
+					}
+
+					// allLightAreaMap.put(light.getKey(), tempArea);
+					allLightAreaMap.put(light.getKey(), new Area(path));
 				}
 			}
 
@@ -421,7 +460,7 @@ public class ZoneView implements ModelChangeListener {
 					if (lightSource.getType() == type) {
 						// This needs to be cached somehow
 						Area lightSourceArea = lightSource.getArea(token, zone, Direction.CENTER);
-						Area visibleArea = FogUtil.calculateVisibility(p.x, p.y, lightSourceArea, getTopology());
+						Area visibleArea = FogUtil.calculateVisibility(p.x, p.y, lightSourceArea, getTopologyTree());
 						if (visibleArea == null) {
 							continue;
 						}
@@ -529,8 +568,6 @@ public class ZoneView implements ModelChangeListener {
 	}
 
 	private void calculateVisibleArea(PlayerView view) {
-		long startTime = System.currentTimeMillis();
-
 		if (visibleAreaMap.get(view) != null && visibleAreaMap.get(view).visibleArea.getBounds().getCenterX() != 0.0d) {
 			return;
 		}

@@ -253,8 +253,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		getPortraitPanel().setImageId(token.getPortraitImage());
 		getTokenLayoutPanel().setToken(token);
 		getImageTableCombo().setSelectedItem(token.getImageTableName());
-		getTokenOpacitySlider()
-				.setValue(new BigDecimal(token.getTokenOpacity()).multiply(new BigDecimal(100)).intValue());
+		getTokenOpacitySlider().setValue(new BigDecimal(token.getTokenOpacity()).multiply(new BigDecimal(100)).intValue());
+		getTerrainModifier().setText(Double.toString(token.getTerrainModifier()));
 
 		// Jamz: Init the VBL tab...
 		JTabbedPane tabbedPane = getTabbedPane();
@@ -494,7 +494,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 			JSlider source = (JSlider) e.getSource();
 			if (!source.getValueIsAdjusting()) {
 				int value = (int) source.getValue();
-				getTokenOpacityLabel().setText(new BigDecimal(value).toString() + "%");
+				getTokenOpacityValueLabel().setText(new BigDecimal(value).toString() + "%");
 			}
 		}
 	}
@@ -503,8 +503,12 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		return (JSlider) getComponent("tokenOpacitySlider");
 	}
 
-	public JLabel getTokenOpacityLabel() {
-		return (JLabel) getComponent("tokenOpacityLabel");
+	public JLabel getTokenOpacityValueLabel() {
+		return (JLabel) getComponent("tokenOpacityValueLabel");
+	}
+
+	public JTextField getTerrainModifier() {
+		return (JTextField) getComponent("terrainModifier");
 	}
 
 	public void initOKButton() {
@@ -546,8 +550,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 		token.setPropertyType((String) getPropertyTypeCombo().getSelectedItem());
 		token.setSightType((String) getSightTypeCombo().getSelectedItem());
 		token.setImageTableName((String) getImageTableCombo().getSelectedItem());
-		token.setTokenOpacity(
-				new BigDecimal(getTokenOpacitySlider().getValue()).divide(new BigDecimal(100)).floatValue());
+		token.setTokenOpacity(new BigDecimal(getTokenOpacitySlider().getValue()).divide(new BigDecimal(100)).floatValue());
+
+		try {
+			token.setTerrainModifier(Double.parseDouble(getTerrainModifier().getText()));
+		} catch (NumberFormatException e) {
+			// User didn't enter a valid float...
+			token.setTerrainModifier(1);
+		}
 
 		// Get the states
 		Component[] stateComponents = getStatesPanel().getComponents();

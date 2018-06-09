@@ -170,6 +170,9 @@ public class Token extends BaseModel implements Cloneable {
 	// Jamz: allow token alpha channel modification
 	private float tokenOpacity = 1.0f;
 
+	// Jamz: modifies A* cost of other tokens
+	private double terrainModifier = 1;
+
 	private boolean isFlippedX;
 	private boolean isFlippedY;
 	private Boolean isFlippedIso;
@@ -329,6 +332,7 @@ public class Token extends BaseModel implements Cloneable {
 
 		heroLabData = token.heroLabData;
 		tokenOpacity = token.tokenOpacity;
+		terrainModifier = token.terrainModifier;
 	}
 
 	public Token() {
@@ -512,6 +516,22 @@ public class Token extends BaseModel implements Cloneable {
 		tokenOpacity = alpha;
 
 		return tokenOpacity;
+	}
+
+	public double getTerrainModifier() {
+		if (terrainModifier == 0)
+			terrainModifier = 1.0f;
+
+		return terrainModifier;
+	}
+
+	public double setTerrainModifier(double modifier) {
+		if (modifier != 0)
+			terrainModifier = modifier;
+		else
+			terrainModifier = 1.0f;
+
+		return terrainModifier;
 	}
 
 	public boolean isObjectStamp() {
@@ -1231,6 +1251,10 @@ public class Token extends BaseModel implements Cloneable {
 
 	public TokenFootprint setFootprint(Grid grid, TokenFootprint footprint) {
 		return grid.getFootprint(getSizeMap().put(grid.getClass(), footprint.getId()));
+	}
+
+	public Set<CellPoint> getOccupiedCells(Grid grid) {
+		return getFootprint(grid).getOccupiedCells(grid.convert(new ZonePoint(getX(), getY())));
 	}
 
 	private Map<Class<? extends Grid>, GUID> getSizeMap() {

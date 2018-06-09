@@ -34,6 +34,8 @@ public class AppStyle {
 	public static BufferedImage tokenInvisible;
 
 	public static BufferedImage cellWaypointImage;
+	public static BufferedImage validMoveImage;
+	public static BufferedImage blockMoveImage;
 
 	public static BufferedImage stackImage;
 
@@ -94,6 +96,8 @@ public class AppStyle {
 			// Set defaults
 			tokenInvisible = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/icon_invisible.png");
 			cellWaypointImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/redDot.png");
+			validMoveImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/valid-move-arrow.png");
+			blockMoveImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/block_move.png");
 			stackImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/stack.png");
 			markerImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/marker.png");
 			chatImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/chat-blue.png");

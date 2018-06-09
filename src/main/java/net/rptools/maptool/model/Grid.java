@@ -10,17 +10,23 @@ package net.rptools.maptool.model;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
+import java.awt.geom.Arc2D.Double;
 import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.Action;
 import javax.swing.KeyStroke;
@@ -35,6 +41,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.util.GraphicsUtil;
 
 /**
  * Base class for grids.
@@ -49,8 +56,11 @@ public abstract class Grid implements Cloneable {
 	 */
 	public static final int MIN_GRID_SIZE = 9;
 	public static final int MAX_GRID_SIZE = 350;
+	protected static final int CIRCLE_SEGMENTS = 60;
 
 	private static final Dimension NO_DIM = new Dimension();
+
+	private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<Integer, Area>();
 
 	private int offsetX = 0;
 	private int offsetY = 0;
@@ -291,8 +301,7 @@ public abstract class Grid implements Cloneable {
 	 *            used to increase the area based on token footprint
 	 * @return Area
 	 */
-	public Area getShapedArea(ShapeType shape, Token token, double range, double arcAngle, int offsetAngle,
-			boolean scaleWithToken) {
+	public Area getShapedArea(ShapeType shape, Token token, double range, double arcAngle, int offsetAngle, boolean scaleWithToken) {
 		if (shape == null) {
 			shape = ShapeType.CIRCLE;
 		}
@@ -313,9 +322,6 @@ public abstract class Grid implements Cloneable {
 				double footprintHeight = token.getFootprint(this).getBounds(this).getHeight() / 2;
 				visionRange += (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
 			}
-			// System.out.println(token.getName() + " footprint.getWidth() " + footprint.getWidth());
-			// System.out.println(token.getName() + " footprint.getHeight() " + footprint.getHeight());
-			// System.out.println("grid getSize() " + getSize());
 		}
 		// System.out.println("this.cellShape " + this.cellShape);
 		// System.out.println("token.getWidth() " + token.getWidth());
@@ -324,20 +330,84 @@ public abstract class Grid implements Cloneable {
 		Area visibleArea = new Area();
 		switch (shape) {
 		case CIRCLE:
-			visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
+			// visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
+			// Use fake circles for better performance, remove those curves! We are talking over 10-100x performance gains! awt.geom.Area.add does NOT do curves fast...
+			visibleArea = GraphicsUtil.createLineSegmentEllipse(-visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
+			break;
+		case GRID:
+			if (range > 0) {
+				long time = System.currentTimeMillis();
+
+				// Create the light
+				int dist = (int) (range / zone.getUnitsPerCell());
+				Area radius = new Area();
+
+				// Get it from cache if it exists, otherwise create and store it
+				synchronized (gridShapeCache) {
+					if (gridShapeCache.containsKey(Integer.valueOf(dist))) {
+						radius = gridShapeCache.get(Integer.valueOf(dist));
+					} else {
+						HashSet<Point> cells = generateRadius(dist);
+
+						for (Point point : cells) {
+							radius.add(new Area(new Rectangle((point.x) * size, (point.y) * size, size, size)));
+
+							// Use grid shape to handle Hex's? Still lots of work to do for Hex in any case
+							// AffineTransform at = new AffineTransform();
+							// at.translate(point.x*size, point.y*size);
+							// radius.add(cellShape.createTransformedArea(at));
+						}
+
+						gridShapeCache.put(Integer.valueOf(dist), radius);
+						log.info("Adding to cache radius: " + Integer.valueOf(dist));
+					}
+				}
+
+				// place the light, this is very fast, < 1ms
+				Set<CellPoint> tokenCells = new HashSet<CellPoint>();
+				double tokenSizeAdjust = 0;
+
+				// FIXME: default properties with scale are not loading properly!
+
+				if (scaleWithToken) {
+					tokenCells = token.getOccupiedCells(this);
+					tokenSizeAdjust = (token.getFootprint(this).getBounds(this).getWidth() / size) / 2;
+				} else {
+					tokenCells.add(new CellPoint((int) ((token.getX() / size)), (token.getY() / size)));
+					tokenSizeAdjust = .5;
+				}
+
+				int cellX = token.getX() / size;
+				int cellY = token.getY() / size;
+
+				for (CellPoint cellPoint : tokenCells) {
+					AffineTransform at = new AffineTransform();
+					at.translate((cellPoint.x - cellX - tokenSizeAdjust) * size, (cellPoint.y - cellY - tokenSizeAdjust) * size);
+					visibleArea.add(radius.createTransformedArea(at));
+				}
+
+				time = (System.currentTimeMillis() - time);
+				if (time > 50)
+					log.info("Long time for grid light " + dist + ": " + time + "ms");
+			} else {
+				// Fall back to regular circle in daylight, etc.
+				visibleArea = GraphicsUtil.createLineSegmentEllipse(-visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
+			}
 			break;
 		case SQUARE:
-			visibleArea = new Area(
-					new Rectangle2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
+			visibleArea = new Area(new Rectangle2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
 			break;
 		case CONE:
 			if (token.getFacing() == null) {
 				token.setFacing(0);
 			}
-			// TODO: confirm if we want the offset to be positive-counter-clockwise, negative-clockwise or vice versa
-			// simply a matter of changing the sign on offsetAngle
-			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange, visionRange * 2,
-					visionRange * 2, 360.0 - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
+			// Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2, 360.0 - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
+
+			Arc2D cone = new Arc2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2, 360.0 - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE);
+			GeneralPath path = new GeneralPath();
+			path.append(cone.getPathIterator(null, 1), false); // Flatten the cone to remove 'curves'
+			Area tempvisibleArea = new Area(path);
+
 			// Rotate
 			tempvisibleArea = tempvisibleArea
 					.createTransformedArea(AffineTransform.getRotateInstance(-Math.toRadians(token.getFacing())));
@@ -355,21 +425,50 @@ public abstract class Grid implements Cloneable {
 			footprint = token.getFootprint(this).getBounds(this);
 			double x = footprint.getCenterX();
 			double y = footprint.getCenterY();
-			double rotation = Math.toRadians(30);
+			// double rotation = Math.toRadians(30);
 
 			double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
 			double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
 			double adjustment = (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
 			x -= adjustment / 2;
 			y -= adjustment / 2;
-			System.out.println("adjustment " + adjustment);
+			// System.out.println("adjustment " + adjustment);
 			visibleArea = createHex(x, y, visionRange, 0);
 			break;
 		default:
-			visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
+			visibleArea = GraphicsUtil.createLineSegmentEllipse(-visionRange, -visionRange, visionRange * 2, visionRange * 2, CIRCLE_SEGMENTS);
 			break;
 		}
+
+		// log.info("visibleArea bounds: " + visibleArea.getBounds());
 		return visibleArea;
+	}
+
+	private HashSet<Point> generateRadius(int radius) {
+		HashSet<Point> points = new HashSet<>();
+		int x, y;
+
+		for (y = -radius; y <= radius; y++) {
+			for (x = -radius; x <= radius; x++) {
+				if (metricDistance(x, y, radius) < radius + 1)
+					points.add(new Point(x, y));
+			}
+		}
+
+		return points;
+	}
+
+	private static double metricDistance(int x, int y, int radius) {
+		double distance;
+
+		int xDist = Math.abs(x);
+		int yDist = Math.abs(y);
+		if (xDist > yDist)
+			distance = 1.5 * yDist + (xDist - yDist);
+		else
+			distance = 1.5 * xDist + (yDist - xDist);
+
+		return distance;
 	}
 
 	private Area createHex(double x, double y, double radius, double rotation) {
@@ -392,6 +491,7 @@ public abstract class Grid implements Cloneable {
 
 	private void fireGridChanged() {
 		if (zone != null) {
+			gridShapeCache.clear();
 			zone.fireModelChangeEvent(new ModelChangeEvent(this, Event.GRID_CHANGED));
 		}
 	}

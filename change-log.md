@@ -1,3 +1,54 @@
+MapTool 1.4.5.0 - _Infused with Nerps!_
+=====
+I'm excited to bring to you the next version of MapTool Nerps! I have some new exciting features to showcase, namely automated Pathfinding for tokens! There is also a huge improvement to performance for Lights as well as several other bug fixes. A new vision/light type of GRID has also been added, which is a circle of the specified size but only lights up the affected grid cells within range, much like using the template tool.
+
+The packaged JRE has also been updated to Java 10 to stay current, although you shouldn't see any changes over Java 9.
+
+___
+
+Enhancements
+-----
+* [#49][i49] - Pathfinding! When activated (via new 'AI' toggle button), tokens will find the shortest path to it's destination as you drag them on the token or hidden layers, taking VBL into account. Yes, this means your tokens will no longer walk thru VBL! If no path can be found (or found within several seconds) no path will be shown, however you can still move your token to that location. This can happen because the area is blocked off or you are working with a very complicated or large map. With MapTool allowing unbounded/nearly infinite map space, I had to include a timeout to prevent an infinite search.
+A new token config value is also now available called Terrain Modifier. This multiplies the cost of moving into that tokens cell and taken into account with Pathfinding is used. Some examples are:
+Setting the multiplier to 2 will cost 10 feet of movement vs 5 feet acting like difficult terrain.
+Setting the multiplier to a sufficiently high number, like 99999, will effectively block the movement and make the token go around the obstacle. Useful for things like an arrow slit, window, lava, etc.
+Any token can have this modifier, NPC tokens to make PC tokens go around them vs through them, or stamp tokens on the object layer like oil or water. You could also place tokens on the hidden layer over rocky terrain to denote difficult terrain.
+Please note, at this time no macros are available to access these new feature, nor server options to force players to use this mode of moving tokens. Due to the complexity of this feature, I felt it better to get this out to you, the user, to play with and use (or not use) and provide feedback. Therefore the Terrain Modifier *could* change in the future or expand in functionality. There could be performance related hits as well, although I did my best to mitigate this, as well as you can turn this feature off and revert to basic movement.
+Also note, currently fractional modifiers are not supported at this time nor straight addition modifiers. I plan to expand this functionality over time.
+* [#45][i45] - Lighting has been improved to greatly reduce lag when multiple light sources are on a map. It also helps alleviate the slowness you encounter as you reveal more and more FoW.
+* [#63][i63] - Spacebar functionality has been restored to it's original behavior, including ctrl+spacebar & shift+spacebar.
+A new shift+ctrl+spacebar command along with a new pointer image is now available. When this keystroke combo is pressed, and you are a GM, the pointer will center & zoom all connected clients to that point. When it is released, all clients will return to their previous view point & zoom.
+* [#67][i67] - A new vision/light type of GRID has also been added, which is a circle of the specified size but only lights up the affected grid cells within range, much like using the template tool. This is useful in systems like Pathfinder if you want to see exactly which grid cells (squares) are affected by a Light/Aura or can be seen. Aura for Channel Energy for instance, or seeing which grid cells are in dim light for concealment.
+* [#71][i71] - The default data directory (USER_HOME/.maptool-{Vendor}, so for Nerps fork, .maptool-Nerps) can now be overridden in Edit -> Preferences -> Startup tab.
+* [#43][i43] - Spotless and .appveyor.yml updated. This is purely a build process enhancement to make deployment of the releases better.
+* [#66][i66] - Update packaged JRE to Java 10 and verify MapTool runs under Java 10. *Note: Java 9 was a short term release hence the update to Java 10.
+
+Bug Fixes
+-----
+* [#68][i68] - MapTool's i18n language override enabled via Edit -> Preferences -> Startup tab. This will override your default language set by your OS.
+* [#41][i41] - Allow player owned tokens without "sight" to move within currently exposed FoW, e.g. areas other PC token can currently see.
+* [#44][i44] - If running the JAR version with your own JRE installed, Edit -> Preferences will no longer throw and error and blow up! Instead the Startup tab will be grayed out (as those values will not be used and you must make your own startup script to set memory settings when using the JAR format)
+* [#27][i27] - Code cleanup, .pdf & .por files will no longer throw errors to the log file.
+* [#65][i65] - Gradle will once again build and deploy vs throw an error getting the branch name.
+* [#179][i179] - Pulled in @Jaggeroth change from main RPTool's Repo; ZOrder sort violation problem by restoring the original comparator and only using the new figure comparator when sorting figure only.
+
+
+[i49]: https://github.com/JamzTheMan/MapTool/issues/49
+[i45]: https://github.com/JamzTheMan/MapTool/issues/45
+[i44]: https://github.com/JamzTheMan/MapTool/issues/44
+[i43]: https://github.com/JamzTheMan/MapTool/issues/43
+[i41]: https://github.com/JamzTheMan/MapTool/issues/41
+[i27]: https://github.com/JamzTheMan/MapTool/issues/27
+[i63]: https://github.com/JamzTheMan/MapTool/issues/63
+[i65]: https://github.com/JamzTheMan/MapTool/issues/65
+[i66]: https://github.com/JamzTheMan/MapTool/issues/66
+[i67]: https://github.com/JamzTheMan/MapTool/issues/67
+[i68]: https://github.com/JamzTheMan/MapTool/issues/68
+[i71]: https://github.com/JamzTheMan/MapTool/issues/71
+[i179]: https://github.com/RPTools/maptool/pull/179
+
+___
+
 MapTool 1.4.4.2 - _Infused with Nerps!_
 =====
 This is a hotfix release to correct issues with Java 9 and macOS as reported via github as well as fixing the auto update check.

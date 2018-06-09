@@ -267,11 +267,15 @@ public class GraphicsUtil {
 	}
 
 	public static Area createLineSegmentEllipse(int x1, int y1, int x2, int y2, int steps) {
+		return createLineSegmentEllipse((double) x1, (double) y1, (double) x2, (double) y2, steps);
+	}
+
+	public static Area createLineSegmentEllipse(double x1, double y1, double x2, double y2, int steps) {
 		double x = Math.min(x1, x2);
 		double y = Math.min(y1, y2);
 
-		int w = Math.abs(x1 - x2);
-		int h = Math.abs(y1 - y2);
+		double w = Math.abs(x1 - x2);
+		double h = Math.abs(y1 - y2);
 
 		// Operate from the center of the ellipse
 		x += w / 2;
@@ -281,8 +285,8 @@ public class GraphicsUtil {
 		// out of line segments
 		GeneralPath path = new GeneralPath();
 
-		int a = w / 2;
-		int b = h / 2;
+		double a = w / 2;
+		double b = h / 2;
 
 		boolean firstMove = true;
 		for (double t = -Math.PI; t <= Math.PI; t += (2 * Math.PI / steps)) {
@@ -296,6 +300,7 @@ public class GraphicsUtil {
 				path.lineTo(px, py);
 			}
 		}
+
 		path.closePath();
 		return new Area(path);
 	}

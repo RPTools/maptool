@@ -56,10 +56,12 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.config.Configurator;
 
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
@@ -1494,10 +1496,12 @@ public class MapTool {
 		boolean listMacros = getCommandLineOption(cmdOptions, "macros", args);
 
 		// Jamz: Just a little console log formatter for system.out to hyperlink messages to source.
-		if (debug)
+		if (debug) {
+			Configurator.setRootLevel(Level.DEBUG);
 			DebugStream.activate();
-		else
+		} else {
 			DebugStream.deactivate();
+		}
 
 		// List out passed in arguments
 		for (String arg : args) {
@@ -1513,7 +1517,6 @@ public class MapTool {
 
 		// Set MapTool version
 		sentry.setRelease(getVersion());
-		// sentry.setEnvironment("Development");
 		sentry.addTag("os", System.getProperty("os.name"));
 		sentry.addTag("version", MapTool.getVersion());
 

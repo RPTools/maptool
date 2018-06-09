@@ -33,28 +33,19 @@ import net.rptools.maptool.model.drawing.Pen;
 
 public interface ServerCommand {
 	public static enum COMMAND {
-		bootPlayer, setCampaign, getZone, putZone, removeZone, putAsset, getAsset, removeAsset, putToken, removeToken, draw, updateDrawing, clearAllDrawings, setZoneGridSize, message, undoDraw, showPointer, movePointer, hidePointer, startTokenMove, stopTokenMove, toggleTokenMoveWaypoint, updateTokenMove, setZoneVisibility, enforceZoneView, setZoneHasFoW, exposeFoW, hideFoW, setFoW, putLabel, removeLabel, sendTokensToBack, bringTokensToFront, enforceZone, setServerPolicy, addTopology, removeTopology, renameZone, heartbeat, updateCampaign, updateInitiative, updateTokenInitiative, setVisionType, updateCampaignMacros, setTokenLocation, // NOTE:
-																																																																																																																																																																// This
-																																																																																																																																																																// is
-																																																																																																																																																																// to
-																																																																																																																																																																// support
-																																																																																																																																																																// third
-																																																																																																																																																																// party
-																																																																																																																																																																// token
-																																																																																																																																																																// placement
-																																																																																																																																																																// and
-																																																																																																																																																																// shouldn't
-																																																																																																																																																																// be
-																																																																																																																																																																// depended
-																																																																																																																																																																// on
-																																																																																																																																																																// for
-																																																																																																																																																																// general
-																																																																																																																																																																// purpose
-																																																																																																																																																																// token
-																																																																																																																																																																// movement
+		// @formatter:off
+		bootPlayer, setCampaign, getZone, putZone, removeZone, putAsset, getAsset, removeAsset, putToken, 
+		removeToken, draw, updateDrawing, clearAllDrawings, setZoneGridSize, message, undoDraw, showPointer, 
+		movePointer, hidePointer, startTokenMove, stopTokenMove, toggleTokenMoveWaypoint, updateTokenMove, 
+		setZoneVisibility, enforceZoneView, setZoneHasFoW, exposeFoW, hideFoW, setFoW, putLabel, removeLabel, 
+		sendTokensToBack, bringTokensToFront, enforceZone, setServerPolicy, addTopology, removeTopology, 
+		renameZone, heartbeat, updateCampaign, updateInitiative, updateTokenInitiative, setVisionType, updateCampaignMacros, 
+		setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be depended on for general purpose token movement
 		setLiveTypingLabel, // Experimental
 		enforceNotification, // Override toggle button to show typing notifications
-		exposePCArea, setBoard, updateExposedAreaMeta, clearExposedArea
+		exposePCArea, setBoard, updateExposedAreaMeta, clearExposedArea, 
+		restoreZoneView // Jamz: New command to restore player's view and let GM temporarily center and scale a player's view
+		// @formatter:on
 	};
 
 	public void bootPlayer(String player);
@@ -72,6 +63,8 @@ public interface ServerCommand {
 	public void removeTopology(GUID zoneGUID, Area area);
 
 	public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height);
+
+	public void restoreZoneView(GUID zoneGUID);
 
 	public void setCampaign(Campaign campaign);
 

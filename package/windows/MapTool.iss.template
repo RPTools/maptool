@@ -14,7 +14,7 @@ AppSupportURL=http://forums.rptools.net/viewtopic.php?f=60&t=23681
 ;AppUpdatesURL=http://java.com/
 DefaultDirName={localappdata}/${AppName}
 DisableStartupPrompt=Yes
-DisableDirPage=Auto
+DisableDirPage=No
 DisableProgramGroupPage=Yes
 DisableReadyPage=Yes
 DisableFinishedPage=Yes

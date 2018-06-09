@@ -311,14 +311,17 @@ public class ImageManager {
 				return;
 			}
 
-			try {
-				assert asset.getImage() != null : "asset.getImage() for " + asset.toString() + "returns null?!";
-				image = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()), hints);
-			} catch (Throwable t) {
-				log.error(
-						"BackgroundImageLoader.run(" + asset.getName() + "," + asset.getId() + "): image not resolved",
-						t);
-				image = BROKEN_IMAGE;
+			if (asset.getImageExtension().equals(Asset.DATA_EXTENSION)) {
+				log.debug("BackgroundImageLoader.run(" + asset.getName() + "," + asset.getImageExtension() + ", " + asset.getId() + "): looks like data and skipped");
+				image = BROKEN_IMAGE; // we should never see this
+			} else {
+				try {
+					assert asset.getImage() != null : "asset.getImage() for " + asset.toString() + "returns null?!";
+					image = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()), hints);
+				} catch (Throwable t) {
+					log.error("BackgroundImageLoader.run(" + asset.getName() + "," + asset.getImageExtension() + ", " + asset.getId() + "): image not resolved", t);
+					image = BROKEN_IMAGE;
+				}
 			}
 
 			synchronized (imageLoaderMutex) {

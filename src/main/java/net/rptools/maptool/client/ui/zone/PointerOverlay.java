@@ -33,12 +33,15 @@ public class PointerOverlay implements ZoneOverlay {
 	private static BufferedImage POINTER_IMAGE;
 	private static BufferedImage SPEECH_IMAGE;
 	private static BufferedImage THOUGHT_IMAGE;
+	private static BufferedImage LOOK_HERE_IMAGE;
 
 	static {
 		try {
 			POINTER_IMAGE = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow.png");
 			SPEECH_IMAGE = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/speech.png");
 			THOUGHT_IMAGE = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/thought.png");
+			LOOK_HERE_IMAGE = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/look_here.png");
+
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
@@ -60,9 +63,9 @@ public class PointerOverlay implements ZoneOverlay {
 				BufferedImage image = null;
 				switch (p.pointer.getType()) {
 				case ARROW:
-					image = POINTER_IMAGE;
 					offX = 2;
 					offY = -36;
+					image = POINTER_IMAGE;
 					break;
 				case SPEECH_BUBBLE:
 					offX = -19;
@@ -78,6 +81,11 @@ public class PointerOverlay implements ZoneOverlay {
 					centY = 23;
 					image = THOUGHT_IMAGE;
 					break;
+				case LOOK_HERE:
+					offX = 0;
+					offY = -52;
+					image = LOOK_HERE_IMAGE;
+					break;
 				}
 				g.drawImage(image, (int) sPoint.x + offX, (int) sPoint.y + offY, null);
 
@@ -85,7 +93,6 @@ public class PointerOverlay implements ZoneOverlay {
 				case ARROW:
 					GraphicsUtil.drawBoxedString(g, p.player, (int) sPoint.x + POINTER_IMAGE.getWidth() - 10, (int) sPoint.y - POINTER_IMAGE.getHeight() + 15, SwingUtilities.LEFT);
 					break;
-
 				case THOUGHT_BUBBLE:
 				case SPEECH_BUBBLE:
 					FontMetrics fm = renderer.getFontMetrics(renderer.getFont());
@@ -96,6 +103,11 @@ public class PointerOverlay implements ZoneOverlay {
 					int x = (int) sPoint.x + centX + offX + 5;
 					int y = (int) sPoint.y + offY + centY + fm.getHeight() / 2;
 					g.drawString(name, x - len / 2, y);
+					break;
+				case LOOK_HERE:
+					GraphicsUtil.drawBoxedString(g, p.player, (int) sPoint.x + LOOK_HERE_IMAGE.getWidth() - 22, (int) sPoint.y + 2, SwingUtilities.LEFT);
+					break;
+				default:
 					break;
 				}
 			}

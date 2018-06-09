@@ -355,7 +355,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		statusPanel.addPanel(new SpacerStatusBar(25));
 
 		zoneMiniMapPanel = new ZoneMiniMapPanel();
-		zoneMiniMapPanel.setSize(100, 100);
+		// zoneMiniMapPanel.setSize(100, 100);
 
 		zoneRendererPanel = new JPanel(new PositionalLayout(5));
 		zoneRendererPanel.setBackground(Color.black);
@@ -1608,8 +1608,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 			for (Object o : c.getActionMap().keys()) {
 				// We're looking for MacroButton here, but we're adding AbstractActions below... Is this right? XXX
 				if (o instanceof MacroButton) {
-					if (log.isInfoEnabled())
-						log.info("Removing MacroButton " + ((MacroButton) o).getButtonText());
+					if (log.isDebugEnabled())
+						log.debug("Removing MacroButton " + ((MacroButton) o).getButtonText());
 					c.getActionMap().remove(o);
 				}
 			}

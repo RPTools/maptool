@@ -79,6 +79,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 			case enforceZoneView:
 				enforceZoneView(context.getGUID(0), context.getInt(1), context.getInt(2), context.getDouble(3), context.getInt(4), context.getInt(5));
 				break;
+			case restoreZoneView:
+				restoreZoneView(context.getGUID(0));
+				break;
 			case exposeFoW:
 				exposeFoW(context.getGUID(0), (Area) context.get(1), (Set<GUID>) context.get(2));
 				break;
@@ -279,7 +282,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 				}
 			}
 			// Arrange
-			Collections.sort(tokenList, zone.getZOrderComparator());
+			Collections.sort(tokenList, Zone.TOKEN_Z_ORDER_COMPARATOR);
 
 			// Update
 			int z = zone.getLargestZOrder() + 1;
@@ -313,6 +316,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 	}
 
 	public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height) {
+		forwardToClients();
+	}
+
+	public void restoreZoneView(GUID zoneGUID) {
 		forwardToClients();
 	}
 
@@ -484,7 +491,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 				}
 			}
 			// Arrange
-			Collections.sort(tokenList, zone.getZOrderComparator());
+			Collections.sort(tokenList, Zone.TOKEN_Z_ORDER_COMPARATOR);
 
 			// Update
 			int z = zone.getSmallestZOrder() - 1;

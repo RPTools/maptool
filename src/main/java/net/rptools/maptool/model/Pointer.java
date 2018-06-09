@@ -14,7 +14,7 @@ package net.rptools.maptool.model;
 public class Pointer {
 
 	public enum Type {
-		ARROW, SPEECH_BUBBLE, THOUGHT_BUBBLE
+		ARROW, SPEECH_BUBBLE, THOUGHT_BUBBLE, LOOK_HERE
 	}
 
 	private GUID zoneGUID;

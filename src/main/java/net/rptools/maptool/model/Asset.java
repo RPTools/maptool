@@ -28,9 +28,12 @@ import com.thoughtworks.xstream.annotations.XStreamConverter;
  * The binary representation of an image.
  */
 public class Asset {
+	public final static String DATA_EXTENSION = "data";
+
 	private MD5Key id;
 	private String name;
 	private String extension;
+	private String type;
 
 	@XStreamConverter(AssetImageConverter.class) private byte[] image;
 
@@ -96,9 +99,9 @@ public class Asset {
 						reader.setInput(iis);
 						extension = reader.getFormatName().toLowerCase();
 					}
-					// We can store more than images, eg HeroLabData in the form of a HashMap
+					// We can store more than images, eg HeroLabData in the form of a HashMap, assume this if an image type can not be established
 					if (extension.isEmpty())
-						extension = "data";
+						extension = DATA_EXTENSION;
 				}
 			} catch (IOException e) {
 				MapTool.showError("IOException?!", e); // Can this happen??
@@ -113,6 +116,10 @@ public class Asset {
 
 	public boolean isTransfering() {
 		return AssetManager.isAssetRequested(id);
+	}
+
+	public String getType() {
+		return type;
 	}
 
 	@Override
@@ -133,4 +140,5 @@ public class Asset {
 		Asset asset = (Asset) obj;
 		return asset.getId().equals(getId());
 	}
+
 }

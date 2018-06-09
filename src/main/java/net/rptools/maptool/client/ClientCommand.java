@@ -11,27 +11,17 @@ package net.rptools.maptool.client;
 public class ClientCommand {
 
 	public static enum COMMAND {
-		startAssetTransfer, updateAssetTransfer, bootPlayer, setCampaign, putZone, removeZone, putAsset, getAsset, removeAsset, putToken, removeToken, draw, clearAllDrawings, updateDrawing, setZoneGridSize, setZoneVisibility, playerConnected, playerDisconnected, message, undoDraw, showPointer, hidePointer, movePointer, startTokenMove, stopTokenMove, toggleTokenMoveWaypoint, updateTokenMove, enforceZoneView, setZoneHasFoW, exposeFoW, hideFoW, setFoW, putLabel, removeLabel, enforceZone, setServerPolicy, addTopology, removeTopology, renameZone, updateCampaign, updateInitiative, updateTokenInitiative, setUseVision, updateCampaignMacros, setTokenLocation, // NOTE:
-																																																																																																																																																																					// This
-																																																																																																																																																																					// is
-																																																																																																																																																																					// to
-																																																																																																																																																																					// support
-																																																																																																																																																																					// third
-																																																																																																																																																																					// party
-																																																																																																																																																																					// token
-																																																																																																																																																																					// placement
-																																																																																																																																																																					// and
-																																																																																																																																																																					// shouldn't
-																																																																																																																																																																					// be
-																																																																																																																																																																					// depended
-																																																																																																																																																																					// on
-																																																																																																																																																																					// for
-																																																																																																																																																																					// general
-																																																																																																																																																																					// purpose
-																																																																																																																																																																					// token
-																																																																																																																																																																					// movement
+		// @formatter:off
+		startAssetTransfer, updateAssetTransfer, bootPlayer, setCampaign, putZone, removeZone, putAsset, getAsset, removeAsset, putToken, 
+		removeToken, draw, clearAllDrawings, updateDrawing, setZoneGridSize, setZoneVisibility, playerConnected, playerDisconnected, message, 
+		undoDraw, showPointer, hidePointer, movePointer, startTokenMove, stopTokenMove, toggleTokenMoveWaypoint, updateTokenMove, 
+		enforceZoneView, setZoneHasFoW, exposeFoW, hideFoW, setFoW, putLabel, removeLabel, enforceZone, setServerPolicy, addTopology, 
+		removeTopology, renameZone, updateCampaign, updateInitiative, updateTokenInitiative, setUseVision, updateCampaignMacros, 
+		setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be depended on for general purpose token movement
 		setLiveTypingLabel, // Experimental chat notification
 		enforceNotification, // enforces notification of typing in the chat window
-		exposePCArea, setBoard, updateExposedAreaMeta, clearExposedArea
+		exposePCArea, setBoard, updateExposedAreaMeta, clearExposedArea, 
+		restoreZoneView // Jamz: New command to restore player's view and let GM temporarily center and scale a player's view
+		// @formatter:on
 	};
 }

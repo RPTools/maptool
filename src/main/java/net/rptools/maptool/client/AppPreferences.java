@@ -159,6 +159,9 @@ public class AppPreferences {
 	private static final String KEY_FORCE_FACING_ARROW = "forceFacingArrow";
 	private static final boolean DEFAULT_FORCE_FACING_ARROW = false;
 
+	private static final String KEY_USE_ASTAR_PATHFINDING = "useAstarPathfinding";
+	private static final boolean DEFAULT_USE_ASTAR_PATHFINDING = true;
+
 	public static void setFillSelectionBox(boolean fill) {
 		prefs.putBoolean(KEY_FILL_SELECTION_BOX, fill);
 	}
@@ -1066,5 +1069,13 @@ public class AppPreferences {
 
 	public static void setShowInitGainMessage(boolean flag) {
 		prefs.putBoolean(KEY_SHOW_INIT_GAIN_MESSAGE, flag);
+	}
+
+	public static boolean isUsingAstarPathfinding() {
+		return prefs.getBoolean(KEY_USE_ASTAR_PATHFINDING, DEFAULT_USE_ASTAR_PATHFINDING);
+	}
+
+	public static void setUseAstarPathfinding(boolean show) {
+		prefs.putBoolean(KEY_USE_ASTAR_PATHFINDING, show);
 	}
 }

@@ -42,12 +42,15 @@ public class SquareGrid extends Grid {
 	private static final String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; //$NON-NLS-1$
 	private static final Dimension CELL_OFFSET = new Dimension(0, 0);
 	private static BufferedImage pathHighlight;
+	private static BufferedImage pathHighlightAlt;
 
 	private static List<TokenFootprint> footprintList;
 
 	static {
 		try {
 			pathHighlight = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/whiteBorder.png");
+			pathHighlightAlt = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/grid-square-red.png");
+
 		} catch (IOException ioe) {
 			MapTool.showError("SquareGrid.error.pathhighlightingNotLoaded", ioe);
 		}

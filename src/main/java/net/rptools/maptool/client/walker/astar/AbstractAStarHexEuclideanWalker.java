@@ -8,11 +8,8 @@
  */
 package net.rptools.maptool.client.walker.astar;
 
-import java.util.List;
-
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.ZonePoint;
 
 public abstract class AbstractAStarHexEuclideanWalker extends AbstractAStarWalker {
 	protected int[][] oddNeighborMap;
@@ -24,10 +21,7 @@ public abstract class AbstractAStarHexEuclideanWalker extends AbstractAStarWalke
 
 	protected abstract void initNeighborMaps();
 
-	@Override
-	protected int[][] getNeighborMap(int x, int y) {
-		return x % 2 == 0 ? evenNeighborMap : oddNeighborMap;
-	}
+	protected abstract int[][] getNeighborMap(int x, int y);
 
 	@Override
 	protected double gScore(CellPoint p1, CellPoint p2) {
@@ -40,18 +34,13 @@ public abstract class AbstractAStarHexEuclideanWalker extends AbstractAStarWalke
 	}
 
 	private double euclideanDistance(CellPoint p1, CellPoint p2) {
-		ZonePoint zp1 = getZone().getGrid().convert(p1);
-		ZonePoint zp2 = getZone().getGrid().convert(p2);
-
-		int a = zp2.x - zp1.x;
-		int b = zp2.y - zp1.y;
+		int a = p1.x - p2.x;
+		int b = p1.y - p2.y;
 
 		return Math.sqrt(a * a + b * b);
 	}
 
-	@Override
-	protected int calculateDistance(List<CellPoint> path, int feetPerCell) {
-		int cellsMoved = path != null && path.size() > 1 ? path.size() - 1 : 0;
-		return cellsMoved * feetPerCell;
+	protected double getDiagonalMultiplier(int[] neighborArray) {
+		return 1;
 	}
 }

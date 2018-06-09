@@ -106,6 +106,10 @@ public class ServerCommandClientImpl implements ServerCommand {
 		makeServerCall(COMMAND.enforceZoneView, zoneGUID, x, y, scale, width, height);
 	}
 
+	public void restoreZoneView(GUID zoneGUID) {
+		makeServerCall(COMMAND.restoreZoneView, zoneGUID);
+	}
+
 	public void putToken(GUID zoneGUID, Token token) {
 		// Hack to generate zone event. All functions that update tokens call this method
 		// after changing the token. But they don't tell the zone about it so classes

@@ -10,22 +10,29 @@ package net.rptools.maptool.util;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
 
 import jdk.packager.services.UserJvmOptionsService;
+import net.rptools.maptool.client.AppUtil;
 
 /*
  * User Preferences are stored here:
  * 
  * Mac: ~/Library/Application Support/[app.preferences.id]/packager/jvmuserargs.cfg
  * 
- * Windows: C:\Users[username]\AppData\Roaming[app.preferences.id]\packager\jvmuserargs.cfg
+ * Windows: C:\Users[username]\AppData\Roaming\[app.preferences.id]\packager\jvmuserargs.cfg
  * 
  * Linux: ~/.local/[app.preferences.id]/packager/jvmuserargs.cfg
  */
@@ -34,9 +41,26 @@ public class UserJvmPrefs {
 
 	private static final Pattern UNIT_PATTERN = Pattern.compile("([0-9]+)[g|G|m|M|k|K]"); // Valid JVM memory units
 
+	private static final Map<String, String> LANGUAGE_MAP = getResourceBundles();
+
+	private static final String I18N_RESOURCE_PREFIX = "i18n_";
+	private static final String I18N_RESOURCE_PATH = "net/rptools/maptool/language";
+
+	private static final String CURRENT_DATA_DIR = AppUtil.getAppHome().getName();
+
 	public enum JVM_OPTION {
-		MAX_MEM("-Xmx", ""), MIN_MEM("-Xms", ""), STACK_SIZE("-Xss", ""), ASSERTIONS("-ea", ""), DATADIR("-DMAPTOOL_DATADIR", ""), LOCALE_LANGUAGE("-Duser.language", ""), LOCALE_COUNTRY(
-				"-Duser.country", ""), JAVA2D_D3D("-Dsun.java2d.d3d=", "false"), JAVA2D_OPENGL_OPTION("-Dsun.java2d.opengl=", "True"), MACOSX_EMBEDDED_OPTION("-Djavafx.macosx.embedded=", "true");
+		// @formatter:off
+		MAX_MEM("-Xmx", ""), 
+		MIN_MEM("-Xms", ""), 
+		STACK_SIZE("-Xss", ""), 
+		ASSERTIONS("-ea", ""), 
+		DATA_DIR("-DMAPTOOL_DATADIR=", CURRENT_DATA_DIR), 
+		LOCALE_LANGUAGE("-Duser.language=", ""), 
+		LOCALE_COUNTRY("-Duser.country=", ""), 
+		JAVA2D_D3D("-Dsun.java2d.d3d=", "false"), 
+		JAVA2D_OPENGL_OPTION("-Dsun.java2d.opengl=", "True"), 
+		MACOSX_EMBEDDED_OPTION("-Djavafx.macosx.embedded=", "true");
+		// @formatter:on
 
 		private final String command, defaultValue;
 
@@ -57,7 +81,7 @@ public class UserJvmPrefs {
 		setJvmOption(JVM_OPTION.MIN_MEM, "");
 		setJvmOption(JVM_OPTION.STACK_SIZE, "");
 		setJvmOption(JVM_OPTION.ASSERTIONS, "");
-		setJvmOption(JVM_OPTION.DATADIR, "");
+		setJvmOption(JVM_OPTION.DATA_DIR, "");
 		setJvmOption(JVM_OPTION.LOCALE_LANGUAGE, "");
 		setJvmOption(JVM_OPTION.LOCALE_COUNTRY, "");
 		setJvmOption(JVM_OPTION.JAVA2D_D3D, "");
@@ -69,14 +93,28 @@ public class UserJvmPrefs {
 		// For testing only
 		RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
 		List<String> arguments = runtimeMxBean.getInputArguments();
-		log.info("get JVM Args :: " + arguments);
+		log.debug("get JVM Args :: " + arguments);
 
 		UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
 		Map<String, String> userOptions = ujo.getUserJVMOptions();
 
 		// If user option is set, return it
-		if (userOptions.containsKey(option.command))
+		if (userOptions.containsKey(option.command)) {
+			if (option.equals(JVM_OPTION.LOCALE_LANGUAGE)) {
+				// Translate 2 letter language code to display language
+				String languageCode = userOptions.get(option.command);
+				for (Entry<String, String> entry : LANGUAGE_MAP.entrySet()) {
+					if (Objects.equals(languageCode, entry.getValue())) {
+						return entry.getKey();
+					}
+				}
+
+				// Language Code not found, default option to English
+				return "English";
+			}
+
 			return userOptions.get(option.command);
+		}
 
 		// Else, look for default value
 		Map<String, String> defaults = ujo.getUserJVMOptionDefaults();
@@ -91,7 +129,7 @@ public class UserJvmPrefs {
 		// For testing only
 		RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
 		List<String> arguments = runtimeMxBean.getInputArguments();
-		log.info("Has JVM Args :: " + arguments);
+		log.debug("Has JVM Args :: " + arguments);
 
 		UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
 		Map<String, String> userOptions = ujo.getUserJVMOptions();
@@ -113,10 +151,15 @@ public class UserJvmPrefs {
 		UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
 		Map<String, String> userOptions = ujo.getUserJVMOptions();
 
-		if (value.isEmpty())
+		if (value.isEmpty()) {
 			userOptions.remove(option.command);
-		else
+		} else {
+			// Translate display language to 2 letter language code
+			if (option.equals(JVM_OPTION.LOCALE_LANGUAGE))
+				value = LANGUAGE_MAP.get(value);
+
 			userOptions.put(option.command, value);
+		}
 
 		ujo.setUserJVMOptions(userOptions);
 	}
@@ -150,5 +193,30 @@ public class UserJvmPrefs {
 			else
 				return true;
 		}
+	}
+
+	private static Map<String, String> getResourceBundles() {
+		Map<String, String> languages = new HashMap<String, String>();
+
+		Locale loc = new Locale("en");
+		languages.put(loc.getDisplayLanguage(), "");
+
+		Reflections reflections = new Reflections(I18N_RESOURCE_PATH, new ResourcesScanner());
+		Set<String> resourcePathSet = reflections.getResources(Pattern.compile(I18N_RESOURCE_PREFIX + ".*\\.properties"));
+		log.info("resourcePathSet: " + resourcePathSet.toString());
+
+		for (String resourcePath : resourcePathSet) {
+			int index = I18N_RESOURCE_PATH.length() + I18N_RESOURCE_PREFIX.length() + 1;
+			String languageCode = resourcePath.substring(index, index + 2);
+			Locale locale = new Locale(languageCode);
+			languages.put(locale.getDisplayLanguage(), languageCode);
+		}
+
+		log.info("languages: " + languages.toString());
+		return languages;
+	}
+
+	public static Set<Entry<String, String>> getLanguages() {
+		return LANGUAGE_MAP.entrySet();
 	}
 }

@@ -19,6 +19,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
+import net.rptools.maptool.util.GraphicsUtil;
 
 public class IsometricGrid extends Grid {
 	/**
@@ -289,7 +291,8 @@ public class IsometricGrid extends Grid {
 		switch (shape) {
 		case CIRCLE:
 			visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
-			visibleArea = new Area(new Ellipse2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2));
+			// visibleArea = new Area(new Ellipse2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2));
+			visibleArea = GraphicsUtil.createLineSegmentEllipse(-visionRange * 2, -visionRange, visionRange * 2, visionRange, CIRCLE_SEGMENTS);
 			break;
 		case SQUARE:
 			int x[] = { 0, (int) visionRange * 2, 0, (int) -visionRange * 2 };
@@ -303,8 +306,14 @@ public class IsometricGrid extends Grid {
 			// Rotate the vision range by 45 degrees for isometric view
 			visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
 			// Get the cone, use degreesFromIso to convert the facing from isometric to plan
-			Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2, token.getFacing() - (arcAngle / 2.0)
-					+ (offsetAngle * 1.0), arcAngle, Arc2D.PIE));
+
+			// Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2, token.getFacing() - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle,
+			// Arc2D.PIE));
+			Arc2D cone = new Arc2D.Double(-visionRange * 2, -visionRange, visionRange * 4, visionRange * 2, token.getFacing() - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle, Arc2D.PIE);
+			GeneralPath path = new GeneralPath();
+			path.append(cone.getPathIterator(null, 1), false); // Flatten the cone to remove 'curves'
+			Area tempvisibleArea = new Area(path);
+
 			// Get the cell footprint
 			Rectangle footprint = token.getFootprint(getZone().getGrid()).getBounds(getZone().getGrid());
 			footprint.x = -footprint.width / 2;
@@ -320,7 +329,8 @@ public class IsometricGrid extends Grid {
 			visibleArea.add(tempvisibleArea);
 			break;
 		default:
-			visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
+			// visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2, visionRange * 2));
+			visibleArea = GraphicsUtil.createLineSegmentEllipse(-visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
 			break;
 		}
 		return visibleArea;

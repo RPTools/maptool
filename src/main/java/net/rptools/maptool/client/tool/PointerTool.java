@@ -48,6 +48,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -235,6 +236,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			// Not allowed
 			return;
 		}
+
 		renderer.addMoveSelectionSet(p.getName(), tokenBeingDragged.getId(), renderer.getOwnedTokens(renderer.getSelectedTokenSet()), false);
 		MapTool.serverCommand().startTokenMove(p.getName(), renderer.getZone().getId(), tokenBeingDragged.getId(), renderer.getOwnedTokens(renderer.getSelectedTokenSet()));
 
@@ -1058,10 +1060,12 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true), new StopPointerActionListener());
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.CTRL_MASK, true), new StopPointerActionListener());
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.SHIFT_MASK, true), new StopPointerActionListener());
+		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK, true), new StopPointerActionListener(true));
 
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, false), new PointerActionListener(Pointer.Type.ARROW));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.CTRL_MASK, false), new PointerActionListener(Pointer.Type.SPEECH_BUBBLE));
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.SHIFT_MASK, false), new PointerActionListener(Pointer.Type.THOUGHT_BUBBLE));
+		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK, false), new PointerActionListener(Pointer.Type.LOOK_HERE));
 
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, 0), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
@@ -1337,7 +1341,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				Pointer pointer = new Pointer(renderer.getZone(), zp.x, zp.y, 0, type);
 				// Jamz test move clients to view when using point (for GM only)...
 				// TODO: Snap player view back when done?
-				if (MapTool.getPlayer().isGM()) {
+				if (MapTool.getPlayer().isGM() & type.equals(Pointer.Type.LOOK_HERE)) {
 					MapTool.serverCommand().enforceZoneView(renderer.getZone().getId(), zp.x, zp.y, renderer.getScale(), renderer.getWidth(), renderer.getHeight());
 				}
 				MapTool.serverCommand().showPointer(MapTool.getPlayer().getName(), pointer);
@@ -1350,11 +1354,24 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	// STOP POINTER ACTION
 	private class StopPointerActionListener extends AbstractAction {
 		private static final long serialVersionUID = -8508019800264211345L;
+		private boolean restoreZoneView = false;
+
+		public StopPointerActionListener(boolean restore) {
+			restoreZoneView = restore;
+		}
+
+		public StopPointerActionListener() {
+			restoreZoneView = false;
+		}
 
 		public void actionPerformed(ActionEvent e) {
 			if (isShowingPointer) {
 				isShowingPointer = false;
 				MapTool.serverCommand().hidePointer(MapTool.getPlayer().getName());
+
+				if (MapTool.getPlayer().isGM() & restoreZoneView) {
+					MapTool.serverCommand().restoreZoneView(renderer.getZone().getId());
+				}
 			}
 			isSpaceDown = false;
 		}

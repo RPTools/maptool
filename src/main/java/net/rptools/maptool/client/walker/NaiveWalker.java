@@ -10,8 +10,11 @@ package net.rptools.maptool.client.walker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import net.rptools.maptool.client.walker.astar.AStarCellPoint;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 
 public class NaiveWalker extends AbstractZoneWalker {
@@ -52,5 +55,16 @@ public class NaiveWalker extends AbstractZoneWalker {
 
 	public int getDistance() {
 		return distance;
+	}
+
+	@Override
+	public void setFootprint(TokenFootprint footprint) {
+		// Not needed/used here
+		System.out.println("Should not see this ever!");
+	}
+
+	@Override
+	public Set<AStarCellPoint> getCheckedPoints() {
+		return null;
 	}
 }

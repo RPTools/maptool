@@ -233,6 +233,11 @@ public class CampaignPropertiesDialog extends JDialog {
 				if (sight.getDistance() != 0)
 					builder.append("distance=").append(StringUtil.formatDecimal(sight.getDistance())).append(' ');
 				break;
+			case GRID:
+				builder.append("grid ");
+				if (sight.getDistance() != 0)
+					builder.append("distance=").append(StringUtil.formatDecimal(sight.getDistance())).append(' ');
+				break;
 			case HEX:
 				builder.append("hex ");
 				if (sight.getDistance() != 0)
@@ -305,6 +310,7 @@ public class CampaignPropertiesDialog extends JDialog {
 					if (light.getShape() != null) {
 						switch (light.getShape()) {
 						case SQUARE:
+						case GRID:
 						case CIRCLE:
 							// TODO: Make this a preference
 							shape = light.getShape().toString().toLowerCase();

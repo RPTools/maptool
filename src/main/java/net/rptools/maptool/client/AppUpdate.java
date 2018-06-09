@@ -36,6 +36,7 @@ public class AppUpdate {
 		String response = null;
 		String jarCommit = null;
 		String latestGitHubReleaseCommit = "";
+		String latestGitHubReleaseTagName = "";
 
 		// Default for Linux?
 		String DOWNLOAD_EXTENSION = ".deb";
@@ -65,6 +66,8 @@ public class AppUpdate {
 			releases = JSONObject.fromObject(response);
 			latestGitHubReleaseCommit = releases.get("target_commitish").toString();
 			log.info("target_commitish from GitHub: " + latestGitHubReleaseCommit);
+			latestGitHubReleaseTagName = releases.get("tag_name").toString();
+			log.info("tag_name from GitHub: " + latestGitHubReleaseTagName);
 		} catch (Exception e) {
 			log.error("Unable to parse JSON payload from GitHub...", e);
 			return false;
@@ -93,8 +96,9 @@ public class AppUpdate {
 					try {
 						URL url = new URL(assetDownloadURL);
 						String commit = latestGitHubReleaseCommit;
+						String tagName = latestGitHubReleaseTagName;
 						SwingUtilities.invokeLater(() -> {
-							if (showMessage("New Update Found", commit))
+							if (showMessage("New Update Found", commit, tagName))
 								downloadFile(url, assetDownloadSize);
 						});
 					} catch (MalformedURLException e) {
@@ -132,12 +136,12 @@ public class AppUpdate {
 		return jarCommit;
 	}
 
-	private static boolean showMessage(String aTitle, String commit) {
+	private static boolean showMessage(String aTitle, String commit, String tagName) {
 		JCheckBox dontAskCheckbox = new JCheckBox("Never check for updates again!");
 
 		String title = "Update Available";
 		String msg1 = "A new version of MapTool infused with Nerps is available!";
-		String msg2 = "Would you like to download it?";
+		String msg2 = "Would you like to download " + tagName + "?";
 		String blankLine = " ";
 
 		Object[] msgContent = { msg1, msg2, blankLine, dontAskCheckbox };

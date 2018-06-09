@@ -80,8 +80,11 @@ import org.apache.commons.lang.StringUtils;
 
 import de.muntjak.tinylookandfeel.TinyComboBoxButton;
 
+// @formatter:off
+// Jamz: Had to remove <pre> tags and add formatter:off due to Spotless 3.x error, still not fixed as of 6/2/18
+// https://github.com/diffplug/spotless/issues/191
 /**
- * <pre>
+ * pre tag here
  * <span style=
 "font-family:sans-serif;">The input() function prompts the user to input several variable values at once.
  * 
@@ -132,10 +135,11 @@ import de.muntjak.tinylookandfeel.TinyComboBoxButton;
  *  All inputTypes except TAB accept the option SPAN=TRUE, which causes the prompt to be hidden and the input
  *  control to span both columns of the dialog layout (default FALSE).
  * </span>
- * </pre>
+ * /pre end tag here
  * 
  * @author knizia.fan
  */
+//@formatter:on
 
 public class InputFunction extends AbstractFunction {
 	private static final Pattern ASSET_PATTERN = Pattern.compile("^(.*)asset://(\\w+)");

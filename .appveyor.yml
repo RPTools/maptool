@@ -2,31 +2,44 @@ version: '{branch}.{build}'
 pull_requests:
   do_not_increment_build_number: true
 skip_non_tags: false
-image: Visual Studio 2017
 platform: x64
+image: 
+  - Ubuntu
+  - Visual Studio 2017
+init:
+  - cmd: git config --global core.autocrlf true
 install:
-  - SET JAVA_HOME="C:\Program Files\Java\jdk9"
-  - SET PATH=%JAVA_HOME%\bin;%PATH%
+  - sh: echo oracle-java10-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+  - sh: sudo add-apt-repository ppa:linuxuprising/java
+  - sh: sudo apt update
+  - sh: sudo apt install -y oracle-java10-installer
+  - sh: sudo apt install -y oracle-java10-set-default
+  - sh: export JAVA_HOME=/usr/lib/jvm/java-10-oracle
+  - sh: echo java home is $JAVA_HOME
+  - sh: sudo apt install -y fakeroot
+  - ./gradlew -version
 build_script:
-  - ./gradlew build -x spotlessCheck
+  - ./gradlew build -x test
 after_build:
   - ./gradlew deploy
 artifacts:
-  - path: releases\release-*\MapTool-*.exe
-    name: MapTool-Install
   - path: build\libs\MapTool-*.jar
     name: MapTool-Jar
+  - path: releases\release-*\MapTool-*.exe
+    name: MapTool-Windows
+  - path: releases\release-*\MapTool-*.deb
+    name: MapTool-Linux
 deploy:
   - provider: GitHub
     description: Windows release from AppVeyor
     auth_token:
       secure: HXIHe/F7K2yGOZ0I56DW5PevrQDe+zjyunjORGKYaUGxFtvPYPcmOdjZT69tzHcS
-    artifact: MapTool-Install, MapTool-Jar
+    artifact: MapTool-Jar, MapTool-Windows, MapTool-Linux
     draft: true
     prerelease: true
-    force_update: false
+    force_update: true
     on:
-      appveyor_repo_tag: true
+      APPVEYOR_REPO_TAG: true
 notifications:
   - provider: Webhook
     url: 

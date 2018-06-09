@@ -21,8 +21,16 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
  * @author trevor
  */
 public class CellPoint extends AbstractPoint {
+	public double g; // Only populated by AStarWalker classes to be used upstream
+	public double distanceTraveled; // Only populated by AStarWalker classes to be used upstream
+
 	public CellPoint(int x, int y) {
 		super(x, y);
+	}
+
+	public CellPoint(int x, int y, double distanceTraveled) {
+		super(x, y);
+		this.distanceTraveled = distanceTraveled;
 	}
 
 	@Override
@@ -49,5 +57,34 @@ public class CellPoint extends AbstractPoint {
 		int sy = renderer.getViewOffsetY() + (int) (zp.y * scale);
 
 		return new ScreenPoint(sx, sy);
+	}
+
+	public ZonePoint convertToZonePoint(Grid grid) {
+		return grid.convert(this);
+	}
+
+	public ZonePoint offsetZonePoint(Grid grid, double offsetX, double offsetY) {
+		ZonePoint zp = convertToZonePoint(grid);
+		offsetX += 1;
+		offsetY += 1;
+
+		zp.x = (int) (zp.x + (grid.getCellWidth() / 2) * offsetX);
+		zp.y = (int) (zp.y + (grid.getCellWidth() / 2) * offsetY);
+
+		return zp;
+	}
+
+	// Return distance in grid units for current map
+	public double getDistanceTraveled(Zone zone) {
+		return Math.floor(distanceTraveled) * zone.getUnitsPerCell();
+	}
+
+	public double getG() {
+		return g;
+	}
+
+	public void replaceG(CellPoint previousCell) {
+		g = previousCell.g;
+		distanceTraveled = previousCell.distanceTraveled;
 	}
 }
