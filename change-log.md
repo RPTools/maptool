@@ -32,7 +32,6 @@ Bug Fixes
 * [#65][i65] - Gradle will once again build and deploy vs throw an error getting the branch name.
 * [#179][i179] - Pulled in @Jaggeroth change from main RPTool's Repo; ZOrder sort violation problem by restoring the original comparator and only using the new figure comparator when sorting figure only.
 
-
 [i49]: https://github.com/JamzTheMan/MapTool/issues/49
 [i45]: https://github.com/JamzTheMan/MapTool/issues/45
 [i44]: https://github.com/JamzTheMan/MapTool/issues/44
@@ -100,7 +99,6 @@ Bug Fixes
 * [#21][i21] - Lights are not updating properly based on ownership looked like it was tied to other 'light' bugs and should now be fixed.
 * [#23][i23] - Fixed sendToBack & bringToFront macros broke states and bar changes in the macro. This was an OLD one going back to 1.3b63! You can now safely use these functions in your macro now!
 * [#30][i30] - Players see NPC movement when there are no lights no more! This was another old bug going back to 1.3b-something and only showed itself if you had NO lights (including personal lights, aka darkvision).
-
 
 [i8]: https://github.com/JamzTheMan/MapTool/issues/8
 [i26]: https://github.com/JamzTheMan/MapTool/issues/26
