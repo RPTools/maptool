@@ -912,10 +912,9 @@ public class PreferencesDialog extends JDialog {
 			jvmInitAwtCheckbox.setSelected(UserJvmPrefs.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
 
 			jvmLanguageOverideComboBox.setSelectedItem(UserJvmPrefs.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
-		} catch (UnsatisfiedLinkError ule) {
-			log.error("Error setting JVM options from preferences. Most likely cause, manual launch of JAR.", ule);
+		} catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
+			log.warn("Error setting JVM options from preferences. Most likely cause, manual launch of JAR.", e);
 			tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
-
 		}
 
 		Integer rawVal = AppPreferences.getTypingNotificationDuration();
