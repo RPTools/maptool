@@ -15,13 +15,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.ResourceBundle;
-import java.util.Set;
-
+import java.util.ServiceConfigurationError;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -912,8 +908,11 @@ public class PreferencesDialog extends JDialog {
 			jvmInitAwtCheckbox.setSelected(UserJvmPrefs.hasJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION));
 
 			jvmLanguageOverideComboBox.setSelectedItem(UserJvmPrefs.getJvmOption(JVM_OPTION.LOCALE_LANGUAGE));
-		} catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
-			log.warn("Error setting JVM options from preferences. Most likely cause, manual launch of JAR.", e);
+		} catch (UnsatisfiedLinkError | NoClassDefFoundError | ServiceConfigurationError e) {
+			log.warn("Warning, unable to get JVM options from preferences. Most likely cause, manual launch of JAR.");
+			tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
+		} catch (Exception e) {
+			log.error("Error getting JVM options from preferences. Most likely cause, manual launch of JAR.", e);
 			tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Startup"), false);
 		}
 

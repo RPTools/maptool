@@ -212,7 +212,7 @@ public class UserJvmPrefs {
 			languages.put(locale.getDisplayLanguage(), languageCode);
 		}
 
-		log.info("languages: " + languages.toString());
+		log.debug("languages: " + languages.toString());
 		return languages;
 	}
 
