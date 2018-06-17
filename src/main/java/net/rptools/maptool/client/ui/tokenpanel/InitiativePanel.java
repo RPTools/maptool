@@ -61,6 +61,7 @@ import net.rptools.maptool.model.Zone.Event;
 import com.jeta.forms.components.line.HorizontalLineComponent;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
+import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.swing.JideButton;
 import com.jidesoft.swing.JideSplitButton;
 
@@ -163,7 +164,15 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 		setLayout(new BorderLayout());
 		JPanel panel = new JPanel(new FormLayout("2px pref 8dlu pref 4dlu fill:30px 0px:grow 2px", "4dlu fill:pref 7px fill:0px:grow 4dlu"));
 		add(panel, SwingConstants.CENTER);
+		
+		// Jamz: Java 10 no longer packs com.sun.java.swing.plaf.windows.WindowsLookAndFeel for Mac/Linux (makes sense, right?)
+		// JIDE doesn't fix this until 3.7.3 which isn't available via Maven. Seems only this "JideSplitButton" has the issue
+		// Workaround is to install a different LAF, create the button, then restore the LAF back.
+		// https://www.jidesoft.com/forum/viewtopic.php?f=18&t=10807
+		LookAndFeelFactory.installJideExtension(LookAndFeelFactory.VSNET_STYLE_WITHOUT_MENU);
 		menuButton = new JideSplitButton(I18N.getText("initPanel.menuButton"));
+		LookAndFeelFactory.installJideExtension(LookAndFeelFactory.XERTO_STYLE);
+		
 		panel.add(menuButton, new CellConstraints(2, 2));
 		JideButton rButton = new JideButton(RESET_COUNTER_ACTION);
 		rButton.setButtonStyle(JideButton.TOOLBOX_STYLE);
