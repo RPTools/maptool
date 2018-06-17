@@ -1,3 +1,19 @@
+MapTool 1.4.5.1 - _Infused with Nerps!_
+=====
+This release is a patch to fix a critical bug seen under Linux & MacOS. It also fixes yet another bug launching the JAR using the JRE vs full JDK.
+
+___
+
+Bug Fixes
+-----
+* [#76][i76] - Will no longer see errors when attempting to open initiative window on Linux or MacOS.
+* [#44][i44] - If running the JAR version with your own JRE installed, Edit -> Preferences will no longer throw and error and blow up! Instead the Startup tab will be grayed out (as those values will not be used and you must make your own startup script to set memory settings when using the JAR format)
+
+[i76]: https://github.com/JamzTheMan/MapTool/issues/76
+[i44]: https://github.com/JamzTheMan/MapTool/issues/44
+
+___
+
 MapTool 1.4.5.0 - _Infused with Nerps!_
 =====
 I'm excited to bring to you the next version of MapTool Nerps! I have some new exciting features to showcase, namely automated Pathfinding for tokens! There is also a huge improvement to performance for Lights as well as several other bug fixes. A new vision/light type of GRID has also been added, which is a circle of the specified size but only lights up the affected grid cells within range, much like using the template tool.
