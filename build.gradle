@@ -27,7 +27,7 @@ apply plugin: 'eclipse'
 apply plugin: 'com.diffplug.gradle.spotless'
 
 // Current Build version
-version = '1.4.5.1'
+version = '1.4.5.2'
 
 // Definitions
 defaultTasks 'clean', 'build'

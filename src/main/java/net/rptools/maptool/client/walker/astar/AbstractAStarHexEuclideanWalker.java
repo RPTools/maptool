@@ -24,20 +24,23 @@ public abstract class AbstractAStarHexEuclideanWalker extends AbstractAStarWalke
 	protected abstract int[][] getNeighborMap(int x, int y);
 
 	@Override
-	protected double gScore(CellPoint p1, CellPoint p2) {
-		return euclideanDistance(p1, p2);
-	}
-
-	@Override
 	protected double hScore(CellPoint p1, CellPoint p2) {
 		return euclideanDistance(p1, p2);
 	}
 
-	private double euclideanDistance(CellPoint p1, CellPoint p2) {
-		int a = p1.x - p2.x;
-		int b = p1.y - p2.y;
+	// Adjusted math per: https://www.redblobgames.com/grids/hexagons/#distances
+	private double euclideanDistance(CellPoint current, CellPoint goal) {
+		// Using Axial coordinates q & r to match hex coordinate conventions
+		int aq = current.x;
+		int bq = goal.x;
+		int ar = current.y;
+		int br = goal.y;
 
-		return Math.sqrt(a * a + b * b);
+		// break ties to prefer better looking paths that are along the straight line from the starting point to the goal
+		int crossProductTieBreaker = Math.abs((aq - bq) * crossY - crossX * (ar - br));
+		double heuristic = ((Math.abs(aq - bq) + Math.abs(aq + ar - bq - br) + Math.abs(ar - br)) / 2) + crossProductTieBreaker * 0.001;
+
+		return heuristic;
 	}
 
 	protected double getDiagonalMultiplier(int[] neighborArray) {

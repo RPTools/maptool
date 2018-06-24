@@ -79,7 +79,7 @@ public class CellPoint extends AbstractPoint {
 		return Math.floor(distanceTraveled) * zone.getUnitsPerCell();
 	}
 
-	public double getG() {
+	public double gCost() {
 		return g;
 	}
 

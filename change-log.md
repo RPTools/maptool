@@ -1,3 +1,16 @@
+MapTool 1.4.5.2 - _Infused with Nerps!_
+=====
+This is a minor enhancement release that tweaks the AI Pathfinding to produce better results in some cases.
+
+___
+
+Enhancements
+-----
+* [#77][i77] - Tweaked the A* algorithm for a more natural and straighter move though open spaces for both square and hex grids. Also tweaked the A* algorithm to find the shortest path more consistently.
+
+[i77]: https://github.com/JamzTheMan/MapTool/issues/77
+
+___
 MapTool 1.4.5.1 - _Infused with Nerps!_
 =====
 This release is a patch to fix a critical bug seen under Linux & MacOS. It also fixes yet another bug launching the JAR using the JRE vs full JDK.

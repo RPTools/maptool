@@ -46,8 +46,8 @@ public class AStarCellPoint extends CellPoint implements Comparable<AStarCellPoi
 		terrainModifier = mod;
 	}
 
-	public double cost() {
-		return h + getG();
+	public double fCost() {
+		return h + gCost();
 	}
 
 	public Point2D toPoint() {
@@ -115,6 +115,6 @@ public class AStarCellPoint extends CellPoint implements Comparable<AStarCellPoi
 
 	@Override
 	public int compareTo(AStarCellPoint other) {
-		return Double.compare(f, other.f);
+		return Double.compare(fCost(), other.fCost());
 	}
 }

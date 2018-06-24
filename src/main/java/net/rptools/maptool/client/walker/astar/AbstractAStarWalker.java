@@ -62,6 +62,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 	private long retrievalCount;
 	private long testCount;
 
+	protected int crossX = 0;
+	protected int crossY = 0;
+
 	private List<AStarCellPoint> terrainCells = new ArrayList<AStarCellPoint>();
 
 	public AbstractAStarWalker(Zone zone) {
@@ -85,8 +88,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 	 */
 	protected abstract int[][] getNeighborMap(int x, int y);
 
-	protected abstract double gScore(CellPoint p1, CellPoint p2);
-
 	protected abstract double hScore(CellPoint p1, CellPoint p2);
 
 	protected abstract double getDiagonalMultiplier(int[] neighborArray);
@@ -108,7 +109,10 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 	}
 
 	@Override
-	protected List<CellPoint> calculatePath(CellPoint start, CellPoint end) {
+	protected List<CellPoint> calculatePath(CellPoint start, CellPoint goal) {
+		crossX = start.x - goal.x;
+		crossY = start.y - goal.y;
+
 		List<AStarCellPoint> openList = new ArrayList<AStarCellPoint>();
 		Map<AStarCellPoint, AStarCellPoint> openSet = new HashMap<AStarCellPoint, AStarCellPoint>(); // For faster lookups
 		Set<AStarCellPoint> closedSet = new HashSet<AStarCellPoint>();
@@ -165,27 +169,27 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
 			currentNode = openList.remove(0);
 			openSet.remove(currentNode);
-			if (currentNode.equals(end)) {
+			if (currentNode.equals(goal)) {
 				break;
 			}
 
-			for (AStarCellPoint neighborNode : getNeighbors(currentNode, closedSet)) {
-				neighborNode.h = hScore(neighborNode, end);
-				showDebugInfo(neighborNode);
+			for (AStarCellPoint currentNeighbor : getNeighbors(currentNode, closedSet)) {
+				currentNeighbor.h = hScore(currentNeighbor, goal);
+				showDebugInfo(currentNeighbor);
 
-				if (openSet.containsKey(neighborNode)) {
+				if (openSet.containsKey(currentNeighbor)) {
 					// check if it is cheaper to get here the way that we just came, versus the previous path
-					AStarCellPoint oldNode = openSet.get(neighborNode);
-					if (neighborNode.getG() < oldNode.getG()) {
-						oldNode.replaceG(neighborNode);
-						neighborNode = oldNode;
-						neighborNode.parent = currentNode;
+					AStarCellPoint oldNode = openSet.get(currentNeighbor);
+					if (currentNeighbor.gCost() < oldNode.gCost()) {
+						oldNode.replaceG(currentNeighbor);
+						currentNeighbor = oldNode;
+						currentNeighbor.parent = currentNode;
 					}
 					continue;
 				}
 
-				pushNode(openList, neighborNode);
-				openSet.put(neighborNode, neighborNode);
+				pushNode(openList, currentNeighbor);
+				openSet.put(currentNeighbor, currentNeighbor);
 			}
 
 			closedSet.add(currentNode);
@@ -230,17 +234,17 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 			list.add(node);
 			return;
 		}
-		if (node.cost() < list.get(0).cost()) {
+		if (node.fCost() < list.get(0).fCost()) {
 			list.add(0, node);
 			return;
 		}
-		if (node.cost() > list.get(list.size() - 1).cost()) {
+		if (node.fCost() > list.get(list.size() - 1).fCost()) {
 			list.add(node);
 			return;
 		}
 		for (ListIterator<AStarCellPoint> iter = list.listIterator(); iter.hasNext();) {
 			AStarCellPoint listNode = iter.next();
-			if (listNode.cost() > node.cost()) {
+			if (listNode.fCost() >= node.fCost()) {
 				iter.previous();
 				iter.add(node);
 				return;
@@ -383,7 +387,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 		Label hScore = new Label();
 		Label fScore = new Label();
 
-		gScore.setLabel(f.format(node.getG()));
+		gScore.setLabel(f.format(node.gCost()));
 		gScore.setX(cellBounds.x + 10);
 		gScore.setY(cellBounds.y + 10);
 
@@ -391,7 +395,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 		hScore.setX(cellBounds.x + 35);
 		hScore.setY(cellBounds.y + 10);
 
-		fScore.setLabel(f.format(node.cost()));
+		fScore.setLabel(f.format(node.fCost()));
 		fScore.setX(cellBounds.x + 25);
 		fScore.setY(cellBounds.y + 25);
 		fScore.setForegroundColor(Color.RED);

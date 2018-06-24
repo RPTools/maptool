@@ -71,11 +71,12 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
 			return 1;
 	}
 
-	private double metricDistance(CellPoint node, CellPoint goal) {
-		int xDist = node.x - goal.x;
-		int yDist = node.y - goal.y;
+	private double metricDistance(CellPoint current, CellPoint goal) {
+		int xDist = current.x - goal.x;
+		int yDist = current.y - goal.y;
 
-		final double distance;
+		double distance;
+		int crossProductTieBreaker = 0;
 
 		switch (metric) {
 		case MANHATTAN:
@@ -84,29 +85,32 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
 			break;
 		default:
 		case ONE_TWO_ONE:
-			xDist = Math.abs(node.x - goal.x);
-			yDist = Math.abs(node.y - goal.y);
-			if (xDist > yDist)
+			xDist = Math.abs(current.x - goal.x);
+			yDist = Math.abs(current.y - goal.y);
+			if (xDist > yDist) {
 				distance = Math.floor(diagonalMultiplier * yDist) + (xDist - yDist);
-			else
+			} else {
 				distance = Math.floor(diagonalMultiplier * xDist) + (yDist - xDist);
+			}
 			break;
 		case ONE_ONE_ONE:
 			distance = Math.max(Math.abs(xDist), Math.abs(yDist));
 			break;
 		}
 
-		return distance;
+		// break ties to prefer better looking paths that are along the straight line from the starting point to the goal
+		if ((goal.x > current.x && goal.y > current.y) || (goal.x < current.x && goal.y < current.y)) {
+			crossProductTieBreaker = Math.abs(xDist * crossY - crossX * yDist);
+		} else {
+			crossProductTieBreaker = Math.abs(xDist * crossY + crossX * yDist);
+		}
+
+		return distance += crossProductTieBreaker * 0.001;
 	}
 
 	@Override
 	public int[][] getNeighborMap(int x, int y) {
 		return neighborMap;
-	}
-
-	@Override
-	protected double gScore(CellPoint p1, CellPoint p2) {
-		return metricDistance(p1, p2);
 	}
 
 	@Override
