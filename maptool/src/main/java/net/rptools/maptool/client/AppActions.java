@@ -173,6 +173,56 @@ public class AppActions {
 		return key;
 	}
 
+	/**
+	 * This action will rotate through the PC tokens owned by the player. 
+	 */
+	public static final Action NEXT_TOKEN = new DefaultClientAction() {
+		{
+			init("menu.nextToken");
+		}
+
+		@Override
+		public void execute(ActionEvent ae) {
+			Token chosenOne = null;
+			ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
+			List<Token> myPlayers = new ArrayList<Token>();
+			for (Token t : renderer.getZone().getPlayerTokens()) {
+				if (AppUtil.playerOwns(t) && t.isVisible() && renderer.getZone().isTokenVisible(t))
+					myPlayers.add(t);
+			}
+			if (renderer != null) {
+				if (myPlayers.size() > 0) {
+					// We want to wrap round the list of player tokens.
+					// But this process only selects 1 player token.
+					if (renderer.getSelectedTokensList().size() > 0) {
+						Token selt = renderer.getSelectedTokensList().get(0);
+						if (myPlayers.contains(selt))
+							chosenOne = selt;
+					}
+					if (chosenOne != null) {
+						for (int i = 0; i < myPlayers.size(); i++) {
+							if (myPlayers.get(i).equals(chosenOne)) {
+								if (i < myPlayers.size() - 1)
+									chosenOne = myPlayers.get(i + 1);
+								else
+									chosenOne = myPlayers.get(0);
+								break;
+							}
+						}
+					} else {
+						chosenOne = myPlayers.get(0);
+					}
+					// Move to chosen token
+					if (chosenOne != null) {
+						renderer.clearSelectedTokens();
+						renderer.centerOn(chosenOne);
+					}
+				}
+			}
+		}
+
+	};
+
 	public static final Action MRU_LIST = new DefaultClientAction() {
 		{
 			init("menu.recent");
