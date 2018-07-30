@@ -76,7 +76,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Install &gt;&gt;</at>
+                 <at name="text">Install</at>
                  <at name="height">25</at>
                  <at name="width">97</at>
                  <at name="name">installButton</at>
