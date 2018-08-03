@@ -58,7 +58,8 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 	private static final Logger log = Logger.getLogger(AddResourceDialog.class);
 
 	private static final String LIBRARY_URL = "http://library.rptools.net/1.3";
-	private static final String LIBRARY_LIST_URL = LIBRARY_URL + "/listArtPacks";
+	//private static final String LIBRARY_LIST_URL = LIBRARY_URL + "/listArtPacks";
+	private static final String LIBRARY_LIST_URL = "http://test.lukasjacobs.de/lib.txt";
 
 	public enum Tab {
 		LOCAL, WEB, RPTOOLS
@@ -288,7 +289,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 				MapTool.showMessage("dialog.addresource.warn.invalidurl", "Error", JOptionPane.ERROR_MESSAGE, model.getUrl());
 				return false;
 			}
-			rowList.add(new LibraryRow(model.getUrlName(), model.getUrl(), -1));
+			rowList.add(new LibraryRow("unknown", model.getUrlName(), model.getUrl(), -1)); //TODO: Don't default to "Unknow" artist
 			break;
 
 		case RPTOOLS:
@@ -339,11 +340,13 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 	}
 
 	private static class LibraryRow {
+		private final String artist;
 		private final String name;
 		private String path;
 		private final int size;
 
-		public LibraryRow(String name, String path, int size) {
+		public LibraryRow(String artist, String name, String path, int size) {
+			this.artist = artist.trim();
 			this.name = name.trim();
 			this.path = path.trim();
 			this.size = size;
@@ -352,9 +355,10 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		public LibraryRow(String row) {
 			String[] data = row.split("\\|");
 
-			name = data[0].trim();
-			path = data[1].trim();
-			size = Integer.parseInt(data[2]);
+			artist = data[0].trim();
+			name = data[1].trim();
+			path = data[2].trim();
+			size = Integer.parseInt(data[3]);
 		}
 
 		@Override
