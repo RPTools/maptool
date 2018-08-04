@@ -25,17 +25,11 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.AbstractListModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
@@ -107,15 +101,15 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		return (JTextField) getComponent("@localDirectory");
 	}
 
-	public JList getLibraryList() {
-		return (JList) getComponent("@rptoolsList");
+	public JTable getLibraryList() {
+		return (JTable) getComponent("@rptoolsList");
 	}
 
 	public void initLibraryList() {
-		JList list = getLibraryList();
+		JTable list = getLibraryList();
 		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-		list.setModel(new MessageListModel(I18N.getText("dialog.addresource.downloading")));
+		list.setModel(new MessageTableModel(I18N.getText("dialog.addresource.downloading")));
 	}
 
 	public void initTabPane() {
@@ -191,7 +185,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		downloadLibraryListInitiated = true;
 
 		new SwingWorker<Object, Object>() {
-			ListModel model;
+			TableModel model;
 
 			@Override
 			protected Object doInBackground() throws Exception {
@@ -201,11 +195,11 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 					result = downloader.read();
 				} finally {
 					if (result == null) {
-						model = new MessageListModel(I18N.getText("dialog.addresource.errorDownloading"));
+						model = new MessageTableModel(I18N.getText("dialog.addresource.errorDownloading"));
 						return null;
 					}
 				}
-				DefaultListModel listModel = new DefaultListModel();
+				LibraryTableModel tableModel = new LibraryTableModel();
 
 				// Create a list to compare against for dups
 				List<String> libraryNameList = new ArrayList<String>();
@@ -223,12 +217,12 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 						if (libraryNameList.contains(row.name)) {
 							continue;
 						}
-						listModel.addElement(row);
+						tableModel.addElement(row);
 					}
-					model = listModel;
+					model = tableModel;
 				} catch (Throwable t) {
 					log.error("unable to parse library list", t);
-					model = new MessageListModel(I18N.getText("dialog.addresource.errorDownloading"));
+					model = new MessageTableModel(I18N.getText("dialog.addresource.errorDownloading"));
 				}
 				return null;
 			}
@@ -236,6 +230,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 			@Override
 			protected void done() {
 				getLibraryList().setModel(model);
+				getLibraryList().repaint();
 			}
 		}.execute();
 	}
@@ -293,11 +288,17 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 			break;
 
 		case RPTOOLS:
-			Object[] selectedRows = getLibraryList().getSelectedValues();
-			if (selectedRows == null || selectedRows.length == 0) {
+			if (getLibraryList().getSelectedRowCount() == 0) {
 				MapTool.showMessage("dialog.addresource.warn.mustselectone", "Error", JOptionPane.ERROR_MESSAGE);
 				return false;
 			}
+
+			ArrayList<LibraryRow> selectedRows = new ArrayList<>();
+			LibraryTableModel model = (LibraryTableModel) getLibraryList().getModel();
+			for (int i = 0; i < getLibraryList().getSelectedRowCount(); i++) {
+				selectedRows.add(model.getRow(i));
+			}
+
 			for (Object obj : selectedRows) {
 				LibraryRow row = (LibraryRow) obj;
 
@@ -430,6 +431,99 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
 		public int getSize() {
 			return 1;
+		}
+	}
+
+	private class MessageTableModel extends AbstractTableModel {
+		private final String message;
+
+		public MessageTableModel(String message) {
+			this.message = message;
+		}
+
+		@Override
+		public int getRowCount() {
+			return 1;
+		}
+
+		@Override
+		public int getColumnCount() {
+			return 1;
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			return message;
+		}
+	}
+
+	private class LibraryTableModel extends AbstractTableModel {
+
+		private ArrayList<LibraryRow> rows;
+
+		LibraryTableModel() {
+			rows = new ArrayList<>();
+		}
+
+		@Override
+		public String getColumnName(int column) {
+			switch (column) { //TODO: Internationalize these Strings
+				case 0: //Artist
+					return "Artist";
+
+				case 1: //Name
+					return "Name";
+
+				case 2: //Size
+					return "Size";
+
+				default:
+					return null;
+			}
+		}
+
+		@Override
+		public int getRowCount() {
+			return rows.size();
+		}
+
+		@Override
+		public int getColumnCount() {
+			return 3; //Author, Name, Size
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			LibraryRow row = rows.get(rowIndex);
+
+			switch (columnIndex) {
+				case 0: //Author
+					return row.artist;
+
+				case 1: //Name
+					return row.name;
+
+				case 2: //Size
+					return row.size;
+
+				default:
+					return null;
+			}
+		}
+
+		public void addElement(LibraryRow row) {
+			if (rows.contains(row))
+				return;
+
+			rows.add(row);
+			fireTableDataChanged();
+		}
+
+		public LibraryRow getRow(int rowIndex) {
+			if(rowIndex >= rows.size() || rowIndex < 0)
+				return null;
+
+			return rows.get(rowIndex);
 		}
 	}
 }
