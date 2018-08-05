@@ -362,11 +362,6 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 			size = Integer.parseInt(data[3]);
 		}
 
-		@Override
-		public String toString() {
-			return "<html><b>" + name + "</b> <i>(" + getSizeString() + ")</i>";
-		}
-
 		private String getSizeString() {
 			NumberFormat format = NumberFormat.getNumberInstance();
 			if (size < 1000) {
