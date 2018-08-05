@@ -110,16 +110,16 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 			public void stateChanged(ChangeEvent e) {
 				// Hmmm, this is fragile (breaks if the order changes) rethink this later
 				switch (tabPane.getSelectedIndex()) {
-				case 0:
-					model.tab = Tab.LOCAL;
-					break;
-				case 1:
-					model.tab = Tab.WEB;
-					break;
-				case 2:
-					model.tab = Tab.RPTOOLS;
-					downloadLibraryList();
-					break;
+					case 0:
+						model.tab = Tab.LOCAL;
+						break;
+					case 1:
+						model.tab = Tab.WEB;
+						break;
+					case 2:
+						model.tab = Tab.RPTOOLS;
+						downloadLibraryList();
+						break;
 				}
 			}
 		});
@@ -256,77 +256,77 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		final List<LibraryRow> rowList = new ArrayList<LibraryRow>();
 
 		switch (model.getTab()) {
-		case LOCAL:
-			if (StringUtils.isEmpty(model.getLocalDirectory())) {
-				MapTool.showMessage("dialog.addresource.warn.filenotfound", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
-				return false;
-			}
-			File root = new File(model.getLocalDirectory());
-			if (!root.exists()) {
-				MapTool.showMessage("dialog.addresource.warn.filenotfound", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
-				return false;
-			}
-			if (!root.isDirectory()) {
-				MapTool.showMessage("dialog.addresource.warn.directoryrequired", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
-				return false;
-			}
-			try {
-				AppSetup.installLibrary(FileUtil.getNameWithoutExtension(root), root);
-			} catch (MalformedURLException e) {
-				log.error("Bad path url: " + root.getPath(), e);
-				MapTool.showMessage("dialog.addresource.warn.badpath", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
-				return false;
-			} catch (IOException e) {
-				log.error("IOException adding local root: " + root.getPath(), e);
-				MapTool.showMessage("dialog.addresource.warn.badpath", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
-				return false;
-			}
-			return true;
-
-		case WEB:
-			if (StringUtils.isEmpty(model.getUrlName())) {
-				MapTool.showMessage("dialog.addresource.warn.musthavename", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
-				return false;
-			}
-			// validate the url format so that we don't hit it later
-			try {
-				new URL(model.getUrl());
-			} catch (MalformedURLException e) {
-				MapTool.showMessage("dialog.addresource.warn.invalidurl", "Error", JOptionPane.ERROR_MESSAGE, model.getUrl());
-				return false;
-			}
-			rowList.add(new LibraryRow("unknown", model.getUrlName(), model.getUrl(), -1));
-			break;
-
-		case RPTOOLS:
-			if (getLibraryTable().getSelectedRowCount() == 0) {
-				MapTool.showMessage("dialog.addresource.warn.mustselectone", "Error", JOptionPane.ERROR_MESSAGE);
-				return false;
-			}
-
-			ArrayList<LibraryRow> selectedRows = new ArrayList<>();
-			LibraryTableModel model = (LibraryTableModel) getLibraryTable().getModel();
-			int[] selectedRowIndices = getLibraryTable().getSelectedRows();
-			for (int i = 0; i < getLibraryTable().getSelectedRowCount(); i++) {
-				int modelRowIndex = getLibraryTable().convertRowIndexToModel(selectedRowIndices[i]);
-				selectedRows.add(model.getRow(modelRowIndex));
-			}
-
-			for (Object obj : selectedRows) {
-				LibraryRow row = (LibraryRow) obj;
-
-				//validate the url format
-				row.path = LIBRARY_URL + "/" + row.path;
-				try {
-					new URL(row.path);
-				} catch (MalformedURLException e) {
-					MapTool.showMessage("dialog.addresource.warn.invalidurl", "Error", JOptionPane.ERROR_MESSAGE, row.path);
+			case LOCAL:
+				if (StringUtils.isEmpty(model.getLocalDirectory())) {
+					MapTool.showMessage("dialog.addresource.warn.filenotfound", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
 					return false;
 				}
-				rowList.add(row);
-			}
+				File root = new File(model.getLocalDirectory());
+				if (!root.exists()) {
+					MapTool.showMessage("dialog.addresource.warn.filenotfound", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
+					return false;
+				}
+				if (!root.isDirectory()) {
+					MapTool.showMessage("dialog.addresource.warn.directoryrequired", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
+					return false;
+				}
+				try {
+					AppSetup.installLibrary(FileUtil.getNameWithoutExtension(root), root);
+				} catch (MalformedURLException e) {
+					log.error("Bad path url: " + root.getPath(), e);
+					MapTool.showMessage("dialog.addresource.warn.badpath", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
+					return false;
+				} catch (IOException e) {
+					log.error("IOException adding local root: " + root.getPath(), e);
+					MapTool.showMessage("dialog.addresource.warn.badpath", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
+					return false;
+				}
+				return true;
 
-			break;
+			case WEB:
+				if (StringUtils.isEmpty(model.getUrlName())) {
+					MapTool.showMessage("dialog.addresource.warn.musthavename", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
+					return false;
+				}
+				// validate the url format so that we don't hit it later
+				try {
+					new URL(model.getUrl());
+				} catch (MalformedURLException e) {
+					MapTool.showMessage("dialog.addresource.warn.invalidurl", "Error", JOptionPane.ERROR_MESSAGE, model.getUrl());
+					return false;
+				}
+				rowList.add(new LibraryRow("unknown", model.getUrlName(), model.getUrl(), -1));
+				break;
+
+			case RPTOOLS:
+				if (getLibraryTable().getSelectedRowCount() == 0) {
+					MapTool.showMessage("dialog.addresource.warn.mustselectone", "Error", JOptionPane.ERROR_MESSAGE);
+					return false;
+				}
+
+				ArrayList<LibraryRow> selectedRows = new ArrayList<>();
+				LibraryTableModel model = (LibraryTableModel) getLibraryTable().getModel();
+				int[] selectedRowIndices = getLibraryTable().getSelectedRows();
+				for (int i = 0; i < getLibraryTable().getSelectedRowCount(); i++) {
+					int modelRowIndex = getLibraryTable().convertRowIndexToModel(selectedRowIndices[i]);
+					selectedRows.add(model.getRow(modelRowIndex));
+				}
+
+				for (Object obj : selectedRows) {
+					LibraryRow row = (LibraryRow) obj;
+
+					//validate the url format
+					row.path = LIBRARY_URL + "/" + row.path;
+					try {
+						new URL(row.path);
+					} catch (MalformedURLException e) {
+						MapTool.showMessage("dialog.addresource.warn.invalidurl", "Error", JOptionPane.ERROR_MESSAGE, row.path);
+						return false;
+					}
+					rowList.add(row);
+				}
+
+				break;
 		}
 
 		new SwingWorker<Object, Object>() {
@@ -441,9 +441,9 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
 	private class LibraryTableModel extends AbstractTableModel {
 
-	    private final int COLUMN_INDEX_ARTIST    = 0;
-        private final int COLUMN_INDEX_NAME      = 1;
-        private final int COLUMN_INDEX_SIZE      = 2;
+		private final int COLUMN_INDEX_ARTIST = 0;
+		private final int COLUMN_INDEX_NAME = 1;
+		private final int COLUMN_INDEX_SIZE = 2;
 
 		private ArrayList<LibraryRow> rows;
 
@@ -523,7 +523,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		}
 
 		public LibraryRow getRow(int rowIndex) {
-			if(rowIndex >= rows.size() || rowIndex < 0)
+			if (rowIndex >= rows.size() || rowIndex < 0)
 				return null;
 
 			return rows.get(rowIndex);
