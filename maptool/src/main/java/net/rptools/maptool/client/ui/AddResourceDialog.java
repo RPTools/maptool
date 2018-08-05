@@ -11,41 +11,31 @@
 
 package net.rptools.maptool.client.ui;
 
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
+import com.jidesoft.swing.FolderChooser;
+import net.rptools.lib.FileUtil;
+import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.GenericDialog;
+import net.rptools.maptool.language.I18N;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.jdesktop.swingworker.SwingWorker;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
-
-import net.rptools.lib.FileUtil;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppSetup;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.RemoteFileDownloader;
-import net.rptools.maptool.client.WebDownloader;
-import net.rptools.maptool.client.swing.AbeillePanel;
-import net.rptools.maptool.client.swing.GenericDialog;
-import net.rptools.maptool.language.I18N;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.jdesktop.swingworker.SwingWorker;
-
-import com.jidesoft.swing.FolderChooser;
+import javax.swing.table.TableRowSorter;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
@@ -220,10 +210,17 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 						tableModel.addElement(row);
 					}
 					model = tableModel;
+
+					//Add a TableRowSorter
+					TableRowSorter<LibraryTableModel> sorter = new TableRowSorter<>();
+					getLibraryList().setRowSorter(sorter);
+					sorter.setModel((LibraryTableModel) model);
+
 				} catch (Throwable t) {
 					log.error("unable to parse library list", t);
 					model = new MessageTableModel(I18N.getText("dialog.addresource.errorDownloading"));
 				}
+
 				return null;
 			}
 
@@ -295,8 +292,10 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
 			ArrayList<LibraryRow> selectedRows = new ArrayList<>();
 			LibraryTableModel model = (LibraryTableModel) getLibraryList().getModel();
+			int[] selectedRowIndices = getLibraryList().getSelectedRows();
 			for (int i = 0; i < getLibraryList().getSelectedRowCount(); i++) {
-				selectedRows.add(model.getRow(i));
+				int modelRowIndex = getLibraryList().convertRowIndexToModel(selectedRowIndices[i]);
+				selectedRows.add(model.getRow(modelRowIndex));
 			}
 
 			for (Object obj : selectedRows) {
@@ -312,6 +311,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 				}
 				rowList.add(row);
 			}
+
 			break;
 		}
 
