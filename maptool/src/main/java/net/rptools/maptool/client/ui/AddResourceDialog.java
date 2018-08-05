@@ -466,15 +466,15 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
 		@Override
 		public String getColumnName(int column) {
-			switch (column) { //TODO: Internationalize these Strings
+			switch (column) {
 				case 0: //Artist
-					return "Artist";
+					return I18N.getText("dialog.addresource.artist");
 
 				case 1: //Name
-					return "Name";
+					return I18N.getText("dialog.addresource.artpackname");
 
 				case 2: //Size
-					return "Size";
+					return I18N.getText("dialog.addresource.size");
 
 				default:
 					return null;
