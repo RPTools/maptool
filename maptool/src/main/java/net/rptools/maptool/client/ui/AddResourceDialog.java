@@ -166,6 +166,11 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		});
 	}
 
+	/**
+	 * Takes a size in bytes and produces a readable string with a unit (byte/kb/mb) attached
+	 * @param size the size in bytes
+	 * @return String containing a human readable file size
+	 */
 	private String getSizeString(int size) {
 		NumberFormat format = NumberFormat.getNumberInstance();
 		if (size < 1000) {
@@ -416,6 +421,9 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		}
 	}
 
+	/**
+	 * Model, passed to the table in the RPTools tab. Doesn't do much, besides displaying a message in a single cell
+	 */
 	private class MessageTableModel extends AbstractTableModel {
 		private final String message;
 
@@ -439,6 +447,10 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		}
 	}
 
+	/**
+	 * Model, passed to the table in the RPTools tab.
+	 * This model displays all the information from the downloaded list of art packs
+	 */
 	private class LibraryTableModel extends AbstractTableModel {
 
 		private final int COLUMN_INDEX_ARTIST = 0;
@@ -530,6 +542,11 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		}
 	}
 
+	/**
+	 * A renderer for the "size" cell in the RPTools JTable.
+	 * This is done, so we can sort by a simple integer size, but still render a size in kb/mb/etc
+	 * @see LibraryTableModel
+	 */
 	private class SizeCellRenderer extends DefaultTableCellRenderer {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
