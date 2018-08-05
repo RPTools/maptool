@@ -25,6 +25,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
@@ -166,6 +167,17 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		});
 	}
 
+	private String getSizeString(int size) {
+		NumberFormat format = NumberFormat.getNumberInstance();
+		if (size < 1000) {
+			return format.format(size) + " bytes";
+		}
+		if (size < 1000000) {
+			return format.format(size / 1000) + " k";
+		}
+		return format.format(size / 1000000) + " mb";
+	}
+
 	private void downloadLibraryList() {
 		if (downloadLibraryListInitiated) {
 			return;
@@ -215,6 +227,9 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 					TableRowSorter<LibraryTableModel> sorter = new TableRowSorter<>();
 					getLibraryList().setRowSorter(sorter);
 					sorter.setModel((LibraryTableModel) model);
+
+					//Set the custom renderer for size
+					getLibraryList().setDefaultRenderer(Integer.class, new SizeCellRenderer());
 
 				} catch (Throwable t) {
 					log.error("unable to parse library list", t);
@@ -361,17 +376,6 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 			path = data[2].trim();
 			size = Integer.parseInt(data[3]);
 		}
-
-		private String getSizeString() {
-			NumberFormat format = NumberFormat.getNumberInstance();
-			if (size < 1000) {
-				return format.format(size) + " bytes";
-			}
-			if (size < 1000000) {
-				return format.format(size / 1000) + " k";
-			}
-			return format.format(size / 1000000) + " mb";
-		}
 	}
 
 	public static class Model {
@@ -506,6 +510,23 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 			}
 		}
 
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			switch (columnIndex) {
+				case 0: //Author
+					return String.class;
+
+				case 1: //Name
+					return String.class;
+
+				case 2: //Size
+					return Integer.class;
+
+				default:
+					return null;
+			}
+		}
+
 		public void addElement(LibraryRow row) {
 			if (rows.contains(row))
 				return;
@@ -519,6 +540,17 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 				return null;
 
 			return rows.get(rowIndex);
+		}
+	}
+
+	private class SizeCellRenderer extends DefaultTableCellRenderer {
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			Integer size = (Integer) value;
+			setText(getSizeString(size.intValue()));
+
+			return this;
 		}
 	}
 }
