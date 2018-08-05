@@ -43,8 +43,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 	private static final Logger log = Logger.getLogger(AddResourceDialog.class);
 
 	private static final String LIBRARY_URL = "http://library.rptools.net/1.3";
-	//private static final String LIBRARY_LIST_URL = LIBRARY_URL + "/listArtPacks";
-	private static final String LIBRARY_LIST_URL = "http://test.lukasjacobs.de/lib.txt";
+	private static final String LIBRARY_LIST_URL = LIBRARY_URL + "/listArtPacks";
 
 	public enum Tab {
 		LOCAL, WEB, RPTOOLS
@@ -92,12 +91,12 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		return (JTextField) getComponent("@localDirectory");
 	}
 
-	public JTable getLibraryList() {
+	public JTable getLibraryTable() {
 		return (JTable) getComponent("@rptoolsList");
 	}
 
 	public void initLibraryList() {
-		JTable list = getLibraryList();
+		JTable list = getLibraryTable();
 		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		list.setModel(new MessageTableModel(I18N.getText("dialog.addresource.downloading")));
@@ -225,11 +224,11 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
 					//Add a TableRowSorter
 					TableRowSorter<LibraryTableModel> sorter = new TableRowSorter<>();
-					getLibraryList().setRowSorter(sorter);
+					getLibraryTable().setRowSorter(sorter);
 					sorter.setModel((LibraryTableModel) model);
 
 					//Set the custom renderer for size
-					getLibraryList().setDefaultRenderer(Integer.class, new SizeCellRenderer());
+					getLibraryTable().setDefaultRenderer(Integer.class, new SizeCellRenderer());
 
 				} catch (Throwable t) {
 					log.error("unable to parse library list", t);
@@ -241,8 +240,8 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
 			@Override
 			protected void done() {
-				getLibraryList().setModel(model);
-				getLibraryList().repaint();
+				getLibraryTable().setModel(model);
+				getLibraryTable().repaint();
 			}
 		}.execute();
 	}
@@ -296,20 +295,20 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 				MapTool.showMessage("dialog.addresource.warn.invalidurl", "Error", JOptionPane.ERROR_MESSAGE, model.getUrl());
 				return false;
 			}
-			rowList.add(new LibraryRow("unknown", model.getUrlName(), model.getUrl(), -1)); //TODO: Don't default to "Unknow" artist
+			rowList.add(new LibraryRow("unknown", model.getUrlName(), model.getUrl(), -1));
 			break;
 
 		case RPTOOLS:
-			if (getLibraryList().getSelectedRowCount() == 0) {
+			if (getLibraryTable().getSelectedRowCount() == 0) {
 				MapTool.showMessage("dialog.addresource.warn.mustselectone", "Error", JOptionPane.ERROR_MESSAGE);
 				return false;
 			}
 
 			ArrayList<LibraryRow> selectedRows = new ArrayList<>();
-			LibraryTableModel model = (LibraryTableModel) getLibraryList().getModel();
-			int[] selectedRowIndices = getLibraryList().getSelectedRows();
-			for (int i = 0; i < getLibraryList().getSelectedRowCount(); i++) {
-				int modelRowIndex = getLibraryList().convertRowIndexToModel(selectedRowIndices[i]);
+			LibraryTableModel model = (LibraryTableModel) getLibraryTable().getModel();
+			int[] selectedRowIndices = getLibraryTable().getSelectedRows();
+			for (int i = 0; i < getLibraryTable().getSelectedRowCount(); i++) {
+				int modelRowIndex = getLibraryTable().convertRowIndexToModel(selectedRowIndices[i]);
 				selectedRows.add(model.getRow(modelRowIndex));
 			}
 
@@ -417,22 +416,6 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		}
 	}
 
-	private class MessageListModel extends AbstractListModel {
-		private final String message;
-
-		public MessageListModel(String message) {
-			this.message = message;
-		}
-
-		public Object getElementAt(int index) {
-			return message;
-		}
-
-		public int getSize() {
-			return 1;
-		}
-	}
-
 	private class MessageTableModel extends AbstractTableModel {
 		private final String message;
 
@@ -458,6 +441,10 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
 	private class LibraryTableModel extends AbstractTableModel {
 
+	    private final int COLUMN_INDEX_ARTIST    = 0;
+        private final int COLUMN_INDEX_NAME      = 1;
+        private final int COLUMN_INDEX_SIZE      = 2;
+
 		private ArrayList<LibraryRow> rows;
 
 		LibraryTableModel() {
@@ -467,13 +454,13 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		@Override
 		public String getColumnName(int column) {
 			switch (column) {
-				case 0: //Artist
+				case COLUMN_INDEX_ARTIST: //Artist
 					return I18N.getText("dialog.addresource.artist");
 
-				case 1: //Name
+				case COLUMN_INDEX_NAME: //Name
 					return I18N.getText("dialog.addresource.artpackname");
 
-				case 2: //Size
+				case COLUMN_INDEX_SIZE: //Size
 					return I18N.getText("dialog.addresource.size");
 
 				default:
@@ -496,13 +483,13 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 			LibraryRow row = rows.get(rowIndex);
 
 			switch (columnIndex) {
-				case 0: //Author
+				case COLUMN_INDEX_ARTIST: //Artist
 					return row.artist;
 
-				case 1: //Name
+				case COLUMN_INDEX_NAME: //Name
 					return row.name;
 
-				case 2: //Size
+				case COLUMN_INDEX_SIZE: //Size
 					return row.size;
 
 				default:
@@ -513,13 +500,13 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		@Override
 		public Class<?> getColumnClass(int columnIndex) {
 			switch (columnIndex) {
-				case 0: //Author
+				case COLUMN_INDEX_ARTIST: //Artist
 					return String.class;
 
-				case 1: //Name
+				case COLUMN_INDEX_NAME: //Name
 					return String.class;
 
-				case 2: //Size
+				case COLUMN_INDEX_SIZE: //Size
 					return Integer.class;
 
 				default:
