@@ -42,5 +42,4 @@ workbench.xmi
 
 # Keystore
 build-resources/rptools-keystore
-/gradle.properties
 /releases/

@@ -82,8 +82,6 @@ public class MapToolEventQueue extends EventQueue {
 			return;
 		}
 
-		log.error("Logging stacktrace to Sentry.IO!");
-
 		// Note that all fields set on the context are optional. Context data is copied onto all future events in the
 		// current context (until the context is cleared).
 

@@ -43,10 +43,6 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 		return (long) (getCenterPoint().distance(origin) * 1000);
 	}
 
-	public double getDoubleDistanceFromOrigin() {
-		return getCenterPoint().distance(origin);
-	}
-
 	public Point2D getCenterPoint() {
 		if (centerPoint == null) {
 			Area path = getPath();
@@ -122,7 +118,7 @@ public class VisibleAreaSegment implements Comparable<VisibleAreaSegment> {
 			// So we changed getDistanceFromOrigin() to return a long after multiplying by 1000 for precision
 			long odist = o.getDistanceFromOrigin();
 			long val = getDistanceFromOrigin() - odist; // separate variable for debugging
-			return (int) (getDoubleDistanceFromOrigin() - o.getDoubleDistanceFromOrigin());
+			return (int) val;
 			// return val < EPSILON && val > -EPSILON ? 0 : (int) val; // Should we use an EPSILON value?
 			// return getDistanceFromOrigin() < odist ? -1 : getDistanceFromOrigin() > odist ? 1 : 0;
 		}

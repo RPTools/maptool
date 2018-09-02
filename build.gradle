@@ -16,7 +16,7 @@ buildscript {
 
 // Access Git info from build script
 plugins {
-	id "org.ajoberstar.grgit" version "2.2.0"
+	id "org.ajoberstar.grgit" version "2.3.0"
 }
 
 // Apply the java plugin to add support for Java
@@ -25,9 +25,6 @@ apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'com.diffplug.gradle.spotless'
-
-// Current Build version
-version = '1.4.5.2'
 
 // Definitions
 defaultTasks 'clean', 'build'
@@ -43,14 +40,33 @@ applicationDefaultJvmArgs = ["-Xss4M"]
 
 // Custom properties
 ext {
-	vendor = "Nerps" // Change to RPTools for official builds
-	git = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
-	revision = git.head().abbreviatedId
-	revisionFull = git.head().id
-	// branch = grgit.branch.current().name
 	gdxVersion = '1.9.6'
 	box2DLightsVersion = '1.4'
 	aiVersion = '1.8.1'
+
+	// Get tag and commit info from Git to use for version numbering
+	def repo = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
+	def head = repo.head()
+	def tags = repo.tag.list().find {
+		it.commit == head
+	}
+
+	revision = head.abbreviatedId
+	revisionFull = head.id
+
+	if (tags) {
+		tagVersion = tags.getName()
+		msiVersion = tagVersion
+		enviroment = "Production"
+		sentryDSN = sentry_production_dsn
+	} else {
+		tagVersion = 'SNAPSHOT-' + revision
+		enviroment = "Development"
+		sentryDSN = sentry_development_dsn
+	}
+
+	// vendor, tagVersion, msiVersion, and DSN's defaults are set in gradle.properties
+	println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor
 }
 
 run {
@@ -120,26 +136,18 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-	// For UserJvmOptionsService; native to os...
-	// compile files("${System.properties['java.home']}/../lib/packager.jar")
-
 	// For Sentry bug reporting
-	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8.2'
-	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.2'
-	compile group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.8.2'	// Bridges v1 to v2 for other code in other libs
+	annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
+	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
+	compile group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.11.0'	// Bridges v1 to v2 for other code in other libs
 
 	compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
 	compile group: 'commons-logging', name: 'commons-logging', version: '1.2'
 
-	compile 'io.sentry:sentry:1.5.0'
-	compile 'io.sentry:sentry-log4j2:1.5.2'
+	compile group: 'io.sentry', name: 'sentry', version: '1.7.5'
+	compile group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.5'
 
 	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1' // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
-
-	// Get release info from GitHub using API v3
-	// compile group: 'org.eclipse.mylyn.github', name: 'org.eclipse.egit.github.core', version: '4.9.0.201710071750-r' // https://mvnrepository.com/artifact/org.eclipse.mylyn.github/org.eclipse.egit.github.core
-	// compile group: 'org.kohsuke', name: 'github-api', version: '1.90' // https://mvnrepository.com/artifact/org.kohsuke/github-api
-
 
 	compile 'net.java.abeille:abeille-formsrt:2.0'
 	compile 'net.rptools.clientserver:clientserver:1.4.0.+'
@@ -194,11 +202,15 @@ dependencies {
 	compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
 
 	// For PDF image extraction
-	compile 'org.apache.pdfbox:pdfbox:2.0.0'
-	compile 'org.apache.pdfbox:pdfbox-tools:2.0.0'								// Dependency for pdfbox
-	compile 'org.bouncycastle:bcmail-jdk15on:1.54'								// To decrypt passworded/secured pdf's
+	compile 'org.apache.pdfbox:pdfbox:2.0.10'
+	compile 'org.bouncycastle:bcmail-jdk15on:1.59'								// To decrypt passworded/secured pdf's
 	compile 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
 	compile 'com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
+
+	// Image processing lib
+	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
 
 	// For syntax highlighting in macro editor
 	compile group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '2.6.1'	// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
@@ -220,8 +232,6 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.locationtech.jts/jts-core
 	// https://locationtech.github.io/jts/jts-features.html
 	compile group: 'org.locationtech.jts', name: 'jts-core', version: '1.15.0'
-	// https://mvnrepository.com/artifact/org.locationtech.jts/jts
-	//compile group: 'org.locationtech.jts', name: 'jts', version: '1.15.0', ext: 'pom'
 
 	// Not in use at this time, left for easy reference later...
 	//compile "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
@@ -238,18 +248,31 @@ dependencies {
 }
 
 
+task configSentryRelease(type: Copy) {
+	from("build-resources/sentry.properties.template")
+	into("src/main/resources/")
+	rename("sentry.properties.template", "sentry.properties")
+	def tokens = [
+		AppVersion: "${tagVersion}",
+		Environment: "${enviroment}",
+		SentryDSN: "${sentryDSN}"
+	]
+	expand(tokens)
+	inputs.properties(tokens)
+}
 
 task uberJar(type: Jar) {
 	group = 'distribution'
 	description = 'Create uber jar for native installers'
 
+	baseName project.name + '-' + tagVersion
+
 	manifest {
 		attributes 'Implementation-Title': project.name,
-		'Implementation-Version': version,
+		'Implementation-Version': tagVersion,
 		'Implementation-Vendor': vendor,
 		'Git-Commit': revision,
 		'Git-Commit-SHA': revisionFull,
-		// 'Git-Branch': branch,
 		'Built-By': System.getProperty('user.name'),
 		'Built-Date': new Date(),
 		'Built-JDK': System.getProperty('java.version'),
@@ -270,12 +293,11 @@ task uberJar(type: Jar) {
 // For logging Git Commit during CI
 task displayGitInfo {
 	doLast {
-		// println 'Git-Branch: ' + branch
 		println 'Git-Commit-SHA: ' + revisionFull
 	}
 }
 
-// Currently includes license, manifest (for Hdpi) and msvcr100.dll (due to packaging bug)
+// Currently includes license files
 task copyPackageExtras(type: Copy) {
 	from('package/license/')
 	into('build/libs/')
@@ -288,7 +310,7 @@ task prepareInnoSetup(type: Copy) {
 	rename("MapTool.iss.template", "MapTool.iss")
 	def tokens = [
 		AppName: "${project.name}",
-		AppVersion: "${version}",
+		AppVersion: "${tagVersion}",
 		Vendor: "${vendor}",
 		WizardImage: "${project.projectDir.absolutePath}/package/windows/${project.name}-setup.bmp",
 		Slash: "\\",
@@ -297,7 +319,7 @@ task prepareInnoSetup(type: Copy) {
 	inputs.properties(tokens)
 }
 
-task deploy(dependsOn: [displayGitInfo, uberJar, copyPackageExtras, prepareInnoSetup]) {
+task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepareInnoSetup]) {
 	group = 'distribution'
 	description = 'Create native installers'
 
@@ -319,9 +341,10 @@ task deploy(dependsOn: [displayGitInfo, uberJar, copyPackageExtras, prepareInnoS
 				"-native", "installer",
 				"-appclass", mainClassName,
 				"-srcdir", "build/libs",
-				"-outdir", "releases/release-"+version,
-				"-outfile", vendor + "-" + project.name,
+				"-outdir", "releases/release-" + tagVersion,
+				"-outfile", project.name,
 				"-name", project.name,
+				"-description", project.name + " " + tagVersion + " by " + vendor,
 				"-title", project.name,
 				"-vendor", vendor,
 				"-BdropinResourcesRoot=.",
@@ -331,14 +354,13 @@ task deploy(dependsOn: [displayGitInfo, uberJar, copyPackageExtras, prepareInnoS
 				"-BmenuHint=true",
 				"-Bwin.menuGroup=" + vendor,
 				"-BshortcutHint=true",
-				"-BappVersion=" + version,
-				"-Bwin.msi.productVersion=1.4.5",
+				"-BappVersion=" + tagVersion,
+				"-Bwin.msi.productVersion=" + msiVersion,
 				"-BlicenseFile=COPYING.AFFERO",
 				"-BlicenseType='GNU AFFERO GENERAL PUBLIC LICENSE'",
 				"-Bcategory=Games",
 				"-Bemail=maptool@nerps.net",
 				"-BuserJvmOptions=-DMAPTOOL_DATADIR\\==.maptool-" + vendor
-				// "-BjvmProperties=MAPTOOL_DATADIR=.maptool-" + vendor
 				//"-BuserJvmOptions=-Xss=4M"
 
 				println commandLine
@@ -349,3 +371,6 @@ task deploy(dependsOn: [displayGitInfo, uberJar, copyPackageExtras, prepareInnoS
 task wrapper(type: Wrapper) {
 	gradleVersion = '4.7'
 }
+
+// Configure current release tag in Sentry.io properties
+processResources.dependsOn configSentryRelease

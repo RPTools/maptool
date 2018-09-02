@@ -11,10 +11,18 @@ package net.rptools.maptool.client;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import org.apache.logging.log4j.ThreadContext;
+
 public class LaunchInstructions {
 	private static final String USAGE = "<html><body width=\"400\">You are running MapTool with insufficient memory allocated (%dMB).<br><br>"
 			+ "You may experience odd behavior, especially when connecting to or hosting a server.<br><br>  "
 			+ "MapTool will launch anyway, but it is recommended that you increase the maximum memory allocated or don't set a limit.</body></html>";
+
+	static {
+		// This will inject additional data tags in log4j2 which will be picked up by Sentry.io
+		System.setProperty("log4j2.isThreadContextMapInheritable", "true");
+		ThreadContext.put("OS", System.getProperty("os.name"));
+	}
 
 	public static void main(String[] args) {
 		// This is to initialize the log4j to set the path for logs. Just calling AppUtil sets the System.property

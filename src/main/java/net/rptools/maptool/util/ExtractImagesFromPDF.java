@@ -8,7 +8,6 @@
  */
 package net.rptools.maptool.util;
 
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,9 +15,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.IOUtils;
@@ -34,13 +36,15 @@ import org.apache.pdfbox.pdmodel.graphics.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceGray;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
-import org.apache.pdfbox.tools.imageio.ImageIOUtil;
+
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppUtil;
+
 import org.apache.commons.io.FileUtils;
-import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Extract all images from a PDF using Apache's PdfBox 2.0 This will also walk through all annotations and extract those images as well which is key, some interactive PDF's, such as from Paizo, store
@@ -50,6 +54,8 @@ import org.apache.pdfbox.contentstream.PDFGraphicsStreamEngine;
  *
  */
 public final class ExtractImagesFromPDF {
+	private static final Logger log = LogManager.getLogger(ExtractImagesFromPDF.class);
+
 	private static final List<String> JPEG = Arrays.asList(
 			COSName.DCT_DECODE.getName(),
 			COSName.DCT_DECODE_ABBREVIATION.getName());
@@ -62,6 +68,7 @@ public final class ExtractImagesFromPDF {
 	private File finalTempDir;
 
 	private static Set<String> imageTracker = new HashSet<String>(); // static Set tracks extracted images across Threads.
+
 	private List<File> fileList;
 	private int imageCounter = 1;
 	private int pageCount = 0;
@@ -70,9 +77,6 @@ public final class ExtractImagesFromPDF {
 	private PDDocument document = null;
 
 	public ExtractImagesFromPDF(File pdfFile, boolean forceRescan) throws IOException {
-		// System.out.println("***************************************************************************");
-		// System.out.println("ExtractImagesFromPDF called...");
-
 		prefix = FileUtil.getNameWithoutExtension(pdfFile.getName());
 		outDir = tmpDir + "/" + prefix + "/";
 		pdfFileHash = outDir + "hash_" + pdfFile.hashCode() + ".txt";
@@ -86,12 +90,7 @@ public final class ExtractImagesFromPDF {
 		if (isExtracted() && !forceRescan)
 			return;
 
-		// document = PDDocument.load(pdfFile, MemoryUsageSetting.setupMixed((1024^2))); // doesn't seem to help?
 		document = PDDocument.load(pdfFile);
-		// AccessPermission ap = document.getCurrentAccessPermission();
-		// if (!ap.canExtractContent()) {
-		// throw new IOException("You do not have permission to extract images.");
-		// }
 
 		fileList = new ArrayList<File>();
 		pageCount = document.getNumberOfPages();
@@ -115,7 +114,6 @@ public final class ExtractImagesFromPDF {
 				out.flush();
 				out.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -128,7 +126,6 @@ public final class ExtractImagesFromPDF {
 			try {
 				document.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -152,54 +149,41 @@ public final class ExtractImagesFromPDF {
 		return pageCount;
 	}
 
-	/*
-	 * public void extractAll_nope() throws IOException { PDDocumentCatalog catalog = document.getDocumentCatalog(); int imgCount = 1; int counter = 1;
-	 * MapTool.getFrame().getAssetPanel().setImagePanelProgressMax(pageCount);
-	 * 
-	 * for (Object pageObj : catalog.getPages()) { PDPage page = (PDPage) pageObj; PDResources resources = page.getResources();
-	 * 
-	 * MapTool.getFrame().getAssetPanel().setImagePanelProgress(counter++);
-	 * 
-	 * for (COSName cosname : resources.getXObjectNames()) { System.out.println( "Parsing COS: " + cosname.getName());
-	 * 
-	 * if (resources.isImageXObject(cosname)) { PDXObject xObject = resources.getXObject(cosname); write2file((PDImageXObject) xObject, outDir + prefix + "_" + imgCount++, DIRECT_JPEG);
-	 * System.out.println( "Writing PDImageXObject"); }
-	 * 
-	 * }
-	 * 
-	 * } }
-	 */
-
 	public List<File> extractPage(int pageNumber) throws IOException {
 		// getPage by index, not actual "Page Number"
 		PDPage page = document.getPage(pageNumber - 1);
-		ImageGraphicsEngine extractor = new ImageGraphicsEngine(page);
-		extractor.run(pageNumber);
 		extractAnnotationImages(page, pageNumber, outDir + prefix + "%s");
-
-		// PDResources resources = page.getResources();
+		getImagesFromResources(page.getResources(), pageNumber);
 
 		close();
 
 		return fileList;
 	}
 
-	public File extractAll() throws IOException {
-		int pageNumber = 1;
-		// MapTool.getFrame().getAssetPanel().setImagePanelProgressMax(pageCount);
+	private void getImagesFromResources(PDResources resources, int pageNumber) throws IOException {
+		// Testing various Pathfinder PDF's, various page elements like borders and backgrounds generally come first...
+		// ...so lets sort them to the bottom and get the images we really want to the top of the TilePane!
+		ArrayList<COSName> xObjectNamesReversed = new ArrayList<>();
 
-		if (!isExtracted()) {
-			for (PDPage page : document.getPages()) {
-				ImageGraphicsEngine extractor = new ImageGraphicsEngine(page);
-				extractor.run(pageNumber);
-				extractAnnotationImages(page, pageNumber, outDir + prefix + "%s");
-
-				// MapTool.getFrame().getAssetPanel().setImagePanelProgress(pageNumber++);
-			}
+		for (COSName xObjectName : resources.getXObjectNames()) {
+			xObjectNamesReversed.add(xObjectName);
 		}
 
-		close();
-		return finalTempDir;
+		Collections.reverse(xObjectNamesReversed);
+
+		for (COSName xObjectName : xObjectNamesReversed) {
+			PDXObject xObject = resources.getXObject(xObjectName);
+
+			if (xObject instanceof PDFormXObject) {
+				getImagesFromResources(((PDFormXObject) xObject).getResources(), pageNumber);
+			} else if (xObject instanceof PDImageXObject) {
+				log.debug("Extracting image... " + xObjectName.getName());
+
+				String pageNumberFormatted = String.format(pageNumberFormat, pageNumber);
+				String fileName = outDir + prefix + "_page " + pageNumberFormatted + "_" + imageCounter++;
+				write2file((PDImageXObject) xObject, fileName);
+			}
+		}
 	}
 
 	/*
@@ -240,7 +224,6 @@ public final class ExtractImagesFromPDF {
 		if (resources == null)
 			return;
 
-		// resources.isImageXObject(name)
 		for (COSName cosname : resources.getXObjectNames()) {
 			PDXObject xObject = resources.getXObject(cosname);
 
@@ -257,7 +240,6 @@ public final class ExtractImagesFromPDF {
 		if (resources == null)
 			return;
 
-		// resources.isImageXObject(name)
 		for (COSName cosname : resources.getXObjectNames()) {
 			PDXObject xObject = resources.getXObject(cosname);
 
@@ -270,97 +252,8 @@ public final class ExtractImagesFromPDF {
 	}
 
 	public void extractAnnotationImages(PDImageXObject image, String imageFormat) throws IOException {
-		// String filename = String.format(imageFormat, "", image.getSuffix());
 		String filename = String.format(imageFormat, "", "");
 		write2file(image, filename);
-	}
-
-	// Instead of capturing the draw method we will use it to write to a file
-	private class ImageGraphicsEngine extends PDFGraphicsStreamEngine {
-		int pageNumber;
-
-		protected ImageGraphicsEngine(PDPage page) throws IOException {
-			super(page);
-		}
-
-		public void run(int pageNumber) throws IOException {
-			this.pageNumber = pageNumber;
-			processPage(getPage());
-		}
-
-		@Override
-		public void drawImage(PDImage pdImage) throws IOException {
-			if (pdImage instanceof PDImageXObject) {
-				// PDImageXObject xobject = (PDImageXObject) pdImage;
-
-				// save image
-				String pageNumberFormatted = String.format(pageNumberFormat, pageNumber);
-				String fileName = outDir + prefix + "_page " + pageNumberFormatted + "_" + imageCounter++;
-				write2file(pdImage, fileName);
-			}
-		}
-
-		@Override
-		public void appendRectangle(Point2D p0, Point2D p1, Point2D p2, Point2D p3)
-				throws IOException {
-
-		}
-
-		@Override
-		public void clip(int windingRule) throws IOException {
-
-		}
-
-		@Override
-		public void moveTo(float x, float y) throws IOException {
-
-		}
-
-		@Override
-		public void lineTo(float x, float y) throws IOException {
-
-		}
-
-		@Override
-		public void curveTo(float x1, float y1, float x2, float y2, float x3, float y3)
-				throws IOException {
-
-		}
-
-		@Override
-		public Point2D getCurrentPoint() throws IOException {
-			return new Point2D.Float(0, 0);
-		}
-
-		@Override
-		public void closePath() throws IOException {
-
-		}
-
-		@Override
-		public void endPath() throws IOException {
-
-		}
-
-		@Override
-		public void strokePath() throws IOException {
-
-		}
-
-		@Override
-		public void fillPath(int windingRule) throws IOException {
-
-		}
-
-		@Override
-		public void fillAndStrokePath(int windingRule) throws IOException {
-
-		}
-
-		@Override
-		public void shadingFill(COSName shadingName) throws IOException {
-
-		}
 	}
 
 	/**
@@ -369,7 +262,7 @@ public final class ExtractImagesFromPDF {
 	 * @param filename
 	 *            the filename
 	 * @throws IOException
-	 *             When somethings wrong with the corresponding file.
+	 *             When something wrong with the corresponding file.
 	 */
 	private void write2file(PDImage pdImage, String filename) throws IOException {
 		String pdfSuffix = pdImage.getSuffix();
@@ -388,7 +281,7 @@ public final class ExtractImagesFromPDF {
 
 		// Lets see if we can find dupes...
 		if (imageTracker.contains(md5Key.toString())) {
-			// System.out.println("*** Skipping Duplicate image [" + filename + "]");
+			log.debug("*** Skipping Duplicate image [" + filename + "]");
 			filename += md5Key.toString() + "." + fileSuffix;
 			return;
 		} else {
@@ -400,12 +293,10 @@ public final class ExtractImagesFromPDF {
 		try {
 			fileCheck = new File(filename);
 			if (fileCheck.exists()) {
-				// System.out.println("*** Found Duplicate file [" + filename + "]");
 				filename += md5Key.toString() + "." + fileSuffix;
 				return;
 			}
 
-			// System.out.println("Saving image: " + filename);
 			out = new FileOutputStream(filename);
 
 			if (image != null) {
@@ -419,18 +310,17 @@ public final class ExtractImagesFromPDF {
 						IOUtils.closeQuietly(data);
 					} else {
 						// for CMYK and other "unusual" colorspaces, the JPEG will be converted
-						ImageIOUtil.writeImage(image, fileSuffix, out);
+						ImageIO.write(image, fileSuffix, out);
 					}
 				} else {
 					// Most likely a JPEG2000, lets try writing it out...
-					ImageIOUtil.writeImage(image, fileSuffix, out);
+					ImageIO.write(image, fileSuffix, out);
 				}
 				fileList.add(new File(filename));
 			}
 			out.flush();
 			image.flush();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			if (out != null) {

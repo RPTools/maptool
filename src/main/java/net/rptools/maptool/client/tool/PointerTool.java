@@ -48,8 +48,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -77,6 +75,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.MovementKey;
 import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
@@ -873,13 +872,13 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				// Rolled back change from commit 3d5f619 because of reported bug by dorpond
 				// https://github.com/JamzTheMan/maptool/commit/3d5f619dff6e61c605ee532ac3c86a3860e91864
 				if (useTokenExposedArea) {
-					// if (token.getHasSight()) {
 					ExposedAreaMetaData meta = zone.getExposedAreaMetaData(token.getExposedAreaGUID());
 					tokenFog.add(meta.getExposedAreaHistory());
-					// } else {
-					// // Jamz: Allow a token without site to move within the current PlayerView
-					// tokenFog.add(renderer.getZoneView().getVisibleArea(new PlayerView(Role.PLAYER)));
-					// }
+
+					// Jamz: Allow a token without site to move within the current PlayerView
+					if (!token.getHasSight()) {
+						tokenFog.add(renderer.getZoneView().getVisibleArea(new PlayerView(Role.PLAYER)));
+					}
 				}
 
 				Rectangle tokenSize = token.getBounds(zone);

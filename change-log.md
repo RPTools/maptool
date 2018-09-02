@@ -1,3 +1,21 @@
+MapTool 1.4.5.3 - _Infused with Nerps!_
+=====
+This is a minor bug release that fixes some annoying bugs.
+
+___
+
+Bug Fixes
+-----
+* [#80][i80] - *Comparison method violates its general contract in FogUtil.calculateVisibility(FogUtil.java:81)*. This should be fixed now.
+* [#81][i81] - *Cell Highlight distance text not sizing for grid sizes*. This is now fixed
+* [#41][i41] - *Bug Fix to allow tokens without sight to move*. Hopefully this is finally squashed properly...
+
+[i80]: https://github.com/JamzTheMan/MapTool/issues/80
+[i81]: https://github.com/JamzTheMan/MapTool/issues/81
+[i41]: https://github.com/JamzTheMan/MapTool/issues/41
+
+___
+
 MapTool 1.4.5.2 - _Infused with Nerps!_
 =====
 This is a minor enhancement release that tweaks the AI Pathfinding to produce better results in some cases.

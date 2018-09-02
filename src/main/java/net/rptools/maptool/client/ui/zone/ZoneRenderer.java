@@ -2259,7 +2259,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 				zp.x += grid.getCellWidth() / 2 + cellOffset.width;
 				zp.y += grid.getCellHeight() / 2 + cellOffset.height;
 				addDistanceText(g, zp, 1.0f, p.getDistanceTraveled(zone));
-				// log.info("p.getDistanceTraveled(zone): " + p.getDistanceTraveled(zone));
 			}
 			int w = 0;
 			for (ZonePoint p : waypointList) {
@@ -2520,8 +2519,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		int cellY = (int) (sp.y - iheight / 2);
 
 		// Draw distance for each cell
-		int fontSize = (int) (getScale() * 12);
-		int textOffset = (int) (getScale() * 7); // 7 pixels at 100% zoom
+		double fontScale = (double) grid.getSize() / 50; // Font size of 12 at grid size 50 is default
+		int fontSize = (int) (getScale() * 12 * fontScale);
+		int textOffset = (int) (getScale() * 7 * fontScale); // 7 pixels at 100% zoom & grid size of 50
 
 		Font font = new Font(Font.DIALOG, Font.BOLD, fontSize);
 		Font originalFont = g.getFont();
@@ -2532,7 +2532,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener, Comp
 		g.setFont(font);
 		g.setColor(Color.BLACK);
 
-		// log.info("Text: [" + distanceText + "], width: " + textWidth + ", font size: " + fontSize + ", offset: " + textOffset);
+		// log.info("Text: [" + distanceText + "], width: " + textWidth + ", font size: " + fontSize + ", offset: " + textOffset + ", fontScale: " + fontScale+ ", getScale(): " + getScale());
 
 		g.drawString(distanceText, (int) (cellX + cwidth - textWidth - textOffset), (int) (cellY + cheight - textOffset));
 		g.setFont(originalFont);

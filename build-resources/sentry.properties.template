@@ -1,0 +1,4 @@
+dsn=${SentryDSN}
+environment=${Environment}
+stacktrace.app.packages=net.rptools.lib,net.rptools.maptool
+release=${AppVersion}

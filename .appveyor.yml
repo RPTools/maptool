@@ -4,8 +4,8 @@ pull_requests:
 skip_non_tags: false
 platform: x64
 image: 
-  - Ubuntu
   - Visual Studio 2017
+  - Ubuntu
 init:
   - cmd: git config --global core.autocrlf true
 install:
@@ -21,7 +21,7 @@ install:
 build_script:
   - ./gradlew build -x test
 after_build:
-  - ./gradlew deploy
+  - ps: if($env:APPVEYOR_REPO_TAG -eq 'True') { ./gradlew deploy } else { echo "Not creating deploy artifacts because this is not a tag build" }
 artifacts:
   - path: build\libs\MapTool-*.jar
     name: MapTool-Jar
@@ -31,54 +31,17 @@ artifacts:
     name: MapTool-Linux
 deploy:
   - provider: GitHub
-    description: Windows release from AppVeyor
-    auth_token:
-      secure: HXIHe/F7K2yGOZ0I56DW5PevrQDe+zjyunjORGKYaUGxFtvPYPcmOdjZT69tzHcS
+    description: Release build from AppVeyor
+    auth_token: $(GITHUB_RELEASE_KEY)
     artifact: MapTool-Jar, MapTool-Windows, MapTool-Linux
-    draft: true
+    draft: false
     prerelease: true
-    force_update: true
+    force_update: false
     on:
       APPVEYOR_REPO_TAG: true
-notifications:
-  - provider: Webhook
-    url: 
-      secure: AYQNchUXucpUxTDKoURYmnesdyYxxAPeGmGf0tM/aJhGVp8X5yuiKoZNjULxjoOICX47ufGpdz+BEJ9nYaj7WrBSNx5dJJOoxsZ+dpPZfPOlidHW/JoNWHM8JMP0P5TwRGaTOGOk3aIlUBftDA/wRVQhRcjiwivpoA0mzD6PSsY=
-    method: POST
-    body: >-
-      {
-        "embeds": [
-          {
-            "title": "Build {{buildId}}",
-            "url": "{{buildUrl}}",
-            "color": {{#passed}}40973{{/passed}}{{^passed}}11672839{{/passed}},
-            "footer": {
-              "icon_url": "{{#passed}}https://i.imgur.com/Rf4g8v6.png{{/passed}}{{^passed}}https://i.imgur.com/QaERwAW.png{{/passed}}",
-              "text": "{{#passed}}Success{{/passed}}{{^passed}}Failure{{/passed}}"
-            },
-            "author": {
-              "name": "{{commitAuthor}}",
-              "url": "https://github.com/{{repositoryName}}/commit/{{commitId}}"
-            },
-            "fields": [
-              {
-                "name": "Commit",
-                "value": "[{{commitMessage}}](https://github.com/{{repositoryName}}/commit/{{commitId}})"
-              },
-              {
-                "name": "Duration",
-                "value": "{{duration}}",
-                "inline": true
-              },
-              {
-                "name": "Build version",
-                "value": "{{buildVersion}}",
-                "inline": true
-              }
-            ]
-          }
-        ]
-      }
-    on_build_success: true
-    on_build_failure: true
-    on_build_status_changed: true
+on_success:
+  - ps: Invoke-RestMethod $env:APPVEYOR_DISCORD_WEBHOOK_SCRIPT_URL -o send.ps1
+  - ps: ./send.ps1 success $env:DISCORD_URL
+on_failure:
+  - ps: Invoke-RestMethod $env:APPVEYOR_DISCORD_WEBHOOK_SCRIPT_URL -o send.ps1
+  - ps: ./send.ps1 failure $env:DISCORD_URL
