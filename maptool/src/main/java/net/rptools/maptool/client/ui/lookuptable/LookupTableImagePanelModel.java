@@ -129,7 +129,6 @@ public class LookupTableImagePanelModel implements ImagePanelModel {
 	 *
 	 * @see net.rptools.lib.swing.ImagePanelModel#getCaption(int, boolean)
 	 */
-	@Override
 	public String getCaption(int index, boolean withDimensions) {
 		Object id = getID(index);
 		Image i = getImage(id);
