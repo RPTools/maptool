@@ -85,7 +85,7 @@ spotless {
 	}
 
 	format 'misc', {
-		target '**/*.gradle', '**/*.md', '**/.gitignore'
+		target '**/*.gradle', '**/.gitignore'
 
 		// spotless has built-in rules for most basic formatting tasks
 		trimTrailingWhitespace()
