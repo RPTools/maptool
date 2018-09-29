@@ -8,6 +8,8 @@
  */
 package net.rptools.maptool.client.tool;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -48,8 +50,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -63,7 +68,11 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
-import net.rptools.maptool.client.ui.*;
+import net.rptools.maptool.client.ui.StampPopupMenu;
+import net.rptools.maptool.client.ui.TokenLocation;
+import net.rptools.maptool.client.ui.TokenPopupMenu;
+import net.rptools.maptool.client.ui.Tool;
+import net.rptools.maptool.client.ui.Toolbox;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
@@ -78,7 +87,6 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
@@ -129,9 +137,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
 	private static int PADDING = 7;
 
-	// Offset from token's X,Y when dragging. Values are in zone coordinates.
-	private int dragOffsetX;
-	private int dragOffsetY;
 	private int dragStartX;
 	private int dragStartY;
 
@@ -148,6 +153,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		htmlRenderer.addStyleSheetRule(".title{font-size: 14pt}");
 
 		layerSelectionDialog = new LayerSelectionDialog(new Zone.Layer[] { Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND }, new LayerSelectionListener() {
+			@Override
 			public void layerSelected(Layer layer) {
 				if (renderer != null) {
 					renderer.setActiveLayer(layer);
@@ -246,9 +252,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		renderer.commitMoveSelectionSet(tokenBeingDragged.getId()); // TODO: figure out a better way
 		isDraggingToken = false;
 		isMovingWithKeys = false;
-
-		dragOffsetX = 0;
-		dragOffsetY = 0;
 
 		exposeFoW(null);
 	}
@@ -493,17 +496,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 					renderer.selectToken(token.getId());
 
 				}
-				// Dragging offset for currently selected token
-				ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-				Rectangle tokenBounds = token.getBounds(renderer.getZone());
-
-				if (token.isSnapToGrid()) {
-					dragOffsetX = (pos.x - tokenBounds.x) - (tokenBounds.width / 2);
-					dragOffsetY = (pos.y - tokenBounds.y) - (tokenBounds.height / 2);
-				} else {
-					dragOffsetX = pos.x - tokenBounds.x;
-					dragOffsetY = pos.y - tokenBounds.y;
-				}
 			}
 		} else {
 			if (SwingUtilities.isLeftMouseButton(e)) {
@@ -655,24 +647,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			return;
 		}
 
-		if (isDraggingToken) {
-			// FJE If we're dragging the token, wouldn't mouseDragged() be called instead? Can this code ever be executed?
-			if (isMovingWithKeys) {
-				return;
-			}
-			ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
-			ZonePoint last;
-			if (tokenUnderMouse == null)
-				last = zp;
-			else {
-				last = renderer.getLastWaypoint(tokenUnderMouse.getId());
-				// XXX This shouldn't be possible, but it happens?!
-				if (last == null)
-					last = zp;
-			}
-			handleDragToken(zp, zp.x - last.x, zp.y - last.y);
-			return;
-		}
 		tokenUnderMouse = renderer.getTokenAt(mouseX, mouseY);
 		keysDown = e.getModifiersEx();
 		renderer.setMouseOver(tokenUnderMouse);
@@ -741,21 +715,12 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				if (isMovingWithKeys) {
 					return;
 				}
-				Grid grid = getZone().getGrid();
-				TokenFootprint tf = tokenUnderMouse.getFootprint(grid);
-				Rectangle r = tf.getBounds(grid);
 				ZonePoint last = renderer.getLastWaypoint(tokenUnderMouse.getId());
-				if (last == null)
-					last = new ZonePoint(tokenUnderMouse.getX() + r.width / 2, tokenUnderMouse.getY() + r.height / 2);
-				ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
-				if (tokenUnderMouse.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-					zp.translate(-r.width / 2, -r.height / 2);
-					last.translate(-r.width / 2, -r.height / 2);
+				if (last == null) {
+					last = new ZonePoint(tokenUnderMouse.getX(), tokenUnderMouse.getY());
 				}
-				zp.translate(-dragOffsetX, -dragOffsetY);
-				int dx = zp.x - last.x;
-				int dy = zp.y - last.y;
-				handleDragToken(zp, dx, dy);
+				ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
+				handleDragToken(zp);
 				return;
 			}
 			if (!isDraggingToken && renderer.isTokenMoving(tokenUnderMouse)) {
@@ -803,21 +768,18 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	 * 
 	 * @param zonePoint
 	 *            The new ZonePoint for the token.
-	 * @param dx
-	 *            The amount being moved in the X direction
-	 * @param dy
-	 *            The amount being moved in the Y direction
+	 * 
 	 * @return true if the move was successful
 	 */
-	public boolean handleDragToken(ZonePoint zonePoint, int dx, int dy) {
+	@VisibleForTesting
+	boolean handleDragToken(ZonePoint zonePoint) {
+		checkNotNull(zonePoint);
+		log.debug("Trying to drag token from: " + tokenBeingDragged.getZonePoint() + " to: " + zonePoint);
 		Grid grid = renderer.getZone().getGrid();
 		if (tokenBeingDragged.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-			// cellUnderMouse is actually token position if the token is being dragged with keys.
-			CellPoint cellUnderMouse = grid.convert(zonePoint);
 			zonePoint.translate(grid.getCellOffset().width / 2, grid.getCellOffset().height / 2);
 			// Convert the zone point to a cell point and back to force the snap to grid on drag
 			zonePoint = grid.convert(grid.convert(zonePoint));
-			MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
 		} else {
 			// Nothing
 		}
@@ -828,7 +790,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		// Make sure it's a valid move
 		boolean isValid;
 		if (grid.getSize() >= 9)
-			isValid = validateMove(tokenBeingDragged, renderer.getSelectedTokenSet(), zonePoint, dx, dy);
+			isValid = validateMove(tokenBeingDragged, renderer.getSelectedTokenSet(), zonePoint, zonePoint.x - tokenBeingDragged.getX(), zonePoint.y - tokenBeingDragged.getY());
 		else
 			isValid = validateMove_legacy(tokenBeingDragged, renderer.getSelectedTokenSet(), zonePoint);
 
@@ -1040,6 +1002,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_R, AppActions.menuShortcut), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO: Combine all this crap with the Stamp tool
 				if (renderer.getSelectedTokenSet().isEmpty()) {
@@ -1069,6 +1032,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, 0), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (!isDraggingToken) {
 					return;
@@ -1081,6 +1045,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (!isDraggingToken) {
 					return;
@@ -1107,6 +1072,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.SHIFT_DOWN_MASK), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleKeyRotate(-1, false); // clockwise
 			}
@@ -1114,6 +1080,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleKeyRotate(-1, true); // clockwise
 			}
@@ -1121,6 +1088,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.SHIFT_DOWN_MASK), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleKeyRotate(1, false); // counter-clockwise
 			}
@@ -1128,6 +1096,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				handleKeyRotate(1, true); // counter-clockwise
 			}
@@ -1135,6 +1104,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_T, 0), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				renderer.cycleSelectedToken(1);
 			}
@@ -1142,6 +1112,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.SHIFT_DOWN_MASK), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				renderer.cycleSelectedToken(-1);
 			}
@@ -1150,6 +1121,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_I, AppActions.menuShortcut), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (MapTool.getPlayer().isGM() || MapTool.getServerPolicy().getPlayersCanRevealVision()) {
 					FogUtil.exposeVisibleArea(renderer, renderer.getOwnedTokens(renderer.getSelectedTokenSet()));
@@ -1159,6 +1131,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_O, AppActions.menuShortcut | InputEvent.SHIFT_DOWN_MASK), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				// Only let the GM's do this
 				if (MapTool.getPlayer().isGM()) {
@@ -1174,6 +1147,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				new AbstractAction() {
 					private static final long serialVersionUID = 1L;
 
+					@Override
 					public void actionPerformed(ActionEvent e) {
 						// Only let the GM's do this
 						if (MapTool.getPlayer().isGM()) {
@@ -1184,6 +1158,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, AppActions.menuShortcut), new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (MapTool.getPlayer().isGM() || MapTool.getServerPolicy().getPlayersCanRevealVision()) {
 					FogUtil.exposeLastPath(renderer, renderer.getOwnedTokens(renderer.getSelectedTokenSet()));
@@ -1277,10 +1252,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			dragStartY = keyToken.getY();
 			startTokenDrag(keyToken);
 		}
-		if (!isMovingWithKeys) {
-			dragOffsetX = 0;
-			dragOffsetY = 0;
-		}
+
 		// The zone point the token will be moved to after adjusting for dx/dy
 		ZonePoint zp = new ZonePoint(dragStartX, dragStartY);
 		Grid grid = renderer.getZone().getGrid();
@@ -1289,8 +1261,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			cp.x += dx;
 			cp.y += dy;
 			zp = grid.convert(cp);
-			dx = zp.x - tokenBeingDragged.getX();
-			dy = zp.y - tokenBeingDragged.getY();
 		} else {
 			// Scalar for dx/dy in zone space. Defaulting to essentially 1 pixel.
 			int moveFactor = 1;
@@ -1304,7 +1274,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			zp = new ZonePoint(x, y);
 		}
 		isMovingWithKeys = true;
-		handleDragToken(zp, (int) dx, (int) dy);
+		handleDragToken(zp);
 	}
 
 	private void setWaypoint() {
@@ -1326,6 +1296,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			this.type = type;
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (isSpaceDown) {
 				return;
@@ -1363,6 +1334,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 			restoreZoneView = false;
 		}
 
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (isShowingPointer) {
 				isShowingPointer = false;
@@ -1383,6 +1355,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	 * 
 	 * @see net.rptools.maptool.client.ZoneOverlay#paintOverlay(net.rptools.maptool .client.ZoneRenderer, java.awt.Graphics2D)
 	 */
+	@Override
 	public void paintOverlay(final ZoneRenderer renderer, Graphics2D g) {
 		Dimension viewSize = renderer.getSize();
 		renderer.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -1420,6 +1393,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 					// Portrait
 					MD5Key portraitId = tokenUnderMouse.getPortraitImage() != null ? tokenUnderMouse.getPortraitImage() : tokenUnderMouse.getImageAssetId();
 					image = ImageManager.getImage(portraitId, new ImageObserver() {
+						@Override
 						public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
 							// The image was loading, so now rebuild the portrait panel with the real image
 							statSheet = null;

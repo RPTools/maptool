@@ -98,6 +98,7 @@ public class Token extends BaseModel implements Cloneable {
 	}
 
 	public static final Comparator<Token> NAME_COMPARATOR = new Comparator<Token>() {
+		@Override
 		public int compare(Token o1, Token o2) {
 			return o1.getName().compareToIgnoreCase(o2.getName());
 		}
@@ -959,6 +960,10 @@ public class Token extends BaseModel implements Cloneable {
 		this.y = y;
 	}
 
+	public ZonePoint getZonePoint() {
+		return new ZonePoint(x, y);
+	}
+
 	// Lee: added functions necessary for path computations
 	public void setOriginPoint(ZonePoint p) {
 		tokenOrigin = p;
@@ -1119,8 +1124,8 @@ public class Token extends BaseModel implements Cloneable {
 		int offsetx = 0;
 		int offsety = 0;
 		if (isSnapToScale()) {
-			offsetx = (int) (imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 : 0);
-			offsety = (int) (imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 : 0);
+			offsetx = imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 : 0;
+			offsety = imgSize.height < footprintBounds.height ? (footprintBounds.height - imgSize.height) / 2 : 0;
 		}
 		double tx = footprintBounds.x + offsetx;
 		double ty = footprintBounds.y + offsety + iso_ho;
@@ -1822,6 +1827,7 @@ public class Token extends BaseModel implements Cloneable {
 	}
 
 	public static final Comparator<Token> COMPARE_BY_NAME = new Comparator<Token>() {
+		@Override
 		public int compare(Token o1, Token o2) {
 			if (o1 == null || o2 == null) {
 				return 0;
@@ -1830,6 +1836,7 @@ public class Token extends BaseModel implements Cloneable {
 		}
 	};
 	public static final Comparator<Token> COMPARE_BY_ZORDER = new Comparator<Token>() {
+		@Override
 		public int compare(Token o1, Token o2) {
 			if (o1 == null || o2 == null) {
 				return 0;
@@ -1883,6 +1890,7 @@ public class Token extends BaseModel implements Cloneable {
 	 * 
 	 * @return cloned token
 	 */
+	@Override
 	public Token clone() {
 		try {
 			return (Token) super.clone();
