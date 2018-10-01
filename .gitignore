@@ -22,10 +22,12 @@ Thumbs.db
 target/
 build/
 out/
+\${sys:appHome}/
 
 # Automatically Generated
 ################################################################################
 package/windows/MapTool.iss
+src/main/resources/sentry.properties
 
 
 # IDEs

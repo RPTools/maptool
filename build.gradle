@@ -25,6 +25,7 @@ apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'com.diffplug.gradle.spotless'
+apply plugin: 'jacoco'
 
 // Definitions
 defaultTasks 'clean', 'build'
@@ -92,6 +93,11 @@ spotless {
 		// or spaces. Takes an integer argument if you don't like 4
 		indentWithTabs()
 	}
+}
+
+jacoco {
+toolVersion = "0.8.1"
+reportsDir = file("$buildDir/reports/jacoco")
 }
 
 // Set eclipse natures, access rules, and other settings
@@ -245,6 +251,9 @@ dependencies {
 	// testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
 	// 'test.useTestNG()' to your build script.
 	testCompile 'junit:junit:4.12'
+
+	// For mocking features during unit tests
+	testCompile group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
 }
 
 
