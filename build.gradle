@@ -16,7 +16,7 @@ buildscript {
 
 // Access Git info from build script
 plugins {
-	id "org.ajoberstar.grgit" version "2.3.0"
+	id "org.ajoberstar.grgit" version "3.0.0-beta.1"
 }
 
 // Apply the java plugin to add support for Java
@@ -29,15 +29,28 @@ apply plugin: 'jacoco'
 
 // Definitions
 defaultTasks 'clean', 'build'
-sourceCompatibility = 10
-targetCompatibility = 10
+sourceCompatibility = 11
+targetCompatibility = 11
 
 // Don't fail build if tests fail until tests are cleaned up
 test.ignoreFailures = true
 
 // Used by gradle assemble & run tasks
-mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
+// mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
+mainClassName = 'net.rptools.maptool_fx.MapTool'
 applicationDefaultJvmArgs = ["-Xss4M"]
+
+// OS needed for proper OpenJFX dependency management
+// https://openjfx.io/openjfx-docs/#gradle
+def currentOS = org.gradle.internal.os.OperatingSystem.current()
+def platform
+if (currentOS.isWindows()) {
+	platform = 'win'
+} else if (currentOS.isLinux()) {
+	platform = 'linux'
+} else if (currentOS.isMacOsX()) {
+	platform = 'mac'
+}
 
 // Custom properties
 ext {
@@ -67,7 +80,7 @@ ext {
 	}
 
 	// vendor, tagVersion, msiVersion, and DSN's defaults are set in gradle.properties
-	println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor
+	println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor + " for " + currentOS
 }
 
 run {
@@ -111,14 +124,9 @@ eclipse {
 
 	classpath {
 		file {
-			withXml {
-				def node = it.asNode()
-				node.appendNode('classpathentry', [kind: 'con', path: 'org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER'])
-			}
 			whenMerged {
 				entries.each { source ->
 					if (source.kind == 'con' && source.path.startsWith('org.eclipse.jdt.launching.JRE_CONTAINER')) {
-						source.accessRules.add(new AccessRule('0', 'javafx/**'))
 						source.accessRules.add(new AccessRule('0', 'jdk/nashorn/api/**'))
 					}
 				}
@@ -142,6 +150,25 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
+	// Ug. stupid but doing this for now so it will compile...
+	compile files('lib/packager.jar')
+
+	// https://mvnrepository.com/artifact/org.openjfx/javafx-base
+	compile group: 'org.openjfx', name: 'javafx-base', version: '11', classifier: platform
+	// https://mvnrepository.com/artifact/org.openjfx/javafx-controls
+	compile group: 'org.openjfx', name: 'javafx-controls', version: '11', classifier: platform
+	// https://mvnrepository.com/artifact/org.openjfx/javafx-graphics
+	compile group: 'org.openjfx', name: 'javafx-graphics', version: '11', classifier: platform
+	// https://mvnrepository.com/artifact/org.openjfx/javafx-fxml
+	compile group: 'org.openjfx', name: 'javafx-fxml', version: '11', classifier: platform
+	// https://mvnrepository.com/artifact/org.openjfx/javafx-media
+	compile group: 'org.openjfx', name: 'javafx-media', version: '11', classifier: platform
+	// https://mvnrepository.com/artifact/org.openjfx/javafx-swing
+	compile group: 'org.openjfx', name: 'javafx-swing', version: '11', classifier: platform
+	// https://mvnrepository.com/artifact/org.openjfx/javafx-web
+	compile group: 'org.openjfx', name: 'javafx-web', version: '11', classifier: platform
+
+
 	// For Sentry bug reporting
 	annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
@@ -377,8 +404,8 @@ task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepa
 	}
 }
 
-task wrapper(type: Wrapper) {
-	gradleVersion = '4.7'
+task createWrapper(type: Wrapper) {
+	gradleVersion = '4.9'
 }
 
 // Configure current release tag in Sentry.io properties
