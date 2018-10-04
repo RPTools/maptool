@@ -83,7 +83,25 @@ ext {
 	println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor + " for " + currentOS
 }
 
+compileJava {
+	options.warnings = false
+
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'javafx.controls'
+        ]
+    }
+}
+
 run {
+    doFirst {
+        jvmArgs = [
+                '--module-path', "C:/Program Files/Java/javafx-sdk-11/lib",
+                '--add-modules', 'javafx.controls'
+        ]
+    }
+
 	args = [ '-v='+version ]
 	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development" ]
 
