@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.CustomMenuItem?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:id="rootContainer" prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool_fx.controller.MapTool_Controller">
+  <children>
+    <MenuBar VBox.vgrow="NEVER">
+      <menus>
+        <Menu mnemonicParsing="false" text="%menu.file">
+          <items>
+            <MenuItem mnemonicParsing="false" text="%action.newCampaign" />
+            <MenuItem mnemonicParsing="false" text="%action.loadCampaign" />
+                  <MenuItem mnemonicParsing="false" text="%action.saveCampaign" />
+            <MenuItem mnemonicParsing="false" text="%action.saveCampaignAs" />
+            <MenuItem mnemonicParsing="false" text="%action.saveMessageHistory" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <Menu mnemonicParsing="false" text="%menu.export">
+                     <items>
+                        <MenuItem mnemonicParsing="false" text="%action.exportScreenShot" />
+                        <MenuItem mnemonicParsing="false" text="%action.exportScreenShotAs" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="%action.exportCampaignAs" />
+                        <MenuItem mnemonicParsing="false" text="%admin.exportCampaignRepo" />
+                     </items></Menu>
+                  <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="%action.addIconSelector" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="%action.serverStart" />
+            <MenuItem mnemonicParsing="false" text="%action.clientConnect" />
+                  <MenuItem mnemonicParsing="false" text="%action.clientDisconnect" />
+                  <MenuItem mnemonicParsing="false" text="%action.showConnectionInfo" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+                  <Menu mnemonicParsing="false" text="menu.recent" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="%action.exit" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="%menu.edit">
+          <items>
+            <MenuItem mnemonicParsing="false" text="%action.undoDrawing" />
+                  <MenuItem mnemonicParsing="false" text="%action.redoDrawing" />
+                  <MenuItem mnemonicParsing="false" text="%action.clearDrawing" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="%action.copyTokens">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="C" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
+                     </accelerator>
+                  </MenuItem>
+                  <MenuItem mnemonicParsing="false" text="%action.cutTokens" />
+                  <MenuItem mnemonicParsing="false" text="%action.pasteTokens" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="%action.campaignProperties" />
+                  <MenuItem mnemonicParsing="false" text="%action.preferences" />
+                  <CustomMenuItem mnemonicParsing="false" text="Unspecified Action" />
+          </items>
+        </Menu>
+            <Menu mnemonicParsing="false" text="%menu.map">
+              <items>
+                <MenuItem mnemonicParsing="false" text="%action.newMap" />
+                  <Menu mnemonicParsing="false" text="%menu.QuickMap" />
+                  <MenuItem mnemonicParsing="false" text="%action.loadMap" />
+                  <MenuItem mnemonicParsing="false" text="%action.saveMapAs" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <CheckMenuItem mnemonicParsing="false" text="%action.hideMap" />
+                  <MenuItem mnemonicParsing="false" text="%action.restoreFogOfWar" />
+                  <CheckMenuItem mnemonicParsing="false" text="%action.enableFogOfWar" />
+                  <CheckMenuItem mnemonicParsing="false" text="%action.revealFogAtWaypoints" />
+                  <Menu mnemonicParsing="false" text="%menu.vision">
+                     <items>
+                        <CheckMenuItem mnemonicParsing="false" text="Off" />
+                        <CheckMenuItem mnemonicParsing="false" text="Day" />
+                        <CheckMenuItem mnemonicParsing="false" text="Night" />
+                     </items>
+                  </Menu>
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="%action.editMap" />
+                  <MenuItem mnemonicParsing="false" text="%action.adjustGrid" />
+                  <MenuItem mnemonicParsing="false" text="%action.adjustGrid" />
+                  <MenuItem mnemonicParsing="false" text="%action.renameMap" />
+                  <MenuItem mnemonicParsing="false" text="%action.copyZone" />
+                  <MenuItem mnemonicParsing="false" text="%action.copyZone" />
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="%menu.view">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Action 1" />
+               </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="%menu.tools">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Action 1" />
+               </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="%menu.window">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Action 1" />
+               </items>
+            </Menu>
+        <Menu mnemonicParsing="false" text="%menu.help">
+          <items>
+            <MenuItem mnemonicParsing="false" text="About MyHelloApp" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+    <AnchorPane fx:id="mainAnchorPane" maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+      <children>
+        <Label alignment="CENTER" layoutX="155.0" layoutY="177.0" style="&#10;" text="Drag components from Library here…" textAlignment="CENTER" textFill="#9f9f9f" wrapText="false">
+          <font>
+            <Font size="18.0" />
+          </font>
+        </Label>
+      </children>
+    </AnchorPane>
+  </children>
+</VBox>

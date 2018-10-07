@@ -89,7 +89,10 @@ compileJava {
     doFirst {
         options.compilerArgs = [
                 '--module-path', classpath.asPath,
-                '--add-modules', 'javafx.controls'
+                '--add-modules', 'javafx.controls',
+                '--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
+                '--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
+                '--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED'
         ]
     }
 }
@@ -98,7 +101,10 @@ run {
     doFirst {
         jvmArgs = [
                 '--module-path', "C:/Program Files/Java/javafx-sdk-11/lib",
-                '--add-modules', 'javafx.controls'
+                '--add-modules', 'javafx.controls',
+                '--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
+                '--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
+                '--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED'
         ]
     }
 
@@ -127,8 +133,8 @@ spotless {
 }
 
 jacoco {
-toolVersion = "0.8.1"
-reportsDir = file("$buildDir/reports/jacoco")
+	toolVersion = "0.8.1"
+	reportsDir = file("$buildDir/reports/jacoco")
 }
 
 // Set eclipse natures, access rules, and other settings
@@ -186,7 +192,18 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.openjfx/javafx-web
 	compile group: 'org.openjfx', name: 'javafx-web', version: '11', classifier: platform
 
-
+	// http://fxexperience.com/controlsfx/
+	// compile 'org.controlsfx:controlsfx:9.0.0'
+	
+	// More 3rd Party FX Controls from http://jfxtras.org/ #incubating
+	// https://mvnrepository.com/artifact/org.jfxtras/jfxtras-controls
+	// compile group: 'org.jfxtras', name: 'jfxtras-controls', version: '9.0-r1'
+		
+	// Shapes! https://github.com/aalmiray/jsilhouette
+	// compile 'org.kordamp.jsilhouette:jsilhouette-javafx:0.3.0'
+	
+	// For consideration: https://github.com/Oshan96/CustomStage/wiki
+	
 	// For Sentry bug reporting
 	annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<StackPane fx:id="splashLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.controller.SplashScreen_Controller">
+	<ImageView pickOnBounds="true" preserveRatio="true">
+		<image>
+			<Image url="@../../client/image/maptool_splash_template_nerps.png" />
+		</image>
+	</ImageView>
+	<ProgressBar fx:id="loadProgress" opacity="0.70" prefHeight="18.0" prefWidth="420.0" progress="0.0" StackPane.alignment="BOTTOM_LEFT">
+		<StackPane.margin>
+			<Insets />
+		</StackPane.margin>
+	</ProgressBar>
+	<Rectangle arcHeight="5.0" arcWidth="5.0" blendMode="MULTIPLY" fill="#c7c8c9" height="17.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="420.0" StackPane.alignment="BOTTOM_CENTER">
+		<StackPane.margin>
+			<Insets bottom="18.0" />
+		</StackPane.margin>
+	</Rectangle>
+	<Label fx:id="versionLabel" layoutX="13.0" layoutY="225.0" styleClass="hortaFont" text="Version" textFill="WHITE" translateX="35.0" translateY="30.0" StackPane.alignment="TOP_LEFT">
+		<font>
+			<Font name="System Bold" size="20.0" />
+		</font>
+		<StackPane.margin>
+			<Insets left="5.0" top="3.0" />
+		</StackPane.margin>
+	</Label>
+	<ImageView fx:id="infusedWithNerpsImageView" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" scaleX="1.4" scaleY="1.4" translateX="-20.0" translateY="80.0">
+		<image>
+			<Image url="@../image/infused_with_nerps.png" />
+		</image>
+	</ImageView>
+	<ImageView fx:id="byRP_ToolsImageView" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" scaleX="0.7" scaleY="0.7" translateX="130.0" translateY="40.0">
+		<image>
+			<Image url="@../image/by_rp_tools.png" />
+		</image>
+	</ImageView>
+	<ImageView fx:id="nerpsLogoImageView" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" scaleX="0.4" scaleY="0.4" translateX="-175.0" translateY="80.0">
+		<image>
+			<Image url="@../image/nerps_logo.png" />
+		</image>
+	</ImageView>
+	<Label fx:id="progressLabel" prefWidth="420.0" text="Loading..." textFill="WHITE" translateY="-5.0" StackPane.alignment="BOTTOM_CENTER">
+		<font>
+			<Font name="System Bold" size="12.0" />
+		</font>
+		<StackPane.margin>
+			<Insets bottom="18.0" left="3.0" />
+		</StackPane.margin>
+	</Label>
+	<ImageView fx:id="byRP_ToolsImageView1" fitHeight="150.0" fitWidth="200.0" layoutX="155.0" layoutY="119.0" pickOnBounds="true" preserveRatio="true" scaleX="1.65" scaleY="1.65" translateY="-20.0">
+		<image>
+			<Image url="@../image/maptool-logo.png" />
+		</image>
+	</ImageView>
+</StackPane>

@@ -17,8 +17,12 @@ import net.tsc.servicediscovery.ServiceGroup;
 
 public class AppConstants {
 
-	public static final String APP_NAME = "MapTool";
-
+	public static final String APP_NAME			= "MapTool";
+	public static final String APP_TAG_LINE		= " - Now Infused with more Nerps!";
+	public static final String VENDOR_NAME		= "Nerps!";
+	public static final String MAP_TOOL_ICON	= "/net/rptools/maptool/client/image/maptool_icon_256.png";
+	public static final String MAP_TOOL_BUNDLE	= "net.rptools.maptool.language.i18n";
+	
 	public static final File UNZIP_DIR = AppUtil.getAppHome("resource");
 
 	public static final ServiceGroup SERVICE_GROUP = new ServiceGroup("maptool");
