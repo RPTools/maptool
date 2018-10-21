@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.ClientCommand;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.client.ui.ConnectionInfoDialog;
 import net.rptools.maptool.common.MapToolConstants;
@@ -33,6 +32,7 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetProducer;
 import net.rptools.maptool.transfer.AssetTransferManager;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * @author drice

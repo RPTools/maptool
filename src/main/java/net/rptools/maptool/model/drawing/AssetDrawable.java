@@ -14,10 +14,10 @@ import java.awt.Rectangle;
 import java.awt.geom.Area;
 
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * This class allows an asset to be used as a drawable.

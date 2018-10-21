@@ -11,9 +11,9 @@ package net.rptools.maptool.client.functions;
 import java.math.BigDecimal;
 import java.util.*;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool_fx.MapTool;
 import net.rptools.parser.*;
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.parser.function.AbstractFunction;

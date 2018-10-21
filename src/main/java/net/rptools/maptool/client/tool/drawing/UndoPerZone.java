@@ -13,12 +13,12 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool_fx.MapTool;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

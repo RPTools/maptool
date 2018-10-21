@@ -24,7 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * All of the tokens currently being shown in the initiative list. It includes a reference to all the tokens in order, a reference to the current token, a displayable initiative value and a hold state

@@ -34,6 +34,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerPolicy;
+import net.rptools.maptool_fx.MapTool;
 
 public class ServerCommandClientImpl implements ServerCommand {
 

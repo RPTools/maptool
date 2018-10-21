@@ -34,7 +34,7 @@ import com.jidesoft.swing.CheckBoxTree;
 import com.jidesoft.swing.CheckBoxTreeSelectionModel;
 
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Some keywords that make looking at the Java source code easier. :)

@@ -23,9 +23,9 @@ import com.jidesoft.dialog.JideOptionPane;
 
 import io.sentry.Sentry;
 import io.sentry.event.UserBuilder;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.SysInfo;
+import net.rptools.maptool_fx.MapTool;
 
 public class MapToolEventQueue extends EventQueue {
 	private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
@@ -34,28 +34,30 @@ public class MapToolEventQueue extends EventQueue {
 
 	@Override
 	protected void dispatchEvent(AWTEvent event) {
+		// Just turn this off for now...
+
 		try {
 			super.dispatchEvent(event);
 		} catch (StackOverflowError soe) {
 			log.error(soe, soe);
-			optionPane.setTitle(I18N.getString("MapToolEventQueue.stackOverflow.title")); //$NON-NLS-1$
-			optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
-			displayPopup();
-			reportToSentryIO(soe);
+			// optionPane.setTitle(I18N.getString("MapToolEventQueue.stackOverflow.title")); //$NON-NLS-1$
+			// optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
+			// displayPopup();
+			// reportToSentryIO(soe);
 		} catch (Throwable t) {
 			log.error(t, t);
-			optionPane.setTitle(I18N.getString("MapToolEventQueue.unexpectedError")); //$NON-NLS-1$
-			optionPane.setDetails(toString(t));
+			// optionPane.setTitle(I18N.getString("MapToolEventQueue.unexpectedError")); //$NON-NLS-1$
+			// optionPane.setDetails(toString(t));
 			try {
-				displayPopup();
-				reportToSentryIO(t);
+				// displayPopup();
+				// reportToSentryIO(t);
 			} catch (Throwable thrown) {
 				// Displaying the error message using the JideOptionPane has just failed. Fallback to standard swing
 				// dialog.
 				log.error(thrown, thrown);
-				JOptionPane.showMessageDialog(null, toString(thrown),
-						I18N.getString("MapToolEventQueue.unexpectedError"), JOptionPane.ERROR_MESSAGE);
-				reportToSentryIO(thrown);
+				// JOptionPane.showMessageDialog(null, toString(thrown),
+				// I18N.getString("MapToolEventQueue.unexpectedError"), JOptionPane.ERROR_MESSAGE);
+				// reportToSentryIO(thrown);
 			}
 		}
 	}

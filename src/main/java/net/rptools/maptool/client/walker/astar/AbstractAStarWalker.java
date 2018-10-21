@@ -32,7 +32,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.walker.AbstractZoneWalker;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
@@ -40,6 +39,7 @@ import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool_fx.MapTool;
 
 public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 	private static final Logger log = LogManager.getLogger(AbstractAStarWalker.class);

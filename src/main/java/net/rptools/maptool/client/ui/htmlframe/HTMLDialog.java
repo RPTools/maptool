@@ -20,9 +20,9 @@ import java.util.Map;
 import javax.swing.JDialog;
 
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool_fx.MapTool;
 
 @SuppressWarnings("serial")
 public class HTMLDialog extends JDialog implements HTMLPanelContainer {

@@ -8,13 +8,13 @@
  */
 package net.rptools.maptool.client.ui;
 
-import net.rptools.maptool.client.MapTool;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.jidesoft.docking.event.DockableFrameEvent;
 import com.jidesoft.docking.event.DockableFrameListener;
+
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * This class acts as a listener to the various dockable frames that MapTool uses.

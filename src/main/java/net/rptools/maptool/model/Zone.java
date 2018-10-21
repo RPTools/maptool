@@ -31,7 +31,6 @@ import org.apache.logging.log4j.Logger;
 
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.drawing.UndoPerZone;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
@@ -47,6 +46,7 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * This object represents the maps that will appear for placement of {@link Token}s.

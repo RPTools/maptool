@@ -10,13 +10,13 @@ package net.rptools.maptool.client.ui.htmlframe;
 
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool_fx.MapTool;
 
 public class HTMLFrameFactory {
 	private HTMLFrameFactory() {

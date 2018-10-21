@@ -25,8 +25,8 @@ import org.apache.logging.log4j.Logger;
 
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool_fx.MapTool;
 
 public class ImageCacheStatusBar extends JLabel {
 	private static final long serialVersionUID = -9102370395342902494L;

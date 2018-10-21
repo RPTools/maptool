@@ -20,7 +20,7 @@ import javax.imageio.stream.ImageInputStream;
 
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 

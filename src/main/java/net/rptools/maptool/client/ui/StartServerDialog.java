@@ -24,7 +24,6 @@ import javax.swing.JTextField;
 
 import net.rptools.lib.service.EchoServer;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
@@ -32,6 +31,7 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
+import net.rptools.maptool_fx.MapTool;
 import yasb.Binder;
 
 import com.caucho.hessian.client.HessianRuntimeException;

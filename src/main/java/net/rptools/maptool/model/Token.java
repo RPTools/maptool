@@ -43,12 +43,12 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool_fx.MapTool;
 import net.rptools.parser.ParserException;
 
 /**

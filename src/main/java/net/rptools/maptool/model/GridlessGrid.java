@@ -19,8 +19,8 @@ import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
+import net.rptools.maptool_fx.MapTool;
 
 public class GridlessGrid extends Grid {
 	private static List<TokenFootprint> footprintList;

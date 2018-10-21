@@ -64,7 +64,6 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
@@ -96,6 +95,7 @@ import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.TokenUtil;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * This is the pointer tool from the top-level of the toolbar. It allows tokens to be selected and moved, it triggers the statsheet to be displayed, it handles keystroke movement of tokens using the

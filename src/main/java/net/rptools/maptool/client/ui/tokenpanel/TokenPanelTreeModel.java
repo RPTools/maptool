@@ -25,7 +25,6 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.ModelChangeEvent;
@@ -33,6 +32,7 @@ import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.ServerPolicy;
+import net.rptools.maptool_fx.MapTool;
 
 public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
 	private static final String _TOKENS = "panel.MapExplorer.View.TOKENS";

@@ -15,6 +15,7 @@ import java.io.Serializable;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.transfer.ConsumerListener;
+import net.rptools.maptool_fx.MapTool;
 
 import org.apache.commons.io.FileUtils;
 

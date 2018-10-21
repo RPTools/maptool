@@ -41,8 +41,8 @@ import javax.swing.JTextArea;
 
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.MemoryStatusBar;
+import net.rptools.maptool_fx.MapTool;
 import net.sbbi.upnp.devices.UPNPRootDevice;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.UPNPResponseException;

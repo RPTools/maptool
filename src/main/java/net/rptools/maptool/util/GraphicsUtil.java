@@ -35,8 +35,8 @@ import javax.swing.SwingUtilities;
 import net.rptools.lib.GeometryUtil;
 import net.rptools.lib.swing.ImageLabel;
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  */

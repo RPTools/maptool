@@ -14,8 +14,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * The blast template draws a square for D&D 4e

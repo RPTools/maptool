@@ -8,7 +8,6 @@
  */
 package net.rptools.maptool.client.macro.impl;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool.client.macro.MacroContext;
@@ -19,6 +18,7 @@ import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
 		name = "impersonate",

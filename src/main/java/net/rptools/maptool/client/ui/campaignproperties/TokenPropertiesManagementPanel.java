@@ -31,12 +31,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import net.rptools.CaseInsensitiveHashMap;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.model.TokenProperty;
+import net.rptools.maptool_fx.MapTool;
 
 public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignProperties> {
 

@@ -31,9 +31,9 @@ import org.apache.logging.log4j.Logger;
 import com.jeta.forms.components.panel.FormPanel;
 
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.server.MapToolServer;
+import net.rptools.maptool_fx.MapTool;
 
 public class ConnectionInfoDialog extends JDialog {
 	private static String externalAddress = "Unknown"; // Used to be "Discovering ..." -- note that this is a UX change

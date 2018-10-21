@@ -45,6 +45,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * A helper class for converting Transferable objects into their respective data types. This class hides the details of drag/drop protocols as much as possible and therefore contains

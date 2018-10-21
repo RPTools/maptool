@@ -33,8 +33,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool_fx.MapTool;
 
 public class ZoneSelectionPopup extends JPopupMenu {
 

@@ -35,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 
 public class AssetLoader {
 	private static final Logger log = LogManager.getLogger(AssetLoader.class);

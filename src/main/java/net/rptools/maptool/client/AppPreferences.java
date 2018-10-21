@@ -22,6 +22,7 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool_fx.MapTool;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

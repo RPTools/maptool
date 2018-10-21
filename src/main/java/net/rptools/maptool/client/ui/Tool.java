@@ -30,10 +30,10 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
+import net.rptools.maptool_fx.MapTool;
 
 public abstract class Tool extends JToggleButton implements ActionListener, KeyListener {
 	private static final long serialVersionUID = -6365594431759083634L;

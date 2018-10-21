@@ -22,7 +22,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.macrobuttons.panels.CampaignPanel;
 import net.rptools.maptool.client.ui.macrobuttons.panels.GlobalPanel;
@@ -31,6 +30,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
+import net.rptools.maptool_fx.MapTool;
 
 @SuppressWarnings("serial")
 public class ButtonGroupPopupMenu extends JPopupMenu {

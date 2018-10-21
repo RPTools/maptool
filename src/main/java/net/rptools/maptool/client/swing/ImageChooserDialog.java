@@ -23,10 +23,10 @@ import javax.swing.JPanel;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SelectionListener;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool_fx.MapTool;
 
 public class ImageChooserDialog extends JDialog {
 

@@ -14,9 +14,9 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;
 import net.rptools.maptool.model.MacroButtonProperties;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Class that is responsible for storing global macro buttons' data in the registry (on Windows that is, dunno where it stores on other platforms, duh.) so it persists across sessions.

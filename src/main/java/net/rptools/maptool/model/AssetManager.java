@@ -35,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * This class handles the caching, loading, and downloading of assets. All assets are loaded through this class.

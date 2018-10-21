@@ -24,7 +24,6 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -32,6 +31,7 @@ import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool_fx.MapTool;
 
 public class DrawablesPanel extends JComponent {
 	private static final long serialVersionUID = 441600187734634440L;

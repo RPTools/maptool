@@ -22,7 +22,6 @@ import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.tool.ToolHelper;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -32,6 +31,7 @@ import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.RadiusTemplate;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Draw a template for an effect with a radius. Make the template show the squares that are effected, not just draw a circle. Let the player choose the vertex with the mouse and use the wheel to set

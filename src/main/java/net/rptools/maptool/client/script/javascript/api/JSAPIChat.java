@@ -8,10 +8,10 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
-import net.rptools.maptool.client.MapTool;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import net.rptools.maptool_fx.MapTool;
 
 public class JSAPIChat {
 	public void broadcast(String message) {

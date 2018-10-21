@@ -18,10 +18,10 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.LineSegment;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Tool for drawing freehand lines.

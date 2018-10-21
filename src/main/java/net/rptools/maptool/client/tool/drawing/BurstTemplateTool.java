@@ -17,12 +17,12 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.BurstTemplate;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Draw a template for an effect with a burst. Make the template show the squares that are effected, not just draw a circle. Let the player choose the base hex with the mouse and then click again to

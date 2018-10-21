@@ -46,7 +46,6 @@ import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.FacingTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
@@ -67,6 +66,7 @@ import net.rptools.maptool.util.FileUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.TokenUtil;
+import net.rptools.maptool_fx.MapTool;
 
 public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 	private static final long serialVersionUID = -3741870412603226747L;

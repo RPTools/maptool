@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.rptools.maptool.util.HTTPUtil;
+import net.rptools.maptool_fx.MapTool;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 

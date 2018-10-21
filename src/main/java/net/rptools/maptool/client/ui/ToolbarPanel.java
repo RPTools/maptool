@@ -27,7 +27,6 @@ import javax.swing.JToolBar;
 
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.FacingTool;
 import net.rptools.maptool.client.tool.GridTool;
@@ -63,6 +62,7 @@ import net.rptools.maptool.client.tool.drawing.WallTemplateTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Zone.TokenSelection;
+import net.rptools.maptool_fx.MapTool;
 
 public class ToolbarPanel extends JToolBar {
 	private final ButtonGroup buttonGroup = new ButtonGroup();

@@ -13,6 +13,8 @@ import javax.swing.JOptionPane;
 
 import org.apache.logging.log4j.ThreadContext;
 
+import net.rptools.maptool_fx.MapTool;
+
 public class LaunchInstructions {
 	private static final String USAGE = "<html><body width=\"400\">You are running MapTool with insufficient memory allocated (%dMB).<br><br>"
 			+ "You may experience odd behavior, especially when connecting to or hosting a server.<br><br>  "

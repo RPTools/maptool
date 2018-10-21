@@ -22,12 +22,12 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.ConsumerListener;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * This dialog is used to display all of the assets being transferred

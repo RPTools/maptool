@@ -20,11 +20,11 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool_fx.MapTool;
 
 public class AreaGroup extends AbstractButtonGroup {
 	// constructor for creating an area group in the campaign/global panels

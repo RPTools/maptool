@@ -16,7 +16,6 @@ import javax.swing.Action;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -25,6 +24,7 @@ import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * The popup menu for initiative tokens.

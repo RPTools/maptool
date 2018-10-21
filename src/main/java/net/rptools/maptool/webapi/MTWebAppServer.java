@@ -8,8 +8,8 @@
  */
 package net.rptools.maptool.webapi;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool_fx.MapTool;
 import net.sf.json.JSONObject;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;

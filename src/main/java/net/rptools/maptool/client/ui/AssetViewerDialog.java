@@ -32,9 +32,9 @@ import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool_fx.MapTool;
 
 public class AssetViewerDialog extends JDialog {
 

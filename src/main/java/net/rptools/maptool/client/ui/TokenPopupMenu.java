@@ -41,7 +41,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
 
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.AbstractTokenAccessorFunction;
 import net.rptools.maptool.client.functions.TokenBarFunction;
@@ -58,6 +57,7 @@ import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Player.Role;
+import net.rptools.maptool_fx.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;

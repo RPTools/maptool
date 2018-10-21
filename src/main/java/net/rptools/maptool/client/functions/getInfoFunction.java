@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
@@ -36,6 +35,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.util.SysInfo;
+import net.rptools.maptool_fx.MapTool;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;

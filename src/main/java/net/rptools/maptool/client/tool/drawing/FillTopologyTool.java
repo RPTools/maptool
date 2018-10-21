@@ -19,11 +19,11 @@ import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Tool for filling in enclosed areas of topology

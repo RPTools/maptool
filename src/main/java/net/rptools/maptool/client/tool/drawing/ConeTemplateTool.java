@@ -14,12 +14,12 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.ConeTemplate;
 import net.rptools.maptool.model.drawing.RadiusTemplate;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Draw a template for an effect with a cone area. Make the template show the squares that are effected, not just draw a circle. Let the player choose the vertex with the mouse and use the wheel to

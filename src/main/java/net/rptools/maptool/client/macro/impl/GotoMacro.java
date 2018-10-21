@@ -11,7 +11,6 @@ package net.rptools.maptool.client.macro.impl;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool.client.macro.MacroContext;
@@ -20,6 +19,7 @@ import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
 		name = "goto",

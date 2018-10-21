@@ -19,7 +19,6 @@ import javax.swing.JDialog;
 import javax.swing.JTextField;
 
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Vision;
@@ -27,6 +26,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.vision.BlockyRoundVision;
 import net.rptools.maptool.model.vision.FacingConicVision;
 import net.rptools.maptool.model.vision.RoundVision;
+import net.rptools.maptool_fx.MapTool;
 
 import com.jeta.forms.components.panel.FormPanel;
 

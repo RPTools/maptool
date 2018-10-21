@@ -37,11 +37,11 @@ import javax.swing.table.TableColumn;
 
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool_fx.MapTool;
 import net.tsc.servicediscovery.AnnouncementListener;
 import net.tsc.servicediscovery.ServiceFinder;
 

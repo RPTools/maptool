@@ -40,7 +40,6 @@ import net.rptools.lib.io.PackedFile;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -57,6 +56,7 @@ import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
 import net.rptools.maptool.model.transform.campaign.TokenPropertyMapTransform;
+import net.rptools.maptool_fx.MapTool;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;

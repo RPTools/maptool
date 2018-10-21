@@ -49,6 +49,7 @@ import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * @author drice

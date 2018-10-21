@@ -13,6 +13,8 @@ import java.util.List;
 
 import com.caucho.hessian.client.HessianProxyFactory;
 
+import net.rptools.maptool_fx.MapTool;
+
 public class MapToolRegistry {
 	private static final String SERVICE_URL = "http://services.rptools.net/maptool_registry-1_3.php";
 	private static MapToolRegistryService service;

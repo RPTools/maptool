@@ -22,8 +22,8 @@ import javax.swing.JLabel;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.io.PackedFile;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
+import net.rptools.maptool_fx.MapTool;
 
 import org.apache.commons.io.IOUtils;
 

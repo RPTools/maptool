@@ -20,13 +20,13 @@ import java.util.Set;
 import javax.swing.*;
 
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.GraphicsUtil;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * @author trevor

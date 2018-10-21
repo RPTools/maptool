@@ -39,11 +39,11 @@ import org.apache.logging.log4j.Logger;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.TransferableHelper;
 import net.rptools.maptool.client.swing.ImageChooserDialog;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool_fx.MapTool;
 
 public class ImageAssetPanel extends JPanel implements DropTargetListener {
 	private static final Logger log = LogManager.getLogger(ImageAssetPanel.class);

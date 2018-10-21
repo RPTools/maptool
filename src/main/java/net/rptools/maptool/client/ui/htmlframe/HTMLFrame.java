@@ -19,9 +19,9 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool_fx.MapTool;
 
 import com.jidesoft.docking.DockContext;
 import com.jidesoft.docking.DockableFrame;

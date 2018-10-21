@@ -34,10 +34,10 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.StyleSheet;
 
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.swing.MessagePanelEditorKit;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool_fx.MapTool;
 
 public class MessagePanel extends JPanel {
 

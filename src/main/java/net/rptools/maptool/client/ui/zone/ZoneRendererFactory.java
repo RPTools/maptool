@@ -8,8 +8,8 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool_fx.MapTool;
 
 public class ZoneRendererFactory {
 	public static ZoneRenderer newRenderer(Zone zone) {

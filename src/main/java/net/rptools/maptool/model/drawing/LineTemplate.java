@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.ListIterator;
 
 import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * A drawing tool that will draw a line template between 2 vertices.

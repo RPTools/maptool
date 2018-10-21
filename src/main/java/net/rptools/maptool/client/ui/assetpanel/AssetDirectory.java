@@ -25,9 +25,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.ImageIcon;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
+import net.rptools.maptool_fx.MapTool;
 
 public class AssetDirectory extends Directory {
 

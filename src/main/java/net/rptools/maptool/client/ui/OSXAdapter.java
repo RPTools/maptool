@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Apple's new platform API has deprecated the <code>ApplicationListener</code> class. The preferred approach going forward is to use the various set*() methods of <code>Application</code> instead.

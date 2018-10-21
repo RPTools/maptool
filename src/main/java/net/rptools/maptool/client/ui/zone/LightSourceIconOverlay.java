@@ -12,10 +12,10 @@ import java.awt.Graphics2D;
 import java.awt.geom.Area;
 
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.AttachedLightSource;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool_fx.MapTool;
 
 public class LightSourceIconOverlay implements ZoneOverlay {
 

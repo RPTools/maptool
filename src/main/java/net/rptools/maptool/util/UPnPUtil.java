@@ -33,7 +33,7 @@ import org.apache.logging.log4j.Logger;
 
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 import net.sbbi.upnp.Discovery;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.ActionResponse;

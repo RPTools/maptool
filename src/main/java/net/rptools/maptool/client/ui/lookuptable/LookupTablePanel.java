@@ -28,11 +28,11 @@ import javax.swing.JScrollPane;
 
 import net.rptools.lib.swing.ImagePanel;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.util.PersistenceUtil;
+import net.rptools.maptool_fx.MapTool;
 
 public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
 	private static final long serialVersionUID = -4404834393567699280L;

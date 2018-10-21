@@ -29,11 +29,11 @@ import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Support class used by the token editor dialog on the "Properties" tab to allow a token's image to be moved around within a one-cell grid area. Scaling is supported using the mousewheel and position

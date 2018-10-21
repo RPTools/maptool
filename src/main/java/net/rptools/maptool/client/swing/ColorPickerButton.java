@@ -19,7 +19,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.border.BevelBorder;
 
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * @author trevor

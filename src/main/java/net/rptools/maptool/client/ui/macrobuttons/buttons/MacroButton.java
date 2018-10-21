@@ -31,7 +31,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AbstractButtonGroup;
@@ -42,6 +41,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Base class of {@link CampaignMacroButton} and {@link GlobalMacroButton}. {@link TokenMacroButton} doesn't extend this class because it is very simple. <code>MacroButton</code>s that extend this

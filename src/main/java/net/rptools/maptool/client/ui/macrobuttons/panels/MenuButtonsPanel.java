@@ -20,9 +20,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool_fx.MapTool;
 
 public class MenuButtonsPanel extends JPanel {
 

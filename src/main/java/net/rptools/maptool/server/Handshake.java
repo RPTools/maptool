@@ -14,9 +14,9 @@ import java.net.Socket;
 import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * @author trevor

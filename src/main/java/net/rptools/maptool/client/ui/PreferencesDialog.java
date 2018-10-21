@@ -41,7 +41,6 @@ import org.apache.logging.log4j.Logger;
 
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
@@ -50,6 +49,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UserJvmPrefs;
 import net.rptools.maptool.util.UserJvmPrefs.JVM_OPTION;
+import net.rptools.maptool_fx.MapTool;
 
 import com.jeta.forms.components.colors.JETAColorWell;
 import com.jeta.forms.components.panel.FormPanel;

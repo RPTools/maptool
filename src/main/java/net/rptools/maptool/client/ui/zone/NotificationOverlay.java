@@ -14,10 +14,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.SwingUtilities;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.Animatable;
 import net.rptools.maptool.client.swing.AnimationManager;
 import net.rptools.maptool.util.GraphicsUtil;
+import net.rptools.maptool_fx.MapTool;
 
 public class NotificationOverlay implements ZoneOverlay, Animatable {
 

@@ -11,6 +11,7 @@ package net.rptools.maptool.model;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Model for arranging assets in a hierarchical way
@@ -48,21 +49,16 @@ public class AssetGroup {
 
 		public boolean accept(File dir, String name) {
 			if (extensionPattern == null) {
-				// Setup defaults, then override if we have Java 1.6+
-				if (MapTool.JAVA_VERSION >= 1.6) {
-					try {
-						Class<?> imageIO = Class.forName("javax.imageio.ImageIO");
-						Method getReaderFileSuffixes = imageIO.getDeclaredMethod("getReaderFileSuffixes", (Class[]) null);
-						Object result = getReaderFileSuffixes.invoke(null, (Object[]) null);
-						extensions = (String[]) result;
-						// extensions = ImageIO.getReaderFileSuffixes();
-					} catch (Exception e) {
-						// NoSuchMethodException
-						// ClassNotFoundException
-						// IllegalAccessException
-						// InvocationTargetException
-					}
+				try {
+					Class<?> imageIO = Class.forName("javax.imageio.ImageIO");
+					Method getReaderFileSuffixes = imageIO.getDeclaredMethod("getReaderFileSuffixes", (Class[]) null);
+					Object result = getReaderFileSuffixes.invoke(null, (Object[]) null);
+					extensions = (String[]) result;
+				} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+
 				String list = Arrays.deepToString(extensions);
 				// Final result is something like: \.(jpeg|jpg|bmp|wbmp|png|gif|tiff)$
 				String pattern = "\\." + list.replace('[', '(').replace(']', ')').replace(", ", "|") + "$";

@@ -108,6 +108,7 @@ import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
 import net.rptools.maptool.util.PersistenceUtil.PersistedMap;
+import net.rptools.maptool_fx.MapTool;
 import net.rptools.maptool.util.SysInfo;
 import net.rptools.maptool.util.UPnPUtil;
 

@@ -8,7 +8,6 @@
  */
 package net.rptools.maptool.client.script_deprecated.api.proxy;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.functions.TokenGMNameFunction;
 import net.rptools.maptool.client.functions.TokenHaloFunction;
@@ -17,6 +16,7 @@ import net.rptools.maptool.client.functions.TokenNameFunction;
 import net.rptools.maptool.client.functions.TokenStateFunction;
 import net.rptools.maptool.client.functions.TokenVisibleFunction;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool_fx.MapTool;
 import net.rptools.parser.ParserException;
 
 public class TokenProxy {

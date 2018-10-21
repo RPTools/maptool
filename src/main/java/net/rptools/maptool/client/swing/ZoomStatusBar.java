@@ -16,9 +16,9 @@ import java.text.ParseException;
 import javax.swing.JTextField;
 
 import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Manages the zoom level in the main MapTool window's status bar at the bottom of the window. This means displaying the current zoom level as a percentage as well as allowing a value to be entered

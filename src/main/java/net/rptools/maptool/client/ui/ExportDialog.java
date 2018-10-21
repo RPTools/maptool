@@ -44,7 +44,6 @@ import net.rptools.lib.net.FTPLocation;
 import net.rptools.lib.net.LocalLocation;
 import net.rptools.lib.net.Location;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -53,6 +52,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Creates a dialog for performing a screen capture to a PNG file.

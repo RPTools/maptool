@@ -21,7 +21,6 @@ import java.util.Set;
 
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.CampaignExportDialog;
 import net.rptools.maptool.client.ui.ExportDialog;
 import net.rptools.maptool.client.ui.ToolbarPanel;
@@ -31,6 +30,7 @@ import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * <p>

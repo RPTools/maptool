@@ -8,9 +8,9 @@
  */
 package net.rptools.maptool.client.script_deprecated.api;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.script_deprecated.api.proxy.TokenProxy;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool_fx.MapTool;
 
 public class TokenApi {
 	public TokenProxy current() {

@@ -18,7 +18,6 @@ import java.util.Set;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.ClientCommand;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.common.MapToolConstants;
@@ -43,6 +42,7 @@ import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.transfer.AssetProducer;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * @author drice

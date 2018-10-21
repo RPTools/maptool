@@ -23,9 +23,9 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool_fx.MapTool;
 
 public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 

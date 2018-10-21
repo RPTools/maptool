@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.util.PersistenceUtil;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * @author tylere

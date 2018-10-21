@@ -11,9 +11,9 @@ package net.rptools.maptool.webapi;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool_fx.MapTool;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 

@@ -37,12 +37,12 @@ import javax.swing.event.ChangeListener;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppSetup;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.RemoteFileDownloader;
 import net.rptools.maptool.client.WebDownloader;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool_fx.MapTool;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;

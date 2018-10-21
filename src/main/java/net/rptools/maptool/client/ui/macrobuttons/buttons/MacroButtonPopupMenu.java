@@ -22,12 +22,12 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MacroButtonDialog;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
+import net.rptools.maptool_fx.MapTool;
 
 @SuppressWarnings("serial")
 public class MacroButtonPopupMenu extends JPopupMenu {

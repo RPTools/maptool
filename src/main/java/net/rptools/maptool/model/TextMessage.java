@@ -11,7 +11,7 @@ package net.rptools.maptool.model;
 import java.util.List;
 import java.util.ListIterator;
 
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 
 public class TextMessage {
 	// Not an enum so that it can be hessian serialized

@@ -43,7 +43,6 @@ import javax.swing.event.ListSelectionListener;
 
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -57,6 +56,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool_fx.MapTool;
 
 import com.jeta.forms.components.line.HorizontalLineComponent;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -124,7 +124,7 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 	/**
 	 * The component that contains the initiative menu.
 	 */
-	private final JideSplitButton menuButton;
+	// private final JideSplitButton menuButton;
 
 	/**
 	 * The menu item that tells the GM if NPC's are visible.
@@ -170,13 +170,13 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 		// Workaround is to install a different LAF, create the button, then restore the LAF back.
 		// https://www.jidesoft.com/forum/viewtopic.php?f=18&t=10807
 		LookAndFeelFactory.installJideExtension(LookAndFeelFactory.VSNET_STYLE_WITHOUT_MENU);
-		menuButton = new JideSplitButton(I18N.getText("initPanel.menuButton"));
+		// menuButton = new JideSplitButton(I18N.getText("initPanel.menuButton"));
 		LookAndFeelFactory.installJideExtension(LookAndFeelFactory.XERTO_STYLE);
 
-		panel.add(menuButton, new CellConstraints(2, 2));
-		JideButton rButton = new JideButton(RESET_COUNTER_ACTION);
-		rButton.setButtonStyle(JideButton.TOOLBOX_STYLE);
-		panel.add(rButton, new CellConstraints(4, 2));
+		// panel.add(menuButton, new CellConstraints(2, 2));
+		// JideButton rButton = new JideButton(RESET_COUNTER_ACTION);
+		// rButton.setButtonStyle(JideButton.TOOLBOX_STYLE);
+		// panel.add(rButton, new CellConstraints(4, 2));
 		round = new JLabel();
 		round.setHorizontalAlignment(SwingConstants.CENTER);
 		round.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
@@ -241,62 +241,62 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 	public void updateView() {
 		displayList.setDragEnabled(hasGMPermission());
 
-		// Set up the button
-		if (ownerPermissions || hasGMPermission()) {
-			NEXT_ACTION.setEnabled(true);
-			menuButton.setAction(NEXT_ACTION);
-		} else {
-			TOGGLE_HOLD_ACTION.setEnabled(true);
-			menuButton.setAction(TOGGLE_HOLD_ACTION);
-		} // endif
-
-		// Set up the menu
-		menuButton.removeAll();
-		if (hasGMPermission()) {
-			menuButton.add(new JMenuItem(PREV_ACTION));
-			menuButton.add(new JMenuItem(SORT_LIST_ACTION));
-			menuButton.addSeparator();
-			menuButton.add(new JMenuItem(MAKE_CURRENT_ACTION));
-		} // endif
-		if (ownerPermissions || hasGMPermission()) {
-			menuButton.add(new JMenuItem(TOGGLE_HOLD_ACTION));
-		} // endif
-		menuButton.add(new JMenuItem(SET_INIT_STATE_VALUE));
-		menuButton.add(new JMenuItem(CLEAR_INIT_STATE_VALUE));
-		menuButton.addSeparator();
-		JCheckBoxMenuItem item = new JCheckBoxMenuItem(SHOW_TOKENS_ACTION);
-		item.setSelected(showTokens);
-		menuButton.add(item);
-		item = new JCheckBoxMenuItem(SHOW_TOKEN_STATES_ACTION);
-		item.setSelected(showTokenStates);
-		menuButton.add(item);
-		item = new JCheckBoxMenuItem(SHOW_INIT_STATE);
-		item.setSelected(showInitState);
-		menuButton.add(item);
-		item = new JCheckBoxMenuItem(INIT_STATE_SECOND_LINE);
-		item.setSelected(initStateSecondLine);
-		menuButton.add(item);
-		if (hasGMPermission()) {
-			hideNPCMenuItem = new JCheckBoxMenuItem(TOGGLE_HIDE_NPC_ACTION);
-			hideNPCMenuItem.setSelected(list == null ? false : list.isHideNPC());
-			menuButton.add(hideNPCMenuItem);
-			ownerPermissionsMenuItem = new JCheckBoxMenuItem(TOGGLE_OWNER_PERMISSIONS_ACTION);
-			ownerPermissionsMenuItem.setSelected(list == null ? false : ownerPermissions);
-			menuButton.add(ownerPermissionsMenuItem);
-			movementLockMenuItem = new JCheckBoxMenuItem(TOGGLE_MOVEMENT_LOCK_ACTION);
-			movementLockMenuItem.setSelected(list == null ? false : movementLock);
-			menuButton.add(movementLockMenuItem);
-			menuButton.addSeparator();
-			menuButton.add(new JMenuItem(ADD_PCS_ACTION));
-			menuButton.add(new JMenuItem(ADD_ALL_ACTION));
-			menuButton.addSeparator();
-			menuButton.add(new JMenuItem(REMOVE_TOKEN_ACTION));
-			menuButton.add(new JMenuItem(REMOVE_ALL_ACTION));
-			menuButton.setText(I18N.getText("initPanel.menuButton"));
-		} else if (ownerPermissions) {
-			menuButton.addSeparator();
-			menuButton.add(new JMenuItem(REMOVE_TOKEN_ACTION));
-		} // endif
+		// // Set up the button
+		// if (ownerPermissions || hasGMPermission()) {
+		// NEXT_ACTION.setEnabled(true);
+		// menuButton.setAction(NEXT_ACTION);
+		// } else {
+		// TOGGLE_HOLD_ACTION.setEnabled(true);
+		// menuButton.setAction(TOGGLE_HOLD_ACTION);
+		// } // endif
+		//
+		// // Set up the menu
+		// menuButton.removeAll();
+		// if (hasGMPermission()) {
+		// menuButton.add(new JMenuItem(PREV_ACTION));
+		// menuButton.add(new JMenuItem(SORT_LIST_ACTION));
+		// menuButton.addSeparator();
+		// menuButton.add(new JMenuItem(MAKE_CURRENT_ACTION));
+		// } // endif
+		// if (ownerPermissions || hasGMPermission()) {
+		// menuButton.add(new JMenuItem(TOGGLE_HOLD_ACTION));
+		// } // endif
+		// menuButton.add(new JMenuItem(SET_INIT_STATE_VALUE));
+		// menuButton.add(new JMenuItem(CLEAR_INIT_STATE_VALUE));
+		// menuButton.addSeparator();
+		// JCheckBoxMenuItem item = new JCheckBoxMenuItem(SHOW_TOKENS_ACTION);
+		// item.setSelected(showTokens);
+		// menuButton.add(item);
+		// item = new JCheckBoxMenuItem(SHOW_TOKEN_STATES_ACTION);
+		// item.setSelected(showTokenStates);
+		// menuButton.add(item);
+		// item = new JCheckBoxMenuItem(SHOW_INIT_STATE);
+		// item.setSelected(showInitState);
+		// menuButton.add(item);
+		// item = new JCheckBoxMenuItem(INIT_STATE_SECOND_LINE);
+		// item.setSelected(initStateSecondLine);
+		// menuButton.add(item);
+		// if (hasGMPermission()) {
+		// hideNPCMenuItem = new JCheckBoxMenuItem(TOGGLE_HIDE_NPC_ACTION);
+		// hideNPCMenuItem.setSelected(list == null ? false : list.isHideNPC());
+		// menuButton.add(hideNPCMenuItem);
+		// ownerPermissionsMenuItem = new JCheckBoxMenuItem(TOGGLE_OWNER_PERMISSIONS_ACTION);
+		// ownerPermissionsMenuItem.setSelected(list == null ? false : ownerPermissions);
+		// menuButton.add(ownerPermissionsMenuItem);
+		// movementLockMenuItem = new JCheckBoxMenuItem(TOGGLE_MOVEMENT_LOCK_ACTION);
+		// movementLockMenuItem.setSelected(list == null ? false : movementLock);
+		// menuButton.add(movementLockMenuItem);
+		// menuButton.addSeparator();
+		// menuButton.add(new JMenuItem(ADD_PCS_ACTION));
+		// menuButton.add(new JMenuItem(ADD_ALL_ACTION));
+		// menuButton.addSeparator();
+		// menuButton.add(new JMenuItem(REMOVE_TOKEN_ACTION));
+		// menuButton.add(new JMenuItem(REMOVE_ALL_ACTION));
+		// menuButton.setText(I18N.getText("initPanel.menuButton"));
+		// } else if (ownerPermissions) {
+		// menuButton.addSeparator();
+		// menuButton.add(new JMenuItem(REMOVE_TOKEN_ACTION));
+		// } // endif
 		valueChanged(null);
 	}
 
@@ -339,8 +339,8 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				model.setList(list);
-				if (menuButton != null && menuButton.getAction() == NEXT_ACTION)
-					menuButton.setButtonEnabled(hasGMPermission() || list.getCurrent() >= 0 && hasOwnerPermission(list.getToken(list.getCurrent())));
+				// if (menuButton != null && menuButton.getAction() == NEXT_ACTION)
+				// menuButton.setButtonEnabled(hasGMPermission() || list.getCurrent() >= 0 && hasOwnerPermission(list.getToken(list.getCurrent())));
 				if (list.getCurrent() >= 0) {
 					int index = model.getDisplayIndex(list.getCurrent());
 					if (index >= 0)
@@ -496,21 +496,21 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 		boolean enabled = (ti != null && hasOwnerPermission(ti.getToken())) ? true : false;
 		CLEAR_INIT_STATE_VALUE.setEnabled(enabled);
 		SET_INIT_STATE_VALUE.setEnabled(enabled);
-		if (menuButton.getAction() == TOGGLE_HOLD_ACTION) {
-			menuButton.setButtonEnabled(enabled);
-		} else {
-			TOGGLE_HOLD_ACTION.setEnabled(enabled);
-		} // endif
+		// if (menuButton.getAction() == TOGGLE_HOLD_ACTION) {
+		// menuButton.setButtonEnabled(enabled);
+		// } else {
+		TOGGLE_HOLD_ACTION.setEnabled(enabled);
+		// } // endif
 		MAKE_CURRENT_ACTION.setEnabled(enabled && ti != list.getTokenInitiative(list.getCurrent()));
 
 		REMOVE_TOKEN_ACTION.setEnabled(enabled);
 		ti = (list.getCurrent() >= 0) ? list.getTokenInitiative(list.getCurrent()) : null;
-		if (hasGMPermission() || (ti != null && hasOwnerPermission(ti.getToken()))) {
-			menuButton.setButtonEnabled(true);
-		} else {
-			if (menuButton.getAction() == NEXT_ACTION)
-				menuButton.setButtonEnabled(false);
-		}
+		// if (hasGMPermission() || (ti != null && hasOwnerPermission(ti.getToken()))) {
+		// menuButton.setButtonEnabled(true);
+		// } else {
+		// if (menuButton.getAction() == NEXT_ACTION)
+		// menuButton.setButtonEnabled(false);
+		// }
 	}
 
 	/*---------------------------------------------------------------------------------------------
@@ -534,8 +534,8 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 			if (InitiativeListModel.isTokenVisible(t, list.isHideNPC()) && t.getType() != Type.NPC && AppPreferences.isShowInitGainMessage())
 				MapTool.addMessage(TextMessage.say(null, s));
 			displayList.ensureIndexIsVisible(model.getDisplayIndex(list.getCurrent()));
-			if (menuButton.getAction() == NEXT_ACTION)
-				menuButton.setButtonEnabled(list.getCurrent() >= 0 && hasOwnerPermission(list.getToken(list.getCurrent())));
+			// if (menuButton.getAction() == NEXT_ACTION)
+			// menuButton.setButtonEnabled(list.getCurrent() >= 0 && hasOwnerPermission(list.getToken(list.getCurrent())));
 		} else if (evt.getPropertyName().equals(InitiativeList.TOKENS_PROP)) {
 			if ((evt.getOldValue() == null && evt.getNewValue() instanceof TokenInitiative) || (evt.getNewValue() == null & evt.getOldValue() instanceof TokenInitiative))
 				displayList.getSelectionModel().clearSelection();

@@ -22,8 +22,8 @@ import javax.swing.JPanel;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool_fx.MapTool;
 
 import org.apache.commons.collections.map.LinkedMap;
 

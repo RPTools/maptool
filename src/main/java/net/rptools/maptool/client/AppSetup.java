@@ -28,6 +28,7 @@ import org.jdesktop.swingworker.SwingWorker;
 
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Executes only the first time the application is run.

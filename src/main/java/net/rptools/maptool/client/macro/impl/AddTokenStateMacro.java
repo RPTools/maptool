@@ -12,7 +12,6 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.macro.Macro;
@@ -29,6 +28,7 @@ import net.rptools.maptool.client.ui.token.XTokenOverlay;
 import net.rptools.maptool.client.ui.token.YieldTokenOverlay;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Create a new token state.

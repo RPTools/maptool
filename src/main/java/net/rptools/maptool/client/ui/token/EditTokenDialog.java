@@ -86,7 +86,6 @@ import com.jidesoft.swing.Selectable;
 
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.AbstractTokenAccessorFunction;
 import net.rptools.maptool.client.functions.TokenBarFunction;
@@ -107,6 +106,7 @@ import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * This dialog is used to display all of the token states and notes to the user.

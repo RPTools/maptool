@@ -20,13 +20,13 @@ import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool_fx.MapTool;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -108,7 +108,7 @@ public class SelectionPanel extends AbstractMacroPanel {
 			if (log.isDebugEnabled())
 				log.debug(results);
 		}
-		MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+		// MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated); // TODO: FIXME post FX
 	}
 
 	private void populateCommonButtons(List<Token> tokenList) {

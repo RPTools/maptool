@@ -37,7 +37,7 @@ import com.jidesoft.swing.CheckBoxListWithSelectable;
 import net.rptools.lib.net.FTPLocation;
 import net.rptools.lib.net.Location;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * @author crash

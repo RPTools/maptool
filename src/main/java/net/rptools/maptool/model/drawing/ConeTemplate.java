@@ -11,8 +11,8 @@ package net.rptools.maptool.model.drawing;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * The cone template draws a highlight over all the squares effected from a specific spine. There are 8 different directions from each spine.

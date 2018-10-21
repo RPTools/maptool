@@ -16,9 +16,9 @@ import java.util.List;
 import javax.swing.AbstractListModel;
 
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token.Type;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * This implements a list model for the for the panel. It removes all of the tokens that aren't visible to players if needed.

@@ -15,8 +15,8 @@ import javax.swing.Action;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool_fx.MapTool;
 
 public class ZonePopupMenu extends JPopupMenu {
 

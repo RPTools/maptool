@@ -18,12 +18,12 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool_fx.MapTool;
 
 public class OvalExposeTool extends OvalTool {
 	private static final long serialVersionUID = -9023090752132286356L;

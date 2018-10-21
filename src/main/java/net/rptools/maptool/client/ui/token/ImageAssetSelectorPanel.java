@@ -17,8 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
 import net.rptools.lib.swing.SelectionListener;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
+import net.rptools.maptool_fx.MapTool;
 
 public class ImageAssetSelectorPanel extends JPanel {
 

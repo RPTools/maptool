@@ -28,9 +28,9 @@ import org.apache.logging.log4j.Logger;
 import com.jeta.forms.components.panel.FormPanel;
 
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.CampaignExport;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Creates a dialog for saving campaigns as a previous version

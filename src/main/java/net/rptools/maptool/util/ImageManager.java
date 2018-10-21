@@ -29,10 +29,10 @@ import com.badlogic.gdx.graphics.Texture;
 
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetAvailableListener;
 import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * The ImageManager class keeps a cache of loaded images. This class can be used to load the raw image data from an asset. The loading of the raw image data into a usable class is done in the

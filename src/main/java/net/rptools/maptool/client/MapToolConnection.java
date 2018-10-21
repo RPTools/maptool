@@ -14,6 +14,7 @@ import java.net.Socket;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.server.Handshake;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * @author trevor

@@ -18,12 +18,12 @@ import javax.swing.JButton;
 
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool_fx.MapTool;
 
 import com.jidesoft.docking.DockableFrame;
 

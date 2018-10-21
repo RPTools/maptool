@@ -13,10 +13,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.client.walker.NaiveWalker;
+import net.rptools.maptool_fx.MapTool;
 
 public class Path<T extends AbstractPoint> {
 	private final List<T> cellList = new LinkedList<T>();

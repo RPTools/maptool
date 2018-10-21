@@ -8,7 +8,6 @@
  */
 package net.rptools.maptool.client.macro;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.AbortFunction;
 import net.rptools.maptool.client.functions.AssertFunction;
@@ -19,6 +18,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool_fx.MapTool;
 import net.rptools.parser.ParserException;
 
 import org.apache.logging.log4j.LogManager;

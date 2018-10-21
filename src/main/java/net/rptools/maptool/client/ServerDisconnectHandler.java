@@ -13,6 +13,7 @@ import java.io.IOException;
 import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.maptool.model.CampaignFactory;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * This class handles when the server inexplicably disconnects

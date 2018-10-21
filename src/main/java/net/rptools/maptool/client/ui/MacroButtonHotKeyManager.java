@@ -12,8 +12,8 @@ import javax.swing.KeyStroke;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * @author tylere

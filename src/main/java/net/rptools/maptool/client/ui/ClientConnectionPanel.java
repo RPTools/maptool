@@ -17,8 +17,8 @@ import javax.swing.ListSelectionModel;
 
 import net.rptools.lib.swing.PopupListener;
 import net.rptools.maptool.client.AppActions;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.PlayerListModel;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Implements the contents of the Window -> Connections status panel. Previously this class only displayed a list of connected clients, but it is being extended to include other information as well:

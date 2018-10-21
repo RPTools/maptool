@@ -8,8 +8,8 @@
  */
 package net.rptools.maptool.client.macro.impl;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool_fx.MapTool;
 
 public abstract class AbstractRollMacro extends AbstractMacro {
 

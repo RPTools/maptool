@@ -86,27 +86,27 @@ ext {
 compileJava {
 	options.warnings = false
 
-    doFirst {
-        options.compilerArgs = [
-                '--module-path', classpath.asPath,
-                '--add-modules', 'javafx.controls',
-                '--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
-                '--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
-                '--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED'
-        ]
-    }
+	doFirst {
+		options.compilerArgs = [
+				'--module-path', classpath.asPath,
+				'--add-modules', 'javafx.controls',
+				'--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
+				'--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
+				'--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED'
+		]
+	}
 }
 
 run {
-    doFirst {
-        jvmArgs = [
-                '--module-path', "C:/Program Files/Java/javafx-sdk-11/lib",
-                '--add-modules', 'javafx.controls',
-                '--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
-                '--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
-                '--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED'
-        ]
-    }
+	doFirst {
+		jvmArgs = [
+				'--module-path', "C:/Program Files/Java/javafx-sdk-11/lib",
+				'--add-modules', 'javafx.controls',
+				'--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
+				'--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
+				'--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED'
+		]
+	}
 
 	args = [ '-v='+version ]
 	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development" ]
@@ -117,7 +117,7 @@ run {
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
 spotless {
@@ -197,17 +197,17 @@ dependencies {
 	compile group: 'org.openjfx', name: 'javafx-web', version: '11', classifier: platform
 
 	// http://fxexperience.com/controlsfx/
-	// compile 'org.controlsfx:controlsfx:9.0.0'
-	
+	compile 'org.controlsfx:controlsfx:9.0.0'
+
 	// More 3rd Party FX Controls from http://jfxtras.org/ #incubating
 	// https://mvnrepository.com/artifact/org.jfxtras/jfxtras-controls
-	// compile group: 'org.jfxtras', name: 'jfxtras-controls', version: '9.0-r1'
-		
+	compile group: 'org.jfxtras', name: 'jfxtras-controls', version: '9.0-r1'
+
 	// Shapes! https://github.com/aalmiray/jsilhouette
 	// compile 'org.kordamp.jsilhouette:jsilhouette-javafx:0.3.0'
-	
+
 	// For consideration: https://github.com/Oshan96/CustomStage/wiki
-	
+
 	// For Sentry bug reporting
 	annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
@@ -269,7 +269,7 @@ dependencies {
 	compile 'com.withay:withay-util:1.0'
 	compile 'xmlpull:xmlpull:1.1.3.1'
 	compile 'xpp3:xpp3_min:1.1.4c'
-	compile 'com.thoughtworks.xstream:xstream:1.4.9'
+	compile 'com.thoughtworks.xstream:xstream:1.4.10'
 	compile 'yasb:yasb:0.2-21012007'
 	compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
 
@@ -321,18 +321,18 @@ dependencies {
 
 	// For mocking features during unit tests
 	testCompile group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
-	
+
 	// https://www.petrikainulainen.net/programming/testing/junit-5-tutorial-running-unit-tests-with-gradle/
-    testCompileOnly (
-            'junit:junit:4.12'
-    )
+	testCompileOnly (
+			'junit:junit:4.12'
+	)
 	testImplementation (
-            'org.junit.jupiter:junit-jupiter-api:5.3.+'
-    )
-    testRuntimeOnly (
-            'org.junit.jupiter:junit-jupiter-engine:5.3.+',
-         	'org.junit.vintage:junit-vintage-engine:5.3.+'
-    )
+			'org.junit.jupiter:junit-jupiter-api:5.3.+'
+	)
+	testRuntimeOnly (
+			'org.junit.jupiter:junit-jupiter-engine:5.3.+',
+			'org.junit.vintage:junit-vintage-engine:5.3.+'
+	)
 }
 
 

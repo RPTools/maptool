@@ -47,7 +47,6 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
 import net.rptools.lib.swing.ImagePanelModel;
 import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.TransferableAsset;
 import net.rptools.maptool.client.TransferableToken;
 import net.rptools.maptool.model.Asset;
@@ -57,6 +56,7 @@ import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.ExtractImagesFromPDF;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.PersistenceUtil;
+import net.rptools.maptool_fx.MapTool;
 
 public class ImageFileImagePanelModel implements ImagePanelModel {
 

@@ -12,9 +12,9 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * The radius template draws a highlight over all the squares effected from a specific spine.

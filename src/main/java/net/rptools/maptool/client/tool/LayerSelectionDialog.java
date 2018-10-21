@@ -17,8 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool_fx.MapTool;
 
 import com.jeta.forms.components.panel.FormPanel;
 

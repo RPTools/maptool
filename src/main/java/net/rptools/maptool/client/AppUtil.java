@@ -25,6 +25,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * This class provides utility functions for maptool client.

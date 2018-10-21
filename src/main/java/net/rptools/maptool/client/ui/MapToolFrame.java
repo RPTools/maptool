@@ -93,7 +93,6 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerDisconnectHandler;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
@@ -141,6 +140,7 @@ import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool_fx.MapTool;
 
 import org.apache.commons.collections.map.LinkedMap;
 import org.apache.logging.log4j.LogManager;
@@ -149,6 +149,8 @@ import org.xml.sax.SAXException;
 
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
+
+import javafx.scene.control.ButtonType;
 
 /**
  */
@@ -185,6 +187,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	private final Toolbox toolbox;
 	private final ZoneMiniMapPanel zoneMiniMapPanel;
 	private final JPanel zoneRendererPanel;
+
+	public JPanel getZoneRendererPanel() {
+		return zoneRendererPanel;
+	}
+
 	private JPanel visibleControlPanel;
 	private FullScreenFrame fullScreenFrame;
 	private final JPanel rendererBorderPanel;
@@ -241,6 +248,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	private final ImpersonatePanel impersonatePanel = new ImpersonatePanel();
 
 	private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
+	private JComponent tokenTreePanel;
+
+	public JComponent getTokenTreePanel() {
+		return tokenTreePanel;
+	}
 
 	private class ChatTyperObserver implements Observer {
 		public void update(Observable o, Object arg) {
@@ -319,6 +331,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		connectionPanel = createConnectionPanel();
 		toolbox = new Toolbox();
 		initiativePanel = createInitiativePanel();
+
+		tokenTreePanel = createTokenTreePanel();
 
 		zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
 		pointerOverlay = new PointerOverlay();
@@ -404,7 +418,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		updateKeyStrokes();
 
 		// This will cause the frame to be set to visible (BAD jide, BAD! No cookie for you!)
-		configureDocking();
+		// configureDocking();
 
 		new WindowPreferences(AppConstants.APP_NAME, "mainFrame", this);
 		chatTyperObserver = new ChatTyperObserver();
@@ -540,7 +554,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	private void initializeFrames() {
 		frameMap.put(MTFrame.CONNECTIONS, createDockingFrame(MTFrame.CONNECTIONS, new JScrollPane(connectionPanel), new ImageIcon(AppStyle.connectionsImage)));
-		frameMap.put(MTFrame.TOKEN_TREE, createDockingFrame(MTFrame.TOKEN_TREE, new JScrollPane(createTokenTreePanel()), new ImageIcon(AppStyle.mapExplorerImage)));
+		frameMap.put(MTFrame.TOKEN_TREE, createDockingFrame(MTFrame.TOKEN_TREE, new JScrollPane(tokenTreePanel), new ImageIcon(AppStyle.mapExplorerImage)));
 		frameMap.put(MTFrame.IMAGE_EXPLORER, createDockingFrame(MTFrame.IMAGE_EXPLORER, assetPanel, new ImageIcon(AppStyle.resourceLibraryImage)));
 		frameMap.put(MTFrame.DRAW_TREE, createDockingFrame(MTFrame.DRAW_TREE, new JScrollPane(createDrawTreePanel()), new ImageIcon(AppStyle.mapExplorerImage)));
 		frameMap.put(MTFrame.CHAT, createDockingFrame(MTFrame.CHAT, commandPanel, new ImageIcon(AppStyle.chatPanelImage)));
@@ -1477,13 +1491,13 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	public void closingMaintenance() {
 		if (AppPreferences.getSaveReminder()) {
 			if (MapTool.getPlayer().isGM()) {
-				int result = MapTool.confirmImpl(I18N.getText("msg.title.saveCampaign"), JOptionPane.YES_NO_CANCEL_OPTION, "msg.confirm.saveCampaign", (Object[]) null);
+				ButtonType result = MapTool.confirmImpl(I18N.getText("msg.title.saveCampaign"), JOptionPane.YES_NO_CANCEL_OPTION, "msg.confirm.saveCampaign", (Object[]) null);
 				// int result = JOptionPane.showConfirmDialog(MapTool.getFrame(), I18N.getText("msg.confirm.saveCampaign"), I18N.getText("msg.title.saveCampaign"), JOptionPane.YES_NO_CANCEL_OPTION);
 
-				if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
+				if (result == ButtonType.CANCEL || result == ButtonType.CLOSE) {
 					return;
 				}
-				if (result == JOptionPane.YES_OPTION) {
+				if (result == ButtonType.YES) {
 					final Observer callback = new Observer() {
 						public void update(java.util.Observable o, Object arg) {
 							if (arg instanceof String) {

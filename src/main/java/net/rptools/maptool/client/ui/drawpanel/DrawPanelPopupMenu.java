@@ -26,7 +26,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
 import net.rptools.lib.swing.ColorPicker;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.ui.AssetPaint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -42,6 +41,7 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
+import net.rptools.maptool_fx.MapTool;
 
 public class DrawPanelPopupMenu extends JPopupMenu {
 

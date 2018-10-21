@@ -24,11 +24,11 @@ import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool_fx.MapTool;
 
 public class TokenVblPanel extends JPanel {
 	private Token token;

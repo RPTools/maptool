@@ -6,7 +6,7 @@
  * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
  * at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package net.rptools.maptool_fx;
 
 import java.awt.Color;
 import java.awt.Desktop;
@@ -120,7 +120,7 @@ import net.tsc.servicediscovery.ServiceAnnouncer;
 
 /**
  */
-public class MapTool {
+public class MapTool_Original {
 	private static final Logger log = LogManager.getLogger(MapTool.class);
 	private static SentryClient sentry;
 
@@ -439,7 +439,7 @@ public class MapTool {
 		return false;
 	}
 
-	private MapTool() {
+	private MapTool_Original() {
 		// Not to be instantiated
 		throw new Error("cannot construct MapTool object!");
 	}

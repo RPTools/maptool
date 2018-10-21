@@ -12,7 +12,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.FocusTraversalPolicy;
 
-import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool_fx.MapTool;
 
 public class MapToolFocusTraversalPolicy extends FocusTraversalPolicy {
 

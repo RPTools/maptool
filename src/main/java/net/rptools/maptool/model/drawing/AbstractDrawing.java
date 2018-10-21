@@ -17,9 +17,9 @@ import java.awt.Image;
 import java.awt.Stroke;
 import java.awt.image.ImageObserver;
 
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * Abstract drawing. This class takes care of setting up the Pen since that will be the same for all implementing classes.

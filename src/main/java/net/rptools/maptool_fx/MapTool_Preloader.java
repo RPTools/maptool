@@ -37,7 +37,7 @@ public class MapTool_Preloader extends Preloader {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(SPLASH_SCREEN_FXML), ResourceBundle.getBundle(MAP_TOOL_BUNDLE));
 		root = (StackPane) fxmlLoader.load();
 		controller = (SplashScreen_Controller) fxmlLoader.getController();
-		//controller.setVersionLabel(MapTool.getVersion());
+		// controller.setVersionLabel(MapTool.getVersion());
 
 		Scene scene = new Scene(root);
 		primaryStage.initStyle(StageStyle.UNDECORATED);

@@ -11,7 +11,6 @@ package net.rptools.maptool.util;
 import java.io.IOException;
 
 import net.rptools.lib.io.PackedFile;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -19,6 +18,7 @@ import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
+import net.rptools.maptool_fx.MapTool;
 
 /**
  * A simple class to segregate and group exporting rules for campaigns...
