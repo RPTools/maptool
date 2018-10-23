@@ -31,12 +31,12 @@ public class MenuBar_Controller {
 	@FXML // This method is called by the FXMLoader when initialization is complete
 	void initialize() {
 		// Later turn these into visible properties?
-		openCampaignMenuItem.disableProperty().bind(MapTool.isHostingAServer().not());
-		log.info("MapTool.isHostingAServer: " + MapTool.isHostingAServer());
+		openCampaignMenuItem.disableProperty().bind(MapTool.getServer().getConfig().isPersonalServer().not());
 	}
 
 	@FXML
 	void openCampaign(ActionEvent event) {
+		// TODO: MOVE ME! Use FXControls Actions API?
 		if (MapTool.isCampaignDirty() && !MapTool.confirm("msg.confirm.loseChanges"))
 			return;
 
@@ -44,7 +44,7 @@ public class MenuBar_Controller {
 		fileChooser.setTitle(I18N.getText("msg.title.loadCampaign"));
 		File campaignFile = fileChooser.showOpenDialog(null);
 		AppActions.loadCampaign(campaignFile);
-		
+
 		// JFileChooser chooser = new CampaignPreviewFileChooser();
 		// chooser.setDialogTitle(I18N.getText("msg.title.loadCampaign"));
 		// chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -55,4 +55,15 @@ public class MenuBar_Controller {
 		// }
 	}
 
+	@FXML
+	void startServer(ActionEvent event) {
+		// TESTING
+		MapTool.getServer().getConfig().setPersonalServer(false);
+	}
+
+	@FXML
+	void clientDisconnect(ActionEvent event) {
+		// TESTING
+		MapTool.getServer().getConfig().setPersonalServer(true);
+	}
 }

@@ -112,8 +112,8 @@ public class ImpersonatePanel extends AbstractMacroPanel {
 	@Override
 	public void clear() {
 		removeAll();
-		MapTool.getFrame().getFrame(MTFrame.IMPERSONATED).setFrameIcon(new ImageIcon(AppStyle.impersonatePanelImage));
-		MapTool.getFrame().getFrame(MTFrame.IMPERSONATED).setTitle(Tab.IMPERSONATED.title);
+		// MapTool.getFrame().getFrame(MTFrame.IMPERSONATED).setFrameIcon(new ImageIcon(AppStyle.impersonatePanelImage));
+		// MapTool.getFrame().getFrame(MTFrame.IMPERSONATED).setTitle(Tab.IMPERSONATED.title);
 		if (getTokenId() == null) {
 			currentlyImpersonating = false;
 		}

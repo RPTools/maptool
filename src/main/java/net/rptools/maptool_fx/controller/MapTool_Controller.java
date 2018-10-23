@@ -46,6 +46,9 @@ public class MapTool_Controller {
 	@FXML // fx:id="chatAnchorPane"
 	private AnchorPane chatAnchorPane;
 
+	@FXML // fx:id="impersonatedAnchorPane"
+	private AnchorPane impersonatedAnchorPane;
+
 	@FXML // fx:id="assetTitledPane"
 	private TitledPane assetTitledPane;
 
@@ -55,19 +58,25 @@ public class MapTool_Controller {
 	@FXML // fx:id="chatTitledPane"
 	private TitledPane chatTitledPane;
 
+	@FXML // fx:id="impersonatedTitledPane"
+	private TitledPane impersonatedTitledPane;
+
 	@FXML // This method is called by the FXMLLoader when initialization is complete
 	void initialize() {
 		assert rootContainer != null : "fx:id=\"rootContainer\" was not injected: check your FXML file 'MapTool.fxml'.";
 
 		assert mainStackPane != null : "fx:id=\"mainStackPane\" was not injected: check your FXML file 'MapTool.fxml'.";
 		assert mainAnchorPane != null : "fx:id=\"mainAnchorPane\" was not injected: check your FXML file 'MapTool.fxml'.";
+
 		assert assetAnchorPane != null : "fx:id=\"assetAnchorPane\" was not injected: check your FXML file 'MapTool.fxml'.";
 		assert mapExplorerAnchorPane != null : "fx:id=\"mapExplorerAnchorPane\" was not injected: check your FXML file 'MapTool.fxml'.";
 		assert chatAnchorPane != null : "fx:id=\"chatAnchorPane\" was not injected: check your FXML file 'MapTool.fxml'.";
+		assert impersonatedAnchorPane != null : "fx:id=\"impersonatedAnchorPane\" was not injected: check your FXML file 'MapTool.fxml'.";
 
 		assert assetTitledPane != null : "fx:id=\"assetTitledPane\" was not injected: check your FXML file 'MapTool.fxml'.";
 		assert mapExplorerTitledPane != null : "fx:id=\"mapExplorerTitledPane\" was not injected: check your FXML file 'MapTool.fxml'.";
 		assert chatTitledPane != null : "fx:id=\"chatTitledPane\" was not injected: check your FXML file 'MapTool.fxml'.";
+		assert impersonatedTitledPane != null : "fx:id=\"impersonatedTitledPane\" was not injected: check your FXML file 'MapTool.fxml'.";
 	}
 
 	public void setDefaultPanes(MapToolFrame clientFrame) {
@@ -79,22 +88,25 @@ public class MapTool_Controller {
 		mainStackPane.getChildren().add(mapAchorPane);
 		anchorIt(mapViewSwingNode);
 
-		// Set other panes in accordians for now
+		// Set other panes in accordions for now
 		SwingNode assetViewSwingNode = new SwingNode();
 		SwingNode mapExplorerSwingNode = new SwingNode();
 		SwingNode chatSwingNode = new SwingNode();
+		SwingNode impersonatedSwingNode = new SwingNode();
 
 		assetViewSwingNode.setContent(clientFrame.getAssetPanel());
 		mapExplorerSwingNode.setContent(clientFrame.getTokenTreePanel());
 		chatSwingNode.setContent(clientFrame.getCommandPanel());
+		impersonatedSwingNode.setContent(clientFrame.getImpersonatePanel());
 
 		assetAnchorPane.getChildren().add(assetViewSwingNode);
-		// mapExplorerAnchorPane.getChildren().add(mapExplorerSwingNode);
+		mapExplorerAnchorPane.getChildren().add(mapExplorerSwingNode);
 		chatAnchorPane.getChildren().add(chatSwingNode);
 
 		anchorIt(assetViewSwingNode);
 		anchorIt(mapExplorerSwingNode);
 		anchorIt(chatSwingNode);
+		anchorIt(impersonatedSwingNode);
 
 		chatTitledPane.setExpanded(true); // Default expand first pane
 	}

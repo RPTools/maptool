@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Random;
 
+import javafx.beans.property.SimpleBooleanProperty;
+
 public class ServerConfig {
 	public static final int DEFAULT_PORT = 51234;
 
@@ -22,7 +24,7 @@ public class ServerConfig {
 	private String hostPlayerId;
 	private String gmPassword;
 	private String playerPassword;
-	private boolean personalServer;
+	private SimpleBooleanProperty personalServer = new SimpleBooleanProperty(false);
 	private String serverName;
 
 	public ServerConfig() {
@@ -57,17 +59,21 @@ public class ServerConfig {
 		return safeCompare(playerPassword, password);
 	}
 
-	public boolean isPersonalServer() {
+	public SimpleBooleanProperty isPersonalServer() {
 		return personalServer;
 	}
 
+	public void setPersonalServer(boolean isPersonal) {
+		personalServer.set(isPersonal);
+	}
+	
 	public int getPort() {
 		return port;
 	}
 
 	public static ServerConfig createPersonalServerConfig() {
 		ServerConfig config = new ServerConfig();
-		config.personalServer = true;
+		config.personalServer.set(true);
 		config.port = findOpenPort(PORT_RANGE_START, PORT_RANGE_END);
 		return config;
 	}

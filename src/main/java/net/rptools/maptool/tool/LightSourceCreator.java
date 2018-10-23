@@ -47,8 +47,8 @@ public class LightSourceCreator {
 
 		lightSourcesMap.put("Generic", lightSourceList);
 
-		XStream xstream = new XStream();
-		System.out.println(xstream.toXML(lightSourcesMap));
+		// XStream xstream = new XStream();
+		// System.out.println(xstream.toXML(lightSourcesMap));
 	}
 
 	private static LightSource createLightSource(String name, double radius, double arcAngle) {

@@ -27,13 +27,11 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
@@ -58,11 +56,6 @@ import org.apache.logging.log4j.core.appender.FileAppender;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.security.NoTypePermission;
-import com.thoughtworks.xstream.security.NullPermission;
-import com.thoughtworks.xstream.security.PrimitiveTypePermission;
-
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
 import io.sentry.event.BreadcrumbBuilder;
@@ -349,8 +342,6 @@ public class MapTool extends Application {
 			log.info("Current list of Macro Functions: " + logOutput);
 		}
 
-		verifyJavaVersion();
-
 		// System properties
 		System.setProperty("swing.aatext", "true");
 
@@ -384,8 +375,14 @@ public class MapTool extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws IOException {
-		// stage = primaryStage;
-		// setUserAgentStylesheet(STYLESHEET_MODENA); // Setting the style back to the new Modena
+		// Do pre initialization needed before FXML loading...
+		verifyJavaVersion(); // TODO: Move to preloader later?
+
+		com.jidesoft.utils.Lm.verifyLicense("Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
+		configureJide(); // OK HERE?
+		initialize(); // shouldn't be doing UI work here now, set up server and everything else?
+
+		// load the FX UI now...
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(MAPTOOL_FXML), ResourceBundle.getBundle(AppConstants.MAP_TOOL_BUNDLE));
 		VBox root = fxmlLoader.load();
 		mapTool_Controller = (MapTool_Controller) fxmlLoader.getController();
@@ -403,12 +400,8 @@ public class MapTool extends Application {
 			}
 		});
 
-		com.jidesoft.utils.Lm.verifyLicense("Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
-		configureJide(); // OK HERE?
-		// initialize();
-
 		Platform.runLater(() -> {
-			initialize();
+			// initialize();
 			Platform.runLater(() -> {
 				mapTool_Controller.setDefaultPanes(clientFrame);
 				primaryStage.show();
@@ -496,23 +489,26 @@ public class MapTool extends Application {
 	 */
 	private static void verifyJavaVersion() {
 		Version version;
+		boolean keepgoing;
 		try {
 			version = java.lang.Runtime.version();
 			log.info("Java Version = " + version);
 
-			// boolean keepgoing = true;
-			if (version.feature() < 11) {
+			if (version.feature() < AppConstants.REQUIRED_JAVA_VERSION) {
 				log.warn("Wrong version of Java detected and unsupported!");
-				// keepgoing = confirm("msg.error.wrongJavaVersion", version);
+				keepgoing = confirm("msg.error.wrongJavaVersion", version);
 			} else {
 				return;
 			}
 		} catch (Exception e) {
 			log.error("Error determining Java version.", e);
-			// keepgoing = confirm("msg.error.unknownJavaVersion");
+			keepgoing = confirm("msg.error.unknownJavaVersion");
 		}
 
-		System.exit(11);
+		if (keepgoing)
+			return;
+		else
+			System.exit(11);
 	}
 
 	private static void initialize() {
@@ -556,10 +552,6 @@ public class MapTool extends Application {
 
 		try {
 			startPersonalServer(CampaignFactory.createBasicCampaign());
-			log.info("server null? " + (server == null));
-			log.info("server.getConfig().isPersonalServer()? " + server.getConfig().isPersonalServer());
-			log.info("isHostingAServer now? " + isHostingAServer());
-
 		} catch (Exception e) {
 			MapTool.showError("While starting personal server", e);
 		}
@@ -1324,13 +1316,13 @@ public class MapTool extends Application {
 			announcer.stop();
 		}
 		// Don't announce personal servers
-		if (!config.isPersonalServer()) {
+		if (!config.isPersonalServer().get()) {
 			announcer = new ServiceAnnouncer(id, server.getConfig().getPort(), AppConstants.SERVICE_GROUP);
 			announcer.start();
 		}
 
 		// Registered ?
-		if (config.isServerRegistered() && !config.isPersonalServer()) {
+		if (config.isServerRegistered() && !config.isPersonalServer().get()) {
 			try {
 				int result = MapToolRegistry.registerInstance(config.getServerName(), config.getPort());
 				if (result == 3) {
@@ -1468,17 +1460,11 @@ public class MapTool extends Application {
 	}
 
 	public static boolean isPersonalServer() {
-		return server != null && server.getConfig().isPersonalServer();
+		return server != null && server.getConfig().isPersonalServer().get();
 	}
 
 	public static boolean isHostingServer() {
-		return server != null && !server.getConfig().isPersonalServer();
-	}
-
-	public static BooleanProperty isHostingAServer() {
-		log.info("isHostingServer: " + isHostingServer());
-		log.info("isPersonalServer: " + isPersonalServer());
-		return new SimpleBooleanProperty(isHostingServer() || isPersonalServer());
+		return server != null && !server.getConfig().isPersonalServer().get();
 	}
 
 	public static void disconnect() {

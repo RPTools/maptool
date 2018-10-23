@@ -16,7 +16,8 @@ import net.rptools.maptool.model.Token;
 import net.tsc.servicediscovery.ServiceGroup;
 
 public class AppConstants {
-
+	public static final int REQUIRED_JAVA_VERSION = 11;
+	
 	public static final String APP_NAME = "MapTool";
 	public static final String APP_TAG_LINE = " - Now Infused with more Nerps!";
 	public static final String VENDOR_NAME = "Nerps!";

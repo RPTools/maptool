@@ -31,6 +31,11 @@
                           <AnchorPane fx:id="chatAnchorPane" minHeight="0.0" minWidth="0.0" />
                         </content>
                       </TitledPane>
+                        <TitledPane fx:id="impersonatedTitledPane" layoutX="10.0" layoutY="60.0" text="%panel.Impersonate">
+                           <content>
+                              <AnchorPane fx:id="impersonatedAnchorPane" minHeight="0.0" minWidth="0.0" />
+                           </content>
+                        </TitledPane>
                     </panes>
                   </Accordion>
                </children>

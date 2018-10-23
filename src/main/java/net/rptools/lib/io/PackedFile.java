@@ -25,6 +25,7 @@ import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,6 +42,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.security.NoTypePermission;
+import com.thoughtworks.xstream.security.NullPermission;
+import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
@@ -83,7 +87,7 @@ public class PackedFile {
 
 	private static File tmpDir = new File(System.getProperty("java.io.tmpdir")); // Shared temporary directory
 
-	private final XStream xstream = new XStream();
+	private final XStream xstream;// = new XStream();
 
 	private final File file; // Original zip file
 	private final File tmpFile; // Temporary directory where changes are kept
@@ -123,6 +127,23 @@ public class PackedFile {
 		this.file = file;
 		dirty = !file.exists();
 		tmpFile = new File(tmpDir, new GUID() + ".tmp");
+
+		xstream = new XStream();
+		
+		// // clear out existing permissions and set own ones
+		// xstream.addPermission(NoTypePermission.NONE);
+		//
+		// // allow some basics
+		// xstream.addPermission(NullPermission.NULL);
+		// xstream.addPermission(PrimitiveTypePermission.PRIMITIVES);
+		// xstream.allowTypeHierarchy(Collection.class);
+		//
+		// XStream.setupDefaultSecurity(xstream); // to be removed after 1.5
+		//
+		// // allow any type from the same package
+		// xstream.allowTypesByWildcard(new String[] {
+		// "net.rptools.**"
+		// });
 	}
 
 	/**

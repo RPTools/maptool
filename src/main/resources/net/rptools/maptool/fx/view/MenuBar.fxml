@@ -30,9 +30,9 @@
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" text="%action.addIconSelector" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="%action.serverStart" />
+            <MenuItem mnemonicParsing="false" onAction="#startServer" text="%action.serverStart" />
             <MenuItem mnemonicParsing="false" text="%action.clientConnect" />
-            <MenuItem mnemonicParsing="false" text="%action.clientDisconnect" />
+            <MenuItem mnemonicParsing="false" onAction="#clientDisconnect" text="%action.clientDisconnect" />
             <MenuItem mnemonicParsing="false" text="%action.showConnectionInfo" />
             <SeparatorMenuItem mnemonicParsing="false" />
             <Menu mnemonicParsing="false" text="menu.recent" />

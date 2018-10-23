@@ -68,7 +68,11 @@ public abstract class AbstractMacroPanel extends JPanel implements Scrollable, M
 
 	@Override
 	public Dimension getPreferredSize() {
-		Dimension size = getParent().getSize();
+		Dimension size = new Dimension(50, 50);
+
+		if (getParent() != null)
+			size = getParent().getSize();
+
 		FlowLayout layout = (FlowLayout) getLayout();
 		Insets insets = getInsets();
 		// This isn't exact, but hopefully it's close enough

@@ -19,11 +19,11 @@ import com.thoughtworks.xstream.XStream;
 public class TokenFootprintCreator {
 	public static void main(String[] args) {
 		// List<TokenFootprint> footprintList = makeHorizHex();
-		List<TokenFootprint> footprintList = makeVertHex();
+		// List<TokenFootprint> footprintList = makeVertHex();
 		// List<TokenFootprint> footprintList = makeSquare();
 		// List<TokenFootprint> footprintList = makeGridless();
-		XStream xstream = new XStream();
-		System.out.println(xstream.toXML(footprintList));
+		// XStream xstream = new XStream();
+		// System.out.println(xstream.toXML(footprintList));
 	}
 
 	private static Point[] points(int[][] points) {

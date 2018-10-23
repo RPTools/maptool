@@ -176,7 +176,7 @@ public class SelectionPanel extends AbstractMacroPanel {
 	@Override
 	protected void clear() {
 		// reset the tab icon
-		MapTool.getFrame().getFrame(MTFrame.SELECTION).setFrameIcon(new ImageIcon(AppStyle.selectionPanelImage));
+		//MapTool.getFrame().getFrame(MTFrame.SELECTION).setFrameIcon(new ImageIcon(AppStyle.selectionPanelImage));
 		super.clear();
 	}
 
