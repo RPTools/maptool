@@ -66,7 +66,7 @@ public class ServerConfig {
 	public void setPersonalServer(boolean isPersonal) {
 		personalServer.set(isPersonal);
 	}
-	
+
 	public int getPort() {
 		return port;
 	}

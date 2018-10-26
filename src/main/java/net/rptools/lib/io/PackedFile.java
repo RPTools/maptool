@@ -129,7 +129,7 @@ public class PackedFile {
 		tmpFile = new File(tmpDir, new GUID() + ".tmp");
 
 		xstream = new XStream();
-		
+
 		// // clear out existing permissions and set own ones
 		// xstream.addPermission(NoTypePermission.NONE);
 		//
