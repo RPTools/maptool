@@ -27,6 +27,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView;
 import net.rptools.maptool.client.ui.MapToolFrame;
 
 public class MapTool_Controller {
@@ -88,17 +89,28 @@ public class MapTool_Controller {
 
 	public void setDefaultPanes(MapToolFrame clientFrame) {
 		// Set the main map view
-		AnchorPane mapAchorPane = new AnchorPane();
-		SwingNode mapViewSwingNode = new SwingNode();
+		var mapAchorPane = new AnchorPane();
+		var mapViewSwingNode = new SwingNode();
 		mapViewSwingNode.setContent(clientFrame.getZoneRendererPanel());
 		mapAchorPane.getChildren().add(mapViewSwingNode);
-		mainStackPane.getChildren().add(0, mapAchorPane);
+		mainStackPane.getChildren().add(mapAchorPane);
 		anchorIt(mapViewSwingNode);
+
+		var webViewAnchorPane = new AnchorPane();
+		var webView = new WebView();
+		var webEngine = webView.getEngine();
+		webEngine.loadContent("<b>Hello MapTool</b>");
+
+		webViewAnchorPane.getChildren().add(webView);
+		mainStackPane.getChildren().add(webViewAnchorPane);
+		anchorIt(webView);
 
 		// Set other panes in accordions for now
 		addSwingNode(clientFrame.getConnectionPanel(), connectionsTitledPane, CONNECTIONS_ICON);
 		addSwingNode(clientFrame.getTokenTreePanel(), mapExplorerTitledPane, MAP_EXPLORER_ICON);
-		addSwingNode(clientFrame.getDrawablesTreePanel(), drawExplorerTitledPane, DRAW_EXPLORER_ICON); // vs getDrawablesPanel() ?
+		addSwingNode(clientFrame.getDrawablesTreePanel(), drawExplorerTitledPane, DRAW_EXPLORER_ICON); // vs
+																										// getDrawablesPanel()
+																										// ?
 		addSwingNode(clientFrame.getInitiativePanel(), initiativeTitledPane, INITIATIVE_ICON);
 		addSwingNode(clientFrame.getAssetPanel(), resourceLibraryTitledPane, RESOURCE_LIBRARY_ICON);
 		addSwingNode(clientFrame.getCommandPanel(), chatTitledPane, CHAT_ICON);
@@ -130,7 +142,7 @@ public class MapTool_Controller {
 		titledPane.setContent(anchorPane);
 		anchorIt(swingNode);
 
-		setGraphicIcon(titledPane, graphicURI);
+		// setGraphicIcon(titledPane, graphicURI);
 	}
 
 	private void setGraphicIcon(TitledPane titledPane, String graphicURI) {

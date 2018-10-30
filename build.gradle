@@ -6,8 +6,20 @@ import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 // Access Git info from build script
 plugins {
-	id "com.diffplug.gradle.spotless" version "3.15.0"
-	id "org.ajoberstar.grgit" version "3.0.0-beta.1"
+	// Core Plugins
+	id 'base'
+	id 'application'
+	id 'java-library'
+	id 'java'
+	id 'eclipse'
+	id 'jacoco'
+
+	// id 'org.gradle.java.experimental-jigsaw' version '0.1.1'
+
+	// Community Plugins
+	id 'com.diffplug.gradle.spotless' version '3.15.0'
+	id 'org.ajoberstar.grgit' version '3.0.0-beta.1'
+	// id "com.zyxist.chainsaw" version "0.3.1"
 }
 
 // Apply the java plugin to add support for Java
@@ -44,6 +56,8 @@ if (currentOS.isWindows()) {
 
 // Custom properties
 ext {
+	moduleName = 'net.rptools.maptool'
+
 	gdxVersion = '1.9.6'
 	box2DLightsVersion = '1.4'
 	aiVersion = '1.8.1'
@@ -78,18 +92,29 @@ compileJava {
 
 	doFirst {
 		options.compilerArgs = [
-				'--module-path', classpath.asPath,
-				'--add-modules', 'javafx.controls',
-				'--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
-				'--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED',
-				'--add-exports', 'javafx.base/com.sun.javafx=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.geom.transform=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED'
+			'--module-path', classpath.asPath,
+			'--add-modules', 'javafx.controls',
+			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED',
+			'--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
+			'--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED',
+			'--add-exports', 'javafx.base/com.sun.javafx=ALL-UNNAMED',
+			'--add-exports', 'javafx.base/com.sun.javafx.logging=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.geom.transform=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.prism=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.glass.utils=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.font=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.scene.input=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.prism.paint=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.scenario.effect=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.text=ALL-UNNAMED'
 		]
 	}
 }
@@ -97,18 +122,29 @@ compileJava {
 run {
 	doFirst {
 		jvmArgs = [
-				'--module-path', "C:/Program Files/Java/javafx-sdk-11/lib",
-				'--add-modules', 'javafx.controls',
-				'--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
-				'--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED',
-				'--add-exports', 'javafx.base/com.sun.javafx=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.geom.transform=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED',
-				'--add-exports', 'javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED'
+			'--module-path', "C:/Program Files/Java/javafx-sdk-11/lib",
+			'--add-modules', 'javafx.controls',
+			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED',
+			'--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
+			'--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED',
+			'--add-exports', 'javafx.base/com.sun.javafx=ALL-UNNAMED',
+			'--add-exports', 'javafx.base/com.sun.javafx.logging=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.geom.transform=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.prism=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.glass.utils=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.font=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.scene.input=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.prism.paint=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.scenario.effect=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.text=ALL-UNNAMED'
 		]
 	}
 
@@ -143,6 +179,14 @@ spotless {
 jacoco {
 	toolVersion = "0.8.1"
 	reportsDir = file("$buildDir/reports/jacoco")
+}
+
+jacocoTestReport {
+	reports {
+		xml.enabled false
+		csv.enabled false
+		html.destination file("${buildDir}/jacocoHtml")
+	}
 }
 
 // Set eclipse natures, access rules, and other settings
@@ -364,7 +408,8 @@ task uberJar(type: Jar) {
 	baseName project.name + '-' + tagVersion
 
 	manifest {
-		attributes 'Implementation-Title': project.name,
+		attributes('Automatic-Module-Name': moduleName,
+		'Implementation-Title': project.name,
 		'Implementation-Version': tagVersion,
 		'Implementation-Vendor': vendor,
 		'Git-Commit': revision,
@@ -374,7 +419,7 @@ task uberJar(type: Jar) {
 		'Built-JDK': System.getProperty('java.version'),
 		'Source-Compatibility': project.sourceCompatibility,
 		'Target-Compatibility': project.targetCompatibility,
-		'Main-Class': project.mainClassName
+		'Main-Class': project.mainClassName)
 	}
 
 	from {
@@ -465,7 +510,7 @@ task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepa
 }
 
 task createWrapper(type: Wrapper) {
-	gradleVersion = '4.9'
+	gradleVersion = '4.10.2'
 }
 
 // Configure current release tag in Sentry.io properties

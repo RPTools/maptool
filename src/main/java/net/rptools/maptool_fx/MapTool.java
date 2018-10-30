@@ -406,7 +406,7 @@ public class MapTool extends Application {
 
 		primaryStage.show();
 		setupDockFX();
-	    
+
 		Platform.runLater(() -> {
 			mapTool_Controller.setDefaultPanes(clientFrame);
 			mapTool_Controller.setIntialTitledPane();
@@ -419,12 +419,12 @@ public class MapTool extends Application {
 	}
 
 	private void setupDockFX() {
-		var dockPane = new DockPane();
-		
-		// create a default test node for the center of the dock area
-	    var tabs = new TabPane();
-	    var htmlEditor = new HTMLEditor();
-	    htmlEditor.setHtmlText("Hello MapTool");
+		// var dockPane = new DockPane();
+		//
+		// // create a default test node for the center of the dock area
+		// var tabs = new TabPane();
+		// var htmlEditor = new HTMLEditor();
+		// htmlEditor.setHtmlText("Hello MapTool");
 	}
 
 	public static String getVersion() {
@@ -1657,7 +1657,7 @@ public class MapTool extends Application {
 		else
 			return "NOT_CONFIGURED";
 	}
-	
+
 	public static void main(String[] args) {
 		launch(args);
 	}
