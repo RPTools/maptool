@@ -35,9 +35,10 @@ public class MapToolEventQueue extends EventQueue {
 	@Override
 	protected void dispatchEvent(AWTEvent event) {
 		// Just turn this off for now...
+		super.dispatchEvent(event);
 
 		try {
-			super.dispatchEvent(event);
+			// super.dispatchEvent(event);
 		} catch (StackOverflowError soe) {
 			log.error(soe, soe);
 			// optionPane.setTitle(I18N.getString("MapToolEventQueue.stackOverflow.title")); //$NON-NLS-1$

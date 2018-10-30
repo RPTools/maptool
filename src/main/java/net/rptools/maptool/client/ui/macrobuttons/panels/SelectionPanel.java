@@ -97,7 +97,7 @@ public class SelectionPanel extends AbstractMacroPanel {
 			}
 			if (selectedTokenList.size() == 1 && AppUtil.playerOwns(selectedTokenList.get(0))) {
 				// if only one token selected, show its image as tab icon
-				MapTool.getFrame().getFrame(MTFrame.SELECTION).setFrameIcon(selectedTokenList.get(0).getIcon(16, 16));
+				// MapTool.getFrame().getFrame(MTFrame.SELECTION).setFrameIcon(selectedTokenList.get(0).getIcon(16, 16));
 			}
 		}
 		timer.stop("painting");

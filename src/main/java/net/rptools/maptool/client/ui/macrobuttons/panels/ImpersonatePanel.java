@@ -52,8 +52,8 @@ public class ImpersonatePanel extends AbstractMacroPanel {
 
 			if (currentlyImpersonating && getToken() != null) {
 				Token token = getToken();
-				mtf.getFrame(MTFrame.IMPERSONATED).setFrameIcon(token.getIcon(16, 16));
-				mtf.getFrame(MTFrame.IMPERSONATED).setTitle(getTitle(token));
+				// mtf.getFrame(MTFrame.IMPERSONATED).setFrameIcon(token.getIcon(16, 16));
+				// mtf.getFrame(MTFrame.IMPERSONATED).setTitle(getTitle(token));
 				addArea(getTokenId());
 			} else if (selectedTokenList.size() != 1) {
 				return;

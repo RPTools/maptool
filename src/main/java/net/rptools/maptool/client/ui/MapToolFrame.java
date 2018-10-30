@@ -187,6 +187,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	private final Toolbox toolbox;
 	private final ZoneMiniMapPanel zoneMiniMapPanel;
 	private final JPanel zoneRendererPanel;
+	private final JComponent drawTreePanel = createDrawTreePanel();
 
 	public JPanel getZoneRendererPanel() {
 		return zoneRendererPanel;
@@ -515,74 +516,74 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		}
 	}
 
-	private void configureDocking() {
-		initializeFrames();
-
-		getDockingManager().setProfileKey(DOCKING_PROFILE_NAME);
-		getDockingManager().setOutlineMode(com.jidesoft.docking.DockingManager.PARTIAL_OUTLINE_MODE);
-		getDockingManager().setUsePref(false);
-
-		getDockingManager().getWorkspace().setAcceptDockableFrame(false);
-
-		// Main panel
-		getDockingManager().getWorkspace().add(rendererBorderPanel);
-
-		// Docked frames
-		getDockingManager().addFrame(getFrame(MTFrame.CONNECTIONS));
-		getDockingManager().addFrame(getFrame(MTFrame.TOKEN_TREE));
-		getDockingManager().addFrame(getFrame(MTFrame.INITIATIVE));
-		getDockingManager().addFrame(getFrame(MTFrame.IMAGE_EXPLORER));
-		getDockingManager().addFrame(getFrame(MTFrame.DRAW_TREE));
-		getDockingManager().addFrame(getFrame(MTFrame.CHAT));
-		getDockingManager().addFrame(getFrame(MTFrame.LOOKUP_TABLES));
-		getDockingManager().addFrame(getFrame(MTFrame.GLOBAL));
-		getDockingManager().addFrame(getFrame(MTFrame.CAMPAIGN));
-		getDockingManager().addFrame(getFrame(MTFrame.SELECTION));
-		getDockingManager().addFrame(getFrame(MTFrame.IMPERSONATED));
-
-		try {
-			getDockingManager().loadInitialLayout(MapToolFrame.class.getClassLoader().getResourceAsStream(INITIAL_LAYOUT_XML));
-		} catch (ParserConfigurationException | SAXException | IOException e) {
-			MapTool.showError("msg.error.layoutParse", e);
-		}
-		getDockingManager().loadLayoutDataFromFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
-	}
+	// private void configureDocking() {
+	// initializeFrames();
+	//
+	// getDockingManager().setProfileKey(DOCKING_PROFILE_NAME);
+	// getDockingManager().setOutlineMode(com.jidesoft.docking.DockingManager.PARTIAL_OUTLINE_MODE);
+	// getDockingManager().setUsePref(false);
+	//
+	// getDockingManager().getWorkspace().setAcceptDockableFrame(false);
+	//
+	// // Main panel
+	// getDockingManager().getWorkspace().add(rendererBorderPanel);
+	//
+	// // Docked frames
+	// getDockingManager().addFrame(getFrame(MTFrame.CONNECTIONS));
+	// getDockingManager().addFrame(getFrame(MTFrame.TOKEN_TREE));
+	// getDockingManager().addFrame(getFrame(MTFrame.INITIATIVE));
+	// getDockingManager().addFrame(getFrame(MTFrame.IMAGE_EXPLORER));
+	// getDockingManager().addFrame(getFrame(MTFrame.DRAW_TREE));
+	// getDockingManager().addFrame(getFrame(MTFrame.CHAT));
+	// getDockingManager().addFrame(getFrame(MTFrame.LOOKUP_TABLES));
+	// getDockingManager().addFrame(getFrame(MTFrame.GLOBAL));
+	// getDockingManager().addFrame(getFrame(MTFrame.CAMPAIGN));
+	// getDockingManager().addFrame(getFrame(MTFrame.SELECTION));
+	// getDockingManager().addFrame(getFrame(MTFrame.IMPERSONATED));
+	//
+	// try {
+	// getDockingManager().loadInitialLayout(MapToolFrame.class.getClassLoader().getResourceAsStream(INITIAL_LAYOUT_XML));
+	// } catch (ParserConfigurationException | SAXException | IOException e) {
+	// MapTool.showError("msg.error.layoutParse", e);
+	// }
+	// getDockingManager().loadLayoutDataFromFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
+	// }
 
 	public DockableFrame getFrame(MTFrame frame) {
 		return frameMap.get(frame);
 	}
 
-	private void initializeFrames() {
-		frameMap.put(MTFrame.CONNECTIONS, createDockingFrame(MTFrame.CONNECTIONS, new JScrollPane(connectionPanel), new ImageIcon(AppStyle.connectionsImage)));
-		frameMap.put(MTFrame.TOKEN_TREE, createDockingFrame(MTFrame.TOKEN_TREE, new JScrollPane(tokenTreePanel), new ImageIcon(AppStyle.mapExplorerImage)));
-		frameMap.put(MTFrame.IMAGE_EXPLORER, createDockingFrame(MTFrame.IMAGE_EXPLORER, assetPanel, new ImageIcon(AppStyle.resourceLibraryImage)));
-		frameMap.put(MTFrame.DRAW_TREE, createDockingFrame(MTFrame.DRAW_TREE, new JScrollPane(createDrawTreePanel()), new ImageIcon(AppStyle.mapExplorerImage)));
-		frameMap.put(MTFrame.CHAT, createDockingFrame(MTFrame.CHAT, commandPanel, new ImageIcon(AppStyle.chatPanelImage)));
-		frameMap.put(MTFrame.LOOKUP_TABLES, createDockingFrame(MTFrame.LOOKUP_TABLES, getLookupTablePanel(), new ImageIcon(AppStyle.tablesPanelImage)));
-		frameMap.put(MTFrame.INITIATIVE, createDockingFrame(MTFrame.INITIATIVE, initiativePanel, new ImageIcon(AppStyle.initiativePanelImage)));
+	// private void initializeFrames() {
+	// frameMap.put(MTFrame.CONNECTIONS, createDockingFrame(MTFrame.CONNECTIONS, new JScrollPane(connectionPanel), new ImageIcon(AppStyle.connectionsImage)));
+	// frameMap.put(MTFrame.TOKEN_TREE, createDockingFrame(MTFrame.TOKEN_TREE, new JScrollPane(tokenTreePanel), new ImageIcon(AppStyle.mapExplorerImage)));
+	// frameMap.put(MTFrame.IMAGE_EXPLORER, createDockingFrame(MTFrame.IMAGE_EXPLORER, assetPanel, new ImageIcon(AppStyle.resourceLibraryImage)));
+	// frameMap.put(MTFrame.DRAW_TREE, createDockingFrame(MTFrame.DRAW_TREE, new JScrollPane(createDrawTreePanel()), new ImageIcon(AppStyle.mapExplorerImage)));
+	// frameMap.put(MTFrame.CHAT, createDockingFrame(MTFrame.CHAT, commandPanel, new ImageIcon(AppStyle.chatPanelImage)));
+	// frameMap.put(MTFrame.LOOKUP_TABLES, createDockingFrame(MTFrame.LOOKUP_TABLES, getLookupTablePanel(), new ImageIcon(AppStyle.tablesPanelImage)));
+	// frameMap.put(MTFrame.INITIATIVE, createDockingFrame(MTFrame.INITIATIVE, initiativePanel, new ImageIcon(AppStyle.initiativePanelImage)));
+	//
+	// JScrollPane campaign = scrollPaneFactory(campaignPanel);
+	// JScrollPane global = scrollPaneFactory(globalPanel);
+	// JScrollPane selection = scrollPaneFactory(selectionPanel);
+	// JScrollPane impersonate = scrollPaneFactory(impersonatePanel);
+	// frameMap.put(MTFrame.GLOBAL, createDockingFrame(MTFrame.GLOBAL, global, new ImageIcon(AppStyle.globalPanelImage)));
+	// frameMap.put(MTFrame.CAMPAIGN, createDockingFrame(MTFrame.CAMPAIGN, campaign, new ImageIcon(AppStyle.campaignPanelImage)));
+	// frameMap.put(MTFrame.SELECTION, createDockingFrame(MTFrame.SELECTION, selection, new ImageIcon(AppStyle.selectionPanelImage)));
+	// frameMap.put(MTFrame.IMPERSONATED, createDockingFrame(MTFrame.IMPERSONATED, impersonate, new ImageIcon(AppStyle.impersonatePanelImage)));
+	// }
 
-		JScrollPane campaign = scrollPaneFactory(campaignPanel);
-		JScrollPane global = scrollPaneFactory(globalPanel);
-		JScrollPane selection = scrollPaneFactory(selectionPanel);
-		JScrollPane impersonate = scrollPaneFactory(impersonatePanel);
-		frameMap.put(MTFrame.GLOBAL, createDockingFrame(MTFrame.GLOBAL, global, new ImageIcon(AppStyle.globalPanelImage)));
-		frameMap.put(MTFrame.CAMPAIGN, createDockingFrame(MTFrame.CAMPAIGN, campaign, new ImageIcon(AppStyle.campaignPanelImage)));
-		frameMap.put(MTFrame.SELECTION, createDockingFrame(MTFrame.SELECTION, selection, new ImageIcon(AppStyle.selectionPanelImage)));
-		frameMap.put(MTFrame.IMPERSONATED, createDockingFrame(MTFrame.IMPERSONATED, impersonate, new ImageIcon(AppStyle.impersonatePanelImage)));
-	}
+	// private JScrollPane scrollPaneFactory(JPanel panel) {
+	// JScrollPane pane = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+	// pane.getViewport().setBorder(null);
+	// return pane;
+	// }
 
-	private JScrollPane scrollPaneFactory(JPanel panel) {
-		JScrollPane pane = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		pane.getViewport().setBorder(null);
-		return pane;
-	}
-
-	private static DockableFrame createDockingFrame(MTFrame mtFrame, Component component, Icon icon) {
-		DockableFrame frame = new DockableFrame(mtFrame.name(), icon);
-		frame.add(component);
-		frame.addDockableFrameListener(new MapToolDockListener());
-		return frame;
-	}
+	// private static DockableFrame createDockingFrame(MTFrame mtFrame, Component component, Icon icon) {
+	// DockableFrame frame = new DockableFrame(mtFrame.name(), icon);
+	// frame.add(component);
+	// frame.addDockableFrameListener(new MapToolDockListener());
+	// return frame;
+	// }
 
 	public LookupTablePanel getLookupTablePanel() {
 		if (lookupTablePanel == null) {
@@ -1249,6 +1250,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	public DrawablesPanel getDrawablesPanel() {
 		return drawablesPanel;
+	}
+
+	public JComponent getDrawablesTreePanel() {
+		return drawTreePanel;
 	}
 
 	public void addAssetRoot(File rootDir) {

@@ -10,17 +10,29 @@
 
 <MenuBar xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool_fx.controller.MenuBar_Controller">
    <menus>
-      <Menu mnemonicParsing="false" text="%menu.file">
+      <Menu text="%menu.file">
          <items>
-            <MenuItem mnemonicParsing="false" text="%action.newCampaign" />
-            <MenuItem fx:id="openCampaignMenuItem" mnemonicParsing="false" onAction="#openCampaign" text="%action.loadCampaign" />
-            <MenuItem mnemonicParsing="false" text="%action.saveCampaign" />
-            <MenuItem mnemonicParsing="false" text="%action.saveCampaignAs" />
-            <MenuItem mnemonicParsing="false" text="%action.saveMessageHistory" />
+            <MenuItem text="%action.newCampaign" />
+            <MenuItem fx:id="openCampaignMenuItem" onAction="#openCampaign" text="%action.loadCampaign">
+               <accelerator>
+                  <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
+               </accelerator></MenuItem>
+            <MenuItem text="%action.saveCampaign">
+               <accelerator>
+                  <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
+               </accelerator></MenuItem>
+            <MenuItem text="%action.saveCampaignAs">
+               <accelerator>
+                  <KeyCodeCombination alt="UP" code="A" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
+               </accelerator></MenuItem>
+            <MenuItem text="%action.saveMessageHistory" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <Menu mnemonicParsing="false" text="%menu.export">
+            <Menu text="%menu.export">
                <items>
-                  <MenuItem mnemonicParsing="false" text="%action.exportScreenShot" />
+                  <MenuItem mnemonicParsing="false" text="%action.exportScreenShot">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="DOWN" shortcut="DOWN" />
+                     </accelerator></MenuItem>
                   <MenuItem mnemonicParsing="false" text="%action.exportScreenShotAs" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem mnemonicParsing="false" text="%action.exportCampaignAs" />
@@ -28,19 +40,19 @@
                </items>
             </Menu>
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="%action.addIconSelector" />
+            <MenuItem text="%action.addIconSelector" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" onAction="#startServer" text="%action.serverStart" />
-            <MenuItem mnemonicParsing="false" text="%action.clientConnect" />
-            <MenuItem mnemonicParsing="false" onAction="#clientDisconnect" text="%action.clientDisconnect" />
-            <MenuItem mnemonicParsing="false" text="%action.showConnectionInfo" />
+            <MenuItem onAction="#startServer" text="%action.serverStart" />
+            <MenuItem text="%action.clientConnect" />
+            <MenuItem onAction="#clientDisconnect" text="%action.clientDisconnect" />
+            <MenuItem text="%action.showConnectionInfo" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <Menu mnemonicParsing="false" text="menu.recent" />
+            <Menu disable="true" text="%menu.recent" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="%action.exit" />
+            <MenuItem text="%action.exit" />
          </items>
       </Menu>
-      <Menu mnemonicParsing="false" text="%menu.edit">
+      <Menu text="%menu.edit">
          <items>
             <MenuItem mnemonicParsing="false" text="%action.undoDrawing" />
             <MenuItem mnemonicParsing="false" text="%action.redoDrawing" />
@@ -59,7 +71,7 @@
             <CustomMenuItem mnemonicParsing="false" text="Unspecified Action" />
          </items>
       </Menu>
-      <Menu mnemonicParsing="false" text="%menu.map">
+      <Menu text="%menu.map">
          <items>
             <MenuItem mnemonicParsing="false" text="%action.newMap" />
             <Menu mnemonicParsing="false" text="%menu.QuickMap" />
@@ -86,22 +98,22 @@
             <MenuItem mnemonicParsing="false" text="%action.copyZone" />
          </items>
       </Menu>
-      <Menu mnemonicParsing="false" text="%menu.view">
+      <Menu text="%menu.view">
          <items>
             <MenuItem mnemonicParsing="false" text="Action 1" />
          </items>
       </Menu>
-      <Menu mnemonicParsing="false" text="%menu.tools">
+      <Menu text="%menu.tools">
          <items>
             <MenuItem mnemonicParsing="false" text="Action 1" />
          </items>
       </Menu>
-      <Menu mnemonicParsing="false" text="%menu.window">
+      <Menu text="%menu.window">
          <items>
             <MenuItem mnemonicParsing="false" text="Action 1" />
          </items>
       </Menu>
-      <Menu mnemonicParsing="false" text="%menu.help">
+      <Menu text="%menu.help">
          <items>
             <MenuItem mnemonicParsing="false" text="About MyHelloApp" />
          </items>

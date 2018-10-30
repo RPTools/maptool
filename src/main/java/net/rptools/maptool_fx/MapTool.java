@@ -52,6 +52,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.appender.FileAppender;
+import org.dockfx.DockPane;
 
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
@@ -63,16 +64,16 @@ import io.sentry.event.UserBuilder;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import net.rptools.clientserver.hessian.client.ClientConnection;
@@ -262,8 +263,9 @@ public class MapTool extends Application {
 			log.info("setting MapTool vendor from manifest:  " + vendor);
 		}
 
+		// TODO: Enable later...
 		// Initialize Sentry.io logging
-		Sentry.init();
+		// Sentry.init();
 
 		// Get command line arguments...
 		String[] args = getParameters().getRaw().toArray(new String[0]);
@@ -318,17 +320,19 @@ public class MapTool extends Application {
 
 		log.info("MapTool vendor: " + vendor);
 
+		// TODO: Enable later...
 		// Set MapTool version, release, os, & environment in Sentry
-		SentryClient sentryClient = Sentry.getStoredClient();
-		sentryClient.setRelease(AppUpdate.getCommitSHA());
-
-		if (sentryClient.getRelease() == null)
-			sentryClient.setEnvironment("Development");
-
-		sentryClient.addTag("os", System.getProperty("os.name"));
-		sentryClient.addTag("version", MapTool.getVersion());
-
-		Sentry.setStoredClient(sentryClient);
+		// SentryClient sentryClient = Sentry.getStoredClient();
+		// sentryClient.setRelease(AppUpdate.getCommitSHA());
+		//
+		// if (sentryClient.getRelease() == null) {
+		// sentryClient.setEnvironment("Development");
+		// }
+		//
+		// sentryClient.addTag("os", System.getProperty("os.name"));
+		// sentryClient.addTag("version", MapTool.getVersion());
+		//
+		// Sentry.setStoredClient(sentryClient);
 
 		if (listMacros) {
 			String logOutput = null;
@@ -400,73 +404,27 @@ public class MapTool extends Application {
 			}
 		});
 
+		primaryStage.show();
+		setupDockFX();
+	    
 		Platform.runLater(() -> {
-			// initialize();
-			Platform.runLater(() -> {
-				mapTool_Controller.setDefaultPanes(clientFrame);
-				primaryStage.show();
-			});
-			Platform.runLater(() -> postInitialize());
+			mapTool_Controller.setDefaultPanes(clientFrame);
+			mapTool_Controller.setIntialTitledPane();
+			postInitialize();
+
+			// Now that the Application is loaded, check for new release...
+			AppUpdate.gitHubReleases();
+
 		});
-
-		// EventQueue.invokeLater(new Runnable() {
-		// public void run() {
-		// initialize();
-		// EventQueue.invokeLater(new Runnable() {
-		// public void run() {
-		// mapTool_Controller.setDefaultPanes(clientFrame);
-		// primaryStage.show();
-		// EventQueue.invokeLater(new Runnable() {
-		// public void run() {
-		// postInitialize();
-		// }
-		// });
-		// }
-		// });
-		// }
-		// });
-
-		// EventQueue.invokeLater(new Runnable() {
-		// public void run() {
-		// initialize();
-		//
-		// EventQueue.invokeLater(new Runnable() {
-		// public void run() {
-		// clientFrame.setVisible(true);
-		//
-		// // Add a LibGDX App/window for testing
-		// // if (startLibGDX) {
-		// // SwingUtilities.invokeLater(new Runnable() {
-		// // public void run() {
-		// // MapToolLwjglApplication = new DesktopLauncher(clientFrame);
-		// // libgdxLoaded = true;
-		// // }
-		// // });
-		// // }
-		//
-		// EventQueue.invokeLater(new Runnable() {
-		// public void run() {
-		// postInitialize();
-		// }
-		// });
-		// }
-		// });
-		// }
-		// });
-		// new Thread(new HeapSpy()).start();
-
-		// old // initialize();
-		// MapTool_Controller.setMapToolFrameNode(clientFrame);
-		// primaryStage.show();
-		// old // postInitialize();
-
-		// postInitialize(); // OK HERE?
-		// Now that the Application is loaded, check for new release...
-		AppUpdate.gitHubReleases();
 	}
 
-	public static void main(String[] args) {
-		launch(args);
+	private void setupDockFX() {
+		var dockPane = new DockPane();
+		
+		// create a default test node for the center of the dock area
+	    var tabs = new TabPane();
+	    var htmlEditor = new HTMLEditor();
+	    htmlEditor.setHtmlText("Hello MapTool");
 	}
 
 	public static String getVersion() {
@@ -1563,11 +1521,11 @@ public class MapTool extends Application {
 		getAutoSaveManager().check();
 		getAutoSaveManager().restart();
 
-		taskbarFlasher = new TaskBarFlasher(clientFrame);
+		// taskbarFlasher = new TaskBarFlasher(clientFrame);
 
 		// Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
 		// so after frame is all done loading we sync them back up.
-		MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
+		// MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
 	}
 
 	/**
@@ -1698,5 +1656,9 @@ public class MapTool extends Application {
 			return ((FileAppender) appender).getFileName();
 		else
 			return "NOT_CONFIGURED";
+	}
+	
+	public static void main(String[] args) {
+		launch(args);
 	}
 }

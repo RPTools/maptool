@@ -14,28 +14,19 @@
          <items>
             <AnchorPane>
                <children>
-                  <Accordion AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <Accordion fx:id="leftAccordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <panes>
-                      <TitledPane fx:id="assetTitledPane" text="%panel.Library">
-                        <content>
-                          <AnchorPane fx:id="assetAnchorPane" minHeight="0.0" minWidth="0.0" />
-                        </content>
-                      </TitledPane>
-                      <TitledPane fx:id="mapExplorerTitledPane" text="%panel.MapExplorer">
-                        <content>
-                          <AnchorPane fx:id="mapExplorerAnchorPane" minHeight="0.0" minWidth="0.0" />
-                        </content>
-                      </TitledPane>
-                      <TitledPane fx:id="chatTitledPane" text="%panel.Chat">
-                        <content>
-                          <AnchorPane fx:id="chatAnchorPane" minHeight="0.0" minWidth="0.0" />
-                        </content>
-                      </TitledPane>
-                        <TitledPane fx:id="impersonatedTitledPane" layoutX="10.0" layoutY="60.0" text="%panel.Impersonate">
-                           <content>
-                              <AnchorPane fx:id="impersonatedAnchorPane" minHeight="0.0" minWidth="0.0" />
-                           </content>
-                        </TitledPane>
+                        <TitledPane fx:id="connectionsTitledPane" layoutX="10.0" layoutY="85.0" text="%panel.Connections" />
+                      <TitledPane fx:id="mapExplorerTitledPane" text="%panel.MapExplorer" />
+                        <TitledPane fx:id="drawExplorerTitledPane" layoutX="10.0" layoutY="110.0" text="%panel.DrawExplorer" />
+                        <TitledPane fx:id="initiativeTitledPane" layoutX="10.0" layoutY="982.0" text="%panel.Initiative" />
+                      <TitledPane fx:id="resourceLibraryTitledPane" text="%panel.Library" />
+                      <TitledPane fx:id="chatTitledPane" text="%panel.Chat" />
+                        <TitledPane fx:id="tablesTitledPane" layoutX="10.0" layoutY="982.0" text="%panel.Tables" />
+                        <TitledPane fx:id="globalTitledPane" layoutX="10.0" layoutY="982.0" text="%panel.Global" />
+                        <TitledPane fx:id="campaignTitledPane" text="%panel.Campaign" />
+                        <TitledPane fx:id="selectedTitledPane" text="%panel.Selected" />
+                        <TitledPane fx:id="impersonatedTitledPane" layoutX="10.0" layoutY="60.0" text="%panel.Impersonate" />
                     </panes>
                   </Accordion>
                </children>

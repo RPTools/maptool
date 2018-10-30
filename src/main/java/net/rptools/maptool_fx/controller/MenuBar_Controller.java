@@ -10,8 +10,6 @@ package net.rptools.maptool_fx.controller;
 
 import java.io.File;
 
-import javax.swing.JFileChooser;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,6 +18,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool_fx.MapTool;
 
@@ -42,6 +41,8 @@ public class MenuBar_Controller {
 
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(I18N.getText("msg.title.loadCampaign"));
+		fileChooser.setInitialDirectory(AppPreferences.getLoadDir());
+
 		File campaignFile = fileChooser.showOpenDialog(null);
 		AppActions.loadCampaign(campaignFile);
 
