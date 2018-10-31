@@ -253,7 +253,8 @@ dependencies {
 	implementation group: 'org.jfxtras', name: 'jfxtras-controls', version: '9.0-r1'
 
 	// Using jitpack.io to get from repo...
-	implementation 'com.github.RobertBColton:DockFX:0.4b'
+	//implementation 'com.github.RobertBColton:DockFX:0.4b'
+	//implementation 'com.github.ClearControl:DockFX:master'
 
 	// Shapes! https://github.com/aalmiray/jsilhouette
 	// compile 'org.kordamp.jsilhouette:jsilhouette-javafx:0.3.0'

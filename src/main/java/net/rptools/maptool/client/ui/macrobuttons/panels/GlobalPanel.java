@@ -12,12 +12,14 @@ import java.util.List;
 
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AbstractButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool_fx.MapTool;
 
 public class GlobalPanel extends AbstractMacroPanel {
 	public GlobalPanel() {
 		super();
+		setName(I18N.getString("panel.Global"));
 		setPanelClass("GlobalPanel");
 		addMouseListener(this);
 		init();

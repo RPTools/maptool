@@ -159,6 +159,7 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 	 * Setup the menu
 	 */
 	public InitiativePanel() {
+		setName(I18N.getString("panel.Initiative"));
 
 		// Build the form and add it's component
 		setLayout(new BorderLayout());
@@ -169,9 +170,9 @@ public class InitiativePanel extends JPanel implements PropertyChangeListener, M
 		// JIDE doesn't fix this until 3.7.3 which isn't available via Maven. Seems only this "JideSplitButton" has the issue
 		// Workaround is to install a different LAF, create the button, then restore the LAF back.
 		// https://www.jidesoft.com/forum/viewtopic.php?f=18&t=10807
-		LookAndFeelFactory.installJideExtension(LookAndFeelFactory.VSNET_STYLE_WITHOUT_MENU);
+		// LookAndFeelFactory.installJideExtension(LookAndFeelFactory.VSNET_STYLE_WITHOUT_MENU);
 		// menuButton = new JideSplitButton(I18N.getText("initPanel.menuButton"));
-		LookAndFeelFactory.installJideExtension(LookAndFeelFactory.XERTO_STYLE);
+		// LookAndFeelFactory.installJideExtension(LookAndFeelFactory.XERTO_STYLE);
 
 		// panel.add(menuButton, new CellConstraints(2, 2));
 		// JideButton rButton = new JideButton(RESET_COUNTER_ACTION);

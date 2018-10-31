@@ -67,6 +67,7 @@ import net.rptools.maptool.client.ui.chat.ChatProcessor;
 import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
@@ -102,6 +103,7 @@ public class CommandPanel extends JPanel implements Observer {
 	private GUID identityGUID;
 
 	public CommandPanel() {
+		setName(I18N.getString("panel.Chat"));
 		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createLineBorder(Color.gray));
 

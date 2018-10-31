@@ -61,6 +61,7 @@ public abstract class AbstractMacroPanel extends JPanel implements Scrollable, M
 	}
 
 	public int getAvailableWidth() {
+		// Dimension size = new Dimension(10, 10); // FIXME: hard coding for testing
 		Dimension size = getParent().getSize();
 		Insets insets = getInsets();
 		return size.width - insets.left - insets.right;

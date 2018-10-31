@@ -43,6 +43,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
 
 	public LookupTablePanel() {
 		super("net/rptools/maptool/client/ui/forms/lookupTablePanel.xml");
+		setName(I18N.getString("panel.Tables"));
 		panelInit();
 	}
 

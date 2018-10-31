@@ -43,6 +43,7 @@ public class SelectionPanel extends AbstractMacroPanel {
 	public SelectionPanel() {
 		// TODO: refactoring reminder
 		setPanelClass("SelectionPanel");
+		setName(I18N.getString("panel.Selected"));
 		init(new ArrayList<Token>()); // when initially loading MT, the CurrentZoneRenderer isn't ready yet; just send an empty list
 	}
 

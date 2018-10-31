@@ -70,6 +70,7 @@ public class AssetPanel extends JComponent {
 	}
 
 	public AssetPanel(String controlName, AssetPanelModel model, int splitPaneDirection) {
+		setName(I18N.getString("panel.Library"));
 		assetPanelModel = model;
 		model.addImageUpdateObserver(this);
 

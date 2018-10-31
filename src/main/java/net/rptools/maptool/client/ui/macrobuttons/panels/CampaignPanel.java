@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AbstractButtonGroup;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool_fx.MapTool;
 
@@ -19,6 +20,7 @@ public class CampaignPanel extends AbstractMacroPanel {
 
 	public CampaignPanel() {
 		setPanelClass("CampaignPanel");
+		setName(I18N.getString("panel.Campaign"));
 		addMouseListener(this);
 		init();
 	}

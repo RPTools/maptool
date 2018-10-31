@@ -893,6 +893,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	private JComponent createDrawTreePanel() {
 		final JTree tree = new JTree();
+
 		drawablesPanel = new DrawablesPanel();
 		drawPanelTreeModel = new DrawPanelTreeModel(tree);
 		tree.setModel(drawPanelTreeModel);
@@ -900,6 +901,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		splitPane.setName(I18N.getString("panel.DrawExplorer"));
 		splitPane.setContinuousLayout(true);
 
 		splitPane.setTopComponent(new JScrollPane(tree));
@@ -1005,6 +1007,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	private JComponent createTokenTreePanel() {
 		final JTree tree = new JTree();
+		tree.setName(I18N.getString("panel.MapExplorer"));
 		tokenPanelTreeModel = new TokenPanelTreeModel(tree);
 		tree.setModel(tokenPanelTreeModel);
 		tree.setCellRenderer(new TokenPanelTreeCellRenderer());

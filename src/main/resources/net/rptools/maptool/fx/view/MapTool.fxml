@@ -1,42 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Accordion?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.BorderPane?>
 
-<VBox fx:id="rootContainer" prefHeight="1024.0" prefWidth="1600.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool_fx.controller.MapTool_Controller">
-  <children>
+
+<BorderPane fx:id="rootPane" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool_fx.controller.MapTool_Controller">
+   <top>
       <fx:include source="MenuBar.fxml" />
-      <SplitPane dividerPositions="0.25" VBox.vgrow="ALWAYS">
-         <items>
-            <AnchorPane>
-               <children>
-                  <Accordion fx:id="leftAccordion" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <panes>
-                        <TitledPane fx:id="connectionsTitledPane" layoutX="10.0" layoutY="85.0" text="%panel.Connections" />
-                      <TitledPane fx:id="mapExplorerTitledPane" text="%panel.MapExplorer" />
-                        <TitledPane fx:id="drawExplorerTitledPane" layoutX="10.0" layoutY="110.0" text="%panel.DrawExplorer" />
-                        <TitledPane fx:id="initiativeTitledPane" layoutX="10.0" layoutY="982.0" text="%panel.Initiative" />
-                      <TitledPane fx:id="resourceLibraryTitledPane" text="%panel.Library" />
-                      <TitledPane fx:id="chatTitledPane" text="%panel.Chat" />
-                        <TitledPane fx:id="tablesTitledPane" layoutX="10.0" layoutY="982.0" text="%panel.Tables" />
-                        <TitledPane fx:id="globalTitledPane" layoutX="10.0" layoutY="982.0" text="%panel.Global" />
-                        <TitledPane fx:id="campaignTitledPane" text="%panel.Campaign" />
-                        <TitledPane fx:id="selectedTitledPane" text="%panel.Selected" />
-                        <TitledPane fx:id="impersonatedTitledPane" layoutX="10.0" layoutY="60.0" text="%panel.Impersonate" />
-                    </panes>
-                  </Accordion>
-               </children>
-            </AnchorPane>
-          <AnchorPane fx:id="mainAnchorPane" maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0">
-            <children>
-                  <StackPane fx:id="mainStackPane" style="-fx-background-color: black;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            </children>
-          </AnchorPane>
-         </items>
-      </SplitPane>
-  </children>
-</VBox>
+   </top>
+</BorderPane>

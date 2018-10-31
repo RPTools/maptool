@@ -32,6 +32,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
 
 	public ImpersonatePanel() {
 		setPanelClass("ImpersonatePanel");
+		setName(I18N.getString("panel.Impersonate"));
 		MapTool.getEventDispatcher().addListener(this,
 				MapTool.ZoneEvent.Activated);
 	}

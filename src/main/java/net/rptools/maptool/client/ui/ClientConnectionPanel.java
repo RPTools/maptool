@@ -18,6 +18,7 @@ import javax.swing.ListSelectionModel;
 import net.rptools.lib.swing.PopupListener;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.PlayerListModel;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool_fx.MapTool;
 
 /**
@@ -32,6 +33,8 @@ import net.rptools.maptool_fx.MapTool;
  */
 public class ClientConnectionPanel extends JList {
 	public ClientConnectionPanel() {
+		setName(I18N.getString("panel.Connections"));
+
 		setModel(new PlayerListModel(MapTool.getPlayerList()));
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		// setCellRenderer(new DefaultListCellRenderer());

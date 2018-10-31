@@ -52,7 +52,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.appender.FileAppender;
+import org.dockfx.DockNode;
 import org.dockfx.DockPane;
+import org.dockfx.DockPos;
+import org.dockfx.demo.DockFX;
 
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
@@ -69,9 +72,18 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Separator;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
@@ -208,6 +220,8 @@ public class MapTool extends Application {
 	public static boolean libgdxLoaded = false;
 
 	private MapTool_Controller mapTool_Controller;
+
+	private DockPane dockPane;
 
 	@Override
 	public void init() throws Exception {
@@ -388,10 +402,10 @@ public class MapTool extends Application {
 
 		// load the FX UI now...
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(MAPTOOL_FXML), ResourceBundle.getBundle(AppConstants.MAP_TOOL_BUNDLE));
-		VBox root = fxmlLoader.load();
+		BorderPane rootPane = fxmlLoader.load();
 		mapTool_Controller = (MapTool_Controller) fxmlLoader.getController();
 
-		Scene scene = new Scene(root);
+		Scene scene = new Scene(rootPane);
 		primaryStage.setTitle(AppConstants.APP_NAME + AppConstants.APP_TAG_LINE);
 		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream(AppConstants.MAP_TOOL_ICON)));
 		primaryStage.setScene(scene);
@@ -404,27 +418,21 @@ public class MapTool extends Application {
 			}
 		});
 
+		dockPane = new DockPane();
+
 		primaryStage.show();
-		setupDockFX();
 
 		Platform.runLater(() -> {
-			mapTool_Controller.setDefaultPanes(clientFrame);
-			mapTool_Controller.setIntialTitledPane();
+			mapTool_Controller.setDefaultPanes(clientFrame, dockPane);
 			postInitialize();
+
+			Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
+			DockPane.initializeDefaultUserAgentStylesheet();
 
 			// Now that the Application is loaded, check for new release...
 			AppUpdate.gitHubReleases();
 
 		});
-	}
-
-	private void setupDockFX() {
-		// var dockPane = new DockPane();
-		//
-		// // create a default test node for the center of the dock area
-		// var tabs = new TabPane();
-		// var htmlEditor = new HTMLEditor();
-		// htmlEditor.setHtmlText("Hello MapTool");
 	}
 
 	public static String getVersion() {
