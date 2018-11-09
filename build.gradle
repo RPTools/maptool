@@ -114,7 +114,13 @@ compileJava {
 			'--add-exports', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
 			'--add-exports', 'javafx.graphics/com.sun.prism.paint=ALL-UNNAMED',
 			'--add-exports', 'javafx.graphics/com.sun.scenario.effect=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.text=ALL-UNNAMED'
+			'--add-exports', 'javafx.graphics/com.sun.javafx.text=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.iio=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.scenario.effect.impl.prism=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.css=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED',
+			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED',
+			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control.inputmap=ALL-UNNAMED'
 		]
 	}
 }
@@ -144,7 +150,13 @@ run {
 			'--add-exports', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
 			'--add-exports', 'javafx.graphics/com.sun.prism.paint=ALL-UNNAMED',
 			'--add-exports', 'javafx.graphics/com.sun.scenario.effect=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.text=ALL-UNNAMED'
+			'--add-exports', 'javafx.graphics/com.sun.javafx.text=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.iio=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.scenario.effect.impl.prism=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.css=ALL-UNNAMED',
+			'--add-exports', 'javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED',
+			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED',
+			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control.inputmap=ALL-UNNAMED'
 		]
 	}
 
@@ -255,7 +267,7 @@ dependencies {
 	// Using jitpack.io to get from repo...
 	//implementation 'com.github.RobertBColton:DockFX:0.4b'
 	//implementation 'com.github.ClearControl:DockFX:master'
-	implementation 'com.github.JamzTheMan:DockFX:java-11-SNAPSHOT'
+	implementation 'com.github.JamzTheMan:DockFX:MapTool-SNAPSHOT'
 	
 	// Shapes! https://github.com/aalmiray/jsilhouette
 	// compile 'org.kordamp.jsilhouette:jsilhouette-javafx:0.3.0'
