@@ -39,7 +39,9 @@ test.ignoreFailures = true
 
 // Used by gradle assemble & run tasks
 // mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
-mainClassName = 'net.rptools.maptool_fx.MapTool'
+// mainClassName = 'net.rptools.maptool_fx.MapTool'
+mainClassName = 'net.rptools.maptool_fx.Launch_MapTool'
+
 applicationDefaultJvmArgs = ["-Xss4M"]
 
 // OS needed for proper OpenJFX dependency management
@@ -87,79 +89,7 @@ ext {
 	println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor + " for " + currentOS
 }
 
-compileJava {
-	options.warnings = false
-
-	doFirst {
-		options.compilerArgs = [
-			'--module-path', classpath.asPath,
-			'--add-modules', 'javafx.controls',
-			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED',
-			'--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
-			'--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED',
-			'--add-exports', 'javafx.base/com.sun.javafx=ALL-UNNAMED',
-			'--add-exports', 'javafx.base/com.sun.javafx.logging=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.geom.transform=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.prism=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.glass.utils=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.font=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.scene.input=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.prism.paint=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.scenario.effect=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.text=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.iio=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.scenario.effect.impl.prism=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.css=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED',
-			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED',
-			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control.inputmap=ALL-UNNAMED'
-		]
-	}
-}
-
 run {
-	doFirst {
-		jvmArgs = [
-			'--module-path', "C:/Program Files/Java/javafx-sdk-11/lib",
-			'--add-modules', 'javafx.controls',
-			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED',
-			'--add-exports', 'javafx.base/com.sun.javafx.reflect=ALL-UNNAMED',
-			'--add-exports', 'javafx.base/com.sun.javafx.beans=ALL-UNNAMED',
-			'--add-exports', 'javafx.base/com.sun.javafx=ALL-UNNAMED',
-			'--add-exports', 'javafx.base/com.sun.javafx.logging=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.geom.transform=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.prism=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.glass.utils=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.font=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.scene.input=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.prism.paint=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.scenario.effect=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.text=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.iio=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.scenario.effect.impl.prism=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.css=ALL-UNNAMED',
-			'--add-exports', 'javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED',
-			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED',
-			'--add-exports', 'javafx.controls/com.sun.javafx.scene.control.inputmap=ALL-UNNAMED'
-		]
-	}
-
 	args = [ '-v='+version ]
 	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development" ]
 
@@ -242,6 +172,8 @@ dependencies {
 	// Ug. stupid but doing this for now so it will compile...
 	implementation files('lib/packager.jar')
 
+	// TODO: Ultimately need mutli platform so we need to add all 3 OS versions of FX for the JAR (or have OS specific JARs)
+	// Can we specify dependencies only when building JAR in gradle so the JAR includes all 3? Or create a second UberJar task to include specific JARs?)
 	// https://mvnrepository.com/artifact/org.openjfx/javafx-base
 	implementation group: 'org.openjfx', name: 'javafx-base', version: '11', classifier: platform
 	// https://mvnrepository.com/artifact/org.openjfx/javafx-controls
@@ -351,7 +283,7 @@ dependencies {
 	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
 
 	// For syntax highlighting in macro editor
-	implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '2.6.1'	// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
+	implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '2.6.1'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
 	implementation group: 'com.fifesoft', name: 'rstaui', version: '2.6.1'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
 	implementation group: 'com.fifesoft', name: 'autocomplete', version: '2.6.0'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 
