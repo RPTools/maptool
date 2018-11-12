@@ -200,7 +200,7 @@ dependencies {
 	//implementation 'com.github.RobertBColton:DockFX:0.4b'
 	//implementation 'com.github.ClearControl:DockFX:master'
 	implementation 'com.github.JamzTheMan:DockFX:MapTool-SNAPSHOT'
-	
+
 	// Shapes! https://github.com/aalmiray/jsilhouette
 	// compile 'org.kordamp.jsilhouette:jsilhouette-javafx:0.3.0'
 
