@@ -3,18 +3,18 @@ pull_requests:
   do_not_increment_build_number: true
 skip_non_tags: false
 platform: x64
+stack: jdk 11
 environment:
   matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       JAVA_HOME: C:\Program Files\Java\jdk11
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      stack: jdk 11
 init:
   - cmd: git config --global core.autocrlf true
 build_script:
   - ./gradlew build -x test
 after_build:
-  - ps: if($env:APPVEYOR_REPO_TAG -eq 'True') { ./gradlew deploy } else { echo "Not creating deploy artifacts because this is not a tag build" }
+  - ps: if($env:APPVEYOR_REPO_TAG -eq 'True') { ./gradlew deploy } else { echo "Not creating deploy artifacts because this is not a tagged commit." }
 artifacts:
   - path: build\libs\MapTool-*.jar
     name: MapTool-Jar
