@@ -1,4 +1,5 @@
 language: java
+jdk: openjdk11
 sudo: false
 matrix:
   include:

@@ -6,18 +6,9 @@ platform: x64
 image: 
   - Visual Studio 2017
   - Ubuntu
+stack: jdk 11
 init:
   - cmd: git config --global core.autocrlf true
-install:
-  - sh: echo oracle-java10-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-  - sh: sudo add-apt-repository ppa:linuxuprising/java
-  - sh: sudo apt update
-  - sh: sudo apt install -y oracle-java10-installer
-  - sh: sudo apt install -y oracle-java10-set-default
-  - sh: export JAVA_HOME=/usr/lib/jvm/java-10-oracle
-  - sh: echo java home is $JAVA_HOME
-  - sh: sudo apt install -y fakeroot
-  - ./gradlew -version
 build_script:
   - ./gradlew build -x test
 after_build:
