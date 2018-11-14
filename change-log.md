@@ -1,3 +1,23 @@
+MapTool 1.4.5.4 - _Infused with Nerps!_
+=====
+This is a minor bug release that fixes a few bugs. Please Note: This version uses Oracle JRE v10 still. If you are using the installs, you don't have to do anything. If you are using the JAR, you need to install this yourself. Due to Oracle no longer supporting Java 9/10, you will need to create a free Oracle account and then you can download the JRE from the Archives at https://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase10-4425482.html
+
+Due to technical differences, you can NOT use OpenJDK and you can NOT use any version of Java 11. It HAS to be Oracle JRE v10.
+
+___
+
+Bug Fixes
+-----
+* [#113][i113] - *Macro function getMoveCount() does not return terrain modifier costs*. See issue for full details but basically a new parameter is added so getMoveCount(0, 1) will return movement costs taking into account any Terrain Modifiers.
+* [#108][i108] - *Fix setTokenOpacity to update token for players.*. Token is now updated with opacity effect on the server after setTokenOpacity macro calls.
+* [#92][i92] - *MapTool should default to UTF-8 encoding*. Windows likes to default to it's one file encoding which can cause issues in macros and certain encoded characters. MapTool will now always launch using UTF-8 file encoding! I've also added a 'Encoding Information' section in Gather Debug Info under the help menu to verify what encoding you are using.
+
+[i113]: https://github.com/JamzTheMan/MapTool/issues/113
+[i108]: https://github.com/JamzTheMan/MapTool/issues/108
+[i92]: https://github.com/JamzTheMan/MapTool/issues/92
+
+___
+
 MapTool 1.4.5.3 - _Infused with Nerps!_
 =====
 This is a minor bug release that fixes some annoying bugs.

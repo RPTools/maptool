@@ -72,7 +72,7 @@ ext {
 
 run {
 	args = [ '-v='+version ]
-	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development" ]
+	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8" ]
 
 	if(System.getProperty("exec.args") != null) {
 		args System.getProperty("exec.args").split()
@@ -369,7 +369,8 @@ task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepa
 				"-BlicenseType='GNU AFFERO GENERAL PUBLIC LICENSE'",
 				"-Bcategory=Games",
 				"-Bemail=maptool@nerps.net",
-				"-BuserJvmOptions=-DMAPTOOL_DATADIR\\==.maptool-" + vendor
+				"-BuserJvmOptions=-DMAPTOOL_DATADIR\\==.maptool-" + vendor,
+				"-BuserJvmOptions=-Dfile.encoding\\==UTF-8"
 				//"-BuserJvmOptions=-Xss=4M"
 
 				println commandLine
