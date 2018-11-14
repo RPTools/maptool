@@ -123,19 +123,28 @@ public class TokenMoveFunctions extends AbstractFunction {
 		}
 		if (functionName.equals("getMoveCount")) {
 			boolean useFractionOnly = false;
+			boolean useTerrainModifiers = false;
 
 			if (parameters.size() == 1) {
 				BigDecimal fractionOnly = (BigDecimal) parameters.get(0);
 				useFractionOnly = fractionOnly != null && fractionOnly.equals(BigDecimal.ZERO) ? false : true;
 			}
 
+			if (parameters.size() == 2) {
+				BigDecimal fractionOnly = (BigDecimal) parameters.get(0);
+				useFractionOnly = fractionOnly != null && fractionOnly.equals(BigDecimal.ZERO) ? false : true;
+
+				BigDecimal terrainModifiers = (BigDecimal) parameters.get(1);
+				useTerrainModifiers = terrainModifiers != null && terrainModifiers.equals(BigDecimal.ZERO) ? false : true;
+			}
+
 			if (useFractionOnly) {
-				if (getMovement(tokenInContext, true).equals("0.5"))
+				if (getMovement(tokenInContext, useFractionOnly, useTerrainModifiers).equals("0.5"))
 					return BigDecimal.ONE;
 				else
 					return BigDecimal.ZERO;
 			} else {
-				return getMovement(tokenInContext, false);
+				return getMovement(tokenInContext, useFractionOnly, useTerrainModifiers);
 			}
 		}
 		if (functionName.equals("movedOverToken")) {
@@ -431,7 +440,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 		return null;
 	}
 
-	private String getMovement(final Token source, boolean returnFractionOnly) throws ParserException {
+	private String getMovement(final Token source, boolean returnFractionOnly, boolean useTerrainModifiers) throws ParserException {
 		ZoneWalker walker = null;
 
 		WalkerMetric metric = MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : MapTool.getServerPolicy().getMovementMetric();
@@ -454,6 +463,15 @@ public class TokenMoveFunctions extends AbstractFunction {
 			y = source.getLastPath().getCellPath().get(0).y;
 		} catch (NullPointerException e) {
 			return "0";
+		}
+
+		if (useTerrainModifiers && !returnFractionOnly) {
+			if (source.getLastPath().getLastWaypoint() instanceof CellPoint) {
+				CellPoint cp = (CellPoint) source.getLastPath().getLastWaypoint();
+				double trueDistance = cp.getDistanceTraveled(zone);
+
+				return new BigDecimal(trueDistance).stripTrailingZeros().toPlainString();
+			}
 		}
 
 		if (source.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {

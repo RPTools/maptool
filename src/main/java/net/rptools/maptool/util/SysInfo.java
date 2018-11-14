@@ -16,6 +16,7 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,6 +24,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -147,6 +149,16 @@ public class SysInfo {
 		appendInfo("");
 	}
 
+	private void getEncodingInfo() {
+		appendInfo("==== Encoding Information ====");
+		appendInfo("Default Locale:   " + Locale.getDefault());
+		appendInfo("Default Charset:  " + Charset.defaultCharset());
+		appendInfo("file.encoding:    " + System.getProperty("file.encoding"));
+		appendInfo("sun.jnu.encoding: " + System.getProperty("sun.jnu.encoding"));
+		appendInfo("Default Encoding: " + getEncoding());
+		appendInfo("");
+	}
+
 	private void getOsInfo(Properties p) {
 		Map<String, String> env = System.getenv();
 
@@ -175,12 +187,21 @@ public class SysInfo {
 		getOsInfo(p);
 		getNetworkInterfaces();
 		getLocaleInfo();
+		getEncodingInfo();
 		getDisplayInfo();
 		getIGDs();
 	}
 
 	private void clearInfo() {
 		this.infoTextArea.setText("");
+	}
+
+	private static String getEncoding() {
+		final byte[] bytes = { 'D' };
+		final InputStream inputStream = new ByteArrayInputStream(bytes);
+		final InputStreamReader reader = new InputStreamReader(inputStream);
+		final String encoding = reader.getEncoding();
+		return encoding;
 	}
 
 	private void getNetworkInterfaces() {

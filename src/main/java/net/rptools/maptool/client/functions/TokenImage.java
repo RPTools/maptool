@@ -97,8 +97,10 @@ public class TokenImage extends AbstractFunction {
 					throw new ParserException(I18N.getText("macro.function.general.noImpersonated", functionName));
 				}
 			}
-
-			return token.setTokenOpacity(Float.parseFloat(args.get(0).toString()));
+			float newOpacity = token.setTokenOpacity(Float.parseFloat(args.get(0).toString()));
+			zone.putToken(token);
+			MapTool.serverCommand().putToken(zone.getId(), token);
+			return newOpacity;
 		}
 
 		if (functionName.equals("getTokenOpacity")) {
