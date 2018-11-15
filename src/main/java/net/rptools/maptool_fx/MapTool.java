@@ -221,6 +221,10 @@ public class MapTool extends Application {
 
 	private MapTool_Controller mapTool_Controller;
 
+	public MapTool_Controller getMapTool_Controller() {
+		return mapTool_Controller;
+	}
+
 	private DockPane dockPane;
 
 	@Override
@@ -424,6 +428,8 @@ public class MapTool extends Application {
 
 		Platform.runLater(() -> {
 			mapTool_Controller.setDefaultPanes(clientFrame, dockPane);
+			// mapTool_Controller.getMenuBarController().setClientFrame(clientFrame);
+			// mapTool_Controller.getMenuBarController().setDockPane(dockPane);
 			postInitialize();
 
 			Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);

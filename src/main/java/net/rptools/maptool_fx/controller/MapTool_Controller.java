@@ -9,6 +9,7 @@
 package net.rptools.maptool_fx.controller;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 import javax.swing.JComponent;
@@ -22,56 +23,66 @@ import org.dockfx.DockPos;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import net.rptools.maptool.client.ui.MapToolFrame;
-import net.rptools.maptool.language.I18N;
 
 public class MapTool_Controller {
-	private static final String CONNECTIONS_ICON = "http://chittagongit.com/images/network-connect-icon/network-connect-icon-20.jpg";
-	private static final String MAP_EXPLORER_ICON = "https://cdn0.iconfinder.com/data/icons/map-navigation-filled/64/Map_Navigation_Dirrection_Road-50_Location_GPS-512.png";
-	private static final String DRAW_EXPLORER_ICON = "https://img.clipartxtras.com/c04de3a05a430c9fcb2f08f3d9ba601d_pencil-and-ruler-icon-free-icons-download-ruler-and-pencil-clipart_256-256.png";
-	private static final String INITIATIVE_ICON = "https://orig00.deviantart.net/49f4/f/2007/207/7/a/d20_icon_de_la_gartoon_by_turtlegirlman.png";
-	private static final String RESOURCE_LIBRARY_ICON = "https://tos.neet.tv/images/payment/icon_item_expbookx4.png";
-	private static final String CHAT_ICON = "https://cdn.pixabay.com/photo/2013/07/13/12/10/chat-159319_640.png";
-	private static final String TABLES_ICON = "https://cdn.pixabay.com/photo/2012/04/11/10/14/insert-27273_640.png";
-	private static final String GLOBAL_ICON = "https://cdn0.iconfinder.com/data/icons/engineers6/143/Untitled-5-512.png";
-	private static final String CAMPAIGN_ICON = "https://cdn3.iconfinder.com/data/icons/seo-glyph-2/24/gear-setting-512.png";
-	private static final String SELECTED_ICON = "https://cdn.onlinewebfonts.com/svg/img_353313.png";
-	private static final String IMPERSONATED_ICON = "https://seef.reputelligence.com/wp-content/uploads/2015/08/impersonation2.png";
-
-	private static final Image DOCK_IMAGE = new Image("file:///D:/Development/git/JamzTheMan/dockfx/src/main/resources/org/dockfx/demo/docknode.png");
+	@FXML private ResourceBundle resources;
+	@FXML private URL location;
+	@FXML private BorderPane rootPane;
+	@FXML private MenuBar_Controller menuBar_Controller;
 
 	private static final Logger log = LogManager.getLogger(MapTool_Controller.class);
 
-	@FXML private ResourceBundle resources;
+	private static final String MAP_ICON = "/net/rptools/maptool/client/image/dock/map.png";
+	private static final String CONNECTIONS_ICON = "/net/rptools/maptool/client/image/dock/connections.png";
+	private static final String MAP_EXPLORER_ICON = "/net/rptools/maptool/client/image/dock/mapExplorer.png";
+	private static final String DRAW_EXPLORER_ICON = "/net/rptools/maptool/client/image/dock/drawExplorer.png";
+	private static final String INITIATIVE_ICON = "/net/rptools/maptool/client/image/dock/intiative.png";
+	private static final String RESOURCE_LIBRARY_ICON = "/net/rptools/maptool/client/image/dock/resourceLibrary.png";
+	private static final String CHAT_ICON = "/net/rptools/maptool/client/image/dock/chat.png";
+	private static final String TABLES_ICON = "/net/rptools/maptool/client/image/dock/tables.png";
+	private static final String GLOBAL_ICON = "/net/rptools/maptool/client/image/dock/localMacros.png";
+	private static final String CAMPAIGN_ICON = "/net/rptools/maptool/client/image/dock/campaignMacros.png";
+	private static final String SELECTED_ICON = "/net/rptools/maptool/client/image/dock/selectedMacros.png";
+	private static final String IMPERSONATED_ICON = "/net/rptools/maptool/client/image/dock/impersonatedMacros.png";
 
-	@FXML private URL location;
+	private static final Image DOCK_IMAGE = new Image("/net/rptools/maptool/client/image/dock/docknode.png");
 
-	@FXML private BorderPane rootPane;
+	private DockPane dockPane;
+
+	// Key is fx:id of the checkMenuItem the dock is associated with, if any.
+	private HashMap<String, DockNode> dockNodes = new HashMap<String, DockNode>();
 
 	@FXML
 	void initialize() {
 		assert rootPane != null : "fx:id=\"rootContainer\" was not injected: check your FXML file 'MapTool.fxml'.";
+		assert menuBar_Controller != null : "fx:id=\"menuBar_Controller\" was not injected: check your FXML file 'MapTool.fxml'.";
+
+		menuBar_Controller.setParentControl(this);
 	}
 
 	public void setDefaultPanes(MapToolFrame clientFrame, DockPane dockPane) {
+		this.dockPane = dockPane;
+
 		addMapView(clientFrame, dockPane);
 
 		// Set other panes in accordions for now
-		// addSwingNode(clientFrame.getConnectionPanel(), dockPane, CONNECTIONS_ICON);
-		addSwingNode(clientFrame.getTokenTreePanel(), dockPane, MAP_EXPLORER_ICON);
-		// addSwingNode(clientFrame.getDrawablesTreePanel(), dockPane, DRAW_EXPLORER_ICON);
-		// addSwingNode(clientFrame.getInitiativePanel(), dockPane, INITIATIVE_ICON);
-		addSwingNode(clientFrame.getAssetPanel(), dockPane, RESOURCE_LIBRARY_ICON);
-		// addSwingNode(clientFrame.getCommandPanel(), dockPane, CHAT_ICON);
-		addSwingNode(clientFrame.getLookupTablePanel(), dockPane, TABLES_ICON);
-		// addSwingNode(clientFrame.getGlobalPanel(), dockPane, GLOBAL_ICON);
-		// addSwingNode(clientFrame.getCampaignPanel(), dockPane, CAMPAIGN_ICON);
-		// addSwingNode(clientFrame.getSelectionPanel(), dockPane, SELECTED_ICON);
-		// addSwingNode(clientFrame.getImpersonatePanel(), dockPane, IMPERSONATED_ICON);
+		dockNodes.put("connectionsWindowMenuItem", addSwingNode(clientFrame.getConnectionPanel(), CONNECTIONS_ICON));
+		dockNodes.put("mapExplorerWindowMenuItem", addSwingNode(clientFrame.getTokenTreePanel(), MAP_EXPLORER_ICON));
+		dockNodes.put("drawExplorerWindowMenuItem", addSwingNode(clientFrame.getDrawablesTreePanel(), DRAW_EXPLORER_ICON));
+		dockNodes.put("intitiativeWindowMenuItem", addSwingNode(clientFrame.getInitiativePanel(), INITIATIVE_ICON));
+		dockNodes.put("resourceLibraryWindowMenuItem", addSwingNode(clientFrame.getAssetPanel(), RESOURCE_LIBRARY_ICON));
+		dockNodes.put("chatWindowMenuItem", addSwingNode(clientFrame.getCommandPanel(), CHAT_ICON));
+		dockNodes.put("tablesWindowMenuItem", addSwingNode(clientFrame.getLookupTablePanel(), TABLES_ICON));
+		dockNodes.put("globalWindowMenuItem", addSwingNode(clientFrame.getGlobalPanel(), GLOBAL_ICON));
+		dockNodes.put("campaignWindowMenuItem", addSwingNode(clientFrame.getCampaignPanel(), CAMPAIGN_ICON));
+		dockNodes.put("selectedWindowMenuItem", addSwingNode(clientFrame.getSelectionPanel(), SELECTED_ICON));
+		dockNodes.put("impersonatedWindowMenuItem", addSwingNode(clientFrame.getImpersonatePanel(), IMPERSONATED_ICON));
 
 		rootPane.setCenter(dockPane);
 	}
@@ -82,21 +93,24 @@ public class MapTool_Controller {
 		mapViewSwingNode.setContent(clientFrame.getZoneRendererPanel());
 		mapAchorPane.getChildren().add(mapViewSwingNode);
 		anchorIt(mapViewSwingNode);
-		addDockNode("Current Map", dockPane, "", mapAchorPane, DockPos.CENTER);
+
+		var mapDockNode = addDockNode("Current Map", MAP_ICON, mapAchorPane);
+		mapDockNode.dock(dockPane, DockPos.CENTER);
+		mapDockNode.setClosable(false);
 	}
 
-	private void addSwingNode(JComponent content, DockPane dockPane, String graphicURI) {
+	private DockNode addSwingNode(JComponent content, String graphicURI) {
 		var swingNode = new SwingNode();
 		swingNode.setContent(content);
 
-		addDockNode(content.getName(), dockPane, graphicURI, swingNode, DockPos.LEFT);
+		return addDockNode(content.getName(), graphicURI, swingNode);
 	}
 
-	private void addDockNode(String dockName, DockPane dockPane, String graphicURI, Node node, DockPos dockPosition) {
+	private DockNode addDockNode(String dockName, String graphicURI, Node node) {
 		var dockNode = new DockNode(node, dockName, setGraphicIcon(graphicURI));
-		// dockNode.setPrefSize(300, 300);
-		dockNode.dock(dockPane, dockPosition);
-		dockNode.closedProperty().addListener((arg, oldVal, newVal) -> System.out.println("dockNode " + dockName + " was closed."));
+		dockNode.closedProperty().addListener((arg, oldVal, newVal) -> ((CheckMenuItem) dockNode.getUserData()).setSelected(!newVal));
+
+		return dockNode;
 	}
 
 	private ImageView setGraphicIcon(String graphicURI) {
@@ -104,8 +118,7 @@ public class MapTool_Controller {
 			return new ImageView(DOCK_IMAGE);
 
 		var imageView = new ImageView(new Image(graphicURI));
-		imageView.setFitHeight(30);
-		// imageView.setFitWidth(30);
+		imageView.setFitHeight(16);
 		imageView.setPreserveRatio(true);
 		imageView.setSmooth(true);
 
@@ -117,5 +130,23 @@ public class MapTool_Controller {
 		AnchorPane.setBottomAnchor(node, 0.0);
 		AnchorPane.setLeftAnchor(node, 0.0);
 		AnchorPane.setRightAnchor(node, 0.0);
+	}
+
+	public void showWindow(CheckMenuItem checkMenuItem) {
+		log.info("Show window for : " + checkMenuItem.getId());
+		var dockNode = dockNodes.get(checkMenuItem.getId());
+
+		if (checkMenuItem.isSelected()) {
+			DockPos dockPosition = dockNode.getLastDockPos();
+			if (dockPosition == null)
+				dockPosition = DockPos.LEFT;
+			else
+				log.info("last pos " + dockPosition);
+
+			dockNode.dock(dockPane, dockPosition);
+			dockNode.setUserData(checkMenuItem); // Used to uncheck menu if dock is closed via X button
+		} else {
+			dockNode.close();
+		}
 	}
 }

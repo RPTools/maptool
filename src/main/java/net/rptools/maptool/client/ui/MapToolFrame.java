@@ -156,12 +156,12 @@ import javafx.scene.control.ButtonType;
  */
 public class MapToolFrame extends DefaultDockableHolder implements WindowListener, AppEventListener {
 	private static final Logger log = LogManager.getLogger(MapToolFrame.class);
-	private static final String INITIAL_LAYOUT_XML = "net/rptools/maptool/client/ui/ilayout.xml";
+	// private static final String INITIAL_LAYOUT_XML = "net/rptools/maptool/client/ui/ilayout.xml";
 	private static final String MAPTOOL_LOGO_IMAGE = "net/rptools/maptool/client/image/maptool-logo.png";
 	private static final String CREDITS_HTML = "net/rptools/maptool/client/credits.html";
 	private static final String MINILOGO_IMAGE = "net/rptools/maptool/client/image/minilogo.png";
 	private static final long serialVersionUID = 3905523813025329458L;
-	private static final String DOCKING_PROFILE_NAME = "maptoolDocking";
+	// private static final String DOCKING_PROFILE_NAME = "maptoolDocking";
 
 	private static final int WINDOW_WIDTH = 800;
 	private static final int WINDOW_HEIGHT = 600;

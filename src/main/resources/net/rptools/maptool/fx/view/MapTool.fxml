@@ -2,9 +2,8 @@
 
 <?import javafx.scene.layout.BorderPane?>
 
-
 <BorderPane fx:id="rootPane" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool_fx.controller.MapTool_Controller">
    <top>
-      <fx:include source="MenuBar.fxml" />
+      <fx:include fx:id="menuBar_" source="MenuBar.fxml" />
    </top>
 </BorderPane>

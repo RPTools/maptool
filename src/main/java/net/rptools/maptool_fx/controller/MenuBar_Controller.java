@@ -12,9 +12,9 @@ import java.io.File;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import net.rptools.maptool.client.AppActions;
@@ -23,19 +23,19 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool_fx.MapTool;
 
 public class MenuBar_Controller {
-	private static final Logger log = LogManager.getLogger(MenuBar_Controller.class);
-
 	@FXML private MenuItem openCampaignMenuItem;
+	@FXML private CheckMenuItem connectionsWindowMenuItem;
+
+	private static final Logger log = LogManager.getLogger(MenuBar_Controller.class);
+	private MapTool_Controller mapTool_Controller;
 
 	@FXML // This method is called by the FXMLoader when initialization is complete
 	void initialize() {
-		// Later turn these into visible properties?
 		openCampaignMenuItem.disableProperty().bind(MapTool.getServer().getConfig().isPersonalServer().not());
 	}
 
 	@FXML
 	void openCampaign(ActionEvent event) {
-		// TODO: MOVE ME! Use FXControls Actions API?
 		if (MapTool.isCampaignDirty() && !MapTool.confirm("msg.confirm.loseChanges"))
 			return;
 
@@ -66,5 +66,14 @@ public class MenuBar_Controller {
 	void clientDisconnect(ActionEvent event) {
 		// TESTING
 		MapTool.getServer().getConfig().setPersonalServer(true);
+	}
+
+	@FXML
+	void windowCheckMenuItem_OnAction(ActionEvent event) {
+		mapTool_Controller.showWindow((CheckMenuItem) event.getSource());
+	}
+
+	public void setParentControl(MapTool_Controller mapTool_Controller) {
+		this.mapTool_Controller = mapTool_Controller;
 	}
 }

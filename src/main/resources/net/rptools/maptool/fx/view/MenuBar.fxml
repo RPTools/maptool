@@ -110,7 +110,17 @@
       </Menu>
       <Menu text="%menu.window">
          <items>
-            <MenuItem mnemonicParsing="false" text="Action 1" />
+            <CheckMenuItem fx:id="connectionsWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Connections" />
+            <CheckMenuItem fx:id="mapExplorerWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.MapExplorer" />
+            <CheckMenuItem fx:id="drawExplorerWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.DrawExplorer" />
+            <CheckMenuItem fx:id="intitiativeWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Initiative" />
+            <CheckMenuItem fx:id="resourceLibraryWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Library" />
+            <CheckMenuItem fx:id="chatWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Chat" />
+            <CheckMenuItem fx:id="tablesWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Tables" />
+            <CheckMenuItem fx:id="globalWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Global" />
+            <CheckMenuItem fx:id="campaignWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Campaign" />
+            <CheckMenuItem fx:id="selectedWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Selected" />
+            <CheckMenuItem fx:id="impersonatedWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Impersonate" />
          </items>
       </Menu>
       <Menu text="%menu.help">
