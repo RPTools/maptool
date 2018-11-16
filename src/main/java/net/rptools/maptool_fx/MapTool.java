@@ -21,7 +21,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.Runtime.Version;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -75,6 +77,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
@@ -88,6 +91,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.HTMLEditor;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import net.rptools.clientserver.hessian.client.ClientConnection;
@@ -210,7 +214,8 @@ public class MapTool extends Application {
 	private static final MTWebAppServer webAppServer = new MTWebAppServer();
 	private static DesktopLauncher MapToolLwjglApplication;
 
-	// Jamz: To support new command line parameters for multi-monitor support & enhanced PrintStream
+	// Jamz: To support new command line parameters for multi-monitor support &
+	// enhanced PrintStream
 	private static boolean debug = false;
 	private static int graphicsMonitor = -1;
 	private static boolean useFullScreen = false;
@@ -231,24 +236,31 @@ public class MapTool extends Application {
 
 	@Override
 	public void init() throws Exception {
-		// Since we are using multiple plugins (Twelve Monkeys for PSD and JAI for jpeg2000) in the same uber jar,
-		// the META-INF/services/javax.imageio.spi.ImageReaderSpi gets overwritten. So we need to register them manually:
+		// Since we are using multiple plugins (Twelve Monkeys for PSD and JAI for
+		// jpeg2000) in the same uber jar,
+		// the META-INF/services/javax.imageio.spi.ImageReaderSpi gets overwritten. So
+		// we need to register them manually:
 		// https://github.com/jai-imageio/jai-imageio-core/issues/29
 		// IIORegistry registry = IIORegistry.getDefaultInstance();
-		// registry.registerServiceProvider(new com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi());
+		// registry.registerServiceProvider(new
+		// com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi());
 
 		// long mem = Runtime.getRuntime().maxMemory();
 		// String msg = new String(String.format(USAGE, mem / (1024 * 1024)));
 		//
-		// // Asking for 256MB via the -Xmx256M switch doesn't guarantee that the amount maxMemory() reports will be 256MB.
-		// // The actual amount seems to vary from PC to PC. 200MB seems to be a safe value for now. <Phergus>
+		// // Asking for 256MB via the -Xmx256M switch doesn't guarantee that the amount
+		// maxMemory() reports will be 256MB.
+		// // The actual amount seems to vary from PC to PC. 200MB seems to be a safe
+		// value for now. <Phergus>
 		// // TODO: FXify this
 		// if (mem < 200 * 1024 * 1024) {
 		// // TODO FX this! -Jamz
-		// JOptionPane.showMessageDialog(new JFrame(), msg, "Usage", JOptionPane.INFORMATION_MESSAGE);
+		// JOptionPane.showMessageDialog(new JFrame(), msg, "Usage",
+		// JOptionPane.INFORMATION_MESSAGE);
 		// }
 
-		// This is to initialize the log4j to set the path for logs. Just calling AppUtil sets the System.property
+		// This is to initialize the log4j to set the path for logs. Just calling
+		// AppUtil sets the System.property
 		// Before anything else, create a place to store all the data
 		try {
 			AppUtil.getAppHome();
@@ -256,7 +268,8 @@ public class MapTool extends Application {
 			t.printStackTrace();
 
 			// TODO FX this! -Jamz
-			// Create an empty frame so there's something to click on if the dialog goes in the background
+			// Create an empty frame so there's something to click on if the dialog goes in
+			// the background
 			JFrame frame = new JFrame();
 			SwingUtil.centerOnScreen(frame);
 			frame.setVisible(true);
@@ -290,7 +303,8 @@ public class MapTool extends Application {
 		// Get command line arguments...
 		String[] args = getParameters().getRaw().toArray(new String[0]);
 
-		// Jamz: Overwrite version for testing if passed as command line argument using -v or -version
+		// Jamz: Overwrite version for testing if passed as command line argument using
+		// -v or -version
 		Options cmdOptions = new Options();
 		cmdOptions.addOption("d", "debug", false, "turn on System.out enhanced debug output");
 		cmdOptions.addOption("v", "version", true, "override MapTool version");
@@ -322,7 +336,8 @@ public class MapTool extends Application {
 
 		boolean listMacros = CommandLineOptionHelper.getCommandLineOption(cmdOptions, "macros", args);
 
-		// Jamz: Just a little console log formatter for system.out to hyperlink messages to source.
+		// Jamz: Just a little console log formatter for system.out to hyperlink
+		// messages to source.
 		if (debug)
 			DebugStream.activate();
 		else
@@ -370,7 +385,8 @@ public class MapTool extends Application {
 		System.setProperty("swing.aatext", "true");
 
 		// TODO: FX ME! -Jamz
-		// final SplashScreen splash = new SplashScreen((isDevelopment()) ? getVersion() : "v" + getVersion());
+		// final SplashScreen splash = new SplashScreen((isDevelopment()) ? getVersion()
+		// : "v" + getVersion());
 
 		// Protocol handlers
 		// cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
@@ -407,7 +423,8 @@ public class MapTool extends Application {
 		initialize(); // shouldn't be doing UI work here now, set up server and everything else?
 
 		// load the FX UI now...
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(MAPTOOL_FXML), ResourceBundle.getBundle(AppConstants.MAP_TOOL_BUNDLE));
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(MAPTOOL_FXML),
+				ResourceBundle.getBundle(AppConstants.MAP_TOOL_BUNDLE));
 		BorderPane rootPane = fxmlLoader.load();
 		mapTool_Controller = (MapTool_Controller) fxmlLoader.getController();
 
@@ -432,7 +449,6 @@ public class MapTool extends Application {
 			mapTool_Controller.setDefaultPanes(clientFrame, dockPane);
 			// mapTool_Controller.getMenuBarController().setClientFrame(clientFrame);
 			// mapTool_Controller.getMenuBarController().setDockPane(dockPane);
-			postInitialize();
 
 			Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
 			DockPane.initializeDefaultUserAgentStylesheet();
@@ -440,6 +456,7 @@ public class MapTool extends Application {
 			// Now that the Application is loaded, check for new release...
 			AppUpdate.gitHubReleases();
 
+			postInitialize();
 		});
 	}
 
@@ -459,7 +476,9 @@ public class MapTool extends Application {
 	/**
 	 * Check to see if we're running on Java 11+.
 	 * <p>
-	 * Now that we are packing the JRE with MapTool this is normally not required, however for Development and running the JAR manually, we need the check. MapTool is written for OpenJDK 11 + OpenJFX
+	 * Now that we are packing the JRE with MapTool this is normally not required,
+	 * however for Development and running the JAR manually, we need the check.
+	 * MapTool is written for OpenJDK 11 + OpenJFX
 	 */
 	private static void verifyJavaVersion() {
 		Version version;
@@ -514,7 +533,8 @@ public class MapTool extends Application {
 		assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
 		playerList = FXCollections.observableArrayList(); // new MapToolObservableList<Player>();
-		messageList = new MapToolObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
+		messageList = new MapToolObservableList<TextMessage>(
+				Collections.synchronizedList(new ArrayList<TextMessage>()));
 
 		handler = new ClientMethodHandler();
 
@@ -558,12 +578,12 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * This method looks up the message key in the properties file and returns the resultant text with the detail message from the <code>Throwable</code> appended to the end.
+	 * This method looks up the message key in the properties file and returns the
+	 * resultant text with the detail message from the <code>Throwable</code>
+	 * appended to the end.
 	 *
-	 * @param msgKey
-	 *            the string to use when calling {@link I18N#getText(String)}
-	 * @param t
-	 *            the exception to be processed
+	 * @param msgKey the string to use when calling {@link I18N#getText(String)}
+	 * @param t      the exception to be processed
 	 * @return the <code>String</code> result
 	 */
 	public static String generateMessage(String msgKey, Throwable t) {
@@ -579,17 +599,19 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * This method is the base method for putting a dialog box up on the screen that might be an error, a warning, or just an information message. Do not use this method if the desired result is a
-	 * simple confirmation box (use {@link #confirm(String, Object...)} instead).
+	 * This method is the base method for putting a dialog box up on the screen that
+	 * might be an error, a warning, or just an information message. Do not use this
+	 * method if the desired result is a simple confirmation box (use
+	 * {@link #confirm(String, Object...)} instead).
 	 *
-	 * @param message
-	 *            the key in the properties file to put in the body of the dialog (formatted using <code>params</code>)
-	 * @param titleKey
-	 *            the key in the properties file to use when creating the title of the dialog window (formatted using <code>params</code>)
-	 * @param messageType
-	 *            JOptionPane.{ERROR|WARNING|INFORMATION}_MESSAGE
-	 * @param params
-	 *            optional parameters to use when formatting the data from the properties file
+	 * @param message     the key in the properties file to put in the body of the
+	 *                    dialog (formatted using <code>params</code>)
+	 * @param titleKey    the key in the properties file to use when creating the
+	 *                    title of the dialog window (formatted using
+	 *                    <code>params</code>)
+	 * @param messageType JOptionPane.{ERROR|WARNING|INFORMATION}_MESSAGE
+	 * @param params      optional parameters to use when formatting the data from
+	 *                    the properties file
 	 */
 	public static void showMessage(String message, String titleKey, int messageType, Object... params) {
 		String title = I18N.getText(titleKey, params);
@@ -597,17 +619,21 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Same as {@link #showMessage(String, String, int, Object...)} except that <code>messages</code> is stored into a JList and that component is then used as the content of the dialog box. This
-	 * allows multiple strings to be displayed in a manner consistent with other message dialogs.
+	 * Same as {@link #showMessage(String, String, int, Object...)} except that
+	 * <code>messages</code> is stored into a JList and that component is then used
+	 * as the content of the dialog box. This allows multiple strings to be
+	 * displayed in a manner consistent with other message dialogs.
 	 *
-	 * @param messages
-	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is performed!
-	 * @param titleKey
-	 *            the key in the properties file to use when creating the title of the dialog window (formatted using <code>params</code>)
-	 * @param messageType
-	 *            one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE</code>
-	 * @param params
-	 *            optional parameters to use when formatting the title text from the properties file
+	 * @param messages    the Objects (normally strings) to put in the body of the
+	 *                    dialog; no properties file lookup is performed!
+	 * @param titleKey    the key in the properties file to use when creating the
+	 *                    title of the dialog window (formatted using
+	 *                    <code>params</code>)
+	 * @param messageType one of <code>JOptionPane.ERROR_MESSAGE</code>,
+	 *                    <code>JOptionPane.WARNING_MESSAGE</code>,
+	 *                    <code>JOptionPane.INFORMATION_MESSAGE</code>
+	 * @param params      optional parameters to use when formatting the title text
+	 *                    from the properties file
 	 */
 	public static void showMessage(Object[] messages, String titleKey, int messageType, Object... params) {
 		String title = I18N.getText(titleKey, params);
@@ -616,36 +642,39 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Displays the messages provided as <code>messages</code> by calling {@link #showMessage(Object[], String, int, Object...)} and passing <code>"msg.title.messageDialogFeedback"</code> and
+	 * Displays the messages provided as <code>messages</code> by calling
+	 * {@link #showMessage(Object[], String, int, Object...)} and passing
+	 * <code>"msg.title.messageDialogFeedback"</code> and
 	 * <code>JOptionPane.ERROR_MESSAGE</code> as parameters.
 	 *
-	 * @param messages
-	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is performed!
+	 * @param messages the Objects (normally strings) to put in the body of the
+	 *                 dialog; no properties file lookup is performed!
 	 */
 	public static void showFeedback(Object[] messages) {
 		showMessage(messages, "msg.title.messageDialogFeedback", JOptionPane.ERROR_MESSAGE);
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showError(String, Throwable)} and passing <code>null</code> for the second parameter.
+	 * Displays a dialog box by calling {@link #showError(String, Throwable)} and
+	 * passing <code>null</code> for the second parameter.
 	 *
-	 * @param msgKey
-	 *            the key to use when calling {@link I18N#getText(String)}
+	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
 	 */
 	public static void showError(String msgKey) {
 		showError(msgKey, null);
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
-	 * the {@link Logger#error(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted
+	 * by calling {@link #generateMessage(String, Throwable)} and passing it the two
+	 * parameters. Also logs an entry using the
+	 * {@link Logger#error(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogError"</code> , and the dialog type is <code>JOptionPane.ERROR_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogError"</code> ,
+	 * and the dialog type is <code>JOptionPane.ERROR_MESSAGE</code>.
 	 *
-	 * @param msgKey
-	 *            the key to use when calling {@link I18N#getText(String)}
-	 * @param t
-	 *            the exception to be processed
+	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
+	 * @param t      the exception to be processed
 	 */
 	public static void showError(String msgKey, Throwable t) {
 		String msg = generateMessage(msgKey, t);
@@ -654,25 +683,26 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showWarning(String, Throwable)} and passing <code>null</code> for the second parameter.
+	 * Displays a dialog box by calling {@link #showWarning(String, Throwable)} and
+	 * passing <code>null</code> for the second parameter.
 	 *
-	 * @param msgKey
-	 *            the key to use when calling {@link I18N#getText(String)}
+	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
 	 */
 	public static void showWarning(String msgKey) {
 		showWarning(msgKey, null);
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
-	 * the {@link Logger#warn(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted
+	 * by calling {@link #generateMessage(String, Throwable)} and passing it the two
+	 * parameters. Also logs an entry using the
+	 * {@link Logger#warn(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogWarning"</code>, and the dialog type is <code>JOptionPane.WARNING_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogWarning"</code>,
+	 * and the dialog type is <code>JOptionPane.WARNING_MESSAGE</code>.
 	 *
-	 * @param msgKey
-	 *            the key to use when calling {@link I18N#getText(String)}
-	 * @param t
-	 *            the exception to be processed
+	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
+	 * @param t      the exception to be processed
 	 */
 	public static void showWarning(String msgKey, Throwable t) {
 		String msg = generateMessage(msgKey, t);
@@ -681,25 +711,26 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showInformation(String, Throwable)} and passing <code>null</code> for the second parameter.
+	 * Displays a dialog box by calling {@link #showInformation(String, Throwable)}
+	 * and passing <code>null</code> for the second parameter.
 	 *
-	 * @param msgKey
-	 *            the key to use when calling {@link I18N#getText(String)}
+	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
 	 */
 	public static void showInformation(String msgKey) {
 		showInformation(msgKey, null);
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
-	 * the {@link Logger#info(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted
+	 * by calling {@link #generateMessage(String, Throwable)} and passing it the two
+	 * parameters. Also logs an entry using the
+	 * {@link Logger#info(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogInfo"</code>, and the dialog type is <code>JOptionPane.INFORMATION_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogInfo"</code>, and
+	 * the dialog type is <code>JOptionPane.INFORMATION_MESSAGE</code>.
 	 *
-	 * @param msgKey
-	 *            the key to use when calling {@link I18N#getText(String)}
-	 * @param t
-	 *            the exception to be processed
+	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
+	 * @param t      the exception to be processed
 	 */
 	public static void showInformation(String msgKey, Throwable t) {
 		String msg = generateMessage(msgKey, t);
@@ -708,51 +739,66 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values as parameters to the formatting of the key lookup.
+	 * Displays a confirmation dialog that uses the message as a key to the
+	 * properties file, and the additional values as parameters to the formatting of
+	 * the key lookup.
 	 *
-	 * @param message
-	 *            key from the properties file (preferred) or hard-coded string to display
-	 * @param params
-	 *            optional arguments for the formatting of the property value
-	 * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
+	 * @param message key from the properties file (preferred) or hard-coded string
+	 *                to display
+	 * @param params  optional arguments for the formatting of the property value
+	 * @return <code>true</code> if the user clicks the OK button,
+	 *         <code>false</code> otherwise
 	 */
 	public static boolean confirm(String message, Object... params) {
 		// String msg = I18N.getText(message, params);
 		// log.debug(message);
 		String title = I18N.getText("msg.title.messageDialogConfirm");
-		// return JOptionPane.showConfirmDialog(clientFrame, msg, title, JOptionPane.OK_OPTION) ==
+		// return JOptionPane.showConfirmDialog(clientFrame, msg, title,
+		// JOptionPane.OK_OPTION) ==
 		// JOptionPane.OK_OPTION;
-		// return confirmImpl(title, JOptionPane.OK_OPTION, message, params) == JOptionPane.OK_OPTION;
-		return confirmImpl(title, JOptionPane.OK_OPTION, message, params) == ButtonType.OK;
+		// return confirmImpl(title, JOptionPane.OK_OPTION, message, params) ==
+		// JOptionPane.OK_OPTION;
+		return confirmImpl(title, JOptionPane.OK_OPTION, message, params) == ButtonType.YES;
 	}
 
 	/**
-	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values as parameters to the formatting of the key lookup.
+	 * Displays a confirmation dialog that uses the message as a key to the
+	 * properties file, and the additional values as parameters to the formatting of
+	 * the key lookup.
 	 *
 	 * @param title
 	 * @param buttons
-	 * @param message
-	 *            key from the properties file (preferred) or hard-coded string to display
-	 * @param params
-	 *            optional arguments for the formatting of the property value
-	 * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
+	 * @param message key from the properties file (preferred) or hard-coded string
+	 *                to display
+	 * @param params  optional arguments for the formatting of the property value
+	 * @return <code>true</code> if the user clicks the OK button,
+	 *         <code>false</code> otherwise
 	 */
 	public static ButtonType confirmImpl(String title, int buttons, String message, Object... params) {
 		String msg = I18N.getText(message, params);
-		log.debug(message);
-		// return JOptionPane.showConfirmDialog(clientFrame, msg, title, buttons);
-		// TODO: Implement buttons later
+		log.info("confirmImpl(" + message + ", " + buttons + ")");
+		log.info("JOptionPane.YES_NO_CANCEL_OPTION = " + JOptionPane.YES_NO_CANCEL_OPTION);
 
-		Alert alert = new Alert(AlertType.CONFIRMATION);
-		// alert.setTitle(title);
-		alert.setHeaderText(title);
-		alert.setContentText(msg);
+		// return JOptionPane.showConfirmDialog(clientFrame, msg, title, buttons);
+		// FIXME: How we request buttons using JOptionsPane has changed and need to fix all the methods upstream
+
+		// https://code.makery.ch/blog/javafx-8-dialogs/
+		// https://code.makery.ch/blog/javafx-dialogs-official/
+
+		Alert alert = new Alert(AlertType.CONFIRMATION, msg, ButtonType.YES, ButtonType.NO);
+
+		if (buttons == JOptionPane.YES_NO_CANCEL_OPTION)
+			alert.getButtonTypes().add(ButtonType.CANCEL);
+
+		alert.setTitle(title);
+		alert.setHeaderText(null);
 
 		return alert.showAndWait().get();
 	}
 
 	/**
-	 * This method is specific to deleting a token, but it can be used as a basis for any other method which wants to be turned off via a property.
+	 * This method is specific to deleting a token, but it can be used as a basis
+	 * for any other method which wants to be turned off via a property.
 	 *
 	 * @return true if the token should be deleted.
 	 */
@@ -825,8 +871,9 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Launch the platform's web browser and ask it to open the given URL. Note that this should not be called from any uncontrolled macros as there are both security and denial-of-service attacks
-	 * possible.
+	 * Launch the platform's web browser and ask it to open the given URL. Note that
+	 * this should not be called from any uncontrolled macros as there are both
+	 * security and denial-of-service attacks possible.
 	 *
 	 * @param url
 	 */
@@ -894,7 +941,8 @@ public class MapTool extends Application {
 
 	// TODO: This method is redundant now. It should be rolled into the
 	// TODO: ExportDialog screenshot method. But until that has proven stable
-	// TODO: for a while, I don't want to mess with this. (version 1.3b70 is most recent)
+	// TODO: for a while, I don't want to mess with this. (version 1.3b70 is most
+	// recent)
 	public static BufferedImage takeMapScreenShot(final PlayerView view) {
 		final ZoneRenderer renderer = clientFrame.getCurrentZoneRenderer();
 		if (renderer == null) {
@@ -951,17 +999,17 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * For Multi-monitor support, allows you to move the frame to a specific monitor. It will also set the height, width and x, y position of the frame.
+	 * For Multi-monitor support, allows you to move the frame to a specific
+	 * monitor. It will also set the height, width and x, y position of the frame.
 	 *
 	 * @author Jamz
 	 * @since 1.4.1.0
 	 *
-	 * @param frame
-	 *            The JFrame to move
-	 * @param monitor
-	 *            The monitor number as an int. Note the first monitor start at 0, not 1.
-	 * @param maximize
-	 *            set to true if you want to maximize the frame to that monitor.
+	 * @param frame    The JFrame to move
+	 * @param monitor  The monitor number as an int. Note the first monitor start at
+	 *                 0, not 1.
+	 * @param maximize set to true if you want to maximize the frame to that
+	 *                 monitor.
 	 */
 	private static void moveToMonitor(JFrame frame, int monitor, boolean maximize) {
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -1008,7 +1056,8 @@ public class MapTool extends Application {
 	// soundManager = new SoundManager();
 	// try {
 	// soundManager.configure(SOUND_PROPERTIES);
-	// soundManager.registerSoundEvent(SND_INVALID_OPERATION, soundManager.getRegisteredSound("Dink"));
+	// soundManager.registerSoundEvent(SND_INVALID_OPERATION,
+	// soundManager.getRegisteredSound("Dink"));
 	// } catch (IOException ioe) {
 	// MapTool.showError("While initializing (configuring sound)", ioe);
 	// }
@@ -1017,7 +1066,9 @@ public class MapTool extends Application {
 	// assetTransferManager.addConsumerListener(new AssetTransferHandler());
 	//
 	// playerList = new ObservableList<Player>();
-	// messageList = new ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
+	// messageList = new
+	// ObservableList<TextMessage>(Collections.synchronizedList(new
+	// ArrayList<TextMessage>()));
 	//
 	// handler = new ClientMethodHandler();
 	//
@@ -1054,8 +1105,10 @@ public class MapTool extends Application {
 				}
 			});
 			profilingNoteFrame.setSize(profilingNoteFrame.getPreferredSize());
-			// It's possible that the SelectionPanel may cause text to be added to the NoteFrame, so it
-			// can happen before MapTool.initialize() has had a chance to init the clientFrame.
+			// It's possible that the SelectionPanel may cause text to be added to the
+			// NoteFrame, so it
+			// can happen before MapTool.initialize() has had a chance to init the
+			// clientFrame.
 			if (clientFrame != null)
 				SwingUtil.centerOver(profilingNoteFrame, clientFrame);
 		}
@@ -1162,7 +1215,8 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Add a message only this client can see. This is a shortcut for addMessage(ME, ...)
+	 * Add a message only this client can see. This is a shortcut for addMessage(ME,
+	 * ...)
 	 *
 	 * @param message
 	 */
@@ -1171,7 +1225,8 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Add a message all clients can see. This is a shortcut for addMessage(SAY, ...)
+	 * Add a message all clients can see. This is a shortcut for addMessage(SAY,
+	 * ...)
 	 *
 	 * @param message
 	 */
@@ -1180,15 +1235,14 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM, ...). The <code>targets</code> is expected do be in a string list built with
-	 * <code>separator</code>.
+	 * Add a message all specified clients will see. This is a shortcut for
+	 * addMessage(WHISPER, ...) and addMessage(GM, ...). The <code>targets</code> is
+	 * expected do be in a string list built with <code>separator</code>.
 	 *
-	 * @param message
-	 *            message to be sent
-	 * @param targets
-	 *            string specifying clients to send the message to (spaces are trimmed)
-	 * @param separator
-	 *            the separator between entries in <code>targets</code>
+	 * @param message   message to be sent
+	 * @param targets   string specifying clients to send the message to (spaces are
+	 *                  trimmed)
+	 * @param separator the separator between entries in <code>targets</code>
 	 */
 	public static void addGlobalMessage(String message, String targets, String separator) {
 		List<String> list = new LinkedList<String>();
@@ -1198,12 +1252,12 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM, ...).
+	 * Add a message all specified clients will see. This is a shortcut for
+	 * addMessage(WHISPER, ...) and addMessage(GM, ...).
 	 *
-	 * @param message
-	 *            message to be sent
-	 * @param targets
-	 *            list of <code>String</code>s specifying clients to send the message to
+	 * @param message message to be sent
+	 * @param targets list of <code>String</code>s specifying clients to send the
+	 *                message to
 	 */
 	public static void addGlobalMessage(String message, List<String> targets) {
 		for (String target : targets) {
@@ -1247,7 +1301,8 @@ public class MapTool extends Application {
 		for (Zone zone : campaign.getZones()) {
 			ZoneRenderer renderer = ZoneRendererFactory.newRenderer(zone);
 			clientFrame.addZoneRenderer(renderer);
-			if ((currRenderer == null || zone.getId().equals(defaultRendererId)) && (getPlayer().isGM() || zone.isVisible())) {
+			if ((currRenderer == null || zone.getId().equals(defaultRendererId))
+					&& (getPlayer().isGM() || zone.isVisible())) {
 				currRenderer = renderer;
 			}
 			eventDispatcher.fireEvent(ZoneEvent.Added, campaign, null, zone);
@@ -1509,20 +1564,26 @@ public class MapTool extends Application {
 				defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
 
 				defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default is true
-				defaults.put("OptionPane.bannerIcon", new ImageIcon(MapTool.class.getClassLoader().getResource("net/rptools/maptool/client/image/maptool_icon.png")));
+				defaults.put("OptionPane.bannerIcon", new ImageIcon(MapTool.class.getClassLoader()
+						.getResource("net/rptools/maptool/client/image/maptool_icon.png")));
 				defaults.put("OptionPane.bannerFontSize", 13);
 				defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
 				defaults.put("OptionPane.bannerMaxCharsPerLine", 60);
-				defaults.put("OptionPane.bannerForeground", painter != null ? painter.getOptionPaneBannerForeground() : null); // you should adjust this if banner background is not the default
-																																// gradient paint
+				defaults.put("OptionPane.bannerForeground",
+						painter != null ? painter.getOptionPaneBannerForeground() : null); // you should adjust this if
+																							// banner background is not
+																							// the default
+																							// gradient paint
 				defaults.put("OptionPane.bannerBorder", null); // use default border
 
-				// set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want gradient
+				// set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want
+				// gradient
 				defaults.put("OptionPane.bannerBackgroundDk", painter != null ? painter.getOptionPaneBannerDk() : null);
 				defaults.put("OptionPane.bannerBackgroundLt", painter != null ? painter.getOptionPaneBannerLt() : null);
 				defaults.put("OptionPane.bannerBackgroundDirection", Boolean.TRUE); // default is true
 
-				// optionally, you can set a Paint object for BannerPanel. If so, the three UIDefaults related to banner background above will be ignored.
+				// optionally, you can set a Paint object for BannerPanel. If so, the three
+				// UIDefaults related to banner background above will be ignored.
 				defaults.put("OptionPane.bannerBackgroundPaint", null);
 
 				defaults.put("OptionPane.buttonAreaBorder", BorderFactory.createEmptyBorder(6, 6, 6, 6));
@@ -1539,14 +1600,17 @@ public class MapTool extends Application {
 
 		// taskbarFlasher = new TaskBarFlasher(clientFrame);
 
-		// Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
+		// Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of
+		// sync,
 		// so after frame is all done loading we sync them back up.
 		// MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
 	}
 
 	/**
-	 * Return whether the campaign file has changed. Only checks to see if there is a single empty map with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". We really
-	 * should check against things like campaign property changes as well, including campaign macros...
+	 * Return whether the campaign file has changed. Only checks to see if there is
+	 * a single empty map with the default name (ZoneFactory.DEFAULT_MAP_NAME). If
+	 * so, the campaign is "empty". We really should check against things like
+	 * campaign property changes as well, including campaign macros...
 	 */
 	public static boolean isCampaignDirty() {
 		// TODO: This is a very naive check, but it's better than nothing
@@ -1635,10 +1699,12 @@ public class MapTool extends Application {
 	 * Examples using the (recommended) static API.
 	 */
 	static void testSentryAPI() {
-		// Note that all fields set on the context are optional. Context data is copied onto
+		// Note that all fields set on the context are optional. Context data is copied
+		// onto
 		// all future events in the current context (until the context is cleared).
 
-		// Record a breadcrumb in the current context. By default the last 100 breadcrumbs are kept.
+		// Record a breadcrumb in the current context. By default the last 100
+		// breadcrumbs are kept.
 		Sentry.getContext().recordBreadcrumb(new BreadcrumbBuilder().setMessage("User made an action").build());
 
 		// Set the user in the current context.
@@ -1651,7 +1717,8 @@ public class MapTool extends Application {
 		Sentry.getContext().addTag("tagName", "tagValue");
 
 		/*
-		 * This sends a simple event to Sentry using the statically stored instance that was created in the ``main`` method.
+		 * This sends a simple event to Sentry using the statically stored instance that
+		 * was created in the ``main`` method.
 		 */
 		Sentry.capture("This is another logWithStaticAPI test");
 
