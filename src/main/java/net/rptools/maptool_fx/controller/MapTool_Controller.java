@@ -29,6 +29,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.language.I18N;
+import net.rptools.maptool_fx.client.ClientConnections;
 
 public class MapTool_Controller {
 	@FXML private ResourceBundle resources;
@@ -71,18 +73,21 @@ public class MapTool_Controller {
 
 		addMapView(clientFrame, dockPane);
 
+		var clientConnections = new ClientConnections();
+
 		// Set other panes in accordions for now
-		dockNodes.put("connectionsWindowMenuItem", addSwingNode(clientFrame.getConnectionPanel(), CONNECTIONS_ICON));
+		dockNodes.put("connectionsWindowMenuItem", addDockNode(clientConnections.getRootNode(), I18N.getString("panel.Connections"), CONNECTIONS_ICON));
+		// dockNodes.put("connectionsWindowMenuItem", addSwingNode(clientFrame.getConnectionPanel(), CONNECTIONS_ICON));
 		dockNodes.put("mapExplorerWindowMenuItem", addSwingNode(clientFrame.getTokenTreePanel(), MAP_EXPLORER_ICON));
 		dockNodes.put("drawExplorerWindowMenuItem", addSwingNode(clientFrame.getDrawablesTreePanel(), DRAW_EXPLORER_ICON));
 		dockNodes.put("intitiativeWindowMenuItem", addSwingNode(clientFrame.getInitiativePanel(), INITIATIVE_ICON));
 		dockNodes.put("resourceLibraryWindowMenuItem", addSwingNode(clientFrame.getAssetPanel(), RESOURCE_LIBRARY_ICON));
 		dockNodes.put("chatWindowMenuItem", addSwingNode(clientFrame.getCommandPanel(), CHAT_ICON));
 		dockNodes.put("tablesWindowMenuItem", addSwingNode(clientFrame.getLookupTablePanel(), TABLES_ICON));
-		dockNodes.put("globalWindowMenuItem", addSwingNode(clientFrame.getGlobalPanel(), GLOBAL_ICON));
-		dockNodes.put("campaignWindowMenuItem", addSwingNode(clientFrame.getCampaignPanel(), CAMPAIGN_ICON));
-		dockNodes.put("selectedWindowMenuItem", addSwingNode(clientFrame.getSelectionPanel(), SELECTED_ICON));
-		dockNodes.put("impersonatedWindowMenuItem", addSwingNode(clientFrame.getImpersonatePanel(), IMPERSONATED_ICON));
+		// dockNodes.put("globalWindowMenuItem", addSwingNode(clientFrame.getGlobalPanel(), GLOBAL_ICON));
+		// dockNodes.put("campaignWindowMenuItem", addSwingNode(clientFrame.getCampaignPanel(), CAMPAIGN_ICON));
+		// dockNodes.put("selectedWindowMenuItem", addSwingNode(clientFrame.getSelectionPanel(), SELECTED_ICON));
+		// dockNodes.put("impersonatedWindowMenuItem", addSwingNode(clientFrame.getImpersonatePanel(), IMPERSONATED_ICON));
 
 		rootPane.setCenter(dockPane);
 	}
@@ -94,7 +99,7 @@ public class MapTool_Controller {
 		mapAchorPane.getChildren().add(mapViewSwingNode);
 		anchorIt(mapViewSwingNode);
 
-		var mapDockNode = addDockNode("Current Map", MAP_ICON, mapAchorPane);
+		var mapDockNode = addDockNode(mapAchorPane, "Current Map", MAP_ICON);
 		mapDockNode.dock(dockPane, DockPos.CENTER);
 		mapDockNode.setClosable(false);
 	}
@@ -103,10 +108,10 @@ public class MapTool_Controller {
 		var swingNode = new SwingNode();
 		swingNode.setContent(content);
 
-		return addDockNode(content.getName(), graphicURI, swingNode);
+		return addDockNode(swingNode, content.getName(), graphicURI);
 	}
 
-	private DockNode addDockNode(String dockName, String graphicURI, Node node) {
+	private DockNode addDockNode(Node node, String dockName, String graphicURI) {
 		var dockNode = new DockNode(node, dockName, setGraphicIcon(graphicURI));
 		dockNode.closedProperty().addListener((arg, oldVal, newVal) -> ((CheckMenuItem) dockNode.getUserData()).setSelected(!newVal));
 
@@ -135,15 +140,31 @@ public class MapTool_Controller {
 	public void showWindow(CheckMenuItem checkMenuItem) {
 		log.info("Show window for : " + checkMenuItem.getId());
 		var dockNode = dockNodes.get(checkMenuItem.getId());
+		
+		if (dockNode == null) {
+			// Window is probably under construction...
+			log.error("Unable to open window: " + checkMenuItem.getId());
+			checkMenuItem.setDisable(true);
+			checkMenuItem.setSelected(false);
+			return;
+		}
 
 		if (checkMenuItem.isSelected()) {
-			DockPos dockPosition = dockNode.getLastDockPos();
+			var dockPosition = dockNode.getLastDockPos();
+			var dockSibiling = dockNode.getLastDockSibling();
+
 			if (dockPosition == null)
 				dockPosition = DockPos.LEFT;
 			else
 				log.info("last pos " + dockPosition);
 
-			dockNode.dock(dockPane, dockPosition);
+			dockNode.setPrefSize(100, 100);
+			
+			if (dockSibiling != null)
+				dockNode.dock(dockPane, dockPosition, dockSibiling);
+			else
+				dockNode.dock(dockPane, dockPosition);
+			
 			dockNode.setUserData(checkMenuItem); // Used to uncheck menu if dock is closed via X button
 		} else {
 			dockNode.close();

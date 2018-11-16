@@ -69,7 +69,7 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.ObservableList;
+import net.rptools.maptool.model.MapToolObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
@@ -685,8 +685,8 @@ public class CommandPanel extends JPanel implements Observer {
 	////
 	// OBSERVER
 	public void update(Observable o, Object arg) {
-		ObservableList<TextMessage> textList = MapTool.getMessageList();
-		ObservableList.Event event = (ObservableList.Event) arg;
+		MapToolObservableList<TextMessage> textList = MapTool.getMessageList();
+		MapToolObservableList.Event event = (MapToolObservableList.Event) arg;
 		switch (event) {
 		case append:
 			addMessage(textList.get(textList.size() - 1));

@@ -29,7 +29,7 @@ import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.ObservableList;
+import net.rptools.maptool.model.MapToolObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
@@ -44,6 +44,8 @@ import net.sf.json.JSONObject;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import javafx.collections.ObservableList;
 
 public class MacroLinkFunction extends AbstractFunction {
 	private static final Logger log = LogManager.getLogger(MacroLinkFunction.class);

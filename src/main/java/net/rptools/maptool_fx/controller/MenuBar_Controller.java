@@ -29,7 +29,7 @@ public class MenuBar_Controller {
 	private static final Logger log = LogManager.getLogger(MenuBar_Controller.class);
 	private MapTool_Controller mapTool_Controller;
 
-	@FXML // This method is called by the FXMLoader when initialization is complete
+	@FXML
 	void initialize() {
 		openCampaignMenuItem.disableProperty().bind(MapTool.getServer().getConfig().isPersonalServer().not());
 	}

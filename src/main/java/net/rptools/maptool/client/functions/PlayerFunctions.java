@@ -11,7 +11,8 @@ package net.rptools.maptool.client.functions;
 import java.util.Iterator;
 import java.util.List;
 
-import net.rptools.maptool.model.ObservableList;
+import javafx.collections.ObservableList;
+import net.rptools.maptool.model.MapToolObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool_fx.MapTool;
 import net.rptools.parser.Parser;

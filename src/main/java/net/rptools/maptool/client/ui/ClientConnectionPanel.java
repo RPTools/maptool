@@ -35,7 +35,7 @@ public class ClientConnectionPanel extends JList {
 	public ClientConnectionPanel() {
 		setName(I18N.getString("panel.Connections"));
 
-		setModel(new PlayerListModel(MapTool.getPlayerList()));
+		// setModel(new PlayerListModel(MapTool.getPlayerList()));
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		// setCellRenderer(new DefaultListCellRenderer());
 

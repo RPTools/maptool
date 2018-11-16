@@ -67,6 +67,8 @@ import io.sentry.event.UserBuilder;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -131,7 +133,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.ObservableList;
+import net.rptools.maptool.model.MapToolObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
@@ -183,7 +185,7 @@ public class MapTool extends Application {
 	private static Campaign campaign;
 
 	private static ObservableList<Player> playerList;
-	private static ObservableList<TextMessage> messageList;
+	private static MapToolObservableList<TextMessage> messageList;
 	private static Player player;
 
 	private static ClientConnection conn;
@@ -511,8 +513,8 @@ public class MapTool extends Application {
 		assetTransferManager = new AssetTransferManager();
 		assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
-		playerList = new ObservableList<Player>();
-		messageList = new ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
+		playerList = FXCollections.observableArrayList(); // new MapToolObservableList<Player>();
+		messageList = new MapToolObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
 
 		handler = new ClientMethodHandler();
 
@@ -1119,7 +1121,7 @@ public class MapTool extends Application {
 		}
 	}
 
-	public static ObservableList<TextMessage> getMessageList() {
+	public static MapToolObservableList<TextMessage> getMessageList() {
 		return messageList;
 	}
 

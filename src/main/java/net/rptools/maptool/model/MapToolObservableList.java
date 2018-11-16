@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Observable;
 
 // TODO: Make this class implement 'List'
-public class ObservableList<K> extends Observable implements Iterable {
+public class MapToolObservableList<K> extends Observable implements Iterable {
 
 	private List<K> list;
 
@@ -24,11 +24,11 @@ public class ObservableList<K> extends Observable implements Iterable {
 		add, append, remove, clear,
 	}
 
-	public ObservableList() {
+	public MapToolObservableList() {
 		list = new ArrayList<K>();
 	}
 
-	public ObservableList(List<K> list) {
+	public MapToolObservableList(List<K> list) {
 		assert list != null : "List cannot be null";
 
 		this.list = list;

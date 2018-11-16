@@ -11,11 +11,12 @@ package net.rptools.maptool.client.macro.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.collections.ObservableList;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.ObservableList;
+import net.rptools.maptool.model.MapToolObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.util.StringUtil;

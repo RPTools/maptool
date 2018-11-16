@@ -84,6 +84,7 @@ import com.jidesoft.swing.CheckBoxListWithSelectable;
 import com.jidesoft.swing.DefaultSelectable;
 import com.jidesoft.swing.Selectable;
 
+import javafx.collections.ObservableList;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapToolUtil;
@@ -97,7 +98,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Association;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.HeroLabData;
-import net.rptools.maptool.model.ObservableList;
+import net.rptools.maptool.model.MapToolObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
