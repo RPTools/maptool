@@ -51,6 +51,8 @@ import org.jdesktop.swingworker.SwingWorker;
 
 import com.jidesoft.swing.FolderChooser;
 
+import javafx.scene.control.Alert.AlertType;
+
 public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 	private static final long serialVersionUID = -1709712124453405062L;
 
@@ -250,41 +252,41 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 		switch (model.getTab()) {
 		case LOCAL:
 			if (StringUtils.isEmpty(model.getLocalDirectory())) {
-				MapTool.showMessage("dialog.addresource.warn.filenotfound", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
+				MapTool.showMessage("dialog.addresource.warn.filenotfound", "Error", AlertType.ERROR, model.getLocalDirectory());
 				return false;
 			}
 			File root = new File(model.getLocalDirectory());
 			if (!root.exists()) {
-				MapTool.showMessage("dialog.addresource.warn.filenotfound", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
+				MapTool.showMessage("dialog.addresource.warn.filenotfound", "Error", AlertType.ERROR, model.getLocalDirectory());
 				return false;
 			}
 			if (!root.isDirectory()) {
-				MapTool.showMessage("dialog.addresource.warn.directoryrequired", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
+				MapTool.showMessage("dialog.addresource.warn.directoryrequired", "Error", AlertType.ERROR, model.getLocalDirectory());
 				return false;
 			}
 			try {
 				AppSetup.installLibrary(FileUtil.getNameWithoutExtension(root), root);
 			} catch (MalformedURLException e) {
 				log.error("Bad path url: " + root.getPath(), e);
-				MapTool.showMessage("dialog.addresource.warn.badpath", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
+				MapTool.showMessage("dialog.addresource.warn.badpath", "Error", AlertType.ERROR, model.getLocalDirectory());
 				return false;
 			} catch (IOException e) {
 				log.error("IOException adding local root: " + root.getPath(), e);
-				MapTool.showMessage("dialog.addresource.warn.badpath", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
+				MapTool.showMessage("dialog.addresource.warn.badpath", "Error", AlertType.ERROR, model.getLocalDirectory());
 				return false;
 			}
 			return true;
 
 		case WEB:
 			if (StringUtils.isEmpty(model.getUrlName())) {
-				MapTool.showMessage("dialog.addresource.warn.musthavename", "Error", JOptionPane.ERROR_MESSAGE, model.getLocalDirectory());
+				MapTool.showMessage("dialog.addresource.warn.musthavename", "Error", AlertType.ERROR, model.getLocalDirectory());
 				return false;
 			}
 			// validate the url format so that we don't hit it later
 			try {
 				new URL(model.getUrl());
 			} catch (MalformedURLException e) {
-				MapTool.showMessage("dialog.addresource.warn.invalidurl", "Error", JOptionPane.ERROR_MESSAGE, model.getUrl());
+				MapTool.showMessage("dialog.addresource.warn.invalidurl", "Error", AlertType.ERROR, model.getUrl());
 				return false;
 			}
 			rowList.add(new LibraryRow(model.getUrlName(), model.getUrl(), -1));
@@ -294,7 +296,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 			Object[] selectedRows = getLibraryList().getSelectedValuesList().toArray();
 
 			if (selectedRows == null || selectedRows.length == 0) {
-				MapTool.showMessage("dialog.addresource.warn.mustselectone", "Error", JOptionPane.ERROR_MESSAGE);
+				MapTool.showMessage("dialog.addresource.warn.mustselectone", "Error", AlertType.ERROR);
 				return false;
 			}
 			for (Object obj : selectedRows) {
@@ -305,7 +307,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 				try {
 					new URL(row.path);
 				} catch (MalformedURLException e) {
-					MapTool.showMessage("dialog.addresource.warn.invalidurl", "Error", JOptionPane.ERROR_MESSAGE, row.path);
+					MapTool.showMessage("dialog.addresource.warn.invalidurl", "Error", AlertType.ERROR, row.path);
 					return false;
 				}
 				rowList.add(row);

@@ -1,0 +1,53 @@
+/* 	For reference... 
+	https://docs.oracle.com/javase/10/docs/api/javafx/scene/doc-files/cssref.html
+	http://www.oracle.com/technetwork/articles/javafx/javafx-css-159889.html
+*/
+
+/* Add custom font */
+@font-face {
+    font-family: Horta;
+    src: url('../fonts/Horta.ttf');
+}
+
+.hortaFont {
+	-fx-font-family: "Horta";
+	-fx-font-size: 20.0;
+}
+
+
+#kick-button {
+    -fx-padding: 1 0 1 0;
+    -fx-font-weight: bold;
+    -fx-min-width: 40px;
+}
+
+#ban-button {
+   -fx-padding: 1 0 1 0;
+   -fx-font-weight: bold;
+   -fx-min-width: 40px;
+}
+
+.ban-button2 {
+    -fx-background-color: linear-gradient(#ff5400, #be1d00);
+    -fx-background-radius: 30;
+    -fx-background-insets: 3;
+    -fx-text-fill: white;
+}
+
+.add-folder-button {
+	-fx-min-width: 26.0px;
+	-fx-min-height: 24.0px;
+	-fx-background-image: url("../image/folder.png");
+	-fx-background-size: 20.0px 20.0px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+.delete-button {
+	-fx-min-width: 26.0px;
+	-fx-min-height: 24.0px;
+	-fx-background-image: url("../image/trash.png");
+	-fx-background-size: 20.0px 20.0px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}

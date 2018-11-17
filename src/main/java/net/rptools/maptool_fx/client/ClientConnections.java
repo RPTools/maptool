@@ -13,16 +13,24 @@ import java.util.ResourceBundle;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.SignatureSpi.ecCVCDSA;
+import org.controlsfx.control.action.Action;
+import org.controlsfx.control.action.ActionUtils;
 
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import net.rptools.maptool.client.AppActions;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool_fx.MapTool;
 
 public class ClientConnections {
@@ -30,7 +38,6 @@ public class ClientConnections {
 	private String CONNECTIONS_FXML = "/net/rptools/maptool/fx/view/Connections.fxml";
 
 	private ListView<Player> clientListView;
-	// private ObservableList<Player> names = FXCollections.observableArrayList();
 
 	public ClientConnections() {
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(CONNECTIONS_FXML), ResourceBundle.getBundle(AppConstants.MAP_TOOL_BUNDLE));
@@ -40,31 +47,124 @@ public class ClientConnections {
 			log.error("Error loading ClientConnections FXML!", e);
 		}
 
+		MapTool.getPlayerList().add(new Player("Mogo", Role.PLAYER, ""));
+		MapTool.getPlayerList().add(new Player("Clint", Role.PLAYER, ""));
+		MapTool.getPlayerList().add(new Player("JamzTheMan", Role.GM, ""));
+		MapTool.getPlayerList().add(new Player("Mogo2", Role.PLAYER, ""));
+
 		clientListView.setItems(MapTool.getPlayerList());
-
-		clientListView.setCellFactory(param -> new ListCell<Player>() {
-		    @Override
-		    protected void updateItem(Player player, boolean empty) {
-		        super.updateItem(player, empty);
-
-		        if (empty || player == null || player.getName() == null) {
-		            setText(null);
-		        } else {
-		        	this.setContentDisplay(ContentDisplay.RIGHT);
-		            setText(player.toString());
-		            
-		            var button = new Button("Kick");
-		            // button.setOnAction(ACTION HERE);
-		            // OLD ACTION :: AppActions.BOOT_CONNECTED_PLAYER
-
-		            setGraphic(button);
-		            this.setGraphicTextGap(10);
-		        }
-		    }
-		});
+		clientListView.setCellFactory(param -> new AddListViewButton());
 	}
 
 	public Node getRootNode() {
 		return clientListView;
 	}
+
+	private final class AddListViewButton extends ListCell<Player> {
+		@Override
+		protected void updateItem(Player player, boolean empty) {
+			super.updateItem(player, empty);
+
+			if (empty || player == null || player.getName() == null) {
+				setText(null);
+			} else {
+				var borderPane = new BorderPane();
+				var hBox = new HBox();
+
+				var label = new Label(player.toString());
+				label.setPadding(new Insets(0, 10, 0, 0));
+				borderPane.setLeft(label);
+
+				if ((MapTool.isHostingServer() || MapTool.getPlayer().isGM()) && !MapTool.getPlayer().equals(player)) {
+					var kickButton = new Button(I18N.getText("action.kickConnectedPlayer"));
+					var banButton = new Button(I18N.getText("action.banConnectedPlayer"));
+
+					kickButton.setOnAction((event) -> kickConnectedPlayer(player));
+					banButton.setOnAction((event) -> kickConnectedPlayer(player, true));
+
+					kickButton.setId("kick-button");
+					banButton.setId("ban-button");
+
+					hBox.getChildren().add(banButton);
+					hBox.getChildren().add(kickButton);
+					hBox.setSpacing(5);
+
+					borderPane.setRight(hBox);
+				}
+
+				setGraphic(borderPane);
+			}
+		}
+
+	}
+
+	private void kickConnectedPlayer(Player player) {
+		kickConnectedPlayer(player, false);
+	}
+
+	private void kickConnectedPlayer(Player selectedPlayer, boolean banPlayer) {
+		if (MapTool.isPlayerConnected(selectedPlayer.getName())) {
+			if (banPlayer) {
+				MapTool.showInformation("CURRENTLY NOT IMPLEMENTED!");
+				return;
+			}
+
+			String msg;
+			if (banPlayer)
+				msg = I18N.getText("msg.confirm.banPlayer", selectedPlayer.getName());
+			else
+				msg = I18N.getText("msg.confirm.kickPlayer", selectedPlayer.getName());
+
+			if (MapTool.confirm(msg)) {
+				if (banPlayer) {
+					// TODO need a ban hammer!
+					MapTool.showInformation(I18N.getText("msg.info.playerBanned", selectedPlayer.getName()));
+				} else {
+					MapTool.serverCommand().bootPlayer(selectedPlayer.getName());
+
+					// Check if player is really removed?
+					if (MapTool.isPlayerConnected(selectedPlayer.getName()))
+						MapTool.showError("msg.error.failedToBoot");
+					else
+						MapTool.showInformation(I18N.getText("msg.info.playerBooted", selectedPlayer.getName()));
+				}
+			}
+
+			return;
+		}
+
+		MapTool.showError("msg.error.failedToBoot");
+	};
+
+	// public static final Action BOOT_CONNECTED_PLAYER = new Action("TEST") {
+	//
+	// public boolean isAvailable() {
+	// return MapTool.isHostingServer() || MapTool.getPlayer().isGM();
+	// }
+	//
+	// public void execute(ActionEvent e) {
+	// ClientConnectionPanel panel = MapTool.getFrame().getConnectionPanel();
+	// Player selectedPlayer = (Player) panel.getSelectedValue();
+	//
+	// if (selectedPlayer == null) {
+	// MapTool.showError("msg.error.mustSelectPlayerFirst");
+	// return;
+	// }
+	// if (MapTool.getPlayer().equals(selectedPlayer)) {
+	// MapTool.showError("msg.error.cantBootSelf");
+	// return;
+	// }
+	// if (MapTool.isPlayerConnected(selectedPlayer.getName())) {
+	// String msg = I18N.getText("msg.confirm.bootPlayer", selectedPlayer.getName());
+	// if (MapTool.confirm(msg)) {
+	// MapTool.serverCommand().bootPlayer(selectedPlayer.getName());
+	// msg = I18N.getText("msg.info.playerBooted", selectedPlayer.getName());
+	// MapTool.showInformation(msg);
+	// return;
+	// }
+	// }
+	// MapTool.showError("msg.error.failedToBoot");
+	// }
+	// };
+	//
 }

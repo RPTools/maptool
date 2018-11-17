@@ -1499,8 +1499,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	public void closingMaintenance() {
 		if (AppPreferences.getSaveReminder()) {
 			if (MapTool.getPlayer().isGM()) {
-				ButtonType result = MapTool.confirmImpl(I18N.getText("msg.title.saveCampaign"), JOptionPane.YES_NO_CANCEL_OPTION, "msg.confirm.saveCampaign", (Object[]) null);
-				// int result = JOptionPane.showConfirmDialog(MapTool.getFrame(), I18N.getText("msg.confirm.saveCampaign"), I18N.getText("msg.title.saveCampaign"), JOptionPane.YES_NO_CANCEL_OPTION);
+				ButtonType result = MapTool.confirmImpl(I18N.getText("msg.title.saveCampaign"), ButtonType.CANCEL, "msg.confirm.saveCampaign", (Object[]) null);
 
 				if (result == ButtonType.CANCEL || result == ButtonType.CLOSE) {
 					return;

@@ -21,9 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.Runtime.Version;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -54,11 +52,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.appender.FileAppender;
-import org.dockfx.DockNode;
+import org.controlsfx.control.action.Action;
 import org.dockfx.DockPane;
-import org.dockfx.DockPos;
-import org.dockfx.demo.DockFX;
-
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
@@ -76,23 +71,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Separator;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.scene.web.HTMLEditor;
-import javafx.scene.web.WebView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
@@ -233,6 +218,8 @@ public class MapTool extends Application {
 	}
 
 	private DockPane dockPane;
+
+	private static Stage mapToolStage;
 
 	@Override
 	public void init() throws Exception {
@@ -415,6 +402,8 @@ public class MapTool extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws IOException {
+		mapToolStage = primaryStage;
+
 		// Do pre initialization needed before FXML loading...
 		verifyJavaVersion(); // TODO: Move to preloader later?
 
@@ -476,9 +465,7 @@ public class MapTool extends Application {
 	/**
 	 * Check to see if we're running on Java 11+.
 	 * <p>
-	 * Now that we are packing the JRE with MapTool this is normally not required,
-	 * however for Development and running the JAR manually, we need the check.
-	 * MapTool is written for OpenJDK 11 + OpenJFX
+	 * Now that we are packing the JRE with MapTool this is normally not required, however for Development and running the JAR manually, we need the check. MapTool is written for OpenJDK 11 + OpenJFX
 	 */
 	private static void verifyJavaVersion() {
 		Version version;
@@ -578,12 +565,12 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * This method looks up the message key in the properties file and returns the
-	 * resultant text with the detail message from the <code>Throwable</code>
-	 * appended to the end.
+	 * This method looks up the message key in the properties file and returns the resultant text with the detail message from the <code>Throwable</code> appended to the end.
 	 *
-	 * @param msgKey the string to use when calling {@link I18N#getText(String)}
-	 * @param t      the exception to be processed
+	 * @param msgKey
+	 *            the string to use when calling {@link I18N#getText(String)}
+	 * @param t
+	 *            the exception to be processed
 	 * @return the <code>String</code> result
 	 */
 	public static String generateMessage(String msgKey, Throwable t) {
@@ -599,41 +586,42 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * This method is the base method for putting a dialog box up on the screen that
-	 * might be an error, a warning, or just an information message. Do not use this
-	 * method if the desired result is a simple confirmation box (use
-	 * {@link #confirm(String, Object...)} instead).
+	 * This method is the base method for putting a dialog box up on the screen that might be an error, a warning, or just an information message. Do not use this method if the desired result is a
+	 * simple confirmation box (use {@link #confirm(String, Object...)} instead).
 	 *
-	 * @param message     the key in the properties file to put in the body of the
-	 *                    dialog (formatted using <code>params</code>)
-	 * @param titleKey    the key in the properties file to use when creating the
-	 *                    title of the dialog window (formatted using
-	 *                    <code>params</code>)
-	 * @param messageType JOptionPane.{ERROR|WARNING|INFORMATION}_MESSAGE
-	 * @param params      optional parameters to use when formatting the data from
-	 *                    the properties file
+	 * @param message
+	 *            the key in the properties file to put in the body of the dialog (formatted using <code>params</code>)
+	 * @param titleKey
+	 *            the key in the properties file to use when creating the title of the dialog window (formatted using <code>params</code>)
+	 * @param messageType
+	 *            JOptionPane.{ERROR|WARNING|INFORMATION}_MESSAGE
+	 * @param params
+	 *            optional parameters to use when formatting the data from the properties file
 	 */
-	public static void showMessage(String message, String titleKey, int messageType, Object... params) {
+	public static void showMessage(String message, String titleKey, AlertType messageType, Object... params) {
 		String title = I18N.getText(titleKey, params);
-		JOptionPane.showMessageDialog(clientFrame, "<html>" + I18N.getText(message, params), title, messageType);
+		String msg = I18N.getText(message, params);
+
+		Alert alert = new Alert(messageType, msg);
+
+		alert.initOwner(mapToolStage);
+		alert.setTitle(title);
+		alert.setHeaderText(null);
+		alert.showAndWait().get();
 	}
 
 	/**
-	 * Same as {@link #showMessage(String, String, int, Object...)} except that
-	 * <code>messages</code> is stored into a JList and that component is then used
-	 * as the content of the dialog box. This allows multiple strings to be
-	 * displayed in a manner consistent with other message dialogs.
+	 * Same as {@link #showMessage(String, String, int, Object...)} except that <code>messages</code> is stored into a JList and that component is then used as the content of the dialog box. This
+	 * allows multiple strings to be displayed in a manner consistent with other message dialogs.
 	 *
-	 * @param messages    the Objects (normally strings) to put in the body of the
-	 *                    dialog; no properties file lookup is performed!
-	 * @param titleKey    the key in the properties file to use when creating the
-	 *                    title of the dialog window (formatted using
-	 *                    <code>params</code>)
-	 * @param messageType one of <code>JOptionPane.ERROR_MESSAGE</code>,
-	 *                    <code>JOptionPane.WARNING_MESSAGE</code>,
-	 *                    <code>JOptionPane.INFORMATION_MESSAGE</code>
-	 * @param params      optional parameters to use when formatting the title text
-	 *                    from the properties file
+	 * @param messages
+	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is performed!
+	 * @param titleKey
+	 *            the key in the properties file to use when creating the title of the dialog window (formatted using <code>params</code>)
+	 * @param messageType
+	 *            one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE</code>
+	 * @param params
+	 *            optional parameters to use when formatting the title text from the properties file
 	 */
 	public static void showMessage(Object[] messages, String titleKey, int messageType, Object... params) {
 		String title = I18N.getText(titleKey, params);
@@ -642,112 +630,105 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Displays the messages provided as <code>messages</code> by calling
-	 * {@link #showMessage(Object[], String, int, Object...)} and passing
-	 * <code>"msg.title.messageDialogFeedback"</code> and
+	 * Displays the messages provided as <code>messages</code> by calling {@link #showMessage(Object[], String, int, Object...)} and passing <code>"msg.title.messageDialogFeedback"</code> and
 	 * <code>JOptionPane.ERROR_MESSAGE</code> as parameters.
 	 *
-	 * @param messages the Objects (normally strings) to put in the body of the
-	 *                 dialog; no properties file lookup is performed!
+	 * @param messages
+	 *            the Objects (normally strings) to put in the body of the dialog; no properties file lookup is performed!
 	 */
 	public static void showFeedback(Object[] messages) {
 		showMessage(messages, "msg.title.messageDialogFeedback", JOptionPane.ERROR_MESSAGE);
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showError(String, Throwable)} and
-	 * passing <code>null</code> for the second parameter.
+	 * Displays a dialog box by calling {@link #showError(String, Throwable)} and passing <code>null</code> for the second parameter.
 	 *
-	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
+	 * @param msgKey
+	 *            the key to use when calling {@link I18N#getText(String)}
 	 */
 	public static void showError(String msgKey) {
 		showError(msgKey, null);
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted
-	 * by calling {@link #generateMessage(String, Throwable)} and passing it the two
-	 * parameters. Also logs an entry using the
-	 * {@link Logger#error(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
+	 * the {@link Logger#error(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogError"</code> ,
-	 * and the dialog type is <code>JOptionPane.ERROR_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogError"</code> , and the dialog type is <code>JOptionPane.ERROR_MESSAGE</code>.
 	 *
-	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
-	 * @param t      the exception to be processed
+	 * @param msgKey
+	 *            the key to use when calling {@link I18N#getText(String)}
+	 * @param t
+	 *            the exception to be processed
 	 */
 	public static void showError(String msgKey, Throwable t) {
 		String msg = generateMessage(msgKey, t);
 		log.error(msgKey, t);
-		showMessage(msg, "msg.title.messageDialogError", JOptionPane.ERROR_MESSAGE);
+		showMessage(msg, "msg.title.messageDialogError", AlertType.ERROR);
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showWarning(String, Throwable)} and
-	 * passing <code>null</code> for the second parameter.
+	 * Displays a dialog box by calling {@link #showWarning(String, Throwable)} and passing <code>null</code> for the second parameter.
 	 *
-	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
+	 * @param msgKey
+	 *            the key to use when calling {@link I18N#getText(String)}
 	 */
 	public static void showWarning(String msgKey) {
 		showWarning(msgKey, null);
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted
-	 * by calling {@link #generateMessage(String, Throwable)} and passing it the two
-	 * parameters. Also logs an entry using the
-	 * {@link Logger#warn(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
+	 * the {@link Logger#warn(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogWarning"</code>,
-	 * and the dialog type is <code>JOptionPane.WARNING_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogWarning"</code>, and the dialog type is <code>JOptionPane.WARNING_MESSAGE</code>.
 	 *
-	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
-	 * @param t      the exception to be processed
+	 * @param msgKey
+	 *            the key to use when calling {@link I18N#getText(String)}
+	 * @param t
+	 *            the exception to be processed
 	 */
 	public static void showWarning(String msgKey, Throwable t) {
 		String msg = generateMessage(msgKey, t);
 		log.warn(msgKey, t);
-		showMessage(msg, "msg.title.messageDialogWarning", JOptionPane.WARNING_MESSAGE);
+		showMessage(msg, "msg.title.messageDialogWarning", AlertType.WARNING);
 	}
 
 	/**
-	 * Displays a dialog box by calling {@link #showInformation(String, Throwable)}
-	 * and passing <code>null</code> for the second parameter.
+	 * Displays a dialog box by calling {@link #showInformation(String, Throwable)} and passing <code>null</code> for the second parameter.
 	 *
-	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
+	 * @param msgKey
+	 *            the key to use when calling {@link I18N#getText(String)}
 	 */
 	public static void showInformation(String msgKey) {
 		showInformation(msgKey, null);
 	}
 
 	/**
-	 * Displays a dialog box with a predefined title and type, and a message crafted
-	 * by calling {@link #generateMessage(String, Throwable)} and passing it the two
-	 * parameters. Also logs an entry using the
-	 * {@link Logger#info(Object, Throwable)} method.
+	 * Displays a dialog box with a predefined title and type, and a message crafted by calling {@link #generateMessage(String, Throwable)} and passing it the two parameters. Also logs an entry using
+	 * the {@link Logger#info(Object, Throwable)} method.
 	 * <p>
-	 * The title is the property key <code>"msg.title.messageDialogInfo"</code>, and
-	 * the dialog type is <code>JOptionPane.INFORMATION_MESSAGE</code>.
+	 * The title is the property key <code>"msg.title.messageDialogInfo"</code>, and the dialog type is <code>JOptionPane.INFORMATION_MESSAGE</code>.
 	 *
-	 * @param msgKey the key to use when calling {@link I18N#getText(String)}
-	 * @param t      the exception to be processed
+	 * @param msgKey
+	 *            the key to use when calling {@link I18N#getText(String)}
+	 * @param t
+	 *            the exception to be processed
 	 */
 	public static void showInformation(String msgKey, Throwable t) {
 		String msg = generateMessage(msgKey, t);
 		log.info(msgKey, t);
-		showMessage(msg, "msg.title.messageDialogInfo", JOptionPane.INFORMATION_MESSAGE);
+		showMessage(msg, "msg.title.messageDialogInfo", AlertType.INFORMATION);
 	}
 
 	/**
-	 * Displays a confirmation dialog that uses the message as a key to the
-	 * properties file, and the additional values as parameters to the formatting of
-	 * the key lookup.
+	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values as parameters to the formatting of the key lookup.
 	 *
-	 * @param message key from the properties file (preferred) or hard-coded string
-	 *                to display
-	 * @param params  optional arguments for the formatting of the property value
-	 * @return <code>true</code> if the user clicks the OK button,
-	 *         <code>false</code> otherwise
+	 * @param message
+	 *            key from the properties file (preferred) or hard-coded string to display
+	 * @param params
+	 *            optional arguments for the formatting of the property value
+	 * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
 	 */
 	public static boolean confirm(String message, Object... params) {
 		// String msg = I18N.getText(message, params);
@@ -758,47 +739,39 @@ public class MapTool extends Application {
 		// JOptionPane.OK_OPTION;
 		// return confirmImpl(title, JOptionPane.OK_OPTION, message, params) ==
 		// JOptionPane.OK_OPTION;
-		return confirmImpl(title, JOptionPane.OK_OPTION, message, params) == ButtonType.YES;
+		return confirmImpl(title, ButtonType.YES, message, params) == ButtonType.YES;
 	}
 
 	/**
-	 * Displays a confirmation dialog that uses the message as a key to the
-	 * properties file, and the additional values as parameters to the formatting of
-	 * the key lookup.
+	 * Displays a confirmation dialog that uses the message as a key to the properties file, and the additional values as parameters to the formatting of the key lookup.
 	 *
 	 * @param title
 	 * @param buttons
-	 * @param message key from the properties file (preferred) or hard-coded string
-	 *                to display
-	 * @param params  optional arguments for the formatting of the property value
-	 * @return <code>true</code> if the user clicks the OK button,
-	 *         <code>false</code> otherwise
+	 * @param message
+	 *            key from the properties file (preferred) or hard-coded string to display
+	 * @param params
+	 *            optional arguments for the formatting of the property value
+	 * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
 	 */
-	public static ButtonType confirmImpl(String title, int buttons, String message, Object... params) {
+	public static ButtonType confirmImpl(String title, ButtonType buttons, String message, Object... params) {
 		String msg = I18N.getText(message, params);
-		log.info("confirmImpl(" + message + ", " + buttons + ")");
-		log.info("JOptionPane.YES_NO_CANCEL_OPTION = " + JOptionPane.YES_NO_CANCEL_OPTION);
-
-		// return JOptionPane.showConfirmDialog(clientFrame, msg, title, buttons);
-		// FIXME: How we request buttons using JOptionsPane has changed and need to fix all the methods upstream
-
-		// https://code.makery.ch/blog/javafx-8-dialogs/
-		// https://code.makery.ch/blog/javafx-dialogs-official/
 
 		Alert alert = new Alert(AlertType.CONFIRMATION, msg, ButtonType.YES, ButtonType.NO);
 
-		if (buttons == JOptionPane.YES_NO_CANCEL_OPTION)
-			alert.getButtonTypes().add(ButtonType.CANCEL);
-
+		alert.initOwner(mapToolStage); // Dialog title icon isn't set unless it has an owner
 		alert.setTitle(title);
 		alert.setHeaderText(null);
 
+		if (buttons == ButtonType.CANCEL)
+			alert.getButtonTypes().add(ButtonType.CANCEL);
+
 		return alert.showAndWait().get();
+		
+		// Good blog on FX dialogs https://code.makery.ch/blog/javafx-dialogs-official/
 	}
 
 	/**
-	 * This method is specific to deleting a token, but it can be used as a basis
-	 * for any other method which wants to be turned off via a property.
+	 * This method is specific to deleting a token, but it can be used as a basis for any other method which wants to be turned off via a property.
 	 *
 	 * @return true if the token should be deleted.
 	 */
@@ -871,9 +844,8 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Launch the platform's web browser and ask it to open the given URL. Note that
-	 * this should not be called from any uncontrolled macros as there are both
-	 * security and denial-of-service attacks possible.
+	 * Launch the platform's web browser and ask it to open the given URL. Note that this should not be called from any uncontrolled macros as there are both security and denial-of-service attacks
+	 * possible.
 	 *
 	 * @param url
 	 */
@@ -999,17 +971,17 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * For Multi-monitor support, allows you to move the frame to a specific
-	 * monitor. It will also set the height, width and x, y position of the frame.
+	 * For Multi-monitor support, allows you to move the frame to a specific monitor. It will also set the height, width and x, y position of the frame.
 	 *
 	 * @author Jamz
 	 * @since 1.4.1.0
 	 *
-	 * @param frame    The JFrame to move
-	 * @param monitor  The monitor number as an int. Note the first monitor start at
-	 *                 0, not 1.
-	 * @param maximize set to true if you want to maximize the frame to that
-	 *                 monitor.
+	 * @param frame
+	 *            The JFrame to move
+	 * @param monitor
+	 *            The monitor number as an int. Note the first monitor start at 0, not 1.
+	 * @param maximize
+	 *            set to true if you want to maximize the frame to that monitor.
 	 */
 	private static void moveToMonitor(JFrame frame, int monitor, boolean maximize) {
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -1215,8 +1187,7 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Add a message only this client can see. This is a shortcut for addMessage(ME,
-	 * ...)
+	 * Add a message only this client can see. This is a shortcut for addMessage(ME, ...)
 	 *
 	 * @param message
 	 */
@@ -1225,8 +1196,7 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Add a message all clients can see. This is a shortcut for addMessage(SAY,
-	 * ...)
+	 * Add a message all clients can see. This is a shortcut for addMessage(SAY, ...)
 	 *
 	 * @param message
 	 */
@@ -1235,14 +1205,15 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Add a message all specified clients will see. This is a shortcut for
-	 * addMessage(WHISPER, ...) and addMessage(GM, ...). The <code>targets</code> is
-	 * expected do be in a string list built with <code>separator</code>.
+	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM, ...). The <code>targets</code> is expected do be in a string list built with
+	 * <code>separator</code>.
 	 *
-	 * @param message   message to be sent
-	 * @param targets   string specifying clients to send the message to (spaces are
-	 *                  trimmed)
-	 * @param separator the separator between entries in <code>targets</code>
+	 * @param message
+	 *            message to be sent
+	 * @param targets
+	 *            string specifying clients to send the message to (spaces are trimmed)
+	 * @param separator
+	 *            the separator between entries in <code>targets</code>
 	 */
 	public static void addGlobalMessage(String message, String targets, String separator) {
 		List<String> list = new LinkedList<String>();
@@ -1252,12 +1223,12 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Add a message all specified clients will see. This is a shortcut for
-	 * addMessage(WHISPER, ...) and addMessage(GM, ...).
+	 * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...) and addMessage(GM, ...).
 	 *
-	 * @param message message to be sent
-	 * @param targets list of <code>String</code>s specifying clients to send the
-	 *                message to
+	 * @param message
+	 *            message to be sent
+	 * @param targets
+	 *            list of <code>String</code>s specifying clients to send the message to
 	 */
 	public static void addGlobalMessage(String message, List<String> targets) {
 		for (String target : targets) {
@@ -1607,10 +1578,8 @@ public class MapTool extends Application {
 	}
 
 	/**
-	 * Return whether the campaign file has changed. Only checks to see if there is
-	 * a single empty map with the default name (ZoneFactory.DEFAULT_MAP_NAME). If
-	 * so, the campaign is "empty". We really should check against things like
-	 * campaign property changes as well, including campaign macros...
+	 * Return whether the campaign file has changed. Only checks to see if there is a single empty map with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". We really
+	 * should check against things like campaign property changes as well, including campaign macros...
 	 */
 	public static boolean isCampaignDirty() {
 		// TODO: This is a very naive check, but it's better than nothing
@@ -1717,8 +1686,7 @@ public class MapTool extends Application {
 		Sentry.getContext().addTag("tagName", "tagValue");
 
 		/*
-		 * This sends a simple event to Sentry using the statically stored instance that
-		 * was created in the ``main`` method.
+		 * This sends a simple event to Sentry using the statically stored instance that was created in the ``main`` method.
 		 */
 		Sentry.capture("This is another logWithStaticAPI test");
 
