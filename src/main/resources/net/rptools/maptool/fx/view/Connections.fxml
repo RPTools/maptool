@@ -3,4 +3,4 @@
 <?import javafx.scene.control.ListView?>
 
 
-<ListView fx:id="connectionsListView" onContextMenuRequested="#bootPlayer_ContextMenu" prefWidth="100.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool_fx.controller.Connections_Controller" />
+<ListView fx:id="connectionsListView" prefWidth="100.0" stylesheets="@../css/MapTool.css" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool_fx.controller.Connections_Controller" />

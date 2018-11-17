@@ -15,11 +15,6 @@ public class Connections_Controller {
 
 	@FXML
 	void initialize() {
-		assert connectionsListView != null : "fx:id=\"rootContainer\" was not injected: check your FXML file 'MapTool.fxml'.";
-	}
-
-	@FXML
-	void bootPlayer_ContextMenu(ContextMenuEvent event) {
-		log.info("BOOT HIS ASS!");
+		assert connectionsListView != null : "fx:id=\"connectionsListView\" was not injected: check your FXML file 'Connections.fxml'.";
 	}
 }
