@@ -13,7 +13,7 @@
       <Menu text="%menu.file">
          <items>
             <MenuItem text="%action.newCampaign" />
-            <MenuItem fx:id="openCampaignMenuItem" onAction="#openCampaign" text="%action.loadCampaign">
+            <MenuItem fx:id="openCampaignMenuItem" onAction="#openCampaign_OnAction" text="%action.loadCampaign">
                <accelerator>
                   <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                </accelerator></MenuItem>
@@ -49,7 +49,7 @@
             <SeparatorMenuItem mnemonicParsing="false" />
             <Menu disable="true" text="%menu.recent" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem text="%action.exit" />
+            <MenuItem onAction="#exit_OnAction" text="%action.exit" />
          </items>
       </Menu>
       <Menu text="%menu.edit">
@@ -121,6 +121,9 @@
             <CheckMenuItem fx:id="campaignWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Campaign" />
             <CheckMenuItem fx:id="selectedWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Selected" />
             <CheckMenuItem fx:id="impersonatedWindowMenuItem" mnemonicParsing="false" onAction="#windowCheckMenuItem_OnAction" text="%panel.Impersonate" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" onAction="#saveLayout_OnAction" text="%window.saveLayout" />
+            <MenuItem mnemonicParsing="false" onAction="#loadLayout_OnAction" text="%window.loadLayout" />
          </items>
       </Menu>
       <Menu text="%menu.help">

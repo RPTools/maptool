@@ -6,7 +6,7 @@
  * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
  * at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client;
+package net.rptools.maptool_fx;
 
 import java.awt.Dimension;
 import java.awt.Event;
@@ -51,6 +51,15 @@ import javax.swing.KeyStroke;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppSetup;
+import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.client.MapToolUtil;
+import net.rptools.maptool.client.RemoteFileDownloader;
+import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.ServerDisconnectHandler;
 import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.GridTool;
 import net.rptools.maptool.client.ui.AddResourceDialog;
@@ -131,8 +140,8 @@ import com.jidesoft.docking.DockableFrame;
  * Last is the {@link ClientAction#execute(ActionEvent)} method. It is passed the {@link ActionEvent} object that triggered this Action as a parameter. It should perform the necessary work to
  * accomplish the effect of the Action.
  */
-public class AppActions {
-	private static final Logger log = LogManager.getLogger(AppActions.class);
+public class AppActionsFX {
+	private static final Logger log = LogManager.getLogger(AppActionsFX.class);
 
 	private static Set<Token> tokenCopySet = null;
 	public static final int menuShortcut = getMenuShortcutKeyMask();
@@ -152,6 +161,17 @@ public class AppActions {
 		}
 		return key;
 	}
+
+
+
+	/*
+	 * 
+	 * 
+	 * OLD CODE BELOW FOR COPY/REFERENCE
+	 * 
+	 * 
+	 * 
+	 */
 
 	public static final Action MRU_LIST = new DefaultClientAction() {
 		{
@@ -481,7 +501,7 @@ public class AppActions {
 		public void execute(ActionEvent e) {
 			try {
 				// Load the defaults
-				InputStream in = AppActions.class.getClassLoader().getResourceAsStream("net/rptools/maptool/client/defaultTables.mtprops");
+				InputStream in = AppActionsFX.class.getClassLoader().getResourceAsStream("net/rptools/maptool/client/defaultTables.mtprops");
 				CampaignProperties properties = PersistenceUtil.loadCampaignProperties(in);
 				in.close();
 
@@ -619,7 +639,9 @@ public class AppActions {
 			Zone z = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 			z.undoDrawable();
 			isAvailable();
-			REDO_PER_MAP.isAvailable(); // XXX FJE Calling these forces the update, but won't the framework call them?
+			REDO_PER_MAP.isAvailable(); // XXX FJE Calling these forces
+										// the update, but won't the
+										// framework call them?
 		}
 
 		@Override
@@ -2698,21 +2720,6 @@ public class AppActions {
 		}
 	};
 
-	// public static final Action EXIT = new DefaultClientAction() {
-	// {
-	// init("action.exit");
-	// }
-	//
-	// @Override
-	// public void execute(ActionEvent ae) {
-	// if (!MapTool.getFrame().confirmClose()) {
-	// return;
-	// } else {
-	// MapTool.getFrame().closingMaintenance();
-	// }
-	// }
-	// };
-
 	/**
 	 * Toggle the drawing of measurements.
 	 */
@@ -2957,7 +2964,7 @@ public class AppActions {
 		public void actionPerformed(ActionEvent ae) {
 			if (MapTool.isCampaignDirty() && !MapTool.confirm("msg.confirm.loseChanges"))
 				return;
-			AppActions.loadCampaign(campaignFile);
+			AppActionsFX.loadCampaign(campaignFile);
 		}
 	}
 }

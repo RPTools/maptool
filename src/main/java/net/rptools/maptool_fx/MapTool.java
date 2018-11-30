@@ -17,6 +17,7 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.Transparency;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -32,9 +33,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Observer;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
+import javax.imageio.spi.IIORegistry;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -57,6 +60,7 @@ import org.dockfx.DockPane;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
+
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
 import io.sentry.event.BreadcrumbBuilder;
@@ -139,12 +143,13 @@ import net.rptools.maptool.webapi.MTWebAppServer;
 import net.rptools.maptool_fx.controller.MapTool_Controller;
 import net.rptools.maptool_fx.util.CommandLineOptionHelper;
 import net.rptools.maptool_fx.util.LogHelper;
-
 import net.tsc.servicediscovery.ServiceAnnouncer;
 
 /**
  */
 public class MapTool extends Application {
+	private static MapTool appInstance;
+
 	private static Logger log;
 
 	private static final String USAGE = "<html><body width=\"400\">You are running MapTool with insufficient memory allocated (%dMB).<br><br>"
@@ -223,28 +228,13 @@ public class MapTool extends Application {
 
 	@Override
 	public void init() throws Exception {
-		// Since we are using multiple plugins (Twelve Monkeys for PSD and JAI for
-		// jpeg2000) in the same uber jar,
-		// the META-INF/services/javax.imageio.spi.ImageReaderSpi gets overwritten. So
-		// we need to register them manually:
-		// https://github.com/jai-imageio/jai-imageio-core/issues/29
-		// IIORegistry registry = IIORegistry.getDefaultInstance();
-		// registry.registerServiceProvider(new
-		// com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi());
+		appInstance = this;
 
-		// long mem = Runtime.getRuntime().maxMemory();
-		// String msg = new String(String.format(USAGE, mem / (1024 * 1024)));
-		//
-		// // Asking for 256MB via the -Xmx256M switch doesn't guarantee that the amount
-		// maxMemory() reports will be 256MB.
-		// // The actual amount seems to vary from PC to PC. 200MB seems to be a safe
-		// value for now. <Phergus>
-		// // TODO: FXify this
-		// if (mem < 200 * 1024 * 1024) {
-		// // TODO FX this! -Jamz
-		// JOptionPane.showMessageDialog(new JFrame(), msg, "Usage",
-		// JOptionPane.INFORMATION_MESSAGE);
-		// }
+		// Since we are using multiple plugins (Twelve Monkeys for PSD and JAI for jpeg2000) in the same uber jar,
+		// the META-INF/services/javax.imageio.spi.ImageReaderSpi gets overwritten. So we need to register them manually:
+		// https://github.com/jai-imageio/jai-imageio-core/issues/29
+		IIORegistry registry = IIORegistry.getDefaultInstance();
+		registry.registerServiceProvider(new com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi());
 
 		// This is to initialize the log4j to set the path for logs. Just calling
 		// AppUtil sets the System.property
@@ -425,8 +415,8 @@ public class MapTool extends Application {
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
 			public void handle(javafx.stage.WindowEvent event) {
-				log.info("Window closed, exiting MapTool.");
-				System.exit(1);
+				event.consume();
+				close();
 			}
 		});
 
@@ -436,17 +426,85 @@ public class MapTool extends Application {
 
 		Platform.runLater(() -> {
 			mapTool_Controller.setDefaultPanes(clientFrame, dockPane);
-			// mapTool_Controller.getMenuBarController().setClientFrame(clientFrame);
-			// mapTool_Controller.getMenuBarController().setDockPane(dockPane);
 
 			Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
 			DockPane.initializeDefaultUserAgentStylesheet();
-
+			
 			// Now that the Application is loaded, check for new release...
 			AppUpdate.gitHubReleases();
 
 			postInitialize();
 		});
+	}
+
+	@Override
+	public void stop() {
+		ServerDisconnectHandler.disconnectExpected = true;
+		MapTool.disconnect();
+
+		mapTool_Controller.saveLayout();
+
+		// If closing cleanly, remove the autosave file
+		MapTool.getAutoSaveManager().purge();
+
+		Platform.exit();
+		System.exit(0);
+	}
+
+	public static MapTool getInstance() {
+		return appInstance;
+	}
+
+	public void close() {
+
+		if (!confirmClose()) {
+			return;
+		}
+
+		if (!doClosingTasks())
+			return;
+
+		stop();
+	}
+
+	private static boolean confirmClose() {
+		if (MapTool.isHostingServer()) {
+			if (!MapTool.confirm("msg.confirm.hostingDisconnect")) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean doClosingTasks() {
+		if (AppPreferences.getSaveReminder()) {
+			if (MapTool.getPlayer().isGM()) {
+				ButtonType result = MapTool.confirmImpl(I18N.getText("msg.title.saveCampaign"), ButtonType.CANCEL, "msg.confirm.saveCampaign", (Object[]) null);
+
+				if (result == ButtonType.CANCEL || result == ButtonType.CLOSE) {
+					return false;
+				}
+
+				if (result == ButtonType.YES) {
+					final Observer callback = new Observer() {
+						public void update(java.util.Observable o, Object arg) {
+							if (arg instanceof String) {
+								// There was an error during the save -- don't terminate MapTool!
+							} else {
+								return;
+							}
+						}
+					};
+
+					ActionEvent ae = new ActionEvent(callback, 0, "close");
+					AppActions.SAVE_CAMPAIGN.actionPerformed(ae);
+				}
+			} else {
+				return MapTool.confirm("msg.confirm.disconnecting");
+			}
+		}
+
+		return true;
 	}
 
 	public static String getVersion() {
@@ -766,7 +824,7 @@ public class MapTool extends Application {
 			alert.getButtonTypes().add(ButtonType.CANCEL);
 
 		return alert.showAndWait().get();
-		
+
 		// Good blog on FX dialogs https://code.makery.ch/blog/javafx-dialogs-official/
 	}
 
@@ -1103,7 +1161,7 @@ public class MapTool extends Application {
 		return serverCommand;
 	}
 
-	public static MapToolServer getServer() {
+	public MapToolServer getServer() {
 		return server;
 	}
 

@@ -178,7 +178,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	// Components
 	private final AssetPanel assetPanel;
-	private final ClientConnectionPanel connectionPanel;
+//	private final ClientConnectionPanel connectionPanel;
 	private final InitiativePanel initiativePanel;
 	private final PointerOverlay pointerOverlay;
 	private final CommandPanel commandPanel;
@@ -329,7 +329,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		// Components
 		glassPane = new GlassPane();
 		assetPanel = createAssetPanel();
-		connectionPanel = createConnectionPanel();
+//		connectionPanel = createConnectionPanel();
 		toolbox = new Toolbox();
 		initiativePanel = createInitiativePanel();
 
@@ -410,8 +410,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 		if (!AppUtil.MAC_OS_X)
 			removeWindowsF10();
-		else
-			registerForMacOSXEvents();
+//		else
+//			registerForMacOSXEvents();
 
 		MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
 
@@ -433,38 +433,39 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		return chatTyperTimers;
 	}
 
-	public void registerForMacOSXEvents() {
-		try {
-			Desktop.getDesktop().setQuitHandler(new QuitHandler() {
-				@Override
-				public void handleQuitRequestWith(QuitEvent arg0, QuitResponse arg1) {
-					((ClientAction) AppActions.EXIT).execute(null);
-					/*
-					 * Always tell the OS to cancel the quit operation -- we're doing it ourselves. Unfortunately, if the user was trying to logout, the logout operation is now cancelled, too! We
-					 * can't use performQuit() because that is documented to call System.exit(0) and we may not be done with what we're doing. That just leaves not calling either one -- that may turn
-					 * out to be the best option in the long run.
-					 */
-					arg1.cancelQuit();
-				}
-			});
-			Desktop.getDesktop().setAboutHandler(new AboutHandler() {
-				@Override
-				public void handleAbout(AboutEvent arg0) {
-					((ClientAction) AppActions.SHOW_ABOUT).execute(null);
-				}
-			});
-			Desktop.getDesktop().setPreferencesHandler(new PreferencesHandler() {
-				@Override
-				public void handlePreferences(PreferencesEvent arg0) {
-					((ClientAction) AppActions.SHOW_PREFERENCES).execute(null);
-				}
-			});
-		} catch (Exception e) {
-			String msg = "Error while configuring Desktop interaction";
-			log.error(msg, e);
-			System.err.println(msg);
-		}
-	}
+// Shouldn't need mac specific events in fx?
+//	public void registerForMacOSXEvents() {
+//		try {
+//			Desktop.getDesktop().setQuitHandler(new QuitHandler() {
+//				@Override
+//				public void handleQuitRequestWith(QuitEvent arg0, QuitResponse arg1) {
+//					((ClientAction) AppActions.EXIT).execute(null);
+//					/*
+//					 * Always tell the OS to cancel the quit operation -- we're doing it ourselves. Unfortunately, if the user was trying to logout, the logout operation is now cancelled, too! We
+//					 * can't use performQuit() because that is documented to call System.exit(0) and we may not be done with what we're doing. That just leaves not calling either one -- that may turn
+//					 * out to be the best option in the long run.
+//					 */
+//					arg1.cancelQuit();
+//				}
+//			});
+//			Desktop.getDesktop().setAboutHandler(new AboutHandler() {
+//				@Override
+//				public void handleAbout(AboutEvent arg0) {
+//					((ClientAction) AppActions.SHOW_ABOUT).execute(null);
+//				}
+//			});
+//			Desktop.getDesktop().setPreferencesHandler(new PreferencesHandler() {
+//				@Override
+//				public void handlePreferences(PreferencesEvent arg0) {
+//					((ClientAction) AppActions.SHOW_PREFERENCES).execute(null);
+//				}
+//			});
+//		} catch (Exception e) {
+//			String msg = "Error while configuring Desktop interaction";
+//			log.error(msg, e);
+//			System.err.println(msg);
+//		}
+//	}
 
 	public DragImageGlassPane getDragImageGlassPane() {
 		return dragImageGlassPane;
@@ -1112,10 +1113,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		return false;
 	}
 
-	private ClientConnectionPanel createConnectionPanel() {
-		ClientConnectionPanel panel = new ClientConnectionPanel();
-		return panel;
-	}
+//	private ClientConnectionPanel createConnectionPanel() {
+//		ClientConnectionPanel panel = new ClientConnectionPanel();
+//		return panel;
+//	}
 
 	private InitiativePanel createInitiativePanel() {
 		MapTool.getEventDispatcher().addListener(new AppEventListener() {
@@ -1243,9 +1244,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		return commandPanel;
 	}
 
-	public ClientConnectionPanel getConnectionPanel() {
-		return connectionPanel;
-	}
+//	public ClientConnectionPanel getConnectionPanel() {
+//		return connectionPanel;
+//	}
 
 	public AssetPanel getAssetPanel() {
 		return assetPanel;
@@ -1476,89 +1477,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		}
 	}
 
-	// WINDOW LISTENER
-	public void windowOpened(WindowEvent e) {
-	}
 
-	public void windowClosing(WindowEvent e) {
-		if (!confirmClose()) {
-			return;
-		}
-		closingMaintenance();
-	}
-
-	public boolean confirmClose() {
-		if (MapTool.isHostingServer()) {
-			if (!MapTool.confirm("msg.confirm.hostingDisconnect")) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public void closingMaintenance() {
-		if (AppPreferences.getSaveReminder()) {
-			if (MapTool.getPlayer().isGM()) {
-				ButtonType result = MapTool.confirmImpl(I18N.getText("msg.title.saveCampaign"), ButtonType.CANCEL, "msg.confirm.saveCampaign", (Object[]) null);
-
-				if (result == ButtonType.CANCEL || result == ButtonType.CLOSE) {
-					return;
-				}
-				if (result == ButtonType.YES) {
-					final Observer callback = new Observer() {
-						public void update(java.util.Observable o, Object arg) {
-							if (arg instanceof String) {
-								// There was an error during the save -- don't terminate MapTool!
-							} else {
-								MapTool.getFrame().close();
-							}
-						}
-					};
-					ActionEvent ae = new ActionEvent(callback, 0, "close");
-					AppActions.SAVE_CAMPAIGN.actionPerformed(ae);
-					return;
-				}
-			} else {
-				if (!MapTool.confirm("msg.confirm.disconnecting")) {
-					return;
-				}
-			}
-		}
-		close();
-	}
-
-	public void close() {
-		ServerDisconnectHandler.disconnectExpected = true;
-		MapTool.disconnect();
-
-		getDockingManager().saveLayoutDataToFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
-
-		// If closing cleanly, remove the autosave file
-		MapTool.getAutoSaveManager().purge();
-		setVisible(false);
-
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				dispose();
-			}
-		});
-	}
-
-	public void windowClosed(WindowEvent e) {
-		System.exit(0);
-	}
-
-	public void windowIconified(WindowEvent e) {
-	}
-
-	public void windowDeiconified(WindowEvent e) {
-	}
-
-	public void windowActivated(WindowEvent e) {
-	}
-
-	public void windowDeactivated(WindowEvent e) {
-	}
 
 	// Windows OS defaults F10 to the menu bar, noooooo!! We want for macro buttons.
 	// XXX Shouldn't this keystroke be configurable via the properties file anyway?
@@ -1783,5 +1702,47 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 				macroButton.getProperties().executeMacro();
 			}
 		}
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

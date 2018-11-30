@@ -31,11 +31,11 @@ public class MenuBar_Controller {
 
 	@FXML
 	void initialize() {
-		openCampaignMenuItem.disableProperty().bind(MapTool.getServer().getConfig().isPersonalServer().not());
+		openCampaignMenuItem.disableProperty().bind(MapTool.getInstance().getServer().getConfig().isPersonalServer().not());
 	}
 
 	@FXML
-	void openCampaign(ActionEvent event) {
+	void openCampaign_OnAction(ActionEvent event) {
 		if (MapTool.isCampaignDirty() && !MapTool.confirm("msg.confirm.loseChanges"))
 			return;
 
@@ -59,18 +59,33 @@ public class MenuBar_Controller {
 	@FXML
 	void startServer(ActionEvent event) {
 		// TESTING
-		MapTool.getServer().getConfig().setPersonalServer(false);
+		MapTool.getInstance().getServer().getConfig().setPersonalServer(false);
 	}
 
 	@FXML
 	void clientDisconnect(ActionEvent event) {
 		// TESTING
-		MapTool.getServer().getConfig().setPersonalServer(true);
+		MapTool.getInstance().getServer().getConfig().setPersonalServer(true);
 	}
 
 	@FXML
 	void windowCheckMenuItem_OnAction(ActionEvent event) {
 		mapTool_Controller.showWindow((CheckMenuItem) event.getSource());
+	}
+
+	@FXML
+	public void exit_OnAction() {
+		MapTool.getInstance().close();
+	}
+
+	@FXML
+	public void saveLayout_OnAction() {
+		mapTool_Controller.saveLayout();
+	}
+
+	@FXML
+	public void loadLayout_OnAction() {
+		mapTool_Controller.loadLayout();
 	}
 
 	public void setParentControl(MapTool_Controller mapTool_Controller) {

@@ -6,7 +6,7 @@
  * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
  * at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool_fx.client;
+package net.rptools.maptool_fx.client.ui;
 
 import java.io.IOException;
 import java.util.ResourceBundle;
@@ -47,20 +47,21 @@ public class ClientConnections {
 			log.error("Error loading ClientConnections FXML!", e);
 		}
 
-		MapTool.getPlayerList().add(new Player("Mogo", Role.PLAYER, ""));
-		MapTool.getPlayerList().add(new Player("Clint", Role.PLAYER, ""));
-		MapTool.getPlayerList().add(new Player("JamzTheMan", Role.GM, ""));
-		MapTool.getPlayerList().add(new Player("Mogo2", Role.PLAYER, ""));
+		// TODO: Remove Me later, for testing only
+		// MapTool.getPlayerList().add(new Player("Mogo", Role.PLAYER, ""));
+		// MapTool.getPlayerList().add(new Player("Clint", Role.PLAYER, ""));
+		// MapTool.getPlayerList().add(new Player("JamzTheMan", Role.GM, ""));
+		// MapTool.getPlayerList().add(new Player("Mogo2", Role.PLAYER, ""));
 
 		clientListView.setItems(MapTool.getPlayerList());
-		clientListView.setCellFactory(param -> new AddListViewButton());
+		clientListView.setCellFactory(param -> new PlayerListCell());
 	}
 
 	public Node getRootNode() {
 		return clientListView;
 	}
 
-	private final class AddListViewButton extends ListCell<Player> {
+	private final class PlayerListCell extends ListCell<Player> {
 		@Override
 		protected void updateItem(Player player, boolean empty) {
 			super.updateItem(player, empty);
@@ -135,36 +136,4 @@ public class ClientConnections {
 
 		MapTool.showError("msg.error.failedToBoot");
 	};
-
-	// public static final Action BOOT_CONNECTED_PLAYER = new Action("TEST") {
-	//
-	// public boolean isAvailable() {
-	// return MapTool.isHostingServer() || MapTool.getPlayer().isGM();
-	// }
-	//
-	// public void execute(ActionEvent e) {
-	// ClientConnectionPanel panel = MapTool.getFrame().getConnectionPanel();
-	// Player selectedPlayer = (Player) panel.getSelectedValue();
-	//
-	// if (selectedPlayer == null) {
-	// MapTool.showError("msg.error.mustSelectPlayerFirst");
-	// return;
-	// }
-	// if (MapTool.getPlayer().equals(selectedPlayer)) {
-	// MapTool.showError("msg.error.cantBootSelf");
-	// return;
-	// }
-	// if (MapTool.isPlayerConnected(selectedPlayer.getName())) {
-	// String msg = I18N.getText("msg.confirm.bootPlayer", selectedPlayer.getName());
-	// if (MapTool.confirm(msg)) {
-	// MapTool.serverCommand().bootPlayer(selectedPlayer.getName());
-	// msg = I18N.getText("msg.info.playerBooted", selectedPlayer.getName());
-	// MapTool.showInformation(msg);
-	// return;
-	// }
-	// }
-	// MapTool.showError("msg.error.failedToBoot");
-	// }
-	// };
-	//
 }

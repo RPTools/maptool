@@ -58,4 +58,6 @@ public class AppConstants {
 	public static final String MACRO_FILE_EXTENSION = ".mtmacro";
 	public static final String MACROSET_FILE_EXTENSION = ".mtmacset";
 	public static final String TABLE_FILE_EXTENSION = ".mttable";
+
+	public static final String DOCK_LAYOUT_FILE = "dock_layout.pref";
 }

@@ -252,4 +252,8 @@ public class AppUtil {
 		}
 		return clientId;
 	}
+
+	public static String getDockConfig() {
+		return getAppHome("config").getAbsolutePath() + "/" + AppConstants.DOCK_LAYOUT_FILE;
+	}
 }
