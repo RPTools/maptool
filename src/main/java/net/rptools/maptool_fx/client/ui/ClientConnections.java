@@ -34,6 +34,8 @@ import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool_fx.MapTool;
 
 public class ClientConnections {
+	public final String WINDOW_NAME = I18N.getString("panel.Connections");
+	
 	private static final Logger log = LogManager.getLogger(ClientConnections.class);
 	private String CONNECTIONS_FXML = "/net/rptools/maptool/fx/view/Connections.fxml";
 

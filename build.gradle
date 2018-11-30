@@ -90,8 +90,8 @@ ext {
 }
 
 run {
-	args = [ '-v='+version ]
-	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development" ]
+	args = [ '-v='+tagVersion ]
+	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dprism.order=sw" ]
 
 	if(System.getProperty("exec.args") != null) {
 		args System.getProperty("exec.args").split()

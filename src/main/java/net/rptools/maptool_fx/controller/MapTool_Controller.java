@@ -76,20 +76,20 @@ public class MapTool_Controller {
 
 		addMapView(clientFrame, dockPane);
 
-		// var clientConnections = new ClientConnections();
+		var clientConnections = new ClientConnections();
 
 		// Set other panes in accordions for now
-		dockNodes.put("connectionsWindowMenuItem", addDockNode(new ClientConnections().getRootNode(), I18N.getString("panel.Connections"), CONNECTIONS_ICON));
-		// dockNodes.put("mapExplorerWindowMenuItem", addSwingNode(clientFrame.getTokenTreePanel(), MAP_EXPLORER_ICON));
-		// dockNodes.put("drawExplorerWindowMenuItem", addSwingNode(clientFrame.getDrawablesTreePanel(), DRAW_EXPLORER_ICON));
-		// dockNodes.put("intitiativeWindowMenuItem", addSwingNode(clientFrame.getInitiativePanel(), INITIATIVE_ICON));
-		// dockNodes.put("resourceLibraryWindowMenuItem", addSwingNode(clientFrame.getAssetPanel(), RESOURCE_LIBRARY_ICON));
-		// dockNodes.put("chatWindowMenuItem", addSwingNode(clientFrame.getCommandPanel(), CHAT_ICON));
-		// dockNodes.put("tablesWindowMenuItem", addSwingNode(clientFrame.getLookupTablePanel(), TABLES_ICON));
-		// dockNodes.put("globalWindowMenuItem", addSwingNode(clientFrame.getGlobalPanel(), GLOBAL_ICON));
-		// dockNodes.put("campaignWindowMenuItem", addSwingNode(clientFrame.getCampaignPanel(), CAMPAIGN_ICON));
-		// dockNodes.put("selectedWindowMenuItem", addSwingNode(clientFrame.getSelectionPanel(), SELECTED_ICON));
-		// dockNodes.put("impersonatedWindowMenuItem", addSwingNode(clientFrame.getImpersonatePanel(), IMPERSONATED_ICON));
+		dockNodes.put("connectionsWindowMenuItem", addDockNode(clientConnections.getRootNode(), clientConnections.WINDOW_NAME, CONNECTIONS_ICON));
+		dockNodes.put("mapExplorerWindowMenuItem", addSwingNode(clientFrame.getTokenTreePanel(), MAP_EXPLORER_ICON));
+		dockNodes.put("drawExplorerWindowMenuItem", addSwingNode(clientFrame.getDrawablesTreePanel(), DRAW_EXPLORER_ICON));
+		dockNodes.put("intitiativeWindowMenuItem", addSwingNode(clientFrame.getInitiativePanel(), INITIATIVE_ICON));
+		dockNodes.put("resourceLibraryWindowMenuItem", addSwingNode(clientFrame.getAssetPanel(), RESOURCE_LIBRARY_ICON));
+		dockNodes.put("chatWindowMenuItem", addSwingNode(clientFrame.getCommandPanel(), CHAT_ICON));
+		dockNodes.put("tablesWindowMenuItem", addSwingNode(clientFrame.getLookupTablePanel(), TABLES_ICON));
+		dockNodes.put("globalWindowMenuItem", addSwingNode(clientFrame.getGlobalPanel(), GLOBAL_ICON));
+		dockNodes.put("campaignWindowMenuItem", addSwingNode(clientFrame.getCampaignPanel(), CAMPAIGN_ICON));
+		dockNodes.put("selectedWindowMenuItem", addSwingNode(clientFrame.getSelectionPanel(), SELECTED_ICON));
+		dockNodes.put("impersonatedWindowMenuItem", addSwingNode(clientFrame.getImpersonatePanel(), IMPERSONATED_ICON));
 
 		rootPane.setCenter(dockPane);
 		loadLayout(); // FIXME doesn't open windows
