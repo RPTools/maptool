@@ -76,10 +76,10 @@ public class MapTool_Controller {
 
 		addMapView(clientFrame, dockPane);
 
-		// var clientConnections = new ClientConnections();
+		 var clientConnections = new ClientConnections();
 
 		// Set other panes in accordions for now
-		dockNodes.put("connectionsWindowMenuItem", addDockNode(new ClientConnections().getRootNode(), I18N.getString("panel.Connections"), CONNECTIONS_ICON));
+		dockNodes.put("connectionsWindowMenuItem", addDockNode(clientConnections.getRootNode(), clientConnections.WINDOW_NAME, CONNECTIONS_ICON));
 		// dockNodes.put("mapExplorerWindowMenuItem", addSwingNode(clientFrame.getTokenTreePanel(), MAP_EXPLORER_ICON));
 		// dockNodes.put("drawExplorerWindowMenuItem", addSwingNode(clientFrame.getDrawablesTreePanel(), DRAW_EXPLORER_ICON));
 		// dockNodes.put("intitiativeWindowMenuItem", addSwingNode(clientFrame.getInitiativePanel(), INITIATIVE_ICON));
