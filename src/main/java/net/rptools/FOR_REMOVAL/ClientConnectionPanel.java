@@ -33,25 +33,25 @@ package net.rptools.FOR_REMOVAL;
  * <li>others?
  * </ul>
  */
-//public class ClientConnectionPanel extends JList {
-//	public ClientConnectionPanel() {
-//		setName(I18N.getString("panel.Connections"));
+// public class ClientConnectionPanel extends JList {
+// public ClientConnectionPanel() {
+// setName(I18N.getString("panel.Connections"));
 //
-//		// setModel(new PlayerListModel(MapTool.getPlayerList()));
-//		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-//		// setCellRenderer(new DefaultListCellRenderer());
+// // setModel(new PlayerListModel(MapTool.getPlayerList()));
+// setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+// // setCellRenderer(new DefaultListCellRenderer());
 //
-//		addMouseListener(createPopupListener());
-//	}
+// addMouseListener(createPopupListener());
+// }
 //
-//	private MouseListener createPopupListener() {
-//		PopupListener listener = new PopupListener(createPopupMenu());
-//		return listener;
-//	}
+// private MouseListener createPopupListener() {
+// PopupListener listener = new PopupListener(createPopupMenu());
+// return listener;
+// }
 //
-//	private JPopupMenu createPopupMenu() {
-//		JPopupMenu menu = new JPopupMenu();
-//		menu.add(new JMenuItem(AppActions.BOOT_CONNECTED_PLAYER));
-//		return menu;
-//	}
-//}
+// private JPopupMenu createPopupMenu() {
+// JPopupMenu menu = new JPopupMenu();
+// menu.add(new JMenuItem(AppActions.BOOT_CONNECTED_PLAYER));
+// return menu;
+// }
+// }

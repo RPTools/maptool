@@ -429,7 +429,7 @@ public class MapTool extends Application {
 
 			Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
 			DockPane.initializeDefaultUserAgentStylesheet();
-			
+
 			// Now that the Application is loaded, check for new release...
 			AppUpdate.gitHubReleases();
 

@@ -178,7 +178,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 	// Components
 	private final AssetPanel assetPanel;
-//	private final ClientConnectionPanel connectionPanel;
+	// private final ClientConnectionPanel connectionPanel;
 	private final InitiativePanel initiativePanel;
 	private final PointerOverlay pointerOverlay;
 	private final CommandPanel commandPanel;
@@ -329,7 +329,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		// Components
 		glassPane = new GlassPane();
 		assetPanel = createAssetPanel();
-//		connectionPanel = createConnectionPanel();
+		// connectionPanel = createConnectionPanel();
 		toolbox = new Toolbox();
 		initiativePanel = createInitiativePanel();
 
@@ -410,8 +410,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
 		if (!AppUtil.MAC_OS_X)
 			removeWindowsF10();
-//		else
-//			registerForMacOSXEvents();
+		// else
+		// registerForMacOSXEvents();
 
 		MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
 
@@ -433,39 +433,39 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		return chatTyperTimers;
 	}
 
-// Shouldn't need mac specific events in fx?
-//	public void registerForMacOSXEvents() {
-//		try {
-//			Desktop.getDesktop().setQuitHandler(new QuitHandler() {
-//				@Override
-//				public void handleQuitRequestWith(QuitEvent arg0, QuitResponse arg1) {
-//					((ClientAction) AppActions.EXIT).execute(null);
-//					/*
-//					 * Always tell the OS to cancel the quit operation -- we're doing it ourselves. Unfortunately, if the user was trying to logout, the logout operation is now cancelled, too! We
-//					 * can't use performQuit() because that is documented to call System.exit(0) and we may not be done with what we're doing. That just leaves not calling either one -- that may turn
-//					 * out to be the best option in the long run.
-//					 */
-//					arg1.cancelQuit();
-//				}
-//			});
-//			Desktop.getDesktop().setAboutHandler(new AboutHandler() {
-//				@Override
-//				public void handleAbout(AboutEvent arg0) {
-//					((ClientAction) AppActions.SHOW_ABOUT).execute(null);
-//				}
-//			});
-//			Desktop.getDesktop().setPreferencesHandler(new PreferencesHandler() {
-//				@Override
-//				public void handlePreferences(PreferencesEvent arg0) {
-//					((ClientAction) AppActions.SHOW_PREFERENCES).execute(null);
-//				}
-//			});
-//		} catch (Exception e) {
-//			String msg = "Error while configuring Desktop interaction";
-//			log.error(msg, e);
-//			System.err.println(msg);
-//		}
-//	}
+	// Shouldn't need mac specific events in fx?
+	// public void registerForMacOSXEvents() {
+	// try {
+	// Desktop.getDesktop().setQuitHandler(new QuitHandler() {
+	// @Override
+	// public void handleQuitRequestWith(QuitEvent arg0, QuitResponse arg1) {
+	// ((ClientAction) AppActions.EXIT).execute(null);
+	// /*
+	// * Always tell the OS to cancel the quit operation -- we're doing it ourselves. Unfortunately, if the user was trying to logout, the logout operation is now cancelled, too! We
+	// * can't use performQuit() because that is documented to call System.exit(0) and we may not be done with what we're doing. That just leaves not calling either one -- that may turn
+	// * out to be the best option in the long run.
+	// */
+	// arg1.cancelQuit();
+	// }
+	// });
+	// Desktop.getDesktop().setAboutHandler(new AboutHandler() {
+	// @Override
+	// public void handleAbout(AboutEvent arg0) {
+	// ((ClientAction) AppActions.SHOW_ABOUT).execute(null);
+	// }
+	// });
+	// Desktop.getDesktop().setPreferencesHandler(new PreferencesHandler() {
+	// @Override
+	// public void handlePreferences(PreferencesEvent arg0) {
+	// ((ClientAction) AppActions.SHOW_PREFERENCES).execute(null);
+	// }
+	// });
+	// } catch (Exception e) {
+	// String msg = "Error while configuring Desktop interaction";
+	// log.error(msg, e);
+	// System.err.println(msg);
+	// }
+	// }
 
 	public DragImageGlassPane getDragImageGlassPane() {
 		return dragImageGlassPane;
@@ -1113,10 +1113,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		return false;
 	}
 
-//	private ClientConnectionPanel createConnectionPanel() {
-//		ClientConnectionPanel panel = new ClientConnectionPanel();
-//		return panel;
-//	}
+	// private ClientConnectionPanel createConnectionPanel() {
+	// ClientConnectionPanel panel = new ClientConnectionPanel();
+	// return panel;
+	// }
 
 	private InitiativePanel createInitiativePanel() {
 		MapTool.getEventDispatcher().addListener(new AppEventListener() {
@@ -1244,9 +1244,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		return commandPanel;
 	}
 
-//	public ClientConnectionPanel getConnectionPanel() {
-//		return connectionPanel;
-//	}
+	// public ClientConnectionPanel getConnectionPanel() {
+	// return connectionPanel;
+	// }
 
 	public AssetPanel getAssetPanel() {
 		return assetPanel;
@@ -1477,8 +1477,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 		}
 	}
 
-
-
 	// Windows OS defaults F10 to the menu bar, noooooo!! We want for macro buttons.
 	// XXX Shouldn't this keystroke be configurable via the properties file anyway?
 	// XXX Doesn't work for Mac OSX and isn't called in that case.
@@ -1707,42 +1705,42 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 	@Override
 	public void windowOpened(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowClosing(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowClosed(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowIconified(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

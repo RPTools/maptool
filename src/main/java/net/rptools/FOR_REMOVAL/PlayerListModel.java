@@ -8,39 +8,39 @@
  */
 package net.rptools.FOR_REMOVAL;
 
-//TODO: REMOVE ME
+// TODO: REMOVE ME
 
-//import java.util.Observable;
-//import java.util.Observer;
+// import java.util.Observable;
+// import java.util.Observer;
 //
-//import javax.swing.AbstractListModel;
+// import javax.swing.AbstractListModel;
 //
-//import net.rptools.maptool.model.MapToolObservableList;
-//import net.rptools.maptool.model.Player;
+// import net.rptools.maptool.model.MapToolObservableList;
+// import net.rptools.maptool.model.Player;
 //
-//public class PlayerListModel extends AbstractListModel implements Observer {
+// public class PlayerListModel extends AbstractListModel implements Observer {
 //
-//	private MapToolObservableList<Player> playerList;
+// private MapToolObservableList<Player> playerList;
 //
-//	public PlayerListModel(MapToolObservableList<Player> playerList) {
-//		this.playerList = playerList;
+// public PlayerListModel(MapToolObservableList<Player> playerList) {
+// this.playerList = playerList;
 //
-//		// TODO: Figure out how to clean this up when no longer in use
-//		// for now it doesn't matter, but, it's bad design
-//		playerList.addObserver(this);
-//	}
+// // TODO: Figure out how to clean this up when no longer in use
+// // for now it doesn't matter, but, it's bad design
+// playerList.addObserver(this);
+// }
 //
-//	public Object getElementAt(int index) {
-//		return playerList.get(index);
-//	}
+// public Object getElementAt(int index) {
+// return playerList.get(index);
+// }
 //
-//	public int getSize() {
-//		return playerList.size();
-//	}
+// public int getSize() {
+// return playerList.size();
+// }
 //
-//	////
-//	// OBSERVER
-//	public void update(Observable o, Object arg) {
-//		fireContentsChanged(this, 0, playerList.size());
-//	}
-//}
+// ////
+// // OBSERVER
+// public void update(Observable o, Object arg) {
+// fireContentsChanged(this, 0, playerList.size());
+// }
+// }

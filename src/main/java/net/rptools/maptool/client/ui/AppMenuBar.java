@@ -79,10 +79,10 @@ public class AppMenuBar extends JMenuBar {
 		fileMenu.add(new JMenuItem(AppActions.SHOW_CONNECTION_INFO));
 		fileMenu.addSeparator();
 		fileMenu.add(createRecentCampaignMenu());
-//		if (!AppUtil.MAC_OS_X) {
-//			fileMenu.addSeparator();
-//			fileMenu.add(new JMenuItem(AppActions.EXIT));
-//		}
+		// if (!AppUtil.MAC_OS_X) {
+		// fileMenu.addSeparator();
+		// fileMenu.add(new JMenuItem(AppActions.EXIT));
+		// }
 		return fileMenu;
 	}
 

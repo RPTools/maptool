@@ -1,7 +1,7 @@
 /*
  * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * TokenTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
  * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
  * at <http://www.gnu.org/licenses/agpl.html>.
@@ -36,7 +36,7 @@ import net.rptools.maptool_fx.MapTool;
 
 public class MapExplorer {
 	public final String WINDOW_NAME = I18N.getString("panel.MapExplorer");
-	
+
 	private static final Logger log = LogManager.getLogger(MapExplorer.class);
 	private String MAP_EXPLORER_FXML = "/net/rptools/maptool/fx/view/MapExplorer.fxml";
 
