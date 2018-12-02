@@ -1,58 +1,92 @@
 package net.rptools.maptool_fx.stub;
 
 import com.jidesoft.docking.DockableFrame;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
 
-import java.awt.*;
+import java.awt.Rectangle;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DockingManagerStub {
+
+
+    // Only want to show get frame once for some names as its very noisy otherwise
+    private static Set<String> frameShown = ConcurrentHashMap.newKeySet();
+
+    private static List<String> showOnlyOnce = Arrays.asList("IMPERSONATED", "SELECTION");
+
+    private void showDialog(String title, String header, String content) {
+        Platform.runLater(() -> {
+            Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+            dialog.setTitle(title);
+            dialog.setHeaderText(header);
+            if (content != null) {
+                dialog.setContentText(content);
+            }
+            dialog.showAndWait();
+        });
+    }
     public void hideFrame(String name) {
-        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
-        dialog.setTitle("Docking Manager Stub");
-        dialog.setHeaderText("DockingManagerStub.hideFrame()");
-        dialog.setContentText("Frame Name = " + name);
-        dialog.showAndWait();
+        showDialog(
+                "Docking Manager Stub",
+                "DockingManagerStub.hideFrame()",
+                "Frame Name = " + name
+        );
     }
 
     public void showFrame(String name) {
-        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
-        dialog.setTitle("Docking Manager Stub");
-        dialog.setHeaderText("DockingManagerStub.showFrame()");
-        dialog.setContentText("Frame Name = " + name);
-        dialog.showAndWait();
+        showDialog(
+                "Docking Manager Stub",
+                "DockingManagerStub.showFrame()",
+                "Frame Name = " + name
+        );
     }
 
     public void resetToDefault() {
-        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
-        dialog.setTitle("Docking Manager Stub");
-        dialog.setHeaderText("DockingManagerStub.resetToDefault()");
-        dialog.showAndWait();
+        showDialog(
+                "Docking Manager Stub",
+                "DockingManagerStub.resetToDefault()",
+                null
+        );
     }
 
     public void addFrame(HTMLFrame htmlFrame) {
-        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
-        dialog.setTitle("Docking Manager Stub");
-        dialog.setHeaderText("DockingManagerStub.addFrame()");
-        dialog.setContentText("HTML Frame Name = " + htmlFrame.getName());
-        dialog.showAndWait();
+        showDialog(
+                "Docking Manager Stub",
+                "DockingManagerStub.addFrame()",
+                "HTML Frame Name = " + htmlFrame.getName()
+        );
     }
 
     public void floatFrame(String key, Rectangle rect, boolean b) {
-        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
-        dialog.setTitle("Docking Manager Stub");
-        dialog.setHeaderText("DockingManagerStub.floatFrame()");
-        dialog.setContentText("key = " + key);
-        dialog.showAndWait();
+        showDialog(
+                 "Docking Manager Stub",
+                "DockingManagerStub.floatFrame()",
+                "key = " + key
+        );
     }
 
     public DockableFrame getFrame(String name) {
-        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
-        dialog.setTitle("Docking Manager Stub");
-        dialog.setHeaderText("DockingManagerStub.getFrame()");
-        dialog.setContentText("Name = " + name);
-        dialog.showAndWait();
-
+        if (showOnlyOnce.contains(name)) {
+            if (!frameShown.contains(name)) {
+                frameShown.add(name);
+                showDialog(
+                        "Docking Manager Stub",
+                        "DockingManagerStub.getFrame()",
+                        "Name = " + name + " (" + name + " will only be shown once)"
+                );
+            }
+        } else {
+            showDialog(
+                    "Docking Manager Stub",
+                    "DockingManagerStub.getFrame()",
+                    "Name = " + name
+            );
+        }
         return null;
     }
 }
