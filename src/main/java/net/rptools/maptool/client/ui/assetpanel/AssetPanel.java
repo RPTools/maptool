@@ -264,7 +264,9 @@ public class AssetPanel extends JComponent {
 			thumbnailPreviewSlider.setOrientation(SwingConstants.VERTICAL);
 			thumbnailPreviewSlider.setToolTipText(I18N.getString("panel.Asset.ImageModel.slider.toolTip"));
 
-			thumbnailPreviewSlider.setUI(new MetalSliderUI() {
+			// TODO: Remove
+			//  MetalSliderUI has a problem with unset default value under Mac OS
+			/*thumbnailPreviewSlider.setUI(new MetalSliderUI() {
 				protected void scrollDueToClickInTrack(int direction) {
 					int value = thumbnailPreviewSlider.getValue();
 
@@ -275,7 +277,7 @@ public class AssetPanel extends JComponent {
 					}
 					thumbnailPreviewSlider.setValue(value);
 				}
-			});
+			});*/
 
 			thumbnailPreviewSlider.addChangeListener(new ChangeListener() {
 				@Override
