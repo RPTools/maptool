@@ -29,69 +29,69 @@ import net.rptools.parser.function.AbstractFunction;
  */
 public class ExportDataFunctions extends AbstractFunction {
 
-	private static final ExportDataFunctions instance = new ExportDataFunctions();
+    private static final ExportDataFunctions instance = new ExportDataFunctions();
 
-	private ExportDataFunctions() {
-		super(1, 3, "exportData", "getEnvironmentVariable");
-	}
+    private ExportDataFunctions() {
+        super(1, 3, "exportData", "getEnvironmentVariable");
+    }
 
-	public static ExportDataFunctions getInstance() {
-		return instance;
-	}
+    public static ExportDataFunctions getInstance() {
+        return instance;
+    }
 
-	@Override
-	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
-		// New function to save data to an external file.
-		if (functionName.equals("exportData")) {
-			if (parameters.size() != 3)
-				throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
+    @Override
+    public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
+        // New function to save data to an external file.
+        if (functionName.equals("exportData")) {
+            if (parameters.size() != 3)
+                throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
 
-			File file = new File(parameters.get(0).toString());
-			String data = parameters.get(1).toString();
-			boolean appendToFile = (new BigDecimal(parameters.get(2).toString()).equals(BigDecimal.ONE) ? true : false);
+            File file = new File(parameters.get(0).toString());
+            String data = parameters.get(1).toString();
+            boolean appendToFile = (new BigDecimal(parameters.get(2).toString()).equals(BigDecimal.ONE) ? true : false);
 
-			try {
-				// if file doesn't exists, then create it
-				if (!file.exists()) {
-					file.createNewFile();
-				}
+            try {
+                // if file doesn't exists, then create it
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
 
-				FileWriter fw = new FileWriter(file.getAbsoluteFile(), appendToFile);
-				BufferedWriter bw = new BufferedWriter(fw);
+                FileWriter fw = new FileWriter(file.getAbsoluteFile(), appendToFile);
+                BufferedWriter bw = new BufferedWriter(fw);
 
-				String[] words = data.split("\\\\r");
-				for (String word : words) {
-					bw.write(word.replaceAll("\\\\t", "\t"));
-					bw.newLine();
-				}
+                String[] words = data.split("\\\\r");
+                for (String word : words) {
+                    bw.write(word.replaceAll("\\\\t", "\t"));
+                    bw.newLine();
+                }
 
-				bw.close();
-			} catch (Exception e) {
-				System.out.println("Jamz: Error in exportData during file write!");
-				e.printStackTrace();
-				return BigDecimal.ZERO;
-			}
+                bw.close();
+            } catch (Exception e) {
+                System.out.println("Jamz: Error in exportData during file write!");
+                e.printStackTrace();
+                return BigDecimal.ZERO;
+            }
 
-			return BigDecimal.ONE;
+            return BigDecimal.ONE;
 
-		}
+        }
 
-		if (functionName.equals("getEnvironmentVariable")) {
-			if (parameters.size() != 1)
-				throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
+        if (functionName.equals("getEnvironmentVariable")) {
+            if (parameters.size() != 1)
+                throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
 
-			String envName = parameters.get(0).toString();
-			String value = System.getenv(envName);
+            String envName = parameters.get(0).toString();
+            String value = System.getenv(envName);
 
-			if (value != null) {
-				// System.out.format("%s=%s%n", envName, value);
-				return value;
-			} else {
-				// System.out.format("%s is not assigned.%n", envName);
-				return "";
-			}
-		}
+            if (value != null) {
+                // System.out.format("%s=%s%n", envName, value);
+                return value;
+            } else {
+                // System.out.format("%s is not assigned.%n", envName);
+                return "";
+            }
+        }
 
-		return BigDecimal.ZERO;
-	}
+        return BigDecimal.ZERO;
+    }
 }

@@ -9,13 +9,13 @@
 package net.rptools.maptool.client.tool;
 
 public class FreeSizeTool extends DefaultTool {
-	@Override
-	public String getTooltip() {
-		return ""; // TODO: Non visible tool
-	}
+    @Override
+    public String getTooltip() {
+        return ""; // TODO: Non visible tool
+    }
 
-	@Override
-	public String getInstructions() {
-		return ""; // TODO: Fill this in
-	}
+    @Override
+    public String getInstructions() {
+        return ""; // TODO: Fill this in
+    }
 }

@@ -21,155 +21,155 @@ import net.rptools.lib.swing.TaskPanelGroup;
 
 public class TaskPanelGroupPreferences implements PropertyChangeListener {
 
-	private TaskPanelGroup group;
+    private TaskPanelGroup group;
 
-	private Preferences prefs;
-	private boolean restoringState; // I don't like this, rethink it later.
+    private Preferences prefs;
+    private boolean restoringState; // I don't like this, rethink it later.
 
-	private static final String PREF_KEY = "state_list";
+    private static final String PREF_KEY = "state_list";
 
-	public TaskPanelGroupPreferences(String appName, String controlName, TaskPanelGroup group) {
-		this.group = group;
+    public TaskPanelGroupPreferences(String appName, String controlName, TaskPanelGroup group) {
+        this.group = group;
 
-		prefs = Preferences.userRoot().node(appName + "/control/" + controlName);
+        prefs = Preferences.userRoot().node(appName + "/control/" + controlName);
 
-		restoreTaskPanelStates();
-		connect();
-	}
+        restoreTaskPanelStates();
+        connect();
+    }
 
-	protected void connect() {
+    protected void connect() {
 
-		for (TaskPanel taskPanel : group.getTaskPanels()) {
-			connectToTaskPanel(taskPanel);
-		}
+        for (TaskPanel taskPanel : group.getTaskPanels()) {
+            connectToTaskPanel(taskPanel);
+        }
 
-		// Make sure to get all future task panels
-		group.addPropertyChangeListener(TaskPanelGroup.TASK_PANEL_LIST, this);
-	}
+        // Make sure to get all future task panels
+        group.addPropertyChangeListener(TaskPanelGroup.TASK_PANEL_LIST, this);
+    }
 
-	private void connectToTaskPanel(TaskPanel taskPanel) {
+    private void connectToTaskPanel(TaskPanel taskPanel) {
 
-		taskPanel.addPropertyChangeListener(TaskPanel.TASK_PANEL_STATE, this);
-	}
+        taskPanel.addPropertyChangeListener(TaskPanel.TASK_PANEL_STATE, this);
+    }
 
-	public void disconnect() {
+    public void disconnect() {
 
-		group.removePropertyChangeListener(TaskPanelGroup.TASK_PANEL_LIST, this);
+        group.removePropertyChangeListener(TaskPanelGroup.TASK_PANEL_LIST, this);
 
-		for (TaskPanel taskPanel : group.getTaskPanels()) {
-			disconnectFromTaskPanel(taskPanel);
-		}
+        for (TaskPanel taskPanel : group.getTaskPanels()) {
+            disconnectFromTaskPanel(taskPanel);
+        }
 
-		group = null;
-		prefs = null;
-	}
+        group = null;
+        prefs = null;
+    }
 
-	private void disconnectFromTaskPanel(TaskPanel taskPanel) {
+    private void disconnectFromTaskPanel(TaskPanel taskPanel) {
 
-		taskPanel.removePropertyChangeListener(TaskPanel.TASK_PANEL_STATE, this);
-	}
+        taskPanel.removePropertyChangeListener(TaskPanel.TASK_PANEL_STATE, this);
+    }
 
-	private void saveTaskPanelStates() {
+    private void saveTaskPanelStates() {
 
-		List<String> stateList = new ArrayList<String>();
+        List<String> stateList = new ArrayList<String>();
 
-		for (TaskPanel taskPanel : group.getTaskPanels()) {
-			stateList.add(taskPanel.getTitle());
-			stateList.add(taskPanel.getState().name());
-		}
+        for (TaskPanel taskPanel : group.getTaskPanels()) {
+            stateList.add(taskPanel.getTitle());
+            stateList.add(taskPanel.getState().name());
+        }
 
-		saveStates(stateList);
-	}
+        saveStates(stateList);
+    }
 
-	private void restoreTaskPanelState(TaskPanel taskPanel) {
+    private void restoreTaskPanelState(TaskPanel taskPanel) {
 
-		List<String> states = loadStates();
+        List<String> states = loadStates();
 
-		try {
-			restoringState = true;
-			for (Iterator<String> iter = states.iterator(); iter.hasNext();) {
+        try {
+            restoringState = true;
+            for (Iterator<String> iter = states.iterator(); iter.hasNext();) {
 
-				String title = iter.next();
-				String state = iter.next();
+                String title = iter.next();
+                String state = iter.next();
 
-				if (taskPanel.getTitle().equals(title)) {
-					taskPanel.setState(TaskPanel.State.valueOf(state));
-					break;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			restoringState = false;
-		}
-	}
+                if (taskPanel.getTitle().equals(title)) {
+                    taskPanel.setState(TaskPanel.State.valueOf(state));
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            restoringState = false;
+        }
+    }
 
-	private void restoreTaskPanelStates() {
+    private void restoreTaskPanelStates() {
 
-		List<String> states = loadStates();
+        List<String> states = loadStates();
 
-		try {
-			restoringState = true;
-			for (Iterator<String> iter = states.iterator(); iter.hasNext();) {
+        try {
+            restoringState = true;
+            for (Iterator<String> iter = states.iterator(); iter.hasNext();) {
 
-				String title = iter.next();
-				String state = iter.next();
+                String title = iter.next();
+                String state = iter.next();
 
-				TaskPanel taskPanel = group.getTaskPanel(title);
+                TaskPanel taskPanel = group.getTaskPanel(title);
 
-				if (taskPanel == null) {
-					continue;
-				}
+                if (taskPanel == null) {
+                    continue;
+                }
 
-				taskPanel.setState(TaskPanel.State.valueOf(state));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			restoringState = false;
-		}
-	}
+                taskPanel.setState(TaskPanel.State.valueOf(state));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            restoringState = false;
+        }
+    }
 
-	private List<String> loadStates() {
+    private List<String> loadStates() {
 
-		String stateList = prefs.get(PREF_KEY, null);
-		if (stateList == null) {
-			return new ArrayList<String>();
-		}
+        String stateList = prefs.get(PREF_KEY, null);
+        if (stateList == null) {
+            return new ArrayList<String>();
+        }
 
-		String[] states = stateList.split("\\|");
+        String[] states = stateList.split("\\|");
 
-		return Arrays.asList(states);
-	}
+        return Arrays.asList(states);
+    }
 
-	private void saveStates(List<String> stateList) {
+    private void saveStates(List<String> stateList) {
 
-		StringBuilder builder = new StringBuilder();
-		for (Iterator<String> iter = stateList.iterator(); iter.hasNext();) {
-			builder.append(iter.next()).append("|").append(iter.next());
-			if (iter.hasNext()) {
-				builder.append("|");
-			}
-		}
+        StringBuilder builder = new StringBuilder();
+        for (Iterator<String> iter = stateList.iterator(); iter.hasNext();) {
+            builder.append(iter.next()).append("|").append(iter.next());
+            if (iter.hasNext()) {
+                builder.append("|");
+            }
+        }
 
-		prefs.put(PREF_KEY, builder.toString());
-	}
+        prefs.put(PREF_KEY, builder.toString());
+    }
 
-	////
-	// PROPERTY CHANGE LISTENER
-	public void propertyChange(PropertyChangeEvent evt) {
+    ////
+    // PROPERTY CHANGE LISTENER
+    public void propertyChange(PropertyChangeEvent evt) {
 
-		if (restoringState) {
-			return;
-		}
+        if (restoringState) {
+            return;
+        }
 
-		if (TaskPanelGroup.TASK_PANEL_LIST.equals(evt.getPropertyName())) {
-			TaskPanel taskPanel = (TaskPanel) evt.getNewValue();
-			connectToTaskPanel(taskPanel);
-			restoreTaskPanelState(taskPanel);
-		} else {
+        if (TaskPanelGroup.TASK_PANEL_LIST.equals(evt.getPropertyName())) {
+            TaskPanel taskPanel = (TaskPanel) evt.getNewValue();
+            connectToTaskPanel(taskPanel);
+            restoreTaskPanelState(taskPanel);
+        } else {
 
-			saveTaskPanelStates();
-		}
-	}
+            saveTaskPanelStates();
+        }
+    }
 }

@@ -33,51 +33,51 @@ import java.io.OutputStream;
  */
 
 public class FTPTransferObject {
-	public Object local;
-	public File remoteDir;
-	public String remote;
-	public Direction getput;
-	public boolean complete;
-	public int currentPosition, maximumPosition;
+    public Object local;
+    public File remoteDir;
+    public String remote;
+    public Direction getput;
+    public boolean complete;
+    public int currentPosition, maximumPosition;
 
-	public enum Direction {
-		FTP_GET, FTP_PUT,
-	};
+    public enum Direction {
+        FTP_GET, FTP_PUT,
+    };
 
-	/**
-	 * Construct an <code>FTPTransferObject</code> using the local object and the specified remote filename.
-	 * 
-	 * @param l
-	 * @param r
-	 */
-	public FTPTransferObject(Direction updown, Object l, String r) {
-		this(updown, l, null, r);
-	}
+    /**
+     * Construct an <code>FTPTransferObject</code> using the local object and the specified remote filename.
+     * 
+     * @param l
+     * @param r
+     */
+    public FTPTransferObject(Direction updown, Object l, String r) {
+        this(updown, l, null, r);
+    }
 
-	/**
-	 * Construct an <code>FTPTransferObject</code> using the local object, the specified remote directory, and the specified remote filename.
-	 * 
-	 * @param l
-	 * @param r
-	 */
-	public FTPTransferObject(Direction updown, Object l, File d, String r) {
-		local = l;
-		remoteDir = d;
-		remote = r;
-		getput = updown;
-		complete = false;
-	}
+    /**
+     * Construct an <code>FTPTransferObject</code> using the local object, the specified remote directory, and the specified remote filename.
+     * 
+     * @param l
+     * @param r
+     */
+    public FTPTransferObject(Direction updown, Object l, File d, String r) {
+        local = l;
+        remoteDir = d;
+        remote = r;
+        getput = updown;
+        complete = false;
+    }
 
-	/**
-	 * Advance the ProgressBar to the next position.
-	 */
-	public void incrCurrentPosition() {
-		currentPosition++;
-		complete = (currentPosition >= maximumPosition);
-	}
+    /**
+     * Advance the ProgressBar to the next position.
+     */
+    public void incrCurrentPosition() {
+        currentPosition++;
+        complete = (currentPosition >= maximumPosition);
+    }
 
-	public void setMaximum(int pos) {
-		maximumPosition = pos;
-		complete = (currentPosition >= maximumPosition);
-	}
+    public void setMaximum(int pos) {
+        maximumPosition = pos;
+        complete = (currentPosition >= maximumPosition);
+    }
 }

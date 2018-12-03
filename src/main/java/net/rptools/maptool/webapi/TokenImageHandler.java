@@ -22,113 +22,113 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class TokenImageHandler extends AbstractHandler {
-	@Override
-	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    @Override
+    public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
-		String args[] = target.replaceAll("^/", "").split("/");
+        String args[] = target.replaceAll("^/", "").split("/");
 
-		for (String s : args) {
-			System.out.println("DEBUG: ARGS: " + s);
-		}
+        for (String s : args) {
+            System.out.println("DEBUG: ARGS: " + s);
+        }
 
-		if ("portrait".equalsIgnoreCase(args[0])) {
-			baseRequest.setHandled(sendPortrait(response, args[1]));
-		} else if ("image".equalsIgnoreCase(args[0])) {
-			baseRequest.setHandled(sendImage(response, args[1]));
-		} else if ("portraitOrImage".equalsIgnoreCase(args[0])) {
-			baseRequest.setHandled(sendPortraitOrImage(response, args[1]));
-		}
+        if ("portrait".equalsIgnoreCase(args[0])) {
+            baseRequest.setHandled(sendPortrait(response, args[1]));
+        } else if ("image".equalsIgnoreCase(args[0])) {
+            baseRequest.setHandled(sendImage(response, args[1]));
+        } else if ("portraitOrImage".equalsIgnoreCase(args[0])) {
+            baseRequest.setHandled(sendPortraitOrImage(response, args[1]));
+        }
 
-		/*
-		 * response.setContentType("text/html; charset=utf-8"); response.setStatus(HttpServletResponse.SC_OK);
-		 * 
-		 * PrintWriter out = response.getWriter();
-		 * 
-		 * baseRequest.setHandled(true);
-		 */
-	}
+        /*
+         * response.setContentType("text/html; charset=utf-8"); response.setStatus(HttpServletResponse.SC_OK);
+         * 
+         * PrintWriter out = response.getWriter();
+         * 
+         * baseRequest.setHandled(true);
+         */
+    }
 
-	private boolean sendImage(HttpServletResponse response, String tokenId) throws IOException {
-		System.out.println("DEBUG: Here (> 0) as well");
-		Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);
-		if (token == null) {
-			return false;
-			// FIXME: log this error
-		}
+    private boolean sendImage(HttpServletResponse response, String tokenId) throws IOException {
+        System.out.println("DEBUG: Here (> 0) as well");
+        Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);
+        if (token == null) {
+            return false;
+            // FIXME: log this error
+        }
 
-		if (token.getImageAssetId() == null) {
-			response.setContentType("image/png");
-			ImageIO.write(ImageManager.BROKEN_IMAGE, "png", response.getOutputStream());
-			response.setStatus(HttpServletResponse.SC_OK);
-		} else {
-			Asset asset = AssetManager.getAsset(token.getImageAssetId());
-			byte[] image = asset.getImage();
-			response.setContentType("image/" + asset.getImageExtension());
-			response.setStatus(HttpServletResponse.SC_OK);
+        if (token.getImageAssetId() == null) {
+            response.setContentType("image/png");
+            ImageIO.write(ImageManager.BROKEN_IMAGE, "png", response.getOutputStream());
+            response.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            Asset asset = AssetManager.getAsset(token.getImageAssetId());
+            byte[] image = asset.getImage();
+            response.setContentType("image/" + asset.getImageExtension());
+            response.setStatus(HttpServletResponse.SC_OK);
 
-			response.setContentLength(image.length);
-			response.getOutputStream().write(image);
-		}
+            response.setContentLength(image.length);
+            response.getOutputStream().write(image);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	private boolean sendPortrait(HttpServletResponse response, String tokenId) throws IOException {
+    private boolean sendPortrait(HttpServletResponse response, String tokenId) throws IOException {
 
-		System.out.println("DEBUG: Here (> 0) as well");
-		Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);
-		if (token == null) {
-			return false;
-			// FIXME: log this error
-		}
+        System.out.println("DEBUG: Here (> 0) as well");
+        Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);
+        if (token == null) {
+            return false;
+            // FIXME: log this error
+        }
 
-		if (token.getPortraitImage() == null) {
-			response.setContentType("image/png");
-			ImageIO.write(ImageManager.BROKEN_IMAGE, "png", response.getOutputStream());
-			response.setStatus(HttpServletResponse.SC_OK);
-		} else {
-			Asset asset = AssetManager.getAsset(token.getPortraitImage());
-			byte[] image = asset.getImage();
-			response.setContentType("image/" + asset.getImageExtension());
-			response.setStatus(HttpServletResponse.SC_OK);
+        if (token.getPortraitImage() == null) {
+            response.setContentType("image/png");
+            ImageIO.write(ImageManager.BROKEN_IMAGE, "png", response.getOutputStream());
+            response.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            Asset asset = AssetManager.getAsset(token.getPortraitImage());
+            byte[] image = asset.getImage();
+            response.setContentType("image/" + asset.getImageExtension());
+            response.setStatus(HttpServletResponse.SC_OK);
 
-			response.setContentLength(image.length);
-			response.getOutputStream().write(image);
-		}
+            response.setContentLength(image.length);
+            response.getOutputStream().write(image);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	private boolean sendPortraitOrImage(HttpServletResponse response, String tokenId) throws IOException {
+    private boolean sendPortraitOrImage(HttpServletResponse response, String tokenId) throws IOException {
 
-		System.out.println("DEBUG: Here (> 0) as well");
-		Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);
-		if (token == null) {
-			return false;
-			// FIXME: log this error
-		}
+        System.out.println("DEBUG: Here (> 0) as well");
+        Token token = WebTokenInfo.getInstance().findTokenFromId(tokenId);
+        if (token == null) {
+            return false;
+            // FIXME: log this error
+        }
 
-		Asset asset = null;
-		if (token.getPortraitImage() != null) {
-			asset = AssetManager.getAsset(token.getPortraitImage());
-		} else if (token.getImageAssetId() != null) {
-			asset = AssetManager.getAsset(token.getImageAssetId());
-		}
+        Asset asset = null;
+        if (token.getPortraitImage() != null) {
+            asset = AssetManager.getAsset(token.getPortraitImage());
+        } else if (token.getImageAssetId() != null) {
+            asset = AssetManager.getAsset(token.getImageAssetId());
+        }
 
-		if (asset != null) {
-			byte[] image = asset.getImage();
-			response.setContentType("image/" + asset.getImageExtension());
-			response.setStatus(HttpServletResponse.SC_OK);
+        if (asset != null) {
+            byte[] image = asset.getImage();
+            response.setContentType("image/" + asset.getImageExtension());
+            response.setStatus(HttpServletResponse.SC_OK);
 
-			response.setContentLength(image.length);
-			response.getOutputStream().write(image);
-		} else {
-			response.setContentType("image/png");
-			ImageIO.write(ImageManager.BROKEN_IMAGE, "png", response.getOutputStream());
-			response.setStatus(HttpServletResponse.SC_OK);
-		}
+            response.setContentLength(image.length);
+            response.getOutputStream().write(image);
+        } else {
+            response.setContentType("image/png");
+            ImageIO.write(ImageManager.BROKEN_IMAGE, "png", response.getOutputStream());
+            response.setStatus(HttpServletResponse.SC_OK);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
 }

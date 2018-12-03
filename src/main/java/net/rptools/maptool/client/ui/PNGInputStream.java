@@ -21,13 +21,13 @@ package net.rptools.maptool.client.ui;
  * ImageWriter pngWriter = null;
  * 
  *//**
-	 * @param largeComponent
-	 *            the Component to be turned into a PNG input stream
-	 *//*
-		 * public PNGInputStream(Component c) { largeComponent = c;
-		 * 
-		 * origBounds = largeComponent.getBounds(); origSize = largeComponent.getSize(); }
-		 * 
-		 * @Override public int read() throws IOException { if (pngWriter != null) { } else { pngWriter = (ImageWriter)ImageIO.getImageWritersByFormatName("png").next(); pngWriter.setOutput(output);
-		 * IIOImage image = new IIOImage(cachedZoneImage, null, null); pngWriter.write(null, image, iwp); } return 0; } }
-		 */
+    * @param largeComponent
+    *            the Component to be turned into a PNG input stream
+    *//*
+       * public PNGInputStream(Component c) { largeComponent = c;
+       * 
+       * origBounds = largeComponent.getBounds(); origSize = largeComponent.getSize(); }
+       * 
+       * @Override public int read() throws IOException { if (pngWriter != null) { } else { pngWriter = (ImageWriter)ImageIO.getImageWritersByFormatName("png").next(); pngWriter.setOutput(output);
+       * IIOImage image = new IIOImage(cachedZoneImage, null, null); pngWriter.write(null, image, iwp); } return 0; } }
+       */

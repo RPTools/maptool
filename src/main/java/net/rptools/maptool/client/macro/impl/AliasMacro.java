@@ -28,55 +28,55 @@ import net.rptools.maptool_fx.MapTool;
  * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author: azhrei_fje $
  */
 @MacroDefinition(
-		name = "alias",
-		aliases = { "alias" },
-		description = "alias.description",
-		expandRolls = false)
+        name = "alias",
+        aliases = { "alias" },
+        description = "alias.description",
+        expandRolls = false)
 public class AliasMacro implements Macro {
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		macro = macro.trim();
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        macro = macro.trim();
 
-		// Request for list ?
-		if (macro.length() == 0) {
-			handlePrintAliases();
-			return;
-		}
-		// Split into components
-		String name = macro;
-		String value = null;
-		int split = macro.indexOf(" "); // LATER: this character should be externalized and shared with the load alias macro
-		if (split > 0) {
-			name = macro.substring(0, split);
-			value = macro.substring(split).trim();
-		}
-		MacroManager.setAlias(name, value);
-		if (value != null) {
-			MapTool.addLocalMessage(I18N.getText("alias.added", name));
-		} else {
-			MapTool.addLocalMessage(I18N.getText("alias.removed", name));
-		}
-	}
+        // Request for list ?
+        if (macro.length() == 0) {
+            handlePrintAliases();
+            return;
+        }
+        // Split into components
+        String name = macro;
+        String value = null;
+        int split = macro.indexOf(" "); // LATER: this character should be externalized and shared with the load alias macro
+        if (split > 0) {
+            name = macro.substring(0, split);
+            value = macro.substring(split).trim();
+        }
+        MacroManager.setAlias(name, value);
+        if (value != null) {
+            MapTool.addLocalMessage(I18N.getText("alias.added", name));
+        } else {
+            MapTool.addLocalMessage(I18N.getText("alias.removed", name));
+        }
+    }
 
-	private void handlePrintAliases() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("<table border='1'>");
+    private void handlePrintAliases() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<table border='1'>");
 
-		builder.append("<tr><td><b>").append(I18N.getText("alias.header")).append("</b></td><td><b>").append(I18N.getText("alias.commandHeader")).append("</b></td></tr>");
+        builder.append("<tr><td><b>").append(I18N.getText("alias.header")).append("</b></td><td><b>").append(I18N.getText("alias.commandHeader")).append("</b></td></tr>");
 
-		Map<String, String> aliasMap = MacroManager.getAliasMap();
-		List<String> nameList = new ArrayList<String>();
-		nameList.addAll(aliasMap.keySet());
-		Collections.sort(nameList);
+        Map<String, String> aliasMap = MacroManager.getAliasMap();
+        List<String> nameList = new ArrayList<String>();
+        nameList.addAll(aliasMap.keySet());
+        Collections.sort(nameList);
 
-		for (String name : nameList) {
-			String value = aliasMap.get(name);
-			if (value == null) {
-				continue;
-			}
-			value = value.replace("<", "&lt;").replace(">", "&gt;");
-			builder.append("<tr><td>").append(name).append("</td><td>").append(value).append("</td></tr>");
-		}
-		builder.append("</table>");
-		MapTool.addLocalMessage(builder.toString());
-	}
+        for (String name : nameList) {
+            String value = aliasMap.get(name);
+            if (value == null) {
+                continue;
+            }
+            value = value.replace("<", "&lt;").replace(">", "&gt;");
+            builder.append("<tr><td>").append(name).append("</td><td>").append(value).append("</td></tr>");
+        }
+        builder.append("</table>");
+        MapTool.addLocalMessage(builder.toString());
+    }
 }

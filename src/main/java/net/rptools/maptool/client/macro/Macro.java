@@ -16,5 +16,5 @@ import net.rptools.maptool.client.MapToolMacroContext;
  */
 public interface Macro {
 
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext);
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext);
 }

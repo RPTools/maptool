@@ -18,12 +18,12 @@ import java.net.URLConnection;
  * @author Jamz
  */
 public class SyrinscapeConnection extends URLConnection {
-	public SyrinscapeConnection(URL url) {
-		super(url);
-	}
+    public SyrinscapeConnection(URL url) {
+        super(url);
+    }
 
-	@Override
-	public void connect() throws IOException {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    public void connect() throws IOException {
+        // TODO Auto-generated method stub
+    }
 }

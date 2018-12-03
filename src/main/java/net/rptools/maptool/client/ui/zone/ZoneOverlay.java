@@ -14,5 +14,5 @@ import java.awt.Graphics2D;
  */
 public interface ZoneOverlay {
 
-	public void paintOverlay(ZoneRenderer renderer, Graphics2D g);
+    public void paintOverlay(ZoneRenderer renderer, Graphics2D g);
 }

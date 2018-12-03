@@ -23,55 +23,55 @@ import javafx.scene.paint.Color;
 import net.rptools.maptool.util.CreateVersionedInstallSplash;
 
 public class SplashScreen extends JFrame {
-	private static int imgWidth = 490;
-	private static int imgHeight = 290;
+    private static int imgWidth = 490;
+    private static int imgHeight = 290;
 
-	public SplashScreen(final String versionText) {
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		final JFXPanel fxPanel = new JFXPanel();
+    public SplashScreen(final String versionText) {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        final JFXPanel fxPanel = new JFXPanel();
 
-		setUndecorated(true);
-		add(fxPanel);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setUndecorated(true);
+        add(fxPanel);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		try {
-			// Jamz: Remove border, change to transparent background
-			// Done in a try/catch because this can bomb on linux...
-			setBackground(new java.awt.Color(0, 0, 0, 0));
-		} catch (Exception e) {
-			setBackground(new java.awt.Color(0, 0, 0));
-		}
+        try {
+            // Jamz: Remove border, change to transparent background
+            // Done in a try/catch because this can bomb on linux...
+            setBackground(new java.awt.Color(0, 0, 0, 0));
+        } catch (Exception e) {
+            setBackground(new java.awt.Color(0, 0, 0));
+        }
 
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				initFX(fxPanel, versionText);
-				int w = imgWidth;
-				int h = imgHeight;
-				int x = (screenSize.width - w) / 2;
-				int y = (screenSize.height - h) / 2;
-				setBounds(x, y, imgWidth, imgHeight);
-				setVisible(true);
-			}
-		});
-	}
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                initFX(fxPanel, versionText);
+                int w = imgWidth;
+                int h = imgHeight;
+                int x = (screenSize.width - w) / 2;
+                int y = (screenSize.height - h) / 2;
+                setBounds(x, y, imgWidth, imgHeight);
+                setVisible(true);
+            }
+        });
+    }
 
-	private static void initFX(JFXPanel fxPanel, String versionText) {
-		// This method is invoked on the JavaFX thread
-		Group root = new Group();
-		Scene scene = new Scene(root, Color.TRANSPARENT);
+    private static void initFX(JFXPanel fxPanel, String versionText) {
+        // This method is invoked on the JavaFX thread
+        Group root = new Group();
+        Scene scene = new Scene(root, Color.TRANSPARENT);
 
-		Image splashImage = SwingFXUtils.toFXImage(CreateVersionedInstallSplash.createLaunchSplash("Launching... " + versionText), null);
-		ImageView splashView = new ImageView(splashImage);
-		imgWidth = (int) splashImage.getWidth();
-		imgHeight = (int) splashImage.getHeight();
-		root.getChildren().add(splashView);
+        Image splashImage = SwingFXUtils.toFXImage(CreateVersionedInstallSplash.createLaunchSplash("Launching... " + versionText), null);
+        ImageView splashView = new ImageView(splashImage);
+        imgWidth = (int) splashImage.getWidth();
+        imgHeight = (int) splashImage.getHeight();
+        root.getChildren().add(splashView);
 
-		fxPanel.setScene(scene);
-	}
+        fxPanel.setScene(scene);
+    }
 
-	public void hideSplashScreen() {
-		setVisible(false);
-		dispose();
-	}
+    public void hideSplashScreen() {
+        setVisible(false);
+        dispose();
+    }
 }

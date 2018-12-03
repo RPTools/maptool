@@ -18,33 +18,33 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class RoundedTitledPanel extends JPanel {
 
-	public RoundedTitledPanel() {
-		super.setLayout(new RoundedTitlePanelLayout());
-	}
+    public RoundedTitledPanel() {
+        super.setLayout(new RoundedTitlePanelLayout());
+    }
 
-	@Override
-	public void setLayout(LayoutManager mgr) {
-		throw new IllegalAccessError("Can't change the layout");
-	}
+    @Override
+    public void setLayout(LayoutManager mgr) {
+        throw new IllegalAccessError("Can't change the layout");
+    }
 
-	private class RoundedTitlePanelLayout implements LayoutManager {
+    private class RoundedTitlePanelLayout implements LayoutManager {
 
-		public void addLayoutComponent(String name, Component comp) {
+        public void addLayoutComponent(String name, Component comp) {
 
-		}
+        }
 
-		public void layoutContainer(Container parent) {
-		}
+        public void layoutContainer(Container parent) {
+        }
 
-		public Dimension minimumLayoutSize(Container parent) {
-			return null;
-		}
+        public Dimension minimumLayoutSize(Container parent) {
+            return null;
+        }
 
-		public Dimension preferredLayoutSize(Container parent) {
-			return null;
-		}
+        public Dimension preferredLayoutSize(Container parent) {
+            return null;
+        }
 
-		public void removeLayoutComponent(Component comp) {
-		}
-	}
+        public void removeLayoutComponent(Component comp) {
+        }
+    }
 }

@@ -27,47 +27,47 @@ import net.rptools.parser.function.AbstractFunction;
  */
 public class RemoveAllFromInitiativeFunction extends AbstractFunction {
 
-	/** Handle removing, all, all PCs or all NPC tokens. */
-	private RemoveAllFromInitiativeFunction() {
-		super(0, 0, "removeAllFromInitiative", "removeAllPCsFromInitiative", "removeAllNPCsFromInitiative");
-	}
+    /** Handle removing, all, all PCs or all NPC tokens. */
+    private RemoveAllFromInitiativeFunction() {
+        super(0, 0, "removeAllFromInitiative", "removeAllPCsFromInitiative", "removeAllNPCsFromInitiative");
+    }
 
-	/** singleton instance of this function */
-	private final static RemoveAllFromInitiativeFunction instance = new RemoveAllFromInitiativeFunction();
+    /** singleton instance of this function */
+    private final static RemoveAllFromInitiativeFunction instance = new RemoveAllFromInitiativeFunction();
 
-	/** @return singleton instance */
-	public static RemoveAllFromInitiativeFunction getInstance() {
-		return instance;
-	}
+    /** @return singleton instance */
+    public static RemoveAllFromInitiativeFunction getInstance() {
+        return instance;
+    }
 
-	/**
-	 * @see net.rptools.parser.function.AbstractFunction#childEvaluate(net.rptools.parser.Parser, java.lang.String, java.util.List)
-	 */
-	@Override
-	public Object childEvaluate(Parser parser, String functionName, List<Object> args) throws ParserException {
-		InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
-		int count = 0;
+    /**
+     * @see net.rptools.parser.function.AbstractFunction#childEvaluate(net.rptools.parser.Parser, java.lang.String, java.util.List)
+     */
+    @Override
+    public Object childEvaluate(Parser parser, String functionName, List<Object> args) throws ParserException {
+        InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
+        int count = 0;
 
-		if (!MapTool.getParser().isMacroTrusted()) {
-			throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-		}
-		if (functionName.equals("removeAllFromInitiative")) {
-			count = list.getSize();
-			list.clearModel();
-		} else {
-			list.startUnitOfWork();
-			boolean pcs = functionName.equals("removeAllPCsFromInitiative");
-			for (int i = list.getSize() - 1; i >= 0; i--) {
-				Token token = list.getTokenInitiative(i).getToken();
-				if (token.getType() == Type.PC && pcs || token.getType() == Type.NPC && !pcs) {
-					list.removeToken(i);
-					count++;
-				} // endif
-			} // endfor
-			list.setRound(-1);
-			list.setCurrent(-1);
-			list.finishUnitOfWork();
-		} // endif
-		return new BigDecimal(count);
-	}
+        if (!MapTool.getParser().isMacroTrusted()) {
+            throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+        }
+        if (functionName.equals("removeAllFromInitiative")) {
+            count = list.getSize();
+            list.clearModel();
+        } else {
+            list.startUnitOfWork();
+            boolean pcs = functionName.equals("removeAllPCsFromInitiative");
+            for (int i = list.getSize() - 1; i >= 0; i--) {
+                Token token = list.getTokenInitiative(i).getToken();
+                if (token.getType() == Type.PC && pcs || token.getType() == Type.NPC && !pcs) {
+                    list.removeToken(i);
+                    count++;
+                } // endif
+            } // endfor
+            list.setRound(-1);
+            list.setCurrent(-1);
+            list.finishUnitOfWork();
+        } // endif
+        return new BigDecimal(count);
+    }
 }

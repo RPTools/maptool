@@ -16,31 +16,31 @@ import net.rptools.maptool_fx.MapTool;
 
 public class MapToolFocusTraversalPolicy extends FocusTraversalPolicy {
 
-	@Override
-	public Component getComponentAfter(Container aContainer,
-			Component aComponent) {
-		return MapTool.getFrame().getCurrentZoneRenderer();
-	}
+    @Override
+    public Component getComponentAfter(Container aContainer,
+            Component aComponent) {
+        return MapTool.getFrame().getCurrentZoneRenderer();
+    }
 
-	@Override
-	public Component getComponentBefore(Container aContainer,
-			Component aComponent) {
-		return MapTool.getFrame().getCurrentZoneRenderer();
-	}
+    @Override
+    public Component getComponentBefore(Container aContainer,
+            Component aComponent) {
+        return MapTool.getFrame().getCurrentZoneRenderer();
+    }
 
-	@Override
-	public Component getFirstComponent(Container aContainer) {
-		return MapTool.getFrame().getCurrentZoneRenderer();
-	}
+    @Override
+    public Component getFirstComponent(Container aContainer) {
+        return MapTool.getFrame().getCurrentZoneRenderer();
+    }
 
-	@Override
-	public Component getLastComponent(Container aContainer) {
-		return MapTool.getFrame().getCurrentZoneRenderer();
-	}
+    @Override
+    public Component getLastComponent(Container aContainer) {
+        return MapTool.getFrame().getCurrentZoneRenderer();
+    }
 
-	@Override
-	public Component getDefaultComponent(Container aContainer) {
-		return MapTool.getFrame().getCurrentZoneRenderer();
-	}
+    @Override
+    public Component getDefaultComponent(Container aContainer) {
+        return MapTool.getFrame().getCurrentZoneRenderer();
+    }
 
 }

@@ -16,22 +16,22 @@ import java.awt.event.ActionEvent;
 
 public class TabPopupMenu extends JPopupMenu {
 
-	// private final JComponent parent;
-	private int index;
+    // private final JComponent parent;
+    private int index;
 
-	// TODO: replace index with Tab.TABNAME.index
-	public TabPopupMenu(JComponent parent, int index) {
-		// this.parent = parent;
-		this.index = index;
-		add(new AddNewButtonAction());
-	}
+    // TODO: replace index with Tab.TABNAME.index
+    public TabPopupMenu(JComponent parent, int index) {
+        // this.parent = parent;
+        this.index = index;
+        add(new AddNewButtonAction());
+    }
 
-	private class AddNewButtonAction extends AbstractAction {
-		public AddNewButtonAction() {
-			putValue(Action.NAME, "New Tab");
-		}
+    private class AddNewButtonAction extends AbstractAction {
+        public AddNewButtonAction() {
+            putValue(Action.NAME, "New Tab");
+        }
 
-		public void actionPerformed(ActionEvent event) {
-		}
-	}
+        public void actionPerformed(ActionEvent event) {
+        }
+    }
 }

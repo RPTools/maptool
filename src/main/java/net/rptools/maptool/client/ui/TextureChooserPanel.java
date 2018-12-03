@@ -24,47 +24,47 @@ import net.rptools.maptool.model.Asset;
 
 public class TextureChooserPanel extends AbstractPaintChooserPanel {
 
-	private PaintChooser paintChooser;
-	private ImagePanel imagePanel;
+    private PaintChooser paintChooser;
+    private ImagePanel imagePanel;
 
-	public TextureChooserPanel(PaintChooser paintChooser, AssetPanelModel model) {
-		this(paintChooser, model, "textureChooser");
-	}
+    public TextureChooserPanel(PaintChooser paintChooser, AssetPanelModel model) {
+        this(paintChooser, model, "textureChooser");
+    }
 
-	public TextureChooserPanel(PaintChooser paintChooser, AssetPanelModel model, String controlName) {
-		setLayout(new GridLayout());
+    public TextureChooserPanel(PaintChooser paintChooser, AssetPanelModel model, String controlName) {
+        setLayout(new GridLayout());
 
-		this.paintChooser = paintChooser;
+        this.paintChooser = paintChooser;
 
-		add(createImageExplorerPanel(model, controlName));
-	}
+        add(createImageExplorerPanel(model, controlName));
+    }
 
-	private JComponent createImageExplorerPanel(AssetPanelModel model, String controlName) {
+    private JComponent createImageExplorerPanel(AssetPanelModel model, String controlName) {
 
-		final AssetPanel assetPanel = new AssetPanel(controlName, model, JSplitPane.HORIZONTAL_SPLIT);
-		assetPanel.addImageSelectionListener(new SelectionListener() {
-			public void selectionPerformed(List<Object> selectedList) {
-				// There should be exactly one
-				if (selectedList.size() != 1) {
-					return;
-				}
+        final AssetPanel assetPanel = new AssetPanel(controlName, model, JSplitPane.HORIZONTAL_SPLIT);
+        assetPanel.addImageSelectionListener(new SelectionListener() {
+            public void selectionPerformed(List<Object> selectedList) {
+                // There should be exactly one
+                if (selectedList.size() != 1) {
+                    return;
+                }
 
-				Integer imageIndex = (Integer) selectedList.get(0);
-				Asset asset = assetPanel.getAsset(imageIndex);
-				if (asset == null) {
-					return;
-				}
+                Integer imageIndex = (Integer) selectedList.get(0);
+                Asset asset = assetPanel.getAsset(imageIndex);
+                if (asset == null) {
+                    return;
+                }
 
-				paintChooser.setPaint(new AssetPaint(asset));
-			}
-		});
-		assetPanel.setThumbSize(100);
+                paintChooser.setPaint(new AssetPaint(asset));
+            }
+        });
+        assetPanel.setThumbSize(100);
 
-		return assetPanel;
-	}
+        return assetPanel;
+    }
 
-	@Override
-	public String getDisplayName() {
-		return "Texture";
-	}
+    @Override
+    public String getDisplayName() {
+        return "Texture";
+    }
 }

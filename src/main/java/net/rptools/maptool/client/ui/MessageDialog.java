@@ -21,22 +21,22 @@ import net.rptools.maptool.util.GraphicsUtil;
 
 public abstract class MessageDialog extends JPanel {
 
-	public MessageDialog() {
-		addMouseListener(new MouseAdapter() {});
-		addMouseMotionListener(new MouseMotionAdapter() {});
-	}
+    public MessageDialog() {
+        addMouseListener(new MouseAdapter() {});
+        addMouseMotionListener(new MouseMotionAdapter() {});
+    }
 
-	protected abstract String getStatus();
+    protected abstract String getStatus();
 
-	@Override
-	protected void paintComponent(Graphics g) {
+    @Override
+    protected void paintComponent(Graphics g) {
 
-		Dimension size = getSize();
-		g.setColor(new Color(0, 0, 0, .5f));
-		g.fillRect(0, 0, size.width, size.height);
+        Dimension size = getSize();
+        g.setColor(new Color(0, 0, 0, .5f));
+        g.fillRect(0, 0, size.width, size.height);
 
-		GraphicsUtil.drawBoxedString((Graphics2D) g, getStatus(), size.width / 2, size.height / 2);
+        GraphicsUtil.drawBoxedString((Graphics2D) g, getStatus(), size.width / 2, size.height / 2);
 
-	}
+    }
 
 }

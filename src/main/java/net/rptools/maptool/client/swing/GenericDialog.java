@@ -24,54 +24,54 @@ import javax.swing.KeyStroke;
 import net.rptools.lib.swing.SwingUtil;
 
 public class GenericDialog extends JDialog {
-	private static final long serialVersionUID = 6739665491287916519L;
-	private final JPanel panel;
-	private boolean hasPositionedItself;
+    private static final long serialVersionUID = 6739665491287916519L;
+    private final JPanel panel;
+    private boolean hasPositionedItself;
 
-	public GenericDialog(String title, Frame parent, JPanel panel) {
-		this(title, parent, panel, true);
-	}
+    public GenericDialog(String title, Frame parent, JPanel panel) {
+        this(title, parent, panel, true);
+    }
 
-	public GenericDialog(String title, Frame parent, JPanel panel, boolean modal) {
-		super(parent, title, modal);
-		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    public GenericDialog(String title, Frame parent, JPanel panel, boolean modal) {
+        super(parent, title, modal);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-		this.panel = panel;
-		setLayout(new GridLayout());
+        this.panel = panel;
+        setLayout(new GridLayout());
 
-		add(this.panel);
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				closeDialog();
-			}
-		});
-		// ESCAPE cancels the window without committing
-		this.panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
-		this.panel.getActionMap().put("cancel", new AbstractAction() {
-			public void actionPerformed(ActionEvent e) {
-				closeDialog();
-			}
-		});
-	}
+        add(this.panel);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                closeDialog();
+            }
+        });
+        // ESCAPE cancels the window without committing
+        this.panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
+        this.panel.getActionMap().put("cancel", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                closeDialog();
+            }
+        });
+    }
 
-	public void closeDialog() {
-		// XXX Doesn't do anything useful and breaks OpenJDK: setVisible(false);
-		dispose();
-	}
+    public void closeDialog() {
+        // XXX Doesn't do anything useful and breaks OpenJDK: setVisible(false);
+        dispose();
+    }
 
-	protected void positionInitialView() {
-		SwingUtil.centerOver(this, getOwner());
-	}
+    protected void positionInitialView() {
+        SwingUtil.centerOver(this, getOwner());
+    }
 
-	public void showDialog() {
-		// We want to center over our parent, but only the first time.
-		// If this dialog is reused, we want it to show up where it was last.
-		if (!hasPositionedItself) {
-			pack();
-			positionInitialView();
-			hasPositionedItself = true;
-		}
-		setVisible(true);
-	}
+    public void showDialog() {
+        // We want to center over our parent, but only the first time.
+        // If this dialog is reused, we want it to show up where it was last.
+        if (!hasPositionedItself) {
+            pack();
+            positionInitialView();
+            hasPositionedItself = true;
+        }
+        setVisible(true);
+    }
 }

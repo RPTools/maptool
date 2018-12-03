@@ -31,50 +31,50 @@ import net.rptools.maptool_fx.MapTool;
 import org.apache.commons.io.FileUtils;
 
 @MacroDefinition(
-		name = "savealiases",
-		aliases = {},
-		description = "savealiases.description")
+        name = "savealiases",
+        aliases = {},
+        description = "savealiases.description")
 public class SaveAliasesMacro implements Macro {
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		File aliasFile = null;
-		if (macro.length() > 0) {
-			aliasFile = new File(macro);
-		} else {
-			JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
-			chooser.setDialogTitle("savealiases.dialogTitle");
-			chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        File aliasFile = null;
+        if (macro.length() > 0) {
+            aliasFile = new File(macro);
+        } else {
+            JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
+            chooser.setDialogTitle("savealiases.dialogTitle");
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-			if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-				return;
-			}
-			aliasFile = chooser.getSelectedFile();
-		}
-		if (aliasFile.getName().indexOf(".") < 0) {
-			aliasFile = new File(aliasFile.getAbsolutePath() + ".alias");
-		}
-		if (aliasFile.exists() && !MapTool.confirm(I18N.getText("msg.confirm.fileExists"))) {
-			return;
-		}
+            if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+            aliasFile = chooser.getSelectedFile();
+        }
+        if (aliasFile.getName().indexOf(".") < 0) {
+            aliasFile = new File(aliasFile.getAbsolutePath() + ".alias");
+        }
+        if (aliasFile.exists() && !MapTool.confirm(I18N.getText("msg.confirm.fileExists"))) {
+            return;
+        }
 
-		try {
-			StringBuilder builder = new StringBuilder();
-			builder.append("# ").append(I18N.getText("savealiases.created")).append(" ").append(new SimpleDateFormat().format(new Date())).append("\n\n");
+        try {
+            StringBuilder builder = new StringBuilder();
+            builder.append("# ").append(I18N.getText("savealiases.created")).append(" ").append(new SimpleDateFormat().format(new Date())).append("\n\n");
 
-			Map<String, String> aliasMap = MacroManager.getAliasMap();
-			List<String> aliasList = new ArrayList<String>();
-			aliasList.addAll(aliasMap.keySet());
-			Collections.sort(aliasList);
-			for (String key : aliasList) {
-				String value = aliasMap.get(key);
-				builder.append(key).append(":").append(value).append("\n"); // LATER: this character should be externalized and shared with the load alias macro
-			}
-			FileUtils.writeByteArrayToFile(aliasFile, builder.toString().getBytes("UTF-8"));
+            Map<String, String> aliasMap = MacroManager.getAliasMap();
+            List<String> aliasList = new ArrayList<String>();
+            aliasList.addAll(aliasMap.keySet());
+            Collections.sort(aliasList);
+            for (String key : aliasList) {
+                String value = aliasMap.get(key);
+                builder.append(key).append(":").append(value).append("\n"); // LATER: this character should be externalized and shared with the load alias macro
+            }
+            FileUtils.writeByteArrayToFile(aliasFile, builder.toString().getBytes("UTF-8"));
 
-			MapTool.addLocalMessage(I18N.getText("aliases.saved"));
-		} catch (FileNotFoundException fnfe) {
-			MapTool.addLocalMessage(I18N.getText("savealiases.couldNotSave", I18N.getText("msg.error.fileNotFound")));
-		} catch (IOException ioe) {
-			MapTool.addLocalMessage(I18N.getText("savealiases.couldNotSave", ioe));
-		}
-	}
+            MapTool.addLocalMessage(I18N.getText("aliases.saved"));
+        } catch (FileNotFoundException fnfe) {
+            MapTool.addLocalMessage(I18N.getText("savealiases.couldNotSave", I18N.getText("msg.error.fileNotFound")));
+        } catch (IOException ioe) {
+            MapTool.addLocalMessage(I18N.getText("savealiases.couldNotSave", ioe));
+        }
+    }
 }

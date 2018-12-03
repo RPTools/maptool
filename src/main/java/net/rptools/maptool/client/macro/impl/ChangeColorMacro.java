@@ -16,12 +16,12 @@ import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
-		name = "color",
-		aliases = { "cc" },
-		description = "changecolor.description")
+        name = "color",
+        aliases = { "cc" },
+        description = "changecolor.description")
 public class ChangeColorMacro extends AbstractMacro {
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		Color newColor = Color.decode(macro);
-		MapTool.getFrame().getCommandPanel().getTextColorWell().setColor(newColor);
-	}
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        Color newColor = Color.decode(macro);
+        MapTool.getFrame().getCommandPanel().getTextColorWell().setColor(newColor);
+    }
 }

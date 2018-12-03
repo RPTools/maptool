@@ -9,5 +9,5 @@
 package net.rptools.maptool.model;
 
 public interface ModelChangeListener {
-	public void modelChanged(ModelChangeEvent event);
+    public void modelChanged(ModelChangeEvent event);
 }

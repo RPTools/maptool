@@ -21,70 +21,70 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
  * @author trevor
  */
 public class CellPoint extends AbstractPoint {
-	public double g; // Only populated by AStarWalker classes to be used upstream
-	public double distanceTraveled; // Only populated by AStarWalker classes to be used upstream
+    public double g; // Only populated by AStarWalker classes to be used upstream
+    public double distanceTraveled; // Only populated by AStarWalker classes to be used upstream
 
-	public CellPoint(int x, int y) {
-		super(x, y);
-	}
+    public CellPoint(int x, int y) {
+        super(x, y);
+    }
 
-	public CellPoint(int x, int y, double distanceTraveled) {
-		super(x, y);
-		this.distanceTraveled = distanceTraveled;
-	}
+    public CellPoint(int x, int y, double distanceTraveled) {
+        super(x, y);
+        this.distanceTraveled = distanceTraveled;
+    }
 
-	@Override
-	public String toString() {
-		return "CellPoint" + super.toString();
-	}
+    @Override
+    public String toString() {
+        return "CellPoint" + super.toString();
+    }
 
-	/**
-	 * Find the screen coordinates of the upper left hand corner of a cell taking into account scaling and translation. <b>This code does not call {@link Grid#getCellOffset()}, which might be
-	 * appropriate in some circumstances.</b>
-	 * 
-	 * @param renderer
-	 *            This renderer provides scaling
-	 * @return The screen coordinates of the upper left hand corner in the passed point or in a new point.
-	 */
-	public ScreenPoint convertToScreen(ZoneRenderer renderer) {
-		double scale = renderer.getScale();
-		Zone zone = renderer.getZone();
+    /**
+     * Find the screen coordinates of the upper left hand corner of a cell taking into account scaling and translation. <b>This code does not call {@link Grid#getCellOffset()}, which might be
+     * appropriate in some circumstances.</b>
+     * 
+     * @param renderer
+     *            This renderer provides scaling
+     * @return The screen coordinates of the upper left hand corner in the passed point or in a new point.
+     */
+    public ScreenPoint convertToScreen(ZoneRenderer renderer) {
+        double scale = renderer.getScale();
+        Zone zone = renderer.getZone();
 
-		Grid grid = zone.getGrid();
-		ZonePoint zp = grid.convert(this);
+        Grid grid = zone.getGrid();
+        ZonePoint zp = grid.convert(this);
 
-		int sx = renderer.getViewOffsetX() + (int) (zp.x * scale);
-		int sy = renderer.getViewOffsetY() + (int) (zp.y * scale);
+        int sx = renderer.getViewOffsetX() + (int) (zp.x * scale);
+        int sy = renderer.getViewOffsetY() + (int) (zp.y * scale);
 
-		return new ScreenPoint(sx, sy);
-	}
+        return new ScreenPoint(sx, sy);
+    }
 
-	public ZonePoint convertToZonePoint(Grid grid) {
-		return grid.convert(this);
-	}
+    public ZonePoint convertToZonePoint(Grid grid) {
+        return grid.convert(this);
+    }
 
-	public ZonePoint offsetZonePoint(Grid grid, double offsetX, double offsetY) {
-		ZonePoint zp = convertToZonePoint(grid);
-		offsetX += 1;
-		offsetY += 1;
+    public ZonePoint offsetZonePoint(Grid grid, double offsetX, double offsetY) {
+        ZonePoint zp = convertToZonePoint(grid);
+        offsetX += 1;
+        offsetY += 1;
 
-		zp.x = (int) (zp.x + (grid.getCellWidth() / 2) * offsetX);
-		zp.y = (int) (zp.y + (grid.getCellWidth() / 2) * offsetY);
+        zp.x = (int) (zp.x + (grid.getCellWidth() / 2) * offsetX);
+        zp.y = (int) (zp.y + (grid.getCellWidth() / 2) * offsetY);
 
-		return zp;
-	}
+        return zp;
+    }
 
-	// Return distance in grid units for current map
-	public double getDistanceTraveled(Zone zone) {
-		return Math.floor(distanceTraveled) * zone.getUnitsPerCell();
-	}
+    // Return distance in grid units for current map
+    public double getDistanceTraveled(Zone zone) {
+        return Math.floor(distanceTraveled) * zone.getUnitsPerCell();
+    }
 
-	public double gCost() {
-		return g;
-	}
+    public double gCost() {
+        return g;
+    }
 
-	public void replaceG(CellPoint previousCell) {
-		g = previousCell.g;
-		distanceTraveled = previousCell.distanceTraveled;
-	}
+    public void replaceG(CellPoint previousCell) {
+        g = previousCell.g;
+        distanceTraveled = previousCell.distanceTraveled;
+    }
 }

@@ -16,51 +16,51 @@ import java.awt.image.BufferedImage;
 
 public class TaskBarFlasher {
 
-	private static final int FLASH_DELAY = 500;
+    private static final int FLASH_DELAY = 500;
 
-	private final BufferedImage flashImage;
-	private final Image originalImage;
-	private final Frame frame;
+    private final BufferedImage flashImage;
+    private final Image originalImage;
+    private final Frame frame;
 
-	private FlashThread flashThread;
+    private FlashThread flashThread;
 
-	public TaskBarFlasher(Frame frame) {
-		this.frame = frame;
+    public TaskBarFlasher(Frame frame) {
+        this.frame = frame;
 
-		originalImage = frame.getIconImage();
-		flashImage = new BufferedImage(originalImage.getWidth(null), originalImage.getHeight(null), BufferedImage.OPAQUE);
-		Graphics g = flashImage.getGraphics();
-		g.setColor(Color.blue);
-		g.fillRect(0, 0, flashImage.getWidth(), flashImage.getHeight());
-		g.drawImage(originalImage, 0, 0, null);
-		g.dispose();
-	}
+        originalImage = frame.getIconImage();
+        flashImage = new BufferedImage(originalImage.getWidth(null), originalImage.getHeight(null), BufferedImage.OPAQUE);
+        Graphics g = flashImage.getGraphics();
+        g.setColor(Color.blue);
+        g.fillRect(0, 0, flashImage.getWidth(), flashImage.getHeight());
+        g.drawImage(originalImage, 0, 0, null);
+        g.dispose();
+    }
 
-	public synchronized void flash() {
-		if (flashThread != null) {
-			// Already flashing
-			return;
-		}
+    public synchronized void flash() {
+        if (flashThread != null) {
+            // Already flashing
+            return;
+        }
 
-		flashThread = new FlashThread();
-		flashThread.start();
-	}
+        flashThread = new FlashThread();
+        flashThread.start();
+    }
 
-	private class FlashThread extends Thread {
-		@Override
-		public void run() {
-			while (!frame.isFocused()) {
-				try {
-					Thread.sleep(FLASH_DELAY);
-					frame.setIconImage(flashImage);
-					Thread.sleep(FLASH_DELAY);
-					frame.setIconImage(originalImage);
-				} catch (InterruptedException ie) {
-					// Just leave, whatever
-					break;
-				}
-			}
-			flashThread = null;
-		}
-	}
+    private class FlashThread extends Thread {
+        @Override
+        public void run() {
+            while (!frame.isFocused()) {
+                try {
+                    Thread.sleep(FLASH_DELAY);
+                    frame.setIconImage(flashImage);
+                    Thread.sleep(FLASH_DELAY);
+                    frame.setIconImage(originalImage);
+                } catch (InterruptedException ie) {
+                    // Just leave, whatever
+                    break;
+                }
+            }
+            flashThread = null;
+        }
+    }
 }

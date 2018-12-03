@@ -11,29 +11,29 @@ package net.rptools.maptool.client.script.javascript.api;
 import net.rptools.maptool.model.Token;
 
 public class JSAPIToken {
-	private final Token token;
+    private final Token token;
 
-	public JSAPIToken(Token token) {
-		this.token = token;
-	}
+    public JSAPIToken(Token token) {
+        this.token = token;
+    }
 
-	public String getName() {
-		return token.getName();
-	}
+    public String getName() {
+        return token.getName();
+    }
 
-	public void setName(String name) {
-		token.setName(name);
-	}
+    public void setName(String name) {
+        token.setName(name);
+    }
 
-	public boolean hasSight() {
-		return token.getHasSight();
-	}
+    public boolean hasSight() {
+        return token.getHasSight();
+    }
 
-	public void setSight(boolean sight) {
-		token.setHasSight(sight);
-	}
+    public void setSight(boolean sight) {
+        token.setHasSight(sight);
+    }
 
-	public String toString() {
-		return "Token(id=" + token.getId() + ")";
-	}
+    public String toString() {
+        return "Token(id=" + token.getId() + ")";
+    }
 }

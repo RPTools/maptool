@@ -21,67 +21,67 @@ import net.rptools.maptool_fx.MapTool;
 
 public class NotificationOverlay implements ZoneOverlay, Animatable {
 
-	private List<EventDetail> eventList = new CopyOnWriteArrayList<EventDetail>();
+    private List<EventDetail> eventList = new CopyOnWriteArrayList<EventDetail>();
 
-	// TODO: make this configurable
-	private static final int MESSAGE_DELAY = 2500;
+    // TODO: make this configurable
+    private static final int MESSAGE_DELAY = 2500;
 
-	public NotificationOverlay() {
-		AnimationManager.addAnimatable(this);
-	}
+    public NotificationOverlay() {
+        AnimationManager.addAnimatable(this);
+    }
 
-	public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
+    public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
 
-		int y = 15;
-		for (EventDetail detail : eventList) {
+        int y = 15;
+        for (EventDetail detail : eventList) {
 
-			GraphicsUtil.drawBoxedString(g, detail.message, 10, y, SwingUtilities.LEFT);
+            GraphicsUtil.drawBoxedString(g, detail.message, 10, y, SwingUtilities.LEFT);
 
-			y += 20;
-		}
-	}
+            y += 20;
+        }
+    }
 
-	public void addEvent(String message) {
-		if (message == null) {
-			return;
-		}
+    public void addEvent(String message) {
+        if (message == null) {
+            return;
+        }
 
-		eventList.add(new EventDetail(message));
-	}
+        eventList.add(new EventDetail(message));
+    }
 
-	private static class EventDetail {
+    private static class EventDetail {
 
-		public long timestamp;
-		public String message;
+        public long timestamp;
+        public String message;
 
-		public EventDetail(String message) {
-			this.message = message;
-			timestamp = System.currentTimeMillis();
-		}
-	}
+        public EventDetail(String message) {
+            this.message = message;
+            timestamp = System.currentTimeMillis();
+        }
+    }
 
-	////
-	// ANIMATABLE
-	public void animate() {
+    ////
+    // ANIMATABLE
+    public void animate() {
 
-		boolean requiresRepaint = false;
-		while (eventList.size() > 0) {
+        boolean requiresRepaint = false;
+        while (eventList.size() > 0) {
 
-			EventDetail detail = eventList.get(0);
-			if (System.currentTimeMillis() - detail.timestamp > MESSAGE_DELAY) {
+            EventDetail detail = eventList.get(0);
+            if (System.currentTimeMillis() - detail.timestamp > MESSAGE_DELAY) {
 
-				eventList.remove(0);
-				requiresRepaint = true;
-			} else {
-				break;
-			}
-		}
-		if (requiresRepaint) {
-			ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-			if (renderer != null) {
-				renderer.repaint();
-			}
-		}
-	}
+                eventList.remove(0);
+                requiresRepaint = true;
+            } else {
+                break;
+            }
+        }
+        if (requiresRepaint) {
+            ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
+            if (renderer != null) {
+                renderer.repaint();
+            }
+        }
+    }
 
 }

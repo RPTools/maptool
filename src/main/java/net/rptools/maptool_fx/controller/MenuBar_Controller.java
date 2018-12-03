@@ -23,72 +23,72 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool_fx.MapTool;
 
 public class MenuBar_Controller {
-	@FXML private MenuItem openCampaignMenuItem;
-	@FXML private CheckMenuItem connectionsWindowMenuItem;
+    @FXML private MenuItem openCampaignMenuItem;
+    @FXML private CheckMenuItem connectionsWindowMenuItem;
 
-	private static final Logger log = LogManager.getLogger(MenuBar_Controller.class);
-	private MapTool_Controller mapTool_Controller;
+    private static final Logger log = LogManager.getLogger(MenuBar_Controller.class);
+    private MapTool_Controller mapTool_Controller;
 
-	@FXML
-	void initialize() {
-		openCampaignMenuItem.disableProperty().bind(MapTool.getInstance().getServer().getConfig().isPersonalServer().not());
-	}
+    @FXML
+    void initialize() {
+        openCampaignMenuItem.disableProperty().bind(MapTool.getInstance().getServer().getConfig().isPersonalServer().not());
+    }
 
-	@FXML
-	void openCampaign_OnAction(ActionEvent event) {
-		if (MapTool.isCampaignDirty() && !MapTool.confirm("msg.confirm.loseChanges"))
-			return;
+    @FXML
+    void openCampaign_OnAction(ActionEvent event) {
+        if (MapTool.isCampaignDirty() && !MapTool.confirm("msg.confirm.loseChanges"))
+            return;
 
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(I18N.getText("msg.title.loadCampaign"));
-		fileChooser.setInitialDirectory(AppPreferences.getLoadDir());
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(I18N.getText("msg.title.loadCampaign"));
+        fileChooser.setInitialDirectory(AppPreferences.getLoadDir());
 
-		File campaignFile = fileChooser.showOpenDialog(null);
-		AppActions.loadCampaign(campaignFile);
+        File campaignFile = fileChooser.showOpenDialog(null);
+        AppActions.loadCampaign(campaignFile);
 
-		// JFileChooser chooser = new CampaignPreviewFileChooser();
-		// chooser.setDialogTitle(I18N.getText("msg.title.loadCampaign"));
-		// chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        // JFileChooser chooser = new CampaignPreviewFileChooser();
+        // chooser.setDialogTitle(I18N.getText("msg.title.loadCampaign"));
+        // chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-		// if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
-		// File campaignFile = chooser.getSelectedFile();
-		// loadCampaign(campaignFile);
-		// }
-	}
+        // if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+        // File campaignFile = chooser.getSelectedFile();
+        // loadCampaign(campaignFile);
+        // }
+    }
 
-	@FXML
-	void startServer(ActionEvent event) {
-		// TESTING
-		MapTool.getInstance().getServer().getConfig().setPersonalServer(false);
-	}
+    @FXML
+    void startServer(ActionEvent event) {
+        // TESTING
+        MapTool.getInstance().getServer().getConfig().setPersonalServer(false);
+    }
 
-	@FXML
-	void clientDisconnect(ActionEvent event) {
-		// TESTING
-		MapTool.getInstance().getServer().getConfig().setPersonalServer(true);
-	}
+    @FXML
+    void clientDisconnect(ActionEvent event) {
+        // TESTING
+        MapTool.getInstance().getServer().getConfig().setPersonalServer(true);
+    }
 
-	@FXML
-	void windowCheckMenuItem_OnAction(ActionEvent event) {
-		mapTool_Controller.showWindow((CheckMenuItem) event.getSource());
-	}
+    @FXML
+    void windowCheckMenuItem_OnAction(ActionEvent event) {
+        mapTool_Controller.showWindow((CheckMenuItem) event.getSource());
+    }
 
-	@FXML
-	public void exit_OnAction() {
-		MapTool.getInstance().close();
-	}
+    @FXML
+    public void exit_OnAction() {
+        MapTool.getInstance().close();
+    }
 
-	@FXML
-	public void saveLayout_OnAction() {
-		mapTool_Controller.saveLayout();
-	}
+    @FXML
+    public void saveLayout_OnAction() {
+        mapTool_Controller.saveLayout();
+    }
 
-	@FXML
-	public void loadLayout_OnAction() {
-		mapTool_Controller.loadLayout();
-	}
+    @FXML
+    public void loadLayout_OnAction() {
+        mapTool_Controller.loadLayout();
+    }
 
-	public void setParentControl(MapTool_Controller mapTool_Controller) {
-		this.mapTool_Controller = mapTool_Controller;
-	}
+    public void setParentControl(MapTool_Controller mapTool_Controller) {
+        this.mapTool_Controller = mapTool_Controller;
+    }
 }

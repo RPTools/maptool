@@ -32,118 +32,118 @@ import net.rptools.maptool_fx.MapTool;
 /**
  */
 public class FacingTool extends DefaultTool {
-	private static final long serialVersionUID = -2807604658989763950L;
+    private static final long serialVersionUID = -2807604658989763950L;
 
-	// TODO: This shouldn't be necessary, just get it from the renderer
-	private Token tokenUnderMouse;
-	private Set<GUID> selectedTokenSet;
+    // TODO: This shouldn't be necessary, just get it from the renderer
+    private Token tokenUnderMouse;
+    private Set<GUID> selectedTokenSet;
 
-	public FacingTool() {
-		// Non tool-bar tool ... atm
-	}
+    public FacingTool() {
+        // Non tool-bar tool ... atm
+    }
 
-	public void init(Token keyToken, Set<GUID> selectedTokenSet) {
-		tokenUnderMouse = keyToken;
-		this.selectedTokenSet = selectedTokenSet;
-	}
+    public void init(Token keyToken, Set<GUID> selectedTokenSet) {
+        tokenUnderMouse = keyToken;
+        this.selectedTokenSet = selectedTokenSet;
+    }
 
-	@Override
-	public String getTooltip() {
-		return "tool.facing.tooltip";
-	}
+    @Override
+    public String getTooltip() {
+        return "tool.facing.tooltip";
+    }
 
-	@Override
-	public String getInstructions() {
-		return "tool.facing.instructions";
-	}
+    @Override
+    public String getInstructions() {
+        return "tool.facing.instructions";
+    }
 
-	@Override
-	protected void installKeystrokes(Map<KeyStroke, Action> actionMap) {
-		super.installKeystrokes(actionMap);
+    @Override
+    protected void installKeystrokes(Map<KeyStroke, Action> actionMap) {
+        super.installKeystrokes(actionMap);
 
-		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), new AbstractAction() {
-			public void actionPerformed(ActionEvent e) {
-				if (MapTool.confirm(I18N.getText("msg.confirm.removeFacings"))) {
-					for (GUID tokenGUID : renderer.getSelectedTokenSet()) {
-						Token token = renderer.getZone().getToken(tokenGUID);
-						if (token == null) {
-							continue;
-						}
-						token.setFacing(null);
-						renderer.flush(token);
-					}
-					// Go back to the pointer tool
-					resetTool();
-				}
-			}
-		});
-	}
+        actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                if (MapTool.confirm(I18N.getText("msg.confirm.removeFacings"))) {
+                    for (GUID tokenGUID : renderer.getSelectedTokenSet()) {
+                        Token token = renderer.getZone().getToken(tokenGUID);
+                        if (token == null) {
+                            continue;
+                        }
+                        token.setFacing(null);
+                        renderer.flush(token);
+                    }
+                    // Go back to the pointer tool
+                    resetTool();
+                }
+            }
+        });
+    }
 
-	////
-	// MOUSE
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		super.mouseMoved(e);
+    ////
+    // MOUSE
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        super.mouseMoved(e);
 
-		if (tokenUnderMouse == null || renderer.getTokenBounds(tokenUnderMouse) == null) {
-			return;
-		}
-		Rectangle bounds = renderer.getTokenBounds(tokenUnderMouse).getBounds();
+        if (tokenUnderMouse == null || renderer.getTokenBounds(tokenUnderMouse) == null) {
+            return;
+        }
+        Rectangle bounds = renderer.getTokenBounds(tokenUnderMouse).getBounds();
 
-		int x = bounds.x + bounds.width / 2;
-		int y = bounds.y + bounds.height / 2;
+        int x = bounds.x + bounds.width / 2;
+        int y = bounds.y + bounds.height / 2;
 
-		double angle = Math.atan2(y - e.getY(), e.getX() - x);
+        double angle = Math.atan2(y - e.getY(), e.getX() - x);
 
-		int degrees = (int) Math.toDegrees(angle);
+        int degrees = (int) Math.toDegrees(angle);
 
-		if (!SwingUtil.isControlDown(e)) {
-			int[] facingAngles = renderer.getZone().getGrid().getFacingAngles();
-			degrees = facingAngles[TokenUtil.getIndexNearestTo(facingAngles, degrees)];
-		}
-		Area visibleArea = null;
-		Set<GUID> remoteSelected = new HashSet<GUID>();
-		for (GUID tokenGUID : selectedTokenSet) {
-			Token token = renderer.getZone().getToken(tokenGUID);
-			if (token == null) {
-				continue;
-			}
-			token.setFacing(degrees);
-			// if has fog(required)
-			// and ((isGM with pref set) OR serverPolicy allows auto reveal by players)
-			if (renderer.getZone().hasFog() && ((AppPreferences.getAutoRevealVisionOnGMMovement() && MapTool.getPlayer().isGM())) || MapTool.getServerPolicy().isAutoRevealOnMovement()) {
-				visibleArea = renderer.getZoneView().getVisibleArea(token);
-				remoteSelected.add(token.getId());
-				renderer.getZone().exposeArea(visibleArea, token);
-			}
-			renderer.flushFog();
-		}
-		// XXX Instead of calling exposeFoW() when visibleArea is null, shouldn't we just skip it?
-		MapTool.serverCommand().exposeFoW(renderer.getZone().getId(), visibleArea == null ? new Area() : visibleArea, remoteSelected);
-		renderer.repaint(); // TODO: shrink this
-	}
+        if (!SwingUtil.isControlDown(e)) {
+            int[] facingAngles = renderer.getZone().getGrid().getFacingAngles();
+            degrees = facingAngles[TokenUtil.getIndexNearestTo(facingAngles, degrees)];
+        }
+        Area visibleArea = null;
+        Set<GUID> remoteSelected = new HashSet<GUID>();
+        for (GUID tokenGUID : selectedTokenSet) {
+            Token token = renderer.getZone().getToken(tokenGUID);
+            if (token == null) {
+                continue;
+            }
+            token.setFacing(degrees);
+            // if has fog(required)
+            // and ((isGM with pref set) OR serverPolicy allows auto reveal by players)
+            if (renderer.getZone().hasFog() && ((AppPreferences.getAutoRevealVisionOnGMMovement() && MapTool.getPlayer().isGM())) || MapTool.getServerPolicy().isAutoRevealOnMovement()) {
+                visibleArea = renderer.getZoneView().getVisibleArea(token);
+                remoteSelected.add(token.getId());
+                renderer.getZone().exposeArea(visibleArea, token);
+            }
+            renderer.flushFog();
+        }
+        // XXX Instead of calling exposeFoW() when visibleArea is null, shouldn't we just skip it?
+        MapTool.serverCommand().exposeFoW(renderer.getZone().getId(), visibleArea == null ? new Area() : visibleArea, remoteSelected);
+        renderer.repaint(); // TODO: shrink this
+    }
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// Commit
-		for (GUID tokenGUID : selectedTokenSet) {
-			Token token = renderer.getZone().getToken(tokenGUID);
-			if (token == null) {
-				continue;
-			}
-			renderer.flush(token);
-			MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-		}
-		// Go back to the pointer tool
-		resetTool();
-	}
+    @Override
+    public void mousePressed(MouseEvent e) {
+        // Commit
+        for (GUID tokenGUID : selectedTokenSet) {
+            Token token = renderer.getZone().getToken(tokenGUID);
+            if (token == null) {
+                continue;
+            }
+            renderer.flush(token);
+            MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+        }
+        // Go back to the pointer tool
+        resetTool();
+    }
 
-	@Override
-	protected void resetTool() {
-		if (tokenUnderMouse.isStamp()) {
-			MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
-		} else {
-			MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
-		}
-	}
+    @Override
+    protected void resetTool() {
+        if (tokenUnderMouse.isStamp()) {
+            MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
+        } else {
+            MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
+        }
+    }
 }

@@ -26,100 +26,100 @@ import net.rptools.maptool_fx.MapTool;
  * 
  */
 public class MapToolDockListener implements DockableFrameListener {
-	private static final Logger log = LogManager.getLogger(MapToolDockListener.class);
+    private static final Logger log = LogManager.getLogger(MapToolDockListener.class);
 
-	public void dockableFrameActivated(DockableFrameEvent dfe) {
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameActivated(DockableFrameEvent dfe) {
+        showEvent(dfe.toString());
+    }
 
-	public void dockableFrameAdded(DockableFrameEvent dfe) {
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameAdded(DockableFrameEvent dfe) {
+        showEvent(dfe.toString());
+    }
 
-	public void dockableFrameAutohidden(DockableFrameEvent dfe) {
-		showEvent(dfe.toString());
-		updatePanels(dfe.getDockableFrame().getName());
-	}
+    public void dockableFrameAutohidden(DockableFrameEvent dfe) {
+        showEvent(dfe.toString());
+        updatePanels(dfe.getDockableFrame().getName());
+    }
 
-	public void dockableFrameAutohideShowing(DockableFrameEvent dfe) {
-		updatePanels(dfe.getDockableFrame().getName());
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameAutohideShowing(DockableFrameEvent dfe) {
+        updatePanels(dfe.getDockableFrame().getName());
+        showEvent(dfe.toString());
+    }
 
-	public void dockableFrameDeactivated(DockableFrameEvent dfe) {
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameDeactivated(DockableFrameEvent dfe) {
+        showEvent(dfe.toString());
+    }
 
-	public void dockableFrameDocked(DockableFrameEvent dfe) {
-		showEvent(dfe.toString());
-		updatePanels(dfe.getDockableFrame().getName());
-	}
+    public void dockableFrameDocked(DockableFrameEvent dfe) {
+        showEvent(dfe.toString());
+        updatePanels(dfe.getDockableFrame().getName());
+    }
 
-	public void dockableFrameFloating(DockableFrameEvent dfe) {
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameFloating(DockableFrameEvent dfe) {
+        showEvent(dfe.toString());
+    }
 
-	public void dockableFrameHidden(DockableFrameEvent dfe) {
-	}
+    public void dockableFrameHidden(DockableFrameEvent dfe) {
+    }
 
-	public void dockableFrameMaximized(DockableFrameEvent dfe) {
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameMaximized(DockableFrameEvent dfe) {
+        showEvent(dfe.toString());
+    }
 
-	public void dockableFrameRemoved(DockableFrameEvent dfe) {
-	}
+    public void dockableFrameRemoved(DockableFrameEvent dfe) {
+    }
 
-	public void dockableFrameRestored(DockableFrameEvent dfe) {
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameRestored(DockableFrameEvent dfe) {
+        showEvent(dfe.toString());
+    }
 
-	public void dockableFrameShown(DockableFrameEvent dfe) {
-		updatePanels(dfe.getDockableFrame().getName());
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameShown(DockableFrameEvent dfe) {
+        updatePanels(dfe.getDockableFrame().getName());
+        showEvent(dfe.toString());
+    }
 
-	public void dockableFrameTabHidden(DockableFrameEvent dfe) {
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameTabHidden(DockableFrameEvent dfe) {
+        showEvent(dfe.toString());
+    }
 
-	public void dockableFrameTabShown(DockableFrameEvent dfe) {
-		updatePanels(dfe.getDockableFrame().getName());
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameTabShown(DockableFrameEvent dfe) {
+        updatePanels(dfe.getDockableFrame().getName());
+        showEvent(dfe.toString());
+    }
 
-	public void dockableFrameMoved(DockableFrameEvent dfe) {
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameMoved(DockableFrameEvent dfe) {
+        showEvent(dfe.toString());
+    }
 
-	public void dockableFrameTransferred(DockableFrameEvent dfe) {
-		showEvent(dfe.toString());
-	}
+    public void dockableFrameTransferred(DockableFrameEvent dfe) {
+        showEvent(dfe.toString());
+    }
 
-	/**
-	 * Updates the Selected or Impersonated panel when it becomes visible to improve performance for moving and selecting tokens.
-	 * 
-	 * @param panel
-	 *            the panel to be updated
-	 */
-	private void updatePanels(String panel) {
-		if (MapTool.getFrame() != null) {
-			if (panel == "SELECTION") {
-				MapTool.getFrame().getSelectionPanel().reset();
-			}
-			if (panel == "IMPERSONATED") {
-				MapTool.getFrame().getImpersonatePanel().reset();
-			}
-		}
-	}
+    /**
+     * Updates the Selected or Impersonated panel when it becomes visible to improve performance for moving and selecting tokens.
+     * 
+     * @param panel
+     *            the panel to be updated
+     */
+    private void updatePanels(String panel) {
+        if (MapTool.getFrame() != null) {
+            if (panel == "SELECTION") {
+                MapTool.getFrame().getSelectionPanel().reset();
+            }
+            if (panel == "IMPERSONATED") {
+                MapTool.getFrame().getImpersonatePanel().reset();
+            }
+        }
+    }
 
-	/**
-	 * Logging convenience function to show which events are fired
-	 * 
-	 * @param dfeId
-	 *            the DockableFrameEvent to record
-	 */
-	private void showEvent(String dfeId) {
-		if (log.isTraceEnabled())
-			log.trace(dfeId);
-	}
+    /**
+     * Logging convenience function to show which events are fired
+     * 
+     * @param dfeId
+     *            the DockableFrameEvent to record
+     */
+    private void showEvent(String dfeId) {
+        if (log.isTraceEnabled())
+            log.trace(dfeId);
+    }
 }

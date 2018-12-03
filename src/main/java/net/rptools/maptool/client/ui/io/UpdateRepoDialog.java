@@ -45,152 +45,152 @@ import net.rptools.maptool_fx.MapTool;
  */
 @SuppressWarnings("serial")
 public class UpdateRepoDialog extends JDialog {
-	private static final Logger log = LogManager.getLogger(FTPClient.class);
-	private static final String UPDATE_REPO_DIALOG = "net/rptools/maptool/client/ui/forms/updateRepoDialog.xml";
-	private static final FormPanel form = new FormPanel(UPDATE_REPO_DIALOG);
+    private static final Logger log = LogManager.getLogger(FTPClient.class);
+    private static final String UPDATE_REPO_DIALOG = "net/rptools/maptool/client/ui/forms/updateRepoDialog.xml";
+    private static final FormPanel form = new FormPanel(UPDATE_REPO_DIALOG);
 
-	private int status = -1;
-	private CheckBoxListWithSelectable list;
-	private FTPLocation location;
+    private int status = -1;
+    private CheckBoxListWithSelectable list;
+    private FTPLocation location;
 
-	private JTextField saveTo;
-	private JTextField hostname;
-	private JTextField directory;
-	private JTextField username;
-	private JCheckBox subdir;
-	private JPasswordField password;
+    private JTextField saveTo;
+    private JTextField hostname;
+    private JTextField directory;
+    private JTextField username;
+    private JCheckBox subdir;
+    private JPasswordField password;
 
-	public UpdateRepoDialog(JFrame frame, List<String> repos, Location loc) {
-		super(frame, "Update Repository Dialog", true);
-		add(form);
-		initFields();
-		initFTPLocation(loc);
+    public UpdateRepoDialog(JFrame frame, List<String> repos, Location loc) {
+        super(frame, "Update Repository Dialog", true);
+        add(form);
+        initFields();
+        initFTPLocation(loc);
 
-		list.setListData(repos.toArray());
-		list.selectAll();
-		MouseListener mouseListener = new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-					int index = list.locationToIndex(e.getPoint());
-					Object o = list.getModel().getElementAt(index);
-					saveTo.setText(o.toString());
-					URL url = null;
-					try {
-						url = new URL(o.toString());
-						// System.out.println("URL object contains: " + url);
-						hostname.setText(url.getHost());
-					} catch (MalformedURLException e1) {
-						e1.printStackTrace();
-					}
-				}
-			}
-		};
-		list.addMouseListener(mouseListener);
+        list.setListData(repos.toArray());
+        list.selectAll();
+        MouseListener mouseListener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                    int index = list.locationToIndex(e.getPoint());
+                    Object o = list.getModel().getElementAt(index);
+                    saveTo.setText(o.toString());
+                    URL url = null;
+                    try {
+                        url = new URL(o.toString());
+                        // System.out.println("URL object contains: " + url);
+                        hostname.setText(url.getHost());
+                    } catch (MalformedURLException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        };
+        list.addMouseListener(mouseListener);
 
-		AbstractButton btn = form.getButton("@okButton");
-		btn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setStatus(JOptionPane.OK_OPTION);
-				UpdateRepoDialog.this.setVisible(false);
-			}
-		});
-		btn = form.getButton("@cancelButton");
-		btn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setStatus(JOptionPane.CANCEL_OPTION);
-				UpdateRepoDialog.this.setVisible(false);
-			}
-		});
-	}
+        AbstractButton btn = form.getButton("@okButton");
+        btn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                setStatus(JOptionPane.OK_OPTION);
+                UpdateRepoDialog.this.setVisible(false);
+            }
+        });
+        btn = form.getButton("@cancelButton");
+        btn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                setStatus(JOptionPane.CANCEL_OPTION);
+                UpdateRepoDialog.this.setVisible(false);
+            }
+        });
+    }
 
-	protected void initFields() {
-		list = (CheckBoxListWithSelectable) form.getComponentByName("checkBoxList");
-		saveTo = form.getTextField("@saveTo");
-		hostname = form.getTextField("@hostname");
-		directory = form.getTextField("@directory");
-		username = form.getTextField("@username");
-		subdir = form.getCheckBox("@subdir");
-		password = (JPasswordField) form.getComponentByName("@password");
-		// If any of the above are null, there's a mismatch with the form.
-		if (list == null || saveTo == null || hostname == null || directory == null || username == null
-				|| subdir == null || password == null)
-			log.error("Form does not match code: " + UPDATE_REPO_DIALOG);
-	}
+    protected void initFields() {
+        list = (CheckBoxListWithSelectable) form.getComponentByName("checkBoxList");
+        saveTo = form.getTextField("@saveTo");
+        hostname = form.getTextField("@hostname");
+        directory = form.getTextField("@directory");
+        username = form.getTextField("@username");
+        subdir = form.getCheckBox("@subdir");
+        password = (JPasswordField) form.getComponentByName("@password");
+        // If any of the above are null, there's a mismatch with the form.
+        if (list == null || saveTo == null || hostname == null || directory == null || username == null
+                || subdir == null || password == null)
+            log.error("Form does not match code: " + UPDATE_REPO_DIALOG);
+    }
 
-	protected void initFTPLocation(Location loc) {
-		if (loc instanceof FTPLocation) {
-			location = (FTPLocation) loc;
-			// Copy the fields into the GUI
-			hostname.setText(location.getHostname());
-			directory.setText(location.getPath());
-			username.setText(location.getUsername());
-			password.setText(location.getPassword());
-		}
-	}
+    protected void initFTPLocation(Location loc) {
+        if (loc instanceof FTPLocation) {
+            location = (FTPLocation) loc;
+            // Copy the fields into the GUI
+            hostname.setText(location.getHostname());
+            directory.setText(location.getPath());
+            username.setText(location.getUsername());
+            password.setText(location.getPassword());
+        }
+    }
 
-	public FormPanel getForm() {
-		return form;
-	}
+    public FormPanel getForm() {
+        return form;
+    }
 
-	public FTPLocation getFTPLocation() {
-		if (location == null) {
-			location = new FTPLocation(getUsername(), getPassword(), getHostname(), getDirectory().getPath());
-		}
-		return location;
-	}
+    public FTPLocation getFTPLocation() {
+        if (location == null) {
+            location = new FTPLocation(getUsername(), getPassword(), getHostname(), getDirectory().getPath());
+        }
+        return location;
+    }
 
-	public String getSaveToRepository() {
-		return saveTo.getText();
-	}
+    public String getSaveToRepository() {
+        return saveTo.getText();
+    }
 
-	public String getHostname() {
-		return hostname.getText();
-	}
+    public String getHostname() {
+        return hostname.getText();
+    }
 
-	public File getDirectory() {
-		String s = directory.getText();
-		File f = new File(s == null ? "/" : s);
-		return f;
-	}
+    public File getDirectory() {
+        String s = directory.getText();
+        File f = new File(s == null ? "/" : s);
+        return f;
+    }
 
-	public String getUsername() {
-		return username.getText();
-	}
+    public String getUsername() {
+        return username.getText();
+    }
 
-	public String getPassword() {
-		return new String(password.getPassword());
-	}
+    public String getPassword() {
+        return new String(password.getPassword());
+    }
 
-	public boolean isCreateSubdir() {
-		return subdir.isEnabled();
-	}
+    public boolean isCreateSubdir() {
+        return subdir.isEnabled();
+    }
 
-	public List<String> getSelectedRepositories() {
-		Object[] objects = list.getSelectedObjects();
-		List<String> repoList = new ArrayList<String>(objects.length);
-		for (int i = 0; i < objects.length; i++) {
-			Object s = objects[i];
-			// System.out.println("repoList[" + i + "] = " + s.toString() + ", type = " +
-			// s.getClass().getCanonicalName());
-			repoList.add(s.toString());
-		}
-		return repoList;
-	}
+    public List<String> getSelectedRepositories() {
+        Object[] objects = list.getSelectedObjects();
+        List<String> repoList = new ArrayList<String>(objects.length);
+        for (int i = 0; i < objects.length; i++) {
+            Object s = objects[i];
+            // System.out.println("repoList[" + i + "] = " + s.toString() + ", type = " +
+            // s.getClass().getCanonicalName());
+            repoList.add(s.toString());
+        }
+        return repoList;
+    }
 
-	public int getStatus() {
-		return status;
-	}
+    public int getStatus() {
+        return status;
+    }
 
-	public void setStatus(int s) {
-		status = s;
-	}
+    public void setStatus(int s) {
+        status = s;
+    }
 
-	@Override
-	public void setVisible(boolean b) {
-		if (b) {
-			SwingUtil.centerOver(this, MapTool.getFrame());
-		}
-		super.setVisible(b);
-	}
+    @Override
+    public void setVisible(boolean b) {
+        if (b) {
+            SwingUtil.centerOver(this, MapTool.getFrame());
+        }
+        super.setVisible(b);
+    }
 }

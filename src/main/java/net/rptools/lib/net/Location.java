@@ -15,9 +15,9 @@ import java.io.InputStream;
 import javax.imageio.ImageWriter;
 
 public interface Location {
-	public void putContent(ImageWriter content, BufferedImage img) throws IOException;
+    public void putContent(ImageWriter content, BufferedImage img) throws IOException;
 
-	public void putContent(InputStream content) throws IOException;
+    public void putContent(InputStream content) throws IOException;
 
-	public InputStream getContent() throws IOException;
+    public InputStream getContent() throws IOException;
 }

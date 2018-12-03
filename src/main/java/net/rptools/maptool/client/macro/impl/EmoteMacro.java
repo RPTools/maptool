@@ -15,22 +15,22 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
-		name = "emote",
-		aliases = { "me" },
-		description = "emote.description")
+        name = "emote",
+        aliases = { "me" },
+        description = "emote.description")
 public class EmoteMacro extends AbstractMacro {
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		macro = processText(macro);
-		StringBuilder sb = new StringBuilder();
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        macro = processText(macro);
+        StringBuilder sb = new StringBuilder();
 
-		// Prevent spoofing
-		sb.append("* ");
-		sb.append("<span style='color:green'>");
-		sb.append(MapTool.getFrame().getCommandPanel().getIdentity());
-		sb.append(" ");
+        // Prevent spoofing
+        sb.append("* ");
+        sb.append("<span style='color:green'>");
+        sb.append(MapTool.getFrame().getCommandPanel().getIdentity());
+        sb.append(" ");
 
-		sb.append(macro);
-		sb.append("</span>");
-		MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), sb.toString()));
-	}
+        sb.append(macro);
+        sb.append("</span>");
+        MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), sb.toString()));
+    }
 }

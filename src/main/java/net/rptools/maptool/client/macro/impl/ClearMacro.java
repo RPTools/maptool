@@ -21,14 +21,14 @@ import net.rptools.maptool_fx.MapTool;
  * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author: azhrei_fje $
  */
 @MacroDefinition(
-		name = "clear",
-		aliases = { "clr", "cls" },
-		description = "clear.description")
+        name = "clear",
+        aliases = { "clr", "cls" },
+        description = "clear.description")
 public class ClearMacro implements Macro {
-	/**
-	 * @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String)
-	 */
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		MapTool.getFrame().getCommandPanel().clearMessagePanel();
-	}
+    /**
+     * @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String)
+     */
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        MapTool.getFrame().getCommandPanel().clearMessagePanel();
+    }
 }

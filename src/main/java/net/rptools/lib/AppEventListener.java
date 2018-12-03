@@ -10,5 +10,5 @@ package net.rptools.lib;
 
 public interface AppEventListener {
 
-	public void handleAppEvent(AppEvent event);
+    public void handleAppEvent(AppEvent event);
 }

@@ -18,58 +18,58 @@ import java.net.Socket;
 
 public class EchoServer {
 
-	private final int port;
-	private boolean stop;
-	private ServerSocket server;
+    private final int port;
+    private boolean stop;
+    private ServerSocket server;
 
-	public EchoServer(int port) {
-		this.port = port;
-	}
+    public EchoServer(int port) {
+        this.port = port;
+    }
 
-	public synchronized void start() throws IOException {
-		if (server != null) {
-			return;
-		}
-		server = new ServerSocket(port);
-		new ReceiveThread().start();
-	}
+    public synchronized void start() throws IOException {
+        if (server != null) {
+            return;
+        }
+        server = new ServerSocket(port);
+        new ReceiveThread().start();
+    }
 
-	public synchronized void stop() {
-		if (server == null) {
-			return;
-		}
-		try {
-			stop = true;
-			server.close();
-			server = null;
-		} catch (IOException ioe) {
-			// Since we're trying to kill it anyway
-			ioe.printStackTrace();
-		}
-	}
+    public synchronized void stop() {
+        if (server == null) {
+            return;
+        }
+        try {
+            stop = true;
+            server.close();
+            server = null;
+        } catch (IOException ioe) {
+            // Since we're trying to kill it anyway
+            ioe.printStackTrace();
+        }
+    }
 
-	private class ReceiveThread extends Thread {
-		@Override
-		public void run() {
-			try {
-				while (!stop) {
-					Socket clientSocket = server.accept();
-					BufferedReader reader = new BufferedReader(
-							new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
-					PrintWriter writer = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"));
+    private class ReceiveThread extends Thread {
+        @Override
+        public void run() {
+            try {
+                while (!stop) {
+                    Socket clientSocket = server.accept();
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
+                    PrintWriter writer = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"));
 
-					String line = reader.readLine();
-					while (line != null) {
-						writer.println(line);
-						writer.flush();
-						line = reader.readLine();
-					}
-				}
-			} catch (IOException e) {
-				// Expected when the accept is killed
-			} finally {
-				server = null;
-			}
-		}
-	}
+                    String line = reader.readLine();
+                    while (line != null) {
+                        writer.println(line);
+                        writer.flush();
+                        line = reader.readLine();
+                    }
+                }
+            } catch (IOException e) {
+                // Expected when the accept is killed
+            } finally {
+                server = null;
+            }
+        }
+    }
 }

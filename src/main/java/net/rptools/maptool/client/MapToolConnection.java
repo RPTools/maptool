@@ -20,35 +20,35 @@ import net.rptools.maptool_fx.MapTool;
  * @author trevor
  */
 public class MapToolConnection extends ClientConnection {
-	private final Player player;
+    private final Player player;
 
-	public MapToolConnection(String host, int port, Player player) throws IOException {
-		super(host, port, null);
-		this.player = player;
-	}
+    public MapToolConnection(String host, int port, Player player) throws IOException {
+        super(host, port, null);
+        this.player = player;
+    }
 
-	public MapToolConnection(Socket socket, Player player) throws IOException {
-		super(socket, null);
-		this.player = player;
-	}
+    public MapToolConnection(Socket socket, Player player) throws IOException {
+        super(socket, null);
+        this.player = player;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.rptools.clientserver.simple.client.ClientConnection#sendHandshake( java.net.Socket)
-	 */
-	@Override
-	public boolean sendHandshake(Socket s) throws IOException {
-		Handshake.Response response = Handshake.sendHandshake(new Handshake.Request(player.getName(), player.getPassword(), player.getRole(), MapTool.getVersion()), s);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.rptools.clientserver.simple.client.ClientConnection#sendHandshake( java.net.Socket)
+     */
+    @Override
+    public boolean sendHandshake(Socket s) throws IOException {
+        Handshake.Response response = Handshake.sendHandshake(new Handshake.Request(player.getName(), player.getPassword(), player.getRole(), MapTool.getVersion()), s);
 
-		if (response.code != Handshake.Code.OK) {
-			MapTool.showError("ERROR: " + response.message);
-			return false;
-		}
-		boolean result = response.code == Handshake.Code.OK;
-		if (result) {
-			MapTool.setServerPolicy(response.policy);
-		}
-		return result;
-	}
+        if (response.code != Handshake.Code.OK) {
+            MapTool.showError("ERROR: " + response.message);
+            return false;
+        }
+        boolean result = response.code == Handshake.Code.OK;
+        if (result) {
+            MapTool.setServerPolicy(response.policy);
+        }
+        return result;
+    }
 }

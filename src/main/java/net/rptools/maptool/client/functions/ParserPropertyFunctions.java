@@ -31,62 +31,62 @@ import java.util.Map;
  */
 public class ParserPropertyFunctions extends AbstractFunction {
 
-	private static ParserPropertyFunctions instance = new ParserPropertyFunctions();
+    private static ParserPropertyFunctions instance = new ParserPropertyFunctions();
 
-	public static ParserPropertyFunctions getInstance() {
-		return instance;
-	}
+    public static ParserPropertyFunctions getInstance() {
+        return instance;
+    }
 
-	public ParserPropertyFunctions() {
-		super(0, 1, "getMaxRecursionDepth", "setMaxRecursionDepth", "getMaxLoopIterations", "setMaxLoopIterations",
-				"getRecursionDepth", "getMacroContext");
-	}
+    public ParserPropertyFunctions() {
+        super(0, 1, "getMaxRecursionDepth", "setMaxRecursionDepth", "getMaxLoopIterations", "setMaxLoopIterations",
+                "getRecursionDepth", "getMacroContext");
+    }
 
-	@Override
-	public Object childEvaluate(Parser parser, String functionName, List<Object> args) throws ParserException {
-		MapToolLineParser mtlParser = MapTool.getParser();
+    @Override
+    public Object childEvaluate(Parser parser, String functionName, List<Object> args) throws ParserException {
+        MapToolLineParser mtlParser = MapTool.getParser();
 
-		int argVal = 0;
+        int argVal = 0;
 
-		if (functionName.startsWith("set")) {
-			if (!MapTool.getParser().isMacroTrusted()) {
-				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-			}
+        if (functionName.startsWith("set")) {
+            if (!MapTool.getParser().isMacroTrusted()) {
+                throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+            }
 
-			if (args.size() < 1) {
-				throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, args.size()));
-			}
+            if (args.size() < 1) {
+                throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, args.size()));
+            }
 
-			argVal = ((BigDecimal) (args.get(0))).intValue();
-		}
+            argVal = ((BigDecimal) (args.get(0))).intValue();
+        }
 
-		int returnVal = 0;
+        int returnVal = 0;
 
-		if (functionName.equals("getMaxRecursionDepth")) {
-			returnVal = mtlParser.getMaxRecursionDepth();
-		} else if (functionName.equalsIgnoreCase("getMaxLoopIterations")) {
-			returnVal = mtlParser.getMaxLoopIterations();
-		} else if (functionName.equals("getRecursionDepth")) {
-			returnVal = mtlParser.getRecursionDepth();
-		} else if (functionName.equals("getMacroContext")) {
-			Map<String, Object> mco = new HashMap<String, Object>();
-			MapToolMacroContext mc = mtlParser.getContext();
-			mco.put("stackSize", mtlParser.getContextStackSize());
-			mco.put("name", mc.getName());
-			mco.put("source", mc.getSource());
-			mco.put("trusted", mc.isTrusted());
-			if (mc.getMacroButtonIndex() >= 0) {
-				mco.put("buttonIndex", mc.getMacroButtonIndex());
-			}
-			return JSONObject.fromObject(mco);
-		} else if (functionName.equals("setMaxRecursionDepth")) {
-			mtlParser.setMaxRecursionDepth(argVal);
-			returnVal = mtlParser.getMaxRecursionDepth();
-		} else if (functionName.equals("setMaxLoopIterations")) {
-			mtlParser.setMaxLoopIterations(argVal);
-			returnVal = mtlParser.getMaxLoopIterations();
-		}
+        if (functionName.equals("getMaxRecursionDepth")) {
+            returnVal = mtlParser.getMaxRecursionDepth();
+        } else if (functionName.equalsIgnoreCase("getMaxLoopIterations")) {
+            returnVal = mtlParser.getMaxLoopIterations();
+        } else if (functionName.equals("getRecursionDepth")) {
+            returnVal = mtlParser.getRecursionDepth();
+        } else if (functionName.equals("getMacroContext")) {
+            Map<String, Object> mco = new HashMap<String, Object>();
+            MapToolMacroContext mc = mtlParser.getContext();
+            mco.put("stackSize", mtlParser.getContextStackSize());
+            mco.put("name", mc.getName());
+            mco.put("source", mc.getSource());
+            mco.put("trusted", mc.isTrusted());
+            if (mc.getMacroButtonIndex() >= 0) {
+                mco.put("buttonIndex", mc.getMacroButtonIndex());
+            }
+            return JSONObject.fromObject(mco);
+        } else if (functionName.equals("setMaxRecursionDepth")) {
+            mtlParser.setMaxRecursionDepth(argVal);
+            returnVal = mtlParser.getMaxRecursionDepth();
+        } else if (functionName.equals("setMaxLoopIterations")) {
+            mtlParser.setMaxLoopIterations(argVal);
+            returnVal = mtlParser.getMaxLoopIterations();
+        }
 
-		return BigDecimal.valueOf(returnVal);
-	}
+        return BigDecimal.valueOf(returnVal);
+    }
 }

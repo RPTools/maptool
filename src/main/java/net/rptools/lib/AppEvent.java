@@ -10,31 +10,31 @@ package net.rptools.lib;
 
 public class AppEvent {
 
-	private Enum<?> id;
-	private Object source;
-	private Object oldValue;
-	private Object newValue;
+    private Enum<?> id;
+    private Object source;
+    private Object oldValue;
+    private Object newValue;
 
-	public AppEvent(Enum<?> id, Object source, Object oldValue, Object newValue) {
-		this.id = id;
-		this.source = source;
-		this.oldValue = oldValue;
-		this.newValue = newValue;
-	}
+    public AppEvent(Enum<?> id, Object source, Object oldValue, Object newValue) {
+        this.id = id;
+        this.source = source;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
 
-	public Enum<?> getId() {
-		return id;
-	}
+    public Enum<?> getId() {
+        return id;
+    }
 
-	public Object getSource() {
-		return source;
-	}
+    public Object getSource() {
+        return source;
+    }
 
-	public Object getOldValue() {
-		return oldValue;
-	}
+    public Object getOldValue() {
+        return oldValue;
+    }
 
-	public Object getNewValue() {
-		return newValue;
-	}
+    public Object getNewValue() {
+        return newValue;
+    }
 }

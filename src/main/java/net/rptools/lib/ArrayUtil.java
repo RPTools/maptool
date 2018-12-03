@@ -10,19 +10,19 @@ package net.rptools.lib;
 
 public class ArrayUtil {
 
-	public static boolean arrayContains(Object[] array, Object object) {
+    public static boolean arrayContains(Object[] array, Object object) {
 
-		for (int i = 0; i < array.length; i++) {
+        for (int i = 0; i < array.length; i++) {
 
-			try {
-				if (array[i] == object || array[i].equals(object)) {
-					return true;
-				}
-			} catch (Exception e) {
-				// Means not the same, keep looking
-			}
-		}
+            try {
+                if (array[i] == object || array[i].equals(object)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                // Means not the same, keep looking
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 }

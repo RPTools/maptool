@@ -27,49 +27,49 @@ import net.rptools.maptool_fx.MapTool;
  * Tool for drawing freehand lines.
  */
 public class PolyLineTopologyTool extends PolygonTopologyTool implements MouseMotionListener {
-	private static final long serialVersionUID = 3258132466219627316L;
+    private static final long serialVersionUID = 3258132466219627316L;
 
-	public PolyLineTopologyTool() {
-		try {
-			setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/top-blue-free.png"))));
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
+    public PolyLineTopologyTool() {
+        try {
+            setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/top-blue-free.png"))));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
 
-	@Override
-	public String getTooltip() {
-		return "tool.polylinetopo.tooltip";
-	}
+    @Override
+    public String getTooltip() {
+        return "tool.polylinetopo.tooltip";
+    }
 
-	@Override
-	public String getInstructions() {
-		return "tool.poly.instructions";
-	}
+    @Override
+    public String getInstructions() {
+        return "tool.poly.instructions";
+    }
 
-	protected boolean isBackgroundFill(MouseEvent e) {
-		return false;
-	}
+    protected boolean isBackgroundFill(MouseEvent e) {
+        return false;
+    }
 
-	protected Pen getPen() {
+    protected Pen getPen() {
 
-		Pen pen = new Pen(MapTool.getFrame().getPen());
-		pen.setEraser(isEraser());
-		pen.setForegroundMode(Pen.MODE_SOLID);
-		pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
-		pen.setThickness(2.0f);
-		pen.setOpacity(AppStyle.topologyRemoveColor.getAlpha() / 255.0f);
-		pen.setPaint(new DrawableColorPaint(isEraser() ? AppStyle.topologyRemoveColor : AppStyle.topologyAddColor));
+        Pen pen = new Pen(MapTool.getFrame().getPen());
+        pen.setEraser(isEraser());
+        pen.setForegroundMode(Pen.MODE_SOLID);
+        pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
+        pen.setThickness(2.0f);
+        pen.setOpacity(AppStyle.topologyRemoveColor.getAlpha() / 255.0f);
+        pen.setPaint(new DrawableColorPaint(isEraser() ? AppStyle.topologyRemoveColor : AppStyle.topologyAddColor));
 
-		return pen;
-	}
+        return pen;
+    }
 
-	protected Polygon getPolygon(LineSegment line) {
-		Polygon polygon = new Polygon();
-		for (Point point : line.getPoints()) {
-			polygon.addPoint(point.x, point.y);
-		}
+    protected Polygon getPolygon(LineSegment line) {
+        Polygon polygon = new Polygon();
+        for (Point point : line.getPoints()) {
+            polygon.addPoint(point.x, point.y);
+        }
 
-		return polygon;
-	}
+        return polygon;
+    }
 }

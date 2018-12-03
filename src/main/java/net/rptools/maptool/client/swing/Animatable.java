@@ -13,5 +13,5 @@ package net.rptools.maptool.client.swing;
  */
 public interface Animatable {
 
-	public void animate();
+    public void animate();
 }

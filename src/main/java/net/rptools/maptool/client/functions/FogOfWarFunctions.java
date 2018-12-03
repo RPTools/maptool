@@ -28,103 +28,103 @@ import net.rptools.parser.function.AbstractFunction;
  *         modified by: Lee, Jamz
  */
 public class FogOfWarFunctions extends AbstractFunction {
-	private static final FogOfWarFunctions instance = new FogOfWarFunctions();
+    private static final FogOfWarFunctions instance = new FogOfWarFunctions();
 
-	private FogOfWarFunctions() {
-		super(0, 2, "exposePCOnlyArea", "exposeFogAtWaypoints", "toggleFoW",
-				"exposeFOW", "exposeAllOwnedArea", "restoreFoW");
-	}
+    private FogOfWarFunctions() {
+        super(0, 2, "exposePCOnlyArea", "exposeFogAtWaypoints", "toggleFoW",
+                "exposeFOW", "exposeAllOwnedArea", "restoreFoW");
+    }
 
-	public static FogOfWarFunctions getInstance() {
-		return instance;
-	}
+    public static FogOfWarFunctions getInstance() {
+        return instance;
+    }
 
-	@Override
-	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
-		if (!MapTool.getParser().isMacroTrusted()) {
-			throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-		}
-		if (parameters.size() > 1) {
-			throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
-		}
-		ZoneRenderer zoneRenderer = (parameters.size() == 1 && parameters.get(0) instanceof String) ? getZoneRenderer((String) parameters.get(0)) : getZoneRenderer(null);
+    @Override
+    public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
+        if (!MapTool.getParser().isMacroTrusted()) {
+            throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+        }
+        if (parameters.size() > 1) {
+            throw new ParserException(I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+        }
+        ZoneRenderer zoneRenderer = (parameters.size() == 1 && parameters.get(0) instanceof String) ? getZoneRenderer((String) parameters.get(0)) : getZoneRenderer(null);
 
-		/*
-		 * String empty = exposePCOnlyArea(optional String mapName)
-		 */
-		if (functionName.equals("exposePCOnlyArea")) {
-			FogUtil.exposePCArea(zoneRenderer);
-			return "<!---->";
-		}
-		/*
-		 * String empty = exposePCOnlyArea(optional String mapName)
-		 */
-		if (functionName.equals("exposeAllOwnedArea")) {
-			FogUtil.exposeAllOwnedArea(zoneRenderer);
-			return "<!---->";
-		}
-		/*
-		 * String empty = exposeFOW(optional String mapName)
-		 */
-		if (functionName.equals("exposeFOW") || functionName.equals("exposeFoW")) {
-			FogUtil.exposeVisibleArea(zoneRenderer,
-					getTokenSelectedSet(zoneRenderer), true);
-			return "<!---->";
-		}
-		/*
-		 * String empty = exposeFOW(optional String mapName)
-		 */
-		if (functionName.equals("restoreFOW") || functionName.equals("restoreFoW")) {
-			FogUtil.restoreFoW(zoneRenderer);
-			return "<!---->";
-		}
-		/*
-		 * Lee: String empty = toggleFoW()
-		 */
-		if (functionName.equals("toggleFoW")) {
-			((ZoneAdminClientAction) AppActions.TOGGLE_FOG).execute(null);
-			return ((ZoneAdminClientAction) AppActions.TOGGLE_FOG).isSelected()
-					? I18N.getText("msg.info.action.enableFoW")
-					: I18N.getText("msg.info.action.disableFoW");
-		}
-		/*
-		 * Lee: String empty = exposeFogAtWaypoints()
-		 */
-		if (functionName.equals("exposeFogAtWaypoints")) {
+        /*
+         * String empty = exposePCOnlyArea(optional String mapName)
+         */
+        if (functionName.equals("exposePCOnlyArea")) {
+            FogUtil.exposePCArea(zoneRenderer);
+            return "<!---->";
+        }
+        /*
+         * String empty = exposePCOnlyArea(optional String mapName)
+         */
+        if (functionName.equals("exposeAllOwnedArea")) {
+            FogUtil.exposeAllOwnedArea(zoneRenderer);
+            return "<!---->";
+        }
+        /*
+         * String empty = exposeFOW(optional String mapName)
+         */
+        if (functionName.equals("exposeFOW") || functionName.equals("exposeFoW")) {
+            FogUtil.exposeVisibleArea(zoneRenderer,
+                    getTokenSelectedSet(zoneRenderer), true);
+            return "<!---->";
+        }
+        /*
+         * String empty = exposeFOW(optional String mapName)
+         */
+        if (functionName.equals("restoreFOW") || functionName.equals("restoreFoW")) {
+            FogUtil.restoreFoW(zoneRenderer);
+            return "<!---->";
+        }
+        /*
+         * Lee: String empty = toggleFoW()
+         */
+        if (functionName.equals("toggleFoW")) {
+            ((ZoneAdminClientAction) AppActions.TOGGLE_FOG).execute(null);
+            return ((ZoneAdminClientAction) AppActions.TOGGLE_FOG).isSelected()
+                    ? I18N.getText("msg.info.action.enableFoW")
+                    : I18N.getText("msg.info.action.disableFoW");
+        }
+        /*
+         * Lee: String empty = exposeFogAtWaypoints()
+         */
+        if (functionName.equals("exposeFogAtWaypoints")) {
 
-			if (((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL)
-					.isAvailable()) {
-				((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL)
-						.execute(null);
+            if (((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL)
+                    .isAvailable()) {
+                ((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL)
+                        .execute(null);
 
-				return ((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL)
-						.isSelected()
-								? I18N.getText(
-										"msg.info.action.enableRevealFogAtWaypoints")
-								: I18N.getText(
-										"msg.info.action.disableRevealFogAtWaypoints");
-			} else {
-				return I18N.getText("msg.info.action.FoWDisabled");
-			}
-		}
-		throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
-	}
+                return ((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL)
+                        .isSelected()
+                                ? I18N.getText(
+                                        "msg.info.action.enableRevealFogAtWaypoints")
+                                : I18N.getText(
+                                        "msg.info.action.disableRevealFogAtWaypoints");
+            } else {
+                return I18N.getText("msg.info.action.FoWDisabled");
+            }
+        }
+        throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+    }
 
-	private Set<GUID> getTokenSelectedSet(final ZoneRenderer zr) {
-		Set<GUID> tokens = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
-		Set<GUID> ownedTokens = MapTool.getFrame().getCurrentZoneRenderer().getOwnedTokens(tokens);
-		return ownedTokens;
-	}
+    private Set<GUID> getTokenSelectedSet(final ZoneRenderer zr) {
+        Set<GUID> tokens = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
+        Set<GUID> ownedTokens = MapTool.getFrame().getCurrentZoneRenderer().getOwnedTokens(tokens);
+        return ownedTokens;
+    }
 
-	private ZoneRenderer getZoneRenderer(final String name) {
-		if (name == null) {
-			return MapTool.getFrame().getCurrentZoneRenderer();
-		}
-		for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
-			if (zr.getZone().getName().equals(name.toString())) {
-				return zr;
-			}
-		}
-		return MapTool.getFrame().getCurrentZoneRenderer();
-	}
+    private ZoneRenderer getZoneRenderer(final String name) {
+        if (name == null) {
+            return MapTool.getFrame().getCurrentZoneRenderer();
+        }
+        for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
+            if (zr.getZone().getName().equals(name.toString())) {
+                return zr;
+            }
+        }
+        return MapTool.getFrame().getCurrentZoneRenderer();
+    }
 }

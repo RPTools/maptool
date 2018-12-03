@@ -22,47 +22,47 @@ import net.rptools.maptool_fx.MapTool;
 
 public class ImageAssetSelectorPanel extends JPanel {
 
-	private ImageAssetPanel imageAssetPanel;
-	private JButton imageExplorerButton;
+    private ImageAssetPanel imageAssetPanel;
+    private JButton imageExplorerButton;
 
-	public ImageAssetSelectorPanel() {
-		setLayout(new BorderLayout());
+    public ImageAssetSelectorPanel() {
+        setLayout(new BorderLayout());
 
-		add(BorderLayout.CENTER, getImageAssetPanel());
-		add(BorderLayout.SOUTH, getImageExplorerButton());
-	}
+        add(BorderLayout.CENTER, getImageAssetPanel());
+        add(BorderLayout.SOUTH, getImageExplorerButton());
+    }
 
-	public ImageAssetPanel getImageAssetPanel() {
-		if (imageAssetPanel == null) {
-			imageAssetPanel = new ImageAssetPanel();
-		}
-		return imageAssetPanel;
-	}
+    public ImageAssetPanel getImageAssetPanel() {
+        if (imageAssetPanel == null) {
+            imageAssetPanel = new ImageAssetPanel();
+        }
+        return imageAssetPanel;
+    }
 
-	public JButton getImageExplorerButton() {
-		if (imageExplorerButton == null) {
-			imageExplorerButton = new JButton("...");
-		}
+    public JButton getImageExplorerButton() {
+        if (imageExplorerButton == null) {
+            imageExplorerButton = new JButton("...");
+        }
 
-		return imageExplorerButton;
-	}
+        return imageExplorerButton;
+    }
 
-	private JComponent createImageExplorerPanel() {
+    private JComponent createImageExplorerPanel() {
 
-		final AssetPanel assetPanel = new AssetPanel("imageAssetSelectorImageExplorer", MapTool.getFrame().getAssetPanel().getModel(), JSplitPane.HORIZONTAL_SPLIT);
-		assetPanel.addImageSelectionListener(new SelectionListener() {
-			public void selectionPerformed(List<Object> selectedList) {
-				// There should be exactly one
-				if (selectedList.size() != 1) {
-					return;
-				}
+        final AssetPanel assetPanel = new AssetPanel("imageAssetSelectorImageExplorer", MapTool.getFrame().getAssetPanel().getModel(), JSplitPane.HORIZONTAL_SPLIT);
+        assetPanel.addImageSelectionListener(new SelectionListener() {
+            public void selectionPerformed(List<Object> selectedList) {
+                // There should be exactly one
+                if (selectedList.size() != 1) {
+                    return;
+                }
 
-				Integer imageIndex = (Integer) selectedList.get(0);
+                Integer imageIndex = (Integer) selectedList.get(0);
 
-				getImageAssetPanel().setImageId(assetPanel.getAsset(imageIndex).getId());
-			}
-		});
+                getImageAssetPanel().setImageId(assetPanel.getAsset(imageIndex).getId());
+            }
+        });
 
-		return assetPanel;
-	}
+        return assetPanel;
+    }
 }

@@ -13,16 +13,16 @@ import java.util.List;
 
 public class MacroContext {
 
-	private List<String> transformHistory;
+    private List<String> transformHistory;
 
-	public void addTransform(String transform) {
-		if (transformHistory == null) {
-			transformHistory = new LinkedList<String>();
-		}
-		transformHistory.add(transform);
-	}
+    public void addTransform(String transform) {
+        if (transformHistory == null) {
+            transformHistory = new LinkedList<String>();
+        }
+        transformHistory.add(transform);
+    }
 
-	public List<String> getTransformationHistory() {
-		return transformHistory;
-	}
+    public List<String> getTransformationHistory() {
+        return transformHistory;
+    }
 }

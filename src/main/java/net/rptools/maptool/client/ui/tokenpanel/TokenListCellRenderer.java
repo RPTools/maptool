@@ -22,34 +22,34 @@ import net.rptools.maptool.util.ImageManager;
 
 public class TokenListCellRenderer extends DefaultListCellRenderer {
 
-	private BufferedImage image;
-	private String name;
+    private BufferedImage image;
+    private String name;
 
-	@Override
-	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+    @Override
+    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 
-		super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		if (value instanceof Token) {
-			Token token = (Token) value;
-			image = ImageManager.getImage(token.getImageAssetId(), this);
-			name = token.getName();
+        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        if (value instanceof Token) {
+            Token token = (Token) value;
+            image = ImageManager.getImage(token.getImageAssetId(), this);
+            name = token.getName();
 
-			setText(" "); // hack to keep the row height the right size
-		}
-		return this;
-	}
+            setText(" "); // hack to keep the row height the right size
+        }
+        return this;
+    }
 
-	@Override
-	protected void paintComponent(Graphics g) {
+    @Override
+    protected void paintComponent(Graphics g) {
 
-		super.paintComponent(g);
+        super.paintComponent(g);
 
-		if (image != null) {
+        if (image != null) {
 
-			Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
-			SwingUtil.constrainTo(imageSize, getSize().height);
-			g.drawImage(image, 0, 0, imageSize.width, imageSize.height, this);
-			g.drawString(name, imageSize.width + 2, g.getFontMetrics().getAscent());
-		}
-	}
+            Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
+            SwingUtil.constrainTo(imageSize, getSize().height);
+            g.drawImage(image, 0, 0, imageSize.width, imageSize.height, this);
+            g.drawString(name, imageSize.width + 2, g.getFontMetrics().getAscent());
+        }
+    }
 }

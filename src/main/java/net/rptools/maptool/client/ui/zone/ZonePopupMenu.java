@@ -20,43 +20,43 @@ import net.rptools.maptool_fx.MapTool;
 
 public class ZonePopupMenu extends JPopupMenu {
 
-	private Zone zone;
+    private Zone zone;
 
-	public ZonePopupMenu(Zone zone) {
-		super("Zone");
+    public ZonePopupMenu(Zone zone) {
+        super("Zone");
 
-		this.zone = zone;
+        this.zone = zone;
 
-		Action action = null;
-		if (zone.isVisible()) {
-			action = new AbstractAction() {
-				{
-					putValue(NAME, "Hide from players");
-				}
+        Action action = null;
+        if (zone.isVisible()) {
+            action = new AbstractAction() {
+                {
+                    putValue(NAME, "Hide from players");
+                }
 
-				public void actionPerformed(ActionEvent e) {
-					ZonePopupMenu.this.zone.setVisible(false);
-					MapTool.serverCommand().setZoneVisibility(ZonePopupMenu.this.zone.getId(), false);
-					MapTool.getFrame().getZoneMiniMapPanel().flush();
-					MapTool.getFrame().refresh();
-				}
-			};
-		} else {
-			action = new AbstractAction() {
-				{
-					putValue(NAME, "Show to players");
-				}
+                public void actionPerformed(ActionEvent e) {
+                    ZonePopupMenu.this.zone.setVisible(false);
+                    MapTool.serverCommand().setZoneVisibility(ZonePopupMenu.this.zone.getId(), false);
+                    MapTool.getFrame().getZoneMiniMapPanel().flush();
+                    MapTool.getFrame().refresh();
+                }
+            };
+        } else {
+            action = new AbstractAction() {
+                {
+                    putValue(NAME, "Show to players");
+                }
 
-				public void actionPerformed(ActionEvent e) {
+                public void actionPerformed(ActionEvent e) {
 
-					ZonePopupMenu.this.zone.setVisible(true);
-					MapTool.serverCommand().setZoneVisibility(ZonePopupMenu.this.zone.getId(), true);
-					MapTool.getFrame().getZoneMiniMapPanel().flush();
-					MapTool.getFrame().refresh();
-				}
-			};
-		}
-		add(new JMenuItem(action));
-	}
+                    ZonePopupMenu.this.zone.setVisible(true);
+                    MapTool.serverCommand().setZoneVisibility(ZonePopupMenu.this.zone.getId(), true);
+                    MapTool.getFrame().getZoneMiniMapPanel().flush();
+                    MapTool.getFrame().refresh();
+                }
+            };
+        }
+        add(new JMenuItem(action));
+    }
 
 }

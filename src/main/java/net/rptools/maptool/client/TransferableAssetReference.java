@@ -21,23 +21,23 @@ import net.rptools.maptool.model.GUID;
  */
 public class TransferableAssetReference implements Transferable {
 
-	public static final DataFlavor dataFlavor = new DataFlavor(GUID.class, "AssetReference");
+    public static final DataFlavor dataFlavor = new DataFlavor(GUID.class, "AssetReference");
 
-	private MD5Key assetID;
+    private MD5Key assetID;
 
-	public TransferableAssetReference(Asset asset) {
-		this.assetID = asset.getId();
-	}
+    public TransferableAssetReference(Asset asset) {
+        this.assetID = asset.getId();
+    }
 
-	public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-		return assetID;
-	}
+    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+        return assetID;
+    }
 
-	public DataFlavor[] getTransferDataFlavors() {
-		return new DataFlavor[] { dataFlavor };
-	}
+    public DataFlavor[] getTransferDataFlavors() {
+        return new DataFlavor[] { dataFlavor };
+    }
 
-	public boolean isDataFlavorSupported(DataFlavor flavor) {
-		return flavor.equals(dataFlavor);
-	}
+    public boolean isDataFlavorSupported(DataFlavor flavor) {
+        return flavor.equals(dataFlavor);
+    }
 }

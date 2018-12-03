@@ -15,13 +15,13 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 @java.lang.annotation.Target(ElementType.TYPE)
 public @interface MacroDefinition {
-	String name();
+    String name();
 
-	String[] aliases() default {};
+    String[] aliases() default {};
 
-	String description();
+    String description();
 
-	boolean hidden() default false;
+    boolean hidden() default false;
 
-	boolean expandRolls() default true;
+    boolean expandRolls() default true;
 }

@@ -17,13 +17,13 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
-		name = "clearaliases",
-		aliases = {},
-		description = "clearaliases.description")
+        name = "clearaliases",
+        aliases = {},
+        description = "clearaliases.description")
 public class ClearAliasesMacro implements Macro {
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		if (MapTool.confirm(I18N.getText("clearaliases.prompt"))) {
-			MacroManager.removeAllAliases();
-		}
-	}
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        if (MapTool.confirm(I18N.getText("clearaliases.prompt"))) {
+            MacroManager.removeAllAliases();
+        }
+    }
 }

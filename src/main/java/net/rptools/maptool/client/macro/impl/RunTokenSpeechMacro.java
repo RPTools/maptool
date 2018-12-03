@@ -24,30 +24,30 @@ import net.rptools.maptool_fx.MapTool;
  * 
  */
 @MacroDefinition(
-		name = "tsay",
-		aliases = { "ts" },
-		description = "tokenspeech.description")
+        name = "tsay",
+        aliases = { "ts" },
+        description = "tokenspeech.description")
 public class RunTokenSpeechMacro implements Macro {
-	/**
-	 * @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String)
-	 */
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		Set<GUID> selectedTokenSet = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
-		if (selectedTokenSet.size() == 0) {
-			MapTool.addLocalMessage(I18N.getText("msg.error.noTokensSelected"));
-			return;
-		}
-		for (GUID tokenId : selectedTokenSet) {
-			Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
-			if (token == null) {
-				continue;
-			}
-			String tmacro = token.getSpeech(macro);
-			if (tmacro == null) {
-				continue;
-			}
-			MapTool.getFrame().getCommandPanel().getCommandTextArea().setText("/im " + token.getId() + ": " + tmacro);
-			MapTool.getFrame().getCommandPanel().commitCommand();
-		}
-	}
+    /**
+     * @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String)
+     */
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        Set<GUID> selectedTokenSet = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
+        if (selectedTokenSet.size() == 0) {
+            MapTool.addLocalMessage(I18N.getText("msg.error.noTokensSelected"));
+            return;
+        }
+        for (GUID tokenId : selectedTokenSet) {
+            Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
+            if (token == null) {
+                continue;
+            }
+            String tmacro = token.getSpeech(macro);
+            if (tmacro == null) {
+                continue;
+            }
+            MapTool.getFrame().getCommandPanel().getCommandTextArea().setText("/im " + token.getId() + ": " + tmacro);
+            MapTool.getFrame().getCommandPanel().commitCommand();
+        }
+    }
 }

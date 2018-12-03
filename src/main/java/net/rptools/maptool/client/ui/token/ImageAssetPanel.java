@@ -46,144 +46,144 @@ import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool_fx.MapTool;
 
 public class ImageAssetPanel extends JPanel implements DropTargetListener {
-	private static final Logger log = LogManager.getLogger(ImageAssetPanel.class);
+    private static final Logger log = LogManager.getLogger(ImageAssetPanel.class);
 
-	private MD5Key imageId;
+    private MD5Key imageId;
 
-	private JButton cancelButton;
-	private JButton addButton;
+    private JButton cancelButton;
+    private JButton addButton;
 
-	private ImageObserver[] observers;
+    private ImageObserver[] observers;
 
-	private boolean allowEmpty = true;
+    private boolean allowEmpty = true;
 
-	public ImageAssetPanel() {
-		new DropTarget(this, this);
-		init();
-	}
+    public ImageAssetPanel() {
+        new DropTarget(this, this);
+        init();
+    }
 
-	private void init() {
-		setLayout(new BorderLayout());
-		add(BorderLayout.NORTH, createNorthPanel());
-		setImageId(null);
-	}
+    private void init() {
+        setLayout(new BorderLayout());
+        add(BorderLayout.NORTH, createNorthPanel());
+        setImageId(null);
+    }
 
-	private JPanel createNorthPanel() {
-		JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-		panel.setOpaque(false);
+    private JPanel createNorthPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        panel.setOpaque(false);
 
-		panel.add(getAddButton());
-		panel.add(getCancelButton());
+        panel.add(getAddButton());
+        panel.add(getCancelButton());
 
-		return panel;
-	}
+        return panel;
+    }
 
-	public JButton getCancelButton() {
-		if (cancelButton == null) {
-			cancelButton = new JButton(new ImageIcon(AppStyle.cancelButton));
-			cancelButton.setContentAreaFilled(false);
-			cancelButton.setBorderPainted(false);
-			cancelButton.setFocusable(false);
-			cancelButton.setMargin(new Insets(0, 0, 0, 0));
+    public JButton getCancelButton() {
+        if (cancelButton == null) {
+            cancelButton = new JButton(new ImageIcon(AppStyle.cancelButton));
+            cancelButton.setContentAreaFilled(false);
+            cancelButton.setBorderPainted(false);
+            cancelButton.setFocusable(false);
+            cancelButton.setMargin(new Insets(0, 0, 0, 0));
 
-			cancelButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					setImageId(null);
-				}
-			});
-		}
-		return cancelButton;
-	}
+            cancelButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    setImageId(null);
+                }
+            });
+        }
+        return cancelButton;
+    }
 
-	public JButton getAddButton() {
-		if (addButton == null) {
-			addButton = new JButton(new ImageIcon(AppStyle.addButton));
-			addButton.setContentAreaFilled(false);
-			addButton.setBorderPainted(false);
-			addButton.setFocusable(false);
-			addButton.setMargin(new Insets(0, 0, 0, 0));
+    public JButton getAddButton() {
+        if (addButton == null) {
+            addButton = new JButton(new ImageIcon(AppStyle.addButton));
+            addButton.setContentAreaFilled(false);
+            addButton.setBorderPainted(false);
+            addButton.setFocusable(false);
+            addButton.setMargin(new Insets(0, 0, 0, 0));
 
-			addButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					ImageChooserDialog chooserDialog = MapTool.getFrame().getImageChooserDialog();
-					chooserDialog.setVisible(true);
+            addButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    ImageChooserDialog chooserDialog = MapTool.getFrame().getImageChooserDialog();
+                    chooserDialog.setVisible(true);
 
-					MD5Key imageId = chooserDialog.getImageId();
-					if (imageId == null) {
-						return;
-					}
-					setImageId(imageId);
-				}
-			});
-		}
-		return addButton;
-	}
+                    MD5Key imageId = chooserDialog.getImageId();
+                    if (imageId == null) {
+                        return;
+                    }
+                    setImageId(imageId);
+                }
+            });
+        }
+        return addButton;
+    }
 
-	public MD5Key getImageId() {
-		return imageId;
-	}
+    public MD5Key getImageId() {
+        return imageId;
+    }
 
-	public void setAllowEmptyImage(boolean allow) {
-		allowEmpty = allow;
-	}
+    public void setAllowEmptyImage(boolean allow) {
+        allowEmpty = allow;
+    }
 
-	public void setImageId(MD5Key sheetAssetId, ImageObserver... observers) {
-		this.imageId = sheetAssetId;
-		this.observers = observers != null && observers.length > 0 ? observers : new ImageObserver[] { this };
+    public void setImageId(MD5Key sheetAssetId, ImageObserver... observers) {
+        this.imageId = sheetAssetId;
+        this.observers = observers != null && observers.length > 0 ? observers : new ImageObserver[] { this };
 
-		getCancelButton().setVisible(allowEmpty && sheetAssetId != null);
+        getCancelButton().setVisible(allowEmpty && sheetAssetId != null);
 
-		revalidate();
-		repaint();
-	}
+        revalidate();
+        repaint();
+    }
 
-	@Override
-	protected void paintComponent(Graphics g) {
-		Dimension size = getSize();
-		((Graphics2D) g).setPaint(new TexturePaint(AppStyle.panelTexture,
-				new Rectangle(0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
-		g.fillRect(0, 0, size.width, size.height);
+    @Override
+    protected void paintComponent(Graphics g) {
+        Dimension size = getSize();
+        ((Graphics2D) g).setPaint(new TexturePaint(AppStyle.panelTexture,
+                new Rectangle(0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
+        g.fillRect(0, 0, size.width, size.height);
 
-		if (imageId == null) {
-			return;
-		}
-		BufferedImage image = ImageManager.getImage(imageId, observers);
+        if (imageId == null) {
+            return;
+        }
+        BufferedImage image = ImageManager.getImage(imageId, observers);
 
-		Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
-		SwingUtil.constrainTo(imgSize, size.width - 8, size.height - 8);
+        Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
+        SwingUtil.constrainTo(imgSize, size.width - 8, size.height - 8);
 
-		g.drawImage(image, (size.width - imgSize.width) / 2, (size.height - imgSize.height) / 2, imgSize.width,
-				imgSize.height, this);
-	}
+        g.drawImage(image, (size.width - imgSize.width) / 2, (size.height - imgSize.height) / 2, imgSize.width,
+                imgSize.height, this);
+    }
 
-	////
-	// DROP TARGET LISTENER
-	public void dragEnter(DropTargetDragEvent dtde) {
-	}
+    ////
+    // DROP TARGET LISTENER
+    public void dragEnter(DropTargetDragEvent dtde) {
+    }
 
-	public void dragExit(DropTargetEvent dte) {
-	}
+    public void dragExit(DropTargetEvent dte) {
+    }
 
-	public void dragOver(DropTargetDragEvent dtde) {
-	}
+    public void dragOver(DropTargetDragEvent dtde) {
+    }
 
-	public void drop(DropTargetDropEvent dtde) {
-		Transferable t = dtde.getTransferable();
-		if (!(TransferableHelper.isSupportedAssetFlavor(t) || TransferableHelper.isSupportedTokenFlavor(t))
-				|| (dtde.getDropAction() & DnDConstants.ACTION_COPY_OR_MOVE) == 0) {
-			dtde.rejectDrop(); // Not a supported flavor or not a copy/move
-			log.warn("Couldn't figure out the drop type");
-			return;
-		}
-		dtde.acceptDrop(dtde.getDropAction());
+    public void drop(DropTargetDropEvent dtde) {
+        Transferable t = dtde.getTransferable();
+        if (!(TransferableHelper.isSupportedAssetFlavor(t) || TransferableHelper.isSupportedTokenFlavor(t))
+                || (dtde.getDropAction() & DnDConstants.ACTION_COPY_OR_MOVE) == 0) {
+            dtde.rejectDrop(); // Not a supported flavor or not a copy/move
+            log.warn("Couldn't figure out the drop type");
+            return;
+        }
+        dtde.acceptDrop(dtde.getDropAction());
 
-		List<Object> assets = TransferableHelper.getAsset(dtde.getTransferable());
-		if (assets == null || assets.isEmpty() || !(assets.get(0) instanceof Asset)) {
-			return;
-		}
-		setImageId(((Asset) assets.get(0)).getId());
-	}
+        List<Object> assets = TransferableHelper.getAsset(dtde.getTransferable());
+        if (assets == null || assets.isEmpty() || !(assets.get(0) instanceof Asset)) {
+            return;
+        }
+        setImageId(((Asset) assets.get(0)).getId());
+    }
 
-	public void dropActionChanged(DropTargetDragEvent dtde) {
-	}
+    public void dropActionChanged(DropTargetDragEvent dtde) {
+    }
 }

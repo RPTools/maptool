@@ -20,30 +20,30 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 
 public class SwitchTokenFunction extends AbstractFunction {
-	private static final SwitchTokenFunction instance = new SwitchTokenFunction();
+    private static final SwitchTokenFunction instance = new SwitchTokenFunction();
 
-	private SwitchTokenFunction() {
-		super(1, 1, "switchToken");
-	}
+    private SwitchTokenFunction() {
+        super(1, 1, "switchToken");
+    }
 
-	public static SwitchTokenFunction getInstance() {
-		return instance;
-	}
+    public static SwitchTokenFunction getInstance() {
+        return instance;
+    }
 
-	@Override
-	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
-		if (!MapTool.getParser().isMacroTrusted()) {
-			throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-		}
-		if (parameters.size() < 1) {
-			throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-		}
-		Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-		Token token = zone.resolveToken(parameters.get(0).toString());
-		if (token == null) {
-			throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
-		}
-		((MapToolVariableResolver) parser.getVariableResolver()).setTokenIncontext(token);
-		return "";
-	}
+    @Override
+    public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
+        if (!MapTool.getParser().isMacroTrusted()) {
+            throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+        }
+        if (parameters.size() < 1) {
+            throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
+        }
+        Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+        Token token = zone.resolveToken(parameters.get(0).toString());
+        if (token == null) {
+            throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
+        }
+        ((MapToolVariableResolver) parser.getVariableResolver()).setTokenIncontext(token);
+        return "";
+    }
 }

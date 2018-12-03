@@ -21,28 +21,28 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class GradientPanel extends JPanel {
 
-	private Color c1;
-	private Color c2;
+    private Color c1;
+    private Color c2;
 
-	public GradientPanel(Color c1, Color c2) {
-		this(c1, c2, new FlowLayout());
-	}
+    public GradientPanel(Color c1, Color c2) {
+        this(c1, c2, new FlowLayout());
+    }
 
-	public GradientPanel(Color c1, Color c2, LayoutManager layout) {
-		super(layout);
+    public GradientPanel(Color c1, Color c2, LayoutManager layout) {
+        super(layout);
 
-		this.c1 = c1;
-		this.c2 = c2;
-	}
+        this.c1 = c1;
+        this.c2 = c2;
+    }
 
-	@Override
-	protected void paintComponent(Graphics g) {
+    @Override
+    protected void paintComponent(Graphics g) {
 
-		Graphics2D g2d = (Graphics2D) g;
-		Paint p = new GradientPaint(0, 0, c1, getSize().width, 0, c2);
-		Paint oldPaint = g2d.getPaint();
-		g2d.setPaint(p);
-		g2d.fillRect(0, 0, getSize().width, getSize().height);
-		g2d.setPaint(oldPaint);
-	}
+        Graphics2D g2d = (Graphics2D) g;
+        Paint p = new GradientPaint(0, 0, c1, getSize().width, 0, c2);
+        Paint oldPaint = g2d.getPaint();
+        g2d.setPaint(p);
+        g2d.fillRect(0, 0, getSize().width, getSize().height);
+        g2d.setPaint(oldPaint);
+    }
 }

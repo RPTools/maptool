@@ -18,40 +18,40 @@ import net.rptools.maptool_fx.MapTool;
 
 public class CampaignPanel extends AbstractMacroPanel {
 
-	public CampaignPanel() {
-		setPanelClass("CampaignPanel");
-		setName(I18N.getString("panel.Campaign"));
-		addMouseListener(this);
-		init();
-	}
+    public CampaignPanel() {
+        setPanelClass("CampaignPanel");
+        setName(I18N.getString("panel.Campaign"));
+        addMouseListener(this);
+        init();
+    }
 
-	private void init() {
-		if (MapTool.getPlayer() == null || MapTool.getPlayer().isGM() || MapTool.getServerPolicy().playersReceiveCampaignMacros()) {
-			addArea(MapTool.getCampaign().getMacroButtonPropertiesArray(), "");
-		}
-	}
+    private void init() {
+        if (MapTool.getPlayer() == null || MapTool.getPlayer().isGM() || MapTool.getServerPolicy().playersReceiveCampaignMacros()) {
+            addArea(MapTool.getCampaign().getMacroButtonPropertiesArray(), "");
+        }
+    }
 
-	public void reset() {
-		clear();
-		init();
-	}
+    public void reset() {
+        clear();
+        init();
+    }
 
-	public static void deleteButtonGroup(String macroGroup) {
-		AbstractButtonGroup.clearHotkeys(MapTool.getFrame().getCampaignPanel(), macroGroup);
-		List<MacroButtonProperties> campProps = MapTool.getCampaign().getMacroButtonPropertiesArray();
-		List<MacroButtonProperties> startingProps = new ArrayList<MacroButtonProperties>(MapTool.getCampaign().getMacroButtonPropertiesArray());
-		campProps.clear();
-		for (MacroButtonProperties nextProp : startingProps) {
-			if (!macroGroup.equals(nextProp.getGroup())) {
-				MapTool.getCampaign().saveMacroButtonProperty(nextProp);
-			}
-		}
-		MapTool.getFrame().getCampaignPanel().reset();
-	}
+    public static void deleteButtonGroup(String macroGroup) {
+        AbstractButtonGroup.clearHotkeys(MapTool.getFrame().getCampaignPanel(), macroGroup);
+        List<MacroButtonProperties> campProps = MapTool.getCampaign().getMacroButtonPropertiesArray();
+        List<MacroButtonProperties> startingProps = new ArrayList<MacroButtonProperties>(MapTool.getCampaign().getMacroButtonPropertiesArray());
+        campProps.clear();
+        for (MacroButtonProperties nextProp : startingProps) {
+            if (!macroGroup.equals(nextProp.getGroup())) {
+                MapTool.getCampaign().saveMacroButtonProperty(nextProp);
+            }
+        }
+        MapTool.getFrame().getCampaignPanel().reset();
+    }
 
-	public static void clearPanel() {
-		AbstractMacroPanel.clearHotkeys(MapTool.getFrame().getCampaignPanel());
-		MapTool.getCampaign().getMacroButtonPropertiesArray().clear();
-		MapTool.getFrame().getCampaignPanel().reset();
-	}
+    public static void clearPanel() {
+        AbstractMacroPanel.clearHotkeys(MapTool.getFrame().getCampaignPanel());
+        MapTool.getCampaign().getMacroButtonPropertiesArray().clear();
+        MapTool.getFrame().getCampaignPanel().reset();
+    }
 }

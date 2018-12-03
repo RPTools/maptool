@@ -20,117 +20,117 @@ import java.util.Set;
  * cell is at 0, 0
  */
 public class TokenFootprint {
-	private final Set<Point> cellSet = new HashSet<Point>();
+    private final Set<Point> cellSet = new HashSet<Point>();
 
-	private String name;
-	private GUID id;
-	private boolean isDefault;
-	private double scale = 1;
+    private String name;
+    private GUID id;
+    private boolean isDefault;
+    private double scale = 1;
 
-	private transient List<OffsetTranslator> translatorList = new LinkedList<OffsetTranslator>();
+    private transient List<OffsetTranslator> translatorList = new LinkedList<OffsetTranslator>();
 
-	public TokenFootprint() {
-		// for serialization
-	}
+    public TokenFootprint() {
+        // for serialization
+    }
 
-	public TokenFootprint(String name, boolean isDefault, double scale, Point... points) {
-		this.name = name;
-		id = new GUID();
-		this.isDefault = isDefault;
-		this.scale = scale;
-		for (Point p : points) {
-			cellSet.add(p);
-		}
-	}
+    public TokenFootprint(String name, boolean isDefault, double scale, Point... points) {
+        this.name = name;
+        id = new GUID();
+        this.isDefault = isDefault;
+        this.scale = scale;
+        for (Point p : points) {
+            cellSet.add(p);
+        }
+    }
 
-	@Override
-	public String toString() {
-		return name;
-	}
+    @Override
+    public String toString() {
+        return name;
+    }
 
-	public void addOffsetTranslator(OffsetTranslator translator) {
-		translatorList.add(translator);
-	}
+    public void addOffsetTranslator(OffsetTranslator translator) {
+        translatorList.add(translator);
+    }
 
-	public Set<CellPoint> getOccupiedCells(CellPoint centerPoint) {
-		Set<CellPoint> occupiedSet = new HashSet<CellPoint>();
+    public Set<CellPoint> getOccupiedCells(CellPoint centerPoint) {
+        Set<CellPoint> occupiedSet = new HashSet<CellPoint>();
 
-		// Implied
-		occupiedSet.add(centerPoint);
+        // Implied
+        occupiedSet.add(centerPoint);
 
-		// Relative
-		for (Point offset : cellSet) {
-			CellPoint cp = new CellPoint(centerPoint.x + offset.x, centerPoint.y + offset.y);
-			for (OffsetTranslator translator : translatorList) {
-				translator.translate(centerPoint, cp);
-			}
-			occupiedSet.add(cp);
-		}
-		return occupiedSet;
-	}
+        // Relative
+        for (Point offset : cellSet) {
+            CellPoint cp = new CellPoint(centerPoint.x + offset.x, centerPoint.y + offset.y);
+            for (OffsetTranslator translator : translatorList) {
+                translator.translate(centerPoint, cp);
+            }
+            occupiedSet.add(cp);
+        }
+        return occupiedSet;
+    }
 
-	public TokenFootprint(String name, Point... points) {
-		this(name, false, 1, points);
-	}
+    public TokenFootprint(String name, Point... points) {
+        this(name, false, 1, points);
+    }
 
-	public void setDefault(boolean isDefault) {
-		this.isDefault = isDefault;
-	}
+    public void setDefault(boolean isDefault) {
+        this.isDefault = isDefault;
+    }
 
-	public boolean isDefault() {
-		return isDefault;
-	}
+    public boolean isDefault() {
+        return isDefault;
+    }
 
-	public GUID getId() {
-		return id;
-	}
+    public GUID getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public Rectangle getBounds(Grid grid) {
-		return getBounds(grid, null);
-	}
+    public Rectangle getBounds(Grid grid) {
+        return getBounds(grid, null);
+    }
 
-	public double getScale() {
-		return scale;
-	}
+    public double getScale() {
+        return scale;
+    }
 
-	/**
-	 * Return a rectangle that exactly bounds the footprint, values are in {@link ZonePoint} space.
-	 * 
-	 * @param grid
-	 *            the {@link Grid} that the footprint corresponds to
-	 * @param cell
-	 *            origin cell of this footprint; <code>null</code> means that <code>(0,0)</code> will be used
-	 */
-	public Rectangle getBounds(Grid grid, CellPoint cell) {
-		cell = cell != null ? cell : new CellPoint(0, 0);
-		Rectangle bounds = new Rectangle(grid.getBounds(cell));
+    /**
+     * Return a rectangle that exactly bounds the footprint, values are in {@link ZonePoint} space.
+     * 
+     * @param grid
+     *            the {@link Grid} that the footprint corresponds to
+     * @param cell
+     *            origin cell of this footprint; <code>null</code> means that <code>(0,0)</code> will be used
+     */
+    public Rectangle getBounds(Grid grid, CellPoint cell) {
+        cell = cell != null ? cell : new CellPoint(0, 0);
+        Rectangle bounds = new Rectangle(grid.getBounds(cell));
 
-		for (CellPoint cp : getOccupiedCells(cell)) {
-			bounds.add(grid.getBounds(cp));
-		}
-		bounds.x += grid.getOffsetX();
-		bounds.y += grid.getOffsetY();
-		return bounds;
-	}
+        for (CellPoint cp : getOccupiedCells(cell)) {
+            bounds.add(grid.getBounds(cp));
+        }
+        bounds.x += grid.getOffsetX();
+        bounds.y += grid.getOffsetY();
+        return bounds;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof TokenFootprint)) {
-			return false;
-		}
-		return ((TokenFootprint) obj).id.equals(id);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof TokenFootprint)) {
+            return false;
+        }
+        return ((TokenFootprint) obj).id.equals(id);
+    }
 
-	private Object readResolve() {
-		translatorList = new LinkedList<OffsetTranslator>();
-		return this;
-	}
+    private Object readResolve() {
+        translatorList = new LinkedList<OffsetTranslator>();
+        return this;
+    }
 
-	public static interface OffsetTranslator {
-		public void translate(CellPoint originPoint, CellPoint offsetPoint);
-	}
+    public static interface OffsetTranslator {
+        public void translate(CellPoint originPoint, CellPoint offsetPoint);
+    }
 }

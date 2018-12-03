@@ -24,71 +24,71 @@ import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool_fx.MapTool;
 
 public class DiamondExposeTool extends DiamondTool {
-	private static final long serialVersionUID = 2577704127916955192L;
+    private static final long serialVersionUID = 2577704127916955192L;
 
-	public DiamondExposeTool() {
-		try {
-			setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/fog-blue-diamond.png"))));
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
+    public DiamondExposeTool() {
+        try {
+            setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/fog-blue-diamond.png"))));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
 
-	@Override
-	public boolean isAvailable() {
-		return MapTool.getPlayer().isGM();
-	}
+    @Override
+    public boolean isAvailable() {
+        return MapTool.getPlayer().isGM();
+    }
 
-	@Override
-	public String getInstructions() {
-		return "tool.rectexpose.instructions";
-	}
+    @Override
+    public String getInstructions() {
+        return "tool.rectexpose.instructions";
+    }
 
-	@Override
-	// Override abstracttool to prevent color palette from
-	// showing up
-	protected void attachTo(ZoneRenderer renderer) {
-		super.attachTo(renderer);
-		// Hide the drawable color palette
-		MapTool.getFrame().hideControlPanel();
-	}
+    @Override
+    // Override abstracttool to prevent color palette from
+    // showing up
+    protected void attachTo(ZoneRenderer renderer) {
+        super.attachTo(renderer);
+        // Hide the drawable color palette
+        MapTool.getFrame().hideControlPanel();
+    }
 
-	@Override
-	protected boolean isBackgroundFill(MouseEvent e) {
-		// Expose tools are implied to be filled
-		return false;
-	}
+    @Override
+    protected boolean isBackgroundFill(MouseEvent e) {
+        // Expose tools are implied to be filled
+        return false;
+    }
 
-	@Override
-	protected Pen getPen() {
-		Pen pen = super.getPen();
-		pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
-		pen.setThickness(1);
-		return pen;
-	}
+    @Override
+    protected Pen getPen() {
+        Pen pen = super.getPen();
+        pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
+        pen.setThickness(1);
+        return pen;
+    }
 
-	@Override
-	protected void completeDrawable(GUID zoneId, Pen pen, Drawable drawable) {
-		if (!MapTool.getPlayer().isGM()) {
-			MapTool.showError("msg.error.fogexpose");
-			MapTool.getFrame().refresh();
-			return;
-		}
-		Zone zone = MapTool.getCampaign().getZone(zoneId);
-		Area area = new Area(drawable.getArea());
-		Set<GUID> selectedToks = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
-		if (pen.isEraser()) {
-			zone.hideArea(area, selectedToks);
-			MapTool.serverCommand().hideFoW(zone.getId(), area, selectedToks);
-		} else {
-			zone.exposeArea(area, selectedToks);
-			MapTool.serverCommand().exposeFoW(zone.getId(), area, selectedToks);
-		}
-		MapTool.getFrame().refresh();
-	}
+    @Override
+    protected void completeDrawable(GUID zoneId, Pen pen, Drawable drawable) {
+        if (!MapTool.getPlayer().isGM()) {
+            MapTool.showError("msg.error.fogexpose");
+            MapTool.getFrame().refresh();
+            return;
+        }
+        Zone zone = MapTool.getCampaign().getZone(zoneId);
+        Area area = new Area(drawable.getArea());
+        Set<GUID> selectedToks = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
+        if (pen.isEraser()) {
+            zone.hideArea(area, selectedToks);
+            MapTool.serverCommand().hideFoW(zone.getId(), area, selectedToks);
+        } else {
+            zone.exposeArea(area, selectedToks);
+            MapTool.serverCommand().exposeFoW(zone.getId(), area, selectedToks);
+        }
+        MapTool.getFrame().refresh();
+    }
 
-	@Override
-	public String getTooltip() {
-		return "tool.diamondexpose.tooltip";
-	}
+    @Override
+    public String getTooltip() {
+        return "tool.diamondexpose.tooltip";
+    }
 }

@@ -25,164 +25,164 @@ import net.rptools.maptool.language.I18N;
  * @author trevor
  */
 public class ActivityMonitorPanel extends JComponent implements ActivityListener, Animatable {
-	private static final int PADDING = 5;
-	private static final int ON_DELAY = 100;
+    private static final int PADDING = 5;
+    private static final int ON_DELAY = 100;
 
-	private boolean receiving;
-	private boolean transmitting;
+    private boolean receiving;
+    private boolean transmitting;
 
-	private boolean receiveComplete;
-	private boolean transmitComplete;
+    private boolean receiveComplete;
+    private boolean transmitComplete;
 
-	private static Image transmitOn;
-	private static Image transmitOff;
+    private static Image transmitOn;
+    private static Image transmitOff;
 
-	private static Image receiveOn;
-	private static Image receiveOff;
+    private static Image receiveOn;
+    private static Image receiveOff;
 
-	private static long receiveStart;
-	private static long transmitStart;
+    private static long receiveStart;
+    private static long transmitStart;
 
-	private static Dimension prefSize;
+    private static Dimension prefSize;
 
-	static {
-		try {
-			transmitOn = ImageUtil.getImage("net/rptools/maptool/client/image/transmitOn.png"); //$NON-NLS-1$
-			transmitOff = ImageUtil.getImage("net/rptools/maptool/client/image/activityOff.png"); //$NON-NLS-1$
+    static {
+        try {
+            transmitOn = ImageUtil.getImage("net/rptools/maptool/client/image/transmitOn.png"); //$NON-NLS-1$
+            transmitOff = ImageUtil.getImage("net/rptools/maptool/client/image/activityOff.png"); //$NON-NLS-1$
 
-			receiveOn = ImageUtil.getImage("net/rptools/maptool/client/image/receiveOn.png"); //$NON-NLS-1$
-			receiveOff = ImageUtil.getImage("net/rptools/maptool/client/image/activityOff.png"); //$NON-NLS-1$
+            receiveOn = ImageUtil.getImage("net/rptools/maptool/client/image/receiveOn.png"); //$NON-NLS-1$
+            receiveOff = ImageUtil.getImage("net/rptools/maptool/client/image/activityOff.png"); //$NON-NLS-1$
 
-			int width = Math.max(transmitOn.getWidth(null), transmitOff.getWidth(null)) + Math.max(receiveOn.getWidth(null), receiveOff.getWidth(null));
-			int height = Math.max(transmitOn.getHeight(null), transmitOff.getHeight(null)) + Math.max(receiveOn.getHeight(null), receiveOff.getHeight(null));
+            int width = Math.max(transmitOn.getWidth(null), transmitOff.getWidth(null)) + Math.max(receiveOn.getWidth(null), receiveOff.getWidth(null));
+            int height = Math.max(transmitOn.getHeight(null), transmitOff.getHeight(null)) + Math.max(receiveOn.getHeight(null), receiveOff.getHeight(null));
 
-			prefSize = new Dimension(width + (PADDING * 2) + 2, height);
-		} catch (IOException ioe) {
-			// TODO: handle this better
-			ioe.printStackTrace();
-		}
-	}
+            prefSize = new Dimension(width + (PADDING * 2) + 2, height);
+        } catch (IOException ioe) {
+            // TODO: handle this better
+            ioe.printStackTrace();
+        }
+    }
 
-	public ActivityMonitorPanel() {
-		setToolTipText(I18N.getString("ActivityMonitorPanel.colorDefinition")); //$NON-NLS-1$
-	}
+    public ActivityMonitorPanel() {
+        setToolTipText(I18N.getString("ActivityMonitorPanel.colorDefinition")); //$NON-NLS-1$
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
-	 */
-	@Override
-	protected void paintComponent(Graphics g) {
-		Image receiveImg = receiving ? receiveOn : receiveOff;
-		Image transmitImg = transmitting ? transmitOn : transmitOff;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+     */
+    @Override
+    protected void paintComponent(Graphics g) {
+        Image receiveImg = receiving ? receiveOn : receiveOff;
+        Image transmitImg = transmitting ? transmitOn : transmitOff;
 
-		g.drawImage(receiveImg, PADDING, (getSize().height - receiveImg.getHeight(null)) / 2, this);
-		g.drawImage(transmitImg, getSize().width - transmitImg.getWidth(null) - PADDING, (getSize().height - transmitImg.getHeight(null)) / 2, this);
-	}
+        g.drawImage(receiveImg, PADDING, (getSize().height - receiveImg.getHeight(null)) / 2, this);
+        g.drawImage(transmitImg, getSize().width - transmitImg.getWidth(null) - PADDING, (getSize().height - transmitImg.getHeight(null)) / 2, this);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.JComponent#getPreferredSize()
-	 */
-	@Override
-	public Dimension getPreferredSize() {
-		return getMinimumSize();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.swing.JComponent#getPreferredSize()
+     */
+    @Override
+    public Dimension getPreferredSize() {
+        return getMinimumSize();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.JComponent#getMinimumSize()
-	 */
-	@Override
-	public Dimension getMinimumSize() {
-		return prefSize;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.swing.JComponent#getMinimumSize()
+     */
+    @Override
+    public Dimension getMinimumSize() {
+        return prefSize;
+    }
 
-	////
-	// ANIMATABLE
+    ////
+    // ANIMATABLE
 
-	public void animate() {
-		long now = System.currentTimeMillis();
-		boolean turnOff = false;
+    public void animate() {
+        long now = System.currentTimeMillis();
+        boolean turnOff = false;
 
-		if (transmitting && transmitComplete && now > transmitStart + ON_DELAY) {
-			transmitting = false;
-			turnOff = true;
-		}
-		if (receiving && receiveComplete && now > receiveStart + ON_DELAY) {
-			turnOff = true;
-			receiving = false;
-		}
-		if (!transmitting && !receiving && turnOff) {
-			AnimationManager.removeAnimatable(this);
-			repaint();
-		}
-	}
+        if (transmitting && transmitComplete && now > transmitStart + ON_DELAY) {
+            transmitting = false;
+            turnOff = true;
+        }
+        if (receiving && receiveComplete && now > receiveStart + ON_DELAY) {
+            turnOff = true;
+            receiving = false;
+        }
+        if (!transmitting && !receiving && turnOff) {
+            AnimationManager.removeAnimatable(this);
+            repaint();
+        }
+    }
 
-	////
-	// ACTIVITY LISTENER
+    ////
+    // ACTIVITY LISTENER
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.rptools.clientserver.ActivityListener#notify(net.rptools.clientserver .ActivityListener.Direction, net.rptools.clientserver.ActivityListener.State, int, int)
-	 */
-	public void notify(Direction direction, State state, int total, int current) {
-		switch (direction) {
-		case Inbound:
-			switch (state) {
-			case Start: {
-				receiving = true;
-				receiveComplete = false;
-				receiveStart = System.currentTimeMillis();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.rptools.clientserver.ActivityListener#notify(net.rptools.clientserver .ActivityListener.Direction, net.rptools.clientserver.ActivityListener.State, int, int)
+     */
+    public void notify(Direction direction, State state, int total, int current) {
+        switch (direction) {
+        case Inbound:
+            switch (state) {
+            case Start: {
+                receiving = true;
+                receiveComplete = false;
+                receiveStart = System.currentTimeMillis();
 
-				AnimationManager.addAnimatable(this);
+                AnimationManager.addAnimatable(this);
 
-				repaint();
-				break;
-			}
-			case Complete: {
-				receiveComplete = true;
+                repaint();
+                break;
+            }
+            case Complete: {
+                receiveComplete = true;
 
-				if (System.currentTimeMillis() > receiveStart + ON_DELAY) {
-					receiving = false;
-				}
-				repaint();
-				break;
-			}
-			default:
-				return;
-			}
-			break;
+                if (System.currentTimeMillis() > receiveStart + ON_DELAY) {
+                    receiving = false;
+                }
+                repaint();
+                break;
+            }
+            default:
+                return;
+            }
+            break;
 
-		case Outbound:
-			switch (state) {
-			case Start: {
-				transmitting = true;
-				transmitComplete = false;
-				transmitStart = System.currentTimeMillis();
+        case Outbound:
+            switch (state) {
+            case Start: {
+                transmitting = true;
+                transmitComplete = false;
+                transmitStart = System.currentTimeMillis();
 
-				AnimationManager.addAnimatable(this);
+                AnimationManager.addAnimatable(this);
 
-				repaint();
-				break;
-			}
-			case Complete: {
-				transmitComplete = true;
+                repaint();
+                break;
+            }
+            case Complete: {
+                transmitComplete = true;
 
-				if (System.currentTimeMillis() > transmitStart + ON_DELAY) {
-					transmitting = false;
-				}
-				repaint();
-				break;
-			}
-			default:
-				return;
-			}
-			break;
-		}
-	}
+                if (System.currentTimeMillis() > transmitStart + ON_DELAY) {
+                    transmitting = false;
+                }
+                repaint();
+                break;
+            }
+            default:
+                return;
+            }
+            break;
+        }
+    }
 }

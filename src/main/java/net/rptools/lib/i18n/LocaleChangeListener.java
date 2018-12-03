@@ -12,5 +12,5 @@ import java.util.Locale;
 
 public interface LocaleChangeListener {
 
-	public void localeChanged(Locale locale);
+    public void localeChanged(Locale locale);
 }

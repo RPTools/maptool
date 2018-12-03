@@ -24,78 +24,78 @@ import net.rptools.maptool.client.AppActions;
  */
 public class AssetTree extends JTree implements TreeSelectionListener {
 
-	private Directory selectedDirectory;
-	private AssetPanel assetPanel;
+    private Directory selectedDirectory;
+    private AssetPanel assetPanel;
 
-	public AssetTree(AssetPanel assetPanel) {
-		super(assetPanel.getModel().getImageFileTreeModel());
+    public AssetTree(AssetPanel assetPanel) {
+        super(assetPanel.getModel().getImageFileTreeModel());
 
-		this.assetPanel = assetPanel;
+        this.assetPanel = assetPanel;
 
-		setCellRenderer(new AssetTreeCellRenderer());
+        setCellRenderer(new AssetTreeCellRenderer());
 
-		addMouseListener(createPopupListener());
-		// addTreeSelectionListener(this); // Jamz: Why? This listener is added below causing valueChanged to be called twice
+        addMouseListener(createPopupListener());
+        // addTreeSelectionListener(this); // Jamz: Why? This listener is added below causing valueChanged to be called twice
 
-		getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		getSelectionModel().addTreeSelectionListener(this);
-	}
+        getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        getSelectionModel().addTreeSelectionListener(this);
+    }
 
-	@Override
-	public int getRowHeight() {
-		return -1;
-	}
+    @Override
+    public int getRowHeight() {
+        return -1;
+    }
 
-	public Directory getSelectedAssetGroup() {
-		return selectedDirectory;
-	}
+    public Directory getSelectedAssetGroup() {
+        return selectedDirectory;
+    }
 
-	private MouseListener createPopupListener() {
+    private MouseListener createPopupListener() {
 
-		PopupListener listener = new PopupListener(createPopupMenu());
+        PopupListener listener = new PopupListener(createPopupMenu());
 
-		return listener;
-	}
+        return listener;
+    }
 
-	private JPopupMenu createPopupMenu() {
+    private JPopupMenu createPopupMenu() {
 
-		JPopupMenu menu = new JPopupMenu();
-		menu.add(new JMenuItem(AppActions.REMOVE_ASSET_ROOT));
-		menu.add(new JMenuItem(AppActions.RESCAN_NODE));
-		return menu;
-	}
+        JPopupMenu menu = new JPopupMenu();
+        menu.add(new JMenuItem(AppActions.REMOVE_ASSET_ROOT));
+        menu.add(new JMenuItem(AppActions.RESCAN_NODE));
+        return menu;
+    }
 
-	public void refresh() {
-		((ImageFileTreeModel) getModel()).refresh();
-	}
+    public void refresh() {
+        ((ImageFileTreeModel) getModel()).refresh();
+    }
 
-	public void initialize() {
-		assetPanel.setDirectory(getSelectedAssetGroup());
-	}
+    public void initialize() {
+        assetPanel.setDirectory(getSelectedAssetGroup());
+    }
 
-	////
-	// Tree Selection Listener
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event. TreeSelectionEvent)
-	 */
-	public void valueChanged(TreeSelectionEvent e) {
+    ////
+    // Tree Selection Listener
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.swing.event.TreeSelectionListener#valueChanged(javax.swing.event. TreeSelectionEvent)
+     */
+    public void valueChanged(TreeSelectionEvent e) {
 
-		// Keep memory tight
-		// TODO: make this an option
-		if (selectedDirectory != null) {
-			selectedDirectory.refresh();
-		}
+        // Keep memory tight
+        // TODO: make this an option
+        if (selectedDirectory != null) {
+            selectedDirectory.refresh();
+        }
 
-		selectedDirectory = null;
+        selectedDirectory = null;
 
-		Object node = e.getPath().getLastPathComponent();
+        Object node = e.getPath().getLastPathComponent();
 
-		if (node instanceof Directory) {
+        if (node instanceof Directory) {
 
-			selectedDirectory = ((Directory) node);
-			assetPanel.setDirectory((Directory) node);
-		}
-	}
+            selectedDirectory = ((Directory) node);
+            assetPanel.setDirectory((Directory) node);
+        }
+    }
 }

@@ -19,43 +19,43 @@ import net.rptools.maptool.model.Token;
 
 public class TokenUtilTest extends TestCase {
 
-	public void testGuessTokenType() throws Exception {
+    public void testGuessTokenType() throws Exception {
 
-		// SQUARE
-		BufferedImage img = new BufferedImage(100, 100, Transparency.BITMASK);
-		Graphics2D g = img.createGraphics();
-		g.setColor(Color.blue);
-		g.fillRect(0, 0, 100, 100);
-		g.dispose();
+        // SQUARE
+        BufferedImage img = new BufferedImage(100, 100, Transparency.BITMASK);
+        Graphics2D g = img.createGraphics();
+        g.setColor(Color.blue);
+        g.fillRect(0, 0, 100, 100);
+        g.dispose();
 
-		assertEquals(Token.TokenShape.SQUARE, TokenUtil.guessTokenType(img));
+        assertEquals(Token.TokenShape.SQUARE, TokenUtil.guessTokenType(img));
 
-		img = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/squareToken.gif");
+        img = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/squareToken.gif");
 
-		assertEquals(Token.TokenShape.SQUARE, TokenUtil.guessTokenType(img));
+        assertEquals(Token.TokenShape.SQUARE, TokenUtil.guessTokenType(img));
 
-		// CIRCLE
-		img = new BufferedImage(100, 100, Transparency.BITMASK);
-		g = img.createGraphics();
-		g.setColor(Color.red);
-		g.fillOval(0, 0, 100, 100);
-		g.dispose();
+        // CIRCLE
+        img = new BufferedImage(100, 100, Transparency.BITMASK);
+        g = img.createGraphics();
+        g.setColor(Color.red);
+        g.fillOval(0, 0, 100, 100);
+        g.dispose();
 
-		assertEquals(Token.TokenShape.CIRCLE, TokenUtil.guessTokenType(img));
+        assertEquals(Token.TokenShape.CIRCLE, TokenUtil.guessTokenType(img));
 
-		img = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/circleToken.png");
+        img = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/circleToken.png");
 
-		assertEquals(Token.TokenShape.CIRCLE, TokenUtil.guessTokenType(img));
+        assertEquals(Token.TokenShape.CIRCLE, TokenUtil.guessTokenType(img));
 
-		// TOP DOWN
-		img = new BufferedImage(100, 100, Transparency.BITMASK);
-		g = img.createGraphics();
-		g.setColor(Color.red);
-		g.fillOval(0, 0, 10, 10);
-		g.fillOval(90, 90, 10, 10);
-		g.fillRect(0, 50, 100, 10);
-		g.dispose();
+        // TOP DOWN
+        img = new BufferedImage(100, 100, Transparency.BITMASK);
+        g = img.createGraphics();
+        g.setColor(Color.red);
+        g.fillOval(0, 0, 10, 10);
+        g.fillOval(90, 90, 10, 10);
+        g.fillRect(0, 50, 100, 10);
+        g.dispose();
 
-		assertEquals(Token.TokenShape.TOP_DOWN, TokenUtil.guessTokenType(img));
-	}
+        assertEquals(Token.TokenShape.TOP_DOWN, TokenUtil.guessTokenType(img));
+    }
 }

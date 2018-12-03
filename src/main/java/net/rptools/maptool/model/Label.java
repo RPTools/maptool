@@ -11,73 +11,73 @@ package net.rptools.maptool.model;
 import java.awt.Color;
 
 public class Label {
-	private final GUID id;
-	private String label;
-	private int x, y;
-	private boolean showBackground;
-	private int foregroundColor;
+    private final GUID id;
+    private String label;
+    private int x, y;
+    private boolean showBackground;
+    private int foregroundColor;
 
-	public Label() {
-		this("");
-	}
+    public Label() {
+        this("");
+    }
 
-	public Label(String label) {
-		this(label, 0, 0);
-	}
+    public Label(String label) {
+        this(label, 0, 0);
+    }
 
-	public Label(String label, int x, int y) {
-		id = new GUID();
-		this.label = label;
-		this.x = x;
-		this.y = y;
-		showBackground = true;
-	}
+    public Label(String label, int x, int y) {
+        id = new GUID();
+        this.label = label;
+        this.x = x;
+        this.y = y;
+        showBackground = true;
+    }
 
-	public Label(Label label) {
-		this(label.label, label.x, label.y);
-	}
+    public Label(Label label) {
+        this(label.label, label.x, label.y);
+    }
 
-	public String getLabel() {
-		return label;
-	}
+    public String getLabel() {
+        return label;
+    }
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
-	public GUID getId() {
-		return id;
-	}
+    public GUID getId() {
+        return id;
+    }
 
-	public int getX() {
-		return x;
-	}
+    public int getX() {
+        return x;
+    }
 
-	public void setX(int x) {
-		this.x = x;
-	}
+    public void setX(int x) {
+        this.x = x;
+    }
 
-	public int getY() {
-		return y;
-	}
+    public int getY() {
+        return y;
+    }
 
-	public void setY(int y) {
-		this.y = y;
-	}
+    public void setY(int y) {
+        this.y = y;
+    }
 
-	public boolean isShowBackground() {
-		return showBackground;
-	}
+    public boolean isShowBackground() {
+        return showBackground;
+    }
 
-	public void setShowBackground(boolean showBackground) {
-		this.showBackground = showBackground;
-	}
+    public void setShowBackground(boolean showBackground) {
+        this.showBackground = showBackground;
+    }
 
-	public Color getForegroundColor() {
-		return new Color(foregroundColor);
-	}
+    public Color getForegroundColor() {
+        return new Color(foregroundColor);
+    }
 
-	public void setForegroundColor(Color foregroundColor) {
-		this.foregroundColor = foregroundColor.getRGB();
-	}
+    public void setForegroundColor(Color foregroundColor) {
+        this.foregroundColor = foregroundColor.getRGB();
+    }
 }

@@ -34,87 +34,87 @@ import net.rptools.maptool_fx.MapTool;
  * Executes only the first time the application is run.
  */
 public class AppSetup {
-	private static final Logger log = LogManager.getLogger(AppSetup.class);
+    private static final Logger log = LogManager.getLogger(AppSetup.class);
 
-	public static void install() {
-		File appDir = AppUtil.getAppHome();
+    public static void install() {
+        File appDir = AppUtil.getAppHome();
 
-		// Only init once
-		if (appDir.listFiles().length > 0) {
-			return;
-		}
-		try {
-			installDefaultTokens();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
+        // Only init once
+        if (appDir.listFiles().length > 0) {
+            return;
+        }
+        try {
+            installDefaultTokens();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
 
-	public static void installDefaultTokens() throws IOException {
-		installLibrary("Default", AppSetup.class.getClassLoader().getResource("default_images.zip"));
-	}
+    public static void installDefaultTokens() throws IOException {
+        installLibrary("Default", AppSetup.class.getClassLoader().getResource("default_images.zip"));
+    }
 
-	/**
-	 * Overwrites any existing README file in the ~/.maptool/resource directory with the one from the current MapTool JAR file. This way any updates to the README will eventually be seen by the user,
-	 * although only when a new directory is added to the resource library...
-	 * 
-	 * @throws IOException
-	 */
-	private static void createREADME() throws IOException {
-		File outFilename = new File(AppConstants.UNZIP_DIR, "README");
-		InputStream inStream = null;
-		OutputStream outStream = null;
-		try {
-			inStream = AppSetup.class.getResourceAsStream("README");
-			outStream = new BufferedOutputStream(new FileOutputStream(outFilename));
-			IOUtils.copy(inStream, outStream);
-		} finally {
-			IOUtils.closeQuietly(inStream);
-			IOUtils.closeQuietly(outStream);
-		}
-	}
+    /**
+     * Overwrites any existing README file in the ~/.maptool/resource directory with the one from the current MapTool JAR file. This way any updates to the README will eventually be seen by the user,
+     * although only when a new directory is added to the resource library...
+     * 
+     * @throws IOException
+     */
+    private static void createREADME() throws IOException {
+        File outFilename = new File(AppConstants.UNZIP_DIR, "README");
+        InputStream inStream = null;
+        OutputStream outStream = null;
+        try {
+            inStream = AppSetup.class.getResourceAsStream("README");
+            outStream = new BufferedOutputStream(new FileOutputStream(outFilename));
+            IOUtils.copy(inStream, outStream);
+        } finally {
+            IOUtils.closeQuietly(inStream);
+            IOUtils.closeQuietly(outStream);
+        }
+    }
 
-	public static void installLibrary(String libraryName, URL resourceFile) throws IOException {
-		createREADME();
-		File unzipDir = new File(AppConstants.UNZIP_DIR, libraryName);
-		FileUtil.unzip(resourceFile, unzipDir);
-		installLibrary(libraryName, unzipDir);
-	}
+    public static void installLibrary(String libraryName, URL resourceFile) throws IOException {
+        createREADME();
+        File unzipDir = new File(AppConstants.UNZIP_DIR, libraryName);
+        FileUtil.unzip(resourceFile, unzipDir);
+        installLibrary(libraryName, unzipDir);
+    }
 
-	public static void installLibrary(final String libraryName, final File root) throws IOException {
-		// Add as a resource root
-		AppPreferences.addAssetRoot(root);
-		if (MapTool.getFrame() != null) {
-			MapTool.getFrame().addAssetRoot(root);
+    public static void installLibrary(final String libraryName, final File root) throws IOException {
+        // Add as a resource root
+        AppPreferences.addAssetRoot(root);
+        if (MapTool.getFrame() != null) {
+            MapTool.getFrame().addAssetRoot(root);
 
-			// License
-			File licenseFile = new File(root, "License.txt");
-			if (!licenseFile.exists()) {
-				licenseFile = new File(root, "license.txt");
-			}
-			if (licenseFile.exists()) {
-				final File licenseFileFinal = licenseFile;
-				EventQueue.invokeLater(new Runnable() {
-					public void run() {
-						try {
-							JTextPane pane = new JTextPane();
-							pane.setPage(licenseFileFinal.toURI().toURL());
-							JOptionPane.showMessageDialog(MapTool.getFrame(), pane, "License for " + libraryName, JOptionPane.INFORMATION_MESSAGE);
-						} catch (MalformedURLException e) {
-							log.error("Could not load license file: " + licenseFileFinal, e);
-						} catch (IOException e) {
-							log.error("Could not load license file: " + licenseFileFinal, e);
-						}
-					}
-				});
-			}
-		}
-		new SwingWorker<Object, Object>() {
-			@Override
-			protected Object doInBackground() throws Exception {
-				AssetManager.searchForImageReferences(root, AppConstants.IMAGE_FILE_FILTER);
-				return null;
-			}
-		}.execute();
-	}
+            // License
+            File licenseFile = new File(root, "License.txt");
+            if (!licenseFile.exists()) {
+                licenseFile = new File(root, "license.txt");
+            }
+            if (licenseFile.exists()) {
+                final File licenseFileFinal = licenseFile;
+                EventQueue.invokeLater(new Runnable() {
+                    public void run() {
+                        try {
+                            JTextPane pane = new JTextPane();
+                            pane.setPage(licenseFileFinal.toURI().toURL());
+                            JOptionPane.showMessageDialog(MapTool.getFrame(), pane, "License for " + libraryName, JOptionPane.INFORMATION_MESSAGE);
+                        } catch (MalformedURLException e) {
+                            log.error("Could not load license file: " + licenseFileFinal, e);
+                        } catch (IOException e) {
+                            log.error("Could not load license file: " + licenseFileFinal, e);
+                        }
+                    }
+                });
+            }
+        }
+        new SwingWorker<Object, Object>() {
+            @Override
+            protected Object doInBackground() throws Exception {
+                AssetManager.searchForImageReferences(root, AppConstants.IMAGE_FILE_FILTER);
+                return null;
+            }
+        }.execute();
+    }
 }

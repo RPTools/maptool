@@ -16,70 +16,70 @@ import javax.swing.JProgressBar;
  */
 public class ProgressStatusBar extends JProgressBar {
 
-	private static final Dimension minSize = new Dimension(75, 10);
+    private static final Dimension minSize = new Dimension(75, 10);
 
-	int indeterminateCount = 0;
-	int determinateCount = 0;
-	int totalWork = 0;
-	int currentWork = 0;
+    int indeterminateCount = 0;
+    int determinateCount = 0;
+    int totalWork = 0;
+    int currentWork = 0;
 
-	public ProgressStatusBar() {
-		setMinimum(0);
-	}
+    public ProgressStatusBar() {
+        setMinimum(0);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.JComponent#getMinimumSize()
-	 */
-	public Dimension getMinimumSize() {
-		return minSize;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.swing.JComponent#getMinimumSize()
+     */
+    public Dimension getMinimumSize() {
+        return minSize;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.JComponent#getPreferredSize()
-	 */
-	public Dimension getPreferredSize() {
-		return getMinimumSize();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.swing.JComponent#getPreferredSize()
+     */
+    public Dimension getPreferredSize() {
+        return getMinimumSize();
+    }
 
-	public void startIndeterminate() {
-		indeterminateCount++;
-		setIndeterminate(true);
-	}
+    public void startIndeterminate() {
+        indeterminateCount++;
+        setIndeterminate(true);
+    }
 
-	public void endIndeterminate() {
-		indeterminateCount--;
-		if (indeterminateCount < 1) {
-			setIndeterminate(false);
+    public void endIndeterminate() {
+        indeterminateCount--;
+        if (indeterminateCount < 1) {
+            setIndeterminate(false);
 
-			indeterminateCount = 0;
-		}
-	}
+            indeterminateCount = 0;
+        }
+    }
 
-	public void startDeterminate(int totalWork) {
-		determinateCount++;
-		this.totalWork += totalWork;
+    public void startDeterminate(int totalWork) {
+        determinateCount++;
+        this.totalWork += totalWork;
 
-		setMaximum(this.totalWork);
-	}
+        setMaximum(this.totalWork);
+    }
 
-	public void updateDeterminateProgress(int additionalWorkCompleted) {
-		currentWork += additionalWorkCompleted;
-		setValue(currentWork);
-	}
+    public void updateDeterminateProgress(int additionalWorkCompleted) {
+        currentWork += additionalWorkCompleted;
+        setValue(currentWork);
+    }
 
-	public void endDeterminate() {
-		determinateCount--;
-		if (determinateCount == 0) {
-			totalWork = 0;
-			currentWork = 0;
+    public void endDeterminate() {
+        determinateCount--;
+        if (determinateCount == 0) {
+            totalWork = 0;
+            currentWork = 0;
 
-			setMaximum(0);
-			setValue(0);
-		}
-	}
+            setMaximum(0);
+            setValue(0);
+        }
+    }
 
 }

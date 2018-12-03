@@ -24,65 +24,65 @@ import net.rptools.lib.swing.SwingUtil;
 
 public class MiniSheet {
 
-	private static final Font PROPERTIES_FONT = new Font("Helvetica", 0, 10);
-	private static final Font TOKEN_NAME_FONT = new Font("Helvetica", Font.BOLD, 10);
+    private static final Font PROPERTIES_FONT = new Font("Helvetica", 0, 10);
+    private static final Font TOKEN_NAME_FONT = new Font("Helvetica", Font.BOLD, 10);
 
-	private BufferedImage sheetImage;
-	private Rectangle portraitRegion;
-	private Rectangle propertiesRegion;
+    private BufferedImage sheetImage;
+    private Rectangle portraitRegion;
+    private Rectangle propertiesRegion;
 
-	public MiniSheet(BufferedImage sheetImage, Rectangle portraitRegion, Rectangle propertiesRegion) {
-		this.sheetImage = sheetImage;
-		this.portraitRegion = portraitRegion;
-		this.propertiesRegion = propertiesRegion;
-	}
+    public MiniSheet(BufferedImage sheetImage, Rectangle portraitRegion, Rectangle propertiesRegion) {
+        this.sheetImage = sheetImage;
+        this.portraitRegion = portraitRegion;
+        this.propertiesRegion = propertiesRegion;
+    }
 
-	public int getWidth() {
-		return sheetImage.getWidth();
-	}
+    public int getWidth() {
+        return sheetImage.getWidth();
+    }
 
-	public int getHeight() {
-		return sheetImage.getHeight();
-	}
+    public int getHeight() {
+        return sheetImage.getHeight();
+    }
 
-	/**
-	 * Renders the card at 0, 0 (this means the caller must position the graphics position before calling)
-	 * 
-	 * @param propertyMap
-	 *            What to show, presumably a LinkedHashMap to preserve order
-	 */
-	public void render(Graphics2D g, BufferedImage portraitImage, Map<String, String> propertyMap) {
+    /**
+     * Renders the card at 0, 0 (this means the caller must position the graphics position before calling)
+     * 
+     * @param propertyMap
+     *            What to show, presumably a LinkedHashMap to preserve order
+     */
+    public void render(Graphics2D g, BufferedImage portraitImage, Map<String, String> propertyMap) {
 
-		Shape oldClip = g.getClip();
+        Shape oldClip = g.getClip();
 
-		// Sheet
-		g.drawImage(sheetImage, 0, 0, null);
+        // Sheet
+        g.drawImage(sheetImage, 0, 0, null);
 
-		// Portrait
-		g.setClip(portraitRegion);
-		Dimension size = new Dimension(portraitImage.getWidth(), portraitImage.getHeight());
-		if (size.width > portraitRegion.width || size.height > portraitRegion.height) {
-			SwingUtil.constrainTo(size, portraitRegion.width, portraitRegion.height);
-		}
-		g.drawImage(portraitImage, portraitRegion.x + (portraitRegion.width - size.width) / 2, portraitRegion.y + (portraitRegion.height - size.height) / 2, size.width, size.height, null);
+        // Portrait
+        g.setClip(portraitRegion);
+        Dimension size = new Dimension(portraitImage.getWidth(), portraitImage.getHeight());
+        if (size.width > portraitRegion.width || size.height > portraitRegion.height) {
+            SwingUtil.constrainTo(size, portraitRegion.width, portraitRegion.height);
+        }
+        g.drawImage(portraitImage, portraitRegion.x + (portraitRegion.width - size.width) / 2, portraitRegion.y + (portraitRegion.height - size.height) / 2, size.width, size.height, null);
 
-		// Properties
-		g.setFont(PROPERTIES_FONT);
-		Object oldAAHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		FontMetrics fm = g.getFontMetrics();
-		g.setClip(propertiesRegion);
-		g.setColor(Color.black);
-		int y = 3 + fm.getAscent() + propertiesRegion.y;
-		for (Entry<String, String> entry : propertyMap.entrySet()) {
+        // Properties
+        g.setFont(PROPERTIES_FONT);
+        Object oldAAHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        FontMetrics fm = g.getFontMetrics();
+        g.setClip(propertiesRegion);
+        g.setColor(Color.black);
+        int y = 3 + fm.getAscent() + propertiesRegion.y;
+        for (Entry<String, String> entry : propertyMap.entrySet()) {
 
-			g.drawString(entry.getKey() + ":", propertiesRegion.x + 5, y);
-			g.drawString(entry.getValue(), propertiesRegion.x + 5 + propertiesRegion.width / 2, y);
+            g.drawString(entry.getKey() + ":", propertiesRegion.x + 5, y);
+            g.drawString(entry.getValue(), propertiesRegion.x + 5 + propertiesRegion.width / 2, y);
 
-			y += fm.getHeight() + 3;
-		}
+            y += fm.getHeight() + 3;
+        }
 
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAAHint);
-		g.setClip(oldClip);
-	}
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAAHint);
+        g.setClip(oldClip);
+    }
 }

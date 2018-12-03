@@ -10,31 +10,31 @@ package net.rptools.lib.swing;
 
 public class FramesPerSecond extends Thread {
 
-	private int count = 0;
-	private int lastFPS = 0;
+    private int count = 0;
+    private int lastFPS = 0;
 
-	public FramesPerSecond() {
-		setDaemon(true);
-	}
+    public FramesPerSecond() {
+        setDaemon(true);
+    }
 
-	public void bump() {
-		count++;
-	}
+    public void bump() {
+        count++;
+    }
 
-	public int getFramesPerSecond() {
-		return lastFPS;
-	}
+    public int getFramesPerSecond() {
+        return lastFPS;
+    }
 
-	@Override
-	public void run() {
-		while (true) {
-			lastFPS = count;
-			count = 0;
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException ie) {
-				ie.printStackTrace();
-			}
-		}
-	}
+    @Override
+    public void run() {
+        while (true) {
+            lastFPS = count;
+            count = 0;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+        }
+    }
 }

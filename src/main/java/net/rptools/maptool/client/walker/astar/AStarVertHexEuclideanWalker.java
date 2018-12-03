@@ -12,30 +12,30 @@ import net.rptools.maptool.model.Zone;
 
 public class AStarVertHexEuclideanWalker extends AbstractAStarHexEuclideanWalker {
 
-	public AStarVertHexEuclideanWalker(Zone zone) {
-		super(zone);
-		initNeighborMaps();
-	}
+    public AStarVertHexEuclideanWalker(Zone zone) {
+        super(zone);
+        initNeighborMaps();
+    }
 
-	@Override
-	protected void initNeighborMaps() {
-		// @formatter:off
-		oddNeighborMap = new int[][] { 
-			{ -1, 0, 1 },	{ 0, -1, 1 },	{ 1, 0, 1 },
-			{ 0,  0, 0 },					{ 0, 0, 0 },
-			{ -1, 1, 1 },	{ 0,  1, 1 },	{ 1, 1, 1 } 
-		};
+    @Override
+    protected void initNeighborMaps() {
+        // @formatter:off
+        oddNeighborMap = new int[][] { 
+            { -1, 0, 1 },    { 0, -1, 1 },    { 1, 0, 1 },
+            { 0,  0, 0 },                    { 0, 0, 0 },
+            { -1, 1, 1 },    { 0,  1, 1 },    { 1, 1, 1 } 
+        };
 
-		evenNeighborMap = new int[][] {
-			{ -1, -1, 1 },	{ 0, -1, 1 },	{ 1, -1, 1 },
-			{  0,  0, 0 },					{ 0,  0, 0 },
-			{ -1,  0, 1 },	{ 0,  1, 1 },	{ 1,  0, 1 }
-		};
-		// @formatter:on
-	}
+        evenNeighborMap = new int[][] {
+            { -1, -1, 1 },    { 0, -1, 1 },    { 1, -1, 1 },
+            {  0,  0, 0 },                    { 0,  0, 0 },
+            { -1,  0, 1 },    { 0,  1, 1 },    { 1,  0, 1 }
+        };
+        // @formatter:on
+    }
 
-	@Override
-	protected int[][] getNeighborMap(int x, int y) {
-		return x % 2 == 0 ? evenNeighborMap : oddNeighborMap;
-	}
+    @Override
+    protected int[][] getNeighborMap(int x, int y) {
+        return x % 2 == 0 ? evenNeighborMap : oddNeighborMap;
+    }
 }

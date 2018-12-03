@@ -18,53 +18,53 @@ import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 
 public class NaiveWalker extends AbstractZoneWalker {
-	public NaiveWalker(Zone zone) {
-		super(zone);
-	}
+    public NaiveWalker(Zone zone) {
+        super(zone);
+    }
 
-	private int distance;
+    private int distance;
 
-	@Override
-	public List<CellPoint> calculatePath(CellPoint start, CellPoint end) {
-		List<CellPoint> list = new ArrayList<CellPoint>();
+    @Override
+    public List<CellPoint> calculatePath(CellPoint start, CellPoint end) {
+        List<CellPoint> list = new ArrayList<CellPoint>();
 
-		int x = start.x;
-		int y = start.y;
+        int x = start.x;
+        int y = start.y;
 
-		int count = 0;
-		while (true && count < 100) {
-			list.add(new CellPoint(x, y));
+        int count = 0;
+        while (true && count < 100) {
+            list.add(new CellPoint(x, y));
 
-			if (x == end.x && y == end.y) {
-				break;
-			}
-			if (x < end.x)
-				x++;
-			if (x > end.x)
-				x--;
-			if (y < end.y)
-				y++;
-			if (y > end.y)
-				y--;
+            if (x == end.x && y == end.y) {
+                break;
+            }
+            if (x < end.x)
+                x++;
+            if (x > end.x)
+                x--;
+            if (y < end.y)
+                y++;
+            if (y > end.y)
+                y--;
 
-			count++;
-		}
-		distance = (list.size() - 1) * 5;
-		return list;
-	}
+            count++;
+        }
+        distance = (list.size() - 1) * 5;
+        return list;
+    }
 
-	public int getDistance() {
-		return distance;
-	}
+    public int getDistance() {
+        return distance;
+    }
 
-	@Override
-	public void setFootprint(TokenFootprint footprint) {
-		// Not needed/used here
-		System.out.println("Should not see this ever!");
-	}
+    @Override
+    public void setFootprint(TokenFootprint footprint) {
+        // Not needed/used here
+        System.out.println("Should not see this ever!");
+    }
 
-	@Override
-	public Set<AStarCellPoint> getCheckedPoints() {
-		return null;
-	}
+    @Override
+    public Set<AStarCellPoint> getCheckedPoints() {
+        return null;
+    }
 }

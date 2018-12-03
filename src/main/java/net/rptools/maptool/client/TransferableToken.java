@@ -16,23 +16,23 @@ import java.io.IOException;
 import net.rptools.maptool.model.Token;
 
 public class TransferableToken implements Transferable {
-	public static final DataFlavor dataFlavor = new DataFlavor(Token.class, "Token");
+    public static final DataFlavor dataFlavor = new DataFlavor(Token.class, "Token");
 
-	private Token token;
+    private Token token;
 
-	public TransferableToken(Token token) {
-		this.token = token;
-	}
+    public TransferableToken(Token token) {
+        this.token = token;
+    }
 
-	public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-		return token;
-	}
+    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+        return token;
+    }
 
-	public DataFlavor[] getTransferDataFlavors() {
-		return new DataFlavor[] { dataFlavor };
-	}
+    public DataFlavor[] getTransferDataFlavors() {
+        return new DataFlavor[] { dataFlavor };
+    }
 
-	public boolean isDataFlavorSupported(DataFlavor flavor) {
-		return flavor.equals(dataFlavor);
-	}
+    public boolean isDataFlavorSupported(DataFlavor flavor) {
+        return flavor.equals(dataFlavor);
+    }
 }

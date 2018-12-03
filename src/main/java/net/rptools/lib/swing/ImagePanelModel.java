@@ -14,21 +14,21 @@ import java.awt.datatransfer.Transferable;
 
 public interface ImagePanelModel {
 
-	public int getImageCount();
+    public int getImageCount();
 
-	public Transferable getTransferable(int index);
+    public Transferable getTransferable(int index);
 
-	public Object getID(int index);
+    public Object getID(int index);
 
-	public Image getImage(Object ID);
+    public Image getImage(Object ID);
 
-	public Image getImage(int index);
+    public Image getImage(int index);
 
-	public String getCaption(int index);
+    public String getCaption(int index);
 
-	public String getCaption(int index, boolean withDimensions);
+    public String getCaption(int index, boolean withDimensions);
 
-	public Paint getBackground(int index);
+    public Paint getBackground(int index);
 
-	public Image[] getDecorations(int index);
+    public Image[] getDecorations(int index);
 }

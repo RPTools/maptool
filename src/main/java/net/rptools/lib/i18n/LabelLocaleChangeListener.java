@@ -13,17 +13,17 @@ import java.util.Locale;
 
 public class LabelLocaleChangeListener implements LocaleChangeListener {
 
-	private Label label;
-	private String key;
+    private Label label;
+    private String key;
 
-	public LabelLocaleChangeListener(Label label, String key) {
-		this.label = label;
-		this.key = key;
-	}
+    public LabelLocaleChangeListener(Label label, String key) {
+        this.label = label;
+        this.key = key;
+    }
 
-	////
-	// LOCALE CHANGE LISTENER
-	public void localeChanged(Locale locale) {
-		label.setText(I18NManager.getText(key));
-	}
+    ////
+    // LOCALE CHANGE LISTENER
+    public void localeChanged(Locale locale) {
+        label.setText(I18NManager.getText(key));
+    }
 }

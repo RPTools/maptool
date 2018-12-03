@@ -34,156 +34,156 @@ import org.apache.logging.log4j.Logger;
 import com.jidesoft.docking.DockableFrame;
 
 public class SelectionPanel extends AbstractMacroPanel {
-	private static final Logger log = LogManager.getLogger(SelectionPanel.class);
+    private static final Logger log = LogManager.getLogger(SelectionPanel.class);
 
-	private final List<Token> tokenList = null;
-	private List<MacroButtonProperties> commonMacros = new ArrayList<MacroButtonProperties>();
-	private CodeTimer timer;
+    private final List<Token> tokenList = null;
+    private List<MacroButtonProperties> commonMacros = new ArrayList<MacroButtonProperties>();
+    private CodeTimer timer;
 
-	public SelectionPanel() {
-		// TODO: refactoring reminder
-		setPanelClass("SelectionPanel");
-		setName(I18N.getString("panel.Selected"));
-		init(new ArrayList<Token>()); // when initially loading MT, the CurrentZoneRenderer isn't ready yet; just send an empty list
-	}
+    public SelectionPanel() {
+        // TODO: refactoring reminder
+        setPanelClass("SelectionPanel");
+        setName(I18N.getString("panel.Selected"));
+        init(new ArrayList<Token>()); // when initially loading MT, the CurrentZoneRenderer isn't ready yet; just send an empty list
+    }
 
-	public List<MacroButtonProperties> getCommonMacros() {
-		return commonMacros;
-	}
+    public List<MacroButtonProperties> getCommonMacros() {
+        return commonMacros;
+    }
 
-	public void setCommonMacros(List<MacroButtonProperties> newCommonMacros) {
-		commonMacros = newCommonMacros;
-	}
+    public void setCommonMacros(List<MacroButtonProperties> newCommonMacros) {
+        commonMacros = newCommonMacros;
+    }
 
-	public void init() {
-		MapToolFrame f = MapTool.getFrame();
-		ZoneRenderer zr = f.getCurrentZoneRenderer();
-		if (zr != null)
-			init(zr.getSelectedTokensList());
-	}
+    public void init() {
+        MapToolFrame f = MapTool.getFrame();
+        ZoneRenderer zr = f.getCurrentZoneRenderer();
+        if (zr != null)
+            init(zr.getSelectedTokensList());
+    }
 
-	public void init(List<Token> selectedTokenList) {
-		boolean panelVisible = true;
+    public void init(List<Token> selectedTokenList) {
+        boolean panelVisible = true;
 
-		if (MapTool.getFrame() != null) {
-			DockableFrame selectionPanel = MapTool.getFrame().getDockingManager().getFrame("SELECTION");
-			if (selectionPanel != null)
-				panelVisible = (selectionPanel.isVisible() && !selectionPanel.isAutohide()) || selectionPanel.isAutohideShowing() ? true : false;
-		}
-		// Set up a code timer to get some performance data
-		timer = new CodeTimer("selectionpanel");
-		timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
-		timer.setThreshold(10);
+        if (MapTool.getFrame() != null) {
+            DockableFrame selectionPanel = MapTool.getFrame().getDockingManager().getFrame("SELECTION");
+            if (selectionPanel != null)
+                panelVisible = (selectionPanel.isVisible() && !selectionPanel.isAutohide()) || selectionPanel.isAutohideShowing() ? true : false;
+        }
+        // Set up a code timer to get some performance data
+        timer = new CodeTimer("selectionpanel");
+        timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
+        timer.setThreshold(10);
 
-		timer.start("painting");
+        timer.start("painting");
 
-		// paint panel only when it's visible or active
-		if (panelVisible) {
-			// add the selection panel controls first
-			add(new MenuButtonsPanel());
+        // paint panel only when it's visible or active
+        if (panelVisible) {
+            // add the selection panel controls first
+            add(new MenuButtonsPanel());
 
-			// draw common group only when there is more than one token selected
-			if (selectedTokenList.size() > 1) {
-				populateCommonButtons(selectedTokenList);
-				if (!commonMacros.isEmpty()) {
-					addArea(commonMacros, I18N.getText("component.areaGroup.macro.commonMacros"));
-				}
-				// add(new ButtonGroup(selectedTokenList, commonMacros, this));
-			}
-			for (Token token : selectedTokenList) {
-				if (!AppUtil.playerOwns(token)) {
-					continue;
-				}
-				addArea(token.getId());
-			}
-			if (selectedTokenList.size() == 1 && AppUtil.playerOwns(selectedTokenList.get(0))) {
-				// if only one token selected, show its image as tab icon
-				// MapTool.getFrame().getFrame(MTFrame.SELECTION).setFrameIcon(selectedTokenList.get(0).getIcon(16, 16));
-			}
-		}
-		timer.stop("painting");
+            // draw common group only when there is more than one token selected
+            if (selectedTokenList.size() > 1) {
+                populateCommonButtons(selectedTokenList);
+                if (!commonMacros.isEmpty()) {
+                    addArea(commonMacros, I18N.getText("component.areaGroup.macro.commonMacros"));
+                }
+                // add(new ButtonGroup(selectedTokenList, commonMacros, this));
+            }
+            for (Token token : selectedTokenList) {
+                if (!AppUtil.playerOwns(token)) {
+                    continue;
+                }
+                addArea(token.getId());
+            }
+            if (selectedTokenList.size() == 1 && AppUtil.playerOwns(selectedTokenList.get(0))) {
+                // if only one token selected, show its image as tab icon
+                // MapTool.getFrame().getFrame(MTFrame.SELECTION).setFrameIcon(selectedTokenList.get(0).getIcon(16, 16));
+            }
+        }
+        timer.stop("painting");
 
-		if (AppState.isCollectProfilingData() || log.isDebugEnabled()) {
-			String results = timer.toString();
-			MapTool.getProfilingNoteFrame().addText(results);
-			if (log.isDebugEnabled())
-				log.debug(results);
-		}
-		// MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated); // TODO: FIXME post FX
-	}
+        if (AppState.isCollectProfilingData() || log.isDebugEnabled()) {
+            String results = timer.toString();
+            MapTool.getProfilingNoteFrame().addText(results);
+            if (log.isDebugEnabled())
+                log.debug(results);
+        }
+        // MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated); // TODO: FIXME post FX
+    }
 
-	private void populateCommonButtons(List<Token> tokenList) {
-		Map<Integer, MacroButtonProperties> uniqueMacros = new HashMap<Integer, MacroButtonProperties>();
-		Map<Integer, MacroButtonProperties> commonMacros = new HashMap<Integer, MacroButtonProperties>();
-		for (Token nextToken : tokenList) {
-			if (!AppUtil.playerOwns(nextToken)) {
-				continue;
-			}
-			for (MacroButtonProperties nextMacro : nextToken.getMacroList(true)) {
-				MacroButtonProperties copiedMacro = new MacroButtonProperties(nextMacro.getIndex(), nextMacro);
-				int macroKey = copiedMacro.hashCodeForComparison();
-				Boolean macroIsInUnique = uniqueMacros.containsKey(copiedMacro.hashCodeForComparison());
-				Boolean macroIsInCommon = commonMacros.containsKey(copiedMacro.hashCodeForComparison());
-				if (!macroIsInUnique && !macroIsInCommon) {
-					uniqueMacros.put(macroKey, copiedMacro);
-				} else if (macroIsInUnique && !macroIsInCommon) {
-					uniqueMacros.remove(macroKey);
-					commonMacros.put(macroKey, copiedMacro);
-				} else if (macroIsInUnique && macroIsInCommon) {
-					uniqueMacros.remove(macroKey);
-				}
-			}
-		}
-		for (MacroButtonProperties nextMacro : commonMacros.values()) {
-			nextMacro.setAllowPlayerEdits(true);
-			for (Token nextToken : tokenList) {
-				if (!AppUtil.playerOwns(nextToken)) {
-					continue;
-				}
-				for (MacroButtonProperties nextTokenMacro : nextToken.getMacroList(true)) {
-					if (!nextTokenMacro.getAllowPlayerEdits()) {
-						nextMacro.setAllowPlayerEdits(false);
-					}
-				}
-			}
-			if (!nextMacro.getCompareApplyToSelectedTokens()) {
-				nextMacro.setCompareApplyToSelectedTokens(false);
-			}
-			if (!nextMacro.getCompareAutoExecute()) {
-				nextMacro.setCompareAutoExecute(false);
-			}
-			if (!nextMacro.getCompareCommand()) {
-				nextMacro.setCommand("");
-			}
-			if (!nextMacro.getCompareGroup()) {
-				nextMacro.setGroup("");
-			}
-			if (!nextMacro.getCompareIncludeLabel()) {
-				nextMacro.setIncludeLabel(false);
-			}
-			if (!nextMacro.getCompareSortPrefix()) {
-				nextMacro.setSortby("");
-			}
-		}
-		this.commonMacros = new ArrayList<MacroButtonProperties>(commonMacros.values());
-		int indexCount = 0;
-		for (MacroButtonProperties nextMacro : this.commonMacros) {
-			nextMacro.setIndex(indexCount);
-			indexCount++;
-		}
-		Collections.sort(this.commonMacros);
-	}
+    private void populateCommonButtons(List<Token> tokenList) {
+        Map<Integer, MacroButtonProperties> uniqueMacros = new HashMap<Integer, MacroButtonProperties>();
+        Map<Integer, MacroButtonProperties> commonMacros = new HashMap<Integer, MacroButtonProperties>();
+        for (Token nextToken : tokenList) {
+            if (!AppUtil.playerOwns(nextToken)) {
+                continue;
+            }
+            for (MacroButtonProperties nextMacro : nextToken.getMacroList(true)) {
+                MacroButtonProperties copiedMacro = new MacroButtonProperties(nextMacro.getIndex(), nextMacro);
+                int macroKey = copiedMacro.hashCodeForComparison();
+                Boolean macroIsInUnique = uniqueMacros.containsKey(copiedMacro.hashCodeForComparison());
+                Boolean macroIsInCommon = commonMacros.containsKey(copiedMacro.hashCodeForComparison());
+                if (!macroIsInUnique && !macroIsInCommon) {
+                    uniqueMacros.put(macroKey, copiedMacro);
+                } else if (macroIsInUnique && !macroIsInCommon) {
+                    uniqueMacros.remove(macroKey);
+                    commonMacros.put(macroKey, copiedMacro);
+                } else if (macroIsInUnique && macroIsInCommon) {
+                    uniqueMacros.remove(macroKey);
+                }
+            }
+        }
+        for (MacroButtonProperties nextMacro : commonMacros.values()) {
+            nextMacro.setAllowPlayerEdits(true);
+            for (Token nextToken : tokenList) {
+                if (!AppUtil.playerOwns(nextToken)) {
+                    continue;
+                }
+                for (MacroButtonProperties nextTokenMacro : nextToken.getMacroList(true)) {
+                    if (!nextTokenMacro.getAllowPlayerEdits()) {
+                        nextMacro.setAllowPlayerEdits(false);
+                    }
+                }
+            }
+            if (!nextMacro.getCompareApplyToSelectedTokens()) {
+                nextMacro.setCompareApplyToSelectedTokens(false);
+            }
+            if (!nextMacro.getCompareAutoExecute()) {
+                nextMacro.setCompareAutoExecute(false);
+            }
+            if (!nextMacro.getCompareCommand()) {
+                nextMacro.setCommand("");
+            }
+            if (!nextMacro.getCompareGroup()) {
+                nextMacro.setGroup("");
+            }
+            if (!nextMacro.getCompareIncludeLabel()) {
+                nextMacro.setIncludeLabel(false);
+            }
+            if (!nextMacro.getCompareSortPrefix()) {
+                nextMacro.setSortby("");
+            }
+        }
+        this.commonMacros = new ArrayList<MacroButtonProperties>(commonMacros.values());
+        int indexCount = 0;
+        for (MacroButtonProperties nextMacro : this.commonMacros) {
+            nextMacro.setIndex(indexCount);
+            indexCount++;
+        }
+        Collections.sort(this.commonMacros);
+    }
 
-	@Override
-	protected void clear() {
-		// reset the tab icon
-		// MapTool.getFrame().getFrame(MTFrame.SELECTION).setFrameIcon(new ImageIcon(AppStyle.selectionPanelImage));
-		super.clear();
-	}
+    @Override
+    protected void clear() {
+        // reset the tab icon
+        // MapTool.getFrame().getFrame(MTFrame.SELECTION).setFrameIcon(new ImageIcon(AppStyle.selectionPanelImage));
+        super.clear();
+    }
 
-	@Override
-	public void reset() {
-		clear();
-		init();
-	}
+    @Override
+    public void reset() {
+        clear();
+        init();
+    }
 }

@@ -10,27 +10,27 @@ package net.rptools.maptool.model;
 
 public class Association<E, T> {
 
-	private E lhs;
-	private T rhs;
+    private E lhs;
+    private T rhs;
 
-	public Association(E lhs, T rhs) {
-		this.lhs = lhs;
-		this.rhs = rhs;
-	}
+    public Association(E lhs, T rhs) {
+        this.lhs = lhs;
+        this.rhs = rhs;
+    }
 
-	public void setLeft(E value) {
-		lhs = value;
-	}
+    public void setLeft(E value) {
+        lhs = value;
+    }
 
-	public void setRight(T value) {
-		rhs = value;
-	}
+    public void setRight(T value) {
+        rhs = value;
+    }
 
-	public E getLeft() {
-		return lhs;
-	}
+    public E getLeft() {
+        return lhs;
+    }
 
-	public T getRight() {
-		return rhs;
-	}
+    public T getRight() {
+        return rhs;
+    }
 }

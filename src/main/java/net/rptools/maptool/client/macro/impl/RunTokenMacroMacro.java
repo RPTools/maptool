@@ -25,29 +25,29 @@ import net.rptools.maptool_fx.MapTool;
  * 
  */
 @MacroDefinition(
-		name = "tmacro",
-		aliases = { "tm" },
-		description = "tmacro.description")
+        name = "tmacro",
+        aliases = { "tm" },
+        description = "tmacro.description")
 public class RunTokenMacroMacro implements Macro {
-	/**
-	 * @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String)
-	 */
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		Set<GUID> selectedTokenSet = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
-		if (selectedTokenSet.size() == 0) {
-			MapTool.addLocalMessage(I18N.getText("msg.error.noTokensSelected"));
-			return;
-		}
-		for (GUID tokenId : selectedTokenSet) {
-			Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
-			if (token == null) {
-				continue;
-			}
-			MacroButtonProperties prop = token.getMacro(macro, true);
-			if (prop == null) {
-				continue;
-			}
-			prop.executeMacro();
-		}
-	}
+    /**
+     * @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String)
+     */
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        Set<GUID> selectedTokenSet = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
+        if (selectedTokenSet.size() == 0) {
+            MapTool.addLocalMessage(I18N.getText("msg.error.noTokensSelected"));
+            return;
+        }
+        for (GUID tokenId : selectedTokenSet) {
+            Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
+            if (token == null) {
+                continue;
+            }
+            MacroButtonProperties prop = token.getMacro(macro, true);
+            if (prop == null) {
+                continue;
+            }
+            prop.executeMacro();
+        }
+    }
 }

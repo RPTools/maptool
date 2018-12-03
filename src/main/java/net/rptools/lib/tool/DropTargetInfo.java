@@ -27,61 +27,61 @@ import net.rptools.lib.transferable.ImageTransferableHandler;
  */
 @SuppressWarnings("serial")
 public class DropTargetInfo extends JFrame implements DropTargetListener {
-	JLabel label = new JLabel("Drop here");
+    JLabel label = new JLabel("Drop here");
 
-	public DropTargetInfo() {
-		super("Drag and drop into this window");
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setLocation(300, 200);
-		setSize(200, 200);
+    public DropTargetInfo() {
+        super("Drag and drop into this window");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocation(300, 200);
+        setSize(200, 200);
 
-		new DropTarget(this, this);
+        new DropTarget(this, this);
 
-		add(label);
-	}
+        add(label);
+    }
 
-	public static void main(String[] args) {
-		DropTargetInfo dti = new DropTargetInfo();
-		dti.setVisible(true);
-	}
+    public static void main(String[] args) {
+        DropTargetInfo dti = new DropTargetInfo();
+        dti.setVisible(true);
+    }
 
-	////
-	// DROP TARGET LISTENER
-	public void dragEnter(DropTargetDragEvent dtde) {
-	}
+    ////
+    // DROP TARGET LISTENER
+    public void dragEnter(DropTargetDragEvent dtde) {
+    }
 
-	public void dragExit(DropTargetEvent dte) {
-	}
+    public void dragExit(DropTargetEvent dte) {
+    }
 
-	public void dragOver(DropTargetDragEvent dtde) {
-	}
+    public void dragOver(DropTargetDragEvent dtde) {
+    }
 
-	public void drop(DropTargetDropEvent dtde) {
-		dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+    public void drop(DropTargetDropEvent dtde) {
+        dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 
-		@SuppressWarnings("unused")
-		Object handlerObj = null;
-		try {
-			handlerObj = new ImageTransferableHandler().getTransferObject(dtde.getTransferable());
+        @SuppressWarnings("unused")
+        Object handlerObj = null;
+        try {
+            handlerObj = new ImageTransferableHandler().getTransferObject(dtde.getTransferable());
 
-			System.out.println("DropAction:" + dtde.getDropAction());
-			System.out.println("Source:" + dtde.getSource());
-			System.out.println("DropTargetContext:" + dtde.getDropTargetContext());
-			System.out.println("Data Flavors:");
-			for (DataFlavor flavor : dtde.getCurrentDataFlavorsAsList()) {
-				try {
-					System.out.println("\t" + flavor.getMimeType());
-				} catch (Exception e) {
-					System.out.println("\t\tfailed");
-				}
-			}
-			System.out.println("--------------------");
-			label.setIcon(new ImageIcon(new ImageTransferableHandler().getTransferObject(dtde.getTransferable())));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            System.out.println("DropAction:" + dtde.getDropAction());
+            System.out.println("Source:" + dtde.getSource());
+            System.out.println("DropTargetContext:" + dtde.getDropTargetContext());
+            System.out.println("Data Flavors:");
+            for (DataFlavor flavor : dtde.getCurrentDataFlavorsAsList()) {
+                try {
+                    System.out.println("\t" + flavor.getMimeType());
+                } catch (Exception e) {
+                    System.out.println("\t\tfailed");
+                }
+            }
+            System.out.println("--------------------");
+            label.setIcon(new ImageIcon(new ImageTransferableHandler().getTransferObject(dtde.getTransferable())));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	public void dropActionChanged(DropTargetDragEvent dtde) {
-	}
+    public void dropActionChanged(DropTargetDragEvent dtde) {
+    }
 }

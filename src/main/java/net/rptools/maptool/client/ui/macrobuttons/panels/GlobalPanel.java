@@ -17,37 +17,37 @@ import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool_fx.MapTool;
 
 public class GlobalPanel extends AbstractMacroPanel {
-	public GlobalPanel() {
-		super();
-		setName(I18N.getString("panel.Global"));
-		setPanelClass("GlobalPanel");
-		addMouseListener(this);
-		init();
-	}
+    public GlobalPanel() {
+        super();
+        setName(I18N.getString("panel.Global"));
+        setPanelClass("GlobalPanel");
+        addMouseListener(this);
+        init();
+    }
 
-	private void init() {
-		List<MacroButtonProperties> properties = MacroButtonPrefs.getButtonProperties();
-		addArea(properties, "");
-	}
+    private void init() {
+        List<MacroButtonProperties> properties = MacroButtonPrefs.getButtonProperties();
+        addArea(properties, "");
+    }
 
-	public void reset() {
-		clear();
-		init();
-	}
+    public void reset() {
+        clear();
+        init();
+    }
 
-	public static void deleteButtonGroup(String macroGroup) {
-		AbstractButtonGroup.clearHotkeys(MapTool.getFrame().getGlobalPanel(), macroGroup);
-		for (MacroButtonProperties nextProp : MacroButtonPrefs.getButtonProperties()) {
-			if (macroGroup.equals(nextProp.getGroup())) {
-				MacroButtonPrefs.delete(nextProp);
-			}
-		}
-		MapTool.getFrame().getGlobalPanel().reset();
-	}
+    public static void deleteButtonGroup(String macroGroup) {
+        AbstractButtonGroup.clearHotkeys(MapTool.getFrame().getGlobalPanel(), macroGroup);
+        for (MacroButtonProperties nextProp : MacroButtonPrefs.getButtonProperties()) {
+            if (macroGroup.equals(nextProp.getGroup())) {
+                MacroButtonPrefs.delete(nextProp);
+            }
+        }
+        MapTool.getFrame().getGlobalPanel().reset();
+    }
 
-	public static void clearPanel() {
-		MacroButtonPrefs.deletePanel();
-		AbstractMacroPanel.clearHotkeys(MapTool.getFrame().getGlobalPanel());
-		MapTool.getFrame().getGlobalPanel().reset();
-	}
+    public static void clearPanel() {
+        MacroButtonPrefs.deletePanel();
+        AbstractMacroPanel.clearHotkeys(MapTool.getFrame().getGlobalPanel());
+        MapTool.getFrame().getGlobalPanel().reset();
+    }
 }

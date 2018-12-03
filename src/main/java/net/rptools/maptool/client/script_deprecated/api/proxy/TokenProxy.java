@@ -20,82 +20,82 @@ import net.rptools.maptool_fx.MapTool;
 import net.rptools.parser.ParserException;
 
 public class TokenProxy {
-	private final Token token;
+    private final Token token;
 
-	public TokenProxy(Token token) {
-		this.token = token;
-	}
+    public TokenProxy(Token token) {
+        this.token = token;
+    }
 
-	// States
-	public boolean getState(String state) throws ParserException {
-		return TokenStateFunction.getInstance().getBooleanTokenState(token, state);
-	}
+    // States
+    public boolean getState(String state) throws ParserException {
+        return TokenStateFunction.getInstance().getBooleanTokenState(token, state);
+    }
 
-	public Object setState(String state, Object value) {
-		return token.setState(state, value);
-	}
+    public Object setState(String state, Object value) {
+        return token.setState(state, value);
+    }
 
-	// Bars
-	public Object getBar(String bar) throws ParserException {
-		return TokenBarFunction.getInstance().getValue(token, bar);
-	}
+    // Bars
+    public Object getBar(String bar) throws ParserException {
+        return TokenBarFunction.getInstance().getValue(token, bar);
+    }
 
-	public void setBar(String bar, Object value) throws ParserException {
-		TokenBarFunction.getInstance().setValue(token, bar, value);
-	}
+    public void setBar(String bar, Object value) throws ParserException {
+        TokenBarFunction.getInstance().setValue(token, bar, value);
+    }
 
-	// Halos
-	public String getHalo() {
-		return TokenHaloFunction.getInstance().getHalo(token).toString();
-	}
+    // Halos
+    public String getHalo() {
+        return TokenHaloFunction.getInstance().getHalo(token).toString();
+    }
 
-	public void setHalo(String color) throws ParserException {
-		TokenHaloFunction.getInstance().setHalo(token, color);
-	}
+    public void setHalo(String color) throws ParserException {
+        TokenHaloFunction.getInstance().setHalo(token, color);
+    }
 
-	// Names
-	public String getName() {
-		return TokenNameFunction.getInstance().getName(token);
-	}
+    // Names
+    public String getName() {
+        return TokenNameFunction.getInstance().getName(token);
+    }
 
-	public void setName(Object value) {
-		TokenNameFunction.getInstance().setName(token, value.toString());
-	}
+    public void setName(Object value) {
+        TokenNameFunction.getInstance().setName(token, value.toString());
+    }
 
-	// GM Name
-	public String getGMName() throws ParserException {
-		return TokenGMNameFunction.getInstance().getGMName(token);
-	}
+    // GM Name
+    public String getGMName() throws ParserException {
+        return TokenGMNameFunction.getInstance().getGMName(token);
+    }
 
-	public void setGMName(Object value) throws ParserException {
-		TokenGMNameFunction.getInstance().setGMName(token, value.toString());
-	}
+    public void setGMName(Object value) throws ParserException {
+        TokenGMNameFunction.getInstance().setGMName(token, value.toString());
+    }
 
-	// Label
-	public String getLabel() {
-		return TokenLabelFunction.getInstance().getLabel(token);
-	}
+    // Label
+    public String getLabel() {
+        return TokenLabelFunction.getInstance().getLabel(token);
+    }
 
-	public void setLabel(Object value) {
-		TokenLabelFunction.getInstance().setLabel(token, value.toString());
-	}
+    public void setLabel(Object value) {
+        TokenLabelFunction.getInstance().setLabel(token, value.toString());
+    }
 
-	// Visible
-	public boolean getVisible() throws ParserException {
-		return TokenVisibleFunction.getInstance().getBooleanVisible(token);
-	}
+    // Visible
+    public boolean getVisible() throws ParserException {
+        return TokenVisibleFunction.getInstance().getBooleanVisible(token);
+    }
 
-	public void setVisible(Object value) throws ParserException {
-		TokenVisibleFunction.getInstance().setVisible(token, value.toString());
-	}
+    public void setVisible(Object value) throws ParserException {
+        TokenVisibleFunction.getInstance().setVisible(token, value.toString());
+    }
 
-	// Properties
-	public Object getProperty(String name) {
-		return token.getEvaluatedProperty(name);
-	}
+    // Properties
+    public Object getProperty(String name) {
+        return token.getEvaluatedProperty(name);
+    }
 
-	public void setProperty(String name, Object value) {
-		token.setProperty(name, value.toString());
-		MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token);
-	}
+    public void setProperty(String name, Object value) {
+        token.setProperty(name, value.toString());
+        MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token);
+    }
 }

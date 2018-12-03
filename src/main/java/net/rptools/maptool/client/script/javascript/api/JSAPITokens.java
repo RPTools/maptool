@@ -14,12 +14,12 @@ import java.util.List;
 import net.rptools.maptool_fx.MapTool;
 
 public class JSAPITokens {
-	public List<JSAPIToken> getMapTokens() {
-		final List<JSAPIToken> tokens = new ArrayList<>();
+    public List<JSAPIToken> getMapTokens() {
+        final List<JSAPIToken> tokens = new ArrayList<>();
 
-		MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokens().forEach(
-				t -> tokens.add(new JSAPIToken(t)));
-		return tokens;
-	}
+        MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokens().forEach(
+                t -> tokens.add(new JSAPIToken(t)));
+        return tokens;
+    }
 
 }

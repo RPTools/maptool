@@ -20,15 +20,15 @@ import net.rptools.lib.ModelVersionTransformation;
  * @author frank
  */
 public class AssetNameTransform implements ModelVersionTransformation {
-	private final String regexOld;
-	private final String regexNew;
+    private final String regexOld;
+    private final String regexNew;
 
-	public AssetNameTransform(String from, String to) {
-		regexOld = from;
-		regexNew = to;
-	}
+    public AssetNameTransform(String from, String to) {
+        regexOld = from;
+        regexNew = to;
+    }
 
-	public String transform(String name) {
-		return name.replace(regexOld, regexNew);
-	}
+    public String transform(String name) {
+        return name.replace(regexOld, regexNew);
+    }
 }

@@ -12,22 +12,22 @@ import java.util.List;
 
 public interface MapToolRegistryService {
 
-	public static final int CODE_UNKNOWN = 0;
-	public static final int CODE_OK = 1;
-	public static final int CODE_COULD_CONNECT_BACK = 2;
-	public static final int CODE_ID_IN_USE = 3;
+    public static final int CODE_UNKNOWN = 0;
+    public static final int CODE_OK = 1;
+    public static final int CODE_COULD_CONNECT_BACK = 2;
+    public static final int CODE_ID_IN_USE = 3;
 
-	public int registerInstance(String id, int port, String version);
+    public int registerInstance(String id, int port, String version);
 
-	public void unregisterInstance(int port);
+    public void unregisterInstance(int port);
 
-	public String findInstance(String id);
+    public String findInstance(String id);
 
-	public List<String> findAllInstances();
+    public List<String> findAllInstances();
 
-	public boolean testConnection(int port);
+    public boolean testConnection(int port);
 
-	public void heartBeat(int port);
+    public void heartBeat(int port);
 
-	public String getAddress();
+    public String getAddress();
 }

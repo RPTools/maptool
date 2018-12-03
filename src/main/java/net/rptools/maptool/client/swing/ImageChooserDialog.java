@@ -30,76 +30,76 @@ import net.rptools.maptool_fx.MapTool;
 
 public class ImageChooserDialog extends JDialog {
 
-	private MD5Key imageId = null;
-	private AssetPanel imageChooser = new AssetPanel("imageAssetPanel", MapTool.getFrame().getAssetPanel().getModel());
+    private MD5Key imageId = null;
+    private AssetPanel imageChooser = new AssetPanel("imageAssetPanel", MapTool.getFrame().getAssetPanel().getModel());
 
-	public ImageChooserDialog(JFrame owner) {
-		super(owner, "Choose Image", true);
-		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				imageId = null;
-				setVisible(false);
-			}
-		});
+    public ImageChooserDialog(JFrame owner) {
+        super(owner, "Choose Image", true);
+        setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                imageId = null;
+                setVisible(false);
+            }
+        });
 
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(BorderLayout.CENTER, imageChooser);
-		panel.add(BorderLayout.SOUTH, createButtonPanel());
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(BorderLayout.CENTER, imageChooser);
+        panel.add(BorderLayout.SOUTH, createButtonPanel());
 
-		setContentPane(panel);
-		setSize(400, 500);
-		SwingUtil.centerOver(this, getOwner());
+        setContentPane(panel);
+        setSize(400, 500);
+        SwingUtil.centerOver(this, getOwner());
 
-		imageChooser.addImageSelectionListener(new SelectionListener() {
-			public void selectionPerformed(List<Object> selected) {
-				if (selected.size() < 0 || (Integer) selected.get(0) < 0) {
-					return;
-				}
+        imageChooser.addImageSelectionListener(new SelectionListener() {
+            public void selectionPerformed(List<Object> selected) {
+                if (selected.size() < 0 || (Integer) selected.get(0) < 0) {
+                    return;
+                }
 
-				Asset asset = imageChooser.getAsset((Integer) selected.get(0));
-				imageId = asset.getId();
+                Asset asset = imageChooser.getAsset((Integer) selected.get(0));
+                imageId = asset.getId();
 
-				// Put the asset into the asset manager since we have the asset handy here
-				AssetManager.putAsset(asset);
-			}
-		});
-	}
+                // Put the asset into the asset manager since we have the asset handy here
+                AssetManager.putAsset(asset);
+            }
+        });
+    }
 
-	public MD5Key getImageId() {
-		return imageId;
-	}
+    public MD5Key getImageId() {
+        return imageId;
+    }
 
-	private JPanel createButtonPanel() {
-		JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    private JPanel createButtonPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-		panel.add(createOKButton());
-		panel.add(createCancelButton());
+        panel.add(createOKButton());
+        panel.add(createCancelButton());
 
-		return panel;
-	}
+        return panel;
+    }
 
-	private JButton createOKButton() {
-		JButton button = new JButton("OK");
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent e) {
-				setVisible(false);
-			}
-		});
+    private JButton createOKButton() {
+        JButton button = new JButton("OK");
+        button.addActionListener(new ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                setVisible(false);
+            }
+        });
 
-		return button;
-	}
+        return button;
+    }
 
-	private JButton createCancelButton() {
-		JButton button = new JButton("Cancel");
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(java.awt.event.ActionEvent e) {
-				imageId = null;
-				setVisible(false);
-			}
-		});
+    private JButton createCancelButton() {
+        JButton button = new JButton("Cancel");
+        button.addActionListener(new ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                imageId = null;
+                setVisible(false);
+            }
+        });
 
-		return button;
-	}
+        return button;
+    }
 }

@@ -24,67 +24,67 @@ import com.jeta.forms.components.panel.FormPanel;
 
 public class LayerSelectionDialog extends JPanel {
 
-	private final FormPanel panel;
-	private JList list;
-	private final LayerSelectionListener listener;
-	private final Zone.Layer[] layerList;
+    private final FormPanel panel;
+    private JList list;
+    private final LayerSelectionListener listener;
+    private final Zone.Layer[] layerList;
 
-	public LayerSelectionDialog(Zone.Layer[] layerList, LayerSelectionListener listener) {
-		panel = new FormPanel("net/rptools/maptool/client/ui/forms/layerSelectionDialog.xml");
-		this.listener = listener;
-		this.layerList = layerList;
-		setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    public LayerSelectionDialog(Zone.Layer[] layerList, LayerSelectionListener listener) {
+        panel = new FormPanel("net/rptools/maptool/client/ui/forms/layerSelectionDialog.xml");
+        this.listener = listener;
+        this.layerList = layerList;
+        setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-		getLayerList();
+        getLayerList();
 
-		setLayout(new GridLayout(1, 1));
-		add(panel);
-	}
+        setLayout(new GridLayout(1, 1));
+        add(panel);
+    }
 
-	public void fireViewSelectionChange() {
+    public void fireViewSelectionChange() {
 
-		int index = list.getSelectedIndex();
-		if (index >= 0 && listener != null) {
-			listener.layerSelected((Zone.Layer) list.getModel().getElementAt(index));
-		}
-	}
+        int index = list.getSelectedIndex();
+        if (index >= 0 && listener != null) {
+            listener.layerSelected((Zone.Layer) list.getModel().getElementAt(index));
+        }
+    }
 
-	public void updateViewList() {
-		getLayerList().setSelectedValue(MapTool.getFrame().getCurrentZoneRenderer().getActiveLayer(), true);
-	}
+    public void updateViewList() {
+        getLayerList().setSelectedValue(MapTool.getFrame().getCurrentZoneRenderer().getActiveLayer(), true);
+    }
 
-	private JList getLayerList() {
+    private JList getLayerList() {
 
-		if (list == null) {
-			list = panel.getList("layerList");
+        if (list == null) {
+            list = panel.getList("layerList");
 
-			DefaultListModel model = new DefaultListModel();
-			for (Zone.Layer layer : layerList) {
-				model.addElement(layer);
-			}
+            DefaultListModel model = new DefaultListModel();
+            for (Zone.Layer layer : layerList) {
+                model.addElement(layer);
+            }
 
-			list.setModel(model);
-			list.addListSelectionListener(new ListSelectionListener() {
+            list.setModel(model);
+            list.addListSelectionListener(new ListSelectionListener() {
 
-				public void valueChanged(ListSelectionEvent e) {
-					if (e.getValueIsAdjusting()) {
-						return;
-					}
+                public void valueChanged(ListSelectionEvent e) {
+                    if (e.getValueIsAdjusting()) {
+                        return;
+                    }
 
-					fireViewSelectionChange();
-				}
-			});
-			list.setSelectedIndex(0);
-		}
+                    fireViewSelectionChange();
+                }
+            });
+            list.setSelectedIndex(0);
+        }
 
-		return list;
-	}
+        return list;
+    }
 
-	public void setSelectedLayer(Zone.Layer layer) {
-		list.setSelectedValue(layer, true);
-	}
+    public void setSelectedLayer(Zone.Layer layer) {
+        list.setSelectedValue(layer, true);
+    }
 
-	public static interface LayerSelectionListener {
-		public void layerSelected(Zone.Layer layer);
-	}
+    public static interface LayerSelectionListener {
+        public void layerSelected(Zone.Layer layer);
+    }
 }

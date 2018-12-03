@@ -19,32 +19,32 @@ import net.rptools.maptool_fx.MapTool;
 
 public class LightSourceIconOverlay implements ZoneOverlay {
 
-	public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
+    public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
 
-		for (Token token : renderer.getZone().getAllTokens()) {
+        for (Token token : renderer.getZone().getAllTokens()) {
 
-			if (token.hasLightSources()) {
-				boolean foundNormalLight = false;
-				for (AttachedLightSource attachedLightSource : token.getLightSources()) {
-					LightSource lightSource = MapTool.getCampaign().getLightSource(attachedLightSource.getLightSourceId());
-					if (lightSource != null && lightSource.getType() == LightSource.Type.NORMAL) {
-						foundNormalLight = true;
-						break;
-					}
-				}
-				if (!foundNormalLight) {
-					continue;
-				}
+            if (token.hasLightSources()) {
+                boolean foundNormalLight = false;
+                for (AttachedLightSource attachedLightSource : token.getLightSources()) {
+                    LightSource lightSource = MapTool.getCampaign().getLightSource(attachedLightSource.getLightSourceId());
+                    if (lightSource != null && lightSource.getType() == LightSource.Type.NORMAL) {
+                        foundNormalLight = true;
+                        break;
+                    }
+                }
+                if (!foundNormalLight) {
+                    continue;
+                }
 
-				Area area = renderer.getTokenBounds(token);
-				if (area == null) {
-					continue;
-				}
+                Area area = renderer.getTokenBounds(token);
+                if (area == null) {
+                    continue;
+                }
 
-				int x = area.getBounds().x + (area.getBounds().width - AppStyle.lightSourceIcon.getWidth()) / 2;
-				int y = area.getBounds().y + (area.getBounds().height - AppStyle.lightSourceIcon.getHeight()) / 2;
-				g.drawImage(AppStyle.lightSourceIcon, x, y, null);
-			}
-		}
-	}
+                int x = area.getBounds().x + (area.getBounds().width - AppStyle.lightSourceIcon.getWidth()) / 2;
+                int y = area.getBounds().y + (area.getBounds().height - AppStyle.lightSourceIcon.getHeight()) / 2;
+                g.drawImage(AppStyle.lightSourceIcon, x, y, null);
+            }
+        }
+    }
 }

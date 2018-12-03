@@ -18,15 +18,15 @@ import net.rptools.maptool.model.Zone;
  * @author drice
  */
 public interface Drawable {
-	public void draw(Graphics2D g, Pen pen);
+    public void draw(Graphics2D g, Pen pen);
 
-	public java.awt.Rectangle getBounds();
+    public java.awt.Rectangle getBounds();
 
-	public Area getArea();
+    public Area getArea();
 
-	public GUID getId();
+    public GUID getId();
 
-	public Zone.Layer getLayer();
+    public Zone.Layer getLayer();
 
-	public void setLayer(Zone.Layer layer);
+    public void setLayer(Zone.Layer layer);
 }

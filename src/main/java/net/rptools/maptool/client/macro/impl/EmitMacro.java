@@ -16,18 +16,18 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
-		name = "emit",
-		aliases = { "e" },
-		description = "emit.description")
+        name = "emit",
+        aliases = { "e" },
+        description = "emit.description")
 public class EmitMacro extends AbstractMacro {
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		macro = processText(macro);
-		if (!MapTool.getPlayer().isGM()) {
-			MapTool.addMessage(TextMessage.me(context.getTransformationHistory(), "<b>" + I18N.getText("slash.mustBeGM", "emit") + "</b>"));
-			return;
-		}
-		StringBuilder sb = new StringBuilder();
-		sb.append("<i><b>").append(macro).append("</b></i>");
-		MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), sb.toString()));
-	}
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        macro = processText(macro);
+        if (!MapTool.getPlayer().isGM()) {
+            MapTool.addMessage(TextMessage.me(context.getTransformationHistory(), "<b>" + I18N.getText("slash.mustBeGM", "emit") + "</b>"));
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("<i><b>").append(macro).append("</b></i>");
+        MapTool.addMessage(TextMessage.say(context.getTransformationHistory(), sb.toString()));
+    }
 }

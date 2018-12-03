@@ -33,201 +33,201 @@ import com.jeta.forms.gui.form.FormAccessor;
 
 @SuppressWarnings("serial")
 public class ColorPicker extends JPanel {
-	private final JFrame owner;
+    private final JFrame owner;
 
-	private final PaintedPanel foregroundColor;
-	private final PaintedPanel backgroundColor;
-	private final List<PaintedPanel> recentColors = new ArrayList<PaintedPanel>(16);
-	private final JToggleButton snapToggle;
-	private final JToggleButton eraseToggle;
-	private final PaintChooser paintChooser;
-	private final JSpinner penWidthSpinner;
-	private final JSpinner transparencySpinner;
+    private final PaintedPanel foregroundColor;
+    private final PaintedPanel backgroundColor;
+    private final List<PaintedPanel> recentColors = new ArrayList<PaintedPanel>(16);
+    private final JToggleButton snapToggle;
+    private final JToggleButton eraseToggle;
+    private final PaintChooser paintChooser;
+    private final JSpinner penWidthSpinner;
+    private final JSpinner transparencySpinner;
 
-	private static final int RECENT_COLOR_LIST_SIZE = 16;
-	private static final int maxPenWidth = 300;
+    private static final int RECENT_COLOR_LIST_SIZE = 16;
+    private static final int maxPenWidth = 300;
 
-	private static final Color[] DEFAULT_COLORS = new Color[] { null, Color.black, Color.darkGray, Color.lightGray, Color.white, Color.pink,
-			new Color(127, 0, 0), Color.red, Color.orange, Color.yellow, new Color(0, 127, 0), Color.green, Color.blue, Color.cyan,
-			new Color(127, 0, 127), Color.magenta, new Color(127 + 32, 127, 61), };
+    private static final Color[] DEFAULT_COLORS = new Color[] { null, Color.black, Color.darkGray, Color.lightGray, Color.white, Color.pink,
+            new Color(127, 0, 0), Color.red, Color.orange, Color.yellow, new Color(0, 127, 0), Color.green, Color.blue, Color.cyan,
+            new Color(127, 0, 127), Color.magenta, new Color(127 + 32, 127, 61), };
 
-	public ColorPicker(JFrame owner) {
-		this.owner = owner;
+    public ColorPicker(JFrame owner) {
+        this.owner = owner;
 
-		paintChooser = new PaintChooser();
-		paintChooser.setPreferredSize(new Dimension(450, 400));
+        paintChooser = new PaintChooser();
+        paintChooser.setPreferredSize(new Dimension(450, 400));
 
-		FormPanel panel = new FormPanel("net/rptools/lib/swing/forms/colorPanel.xml");
+        FormPanel panel = new FormPanel("net/rptools/lib/swing/forms/colorPanel.xml");
 
-		ColorWellListener listener = new ColorWellListener(1);
+        ColorWellListener listener = new ColorWellListener(1);
 
-		foregroundColor = new PaintedPanel();
-		backgroundColor = new PaintedPanel();
+        foregroundColor = new PaintedPanel();
+        backgroundColor = new PaintedPanel();
 
-		JPanel wrappedForeground = new JPanel(new GridLayout());
-		wrappedForeground.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-		wrappedForeground.add(foregroundColor);
-		foregroundColor.addMouseListener(listener);
+        JPanel wrappedForeground = new JPanel(new GridLayout());
+        wrappedForeground.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+        wrappedForeground.add(foregroundColor);
+        foregroundColor.addMouseListener(listener);
 
-		JPanel wrappedBackground = new JPanel(new GridLayout());
-		wrappedBackground.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-		wrappedBackground.add(backgroundColor);
-		backgroundColor.addMouseListener(listener);
+        JPanel wrappedBackground = new JPanel(new GridLayout());
+        wrappedBackground.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+        wrappedBackground.add(backgroundColor);
+        backgroundColor.addMouseListener(listener);
 
-		FormAccessor accessor = panel.getFormAccessor("colorPanel");
+        FormAccessor accessor = panel.getFormAccessor("colorPanel");
 
-		accessor.replaceBean("foregroundColor", wrappedForeground);
-		accessor.replaceBean("backgroundColor", wrappedBackground);
+        accessor.replaceBean("foregroundColor", wrappedForeground);
+        accessor.replaceBean("backgroundColor", wrappedBackground);
 
-		listener = new ColorWellListener(2);
-		accessor = panel.getFormAccessor("recentColors");
-		for (int i = 0; i < RECENT_COLOR_LIST_SIZE; i++) {
-			PaintedPanel paintedPanel = new PaintedPanel();
-			paintedPanel.setPreferredSize(new Dimension(15, 15));
+        listener = new ColorWellListener(2);
+        accessor = panel.getFormAccessor("recentColors");
+        for (int i = 0; i < RECENT_COLOR_LIST_SIZE; i++) {
+            PaintedPanel paintedPanel = new PaintedPanel();
+            paintedPanel.setPreferredSize(new Dimension(15, 15));
 
-			JPanel wrappedPanel = new JPanel(new GridLayout());
-			wrappedPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-			wrappedPanel.add(paintedPanel);
+            JPanel wrappedPanel = new JPanel(new GridLayout());
+            wrappedPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+            wrappedPanel.add(paintedPanel);
 
-			accessor.replaceBean("recentColor" + i, wrappedPanel);
-			paintedPanel.addMouseListener(listener);
-			recentColors.add(paintedPanel);
-		}
-		snapToggle = (JToggleButton) panel.getButton("toggleSnapToGrid");
-		eraseToggle = (JToggleButton) panel.getButton("toggleErase");
+            accessor.replaceBean("recentColor" + i, wrappedPanel);
+            paintedPanel.addMouseListener(listener);
+            recentColors.add(paintedPanel);
+        }
+        snapToggle = (JToggleButton) panel.getButton("toggleSnapToGrid");
+        eraseToggle = (JToggleButton) panel.getButton("toggleErase");
 
-		penWidthSpinner = panel.getSpinner("penWidth");
-		penWidthSpinner.setModel(new SpinnerNumberModel(3, 1, maxPenWidth, 1));
-		penWidthSpinner.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				try {
-					penWidthSpinner.commitEdit();
-				} catch (ParseException pe) {
-					pe.printStackTrace();
-				}
-			}
-		});
+        penWidthSpinner = panel.getSpinner("penWidth");
+        penWidthSpinner.setModel(new SpinnerNumberModel(3, 1, maxPenWidth, 1));
+        penWidthSpinner.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                try {
+                    penWidthSpinner.commitEdit();
+                } catch (ParseException pe) {
+                    pe.printStackTrace();
+                }
+            }
+        });
 
-		transparencySpinner = panel.getSpinner("opacity");
-		transparencySpinner.setModel(new SpinnerNumberModel(100, 1, 100, 1));
-		transparencySpinner.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				try {
-					transparencySpinner.commitEdit();
-				} catch (ParseException pe) {
-					pe.printStackTrace();
-				}
-			}
-		});
-		initialize();
-		add(panel);
-	}
+        transparencySpinner = panel.getSpinner("opacity");
+        transparencySpinner.setModel(new SpinnerNumberModel(100, 1, 100, 1));
+        transparencySpinner.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                try {
+                    transparencySpinner.commitEdit();
+                } catch (ParseException pe) {
+                    pe.printStackTrace();
+                }
+            }
+        });
+        initialize();
+        add(panel);
+    }
 
-	public PaintChooser getPaintChooser() {
-		return paintChooser;
-	}
+    public PaintChooser getPaintChooser() {
+        return paintChooser;
+    }
 
-	public void initialize() {
-		foregroundColor.setPaint(Color.BLACK);
-		backgroundColor.setPaint(Color.WHITE);
+    public void initialize() {
+        foregroundColor.setPaint(Color.BLACK);
+        backgroundColor.setPaint(Color.WHITE);
 
-		for (int i = 0; i < DEFAULT_COLORS.length && i < RECENT_COLOR_LIST_SIZE; i++) {
-			recentColors.get(i).setPaint(DEFAULT_COLORS[i]);
-		}
-	}
+        for (int i = 0; i < DEFAULT_COLORS.length && i < RECENT_COLOR_LIST_SIZE; i++) {
+            recentColors.get(i).setPaint(DEFAULT_COLORS[i]);
+        }
+    }
 
-	public void setForegroundPaint(Paint paint) {
-		foregroundColor.setPaint(paint);
-	}
+    public void setForegroundPaint(Paint paint) {
+        foregroundColor.setPaint(paint);
+    }
 
-	public void setBackgroundPaint(Paint paint) {
-		backgroundColor.setPaint(paint);
-	}
+    public void setBackgroundPaint(Paint paint) {
+        backgroundColor.setPaint(paint);
+    }
 
-	public boolean isFillForegroundSelected() {
-		return foregroundColor.getPaint() != null;
-	}
+    public boolean isFillForegroundSelected() {
+        return foregroundColor.getPaint() != null;
+    }
 
-	public boolean isFillBackgroundSelected() {
-		return backgroundColor.getPaint() != null;
-	}
+    public boolean isFillBackgroundSelected() {
+        return backgroundColor.getPaint() != null;
+    }
 
-	public void setEraseSelected(boolean selected) {
-		eraseToggle.setSelected(selected);
-	}
+    public void setEraseSelected(boolean selected) {
+        eraseToggle.setSelected(selected);
+    }
 
-	public boolean isEraseSelected() {
-		return eraseToggle.isSelected();
-	}
+    public boolean isEraseSelected() {
+        return eraseToggle.isSelected();
+    }
 
-	public void setSnapSelected(boolean selected) {
-		snapToggle.setSelected(selected);
-	}
+    public void setSnapSelected(boolean selected) {
+        snapToggle.setSelected(selected);
+    }
 
-	public boolean isSnapSelected() {
-		return snapToggle.isSelected();
-	}
+    public boolean isSnapSelected() {
+        return snapToggle.isSelected();
+    }
 
-	public void setTranslucency(int percent) {
-		percent = Math.max(0, percent);
-		percent = Math.min(100, percent);
+    public void setTranslucency(int percent) {
+        percent = Math.max(0, percent);
+        percent = Math.min(100, percent);
 
-		transparencySpinner.setValue(percent);
-	}
+        transparencySpinner.setValue(percent);
+    }
 
-	public void setPenWidth(int width) {
-		width = Math.max(0, width);
-		width = Math.min(maxPenWidth, width);
+    public void setPenWidth(int width) {
+        width = Math.max(0, width);
+        width = Math.min(maxPenWidth, width);
 
-		penWidthSpinner.setValue(width);
-	}
+        penWidthSpinner.setValue(width);
+    }
 
-	public Paint getForegroundPaint() {
-		return foregroundColor.getPaint();
-	}
+    public Paint getForegroundPaint() {
+        return foregroundColor.getPaint();
+    }
 
-	public Paint getBackgroundPaint() {
-		return backgroundColor.getPaint();
-	}
+    public Paint getBackgroundPaint() {
+        return backgroundColor.getPaint();
+    }
 
-	public int getStrokeWidth() {
-		return (Integer) penWidthSpinner.getValue();
-	}
+    public int getStrokeWidth() {
+        return (Integer) penWidthSpinner.getValue();
+    }
 
-	public float getOpacity() {
-		return ((Integer) transparencySpinner.getValue()) / 100.0f;
-	}
+    public float getOpacity() {
+        return ((Integer) transparencySpinner.getValue()) / 100.0f;
+    }
 
-	public class ColorWellListener extends MouseAdapter {
-		private final int clickCount;
+    public class ColorWellListener extends MouseAdapter {
+        private final int clickCount;
 
-		/**
-		 * Pass a 1 or 2 to determine whether this listener is looking for single or double click mouse events.
-		 * 
-		 * @param clickCount
-		 *            number of clicks to listen for
-		 */
-		public ColorWellListener(int clickCount) {
-			this.clickCount = clickCount;
-		}
+        /**
+         * Pass a 1 or 2 to determine whether this listener is looking for single or double click mouse events.
+         * 
+         * @param clickCount
+         *            number of clicks to listen for
+         */
+        public ColorWellListener(int clickCount) {
+            this.clickCount = clickCount;
+        }
 
-		@Override
-		public void mouseClicked(MouseEvent evt) {
-			PaintedPanel comp = (PaintedPanel) evt.getSource();
+        @Override
+        public void mouseClicked(MouseEvent evt) {
+            PaintedPanel comp = (PaintedPanel) evt.getSource();
 
-			if (evt.getClickCount() == clickCount) {
-				Paint result = paintChooser.choosePaint(owner, comp.getPaint());
-				comp.setPaint(result);
-				return;
-			}
-			switch (evt.getButton()) {
-			case MouseEvent.BUTTON1:
-				foregroundColor.setPaint(comp.getPaint());
-				break;
-			case MouseEvent.BUTTON3:
-				backgroundColor.setPaint(comp.getPaint());
-				break;
-			}
-		}
-	}
+            if (evt.getClickCount() == clickCount) {
+                Paint result = paintChooser.choosePaint(owner, comp.getPaint());
+                comp.setPaint(result);
+                return;
+            }
+            switch (evt.getButton()) {
+            case MouseEvent.BUTTON1:
+                foregroundColor.setPaint(comp.getPaint());
+                break;
+            case MouseEvent.BUTTON3:
+                backgroundColor.setPaint(comp.getPaint());
+                break;
+            }
+        }
+    }
 }

@@ -28,96 +28,96 @@ import net.rptools.maptool.model.drawing.ShapeDrawable;
 
 public class DiamondTool extends AbstractDrawingTool implements MouseMotionListener {
 
-	private static final long serialVersionUID = 8239333601131612106L;
-	protected Shape diamond;
-	protected ZonePoint originPoint;
+    private static final long serialVersionUID = 8239333601131612106L;
+    protected Shape diamond;
+    protected ZonePoint originPoint;
 
-	public DiamondTool() {
-		try {
-			setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/draw-blue-diamond.png"))));
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
+    public DiamondTool() {
+        try {
+            setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/draw-blue-diamond.png"))));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
 
-	@Override
-	public String getInstructions() {
-		return "tool.rect.instructions";
-	}
+    @Override
+    public String getInstructions() {
+        return "tool.rect.instructions";
+    }
 
-	@Override
-	public String getTooltip() {
-		return "tool.diamond.tooltip";
-	}
+    @Override
+    public String getTooltip() {
+        return "tool.diamond.tooltip";
+    }
 
-	@Override
-	public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
-		if (diamond != null) {
-			Pen pen = getPen();
-			if (pen.isEraser()) {
-				pen = new Pen(pen);
-				pen.setEraser(false);
-				pen.setPaint(new DrawableColorPaint(Color.white));
-				pen.setBackgroundPaint(new DrawableColorPaint(Color.white));
-			}
-			paintTransformed(g, renderer, new ShapeDrawable(diamond, false), pen);
-			ToolHelper.drawDiamondMeasurement(renderer, g, diamond);
-		}
-	}
+    @Override
+    public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
+        if (diamond != null) {
+            Pen pen = getPen();
+            if (pen.isEraser()) {
+                pen = new Pen(pen);
+                pen.setEraser(false);
+                pen.setPaint(new DrawableColorPaint(Color.white));
+                pen.setBackgroundPaint(new DrawableColorPaint(Color.white));
+            }
+            paintTransformed(g, renderer, new ShapeDrawable(diamond, false), pen);
+            ToolHelper.drawDiamondMeasurement(renderer, g, diamond);
+        }
+    }
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-		ZonePoint zp = getPoint(e);
-		if (SwingUtilities.isLeftMouseButton(e)) {
-			if (diamond == null) {
-				originPoint = zp;
-				diamond = createDiamond(originPoint, originPoint);
-			} else {
-				diamond = createDiamond(originPoint, zp);
+    @Override
+    public void mousePressed(MouseEvent e) {
+        ZonePoint zp = getPoint(e);
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            if (diamond == null) {
+                originPoint = zp;
+                diamond = createDiamond(originPoint, originPoint);
+            } else {
+                diamond = createDiamond(originPoint, zp);
 
-				if (diamond.getBounds().width == 0 || diamond.getBounds().height == 0) {
-					diamond = null;
-					renderer.repaint();
-					return;
-				}
-				// ToolHelper.drawDiamondMeasurement(renderer, null, diamond);
-				completeDrawable(renderer.getZone().getId(), getPen(), new ShapeDrawable(diamond, false));
-				diamond = null;
-			}
-			setIsEraser(isEraser(e));
-		}
-		super.mousePressed(e);
-	}
+                if (diamond.getBounds().width == 0 || diamond.getBounds().height == 0) {
+                    diamond = null;
+                    renderer.repaint();
+                    return;
+                }
+                // ToolHelper.drawDiamondMeasurement(renderer, null, diamond);
+                completeDrawable(renderer.getZone().getId(), getPen(), new ShapeDrawable(diamond, false));
+                diamond = null;
+            }
+            setIsEraser(isEraser(e));
+        }
+        super.mousePressed(e);
+    }
 
-	@Override
-	public void mouseDragged(MouseEvent e) {
-		if (diamond == null) {
-			super.mouseDragged(e);
-		}
-	}
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        if (diamond == null) {
+            super.mouseDragged(e);
+        }
+    }
 
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		super.mouseMoved(e);
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        super.mouseMoved(e);
 
-		if (diamond != null) {
-			ZonePoint p = getPoint(e);
-			diamond = createDiamond(originPoint, p);
-			renderer.repaint();
-		}
-	}
+        if (diamond != null) {
+            ZonePoint p = getPoint(e);
+            diamond = createDiamond(originPoint, p);
+            renderer.repaint();
+        }
+    }
 
-	/**
-	 * Stop drawing a rectangle and repaint the zone.
-	 */
-	@Override
-	public void resetTool() {
-		if (diamond != null) {
-			diamond = null;
-			originPoint = null;
-			renderer.repaint();
-		} else {
-			super.resetTool();
-		}
-	}
+    /**
+     * Stop drawing a rectangle and repaint the zone.
+     */
+    @Override
+    public void resetTool() {
+        if (diamond != null) {
+            diamond = null;
+            originPoint = null;
+            renderer.repaint();
+        } else {
+            super.resetTool();
+        }
+    }
 }

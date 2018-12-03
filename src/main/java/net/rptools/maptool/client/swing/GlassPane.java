@@ -23,72 +23,72 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 public class GlassPane extends JPanel {
-	private BufferedImage backImage;
+    private BufferedImage backImage;
 
-	private boolean modal;
+    private boolean modal;
 
-	public GlassPane() {
-		super(null); // No layout manager
+    public GlassPane() {
+        super(null); // No layout manager
 
-	}
+    }
 
-	public void setModel(boolean modal) {
-		this.modal = modal;
-	}
+    public void setModel(boolean modal) {
+        this.modal = modal;
+    }
 
-	@Override
-	public void setVisible(boolean aFlag) {
+    @Override
+    public void setVisible(boolean aFlag) {
 
-		if (modal) {
-			JComponent root = getRootPane();
-			Dimension size = root.getSize();
-			if (backImage == null || backImage.getWidth() != size.width
-					|| backImage.getHeight() != size.height) {
-				backImage = new BufferedImage(size.width, size.height,
-						Transparency.OPAQUE);
-			}
+        if (modal) {
+            JComponent root = getRootPane();
+            Dimension size = root.getSize();
+            if (backImage == null || backImage.getWidth() != size.width
+                    || backImage.getHeight() != size.height) {
+                backImage = new BufferedImage(size.width, size.height,
+                        Transparency.OPAQUE);
+            }
 
-			// Get a copy of the current application state
-			Graphics2D g = backImage.createGraphics();
-			g.setClip(0, 0, size.width, size.height);
-			root.paint(g);
+            // Get a copy of the current application state
+            Graphics2D g = backImage.createGraphics();
+            g.setClip(0, 0, size.width, size.height);
+            root.paint(g);
 
-			// Shade it
-			g.setColor(new Color(1, 1, 1, .5f));
-			g.fillRect(0, 0, size.width, size.height);
+            // Shade it
+            g.setColor(new Color(1, 1, 1, .5f));
+            g.fillRect(0, 0, size.width, size.height);
 
-			g.dispose();
+            g.dispose();
 
-			// Consume all actions
-			addMouseMotionListener(new MouseMotionAdapter() {});
-			addMouseListener(new MouseAdapter() {});
-		} else {
-			for (MouseMotionListener listener : getMouseMotionListeners()) {
-				removeMouseMotionListener(listener);
-			}
-			for (MouseListener listener : getMouseListeners()) {
-				removeMouseListener(listener);
-			}
-		}
+            // Consume all actions
+            addMouseMotionListener(new MouseMotionAdapter() {});
+            addMouseListener(new MouseAdapter() {});
+        } else {
+            for (MouseMotionListener listener : getMouseMotionListeners()) {
+                removeMouseMotionListener(listener);
+            }
+            for (MouseListener listener : getMouseListeners()) {
+                removeMouseListener(listener);
+            }
+        }
 
-		setOpaque(modal);
+        setOpaque(modal);
 
-		super.setVisible(aFlag);
+        super.setVisible(aFlag);
 
-		if (getComponents().length > 0) {
-			getComponents()[0].requestFocus();
-		}
-	}
+        if (getComponents().length > 0) {
+            getComponents()[0].requestFocus();
+        }
+    }
 
-	@Override
-	protected void paintComponent(Graphics g) {
+    @Override
+    protected void paintComponent(Graphics g) {
 
-		if (!modal) {
-			return;
-		}
+        if (!modal) {
+            return;
+        }
 
-		// Show the application contents behind the pane
-		g.drawImage(backImage, 0, 0, this);
-	}
+        // Show the application contents behind the pane
+        g.drawImage(backImage, 0, 0, this);
+    }
 
 }

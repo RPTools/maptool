@@ -12,23 +12,23 @@ package net.rptools.maptool.model.drawing;
  */
 public class DrawnElement {
 
-	private Drawable drawable;
-	private Pen pen;
+    private Drawable drawable;
+    private Pen pen;
 
-	public DrawnElement(Drawable drawable, Pen pen) {
-		this.drawable = drawable;
-		this.pen = pen;
-	}
+    public DrawnElement(Drawable drawable, Pen pen) {
+        this.drawable = drawable;
+        this.pen = pen;
+    }
 
-	public Drawable getDrawable() {
-		return drawable;
-	}
+    public Drawable getDrawable() {
+        return drawable;
+    }
 
-	public Pen getPen() {
-		return pen;
-	}
+    public Pen getPen() {
+        return pen;
+    }
 
-	public void setPen(Pen pen) {
-		this.pen = pen;
-	}
+    public void setPen(Pen pen) {
+        this.pen = pen;
+    }
 }

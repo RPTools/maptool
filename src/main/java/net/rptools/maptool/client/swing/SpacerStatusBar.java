@@ -16,17 +16,17 @@ import javax.swing.JLabel;
  */
 public class SpacerStatusBar extends JLabel {
 
-	private Dimension minSize = new Dimension(0, 10);
+    private Dimension minSize = new Dimension(0, 10);
 
-	public SpacerStatusBar(int size) {
-		minSize = new Dimension(size, 10);
-	}
+    public SpacerStatusBar(int size) {
+        minSize = new Dimension(size, 10);
+    }
 
-	public Dimension getMinimumSize() {
-		return minSize;
-	}
+    public Dimension getMinimumSize() {
+        return minSize;
+    }
 
-	public Dimension getPreferredSize() {
-		return getMinimumSize();
-	}
+    public Dimension getPreferredSize() {
+        return getMinimumSize();
+    }
 }

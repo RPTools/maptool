@@ -16,17 +16,17 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
-		name = "rollgm",
-		aliases = { "rgm" },
-		description = "rollgm.description")
+        name = "rollgm",
+        aliases = { "rgm" },
+        description = "rollgm.description")
 public class RollGMMacro extends AbstractRollMacro {
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		String result = roll(macro);
-		if (result != null) {
-			MapTool.addMessage(new TextMessage(TextMessage.Channel.GM, null, MapTool.getPlayer().getName(), "* " +
-					I18N.getText("rollgm.gm.string", MapTool.getPlayer().getName(), result), context.getTransformationHistory()));
-			MapTool.addMessage(new TextMessage(TextMessage.Channel.ME, null, MapTool.getPlayer().getName(), "* " +
-					I18N.getText("rollgm.self.string", result), context.getTransformationHistory()));
-		}
-	}
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        String result = roll(macro);
+        if (result != null) {
+            MapTool.addMessage(new TextMessage(TextMessage.Channel.GM, null, MapTool.getPlayer().getName(), "* " +
+                    I18N.getText("rollgm.gm.string", MapTool.getPlayer().getName(), result), context.getTransformationHistory()));
+            MapTool.addMessage(new TextMessage(TextMessage.Channel.ME, null, MapTool.getPlayer().getName(), "* " +
+                    I18N.getText("rollgm.self.string", result), context.getTransformationHistory()));
+        }
+    }
 }

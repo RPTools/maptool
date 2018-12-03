@@ -26,38 +26,38 @@ import net.rptools.maptool.model.drawing.ShapeDrawable;
  * Tool for drawing freehand lines.
  */
 public class PolygonTool extends LineTool implements MouseMotionListener {
-	private static final long serialVersionUID = 3258132466219627316L;
+    private static final long serialVersionUID = 3258132466219627316L;
 
-	public PolygonTool() {
-		try {
-			setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/draw-blue-strtlines.png"))));
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
+    public PolygonTool() {
+        try {
+            setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/draw-blue-strtlines.png"))));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
 
-	@Override
-	public String getTooltip() {
-		return "tool.poly.tooltip";
-	}
+    @Override
+    public String getTooltip() {
+        return "tool.poly.tooltip";
+    }
 
-	@Override
-	public String getInstructions() {
-		return "tool.poly.instructions";
-	}
+    @Override
+    public String getInstructions() {
+        return "tool.poly.instructions";
+    }
 
-	@Override
-	protected void completeDrawable(GUID zoneGUID, Pen pen, Drawable drawable) {
-		LineSegment line = (LineSegment) drawable;
-		super.completeDrawable(zoneGUID, pen, new ShapeDrawable(getPolygon(line)));
-	}
+    @Override
+    protected void completeDrawable(GUID zoneGUID, Pen pen, Drawable drawable) {
+        LineSegment line = (LineSegment) drawable;
+        super.completeDrawable(zoneGUID, pen, new ShapeDrawable(getPolygon(line)));
+    }
 
-	@Override
-	protected Polygon getPolygon(LineSegment line) {
-		Polygon polygon = new Polygon();
-		for (Point point : line.getPoints()) {
-			polygon.addPoint(point.x, point.y);
-		}
-		return polygon;
-	}
+    @Override
+    protected Polygon getPolygon(LineSegment line) {
+        Polygon polygon = new Polygon();
+        for (Point point : line.getPoints()) {
+            polygon.addPoint(point.x, point.y);
+        }
+        return polygon;
+    }
 }

@@ -41,104 +41,104 @@ import net.rptools.maptool_fx.MapTool;
  */
 @SuppressWarnings("serial")
 public class CampaignExportDialog extends JDialog {
-	private static final Logger log = LogManager.getLogger(CampaignExportDialog.class);
+    private static final Logger log = LogManager.getLogger(CampaignExportDialog.class);
 
-	private static FormPanel mainPanel;
-	private static JEditorPane versionNotesText;
-	private static JComboBox selectVersionCombo;
-	private static File campaignFile;
-	private static int saveStatus = -1;
+    private static FormPanel mainPanel;
+    private static JEditorPane versionNotesText;
+    private static JComboBox selectVersionCombo;
+    private static File campaignFile;
+    private static int saveStatus = -1;
 
-	/**
-	 * Only doing this because I don't expect more than one instance of this modal dialog
-	 */
-	private static int instanceCount = 0;
+    /**
+     * Only doing this because I don't expect more than one instance of this modal dialog
+     */
+    private static int instanceCount = 0;
 
-	public CampaignExportDialog() throws Exception {
-		super(MapTool.getFrame(), "Export Campaign", true);
-		if (instanceCount == 0) {
-			instanceCount++;
-		} else {
-			throw new Exception("Only one instance of ExportCampaignDialog allowed!");
-		}
+    public CampaignExportDialog() throws Exception {
+        super(MapTool.getFrame(), "Export Campaign", true);
+        if (instanceCount == 0) {
+            instanceCount++;
+        } else {
+            throw new Exception("Only one instance of ExportCampaignDialog allowed!");
+        }
 
-		setDefaultCloseOperation(HIDE_ON_CLOSE);
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
 
-		//
-		// Initialize the panel and button actions
-		//
-		mainPanel = new FormPanel("net/rptools/maptool/client/ui/forms/campaignExportDialog.xml");
-		setLayout(new GridLayout());
-		add(mainPanel);
-		getRootPane().setDefaultButton((JButton) mainPanel.getButton("exportButton"));
-		pack();
+        //
+        // Initialize the panel and button actions
+        //
+        mainPanel = new FormPanel("net/rptools/maptool/client/ui/forms/campaignExportDialog.xml");
+        setLayout(new GridLayout());
+        add(mainPanel);
+        getRootPane().setDefaultButton((JButton) mainPanel.getButton("exportButton"));
+        pack();
 
-		mainPanel.getButton("exportButton").addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				exportButtonAction();
-			}
-		});
-		mainPanel.getButton("cancelButton").addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				saveStatus = -1;
-				dispose();
-			}
-		});
+        mainPanel.getButton("exportButton").addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                exportButtonAction();
+            }
+        });
+        mainPanel.getButton("cancelButton").addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                saveStatus = -1;
+                dispose();
+            }
+        });
 
-		versionNotesText = (JEditorPane) mainPanel.getComponentByName("versionNotesText");
-		versionNotesText.setEditable(false);
+        versionNotesText = (JEditorPane) mainPanel.getComponentByName("versionNotesText");
+        versionNotesText.setEditable(false);
 
-		selectVersionCombo = mainPanel.getComboBox("selectVersionCombo");
-		initSelectVersionCombo();
-	}
+        selectVersionCombo = mainPanel.getComboBox("selectVersionCombo");
+        initSelectVersionCombo();
+    }
 
-	@Override
-	public void setVisible(boolean b) {
-		SwingUtil.centerOver(this, MapTool.getFrame());
-		super.setVisible(b);
-	}
+    @Override
+    public void setVisible(boolean b) {
+        SwingUtil.centerOver(this, MapTool.getFrame());
+        super.setVisible(b);
+    }
 
-	private void initSelectVersionCombo() {
-		DefaultComboBoxModel defaultCombo = new DefaultComboBoxModel();
-		selectVersionCombo.setModel(defaultCombo);
+    private void initSelectVersionCombo() {
+        DefaultComboBoxModel defaultCombo = new DefaultComboBoxModel();
+        selectVersionCombo.setModel(defaultCombo);
 
-		for (String version : CampaignExport.getVersionArray()) {
-			defaultCombo.addElement(version);
-		}
+        for (String version : CampaignExport.getVersionArray()) {
+            defaultCombo.addElement(version);
+        }
 
-		versionNotesText.setText(I18N.getString("dialog.campaignExport.notes.version." + getVersionText()));
+        versionNotesText.setText(I18N.getString("dialog.campaignExport.notes.version." + getVersionText()));
 
-		selectVersionCombo.addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent event) {
-				if (event.getStateChange() == ItemEvent.SELECTED) {
-					versionNotesText.setText(I18N.getString("dialog.campaignExport.notes.version." + getVersionText()));
-				}
-			}
-		});
-	}
+        selectVersionCombo.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent event) {
+                if (event.getStateChange() == ItemEvent.SELECTED) {
+                    versionNotesText.setText(I18N.getString("dialog.campaignExport.notes.version." + getVersionText()));
+                }
+            }
+        });
+    }
 
-	public String getVersionText() {
-		return selectVersionCombo.getSelectedItem().toString();
-	}
+    public String getVersionText() {
+        return selectVersionCombo.getSelectedItem().toString();
+    }
 
-	public int getSaveStatus() {
-		return saveStatus;
-	}
+    public int getSaveStatus() {
+        return saveStatus;
+    }
 
-	public File getCampaignFile() {
-		return campaignFile;
-	}
+    public File getCampaignFile() {
+        return campaignFile;
+    }
 
-	private void exportButtonAction() {
-		try {
-			JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
-			saveStatus = chooser.showSaveDialog(MapTool.getFrame());
-			campaignFile = chooser.getSelectedFile();
-		} catch (Exception ex) {
-			MapTool.showError(I18N.getString("dialog.campaignexport.error.failedExporting"), ex);
-		} finally {
-			setVisible(false);
-		}
-	}
+    private void exportButtonAction() {
+        try {
+            JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
+            saveStatus = chooser.showSaveDialog(MapTool.getFrame());
+            campaignFile = chooser.getSelectedFile();
+        } catch (Exception ex) {
+            MapTool.showError(I18N.getString("dialog.campaignexport.error.failedExporting"), ex);
+        } finally {
+            setVisible(false);
+        }
+    }
 }

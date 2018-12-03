@@ -15,23 +15,23 @@ import java.util.Locale;
 
 public class WindowLocaleChangeListener implements LocaleChangeListener {
 
-	private Window window;
-	private String key;
+    private Window window;
+    private String key;
 
-	public WindowLocaleChangeListener(Window window, String key) {
-		this.window = window;
-		this.key = key;
-	}
+    public WindowLocaleChangeListener(Window window, String key) {
+        this.window = window;
+        this.key = key;
+    }
 
-	////
-	// LOCALE CHANGE LISTENER
-	public void localeChanged(Locale locale) {
+    ////
+    // LOCALE CHANGE LISTENER
+    public void localeChanged(Locale locale) {
 
-		if (window instanceof Dialog) {
-			((Dialog) window).setTitle(I18NManager.getText(key));
-		}
-		if (window instanceof Frame) {
-			((Frame) window).setTitle(I18NManager.getText(key));
-		}
-	}
+        if (window instanceof Dialog) {
+            ((Dialog) window).setTitle(I18NManager.getText(key));
+        }
+        if (window instanceof Frame) {
+            ((Frame) window).setTitle(I18NManager.getText(key));
+        }
+    }
 }

@@ -15,47 +15,47 @@ import java.util.Set;
 
 public class AreaIsland implements AreaContainer {
 
-	private AreaMeta meta;
-	private Set<AreaOcean> oceanSet = new HashSet<AreaOcean>();
+    private AreaMeta meta;
+    private Set<AreaOcean> oceanSet = new HashSet<AreaOcean>();
 
-	public AreaIsland(AreaMeta meta) {
-		this.meta = meta;
-	}
+    public AreaIsland(AreaMeta meta) {
+        this.meta = meta;
+    }
 
-	public Set<VisibleAreaSegment> getVisibleAreaSegments(Point2D origin) {
+    public Set<VisibleAreaSegment> getVisibleAreaSegments(Point2D origin) {
 
-		return meta.getVisibleAreas(origin);
-	}
+        return meta.getVisibleAreas(origin);
+    }
 
-	public AreaOcean getDeepestOceanAt(Point2D point) {
+    public AreaOcean getDeepestOceanAt(Point2D point) {
 
-		if (!meta.area.contains(point)) {
-			return null;
-		}
+        if (!meta.area.contains(point)) {
+            return null;
+        }
 
-		for (AreaOcean ocean : oceanSet) {
-			AreaOcean deepOcean = ocean.getDeepestOceanAt(point);
-			if (deepOcean != null) {
-				return deepOcean;
-			}
-		}
+        for (AreaOcean ocean : oceanSet) {
+            AreaOcean deepOcean = ocean.getDeepestOceanAt(point);
+            if (deepOcean != null) {
+                return deepOcean;
+            }
+        }
 
-		// If we don't have an ocean that contains the point then
-		// the point is not technically in an ocean
-		return null;
-	}
+        // If we don't have an ocean that contains the point then
+        // the point is not technically in an ocean
+        return null;
+    }
 
-	public Set<AreaOcean> getOceans() {
-		return new HashSet<AreaOcean>(oceanSet);
-	}
+    public Set<AreaOcean> getOceans() {
+        return new HashSet<AreaOcean>(oceanSet);
+    }
 
-	public void addOcean(AreaOcean ocean) {
-		oceanSet.add(ocean);
-	}
+    public void addOcean(AreaOcean ocean) {
+        oceanSet.add(ocean);
+    }
 
-	////
-	// AREA CONTAINER
-	public Area getBounds() {
-		return meta.area;
-	}
+    ////
+    // AREA CONTAINER
+    public Area getBounds() {
+        return meta.area;
+    }
 }

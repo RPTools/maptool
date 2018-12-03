@@ -12,5 +12,5 @@ import java.util.List;
 
 public interface SelectionListener {
 
-	public void selectionPerformed(List<Object> selectedList);
+    public void selectionPerformed(List<Object> selectedList);
 }

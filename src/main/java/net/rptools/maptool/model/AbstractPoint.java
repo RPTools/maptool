@@ -10,41 +10,41 @@ package net.rptools.maptool.model;
 
 public abstract class AbstractPoint implements Cloneable {
 
-	public int x;
-	public int y;
+    public int x;
+    public int y;
 
-	public AbstractPoint(int x, int y) {
-		this.x = x;
-		this.y = y;
-	}
+    public AbstractPoint(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
 
-	public void translate(int dx, int dy) {
-		x += dx;
-		y += dy;
-	}
+    public void translate(int dx, int dy) {
+        x += dx;
+        y += dy;
+    }
 
-	public boolean equals(Object o) {
-		if (!(o instanceof AbstractPoint))
-			return false;
-		AbstractPoint p = (AbstractPoint) o;
+    public boolean equals(Object o) {
+        if (!(o instanceof AbstractPoint))
+            return false;
+        AbstractPoint p = (AbstractPoint) o;
 
-		return p.x == x && p.y == y;
-	}
+        return p.x == x && p.y == y;
+    }
 
-	public int hashCode() {
-		return new String(x + "-" + y).hashCode();
-	}
+    public int hashCode() {
+        return new String(x + "-" + y).hashCode();
+    }
 
-	public String toString() {
-		return "[" + x + "," + y + "]";
-	}
+    public String toString() {
+        return "[" + x + "," + y + "]";
+    }
 
-	public AbstractPoint clone() {
-		try {
-			return (AbstractPoint) super.clone();
-		} catch (CloneNotSupportedException e) {
-			// this shouldn't happen, since we are Cloneable
-			throw new InternalError();
-		}
-	}
+    public AbstractPoint clone() {
+        try {
+            return (AbstractPoint) super.clone();
+        } catch (CloneNotSupportedException e) {
+            // this shouldn't happen, since we are Cloneable
+            throw new InternalError();
+        }
+    }
 }

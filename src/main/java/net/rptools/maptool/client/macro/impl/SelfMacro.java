@@ -15,14 +15,14 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
-		name = "self",
-		aliases = { "self" },
-		description = "self.description")
+        name = "self",
+        aliases = { "self" },
+        description = "self.description")
 public class SelfMacro extends AbstractMacro {
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		macro = processText(macro);
-		StringBuilder sb = new StringBuilder();
-		sb.append("<i>").append(macro).append("</i>");
-		MapTool.addMessage(TextMessage.me(context.getTransformationHistory(), sb.toString()));
-	}
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        macro = processText(macro);
+        StringBuilder sb = new StringBuilder();
+        sb.append("<i>").append(macro).append("</i>");
+        MapTool.addMessage(TextMessage.me(context.getTransformationHistory(), sb.toString()));
+    }
 }

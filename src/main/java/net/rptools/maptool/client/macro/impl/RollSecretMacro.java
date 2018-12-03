@@ -16,22 +16,22 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
-		name = "rollsecret",
-		aliases = { "rsec" },
-		description = "rollsecret.description")
+        name = "rollsecret",
+        aliases = { "rsec" },
+        description = "rollsecret.description")
 public class RollSecretMacro extends AbstractRollMacro {
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		String result = roll(macro);
-		if (result != null) {
-			if (!MapTool.getPlayer().isGM()) {
-				MapTool.addMessage(new TextMessage(TextMessage.Channel.GM, null, MapTool.getPlayer().getName(), "* " +
-						I18N.getText("rollsecret.gm.string", MapTool.getPlayer().getName(), result), context.getTransformationHistory()));
-				MapTool.addMessage(new TextMessage(TextMessage.Channel.ME, null, MapTool.getPlayer().getName(),
-						I18N.getText("rollsecret.self.string"), context.getTransformationHistory()));
-			} else {
-				MapTool.addMessage(new TextMessage(TextMessage.Channel.GM, null, MapTool.getPlayer().getName(), "* " +
-						I18N.getText("rollsecret.gmself.string", result), context.getTransformationHistory()));
-			}
-		}
-	}
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        String result = roll(macro);
+        if (result != null) {
+            if (!MapTool.getPlayer().isGM()) {
+                MapTool.addMessage(new TextMessage(TextMessage.Channel.GM, null, MapTool.getPlayer().getName(), "* " +
+                        I18N.getText("rollsecret.gm.string", MapTool.getPlayer().getName(), result), context.getTransformationHistory()));
+                MapTool.addMessage(new TextMessage(TextMessage.Channel.ME, null, MapTool.getPlayer().getName(),
+                        I18N.getText("rollsecret.self.string"), context.getTransformationHistory()));
+            } else {
+                MapTool.addMessage(new TextMessage(TextMessage.Channel.GM, null, MapTool.getPlayer().getName(), "* " +
+                        I18N.getText("rollsecret.gmself.string", result), context.getTransformationHistory()));
+            }
+        }
+    }
 }

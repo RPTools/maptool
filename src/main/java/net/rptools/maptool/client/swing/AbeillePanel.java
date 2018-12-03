@@ -54,181 +54,181 @@ import com.jeta.forms.components.panel.FormPanel;
  */
 @SuppressWarnings("serial")
 public class AbeillePanel<T> extends JPanel {
-	private static final Logger log = LogManager.getLogger(AbeillePanel.class);
-	private final FormPanel panel;
-	private T model;
+    private static final Logger log = LogManager.getLogger(AbeillePanel.class);
+    private final FormPanel panel;
+    private T model;
 
-	static {
-		Binder.setDefaultAdapter(JRadioButton.class, RadioButtonAdapter.class);
-		Binder.setBindingResolver(new BindingResolver() {
-			public BindingInfo getBindingInfo(Component view) {
-				String name = view.getName();
-				if (name == null || !name.startsWith("@")) {
-					return null;
-				}
+    static {
+        Binder.setDefaultAdapter(JRadioButton.class, RadioButtonAdapter.class);
+        Binder.setBindingResolver(new BindingResolver() {
+            public BindingInfo getBindingInfo(Component view) {
+                String name = view.getName();
+                if (name == null || !name.startsWith("@")) {
+                    return null;
+                }
 
-				// System.out.println("Name:" + name);
-				name = name.substring(1).trim(); // cut the "@"
-				int point = name.indexOf(".");
-				if (point >= 0)
-					name = name.substring(0, point).trim();
-				return new BindingInfo(name);
-			}
+                // System.out.println("Name:" + name);
+                name = name.substring(1).trim(); // cut the "@"
+                int point = name.indexOf(".");
+                if (point >= 0)
+                    name = name.substring(0, point).trim();
+                return new BindingInfo(name);
+            }
 
-			public void storeBindingInfo(Component view, BindingInfo info) {
-			}
-		});
-	}
+            public void storeBindingInfo(Component view, BindingInfo info) {
+            }
+        });
+    }
 
-	public AbeillePanel(String panelForm) {
-		setLayout(new GridLayout());
-		panel = new FormPanel(panelForm);
-		add(panel);
-	}
+    public AbeillePanel(String panelForm) {
+        setLayout(new GridLayout());
+        panel = new FormPanel(panelForm);
+        add(panel);
+    }
 
-	public T getModel() {
-		return model;
-	}
+    public T getModel() {
+        return model;
+    }
 
-	/**
-	 * Call any method on the class that matches "init*" that has zero arguments
-	 */
-	protected void panelInit() {
-		for (Method method : getClass().getMethods()) {
-			if (method.getName().startsWith("init")) {
-				try {
-					method.invoke(this, new Object[] {});
-				} catch (IllegalArgumentException e) {
-					log.error("Could not init method: " + method.getName(), e);
-				} catch (IllegalAccessException e) {
-					log.error("Could not init method: " + method.getName(), e);
-				} catch (InvocationTargetException e) {
-					log.error("Could not init method: " + method.getName(), e);
-				}
-			}
-		}
-	}
+    /**
+     * Call any method on the class that matches "init*" that has zero arguments
+     */
+    protected void panelInit() {
+        for (Method method : getClass().getMethods()) {
+            if (method.getName().startsWith("init")) {
+                try {
+                    method.invoke(this, new Object[] {});
+                } catch (IllegalArgumentException e) {
+                    log.error("Could not init method: " + method.getName(), e);
+                } catch (IllegalAccessException e) {
+                    log.error("Could not init method: " + method.getName(), e);
+                } catch (InvocationTargetException e) {
+                    log.error("Could not init method: " + method.getName(), e);
+                }
+            }
+        }
+    }
 
-	protected void replaceComponent(String panelName, String name, Component component) {
-		panel.getFormAccessor(panelName).replaceBean(name, component);
-		panel.reset();
-	}
+    protected void replaceComponent(String panelName, String name, Component component) {
+        panel.getFormAccessor(panelName).replaceBean(name, component);
+        panel.reset();
+    }
 
-	protected Component getComponent(String name) {
-		return panel.getComponentByName(name);
-	}
+    protected Component getComponent(String name) {
+        return panel.getComponentByName(name);
+    }
 
-	/**
-	 * Creates the link between the model and the view by calling {@link Binder#bindContainer(Class, java.awt.Container, UpdateTime)} and passing it the class of the model, the view component, and
-	 * when to make the updates.
-	 * <p>
-	 * This code assumes that the updates will never occur automatically.
-	 * </p>
-	 * <p>
-	 * Also, this code calls the protected method {@link #preModelBind()} to allow subclasses to modify the binding characteristics before copying the model fields to the view.
-	 * </p>
-	 * 
-	 * @param model
-	 */
-	public void bind(T model) {
-		if (this.model != null) {
-			// Jamz: Don't like this; the bind/unbind on open/close tracking. Binding can get locked on an exception rendering the dialog in a broken state.
-			unbind();
-			throw new IllegalStateException("Already bound exception");
-		}
-		this.model = model;
-		Binder.bindContainer(model.getClass(), panel, UpdateTime.NEVER);
-		preModelBind();
-		Binder.modelToView(model, panel);
-	}
+    /**
+     * Creates the link between the model and the view by calling {@link Binder#bindContainer(Class, java.awt.Container, UpdateTime)} and passing it the class of the model, the view component, and
+     * when to make the updates.
+     * <p>
+     * This code assumes that the updates will never occur automatically.
+     * </p>
+     * <p>
+     * Also, this code calls the protected method {@link #preModelBind()} to allow subclasses to modify the binding characteristics before copying the model fields to the view.
+     * </p>
+     * 
+     * @param model
+     */
+    public void bind(T model) {
+        if (this.model != null) {
+            // Jamz: Don't like this; the bind/unbind on open/close tracking. Binding can get locked on an exception rendering the dialog in a broken state.
+            unbind();
+            throw new IllegalStateException("Already bound exception");
+        }
+        this.model = model;
+        Binder.bindContainer(model.getClass(), panel, UpdateTime.NEVER);
+        preModelBind();
+        Binder.modelToView(model, panel);
+    }
 
-	protected void preModelBind() {
-		// Do nothing
-	}
+    protected void preModelBind() {
+        // Do nothing
+    }
 
-	/**
-	 * This method is invoked by the application code whenever it wants to copy data from the view to the model.
-	 * 
-	 * @return <code>true</code> if successful, <code>false</code> otherwise
-	 */
-	public boolean commit() {
-		if (model != null) {
-			try {
-				Binder.viewToModel(model, panel);
-			} catch (AdapterException e) {
-				e.printStackTrace();
-				return false;
-			}
-		}
-		return true;
-	}
+    /**
+     * This method is invoked by the application code whenever it wants to copy data from the view to the model.
+     * 
+     * @return <code>true</code> if successful, <code>false</code> otherwise
+     */
+    public boolean commit() {
+        if (model != null) {
+            try {
+                Binder.viewToModel(model, panel);
+            } catch (AdapterException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return true;
+    }
 
-	/**
-	 * Breaks the binding between the model and the view.
-	 */
-	public void unbind() {
-		model = null;
-	}
+    /**
+     * Breaks the binding between the model and the view.
+     */
+    public void unbind() {
+        model = null;
+    }
 
-	public static class RadioButtonAdapter extends AbstractComponentAdapter implements ItemListener {
-		private JRadioButton button;
-		private Enum selected;
+    public static class RadioButtonAdapter extends AbstractComponentAdapter implements ItemListener {
+        private JRadioButton button;
+        private Enum selected;
 
-		// COMPONENT ADAPTER
-		@Override
-		protected Object getActualContent() {
-			try {
-				return getValue();
-			} catch (Exception e) {
-				// YLogger.logException(e);
-				return null;
-			}
-		}
+        // COMPONENT ADAPTER
+        @Override
+        protected Object getActualContent() {
+            try {
+                return getValue();
+            } catch (Exception e) {
+                // YLogger.logException(e);
+                return null;
+            }
+        }
 
-		@Override
-		protected Object getValue() throws Exception {
-			return button.isSelected() ? selected : null;
-		}
+        @Override
+        protected Object getValue() throws Exception {
+            return button.isSelected() ? selected : null;
+        }
 
-		@Override
-		protected void setupListener() {
-			button.addItemListener(this);
-		}
+        @Override
+        protected void setupListener() {
+            button.addItemListener(this);
+        }
 
-		@Override
-		protected void showValue(Object value) {
-			if (value == selected) {
-				button.setSelected(true);
-			}
-		}
+        @Override
+        protected void showValue(Object value) {
+            if (value == selected) {
+                button.setSelected(true);
+            }
+        }
 
-		@Override
-		public void viewToModel(Object dataSource) throws AdapterException {
-			if (!button.isSelected()) {
-				return;
-			}
-			super.viewToModel(dataSource);
-		}
+        @Override
+        public void viewToModel(Object dataSource) throws AdapterException {
+            if (!button.isSelected()) {
+                return;
+            }
+            super.viewToModel(dataSource);
+        }
 
-		@SuppressWarnings("unchecked")
-		@Override
-		public void bind(Property property, Component view, UpdateTime updateTime) {
-			// System.out.println("bind:" + view.getName() + " - " + view);
-			if (view instanceof JRadioButton) {
-				button = (JRadioButton) view;
-				super.bind(property, view, updateTime);
+        @SuppressWarnings("unchecked")
+        @Override
+        public void bind(Property property, Component view, UpdateTime updateTime) {
+            // System.out.println("bind:" + view.getName() + " - " + view);
+            if (view instanceof JRadioButton) {
+                button = (JRadioButton) view;
+                super.bind(property, view, updateTime);
 
-				String bindVal = button.getName();
-				bindVal = bindVal.substring(bindVal.indexOf(".") + 1);
+                String bindVal = button.getName();
+                bindVal = bindVal.substring(bindVal.indexOf(".") + 1);
 
-				selected = Enum.valueOf(property.getType(), bindVal);
-			}
-		}
+                selected = Enum.valueOf(property.getType(), bindVal);
+            }
+        }
 
-		// ITEM LISTENER
-		public void itemStateChanged(ItemEvent e) {
-			fireViewChanged();
-			fireViewEditValidated();
-		}
-	}
+        // ITEM LISTENER
+        public void itemStateChanged(ItemEvent e) {
+            fireViewChanged();
+            fireViewEditValidated();
+        }
+    }
 }

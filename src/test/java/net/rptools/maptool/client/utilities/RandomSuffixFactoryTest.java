@@ -21,61 +21,61 @@ import org.junit.Test;
  * @author Alexander "d4rkAlf" Johansson Werne
  */
 public class RandomSuffixFactoryTest extends TestCase {
-	RandomSuffixFactory rsf;
+    RandomSuffixFactory rsf;
 
-	@Override
-	@Before
-	public void setUp() throws Exception {
-		rsf = new RandomSuffixFactory();
-	}
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        rsf = new RandomSuffixFactory();
+    }
 
-	@Override
-	@After
-	public void tearDown() throws Exception {
-		rsf = null;
-	}
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        rsf = null;
+    }
 
-	@Test
-	public void testGetASuffix() {
-		int s = rsf.nextSuffixForToken("d4rkAlf");
-		assertTrue(1 <= s && s < 257);
-	}
+    @Test
+    public void testGetASuffix() {
+        int s = rsf.nextSuffixForToken("d4rkAlf");
+        assertTrue(1 <= s && s < 257);
+    }
 
-	@Test
-	public void testGetAllSuffixes() {
-		RandomSuffixFactory testRSF = new RandomSuffixFactory();
-		boolean[] bytes = new boolean[256];
-		Arrays.fill(bytes, false);
-		for (int i = 0; i < bytes.length; i++) {
-			int suffix = testRSF.nextSuffixForToken("Test");
-			bytes[suffix - 1] = true;
-		}
-		for (int i = 0; i < 256; i++) {
-			assertTrue("Suffix number " + i + " is missing", bytes[i]);
-		}
-	}
+    @Test
+    public void testGetAllSuffixes() {
+        RandomSuffixFactory testRSF = new RandomSuffixFactory();
+        boolean[] bytes = new boolean[256];
+        Arrays.fill(bytes, false);
+        for (int i = 0; i < bytes.length; i++) {
+            int suffix = testRSF.nextSuffixForToken("Test");
+            bytes[suffix - 1] = true;
+        }
+        for (int i = 0; i < 256; i++) {
+            assertTrue("Suffix number " + i + " is missing", bytes[i]);
+        }
+    }
 
-	@Test
-	public void testGetMoreThan256Suffixes() {
-		int max = 0;
-		for (int i = 0; i < 512; i++) {
-			int suffix = rsf.nextSuffixForToken("Too many monsters!");
-			max = Math.max(suffix, max);
-		}
+    @Test
+    public void testGetMoreThan256Suffixes() {
+        int max = 0;
+        for (int i = 0; i < 512; i++) {
+            int suffix = rsf.nextSuffixForToken("Too many monsters!");
+            max = Math.max(suffix, max);
+        }
 
-		assertTrue(max > 256);
-	}
+        assertTrue(max > 256);
+    }
 
-	@Test
-	public void testThatSuffixesAreUnique() {
-		boolean[] uniqueSuffixes = new boolean[10_000_000];
-		for (int i = 1; i < uniqueSuffixes.length + 1; i++) {
-			int suffix = rsf.nextSuffixForToken("Special Snowflake");
-			if (uniqueSuffixes[i - 1] != true) {
-				uniqueSuffixes[i - 1] = true;
-			} else {
-				fail("The suffix '" + suffix + "' was generated twice");
-			}
-		}
-	}
+    @Test
+    public void testThatSuffixesAreUnique() {
+        boolean[] uniqueSuffixes = new boolean[10_000_000];
+        for (int i = 1; i < uniqueSuffixes.length + 1; i++) {
+            int suffix = rsf.nextSuffixForToken("Special Snowflake");
+            if (uniqueSuffixes[i - 1] != true) {
+                uniqueSuffixes[i - 1] = true;
+            } else {
+                fail("The suffix '" + suffix + "' was generated twice");
+            }
+        }
+    }
 }

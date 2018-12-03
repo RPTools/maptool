@@ -15,29 +15,29 @@ import java.io.IOException;
 
 public class TransferableMacroButton implements Transferable {
 
-	public static final DataFlavor macroButtonFlavor = new DataFlavor(MacroButton.class, "Macro Button");
+    public static final DataFlavor macroButtonFlavor = new DataFlavor(MacroButton.class, "Macro Button");
 
-	// private TokenMacroButton button;
-	private TransferData transferData;
+    // private TokenMacroButton button;
+    private TransferData transferData;
 
-	public TransferableMacroButton(MacroButton button) {
-		// this.button = button;
-		transferData = new TransferData(button);
-	}
+    public TransferableMacroButton(MacroButton button) {
+        // this.button = button;
+        transferData = new TransferData(button);
+    }
 
-	public DataFlavor[] getTransferDataFlavors() {
-		return new DataFlavor[] { macroButtonFlavor };
-	}
+    public DataFlavor[] getTransferDataFlavors() {
+        return new DataFlavor[] { macroButtonFlavor };
+    }
 
-	public boolean isDataFlavorSupported(DataFlavor dataFlavor) {
-		return dataFlavor.equals(macroButtonFlavor);
-	}
+    public boolean isDataFlavorSupported(DataFlavor dataFlavor) {
+        return dataFlavor.equals(macroButtonFlavor);
+    }
 
-	public Object getTransferData(DataFlavor dataFlavor) throws UnsupportedFlavorException, IOException {
-		if (dataFlavor.equals(macroButtonFlavor)) {
-			return transferData;
-		}
+    public Object getTransferData(DataFlavor dataFlavor) throws UnsupportedFlavorException, IOException {
+        if (dataFlavor.equals(macroButtonFlavor)) {
+            return transferData;
+        }
 
-		return null;
-	}
+        return null;
+    }
 }

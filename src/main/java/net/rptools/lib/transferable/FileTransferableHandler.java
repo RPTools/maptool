@@ -18,18 +18,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileTransferableHandler extends TransferableHandler {
-	private static final DataFlavor fileList = DataFlavor.javaFileListFlavor;
+    private static final DataFlavor fileList = DataFlavor.javaFileListFlavor;
 
-	@Override
-	public List<URL> getTransferObject(Transferable transferable) throws IOException, UnsupportedFlavorException {
-		if (transferable.isDataFlavorSupported(fileList)) {
-			@SuppressWarnings("unchecked")
-			List<File> files = (List<File>) transferable.getTransferData(fileList);
-			List<URL> urls = new ArrayList<URL>(files.size());
-			for (File file : files)
-				urls.add(file.toURI().toURL());
-			return urls;
-		}
-		throw new UnsupportedFlavorException(null);
-	}
+    @Override
+    public List<URL> getTransferObject(Transferable transferable) throws IOException, UnsupportedFlavorException {
+        if (transferable.isDataFlavorSupported(fileList)) {
+            @SuppressWarnings("unchecked")
+            List<File> files = (List<File>) transferable.getTransferData(fileList);
+            List<URL> urls = new ArrayList<URL>(files.size());
+            for (File file : files)
+                urls.add(file.toURI().toURL());
+            return urls;
+        }
+        throw new UnsupportedFlavorException(null);
+    }
 }

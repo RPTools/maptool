@@ -21,23 +21,23 @@ import javax.swing.tree.TreeCellRenderer;
  */
 @SuppressWarnings("serial")
 class CustomTreeCellRenderer extends JCheckBox implements TreeCellRenderer {
-	DefaultMutableTreeNode node;
-	MaptoolNode mtnode;
+    DefaultMutableTreeNode node;
+    MaptoolNode mtnode;
 
-	public Component getTreeCellRendererComponent(JTree tree, Object value,
-			boolean sel, boolean expanded, boolean leaf, int row,
-			boolean hasFocus) {
+    public Component getTreeCellRendererComponent(JTree tree, Object value,
+            boolean sel, boolean expanded, boolean leaf, int row,
+            boolean hasFocus) {
 
-		node = (DefaultMutableTreeNode) value;
-		mtnode = (MaptoolNode) node.getUserObject();
-		setText(mtnode.toString());
-		setBackground(tree.getBackground());
-		setEnabled(tree.isEnabled());
-		setComponentOrientation(tree.getComponentOrientation());
-		return this;
-	}
+        node = (DefaultMutableTreeNode) value;
+        mtnode = (MaptoolNode) node.getUserObject();
+        setText(mtnode.toString());
+        setBackground(tree.getBackground());
+        setEnabled(tree.isEnabled());
+        setComponentOrientation(tree.getComponentOrientation());
+        return this;
+    }
 
-	protected boolean isFirstLevel() {
-		return node.getParent() == node.getRoot();
-	}
+    protected boolean isFirstLevel() {
+        return node.getParent() == node.getRoot();
+    }
 }

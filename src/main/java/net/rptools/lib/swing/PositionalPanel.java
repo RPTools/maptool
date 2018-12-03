@@ -15,32 +15,32 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class PositionalPanel extends JPanel {
 
-	public PositionalPanel() {
-		setLayout(new PositionalLayout());
-	}
+    public PositionalPanel() {
+        setLayout(new PositionalLayout());
+    }
 
-	public void addImpl(Component comp, Object constraints, int index) {
+    public void addImpl(Component comp, Object constraints, int index) {
 
-		if (!(constraints instanceof PositionalLayout.Position)) {
-			throw new IllegalArgumentException("Use add(Component, PositionalLayout.Position)");
-		}
+        if (!(constraints instanceof PositionalLayout.Position)) {
+            throw new IllegalArgumentException("Use add(Component, PositionalLayout.Position)");
+        }
 
-		super.addImpl(comp, constraints, index);
+        super.addImpl(comp, constraints, index);
 
-		if (((PositionalLayout.Position) constraints) == PositionalLayout.Position.CENTER) {
+        if (((PositionalLayout.Position) constraints) == PositionalLayout.Position.CENTER) {
 
-			setComponentZOrder(comp, getComponents().length - 1);
-		} else {
-			setComponentZOrder(comp, 0);
-		}
-	}
+            setComponentZOrder(comp, getComponents().length - 1);
+        } else {
+            setComponentZOrder(comp, 0);
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.JComponent#isOptimizedDrawingEnabled()
-	 */
-	public boolean isOptimizedDrawingEnabled() {
-		return false;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.swing.JComponent#isOptimizedDrawingEnabled()
+     */
+    public boolean isOptimizedDrawingEnabled() {
+        return false;
+    }
 }

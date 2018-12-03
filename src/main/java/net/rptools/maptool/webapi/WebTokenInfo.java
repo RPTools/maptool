@@ -22,271 +22,271 @@ import java.util.List;
 
 public class WebTokenInfo {
 
-	private static final WebTokenInfo instance = new WebTokenInfo();
+    private static final WebTokenInfo instance = new WebTokenInfo();
 
-	private final AppEventListener appEventListener;
-	private final Map<Zone, ModelChangeListener> modelChangeListeners = new WeakHashMap<>();
+    private final AppEventListener appEventListener;
+    private final Map<Zone, ModelChangeListener> modelChangeListeners = new WeakHashMap<>();
 
-	private WebTokenInfo() {
-		// Add listener for new zones.
-		appEventListener = new AppEventListener() {
-			@Override
-			public void handleAppEvent(AppEvent appEvent) {
-				if (appEvent.getId().equals(MapTool.ZoneEvent.Added)) {
-					addTokenChangeListeners();
-				}
-			}
-		};
+    private WebTokenInfo() {
+        // Add listener for new zones.
+        appEventListener = new AppEventListener() {
+            @Override
+            public void handleAppEvent(AppEvent appEvent) {
+                if (appEvent.getId().equals(MapTool.ZoneEvent.Added)) {
+                    addTokenChangeListeners();
+                }
+            }
+        };
 
-		addTokenChangeListeners();
-	}
+        addTokenChangeListeners();
+    }
 
-	// TODO: This could be a single listener for all zones
-	private void addTokenChangeListeners() {
-		for (Zone zone : MapTool.getCampaign().getZones()) {
-			if (modelChangeListeners.containsKey(zone) == false) {
-				modelChangeListeners.put(zone, new ModelChangeListener() {
-					@Override
-					public void modelChanged(ModelChangeEvent event) {
-						System.out.println("DEBUG: Event " + event.eventType);
-						if (event.eventType == Zone.Event.TOKEN_CHANGED) {
-							tokenChanged((Token) event.getArg());
-						} else if (event.eventType == Zone.Event.TOKEN_ADDED) {
-							tokenAdded((Token) event.getArg());
-						} else if (event.eventType == Zone.Event.TOKEN_REMOVED) {
-							tokenRemoved((Token) event.getArg());
-						}
-					}
-				});
-				zone.addModelChangeListener(modelChangeListeners.get(zone));
-			}
-		}
-	}
+    // TODO: This could be a single listener for all zones
+    private void addTokenChangeListeners() {
+        for (Zone zone : MapTool.getCampaign().getZones()) {
+            if (modelChangeListeners.containsKey(zone) == false) {
+                modelChangeListeners.put(zone, new ModelChangeListener() {
+                    @Override
+                    public void modelChanged(ModelChangeEvent event) {
+                        System.out.println("DEBUG: Event " + event.eventType);
+                        if (event.eventType == Zone.Event.TOKEN_CHANGED) {
+                            tokenChanged((Token) event.getArg());
+                        } else if (event.eventType == Zone.Event.TOKEN_ADDED) {
+                            tokenAdded((Token) event.getArg());
+                        } else if (event.eventType == Zone.Event.TOKEN_REMOVED) {
+                            tokenRemoved((Token) event.getArg());
+                        }
+                    }
+                });
+                zone.addModelChangeListener(modelChangeListeners.get(zone));
+            }
+        }
+    }
 
-	private void tokenChanged(Token token) {
-		JSONObject jobj = new JSONObject();
-		JSONArray tokenArray = new JSONArray();
-		tokenArray.add(token.getId().toString());
-		jobj.put("tokensChanged", tokenArray);
+    private void tokenChanged(Token token) {
+        JSONObject jobj = new JSONObject();
+        JSONArray tokenArray = new JSONArray();
+        tokenArray.add(token.getId().toString());
+        jobj.put("tokensChanged", tokenArray);
 
-		MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
-	}
+        MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
+    }
 
-	private void tokenAdded(Token token) {
-		JSONObject jobj = new JSONObject();
-		JSONArray tokenArray = new JSONArray();
-		tokenArray.add(token.getId().toString());
-		jobj.put("tokensAdded", tokenArray);
+    private void tokenAdded(Token token) {
+        JSONObject jobj = new JSONObject();
+        JSONArray tokenArray = new JSONArray();
+        tokenArray.add(token.getId().toString());
+        jobj.put("tokensAdded", tokenArray);
 
-		MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
-	}
+        MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
+    }
 
-	private void tokenRemoved(Token token) {
-		JSONObject jobj = new JSONObject();
-		JSONArray tokenArray = new JSONArray();
-		tokenArray.add(token.getId().toString());
-		jobj.put("tokensRemoved", tokenArray);
+    private void tokenRemoved(Token token) {
+        JSONObject jobj = new JSONObject();
+        JSONArray tokenArray = new JSONArray();
+        tokenArray.add(token.getId().toString());
+        jobj.put("tokensRemoved", tokenArray);
 
-		MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
-	}
+        MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
+    }
 
-	public static WebTokenInfo getInstance() {
-		return instance;
-	}
+    public static WebTokenInfo getInstance() {
+        return instance;
+    }
 
-	public Token findTokenFromId(String tokenId) {
-		System.out.println("DEBUG: tokenId = " + tokenId);
-		final GUID id = new GUID(tokenId);
+    public Token findTokenFromId(String tokenId) {
+        System.out.println("DEBUG: tokenId = " + tokenId);
+        final GUID id = new GUID(tokenId);
 
-		final List<Token> tokenList = new ArrayList<>();
+        final List<Token> tokenList = new ArrayList<>();
 
-		List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-		for (ZoneRenderer zr : zrenderers) {
-			tokenList.addAll(zr.getZone().getTokensFiltered(new Zone.Filter() {
-				public boolean matchToken(Token t) {
-					return t.getId().equals(id);
-				}
-			}));
+        List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+        for (ZoneRenderer zr : zrenderers) {
+            tokenList.addAll(zr.getZone().getTokensFiltered(new Zone.Filter() {
+                public boolean matchToken(Token t) {
+                    return t.getId().equals(id);
+                }
+            }));
 
-			if (tokenList.size() > 0) {
-				break;
-			}
-		}
+            if (tokenList.size() > 0) {
+                break;
+            }
+        }
 
-		if (tokenList.size() > 0) {
-			return tokenList.get(0);
-		} else {
-			return null;
-		}
-	}
+        if (tokenList.size() > 0) {
+            return tokenList.get(0);
+        } else {
+            return null;
+        }
+    }
 
-	private Zone findZoneTokenIsOn(Token token) {
-		List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-		for (ZoneRenderer zr : zrenderers) {
-			if (zr.getZone().getTokens().contains(token)) {
-				return zr.getZone();
-			}
-		}
+    private Zone findZoneTokenIsOn(Token token) {
+        List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+        for (ZoneRenderer zr : zrenderers) {
+            if (zr.getZone().getTokens().contains(token)) {
+                return zr.getZone();
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	void sendTokenInfo(MTWebSocket mtws, String inResponseTo, JSONObject data) {
+    void sendTokenInfo(MTWebSocket mtws, String inResponseTo, JSONObject data) {
 
-		if (data.containsKey("propertyNames")) {
-			sendTokenProperties(mtws, inResponseTo, data);
-		} else {
-			sendTokenRegisterdProperties(mtws, inResponseTo, data);
-		}
-	}
+        if (data.containsKey("propertyNames")) {
+            sendTokenProperties(mtws, inResponseTo, data);
+        } else {
+            sendTokenRegisterdProperties(mtws, inResponseTo, data);
+        }
+    }
 
-	String getTokenValue(Token token, String name) {
-		if (":name".equalsIgnoreCase(name)) {
-			return token.getName();
-		} else if (":notes".equalsIgnoreCase(name)) {
-			return token.getNotes();
-		} else if (":label".equalsIgnoreCase(name)) {
-			return token.getLabel();
-		}
+    String getTokenValue(Token token, String name) {
+        if (":name".equalsIgnoreCase(name)) {
+            return token.getName();
+        } else if (":notes".equalsIgnoreCase(name)) {
+            return token.getNotes();
+        } else if (":label".equalsIgnoreCase(name)) {
+            return token.getLabel();
+        }
 
-		return "";
-	}
+        return "";
+    }
 
-	void sendTokenProperties(MTWebSocket mtws, String inResponseTo, JSONObject data) {
-		String tokenId = data.getString("tokenId");
-		Token token = findTokenFromId(tokenId);
+    void sendTokenProperties(MTWebSocket mtws, String inResponseTo, JSONObject data) {
+        String tokenId = data.getString("tokenId");
+        Token token = findTokenFromId(tokenId);
 
-		if (token == null) {
-			System.out.println("DEBUG: sendTokenInfo(): Unable to find token " + tokenId);
-			return;
-			// FIXME: log this error
-		}
+        if (token == null) {
+            System.out.println("DEBUG: sendTokenInfo(): Unable to find token " + tokenId);
+            return;
+            // FIXME: log this error
+        }
 
-		JSONObject jobj = new JSONObject();
-		jobj.put("tokenId", tokenId);
+        JSONObject jobj = new JSONObject();
+        jobj.put("tokenId", tokenId);
 
-		JSONArray properties = new JSONArray();
-		JSONObject propertiesMap = new JSONObject();
+        JSONArray properties = new JSONArray();
+        JSONObject propertiesMap = new JSONObject();
 
-		JSONArray propToFetch = data.getJSONArray("propertyNames");
-		for (int i = 0; i < propToFetch.size(); i++) {
-			String pname = propToFetch.getString(i);
-			String val;
-			if (pname.startsWith(":")) {
-				val = getTokenValue(token, pname);
-			} else {
+        JSONArray propToFetch = data.getJSONArray("propertyNames");
+        for (int i = 0; i < propToFetch.size(); i++) {
+            String pname = propToFetch.getString(i);
+            String val;
+            if (pname.startsWith(":")) {
+                val = getTokenValue(token, pname);
+            } else {
 
-				val = token.getProperty(pname) == null ? null : token.getProperty(pname).toString();
-			}
-			JSONObject jprop = new JSONObject();
-			jprop.put("name", pname);
-			jprop.put("value", val);
-			properties.add(jprop);
-			propertiesMap.put(pname, val);
-		}
+                val = token.getProperty(pname) == null ? null : token.getProperty(pname).toString();
+            }
+            JSONObject jprop = new JSONObject();
+            jprop.put("name", pname);
+            jprop.put("value", val);
+            properties.add(jprop);
+            propertiesMap.put(pname, val);
+        }
 
-		jobj.put("properties", properties);
-		jobj.put("propertiesMap", propertiesMap);
+        jobj.put("properties", properties);
+        jobj.put("propertiesMap", propertiesMap);
 
-		mtws.sendMessage("tokenProperties", inResponseTo, jobj);
-	}
+        mtws.sendMessage("tokenProperties", inResponseTo, jobj);
+    }
 
-	void sendTokenRegisterdProperties(MTWebSocket mtws, String inResponseTo, JSONObject data) {
-		String tokenId = data.getString("tokenId");
-		Token token = findTokenFromId(tokenId);
+    void sendTokenRegisterdProperties(MTWebSocket mtws, String inResponseTo, JSONObject data) {
+        String tokenId = data.getString("tokenId");
+        Token token = findTokenFromId(tokenId);
 
-		if (token == null) {
-			System.out.println("DEBUG: sendTokenInfo(): Unable to find token " + tokenId);
-			return;
-			// FIXME: log this error
-		}
+        if (token == null) {
+            System.out.println("DEBUG: sendTokenInfo(): Unable to find token " + tokenId);
+            return;
+            // FIXME: log this error
+        }
 
-		JSONObject jobj = new JSONObject();
-		jobj.put("tokenId", tokenId);
-		jobj.put("name", token.getName());
-		jobj.put("label", token.getLabel());
-		jobj.put("notes", token.getNotes());
+        JSONObject jobj = new JSONObject();
+        jobj.put("tokenId", tokenId);
+        jobj.put("name", token.getName());
+        jobj.put("label", token.getLabel());
+        jobj.put("notes", token.getNotes());
 
-		JSONObject jprop = new JSONObject();
+        JSONObject jprop = new JSONObject();
 
-		for (TokenProperty tp : MapTool.getCampaign().getTokenPropertyList(token.getPropertyType())) {
-			JSONObject jp = new JSONObject();
-			jp.put("name", tp.getName());
-			if (tp.getShortName() != null) {
-				jp.put("shortName", tp.getShortName());
-			}
-			if (tp.getDefaultValue() != null) {
-				jp.put("defaultValue", tp.getDefaultValue());
-			}
-			jp.put("value", token.getProperty(tp.getName()));
-			jp.put("showOnStatSheet", tp.isShowOnStatSheet());
+        for (TokenProperty tp : MapTool.getCampaign().getTokenPropertyList(token.getPropertyType())) {
+            JSONObject jp = new JSONObject();
+            jp.put("name", tp.getName());
+            if (tp.getShortName() != null) {
+                jp.put("shortName", tp.getShortName());
+            }
+            if (tp.getDefaultValue() != null) {
+                jp.put("defaultValue", tp.getDefaultValue());
+            }
+            jp.put("value", token.getProperty(tp.getName()));
+            jp.put("showOnStatSheet", tp.isShowOnStatSheet());
 
-			jprop.put(tp.getName(), jp);
-		}
+            jprop.put(tp.getName(), jp);
+        }
 
-		jobj.put("properties", jprop);
+        jobj.put("properties", jprop);
 
-		JSONArray jmacros = new JSONArray();
+        JSONArray jmacros = new JSONArray();
 
-		for (MacroButtonProperties macro : token.getMacroList(false)) {
-			JSONObject jmb = new JSONObject();
-			jmb.put("label", macro.getLabel());
-			jmb.put("tooltip", macro.getEvaluatedToolTip());
-			jmb.put("index", macro.getIndex());
-			jmb.put("fontColor", macro.getFontColorAsHtml());
-			jmb.put("displayGroup", macro.getGroupForDisplay());
-			jmb.put("group", macro.getGroup());
-			jmb.put("index", macro.getIndex());
-			jmb.put("autoExecute", macro.getAutoExecute());
-			jmb.put("maxWidth", macro.getMaxWidth());
-			jmb.put("minWidth", macro.getMinWidth());
-			jmb.put("applyToTokens", macro.getApplyToTokens());
+        for (MacroButtonProperties macro : token.getMacroList(false)) {
+            JSONObject jmb = new JSONObject();
+            jmb.put("label", macro.getLabel());
+            jmb.put("tooltip", macro.getEvaluatedToolTip());
+            jmb.put("index", macro.getIndex());
+            jmb.put("fontColor", macro.getFontColorAsHtml());
+            jmb.put("displayGroup", macro.getGroupForDisplay());
+            jmb.put("group", macro.getGroup());
+            jmb.put("index", macro.getIndex());
+            jmb.put("autoExecute", macro.getAutoExecute());
+            jmb.put("maxWidth", macro.getMaxWidth());
+            jmb.put("minWidth", macro.getMinWidth());
+            jmb.put("applyToTokens", macro.getApplyToTokens());
 
-			jmacros.add(jmb);
-		}
+            jmacros.add(jmb);
+        }
 
-		jobj.put("macros", jmacros);
+        jobj.put("macros", jmacros);
 
-		mtws.sendMessage("tokenInfo", inResponseTo, jobj);
+        mtws.sendMessage("tokenInfo", inResponseTo, jobj);
 
-	}
+    }
 
-	void processMacro(JSONObject data) {
-		// FIXME: need to check parameters.
-		// FIXME: need to check permissions.
-		if ("callMacro".equalsIgnoreCase(data.getString("command"))) {
-			Token token = findTokenFromId(data.getString("tokenId"));
+    void processMacro(JSONObject data) {
+        // FIXME: need to check parameters.
+        // FIXME: need to check permissions.
+        if ("callMacro".equalsIgnoreCase(data.getString("command"))) {
+            Token token = findTokenFromId(data.getString("tokenId"));
 
-			MacroButtonProperties macro = token.getMacro(data.getInt("macroIndex"), false);
-			macro.executeMacro(token.getId());
-		}
-	}
+            MacroButtonProperties macro = token.getMacro(data.getInt("macroIndex"), false);
+            macro.executeMacro(token.getId());
+        }
+    }
 
-	void processSetProperties(JSONObject data) {
-		final String tokenId = data.getString("tokenId");
-		final Token token = findTokenFromId(tokenId);
-		final Zone zone = findZoneTokenIsOn(token);
+    void processSetProperties(JSONObject data) {
+        final String tokenId = data.getString("tokenId");
+        final Token token = findTokenFromId(tokenId);
+        final Zone zone = findZoneTokenIsOn(token);
 
-		if (token == null) {
-			System.out.println("DEBUG: sendTokenInfo(): Unable to find token " + tokenId);
-			return;
-			// FIXME: log this error
-		}
+        if (token == null) {
+            System.out.println("DEBUG: sendTokenInfo(): Unable to find token " + tokenId);
+            return;
+            // FIXME: log this error
+        }
 
-		final JSONObject props = data.getJSONObject("properties");
-		EventQueue.invokeLater(new Runnable() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public void run() {
-				Set<String> pnames = props.keySet();
-				for (String pname : pnames) {
-					String val = props.getString(pname);
-					token.setProperty(pname, val);
-				}
+        final JSONObject props = data.getJSONObject("properties");
+        EventQueue.invokeLater(new Runnable() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public void run() {
+                Set<String> pnames = props.keySet();
+                for (String pname : pnames) {
+                    String val = props.getString(pname);
+                    token.setProperty(pname, val);
+                }
 
-				zone.putToken(token);
-			}
-		});
-	}
+                zone.putToken(token);
+            }
+        });
+    }
 
 }

@@ -25,77 +25,77 @@ import org.apache.logging.log4j.Logger;
  * @author trevor
  */
 public class MapToolServerConnection extends ServerConnection implements ServerObserver {
-	private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
-	private final Map<String, Player> playerMap = new ConcurrentHashMap<String, Player>();
-	private final MapToolServer server;
+    private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
+    private final Map<String, Player> playerMap = new ConcurrentHashMap<String, Player>();
+    private final MapToolServer server;
 
-	public MapToolServerConnection(MapToolServer server, int port) throws IOException {
-		super(port);
-		this.server = server;
-		addObserver(this);
-	}
+    public MapToolServerConnection(MapToolServer server, int port) throws IOException {
+        super(port);
+        this.server = server;
+        addObserver(this);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
-	 */
-	@Override
-	public boolean handleConnectionHandshake(String id, Socket socket) {
-		try {
-			Player player = Handshake.receiveHandshake(server, socket);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
+     */
+    @Override
+    public boolean handleConnectionHandshake(String id, Socket socket) {
+        try {
+            Player player = Handshake.receiveHandshake(server, socket);
 
-			if (player != null) {
-				playerMap.put(id.toUpperCase(), player);
-				return true;
-			}
-		} catch (IOException ioe) {
-			log.error("Handshake failure: " + ioe, ioe);
-		}
-		return false;
-	}
+            if (player != null) {
+                playerMap.put(id.toUpperCase(), player);
+                return true;
+            }
+        } catch (IOException ioe) {
+            log.error("Handshake failure: " + ioe, ioe);
+        }
+        return false;
+    }
 
-	public Player getPlayer(String id) {
-		for (Player player : playerMap.values()) {
-			if (player.getName().equalsIgnoreCase(id)) {
-				return player;
-			}
-		}
-		return null;
-	}
+    public Player getPlayer(String id) {
+        for (Player player : playerMap.values()) {
+            if (player.getName().equalsIgnoreCase(id)) {
+                return player;
+            }
+        }
+        return null;
+    }
 
-	public String getConnectionId(String playerId) {
-		for (Map.Entry<String, Player> entry : playerMap.entrySet()) {
-			if (entry.getValue().getName().equalsIgnoreCase(playerId)) {
-				return entry.getKey();
-			}
-		}
-		return null;
-	}
+    public String getConnectionId(String playerId) {
+        for (Map.Entry<String, Player> entry : playerMap.entrySet()) {
+            if (entry.getValue().getName().equalsIgnoreCase(playerId)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
 
-	////
-	// SERVER OBSERVER
+    ////
+    // SERVER OBSERVER
 
-	/**
-	 * Handle late connections
-	 */
-	public void connectionAdded(net.rptools.clientserver.simple.client.ClientConnection conn) {
-		server.configureClientConnection(conn);
+    /**
+     * Handle late connections
+     */
+    public void connectionAdded(net.rptools.clientserver.simple.client.ClientConnection conn) {
+        server.configureClientConnection(conn);
 
-		Player player = playerMap.get(conn.getId().toUpperCase());
-		for (String id : playerMap.keySet()) {
-			server.getConnection().callMethod(conn.getId(), ClientCommand.COMMAND.playerConnected.name(), playerMap.get(id));
-		}
-		server.getConnection().broadcastCallMethod(ClientCommand.COMMAND.playerConnected.name(), player);
-		// if (!server.isHostId(player.getName())) {
-		// Don't bother sending the campaign file if we're hosting it ourselves
-		server.getConnection().callMethod(conn.getId(), ClientCommand.COMMAND.setCampaign.name(), server.getCampaign());
-		// }
-	}
+        Player player = playerMap.get(conn.getId().toUpperCase());
+        for (String id : playerMap.keySet()) {
+            server.getConnection().callMethod(conn.getId(), ClientCommand.COMMAND.playerConnected.name(), playerMap.get(id));
+        }
+        server.getConnection().broadcastCallMethod(ClientCommand.COMMAND.playerConnected.name(), player);
+        // if (!server.isHostId(player.getName())) {
+        // Don't bother sending the campaign file if we're hosting it ourselves
+        server.getConnection().callMethod(conn.getId(), ClientCommand.COMMAND.setCampaign.name(), server.getCampaign());
+        // }
+    }
 
-	public void connectionRemoved(net.rptools.clientserver.simple.client.ClientConnection conn) {
-		server.releaseClientConnection(conn.getId());
-		server.getConnection().broadcastCallMethod(new String[] { conn.getId() }, ClientCommand.COMMAND.playerDisconnected.name(), playerMap.get(conn.getId().toUpperCase()));
-		playerMap.remove(conn.getId().toUpperCase());
-	}
+    public void connectionRemoved(net.rptools.clientserver.simple.client.ClientConnection conn) {
+        server.releaseClientConnection(conn.getId());
+        server.getConnection().broadcastCallMethod(new String[] { conn.getId() }, ClientCommand.COMMAND.playerDisconnected.name(), playerMap.get(conn.getId().toUpperCase()));
+        playerMap.remove(conn.getId().toUpperCase());
+    }
 }

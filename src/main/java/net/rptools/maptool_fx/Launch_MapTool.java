@@ -11,7 +11,7 @@ package net.rptools.maptool_fx;
 import net.rptools.maptool_fx.MapTool;
 
 public class Launch_MapTool {
-	public static void main(String[] args) {
-		MapTool.main(args);
-	}
+    public static void main(String[] args) {
+        MapTool.main(args);
+    }
 }

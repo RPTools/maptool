@@ -9,12 +9,12 @@
 package net.rptools.maptool.model;
 
 public class ZonePoint extends AbstractPoint {
-	public ZonePoint(int x, int y) {
-		super(x, y);
-	}
+    public ZonePoint(int x, int y) {
+        super(x, y);
+    }
 
-	@Override
-	public String toString() {
-		return "ZonePoint" + super.toString();
-	}
+    @Override
+    public String toString() {
+        return "ZonePoint" + super.toString();
+    }
 }

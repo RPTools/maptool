@@ -19,10 +19,10 @@ import java.lang.annotation.RetentionPolicy;
  * variable defined for them in the main scope need to have this annotation.
  */
 public @interface MapToolJSAPIDefinition {
-	/**
-	 * The name of the variable that the object will be bound to in the JavaScript scope.
-	 * 
-	 * @return the name of the variable.
-	 */
-	String javaScriptVariableName();
+    /**
+     * The name of the variable that the object will be bound to in the JavaScript scope.
+     * 
+     * @return the name of the variable.
+     */
+    String javaScriptVariableName();
 }

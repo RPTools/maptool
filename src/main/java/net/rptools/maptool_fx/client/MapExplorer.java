@@ -35,24 +35,24 @@ import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool_fx.MapTool;
 
 public class MapExplorer {
-	public final String WINDOW_NAME = I18N.getString("panel.MapExplorer");
+    public final String WINDOW_NAME = I18N.getString("panel.MapExplorer");
 
-	private static final Logger log = LogManager.getLogger(MapExplorer.class);
-	private String MAP_EXPLORER_FXML = "/net/rptools/maptool/fx/view/MapExplorer.fxml";
+    private static final Logger log = LogManager.getLogger(MapExplorer.class);
+    private String MAP_EXPLORER_FXML = "/net/rptools/maptool/fx/view/MapExplorer.fxml";
 
-	private TreeView<Player> mapExplorerTreeView;
+    private TreeView<Player> mapExplorerTreeView;
 
-	public MapExplorer() {
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(MAP_EXPLORER_FXML), ResourceBundle.getBundle(AppConstants.MAP_TOOL_BUNDLE));
-		try {
-			mapExplorerTreeView = fxmlLoader.load();
-		} catch (IOException e) {
-			log.error("Error loading ClientConnections FXML!", e);
-		}
+    public MapExplorer() {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(MAP_EXPLORER_FXML), ResourceBundle.getBundle(AppConstants.MAP_TOOL_BUNDLE));
+        try {
+            mapExplorerTreeView = fxmlLoader.load();
+        } catch (IOException e) {
+            log.error("Error loading ClientConnections FXML!", e);
+        }
 
-	}
+    }
 
-	public Node getRootNode() {
-		return mapExplorerTreeView;
-	}
+    public Node getRootNode() {
+        return mapExplorerTreeView;
+    }
 }

@@ -21,23 +21,23 @@ import net.rptools.maptool.client.AppActions.ClientAction;
  */
 public class RPCheckBoxMenuItem extends JCheckBoxMenuItem implements MenuListener {
 
-	public RPCheckBoxMenuItem(Action action, JMenu parentMenu) {
-		super(action);
+    public RPCheckBoxMenuItem(Action action, JMenu parentMenu) {
+        super(action);
 
-		parentMenu.addMenuListener(this);
-	}
+        parentMenu.addMenuListener(this);
+    }
 
-	public void menuSelected(MenuEvent e) {
-		Action action = getAction();
-		if (action instanceof ClientAction) {
-			setSelected(((ClientAction) action).isSelected());
-		}
-	}
+    public void menuSelected(MenuEvent e) {
+        Action action = getAction();
+        if (action instanceof ClientAction) {
+            setSelected(((ClientAction) action).isSelected());
+        }
+    }
 
-	public void menuCanceled(MenuEvent e) {
-	}
+    public void menuCanceled(MenuEvent e) {
+    }
 
-	public void menuDeselected(MenuEvent e) {
-	}
+    public void menuDeselected(MenuEvent e) {
+    }
 
 }

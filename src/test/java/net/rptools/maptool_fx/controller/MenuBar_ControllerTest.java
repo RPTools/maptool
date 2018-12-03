@@ -22,40 +22,40 @@ import org.junit.jupiter.api.Test;
  */
 class MenuBar_ControllerTest {
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@BeforeAll
-	static void setUpBeforeClass() throws Exception {
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @BeforeAll
+    static void setUpBeforeClass() throws Exception {
+    }
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@AfterAll
-	static void tearDownAfterClass() throws Exception {
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @AfterAll
+    static void tearDownAfterClass() throws Exception {
+    }
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@BeforeEach
-	void setUp() throws Exception {
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @BeforeEach
+    void setUp() throws Exception {
+    }
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@AfterEach
-	void tearDown() throws Exception {
-	}
+    /**
+     * @throws java.lang.Exception
+     */
+    @AfterEach
+    void tearDown() throws Exception {
+    }
 
-	/**
-	 * Test method for {@link net.rptools.maptool_fx.controller.MenuBar_Controller#openCampaign(javafx.event.ActionEvent)}.
-	 */
-	@Test
-	void testOpenCampaign() {
-		fail("Not yet implemented");
-	}
+    /**
+     * Test method for {@link net.rptools.maptool_fx.controller.MenuBar_Controller#openCampaign(javafx.event.ActionEvent)}.
+     */
+    @Test
+    void testOpenCampaign() {
+        fail("Not yet implemented");
+    }
 
 }

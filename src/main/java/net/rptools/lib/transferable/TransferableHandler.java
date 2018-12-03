@@ -14,5 +14,5 @@ import java.io.IOException;
 
 public abstract class TransferableHandler {
 
-	public abstract Object getTransferObject(Transferable transferable) throws IOException, UnsupportedFlavorException;
+    public abstract Object getTransferObject(Transferable transferable) throws IOException, UnsupportedFlavorException;
 }

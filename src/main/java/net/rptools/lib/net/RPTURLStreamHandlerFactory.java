@@ -22,61 +22,61 @@ import net.rptools.lib.FileUtil;
 
 public class RPTURLStreamHandlerFactory implements URLStreamHandlerFactory {
 
-	private static Map<String, byte[]> imageMap = new HashMap<String, byte[]>();
+    private static Map<String, byte[]> imageMap = new HashMap<String, byte[]>();
 
-	private Map<String, URLStreamHandler> protocolMap = new HashMap<String, URLStreamHandler>();
+    private Map<String, URLStreamHandler> protocolMap = new HashMap<String, URLStreamHandler>();
 
-	public RPTURLStreamHandlerFactory() {
-		registerProtocol("cp", new ClasspathStreamHandler());
-	}
+    public RPTURLStreamHandlerFactory() {
+        registerProtocol("cp", new ClasspathStreamHandler());
+    }
 
-	public void registerProtocol(String protocol, URLStreamHandler handler) {
-		protocolMap.put(protocol, handler);
-	}
+    public void registerProtocol(String protocol, URLStreamHandler handler) {
+        protocolMap.put(protocol, handler);
+    }
 
-	public URLStreamHandler createURLStreamHandler(String protocol) {
+    public URLStreamHandler createURLStreamHandler(String protocol) {
 
-		return protocolMap.get(protocol);
-	}
+        return protocolMap.get(protocol);
+    }
 
-	private static class ClasspathStreamHandler extends URLStreamHandler {
+    private static class ClasspathStreamHandler extends URLStreamHandler {
 
-		@Override
-		protected URLConnection openConnection(URL u) throws IOException {
+        @Override
+        protected URLConnection openConnection(URL u) throws IOException {
 
-			// TODO: This should really figure out the exact type
-			return new ImageURLConnection(u);
-		}
-	}
+            // TODO: This should really figure out the exact type
+            return new ImageURLConnection(u);
+        }
+    }
 
-	private static class ImageURLConnection extends URLConnection {
+    private static class ImageURLConnection extends URLConnection {
 
-		private byte[] data;
+        private byte[] data;
 
-		public ImageURLConnection(URL url) {
-			super(url);
+        public ImageURLConnection(URL url) {
+            super(url);
 
-			String path = url.getHost() + url.getFile();
-			data = imageMap.get(path);
-			if (data == null) {
-				try {
-					data = FileUtil.loadResource(path);
-					imageMap.put(path, data);
-				} catch (IOException ioe) {
-					ioe.printStackTrace();
-					data = new byte[] {};
-				}
-			}
-		}
+            String path = url.getHost() + url.getFile();
+            data = imageMap.get(path);
+            if (data == null) {
+                try {
+                    data = FileUtil.loadResource(path);
+                    imageMap.put(path, data);
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                    data = new byte[] {};
+                }
+            }
+        }
 
-		@Override
-		public void connect() throws IOException {
-			// Nothing to do
-		}
+        @Override
+        public void connect() throws IOException {
+            // Nothing to do
+        }
 
-		@Override
-		public InputStream getInputStream() throws IOException {
-			return new ByteArrayInputStream(data);
-		}
-	}
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return new ByteArrayInputStream(data);
+        }
+    }
 }

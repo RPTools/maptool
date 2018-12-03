@@ -14,28 +14,28 @@ import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.model.CellPoint;
 
 public class RenderPathWorker extends SwingWorker<Void, Void> {
-	// private static final Logger log = LogManager.getLogger(RenderPathWorker.class);
+    // private static final Logger log = LogManager.getLogger(RenderPathWorker.class);
 
-	ZoneRenderer zoneRenderer;
-	ZoneWalker walker;
-	CellPoint startPoint, endPoint;
-	private boolean restrictMovement = false;
+    ZoneRenderer zoneRenderer;
+    ZoneWalker walker;
+    CellPoint startPoint, endPoint;
+    private boolean restrictMovement = false;
 
-	public RenderPathWorker(ZoneWalker walker, CellPoint endPoint, boolean restrictMovement, ZoneRenderer zoneRenderer) {
-		this.walker = walker;
-		this.endPoint = endPoint;
-		this.restrictMovement = restrictMovement;
-		this.zoneRenderer = zoneRenderer;
-	}
+    public RenderPathWorker(ZoneWalker walker, CellPoint endPoint, boolean restrictMovement, ZoneRenderer zoneRenderer) {
+        this.walker = walker;
+        this.endPoint = endPoint;
+        this.restrictMovement = restrictMovement;
+        this.zoneRenderer = zoneRenderer;
+    }
 
-	@Override
-	protected Void doInBackground() throws Exception {
-		walker.replaceLastWaypoint(endPoint, restrictMovement);
-		return null;
-	}
+    @Override
+    protected Void doInBackground() throws Exception {
+        walker.replaceLastWaypoint(endPoint, restrictMovement);
+        return null;
+    }
 
-	@Override
-	protected void done() {
-		zoneRenderer.repaint();
-	}
+    @Override
+    protected void done() {
+        zoneRenderer.repaint();
+    }
 }

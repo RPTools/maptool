@@ -12,11 +12,11 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool_fx.MapTool;
 
 public class ZoneRendererFactory {
-	public static ZoneRenderer newRenderer(Zone zone) {
-		ZoneRenderer renderer = new ZoneRenderer(zone);
-		if (MapTool.getFrame() != null) {
-			renderer.addOverlay(MapTool.getFrame().getPointerOverlay());
-		}
-		return renderer;
-	}
+    public static ZoneRenderer newRenderer(Zone zone) {
+        ZoneRenderer renderer = new ZoneRenderer(zone);
+        if (MapTool.getFrame() != null) {
+            renderer.addOverlay(MapTool.getFrame().getPointerOverlay());
+        }
+        return renderer;
+    }
 }

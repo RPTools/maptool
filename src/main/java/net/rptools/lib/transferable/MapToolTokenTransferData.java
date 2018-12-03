@@ -20,8 +20,8 @@ import java.util.ArrayList;
  */
 @SuppressWarnings("serial")
 public class MapToolTokenTransferData extends ArrayList<TokenTransferData> {
-	/**
-	 * The data flavor that describes a list of tokens for exporting to maptool.
-	 */
-	public final static DataFlavor MAP_TOOL_TOKEN_LIST_FLAVOR = new DataFlavor(MapToolTokenTransferData.class, "Map Tool Token List");
+    /**
+     * The data flavor that describes a list of tokens for exporting to maptool.
+     */
+    public final static DataFlavor MAP_TOOL_TOKEN_LIST_FLAVOR = new DataFlavor(MapToolTokenTransferData.class, "Map Tool Token List");
 }

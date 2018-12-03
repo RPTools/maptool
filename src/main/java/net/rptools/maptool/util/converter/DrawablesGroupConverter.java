@@ -23,17 +23,17 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
  *
  */
 public class DrawablesGroupConverter implements Converter {
-	@Override
-	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
-	}
+    @Override
+    public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
+    }
 
-	@Override
-	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		return null;
-	}
+    @Override
+    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+        return null;
+    }
 
-	@Override
-	public boolean canConvert(Class clazz) {
-		return clazz.equals(DrawablesGroup.class);
-	}
+    @Override
+    public boolean canConvert(Class clazz) {
+        return clazz.equals(DrawablesGroup.class);
+    }
 }

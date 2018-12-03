@@ -19,62 +19,62 @@ import net.rptools.maptool.model.Vision;
 import net.rptools.maptool.model.Zone;
 
 public class FacingConicVision extends Vision {
-	private Integer lastFacing;
+    private Integer lastFacing;
 
-	// DEPRECATED: here to support the serialization
-	private transient GUID tokenGUID;
+    // DEPRECATED: here to support the serialization
+    private transient GUID tokenGUID;
 
-	public FacingConicVision() {
-	}
+    public FacingConicVision() {
+    }
 
-	public FacingConicVision(int distance) {
-		setDistance(distance);
-	}
+    public FacingConicVision(int distance) {
+        setDistance(distance);
+    }
 
-	@Override
-	public Anchor getAnchor() {
-		return Vision.Anchor.CENTER;
-	}
+    @Override
+    public Anchor getAnchor() {
+        return Vision.Anchor.CENTER;
+    }
 
-	@Override
-	public Area getArea(Zone zone, Token token) {
-		if (token == null) {
-			return null;
-		}
-		if (lastFacing == null || !lastFacing.equals(token.getFacing())) {
-			flush();
-			lastFacing = token.getFacing();
-		}
-		return super.getArea(zone, token);
-	}
+    @Override
+    public Area getArea(Zone zone, Token token) {
+        if (token == null) {
+            return null;
+        }
+        if (lastFacing == null || !lastFacing.equals(token.getFacing())) {
+            flush();
+            lastFacing = token.getFacing();
+        }
+        return super.getArea(zone, token);
+    }
 
-	@Override
-	protected Area createArea(Zone zone, Token token) {
-		if (token == null) {
-			return null;
-		}
-		if (token.getFacing() == null) {
-			token.setFacing(0);
-		}
-		// Start round
-		int size = getDistance() * getZonePointsPerCell(zone) * 2;
-		int half = size / 2;
-		Area area = new Area(new Ellipse2D.Float(-half, -half, size, size));
+    @Override
+    protected Area createArea(Zone zone, Token token) {
+        if (token == null) {
+            return null;
+        }
+        if (token.getFacing() == null) {
+            token.setFacing(0);
+        }
+        // Start round
+        int size = getDistance() * getZonePointsPerCell(zone) * 2;
+        int half = size / 2;
+        Area area = new Area(new Ellipse2D.Float(-half, -half, size, size));
 
-		// Cut off the part that isn't in the cone
-		area.subtract(new Area(new Rectangle(-100000, 1, 200000, 200000)));
-		area.subtract(new Area(new Rectangle(-100000, -100000, 99999, 200000)));
+        // Cut off the part that isn't in the cone
+        area.subtract(new Area(new Rectangle(-100000, 1, 200000, 200000)));
+        area.subtract(new Area(new Rectangle(-100000, -100000, 99999, 200000)));
 
-		// Rotate
-		int angle = (-token.getFacing() + 45);
-		area.transform(AffineTransform.getRotateInstance(Math.toRadians(angle)));
+        // Rotate
+        int angle = (-token.getFacing() + 45);
+        area.transform(AffineTransform.getRotateInstance(Math.toRadians(angle)));
 
-		lastFacing = token.getFacing();
-		return area;
-	}
+        lastFacing = token.getFacing();
+        return area;
+    }
 
-	@Override
-	public String toString() {
-		return "Conic Facing";
-	}
+    @Override
+    public String toString() {
+        return "Conic Facing";
+    }
 }

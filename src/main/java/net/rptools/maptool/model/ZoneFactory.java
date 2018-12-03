@@ -23,45 +23,45 @@ import net.rptools.maptool.util.ImageManager;
 
 public class ZoneFactory {
 
-	public static final String DEFAULT_MAP_NAME = "Grasslands";
-	public static MD5Key defaultImageId;
+    public static final String DEFAULT_MAP_NAME = "Grasslands";
+    public static MD5Key defaultImageId;
 
-	static {
-		// TODO: I really don't like this being hard wired this way, need to make it a preference or something
-		File grassImage = new File(AppUtil.getAppHome("resource/Default/Textures").getAbsolutePath() + "/Grass.png");
-		if (grassImage.exists()) {
-			try {
-				Asset asset = new Asset(DEFAULT_MAP_NAME, FileUtils.readFileToByteArray(grassImage));
-				defaultImageId = asset.getId();
+    static {
+        // TODO: I really don't like this being hard wired this way, need to make it a preference or something
+        File grassImage = new File(AppUtil.getAppHome("resource/Default/Textures").getAbsolutePath() + "/Grass.png");
+        if (grassImage.exists()) {
+            try {
+                Asset asset = new Asset(DEFAULT_MAP_NAME, FileUtils.readFileToByteArray(grassImage));
+                defaultImageId = asset.getId();
 
-				// Make sure the image is loaded to avoid a flash screen when it becomes visible
-				ImageManager.getImageAndWait(asset.getId());
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			}
+                // Make sure the image is loaded to avoid a flash screen when it becomes visible
+                ImageManager.getImageAndWait(asset.getId());
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
 
-		}
-	}
+        }
+    }
 
-	public static Zone createZone() {
+    public static Zone createZone() {
 
-		Zone zone = new Zone();
+        Zone zone = new Zone();
 
-		zone.setName(DEFAULT_MAP_NAME);
-		zone.setBackgroundPaint(new DrawableTexturePaint(defaultImageId));
-		zone.setFogPaint(new DrawableColorPaint(Color.black));
+        zone.setName(DEFAULT_MAP_NAME);
+        zone.setBackgroundPaint(new DrawableTexturePaint(defaultImageId));
+        zone.setFogPaint(new DrawableColorPaint(Color.black));
 
-		zone.setVisible(AppPreferences.getNewMapsVisible());
-		zone.setHasFog(AppPreferences.getNewMapsHaveFOW());
-		zone.setUnitsPerCell(AppPreferences.getDefaultUnitsPerCell());
-		zone.setTokenVisionDistance(AppPreferences.getDefaultVisionDistance());
+        zone.setVisible(AppPreferences.getNewMapsVisible());
+        zone.setHasFog(AppPreferences.getNewMapsHaveFOW());
+        zone.setUnitsPerCell(AppPreferences.getDefaultUnitsPerCell());
+        zone.setTokenVisionDistance(AppPreferences.getDefaultVisionDistance());
 
-		zone.setGrid(GridFactory.createGrid(AppPreferences.getDefaultGridType(), AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex()));
-		zone.setGridColor(AppPreferences.getDefaultGridColor().getRGB());
-		zone.getGrid().setSize(AppPreferences.getDefaultGridSize());
-		zone.getGrid().setOffset(0, 0);
+        zone.setGrid(GridFactory.createGrid(AppPreferences.getDefaultGridType(), AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex()));
+        zone.setGridColor(AppPreferences.getDefaultGridColor().getRGB());
+        zone.getGrid().setSize(AppPreferences.getDefaultGridSize());
+        zone.getGrid().setOffset(0, 0);
 
-		return zone;
-	}
+        return zone;
+    }
 
 }

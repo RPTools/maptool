@@ -13,23 +13,23 @@ import java.util.List;
 
 public class ChatProcessor {
 
-	private List<ChatTranslationRuleGroup> translationRuleGroupList = new ArrayList<ChatTranslationRuleGroup>();
+    private List<ChatTranslationRuleGroup> translationRuleGroupList = new ArrayList<ChatTranslationRuleGroup>();
 
-	public String process(String incoming) {
-		if (incoming == null) {
-			return null;
-		}
+    public String process(String incoming) {
+        if (incoming == null) {
+            return null;
+        }
 
-		for (ChatTranslationRuleGroup ruleGroup : translationRuleGroupList) {
-			if (!ruleGroup.isEnabled()) {
-				continue;
-			}
-			incoming = ruleGroup.translate(incoming);
-		}
-		return incoming;
-	}
+        for (ChatTranslationRuleGroup ruleGroup : translationRuleGroupList) {
+            if (!ruleGroup.isEnabled()) {
+                continue;
+            }
+            incoming = ruleGroup.translate(incoming);
+        }
+        return incoming;
+    }
 
-	public void install(ChatTranslationRuleGroup ruleGroup) {
-		translationRuleGroupList.add(ruleGroup);
-	}
+    public void install(ChatTranslationRuleGroup ruleGroup) {
+        translationRuleGroupList.add(ruleGroup);
+    }
 }

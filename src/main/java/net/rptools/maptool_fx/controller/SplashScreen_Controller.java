@@ -14,42 +14,42 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.StackPane;
 
 public class SplashScreen_Controller {
-	private static String versionPrefix;
+    private static String versionPrefix;
 
-	@FXML private StackPane splashLayout;
+    @FXML private StackPane splashLayout;
 
-	@FXML private ProgressBar loadProgress;
+    @FXML private ProgressBar loadProgress;
 
-	@FXML private Label progressLabel;
-	@FXML private Label versionLabel;
+    @FXML private Label progressLabel;
+    @FXML private Label versionLabel;
 
-	@FXML // This method is called by the FXMLLoader when initialization is complete
-	void initialize() {
-		assert splashLayout != null : "fx:id=\"splashLayout\" was not injected: check your FXML file 'SplashScreenLoader.fxml'.";
-		assert loadProgress != null : "fx:id=\"loadProgress\" was not injected: check your FXML file 'SplashScreenLoader.fxml'.";
-		assert progressLabel != null : "fx:id=\"progressText\" was not injected: check your FXML file 'SplashScreenLoader.fxml'.";
-		assert versionLabel != null : "fx:id=\"versionLabel\" was not injected: check your FXML file 'SplashScreenLoader.fxml'.";
+    @FXML // This method is called by the FXMLLoader when initialization is complete
+    void initialize() {
+        assert splashLayout != null : "fx:id=\"splashLayout\" was not injected: check your FXML file 'SplashScreenLoader.fxml'.";
+        assert loadProgress != null : "fx:id=\"loadProgress\" was not injected: check your FXML file 'SplashScreenLoader.fxml'.";
+        assert progressLabel != null : "fx:id=\"progressText\" was not injected: check your FXML file 'SplashScreenLoader.fxml'.";
+        assert versionLabel != null : "fx:id=\"versionLabel\" was not injected: check your FXML file 'SplashScreenLoader.fxml'.";
 
-		versionPrefix = getVersionLabel() + " ";
-	}
+        versionPrefix = getVersionLabel() + " ";
+    }
 
-	public void setLoadProgress(Double progress) {
-		this.loadProgress.setProgress(progress);
-	}
+    public void setLoadProgress(Double progress) {
+        this.loadProgress.setProgress(progress);
+    }
 
-	public String getProgressLabel() {
-		return progressLabel.getText();
-	}
+    public String getProgressLabel() {
+        return progressLabel.getText();
+    }
 
-	public void setProgressLabel(String text) {
-		this.progressLabel.setText(text);
-	}
+    public void setProgressLabel(String text) {
+        this.progressLabel.setText(text);
+    }
 
-	public String getVersionLabel() {
-		return versionLabel.getText();
-	}
+    public String getVersionLabel() {
+        return versionLabel.getText();
+    }
 
-	public void setVersionLabel(String text) {
-		this.versionLabel.setText(versionPrefix + text);
-	}
+    public void setVersionLabel(String text) {
+        this.versionLabel.setText(versionPrefix + text);
+    }
 }

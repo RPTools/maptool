@@ -52,331 +52,331 @@ import com.jeta.forms.components.panel.FormPanel;
  * instance?
  */
 public class BoardTool extends DefaultTool {
-	private static final long serialVersionUID = 98389912045059L;
+    private static final long serialVersionUID = 98389912045059L;
 
-	// Context variables
-	private static Zone zone;
-	private static boolean oldShowGrid;
+    // Context variables
+    private static Zone zone;
+    private static boolean oldShowGrid;
 
-	// Status variables
-	private static Point boardPosition = new Point(0, 0);
-	private static Dimension snap = new Dimension(1, 1);
+    // Status variables
+    private static Point boardPosition = new Point(0, 0);
+    private static Dimension snap = new Dimension(1, 1);
 
-	// Action control variables
-	private Point dragStart;
-	private Dimension dragOffset;
-	private Point boardStart;
+    // Action control variables
+    private Point dragStart;
+    private Dimension dragOffset;
+    private Point boardStart;
 
-	// UI button fields
-	private final JTextField boardPositionXTextField;
-	private final JTextField boardPositionYTextField;
-	private final FormPanel controlPanel;
-	private final JRadioButton snapNoneButton;
-	private final JRadioButton snapGridButton;
-	private final JRadioButton snapTileButton;
+    // UI button fields
+    private final JTextField boardPositionXTextField;
+    private final JTextField boardPositionYTextField;
+    private final FormPanel controlPanel;
+    private final JRadioButton snapNoneButton;
+    private final JRadioButton snapGridButton;
+    private final JRadioButton snapTileButton;
 
-	/**
-	 * Initialize the panel and set up the actions.
-	 */
-	public BoardTool() {
-		try {
-			setIcon(new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/board.png")));
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-		// Create the control panel
-		controlPanel = new FormPanel("net/rptools/maptool/client/ui/forms/adjustBoardControlPanel.xml");
-		// controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+    /**
+     * Initialize the panel and set up the actions.
+     */
+    public BoardTool() {
+        try {
+            setIcon(new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/board.png")));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+        // Create the control panel
+        controlPanel = new FormPanel("net/rptools/maptool/client/ui/forms/adjustBoardControlPanel.xml");
+        // controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
-		boardPositionXTextField = controlPanel.getTextField("offsetX");
-		boardPositionXTextField.addKeyListener(new UpdateBoardListener());
+        boardPositionXTextField = controlPanel.getTextField("offsetX");
+        boardPositionXTextField.addKeyListener(new UpdateBoardListener());
 
-		boardPositionYTextField = controlPanel.getTextField("offsetY");
-		boardPositionYTextField.addKeyListener(new UpdateBoardListener());
+        boardPositionYTextField = controlPanel.getTextField("offsetY");
+        boardPositionYTextField.addKeyListener(new UpdateBoardListener());
 
-		ActionListener enforceRules = new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				enforceButtonRules();
-			}
-		};
-		snapNoneButton = controlPanel.getRadioButton("snapNone");
-		snapNoneButton.addActionListener(enforceRules);
+        ActionListener enforceRules = new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                enforceButtonRules();
+            }
+        };
+        snapNoneButton = controlPanel.getRadioButton("snapNone");
+        snapNoneButton.addActionListener(enforceRules);
 
-		snapGridButton = controlPanel.getRadioButton("snapGrid");
-		snapGridButton.addActionListener(enforceRules);
+        snapGridButton = controlPanel.getRadioButton("snapGrid");
+        snapGridButton.addActionListener(enforceRules);
 
-		snapTileButton = controlPanel.getRadioButton("snapTile");
-		snapTileButton.addActionListener(enforceRules);
+        snapTileButton = controlPanel.getRadioButton("snapTile");
+        snapTileButton.addActionListener(enforceRules);
 
-		JButton closeButton = (JButton) controlPanel.getComponentByName("closeButton");
-		closeButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				resetTool();
-			}
-		});
-	}
+        JButton closeButton = (JButton) controlPanel.getComponentByName("closeButton");
+        closeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                resetTool();
+            }
+        });
+    }
 
-	@Override
-	protected void installKeystrokes(Map<KeyStroke, Action> actionMap) {
-		super.installKeystrokes(actionMap);
+    @Override
+    protected void installKeystrokes(Map<KeyStroke, Action> actionMap) {
+        super.installKeystrokes(actionMap);
 
-		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), new boardPositionAction(Direction.Up));
-		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), new boardPositionAction(Direction.Left));
-		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), new boardPositionAction(Direction.Down));
-		actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), new boardPositionAction(Direction.Right));
-	}
+        actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), new boardPositionAction(Direction.Up));
+        actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), new boardPositionAction(Direction.Left));
+        actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), new boardPositionAction(Direction.Down));
+        actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), new boardPositionAction(Direction.Right));
+    }
 
-	/**
-	 * Figure out how big the repeating board tile image is.
-	 */
+    /**
+     * Figure out how big the repeating board tile image is.
+     */
 
-	private Dimension getTileSize() {
-		Zone zone = renderer.getZone();
-		Dimension tileSize = null;
+    private Dimension getTileSize() {
+        Zone zone = renderer.getZone();
+        Dimension tileSize = null;
 
-		if (zone != null) {
-			DrawablePaint paint = zone.getBackgroundPaint();
-			DrawableTexturePaint dummy = new DrawableTexturePaint();
-			if (paint.getClass() == dummy.getClass()) {
-				Image bgTexture = ImageManager.getImage(((DrawableTexturePaint) paint).getAsset().getId());
-				tileSize = new Dimension(bgTexture.getWidth(null), bgTexture.getHeight(null));
-			}
-		}
-		return tileSize;
-	}
+        if (zone != null) {
+            DrawablePaint paint = zone.getBackgroundPaint();
+            DrawableTexturePaint dummy = new DrawableTexturePaint();
+            if (paint.getClass() == dummy.getClass()) {
+                Image bgTexture = ImageManager.getImage(((DrawableTexturePaint) paint).getAsset().getId());
+                tileSize = new Dimension(bgTexture.getWidth(null), bgTexture.getHeight(null));
+            }
+        }
+        return tileSize;
+    }
 
-	/**
-	 * Moves the board to the nearest snap intersection. Modifies GUI.
-	 */
-	private void snapBoard() {
-		boardPosition.x = (Math.round(boardPosition.x / snap.width) * snap.width);
-		boardPosition.y = (Math.round(boardPosition.y / snap.height) * snap.height);
-		updateGUI();
-	}
+    /**
+     * Moves the board to the nearest snap intersection. Modifies GUI.
+     */
+    private void snapBoard() {
+        boardPosition.x = (Math.round(boardPosition.x / snap.width) * snap.width);
+        boardPosition.y = (Math.round(boardPosition.y / snap.height) * snap.height);
+        updateGUI();
+    }
 
-	/**
-	 * Sets the snap mode with independent x/y snaps and adjusts the board position appropriately.
-	 * 
-	 * @param x
-	 *            the new x snap amount
-	 * @param y
-	 *            the new y snap amount
-	 */
-	private void setSnap(int x, int y) {
-		snap.width = x;
-		snap.height = y;
-		snapBoard();
-	}
+    /**
+     * Sets the snap mode with independent x/y snaps and adjusts the board position appropriately.
+     * 
+     * @param x
+     *            the new x snap amount
+     * @param y
+     *            the new y snap amount
+     */
+    private void setSnap(int x, int y) {
+        snap.width = x;
+        snap.height = y;
+        snapBoard();
+    }
 
-	private void updateGUI() {
-		boardPositionXTextField.setText(Integer.toString(boardPosition.x));
-		boardPositionYTextField.setText(Integer.toString(boardPosition.y));
-	}
+    private void updateGUI() {
+        boardPositionXTextField.setText(Integer.toString(boardPosition.x));
+        boardPositionYTextField.setText(Integer.toString(boardPosition.y));
+    }
 
-	/**
-	 * Copies the current board (map image as set in "New Map/Edit Map") info to the tool so we have the appropriate starting info. Should be called each time the tool is un-hidden.
-	 */
-	private void copyBoardToControlPanel() {
-		boardPosition.x = zone.getBoardX();
-		boardPosition.y = zone.getBoardY();
-		snapBoard();
-		updateGUI();
-	}
+    /**
+     * Copies the current board (map image as set in "New Map/Edit Map") info to the tool so we have the appropriate starting info. Should be called each time the tool is un-hidden.
+     */
+    private void copyBoardToControlPanel() {
+        boardPosition.x = zone.getBoardX();
+        boardPosition.y = zone.getBoardY();
+        snapBoard();
+        updateGUI();
+    }
 
-	private void copyControlPanelToBoard() {
-		boardPosition.x = getInt(boardPositionXTextField, 0);
-		boardPosition.y = getInt(boardPositionYTextField, 0);
-		zone.setBoard(boardPosition);
-	}
+    private void copyControlPanelToBoard() {
+        boardPosition.x = getInt(boardPositionXTextField, 0);
+        boardPosition.y = getInt(boardPositionYTextField, 0);
+        zone.setBoard(boardPosition);
+    }
 
-	@Override
-	public String getTooltip() {
-		return "tool.boardtool.tooltip";
-	}
+    @Override
+    public String getTooltip() {
+        return "tool.boardtool.tooltip";
+    }
 
-	@Override
-	public String getInstructions() {
-		return "tool.boardtool.instructions";
-	}
+    @Override
+    public String getInstructions() {
+        return "tool.boardtool.instructions";
+    }
 
-	/**
-	 * Parses the text field of the component into a number, returning the default value if the text field is _not_ a number.
-	 */
-	private int getInt(JTextComponent component, int defaultValue) {
-		// Get the string from the component, then
-		// call the more-generic getInt-from-a-string
-		return StringUtil.parseInteger(component.getText(), defaultValue);
-	}
+    /**
+     * Parses the text field of the component into a number, returning the default value if the text field is _not_ a number.
+     */
+    private int getInt(JTextComponent component, int defaultValue) {
+        // Get the string from the component, then
+        // call the more-generic getInt-from-a-string
+        return StringUtil.parseInteger(component.getText(), defaultValue);
+    }
 
-	/*
-	 * private double getDouble(String value, double defaultValue) { try { return value.length() > 0 ? Double.parseDouble(value.trim()) : defaultValue; } catch (NumberFormatException e) { return 0; }
-	 * }
-	 */
+    /*
+     * private double getDouble(String value, double defaultValue) { try { return value.length() > 0 ? Double.parseDouble(value.trim()) : defaultValue; } catch (NumberFormatException e) { return 0; }
+     * }
+     */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see maptool.client.Tool#attachTo(maptool.client.ZoneRenderer)
-	 */
-	@Override
-	protected void attachTo(ZoneRenderer renderer) {
-		super.attachTo(renderer);
-		zone = renderer.getZone();
-		copyBoardToControlPanel();
-		oldShowGrid = AppState.isShowGrid();
-		AppState.setShowGrid(true);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see maptool.client.Tool#attachTo(maptool.client.ZoneRenderer)
+     */
+    @Override
+    protected void attachTo(ZoneRenderer renderer) {
+        super.attachTo(renderer);
+        zone = renderer.getZone();
+        copyBoardToControlPanel();
+        oldShowGrid = AppState.isShowGrid();
+        AppState.setShowGrid(true);
 
-		// Find out if it is already aligned to grid or background tile, and
-		// default to keeping that same alignment.
-		final int offset = zone.getBoardX();
-		final Dimension tileSize = getTileSize();
-		final int gridSize = zone.getGrid().getSize();
+        // Find out if it is already aligned to grid or background tile, and
+        // default to keeping that same alignment.
+        final int offset = zone.getBoardX();
+        final Dimension tileSize = getTileSize();
+        final int gridSize = zone.getGrid().getSize();
 
-		if ((tileSize != null) && ((offset % tileSize.width) == 0)) {
-			setSnap(tileSize.width, tileSize.height);
-			snapTileButton.setSelected(true);
-		} else if ((offset % gridSize) == 0) {
-			setSnap(gridSize, gridSize);
-			snapGridButton.setSelected(true);
-		} else {
-			setSnap(1, 1);
-			snapNoneButton.setSelected(true);
-		}
-		MapTool.getFrame().showControlPanel(controlPanel);
-	}
+        if ((tileSize != null) && ((offset % tileSize.width) == 0)) {
+            setSnap(tileSize.width, tileSize.height);
+            snapTileButton.setSelected(true);
+        } else if ((offset % gridSize) == 0) {
+            setSnap(gridSize, gridSize);
+            snapGridButton.setSelected(true);
+        } else {
+            setSnap(1, 1);
+            snapNoneButton.setSelected(true);
+        }
+        MapTool.getFrame().showControlPanel(controlPanel);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see maptool.client.Tool#detachFrom(maptool.client.ZoneRenderer)
-	 */
-	@Override
-	protected void detachFrom(ZoneRenderer renderer) {
-		MapTool.getFrame().hideControlPanel();
-		MapTool.serverCommand().setBoard(zone.getId(), zone.getMapAssetId(), zone.getBoardX(), zone.getBoardY());
-		AppState.setShowGrid(oldShowGrid);
-		super.detachFrom(renderer);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see maptool.client.Tool#detachFrom(maptool.client.ZoneRenderer)
+     */
+    @Override
+    protected void detachFrom(ZoneRenderer renderer) {
+        MapTool.getFrame().hideControlPanel();
+        MapTool.serverCommand().setBoard(zone.getId(), zone.getMapAssetId(), zone.getBoardX(), zone.getBoardY());
+        AppState.setShowGrid(oldShowGrid);
+        super.detachFrom(renderer);
+    }
 
-	////
-	// MOUSE LISTENER
+    ////
+    // MOUSE LISTENER
 
-	@Override
-	public void mousePressed(java.awt.event.MouseEvent e) {
-		if (SwingUtilities.isLeftMouseButton(e)) {
-			ZonePoint zp = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-			Grid grid = renderer.getZone().getGrid();
-			dragStart = new Point(zp.x - grid.getOffsetX(), zp.y - grid.getOffsetY());
-			boardStart = new Point(boardPosition);
-			dragOffset = new Dimension(0, 0);
-		} else {
-			super.mousePressed(e);
-		}
-	}
+    @Override
+    public void mousePressed(java.awt.event.MouseEvent e) {
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            ZonePoint zp = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+            Grid grid = renderer.getZone().getGrid();
+            dragStart = new Point(zp.x - grid.getOffsetX(), zp.y - grid.getOffsetY());
+            boardStart = new Point(boardPosition);
+            dragOffset = new Dimension(0, 0);
+        } else {
+            super.mousePressed(e);
+        }
+    }
 
-	////
-	// MOUSE MOTION LISTENER
-	@Override
-	public void mouseDragged(java.awt.event.MouseEvent e) {
-		if (SwingUtilities.isLeftMouseButton(e)) {
-			ZonePoint zp = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+    ////
+    // MOUSE MOTION LISTENER
+    @Override
+    public void mouseDragged(java.awt.event.MouseEvent e) {
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            ZonePoint zp = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
 
-			dragOffset.width = zp.x - dragStart.x;
-			dragOffset.height = zp.y - dragStart.y;
+            dragOffset.width = zp.x - dragStart.x;
+            dragOffset.height = zp.y - dragStart.y;
 
-			boardPosition.x = boardStart.x + dragOffset.width;
-			boardPosition.y = boardStart.y + dragOffset.height;
-			snapBoard();
-			updateGUI();
-			zone.setBoard(boardPosition);
-		} else {
-			super.mouseDragged(e);
-		}
-	}
+            boardPosition.x = boardStart.x + dragOffset.width;
+            boardPosition.y = boardStart.y + dragOffset.height;
+            snapBoard();
+            updateGUI();
+            zone.setBoard(boardPosition);
+        } else {
+            super.mouseDragged(e);
+        }
+    }
 
-	@Override
-	public void mouseMoved(java.awt.event.MouseEvent e) {
-		mouseX = e.getX();
-		mouseY = e.getY();
-	}
+    @Override
+    public void mouseMoved(java.awt.event.MouseEvent e) {
+        mouseX = e.getX();
+        mouseY = e.getY();
+    }
 
-	/**
-	 * A simple enum for correlating keys with directions
-	 */
-	private static enum Direction {
-		Left, Right, Up, Down
-	};
+    /**
+     * A simple enum for correlating keys with directions
+     */
+    private static enum Direction {
+        Left, Right, Up, Down
+    };
 
-	/**
-	 * Constructs actions to attach to key-presses.
-	 */
-	@SuppressWarnings("serial")
-	private class boardPositionAction extends AbstractAction {
-		private final Direction direction;
+    /**
+     * Constructs actions to attach to key-presses.
+     */
+    @SuppressWarnings("serial")
+    private class boardPositionAction extends AbstractAction {
+        private final Direction direction;
 
-		public boardPositionAction(Direction direction) {
-			this.direction = direction;
-		}
+        public boardPositionAction(Direction direction) {
+            this.direction = direction;
+        }
 
-		public void actionPerformed(ActionEvent e) {
-			switch (direction) {
-			case Left:
-				boardPosition.x -= snap.width;
-				break;
-			case Right:
-				boardPosition.x += snap.width;
-				break;
-			case Up:
-				boardPosition.y -= snap.height;
-				break;
-			case Down:
-				boardPosition.y += snap.height;
-				break;
-			}
-			updateGUI();
-			zone.setBoard(boardPosition);
-		}
-	}
+        public void actionPerformed(ActionEvent e) {
+            switch (direction) {
+            case Left:
+                boardPosition.x -= snap.width;
+                break;
+            case Right:
+                boardPosition.x += snap.width;
+                break;
+            case Up:
+                boardPosition.y -= snap.height;
+                break;
+            case Down:
+                boardPosition.y += snap.height;
+                break;
+            }
+            updateGUI();
+            zone.setBoard(boardPosition);
+        }
+    }
 
-	////
-	// ACTIONS
-	private class UpdateBoardListener implements KeyListener, ChangeListener, FocusListener {
-		public void keyPressed(KeyEvent e) {
-		}
+    ////
+    // ACTIONS
+    private class UpdateBoardListener implements KeyListener, ChangeListener, FocusListener {
+        public void keyPressed(KeyEvent e) {
+        }
 
-		public void keyReleased(KeyEvent e) {
-			copyControlPanelToBoard();
-		}
+        public void keyReleased(KeyEvent e) {
+            copyControlPanelToBoard();
+        }
 
-		public void keyTyped(KeyEvent e) {
-		}
+        public void keyTyped(KeyEvent e) {
+        }
 
-		public void stateChanged(ChangeEvent e) {
-			copyControlPanelToBoard();
-		}
+        public void stateChanged(ChangeEvent e) {
+            copyControlPanelToBoard();
+        }
 
-		public void focusLost(FocusEvent e) {
-			copyControlPanelToBoard();
-		}
+        public void focusLost(FocusEvent e) {
+            copyControlPanelToBoard();
+        }
 
-		public void focusGained(FocusEvent e) {
-		}
-	}
+        public void focusGained(FocusEvent e) {
+        }
+    }
 
-	private void enforceButtonRules() {
-		if (snapGridButton.isSelected()) {
-			final int gridSize = zone.getGrid().getSize();
-			setSnap(gridSize, gridSize);
-		} else if (snapTileButton.isSelected()) {
-			final Dimension tileSize = getTileSize();
-			if (tileSize != null)
-				setSnap(tileSize.width, tileSize.height);
-			else
-				setSnap(1, 1);
-		} else {
-			setSnap(1, 1);
-		}
-		updateGUI();
-		zone.setBoard(boardPosition);
-	}
+    private void enforceButtonRules() {
+        if (snapGridButton.isSelected()) {
+            final int gridSize = zone.getGrid().getSize();
+            setSnap(gridSize, gridSize);
+        } else if (snapTileButton.isSelected()) {
+            final Dimension tileSize = getTileSize();
+            if (tileSize != null)
+                setSnap(tileSize.width, tileSize.height);
+            else
+                setSnap(1, 1);
+        } else {
+            setSnap(1, 1);
+        }
+        updateGUI();
+        zone.setBoard(boardPosition);
+    }
 }

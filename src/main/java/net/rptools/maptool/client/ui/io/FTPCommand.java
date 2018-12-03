@@ -34,50 +34,50 @@ import org.apache.commons.net.ftp.FTPClientConfig;
  */
 
 public class FTPCommand extends FTPClient {
-	private final String host;
+    private final String host;
 
-	public FTPCommand(String h) throws IOException {
-		host = h;
-		FTPClientConfig config = new FTPClientConfig();
-		// Nothing to configure just yet but maybe in the future...
-		this.configure(config);
-		this.connect(host);
-	}
+    public FTPCommand(String h) throws IOException {
+        host = h;
+        FTPClientConfig config = new FTPClientConfig();
+        // Nothing to configure just yet but maybe in the future...
+        this.configure(config);
+        this.connect(host);
+    }
 
-	public int mkdir(String dir) throws IOException {
-		int result = 0;
-		try {
-			mkd(dir);
-			result = getReplyCode();
-		} catch (IOException e) {
-			result = getReplyCode();
-			if (result != 550) {
-				// "Directory already exists" is not necessarily an error. For now just print a
-				// stack trace and we'll decide later if this is a problem...
-				e.printStackTrace();
-			}
-		}
-		return result;
-	}
+    public int mkdir(String dir) throws IOException {
+        int result = 0;
+        try {
+            mkd(dir);
+            result = getReplyCode();
+        } catch (IOException e) {
+            result = getReplyCode();
+            if (result != 550) {
+                // "Directory already exists" is not necessarily an error. For now just print a
+                // stack trace and we'll decide later if this is a problem...
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
 
-	public int remove(String filename) throws IOException {
-		int result = 0;
-		try {
-			dele(filename);
-			result = getReplyCode();
-		} catch (IOException e) {
-			result = getReplyCode();
-			if (result != 550) {
-				// "File doesn't exist" is not an error, but we should report it for safety's sake.
-				e.printStackTrace();
-			}
-		}
-		return result;
-	}
+    public int remove(String filename) throws IOException {
+        int result = 0;
+        try {
+            dele(filename);
+            result = getReplyCode();
+        } catch (IOException e) {
+            result = getReplyCode();
+            if (result != 550) {
+                // "File doesn't exist" is not an error, but we should report it for safety's sake.
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
 
-	public boolean closeServer() throws IOException {
-		boolean result = this.logout();
-		this.disconnect();
-		return result;
-	}
+    public boolean closeServer() throws IOException {
+        boolean result = this.logout();
+        this.disconnect();
+        return result;
+    }
 }

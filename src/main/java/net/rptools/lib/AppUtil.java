@@ -12,56 +12,56 @@ import java.io.File;
 
 public class AppUtil {
 
-	private static final String USER_HOME;
+    private static final String USER_HOME;
 
-	private static String appName;
+    private static String appName;
 
-	static {
+    static {
 
-		USER_HOME = System.getProperty("user.home");
+        USER_HOME = System.getProperty("user.home");
 
-	}
+    }
 
-	public static void init(String appName) {
-		AppUtil.appName = appName;
-	}
+    public static void init(String appName) {
+        AppUtil.appName = appName;
+    }
 
-	public static File getUserHome() {
-		checkInit();
-		return USER_HOME != null ? new File(USER_HOME) : null;
-	}
+    public static File getUserHome() {
+        checkInit();
+        return USER_HOME != null ? new File(USER_HOME) : null;
+    }
 
-	public static File getAppHome() {
-		checkInit();
-		if (USER_HOME == null) {
-			return null;
-		}
+    public static File getAppHome() {
+        checkInit();
+        if (USER_HOME == null) {
+            return null;
+        }
 
-		File home = new File(USER_HOME + "/." + appName);
-		home.mkdirs();
+        File home = new File(USER_HOME + "/." + appName);
+        home.mkdirs();
 
-		return home;
-	}
+        return home;
+    }
 
-	public static File getAppHome(String subdir) {
-		checkInit();
-		if (USER_HOME == null) {
-			return null;
-		}
+    public static File getAppHome(String subdir) {
+        checkInit();
+        if (USER_HOME == null) {
+            return null;
+        }
 
-		File home = new File(getAppHome().getPath() + "/" + subdir);
-		home.mkdirs();
+        File home = new File(getAppHome().getPath() + "/" + subdir);
+        home.mkdirs();
 
-		return home;
-	}
+        return home;
+    }
 
-	private static void checkInit() {
-		if (appName == null) {
-			throw new IllegalStateException("Must call init() on AppUtil");
-		}
-	}
+    private static void checkInit() {
+        if (appName == null) {
+            throw new IllegalStateException("Must call init() on AppUtil");
+        }
+    }
 
-	public static String getAppName() {
-		return appName;
-	}
+    public static String getAppName() {
+        return appName;
+    }
 }

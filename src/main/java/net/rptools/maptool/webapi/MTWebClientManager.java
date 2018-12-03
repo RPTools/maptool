@@ -17,83 +17,83 @@ import java.util.Set;
 
 public class MTWebClientManager {
 
-	/**
-	 * Create the singleton instance.
-	 */
-	private final static MTWebClientManager instance = new MTWebClientManager();
+    /**
+     * Create the singleton instance.
+     */
+    private final static MTWebClientManager instance = new MTWebClientManager();
 
-	/**
-	 * The connected clients.
-	 */
-	private Set<MTWebSocket> clientSockets = Collections.synchronizedSet(new HashSet<MTWebSocket>());
+    /**
+     * The connected clients.
+     */
+    private Set<MTWebSocket> clientSockets = Collections.synchronizedSet(new HashSet<MTWebSocket>());
 
-	/**
-	 * Create a new MTWebClientManager.
-	 */
-	private MTWebClientManager() {
-	};
+    /**
+     * Create a new MTWebClientManager.
+     */
+    private MTWebClientManager() {
+    };
 
-	/**
-	 * Returns the singleton instance of MTWebClientManager.
-	 *
-	 * @return the instance of MTWebClientManager.
-	 */
-	public static MTWebClientManager getInstance() {
-		return instance;
-	}
+    /**
+     * Returns the singleton instance of MTWebClientManager.
+     *
+     * @return the instance of MTWebClientManager.
+     */
+    public static MTWebClientManager getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Return the sessions for the clients that are connected.
-	 *
-	 * @return the sessions for the clients that are connected.
-	 */
-	Collection<MTWebSocket> getClientSessions() {
-		return Collections.unmodifiableCollection(clientSockets);
-	}
+    /**
+     * Return the sessions for the clients that are connected.
+     *
+     * @return the sessions for the clients that are connected.
+     */
+    Collection<MTWebSocket> getClientSessions() {
+        return Collections.unmodifiableCollection(clientSockets);
+    }
 
-	/**
-	 * Sends a message to all sessions.
-	 * 
-	 * @param messageType
-	 *            the type of the message.
-	 * @param data
-	 *            the data to send
-	 */
-	public void sendToAllSessions(String messageType, JSONObject data) {
-		for (MTWebSocket ws : clientSockets) {
-			ws.sendMessage(messageType, data);
-		}
-	}
+    /**
+     * Sends a message to all sessions.
+     * 
+     * @param messageType
+     *            the type of the message.
+     * @param data
+     *            the data to send
+     */
+    public void sendToAllSessions(String messageType, JSONObject data) {
+        for (MTWebSocket ws : clientSockets) {
+            ws.sendMessage(messageType, data);
+        }
+    }
 
-	/**
-	 * Adds a client to the list of clients being managed.
-	 * 
-	 * @param wcs
-	 *            The web socket of the client.
-	 */
-	void addClient(MTWebSocket wcs) {
-		clientSockets.add(wcs);
-		sendInitialInfo(wcs);
-	}
+    /**
+     * Adds a client to the list of clients being managed.
+     * 
+     * @param wcs
+     *            The web socket of the client.
+     */
+    void addClient(MTWebSocket wcs) {
+        clientSockets.add(wcs);
+        sendInitialInfo(wcs);
+    }
 
-	/**
-	 * Removes a client from the list of clients being managed.
-	 * 
-	 * @param wcs
-	 *            The web socket of the client.
-	 */
-	void removeClient(MTWebSocket wcs) {
-		clientSockets.remove(wcs);
-	}
+    /**
+     * Removes a client from the list of clients being managed.
+     * 
+     * @param wcs
+     *            The web socket of the client.
+     */
+    void removeClient(MTWebSocket wcs) {
+        clientSockets.remove(wcs);
+    }
 
-	/**
-	 * Send the initiative information to the specified client.
-	 * 
-	 * @param wcs
-	 *            the web socket of the client.
-	 */
-	void sendInitialInfo(MTWebSocket wcs) {
-		WebAppInitiative.getInstance().sendInitiative(wcs);
-	}
+    /**
+     * Send the initiative information to the specified client.
+     * 
+     * @param wcs
+     *            the web socket of the client.
+     */
+    void sendInitialInfo(MTWebSocket wcs) {
+        WebAppInitiative.getInstance().sendInitiative(wcs);
+    }
 
 }

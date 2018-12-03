@@ -28,103 +28,103 @@ import net.sf.json.JSONArray;
  * @author bdornauf
  */
 public class ChatFunction extends AbstractFunction {
-	/**
-	 * Ctor
-	 */
-	public ChatFunction() {
-		super(1, 3, "broadcast");
-	}
+    /**
+     * Ctor
+     */
+    public ChatFunction() {
+        super(1, 3, "broadcast");
+    }
 
-	/**
-	 * The singleton instance.
-	 */
-	private final static ChatFunction instance = new ChatFunction();
+    /**
+     * The singleton instance.
+     */
+    private final static ChatFunction instance = new ChatFunction();
 
-	/**
-	 * Gets the Input instance.
-	 * 
-	 * @return the instance.
-	 */
-	public static ChatFunction getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the Input instance.
+     * 
+     * @return the instance.
+     */
+    public static ChatFunction getInstance() {
+        return instance;
+    }
 
-	@Override
-	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
-		MapToolVariableResolver resolver = ((MapToolVariableResolver) parser.getVariableResolver());
+    @Override
+    public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
+        MapToolVariableResolver resolver = ((MapToolVariableResolver) parser.getVariableResolver());
 
-		if (functionName.equals("broadcast")) {
-			return broadcast(resolver, parameters);
-		} else {
-			throw new ParserException("Unknown function: " + functionName);
-		}
-	}
+        if (functionName.equals("broadcast")) {
+            return broadcast(resolver, parameters);
+        } else {
+            throw new ParserException("Unknown function: " + functionName);
+        }
+    }
 
-	/**
-	 * broadcast sends a message to the chat panel of all clients using TextMessage.SAY
-	 * 
-	 * @return empty string
-	 */
-	private Object broadcast(MapToolVariableResolver resolver, List<Object> param) throws ParserException {
-		// broadcast shall be trusted
-		if (!MapTool.getParser().isMacroTrusted()) {
-			throw new ParserException(I18N.getText("macro.function.general.noPerm", "broadcast"));
-		}
+    /**
+     * broadcast sends a message to the chat panel of all clients using TextMessage.SAY
+     * 
+     * @return empty string
+     */
+    private Object broadcast(MapToolVariableResolver resolver, List<Object> param) throws ParserException {
+        // broadcast shall be trusted
+        if (!MapTool.getParser().isMacroTrusted()) {
+            throw new ParserException(I18N.getText("macro.function.general.noPerm", "broadcast"));
+        }
 
-		String message = null;
-		String delim = ",";
-		JSONArray jarray = null;
-		switch (param.size()) {
-		default:
-			throw new ParserException(I18N.getText("macro.function.general.tooManyParam", "broadcast", 3, param.size()));
-		case 0:
-			throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", "broadcast", 1, 0));
-		case 3:
-			delim = param.get(2).toString();
-			// FALLTHRU
-		case 2:
-			String temp = param.get(1).toString().trim();
-			if ("json".equals(delim) || temp.charAt(0) == '[')
-				jarray = JSONArray.fromObject(temp);
-			else {
-				jarray = new JSONArray();
-				for (String t : temp.split(delim))
-					jarray.add(t.trim());
-			}
-			if (jarray.isEmpty())
-				return ""; // dont send to empty lists
+        String message = null;
+        String delim = ",";
+        JSONArray jarray = null;
+        switch (param.size()) {
+        default:
+            throw new ParserException(I18N.getText("macro.function.general.tooManyParam", "broadcast", 3, param.size()));
+        case 0:
+            throw new ParserException(I18N.getText("macro.function.general.notEnoughParam", "broadcast", 1, 0));
+        case 3:
+            delim = param.get(2).toString();
+            // FALLTHRU
+        case 2:
+            String temp = param.get(1).toString().trim();
+            if ("json".equals(delim) || temp.charAt(0) == '[')
+                jarray = JSONArray.fromObject(temp);
+            else {
+                jarray = new JSONArray();
+                for (String t : temp.split(delim))
+                    jarray.add(t.trim());
+            }
+            if (jarray.isEmpty())
+                return ""; // dont send to empty lists
 
-			// FALLTHRU
-		case 1:
-			message = checkForCheating(param.get(0).toString());
-			if (message != null) {
-				if (jarray == null || jarray.isEmpty()) {
-					MapTool.addGlobalMessage(message);
-				} else {
-					@SuppressWarnings("unchecked")
-					Collection<String> targets = JSONArray.toCollection(jarray, List.class); // Returns an ArrayList<String>
-					MapTool.addGlobalMessage(message, (List<String>) targets);
-				}
-			}
-			return "";
-		}
-	}
+            // FALLTHRU
+        case 1:
+            message = checkForCheating(param.get(0).toString());
+            if (message != null) {
+                if (jarray == null || jarray.isEmpty()) {
+                    MapTool.addGlobalMessage(message);
+                } else {
+                    @SuppressWarnings("unchecked")
+                    Collection<String> targets = JSONArray.toCollection(jarray, List.class); // Returns an ArrayList<String>
+                    MapTool.addGlobalMessage(message, (List<String>) targets);
+                }
+            }
+            return "";
+        }
+    }
 
-	/**
-	 * check if a message contains characters flagged as cheating and delete the message if found. As well
-	 * 
-	 * @param message
-	 * @return message
-	 */
-	private String checkForCheating(String message) {
-		// Detect whether the person is attempting to fake rolls.
-		Pattern cheater_pattern = CommandPanel.CHEATER_PATTERN;
+    /**
+     * check if a message contains characters flagged as cheating and delete the message if found. As well
+     * 
+     * @param message
+     * @return message
+     */
+    private String checkForCheating(String message) {
+        // Detect whether the person is attempting to fake rolls.
+        Pattern cheater_pattern = CommandPanel.CHEATER_PATTERN;
 
-		if (cheater_pattern.matcher(message).find()) {
-			MapTool.addServerMessage(TextMessage.me(null, "Cheater.  You have been reported."));
-			MapTool.serverCommand().message(TextMessage.gm(null, MapTool.getPlayer().getName() + " was caught <i>cheating</i>: " + message));
-			message = null;
-		}
-		return message;
-	}
+        if (cheater_pattern.matcher(message).find()) {
+            MapTool.addServerMessage(TextMessage.me(null, "Cheater.  You have been reported."));
+            MapTool.serverCommand().message(TextMessage.gm(null, MapTool.getPlayer().getName() + " was caught <i>cheating</i>: " + message));
+            message = null;
+        }
+        return message;
+    }
 }

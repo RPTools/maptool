@@ -22,82 +22,82 @@ import javazoom.jl.player.Player;
 
 public class SoundPlayer {
 
-	private static ExecutorService playerThreadPool = Executors.newCachedThreadPool();
-	private static AtomicInteger playerCount = new AtomicInteger();
-	public static final String FILE_EXTENSION = "mp3";
+    private static ExecutorService playerThreadPool = Executors.newCachedThreadPool();
+    private static AtomicInteger playerCount = new AtomicInteger();
+    public static final String FILE_EXTENSION = "mp3";
 
-	public static void play(File file) throws IOException {
-		try {
-			Player player = new Player(new FileInputStream(file));
-			play(player);
-		} catch (JavaLayerException jle) {
-			throw new IOException(jle.toString());
-		}
-	}
+    public static void play(File file) throws IOException {
+        try {
+            Player player = new Player(new FileInputStream(file));
+            play(player);
+        } catch (JavaLayerException jle) {
+            throw new IOException(jle.toString());
+        }
+    }
 
-	public static void play(URL url) throws IOException {
-		try {
-			Player player = new Player(url.openStream());
-			play(player);
-		} catch (JavaLayerException jle) {
-			throw new IOException(jle.toString());
-		}
-	}
+    public static void play(URL url) throws IOException {
+        try {
+            Player player = new Player(url.openStream());
+            play(player);
+        } catch (JavaLayerException jle) {
+            throw new IOException(jle.toString());
+        }
+    }
 
-	public static void play(String sound) throws IOException {
-		try {
-			Player player = new Player(SoundPlayer.class.getClassLoader().getResourceAsStream(sound));
-			play(player);
-			player.close();
-		} catch (JavaLayerException jle) {
-			throw new IOException(jle.toString());
-		} catch (NullPointerException npe) {
-			throw new IOException("Could not find sound: " + sound);
-		}
-	}
+    public static void play(String sound) throws IOException {
+        try {
+            Player player = new Player(SoundPlayer.class.getClassLoader().getResourceAsStream(sound));
+            play(player);
+            player.close();
+        } catch (JavaLayerException jle) {
+            throw new IOException(jle.toString());
+        } catch (NullPointerException npe) {
+            throw new IOException("Could not find sound: " + sound);
+        }
+    }
 
-	public static int stopAll() {
-		int currentThreads = playerCount.get();
-		playerThreadPool.shutdownNow();
-		System.out.println("Shutdown? " + playerThreadPool.isShutdown());
-		playerThreadPool.shutdown();
-		System.out.println("Terminated? " + playerThreadPool.isTerminated());
+    public static int stopAll() {
+        int currentThreads = playerCount.get();
+        playerThreadPool.shutdownNow();
+        System.out.println("Shutdown? " + playerThreadPool.isShutdown());
+        playerThreadPool.shutdown();
+        System.out.println("Terminated? " + playerThreadPool.isTerminated());
 
-		return currentThreads;
-	}
+        return currentThreads;
+    }
 
-	/**
-	 * Wait for all sounds to stop playing (Mostly for testing purposes)
-	 */
-	public static void waitFor() {
+    /**
+     * Wait for all sounds to stop playing (Mostly for testing purposes)
+     */
+    public static void waitFor() {
 
-		while (playerCount.get() > 0) {
-			try {
-				synchronized (playerCount) {
-					playerCount.wait();
-				}
-			} catch (InterruptedException ie) {
-				ie.printStackTrace();
-			}
-		}
-	}
+        while (playerCount.get() > 0) {
+            try {
+                synchronized (playerCount) {
+                    playerCount.wait();
+                }
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+        }
+    }
 
-	private static void play(final Player player) {
-		playerCount.incrementAndGet();
+    private static void play(final Player player) {
+        playerCount.incrementAndGet();
 
-		// Not sure how to use Future here?
-		Future<?> f = playerThreadPool.submit(new Runnable() {
-			public void run() {
-				try {
-					player.play();
-					playerCount.decrementAndGet();
-					synchronized (playerCount) {
-						playerCount.notify();
-					}
-				} catch (JavaLayerException jle) {
-					jle.printStackTrace();
-				}
-			}
-		});
-	}
+        // Not sure how to use Future here?
+        Future<?> f = playerThreadPool.submit(new Runnable() {
+            public void run() {
+                try {
+                    player.play();
+                    playerCount.decrementAndGet();
+                    synchronized (playerCount) {
+                        playerCount.notify();
+                    }
+                } catch (JavaLayerException jle) {
+                    jle.printStackTrace();
+                }
+            }
+        });
+    }
 }

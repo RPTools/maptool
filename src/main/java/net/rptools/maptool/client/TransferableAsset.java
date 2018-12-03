@@ -19,27 +19,27 @@ import net.rptools.maptool.model.Asset;
  */
 public class TransferableAsset implements Transferable {
 
-	public static final DataFlavor dataFlavor = new DataFlavor(Asset.class, "Asset");
+    public static final DataFlavor dataFlavor = new DataFlavor(Asset.class, "Asset");
 
-	private Asset asset;
+    private Asset asset;
 
-	public TransferableAsset(Asset asset) {
-		this.asset = asset;
-	}
+    public TransferableAsset(Asset asset) {
+        this.asset = asset;
+    }
 
-	public Asset getAsset() {
-		return asset;
-	}
+    public Asset getAsset() {
+        return asset;
+    }
 
-	public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-		return asset;
-	}
+    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+        return asset;
+    }
 
-	public DataFlavor[] getTransferDataFlavors() {
-		return new DataFlavor[] { dataFlavor };
-	}
+    public DataFlavor[] getTransferDataFlavors() {
+        return new DataFlavor[] { dataFlavor };
+    }
 
-	public boolean isDataFlavorSupported(DataFlavor flavor) {
-		return flavor.equals(dataFlavor);
-	}
+    public boolean isDataFlavorSupported(DataFlavor flavor) {
+        return flavor.equals(dataFlavor);
+    }
 }

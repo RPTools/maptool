@@ -17,56 +17,56 @@ import java.awt.geom.Area;
  * An rectangle
  */
 public class ShapeDrawable extends AbstractDrawing {
-	private final Shape shape;
-	private final boolean useAntiAliasing;
+    private final Shape shape;
+    private final boolean useAntiAliasing;
 
-	public ShapeDrawable(Shape shape, boolean useAntiAliasing) {
-		this.shape = shape;
-		this.useAntiAliasing = useAntiAliasing;
-	}
+    public ShapeDrawable(Shape shape, boolean useAntiAliasing) {
+        this.shape = shape;
+        this.useAntiAliasing = useAntiAliasing;
+    }
 
-	public ShapeDrawable(Shape shape) {
-		this(shape, true);
-	}
+    public ShapeDrawable(Shape shape) {
+        this(shape, true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-	 */
-	public java.awt.Rectangle getBounds() {
-		return shape.getBounds();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+     */
+    public java.awt.Rectangle getBounds() {
+        return shape.getBounds();
+    }
 
-	public Area getArea() {
-		return new Area(shape);
-	}
+    public Area getArea() {
+        return new Area(shape);
+    }
 
-	@Override
-	protected void draw(Graphics2D g) {
-		Object oldAA = applyAA(g);
-		g.draw(shape);
-		restoreAA(g, oldAA);
-	}
+    @Override
+    protected void draw(Graphics2D g) {
+        Object oldAA = applyAA(g);
+        g.draw(shape);
+        restoreAA(g, oldAA);
+    }
 
-	@Override
-	protected void drawBackground(Graphics2D g) {
-		Object oldAA = applyAA(g);
-		g.fill(shape);
-		restoreAA(g, oldAA);
-	}
+    @Override
+    protected void drawBackground(Graphics2D g) {
+        Object oldAA = applyAA(g);
+        g.fill(shape);
+        restoreAA(g, oldAA);
+    }
 
-	public Shape getShape() {
-		return shape;
-	}
+    public Shape getShape() {
+        return shape;
+    }
 
-	private Object applyAA(Graphics2D g) {
-		Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, useAntiAliasing ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
-		return oldAA;
-	}
+    private Object applyAA(Graphics2D g) {
+        Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, useAntiAliasing ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
+        return oldAA;
+    }
 
-	private void restoreAA(Graphics2D g, Object oldAA) {
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
-	}
+    private void restoreAA(Graphics2D g, Object oldAA) {
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
+    }
 }

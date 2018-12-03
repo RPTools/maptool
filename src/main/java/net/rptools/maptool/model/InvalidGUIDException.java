@@ -9,14 +9,14 @@
 package net.rptools.maptool.model;
 
 public class InvalidGUIDException extends RuntimeException {
-	private static final long serialVersionUID = 3257568421032768820L;
+    private static final long serialVersionUID = 3257568421032768820L;
 
-	public InvalidGUIDException() {
-		super();
-	}
+    public InvalidGUIDException() {
+        super();
+    }
 
-	public InvalidGUIDException(String s) {
-		super(s);
-	}
+    public InvalidGUIDException(String s) {
+        super(s);
+    }
 
 }

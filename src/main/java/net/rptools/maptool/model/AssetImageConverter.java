@@ -13,25 +13,25 @@ import com.thoughtworks.xstream.converters.extended.EncodedByteArrayConverter;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public class AssetImageConverter extends EncodedByteArrayConverter {
-	@Override
-	public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-		// Ignore the image when creating 1.3.b65+ campaigns with assets...
-		// System.out.println(context.toString()); // uncomment to set a breakpoint
-	}
+    @Override
+    public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+        // Ignore the image when creating 1.3.b65+ campaigns with assets...
+        // System.out.println(context.toString()); // uncomment to set a breakpoint
+    }
 
-	// @formatter:off
-	/*
-	@Override
-	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		// But be sure to read them in if they exist.
-		return super.unmarshal(reader, context);
-	}
-	*/
-	// @formatter:on
+    // @formatter:off
+    /*
+    @Override
+    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+        // But be sure to read them in if they exist.
+        return super.unmarshal(reader, context);
+    }
+    */
+    // @formatter:on
 
-	@SuppressWarnings("rawtypes")
-	@Override
-	public boolean canConvert(Class type) {
-		return true; // Tell XStream that we can convert the image so it uses our methods
-	}
+    @SuppressWarnings("rawtypes")
+    @Override
+    public boolean canConvert(Class type) {
+        return true; // Tell XStream that we can convert the image so it uses our methods
+    }
 }

@@ -14,17 +14,17 @@ import javax.swing.AbstractButton;
 
 public class ButtonLocaleChangeListener implements LocaleChangeListener {
 
-	private AbstractButton button;
-	private String key;
+    private AbstractButton button;
+    private String key;
 
-	public ButtonLocaleChangeListener(AbstractButton button, String key) {
-		this.button = button;
-		this.key = key;
-	}
+    public ButtonLocaleChangeListener(AbstractButton button, String key) {
+        this.button = button;
+        this.key = key;
+    }
 
-	////
-	// LOCALE CHANGE LISTENER
-	public void localeChanged(Locale locale) {
-		button.setText(I18NManager.getText(key));
-	}
+    ////
+    // LOCALE CHANGE LISTENER
+    public void localeChanged(Locale locale) {
+        button.setText(I18NManager.getText(key));
+    }
 }

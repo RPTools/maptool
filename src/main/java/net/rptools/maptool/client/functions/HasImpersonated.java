@@ -20,25 +20,25 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 
 public class HasImpersonated extends AbstractFunction {
-	private static final HasImpersonated instance = new HasImpersonated();
+    private static final HasImpersonated instance = new HasImpersonated();
 
-	private HasImpersonated() {
-		super(0, 0, "hasImpersonated");
-	}
+    private HasImpersonated() {
+        super(0, 0, "hasImpersonated");
+    }
 
-	public static HasImpersonated getInstance() {
-		return instance;
-	}
+    public static HasImpersonated getInstance() {
+        return instance;
+    }
 
-	@Override
-	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
-		Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-		Token t;
-		GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
-		if (guid != null)
-			t = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
-		else
-			t = zone.resolveToken(MapTool.getFrame().getCommandPanel().getIdentity());
-		return t == null ? BigDecimal.ZERO : BigDecimal.ONE;
-	}
+    @Override
+    public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
+        Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+        Token t;
+        GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
+        if (guid != null)
+            t = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
+        else
+            t = zone.resolveToken(MapTool.getFrame().getCommandPanel().getIdentity());
+        return t == null ? BigDecimal.ZERO : BigDecimal.ONE;
+    }
 }

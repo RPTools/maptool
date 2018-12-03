@@ -12,38 +12,38 @@ import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Zone;
 
 public abstract class AbstractAStarHexEuclideanWalker extends AbstractAStarWalker {
-	protected int[][] oddNeighborMap;
-	protected int[][] evenNeighborMap;
+    protected int[][] oddNeighborMap;
+    protected int[][] evenNeighborMap;
 
-	public AbstractAStarHexEuclideanWalker(Zone zone) {
-		super(zone);
-	}
+    public AbstractAStarHexEuclideanWalker(Zone zone) {
+        super(zone);
+    }
 
-	protected abstract void initNeighborMaps();
+    protected abstract void initNeighborMaps();
 
-	protected abstract int[][] getNeighborMap(int x, int y);
+    protected abstract int[][] getNeighborMap(int x, int y);
 
-	@Override
-	protected double hScore(CellPoint p1, CellPoint p2) {
-		return euclideanDistance(p1, p2);
-	}
+    @Override
+    protected double hScore(CellPoint p1, CellPoint p2) {
+        return euclideanDistance(p1, p2);
+    }
 
-	// Adjusted math per: https://www.redblobgames.com/grids/hexagons/#distances
-	private double euclideanDistance(CellPoint current, CellPoint goal) {
-		// Using Axial coordinates q & r to match hex coordinate conventions
-		int aq = current.x;
-		int bq = goal.x;
-		int ar = current.y;
-		int br = goal.y;
+    // Adjusted math per: https://www.redblobgames.com/grids/hexagons/#distances
+    private double euclideanDistance(CellPoint current, CellPoint goal) {
+        // Using Axial coordinates q & r to match hex coordinate conventions
+        int aq = current.x;
+        int bq = goal.x;
+        int ar = current.y;
+        int br = goal.y;
 
-		// break ties to prefer better looking paths that are along the straight line from the starting point to the goal
-		int crossProductTieBreaker = Math.abs((aq - bq) * crossY - crossX * (ar - br));
-		double heuristic = ((Math.abs(aq - bq) + Math.abs(aq + ar - bq - br) + Math.abs(ar - br)) / 2) + crossProductTieBreaker * 0.001;
+        // break ties to prefer better looking paths that are along the straight line from the starting point to the goal
+        int crossProductTieBreaker = Math.abs((aq - bq) * crossY - crossX * (ar - br));
+        double heuristic = ((Math.abs(aq - bq) + Math.abs(aq + ar - bq - br) + Math.abs(ar - br)) / 2) + crossProductTieBreaker * 0.001;
 
-		return heuristic;
-	}
+        return heuristic;
+    }
 
-	protected double getDiagonalMultiplier(int[] neighborArray) {
-		return 1;
-	}
+    protected double getDiagonalMultiplier(int[] neighborArray) {
+        return 1;
+    }
 }

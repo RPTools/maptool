@@ -16,45 +16,45 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AssetPanelModel implements PropertyChangeListener {
 
-	private final ImageFileTreeModel imageFileTreeModel;
+    private final ImageFileTreeModel imageFileTreeModel;
 
-	private final List<ImageObserver> observerList = new CopyOnWriteArrayList<ImageObserver>();
+    private final List<ImageObserver> observerList = new CopyOnWriteArrayList<ImageObserver>();
 
-	public AssetPanelModel() {
-		imageFileTreeModel = new ImageFileTreeModel();
-	}
+    public AssetPanelModel() {
+        imageFileTreeModel = new ImageFileTreeModel();
+    }
 
-	public ImageFileTreeModel getImageFileTreeModel() {
-		return imageFileTreeModel;
-	}
+    public ImageFileTreeModel getImageFileTreeModel() {
+        return imageFileTreeModel;
+    }
 
-	public void removeRootGroup(Directory dir) {
-		imageFileTreeModel.removeRootGroup(dir);
-		dir.removePropertyChangeListener(this);
-	}
+    public void removeRootGroup(Directory dir) {
+        imageFileTreeModel.removeRootGroup(dir);
+        dir.removePropertyChangeListener(this);
+    }
 
-	public void addRootGroup(Directory dir) {
-		if (imageFileTreeModel.containsRootGroup(dir)) {
-			return;
-		}
-		dir.addPropertyChangeListener(this);
-		imageFileTreeModel.addRootGroup(dir);
-	}
+    public void addRootGroup(Directory dir) {
+        if (imageFileTreeModel.containsRootGroup(dir)) {
+            return;
+        }
+        dir.addPropertyChangeListener(this);
+        imageFileTreeModel.addRootGroup(dir);
+    }
 
-	public void addImageUpdateObserver(ImageObserver observer) {
-		if (!observerList.contains(observer)) {
-			observerList.add(observer);
-		}
-	}
+    public void addImageUpdateObserver(ImageObserver observer) {
+        if (!observerList.contains(observer)) {
+            observerList.add(observer);
+        }
+    }
 
-	public void removeImageUpdateObserver(ImageObserver observer) {
-		observerList.remove(observer);
-	}
+    public void removeImageUpdateObserver(ImageObserver observer) {
+        observerList.remove(observer);
+    }
 
-	// PROPERTY CHANGE LISTENER
-	public void propertyChange(PropertyChangeEvent evt) {
-		for (ImageObserver observer : observerList) {
-			observer.imageUpdate(null, ImageObserver.ALLBITS, 0, 0, 0, 0);
-		}
-	}
+    // PROPERTY CHANGE LISTENER
+    public void propertyChange(PropertyChangeEvent evt) {
+        for (ImageObserver observer : observerList) {
+            observer.imageUpdate(null, ImageObserver.ALLBITS, 0, 0, 0, 0);
+        }
+    }
 }

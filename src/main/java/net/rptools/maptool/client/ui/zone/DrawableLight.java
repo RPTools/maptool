@@ -15,32 +15,32 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 
 public class DrawableLight {
 
-	private DrawablePaint paint;
-	private Area area;
-	private LightSource.Type type;
+    private DrawablePaint paint;
+    private Area area;
+    private LightSource.Type type;
 
-	public DrawableLight(LightSource.Type type, DrawablePaint paint, Area area) {
-		super();
-		this.paint = paint;
-		this.area = area;
-		this.type = type;
-	}
+    public DrawableLight(LightSource.Type type, DrawablePaint paint, Area area) {
+        super();
+        this.paint = paint;
+        this.area = area;
+        this.type = type;
+    }
 
-	public DrawablePaint getPaint() {
-		return paint;
-	}
+    public DrawablePaint getPaint() {
+        return paint;
+    }
 
-	public Area getArea() {
-		return area;
-	}
+    public Area getArea() {
+        return area;
+    }
 
-	public LightSource.Type getType() {
-		return type;
-	}
+    public LightSource.Type getType() {
+        return type;
+    }
 
-	@Override
-	public String toString() {
-		return "DrawableLight[" + area.getBounds() + ", " + paint.getClass().getName() + "]";
-	}
+    @Override
+    public String toString() {
+        return "DrawableLight[" + area.getBounds() + ", " + paint.getClass().getName() + "]";
+    }
 
 }

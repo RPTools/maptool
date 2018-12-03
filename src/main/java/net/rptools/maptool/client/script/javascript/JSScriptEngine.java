@@ -22,124 +22,124 @@ import java.util.Set;
 
 public class JSScriptEngine {
 
-	private static JSScriptEngine jsScriptEngine = new JSScriptEngine();
-	private static final Logger log = LogManager.getLogger(JSScriptEngine.class);
+    private static JSScriptEngine jsScriptEngine = new JSScriptEngine();
+    private static final Logger log = LogManager.getLogger(JSScriptEngine.class);
 
-	private ScriptEngine engine;
-	private ScriptContext anonymousContext;
+    private ScriptEngine engine;
+    private ScriptContext anonymousContext;
 
-	public class JSClassFilter implements ClassFilter {
+    public class JSClassFilter implements ClassFilter {
 
-		@Override
-		public boolean exposeToScripts(String jclass) {
-			if (jclass.equals("java.lang.Math")) {
-				return true;
-			}
-			if (jclass.equals("java.lang.Boolean")) {
-				return true;
-			}
-			if (jclass.equals("java.lang.Byte")) {
-				return true;
-			}
-			if (jclass.equals("java.lang.Character")) {
-				return true;
-			}
-			if (jclass.equals("java.lang.Double")) {
-				return true;
-			}
-			if (jclass.equals("java.lang.Float")) {
-				return true;
-			}
-			if (jclass.equals("java.lang.Long")) {
-				return true;
-			}
-			if (jclass.equals("java.lang.Number")) {
-				return true;
-			}
-			if (jclass.equals("java.lang.Short")) {
-				return true;
-			}
-			if (jclass.equals("java.lang.StrictMath")) {
-				return true;
-			}
-			if (jclass.equals("java.lang.String")) {
-				return true;
-			}
-			if (jclass.startsWith("java.lang.")) {
-				return false;
-			}
-			if (jclass.startsWith("java.util.Timer")) {
-				return false;
-			}
-			if (jclass.startsWith("java.util.concurrent")) {
-				return false;
-			}
-			if (jclass.startsWith("java.util.concurrent.atomic")) {
-				return false;
-			}
-			if (jclass.startsWith("java.util.concurrent.locks")) {
-				return false;
-			}
-			if (jclass.startsWith("java.util.function")) {
-				return false;
-			}
-			if (jclass.startsWith("java.util.jar")) {
-				return false;
-			}
-			if (jclass.startsWith("java.util.logging")) {
-				return false;
-			}
-			if (jclass.startsWith("java.util.spi")) {
-				return false;
-			}
-			if (jclass.startsWith("java.util.zip")) {
-				return false;
-			}
-			if (jclass.startsWith("java.util.")) {
-				return true;
-			}
-			if (jclass.startsWith("net.rptools.maptool.client.script.javascript.api.")) {
-				return true;
-			}
+        @Override
+        public boolean exposeToScripts(String jclass) {
+            if (jclass.equals("java.lang.Math")) {
+                return true;
+            }
+            if (jclass.equals("java.lang.Boolean")) {
+                return true;
+            }
+            if (jclass.equals("java.lang.Byte")) {
+                return true;
+            }
+            if (jclass.equals("java.lang.Character")) {
+                return true;
+            }
+            if (jclass.equals("java.lang.Double")) {
+                return true;
+            }
+            if (jclass.equals("java.lang.Float")) {
+                return true;
+            }
+            if (jclass.equals("java.lang.Long")) {
+                return true;
+            }
+            if (jclass.equals("java.lang.Number")) {
+                return true;
+            }
+            if (jclass.equals("java.lang.Short")) {
+                return true;
+            }
+            if (jclass.equals("java.lang.StrictMath")) {
+                return true;
+            }
+            if (jclass.equals("java.lang.String")) {
+                return true;
+            }
+            if (jclass.startsWith("java.lang.")) {
+                return false;
+            }
+            if (jclass.startsWith("java.util.Timer")) {
+                return false;
+            }
+            if (jclass.startsWith("java.util.concurrent")) {
+                return false;
+            }
+            if (jclass.startsWith("java.util.concurrent.atomic")) {
+                return false;
+            }
+            if (jclass.startsWith("java.util.concurrent.locks")) {
+                return false;
+            }
+            if (jclass.startsWith("java.util.function")) {
+                return false;
+            }
+            if (jclass.startsWith("java.util.jar")) {
+                return false;
+            }
+            if (jclass.startsWith("java.util.logging")) {
+                return false;
+            }
+            if (jclass.startsWith("java.util.spi")) {
+                return false;
+            }
+            if (jclass.startsWith("java.util.zip")) {
+                return false;
+            }
+            if (jclass.startsWith("java.util.")) {
+                return true;
+            }
+            if (jclass.startsWith("net.rptools.maptool.client.script.javascript.api.")) {
+                return true;
+            }
 
-			return false;
-		}
-	}
+            return false;
+        }
+    }
 
-	private void registerAPIObject(ScriptContext context, MapToolJSAPIInterface apiObj) throws ScriptException {
-		MapToolJSAPIDefinition def = apiObj.getClass().getAnnotation(MapToolJSAPIDefinition.class);
-		Bindings bindings = context.getBindings(ScriptContext.ENGINE_SCOPE);
-		bindings.put(def.javaScriptVariableName(), apiObj);
-	}
+    private void registerAPIObject(ScriptContext context, MapToolJSAPIInterface apiObj) throws ScriptException {
+        MapToolJSAPIDefinition def = apiObj.getClass().getAnnotation(MapToolJSAPIDefinition.class);
+        Bindings bindings = context.getBindings(ScriptContext.ENGINE_SCOPE);
+        bindings.put(def.javaScriptVariableName(), apiObj);
+    }
 
-	private JSScriptEngine() {
-		engine = new NashornScriptEngineFactory().getScriptEngine(new JSClassFilter());
-		anonymousContext = new SimpleScriptContext();
-		anonymousContext.setBindings(engine.createBindings(), ScriptContext.ENGINE_SCOPE);
-		Reflections reflections = new Reflections("net.rptools.maptool.client.script.javascript.api");
-		Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(MapToolJSAPIDefinition.class);
+    private JSScriptEngine() {
+        engine = new NashornScriptEngineFactory().getScriptEngine(new JSClassFilter());
+        anonymousContext = new SimpleScriptContext();
+        anonymousContext.setBindings(engine.createBindings(), ScriptContext.ENGINE_SCOPE);
+        Reflections reflections = new Reflections("net.rptools.maptool.client.script.javascript.api");
+        Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(MapToolJSAPIDefinition.class);
 
-		for (Class<?> apiClass : annotated) {
-			try {
-				if (MapToolJSAPIInterface.class.isAssignableFrom(apiClass)) {
-					registerAPIObject(anonymousContext, (MapToolJSAPIInterface) apiClass.newInstance());
-				} else {
-					log.error("Could not add API object " + apiClass.getName() + " (missing interface)");
-				}
-			} catch (Exception e) {
-				log.error("Could not add API object " + apiClass.getName(), e);
-			}
-		}
-	}
+        for (Class<?> apiClass : annotated) {
+            try {
+                if (MapToolJSAPIInterface.class.isAssignableFrom(apiClass)) {
+                    registerAPIObject(anonymousContext, (MapToolJSAPIInterface) apiClass.newInstance());
+                } else {
+                    log.error("Could not add API object " + apiClass.getName() + " (missing interface)");
+                }
+            } catch (Exception e) {
+                log.error("Could not add API object " + apiClass.getName(), e);
+            }
+        }
+    }
 
-	public static JSScriptEngine getJSScriptEngine() {
-		return jsScriptEngine;
-	}
+    public static JSScriptEngine getJSScriptEngine() {
+        return jsScriptEngine;
+    }
 
-	public Object evalAnonymous(String script) throws ScriptException {
+    public Object evalAnonymous(String script) throws ScriptException {
 
-		StringBuilder wrapped = new StringBuilder();
-		wrapped.append("(function() { var args = MTScript.getMTScriptCallingArgs(); ").append(script).append("})();");
-		return engine.eval(wrapped.toString(), anonymousContext);
-	}
+        StringBuilder wrapped = new StringBuilder();
+        wrapped.append("(function() { var args = MTScript.getMTScriptCallingArgs(); ").append(script).append("})();");
+        return engine.eval(wrapped.toString(), anonymousContext);
+    }
 }

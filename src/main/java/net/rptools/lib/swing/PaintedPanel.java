@@ -19,42 +19,42 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class PaintedPanel extends JPanel {
 
-	private Paint paint;
+    private Paint paint;
 
-	public PaintedPanel() {
-		this(null);
-	}
+    public PaintedPanel() {
+        this(null);
+    }
 
-	public PaintedPanel(Paint paint) {
-		this.paint = paint;
-		setMinimumSize(new Dimension(10, 10));
-		setPreferredSize(getMinimumSize());
-	}
+    public PaintedPanel(Paint paint) {
+        this.paint = paint;
+        setMinimumSize(new Dimension(10, 10));
+        setPreferredSize(getMinimumSize());
+    }
 
-	public Paint getPaint() {
-		return paint;
-	}
+    public Paint getPaint() {
+        return paint;
+    }
 
-	public void setPaint(Paint paint) {
-		this.paint = paint;
-		repaint();
-	}
+    public void setPaint(Paint paint) {
+        this.paint = paint;
+        repaint();
+    }
 
-	@Override
-	protected void paintComponent(Graphics g) {
+    @Override
+    protected void paintComponent(Graphics g) {
 
-		Dimension size = getSize();
-		g.setColor(getBackground());
-		g.fillRect(0, 0, size.width, size.height);
+        Dimension size = getSize();
+        g.setColor(getBackground());
+        g.fillRect(0, 0, size.width, size.height);
 
-		if (paint != null) {
-			((Graphics2D) g).setPaint(paint);
-			g.fillRect(0, 0, size.width, size.height);
-		} else {
-			g.setColor(Color.white);
-			g.fillRect(0, 0, size.width, size.height);
-			g.setColor(Color.red);
-			g.drawLine(size.width - 1, 0, 0, size.height - 1);
-		}
-	}
+        if (paint != null) {
+            ((Graphics2D) g).setPaint(paint);
+            g.fillRect(0, 0, size.width, size.height);
+        } else {
+            g.setColor(Color.white);
+            g.fillRect(0, 0, size.width, size.height);
+            g.setColor(Color.red);
+            g.drawLine(size.width - 1, 0, 0, size.height - 1);
+        }
+    }
 }

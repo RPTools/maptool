@@ -9,28 +9,28 @@
 package net.rptools.maptool.client.ui;
 
 public class StaticMessageDialog extends MessageDialog {
-	private static final long serialVersionUID = 3101164410637883204L;
+    private static final long serialVersionUID = 3101164410637883204L;
 
-	private String status;
+    private String status;
 
-	public StaticMessageDialog(String status) {
-		this.status = status;
-	}
+    public StaticMessageDialog(String status) {
+        this.status = status;
+    }
 
-	@Override
-	protected String getStatus() {
-		return status;
-	}
+    @Override
+    protected String getStatus() {
+        return status;
+    }
 
-	/**
-	 * Doesn't work right as it forces a repaint of the GlassPane object which takes a snapshot of the RootPane and then adds the 'status' message as an overlay. The problem is that the RootPane
-	 * snapshot includes the previous image that might have been displayed previously.
-	 * 
-	 * @param s
-	 */
-	public void setStatus(String s) {
-		this.status = s;
-		revalidate();
-		repaint();
-	}
+    /**
+     * Doesn't work right as it forces a repaint of the GlassPane object which takes a snapshot of the RootPane and then adds the 'status' message as an overlay. The problem is that the RootPane
+     * snapshot includes the previous image that might have been displayed previously.
+     * 
+     * @param s
+     */
+    public void setStatus(String s) {
+        this.status = s;
+        revalidate();
+        repaint();
+    }
 }

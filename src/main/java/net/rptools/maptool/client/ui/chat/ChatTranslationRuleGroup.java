@@ -12,39 +12,39 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ChatTranslationRuleGroup {
-	private final String name;
-	private final List<ChatTranslationRule> translationRuleList = new LinkedList<ChatTranslationRule>();
+    private final String name;
+    private final List<ChatTranslationRule> translationRuleList = new LinkedList<ChatTranslationRule>();
 
-	public ChatTranslationRuleGroup(String name) {
-		this(name, null);
-	}
+    public ChatTranslationRuleGroup(String name) {
+        this(name, null);
+    }
 
-	public ChatTranslationRuleGroup(String name, List<ChatTranslationRule> translationRuleList) {
-		this.name = name;
-		if (translationRuleList != null) {
-			this.translationRuleList.addAll(translationRuleList);
-		}
-	}
+    public ChatTranslationRuleGroup(String name, List<ChatTranslationRule> translationRuleList) {
+        this.name = name;
+        if (translationRuleList != null) {
+            this.translationRuleList.addAll(translationRuleList);
+        }
+    }
 
-	public void addRule(ChatTranslationRule rule) {
-		translationRuleList.add(rule);
-	}
+    public void addRule(ChatTranslationRule rule) {
+        translationRuleList.add(rule);
+    }
 
-	public boolean isEnabled() {
-		return true;
-	}
+    public boolean isEnabled() {
+        return true;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String translate(String incoming) {
-		if (incoming == null) {
-			return null;
-		}
-		for (ChatTranslationRule rule : translationRuleList) {
-			incoming = rule.translate(incoming);
-		}
-		return incoming;
-	}
+    public String translate(String incoming) {
+        if (incoming == null) {
+            return null;
+        }
+        for (ChatTranslationRule rule : translationRuleList) {
+            incoming = rule.translate(incoming);
+        }
+        return incoming;
+    }
 }

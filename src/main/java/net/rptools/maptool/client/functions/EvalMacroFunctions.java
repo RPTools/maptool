@@ -22,80 +22,80 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 
 public class EvalMacroFunctions extends AbstractFunction {
-	/** The singleton instance. */
-	private static final EvalMacroFunctions instance = new EvalMacroFunctions();
+    /** The singleton instance. */
+    private static final EvalMacroFunctions instance = new EvalMacroFunctions();
 
-	private EvalMacroFunctions() {
-		super(1, 1, "evalMacro", "execMacro");
-	}
+    private EvalMacroFunctions() {
+        super(1, 1, "evalMacro", "execMacro");
+    }
 
-	/**
-	 * Gets the instance of EvalMacroFunction.
-	 * 
-	 * @return the instance.
-	 */
-	public static EvalMacroFunctions getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the instance of EvalMacroFunction.
+     * 
+     * @return the instance.
+     */
+    public static EvalMacroFunctions getInstance() {
+        return instance;
+    }
 
-	@Override
-	public Object childEvaluate(Parser parser, String functionName,
-			List<Object> parameters) throws ParserException {
-		MapToolLineParser lineParser = MapTool.getParser();
+    @Override
+    public Object childEvaluate(Parser parser, String functionName,
+            List<Object> parameters) throws ParserException {
+        MapToolLineParser lineParser = MapTool.getParser();
 
-		if (!lineParser.isMacroTrusted()) {
-			throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-		}
+        if (!lineParser.isMacroTrusted()) {
+            throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+        }
 
-		MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
-		Token tokenInContext = resolver.getTokenInContext();
+        MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
+        Token tokenInContext = resolver.getTokenInContext();
 
-		// execMacro has new variable scope where as evalMacro does not.
-		if (functionName.equals("execMacro")) {
-			return execMacro(tokenInContext, parameters.get(0).toString());
-		} else {
-			return evalMacro(resolver, tokenInContext, parameters.get(0).toString());
-		}
+        // execMacro has new variable scope where as evalMacro does not.
+        if (functionName.equals("execMacro")) {
+            return execMacro(tokenInContext, parameters.get(0).toString());
+        } else {
+            return evalMacro(resolver, tokenInContext, parameters.get(0).toString());
+        }
 
-	}
+    }
 
-	/**
-	 * Executes the macro with a new variable scope.
-	 * 
-	 * @param tokenInContext
-	 *            The token in context.
-	 * @param line
-	 *            the macro to execute.
-	 * @return the result of the execution.
-	 * @throws ParserException
-	 *             if an error occurs.
-	 */
-	public static Object execMacro(Token tokenInContext, String line) throws ParserException {
-		return evalMacro(null, tokenInContext, line);
-	}
+    /**
+     * Executes the macro with a new variable scope.
+     * 
+     * @param tokenInContext
+     *            The token in context.
+     * @param line
+     *            the macro to execute.
+     * @return the result of the execution.
+     * @throws ParserException
+     *             if an error occurs.
+     */
+    public static Object execMacro(Token tokenInContext, String line) throws ParserException {
+        return evalMacro(null, tokenInContext, line);
+    }
 
-	/**
-	 * Executes the macro with the specified variable scope.
-	 * 
-	 * @param tokenInContext
-	 *            The token in context.
-	 * @param line
-	 *            the macro to execute.
-	 * @return the result of the execution.
-	 * @throws ParserException
-	 *             if an error occurs.
-	 */
-	public static Object evalMacro(MapToolVariableResolver res, Token tokenInContext, String line) throws ParserException {
-		res = res == null ? new MapToolVariableResolver(tokenInContext) : res;
+    /**
+     * Executes the macro with the specified variable scope.
+     * 
+     * @param tokenInContext
+     *            The token in context.
+     * @param line
+     *            the macro to execute.
+     * @return the result of the execution.
+     * @throws ParserException
+     *             if an error occurs.
+     */
+    public static Object evalMacro(MapToolVariableResolver res, Token tokenInContext, String line) throws ParserException {
+        res = res == null ? new MapToolVariableResolver(tokenInContext) : res;
 
-		MapToolMacroContext context = new MapToolMacroContext("<dynamic>", MapTool.getParser().getContext().getSource(), true);
-		String ret = MapTool.getParser().parseLine(res, tokenInContext, line, context);
+        MapToolMacroContext context = new MapToolMacroContext("<dynamic>", MapTool.getParser().getContext().getSource(), true);
+        String ret = MapTool.getParser().parseLine(res, tokenInContext, line, context);
 
-		// Try to convert to a number
-		try {
-			return new BigDecimal(ret);
-		} catch (Exception e) {
-			return ret;
-		}
-	}
+        // Try to convert to a number
+        try {
+            return new BigDecimal(ret);
+        } catch (Exception e) {
+            return ret;
+        }
+    }
 }

@@ -16,62 +16,62 @@ import java.util.List;
  */
 public class AnimationManager {
 
-	private static List<Animatable> animatableList = new ArrayList<Animatable>();
+    private static List<Animatable> animatableList = new ArrayList<Animatable>();
 
-	private static List<Animatable> removeList = new ArrayList<Animatable>();
-	private static List<Animatable> addList = new ArrayList<Animatable>();
+    private static List<Animatable> removeList = new ArrayList<Animatable>();
+    private static List<Animatable> addList = new ArrayList<Animatable>();
 
-	private static int delay = 200;
+    private static int delay = 200;
 
-	static {
-		new AnimThread().start();
-	}
+    static {
+        new AnimThread().start();
+    }
 
-	public static void addAnimatable(Animatable animatable) {
+    public static void addAnimatable(Animatable animatable) {
 
-		synchronized (animatableList) {
-			if (!animatableList.contains(animatable)) {
-				addList.add(animatable);
-			}
-		}
-	}
+        synchronized (animatableList) {
+            if (!animatableList.contains(animatable)) {
+                addList.add(animatable);
+            }
+        }
+    }
 
-	public static void removeAnimatable(Animatable animatable) {
+    public static void removeAnimatable(Animatable animatable) {
 
-		synchronized (animatableList) {
-			removeList.remove(animatable);
-		}
-	}
+        synchronized (animatableList) {
+            removeList.remove(animatable);
+        }
+    }
 
-	private static class AnimThread extends Thread {
+    private static class AnimThread extends Thread {
 
-		public void run() {
+        public void run() {
 
-			while (true) {
+            while (true) {
 
-				if (animatableList.size() > 0) {
+                if (animatableList.size() > 0) {
 
-				}
+                }
 
-				synchronized (animatableList) {
+                synchronized (animatableList) {
 
-					animatableList.addAll(addList);
-					addList.clear();
+                    animatableList.addAll(addList);
+                    addList.clear();
 
-					for (Animatable animatable : animatableList) {
-						animatable.animate();
-					}
+                    for (Animatable animatable : animatableList) {
+                        animatable.animate();
+                    }
 
-					animatableList.removeAll(removeList);
-					removeList.clear();
-				}
+                    animatableList.removeAll(removeList);
+                    removeList.clear();
+                }
 
-				try {
-					Thread.sleep(delay);
-				} catch (InterruptedException ie) {
-					ie.printStackTrace();
-				}
-			}
-		}
-	}
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                }
+            }
+        }
+    }
 }

@@ -16,35 +16,35 @@ import net.rptools.maptool.language.I18N;
  */
 public class CoordinateStatusBar extends JLabel {
 
-	private static final Dimension minSize = new Dimension(75, 10);
+    private static final Dimension minSize = new Dimension(75, 10);
 
-	public CoordinateStatusBar() {
-		setToolTipText(I18N.getString("CoordinateStatusBar.mapCoordinates")); //$NON-NLS-1$
-	}
+    public CoordinateStatusBar() {
+        setToolTipText(I18N.getString("CoordinateStatusBar.mapCoordinates")); //$NON-NLS-1$
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.JComponent#getMinimumSize()
-	 */
-	public Dimension getMinimumSize() {
-		return minSize;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.swing.JComponent#getMinimumSize()
+     */
+    public Dimension getMinimumSize() {
+        return minSize;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.JComponent#getPreferredSize()
-	 */
-	public Dimension getPreferredSize() {
-		return getMinimumSize();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.swing.JComponent#getPreferredSize()
+     */
+    public Dimension getPreferredSize() {
+        return getMinimumSize();
+    }
 
-	public void clear() {
-		setText(""); //$NON-NLS-1$
-	}
+    public void clear() {
+        setText(""); //$NON-NLS-1$
+    }
 
-	public void update(int x, int y) {
-		setText("  " + x + ", " + y); //$NON-NLS-1$ //$NON-NLS-2$
-	}
+    public void update(int x, int y) {
+        setText("  " + x + ", " + y); //$NON-NLS-1$ //$NON-NLS-2$
+    }
 }

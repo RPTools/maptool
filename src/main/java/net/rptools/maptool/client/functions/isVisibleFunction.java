@@ -24,67 +24,67 @@ import net.rptools.parser.function.AbstractFunction;
 
 public class isVisibleFunction extends AbstractFunction {
 
-	/** The singleton instance. */
-	private static final isVisibleFunction instance = new isVisibleFunction();
+    /** The singleton instance. */
+    private static final isVisibleFunction instance = new isVisibleFunction();
 
-	private isVisibleFunction() {
-		super(2, 3, "isVisible");
-	}
+    private isVisibleFunction() {
+        super(2, 3, "isVisible");
+    }
 
-	/**
-	 * Gets the instance of isVisibleFunction.
-	 * 
-	 * @return the instance.
-	 */
-	public static isVisibleFunction getInstance() {
-		return instance;
-	}
+    /**
+     * Gets the instance of isVisibleFunction.
+     * 
+     * @return the instance.
+     */
+    public static isVisibleFunction getInstance() {
+        return instance;
+    }
 
-	@Override
-	public Object childEvaluate(Parser parser, String functionName, List<Object> param) throws ParserException {
-		ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-		Token token = null;
+    @Override
+    public Object childEvaluate(Parser parser, String functionName, List<Object> param) throws ParserException {
+        ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+        Token token = null;
 
-		// If there is more than two parameters (x,y) then the third parameter is the token
-		// to test visibility for, so perform all the usual checks for trusted and fetch
-		// the token from the zone.
-		if (param.size() > 2) {
-			if (!MapTool.getParser().isMacroTrusted()) {
-				throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-			}
-			token = zr.getZone().resolveToken(param.get(2).toString());
-			if (token == null) {
-				throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, param.get(2).toString()));
-			}
-		} else {
-			MapToolVariableResolver mvr = (MapToolVariableResolver) parser.getVariableResolver();
-			if (mvr.getTokenInContext() != null) {
-				token = mvr.getTokenInContext();
-			}
-			if (token == null) {
-				throw new ParserException(I18N.getText("macro.function.initiative.noImpersonated", functionName));
-			}
-		}
+        // If there is more than two parameters (x,y) then the third parameter is the token
+        // to test visibility for, so perform all the usual checks for trusted and fetch
+        // the token from the zone.
+        if (param.size() > 2) {
+            if (!MapTool.getParser().isMacroTrusted()) {
+                throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+            }
+            token = zr.getZone().resolveToken(param.get(2).toString());
+            if (token == null) {
+                throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName, param.get(2).toString()));
+            }
+        } else {
+            MapToolVariableResolver mvr = (MapToolVariableResolver) parser.getVariableResolver();
+            if (mvr.getTokenInContext() != null) {
+                token = mvr.getTokenInContext();
+            }
+            if (token == null) {
+                throw new ParserException(I18N.getText("macro.function.initiative.noImpersonated", functionName));
+            }
+        }
 
-		if (!(param.get(0) instanceof BigDecimal)) {
-			throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", functionName, 1, param.get(0).toString()));
-		}
+        if (!(param.get(0) instanceof BigDecimal)) {
+            throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", functionName, 1, param.get(0).toString()));
+        }
 
-		if (!(param.get(1) instanceof BigDecimal)) {
-			throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", functionName, 2, param.get(1).toString()));
-		}
-		if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
-			return BigDecimal.ZERO;
-		}
-		int x = ((BigDecimal) param.get(0)).intValue();
-		int y = ((BigDecimal) param.get(1)).intValue();
+        if (!(param.get(1) instanceof BigDecimal)) {
+            throw new ParserException(I18N.getText("macro.function.general.argumentTypeN", functionName, 2, param.get(1).toString()));
+        }
+        if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
+            return BigDecimal.ZERO;
+        }
+        int x = ((BigDecimal) param.get(0)).intValue();
+        int y = ((BigDecimal) param.get(1)).intValue();
 
-		Area visArea = zr.getZoneView().getVisibleArea(token);
-		if (visArea == null) {
-			return BigDecimal.ZERO;
-		}
+        Area visArea = zr.getZoneView().getVisibleArea(token);
+        if (visArea == null) {
+            return BigDecimal.ZERO;
+        }
 
-		return visArea.contains(x, y) ? BigDecimal.ONE : BigDecimal.ZERO;
-	}
+        return visArea.contains(x, y) ? BigDecimal.ONE : BigDecimal.ZERO;
+    }
 
 }

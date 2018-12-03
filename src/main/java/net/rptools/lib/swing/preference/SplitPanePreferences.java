@@ -16,40 +16,40 @@ import javax.swing.JSplitPane;
 
 public class SplitPanePreferences implements PropertyChangeListener {
 
-	private JSplitPane splitPane;
-	private Preferences prefs;
+    private JSplitPane splitPane;
+    private Preferences prefs;
 
-	private static final String PREF_LOCATION_KEY = "location";
+    private static final String PREF_LOCATION_KEY = "location";
 
-	public SplitPanePreferences(String appName, String controlName, JSplitPane splitPane) {
-		this.splitPane = splitPane;
+    public SplitPanePreferences(String appName, String controlName, JSplitPane splitPane) {
+        this.splitPane = splitPane;
 
-		prefs = Preferences.userRoot().node(appName + "/control/" + controlName);
+        prefs = Preferences.userRoot().node(appName + "/control/" + controlName);
 
-		splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
+        splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
 
-		restorePreferences();
-	}
+        restorePreferences();
+    }
 
-	private void restorePreferences() {
+    private void restorePreferences() {
 
-		int position = prefs.getInt(PREF_LOCATION_KEY, -1);
-		if (position == -1) {
-			// First time usage, don't change the position of the split pane
-			return;
-		}
+        int position = prefs.getInt(PREF_LOCATION_KEY, -1);
+        if (position == -1) {
+            // First time usage, don't change the position of the split pane
+            return;
+        }
 
-		splitPane.setDividerLocation(position);
-	}
+        splitPane.setDividerLocation(position);
+    }
 
-	private void savePreferences() {
+    private void savePreferences() {
 
-		prefs.putInt(PREF_LOCATION_KEY, splitPane.getDividerLocation());
-	}
+        prefs.putInt(PREF_LOCATION_KEY, splitPane.getDividerLocation());
+    }
 
-	////
-	// PROPERTY CHANGE LISTENER
-	public void propertyChange(PropertyChangeEvent evt) {
-		savePreferences();
-	}
+    ////
+    // PROPERTY CHANGE LISTENER
+    public void propertyChange(PropertyChangeEvent evt) {
+        savePreferences();
+    }
 }

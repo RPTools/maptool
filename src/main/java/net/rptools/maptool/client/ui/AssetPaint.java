@@ -17,21 +17,21 @@ import net.rptools.maptool.util.ImageManager;
 
 public class AssetPaint extends TexturePaint {
 
-	private Asset asset;
+    private Asset asset;
 
-	public AssetPaint(Asset asset) {
-		this(ImageManager.getImageAndWait(asset.getId()));
-		this.asset = asset;
-	}
+    public AssetPaint(Asset asset) {
+        this(ImageManager.getImageAndWait(asset.getId()));
+        this.asset = asset;
+    }
 
-	// Only used to avoid a bunch of calls to getImageAndWait() that the compiler may
-	// not be able to optimize (method calls may not be optimizable when side effects
-	// of the method are not known to the compiler).
-	private AssetPaint(BufferedImage img) {
-		super(img, new Rectangle2D.Float(0, 0, img.getWidth(), img.getHeight()));
-	}
+    // Only used to avoid a bunch of calls to getImageAndWait() that the compiler may
+    // not be able to optimize (method calls may not be optimizable when side effects
+    // of the method are not known to the compiler).
+    private AssetPaint(BufferedImage img) {
+        super(img, new Rectangle2D.Float(0, 0, img.getWidth(), img.getHeight()));
+    }
 
-	public Asset getAsset() {
-		return asset;
-	}
+    public Asset getAsset() {
+        return asset;
+    }
 }

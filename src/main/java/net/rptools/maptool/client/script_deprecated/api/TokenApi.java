@@ -13,13 +13,13 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool_fx.MapTool;
 
 public class TokenApi {
-	public TokenProxy current() {
-		Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().resolveToken(MapTool.getFrame().getCommandPanel().getIdentity());
+    public TokenProxy current() {
+        Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().resolveToken(MapTool.getFrame().getCommandPanel().getIdentity());
 
-		return new TokenProxy(token);
-	}
+        return new TokenProxy(token);
+    }
 
-	// public TokenProxy find() {
-	// return null;
-	// }
+    // public TokenProxy find() {
+    // return null;
+    // }
 }

@@ -18,7 +18,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
  */
 public interface DrawableRenderer {
 
-	public void renderDrawables(Graphics g, List<DrawnElement> drawableList, Rectangle viewport, double scale);
+    public void renderDrawables(Graphics g, List<DrawnElement> drawableList, Rectangle viewport, double scale);
 
-	public void flush();
+    public void flush();
 }

@@ -23,105 +23,105 @@ import net.rptools.maptool_fx.MapTool;
  * @author Jay
  */
 public class BurstTemplate extends RadiusTemplate {
-	/*---------------------------------------------------------------------------------------------
-	 * Instance Variables
-	 *-------------------------------------------------------------------------------------------*/
+    /*---------------------------------------------------------------------------------------------
+     * Instance Variables
+     *-------------------------------------------------------------------------------------------*/
 
-	/**
-	 * Renderer for the blast. The {@link Shape} is just a rectangle.
-	 */
-	private final ShapeDrawable renderer = new ShapeDrawable(new Rectangle());
+    /**
+     * Renderer for the blast. The {@link Shape} is just a rectangle.
+     */
+    private final ShapeDrawable renderer = new ShapeDrawable(new Rectangle());
 
-	/**
-	 * Renderer for the blast. The {@link Shape} is just a rectangle.
-	 */
-	private final ShapeDrawable vertexRenderer = new ShapeDrawable(new Rectangle());
+    /**
+     * Renderer for the blast. The {@link Shape} is just a rectangle.
+     */
+    private final ShapeDrawable vertexRenderer = new ShapeDrawable(new Rectangle());
 
-	/*---------------------------------------------------------------------------------------------
-	 * Instance Methods
-	 *-------------------------------------------------------------------------------------------*/
+    /*---------------------------------------------------------------------------------------------
+     * Instance Methods
+     *-------------------------------------------------------------------------------------------*/
 
-	/**
-	 * This methods adjusts the rectangle in the renderer to match the new radius, vertex, or direction. Due to the fact that it is impossible to draw to the cardinal directions evenly when the radius
-	 * is an even number and still stay in the squares, that case isn't allowed.
-	 */
-	private void adjustShape() {
-		if (getZoneId() == null)
-			return;
-		int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
-		Rectangle r = (Rectangle) vertexRenderer.getShape();
-		r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
-		r = (Rectangle) renderer.getShape();
-		r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
-		r.x -= getRadius() * gridSize;
-		r.y -= getRadius() * gridSize;
-		r.width = r.height = (getRadius() * 2 + 1) * gridSize;
-	}
+    /**
+     * This methods adjusts the rectangle in the renderer to match the new radius, vertex, or direction. Due to the fact that it is impossible to draw to the cardinal directions evenly when the radius
+     * is an even number and still stay in the squares, that case isn't allowed.
+     */
+    private void adjustShape() {
+        if (getZoneId() == null)
+            return;
+        int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+        Rectangle r = (Rectangle) vertexRenderer.getShape();
+        r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
+        r = (Rectangle) renderer.getShape();
+        r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
+        r.x -= getRadius() * gridSize;
+        r.y -= getRadius() * gridSize;
+        r.width = r.height = (getRadius() * 2 + 1) * gridSize;
+    }
 
-	/*---------------------------------------------------------------------------------------------
-	 * Overridden *Template Methods
-	 *-------------------------------------------------------------------------------------------*/
+    /*---------------------------------------------------------------------------------------------
+     * Overridden *Template Methods
+     *-------------------------------------------------------------------------------------------*/
 
-	/**
-	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int)
-	 */
-	@Override
-	public void setRadius(int squares) {
-		super.setRadius(squares);
-		adjustShape();
-	}
+    /**
+     * @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int)
+     */
+    @Override
+    public void setRadius(int squares) {
+        super.setRadius(squares);
+        adjustShape();
+    }
 
-	/**
-	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(net.rptools.maptool.model.ZonePoint)
-	 */
-	@Override
-	public void setVertex(ZonePoint vertex) {
-		super.setVertex(vertex);
-		adjustShape();
-	}
+    /**
+     * @see net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(net.rptools.maptool.model.ZonePoint)
+     */
+    @Override
+    public void setVertex(ZonePoint vertex) {
+        super.setVertex(vertex);
+        adjustShape();
+    }
 
-	/**
-	 * @see net.rptools.maptool.model.drawing.AbstractTemplate#getDistance(int, int)
-	 */
-	@Override
-	public int getDistance(int x, int y) {
-		return Math.max(x, y);
-	}
+    /**
+     * @see net.rptools.maptool.model.drawing.AbstractTemplate#getDistance(int, int)
+     */
+    @Override
+    public int getDistance(int x, int y) {
+        return Math.max(x, y);
+    }
 
-	@Override
-	public Rectangle getBounds() {
-		Rectangle r = new Rectangle(renderer.getShape().getBounds());
-		// We don't know pen width, so add some padding to account for it
-		r.x -= 5;
-		r.y -= 5;
-		r.width += 10;
-		r.height += 10;
+    @Override
+    public Rectangle getBounds() {
+        Rectangle r = new Rectangle(renderer.getShape().getBounds());
+        // We don't know pen width, so add some padding to account for it
+        r.x -= 5;
+        r.y -= 5;
+        r.width += 10;
+        r.height += 10;
 
-		return r;
-	}
+        return r;
+    }
 
-	/*---------------------------------------------------------------------------------------------
-	 * Overridden AbstractDrawing Methods
-	 *-------------------------------------------------------------------------------------------*/
+    /*---------------------------------------------------------------------------------------------
+     * Overridden AbstractDrawing Methods
+     *-------------------------------------------------------------------------------------------*/
 
-	/**
-	 * @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D)
-	 */
-	@Override
-	protected void draw(Graphics2D g) {
-		renderer.draw(g);
-		vertexRenderer.draw(g);
-	}
+    /**
+     * @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D)
+     */
+    @Override
+    protected void draw(Graphics2D g) {
+        renderer.draw(g);
+        vertexRenderer.draw(g);
+    }
 
-	/**
-	 * @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D)
-	 */
-	@Override
-	protected void drawBackground(Graphics2D g) {
-		Composite old = g.getComposite();
-		if (old != AlphaComposite.Clear)
-			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, DEFAULT_BG_ALPHA));
-		renderer.drawBackground(g);
-		g.setComposite(old);
-	}
+    /**
+     * @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D)
+     */
+    @Override
+    protected void drawBackground(Graphics2D g) {
+        Composite old = g.getComposite();
+        if (old != AlphaComposite.Clear)
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, DEFAULT_BG_ALPHA));
+        renderer.drawBackground(g);
+        g.setComposite(old);
+    }
 }

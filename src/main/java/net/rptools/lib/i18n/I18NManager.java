@@ -16,54 +16,54 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class I18NManager {
 
-	private static List<String> bundleNameList = new CopyOnWriteArrayList<String>();
-	private static List<ResourceBundle> bundleList = new ArrayList<ResourceBundle>();
-	private static Locale locale = Locale.US;
-	private static List<LocaleChangeListener> localeListenerList = new CopyOnWriteArrayList<LocaleChangeListener>();
+    private static List<String> bundleNameList = new CopyOnWriteArrayList<String>();
+    private static List<ResourceBundle> bundleList = new ArrayList<ResourceBundle>();
+    private static Locale locale = Locale.US;
+    private static List<LocaleChangeListener> localeListenerList = new CopyOnWriteArrayList<LocaleChangeListener>();
 
-	public static void addBundle(String bundleName) {
-		bundleNameList.add(bundleName);
-		updateBundles();
-	}
+    public static void addBundle(String bundleName) {
+        bundleNameList.add(bundleName);
+        updateBundles();
+    }
 
-	public static void removeBundle(String bundleName) {
-		bundleNameList.remove(bundleName);
-		updateBundles();
-	}
+    public static void removeBundle(String bundleName) {
+        bundleNameList.remove(bundleName);
+        updateBundles();
+    }
 
-	public static void setLocale(Locale locale) {
-		I18NManager.locale = locale;
-		updateBundles();
-		fireLocaleChanged();
-	}
+    public static void setLocale(Locale locale) {
+        I18NManager.locale = locale;
+        updateBundles();
+        fireLocaleChanged();
+    }
 
-	public static String getText(String key) {
+    public static String getText(String key) {
 
-		for (ResourceBundle bundle : bundleList) {
+        for (ResourceBundle bundle : bundleList) {
 
-			String value = bundle.getString(key);
-			if (value != null) {
-				return value;
-			}
-		}
+            String value = bundle.getString(key);
+            if (value != null) {
+                return value;
+            }
+        }
 
-		return key;
-	}
+        return key;
+    }
 
-	private synchronized static void fireLocaleChanged() {
+    private synchronized static void fireLocaleChanged() {
 
-		for (LocaleChangeListener listener : localeListenerList) {
-			listener.localeChanged(locale);
-		}
-	}
+        for (LocaleChangeListener listener : localeListenerList) {
+            listener.localeChanged(locale);
+        }
+    }
 
-	private synchronized static void updateBundles() {
+    private synchronized static void updateBundles() {
 
-		bundleList.clear();
+        bundleList.clear();
 
-		for (String bundleName : bundleNameList) {
+        for (String bundleName : bundleNameList) {
 
-			bundleList.add(ResourceBundle.getBundle(bundleName, locale));
-		}
-	}
+            bundleList.add(ResourceBundle.getBundle(bundleName, locale));
+        }
+    }
 }

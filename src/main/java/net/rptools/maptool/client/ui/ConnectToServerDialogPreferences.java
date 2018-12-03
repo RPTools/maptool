@@ -16,69 +16,69 @@ import net.rptools.maptool.server.ServerConfig;
 
 public class ConnectToServerDialogPreferences {
 
-	private static Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs/connect");
+    private static Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs/connect");
 
-	private static final String KEY_USERNAME = "name";
-	private static final String KEY_ROLE = "playerRole";
-	private static final String KEY_HOST = "host";
-	private static final String KEY_PORT = "port";
-	private static final String KEY_PASSWORD = "password";
-	private static final String KEY_TAB = "tab";
-	private static final String KEY_SERVER_NAME = "serverName";
+    private static final String KEY_USERNAME = "name";
+    private static final String KEY_ROLE = "playerRole";
+    private static final String KEY_HOST = "host";
+    private static final String KEY_PORT = "port";
+    private static final String KEY_PASSWORD = "password";
+    private static final String KEY_TAB = "tab";
+    private static final String KEY_SERVER_NAME = "serverName";
 
-	public String getUsername() {
-		return prefs.get(KEY_USERNAME, "");
-	}
+    public String getUsername() {
+        return prefs.get(KEY_USERNAME, "");
+    }
 
-	public void setUsername(String name) {
-		prefs.put(KEY_USERNAME, name);
-	}
+    public void setUsername(String name) {
+        prefs.put(KEY_USERNAME, name);
+    }
 
-	public Player.Role getRole() {
-		return Player.Role.valueOf(prefs.get(KEY_ROLE, Player.Role.PLAYER.name()));
-	}
+    public Player.Role getRole() {
+        return Player.Role.valueOf(prefs.get(KEY_ROLE, Player.Role.PLAYER.name()));
+    }
 
-	public void setRole(Player.Role role) {
-		prefs.put(KEY_ROLE, role.name());
-	}
+    public void setRole(Player.Role role) {
+        prefs.put(KEY_ROLE, role.name());
+    }
 
-	public void setHost(String host) {
-		prefs.put(KEY_HOST, host);
-	}
+    public void setHost(String host) {
+        prefs.put(KEY_HOST, host);
+    }
 
-	public String getHost() {
-		return prefs.get(KEY_HOST, "");
-	}
+    public String getHost() {
+        return prefs.get(KEY_HOST, "");
+    }
 
-	public int getPort() {
-		return prefs.getInt(KEY_PORT, ServerConfig.DEFAULT_PORT);
-	}
+    public int getPort() {
+        return prefs.getInt(KEY_PORT, ServerConfig.DEFAULT_PORT);
+    }
 
-	public void setPort(int port) {
-		prefs.putInt(KEY_PORT, port);
-	}
+    public void setPort(int port) {
+        prefs.putInt(KEY_PORT, port);
+    }
 
-	public void setPassword(String password) {
-		prefs.put(KEY_PASSWORD, password);
-	}
+    public void setPassword(String password) {
+        prefs.put(KEY_PASSWORD, password);
+    }
 
-	public String getPassword() {
-		return prefs.get(KEY_PASSWORD, "");
-	}
+    public String getPassword() {
+        return prefs.get(KEY_PASSWORD, "");
+    }
 
-	public int getTab() {
-		return prefs.getInt(KEY_TAB, 0);
-	}
+    public int getTab() {
+        return prefs.getInt(KEY_TAB, 0);
+    }
 
-	public void setTab(int tab) {
-		prefs.putInt(KEY_TAB, tab);
-	}
+    public void setTab(int tab) {
+        prefs.putInt(KEY_TAB, tab);
+    }
 
-	public void setServerName(String host) {
-		prefs.put(KEY_SERVER_NAME, host);
-	}
+    public void setServerName(String host) {
+        prefs.put(KEY_SERVER_NAME, host);
+    }
 
-	public String getServerName() {
-		return prefs.get(KEY_SERVER_NAME, "");
-	}
+    public String getServerName() {
+        return prefs.get(KEY_SERVER_NAME, "");
+    }
 }

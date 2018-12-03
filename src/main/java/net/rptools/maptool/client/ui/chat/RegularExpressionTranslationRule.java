@@ -14,23 +14,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class RegularExpressionTranslationRule extends AbstractChatTranslationRule {
-	private static final Logger log = LogManager.getLogger(RegularExpressionTranslationRule.class);
-	private Pattern pattern;
-	private final String replaceWith;
+    private static final Logger log = LogManager.getLogger(RegularExpressionTranslationRule.class);
+    private Pattern pattern;
+    private final String replaceWith;
 
-	public RegularExpressionTranslationRule(String pattern, String replaceWith) {
-		try {
-			this.pattern = Pattern.compile(pattern);
-		} catch (Exception e) {
-			log.error("Could not parse regex: " + pattern, e);
-		}
-		this.replaceWith = replaceWith;
-	}
+    public RegularExpressionTranslationRule(String pattern, String replaceWith) {
+        try {
+            this.pattern = Pattern.compile(pattern);
+        } catch (Exception e) {
+            log.error("Could not parse regex: " + pattern, e);
+        }
+        this.replaceWith = replaceWith;
+    }
 
-	public String translate(String incoming) {
-		if (pattern == null) {
-			return incoming;
-		}
-		return pattern.matcher(incoming).replaceAll(replaceWith);
-	}
+    public String translate(String incoming) {
+        if (pattern == null) {
+            return incoming;
+        }
+        return pattern.matcher(incoming).replaceAll(replaceWith);
+    }
 }

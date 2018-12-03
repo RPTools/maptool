@@ -16,13 +16,13 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
-		name = "undefined",
-		description = "Undefined macro.",
-		hidden = true)
+        name = "undefined",
+        description = "Undefined macro.",
+        hidden = true)
 public class UndefinedMacro implements Macro {
 
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		MapTool.addLocalMessage(I18N.getText("undefinedmacro.unknownCommand", macro));
-	}
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        MapTool.addLocalMessage(I18N.getText("undefinedmacro.unknownCommand", macro));
+    }
 
 }

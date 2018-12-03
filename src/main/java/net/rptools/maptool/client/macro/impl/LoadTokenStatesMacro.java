@@ -32,48 +32,48 @@ import net.rptools.maptool_fx.MapTool;
  * @version $Revision$ $Date$ $Author$
  */
 @MacroDefinition(
-		name = "loadtokenstates",
-		aliases = { "tsl" },
-		description = "loadtokenstates.description")
+        name = "loadtokenstates",
+        aliases = { "tsl" },
+        description = "loadtokenstates.description")
 public class LoadTokenStatesMacro implements Macro {
-	/**
-	 * @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String)
-	 */
-	@SuppressWarnings("unchecked")
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		// Was the token states file passed?
-		File aliasFile = null;
-		if (macro.length() > 0) {
-			aliasFile = new File(macro);
-		} else {
-			// Ask the user for the token states file
-			JFileChooser chooser = MapTool.getFrame().getLoadFileChooser();
-			chooser.setDialogTitle(I18N.getText("loadtokenstates.dialogTitle"));
-			chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION)
-				return;
-			aliasFile = chooser.getSelectedFile();
-		} // endif
+    /**
+     * @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String)
+     */
+    @SuppressWarnings("unchecked")
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        // Was the token states file passed?
+        File aliasFile = null;
+        if (macro.length() > 0) {
+            aliasFile = new File(macro);
+        } else {
+            // Ask the user for the token states file
+            JFileChooser chooser = MapTool.getFrame().getLoadFileChooser();
+            chooser.setDialogTitle(I18N.getText("loadtokenstates.dialogTitle"));
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION)
+                return;
+            aliasFile = chooser.getSelectedFile();
+        } // endif
 
-		// Make it an XML file if type isn't set, check for existance
-		if (aliasFile.getName().indexOf(".") < 0)
-			aliasFile = new File(aliasFile.getAbsolutePath() + "-tokenStates.xml");
-		if (!aliasFile.exists()) {
-			MapTool.addLocalMessage(I18N.getText("loadtokenstates.cantFindFile", aliasFile));
-			return;
-		} // endif
+        // Make it an XML file if type isn't set, check for existance
+        if (aliasFile.getName().indexOf(".") < 0)
+            aliasFile = new File(aliasFile.getAbsolutePath() + "-tokenStates.xml");
+        if (!aliasFile.exists()) {
+            MapTool.addLocalMessage(I18N.getText("loadtokenstates.cantFindFile", aliasFile));
+            return;
+        } // endif
 
-		// Read the serialized set of states
-		try {
-			XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(aliasFile)));
-			List<BooleanTokenOverlay> overlays = (List<BooleanTokenOverlay>) decoder.readObject();
-			decoder.close();
-			for (BooleanTokenOverlay overlay : overlays) {
-				MapTool.getCampaign().getTokenStatesMap().put(overlay.getName(), overlay);
-			} // endfor
-			MapTool.addLocalMessage(I18N.getText("loadtokenstates.loaded", overlays.size()));
-		} catch (FileNotFoundException e) {
-			MapTool.addLocalMessage(I18N.getText("loadtokenstates.cantFindFile", I18N.getText("msg.error.fileNotFound")));
-		} // endtry
-	}
+        // Read the serialized set of states
+        try {
+            XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(aliasFile)));
+            List<BooleanTokenOverlay> overlays = (List<BooleanTokenOverlay>) decoder.readObject();
+            decoder.close();
+            for (BooleanTokenOverlay overlay : overlays) {
+                MapTool.getCampaign().getTokenStatesMap().put(overlay.getName(), overlay);
+            } // endfor
+            MapTool.addLocalMessage(I18N.getText("loadtokenstates.loaded", overlays.size()));
+        } catch (FileNotFoundException e) {
+            MapTool.addLocalMessage(I18N.getText("loadtokenstates.cantFindFile", I18N.getText("msg.error.fileNotFound")));
+        } // endtry
+    }
 }

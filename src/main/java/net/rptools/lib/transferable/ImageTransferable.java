@@ -16,29 +16,29 @@ import java.io.IOException;
 
 public class ImageTransferable implements Transferable {
 
-	public static final DataFlavor FLAVOR = new DataFlavor("image/x-java-image; class=java.awt.Image", "Image");
+    public static final DataFlavor FLAVOR = new DataFlavor("image/x-java-image; class=java.awt.Image", "Image");
 
-	private Image image;
+    private Image image;
 
-	public ImageTransferable(Image image) {
-		this.image = image;
-	}
+    public ImageTransferable(Image image) {
+        this.image = image;
+    }
 
-	public DataFlavor[] getTransferDataFlavors() {
-		return new DataFlavor[] { FLAVOR };
-	}
+    public DataFlavor[] getTransferDataFlavors() {
+        return new DataFlavor[] { FLAVOR };
+    }
 
-	public boolean isDataFlavorSupported(DataFlavor flavor) {
-		return flavor.equals(FLAVOR);
-	}
+    public boolean isDataFlavorSupported(DataFlavor flavor) {
+        return flavor.equals(FLAVOR);
+    }
 
-	public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
 
-		if (!flavor.equals(FLAVOR)) {
-			throw new UnsupportedFlavorException(flavor);
-		}
+        if (!flavor.equals(FLAVOR)) {
+            throw new UnsupportedFlavorException(flavor);
+        }
 
-		return image;
-	}
+        return image;
+    }
 
 }

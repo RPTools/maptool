@@ -18,45 +18,45 @@ import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.TokenFootprint;
 
 public interface ZoneWalker {
-	public void setWaypoints(CellPoint... points);
+    public void setWaypoints(CellPoint... points);
 
-	public void addWaypoints(CellPoint... point);
+    public void addWaypoints(CellPoint... point);
 
-	public CellPoint replaceLastWaypoint(CellPoint point);
+    public CellPoint replaceLastWaypoint(CellPoint point);
 
-	public CellPoint replaceLastWaypoint(CellPoint point, boolean restrictMovement);
+    public CellPoint replaceLastWaypoint(CellPoint point, boolean restrictMovement);
 
-	public boolean isWaypoint(CellPoint point);
+    public boolean isWaypoint(CellPoint point);
 
-	public int getDistance();
+    public int getDistance();
 
-	public Path<CellPoint> getPath();
+    public Path<CellPoint> getPath();
 
-	public Path<CellPoint> getPath(RenderPathWorker renderPathWorker);
+    public Path<CellPoint> getPath(RenderPathWorker renderPathWorker);
 
-	public CellPoint getLastPoint();
+    public CellPoint getLastPoint();
 
-	/**
-	 * Remove an existing waypoint. Nothing is removed if the passed point is not a waypoint.
-	 * 
-	 * @param point
-	 *            The point to be removed
-	 * @return The value <code>true</code> is returned if the point is removed.
-	 */
-	boolean removeWaypoint(CellPoint point);
+    /**
+     * Remove an existing waypoint. Nothing is removed if the passed point is not a waypoint.
+     * 
+     * @param point
+     *            The point to be removed
+     * @return The value <code>true</code> is returned if the point is removed.
+     */
+    boolean removeWaypoint(CellPoint point);
 
-	/**
-	 * Toggle the existence of a way point. A waypoint is added if the passed point is not on an existing waypoint or a waypoint is removed if it is on an existing point.
-	 * 
-	 * @param point
-	 *            Point being toggled
-	 * @return The value <code>true</code> if a waypoint was added, <code>false</code> if one was removed.
-	 */
-	boolean toggleWaypoint(CellPoint point);
+    /**
+     * Toggle the existence of a way point. A waypoint is added if the passed point is not on an existing waypoint or a waypoint is removed if it is on an existing point.
+     * 
+     * @param point
+     *            Point being toggled
+     * @return The value <code>true</code> if a waypoint was added, <code>false</code> if one was removed.
+     */
+    boolean toggleWaypoint(CellPoint point);
 
-	public void setFootprint(TokenFootprint footprint);
+    public void setFootprint(TokenFootprint footprint);
 
-	public default Collection<AStarCellPoint> getCheckedPoints() {
-		return null;
-	}
+    public default Collection<AStarCellPoint> getCheckedPoints() {
+        return null;
+    }
 }

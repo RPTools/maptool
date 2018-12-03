@@ -17,75 +17,75 @@ import java.awt.geom.Area;
  * An Cross
  */
 public class Cross extends AbstractDrawing {
-	protected Point startPoint;
-	protected Point endPoint;
-	private transient java.awt.Rectangle bounds;
+    protected Point startPoint;
+    protected Point endPoint;
+    private transient java.awt.Rectangle bounds;
 
-	public Cross(int startX, int startY, int endX, int endY) {
+    public Cross(int startX, int startY, int endX, int endY) {
 
-		startPoint = new Point(startX, startY);
-		endPoint = new Point(endX, endY);
-	}
+        startPoint = new Point(startX, startY);
+        endPoint = new Point(endX, endY);
+    }
 
-	public Area getArea() {
-		return new Area(getBounds());
-	}
+    public Area getArea() {
+        return new Area(getBounds());
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-	 */
-	public java.awt.Rectangle getBounds() {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+     */
+    public java.awt.Rectangle getBounds() {
 
-		if (bounds == null) {
-			int x = Math.min(startPoint.x, endPoint.x);
-			int y = Math.min(startPoint.y, endPoint.y);
-			int width = Math.abs(endPoint.x - startPoint.x);
-			int height = Math.abs(endPoint.y - startPoint.y);
+        if (bounds == null) {
+            int x = Math.min(startPoint.x, endPoint.x);
+            int y = Math.min(startPoint.y, endPoint.y);
+            int width = Math.abs(endPoint.x - startPoint.x);
+            int height = Math.abs(endPoint.y - startPoint.y);
 
-			bounds = new java.awt.Rectangle(x, y, width, height);
-		}
+            bounds = new java.awt.Rectangle(x, y, width, height);
+        }
 
-		return bounds;
-	}
+        return bounds;
+    }
 
-	public Point getStartPoint() {
-		return startPoint;
-	}
+    public Point getStartPoint() {
+        return startPoint;
+    }
 
-	public Point getEndPoint() {
-		return endPoint;
-	}
+    public Point getEndPoint() {
+        return endPoint;
+    }
 
-	protected void draw(Graphics2D g) {
+    protected void draw(Graphics2D g) {
 
-		int minX = Math.min(startPoint.x, endPoint.x);
-		int minY = Math.min(startPoint.y, endPoint.y);
+        int minX = Math.min(startPoint.x, endPoint.x);
+        int minY = Math.min(startPoint.y, endPoint.y);
 
-		int width = Math.abs(startPoint.x - endPoint.x);
-		int height = Math.abs(startPoint.y - endPoint.y);
+        int width = Math.abs(startPoint.x - endPoint.x);
+        int height = Math.abs(startPoint.y - endPoint.y);
 
-		Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-		// g.drawRect(minX, minY, width, height);
+        Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        // g.drawRect(minX, minY, width, height);
 
-		g.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
-		g.drawLine(startPoint.x, endPoint.y, endPoint.x, startPoint.y);
+        g.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+        g.drawLine(startPoint.x, endPoint.y, endPoint.x, startPoint.y);
 
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
-	}
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
+    }
 
-	protected void drawBackground(Graphics2D g) {
-		int minX = Math.min(startPoint.x, endPoint.x);
-		int minY = Math.min(startPoint.y, endPoint.y);
+    protected void drawBackground(Graphics2D g) {
+        int minX = Math.min(startPoint.x, endPoint.x);
+        int minY = Math.min(startPoint.y, endPoint.y);
 
-		int width = Math.abs(startPoint.x - endPoint.x);
-		int height = Math.abs(startPoint.y - endPoint.y);
+        int width = Math.abs(startPoint.x - endPoint.x);
+        int height = Math.abs(startPoint.y - endPoint.y);
 
-		Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-		g.fillRect(minX, minY, width, height);
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
-	}
+        Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        g.fillRect(minX, minY, width, height);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
+    }
 }

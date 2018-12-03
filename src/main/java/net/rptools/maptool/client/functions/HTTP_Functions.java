@@ -36,97 +36,97 @@ import net.rptools.parser.function.AbstractFunction;
  */
 public class HTTP_Functions extends AbstractFunction {
 
-	private static final HTTP_Functions instance = new HTTP_Functions();
+    private static final HTTP_Functions instance = new HTTP_Functions();
 
-	private HTTP_Functions() {
-		super(1, 3, "requestURL", "sendURL");
-	}
+    private HTTP_Functions() {
+        super(1, 3, "requestURL", "sendURL");
+    }
 
-	public static HTTP_Functions getInstance() {
-		return instance;
-	}
+    public static HTTP_Functions getInstance() {
+        return instance;
+    }
 
-	@Override
-	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
-		String responseString = "";
+    @Override
+    public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
+        String responseString = "";
 
-		// New function to return a response from a HTTP URL request.
-		if (functionName.equals("requestURL")) {
-			if (parameters.size() != 1)
-				throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
+        // New function to return a response from a HTTP URL request.
+        if (functionName.equals("requestURL")) {
+            if (parameters.size() != 1)
+                throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
 
-			// Send GET Request to URL
-			String requestURL = parameters.get(0).toString();
-			InputStream is;
+            // Send GET Request to URL
+            String requestURL = parameters.get(0).toString();
+            InputStream is;
 
-			try {
-				is = HTTPUtil.sendGetRequest(requestURL);
-				String[] response = HTTPUtil.parseMultipleLinesRespone(is);
+            try {
+                is = HTTPUtil.sendGetRequest(requestURL);
+                String[] response = HTTPUtil.parseMultipleLinesRespone(is);
 
-				for (String line : response) {
-					responseString += line + "\n";
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+                for (String line : response) {
+                    responseString += line + "\n";
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
-			return responseString;
-		}
+            return responseString;
+        }
 
-		if (functionName.equals("sendURL")) {
-			if (parameters.size() == 0 || parameters.size() > 3)
-				throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
+        if (functionName.equals("sendURL")) {
+            if (parameters.size() == 0 || parameters.size() > 3)
+                throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
 
-			// Send POST request to URL
-			Map<String, String> params = new HashMap<String, String>();
-			String requestURL = parameters.get(0).toString();
+            // Send POST request to URL
+            Map<String, String> params = new HashMap<String, String>();
+            String requestURL = parameters.get(0).toString();
 
-			if (!requestURL.startsWith("syrinscape")) {
-				if (parameters.size() > 3)
-					throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 2, parameters.size()));
+            if (!requestURL.startsWith("syrinscape")) {
+                if (parameters.size() > 3)
+                    throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 2, parameters.size()));
 
-				// Use default key name of jsonData
-				if (parameters.size() == 2)
-					params.put("jsonData", parameters.get(1).toString());
+                // Use default key name of jsonData
+                if (parameters.size() == 2)
+                    params.put("jsonData", parameters.get(1).toString());
 
-				if (parameters.size() == 3)
-					params.put(parameters.get(1).toString(), parameters.get(2).toString());
+                if (parameters.size() == 3)
+                    params.put(parameters.get(1).toString(), parameters.get(2).toString());
 
-				InputStream is;
-				try {
-					is = HTTPUtil.sendPostRequest(requestURL, params);
-					String[] response = HTTPUtil.parseMultipleLinesRespone(is);
-					for (String line : response) {
-						responseString += line + "\n";
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+                InputStream is;
+                try {
+                    is = HTTPUtil.sendPostRequest(requestURL, params);
+                    String[] response = HTTPUtil.parseMultipleLinesRespone(is);
+                    for (String line : response) {
+                        responseString += line + "\n";
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-				return responseString;
-			} else {
-				if (parameters.size() != 1)
-					throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
+                return responseString;
+            } else {
+                if (parameters.size() != 1)
+                    throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
 
-				if (!AppPreferences.getSyrinscapeActive())
-					return BigDecimal.ZERO;
+                if (!AppPreferences.getSyrinscapeActive())
+                    return BigDecimal.ZERO;
 
-				URI uri = null;
+                URI uri = null;
 
-				if (Desktop.isDesktopSupported()) {
-					try {
-						uri = new URI(requestURL);
-						Desktop.getDesktop().browse(uri);
-					} catch (IOException | URISyntaxException e) {
-						e.printStackTrace();
-					}
-				}
+                if (Desktop.isDesktopSupported()) {
+                    try {
+                        uri = new URI(requestURL);
+                        Desktop.getDesktop().browse(uri);
+                    } catch (IOException | URISyntaxException e) {
+                        e.printStackTrace();
+                    }
+                }
 
-				return BigDecimal.ONE;
-			}
-		}
+                return BigDecimal.ONE;
+            }
+        }
 
-		return "No Response";
-	}
+        return "No Response";
+    }
 }

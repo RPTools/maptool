@@ -17,12 +17,12 @@ import javafx.scene.input.ContextMenuEvent;
 
 public class Connections_Controller {
 
-	@FXML private ListView<?> connectionsListView;
+    @FXML private ListView<?> connectionsListView;
 
-	private static final Logger log = LogManager.getLogger(Connections_Controller.class);
+    private static final Logger log = LogManager.getLogger(Connections_Controller.class);
 
-	@FXML
-	void initialize() {
-		assert connectionsListView != null : "fx:id=\"connectionsListView\" was not injected: check your FXML file 'Connections.fxml'.";
-	}
+    @FXML
+    void initialize() {
+        assert connectionsListView != null : "fx:id=\"connectionsListView\" was not injected: check your FXML file 'Connections.fxml'.";
+    }
 }

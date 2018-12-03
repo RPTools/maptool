@@ -25,58 +25,58 @@ import net.rptools.maptool.model.drawing.BlastTemplate;
  */
 public class BlastTemplateTool extends BurstTemplateTool {
 
-	/*---------------------------------------------------------------------------------------------
-	 * Constructors
-	 *-------------------------------------------------------------------------------------------*/
+    /*---------------------------------------------------------------------------------------------
+     * Constructors
+     *-------------------------------------------------------------------------------------------*/
 
-	/**
-	 * Set the icon for the base tool.
-	 */
-	public BlastTemplateTool() {
-		try {
-			setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream(
-					"net/rptools/maptool/client/image/tool/temp-blue-square.png"))));
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		} // endtry
-	}
+    /**
+     * Set the icon for the base tool.
+     */
+    public BlastTemplateTool() {
+        try {
+            setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream(
+                    "net/rptools/maptool/client/image/tool/temp-blue-square.png"))));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        } // endtry
+    }
 
-	/*---------------------------------------------------------------------------------------------
-	 * Overridden RadiusTemplateTool methods
-	 *-------------------------------------------------------------------------------------------*/
+    /*---------------------------------------------------------------------------------------------
+     * Overridden RadiusTemplateTool methods
+     *-------------------------------------------------------------------------------------------*/
 
-	/**
-	 * @see net.rptools.maptool.client.tool.drawing.BurstTemplateTool#createBaseTemplate()
-	 */
-	@Override
-	protected AbstractTemplate createBaseTemplate() {
-		return new BlastTemplate();
-	}
+    /**
+     * @see net.rptools.maptool.client.tool.drawing.BurstTemplateTool#createBaseTemplate()
+     */
+    @Override
+    protected AbstractTemplate createBaseTemplate() {
+        return new BlastTemplate();
+    }
 
-	/**
-	 * @see net.rptools.maptool.client.ui.Tool#getTooltip()
-	 */
-	@Override
-	public String getTooltip() {
-		return "tool.blasttemplate.tooltip";
-	}
+    /**
+     * @see net.rptools.maptool.client.ui.Tool#getTooltip()
+     */
+    @Override
+    public String getTooltip() {
+        return "tool.blasttemplate.tooltip";
+    }
 
-	/**
-	 * @see net.rptools.maptool.client.ui.Tool#getInstructions()
-	 */
-	@Override
-	public String getInstructions() {
-		return "tool.blasttemplate.instructions";
-	}
+    /**
+     * @see net.rptools.maptool.client.ui.Tool#getInstructions()
+     */
+    @Override
+    public String getInstructions() {
+        return "tool.blasttemplate.instructions";
+    }
 
-	/**
-	 * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#setRadiusFromAnchor(java.awt.event.MouseEvent)
-	 */
-	@Override
-	protected void setRadiusFromAnchor(MouseEvent e) {
-		// Determine mouse cell position relative to base cell and then pass to blast template
-		CellPoint workingCell = renderer.getZone().getGrid().convert(getCellAtMouse(e));
-		CellPoint vertexCell = renderer.getZone().getGrid().convert(template.getVertex());
-		((BlastTemplate) template).setControlCellRelative(workingCell.x - vertexCell.x, workingCell.y - vertexCell.y);
-	}
+    /**
+     * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#setRadiusFromAnchor(java.awt.event.MouseEvent)
+     */
+    @Override
+    protected void setRadiusFromAnchor(MouseEvent e) {
+        // Determine mouse cell position relative to base cell and then pass to blast template
+        CellPoint workingCell = renderer.getZone().getGrid().convert(getCellAtMouse(e));
+        CellPoint vertexCell = renderer.getZone().getGrid().convert(template.getVertex());
+        ((BlastTemplate) template).setControlCellRelative(workingCell.x - vertexCell.x, workingCell.y - vertexCell.y);
+    }
 }

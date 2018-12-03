@@ -25,57 +25,57 @@ import net.rptools.lib.FileUtil;
 
 public class LocalLocation implements Location {
 
-	private String localFile;
+    private String localFile;
 
-	public LocalLocation() {
-		// For serialization
-	}
+    public LocalLocation() {
+        // For serialization
+    }
 
-	public LocalLocation(File file) {
-		this.localFile = file.getAbsolutePath();
-	}
+    public LocalLocation(File file) {
+        this.localFile = file.getAbsolutePath();
+    }
 
-	public File getFile() {
-		return new File(localFile);
-	}
+    public File getFile() {
+        return new File(localFile);
+    }
 
-	public InputStream getContent() throws IOException {
-		return new BufferedInputStream(new FileInputStream(getFile()));
-	}
+    public InputStream getContent() throws IOException {
+        return new BufferedInputStream(new FileInputStream(getFile()));
+    }
 
-	public void putContent(InputStream content) throws IOException {
+    public void putContent(InputStream content) throws IOException {
 
-		OutputStream out = null;
-		try {
-			out = new BufferedOutputStream(new FileOutputStream(getFile()));
+        OutputStream out = null;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream(getFile()));
 
-			FileUtil.copyWithClose(content, out);
-		} finally {
-			if (out != null) {
-				out.close();
-			}
-		}
-	}
+            FileUtil.copyWithClose(content, out);
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+        }
+    }
 
-	public void putContent(ImageWriter writer, BufferedImage content) throws IOException {
-		FileImageOutputStream out = null;
-		try {
-			out = new FileImageOutputStream(getFile());
+    public void putContent(ImageWriter writer, BufferedImage content) throws IOException {
+        FileImageOutputStream out = null;
+        try {
+            out = new FileImageOutputStream(getFile());
 
-			writer.setOutput(out);
-			writer.write(content);
-		} finally {
-			if (out != null) {
-				out.close();
-			}
-		}
+            writer.setOutput(out);
+            writer.write(content);
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+        }
 
-	}
+    }
 
-	/*
-	 * public void backgroundPutContent(ImageWriter writer, BufferedImage content) throws IOException { FileImageOutputStream out = null; // TODO: put this in another thread try { out = new
-	 * FileImageOutputStream(getFile());
-	 * 
-	 * writer.setOutput(out); writer.write(content); } finally { if (out != null) { out.close(); } } }
-	 */
+    /*
+     * public void backgroundPutContent(ImageWriter writer, BufferedImage content) throws IOException { FileImageOutputStream out = null; // TODO: put this in another thread try { out = new
+     * FileImageOutputStream(getFile());
+     * 
+     * writer.setOutput(out); writer.write(content); } finally { if (out != null) { out.close(); } } }
+     */
 }

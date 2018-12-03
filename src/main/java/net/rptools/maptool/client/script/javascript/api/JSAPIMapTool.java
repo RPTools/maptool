@@ -10,21 +10,21 @@ package net.rptools.maptool.client.script.javascript.api;
 
 @MapToolJSAPIDefinition(javaScriptVariableName = "MapTool")
 public class JSAPIMapTool implements MapToolJSAPIInterface {
-	private final JSAPIClientInfo clientInfo = new JSAPIClientInfo();
+    private final JSAPIClientInfo clientInfo = new JSAPIClientInfo();
 
-	private final JSAPIChat chat = new JSAPIChat();
+    private final JSAPIChat chat = new JSAPIChat();
 
-	private final JSAPITokens tokens = new JSAPITokens();
+    private final JSAPITokens tokens = new JSAPITokens();
 
-	public JSAPIClientInfo getClientInfo() {
-		return clientInfo;
-	}
+    public JSAPIClientInfo getClientInfo() {
+        return clientInfo;
+    }
 
-	public JSAPIChat getChat() {
-		return chat;
-	}
+    public JSAPIChat getChat() {
+        return chat;
+    }
 
-	public JSAPITokens getTokens() {
-		return tokens;
-	}
+    public JSAPITokens getTokens() {
+        return tokens;
+    }
 }

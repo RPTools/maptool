@@ -27,59 +27,59 @@ import net.rptools.maptool_fx.MapTool;
  */
 public class AssetDrawable extends AbstractDrawing {
 
-	/**
-	 * Id of the asset to be drawn
-	 */
-	private MD5Key assetId;
+    /**
+     * Id of the asset to be drawn
+     */
+    private MD5Key assetId;
 
-	/**
-	 * The id of the zone where this drawable is painted.
-	 */
-	private GUID zoneId;
+    /**
+     * The id of the zone where this drawable is painted.
+     */
+    private GUID zoneId;
 
-	/**
-	 * The bounds of the asset drawn
-	 */
-	private Rectangle bounds;
+    /**
+     * The bounds of the asset drawn
+     */
+    private Rectangle bounds;
 
-	/**
-	 * Build a drawable that draws an asset.
-	 * 
-	 * @param anAssetId
-	 *            The id of the asset to be drawn.
-	 * @param theBounds
-	 *            The bounds used to paint the drawable.
-	 * @param aZoneId
-	 *            The id of the zone that draws this drawable.
-	 */
-	public AssetDrawable(MD5Key anAssetId, Rectangle theBounds, GUID aZoneId) {
-		assetId = anAssetId;
-		bounds = theBounds;
-		zoneId = aZoneId;
-	}
+    /**
+     * Build a drawable that draws an asset.
+     * 
+     * @param anAssetId
+     *            The id of the asset to be drawn.
+     * @param theBounds
+     *            The bounds used to paint the drawable.
+     * @param aZoneId
+     *            The id of the zone that draws this drawable.
+     */
+    public AssetDrawable(MD5Key anAssetId, Rectangle theBounds, GUID aZoneId) {
+        assetId = anAssetId;
+        bounds = theBounds;
+        zoneId = aZoneId;
+    }
 
-	/**
-	 * @see net.rptools.maptool.model.drawing.Drawable#draw(java.awt.Graphics2D, net.rptools.maptool.model.drawing.Pen)
-	 */
-	public void draw(Graphics2D g) {
-	}
+    /**
+     * @see net.rptools.maptool.model.drawing.Drawable#draw(java.awt.Graphics2D, net.rptools.maptool.model.drawing.Pen)
+     */
+    public void draw(Graphics2D g) {
+    }
 
-	@Override
-	protected void drawBackground(Graphics2D g) {
-		ZoneRenderer renderer = MapTool.getFrame().getZoneRenderer(zoneId);
-		Image image = ImageManager.getImage(assetId, renderer);
-		g.drawImage(image, bounds.x, bounds.y, renderer);
-	}
+    @Override
+    protected void drawBackground(Graphics2D g) {
+        ZoneRenderer renderer = MapTool.getFrame().getZoneRenderer(zoneId);
+        Image image = ImageManager.getImage(assetId, renderer);
+        g.drawImage(image, bounds.x, bounds.y, renderer);
+    }
 
-	/**
-	 * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-	 */
-	public Rectangle getBounds() {
-		return bounds;
-	}
+    /**
+     * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+     */
+    public Rectangle getBounds() {
+        return bounds;
+    }
 
-	public Area getArea() {
-		return null;
-	}
+    public Area getArea() {
+        return null;
+    }
 
 }

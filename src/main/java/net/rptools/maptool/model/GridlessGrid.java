@@ -23,104 +23,104 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool_fx.MapTool;
 
 public class GridlessGrid extends Grid {
-	private static List<TokenFootprint> footprintList;
+    private static List<TokenFootprint> footprintList;
 
-	// @formatter:off
-	private static final GridCapabilities GRID_CAPABILITIES= new GridCapabilities() {
-		public boolean isPathingSupported() {return false;}
-		public boolean isSnapToGridSupported() {return false;}
-		public boolean isPathLineSupported() {return false;}
-		public boolean isSecondDimensionAdjustmentSupported() {return false;}
-		public boolean isCoordinatesSupported() {return false;}
-	};
-	// @formatter:on
+    // @formatter:off
+    private static final GridCapabilities GRID_CAPABILITIES= new GridCapabilities() {
+        public boolean isPathingSupported() {return false;}
+        public boolean isSnapToGridSupported() {return false;}
+        public boolean isPathLineSupported() {return false;}
+        public boolean isSecondDimensionAdjustmentSupported() {return false;}
+        public boolean isCoordinatesSupported() {return false;}
+    };
+    // @formatter:on
 
-	private static final int[] FACING_ANGLES = new int[] { -135, -90, -45, 0, 45, 90, 135, 180 };
+    private static final int[] FACING_ANGLES = new int[] { -135, -90, -45, 0, 45, 90, 135, 180 };
 
-	@Override
-	public List<TokenFootprint> getFootprints() {
-		if (footprintList == null) {
-			try {
-				footprintList = loadFootprints("net/rptools/maptool/model/gridlessGridFootprints.xml");
-			} catch (IOException ioe) {
-				MapTool.showError("GridlessGrid.error.notLoaded", ioe);
-			}
-		}
-		return footprintList;
-	}
+    @Override
+    public List<TokenFootprint> getFootprints() {
+        if (footprintList == null) {
+            try {
+                footprintList = loadFootprints("net/rptools/maptool/model/gridlessGridFootprints.xml");
+            } catch (IOException ioe) {
+                MapTool.showError("GridlessGrid.error.notLoaded", ioe);
+            }
+        }
+        return footprintList;
+    }
 
-	@Override
-	public int[] getFacingAngles() {
-		return FACING_ANGLES;
-	}
+    @Override
+    public int[] getFacingAngles() {
+        return FACING_ANGLES;
+    }
 
-	/*
-	 * May as well use the same keys as for the square grid...
-	 */
-	@Override
-	public void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap) {
-		if (movementKeys == null) {
-			movementKeys = new HashMap<KeyStroke, Action>(18); // This is 13/0.75, rounded up
-			Rectangle r = getFootprint(null).getBounds(this);
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD7, 0), new MovementKey(callback, -r.width, -r.height));
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0), new MovementKey(callback, 0, -r.height));
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), new MovementKey(callback, r.width, -r.height));
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), new MovementKey(callback, -r.width, 0));
-			// movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(callback, 0, 0));
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), new MovementKey(callback, r.width, 0));
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, 0), new MovementKey(callback, -r.width, r.height));
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, 0), new MovementKey(callback, 0, r.height));
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD3, 0), new MovementKey(callback, r.width, r.height));
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), new MovementKey(callback, -r.width, 0));
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), new MovementKey(callback, r.width, 0));
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), new MovementKey(callback, 0, -r.height));
-			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), new MovementKey(callback, 0, r.height));
-		}
-		actionMap.putAll(movementKeys);
-	}
+    /*
+     * May as well use the same keys as for the square grid...
+     */
+    @Override
+    public void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap) {
+        if (movementKeys == null) {
+            movementKeys = new HashMap<KeyStroke, Action>(18); // This is 13/0.75, rounded up
+            Rectangle r = getFootprint(null).getBounds(this);
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD7, 0), new MovementKey(callback, -r.width, -r.height));
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0), new MovementKey(callback, 0, -r.height));
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), new MovementKey(callback, r.width, -r.height));
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), new MovementKey(callback, -r.width, 0));
+            // movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(callback, 0, 0));
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), new MovementKey(callback, r.width, 0));
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, 0), new MovementKey(callback, -r.width, r.height));
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, 0), new MovementKey(callback, 0, r.height));
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD3, 0), new MovementKey(callback, r.width, r.height));
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), new MovementKey(callback, -r.width, 0));
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), new MovementKey(callback, r.width, 0));
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), new MovementKey(callback, 0, -r.height));
+            movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), new MovementKey(callback, 0, r.height));
+        }
+        actionMap.putAll(movementKeys);
+    }
 
-	@Override
-	public void uninstallMovementKeys(Map<KeyStroke, Action> actionMap) {
-		if (movementKeys != null) {
-			for (KeyStroke key : movementKeys.keySet()) {
-				actionMap.remove(key);
-			}
-		}
-	}
+    @Override
+    public void uninstallMovementKeys(Map<KeyStroke, Action> actionMap) {
+        if (movementKeys != null) {
+            for (KeyStroke key : movementKeys.keySet()) {
+                actionMap.remove(key);
+            }
+        }
+    }
 
-	@Override
-	public Rectangle getBounds(CellPoint cp) {
-		return new Rectangle(cp.x, cp.y, getSize(), getSize());
-	}
+    @Override
+    public Rectangle getBounds(CellPoint cp) {
+        return new Rectangle(cp.x, cp.y, getSize(), getSize());
+    }
 
-	@Override
-	public ZonePoint convert(CellPoint cp) {
-		return new ZonePoint(cp.x, cp.y);
-	}
+    @Override
+    public ZonePoint convert(CellPoint cp) {
+        return new ZonePoint(cp.x, cp.y);
+    }
 
-	@Override
-	public CellPoint convert(ZonePoint zp) {
-		return new CellPoint(zp.x, zp.y);
-	}
+    @Override
+    public CellPoint convert(ZonePoint zp) {
+        return new CellPoint(zp.x, zp.y);
+    }
 
-	@Override
-	protected Area createCellShape(int size) {
-		// Doesn't do this
-		return null;
-	}
+    @Override
+    protected Area createCellShape(int size) {
+        // Doesn't do this
+        return null;
+    }
 
-	@Override
-	public GridCapabilities getCapabilities() {
-		return GRID_CAPABILITIES;
-	}
+    @Override
+    public GridCapabilities getCapabilities() {
+        return GRID_CAPABILITIES;
+    }
 
-	@Override
-	public double getCellWidth() {
-		return getSize();
-	}
+    @Override
+    public double getCellWidth() {
+        return getSize();
+    }
 
-	@Override
-	public double getCellHeight() {
-		return getSize();
-	}
+    @Override
+    public double getCellHeight() {
+        return getSize();
+    }
 }

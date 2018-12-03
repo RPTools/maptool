@@ -12,16 +12,16 @@ import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool_fx.MapTool;
 
 public abstract class AbstractMacro implements Macro {
-	protected String processText(String incoming) {
-		return "\002" + MapTool.getFrame().getCommandPanel().getChatProcessor().process(incoming) + "\003";
-	}
+    protected String processText(String incoming) {
+        return "\002" + MapTool.getFrame().getCommandPanel().getChatProcessor().process(incoming) + "\003";
+    }
 
-	// public static void main(String[] args) {
-	// new AbstractMacro(){
-	// public void execute(String macro) {
-	//
-	// System.out.println(getWords(macro));
-	// }
-	// }.execute("one \"two three\" \"four five\"");
-	// }
+    // public static void main(String[] args) {
+    // new AbstractMacro(){
+    // public void execute(String macro) {
+    //
+    // System.out.println(getWords(macro));
+    // }
+    // }.execute("one \"two three\" \"four five\"");
+    // }
 }

@@ -10,41 +10,41 @@ package net.rptools.lib;
 
 public class DebugUtil {
 
-	/**
-	 * Get the bits in the number represented as a string
-	 * 
-	 * @param num
-	 * @return the bits in the number represented as a string
-	 */
-	public static String getBits(long num) {
-		String str = "";
-		for (int i = 0; i < 64; i++) {
-			str = (num & 1) + str;
-			num >>= 1;
+    /**
+     * Get the bits in the number represented as a string
+     * 
+     * @param num
+     * @return the bits in the number represented as a string
+     */
+    public static String getBits(long num) {
+        String str = "";
+        for (int i = 0; i < 64; i++) {
+            str = (num & 1) + str;
+            num >>= 1;
 
-			if (i % 4 == 3) {
-				str = " " + str;
-			}
-		}
-		return str;
-	}
+            if (i % 4 == 3) {
+                str = " " + str;
+            }
+        }
+        return str;
+    }
 
-	/**
-	 * Get the bits in the number represented as a string
-	 * 
-	 * @param num
-	 * @return the bits in the number represented as a string
-	 */
-	public static String getBits(int num) {
-		String str = "";
-		for (int i = 0; i < 32; i++) {
-			str = (num & 1) + str;
-			num >>= 1;
+    /**
+     * Get the bits in the number represented as a string
+     * 
+     * @param num
+     * @return the bits in the number represented as a string
+     */
+    public static String getBits(int num) {
+        String str = "";
+        for (int i = 0; i < 32; i++) {
+            str = (num & 1) + str;
+            num >>= 1;
 
-			if (i % 4 == 3) {
-				str = " " + str;
-			}
-		}
-		return str;
-	}
+            if (i % 4 == 3) {
+                str = " " + str;
+            }
+        }
+        return str;
+    }
 }

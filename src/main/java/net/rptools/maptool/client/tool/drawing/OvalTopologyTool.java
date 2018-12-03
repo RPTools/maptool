@@ -30,140 +30,140 @@ import net.rptools.maptool_fx.MapTool;
 
 public class OvalTopologyTool extends AbstractDrawingTool implements MouseMotionListener {
 
-	private static final long serialVersionUID = 3258413928311830321L;
+    private static final long serialVersionUID = 3258413928311830321L;
 
-	protected Oval oval;
-	private ZonePoint originPoint;
+    protected Oval oval;
+    private ZonePoint originPoint;
 
-	public OvalTopologyTool() {
-		try {
-			setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/top-blue-oval.png"))));
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
+    public OvalTopologyTool() {
+        try {
+            setIcon(new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream("net/rptools/maptool/client/image/tool/top-blue-oval.png"))));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
 
-	@Override
-	// Override abstracttool to prevent color palette from
-	// showing up
-	protected void attachTo(ZoneRenderer renderer) {
-		super.attachTo(renderer);
-		// Hide the drawable color palette
-		MapTool.getFrame().hideControlPanel();
-	}
+    @Override
+    // Override abstracttool to prevent color palette from
+    // showing up
+    protected void attachTo(ZoneRenderer renderer) {
+        super.attachTo(renderer);
+        // Hide the drawable color palette
+        MapTool.getFrame().hideControlPanel();
+    }
 
-	@Override
-	public boolean isAvailable() {
-		return MapTool.getPlayer().isGM();
-	}
+    @Override
+    public boolean isAvailable() {
+        return MapTool.getPlayer().isGM();
+    }
 
-	@Override
-	public String getInstructions() {
-		return "tool.ovaltopology.instructions";
-	}
+    @Override
+    public String getInstructions() {
+        return "tool.ovaltopology.instructions";
+    }
 
-	@Override
-	public String getTooltip() {
-		return "tool.ovaltopology.tooltip";
-	}
+    @Override
+    public String getTooltip() {
+        return "tool.ovaltopology.tooltip";
+    }
 
-	@Override
-	public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
-		if (MapTool.getPlayer().isGM()) {
-			Zone zone = renderer.getZone();
-			Area topology = zone.getTopology();
+    @Override
+    public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
+        if (MapTool.getPlayer().isGM()) {
+            Zone zone = renderer.getZone();
+            Area topology = zone.getTopology();
 
-			Graphics2D g2 = (Graphics2D) g.create();
-			g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
-			g2.scale(renderer.getScale(), renderer.getScale());
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
+            g2.scale(renderer.getScale(), renderer.getScale());
 
-			g2.setColor(AppStyle.tokenTopologyColor);
-			g2.fill(getTokenTopology());
+            g2.setColor(AppStyle.tokenTopologyColor);
+            g2.fill(getTokenTopology());
 
-			g2.setColor(AppStyle.topologyColor);
-			g2.fill(topology);
+            g2.setColor(AppStyle.topologyColor);
+            g2.fill(topology);
 
-			g2.dispose();
-		}
-		if (oval != null) {
-			Pen pen = new Pen();
-			pen.setEraser(getPen().isEraser());
-			pen.setOpacity(AppStyle.topologyRemoveColor.getAlpha() / 255.0f);
-			pen.setBackgroundMode(Pen.MODE_SOLID);
+            g2.dispose();
+        }
+        if (oval != null) {
+            Pen pen = new Pen();
+            pen.setEraser(getPen().isEraser());
+            pen.setOpacity(AppStyle.topologyRemoveColor.getAlpha() / 255.0f);
+            pen.setBackgroundMode(Pen.MODE_SOLID);
 
-			if (pen.isEraser()) {
-				pen.setEraser(false);
-			}
-			if (isEraser()) {
-				pen.setBackgroundPaint(new DrawableColorPaint(AppStyle.topologyRemoveColor));
-			} else {
-				pen.setBackgroundPaint(new DrawableColorPaint(AppStyle.topologyAddColor));
-			}
-			paintTransformed(g, renderer, oval, pen);
-		}
-	}
+            if (pen.isEraser()) {
+                pen.setEraser(false);
+            }
+            if (isEraser()) {
+                pen.setBackgroundPaint(new DrawableColorPaint(AppStyle.topologyRemoveColor));
+            } else {
+                pen.setBackgroundPaint(new DrawableColorPaint(AppStyle.topologyAddColor));
+            }
+            paintTransformed(g, renderer, oval, pen);
+        }
+    }
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-		if (SwingUtilities.isLeftMouseButton(e)) {
-			ZonePoint zp = getPoint(e);
+    @Override
+    public void mousePressed(MouseEvent e) {
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            ZonePoint zp = getPoint(e);
 
-			if (oval == null) {
-				oval = new Oval(zp.x, zp.y, zp.x, zp.y);
-				originPoint = zp;
-			} else {
-				oval.getEndPoint().x = zp.x;
-				oval.getEndPoint().y = zp.y;
+            if (oval == null) {
+                oval = new Oval(zp.x, zp.y, zp.x, zp.y);
+                originPoint = zp;
+            } else {
+                oval.getEndPoint().x = zp.x;
+                oval.getEndPoint().y = zp.y;
 
-				Area area = GraphicsUtil.createLineSegmentEllipse(oval.getStartPoint().x, oval.getStartPoint().y, oval.getEndPoint().x, oval.getEndPoint().y, 10);
+                Area area = GraphicsUtil.createLineSegmentEllipse(oval.getStartPoint().x, oval.getStartPoint().y, oval.getEndPoint().x, oval.getEndPoint().y, 10);
 
-				if (isEraser(e)) {
-					renderer.getZone().removeTopology(area);
-					MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
-				} else {
-					renderer.getZone().addTopology(area);
-					MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
-				}
-				renderer.repaint();
-				oval = null;
-			}
-			setIsEraser(isEraser(e));
-		}
-		super.mousePressed(e);
-	}
+                if (isEraser(e)) {
+                    renderer.getZone().removeTopology(area);
+                    MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
+                } else {
+                    renderer.getZone().addTopology(area);
+                    MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
+                }
+                renderer.repaint();
+                oval = null;
+            }
+            setIsEraser(isEraser(e));
+        }
+        super.mousePressed(e);
+    }
 
-	@Override
-	public void mouseDragged(MouseEvent e) {
-		if (oval == null) {
-			super.mouseDragged(e);
-		}
-	}
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        if (oval == null) {
+            super.mouseDragged(e);
+        }
+    }
 
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		setIsEraser(isEraser(e));
-		if (oval != null) {
-			ZonePoint sp = getPoint(e);
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        setIsEraser(isEraser(e));
+        if (oval != null) {
+            ZonePoint sp = getPoint(e);
 
-			oval.getEndPoint().x = sp.x;
-			oval.getEndPoint().y = sp.y;
-			oval.getStartPoint().x = originPoint.x - (sp.x - originPoint.x);
-			oval.getStartPoint().y = originPoint.y - (sp.y - originPoint.y);
+            oval.getEndPoint().x = sp.x;
+            oval.getEndPoint().y = sp.y;
+            oval.getStartPoint().x = originPoint.x - (sp.x - originPoint.x);
+            oval.getStartPoint().y = originPoint.y - (sp.y - originPoint.y);
 
-			renderer.repaint();
-		}
-	}
+            renderer.repaint();
+        }
+    }
 
-	/**
-	 * Stop drawing a rectangle and repaint the zone.
-	 */
-	@Override
-	public void resetTool() {
-		if (oval != null) {
-			oval = null;
-			renderer.repaint();
-		} else {
-			super.resetTool();
-		}
-	}
+    /**
+     * Stop drawing a rectangle and repaint the zone.
+     */
+    @Override
+    public void resetTool() {
+        if (oval != null) {
+            oval = null;
+            renderer.repaint();
+        } else {
+            super.resetTool();
+        }
+    }
 }

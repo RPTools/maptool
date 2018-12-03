@@ -13,56 +13,56 @@ package net.rptools.maptool.model;
  */
 public class Pointer {
 
-	public enum Type {
-		ARROW, SPEECH_BUBBLE, THOUGHT_BUBBLE, LOOK_HERE
-	}
+    public enum Type {
+        ARROW, SPEECH_BUBBLE, THOUGHT_BUBBLE, LOOK_HERE
+    }
 
-	private GUID zoneGUID;
-	private int x;
-	private int y;
-	private double direction; //
-	private String type;
+    private GUID zoneGUID;
+    private int x;
+    private int y;
+    private double direction; //
+    private String type;
 
-	public Pointer() {
-		/* Hessian serializable */}
+    public Pointer() {
+        /* Hessian serializable */}
 
-	public Pointer(Zone zone, int x, int y, double direction, Type type) {
-		this.zoneGUID = zone.getId();
-		this.x = x;
-		this.y = y;
-		this.direction = direction;
-		this.type = type.name();
-	}
+    public Pointer(Zone zone, int x, int y, double direction, Type type) {
+        this.zoneGUID = zone.getId();
+        this.x = x;
+        this.y = y;
+        this.direction = direction;
+        this.type = type.name();
+    }
 
-	public String toString() {
-		return x + "." + y + "-" + direction;
-	}
+    public String toString() {
+        return x + "." + y + "-" + direction;
+    }
 
-	public Type getType() {
-		return type != null ? Type.valueOf(type) : Type.ARROW;
-	}
+    public Type getType() {
+        return type != null ? Type.valueOf(type) : Type.ARROW;
+    }
 
-	public GUID getZoneGUID() {
-		return zoneGUID;
-	}
+    public GUID getZoneGUID() {
+        return zoneGUID;
+    }
 
-	public int getX() {
-		return x;
-	}
+    public int getX() {
+        return x;
+    }
 
-	public int getY() {
-		return y;
-	}
+    public int getY() {
+        return y;
+    }
 
-	public void setX(int x) {
-		this.x = x;
-	}
+    public void setX(int x) {
+        this.x = x;
+    }
 
-	public void setY(int y) {
-		this.y = y;
-	}
+    public void setY(int y) {
+        this.y = y;
+    }
 
-	public double getDirection() {
-		return direction;
-	}
+    public double getDirection() {
+        return direction;
+    }
 }

@@ -18,34 +18,34 @@ import java.util.List;
 
 public class FileListTransferable implements Transferable {
 
-	public static final DataFlavor FLAVOR = new DataFlavor("application/x-java-file-list;class=java.util.List", null);
+    public static final DataFlavor FLAVOR = new DataFlavor("application/x-java-file-list;class=java.util.List", null);
 
-	private List<File> fileList;
+    private List<File> fileList;
 
-	public FileListTransferable(List<File> fileList) {
-		this.fileList = fileList;
-	}
+    public FileListTransferable(List<File> fileList) {
+        this.fileList = fileList;
+    }
 
-	public FileListTransferable(File file) {
-		fileList = new LinkedList<File>();
-		fileList.add(file);
-	}
+    public FileListTransferable(File file) {
+        fileList = new LinkedList<File>();
+        fileList.add(file);
+    }
 
-	public DataFlavor[] getTransferDataFlavors() {
-		return new DataFlavor[] { FLAVOR };
-	}
+    public DataFlavor[] getTransferDataFlavors() {
+        return new DataFlavor[] { FLAVOR };
+    }
 
-	public boolean isDataFlavorSupported(DataFlavor flavor) {
-		return flavor.equals(FLAVOR);
-	}
+    public boolean isDataFlavorSupported(DataFlavor flavor) {
+        return flavor.equals(FLAVOR);
+    }
 
-	public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
 
-		if (!flavor.equals(FLAVOR)) {
-			throw new UnsupportedFlavorException(flavor);
-		}
+        if (!flavor.equals(FLAVOR)) {
+            throw new UnsupportedFlavorException(flavor);
+        }
 
-		return fileList;
-	}
+        return fileList;
+    }
 
 }

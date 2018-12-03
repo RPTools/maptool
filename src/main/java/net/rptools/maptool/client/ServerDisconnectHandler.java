@@ -19,30 +19,30 @@ import net.rptools.maptool_fx.MapTool;
  * This class handles when the server inexplicably disconnects
  */
 public class ServerDisconnectHandler implements DisconnectHandler {
-	// TODO: This is a temporary hack until I can come up with a cleaner mechanism
-	public static boolean disconnectExpected;
+    // TODO: This is a temporary hack until I can come up with a cleaner mechanism
+    public static boolean disconnectExpected;
 
-	public void handleDisconnect(AbstractConnection arg0) {
-		// Update internal state
-		MapTool.disconnect();
+    public void handleDisconnect(AbstractConnection arg0) {
+        // Update internal state
+        MapTool.disconnect();
 
-		// TODO: attempt to reconnect if this was unexpected
-		if (!disconnectExpected) {
-			MapTool.showError("Server has disconnected.");
+        // TODO: attempt to reconnect if this was unexpected
+        if (!disconnectExpected) {
+            MapTool.showError("Server has disconnected.");
 
-			// hide map so player doesn't get a brief GM view
-			MapTool.getFrame().setCurrentZoneRenderer(null);
+            // hide map so player doesn't get a brief GM view
+            MapTool.getFrame().setCurrentZoneRenderer(null);
 
-			try {
-				MapTool.startPersonalServer(CampaignFactory.createBasicCampaign());
-			} catch (IOException ioe) {
-				MapTool.showError("Could not restart personal server");
-			}
-		} else if (!MapTool.isPersonalServer() && !MapTool.isHostingServer()) {
-			// expected disconnect from someone else's server
-			// hide map so player doesn't get a brief GM view
-			MapTool.getFrame().setCurrentZoneRenderer(null);
-		}
-		disconnectExpected = false;
-	}
+            try {
+                MapTool.startPersonalServer(CampaignFactory.createBasicCampaign());
+            } catch (IOException ioe) {
+                MapTool.showError("Could not restart personal server");
+            }
+        } else if (!MapTool.isPersonalServer() && !MapTool.isHostingServer()) {
+            // expected disconnect from someone else's server
+            // hide map so player doesn't get a brief GM view
+            MapTool.getFrame().setCurrentZoneRenderer(null);
+        }
+        disconnectExpected = false;
+    }
 }

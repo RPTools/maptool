@@ -19,51 +19,51 @@ import javax.swing.Scrollable;
 
 public class ScrollablePanel extends JPanel implements Scrollable {
 
-	private int unitIncrement;
-	private int blockIncrement;
+    private int unitIncrement;
+    private int blockIncrement;
 
-	public ScrollablePanel(JComponent component, int unitIncrement, int blockIncrement) {
-		setLayout(new GridLayout());
-		add(component);
+    public ScrollablePanel(JComponent component, int unitIncrement, int blockIncrement) {
+        setLayout(new GridLayout());
+        add(component);
 
-		this.unitIncrement = unitIncrement;
-		this.blockIncrement = blockIncrement;
-	}
+        this.unitIncrement = unitIncrement;
+        this.blockIncrement = blockIncrement;
+    }
 
-	public ScrollablePanel(JComponent component, int unitIncrement) {
-		this(component, unitIncrement, unitIncrement * 3);
-	}
+    public ScrollablePanel(JComponent component, int unitIncrement) {
+        this(component, unitIncrement, unitIncrement * 3);
+    }
 
-	public ScrollablePanel(JComponent component) {
-		this(component, 20);
-	}
+    public ScrollablePanel(JComponent component) {
+        this(component, 20);
+    }
 
-	public static JScrollPane wrap(JComponent component) {
+    public static JScrollPane wrap(JComponent component) {
 
-		JScrollPane pane = new JScrollPane(new ScrollablePanel(component), JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		return pane;
-	}
+        JScrollPane pane = new JScrollPane(new ScrollablePanel(component), JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        return pane;
+    }
 
-	////
-	// SCROLLABLE
-	public Dimension getPreferredScrollableViewportSize() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    ////
+    // SCROLLABLE
+    public Dimension getPreferredScrollableViewportSize() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-		return blockIncrement;
-	}
+    public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return blockIncrement;
+    }
 
-	public boolean getScrollableTracksViewportHeight() {
-		return false;
-	}
+    public boolean getScrollableTracksViewportHeight() {
+        return false;
+    }
 
-	public boolean getScrollableTracksViewportWidth() {
-		return true;
-	}
+    public boolean getScrollableTracksViewportWidth() {
+        return true;
+    }
 
-	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
-		return unitIncrement;
-	}
+    public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return unitIncrement;
+    }
 }

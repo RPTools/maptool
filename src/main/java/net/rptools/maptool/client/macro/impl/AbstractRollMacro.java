@@ -13,16 +13,16 @@ import net.rptools.maptool_fx.MapTool;
 
 public abstract class AbstractRollMacro extends AbstractMacro {
 
-	protected String roll(String roll) {
+    protected String roll(String roll) {
 
-		try {
-			String text = roll + " => " + MapTool.getParser().expandRoll(roll);
+        try {
+            String text = roll + " => " + MapTool.getParser().expandRoll(roll);
 
-			return text;
-		} catch (Exception e) {
-			MapTool.addLocalMessage("<b>" + I18N.getText("roll.general.unknown", roll) + "</b>");
-			return null;
-		}
-	}
+            return text;
+        } catch (Exception e) {
+            MapTool.addLocalMessage("<b>" + I18N.getText("roll.general.unknown", roll) + "</b>");
+            return null;
+        }
+    }
 
 }

@@ -14,17 +14,17 @@ import java.util.List;
 import net.rptools.maptool_fx.MapTool;
 
 public class JSAPIChat {
-	public void broadcast(String message) {
-		MapTool.addGlobalMessage(message);
-	}
+    public void broadcast(String message) {
+        MapTool.addGlobalMessage(message);
+    }
 
-	public void broadcastTo(List<String> who, String message) {
-		MapTool.addGlobalMessage(message, who);
-	}
+    public void broadcastTo(List<String> who, String message) {
+        MapTool.addGlobalMessage(message, who);
+    }
 
-	public void broadcastToGM(String message) {
-		List<String> who = new ArrayList<>();
-		who.add("gm");
-		MapTool.addGlobalMessage(message, who);
-	}
+    public void broadcastToGM(String message) {
+        List<String> who = new ArrayList<>();
+        who.add("gm");
+        MapTool.addGlobalMessage(message, who);
+    }
 }

@@ -25,60 +25,60 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
-		name = "loadaliases",
-		aliases = {},
-		description = "loadaliases.description")
+        name = "loadaliases",
+        aliases = {},
+        description = "loadaliases.description")
 public class LoadAliasesMacro implements Macro {
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		File aliasFile = null;
-		if (macro.length() > 0) {
-			aliasFile = new File(macro);
-		} else {
-			JFileChooser chooser = MapTool.getFrame().getLoadFileChooser();
-			chooser.setDialogTitle(I18N.getText("loadaliases.dialogTitle"));
-			chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        File aliasFile = null;
+        if (macro.length() > 0) {
+            aliasFile = new File(macro);
+        } else {
+            JFileChooser chooser = MapTool.getFrame().getLoadFileChooser();
+            chooser.setDialogTitle(I18N.getText("loadaliases.dialogTitle"));
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-			if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-				return;
-			}
-			aliasFile = chooser.getSelectedFile();
-		}
-		if (aliasFile.getName().indexOf(".") < 0) {
-			aliasFile = new File(aliasFile.getAbsolutePath() + ".alias");
-		}
-		if (!aliasFile.exists()) {
-			MapTool.addLocalMessage(I18N.getText("loadaliases.cantFindFile", aliasFile));
-			return;
-		}
+            if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+            aliasFile = chooser.getSelectedFile();
+        }
+        if (aliasFile.getName().indexOf(".") < 0) {
+            aliasFile = new File(aliasFile.getAbsolutePath() + ".alias");
+        }
+        if (!aliasFile.exists()) {
+            MapTool.addLocalMessage(I18N.getText("loadaliases.cantFindFile", aliasFile));
+            return;
+        }
 
-		try {
-			MapTool.addLocalMessage(I18N.getText("loadalises.loading"));
-			List<String> lineList = FileUtil.getLines(aliasFile);
+        try {
+            MapTool.addLocalMessage(I18N.getText("loadalises.loading"));
+            List<String> lineList = FileUtil.getLines(aliasFile);
 
-			for (String line : lineList) {
-				line = line.trim();
-				if (line.length() == 0 || line.charAt(0) == '#') {
-					continue;
-				}
-				// Split into components
-				String name = line;
-				String value = null;
-				int split = line.indexOf(":");
-				if (split > 0) {
-					name = line.substring(0, split);
-					value = line.substring(split + 1).trim();
-				}
-				if (value != null) {
-					MapTool.addLocalMessage("&nbsp;&nbsp;&nbsp;'" + name + "'");
-					MacroManager.setAlias(name, value);
-				} else {
-					MapTool.addLocalMessage("&nbsp;&nbsp;&nbsp;" + I18N.getText("loadaliases.ignoring", name));
-				}
-			}
-		} catch (FileNotFoundException fnfe) {
-			MapTool.addLocalMessage(I18N.getText("loadaliases.couldNotLoad", I18N.getText("msg.error.fileNotFound")));
-		} catch (IOException ioe) {
-			MapTool.addLocalMessage("loadaliases.couldNotLoad" + ioe);
-		}
-	}
+            for (String line : lineList) {
+                line = line.trim();
+                if (line.length() == 0 || line.charAt(0) == '#') {
+                    continue;
+                }
+                // Split into components
+                String name = line;
+                String value = null;
+                int split = line.indexOf(":");
+                if (split > 0) {
+                    name = line.substring(0, split);
+                    value = line.substring(split + 1).trim();
+                }
+                if (value != null) {
+                    MapTool.addLocalMessage("&nbsp;&nbsp;&nbsp;'" + name + "'");
+                    MacroManager.setAlias(name, value);
+                } else {
+                    MapTool.addLocalMessage("&nbsp;&nbsp;&nbsp;" + I18N.getText("loadaliases.ignoring", name));
+                }
+            }
+        } catch (FileNotFoundException fnfe) {
+            MapTool.addLocalMessage(I18N.getText("loadaliases.couldNotLoad", I18N.getText("msg.error.fileNotFound")));
+        } catch (IOException ioe) {
+            MapTool.addLocalMessage("loadaliases.couldNotLoad" + ioe);
+        }
+    }
 }

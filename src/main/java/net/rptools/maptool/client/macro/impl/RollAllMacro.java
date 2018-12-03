@@ -16,15 +16,15 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool_fx.MapTool;
 
 @MacroDefinition(
-		name = "roll",
-		aliases = { "r" },
-		description = "roll.description")
+        name = "roll",
+        aliases = { "r" },
+        description = "roll.description")
 public class RollAllMacro extends AbstractRollMacro {
-	public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-		String result = roll(macro);
-		if (result != null) {
-			MapTool.addMessage(new TextMessage(TextMessage.Channel.ALL, null, MapTool.getPlayer().getName(), "* " +
-					I18N.getText("roll.string", MapTool.getPlayer().getName(), result), context.getTransformationHistory()));
-		}
-	}
+    public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
+        String result = roll(macro);
+        if (result != null) {
+            MapTool.addMessage(new TextMessage(TextMessage.Channel.ALL, null, MapTool.getPlayer().getName(), "* " +
+                    I18N.getText("roll.string", MapTool.getPlayer().getName(), result), context.getTransformationHistory()));
+        }
+    }
 }
