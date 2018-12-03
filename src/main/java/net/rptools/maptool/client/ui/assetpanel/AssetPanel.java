@@ -265,19 +265,13 @@ public class AssetPanel extends JComponent {
 			thumbnailPreviewSlider.setToolTipText(I18N.getString("panel.Asset.ImageModel.slider.toolTip"));
 
 			// TODO: Remove
-			//  MetalSliderUI has a problem with unset default value under Mac OS
-			/*thumbnailPreviewSlider.setUI(new MetalSliderUI() {
-				protected void scrollDueToClickInTrack(int direction) {
-					int value = thumbnailPreviewSlider.getValue();
-
-					if (thumbnailPreviewSlider.getOrientation() == JSlider.HORIZONTAL) {
-						value = this.valueForXPosition(thumbnailPreviewSlider.getMousePosition().x);
-					} else if (slider.getOrientation() == JSlider.VERTICAL) {
-						value = this.valueForYPosition(thumbnailPreviewSlider.getMousePosition().y);
-					}
-					thumbnailPreviewSlider.setValue(value);
-				}
-			});*/
+			// MetalSliderUI has a problem with unset default value under Mac OS
+			/*
+			 * thumbnailPreviewSlider.setUI(new MetalSliderUI() { protected void scrollDueToClickInTrack(int direction) { int value = thumbnailPreviewSlider.getValue();
+			 * 
+			 * if (thumbnailPreviewSlider.getOrientation() == JSlider.HORIZONTAL) { value = this.valueForXPosition(thumbnailPreviewSlider.getMousePosition().x); } else if (slider.getOrientation() ==
+			 * JSlider.VERTICAL) { value = this.valueForYPosition(thumbnailPreviewSlider.getMousePosition().y); } thumbnailPreviewSlider.setValue(value); } });
+			 */
 
 			thumbnailPreviewSlider.addChangeListener(new ChangeListener() {
 				@Override

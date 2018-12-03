@@ -135,7 +135,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.jidesoft.docking.DockableFrame;
 
-
 /**
  */
 public class MapToolFrame extends JFrame implements WindowListener, AppEventListener {
