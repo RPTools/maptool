@@ -1223,7 +1223,7 @@ public class MapTool extends Application {
 			getFrame().getChatActionLabel().setVisible(true);
 		}
 		// Flashing
-		if (!isInFocus()) {
+		if (!isInFocus() && taskbarFlasher != null) {
 			taskbarFlasher.flash();
 		}
 		if (message.isWhisper()) {

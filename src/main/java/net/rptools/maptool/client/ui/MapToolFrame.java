@@ -844,7 +844,7 @@ public class MapToolFrame extends JFrame implements WindowListener, AppEventList
 	}
 
 	public boolean isCommandPanelVisible() {
-		return getFrame(MTFrame.CHAT).isShowing();
+		return getCommandPanel().isShowing();
 	}
 
 	public void showCommandPanel() {
