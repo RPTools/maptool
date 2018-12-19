@@ -41,8 +41,7 @@ import javafx.stage.StageStyle;
 import net.rptools.maptool.client.swing.SplashScreen;
 
 public class CreateVersionedInstallSplash extends Application {
-	private static String resourceImage = "net/rptools/maptool/client/image/maptool_splash_template_nerps.png";
-	private static String installImageOutputFilename = "../build-resources/jWrapper/maptool_installing_splash.png";
+	private static String resourceImage = "net/rptools/maptool/client/image/maptool_splash_template.png";
 	private static String webOutputPath;
 	private static String versionText = "Dev-Build";
 	private static final String FONT_RESOURCE = "/net/rptools/maptool/client/fonts/Horta.ttf";
@@ -57,7 +56,6 @@ public class CreateVersionedInstallSplash extends Application {
 
 		// Parameters that can be overridden via command line options...
 		resourceImage = getCommandLineOption(cmdOptions, "source", resourceImage, args);
-		installImageOutputFilename = getCommandLineOption(cmdOptions, "output", installImageOutputFilename, args);
 		versionText = getCommandLineOption(cmdOptions, "version", versionText, args);
 		webOutputPath = getCommandLineOption(cmdOptions, "web_output", null, args);
 
@@ -66,17 +64,12 @@ public class CreateVersionedInstallSplash extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		final File installSplashFile = new File(installImageOutputFilename);
-
-		BufferedImage installImage = createLaunchSplash("Installing... " + "v" + versionText);
 		BufferedImage webImage = createLaunchSplash("v" + versionText);
 
 		try {
 			System.out.println("Version: " + versionText);
 			System.out.println("Source: " + resourceImage);
-			System.out.println("Output: " + installSplashFile.getCanonicalPath());
 
-			ImageIO.write(installImage, "png", installSplashFile);
 			if (webOutputPath != null) {
 				System.out.println("Web Output: " + webOutputPath);
 				updateWebVersion(versionText);

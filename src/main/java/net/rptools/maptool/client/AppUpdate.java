@@ -10,6 +10,7 @@ package net.rptools.maptool.client;
 
 import java.io.*;
 import java.net.*;
+import java.util.Properties;
 import java.util.jar.*;
 import javax.swing.*;
 
@@ -24,9 +25,8 @@ import net.sf.json.JSONObject;
 public class AppUpdate {
 	private static final Logger log = LogManager.getLogger(AppUpdate.class);
 
-	// TODO: Move this to a .properties config
-	static final String GIT_HUB_API_URL = "https://api.github.com/repos/JamzTheMan/MapTool/releases/latest?access_token=";
-	static final String GIT_HUB_OAUTH_TOKEN = "60a5595a0b90510f8d0fbe686e21be6ed1c0b787"; // Grants read-only access to public information
+	static final String GIT_HUB_API_URL = "github.api.url";
+	static final String GIT_HUB_OAUTH_TOKEN = "github.api.oauth.token"; // Grants read-only access to public information
 
 	public static boolean gitHubReleases() {
 		// AppPreferences.setSkipAutoUpdate(false); // For testing only
@@ -50,14 +50,16 @@ public class AppUpdate {
 		jarCommit = getCommitSHA();
 
 		// If we don't have a commit attribute from JAR, we're done!
-		if (jarCommit == null)
+		if (jarCommit == null) {
+			log.info("No commit SHA (running in DEVELOPMENT mode?): " + getProperty(GIT_HUB_API_URL) + getProperty(GIT_HUB_OAUTH_TOKEN));
 			return false;
+		}
 
 		try {
-			response = HTTPUtil.getJsonPaylod(GIT_HUB_API_URL + GIT_HUB_OAUTH_TOKEN);
+			response = HTTPUtil.getJsonPaylod(getProperty(GIT_HUB_API_URL) + getProperty(GIT_HUB_OAUTH_TOKEN));
 			log.debug("Response: " + response);
 		} catch (IOException e) {
-			log.error("Unable to reach " + GIT_HUB_API_URL, e.getLocalizedMessage());
+			log.error("Unable to reach " + getProperty(GIT_HUB_API_URL), e.getLocalizedMessage());
 			return false;
 		}
 
@@ -116,12 +118,9 @@ public class AppUpdate {
 	public static String getCommitSHA() {
 		String jarCommit = "";
 
-		// Attempt to get current commit out of JAR Manifest, if null is return, most likely ran from IDE/non-JAR version so skip
-		// URLClassLoader cl = (URLClassLoader) MapTool.class.getClassLoader();
 		ClassLoader cl = MapTool.class.getClassLoader();
 
 		try {
-			// URL url = cl.findResource("META-INF/MANIFEST.MF");
 			URL url = cl.getResource("META-INF/MANIFEST.MF");
 			Manifest manifest = new Manifest(url.openStream());
 
@@ -140,7 +139,7 @@ public class AppUpdate {
 		JCheckBox dontAskCheckbox = new JCheckBox("Never check for updates again!");
 
 		String title = "Update Available";
-		String msg1 = "A new version of MapTool infused with Nerps is available!";
+		String msg1 = "A new version of MapTool is available!";
 		String msg2 = "Would you like to download " + tagName + "?";
 		String blankLine = " ";
 
@@ -197,4 +196,18 @@ public class AppUpdate {
 
 		new Thread(updatethread).start();
 	}
+	
+	private static String getProperty(String propertyName) {
+		Properties prop = new Properties();
+		
+		try {
+			prop.load(AppUpdate.class.getClassLoader().getResourceAsStream("github.properties"));
+			
+			return prop.getProperty(propertyName);
+		} catch (IOException ioe) {
+			log.error("Unable to load github.properties.", ioe);
+		}
+		
+		return "";
+	  }
 }

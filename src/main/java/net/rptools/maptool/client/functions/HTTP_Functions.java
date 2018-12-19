@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.HTTPUtil;
 import net.rptools.parser.Parser;
@@ -50,6 +51,12 @@ public class HTTP_Functions extends AbstractFunction {
 	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
 		String responseString = "";
 
+		if (!MapTool.getParser().isMacroPathTrusted())
+			throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+		
+		if (!AppPreferences.getAllowExternalMacroAccess())
+			throw new ParserException(I18N.getText("macro.function.general.accessDenied", functionName));
+		
 		// New function to return a response from a HTTP URL request.
 		if (functionName.equals("requestURL")) {
 			if (parameters.size() != 1)

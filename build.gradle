@@ -16,7 +16,7 @@ buildscript {
 
 // Access Git info from build script
 plugins {
-	id "org.ajoberstar.grgit" version "2.3.0"
+	id "org.ajoberstar.grgit" version "3.0.0"
 }
 
 // Apply the java plugin to add support for Java
@@ -72,7 +72,7 @@ ext {
 
 run {
 	args = [ '-v='+version ]
-	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8" ]
+	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ]
 
 	if(System.getProperty("exec.args") != null) {
 		args System.getProperty("exec.args").split()
@@ -136,6 +136,7 @@ repositories {
 	mavenCentral()
 	maven { url = 'http://maptool.craigs-stuff.net/repo/' }
 	maven { url = 'http://www.nerps.net/repo/' }
+	maven { url = 'http://nexus.fyiblue.com/content/groups/public' }
 	mavenLocal()
 }
 
@@ -368,18 +369,18 @@ task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepa
 				"-BlicenseFile=COPYING.AFFERO",
 				"-BlicenseType='GNU AFFERO GENERAL PUBLIC LICENSE'",
 				"-Bcategory=Games",
-				"-Bemail=maptool@nerps.net",
+				"-Bemail=maptool@rptools.net",
 				"-BuserJvmOptions=-DMAPTOOL_DATADIR\\==.maptool-" + vendor,
-				"-BuserJvmOptions=-Dfile.encoding\\==UTF-8"
-				//"-BuserJvmOptions=-Xss=4M"
+				"-BuserJvmOptions=-Dfile.encoding\\==UTF-8",
+				"-BuserJvmOptions=-Xss=4M"
 
 				println commandLine
 		}
 	}
 }
 
-task wrapper(type: Wrapper) {
-	gradleVersion = '4.7'
+task createWrapper(type: Wrapper) {
+	gradleVersion = '5.0'
 }
 
 // Configure current release tag in Sentry.io properties

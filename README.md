@@ -1,24 +1,10 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/o4hmpca4mert1k0i/branch/master?svg=true)](https://ci.appveyor.com/project/JamzTheMan/maptool/branch/master)
-[![Build Status](https://travis-ci.org/JamzTheMan/MapTool.svg?branch=master)](https://travis-ci.org/JamzTheMan/MapTool)
-
 MapTool
 =======
 
-Welcome to my fork of MapTool, now infused with Nerps!. The old version (1.3) still resides on [SourceForge](http://sourceforge.net/p/rptools/svn/HEAD/tree/) but should only be updated with major bug fixes.
+Welcome to the MapTool 1.4 repository. The old version (1.3) still resides on [SourceForge](http://sourceforge.net/p/rptools/svn/HEAD/tree/) but will not be updated going forward.
 
-
-What's with the Infused with Nerps?
------
-It's simply my way of telling you, the user, this is my fork of MapTool and not the official RPTools version.  I've been a passionate user and contributer of MapTool for over 7 years now. I enjoy coding in Java as a hobby and use MapTool in my weekly game (currently Pathfinder) and plan to do so indefinetly. _My gaming group has been going strong since 1991!_
-
-Why am I telling random people on the internet this? So you know this is not just some one off fork that will be dead in 6 months. If there is a bug and it's hampering my game...or there is some enhancement that I simply must have to make my game better, I'm going to code it. And as a byproduct, you the user also get those fixes/enhancements for the low low price of *free*!
-
-Lastly, all code I write is for fun and as such, open source for consumption upstream to RPTools. Feel free to fork from the main repository or mine and submit contributions! If you find any bug/flaws or have a really cool idea for an enhancement, feel free to create an issue on GitHub. It's the best way to catch my attention! You can also join fellow users on Discord: https://discord.gg/gevEtpC
-
-___
-
-So what is MapTool?
------
+So what is MapTool? 
+-------------------
 
 MapTool is much more than just a mapping program. Included are not only powerful tools for the creation of detailed maps, but also a chat function, detailed token management (allowing you to track properties of the units placed on the map and display health and status information), and an initiative tracker. Functions not being used can be hidden out of sight. These features enable your computer screen to function as a virtual table top, filling the role of battlemats and dry-erase markers and providing for infinitely scrollable maps and the ability to use a large-screen TV or video projector.  It is "game system agnostic", meaning that while MapTool has special support for some game systems (like hexes for GURPS or square templates for D&D 4E) there is no requirement for you to use these features.
 
@@ -29,64 +15,83 @@ And we don't stop there! Not content with just emulating the tabletop, we seek t
 Requirements
 ------------
 
-- MapTool 1.4.4.x comes with it's own JRE. Only download and install java if you want to run the JAR file manually. [Java 1.8+](https://java.com/en/download/)
+- MapTool 1.4 requires [Java 1.7+](https://java.com/en/download/) although current iterations have an embedded JRE that will install along with MapTool
 - Building MapTool requires the Java Development Kit (JDK): [How To Install JDK](doc/How_To_Install_JDK.md)
+
+Version Numbers
+---------------
+
+The RPTools team intends to use the "1.4" moniker until such time as changes are made that break backward compatibility with reading user data files (campaigns, maps, tokens, etc).  At that point, the version number will be bumped to "1.5".  (Note that the format of exported data may change without bumping the version number, as long as the older file format can still be read and used.)  In any case, the next digit will be even-numbered for stable releases and odd-numbered for development builds.
+
+All of the exciting new features will be happening in the development builds.  Major bugs or security fixes will be ported between the stable and development branches so that they are available in both.
 
 Resources
 ---------
 
-- **Website:** http://rptools.net/
-- **Forums:**  http://forums.rptools.net
-- **Wiki:**    http://lmwcs.com/rptools/wiki/Main_Page
+ - **Website:** http://rptools.net/ 
+ - **Forums:**  http://forums.rptools.net 
+ - **Wiki:**    http://lmwcs.com/rptools/wiki/Main_Page 
 
-Building Maptool
-----------------
+Configuration Steps Prior to Building MapTool
+---------------------------------------------
 
 First, [install the JDK](doc/How_To_Install_JDK.md).
 
-[Gradle](http://gradle.org/) is used to build MapTool 1.4. You do not need Gradle installed to perform the build as the repository has a small wrapper that will download and install it in a subdirectory for you. This means that the first time you do a build you will need to be connected to the internet and it will take a while
-as it downloads everything it needs.
+Second, clone the GitHub repository (this one or one that you have forked) to your local system.  If you are cloning your own fork, change the URL as appropriate.
 
-```Shell
+```
+git clone git@github.com:RPTools/maptool.git
+```
+
+From here on, it is expected that you are running these commands from within the directory that was created when you cloned the repository (referred to as the _working directory_ in Git-speak).
+
+[Gradle](http://gradle.org/) is used to build MapTool 1.4. You do not need Gradle installed to perform the build as the repository has a small wrapper that will download and install it in a subdirectory for you. This means that the first time you run Gradle, you will need to be connected to the Internet and it will take a while as it downloads everything it needs.
+
+(Note that Java 9 requires Gradle 4.x+ -- older versions of Gradle _will not work_!)
+
+* On Linux and macOS (and other Unix systems):
+```
+./gradlew wrapper --gradle-version=4.5.1 --distribution-type=bin
+```
+
+* On Windows, remember to use the backslash instead:
+```
+.\gradlew wrapper --gradle-version=4.5.1 --distribution-type=bin
+```
+
+You now have Gradle updated to version 4.5.1 with any updates applied to
+the wrapper script itself as well.
+
+Building MapTool
+----------------
+
+* On Linux and macOS (and other Unix systems):
+```
 ./gradlew build
 ```
 
-For Windows, remember to flip the slash:
-
-```Shell
+* On Windows, remember to use the backslash instead:
+```
 .\gradlew build
 ```
 
-Running Maptool from source
-----------------
-```Shell
-./gradlew run
-```
-
-For Windows, remember to flip the slash:
-
-```Shell
-.\gradlew run
-```
-
-Building a Native Executable
+Building the Distributable Zip
 ------------------------------
 
-```Shell
-./gradlew clean deploy
+* On Linux and macOS (and other Unix systems):
+```
+./gradlew clean release
 ```
 
-For Windows, remember to flip the slash:
-
-```Shell
-.\gradlew clean deploy
+* On Windows, remember to use the backslash instead:
+```
+.\gradlew clean release 
 ```
 
-This will create an installable file for use on your operating system. Look in the 'releases' folder for the ouput. *Note: Additional requirements may be needed, ie Inno setup. See the offical documentation for more information:* https://docs.oracle.com/javase/8/docs/technotes/guides/deploy/self-contained-packaging.html
+This will create a `.zip` file for use on all systems (as well as a zipped `.app` for macOS) in the `maptool/build/` subdirectory. The build number will be based on the latest tag and latest commit.
 
-
-Developers
-----------
+Contributors
+------------
 
 Please follow our [Code Style and Guidelines](doc/Code_Style_and_Guidelines.md) when submitting patches and pull requests.
 
@@ -94,5 +99,5 @@ Please follow our [Code Style and Guidelines](doc/Code_Style_and_Guidelines.md) 
 Optional
 --------
 
-- [How To Setup User Interface (UI) Tools for Maptool](doc/How_To_Setup_UI_Tools.md)
 - [How To Setup Eclipse for MapTool](doc/How_To_Setup_Eclipse.md)
+- [How To Setup User Interface (UI) Tools for MapTool](doc/How_To_Setup_UI_Tools.md)

@@ -347,6 +347,9 @@ public class AppPreferences {
 	private static final String KEY_PORTRAIT_SIZE = "portraitSize";
 	private static final int DEFAULT_PORTRAIT_SIZE = 175;
 
+	private static final String KEY_THUMBNAIL_SIZE = "thumbnailSize";
+	private static final int DEFAULT_THUMBNAIL_SIZE = 500;
+	
 	private static final String KEY_ALLOW_PLAYER_MACRO_EDITS_DEFAULT = "allowPlayerMacroEditsDefault";
 	private static final boolean DEFAULT_ALLOW_PLAYER_MACRO_EDITS_DEFAULT = true;
 
@@ -407,10 +410,13 @@ public class AppPreferences {
 	private static final String KEY_FILE_SYNC_PATH = "fileSyncPath";
 	private static final String DEFAULT_FILE_SYNC_PATH = "";
 
-	private static final String SKIP_AUTO_UPDATE = "skipAutoUpdate";
+	private static final String KEY_SKIP_AUTO_UPDATE = "skipAutoUpdate";
 	private static final boolean DEFAULT_SKIP_AUTO_UPDATE = false;
-	private static final String SKIP_AUTO_UPDATE_COMMIT = "skipAutoUpdateCommit";
+	private static final String KEY_SKIP_AUTO_UPDATE_COMMIT = "skipAutoUpdateCommit";
 	private static final String DEFAULT_SKIP_AUTO_UPDATE_COMMIT = "";
+	
+	private static final String KEY_ALLOW_EXTERNAL_MACRO_ACCESS = "allowExternalMacroAccess";
+	private static final boolean DEFAULT_ALLOW_EXTERNAL_MACRO_ACCESS = false;
 
 	public static void setTypingNotificationDuration(int ms) {
 		prefs.putInt(KEY_TYPING_NOTIFICATION_DURATION, ms);
@@ -503,6 +509,14 @@ public class AppPreferences {
 
 	public static int getPortraitSize() {
 		return prefs.getInt(KEY_PORTRAIT_SIZE, DEFAULT_PORTRAIT_SIZE);
+	}
+	
+	public static void setThumbnailSize(int size) {
+		prefs.putInt(KEY_THUMBNAIL_SIZE, size);
+	}
+
+	public static int getThumbnailSize() {
+		return prefs.getInt(KEY_THUMBNAIL_SIZE, DEFAULT_THUMBNAIL_SIZE);
 	}
 
 	public static void setShowSmilies(boolean show) {
@@ -802,21 +816,29 @@ public class AppPreferences {
 	}
 
 	public static boolean getSkipAutoUpdate() {
-		return prefs.getBoolean(SKIP_AUTO_UPDATE, DEFAULT_SKIP_AUTO_UPDATE);
+		return prefs.getBoolean(KEY_SKIP_AUTO_UPDATE, DEFAULT_SKIP_AUTO_UPDATE);
 	}
 
 	public static void setSkipAutoUpdate(boolean value) {
-		prefs.putBoolean(SKIP_AUTO_UPDATE, value);
+		prefs.putBoolean(KEY_SKIP_AUTO_UPDATE, value);
 	}
 
 	public static String getSkipAutoUpdateCommit() {
-		return prefs.get(SKIP_AUTO_UPDATE_COMMIT, DEFAULT_SKIP_AUTO_UPDATE_COMMIT);
+		return prefs.get(KEY_SKIP_AUTO_UPDATE_COMMIT, DEFAULT_SKIP_AUTO_UPDATE_COMMIT);
 	}
 
 	public static void setSkipAutoUpdateCommit(String commit) {
-		prefs.put(SKIP_AUTO_UPDATE_COMMIT, commit);
+		prefs.put(KEY_SKIP_AUTO_UPDATE_COMMIT, commit);
 	}
 
+	public static boolean getAllowExternalMacroAccess() {
+		return prefs.getBoolean(KEY_ALLOW_EXTERNAL_MACRO_ACCESS, DEFAULT_ALLOW_EXTERNAL_MACRO_ACCESS);
+	}
+
+	public static void setAllowExternalMacroAccess(boolean value) {
+		prefs.putBoolean(KEY_ALLOW_EXTERNAL_MACRO_ACCESS, value);
+	}
+	
 	public static WalkerMetric getMovementMetric() {
 		WalkerMetric metric;
 		try {

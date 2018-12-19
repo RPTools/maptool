@@ -93,7 +93,7 @@ public class MapToolEventQueue extends EventQueue {
 		UserBuilder user = new UserBuilder();
 		user.setUsername(MapTool.getPlayer().getName());
 		user.setId(MapTool.getClientId());
-		user.setEmail(MapTool.getPlayer().getName().replaceAll(" ", "_") + "@nerps.net"); // Lets prompt for this?
+		user.setEmail(MapTool.getPlayer().getName().replaceAll(" ", "_") + "@rptools.net"); // Lets prompt for this?
 
 		// Set the user in the current context.
 		Sentry.getContext().setUser(user.build());

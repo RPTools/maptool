@@ -148,11 +148,11 @@ public class MapTool {
 	// Jamz: This sets the thumbnail size that is cached for imageThumbs
 	// Set it to 500 (from 100) for now to support larger asset window previews
 	// TODO: Add preferences option as well as add auto-purge after x days preferences
-	private static final Dimension THUMBNAIL_SIZE = new Dimension(500, 500);
+	private static final Dimension THUMBNAIL_SIZE = new Dimension(AppPreferences.getThumbnailSize(), AppPreferences.getThumbnailSize());
 
 	private static ThumbnailManager thumbnailManager;
 	private static String version = "DEVELOPMENT";;
-	private static String vendor = "Nerps!";
+	private static String vendor = "RPTools!"; // Default, will get from JAR Manifest during normal runtime
 
 	private static Campaign campaign;
 
@@ -713,7 +713,7 @@ public class MapTool {
 	}
 
 	public static boolean isDevelopment() {
-		return "DEVELOPMENT".equals(version) || "@buildNumber@".equals(version);
+		return "DEVELOPMENT".equals(version) || "@buildNumber@".equals(version) || "SNAPSHOT".startsWith(version);
 	}
 
 	public static ServerPolicy getServerPolicy() {

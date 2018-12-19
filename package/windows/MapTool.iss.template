@@ -9,7 +9,7 @@ AppVerName=${AppName} ${AppVersion}
 AppPublisher=${Vendor}
 AppComments=${AppName} by ${Vendor}
 AppCopyright=Copyright (C) 2018
-AppPublisherURL=http://maptool.nerps.net/
+AppPublisherURL=http://www.rptools.net/
 AppSupportURL=http://forums.rptools.net/viewtopic.php?f=60&t=23681
 ;AppUpdatesURL=http://java.com/
 DefaultDirName={localappdata}/${AppName}
