@@ -62,6 +62,7 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
 import net.rptools.maptool.client.ui.StampPopupMenu;
@@ -1381,14 +1382,20 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 							if (property.isOwnerOnly() && !AppUtil.playerOwns(tokenUnderMouse)) {
 								continue;
 							}
-							Object propertyValue = tokenUnderMouse.getEvaluatedProperty(property.getName());
+							MapToolVariableResolver resolver = new MapToolVariableResolver(tokenUnderMouse);
+							//TODO: is the double resolution of properties necessary here. I kept it, but it seems wasteful and I can't figure out any reason that the first resolution can't be used below.
+							resolver.initialize();
+							resolver.setAutoPrompt(false);
+							Object propertyValue = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
+							resolver.flush();
 							if (propertyValue != null) {
 								if (propertyValue.toString().length() > 0) {
 									String propName = property.getName();
 									if (property.getShortName() != null) {
 										propName = property.getShortName();
 									}
-									Object value = tokenUnderMouse.getEvaluatedProperty(property.getName());
+									Object value = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
+                  resolver.flush();
 									propertyMap.put(propName, value != null ? value.toString() : "");
 								}
 							}

@@ -40,6 +40,7 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.ImageManager;
@@ -1041,6 +1042,10 @@ public class Token extends BaseModel {
 	}
 
 	public Object getEvaluatedProperty(String key) {
+		return getEvaluatedProperty(null, key);
+	}
+
+	public Object getEvaluatedProperty(MapToolVariableResolver resolver, String key) {
 		Object val = getProperty(key);
 		if (val == null) {
 			// Global default ?
@@ -1068,7 +1073,7 @@ public class Token extends BaseModel {
 			if (log.isDebugEnabled()) {
 				log.debug("Evaluating property: '" + key + "' for token " + getName() + "(" + getId() + ")----------------------------------------------------------------------------------");
 			}
-			val = MapTool.getParser().parseLine(this, val.toString());
+			val = MapTool.getParser().parseLine(resolver, this, val.toString());
 		} catch (ParserException pe) {
 			// pe.printStackTrace();
 			val = val.toString();

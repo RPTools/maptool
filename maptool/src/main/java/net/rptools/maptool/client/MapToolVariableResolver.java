@@ -83,8 +83,11 @@ public class MapToolVariableResolver extends MapVariableResolver {
 
 	private Token tokenInContext;
 
+	private boolean autoPrompt;
+
 	public MapToolVariableResolver(Token tokenInContext) {
 		this.tokenInContext = tokenInContext;
+		autoPrompt = true;
 		// Set the default macro.args to ""  so that it is always present.
 		try {
 			this.setVariable("macro.args", "");
@@ -125,6 +128,14 @@ public class MapToolVariableResolver extends MapVariableResolver {
 		for (Runnable r : delayedActionList) {
 			r.run();
 		}
+	}
+
+	public void setAutoPrompt(boolean value) {
+		autoPrompt = value;
+	}
+
+	public boolean getAutoPrompt() {
+		return autoPrompt;
 	}
 
 	@Override
@@ -210,7 +221,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
 		}
 
 		// Prompt
-		if (result == null || mods == VariableModifiers.Prompt) {
+		if ((result == null && autoPrompt == true) || mods == VariableModifiers.Prompt) {
 			String DialogTitle = I18N.getText("lineParser.dialogTitleNoToken");
 			if (tokenInContext != null && tokenInContext.getGMName() != null && MapTool.getPlayer().isGM()) {
 				DialogTitle = I18N.getText("lineParser.dialogTitle", tokenInContext.getGMName());
