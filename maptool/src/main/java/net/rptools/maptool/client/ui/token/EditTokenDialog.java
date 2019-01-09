@@ -82,6 +82,7 @@ import com.jidesoft.grid.AbstractPropertyTableModel;
 import com.jidesoft.grid.Property;
 import com.jidesoft.grid.PropertyPane;
 import com.jidesoft.grid.PropertyTable;
+import com.jidesoft.grid.MultilineStringCellEditor;
 import com.jidesoft.swing.CheckBoxListWithSelectable;
 import com.jidesoft.swing.DefaultSelectable;
 import com.jidesoft.swing.Selectable;
@@ -895,6 +896,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 			public EditTokenProperty(String key) {
 				super(key, key, String.class, (String) getPropertyTypeCombo().getSelectedItem());
 				this.key = key;
+				setCellEditor(new MultilineStringCellEditor());
 			}
 
 			@Override
