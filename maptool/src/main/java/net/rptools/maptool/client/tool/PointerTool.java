@@ -32,13 +32,21 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineBreakMeasurer;
+import java.awt.font.TextAttribute;
+import java.awt.font.TextLayout;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
+import java.text.AttributedCharacterIterator;
+import java.text.AttributedString;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -1319,6 +1327,28 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		}
 	}
 
+	/*class WrappedText
+	{
+		int lineCount;
+		String[] lines;
+		stringWidth[] widths;
+	}*/
+
+	/*private WrappedText wrapText(string text)
+	{
+		StringBuilder currentLine;
+		WrappedText wrappedText = new WrappedText();
+		for(int I = 0;I<text.length();I++){
+			if(text.charAt(I) == '\n'){
+				wrappedText.lines 
+			}
+				
+				currentLine.append(text.charAt(I));
+			
+		}
+		String[] firstPass = text.split('\n');
+	}*/
+
 	// //
 	// ZoneOverlay
 	/*
@@ -1329,6 +1359,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	 */
 	public void paintOverlay(final ZoneRenderer renderer, Graphics2D g) {
 		Dimension viewSize = renderer.getSize();
+		FontRenderContext fontRenderContext = g.getFontRenderContext();
 
 		Composite composite = g.getComposite();
 		if (selectionBoundBox != null) {
@@ -1371,8 +1402,18 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				// Size
 				SwingUtil.constrainTo(imgSize, AppPreferences.getPortraitSize());
 
+				Dimension statSize = null;
+				int rm = AppStyle.miniMapBorder.getRightMargin();
+				int lm = AppStyle.miniMapBorder.getLeftMargin();
+				int tm = AppStyle.miniMapBorder.getTopMargin();
+				int bm = AppStyle.miniMapBorder.getBottomMargin();
+
 				// Stats
+				//My math is off here somewhere or I don't undestand something about the viewport. My math says I should only need to subtract off PADDING * 3, but that wasn't working. I subtract off PADDING * 7 to correct, but it's a hack.
+				int maxStatsWidth = viewSize.width - lm - rm - imgSize.width - PADDING * 7;
 				Map<String, String> propertyMap = new LinkedHashMap<String, String>();
+				Map<String, Integer> propertyLineCount = new LinkedHashMap<String, Integer>();
+				LinkedList<TextLayout> lineLayouts = new LinkedList<TextLayout>();
 				if (AppPreferences.getShowStatSheet()) {
 					for (TokenProperty property : MapTool.getCampaign().getTokenPropertyList(tokenUnderMouse.getPropertyType())) {
 						if (property.isShowOnStatSheet()) {
@@ -1402,11 +1443,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 						}
 					}
 				}
-				Dimension statSize = null;
-				int rm = AppStyle.miniMapBorder.getRightMargin();
-				int lm = AppStyle.miniMapBorder.getLeftMargin();
-				int tm = AppStyle.miniMapBorder.getTopMargin();
-				int bm = AppStyle.miniMapBorder.getBottomMargin();
 				if (tokenUnderMouse.getPortraitImage() != null || !propertyMap.isEmpty()) {
 					Font font = AppStyle.labelFont;
 					FontMetrics valueFM = g.getFontMetrics(font);
@@ -1414,15 +1450,46 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 					int rowHeight = Math.max(valueFM.getHeight(), keyFM.getHeight());
 					if (!propertyMap.isEmpty()) {
 						// Figure out size requirements
-						int height = propertyMap.size() * (rowHeight + PADDING);
-						int width = -1;
+						//int height = propertyMap.size() * (rowHeight + PADDING);
+						int height = 0;
+						int keyWidth = -1;
+						float valueWidth = -1;
+						//Iterate over keys to reserve room for key column
 						for (Entry<String, String> entry : propertyMap.entrySet()) {
-							int lineWidth = SwingUtilities.computeStringWidth(keyFM, entry.getKey()) + SwingUtilities.computeStringWidth(valueFM, "  " + entry.getValue());
-							if (width < 0 || lineWidth > width) {
-								width = lineWidth;
+							int tempKeyWidth = SwingUtilities.computeStringWidth(keyFM, entry.getKey());
+							if (keyWidth < 0 || tempKeyWidth > keyWidth) {
+								keyWidth = tempKeyWidth;
 							}
 						}
-						statSize = new Dimension(width + PADDING * 3, height);
+						//Iterate over values, break then into lines as necessary. Figure out longest value length.
+						for (Entry<String, String> entry : propertyMap.entrySet()) {
+							int lineCount = 0;
+							for (String line : entry.getValue().split("\n")) {
+								//For each value, make the iterator need and stash data about it
+								AttributedString text = new AttributedString(line);
+								text.addAttribute(TextAttribute.FONT, font);
+								AttributedCharacterIterator paragraph = text.getIterator();
+								int paragraphStart = paragraph.getBeginIndex();
+								int paragraphEnd = paragraph.getEndIndex();
+								//Make and initialize LineBreakMeasurer
+								LineBreakMeasurer lineMeasurer = new LineBreakMeasurer(paragraph, BreakIterator.getLineInstance(), fontRenderContext);
+								lineMeasurer.setPosition(paragraphStart);
+								//Get each line from the measurer and find the widest one;
+								while (lineMeasurer.getPosition() < paragraphEnd) {
+									TextLayout layout = lineMeasurer.nextLayout(maxStatsWidth - keyWidth);
+									lineLayouts.add(layout);
+									height += rowHeight;
+									float tmpValueWidth = layout.getAdvance();
+									lineCount++;
+									if (valueWidth < 0 || tmpValueWidth > valueWidth) {
+										valueWidth = tmpValueWidth;
+									}
+								}
+							}
+							propertyLineCount.put(entry.getKey(), lineCount);
+							height += PADDING;
+						}
+						statSize = new Dimension((int) (keyWidth + valueWidth + PADDING * 3), height);
 					}
 					// Create the space for the image
 					int width = imgSize.width + (statSize != null ? statSize.width + rm : 0) + lm + rm;
@@ -1446,19 +1513,40 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 						for (Entry<String, String> entry : propertyMap.entrySet()) {
 							// Box
 							statsG.setColor(new Color(249, 241, 230, 140));
-							statsG.fillRect(bounds.x, y - keyFM.getAscent(), bounds.width - PADDING / 2, rowHeight);
+							statsG.fillRect(bounds.x, y - keyFM.getAscent(), bounds.width - PADDING / 2, rowHeight * propertyLineCount.get(entry.getKey()));
 							statsG.setColor(new Color(175, 163, 149));
-							statsG.drawRect(bounds.x, y - keyFM.getAscent(), bounds.width - PADDING / 2, rowHeight);
+							statsG.drawRect(bounds.x, y - keyFM.getAscent(), bounds.width - PADDING / 2, rowHeight * propertyLineCount.get(entry.getKey()));
 
-							// Values
+							// Draw Key
 							statsG.setColor(Color.black);
 							statsG.setFont(boldFont);
 							statsG.drawString(entry.getKey(), bounds.x + PADDING * 2, y);
+
+							// Draw Value
+							for (String line : entry.getValue().split("\n")) {
+								//For each value, make the iterator need and stash data about it
+								AttributedString text = new AttributedString(line);
+								text.addAttribute(TextAttribute.FONT, font);
+								AttributedCharacterIterator paragraph = text.getIterator();
+								int paragraphStart = paragraph.getBeginIndex();
+								int paragraphEnd = paragraph.getEndIndex();
+								//Make and initialize LineBreakMeasurer
+								LineBreakMeasurer lineMeasurer = new LineBreakMeasurer(paragraph, BreakIterator.getLineInstance(), fontRenderContext);
+								lineMeasurer.setPosition(paragraphStart);
+								//Get each line from the measurer and find the widest one;
+								while (lineMeasurer.getPosition() < paragraphEnd) {
+									TextLayout layout = lineMeasurer.nextLayout(maxStatsWidth);
+									layout.draw(statsG, bounds.x + bounds.width - PADDING - layout.getAdvance(), y);
+									y += rowHeight;
+								}
+							}
+							/*
 							statsG.setFont(font);
 							int strw = SwingUtilities.computeStringWidth(valueFM, entry.getValue());
 							statsG.drawString(entry.getValue(), bounds.x + bounds.width - strw - PADDING, y);
+							*/
 
-							y += PADDING + rowHeight;
+							y += PADDING;
 						}
 					}
 					// Draw the portrait
