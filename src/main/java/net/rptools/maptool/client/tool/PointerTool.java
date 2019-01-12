@@ -137,6 +137,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	private Token tokenOnStatSheet;
 
 	private static int PADDING = 7;
+	private static int STATSHEET_EXTERIOR_PADDING = 5;
 
 	// Offset from token's X,Y when dragging. Values are in zone coordinates.
 	private int dragOffsetX;
@@ -1474,8 +1475,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 				int bm = AppStyle.miniMapBorder.getBottomMargin();
 
 				// Stats
-				//My math is off here somewhere or I don't undestand something about the viewport. My math says I should only need to subtract off PADDING * 3, but that wasn't working. I subtract off PADDING * 7 to correct, but it's a hack.
-				int maxStatsWidth = viewSize.width - lm - rm - imgSize.width - PADDING * 7;
+				int maxStatsWidth = viewSize.width - lm - rm * 2 - imgSize.width - PADDING * 3 - STATSHEET_EXTERIOR_PADDING * 2;
 				Map<String, String> propertyMap = new LinkedHashMap<String, String>();
 				Map<String, Integer> propertyLineCount = new LinkedHashMap<String, Integer>();
 				LinkedList<TextLayout> lineLayouts = new LinkedList<TextLayout>();
@@ -1513,12 +1513,12 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 					FontMetrics valueFM = g.getFontMetrics(font);
 					FontMetrics keyFM = g.getFontMetrics(boldFont);
 					int rowHeight = Math.max(valueFM.getHeight(), keyFM.getHeight());
+					int keyWidth = -1;
+					float valueWidth = -1;
 					if (!propertyMap.isEmpty()) {
 						// Figure out size requirements
 						//int height = propertyMap.size() * (rowHeight + PADDING);
 						int height = 0;
-						int keyWidth = -1;
-						float valueWidth = -1;
 						//Iterate over keys to reserve room for key column
 						for (Entry<String, String> entry : propertyMap.entrySet()) {
 							int tempKeyWidth = SwingUtilities.computeStringWidth(keyFM, entry.getKey());
@@ -1600,7 +1600,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 								lineMeasurer.setPosition(paragraphStart);
 								//Get each line from the measurer and find the widest one;
 								while (lineMeasurer.getPosition() < paragraphEnd) {
-									TextLayout layout = lineMeasurer.nextLayout(maxStatsWidth);
+									TextLayout layout = lineMeasurer.nextLayout(maxStatsWidth - keyWidth);
 									layout.draw(statsG, bounds.x + bounds.width - PADDING - layout.getAdvance(), y);
 									y += rowHeight;
 								}
@@ -1641,7 +1641,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
 		// Jamz: Statsheet was still showing on drag, added other tests to hide statsheet as well
 		if (statSheet != null && !isDraggingToken && !mouseButtonDown) {
-			g.drawImage(statSheet, 5, viewSize.height - statSheet.getHeight() - 5, this);
+			g.drawImage(statSheet, STATSHEET_EXTERIOR_PADDING, viewSize.height - statSheet.getHeight() - STATSHEET_EXTERIOR_PADDING, this);
 		}
 
 		// Hovers
