@@ -1544,7 +1544,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 									TextLayout layout = lineMeasurer.nextLayout(maxStatsWidth - keyWidth);
 									lineLayouts.add(layout);
 									height += rowHeight;
-									float tmpValueWidth = layout.getAdvance();
+									float tmpValueWidth = layout.getPixelBounds(null, 0, 0).width;
 									lineCount++;
 									if (valueWidth < 0 || tmpValueWidth > valueWidth) {
 										valueWidth = tmpValueWidth;
@@ -1601,7 +1601,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 								//Get each line from the measurer and find the widest one;
 								while (lineMeasurer.getPosition() < paragraphEnd) {
 									TextLayout layout = lineMeasurer.nextLayout(maxStatsWidth - keyWidth);
-									layout.draw(statsG, bounds.x + bounds.width - PADDING - layout.getAdvance(), y);
+									layout.draw(statsG, bounds.x + bounds.width - PADDING - layout.getPixelBounds(null, 0, 0).width, y);
 									y += rowHeight;
 								}
 							}
