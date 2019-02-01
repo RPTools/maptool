@@ -987,8 +987,8 @@ public class AppPreferences {
 	// Effectively, only the GM now has access to the initiative panel. This greatly increases performance and
 	// prevents the updates from getting out of sync as they can today.
 	// Note: This is a HACK to fix a broken system, but we're not going to invest anymore time into the current classes. REWRITE ME!
-	private static final String INIT_ENABLE_SERVER_SYNC = "initEnableServerSync";
-	private static final boolean DEFAULT_INIT_ENABLE_SERVER_SYNC = false;
+	// private static final String INIT_ENABLE_SERVER_SYNC = "initEnableServerSync";
+	// private static final boolean DEFAULT_INIT_ENABLE_SERVER_SYNC = true;
 
 	private static final String INIT_SHOW_TOKENS = "initShowTokens";
 	private static final boolean DEFAULT_INIT_SHOW_TOKENS = true;
@@ -1011,13 +1011,13 @@ public class AppPreferences {
 	private static final String INIT_LOCK_MOVEMENT = "initLockMovement";
 	private static final boolean DEFAULT_INIT_LOCK_MOVEMENT = false;
 
-	public static boolean getInitEnableServerSync() {
-		return prefs.getBoolean(INIT_ENABLE_SERVER_SYNC, DEFAULT_INIT_ENABLE_SERVER_SYNC);
-	}
-
-	public static void setInitEnableServerSync(boolean enableSync) {
-		prefs.putBoolean(INIT_ENABLE_SERVER_SYNC, enableSync);
-	}
+	// public static boolean getInitEnableServerSync() {
+	// return prefs.getBoolean(INIT_ENABLE_SERVER_SYNC, DEFAULT_INIT_ENABLE_SERVER_SYNC);
+	// }
+	//
+	// public static void setInitEnableServerSync(boolean enableSync) {
+	// prefs.putBoolean(INIT_ENABLE_SERVER_SYNC, enableSync);
+	// }
 
 	public static boolean getInitShowTokens() {
 		return prefs.getBoolean(INIT_SHOW_TOKENS, DEFAULT_INIT_SHOW_TOKENS);

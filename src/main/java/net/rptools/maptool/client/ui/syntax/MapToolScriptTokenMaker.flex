@@ -438,6 +438,7 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "getPropertyType" |
 "getRawProperty" |
 "getRecursionDepth" |
+"getRequest" |
 "getSelected" |
 "getSelectedNames" |
 "getSightType" |
@@ -622,6 +623,7 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "openTest" |
 "pow" |
 "power" |
+"postRequest" |
 "removeAllFromInitiative" |
 "removeAllNPCsFromInitiative" |
 "removeAllPCsFromInitiative" |
@@ -630,7 +632,6 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "removeToken" |
 "removeTokenFacing" |
 "replace" |
-"requestURL" |
 "reroll" |
 "resetFrame" |
 "resetProperty" |
@@ -640,7 +641,6 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "selectTokens" |
 "sendDrawingToBack" |
 "sendToBack" |
-"sendURL" |
 "set" |
 "setAllStates" |
 "setAlwaysVisible" |

@@ -136,6 +136,7 @@ getPropertyNamesRaw
 getPropertyType
 getRawProperty
 getRecursionDepth
+getRequest
 getSelected
 getSelectedNames
 getSightType
@@ -318,6 +319,7 @@ nextInitiative
 number
 oldFunction
 openTest
+postRequest
 pow
 power
 removeAllFromInitiative
@@ -328,7 +330,6 @@ removeMacro
 removeToken
 removeTokenFacing
 replace
-requestURL
 reroll
 resetFrame
 resetProperty
@@ -338,7 +339,6 @@ round
 selectTokens
 sendDrawingToBack
 sendToBack
-sendURL
 set
 setAllStates
 setAlwaysVisible

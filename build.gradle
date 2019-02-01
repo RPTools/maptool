@@ -380,7 +380,7 @@ task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepa
 }
 
 task createWrapper(type: Wrapper) {
-	gradleVersion = '5.0'
+	gradleVersion = '5.1.1'
 }
 
 // Configure current release tag in Sentry.io properties

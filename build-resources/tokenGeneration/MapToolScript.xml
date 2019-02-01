@@ -203,6 +203,7 @@ https://github.com/bobbylight/TokenMakerMaker</classComment>
     <function>getPropertyType</function>
     <function>getRawProperty</function>
     <function>getRecursionDepth</function>
+    <function>getRequest</function>
     <function>getSelected</function>
     <function>getSelectedNames</function>
     <function>getSightType</function>
@@ -376,6 +377,7 @@ https://github.com/bobbylight/TokenMakerMaker</classComment>
     <function>openTest</function>
     <function>pow</function>
     <function>power</function>
+    <function>postRequest</function>
     <function>removeAllFromInitiative</function>
     <function>removeAllNPCsFromInitiative</function>
     <function>removeAllPCsFromInitiative</function>
@@ -384,7 +386,6 @@ https://github.com/bobbylight/TokenMakerMaker</classComment>
     <function>removeToken</function>
     <function>removeTokenFacing</function>
     <function>replace</function>
-    <function>requestURL</function>
     <function>reroll</function>
     <function>resetFrame</function>
     <function>resetProperty</function>
@@ -393,7 +394,6 @@ https://github.com/bobbylight/TokenMakerMaker</classComment>
     <function>round</function>
     <function>selectTokens</function>
     <function>sendToBack</function>
-    <function>sendURL</function>
     <function>set</function>
     <function>setAllStates</function>
     <function>setBar</function>

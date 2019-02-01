@@ -179,7 +179,7 @@ public class PreferencesDialog extends JDialog {
 	// Application
 	private final JCheckBox fitGMView;
 	private final JCheckBox fillSelectionCheckBox;
-	private final JCheckBox initEnableServerSyncCheckBox;
+	// private final JCheckBox initEnableServerSyncCheckBox;
 	private final JCheckBox hideNPCs;
 	private final JCheckBox ownerPermissions;
 	private final JCheckBox lockMovement;
@@ -187,6 +187,7 @@ public class PreferencesDialog extends JDialog {
 	private final JTextField upnpDiscoveryTimeoutTextField;
 	private final JTextField fileSyncPath;
 	private final JButton fileSyncPathButton;
+	private final JCheckBox allowExternalMacroAccessCheckBox;
 
 	// Startup
 	private final JTextField jvmXmxTextField;
@@ -201,6 +202,8 @@ public class PreferencesDialog extends JDialog {
 
 	private final JComboBox<String> jvmLanguageOverideComboBox;
 
+	private boolean jvmValuesChanged = false;
+
 	public PreferencesDialog() {
 		super(MapTool.getFrame(), "Preferences", true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -212,6 +215,12 @@ public class PreferencesDialog extends JDialog {
 		getRootPane().setDefaultButton(okButton);
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent e) {
+				// Warn the user that they changed JVM options and need to restart MapTool for them to take affect.
+				// Also warn user to double check settings...
+				if (jvmValuesChanged)
+					if (!MapTool.confirm("msg.confirm.jvm.options"))
+						return;
+				
 				setVisible(false);
 				dispose();
 				MapTool.getEventDispatcher().fireEvent(MapTool.PreferencesEvent.Changed);
@@ -227,7 +236,7 @@ public class PreferencesDialog extends JDialog {
 		showNumberingCombo = panel.getComboBox("showNumberingCombo");
 		saveReminderCheckBox = panel.getCheckBox("saveReminderCheckBox");
 		fillSelectionCheckBox = panel.getCheckBox("fillSelectionCheckBox");
-		initEnableServerSyncCheckBox = panel.getCheckBox("initEnableServerSyncCheckBox");
+		// initEnableServerSyncCheckBox = panel.getCheckBox("initEnableServerSyncCheckBox");
 		autoSaveSpinner = panel.getSpinner("autoSaveSpinner");
 		duplicateTokenCombo = panel.getComboBox("duplicateTokenCombo");
 		tokenNamingCombo = panel.getComboBox("tokenNamingCombo");
@@ -286,6 +295,7 @@ public class PreferencesDialog extends JDialog {
 		showInitGainMessage = panel.getCheckBox("showInitGainMessage");
 		upnpDiscoveryTimeoutTextField = panel.getTextField("upnpDiscoveryTimeoutTextField");
 		typingNotificationDuration = panel.getSpinner("typingNotificationDuration");
+		allowExternalMacroAccessCheckBox = panel.getCheckBox("allowExternalMacroAccessCheckBox");
 		fileSyncPath = panel.getTextField("fileSyncPath");
 		fileSyncPathButton = (JButton) panel.getButton("fileSyncPathButton");
 
@@ -417,9 +427,14 @@ public class PreferencesDialog extends JDialog {
 				AppPreferences.setFillSelectionBox(fillSelectionCheckBox.isSelected());
 			}
 		});
-		initEnableServerSyncCheckBox.addActionListener(new ActionListener() {
+		// initEnableServerSyncCheckBox.addActionListener(new ActionListener() {
+		// public void actionPerformed(ActionEvent e) {
+		// AppPreferences.setInitEnableServerSync(initEnableServerSyncCheckBox.isSelected());
+		// }
+		// });
+		allowExternalMacroAccessCheckBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				AppPreferences.setInitEnableServerSync(initEnableServerSyncCheckBox.isSelected());
+				AppPreferences.setAllowExternalMacroAccess(allowExternalMacroAccessCheckBox.isSelected());
 			}
 		});
 		showDialogOnNewToken.addActionListener(new ActionListener() {
@@ -668,6 +683,7 @@ public class PreferencesDialog extends JDialog {
 						UserJvmPrefs.setJvmOption(JVM_OPTION.MAX_MEM, JVM_OPTION.MAX_MEM.getDefaultValue());
 						log.warn("Invalid JVM Xmx paramater entered: " + jvmXmx);
 					}
+					jvmValuesChanged = true;
 				}
 			}
 		});
@@ -684,6 +700,7 @@ public class PreferencesDialog extends JDialog {
 						UserJvmPrefs.setJvmOption(JVM_OPTION.MIN_MEM, JVM_OPTION.MIN_MEM.getDefaultValue());
 						log.warn("Invalid JVM Xms paramater entered: " + jvmXms);
 					}
+					jvmValuesChanged = true;
 				}
 			}
 		});
@@ -700,6 +717,7 @@ public class PreferencesDialog extends JDialog {
 						UserJvmPrefs.setJvmOption(JVM_OPTION.STACK_SIZE, JVM_OPTION.STACK_SIZE.getDefaultValue());
 						log.warn("Invalid JVM Xss paramater entered: " + jvmXss);
 					}
+					jvmValuesChanged = true;
 				}
 			}
 		});
@@ -708,6 +726,7 @@ public class PreferencesDialog extends JDialog {
 			public void focusLost(FocusEvent e) {
 				if (!e.isTemporary()) {
 					UserJvmPrefs.setJvmOption(JVM_OPTION.DATA_DIR, dataDirTextField.getText().trim());
+					jvmValuesChanged = true;
 				}
 			}
 		});
@@ -716,27 +735,32 @@ public class PreferencesDialog extends JDialog {
 
 			public void actionPerformed(ActionEvent e) {
 				UserJvmPrefs.setJvmOption(JVM_OPTION.ASSERTIONS, jvmAssertionsCheckbox.isSelected());
+				jvmValuesChanged = true;
 			}
 		});
 		jvmDirect3dCheckbox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserJvmPrefs.setJvmOption(JVM_OPTION.JAVA2D_D3D, jvmDirect3dCheckbox.isSelected());
+				jvmValuesChanged = true;
 			}
 		});
 		jvmOpenGLCheckbox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserJvmPrefs.setJvmOption(JVM_OPTION.JAVA2D_OPENGL_OPTION, jvmOpenGLCheckbox.isSelected());
+				jvmValuesChanged = true;
 			}
 		});
 		jvmInitAwtCheckbox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				UserJvmPrefs.setJvmOption(JVM_OPTION.MACOSX_EMBEDDED_OPTION, jvmInitAwtCheckbox.isSelected());
+				jvmValuesChanged = true;
 			}
 		});
 
 		jvmLanguageOverideComboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				UserJvmPrefs.setJvmOption(JVM_OPTION.LOCALE_LANGUAGE, jvmLanguageOverideComboBox.getSelectedItem().toString());
+				jvmValuesChanged = true;
 			}
 		});
 
@@ -839,7 +863,7 @@ public class PreferencesDialog extends JDialog {
 		showDialogOnNewToken.setSelected(AppPreferences.getShowDialogOnNewToken());
 		saveReminderCheckBox.setSelected(AppPreferences.getSaveReminder());
 		fillSelectionCheckBox.setSelected(AppPreferences.getFillSelectionBox());
-		initEnableServerSyncCheckBox.setSelected(AppPreferences.getInitEnableServerSync());
+		// initEnableServerSyncCheckBox.setSelected(AppPreferences.getInitEnableServerSync());
 		autoSaveSpinner.setValue(AppPreferences.getAutoSaveIncrement());
 		newMapsHaveFOWCheckBox.setSelected(AppPreferences.getNewMapsHaveFOW());
 		tokensPopupWarningWhenDeletedCheckBox.setSelected(AppPreferences.getTokensWarnWhenDeleted());
@@ -893,6 +917,7 @@ public class PreferencesDialog extends JDialog {
 		lockMovement.setSelected(AppPreferences.getInitLockMovement());
 		showInitGainMessage.setSelected(AppPreferences.isShowInitGainMessage());
 		upnpDiscoveryTimeoutTextField.setText(Integer.toString(AppPreferences.getUpnpDiscoveryTimeout()));
+		allowExternalMacroAccessCheckBox.setSelected(AppPreferences.getAllowExternalMacroAccess());
 		fileSyncPath.setText(AppPreferences.getFileSyncPath());
 
 		// get JVM User Defaults/User override preferences

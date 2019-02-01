@@ -27,9 +27,10 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
- * New class extending AbstractFunction to create new "Macro Functions" requestURL & sendURL
+ * New class extending AbstractFunction to create new "Macro Functions" getRequest & postRequest
  * 
- * requestURL(URL) :: Takes a URL as a string and sends a GET request, returning HTTP data. sendURL(URL, Parameters) :: Takes a URL as a string and a JSON array of Parameters and sends s POST request,
+ * getRequest(URL) :: Takes a URL as a string and sends a GET request, returning HTTP data. 
+ * postRequest(URL, Parameters) :: Takes a URL as a string and a JSON array of Parameters and sends s POST request,
  * returning HTTP data.
  * 
  * HTTPUtil Class from: http://www.codejava.net/java-se/networking/an-http-utility-class-to-send-getpost-request
@@ -40,7 +41,7 @@ public class HTTP_Functions extends AbstractFunction {
 	private static final HTTP_Functions instance = new HTTP_Functions();
 
 	private HTTP_Functions() {
-		super(1, 3, "requestURL", "sendURL");
+		super(1, 3, "getRequest", "postRequest");
 	}
 
 	public static HTTP_Functions getInstance() {
@@ -58,7 +59,7 @@ public class HTTP_Functions extends AbstractFunction {
 			throw new ParserException(I18N.getText("macro.function.general.accessDenied", functionName));
 		
 		// New function to return a response from a HTTP URL request.
-		if (functionName.equals("requestURL")) {
+		if (functionName.equals("getRequest")) {
 			if (parameters.size() != 1)
 				throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
 
@@ -81,7 +82,7 @@ public class HTTP_Functions extends AbstractFunction {
 			return responseString;
 		}
 
-		if (functionName.equals("sendURL")) {
+		if (functionName.equals("postRequest")) {
 			if (parameters.size() == 0 || parameters.size() > 3)
 				throw new ParserException(I18N.getText("macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
 
