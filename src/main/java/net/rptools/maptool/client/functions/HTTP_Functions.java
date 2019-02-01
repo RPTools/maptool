@@ -29,9 +29,8 @@ import net.rptools.parser.function.AbstractFunction;
 /**
  * New class extending AbstractFunction to create new "Macro Functions" getRequest & postRequest
  * 
- * getRequest(URL) :: Takes a URL as a string and sends a GET request, returning HTTP data. 
- * postRequest(URL, Parameters) :: Takes a URL as a string and a JSON array of Parameters and sends s POST request,
- * returning HTTP data.
+ * getRequest(URL) :: Takes a URL as a string and sends a GET request, returning HTTP data. postRequest(URL, Parameters) :: Takes a URL as a string and a JSON array of Parameters and sends s POST
+ * request, returning HTTP data.
  * 
  * HTTPUtil Class from: http://www.codejava.net/java-se/networking/an-http-utility-class-to-send-getpost-request
  * 
@@ -54,10 +53,10 @@ public class HTTP_Functions extends AbstractFunction {
 
 		if (!MapTool.getParser().isMacroPathTrusted())
 			throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-		
+
 		if (!AppPreferences.getAllowExternalMacroAccess())
 			throw new ParserException(I18N.getText("macro.function.general.accessDenied", functionName));
-		
+
 		// New function to return a response from a HTTP URL request.
 		if (functionName.equals("getRequest")) {
 			if (parameters.size() != 1)

@@ -46,10 +46,10 @@ public class ExportDataFunctions extends AbstractFunction {
 	public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) throws ParserException {
 		if (!MapTool.getParser().isMacroPathTrusted())
 			throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-		
+
 		if (!AppPreferences.getAllowExternalMacroAccess())
 			throw new ParserException(I18N.getText("macro.function.general.accessDenied", functionName));
-		
+
 		// New function to save data to an external file.
 		if (functionName.equals("exportData")) {
 			if (parameters.size() != 3)

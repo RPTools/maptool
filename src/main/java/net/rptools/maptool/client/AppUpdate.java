@@ -196,18 +196,18 @@ public class AppUpdate {
 
 		new Thread(updatethread).start();
 	}
-	
+
 	private static String getProperty(String propertyName) {
 		Properties prop = new Properties();
-		
+
 		try {
 			prop.load(AppUpdate.class.getClassLoader().getResourceAsStream("github.properties"));
-			
+
 			return prop.getProperty(propertyName);
 		} catch (IOException ioe) {
 			log.error("Unable to load github.properties.", ioe);
 		}
-		
+
 		return "";
-	  }
+	}
 }

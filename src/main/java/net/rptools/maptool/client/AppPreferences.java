@@ -349,7 +349,7 @@ public class AppPreferences {
 
 	private static final String KEY_THUMBNAIL_SIZE = "thumbnailSize";
 	private static final int DEFAULT_THUMBNAIL_SIZE = 500;
-	
+
 	private static final String KEY_ALLOW_PLAYER_MACRO_EDITS_DEFAULT = "allowPlayerMacroEditsDefault";
 	private static final boolean DEFAULT_ALLOW_PLAYER_MACRO_EDITS_DEFAULT = true;
 
@@ -414,7 +414,7 @@ public class AppPreferences {
 	private static final boolean DEFAULT_SKIP_AUTO_UPDATE = false;
 	private static final String KEY_SKIP_AUTO_UPDATE_COMMIT = "skipAutoUpdateCommit";
 	private static final String DEFAULT_SKIP_AUTO_UPDATE_COMMIT = "";
-	
+
 	private static final String KEY_ALLOW_EXTERNAL_MACRO_ACCESS = "allowExternalMacroAccess";
 	private static final boolean DEFAULT_ALLOW_EXTERNAL_MACRO_ACCESS = false;
 
@@ -510,7 +510,7 @@ public class AppPreferences {
 	public static int getPortraitSize() {
 		return prefs.getInt(KEY_PORTRAIT_SIZE, DEFAULT_PORTRAIT_SIZE);
 	}
-	
+
 	public static void setThumbnailSize(int size) {
 		prefs.putInt(KEY_THUMBNAIL_SIZE, size);
 	}
@@ -838,7 +838,7 @@ public class AppPreferences {
 	public static void setAllowExternalMacroAccess(boolean value) {
 		prefs.putBoolean(KEY_ALLOW_EXTERNAL_MACRO_ACCESS, value);
 	}
-	
+
 	public static WalkerMetric getMovementMetric() {
 		WalkerMetric metric;
 		try {

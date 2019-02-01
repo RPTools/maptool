@@ -220,7 +220,7 @@ public class PreferencesDialog extends JDialog {
 				if (jvmValuesChanged)
 					if (!MapTool.confirm("msg.confirm.jvm.options"))
 						return;
-				
+
 				setVisible(false);
 				dispose();
 				MapTool.getEventDispatcher().fireEvent(MapTool.PreferencesEvent.Changed);
