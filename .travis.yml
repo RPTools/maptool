@@ -10,7 +10,8 @@ before_deploy:
  - ./gradlew deploy
 deploy:
   provider: releases
-  api_key: $DEPLOYMENT_KEY
+  api_key:
+    secure: $DEPLOYMENT_KEY
   file_glob: true
   file: releases/release-*/*
   overwrite: true
