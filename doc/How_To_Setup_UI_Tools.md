@@ -1,7 +1,7 @@
 How To Setup User Interface (UI) Tools for MapTool
 ==================================================
 
-You thought you were done? Sorry, there are two extra things you may wish to consider and both are related to managing UI elements within Maptool. The current edition of the tool uses **Albeille** to manage **Swing** elements within the design. Albeille is a WYSIWYG form designer for Swing objects and if you plan on modifying any of the UI elements you should definitely install the Albeille Designer. 
+You thought you were done? Sorry, there are two extra things you may wish to consider and both are related to managing UI elements within Maptool. The current edition of the tool uses **Albeille** to manage **Swing** elements within the design. Albeille is a WYSIWYG form designer for Swing objects and if you plan on modifying any of the UI elements you should definitely install the Albeille Designer.
 
 As Swing is now depreciated within Java the plan is to move those elements over to **JavaFX**, although this is work is further down the line at the moment. If you want to get to grips with JavaFX, you should probably install the Eclipse Plugin **e(fx)clipse** and the **JavaFX Scene Builder**. Scene Builder is also a WYSIWYG form designer, but this time for JavaFX Objects.
 
@@ -26,7 +26,7 @@ Install e(fx)clipse Plugin
 Install JavaFX Scene Builder
 ----------------------------
 
-The JavaFX Scene Builder application has been handed over to the open source community and as a consequence it can be hard to find the Scene Builder install. The last Oracle version can be found on the [JavaFX Scene Builder Archive](http://www.oracle.com/technetwork/java/javafxscenebuilder-1x-archive-2199384.html) page. 
+The JavaFX Scene Builder application has been handed over to the open source community and as a consequence it can be hard to find the Scene Builder install. The last Oracle version can be found on the [JavaFX Scene Builder Archive](http://www.oracle.com/technetwork/java/javafxscenebuilder-1x-archive-2199384.html) page.
 
 1. Download the **Windows 32/64 bit (msi)** from the **JavaFX Scene Builder 2.0 Related Downloads** section found towards the bottom of the page.
 2. Execute the msi file as normal. This will install the application and make a file association to the FXML extension.

@@ -20,25 +20,25 @@ the one you've just downloaded:  **MapTool**.
 
 #. **MapTool** - virtual tabletop gaming application
 
-    **MapTool** is an online, multiplayer, programmable, interactive, and
+	**MapTool** is an online, multiplayer, programmable, interactive, and
 cross-platform application that allows collaborative gaming such as
 role-playing games, boardgames, card games, dice games, and much more.
 
-    It has been translated into many languages and new translations are
+	It has been translated into many languages and new translations are
 submitted by our users all the time.  As of this writing the
 included languages are English (the primary one), Spanish, French,
 German, Italian, Japanese, Polish, Russian, and Chinese.
 
 #. **TokenTool** - digital gaming token creation tool
 
-    **TokenTool** is a simple graphical program for creating "tokens",
+	**TokenTool** is a simple graphical program for creating "tokens",
 digital versions of miniatures that can be used with **MapTool**
 or any other virtual tabletop application, such as **Roll20** and
 **d20Pro**.
 
 #. **CharacterTool** - character management tool
 
-    **CharTool** is a character management tool.  It will manage all
+	**CharTool** is a character management tool.  It will manage all
 aspects of character creation and advancement for those game systems
 which have a template available.  Seasoned users can create their own
 templates to add to the available game systems or create their
@@ -46,13 +46,13 @@ own unique system.
 
 #. **InitiativeTool** - initiative tracker (mostly for combat encounters)
 
-    **InitTool** will manage the turn-by-turn sequencing that many
+	**InitTool** will manage the turn-by-turn sequencing that many
 game systems use.  Characters can be created in **CharTool** and
 dragged into **InitTool** when needed.
 
 #. **DiceTool** - feature-rich dice-rolling application
 
-    **DiceTool** is a (not so) simple dice rolling application.  Users can
+	**DiceTool** is a (not so) simple dice rolling application.  Users can
 develop their own custom dice rolling functions and implement any dice
 rolling scheme they can think up!  **DiceTool** comes preloaded with a
 variety of game systems already implemented.
@@ -113,7 +113,7 @@ category.
 
 #. Download the Application
 
-    You can visit the
+	You can visit the
 [Downloads page](http://www.rptools.net/?page=downloads)
 and download the ZIP file for your platform (Windows, OS X, or Linux).
 (Stay away from ones marked B<broken>.  Those
@@ -122,21 +122,21 @@ make them unsuitable for most users.)
 
 #. Unpack the ZIP file somewhere on your computer
 
-    Do not try to run the application from inside the ZIP file
+	Do not try to run the application from inside the ZIP file
 because it won't work!
 
-    When you extract the contents be sure to
+	When you extract the contents be sure to
 extract full directory names.  Some files stored in the archive are
 in subdirectories and the application won't work correctly unless
 that structure is preserved.
 
 #. Execute the application
 
-    Once unpacked, you can navigate to that folder (a.k.a. "directory")
+	Once unpacked, you can navigate to that folder (a.k.a. "directory")
 and double-click the **MapTool Launcher** file to start it.  It has a
 filename extension of **.jar** (it's a Java archive).
 
-    The **MapTool Launcher** has its own documentation.  Look in
+	The **MapTool Launcher** has its own documentation.  Look in
 the *doc* subdirectory for the *HowTo* guide.
 
 ## Using the Application
