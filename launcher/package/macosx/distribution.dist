@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<installer-gui-script minSpecVersion="1">
+<title>Launcher</title>
+<background file="Launcher-background.png" mime-type="image/png" alignment="bottomleft"  scaling="none"/>
+<license file="/Users/frank/git/RPTools/launcher/build/libs/COPYING.AFFERO" mime-type="text/rtf"/>
+<pkg-ref id="net.rptools.maptool"/>
+<options customize="never" require-scripts="false"/>
+<choices-outline>
+    <line choice="default">
+        <line choice="net.rptools.maptool"/>
+    </line>
+</choices-outline>
+<choice id="default"/>
+<choice id="net.rptools.maptool" visible="false">
+    <pkg-ref id="net.rptools.maptool"/>
+</choice>
+<pkg-ref id="net.rptools.maptool" version="1.4.1.9" onConclusion="none">Launcher-app.pkg</pkg-ref>
+</installer-gui-script>

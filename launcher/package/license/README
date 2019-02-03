@@ -1,0 +1,22 @@
+This directory contains all licenses used by various RPTools packages.
+
+The libraries use LGPLv3, the applications use the Affero license,
+and there may be some older pieces of code that use GPLv3 but those
+will be transitioned to one of the first two over time.
+
+The plan was to include this directory in the Git repository of all
+RPTools packages so that the Gradle build file could refer to them
+as needed and, perhaps, in an automated manner.  In other words, a
+single 'build.gradle' for all RPTools packages that automatically
+distinguishes between the repo being for a library or an application
+and "doing the Right Thing".
+
+Another alternative is to copy the appropriate license file to
+another filename, and use the package name as the filename.  So the
+COPYING.AFFERO could be copied to LICENSE.maptool, for example.
+Then the build.gradle could refer to "LICENSE"+project.name without
+any need for conditional logic.
+
+Which of those techniques -- or any other future possibility --
+will be decided over time, likely after trying one or more to see
+how they work out. :)
