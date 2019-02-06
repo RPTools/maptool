@@ -197,6 +197,8 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 		} else {
 			pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
 		}
+    pen.setSquareCap(picker.isSquareCapSelected());
+    pen.setThickness(picker.getStrokeWidth());
 		return pen;
 	}
 
@@ -237,6 +239,8 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 		if (!hasPaint(pen)) {
 			return;
 		}
+		if (drawable.getBounds() == null)
+			return;
 		drawable.setLayer(selectedLayer);
 
 		// Send new textures

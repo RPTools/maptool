@@ -8,6 +8,7 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 
 /**
@@ -27,6 +28,7 @@ public class Pen {
 
 	private float thickness;
 	private boolean eraser;
+	private boolean squareCap;
 	private float opacity = 1;
 
 	// ***** Legacy support, these supports drawables from 1.1
@@ -37,13 +39,14 @@ public class Pen {
 	}
 
 	public Pen(DrawablePaint paint, float thickness) {
-		this(paint, thickness, false);
+		this(paint, thickness, false, true);
 	}
 
-	public Pen(DrawablePaint paint, float thickness, boolean eraser) {
+	public Pen(DrawablePaint paint, float thickness, boolean eraser, boolean squareCap) {
 		this.paint = paint;
 		this.thickness = thickness;
 		this.eraser = eraser;
+		this.squareCap = squareCap;
 	}
 
 	public Pen(Pen copy) {
@@ -53,6 +56,7 @@ public class Pen {
 		this.backgroundMode = copy.backgroundMode;
 		this.thickness = copy.thickness;
 		this.eraser = copy.eraser;
+		this.squareCap = copy.squareCap;
 		this.opacity = copy.opacity;
 	}
 
@@ -110,6 +114,28 @@ public class Pen {
 
 	public void setOpacity(float opacity) {
 		this.opacity = opacity;
+	}
+
+	public boolean getSquareCap() {
+		return squareCap;
+	}
+
+	public void setSquareCap(boolean squareCap) {
+		this.squareCap = squareCap;
+	}
+
+	public int getStrokeCap() {
+		if (squareCap)
+			return BasicStroke.CAP_SQUARE;
+		else
+			return BasicStroke.CAP_ROUND;
+	}
+
+	public int getStrokeJoin() {
+		if (squareCap)
+			return BasicStroke.JOIN_MITER;
+		else
+			return BasicStroke.JOIN_ROUND;
 	}
 
 	// ***** Legacy support, these supports drawables from 1.1
