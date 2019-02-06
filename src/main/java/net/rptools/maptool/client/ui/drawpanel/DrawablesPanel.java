@@ -1,11 +1,3 @@
-/*
- * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
- *
- * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
- * at <http://www.gnu.org/licenses/agpl.html>.
- */
 package net.rptools.maptool.client.ui.drawpanel;
 
 import java.awt.AlphaComposite;
@@ -103,9 +95,7 @@ public class DrawablesPanel extends JComponent {
 		for (DrawnElement element : drawableList) {
 			Drawable drawable = element.getDrawable();
 			Pen pen = element.getPen();
-			if (pen.getOpacity() != 1 && pen.getOpacity() != 0 /*
-																 * handle legacy pens, besides, it doesn't make sense to have a non visible pen
-																 */) {
+			if (pen.getOpacity() != 1 && pen.getOpacity() != 0 /* handle legacy pens, besides, it doesn't make sense to have a non visible pen*/) {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
 			}
 			// If we are only drawing cuts, make the pen visible
@@ -128,6 +118,10 @@ public class DrawablesPanel extends JComponent {
 	private Rectangle getBounds(List<DrawnElement> drawableList) {
 		Rectangle bounds = null;
 		for (DrawnElement element : drawableList) {
+			// Empty drawables are created by right clicking during the draw process
+			// and need to be skipped.
+			if (element.getDrawable().getBounds() == null)
+				continue;
 			Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds());
 			// Handle pen size
 			Pen pen = element.getPen();

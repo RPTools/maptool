@@ -59,7 +59,8 @@ public class MapToolLineParser {
 			TokenPropertyFunctions.getInstance(), TokenRemoveFromInitiativeFunction.getInstance(), TokenSelectionFunctions.getInstance(),
 			TokenSightFunctions.getInstance(), TokenSpeechFunctions.getInstance(), TokenStateFunction.getInstance(), TokenVisibleFunction.getInstance(), UserDefinedMacroFunctions.getInstance(),
 			isVisibleFunction.getInstance(), getInfoFunction.getInstance(), TokenMoveFunctions.getInstance(), FogOfWarFunctions.getInstance(), VBL_Functions.getInstance(),
-			ZoomFunctions.getInstance(), ParserPropertyFunctions.getInstance(), MathFunctions.getInstance(), MacroJavaScriptBridge.getInstance(), DrawingFunctions.getInstance(),
+			ZoomFunctions.getInstance(), ParserPropertyFunctions.getInstance(), MathFunctions.getInstance(), MacroJavaScriptBridge.getInstance(),
+      DrawingGetterFunctions.getInstance(), DrawingSetterFunctions.getInstance(), DrawingMiscFunctions.getInstance(),
 			ExportDataFunctions.getInstance(), HTTP_Functions.getInstance(), HeroLabFunctions.getInstance() };
 
 	/** Name and Source or macros that come from chat. */
