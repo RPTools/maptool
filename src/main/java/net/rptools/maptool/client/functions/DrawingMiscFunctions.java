@@ -69,8 +69,11 @@ public class DrawingMiscFunctions extends DrawingFunctions {
 
 	/**
 	 * Searches the list of drawn elements for items with a matching name
-	 * @param  drawableList List of drawables.
-	 * @param  name String value for the search
+	 * 
+	 * @param drawableList
+	 *            List of drawables.
+	 * @param name
+	 *            String value for the search
 	 * 
 	 * @return List<String> of ids
 	 */

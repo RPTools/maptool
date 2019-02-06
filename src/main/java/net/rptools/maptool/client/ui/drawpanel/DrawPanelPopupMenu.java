@@ -1,16 +1,11 @@
 /*
- * This software Copyright by the RPTools.net development team, and licensed
- * under the GPL Version 3 or, at your option, any later version.
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
  *
- * MapTool 2 Source Code is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * You should have received a copy of the GNU General Public License along with
- * this source Code. If not, see <http://www.gnu.org/licenses/>
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
-
 package net.rptools.maptool.client.ui.drawpanel;
 
 import java.awt.BasicStroke;
@@ -80,7 +75,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 		add(new MergeDrawingsAction());
 		addGMItem(new JSeparator());
 		add(new DeleteDrawingAction());
-		//add(new JSeparator());
+		// add(new JSeparator());
 		add(new GetPropertiesAction());
 		add(new SetPropertiesAction());
 		add(new SetDrawingName());
@@ -378,10 +373,12 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 	}
 
 	/**
-	 * Menu items for VBL section.
-	 * Calls VblTool
-	 * @param pathOnly - boolean, just path if true, otherwise fill shape.
-	 * @param isEraser - boolean, erase VBL if true.
+	 * Menu items for VBL section. Calls VblTool
+	 * 
+	 * @param pathOnly
+	 *            - boolean, just path if true, otherwise fill shape.
+	 * @param isEraser
+	 *            - boolean, erase VBL if true.
 	 */
 	private class VblAction extends AbstractAction {
 		private final boolean isEraser;
@@ -491,6 +488,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 	/**
 	 * Tests to see if the selected object has a drawn path
+	 * 
 	 * @param drawnElement
 	 * @return boolean
 	 */
@@ -518,9 +516,12 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
 	/**
 	 * Takes a drawable and adds or removes its shape or path from the VBL
+	 * 
 	 * @param drawable
-	 * @param pathOnly - boolean, just path if true, otherwise fill shape.
-	 * @param isEraser - boolean, erase VBL if true.
+	 * @param pathOnly
+	 *            - boolean, just path if true, otherwise fill shape.
+	 * @param isEraser
+	 *            - boolean, erase VBL if true.
 	 */
 	private void VblTool(Drawable drawable, boolean pathOnly, boolean isEraser) {
 		Area area = new Area();

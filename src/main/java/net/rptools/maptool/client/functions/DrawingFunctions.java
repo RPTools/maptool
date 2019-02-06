@@ -45,9 +45,12 @@ public class DrawingFunctions extends AbstractFunction {
 	/**
 	 * Moves a specified drawing on a specified map to the top of the drawing stack.
 	 *
-	 * @param    map             the zone that should contain the drawing
-	 * @param    guid            the id of the drawing.
-	 * @throws   ParserException    if there were more or less parameters than allowed
+	 * @param map
+	 *            the zone that should contain the drawing
+	 * @param guid
+	 *            the id of the drawing.
+	 * @throws ParserException
+	 *             if there were more or less parameters than allowed
 	 */
 	protected void bringToFront(Zone map, GUID guid) {
 		List<DrawnElement> drawableList = map.getAllDrawnElements();
@@ -84,15 +87,18 @@ public class DrawingFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Checks that the number of objects in the list <code>parameters</code>
-	 * is within given bounds (inclusive). Throws a <code>ParserException</code>
-	 * if the check fails.
+	 * Checks that the number of objects in the list <code>parameters</code> is within given bounds (inclusive). Throws a <code>ParserException</code> if the check fails.
 	 *
-	 * @param    functionName    this is used in the exception message
-	 * @param    parameters      a list of parameters
-	 * @param    min             the minimum amount of parameters (inclusive)
-	 * @param    max             the maximum amount of parameters (inclusive)
-	 * @throws   ParserException    if there were more or less parameters than allowed
+	 * @param functionName
+	 *            this is used in the exception message
+	 * @param parameters
+	 *            a list of parameters
+	 * @param min
+	 *            the minimum amount of parameters (inclusive)
+	 * @param max
+	 *            the maximum amount of parameters (inclusive)
+	 * @throws ParserException
+	 *             if there were more or less parameters than allowed
 	 */
 	protected void checkNumberOfParameters(String functionName, List<Object> parameters, int min, int max) throws ParserException {
 		int numberOfParameters = parameters.size();
@@ -106,8 +112,10 @@ public class DrawingFunctions extends AbstractFunction {
 	/**
 	 * Checks whether or not the function is trusted
 	 * 
-	 * @param functionName     Name of the macro function
-	 * @throws ParserException Returns trust error message and function name 
+	 * @param functionName
+	 *            Name of the macro function
+	 * @throws ParserException
+	 *             Returns trust error message and function name
 	 */
 	protected void checkTrusted(String functionName) throws ParserException {
 		if (!MapTool.getParser().isMacroTrusted()) {
@@ -116,13 +124,16 @@ public class DrawingFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Looks for a drawing on a specific map that matches a specific id.
-	 * Throws a <code>ParserException</code> if the drawing is not found.
+	 * Looks for a drawing on a specific map that matches a specific id. Throws a <code>ParserException</code> if the drawing is not found.
 	 *
-	 * @param    functionName    this is used in the exception message
-	 * @param    map             the zone that should contain the drawing
-	 * @param    guid            the id of the drawing.
-	 * @throws   ParserException if the drawing is not found.
+	 * @param functionName
+	 *            this is used in the exception message
+	 * @param map
+	 *            the zone that should contain the drawing
+	 * @param guid
+	 *            the id of the drawing.
+	 * @throws ParserException
+	 *             if the drawing is not found.
 	 */
 	protected Drawable getDrawable(String functionName, Zone map, GUID guid) throws ParserException {
 		return getDrawnElement(functionName, map, guid).getDrawable();
@@ -153,10 +164,14 @@ public class DrawingFunctions extends AbstractFunction {
 
 	/**
 	 * Validates the float
-	 * @param  functionName String Name of the calling function. Used for error messages.
-	 * @param  f String value of percentage
+	 * 
+	 * @param functionName
+	 *            String Name of the calling function. Used for error messages.
+	 * @param f
+	 *            String value of percentage
 	 * @return float
-	 * @throws ParserException thrown on invalid float
+	 * @throws ParserException
+	 *             thrown on invalid float
 	 */
 	protected float getFloatPercent(String functionName, String f) throws ParserException {
 		try {
@@ -171,10 +186,14 @@ public class DrawingFunctions extends AbstractFunction {
 
 	/**
 	 * Validates the float
-	 * @param  functionName String Name of the calling function. Used for error messages.
-	 * @param  f String value of float
+	 * 
+	 * @param functionName
+	 *            String Name of the calling function. Used for error messages.
+	 * @param f
+	 *            String value of float
 	 * @return float
-	 * @throws ParserException thrown on invalid float
+	 * @throws ParserException
+	 *             thrown on invalid float
 	 */
 	protected float getFloat(String functionName, String f) throws ParserException {
 		try {
@@ -187,10 +206,14 @@ public class DrawingFunctions extends AbstractFunction {
 
 	/**
 	 * Validates the GUID
-	 * @param  functionName String Name of the calling function. Used for error messages.
-	 * @param  id String value of GUID
+	 * 
+	 * @param functionName
+	 *            String Name of the calling function. Used for error messages.
+	 * @param id
+	 *            String value of GUID
 	 * @return GUID
-	 * @throws ParserException thrown on invalid GUID
+	 * @throws ParserException
+	 *             thrown on invalid GUID
 	 */
 	protected GUID getGUID(String functionName, String id) throws ParserException {
 		try {
@@ -202,7 +225,9 @@ public class DrawingFunctions extends AbstractFunction {
 
 	/**
 	 * Take a string and return a layer
-	 * @param  layer String naming the layer
+	 * 
+	 * @param layer
+	 *            String naming the layer
 	 * @return Layer
 	 */
 	protected Layer getLayer(String layer) {
@@ -217,10 +242,14 @@ public class DrawingFunctions extends AbstractFunction {
 
 	/**
 	 * Find the map/zone for a given map name
-	 * @param functionName String Name of the calling function.
-	 * @param mapName      String Name of the searched for map.
-	 * @return             ZoneRenderer The map/zone.
-	 * @throws ParserException  if the map is not found
+	 * 
+	 * @param functionName
+	 *            String Name of the calling function.
+	 * @param mapName
+	 *            String Name of the searched for map.
+	 * @return ZoneRenderer The map/zone.
+	 * @throws ParserException
+	 *             if the map is not found
 	 */
 	protected ZoneRenderer getNamedMap(String functionName, String mapName) throws ParserException {
 		for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
@@ -232,14 +261,17 @@ public class DrawingFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Looks for a drawing on a specific map that matches a specific id and returns its pen.
-	 * Throws a <code>ParserException</code> if the drawing is not found.
+	 * Looks for a drawing on a specific map that matches a specific id and returns its pen. Throws a <code>ParserException</code> if the drawing is not found.
 	 *
-	 * @param    functionName    this is used in the exception message
-	 * @param    map             the zone that should contain the drawing
-	 * @param    guid            the id of the drawing.
-	 * @return   Pen             Pen of the drawing.
-	 * @throws   ParserException if the drawing is not found.
+	 * @param functionName
+	 *            this is used in the exception message
+	 * @param map
+	 *            the zone that should contain the drawing
+	 * @param guid
+	 *            the id of the drawing.
+	 * @return Pen Pen of the drawing.
+	 * @throws ParserException
+	 *             if the drawing is not found.
 	 */
 	protected Pen getPen(String functionName, Zone map, GUID guid) throws ParserException {
 		return getDrawnElement(functionName, map, guid).getPen();
@@ -248,8 +280,9 @@ public class DrawingFunctions extends AbstractFunction {
 	/**
 	 * Parses a string into either a Color Paint or Texture Paint.
 	 *
-	 * @param    paint           String containing the paint description.
-	 * @return   Pen             DrawableTexturePaint or DrawableColorPaint.
+	 * @param paint
+	 *            String containing the paint description.
+	 * @return Pen DrawableTexturePaint or DrawableColorPaint.
 	 */
 	protected DrawablePaint paintFromString(String paint) {
 		if (paint.toLowerCase().startsWith("asset://")) {
@@ -273,13 +306,16 @@ public class DrawingFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Parses a string to a boolean.
-	 * Throws a <code>ParserException</code> if the drawing is not found.
+	 * Parses a string to a boolean. Throws a <code>ParserException</code> if the drawing is not found.
 	 *
-	 * @param    functionName    this is used in the exception message.
-	 * @param    args            List of parameters passed to the function.
-	 * @param    param           int reference to the boolean parameter.
-	 * @throws   ParserException if the parameter fails to parse.
+	 * @param functionName
+	 *            this is used in the exception message.
+	 * @param args
+	 *            List of parameters passed to the function.
+	 * @param param
+	 *            int reference to the boolean parameter.
+	 * @throws ParserException
+	 *             if the parameter fails to parse.
 	 */
 	protected boolean parseBoolean(String functionName, List<Object> args, int param) throws ParserException {
 		try {
@@ -332,15 +368,18 @@ public class DrawingFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Looks for a drawing on a specific map that matches a specific id.
-	 * If found sets the Pen.
-	 * Throws a <code>ParserException</code> if the drawing is not found.
+	 * Looks for a drawing on a specific map that matches a specific id. If found sets the Pen. Throws a <code>ParserException</code> if the drawing is not found.
 	 *
-	 * @param    functionName    this is used in the exception message
-	 * @param    map             the zone that should contain the drawing
-	 * @param    guid            the id of the drawing.
-	 * @param    pen             the replacement pen.
-	 * @throws   ParserException if the drawing is not found.
+	 * @param functionName
+	 *            this is used in the exception message
+	 * @param map
+	 *            the zone that should contain the drawing
+	 * @param guid
+	 *            the id of the drawing.
+	 * @param pen
+	 *            the replacement pen.
+	 * @throws ParserException
+	 *             if the drawing is not found.
 	 */
 	protected void setPen(String functionName, Zone map, GUID guid, Object pen) throws ParserException {
 		if (!(pen instanceof Pen))

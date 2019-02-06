@@ -201,8 +201,8 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 			timer.start("createChunk:calculate");
 			Drawable drawable = element.getDrawable();
 			if (drawable.getBounds() == null) {
-			  timer.stop("createChunk:calculate");
-			  continue;
+				timer.stop("createChunk:calculate");
+				continue;
 			}
 
 			Rectangle2D drawnBounds = new Rectangle(drawable.getBounds());

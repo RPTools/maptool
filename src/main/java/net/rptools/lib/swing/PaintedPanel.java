@@ -56,19 +56,19 @@ public class PaintedPanel extends JPanel {
 			((Graphics2D) g).setPaint(paint);
 			g.fillRect(0, 0, size.width, size.height);
 		} else {
-      try {
-        BufferedImage texture;
-        texture = ImageIO.read(getClass().getResource("/net/rptools/lib/image/icons/transparent.png"));
-        TexturePaint tp = new TexturePaint(texture, new Rectangle(0, 0, 28, 28));
-        ((Graphics2D) g).setPaint(tp);
-        g.fillRect(0, 0, size.width, size.height);
-      } catch (IOException e) {
-        System.out.println(e.getMessage());
-        g.setColor(Color.white);
-        g.fillRect(0, 0, size.width, size.height);
-        g.setColor(Color.red);
-        g.drawLine(size.width - 1, 0, 0, size.height - 1);
-      }
+			try {
+				BufferedImage texture;
+				texture = ImageIO.read(getClass().getResource("/net/rptools/lib/image/icons/transparent.png"));
+				TexturePaint tp = new TexturePaint(texture, new Rectangle(0, 0, 28, 28));
+				((Graphics2D) g).setPaint(tp);
+				g.fillRect(0, 0, size.width, size.height);
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+				g.setColor(Color.white);
+				g.fillRect(0, 0, size.width, size.height);
+				g.setColor(Color.red);
+				g.drawLine(size.width - 1, 0, 0, size.height - 1);
+			}
 		}
 	}
 }

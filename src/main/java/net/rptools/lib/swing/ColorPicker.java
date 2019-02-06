@@ -36,12 +36,12 @@ import com.jeta.forms.gui.form.FormAccessor;
 public class ColorPicker extends JPanel {
 	private final JFrame owner;
 
-  private final ImageIcon eraserIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/eraser.png"));
-  private final ImageIcon pencilIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/pencil.png"));
-  private final ImageIcon roundCapIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/round_cap.png"));
-  private final ImageIcon squareCapIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/square_cap.png"));
-  private final ImageIcon snapToIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/shape_handles.png"));
-  private final ImageIcon freeDrawIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/freehand.png"));
+	private final ImageIcon eraserIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/eraser.png"));
+	private final ImageIcon pencilIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/pencil.png"));
+	private final ImageIcon roundCapIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/round_cap.png"));
+	private final ImageIcon squareCapIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/square_cap.png"));
+	private final ImageIcon snapToIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/shape_handles.png"));
+	private final ImageIcon freeDrawIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/freehand.png"));
 
 	private final PaintedPanel foregroundColor;
 	private final PaintedPanel backgroundColor;
