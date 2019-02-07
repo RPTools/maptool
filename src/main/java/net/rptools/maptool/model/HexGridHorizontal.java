@@ -31,6 +31,16 @@ import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarHorizHexEuclideanWalker;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 
+/*
+ * @formatter:off
+ * Horizontal Hex grids produce rows of hexes
+ * and have their points at the top
+ *  /\ /\ /\ /\ /\ /\
+ * |  |  |  |  |  |  |
+ *  \/ \/ \/ \/ \/ \/
+ *  
+ * @formatter:on
+ */
 public class HexGridHorizontal extends HexGrid {
 
 	/*
@@ -235,4 +245,22 @@ public class HexGridHorizontal extends HexGrid {
 	protected OffsetTranslator getOffsetTranslator() {
 		return OFFSET_TRANSLATOR;
 	}
+	
+  /**
+   * Returns the cell centre as well as nearest vertex
+   */
+	@Override
+	public ZonePoint getNearestVertex(ZonePoint point) {
+	  double heightHalf = getURadius() / 2;
+	  //
+	  double isoX = ((point.x - getOffsetX()) / getVRadius() + (point.y - getOffsetY()) / heightHalf) / 2;
+	  double isoY = ((point.y - getOffsetY()) / heightHalf - (point.x - getOffsetX()) / getVRadius()) / 2;
+	  int newX = (int) Math.floor(isoX);
+	  int newY = (int) Math.floor(isoY);
+	  //
+	  double mapX = (newX - newY) * getVRadius();
+	  double mapY = ((newX + newY) * heightHalf) + heightHalf;
+	  return new ZonePoint((int) (mapX) + getOffsetX(), (int) (mapY) + getOffsetY());
+	}
+
 }

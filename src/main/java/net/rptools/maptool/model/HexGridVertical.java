@@ -29,6 +29,18 @@ import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarVertHexEuclideanWalker;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 
+/*
+ * @formatter:off
+ * Vertical Hex grids produce columns of hexes
+ * and have their points at the side
+ *  \_/ \
+ *  / \_/
+ *  \_/ \
+ *  / \_/
+ *  \_/ \
+ *  
+ * @formatter:on
+ */
 public class HexGridVertical extends HexGrid {
 
 	private static final int[] ALL_ANGLES = new int[] { -150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180 };
@@ -206,4 +218,22 @@ public class HexGridVertical extends HexGrid {
 	protected OffsetTranslator getOffsetTranslator() {
 		return OFFSET_TRANSLATOR;
 	}
+	
+  /**
+   * Returns the cell centre as well as nearest vertex
+   */
+	@Override
+	public ZonePoint getNearestVertex(ZonePoint point) {
+	  double heightHalf = getURadius() / 2;
+	  //
+	  double isoY = ((point.y - getOffsetY()) / getVRadius() + (point.x - getOffsetX()) / heightHalf) / 2;
+	  double isoX = ((point.x - getOffsetX()) / heightHalf - (point.y - getOffsetY()) / getVRadius()) / 2;
+	  int newX = (int) Math.floor(isoX);
+	  int newY = (int) Math.floor(isoY);
+	  //
+	  double mapY = (newY - newX) * getVRadius();
+	  double mapX = ((newX + newY) * heightHalf) + heightHalf;
+	  return new ZonePoint((int) (mapX) + getOffsetX(), (int) (mapY) + getOffsetY());
+	}
+
 }
