@@ -238,6 +238,10 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 			return;
 		}
 		drawable.setLayer(selectedLayer);
+		if (MapTool.getPlayer().isGM())
+			drawable.setLayer(selectedLayer);
+		else
+			drawable.setLayer(Layer.TOKEN);
 
 		// Send new textures
 		MapToolUtil.uploadTexture(pen.getPaint());
