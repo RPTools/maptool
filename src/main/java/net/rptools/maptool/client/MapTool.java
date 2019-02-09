@@ -1521,7 +1521,7 @@ public class MapTool {
 		sentry.addTag("version", MapTool.getVersion());
 
 		if (listMacros) {
-			String logOutput = null;
+			String logOutput = "";
 			List<String> macroList = parser.listAllMacroFunctions();
 			Collections.sort(macroList);
 

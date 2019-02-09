@@ -51,6 +51,8 @@ import org.fife.ui.rsyntaxtextarea.ErrorStrip;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
+import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
@@ -359,7 +361,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
 	private void initCommandTextArea() {
 		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
-		atmf.putMapping("text/MapToolScript", "net.rptools.maptool.client.ui.syntax.MapToolScriptTokenMaker");
+		//atmf.putMapping("text/MapToolScript", "net.rptools.maptool.client.ui.syntax.MapToolScriptTokenMaker");
+		atmf.putMapping("text/MapToolScript", "net.rptools.maptool.client.ui.syntax.MapToolScriptFunctionsTokenMaker");
 		macroEditorRSyntaxTextArea.setSyntaxEditingStyle("text/MapToolScript");
 
 		macroEditorRSyntaxTextArea.setEditable(true);
@@ -368,6 +371,9 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 		macroEditorRSyntaxTextArea.setWrapStyleWord(true);
 		macroEditorRSyntaxTextArea.setTabSize(4);
 
+		FoldParserManager.get().addFoldParserMapping("text/MapToolScript", new CurlyFoldParser());
+		// https://stackoverflow.com/questions/39613186/how-to-add-keywords-for-rsyntaxtextarea-for-syntax-highlighting
+			
 		// Set the color style via Theme
 		try {
 			// Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/default.xml"));
