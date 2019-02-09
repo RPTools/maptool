@@ -220,9 +220,9 @@ dependencies {
 	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
 
 	// For syntax highlighting in macro editor
-	compile group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '2.6.1'	// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
-	compile group: 'com.fifesoft', name: 'rstaui', version: '2.6.1'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
-	compile group: 'com.fifesoft', name: 'autocomplete', version: '2.6.0'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
+	compile group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.2'	// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
+	compile group: 'com.fifesoft', name: 'rstaui', version: '3.0.0'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
+	compile group: 'com.fifesoft', name: 'autocomplete', version: '3.0.0'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 
 	// For simple xml work in Hero Lab integration
 	compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.18.1'			// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
@@ -380,7 +380,7 @@ task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepa
 }
 
 task createWrapper(type: Wrapper) {
-	gradleVersion = '5.1.1'
+	gradleVersion = '5.2.1'
 }
 
 // Configure current release tag in Sentry.io properties
