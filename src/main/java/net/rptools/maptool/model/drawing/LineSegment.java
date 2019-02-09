@@ -23,12 +23,14 @@ import java.util.List;
 public class LineSegment extends AbstractDrawing {
 	private final List<Point> points = new ArrayList<Point>();
 	private Float width;
+	private boolean squareCap;
 	private transient int lastPointCount = -1;
 	private transient Rectangle cachedBounds;
 	private transient Area area;
 
-	public LineSegment(float width) {
+	public LineSegment(float width, boolean squareCap) {
 		this.width = width;
+		this.squareCap = squareCap;
 	}
 
 	/**
@@ -49,6 +51,8 @@ public class LineSegment extends AbstractDrawing {
 	}
 
 	private Area createLineArea() {
+		if (points.size() < 1)
+			return null;
 		GeneralPath gp = null;
 		for (Point point : points) {
 			if (gp == null) {
@@ -58,7 +62,7 @@ public class LineSegment extends AbstractDrawing {
 			}
 			gp.lineTo(point.x, point.y);
 		}
-		BasicStroke stroke = new BasicStroke(width != null ? width : 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+		BasicStroke stroke = new BasicStroke(width != null ? width : 2, getStrokeCap(), getStrokeJoin());
 		return new Area(stroke.createStrokedShape(gp));
 	}
 
@@ -67,10 +71,12 @@ public class LineSegment extends AbstractDrawing {
 		if (width == null) {
 			// Handle legacy values
 			area = null; // reset, build with new value
-			width = ((BasicStroke) g.getStroke()).getLineWidth();
 		}
+		width = ((BasicStroke) g.getStroke()).getLineWidth();
+		squareCap = ((BasicStroke) g.getStroke()).getEndCap() == BasicStroke.CAP_SQUARE;
 		Area area = getArea();
-		g.fill(area);
+		if (area != null)
+			g.fill(area);
 	}
 
 	@Override
@@ -87,6 +93,8 @@ public class LineSegment extends AbstractDrawing {
 		if (lastPointCount == points.size()) {
 			return cachedBounds;
 		}
+		if (points.size() < 1)
+			return null;
 		Rectangle bounds = new Rectangle(points.get(0));
 		for (Point point : points) {
 			bounds.add(point);
@@ -102,5 +110,27 @@ public class LineSegment extends AbstractDrawing {
 		cachedBounds = bounds;
 		lastPointCount = points.size();
 		return bounds;
+	}
+
+	public Float getWidth() {
+		return width;
+	}
+
+	public boolean isSquareCap() {
+		return squareCap;
+	}
+
+	public int getStrokeCap() {
+		if (squareCap)
+			return BasicStroke.CAP_SQUARE;
+		else
+			return BasicStroke.CAP_ROUND;
+	}
+
+	public int getStrokeJoin() {
+		if (squareCap)
+			return BasicStroke.JOIN_MITER;
+		else
+			return BasicStroke.JOIN_ROUND;
 	}
 }

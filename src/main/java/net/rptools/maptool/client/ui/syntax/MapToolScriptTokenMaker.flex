@@ -365,6 +365,7 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "exposeFOW" |
 "exposeFogAtWaypoints" |
 "exposePCOnlyArea" |
+"findDrawings" |
 "findToken" |
 "floor" |
 "formatStrProp" |
@@ -378,11 +379,15 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "getCurrentMapName" |
 "getDistance" |
 "getDistanceToXY" |
+"getDrawingEraser" |
 "getDrawingLayer" |
+"getDrawingOpacity" |
+"getDrawingProperties" |
 "getEnvironmentVariable" |
 "getExposedTokenNames" |
 "getExposedTokens" |
 "getFindCount" |
+"getFillColor" |
 "getGMName" |
 "getGMNotes" |
 "getGroup" |
@@ -405,6 +410,7 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "getLibProperty" |
 "getLibPropertyNames" |
 "getLights" |
+"getLineCap" |
 "getMacroButtonIndex" |
 "getMacroCommand" |
 "getMacroContext" |
@@ -430,6 +436,8 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "getOwners" |
 "getPC" |
 "getPCNames" |
+"getPenColor" |
+"getPenWidth" |
 "getPlayerName" |
 "getProperty" |
 "getPropertyDefault" |
@@ -624,6 +632,7 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "pow" |
 "power" |
 "postRequest" |
+"refreshDrawing" |
 "removeAllFromInitiative" |
 "removeAllNPCsFromInitiative" |
 "removeAllPCsFromInitiative" |
@@ -648,7 +657,11 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "setBarVisible" |
 "setCurrentInitiative" |
 "setCurrentMap" |
+"setDrawingEraser" |
 "setDrawingLayer" |
+"setDrawingOpacity" |
+"setDrawingProperties" |
+"setFillColor" |
 "setGMName" |
 "setGMNotes" |
 "setHalo" |
@@ -660,6 +673,7 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "setLayer" |
 "setLibProperty" |
 "setLight" |
+"setLineCap" |
 "setMacroCommand" |
 "setMacroProps" |
 "setMapName" |
@@ -673,6 +687,8 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 "setOwner" |
 "setOwnerOnlyVisible" |
 "setPC" |
+"setPenColor" |
+"setPenWidth" |
 "setProperty" |
 "setPropertyType" |
 "setSightType" |

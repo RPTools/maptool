@@ -200,6 +200,10 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 		for (DrawnElement element : drawableList) {
 			timer.start("createChunk:calculate");
 			Drawable drawable = element.getDrawable();
+			if (drawable.getBounds() == null) {
+				timer.stop("createChunk:calculate");
+				continue;
+			}
 
 			Rectangle2D drawnBounds = new Rectangle(drawable.getBounds());
 			Rectangle2D chunkBounds = new Rectangle((int) (gridx * (CHUNK_SIZE / scale)), (int) (gridy * (CHUNK_SIZE / scale)), (int) (CHUNK_SIZE / scale), (int) (CHUNK_SIZE / scale));

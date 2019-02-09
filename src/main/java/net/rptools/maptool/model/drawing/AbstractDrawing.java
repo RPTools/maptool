@@ -31,6 +31,7 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
 	private final GUID id = new GUID();
 
 	private String layer;
+	private String name;
 
 	/*
 	 * (non-Javadoc)
@@ -42,7 +43,7 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
 			pen = Pen.DEFAULT;
 		}
 		Stroke oldStroke = g.getStroke();
-		g.setStroke(new BasicStroke(pen.getThickness(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		g.setStroke(new BasicStroke(pen.getThickness(), pen.getStrokeCap(), pen.getStrokeJoin()));
 
 		Composite oldComposite = g.getComposite();
 		if (pen.isEraser()) {
@@ -91,6 +92,14 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
 
 	public Zone.Layer getLayer() {
 		return layer != null ? Zone.Layer.valueOf(layer) : Zone.Layer.BACKGROUND;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**

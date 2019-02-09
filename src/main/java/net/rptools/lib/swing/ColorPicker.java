@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -35,11 +36,19 @@ import com.jeta.forms.gui.form.FormAccessor;
 public class ColorPicker extends JPanel {
 	private final JFrame owner;
 
+	private final ImageIcon eraserIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/eraser.png"));
+	private final ImageIcon pencilIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/pencil.png"));
+	private final ImageIcon roundCapIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/round_cap.png"));
+	private final ImageIcon squareCapIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/square_cap.png"));
+	private final ImageIcon snapToIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/shape_handles.png"));
+	private final ImageIcon freeDrawIcon = new ImageIcon(this.getClass().getResource("/net/rptools/lib/image/icons/freehand.png"));
+
 	private final PaintedPanel foregroundColor;
 	private final PaintedPanel backgroundColor;
 	private final List<PaintedPanel> recentColors = new ArrayList<PaintedPanel>(16);
 	private final JToggleButton snapToggle;
 	private final JToggleButton eraseToggle;
+	private final JToggleButton squareCapToggle;
 	private final PaintChooser paintChooser;
 	private final JSpinner penWidthSpinner;
 	private final JSpinner transparencySpinner;
@@ -94,7 +103,16 @@ public class ColorPicker extends JPanel {
 			recentColors.add(paintedPanel);
 		}
 		snapToggle = (JToggleButton) panel.getButton("toggleSnapToGrid");
+		snapToggle.setIcon(freeDrawIcon);
+		snapToggle.setSelectedIcon(snapToIcon);
+
+		squareCapToggle = (JToggleButton) panel.getButton("toggelSquareCap");
+		squareCapToggle.setIcon(roundCapIcon);
+		squareCapToggle.setSelectedIcon(squareCapIcon);
+
 		eraseToggle = (JToggleButton) panel.getButton("toggleErase");
+		eraseToggle.setIcon(pencilIcon);
+		eraseToggle.setSelectedIcon(eraserIcon);
 
 		penWidthSpinner = panel.getSpinner("penWidth");
 		penWidthSpinner.setModel(new SpinnerNumberModel(3, 1, maxPenWidth, 1));
@@ -166,6 +184,14 @@ public class ColorPicker extends JPanel {
 
 	public boolean isSnapSelected() {
 		return snapToggle.isSelected();
+	}
+
+	public boolean isSquareCapSelected() {
+		return squareCapToggle.isSelected();
+	}
+
+	public void setSquareCapSelected(boolean selected) {
+		squareCapToggle.setSelected(selected);
 	}
 
 	public void setTranslucency(int percent) {

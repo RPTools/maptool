@@ -103,9 +103,7 @@ public class DrawablesPanel extends JComponent {
 		for (DrawnElement element : drawableList) {
 			Drawable drawable = element.getDrawable();
 			Pen pen = element.getPen();
-			if (pen.getOpacity() != 1 && pen.getOpacity() != 0 /*
-																 * handle legacy pens, besides, it doesn't make sense to have a non visible pen
-																 */) {
+			if (pen.getOpacity() != 1 && pen.getOpacity() != 0 /* handle legacy pens, besides, it doesn't make sense to have a non visible pen */) {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
 			}
 			// If we are only drawing cuts, make the pen visible
@@ -128,10 +126,14 @@ public class DrawablesPanel extends JComponent {
 	private Rectangle getBounds(List<DrawnElement> drawableList) {
 		Rectangle bounds = null;
 		for (DrawnElement element : drawableList) {
+			// Empty drawables are created by right clicking during the draw process
+			// and need to be skipped.
+			if (element.getDrawable().getBounds() == null)
+				continue;
 			Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds());
 			// Handle pen size
 			Pen pen = element.getPen();
-			int penSize = (int) (pen.getThickness() / 2 + 1);
+			int penSize = (int) pen.getThickness();
 			drawnBounds.setRect(drawnBounds.getX() - penSize, drawnBounds.getY() - penSize, drawnBounds.getWidth() + (penSize * 2), drawnBounds.getHeight() + (penSize * 2));
 			if (bounds == null)
 				bounds = drawnBounds;

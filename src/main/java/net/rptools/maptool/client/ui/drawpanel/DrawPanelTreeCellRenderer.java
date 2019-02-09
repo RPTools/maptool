@@ -21,7 +21,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.drawing.AbstractDrawing;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
+import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.LineSegment;
@@ -59,7 +61,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 			} else if (de.getDrawable() instanceof LineSegment) {
 				LineSegment ls = (LineSegment) de.getDrawable();
 				key = String.format("panel.DrawExplorer.%s.Line", ls.getClass().getSimpleName());
-				text = I18N.getText(key, ls.getPoints().size() - 1, de.getPen().getThickness());
+				text = I18N.getText(key, ls.getPoints().size(), de.getPen().getThickness());
 				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			} else if (de.getDrawable() instanceof AbstractTemplate) {
 				AbstractTemplate at = (AbstractTemplate) de.getDrawable();
@@ -67,10 +69,10 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 				text = I18N.getText(key, at.getRadius());
 				setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
 			}
-			text = addPenText(de.getPen(), text);
+			text = addText(de.getPen(), text, de.getDrawable());
 		} else if (value instanceof DrawPanelTreeModel.View) {
 			DrawPanelTreeModel.View view = (DrawPanelTreeModel.View) value;
-			text = view.getLayer().name();
+			text = view.getLayer().toString();
 		} else {
 			// setLeafIcon(null);
 		}
@@ -82,7 +84,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 		return this;
 	}
 
-	private String addPenText(Pen pen, String text) {
+	private String addText(Pen pen, String text, Drawable drawing) {
 		if (pen == null)
 			return text;
 		String result = text;
@@ -91,6 +93,11 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 		if (pen.getOpacity() < 1) {
 			int perc = (int) (pen.getOpacity() * 100);
 			result = result + String.format(" opacity %s%%", perc);
+		}
+		if (drawing instanceof AbstractDrawing) {
+			String dName = ((AbstractDrawing) drawing).getName();
+			if (dName != null && !"".equals(dName))
+				result = dName + ": " + result;
 		}
 		return result;
 	}
