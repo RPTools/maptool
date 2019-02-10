@@ -50,3 +50,5 @@ on_success:
 on_failure:
   - ps: Invoke-RestMethod $env:APPVEYOR_DISCORD_WEBHOOK_SCRIPT_URL -o send.ps1
   - ps: ./send.ps1 failure $env:DISCORD_URL
+on_finish:
+  - ps: $blockRdp = $true;
