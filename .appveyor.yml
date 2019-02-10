@@ -26,8 +26,8 @@ install:
 build_script:
   - ./gradlew build -x test
 after_build:
-  - sh: if($env:APPVEYOR_REPO_TAG -eq 'True') { ./gradlew deploy } else { echo "Not creating deploy artifacts because this is not a tag build" }
-  - cmd: IF "%APPVEYOR_REPO_TAG%"=="true" gradlew deploy
+  - sh: if($env:APPVEYOR_REPO_TAG -eq 'True') { ./gradlew deploy } else { echo "Not creating deploy artifacts because this is not a tag build." }
+  - cmd: IF "%APPVEYOR_REPO_TAG%"=="true" (gradlew deploy) ELSE (echo Not creating deploy artifacts because this is not a tag build.)
 artifacts:
   - path: build\libs\MapTool-*.jar
     name: MapTool-Jar
