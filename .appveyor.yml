@@ -4,8 +4,8 @@ pull_requests:
 skip_non_tags: false
 platform: x64
 image: 
-  - Visual Studio 2017
   - Ubuntu
+  - Visual Studio 2017
 init:
   - cmd: git config --global core.autocrlf true
 install:
