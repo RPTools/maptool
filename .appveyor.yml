@@ -25,6 +25,7 @@ install:
 build_script:
   - ./gradlew build -x test
 after_build:
+  - sh: echo tag is $APPVEYOR_REPO_TAG
   - sh: if [[ $APPVEYOR_REPO_TAG == "True" ]]; then ./gradlew deploy; else echo "Not creating deploy artifacts because this is not a tag build."; fi
   - cmd: IF "%APPVEYOR_REPO_TAG%"=="true" (gradlew deploy) ELSE (echo Not creating deploy artifacts because this is not a tag build.)
 artifacts:
