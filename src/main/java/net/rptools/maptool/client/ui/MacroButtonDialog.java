@@ -361,7 +361,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
 	private void initCommandTextArea() {
 		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
-		//atmf.putMapping("text/MapToolScript", "net.rptools.maptool.client.ui.syntax.MapToolScriptTokenMaker");
+		// atmf.putMapping("text/MapToolScript", "net.rptools.maptool.client.ui.syntax.MapToolScriptTokenMaker");
 		atmf.putMapping("text/MapToolScript", "net.rptools.maptool.client.ui.syntax.MapToolScriptFunctionsTokenMaker");
 		macroEditorRSyntaxTextArea.setSyntaxEditingStyle("text/MapToolScript");
 
@@ -373,7 +373,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
 		FoldParserManager.get().addFoldParserMapping("text/MapToolScript", new CurlyFoldParser());
 		// https://stackoverflow.com/questions/39613186/how-to-add-keywords-for-rsyntaxtextarea-for-syntax-highlighting
-			
+
 		// Set the color style via Theme
 		try {
 			// Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/default.xml"));
