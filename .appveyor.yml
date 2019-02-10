@@ -4,8 +4,8 @@ pull_requests:
 skip_non_tags: false
 platform: x64
 image: 
-  - Ubuntu
   - Visual Studio 2017
+  - Ubuntu
 init:
   - cmd: git config --global core.autocrlf true
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
