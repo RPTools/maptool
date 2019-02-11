@@ -46,7 +46,9 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.text.BadLocationException;
 
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
@@ -1115,6 +1117,34 @@ public class AppActions {
 			}
 
 			assetPanel.rescanImagePanelDir(dir);
+		}
+	};
+
+	public static final Action WHISPER_PLAYER = new DefaultClientAction() {
+		{
+			init("whisper.command");
+		}
+
+		@Override
+		public void execute(ActionEvent e) {
+			ClientConnectionPanel panel = MapTool.getFrame().getConnectionPanel();
+			Player selectedPlayer = (Player) panel.getSelectedValue();
+
+			if (selectedPlayer == null) {
+				MapTool.showError("msg.error.mustSelectPlayerFirst");
+				return;
+			}
+			try {
+				JTextPane chatBox = MapTool.getFrame().getCommandPanel().getCommandTextArea();
+				String enterText = I18N.getText("whisper.enterText");
+				chatBox.replaceSelection(String.format("[w(\"%s\"): \"%s\"]", selectedPlayer.getName(), enterText));
+				String chatBoxText = chatBox.getDocument().getText(0, chatBox.getDocument().getLength());
+				int start = chatBoxText.indexOf(enterText);
+				chatBox.select(start, start + enterText.length());
+				chatBox.requestFocusInWindow();
+			} catch (BadLocationException e1) {
+				// e1.printStackTrace();
+			}
 		}
 	};
 

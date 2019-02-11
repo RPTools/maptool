@@ -59,6 +59,7 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * New RESTful functions getRequest & postRequest to send GET & POST requests to a URI. *Note: You must first turn access on in Preferences for these macro functions to work.
 * New function exportData exportData(FilePath file, String data, boolean appendToFile) which saves string data to external file.
 * New function getEnvironmentVariable(String name), Returns the value stored in the Environment Variable.
+* New menu option added to the "Connections" window. Right clicking a player will offer a "Whisper" command that prepopulates the chat window with a whisper macro.  
 
 [i113]: https://github.com/JamzTheMan/MapTool/issues/113
 [i108]: https://github.com/JamzTheMan/MapTool/issues/108
