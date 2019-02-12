@@ -60,6 +60,7 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * New function exportData exportData(FilePath file, String data, boolean appendToFile) which saves string data to external file.
 * New function getEnvironmentVariable(String name), Returns the value stored in the Environment Variable.
 * New menu option added to the "Connections" window. Right clicking a player will offer a "Whisper" command that prepopulates the chat window with a whisper macro.  
+* [#237][i237] - Added support to use shift-enter to insert newlines into the command entry box (also known as the chat entry box)
 
 [i113]: https://github.com/JamzTheMan/MapTool/issues/113
 [i108]: https://github.com/JamzTheMan/MapTool/issues/108
@@ -101,3 +102,4 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 [i54]: https://github.com/JamzTheMan/MapTool/issues/54
 [i59]: https://github.com/JamzTheMan/MapTool/issues/59
 [i125]: https://github.com/JamzTheMan/MapTool/issues/125
+[i237]: https://github.com/RPTools/maptool/issues/237
