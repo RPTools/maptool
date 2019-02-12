@@ -46,6 +46,8 @@ import org.fife.rsta.ui.search.ReplaceDialog;
 import org.fife.rsta.ui.search.ReplaceToolBar;
 import org.fife.rsta.ui.search.SearchEvent;
 import org.fife.rsta.ui.search.SearchListener;
+import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.ErrorStrip;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -65,6 +67,7 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
+import net.rptools.maptool.client.ui.syntax.MapToolScriptAutoComplete;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
@@ -361,8 +364,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
 	private void initCommandTextArea() {
 		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
-		// atmf.putMapping("text/MapToolScript", "net.rptools.maptool.client.ui.syntax.MapToolScriptTokenMaker");
-		atmf.putMapping("text/MapToolScript", "net.rptools.maptool.client.ui.syntax.MapToolScriptFunctionsTokenMaker");
+		atmf.putMapping("text/MapToolScript", "net.rptools.maptool.client.ui.syntax.MapToolScriptSyntax");
 		macroEditorRSyntaxTextArea.setSyntaxEditingStyle("text/MapToolScript");
 
 		macroEditorRSyntaxTextArea.setEditable(true);
@@ -372,7 +374,15 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 		macroEditorRSyntaxTextArea.setTabSize(4);
 
 		FoldParserManager.get().addFoldParserMapping("text/MapToolScript", new CurlyFoldParser());
+
 		// https://stackoverflow.com/questions/39613186/how-to-add-keywords-for-rsyntaxtextarea-for-syntax-highlighting
+		CompletionProvider provider = new MapToolScriptAutoComplete().get();
+		AutoCompletion ac = new AutoCompletion(provider);
+		ac.setAutoCompleteEnabled(true);
+		ac.setAutoActivationEnabled(true);
+		ac.setAutoActivationDelay(500);
+		ac.setShowDescWindow(true);
+		ac.install(macroEditorRSyntaxTextArea);
 
 		// Set the color style via Theme
 		try {

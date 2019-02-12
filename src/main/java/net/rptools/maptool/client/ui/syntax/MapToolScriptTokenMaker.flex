@@ -1,6 +1,12 @@
 /*
- * Generated on 2/9/19, 5:58 PM
+ * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
+ * at <http://www.gnu.org/licenses/agpl.html>.
  */
+
 package net.rptools.maptool.client.ui.syntax;
 
 import java.io.*;
@@ -11,7 +17,10 @@ import org.fife.ui.rsyntaxtextarea.*;
 
 /**
  * Auto-generated source created using TokenMakerMaker
-https://github.com/bobbylight/TokenMakerMaker
+ * https://github.com/bobbylight/TokenMakerMaker
+ *
+ * NOTE: Run JFlex using this as -skel input then removed extra methods in generated output
+ *
  */
 %%
 
@@ -142,6 +151,8 @@ https://github.com/bobbylight/TokenMakerMaker
 	 *
 	 * @return      <code>true</code> if EOF was reached, otherwise
 	 *              <code>false</code>.
+	 *
+	 * NOTE: Keep this method version and remove the other zzRefill() after JFlex generation. -Jamz 
 	 */
 	private boolean zzRefill() {
 		return zzCurrentPos>=s.offset+s.count;
@@ -156,7 +167,9 @@ https://github.com/bobbylight/TokenMakerMaker
 	 * <b>cannot</b> be reused (internal buffer is discarded and lost).
 	 * Lexical state is set to <tt>YY_INITIAL</tt>.
 	 *
-	 * @param reader   the new input stream 
+	 * @param reader   the new input stream
+	 *
+	 * NOTE: Keep this method version and remove the other yyreset(Reader reader) after JFlex generation. -Jamz 
 	 */
 	public final void yyreset(Reader reader) {
 		// 's' has been updated.
@@ -180,24 +193,24 @@ https://github.com/bobbylight/TokenMakerMaker
 
 %}
 
-Letter							= [A-Za-z]
-LetterOrUnderscore				= ({Letter}|"_")
-NonzeroDigit						= [1-9]
-Digit							= ("0"|{NonzeroDigit})
-HexDigit							= ({Digit}|[A-Fa-f])
-OctalDigit						= ([0-7])
+Letter									= [A-Za-z]
+LetterOrUnderscore						= ({Letter}|"_")
+NonzeroDigit							= [1-9]
+Digit									= ("0"|{NonzeroDigit})
+HexDigit								= ({Digit}|[A-Fa-f])
+OctalDigit								= ([0-7])
 AnyCharacterButApostropheOrBackSlash	= ([^\\'])
 AnyCharacterButDoubleQuoteOrBackSlash	= ([^\\\"\n])
-EscapedSourceCharacter				= ("u"{HexDigit}{HexDigit}{HexDigit}{HexDigit})
-Escape							= ("\\"(([btnfr\"'\\])|([0123]{OctalDigit}?{OctalDigit}?)|({OctalDigit}{OctalDigit}?)|{EscapedSourceCharacter}))
-NonSeparator						= ([^\t\f\r\n\ \(\)\{\}\[\]\;\,\.\=\>\<\!\~\?\:\+\-\*\/\&\|\^\%\"\']|"#"|"\\")
-IdentifierStart					= ({LetterOrUnderscore}|"$")
-IdentifierPart						= ({IdentifierStart}|{Digit}|("\\"{EscapedSourceCharacter}))
+EscapedSourceCharacter					= ("u"{HexDigit}{HexDigit}{HexDigit}{HexDigit})
+Escape									= ("\\"(([btnfr\"'\\])|([0123]{OctalDigit}?{OctalDigit}?)|({OctalDigit}{OctalDigit}?)|{EscapedSourceCharacter}))
+NonSeparator							= ([^\t\f\r\n\ \(\)\{\}\[\]\;\,\.\=\>\<\!\~\?\:\+\-\*\/\&\|\^\%\"\']|"#"|"\\")
+IdentifierStart							= ({LetterOrUnderscore}|"$")
+IdentifierPart							= ({IdentifierStart}|{Digit}|\.|("\\"{EscapedSourceCharacter}))
 
 LineTerminator				= (\n)
-WhiteSpace				= ([ \t\f]+)
+WhiteSpace					= ([ \t\f]+)
 
-CharLiteral	= ([\']({AnyCharacterButApostropheOrBackSlash}|{Escape})[\'])
+CharLiteral					= ([\']({AnyCharacterButApostropheOrBackSlash}|{Escape})[\'])
 UnclosedCharLiteral			= ([\'][^\'\n]*)
 ErrorCharLiteral			= ({UnclosedCharLiteral}[\'])
 StringLiteral				= ([\"]({AnyCharacterButDoubleQuoteOrBackSlash}|{Escape})*[\"])
@@ -205,29 +218,29 @@ UnclosedStringLiteral		= ([\"]([\\].|[^\\\"])*[^\"]?)
 ErrorStringLiteral			= ({UnclosedStringLiteral}[\"])
 
 MLCBegin					= "<!--"
-MLCEnd					= "-->"
+MLCEnd						= "-->"
 
 /* No documentation comments */
 /* No line comments */
 
-IntegerLiteral			= ({Digit}+)
-HexLiteral			= (0x{HexDigit}+)
-FloatLiteral			= (({Digit}+)("."{Digit}+)?(e[+-]?{Digit}+)? | ({Digit}+)?("."{Digit}+)(e[+-]?{Digit}+)?)
+IntegerLiteral				= ({Digit}+)
+HexLiteral					= (0x{HexDigit}+)
+FloatLiteral				= (({Digit}+)("."{Digit}+)?(e[+-]?{Digit}+)? | ({Digit}+)?("."{Digit}+)(e[+-]?{Digit}+)?)
 ErrorNumberFormat			= (({IntegerLiteral}|{HexLiteral}|{FloatLiteral}){NonSeparator}+)
 BooleanLiteral				= ("true"|"false")
 
 Separator					= ([\(\)\{\}\[\]])
-Separator2				= ([\;,.])
+Separator2					= ([\;,.])
 
-Identifier				= ({IdentifierStart}{IdentifierPart}*)
+Identifier					= ({IdentifierStart}{IdentifierPart}*)
 
-URLGenDelim				= ([:\/\?#\[\]@])
-URLSubDelim				= ([\!\$&'\(\)\*\+,;=])
-URLUnreserved			= ({LetterOrUnderscore}|{Digit}|[\-\.\~])
-URLCharacter			= ({URLGenDelim}|{URLSubDelim}|{URLUnreserved}|[%])
-URLCharacters			= ({URLCharacter}*)
-URLEndCharacter			= ([\/\$]|{Letter}|{Digit})
-URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
+URLGenDelim					= ([:\/\?#\[\]@])
+URLSubDelim					= ([\!\$&'\(\)\*\+,;=])
+URLUnreserved				= ({LetterOrUnderscore}|{Digit}|[\-\.\~])
+URLCharacter				= ({URLGenDelim}|{URLSubDelim}|{URLUnreserved}|[%])
+URLCharacters				= ({URLCharacter}*)
+URLEndCharacter				= ([\/\$]|{Letter}|{Digit})
+URL							= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 
 
 /* No string state */
@@ -240,63 +253,13 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 
 <YYINITIAL> {
 
-	/* Keywords */
-	"c" |
-"code" |
-"count" |
-"dialog" |
-"e" |
-"expanded" |
-"for" |
-"foreach" |
-"frame" |
-"g" |
-"gm" |
-"gmtt" |
-"gt" |
-"h" |
-"hidden" |
-"hide" |
-"if" |
-"macro" |
-"r" |
-"result" |
-"s" |
-"self" |
-"selftt" |
-"st" |
-"switch" |
-"t" |
-"token" |
-"tooltip" |
-"u" |
-"unformatted" |
-"w" |
-"while" |
-"whisper"		{ addToken(Token.RESERVED_WORD); }
+	/* Keywords dynamically added via MapToolScriptSyntax class */
 
-	/* Keywords 2 (just an optional set of keywords colored differently) */
-	/* No keywords 2 */
+	/* Keywords 2 (just an optional set of keywords colored differently) dynamically added via MapToolScriptSyntax class */
 
-	/* Data types */
-	"bar.name" |
-"macro.args" |
-"macro.return" |
-"roll.count" |
-"roll.result" |
-"state.name" |
-"token.gm name" |
-"token.halo" |
-"token.init" |
-"token.initHold" |
-"token.label" |
-"token.name" |
-"token.visible" |
-"tokens.denyMove" |
-"tokens.moveCount"		{ addToken(Token.DATA_TYPE); }
+	/* Data types dynamically added via MapToolScriptSyntax class */
 
-	/* Functions */
-	/* No functions */
+	/* functions dynamically added via MapToolScriptSyntax class */
 
 	{BooleanLiteral}			{ addToken(Token.LITERAL_BOOLEAN); }
 
@@ -324,24 +287,6 @@ URL						= (((https?|f(tp|ile))"://"|"www.")({URLCharacters}{URLEndCharacter})?)
 	{Separator2}					{ addToken(Token.IDENTIFIER); }
 
 	/* Operators. */
-	"!" |
-"%" |
-"&" |
-"&&" |
-"*" |
-"+" |
-"," |
-"-" |
-"/" |
-":" |
-"<" |
-"<=" |
-"=" |
-"==" |
-">" |
-">=" |
-"|" |
-"||"		{ addToken(Token.OPERATOR); }
 
 	/* Numbers */
 	{IntegerLiteral}				{ addToken(Token.LITERAL_NUMBER_DECIMAL_INT); }

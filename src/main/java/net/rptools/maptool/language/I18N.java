@@ -40,6 +40,7 @@ import net.rptools.maptool.client.AppUtil;
 
 public class I18N {
 	private static final ResourceBundle BUNDLE;
+
 	private static final Logger log = LogManager.getLogger(I18N.class);
 
 	private static final String ACCELERATOR_EXTENSION = ".accel";
@@ -119,6 +120,21 @@ public class I18N {
 			return Character.toUpperCase(value.charAt(index + 1));
 		}
 		return -1;
+	}
+
+	/**
+	 * Returns the String that results from a lookup within the properties file.
+	 * 
+	 * @param key
+	 *            the component to search for
+	 * @return the String found or <code>null</code>
+	 */
+	public static String getString(String key, ResourceBundle bundle) {
+		try {
+			return bundle.getString(key);
+		} catch (MissingResourceException e) {
+			return null;
+		}
 	}
 
 	/**
