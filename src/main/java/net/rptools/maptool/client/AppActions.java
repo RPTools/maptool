@@ -1438,6 +1438,22 @@ public class AppActions {
 		}
 	};
 
+	/**
+	 * Action to insert a newline into the chat input field
+	 */
+	public static final String NEWLINE_COMMAND_ID = "action.newlineCommand";
+
+	public static final Action NEWLINE_COMMAND = new DefaultClientAction() {
+		{
+			init(NEWLINE_COMMAND_ID);
+		}
+
+		@Override
+		public void execute(ActionEvent e) {
+			MapTool.getFrame().getCommandPanel().insertNewline();
+		}
+	};
+
 	public static final Action ADJUST_GRID = new ZoneAdminClientAction() {
 		{
 			init("action.adjustGrid");

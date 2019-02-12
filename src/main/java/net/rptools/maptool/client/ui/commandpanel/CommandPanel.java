@@ -22,6 +22,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
@@ -380,12 +381,14 @@ public class CommandPanel extends JPanel implements Observer {
 			actions.put(AppActions.CANCEL_COMMAND_ID, AppActions.CANCEL_COMMAND);
 			actions.put(AppActions.COMMAND_UP_ID, new CommandHistoryUpAction());
 			actions.put(AppActions.COMMAND_DOWN_ID, new CommandHistoryDownAction());
+			actions.put(AppActions.NEWLINE_COMMAND_ID, AppActions.NEWLINE_COMMAND);
 
 			InputMap inputs = commandTextArea.getInputMap();
 			inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), AppActions.CANCEL_COMMAND_ID);
 			inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), AppActions.COMMIT_COMMAND_ID);
 			inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), AppActions.COMMAND_UP_ID);
 			inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), AppActions.COMMAND_DOWN_ID);
+			inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK), AppActions.NEWLINE_COMMAND_ID);
 
 			// Resize on demand
 			MapTool.getEventDispatcher().addListener(MapTool.PreferencesEvent.Changed, new AppEventListener() {
@@ -479,7 +482,7 @@ public class CommandPanel extends JPanel implements Observer {
 			closeDivCount++;
 		}
 		if (closeDivCount > divCount) {
-			MapTool.addServerMessage(TextMessage.me(null, "You have too many &lt;/div&gt;."));
+			MapTool.addServerMessage(TextMessage.me(null, "Unexpected &lt;/div&gt; tag without matching &lt;div&gt;."));
 			commandTextArea.setText("");
 			return;
 		}
@@ -503,6 +506,14 @@ public class CommandPanel extends JPanel implements Observer {
 		commandTextArea.setText("");
 		validate();
 		MapTool.getFrame().hideCommandPanel();
+	}
+
+	/**
+	 * Inserts a newline into the chat input box.
+	 */
+	public void insertNewline() {
+		String text = commandTextArea.getText();
+		commandTextArea.setText(text + "\n");
 	}
 
 	public void startMacro() {
