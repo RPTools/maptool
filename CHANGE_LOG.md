@@ -11,11 +11,9 @@ Bug Fixes
 * [#92][i92] - *MapTool should default to UTF-8 encoding*. Windows likes to default to it's one file encoding which can cause issues in macros and certain encoded characters. MapTool will now always launch using UTF-8 file encoding! I've also added a 'Encoding Information' section in Gather Debug Info under the help menu to verify what encoding you are using.
 * [#80][i80] - *Comparison method violates its general contract in FogUtil.calculateVisibility(FogUtil.java:81)*. This should be fixed now.
 * [#81][i81] - *Cell Highlight distance text not sizing for grid sizes*. This is now fixed
-* [#41][i41] - *Bug Fix to allow tokens without sight to move*. Hopefully this is finally squashed properly...
 * [#76][i76] - Will no longer see errors when attempting to open initiative window on Linux or MacOS.
-* [#44][i44] - If running the JAR version with your own JRE installed, Edit -> Preferences will no longer throw and error and blow up! Instead the Startup tab will be grayed out (as those values will not be used and you must make your own startup script to set memory settings when using the JAR format)
 * [#68][i68] - MapTool's i18n language override enabled via Edit -> Preferences -> Startup tab. This will override your default language set by your OS.
-* [#41][i41] - Allow player owned tokens without "sight" to move within currently exposed FoW, e.g. areas other PC token can currently see.
+* [#41][i41] - Allow player owned tokens without "sight" to move within currently exposed FoW, e.g. areas other PC token can currently see. Hopefully this is finally squashed properly...
 * [#44][i44] - If running the JAR version with your own JRE installed, Edit -> Preferences will no longer throw and error and blow up! Instead the Startup tab will be grayed out (as those values will not be used and you must make your own startup script to set memory settings when using the JAR format)
 * [#27][i27] - Code cleanup, .pdf & .por files will no longer throw errors to the log file.
 * [#65][i65] - Gradle will once again build and deploy vs throw an error getting the branch name.
