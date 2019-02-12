@@ -1,8 +1,3 @@
-.gradle
-build/
-/bin/
-
-
 # OS generated files
 ################################################################################
 .DS_Store
@@ -17,12 +12,16 @@ Thumbs.db
 
 # Others
 ################################################################################
+.gradle
+build/
+/bin/
+target/
+out/
+/releases/
 *.log
 *~
-target/
-build/
-out/
 \${sys:appHome}/
+
 
 # Automatically Generated
 ################################################################################
@@ -44,4 +43,3 @@ workbench.xmi
 
 # Keystore
 build-resources/rptools-keystore
-/releases/
