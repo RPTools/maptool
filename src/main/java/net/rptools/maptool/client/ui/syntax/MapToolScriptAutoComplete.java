@@ -34,9 +34,20 @@ public class MapToolScriptAutoComplete {
 		for (String macro : MapTool.getParser().listAllMacroFunctions())
 			provider.addCompletion(new BasicCompletion(provider, macro, getShortDescription(macro), getSummary(macro)));
 
+		// FIXME: TERRIBLE! But I'm tired and running out of time, need to add to a .properties file!
 		provider.addCompletion(new ShorthandCompletion(provider, "if", "[h, if(condition), CODE: {\r\n\t[h: true_body]\r\n};{\r\n\t[h: false_body]\r\n}]", "A complex hidden IF/THEN statement"));
 		provider.addCompletion(new ShorthandCompletion(provider, "if", "[h, if(condition): true_body]", "A basic hidden IF statement")); // Can also add a full HTML description
 		provider.addCompletion(new ShorthandCompletion(provider, "if", "[h, if(condition): true_body; false_body]", "A basic hidden IF/THEN statement"));
+		
+		provider.addCompletion(new ShorthandCompletion(provider, "for", "[h, for(var, start, end): body]", "A basic hidden FOR loop"));
+		provider.addCompletion(new ShorthandCompletion(provider, "for", "[h, for(var, start, end, stepsize): body]", "A basic hidden FOR loop with steps"));
+		provider.addCompletion(new ShorthandCompletion(provider, "for", "[h, for(var, start, end, stepsize, separator): body]", "A basic hidden FOR loop with seps and seperator"));
+
+		provider.addCompletion(new ShorthandCompletion(provider, "foreach", "[h, FOREACH(var, list): body]", "A basic hidden FOREACH loop"));
+		provider.addCompletion(new ShorthandCompletion(provider, "foreach", "[h, FOREACH(var, list, output_separator): body]", "A basic hidden FOREACH loop with steps"));
+		provider.addCompletion(new ShorthandCompletion(provider, "foreach", "[h, FOREACH(var, list, output_separator, list_separator): body]", "A basic hidden FOREACH loop with seps and seperator"));
+		
+		provider.addCompletion(new ShorthandCompletion(provider, "foreach", "[h, FOREACH(var, list), CODE: {\r\n\t[h: do_stuff]\r\n}]", "A complex hidden FOREACH loop"));
 	}
 
 	private String getShortDescription(String macro) {
