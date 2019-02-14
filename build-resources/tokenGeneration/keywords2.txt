@@ -1,5 +1,0 @@
-onCampaignLoad
-onChangeSelection
-onMouseOverEvent
-onMultipleTokensMove
-onTokenMove

@@ -8,8 +8,6 @@
  */
 package net.rptools.maptool.client.ui.syntax;
 
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.rsyntaxtextarea.Token;
@@ -18,21 +16,41 @@ import org.fife.ui.rsyntaxtextarea.TokenTypes;
 
 import net.rptools.maptool.client.MapTool;
 
-public class MapToolScriptFunctionsTokenMaker extends MapToolScriptTokenMaker {
-	private static final Logger log = LogManager.getLogger(MapToolScriptFunctionsTokenMaker.class);
+public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
+	private static final Logger log = LogManager.getLogger(MapToolScriptSyntax.class);
 
 	static TokenMap macroFunctionTokenMap;
 
-	public MapToolScriptFunctionsTokenMaker() {
+	static String[] DATA_TYPES = { "bar.name", "macro.args", "macro.return", "roll.count", "roll.result", "state.name",
+			"token.gm_name", "token.halo", "token.init", "token.initHold", "token.label", "token.name", "token.visible", "tokens.denyMove", "tokens.moveCount" };
+
+	static String[] RESERVED_WORDS = { "c", "code", "count", "dialog", "e", "expanded", "for", "foreach", "frame", "g", "gm", "gmtt", "gt",
+			"h", "hidden", "hide", "if", "macro", "r", "result", "s", "self", "selftt", "st", "switch",
+			"t", "token", "tooltip", "u", "unformatted", "w", "while", "whisper" };
+
+	static String[] RESERVED_WORDS_2 = { "onCampaignLoad", "onChangeSelection", "onMouseOverEvent", "onMultipleTokensMove", "onTokenMove" };
+
+	static String[] OPERATORS = { "!", "&&", "*", "+", ",", "-", "/", ":", ";", "<", "<=", "=", "==", ">", ">=", "||" };
+
+	public MapToolScriptSyntax() {
 		// Get all the macro functions defined in the parser
 		macroFunctionTokenMap = getMacroFunctionNames();
 
-		// Additional special functions
-		macroFunctionTokenMap.put("onCampaignLoad", Token.RESERVED_WORD_2);
-		macroFunctionTokenMap.put("onChangeSelection", Token.RESERVED_WORD_2);
-		macroFunctionTokenMap.put("onMouseOverEvent", Token.RESERVED_WORD_2);
-		macroFunctionTokenMap.put("onMultipleTokensMove", Token.RESERVED_WORD_2);
-		macroFunctionTokenMap.put("onTokenMove", Token.RESERVED_WORD_2);
+		// Add "Special Variables" as Data Type
+		for (String dataType : DATA_TYPES)
+			macroFunctionTokenMap.put(dataType, Token.DATA_TYPE);
+
+		// Add "Roll Options" as Reserved word
+		for (String reservedWord : RESERVED_WORDS)
+			macroFunctionTokenMap.put(reservedWord, Token.RESERVED_WORD);
+
+		// Add "Events" as Reserved Word 2
+		for (String reservedWord : RESERVED_WORDS_2)
+			macroFunctionTokenMap.put(reservedWord, Token.RESERVED_WORD_2);
+
+		// Add "Events" as OPERATOR
+		for (String reservedWord : OPERATORS)
+			macroFunctionTokenMap.put(reservedWord, Token.OPERATOR);
 	}
 
 	@Override
@@ -48,14 +66,11 @@ public class MapToolScriptFunctionsTokenMaker extends MapToolScriptTokenMaker {
 		super.addToken(array, start, end, tokenType, startOffset, hyperlink);
 	}
 
-	// FIXME: Currently any functions with a . in them do not highlight :(
 	private TokenMap getMacroFunctionNames() {
 		if (macroFunctionTokenMap == null) {
 			macroFunctionTokenMap = new TokenMap(true);
 
-			List<String> macroList = MapTool.getParser().listAllMacroFunctions();
-
-			for (String macro : macroList) {
+			for (String macro : MapTool.getParser().listAllMacroFunctions()) {
 				macroFunctionTokenMap.put(macro, Token.FUNCTION);
 				log.debug("Adding \"" + macro + "\" macro function to syntax highlighting.");
 			}

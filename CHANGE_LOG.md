@@ -59,6 +59,8 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * New function getEnvironmentVariable(String name), Returns the value stored in the Environment Variable.
 * New menu option added to the "Connections" window. Right clicking a player will offer a "Whisper" command that prepopulates the chat window with a whisper macro.  
 * [#237][i237] - Added support to use shift-enter to insert newlines into the command entry box (also known as the chat entry box)
+* [#239][i239] - MapToolScriptTokenMaker now handles function names with . notation and dynamically pulls in all functions names. TokenMakerMaker no longer needs to be ran upon changes to MTScript.
+* [#240][i240] - Macro Editor now has Auto-Completion for macro functions! A brief description and summary can be displayed (these will be added as time permits)
 
 [i113]: https://github.com/JamzTheMan/MapTool/issues/113
 [i108]: https://github.com/JamzTheMan/MapTool/issues/108
@@ -101,3 +103,5 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 [i59]: https://github.com/JamzTheMan/MapTool/issues/59
 [i125]: https://github.com/JamzTheMan/MapTool/issues/125
 [i237]: https://github.com/RPTools/maptool/issues/237
+[i239]: https://github.com/RPTools/maptool/issues/239
+[i240]: https://github.com/RPTools/maptool/issues/240
