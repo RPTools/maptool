@@ -1387,27 +1387,27 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 		}
 	}
 
-	/*class WrappedText
-	{
-		int lineCount;
-		String[] lines;
-		stringWidth[] widths;
-	}*/
+	// class WrappedText
+	// {
+	// int lineCount;
+	// String[] lines;
+	// stringWidth[] widths;
+	// }
 
-	/*private WrappedText wrapText(string text)
-	{
-		StringBuilder currentLine;
-		WrappedText wrappedText = new WrappedText();
-		for(int I = 0;I<text.length();I++){
-			if(text.charAt(I) == '\n'){
-				wrappedText.lines 
-			}
-				
-				currentLine.append(text.charAt(I));
-			
-		}
-		String[] firstPass = text.split('\n');
-	}*/
+	// private WrappedText wrapText(string text)
+	// {
+	// StringBuilder currentLine;
+	// WrappedText wrappedText = new WrappedText();
+	// for(int I = 0;I<text.length();I++){
+	// if(text.charAt(I) == '\n'){
+	// wrappedText.lines
+	// }
+	//
+	// currentLine.append(text.charAt(I));
+	//
+	// }
+	// String[] firstPass = text.split('\n');
+	// }
 
 	// //
 	// ZoneOverlay
@@ -1489,7 +1489,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 								continue;
 							}
 							MapToolVariableResolver resolver = new MapToolVariableResolver(tokenUnderMouse);
-							//TODO: is the double resolution of properties necessary here. I kept it, but it seems wasteful and I can't figure out any reason that the first resolution can't be used below.
+							// TODO: is the double resolution of properties necessary here. I kept it, but it seems wasteful and I can't figure out any reason that the first resolution can't be used
+							// below.
 							resolver.initialize();
 							resolver.setAutoPrompt(false);
 							Object propertyValue = tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
@@ -1515,33 +1516,35 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 					int rowHeight = Math.max(valueFM.getHeight(), keyFM.getHeight());
 					int keyWidth = -1;
 					float valueWidth = -1;
+					int layoutWidth = 1;
 					if (!propertyMap.isEmpty()) {
 						// Figure out size requirements
-						//int height = propertyMap.size() * (rowHeight + PADDING);
+						// int height = propertyMap.size() * (rowHeight + PADDING);
 						int height = 0;
-						//Iterate over keys to reserve room for key column
+						// Iterate over keys to reserve room for key column
 						for (Entry<String, String> entry : propertyMap.entrySet()) {
 							int tempKeyWidth = SwingUtilities.computeStringWidth(keyFM, entry.getKey());
 							if (keyWidth < 0 || tempKeyWidth > keyWidth) {
 								keyWidth = tempKeyWidth;
 							}
 						}
-						//Iterate over values, break then into lines as necessary. Figure out longest value length.
+						layoutWidth = Math.max(1, maxStatsWidth - keyWidth);
+						// Iterate over values, break then into lines as necessary. Figure out longest value length.
 						for (Entry<String, String> entry : propertyMap.entrySet()) {
 							int lineCount = 0;
 							for (String line : entry.getValue().split("\n")) {
-								//For each value, make the iterator need and stash data about it
+								// For each value, make the iterator need and stash data about it
 								AttributedString text = new AttributedString(line);
 								text.addAttribute(TextAttribute.FONT, font);
 								AttributedCharacterIterator paragraph = text.getIterator();
 								int paragraphStart = paragraph.getBeginIndex();
 								int paragraphEnd = paragraph.getEndIndex();
-								//Make and initialize LineBreakMeasurer
+								// Make and initialize LineBreakMeasurer
 								LineBreakMeasurer lineMeasurer = new LineBreakMeasurer(paragraph, BreakIterator.getLineInstance(), fontRenderContext);
 								lineMeasurer.setPosition(paragraphStart);
-								//Get each line from the measurer and find the widest one;
+								// Get each line from the measurer and find the widest one;
 								while (lineMeasurer.getPosition() < paragraphEnd) {
-									TextLayout layout = lineMeasurer.nextLayout(maxStatsWidth - keyWidth);
+									TextLayout layout = lineMeasurer.nextLayout(layoutWidth);
 									lineLayouts.add(layout);
 									height += rowHeight;
 									float tmpValueWidth = layout.getPixelBounds(null, 0, 0).width;
@@ -1589,27 +1592,26 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
 							// Draw Value
 							for (String line : entry.getValue().split("\n")) {
-								//For each value, make the iterator need and stash data about it
+								// For each value, make the iterator need and stash data about it
 								AttributedString text = new AttributedString(line);
 								text.addAttribute(TextAttribute.FONT, font);
 								AttributedCharacterIterator paragraph = text.getIterator();
 								int paragraphStart = paragraph.getBeginIndex();
 								int paragraphEnd = paragraph.getEndIndex();
-								//Make and initialize LineBreakMeasurer
+								// Make and initialize LineBreakMeasurer
 								LineBreakMeasurer lineMeasurer = new LineBreakMeasurer(paragraph, BreakIterator.getLineInstance(), fontRenderContext);
 								lineMeasurer.setPosition(paragraphStart);
-								//Get each line from the measurer and find the widest one;
+								// Get each line from the measurer and find the widest one;
 								while (lineMeasurer.getPosition() < paragraphEnd) {
-									TextLayout layout = lineMeasurer.nextLayout(maxStatsWidth - keyWidth);
+									TextLayout layout = lineMeasurer.nextLayout(layoutWidth);
 									layout.draw(statsG, bounds.x + bounds.width - PADDING - layout.getPixelBounds(null, 0, 0).width, y);
 									y += rowHeight;
 								}
 							}
-							/*
-							statsG.setFont(font);
-							int strw = SwingUtilities.computeStringWidth(valueFM, entry.getValue());
-							statsG.drawString(entry.getValue(), bounds.x + bounds.width - strw - PADDING, y);
-							*/
+
+							// statsG.setFont(font);
+							// int strw = SwingUtilities.computeStringWidth(valueFM, entry.getValue());
+							// statsG.drawString(entry.getValue(), bounds.x + bounds.width - strw -PADDING, y);
 
 							y += PADDING;
 						}
