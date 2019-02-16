@@ -1,5 +1,5 @@
---- jamz-has.txt	2019-02-15 01:11:26.000000000 -0500
-+++ wiki-has.txt	2019-02-15 01:25:09.000000000 -0500
+--- jamz-has.txt	2019-02-16 16:28:56.000000000 -0500
++++ wiki-has.txt	2019-02-16 16:28:56.000000000 -0500
 @@ -1,4 +1,6 @@
  abort
 +absolutevalue
@@ -26,7 +26,7 @@
  closeDialog
  closeFrame
  copyMap
--copyTable  trusted; 2 params: oldname, newname
+-copyTable
  copyToken
  countStrProp
 +countsuccess
@@ -46,13 +46,13 @@
 +eval
  evalMacro
  execLink
--execMacro  alias of 'evalMacro'
--exportData trusted; 3 params: File file, String data, boolean append
--exposeAllOwnedArea trusted; 1 param: mapName
+-execMacro
+-exportData
+-exposeAllOwnedArea
 +explode
 +explodingSuccess
  exposeFOW
--exposeFogAtWaypoints   trusted; no params (although 1 param will not trigger an error and should)
+-exposeFogAtWaypoints
  exposePCOnlyArea
  findDrawings
  findToken

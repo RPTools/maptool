@@ -24,6 +24,7 @@ clearTable
 closeDialog
 closeFrame
 copyMap
+copyTable
 copyToken
 countStrProp
 countsuccess
@@ -44,10 +45,14 @@ endsWith
 eraseVBL
 eval
 evalMacro
+execMacro
 execLink
 explode
 explodingSuccess
+exportData
+exposeAllOwnedArea
 exposeFOW
+exposeFogAtWaypoints
 exposePCOnlyArea
 findDrawings
 findToken
@@ -67,6 +72,7 @@ getDrawingEraser
 getDrawingLayer
 getDrawingOpacity
 getDrawingProperties
+getEnvironmentVariable
 getExposedTokenNames
 getExposedTokens
 getFillColor
@@ -91,6 +97,7 @@ getLabel
 getLastPath
 getLayer
 getLibProperty
+getLibPropertyNames
 getLights
 getLineCap
 getMacroButtonIndex
@@ -106,7 +113,7 @@ getMapVisible
 getMatchingLibProperties
 getMatchingProperties
 getMaxLoopIterations
-getMaxRecusionDepth
+getMaxRecursionDepth
 getMoveCount
 getNPC
 getNPCNames
@@ -138,6 +145,7 @@ getState
 getStateImage
 getStrProp
 getTableAccess
+getTableImage
 getTableNames
 getTableRoll
 getTableVisible
@@ -152,6 +160,7 @@ getTokenLabel
 getTokenNames
 getTokenOpacity
 getTokenPortrait
+getTokenRotation
 getTokenShape
 getTokenStates
 getTokenVBL
@@ -160,6 +169,7 @@ getTokenX
 getTokenY
 getTokens
 getVBL
+getViewArea
 getVisible
 getVisibleMapNames
 getVisibleTokenNames
@@ -185,6 +195,7 @@ initiativeSize
 input
 isBarVisible
 isDialogVisible
+isExternalMacroAccessAllowed
 isFrameVisible
 isFunctionDefined
 isGM
@@ -310,7 +321,7 @@ setMacroProps
 setMapName
 setMapVisible
 setMaxLoopIterations
-setMaxRecusionDepth
+setMaxRecursionDepth
 setNPC
 setName
 setNotes
@@ -329,6 +340,7 @@ setState
 setStrProp
 setTableAccess
 setTableEntry
+setTableImage
 setTableRoll
 setTableVisible
 setTokenDrawOrder
