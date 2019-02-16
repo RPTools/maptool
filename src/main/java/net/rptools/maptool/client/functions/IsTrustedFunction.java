@@ -34,9 +34,9 @@ public class IsTrustedFunction extends AbstractFunction {
 	@Override
 	public Object childEvaluate(Parser parser, String functionName,
 			List<Object> parameters) throws ParserException {
-		if (functionName.equals("isTrusted")) {
+		if (functionName.equalsIgnoreCase("isTrusted")) {
 			return MapTool.getParser().isMacroTrusted() ? BigDecimal.ONE : BigDecimal.ZERO;
-		} else if (functionName.equals("isEnabled")) {
+		} else if (functionName.equalsIgnoreCase("isExternalMacroAccessAllowed")) {
 			return AppPreferences.getAllowExternalMacroAccess() ? BigDecimal.ONE : BigDecimal.ZERO;
 		} else {
 			// functionName is isGM
