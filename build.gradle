@@ -91,7 +91,7 @@ spotless {
 		// spotless has built-in rules for most basic formatting tasks
 		trimTrailingWhitespace()
 		// or spaces. Takes an integer argument if you don't like 4
-		indentWithTabs()
+		indentWithSpaces(4)
 	}
 }
 
