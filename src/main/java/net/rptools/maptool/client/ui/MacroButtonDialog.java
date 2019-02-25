@@ -17,8 +17,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -452,11 +450,14 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     }
 
     /**
-     * Creates a new menu bar item, "Search".
+     * Creates new menu items that are added to the "Edit" top-level menu.
      *
      * This is trickier than it sounds as macOS doesn't automatically merge the
      * per-window menu bar that this method used to create to the
-     * top-of-the-screen menu bar that is the stock in trade on macOS.
+     * top-of-the-screen menu bar that is the stock in trade on macOS. So in
+     * order to create a portable method that works everywhere, we retrieve the
+     * "Edit" JMenu and add our elements to it. When the dialog closes, we call
+     * {@link #destroyMenuBar()} to remove these newly added menu items.
      *
      * @return
      */
@@ -473,24 +474,44 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         throw new RuntimeException("Didn't find the 'Edit' menu?");
     }
 
+    /**
+     * Is a utility method that adds all of the menu items.
+     * 
+     * @param menu
+     */
     private void addMenuItems(JMenu menu) {
+        menu.addSeparator();
         menu.add(new JMenuItem(new ShowFindDialogAction(this)));
         menu.add(new JMenuItem(new ShowReplaceDialogAction(this)));
         menu.add(new JMenuItem(new GoToLineAction()));
         menu.addSeparator();
 
-        int ctrl = AppActions.menuShortcut;
-        int shift = InputEvent.SHIFT_MASK;
-        KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F, ctrl | shift);
-        Action a = csp.addBottomComponent(ks, findToolBar);
-        a.putValue(Action.NAME, "Show Find Search Bar");
-        menu.add(new JMenuItem(a));
-        ks = KeyStroke.getKeyStroke(KeyEvent.VK_H, ctrl | shift);
-        a = csp.addBottomComponent(ks, replaceToolBar);
-        a.putValue(Action.NAME, "Show Replace Search Bar");
-        menu.add(new JMenuItem(a));
+        menu.add(bottomComponent("action.macroEditor.showFindSearchBar", findToolBar)); // shift f
+        menu.add(bottomComponent("action.macroEditor.showReplaceSearchBar", replaceToolBar)); // shift h
     }
 
+    /**
+     * Creates the slide-up panel at the bottom of the macro editor dialog
+     * panel.
+     *
+     * @param key
+     *            string key to lookup in the properties file (used to call
+     *            {@link I18N#getKeystroke()} and {@link I18N#getText()}
+     * @param tb
+     *            the toolbar that is meant to slide up
+     * @return new JMenuItem containing the new {@link Action}
+     */
+    private JMenuItem bottomComponent(String key, FindToolBar tb) {
+        KeyStroke k = I18N.getKeystroke(key);
+        Action a = csp.addBottomComponent(k, tb);
+        a.putValue(Action.NAME, I18N.getText(key));
+        return new JMenuItem(a);
+    }
+
+    /**
+     * Is called when the dialog is about to disappear. We use it to do any menu
+     * cleanup.
+     */
     private void destroyMenuBar() {
         JMenuBar mb = MapTool.getFrame().getJMenuBar();
         for (int i = 0; i < mb.getMenuCount(); i++) {
@@ -504,12 +525,27 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         throw new RuntimeException("Didn't find the 'Edit' menu?");
     }
 
+    /**
+     * Removes all menu items added when the macro editor dialog is opened.
+     *
+     * @param menu
+     *            menu containing the items to be removed
+     * @param max
+     *            current number of items on the menu.
+     */
     private void removeMenuItems(JMenu menu, int max) {
+        // Start at the end and delete items until we find the first Action we added.
+        // We then delete _one more_ because we put a separator above it.
         while (max-- > 0) {
             JMenuItem mi = menu.getItem(max);
             menu.remove(max);
-            if (mi.getAction() instanceof ShowFindDialogAction) {
-                return;
+            if (mi != null) {
+                Action a = mi.getAction();
+                if (a instanceof ShowFindDialogAction) {
+                    // When we find the one we want, delete the separator above it, and we're done.
+                    menu.remove(max - 1);
+                    return;
+                }
             }
         }
     }
@@ -518,7 +554,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         MacroButtonDialog callingDialog;
 
         public ShowFindDialogAction(MacroButtonDialog macroButtonDialog) {
-            init("dialog.macroEditor.searchFind");
+            init("action.macroEditor.searchFind");
             callingDialog = macroButtonDialog;
         }
 
@@ -537,7 +573,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         MacroButtonDialog callingDialog;
 
         public ShowReplaceDialogAction(MacroButtonDialog macroButtonDialog) {
-            init("dialog.macroEditor.searchReplace");
+            init("action.macroEditor.searchReplace");
             callingDialog = macroButtonDialog;
         }
 
@@ -554,7 +590,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
     private class GoToLineAction extends AppActions.DefaultClientAction {
         public GoToLineAction() {
-            init("dialog.macroEditor.gotoLine");
+            init("action.macroEditor.gotoLine");
         }
 
         @Override
