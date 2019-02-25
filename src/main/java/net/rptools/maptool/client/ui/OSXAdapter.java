@@ -1,10 +1,15 @@
 /*
- * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ * This software Copyright by the RPTools.net development team, and licensed
+ * under the Affero GPL Version 3 or, at your option, any later version.
  *
- * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * MapTool Source Code is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.
  *
- * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
- * at <http://www.gnu.org/licenses/agpl.html>.
+ * You should have received a copy of the GNU Affero General Public License *
+ * along with this source Code. If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license text at
+ * <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client.ui;
 
@@ -30,8 +35,9 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 
 /**
- * Apple's new platform API has deprecated the <code>ApplicationListener</code> class. The preferred approach going forward is to use the various set*() methods of <code>Application</code> instead.
- * They are:
+ * Apple's new platform API has deprecated the <code>ApplicationListener</code>
+ * class. The preferred approach going forward is to use the various set*()
+ * methods of <code>Application</code> instead. They are:
  * <ul>
  * <li><code>requestToggleFullScreen({@link java.awt.Window})
  * <li><code>setAboutHandler({@link java.awt.desktop.AboutHandler})
@@ -55,7 +61,8 @@ public class OSXAdapter {
 	private static Desktop dt = Desktop.getDesktop();
 
 	/**
-	 * Sets the quit handler for the main menu on macOS so that it invokes the proper method of the {@link java.awt.desktop.QuitHandler} object.
+	 * Sets the quit handler for the main menu on macOS so that it invokes the
+	 * proper method of the {@link java.awt.desktop.QuitHandler} object.
 	 *
 	 * @param h
 	 *            the object to delegate the event to
@@ -66,7 +73,8 @@ public class OSXAdapter {
 	}
 
 	/**
-	 * Sets the quit handler for the main menu on macOS so that it invokes the proper method of the {@link java.awt.desktop.AboutHandler} object.
+	 * Sets the quit handler for the main menu on macOS so that it invokes the
+	 * proper method of the {@link java.awt.desktop.AboutHandler} object.
 	 *
 	 * @param h
 	 *            the object to delegate the event to
@@ -76,7 +84,8 @@ public class OSXAdapter {
 	}
 
 	/**
-	 * Sets the quit handler for the main menu on macOS so that it invokes the proper method of the {@link java.awt.desktop.PreferencesHandler} object.
+	 * Sets the quit handler for the main menu on macOS so that it invokes the
+	 * proper method of the {@link java.awt.desktop.PreferencesHandler} object.
 	 *
 	 * @param h
 	 *            the object to delegate the event to
@@ -86,7 +95,8 @@ public class OSXAdapter {
 	}
 
 	/**
-	 * Sets the quit handler for the main menu on macOS so that it invokes the proper method of the {@link java.awt.desktop.OpenFilesHandler} object.
+	 * Sets the quit handler for the main menu on macOS so that it invokes the
+	 * proper method of the {@link java.awt.desktop.OpenFilesHandler} object.
 	 *
 	 * @param h
 	 *            the object to delegate the event to
@@ -96,8 +106,10 @@ public class OSXAdapter {
 	}
 
 	/**
-	 * If we're running on macOS, we call this method to download and install the MapTool logo from the main web site. We cache this image so that it appears correctly if the application is later
-	 * executed in "offline" mode, so to speak.
+	 * If we're running on macOS, we call this method to download and install
+	 * the MapTool logo from the main web site. We cache this image so that it
+	 * appears correctly if the application is later executed in "offline" mode,
+	 * so to speak.
 	 */
 	public static void macOSXicon() {
 		// If we're running on OSX, add the dock icon image

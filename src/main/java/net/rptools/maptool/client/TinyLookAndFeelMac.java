@@ -1,10 +1,15 @@
 /*
- * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ * This software Copyright by the RPTools.net development team, and licensed
+ * under the Affero GPL Version 3 or, at your option, any later version.
  *
- * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * MapTool Source Code is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.
  *
- * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
- * at <http://www.gnu.org/licenses/agpl.html>.
+ * You should have received a copy of the GNU Affero General Public License *
+ * along with this source Code. If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license text at
+ * <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client;
 
@@ -22,6 +27,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 		super.initComponentDefaults(table);
 
 		Object fieldInputMap = new UIDefaults.LazyInputMap(new Object[] {
+				// @formatter:off
 				"meta C", DefaultEditorKit.copyAction,
 				"meta V", DefaultEditorKit.pasteAction,
 				"meta X", DefaultEditorKit.cutAction,
@@ -55,19 +61,19 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"KP_RIGHT", DefaultEditorKit.forwardAction,
 				"KP_LEFT", DefaultEditorKit.backwardAction,
 				"ENTER", JTextField.notifyAction,
-				"ctrl BACK_SLASH", "unselect"/*
-												 * DefaultEditorKit. unselectAction
-												 */,
-				// "control shift O", "toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
+				"ctrl BACK_SLASH", "unselect", // DefaultEditorKit.unselectAction
+				// "control shift O", "toggle-componentOrientation", // DefaultEditorKit.toggleComponentOrientation
 				// FJE: {
 				"meta LEFT", DefaultEditorKit.beginLineAction,
 				"meta KP_LEFT", DefaultEditorKit.beginLineAction,
 				"meta RIGHT", DefaultEditorKit.endLineAction,
 				"meta KP_RIGHT", DefaultEditorKit.endLineAction,
 				// }
+				// @formatter:on
 		});
 
 		Object passwordInputMap = new UIDefaults.LazyInputMap(new Object[] {
+				// @formatter:off
 				"meta C", DefaultEditorKit.copyAction,
 				"meta V", DefaultEditorKit.pasteAction,
 				"meta X", DefaultEditorKit.cutAction,
@@ -111,9 +117,11 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"meta RIGHT", DefaultEditorKit.endLineAction,
 				"meta KP_RIGHT", DefaultEditorKit.endLineAction,
 				// }
+				// @formatter:on
 		});
 
 		Object multilineInputMap = new UIDefaults.LazyInputMap(new Object[] {
+				// @formatter:off
 				"meta C", DefaultEditorKit.copyAction,
 				"meta V", DefaultEditorKit.pasteAction,
 				"meta X", DefaultEditorKit.cutAction,
@@ -146,7 +154,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"KP_DOWN", DefaultEditorKit.downAction,
 				"PAGE_UP", DefaultEditorKit.pageUpAction,
 				"PAGE_DOWN", DefaultEditorKit.pageDownAction,
-				"shift PAGE_UP", "selection-page-up",
+				"shift PAGE_UP", "selection-page-up", // not 'public' in DefaultEditorKit
 				"shift PAGE_DOWN", "selection-page-down",
 				"ctrl shift PAGE_UP", "selection-page-left",
 				"ctrl shift PAGE_DOWN", "selection-page-right",
@@ -163,9 +171,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"KP_RIGHT", DefaultEditorKit.forwardAction,
 				"KP_LEFT", DefaultEditorKit.backwardAction,
 				"TAB", DefaultEditorKit.insertTabAction,
-				"ctrl BACK_SLASH", "unselect"/*
-												 * DefaultEditorKit. unselectAction
-												 */,
+				"ctrl BACK_SLASH", "unselect",
 				"ctrl HOME", DefaultEditorKit.beginAction,
 				"ctrl END", DefaultEditorKit.endAction,
 				"ctrl shift HOME", DefaultEditorKit.selectionBeginAction,
@@ -173,16 +179,20 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 				"ctrl T", "next-link-action",
 				"ctrl shift T", "previous-link-action",
 				"ctrl SPACE", "activate-link-action",
-				// "control shift O", "toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
+				// "control shift O", "toggle-componentOrientation", // DefaultEditorKit.toggleComponentOrientation
 				// FJE: {
 				"meta LEFT", DefaultEditorKit.beginLineAction,
 				"meta KP_LEFT", DefaultEditorKit.beginLineAction,
 				"meta RIGHT", DefaultEditorKit.endLineAction,
 				"meta KP_RIGHT", DefaultEditorKit.endLineAction,
+				"meta HOME", DefaultEditorKit.beginAction, // added 1.5.0
+				"meta END", DefaultEditorKit.endAction, // added 1.5.0
 				// }
+				// @formatter:on
 		});
 
 		Object[] defaults = {
+				// @formatter:off
 				"TextField.focusInputMap", fieldInputMap,
 				"PasswordField.focusInputMap", passwordInputMap,
 				"TextArea.focusInputMap", multilineInputMap,
@@ -629,6 +639,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
 						"ctrl ENTER", "press",
 						"ctrl released ENTER", "release"
 				},
+				// @formatter:on
 		};
 		table.putDefaults(defaults);
 	}
