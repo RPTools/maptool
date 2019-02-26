@@ -1529,7 +1529,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 							}
 						}
 						layoutWidth = Math.max(1, maxStatsWidth - keyWidth);
-						// Iterate over values, break then into lines as necessary. Figure out longest value length.
+						// Iterate over values, break them into lines as necessary. Figure out longest value length.
 						for (Entry<String, String> entry : propertyMap.entrySet()) {
 							int lineCount = 0;
 							for (String line : entry.getValue().split("\n")) {
