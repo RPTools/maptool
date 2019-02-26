@@ -81,9 +81,7 @@ public class ZoomFunctions extends AbstractFunction {
 	}
 
 	/**
-	 * Given a grid, returns the pixel (arg=true) or cell (arg=false)
-         * coordinates of top left (x1, y1) and bottom right (x2, y2)
-         * coordinates of the current view.
+	 * Given a grid, returns the pixel (arg=true) or cell (arg=false) coordinates of top left (x1, y1) and bottom right (x2, y2) coordinates of the current view.
 	 * 
 	 * @param arg
 	 *            should be boolean (pixels=true, cells=false)
