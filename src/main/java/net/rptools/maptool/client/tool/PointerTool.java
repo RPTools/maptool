@@ -1597,7 +1597,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
 							// Draw Value
 							for (String line : entry.getValue().split("\n")) {
-								if(line.length() > 0) {
+								if (line.length() > 0) {
 									// For each value, make the iterator need and stash data about it
 									AttributedString text = new AttributedString(line);
 									text.addAttribute(TextAttribute.FONT, font);
@@ -1613,9 +1613,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 										layout.draw(statsG, bounds.x + bounds.width - PADDING - layout.getPixelBounds(null, 0, 0).width, y);
 										y += rowHeight;
 									}
-								}
-								else
-								{
+								} else {
 									y += rowHeight;
 								}
 							}
