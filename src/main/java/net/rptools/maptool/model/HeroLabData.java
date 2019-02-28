@@ -289,8 +289,6 @@ public class HeroLabData {
 		} else {
 			portfolioPath = portfolioFile.getPath().toString();
 		}
-
-		System.out.println("portfolioPath: " + portfolioPath);
 	}
 
 	private long getPortfolioLastModified() {

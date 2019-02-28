@@ -282,75 +282,9 @@ public class VBL_Functions extends AbstractFunction {
 			}
 
 			if (vblFromToken) {
-				renderVBL(renderer, token.getTransformedVBL(), false);
+				TokenVBL.renderVBL(renderer, token.getTransformedVBL(), false);
 			} else {
-				Rectangle footprintBounds = token.getBounds(renderer.getZone());
-				Area newTokenVBL = new Area(footprintBounds);
-				Dimension imgSize = new Dimension(token.getWidth(), token.getHeight());
-				SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
-				AffineTransform atArea = new AffineTransform();
-
-				double tx, ty, sx, sy;
-
-				// Prepare to reverse all the current token transformations so we can store a
-				// raw untransformed version on the Token
-				if (token.isSnapToScale()) {
-					tx = -newTokenVBL.getBounds().getX() - (int) ((footprintBounds.getWidth() - imgSize.getWidth()) / 2);
-					ty = -newTokenVBL.getBounds().getY() - (int) ((footprintBounds.getHeight() - imgSize.getHeight()) / 2);
-					sx = 1 / (imgSize.getWidth() / token.getWidth());
-					sy = 1 / (imgSize.getHeight() / token.getHeight());
-
-					atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
-				} else {
-					tx = -newTokenVBL.getBounds().getX();
-					ty = -newTokenVBL.getBounds().getY();
-					sx = 1 / token.getScaleX();
-					sy = 1 / token.getScaleY();
-
-					atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
-				}
-
-				if (token.getShape() == Token.TokenShape.TOP_DOWN && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
-					// Get the center of the token bounds
-					double rx = newTokenVBL.getBounds2D().getCenterX();
-					double ry = newTokenVBL.getBounds2D().getCenterY();
-
-					// Rotate the area to match the token facing
-					AffineTransform captureArea = AffineTransform.getRotateInstance(Math.toRadians(token.getFacingInDegrees()), rx, ry);
-					newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
-
-					// Capture the VBL via intersection
-					newTokenVBL.intersect(renderer.getZone().getTopology());
-
-					// Rotate the area back to prep to store on Token
-					captureArea = AffineTransform.getRotateInstance(-Math.toRadians(token.getFacingInDegrees()), rx, ry);
-					newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
-				} else {
-					// Token will not be rotated so lets just capture the VBL
-					newTokenVBL.intersect(renderer.getZone().getTopology());
-				}
-
-				// Translate the capture to zero out the x,y to store on the Token
-				atArea.concatenate(AffineTransform.getTranslateInstance(tx, ty));
-				newTokenVBL = new Area(atArea.createTransformedShape(newTokenVBL));
-
-				// Lets account for flipped images...
-				atArea = new AffineTransform();
-				if (token.isFlippedX()) {
-					atArea.concatenate(AffineTransform.getScaleInstance(-1.0, 1.0));
-					atArea.concatenate(AffineTransform.getTranslateInstance(-token.getWidth(), 0));
-				}
-
-				if (token.isFlippedY()) {
-					atArea.concatenate(AffineTransform.getScaleInstance(1.0, -1.0));
-					atArea.concatenate(AffineTransform.getTranslateInstance(0, -token.getHeight()));
-				}
-
-				// Do any final transformations for flipped images
-				newTokenVBL = new Area(atArea.createTransformedShape(newTokenVBL));
-
-				// Transform the VBL capture and store on the Token
-				token.setVBL(newTokenVBL);
+				token.setVBL(TokenVBL.getMapVBL_transformed(renderer, token));
 			}
 		}
 
@@ -462,7 +396,7 @@ public class VBL_Functions extends AbstractFunction {
 		if (!atArea.isIdentity())
 			area.transform(atArea);
 
-		return renderVBL(renderer, area, erase);
+		return TokenVBL.renderVBL(renderer, area, erase);
 	}
 
 	private void applyTranslate(String funcname, AffineTransform at, JSONObject vblObject, String[] params) throws ParserException {
@@ -593,7 +527,7 @@ public class VBL_Functions extends AbstractFunction {
 		if (!atArea.isIdentity())
 			area.transform(atArea);
 
-		return renderVBL(renderer, area, erase);
+		return TokenVBL.renderVBL(renderer, area, erase);
 	}
 
 	/**
@@ -678,7 +612,7 @@ public class VBL_Functions extends AbstractFunction {
 		if (!atArea.isIdentity())
 			area.transform(atArea);
 
-		return renderVBL(renderer, area, erase);
+		return TokenVBL.renderVBL(renderer, area, erase);
 	}
 
 	/**
@@ -773,7 +707,7 @@ public class VBL_Functions extends AbstractFunction {
 		if (!atArea.isIdentity())
 			area.transform(atArea);
 
-		return renderVBL(renderer, area, erase);
+		return TokenVBL.renderVBL(renderer, area, erase);
 	}
 
 	/**
@@ -1035,31 +969,5 @@ public class VBL_Functions extends AbstractFunction {
 			throw new ParserException(I18N.getText("macro.function.general.argumentKeyTypeD", funcname, key));
 		}
 		return value;
-	}
-
-	/**
-	 * This is a convenience method to send the VBL Area to be rendered to the server
-	 * 
-	 * @param renderer
-	 *            Reference to the ZoneRenderer
-	 * @param area
-	 *            A valid Area containing VBL polygons
-	 * @param erase
-	 *            Set to true to erase the VBL, otherwise draw it
-	 */
-	private Area renderVBL(ZoneRenderer renderer, Area area, boolean erase) {
-		if (renderer == null)
-			return area;
-
-		if (erase) {
-			renderer.getZone().removeTopology(area);
-			MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
-		} else {
-			renderer.getZone().addTopology(area);
-			MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
-		}
-
-		renderer.repaint();
-		return null;
 	}
 }
