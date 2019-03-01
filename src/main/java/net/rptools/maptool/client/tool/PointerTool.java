@@ -1418,7 +1418,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 	 */
 	public void paintOverlay(final ZoneRenderer renderer, Graphics2D g) {
 		Dimension viewSize = renderer.getSize();
-		renderer.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		FontRenderContext fontRenderContext = g.getFontRenderContext();
 
 		Composite composite = g.getComposite();
