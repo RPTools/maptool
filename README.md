@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=merge-from-nerps)](https://travis-ci.org/RPTools/maptool)
+
 MapTool
 =======
 
