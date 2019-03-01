@@ -35,6 +35,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
@@ -129,20 +130,23 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
         panel.getCheckBox("applyToTokensCheckBox").setEnabled(!isTokenMacro);
         panel.getComboBox("hotKey").setEnabled(!isTokenMacro);
-        panel.getTextField("maxWidth").setEnabled(false); // can't get max-width to work, so temporarily disabling it.
+        // can't get max-width to work, so temporarily disabling it.
+        panel.getTextField("maxWidth").setEnabled(false);
         panel.getCheckBox("allowPlayerEditsCheckBox").setEnabled(MapTool.getPlayer().isGM());
 
         new WindowPreferences(AppConstants.APP_NAME, "editMacroDialog", this);
         SwingUtil.centerOver(this, MapTool.getFrame());
 
-        // Capture all close events (including red X) so we can maintain the list of open macros
+        // Capture all close events (including red X) so we can maintain the
+        // list of open macros
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
                 destroyMenuBar();
                 updateOpenMacroList(false);
-                dispose();
+                // FJE fix for macOS pinwheel
+                SwingUtilities.invokeLater(() -> dispose());
             }
         });
     }
@@ -227,7 +231,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
     private void installFontSizeCombo() {
         String[] fontSizes = { "0.75em", "0.80em", "0.85em", "0.90em", "0.95em", "1.00em", "1.05em", "1.10em", "1.15em", "1.20em", "1.25em" };
-        // String[] fontSizes = { "6pt", "7pt", "8pt", "9pt", "10pt", "11pt", "12pt", "13pt", "14pt", "15pt", "16pt" };
+        // String[] fontSizes = { "6pt", "7pt", "8pt", "9pt", "10pt", "11pt",
+        // "12pt", "13pt", "14pt", "15pt", "16pt" };
         JComboBox combo = panel.getComboBox("fontSizeComboBox");
         combo.setModel(new DefaultComboBoxModel(fontSizes));
     }
@@ -389,13 +394,19 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
         // Set the color style via Theme
         try {
-            // Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/default.xml"));
-            // Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/dark.xml"));
-            // Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/eclipse.xml"));
-            // Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/idea.xml"));
-            // Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/vs.xml"));
+            // Theme theme =
+            // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/default.xml"));
+            // Theme theme =
+            // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/dark.xml"));
+            // Theme theme =
+            // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/eclipse.xml"));
+            // Theme theme =
+            // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/idea.xml"));
+            // Theme theme =
+            // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/vs.xml"));
             Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/nerps.xml"));
-            // Theme theme = Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/nerps-dark.xml"));
+            // Theme theme =
+            // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/nerps-dark.xml"));
             theme.apply(macroEditorRSyntaxTextArea);
             macroEditorRSyntaxTextArea.revalidate();
         } catch (IOException e) {
@@ -425,7 +436,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
         RTextScrollPane macroEditorRTextScrollPane = new RTextScrollPane(macroEditorRSyntaxTextArea);
         macroEditorRTextScrollPane.setLineNumbersEnabled(true);
-        // replaceComponent("macroEditorPanel", "macroEditorRTextScrollPane", macroEditorRTextScrollPane);
+        // replaceComponent("macroEditorPanel", "macroEditorRTextScrollPane",
+        // macroEditorRTextScrollPane);
 
         csp.add(macroEditorRTextScrollPane);
     }
@@ -437,7 +449,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         findDialog = new FindDialog(this, this);
         replaceDialog = new ReplaceDialog(this, this);
 
-        // This ties the properties of the two dialogs together (match case, regex, etc.).
+        // This ties the properties of the two dialogs together (match case,
+        // regex, etc.).
         SearchContext context = findDialog.getSearchContext();
         replaceDialog.setSearchContext(context);
 
@@ -476,7 +489,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
     /**
      * Is a utility method that adds all of the menu items.
-     * 
+     *
      * @param menu
      */
     private void addMenuItems(JMenu menu) {
@@ -486,8 +499,10 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         menu.add(new JMenuItem(new GoToLineAction()));
         menu.addSeparator();
 
-        menu.add(bottomComponent("action.macroEditor.showFindSearchBar", findToolBar)); // shift f
-        menu.add(bottomComponent("action.macroEditor.showReplaceSearchBar", replaceToolBar)); // shift h
+        menu.add(bottomComponent("action.macroEditor.showFindSearchBar", findToolBar)); // shift
+                                                                                        // f
+        menu.add(bottomComponent("action.macroEditor.showReplaceSearchBar", replaceToolBar)); // shift
+                                                                                              // h
     }
 
     /**
@@ -534,7 +549,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
      *            current number of items on the menu.
      */
     private void removeMenuItems(JMenu menu, int max) {
-        // Start at the end and delete items until we find the first Action we added.
+        // Start at the end and delete items until we find the first Action we
+        // added.
         // We then delete _one more_ because we put a separator above it.
         while (max-- > 0) {
             JMenuItem mi = menu.getItem(max);
@@ -542,7 +558,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
             if (mi != null) {
                 Action a = mi.getAction();
                 if (a instanceof ShowFindDialogAction) {
-                    // When we find the one we want, delete the separator above it, and we're done.
+                    // When we find the one we want, delete the separator above
+                    // it, and we're done.
                     menu.remove(max - 1);
                     return;
                 }
@@ -620,8 +637,10 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     // public void rememberLastWindowLocation() {
     // Dimension windowSize = this.getSize();
     //
-    // int x = outerWindow.getLocation().x + (outerSize.width - innerSize.width) / 2;
-    // int y = outerWindow.getLocation().y + (outerSize.height - innerSize.height) / 2;
+    // int x = outerWindow.getLocation().x + (outerSize.width - innerSize.width)
+    // / 2;
+    // int y = outerWindow.getLocation().y + (outerSize.height -
+    // innerSize.height) / 2;
     //
     // // Jamz: For multiple monitor's, x & y can be negative values...
     // // innerWindow.setLocation(x < 0 ? 0 : x, y < 0 ? 0 : y);
@@ -855,7 +874,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         getSortbyTextField().setToolTipText(I18N.getText("component.tooltip.macro.sortPrefix"));
         panel.getLabel("macroHotKeyLabel").setText(I18N.getText("component.label.macro.hotKey") + ":");
         getHotKeyCombo().setToolTipText(I18N.getText("component.tooltip.macro.hotKey"));
-        // Jamz: FIXME need to edit border text for gridview panel.getLabel("macroCommandLabel").setText(I18N.getText("component.label.macro.command"));
+        // Jamz: FIXME need to edit border text for gridview
+        // panel.getLabel("macroCommandLabel").setText(I18N.getText("component.label.macro.command"));
         panel.getLabel("macroButtonColorLabel").setText(I18N.getText("component.label.macro.buttonColor") + ":");
         getColorComboBox().setToolTipText(I18N.getText("component.tooltip.macro.buttonColor"));
         panel.getLabel("macroFontColorLabel").setText(I18N.getText("component.label.macro.fontColor") + ":");

@@ -1,8 +1,49 @@
-All of these files except the `macro_descriptions.properties` file
-will go away when the project of converting the wiki's HTML to
-something the MT macro editor can use has been completed.
+These scripts and auxiliary files are used to extract the documentation
+from Craig's `lmwcs.com` web site and store them here under the
+`processed/` directory.
 
-I will likely leave the runtime scripts here, though, since the
-simplest way to add help docs for a new macro function help may be
-to add it to the wiki, then extract it here.  A different process
-will be needed in the future because that's just dumb.
+The MediaWiki software adds some boilerplate that is removed in these
+files -- we only keep the contents of `<div id="mw-content-text">` but
+even that has pieces removed, like the table of contents and all
+HTML comments.
+
+The process is as follows:
+
+1.  `1-wiki-getfnnames.py`
+
+    This Python3 script reads Craig's MediaWiki dump file and makes a
+    list of all pages that appear to describe macro functions.  This
+    list is stored in `wiki-has.txt` and is used in the next step.
+
+1.  `2-get-wiki-pages.sh`
+
+    This script reads the `wiki-has.txt` file to determine which pages
+    to retrieve.  It grabs them using `wget` and puts them under the
+    `lmwcs.com` directory.  The actual pages are under `rptools/wiki/`
+    and auxiliary files are under `maptool/` (like JavaScripts, CSS, and
+    images).
+
+1.  `3-extract-mw-content.sh`
+
+    This script extracts the proper `<div>` from the pages under
+    `lmwcs.com/rptools/wiki/`, checking to ensure the HTML is valid,
+    and then reformatting and re-indenting the document when
+    generating the output.  That output is put under `processed/` for
+    use in the next step.
+
+1.  `4-generate-macro-list.sh`
+
+    This script reads all of the files under `processed/` and creates an
+    "index", per se, that lists each filename and the description of the
+    macro that the file documents.  It looks for `<div
+    class="template_description">` to isolate the description text.
+    This becomes input for the script in the next step.
+
+1.  `5-create-properties.sh`
+
+    This script reads the fully processed HTML snippets stored under the
+    `processed/` directory and creates the `i18n.properties` file.  This
+    part isn't perfect, as it doesn't always detect the `.description`
+    field properly.  Future updates to the wiki pages may correct that.
+    This script should be executed and the output redirected to
+    `i18n.properties` to create that file.
