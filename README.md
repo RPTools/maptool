@@ -1,3 +1,6 @@
+
+[![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=master)](https://travis-ci.org/RPTools/maptool)
+
 MapTool
 =======
 
