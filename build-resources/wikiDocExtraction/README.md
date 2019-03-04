@@ -7,6 +7,10 @@ files -- we only keep the contents of `<div id="mw-content-text">` but
 even that has pieces removed, like the table of contents and all
 HTML comments.
 
+The end result is a Java properties file that we can manually copy to
+`../../src/main/resources/net/rptools/maptool/language/macro_descriptions/`
+under the name `i18n.properties`.
+
 The process is as follows:
 
 1.  `1-wiki-getfnnames.py`

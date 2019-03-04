@@ -5,37 +5,27 @@
 #abort.description = Conditionally abort the execution of a macro
 #abort.summary     = <h2><span>abort() Function</span></h2>\
 #<div>\u2022 <b>Introduced in version 1.3b42</b></div>\
+PROC=${1:-processed.txt}
 
-cd processed || {
-    echo >&2 "Can't change directory to 'processed'?!";
-    exit 1
-}
+while read file desc
+do
+    # First, write the description of the function
+    # If empty, use "TBD"
+    echo "$file.description = ${desc:-TBD}"
 
-# Search each HTML file looking for 'template_version'.  We want to
-# extract the following line (the description) and print the filename, a
-# TAB, and the description, to stdout.  That becomes the list of things
-# to process in the 'while' loop.
-awk '/template_version/ { getline; print FILENAME "\t" $0 }' * |
-    while read file desc
-    do
-        # First, strip the '.html' filename extensions
-        file=${file%.html}
+    # Second, read the contents of the file under 'processed/' and
+    # generate the content for the help doc
+    echo "$file.summary     = \\"
 
-        # Next, write the description of the function
-        # If empty, use "TBD"
-        echo "$file.description = ${desc:-TBD}"
+    # xmllint(1) will output an XML processing instruction as line one
+    # and we want to remove that, then add a backslash to every line.
+    xmllint --format "processed/$file.html" |
+        sed -e '1d' -e 's/$/\\/'
 
-        # Next, read the contents of the file under 'processed/'
-        # and generate the content for the help doc
-        echo "$file.summary     = \\"
-        tail -n +2 "processed/$file.html" |
-            xmllint --format - |
-            sed -e 's/$/\\/'
+    # This adds a blank line to indicate the previous string has
+    # ended (necessary because the last line contains a backslash).
+    echo
 
-        # Next, add a blank line to indicate the previous string has
-        # ended (necessary because the last line contains a backslash).
-        echo
-
-        # And last, add a blank line between entries
-        echo
-    done
+    # And last, add a blank line between entries
+    echo
+done < "$PROC"

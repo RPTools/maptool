@@ -45,8 +45,8 @@ endsWith
 eraseVBL
 eval
 evalMacro
-execMacro
 execLink
+execMacro
 explode
 explodingSuccess
 exportData
@@ -114,6 +114,7 @@ getMatchingLibProperties
 getMatchingProperties
 getMaxLoopIterations
 getMaxRecursionDepth
+getMaxRecusionDepth
 getMoveCount
 getNPC
 getNPCNames
@@ -322,6 +323,7 @@ setMapName
 setMapVisible
 setMaxLoopIterations
 setMaxRecursionDepth
+setMaxRecusionDepth
 setNPC
 setName
 setNotes

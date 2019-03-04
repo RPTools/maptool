@@ -1,5 +1,16 @@
 #!/usr/bin/perl -w
 
+# Some of the characters we're going to read are apparently multibyte
+# (i.e., wide) characters.  And when our `print` statements tries to
+# concatenate two strings together we'll get a warning that wide
+# characters are being used in conjunction with non-wide characters.
+# By opening all files using the `locale` module, files will be
+# interpreted using environment variables, thus becoming UTF-8 or
+# whatever locale is the default.  (Note that the Windows OS doesn't
+# define a default locale, so explicit variables must be created.  If
+# this is done, Perl will pick those up and use them.)
+# See 'What is a "wide character"?' in `perldoc perlunifaq`.
+use open ':locale';
 use HTML::TreeBuilder 5 -weak;
 
 # Reads all of the HTML files under 'processed/' and makes a list that
@@ -48,7 +59,14 @@ sub processFile {
     foreach my $elem ($e->content_list()) {
         push(@t, ref($elem) ? $elem->as_HTML() : $elem);
     }
-    $t = join("", @t);
-    $t =~ s/[.]\s\s*[A-Z].*$/./;
+    $t = join(" ", @t);
+    # This looks for the end of the first sentence and deletes
+    # everything after that point.  This doesn't work, though.
+    # What if there's a "." inside an HTML tag, such as:
+    #   <img src="xxx" alt="Look. Here... Really!">
+    # But doing this correctly means parsing out HTML elements, looking
+    # for the end-of-sentence, then adding HTML elements back in.
+    $t =~ s/[.]\s+[[:upper:]<].*$/./;
+    $t =~ s/\s+/ /g;
     return $t;
 }

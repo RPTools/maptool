@@ -3,7 +3,7 @@
 from lxml.etree import ElementTree
 
 root = ElementTree().parse('wiki-dump.xml')
-print(repr(root))
+#print(repr(root))
 tag = str(root.tag)
 
 ens = "{" + tag[1:tag.find("}")] + "}"      # per-element namespace
@@ -21,19 +21,46 @@ ns = { "default": tag[1:tag.find("}")] }    # for use in find(), et al
 # Cache some things that will otherwise take up quite a bit of time
 page_with_ns = ens + "page"
 
-names = []
+names = {}
 for (elem_num, page) in enumerate(root, 1):
     if page.tag == page_with_ns:
         title = page.find("./default:title", ns).text
         # print("Title: {0}".format(title))
 
         text = page.find("./default:revision/default:text", ns).text
-        # if not text:
-        #     print("Missing revision/text field.  {0}:{1}".format(title, elem_num))
-        if text and text.find("{{MacroFunction") != -1:
-            names.append(title)
-    else:
-        print(page)
+        # Text must exist.
+        # Text must contain '{{MacroFunction'.
+        if title and text and text.find("{{MacroFunction") != -1:
+            # Title must not contain " " (no macro names contain spaces).
+            # Title must not contain ":" (these are "category" pages).
+            # Title must not contain "/" (these are translated pages).
+            if title.find(" ") == -1 and \
+               title.find(":") == -1 and \
+               title.find("/") == -1:
+                names[title] = 1
 
-print("List of macro names")
-print("\n".join(names))
+# The current `wiki-dump.xml` doesn't include all macro functions,
+# as some new pages were added after Craig's dump.  Those pages
+# are added here.  We dump the ones we found, above
+
+added = """\
+copyTable
+execMacro
+exportData
+exposeAllOwnedArea
+exposeFogAtWaypoints
+getEnvironmentVariable
+getLibPropertyNames
+getMaxRecursionDepth
+getTableImage
+getTokenRotation
+getViewArea
+isExternalMacroAccessAllowed
+setMaxRecursionDepth
+setTableImage
+"""
+
+names.update(dict.fromkeys(added.split(), 2))
+all_names = list(names.keys())
+all_names.sort()
+print("\n".join(all_names))
