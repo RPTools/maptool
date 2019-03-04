@@ -1,30 +1,34 @@
 /*
- * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL
- * Version 3 or, at your option, any later version.
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
  *
- * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * You should have received a copy of the GNU Affero General Public License * along with this source
- * Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.maptool.client;
 
+import de.muntjak.tinylookandfeel.TinyLookAndFeel;
 import javax.swing.JTextField;
 import javax.swing.UIDefaults;
 import javax.swing.text.DefaultEditorKit;
 
-import de.muntjak.tinylookandfeel.TinyLookAndFeel;
-
 public class TinyLookAndFeelMac extends TinyLookAndFeel {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    @Override
-    protected void initComponentDefaults(UIDefaults table) {
-        super.initComponentDefaults(table);
+  @Override
+  protected void initComponentDefaults(UIDefaults table) {
+    super.initComponentDefaults(table);
 
-        Object fieldInputMap = new UIDefaults.LazyInputMap(new Object[] {
+    Object fieldInputMap =
+        new UIDefaults.LazyInputMap(
+            new Object[] {
               // @formatter:off
               "meta C", DefaultEditorKit.copyAction,
               "meta V", DefaultEditorKit.pasteAction,
@@ -69,9 +73,11 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
               "meta KP_RIGHT", DefaultEditorKit.endLineAction,
               // }
               // @formatter:on
-        });
+            });
 
-        Object passwordInputMap = new UIDefaults.LazyInputMap(new Object[] {
+    Object passwordInputMap =
+        new UIDefaults.LazyInputMap(
+            new Object[] {
               // @formatter:off
               "meta C", DefaultEditorKit.copyAction,
               "meta V", DefaultEditorKit.pasteAction,
@@ -118,9 +124,11 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
               "meta KP_RIGHT", DefaultEditorKit.endLineAction,
               // }
               // @formatter:on
-        });
+            });
 
-        Object multilineInputMap = new UIDefaults.LazyInputMap(new Object[] {
+    Object multilineInputMap =
+        new UIDefaults.LazyInputMap(
+            new Object[] {
               // @formatter:off
               "meta C", DefaultEditorKit.copyAction,
               "meta V", DefaultEditorKit.pasteAction,
@@ -189,9 +197,9 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
               "meta END", DefaultEditorKit.endAction, // added 1.5.0
               // }
               // @formatter:on
-        });
+            });
 
-        Object[] defaults = {
+    Object[] defaults = {
       // @formatter:off
       "TextField.focusInputMap",
       fieldInputMap,
@@ -664,7 +672,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
         "ctrl released ENTER", "release"
       },
       // @formatter:on
-        };
-        table.putDefaults(defaults);
-    }
+    };
+    table.putDefaults(defaults);
+  }
 }

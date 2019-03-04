@@ -32,20 +32,17 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 
 /**
-<<<<<<< HEAD
- * New class extending AbstractFunction to create new "Macro Functions" getRequest & postRequest
+ * <<<<<<< HEAD New class extending AbstractFunction to create new "Macro Functions" getRequest &
+ * postRequest
  *
  * <p>getRequest(URL) :: Takes a URL as a string and sends a GET request, returning HTTP data.
  * postRequest(URL, Parameters) :: Takes a URL as a string and a JSON array of Parameters and sends
- * s POST request, returning HTTP data.
-=======
- * New class extending AbstractFunction to create new "Macro Functions" getRequest &amp;
- * postRequest.
+ * s POST request, returning HTTP data. ======= New class extending AbstractFunction to create new
+ * "Macro Functions" getRequest &amp; postRequest.
  *
  * <p>getRequest(URL) :: Takes a URL as a string and sends a GET request, returning HTTP data.
  * postRequest(URL, Parameters) :: Takes a URL as a string, and a JSON array of parameters, and
- * sends a POST request, returning HTTP data.
->>>>>>> merge-from-nerps
+ * sends a POST request, returning HTTP data. >>>>>>> merge-from-nerps
  *
  * <p>HTTPUtil Class from:
  * http://www.codejava.net/java-se/networking/an-http-utility-class-to-send-getpost-request
