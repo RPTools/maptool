@@ -1,10 +1,16 @@
 /*
- * This software Copyright by the RPTools.net development team, and licensed under the Affero GPL Version 3 or, at your option, any later version.
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
  *
- * MapTool Source Code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
- * at <http://www.gnu.org/licenses/agpl.html>.
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
  */
 package net.rptools.lib.swing;
 
@@ -16,13 +22,13 @@ import java.awt.LayoutManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
 /*
  * $Id: TaskPanelGroup.java 5381 2010-09-07 17:17:26Z azhrei_fje $
  *
@@ -33,170 +39,167 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class TaskPanelGroup extends JPanel {
 
-	private int gap = 0;
+  private int gap = 0;
 
-	public static final String TASK_PANEL_LIST = "taskPanelGroup.panelList";
+  public static final String TASK_PANEL_LIST = "taskPanelGroup.panelList";
 
-	private List<TaskPanel> taskPanelList = new ArrayList<TaskPanel>();
+  private List<TaskPanel> taskPanelList = new ArrayList<TaskPanel>();
 
-	public TaskPanelGroup() {
-		this(0);
-	}
+  public TaskPanelGroup() {
+    this(0);
+  }
 
-	public TaskPanelGroup(int gap) {
-		this.gap = gap;
-		setLayout(new TaskPanelGroupLayout());
-	}
+  public TaskPanelGroup(int gap) {
+    this.gap = gap;
+    setLayout(new TaskPanelGroupLayout());
+  }
 
-	public TaskPanel getTaskPanel(String title) {
+  public TaskPanel getTaskPanel(String title) {
 
-		for (TaskPanel taskPanel : taskPanelList) {
-			if (title.equals(taskPanel.getTitle())) {
-				return taskPanel;
-			}
-		}
+    for (TaskPanel taskPanel : taskPanelList) {
+      if (title.equals(taskPanel.getTitle())) {
+        return taskPanel;
+      }
+    }
 
-		return null;
-	}
+    return null;
+  }
 
-	@Override
-	public Component add(String name, Component comp) {
-		add(comp, name);
-		return comp;
-	}
+  @Override
+  public Component add(String name, Component comp) {
+    add(comp, name);
+    return comp;
+  }
 
-	@Override
-	public void add(Component comp, Object title) {
-		if (!(title instanceof String)) {
-			// LATER: Title should be able to handle any component
-			throw new IllegalArgumentException("Must supply a string title");
-		}
+  @Override
+  public void add(Component comp, Object title) {
+    if (!(title instanceof String)) {
+      // LATER: Title should be able to handle any component
+      throw new IllegalArgumentException("Must supply a string title");
+    }
 
-		TaskPanel taskPanel = new TaskPanel((String) title, comp);
-		firePropertyChange(TASK_PANEL_LIST, null, taskPanel);
+    TaskPanel taskPanel = new TaskPanel((String) title, comp);
+    firePropertyChange(TASK_PANEL_LIST, null, taskPanel);
 
-		taskPanelList.add(taskPanel);
-		add(taskPanel);
-	}
+    taskPanelList.add(taskPanel);
+    add(taskPanel);
+  }
 
-	public List<TaskPanel> getTaskPanels() {
-		return Collections.unmodifiableList(taskPanelList);
-	}
+  public List<TaskPanel> getTaskPanels() {
+    return Collections.unmodifiableList(taskPanelList);
+  }
 
-	private class TaskPanelGroupLayout implements LayoutManager {
+  private class TaskPanelGroupLayout implements LayoutManager {
 
-		public void addLayoutComponent(String name, Component comp) {
-		}
+    public void addLayoutComponent(String name, Component comp) {}
 
-		public void layoutContainer(Container parent) {
+    public void layoutContainer(Container parent) {
 
-			Dimension size = getSize();
-			Insets insets = getInsets();
+      Dimension size = getSize();
+      Insets insets = getInsets();
 
-			int heightRemaining = size.height - insets.bottom - insets.top;
-			int openPanelCount = 0;
+      int heightRemaining = size.height - insets.bottom - insets.top;
+      int openPanelCount = 0;
 
-			TaskPanel lastPanel = null;
-			for (Component comp : getComponents()) {
-				if (!(comp instanceof TaskPanel)) {
-					continue;
-				}
+      TaskPanel lastPanel = null;
+      for (Component comp : getComponents()) {
+        if (!(comp instanceof TaskPanel)) {
+          continue;
+        }
 
-				TaskPanel panel = (TaskPanel) comp;
+        TaskPanel panel = (TaskPanel) comp;
 
-				if (!panel.isOpen()) {
-					heightRemaining -= panel.getPreferredSize().height;
-				} else {
-					openPanelCount++;
-					heightRemaining -= gap;
-				}
+        if (!panel.isOpen()) {
+          heightRemaining -= panel.getPreferredSize().height;
+        } else {
+          openPanelCount++;
+          heightRemaining -= gap;
+        }
 
-				lastPanel = panel;
-			}
+        lastPanel = panel;
+      }
 
-			// Add back the last gap
-			if (lastPanel != null && lastPanel.isOpen()) {
-				heightRemaining += gap;
-			}
+      // Add back the last gap
+      if (lastPanel != null && lastPanel.isOpen()) {
+        heightRemaining += gap;
+      }
 
-			int openSize = openPanelCount > 0 ? heightRemaining / openPanelCount : 0;
-			int currentHeight = insets.top;
+      int openSize = openPanelCount > 0 ? heightRemaining / openPanelCount : 0;
+      int currentHeight = insets.top;
 
-			for (Component comp : getComponents()) {
-				if (!(comp instanceof TaskPanel)) {
-					continue;
-				}
+      for (Component comp : getComponents()) {
+        if (!(comp instanceof TaskPanel)) {
+          continue;
+        }
 
-				TaskPanel panel = (TaskPanel) comp;
-				int height = panel.isOpen() ? openSize : panel.getPreferredSize().height;
-				panel.setSize(size.width - insets.left - insets.right, height);
-				panel.setLocation(insets.left, currentHeight);
+        TaskPanel panel = (TaskPanel) comp;
+        int height = panel.isOpen() ? openSize : panel.getPreferredSize().height;
+        panel.setSize(size.width - insets.left - insets.right, height);
+        panel.setLocation(insets.left, currentHeight);
 
-				currentHeight += height;
-				if (panel.isOpen()) {
-					currentHeight += gap;
-				}
-			}
-		}
+        currentHeight += height;
+        if (panel.isOpen()) {
+          currentHeight += gap;
+        }
+      }
+    }
 
-		public Dimension minimumLayoutSize(Container parent) {
+    public Dimension minimumLayoutSize(Container parent) {
 
-			int width = 0;
-			int height = 0;
+      int width = 0;
+      int height = 0;
 
-			for (Component comp : getComponents()) {
+      for (Component comp : getComponents()) {
 
-				Dimension size = comp.getMinimumSize();
-				if (size.width > width) {
-					width = size.width;
-				}
+        Dimension size = comp.getMinimumSize();
+        if (size.width > width) {
+          width = size.width;
+        }
 
-				height += size.height;
-			}
+        height += size.height;
+      }
 
-			return new Dimension(width, height);
-		}
+      return new Dimension(width, height);
+    }
 
-		public Dimension preferredLayoutSize(Container parent) {
-			int width = 0;
-			int height = 0;
+    public Dimension preferredLayoutSize(Container parent) {
+      int width = 0;
+      int height = 0;
 
-			for (Component comp : getComponents()) {
+      for (Component comp : getComponents()) {
 
-				Dimension size = comp.getPreferredSize();
-				if (size.width > width) {
-					width = size.width;
-				}
+        Dimension size = comp.getPreferredSize();
+        if (size.width > width) {
+          width = size.width;
+        }
 
-				height += size.height;
-			}
+        height += size.height;
+      }
 
-			return new Dimension(width, height);
-		}
+      return new Dimension(width, height);
+    }
 
-		public void removeLayoutComponent(Component comp) {
-		}
-	}
+    public void removeLayoutComponent(Component comp) {}
+  }
 
-	public static void main(String[] args) {
+  public static void main(String[] args) {
 
-		JFrame f = new JFrame();
-		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    JFrame f = new JFrame();
+    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		TaskPanelGroup group = new TaskPanelGroup(5);
-		group.add(new TaskPanel("Testing", new JButton("Hello World")));
-		group.add(Box.createHorizontalGlue());
-		group.add(new TaskPanel("Testing 2", new JButton("Hello World2")));
-		group.add(Box.createHorizontalGlue());
-		group.add(new TaskPanel("Testing 2", new JButton("Hello World2")));
-		group.add(Box.createHorizontalGlue());
+    TaskPanelGroup group = new TaskPanelGroup(5);
+    group.add(new TaskPanel("Testing", new JButton("Hello World")));
+    group.add(Box.createHorizontalGlue());
+    group.add(new TaskPanel("Testing 2", new JButton("Hello World2")));
+    group.add(Box.createHorizontalGlue());
+    group.add(new TaskPanel("Testing 2", new JButton("Hello World2")));
+    group.add(Box.createHorizontalGlue());
 
-		((JComponent) f.getContentPane()).setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		f.add(group);
-		f.pack();
-		SwingUtil.centerOnScreen(f);
+    ((JComponent) f.getContentPane()).setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    f.add(group);
+    f.pack();
+    SwingUtil.centerOnScreen(f);
 
-		f.setVisible(true);
-
-	}
+    f.setVisible(true);
+  }
 }
