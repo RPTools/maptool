@@ -81,10 +81,12 @@ run {
 
 spotless {
     java {
-        licenseHeaderFile	'spotless.license.java'
+        licenseHeaderFile 'spotless.license.java'
         // Now using the Google Java style guide
         //eclipse().configFile('build-resources/eclipse.prefs.formatter.xml')
         googleJavaFormat()
+        // https://github.com/diffplug/spotless/blob/master/PADDEDCELL.md
+        paddedCell()
     }
 
     format 'misc', {
@@ -94,6 +96,8 @@ spotless {
         trimTrailingWhitespace()
         // or spaces. Takes an integer argument if you don't like 4
         indentWithSpaces(4)
+        // https://github.com/diffplug/spotless/blob/master/PADDEDCELL.md
+        paddedCell()
     }
 }
 
