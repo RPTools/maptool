@@ -1,4 +1,4 @@
-MapTool 1.5.0.0
+MapTool 1.5.0
 =====
 A major update pulling in almost a years worth of enhancements and bug fixes from the Nerps fork back to the main MapTool repository. This will bring us back to a single build for users once again while we continue working on MapTool 2.0.
 
@@ -29,6 +29,7 @@ Bug Fixes
 * [#21][i21] - Lights are not updating properly based on ownership looked like it was tied to other 'light' bugs and should now be fixed.
 * [#23][i23] - Fixed sendToBack & bringToFront macros broke states and bar changes in the macro. This was an OLD one going back to 1.3b63! You can now safely use these functions in your macro now!
 * [#30][i30] - Players see NPC movement when there are no lights no more! This was another old bug going back to 1.3b-something and only showed itself if you had NO lights (including personal lights, aka darkvision).
+* [#232][i232] - Mouse pointer incorrectly changing to Hand pointer was an oversight which has been corrected, hands down the best bug fix!
 
 Enhancements
 -----
@@ -105,3 +106,4 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 [i237]: https://github.com/RPTools/maptool/issues/237
 [i239]: https://github.com/RPTools/maptool/issues/239
 [i240]: https://github.com/RPTools/maptool/issues/240
+[i232]: https://github.com/RPTools/maptool/issues/232
