@@ -28,9 +28,8 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
 
 /**
- * <<<<<<< HEAD A utility class that creates and returns and Area based on image pixels ======= A
- * utility class that creates and returns and Area based on image pixels A few convience methods to
- * handle other Token VBL functions >>>>>>> merge-from-nerps
+ * A utility class that creates and returns an Area based on image pixels. A few convenience methods
+ * to handle other Token VBL functions.
  *
  * @author Jamz
  */
