@@ -1,4 +1,4 @@
-abort	The <code>abort()</code> function is used to conditionally abort the execution of a macro.
+abort	Is used to conditionally abort the execution of a macro.
 absolutevalue	Returns the absolute value of a number.
 add	Adds number and/or strings together.
 addAllNPCsToInitiative	Adds all the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Token:NPC_token&action=edit&redlink=1" title="Token:NPC token (page does not exist)">NPC tokens</a> on the current <a class="new" href="http://lmwcs.com/maptool/index.php?title=Map:map&action=edit&redlink=1" title="Map:map (page does not exist)">map</a> to the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Initiative:initiative_panel&action=edit&redlink=1" title="Initiative:initiative panel (page does not exist)">initiative panel</a> .
@@ -6,10 +6,10 @@ addAllPCsToInitiative	Adds all the <a class="new" href="http://lmwcs.com/maptool
 addAllToInitiative	Adds all of the <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">tokens</a> on the current <a class="new" href="http://lmwcs.com/maptool/index.php?title=Map:map&action=edit&redlink=1" title="Map:map (存在しないページ)">map</a> to the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Initiative:initiative_panel&action=edit&redlink=1" title="Initiative:initiative panel (存在しないページ)">initiative panel</a> .
 addTableEntry	Adds a new row to the specified table.
 addToInitiative	Adds the <a href="http://lmwcs.com/rptools/wiki/Current_Token" title="Current Token">Current Token</a> to the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Initiative:initiative_panel&action=edit&redlink=1" title="Initiative:initiative panel (page does not exist)">initiative panel</a> .
-arg	The <code>arg()</code> function is used to extract arguments that are passed to a macro when called as a user defined function.
-argCount	The <code>argCount()</code> function is used to determine the number of arguments that have been passed to a user defined function.
+arg	Is used to extract arguments that are passed to a macro when called as a user defined function.
+argCount	Is used to determine the number of arguments that have been passed to a user defined function.
 assert	Halts execution and prints a custom error message if a condition is <code>false</code> ( <code>0</code> ).
-average	The <code>avg()</code> function calculates the average (or mean) of all of the numbers that are passed in.
+average	Calculates the average (or mean) of all of the numbers that are passed in.
 bitwiseand	Performs a bitwise 'and' operation of the {number} arguments by taking the binary representation of each of the numbers and performing the logical and operation on each of the bits.
 bitwisenot	Performs a bitwise 'not' operation of the {number}. A bitwise not is performed by taking the binary representation of the {number} and performing a logical 'not' operation on each of these bits. <p><b>Logical "not" Table</b> <table><tr><td>Bit </td><td> Result </td></tr><tr><td align="center"> 0 </td><td align="center"> 1 </td></tr><tr><td align="center"> 1 </td><td align="center"> 0 </td></tr></table> <p><br /> Unfortunately its not quite as simple as the table above makes it appear since number are a string of 32 (or more bits) so a 1 in binary is actually a 00000000000000000000000000000001 and a 0 is actually a 00000000000000000000000000000000 so the table is now. <pre> bnot of binary 00000000000000000000000000000000 is 11111111111111111111111111111111 which is -1 in decimal </pre> <pre> bnot of binary 00000000000000000000000000000001 is 11111111111111111111111111111110 which is -2 in decimal </pre> If you are unsure why the results are negative then you can get more information by reading <a class="extiw" href="http://en.wikipedia.org/wiki/Twos_complement" title="wp:Twos complement">Twos_complement</a>
 bitwiseor	Performs a bitwise 'or' operation of the number arguments by taking the binary representation of each of the numbers and performing the logical or operation on each of the bits.
@@ -23,7 +23,7 @@ clearLights	Turns off all of the <a class="new" href="http://lmwcs.com/maptool/i
 clearTable	Removes all rows from the specified table.
 closeDialog	Closes the specified macro dialog that was previously created using <a href="http://lmwcs.com/rptools/wiki/dialog_(roll_option)" title="dialog (roll option)">[ dialog():]</a> .
 closeFrame	Closes the specified macro frame that was previously created using <a href="http://lmwcs.com/rptools/wiki/frame_(roll_option)" title="frame (roll option)">[frame():]</a> .
-copyMap	Function creates a copy of an specified map, with the new map name.
+copyMap	Creates a copy of an specified map, with the new map name.
 copyTable	Copies a MapTool table to a new name.
 copyToken	Creates one or more copies of a <a href="http://lmwcs.com/rptools/wiki/Token" title="Token">Token</a> and returns the id of the created copy.
 countStrProp	Returns the number of keys in a <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Macros:string_property_list" title="Macros:string property list">string property list</a> .
@@ -38,11 +38,11 @@ deleteTable	Removes the specified table from the campaign.
 deleteTableEntry	Removes a row from the specified table.
 deselectTokens	Deselects one or more visible tokens on the map.
 divide	Divides the first number by the second number, and then divides that result by the third number --if present-- and so on for all the numbers passed to the function.
-drawVBL	This function draws Vision Blocking Layer (VBL) shapes.
+drawVBL	Draws Vision Blocking Layer (VBL) shapes.
 drop	Generates random numbers to emulate dice rolls; returns the total of a dice roll that ignores a certain number of the lowest dice rolled.
 encode	Encodes a string that was can be decoded with the <a href="decode.html" title="decode">decode()</a> function.
 endsWith	Returns 1 if the string ends with a certain sub string.
-eraseVBL	This function erases Vision Blocking Layer (VBL) shapes.
+eraseVBL	Erases Vision Blocking Layer (VBL) shapes.
 eval	Evaluates an expression in a string and returns the result.
 evalMacro	Evaluates and "executes" the macro in a string and returns the result.
 execLink	Executes a macro link that was created with <a href="macroLinkText.html" title="macroLinkText">macroLinkText()</a> , output generated by the link is sent to players using the standard <a href="macroLinkText.html" title="macroLinkText">macroLinkText()</a> logic.
@@ -51,7 +51,7 @@ explode	Generates random numbers to emulate dice rolls; returns the total of a d
 explodingSuccess	Generates random numbers to emulate dice rolls; returns the count of dice rolls that are above a certain number, while each individual dice rolled at maximum value will be rerolled with the new roll added to the old.
 exportData	Allows the storage of string data into an external file.
 exposeFogAtWaypoints	Returns a string indicating whether the <b>Expose Fog At Waypoints</b> option is set in the MapTool Map menu.
-exposeFOW	Expose FoW (fog of war).
+exposeFOW	Exposes FoW (fog of war).
 exposePCOnlyArea	Exposes FoW (fog of war) where PC tokens can see and establishes/restores FoW where not.
 findDrawings	Returns the id or ids of any drawing on the specified map that match the name parameter.
 findToken	Finds a <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">token</a> on the current <a class="new" href="http://lmwcs.com/maptool/index.php?title=Map:map&action=edit&redlink=1" title="Map:map (page does not exist)">map</a> by the <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">token</a> name or GM name and returns its id.
@@ -61,7 +61,7 @@ fudge	Generates random numbers to emulate dice rolls; returns the total of a spe
 getAllMapNames	Returns the names of all of the maps as either a <a href="http://lmwcs.com/rptools/wiki/String_List" title="String List">String List</a> or <a href="http://lmwcs.com/rptools/wiki/JSON_Array" title="JSON Array">JSON Array</a> .
 getAllPlayerNames	Gets a <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Macros:string_list" title="Macros:string list">string list</a> containing the names of all the players that are connected.
 getAllPropertyNames	Gets a list containing the <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token_property" title="Token:token property">token property</a> names that are defined in the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Campaign:campaign_properties&action=edit&redlink=1" title="Campaign:campaign properties (page does not exist)">campaign properties</a> .
-getAlwaysVisible	returns the value of the corresponding setting for the token.
+getAlwaysVisible	Returns the value of the corresponding setting for the token.
 getBar	Gets the value of the specified <a class="new" href="http://lmwcs.com/maptool/index.php?title=Token:bar&action=edit&redlink=1" title="Token:bar (page does not exist)">bar</a> for the <a href="http://lmwcs.com/rptools/wiki/Current_Token" title="Current Token">Current Token</a> .
 getCurrentInitiative	Gets the offset of the <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">token</a> in the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Initiative:initiative_panel&action=edit&redlink=1" title="Initiative:initiative panel (page does not exist)">initiative panel</a> that has the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Initiative:initiative&action=edit&redlink=1" title="Initiative:initiative (page does not exist)">initiative</a> .
 getCurrentMapName	Returns the name of the current map.
@@ -143,36 +143,36 @@ getSpeechNames	Returns a list containing the <a class="new" href="http://lmwcs.c
 getState	Checks if the specified <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/State" title="State">State</a> is set on a token, return <code>true</code> ( <code>1</code> ) or <code>false</code> ( <code>0</code> ).
 getStateImage	Gets the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Asset_ID&action=edit&redlink=1" title="Asset ID (存在しないページ)">asset id</a> for the image of a state, the state must be one of the image types for this to work.
 getStrProp	Returns the value associated with a key from the specified <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Macros:string_property_list" title="Macros:string property list">string property list</a> .
-getTableAccess	Returns either <code>true</code> (<code>1</code>) or <code>false</code> (<code>0</code>) depending upon whether or not the table may be accessed by players.
+getTableAccess	Returns either <code>true</code> ( <code>1</code> ) or <code>false</code> ( <code>0</code> ) depending upon whether or not the table may be accessed by players.
 getTableImage	Gets the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Asset_ID&action=edit&redlink=1" title="Asset ID (page does not exist)">asset id</a> for the image of the current row for the given table.
 getTableNames	Returns a list containing the names of the tables in the campaign.
 getTableRoll	Returns the roll expression for the specified table.
-getTableVisible	Returns either <code>true</code> (<code>1</code>) or <code>false</code> (<code>0</code>) depending upon whether or not the table is visible to players.
+getTableVisible	Returns either <code>true</code> ( <code>1</code> ) or <code>false</code> ( <code>0</code> ) depending upon whether or not the table is visible to players.
 getTokenDrawOrder	Gets the draw order of a token.
 getTokenFacing	Gets the facing angle of the token, or <code>""</code> if there is no facing.
 getTokenGMName	Gets the GM Name of the current token.
 getTokenHalo	Gets the hex color code of a token's halo.
 getTokenHandout	Returns the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Asset_ID&action=edit&redlink=1" title="Asset ID (存在しないページ)">asset id</a> of the handout image for the for the <a href="http://lmwcs.com/rptools/wiki/Current_Token" title="Current Token">Current Token</a> .
-getTokenHeight	This function retrieves the token's image height in pixels (boundary size).
+getTokenHeight	Retrieves the token's image height in pixels (boundary size).
 getTokenImage	Returns the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Asset_ID&action=edit&redlink=1" title="Asset ID (存在しないページ)">asset id</a> of the image for the for the <a href="http://lmwcs.com/rptools/wiki/Current_Token" title="Current Token">Current Token</a> .
 getTokenLabel	Gets the label of the current token.
 getTokenNames	Gets a list containing the names of all the <a href="http://lmwcs.com/rptools/wiki/Token" title="Token">tokens</a> on the current <a class="new" href="http://lmwcs.com/maptool/index.php?title=Map&action=edit&redlink=1" title="Map (page does not exist)">map</a> .
-getTokenOpacity	returns the opacity value of the corresponding token.
+getTokenOpacity	Returns the opacity value of the corresponding token.
 getTokenPortrait	Returns the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Asset_ID&action=edit&redlink=1" title="Asset ID (page does not exist)">asset id</a> of the portrait image for the for the <a href="http://lmwcs.com/rptools/wiki/Current_Token" title="Current Token">Current Token</a> .
-getTokenRotation	This function retrieves the token's rotation angle in degrees.
+getTokenRotation	Retrieves the token's rotation angle in degrees.
 getTokens	Gets a list containing the ids of all the tokens on the current map, or all the tokens that match the specified conditions.
-getTokenShape	This function retrieves the token's shape (top-down, circle, square).
+getTokenShape	Retrieves the token's shape (top-down, circle, square).
 getTokenStates	Returns the valid states in the campaign settings in either a <a href="http://lmwcs.com/rptools/wiki/String_List" title="String List">String List</a> or <a href="http://lmwcs.com/rptools/wiki/JSON_Array" title="JSON Array">JSON Array</a> .
 getTokenVBL	Gets the VBL attached to a token as a JSON object.
-getTokenWidth	This function retrieves the token's image width in pixels (boundary size).
+getTokenWidth	Retrieves the token's image width in pixels (boundary size).
 getTokenX	Gets the X coordinate of a token.
 getTokenY	Gets the Y coordinate for a token.
-getVBL	This function saves Vision Blocking Layer (VBL) shapes.
+getVBL	Saves Vision Blocking Layer (VBL) shapes.
 getViewArea	Returns the limits of the visible area of the map window, given in either pixels or cell coordinates depending on the first parameter.
 getVisible	Returns <code>true</code> ( <code>1</code> ) if the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Token:visible_to_players&action=edit&redlink=1" title="Token:visible to players (page does not exist)">visible to players</a> flag is set on a <a href="http://lmwcs.com/rptools/wiki/Token" title="Token">Token</a> otherwise returns <code>false</code> ( <code>0</code> ).
 getVisibleMapNames	Returns the names of all of the player visible maps as either a <a href="http://lmwcs.com/rptools/wiki/String_List" title="String List">String List</a> or <a href="http://lmwcs.com/rptools/wiki/JSON_Array" title="JSON Array">JSON Array</a> .
-getVisibleTokenNames	This function returns a <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Macros:string_list" title="Macros:string list">string list</a> or <a href="http://lmwcs.com/rptools/wiki/JSON_Array" title="JSON Array">JSON Array</a> of <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">Token:token</a> names for the <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">tokens</a> that are <i>visible</i> to the player.
-getVisibleTokens	This function returns a <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Macros:string_list" title="Macros:string list">string list</a> or <a href="http://lmwcs.com/rptools/wiki/JSON_Array" title="JSON Array">JSON Array</a> of <a href="http://lmwcs.com/rptools/wiki/Glossary#Token_Id" title="Glossary">token ids</a> for the <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">tokens</a> that are <i>visible</i> to the player.
+getVisibleTokenNames	Returns a <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Macros:string_list" title="Macros:string list">string list</a> or <a href="http://lmwcs.com/rptools/wiki/JSON_Array" title="JSON Array">JSON Array</a> of <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">Token:token</a> names for the <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">tokens</a> that are <i>visible</i> to the player.
+getVisibleTokens	Returns a <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Macros:string_list" title="Macros:string list">string list</a> or <a href="http://lmwcs.com/rptools/wiki/JSON_Array" title="JSON Array">JSON Array</a> of <a href="http://lmwcs.com/rptools/wiki/Glossary#Token_Id" title="Glossary">token ids</a> for the <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">tokens</a> that are <i>visible</i> to the player.
 getWithState	Gets a list containing the ids of all the <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">tokens</a> on the current <a class="new" href="http://lmwcs.com/maptool/index.php?title=Map:map&action=edit&redlink=1" title="Map:map (page does not exist)">map</a> that have the specified <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:state" title="Token:state"> token state</a> set.
 getWithStateNames	Gets a list containing the names of all the <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:token" title="Token:token">tokens</a> on the current <a class="new" href="http://lmwcs.com/maptool/index.php?title=Map:map&action=edit&redlink=1" title="Map:map (page does not exist)">map</a> that have the specified <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Token:state" title="Token:state"> token state</a> set.
 getZoom	Returns the current zoom level of the viewport in percentage, where 1 (=100%) is the default.
@@ -183,10 +183,18 @@ hasMacro	Returns <code>true</code> ( <code>1</code> ) if a <a href="http://lmwcs
 hasProperty	Returns <code>true</code> ( <code>1</code> ) if the <a href="http://lmwcs.com/rptools/wiki/Token_Property" title="Token Property">Token Property</a> with the specified name exists on a <a href="http://lmwcs.com/rptools/wiki/Token" title="Token">Token</a> .
 hasSight	Returns 1 if the <a href="http://lmwcs.com/rptools/wiki/Current_Token" title="Current Token">Current Token</a> has <a class="new" href="http://lmwcs.com/maptool/index.php?title=Token:sight&action=edit&redlink=1" title="Token:sight (page does not exist)">sight</a> .
 herobody	Generates random numbers to emulate dice rolls; this is the partner function to <a href="herostun.html" title="herostun">herostun()</a> .
+herolab.getImage	Returns the asset id of the image retrieved from a Hero Lab file for a Token.
+herolab.getInfo	Get basic information about the Hero Lab data associated with this token.
+herolab.getMasterName	Get basic information about the Hero Lab data associated with this token.
+herolab.getStatBlock	Returns associated statblock for the token as a string.
+herolab.hasChanged	Returns a boolean value of true if the portfolio file has been modified compared to the current stored data on the token, otherwise returns false.
+herolab.isMinion	Returns true if token is a Hero Lab <i>minion</i> character, such as an Eidolon or Familiar.
+herolab.refresh	Refresh the Hero Lab data associated with this token.
+herolab.XPath	Returns data results based on the passed in XPath expression from the XML statblock.
 herostun	Generates random numbers to emulate dice rolls; acts like a standard <a href="roll.html" title="roll">roll()</a> with the difference being that a hidden variable is tracked, which can then be returned using <a href="herobody.html" title="herobody">herobody()</a> .
 hex	Returns a string which contains the hexadecimal representation of the number that was passed in.
 hypotenuse	Returns the hypotenuse of a right triangle whos other two sides have a length of sideA and sideB.
-if	This function is used to check whether a certain code <i>expression</i> should be executed or not. If the <i>condition</i> to be evaluated with this function is <code>true</code> , the first <i>expression</i> of code is executed, otherwise the second <i>expression</i> of code is executed. <p><br /><span style="color:red;font-size:1.1em"><b><u>Important note:</u></b></span><br /> <p>Both <code>trueExpr</code> and <code>falseExpr</code> are evaluated regardless of what <code>condition</code> returns. This means that updates, macro calling, etc. in <b>both</b> <i>branches</i> will be executed regardless of the test result.<br /> So this function should only be used in limited cases where <i>branches</i> stick to returning a value. <p>However, the function doesn't have the parenthesis limit the roll option has: <div class="mw-geshi mw-code mw-content-ltr" dir="ltr"><div class="mtmacro source-mtmacro"><pre class="de1"><span class="sc1"><span class="br0">[</span><span class="kw1">if</span><span class="br0">(</span><span class="br0">(</span><span class="br0">(</span><span class="nu0">1</span><span class="br0">)</span><span class="br0">)</span><span class="br0">)</span>: <span class="nu0">1</span>;<span class="nu0">0</span><span class="br0">]</span></span> &lt;!-- in this case if() roll option fails --&gt; <span class="sc1"><span class="br0">[</span><span class="kw1">if</span><span class="br0">(</span><span class="br0">(</span><span class="br0">(</span><span class="nu0">1</span><span class="br0">)</span><span class="br0">)</span>,<span class="nu0">1</span>,<span class="nu0">0</span><span class="br0">)</span><span class="br0">]</span></span> &lt;!-- in this case if() function works --&gt;</pre></div></div>
+if	Is used to check whether a certain code <i>expression</i> should be executed or not. If the <i>condition</i> to be evaluated with this function is <code>true</code> , the first <i>expression</i> of code is executed, otherwise the second <i>expression</i> of code is executed. <p><br /><span style="color:red;font-size:1.1em"><b><u>Important note:</u></b></span><br /> <p>Both <code>trueExpr</code> and <code>falseExpr</code> are evaluated regardless of what <code>condition</code> returns. This means that updates, macro calling, etc. in <b>both</b> <i>branches</i> will be executed regardless of the test result.<br /> So this function should only be used in limited cases where <i>branches</i> stick to returning a value. <p>However, the function doesn't have the parenthesis limit the roll option has: <div class="mw-geshi mw-code mw-content-ltr" dir="ltr"><div class="mtmacro source-mtmacro"><pre class="de1"><span class="sc1"><span class="br0">[</span><span class="kw1">if</span><span class="br0">(</span><span class="br0">(</span><span class="br0">(</span><span class="nu0">1</span><span class="br0">)</span><span class="br0">)</span><span class="br0">)</span>: <span class="nu0">1</span>;<span class="nu0">0</span><span class="br0">]</span></span> &lt;!-- in this case if() roll option fails --&gt; <span class="sc1"><span class="br0">[</span><span class="kw1">if</span><span class="br0">(</span><span class="br0">(</span><span class="br0">(</span><span class="nu0">1</span><span class="br0">)</span><span class="br0">)</span>,<span class="nu0">1</span>,<span class="nu0">0</span><span class="br0">)</span><span class="br0">]</span></span> &lt;!-- in this case if() function works --&gt;</pre></div></div>
 indexKeyStrProp	Returns the key from the specified <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Macros:string_property_list" title="Macros:string property list">string property list</a> at the specified index.
 indexOf	Returns the index of a substring in the specified string.
 indexValueStrProp	Returns the value from the specified <a class="mw-redirect" href="http://lmwcs.com/rptools/wiki/Macros:string_property_list" title="Macros:string property list">string property list</a> at the specified index.
@@ -194,7 +202,7 @@ initiativeSize	Returns the number of tokens in the <a class="new" href="http://l
 input	Allows the user to input several values at once via a modal dialog.
 isBarVisible	Returns <code>true</code> ( <code>1</code> ) if the specified <a class="new" href="http://lmwcs.com/maptool/index.php?title=Token_Bar&action=edit&redlink=1" title="Token Bar (page does not exist)">Token Bar</a> on the <a href="http://lmwcs.com/rptools/wiki/Current_Token" title="Current Token">Current Token</a> is visible, or <code>false</code> ( <code>0</code> ) if it is not.
 isDialogVisible	Returns 1 if the specified dialog is visible, or 0 if it is not visible.
-isExternalMacroAccessAllowed	Returns <code>true</code> (<code>1</code>) if the client is configured to allow external macro access (see <b>Allow External Macro Access</b> in MapTool Preferences).
+isExternalMacroAccessAllowed	Returns <code>true</code> ( <code>1</code> ) if the client is configured to allow external macro access (see <b>Allow External Macro Access</b> in MapTool Preferences).
 isFrameVisible	Returns 1 if the specified frame is visible, or 0 if it is not visible.
 isFunctionDefined	Checks if a function has been defined using <a href="defineFunction.html" title="defineFunction">defineFunction()</a> .
 isGM	Returns <code>true</code> ( <code>1</code> ) if the player is a GM or <code>false</code> ( <code>0</code> ) if they are not.
@@ -263,7 +271,7 @@ median	Returns the <a class="extiw" href="http://en.wikipedia.org/wiki/Median" t
 min	Returns the smallest of the numbers that are passed in.
 mod	Returns the result of the modulo operation between the two numbers, which represents the remainder after a division operation.
 movedOverPoints	This function can be used to check if a token has moved through a shape that is defined by an array of cell coordinates (formatted like the one received from <a href="getLastPath.html" title="getLastPath">getLastPath()</a> or the onTokenMove-events macro.args).
-movedOverToken	This function can be used to check if <code>token</code> is in an array of cell coordinates like the one received from <a href="getLastPath.html" title="getLastPath">getLastPath()</a> or the onTokenMove-events <code>macro.args</code>.
+movedOverToken	Is used to check if <code>token</code> is in an array of cell coordinates like the one received from <a href="getLastPath.html" title="getLastPath">getLastPath()</a> or the onTokenMove-events {{code|macro.args}}.
 moveToken	Move a token to a new location.
 moveTokenFromMap	Moves tokens from a specified map to the current map.
 moveTokenToMap	Moves tokens from the current map to a specified map.
@@ -273,7 +281,7 @@ number	Returns the value that is passed in as a number.
 oldFunction	If a user-defined function redefines a standard MapTool function or another user-defined function -- for instance, a user defines a function called <code>eval()</code> , redefining the standard MapTool <a href="eval.html" title="eval">eval()</a> -- <strong class="selflink">oldFunction()</strong> can be used in the user-defined function to call the original function.
 openTest	Generates random numbers to emulate dice rolls; returns a formatted string containing the result of each dice(using an <a href="explode.html" title="explode">exploded</a> roll), and the highest.
 power	Returns a <code>number</code> raised to the power of <code>2</code> , or raised to a specific <i>exponent</i> .
-refreshDrawing	The function causes the specified drawing to be updated on all of the clients connected to the server.
+refreshDrawing	Causes the specified drawing to be updated on all of the clients connected to the server.
 removeAllFromInitiative	Removes all of the <a href="http://lmwcs.com/rptools/wiki/Token" title="Token">Tokens</a> from the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Initiative:Initiative_Panel&action=edit&redlink=1" title="Initiative:Initiative Panel (page does not exist)">Initiative Panel</a> .
 removeAllNPCsFromInitiative	Removes all of the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Token:NPC&action=edit&redlink=1" title="Token:NPC (page does not exist)">NPC</a> <a href="http://lmwcs.com/rptools/wiki/Token" title="Token">Tokens</a> from the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Initiative:Initiative_Panel&action=edit&redlink=1" title="Initiative:Initiative Panel (page does not exist)">Initiative Panel</a> .
 removeAllPCsFromInitiative	Removes all of the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Token:PC&action=edit&redlink=1" title="Token:PC (page does not exist)">PC</a> <a href="http://lmwcs.com/rptools/wiki/Token" title="Token">Tokens</a> from the <a class="new" href="http://lmwcs.com/maptool/index.php?title=Initiative:Initiative_Panel&action=edit&redlink=1" title="Initiative:Initiative Panel (page does not exist)">Initiative Panel</a> .

@@ -27,6 +27,7 @@ chdir "processed"
 
 foreach my $fn (glob("*.html")) {
     my $result = &processFile($fn);
+    $fn =~ s/[.]html$//;
     print "$fn\t$result\n";
 }
 exit(0);

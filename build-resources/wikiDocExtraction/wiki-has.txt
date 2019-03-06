@@ -185,6 +185,14 @@ hasMacro
 hasProperty
 hasSight
 herobody
+herolab.XPath
+herolab.getImage
+herolab.getInfo
+herolab.getMasterName
+herolab.getStatBlock
+herolab.hasChanged
+herolab.isMinion
+herolab.refresh
 herostun
 hex
 hypotenuse
