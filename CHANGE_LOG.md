@@ -1,4 +1,4 @@
-MapTool 1.5.0.0
+MapTool 1.5.0
 =====
 A major update pulling in almost a years worth of enhancements and bug fixes from the Nerps fork back to the main MapTool repository. This will bring us back to a single build for users once again while we continue working on MapTool 2.0.
 
