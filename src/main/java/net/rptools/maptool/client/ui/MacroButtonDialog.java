@@ -209,8 +209,10 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
   private void installColorCombo() {
     JComboBox<String> combo = getColorComboBox();
-    combo.setModel(
-        new DefaultComboBoxModel<String>((String[]) MapToolUtil.getColorNames().toArray()));
+    var colorNamesSet = MapToolUtil.getColorNames();
+    var colorNamesArray = new String[colorNamesSet.size()];
+    colorNamesSet.toArray(colorNamesArray);
+    combo.setModel(new DefaultComboBoxModel<String>(colorNamesArray));
     combo.insertItemAt("default", 0);
     combo.setSelectedItem("default");
     combo.setRenderer(new ColorComboBoxRenderer());
@@ -804,8 +806,11 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     return panel.getComboBox("hotKey");
   }
 
+  @SuppressWarnings("unchecked")
   private JComboBox<String> getColorComboBox() {
-    return panel.getComboBox("colorComboBox");
+    var v = panel.getComboBox("colorComboBox");
+    return v;
+    // return panel.getComboBox("colorComboBox");
   }
 
   private JTextField getLabelTextField() {
