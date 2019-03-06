@@ -33,14 +33,21 @@ public class MapToolScriptAutoComplete {
   private static final String I18N_SUMMARY = ".summary";
   private static final String I18N_PLACEHOLDER_TEXT = "TBD";
 
-  DefaultCompletionProvider provider = new DefaultCompletionProvider();
+  DefaultCompletionProvider provider =
+      new DefaultCompletionProvider() {
+        @Override
+        protected boolean isValidChar(char ch) {
+          return super.isValidChar(ch) || ch == '.';
+        }
+      };
 
   public MapToolScriptAutoComplete() {
     for (String macro : MapTool.getParser().listAllMacroFunctions())
       provider.addCompletion(
           new BasicCompletion(provider, macro, getShortDescription(macro), getSummary(macro)));
 
-    // FIXME: TERRIBLE! But I'm tired and running out of time, need to add to a .properties file!
+    // FIXME: TERRIBLE! But I'm tired and running out of time, need to add to a .properties
+    // file!
     provider.addCompletion(
         new ShorthandCompletion(
             provider,
@@ -49,10 +56,13 @@ public class MapToolScriptAutoComplete {
             "A complex hidden IF/THEN statement"));
     provider.addCompletion(
         new ShorthandCompletion(
-            provider,
-            "if",
-            "[h, if(condition): true_body]",
-            "A basic hidden IF statement")); // Can also add a full HTML description
+            provider, "if", "[h, if(condition): true_body]", "A basic hidden IF statement")); // Can
+    // also
+    // add
+    // a
+    // full
+    // HTML
+    // description
     provider.addCompletion(
         new ShorthandCompletion(
             provider,
