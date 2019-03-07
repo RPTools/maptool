@@ -166,7 +166,8 @@ public class MapToolVariableResolver extends MapVariableResolver {
         String barName = name.substring(BAR_PREFIX.length());
         return TokenBarFunction.getInstance().getValue(getTokenInContext(), barName);
       } else if (name.equals(TOKEN_HALO)) {
-        // We don't want this evaluated as the # format is more useful to us then the evaluated
+        // We don't want this evaluated as the # format is more useful to us then the
+        // evaluated
         // format.
         return TokenHaloFunction.getInstance().getHalo(tokenInContext).toString();
       } else if (name.equals(TOKEN_NAME)) {

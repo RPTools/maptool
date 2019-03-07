@@ -20,13 +20,10 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.HashSet;
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -40,6 +37,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
@@ -47,6 +45,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
+import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -81,7 +80,7 @@ import org.fife.ui.rtextarea.SearchResult;
 public class MacroButtonDialog extends JDialog implements SearchListener {
 
   private static final long serialVersionUID = 8228617911117087993L;
-  private FormPanel panel;
+  private final FormPanel panel;
   MacroButton button;
   MacroButtonProperties properties;
   boolean isTokenMacro = false;
@@ -94,7 +93,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   Boolean startingCompareApplyToSelectedTokens;
   Boolean startingAllowPlayerEdits;
 
-  private RSyntaxTextArea macroEditorRSyntaxTextArea = new RSyntaxTextArea(2, 2);
+  private final RSyntaxTextArea macroEditorRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private CollapsibleSectionPanel csp;
   private FindDialog findDialog;
   private ReplaceDialog replaceDialog;
@@ -102,8 +101,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   private ReplaceToolBar replaceToolBar;
   private JLabel status;
 
-  @SuppressWarnings("unchecked")
-  private static HashSet<String> openMacroList = new HashSet(4);
+  private static HashSet<String> openMacroList = new HashSet<String>(4);
 
   public MacroButtonDialog() {
     super(MapTool.getFrame(), "", true);
@@ -125,26 +123,28 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     initCommandTextArea();
     initSearchDialogs();
 
-    setJMenuBar(createMenuBar());
+    createMenuBar();
 
     panel.getCheckBox("applyToTokensCheckBox").setEnabled(!isTokenMacro);
     panel.getComboBox("hotKey").setEnabled(!isTokenMacro);
-    panel
-        .getTextField("maxWidth")
-        .setEnabled(false); // can't get max-width to work, so temporarily disabling it.
+    // can't get max-width to work, so temporarily disabling it.
+    panel.getTextField("maxWidth").setEnabled(false);
     panel.getCheckBox("allowPlayerEditsCheckBox").setEnabled(MapTool.getPlayer().isGM());
 
     new WindowPreferences(AppConstants.APP_NAME, "editMacroDialog", this);
     SwingUtil.centerOver(this, MapTool.getFrame());
 
-    // Capture all close events (including red X) so we can maintain the list of open macros
+    // Capture all close events (including red X) so we can maintain the
+    // list of open macros
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     addWindowListener(
         new WindowAdapter() {
           @Override
           public void windowClosed(WindowEvent e) {
+            destroyMenuBar();
             updateOpenMacroList(false);
-            dispose();
+            // FJE fix for macOS pinwheel
+            SwingUtilities.invokeLater(() -> dispose());
           }
         });
   }
@@ -203,21 +203,24 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
   private void installHotKeyCombo() {
     String[] hotkeys = MacroButtonHotKeyManager.HOTKEYS;
-    JComboBox combo = panel.getComboBox("hotKey");
+    JComboBox<String> combo = getHotKeyCombo();
     for (int i = 0; i < hotkeys.length; i++) combo.insertItemAt(hotkeys[i], i);
   }
 
   private void installColorCombo() {
-    JComboBox combo = panel.getComboBox("colorComboBox");
-    combo.setModel(new DefaultComboBoxModel(MapToolUtil.getColorNames().toArray()));
+    JComboBox<String> combo = getColorComboBox();
+    var colorNamesSet = MapToolUtil.getColorNames();
+    var colorNamesArray = new String[colorNamesSet.size()];
+    colorNamesSet.toArray(colorNamesArray);
+    combo.setModel(new DefaultComboBoxModel<String>(colorNamesArray));
     combo.insertItemAt("default", 0);
     combo.setSelectedItem("default");
     combo.setRenderer(new ColorComboBoxRenderer());
   }
 
   private void installFontColorCombo() {
-    JComboBox combo = panel.getComboBox("fontColorComboBox");
-    combo.setModel(new DefaultComboBoxModel(MacroButtonProperties.getFontColors()));
+    JComboBox<String> combo = getFontColorComboBox();
+    combo.setModel(new DefaultComboBoxModel<String>(MacroButtonProperties.getFontColors()));
     // combo.insertItemAt("default", 0);
     combo.setSelectedItem("black");
     combo.setRenderer(new ColorComboBoxRenderer());
@@ -228,10 +231,10 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
       "0.75em", "0.80em", "0.85em", "0.90em", "0.95em", "1.00em", "1.05em", "1.10em", "1.15em",
       "1.20em", "1.25em"
     };
-    // String[] fontSizes = { "6pt", "7pt", "8pt", "9pt", "10pt", "11pt", "12pt", "13pt", "14pt",
-    // "15pt", "16pt" };
-    JComboBox combo = panel.getComboBox("fontSizeComboBox");
-    combo.setModel(new DefaultComboBoxModel(fontSizes));
+    // String[] fontSizes = { "6pt", "7pt", "8pt", "9pt", "10pt", "11pt",
+    // "12pt", "13pt", "14pt", "15pt", "16pt" };
+    JComboBox<String> combo = getFontSizeComboBox();
+    combo.setModel(new DefaultComboBoxModel<String>(fontSizes));
   }
 
   private void installRunButton() {
@@ -466,7 +469,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     findDialog = new FindDialog(this, this);
     replaceDialog = new ReplaceDialog(this, this);
 
-    // This ties the properties of the two dialogs together (match case, regex, etc.).
+    // This ties the properties of the two dialogs together (match case,
+    // regex, etc.).
     SearchContext context = findDialog.getSearchContext();
     replaceDialog.setSearchContext(context);
 
@@ -478,83 +482,147 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     status = (JLabel) panel.getComponentByName("statusBarLabel");
   }
 
-  private JMenuBar createMenuBar() {
-    JMenuBar mb = new JMenuBar();
-    JMenu menu = new JMenu("Search");
+  /**
+   * Creates new menu items that are added to the "Edit" top-level menu.
+   *
+   * <p>This is trickier than it sounds as macOS doesn't automatically merge the per-window menu bar
+   * that this method used to create to the top-of-the-screen menu bar that is the stock in trade on
+   * macOS. So in order to create a portable method that works everywhere, we retrieve the "Edit"
+   * JMenu and add our elements to it. When the dialog closes, we call {@link #destroyMenuBar()} to
+   * remove these newly added menu items.
+   *
+   * @return
+   */
+  private void createMenuBar() {
+    JMenuBar mb = MapTool.getFrame().getJMenuBar();
+    for (int i = 0; i < mb.getMenuCount(); i++) {
+      JMenu menu = mb.getMenu(i);
+      if (menu.getText().equalsIgnoreCase("Edit")) {
+        // This is the menu we want to add onto...
+        addMenuItems(menu);
+        return;
+      }
+    }
+    throw new RuntimeException("Didn't find the 'Edit' menu?");
+  }
+
+  /**
+   * Is a utility method that adds all of the menu items.
+   *
+   * @param menu
+   */
+  private void addMenuItems(JMenu menu) {
+    menu.addSeparator();
     menu.add(new JMenuItem(new ShowFindDialogAction(this)));
     menu.add(new JMenuItem(new ShowReplaceDialogAction(this)));
     menu.add(new JMenuItem(new GoToLineAction()));
     menu.addSeparator();
 
-    int ctrl = getToolkit().getMenuShortcutKeyMask();
-    int shift = InputEvent.SHIFT_MASK;
-    KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F, ctrl | shift);
-    Action a = csp.addBottomComponent(ks, findToolBar);
-    a.putValue(Action.NAME, "Show Find Search Bar");
-    menu.add(new JMenuItem(a));
-    ks = KeyStroke.getKeyStroke(KeyEvent.VK_H, ctrl | shift);
-    a = csp.addBottomComponent(ks, replaceToolBar);
-    a.putValue(Action.NAME, "Show Replace Search Bar");
-    menu.add(new JMenuItem(a));
-
-    mb.add(menu);
-
-    return mb;
+    menu.add(bottomComponent("action.macroEditor.showFindSearchBar", findToolBar)); // shift
+    // f
+    menu.add(bottomComponent("action.macroEditor.showReplaceSearchBar", replaceToolBar)); // shift
+    // h
   }
 
-  private class ShowFindDialogAction extends AbstractAction {
+  /**
+   * Creates the slide-up panel at the bottom of the macro editor dialog panel.
+   *
+   * @param key string key to lookup in the properties file (used to call {@link
+   *     I18N#getKeystroke()} and {@link I18N#getText()}
+   * @param tb the toolbar that is meant to slide up
+   * @return new JMenuItem containing the new {@link Action}
+   */
+  private JMenuItem bottomComponent(String key, FindToolBar tb) {
+    KeyStroke k = I18N.getKeystroke(key);
+    Action a = csp.addBottomComponent(k, tb);
+    a.putValue(Action.NAME, I18N.getText(key));
+    return new JMenuItem(a);
+  }
+
+  /** Is called when the dialog is about to disappear. We use it to do any menu cleanup. */
+  private void destroyMenuBar() {
+    JMenuBar mb = MapTool.getFrame().getJMenuBar();
+    for (int i = 0; i < mb.getMenuCount(); i++) {
+      JMenu menu = mb.getMenu(i);
+      if (menu.getText().equalsIgnoreCase("Edit")) {
+        // This is the menu we want to cleanup...
+        removeMenuItems(menu, menu.getItemCount());
+        return;
+      }
+    }
+    throw new RuntimeException("Didn't find the 'Edit' menu?");
+  }
+
+  /**
+   * Removes all menu items added when the macro editor dialog is opened.
+   *
+   * @param menu menu containing the items to be removed
+   * @param max current number of items on the menu.
+   */
+  private void removeMenuItems(JMenu menu, int max) {
+    // Start at the end and delete items until we find the first Action we
+    // added.
+    // We then delete _one more_ because we put a separator above it.
+    while (max-- > 0) {
+      JMenuItem mi = menu.getItem(max);
+      menu.remove(max);
+      if (mi != null) {
+        Action a = mi.getAction();
+        if (a instanceof ShowFindDialogAction) {
+          // When we find the one we want, delete the separator above
+          // it, and we're done.
+          menu.remove(max - 1);
+          return;
+        }
+      }
+    }
+  }
+
+  private class ShowFindDialogAction extends AppActions.DefaultClientAction {
     MacroButtonDialog callingDialog;
 
     public ShowFindDialogAction(MacroButtonDialog macroButtonDialog) {
-      super("Find...");
-      int c = getToolkit().getMenuShortcutKeyMask();
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, c));
+      init("action.macroEditor.searchFind");
       callingDialog = macroButtonDialog;
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void execute(ActionEvent e) {
       if (replaceDialog.isVisible()) {
         replaceDialog.setVisible(false);
       }
-
       // findDialog.setSearchString(macroEditorRSyntaxTextArea.getSelectedText());
       SwingUtil.centerOver(findDialog, callingDialog);
       findDialog.setVisible(true);
     }
   }
 
-  private class ShowReplaceDialogAction extends AbstractAction {
+  private class ShowReplaceDialogAction extends AppActions.DefaultClientAction {
     MacroButtonDialog callingDialog;
 
     public ShowReplaceDialogAction(MacroButtonDialog macroButtonDialog) {
-      super("Replace...");
-      int c = getToolkit().getMenuShortcutKeyMask();
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, c));
+      init("action.macroEditor.searchReplace");
       callingDialog = macroButtonDialog;
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void execute(ActionEvent e) {
       if (findDialog.isVisible()) {
         findDialog.setVisible(false);
       }
-
       // findDialog.setSearchString(macroEditorRSyntaxTextArea.getSelectedText());
       SwingUtil.centerOver(replaceDialog, callingDialog);
       replaceDialog.setVisible(true);
     }
   }
 
-  private class GoToLineAction extends AbstractAction {
+  private class GoToLineAction extends AppActions.DefaultClientAction {
     public GoToLineAction() {
-      super("Go To Line...");
-      int c = getToolkit().getMenuShortcutKeyMask();
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, c));
+      init("action.macroEditor.gotoLine");
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void execute(ActionEvent e) {
       if (findDialog.isVisible()) {
         findDialog.setVisible(false);
       }
@@ -581,11 +649,13 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   // public void rememberLastWindowLocation() {
   // Dimension windowSize = this.getSize();
   //
-  // int x = outerWindow.getLocation().x + (outerSize.width - innerSize.width) / 2;
-  // int y = outerWindow.getLocation().y + (outerSize.height - innerSize.height) / 2;
+  // int x = outerWindow.getLocation().x + (outerSize.width - innerSize.width)
+  // / 2;
+  // int y = outerWindow.getLocation().y + (outerSize.height -
+  // innerSize.height) / 2;
   //
-  // // Jamz: For multiple monitor's, x & y can be negative values...
-  // // innerWindow.setLocation(x < 0 ? 0 : x, y < 0 ? 0 : y);
+  // Jamz: For multiple monitor's, x & y can be negative values...
+  // innerWindow.setLocation(x < 0 ? 0 : x, y < 0 ? 0 : y);
   // innerWindow.setLocation(x, y);
   // }
 
@@ -732,12 +802,15 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     return panel.getCheckBox("applyToTokensCheckBox");
   }
 
-  private JComboBox getHotKeyCombo() {
+  private JComboBox<String> getHotKeyCombo() {
     return panel.getComboBox("hotKey");
   }
 
-  private JComboBox getColorComboBox() {
-    return panel.getComboBox("colorComboBox");
+  @SuppressWarnings("unchecked")
+  private JComboBox<String> getColorComboBox() {
+    var v = panel.getComboBox("colorComboBox");
+    return v;
+    // return panel.getComboBox("colorComboBox");
   }
 
   private JTextField getLabelTextField() {
@@ -757,11 +830,11 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     return macroEditorRSyntaxTextArea;
   }
 
-  private JComboBox getFontColorComboBox() {
+  private JComboBox<String> getFontColorComboBox() {
     return panel.getComboBox("fontColorComboBox");
   }
 
-  private JComboBox getFontSizeComboBox() {
+  private JComboBox<String> getFontSizeComboBox() {
     return panel.getComboBox("fontSizeComboBox");
   }
 

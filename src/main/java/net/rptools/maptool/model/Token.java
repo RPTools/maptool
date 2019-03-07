@@ -131,8 +131,8 @@ public class Token extends BaseModel implements Cloneable {
 
   // Lee: for use in added path calculations
   private transient ZonePoint tokenOrigin = null;
-  private boolean snapToScale =
-      true; // Whether the scaleX and scaleY represent snap-to-grid measurements
+  private boolean snapToScale = true; // Whether the scaleX and scaleY represent snap-to-grid
+  // measurements
 
   // These are the original image width and height
   private int width;
@@ -145,15 +145,15 @@ public class Token extends BaseModel implements Cloneable {
 
   private Map<Class<? extends Grid>, GUID> sizeMap;
 
-  private boolean snapToGrid =
-      true; // Whether the token snaps to the current grid or is free floating
+  private boolean snapToGrid = true; // Whether the token snaps to the current grid or is free
+  // floating
 
   private boolean isVisible = true;
   private boolean visibleOnlyToOwner = false;
 
   private int vblAlphaSensitivity = -1;
-  private int alwaysVisibleTolerance =
-      2; // Default for # of regions (out of 9) that must be seen before token is shown over FoW
+  private int alwaysVisibleTolerance = 2; // Default for # of regions (out of 9) that must be seen
+  // before token is shown over FoW
   private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
   private Area vbl;
 
@@ -568,9 +568,10 @@ public class Token extends BaseModel implements Cloneable {
 
   public TokenShape getShape() {
     try {
-      return tokenShape != null
-          ? TokenShape.valueOf(tokenShape)
-          : TokenShape.SQUARE; // TODO: make this a psf
+      return tokenShape != null ? TokenShape.valueOf(tokenShape) : TokenShape.SQUARE; // TODO:
+      // make
+      // this
+      // a psf
     } catch (IllegalArgumentException iae) {
       return TokenShape.SQUARE;
     }
@@ -1124,15 +1125,11 @@ public class Token extends BaseModel implements Cloneable {
     int offsety = 0;
     if (isSnapToScale()) {
       offsetx =
-          (int)
-              (imgSize.width < footprintBounds.width
-                  ? (footprintBounds.width - imgSize.width) / 2
-                  : 0);
+          imgSize.width < footprintBounds.width ? (footprintBounds.width - imgSize.width) / 2 : 0;
       offsety =
-          (int)
-              (imgSize.height < footprintBounds.height
-                  ? (footprintBounds.height - imgSize.height) / 2
-                  : 0);
+          imgSize.height < footprintBounds.height
+              ? (footprintBounds.height - imgSize.height) / 2
+              : 0;
     }
     double tx = footprintBounds.x + offsetx;
     double ty = footprintBounds.y + offsety + iso_ho;
@@ -1478,7 +1475,8 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public void replaceMacroList(List<MacroButtonProperties> newMacroList) {
-    // used by the token edit dialog, which will handle resetting panels and putting token to zone
+    // used by the token edit dialog, which will handle resetting panels and putting token to
+    // zone
     macroPropertiesMap.clear();
     for (MacroButtonProperties macro : newMacroList) {
       if (macro.getLabel() == null
@@ -1524,8 +1522,8 @@ public class Token extends BaseModel implements Cloneable {
     getMacroPropertiesMap(false).remove(prop.getIndex());
     MapTool.serverCommand()
         .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
-    MapTool.getFrame()
-        .resetTokenPanels(); // switched with above line to resolve panel render timing problem.
+    MapTool.getFrame().resetTokenPanels(); // switched with above line to resolve panel render
+    // timing problem.
 
     // Lets the token macro panels update only if a macro changes
     fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
@@ -1829,10 +1827,9 @@ public class Token extends BaseModel implements Cloneable {
     for (MacroButtonProperties nextProp : tempMacros) {
       // Lee: maybe erasing the command will suffice to fix the hotkey bug.
       nextProp.setCommand("");
-      getMacroPropertiesMap(secure)
-          .remove(
-              nextProp
-                  .getIndex()); // switched with above line to resolve panel render timing problem.
+      getMacroPropertiesMap(secure).remove(nextProp.getIndex()); // switched with above line
+      // to resolve panel render
+      // timing problem.
     }
 
     MapTool.serverCommand()
@@ -1899,6 +1896,7 @@ public class Token extends BaseModel implements Cloneable {
    *
    * @return cloned token
    */
+  @Override
   public Token clone() {
     try {
       return (Token) super.clone();

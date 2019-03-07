@@ -533,7 +533,8 @@ public class VBL_Functions extends AbstractFunction {
           new BasicStroke(t > 0f ? t : 0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
       area = new Area(stroke.createStrokedShape(path));
     } else {
-      // User requests for polygon to be closed, so a Polygon is used which is automatically closed
+      // User requests for polygon to be closed, so a Polygon is used which is automatically
+      // closed
       Polygon poly = new Polygon();
 
       for (int i = 0; i < points.size(); i++) {

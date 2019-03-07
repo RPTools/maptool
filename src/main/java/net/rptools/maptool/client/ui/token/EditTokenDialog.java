@@ -122,8 +122,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private GenericDialog dialog;
   private ImageAssetPanel imagePanel;
   // private CharSheetController controller;
-  private RSyntaxTextArea XMLstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
-  private RSyntaxTextArea TEXTstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
+  private final RSyntaxTextArea XMLstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
+  private final RSyntaxTextArea TEXTstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private HeroLabData heroLabData;
 
   private static final ImageIcon REFRESH_ICON_ON =
@@ -515,7 +515,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     public void stateChanged(ChangeEvent e) {
       JSlider source = (JSlider) e.getSource();
       if (!source.getValueIsAdjusting()) {
-        int value = (int) source.getValue();
+        int value = source.getValue();
         getTokenOpacityValueLabel().setText(new BigDecimal(value).toString() + "%");
       }
     }
@@ -1349,6 +1349,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     xmlStatblockSearchTextField.addKeyListener(
         new KeyAdapter() {
+          @Override
           public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
               xmlStatblockSearchButton.doClick();
@@ -1376,6 +1377,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     textStatblockSearchTextField.addKeyListener(
         new KeyAdapter() {
+          @Override
           public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
               textStatblockSearchButton.doClick();

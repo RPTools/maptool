@@ -160,8 +160,8 @@ public class MapTool {
 
   private static ThumbnailManager thumbnailManager;
   private static String version = "DEVELOPMENT";;
-  private static String vendor =
-      "RPTools!"; // Default, will get from JAR Manifest during normal runtime
+  private static String vendor = "RPTools!"; // Default, will get from JAR Manifest during normal
+  // runtime
 
   private static Campaign campaign;
 
@@ -736,7 +736,8 @@ public class MapTool {
             }
           });
       profilingNoteFrame.setSize(profilingNoteFrame.getPreferredSize());
-      // It's possible that the SelectionPanel may cause text to be added to the NoteFrame, so it
+      // It's possible that the SelectionPanel may cause text to be added to the NoteFrame, so
+      // it
       // can happen before MapTool.initialize() has had a chance to init the clientFrame.
       if (clientFrame != null) SwingUtil.centerOver(profilingNoteFrame, clientFrame);
     }
@@ -1192,8 +1193,8 @@ public class MapTool {
             ThemePainter painter = (ThemePainter) UIDefaultsLookup.get("Theme.painter");
             defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
 
-            defaults.put(
-                "OptionPane.showBanner", Boolean.TRUE); // show banner or not. default is true
+            defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default
+            // is true
             defaults.put(
                 "OptionPane.bannerIcon",
                 new ImageIcon(
@@ -1205,22 +1206,33 @@ public class MapTool {
             defaults.put("OptionPane.bannerMaxCharsPerLine", 60);
             defaults.put(
                 "OptionPane.bannerForeground",
-                painter != null
-                    ? painter.getOptionPaneBannerForeground()
-                    : null); // you should adjust this if banner background is not the default
+                painter != null ? painter.getOptionPaneBannerForeground() : null); // you
+            // should
+            // adjust
+            // this
+            // if
+            // banner
+            // background
+            // is
+            // not
+            // the
+            // default
             // gradient paint
             defaults.put("OptionPane.bannerBorder", null); // use default border
 
-            // set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want gradient
+            // set both bannerBackgroundDk and bannerBackgroundLt to null if you don't want
+            // gradient
             defaults.put(
                 "OptionPane.bannerBackgroundDk",
                 painter != null ? painter.getOptionPaneBannerDk() : null);
             defaults.put(
                 "OptionPane.bannerBackgroundLt",
                 painter != null ? painter.getOptionPaneBannerLt() : null);
-            defaults.put("OptionPane.bannerBackgroundDirection", Boolean.TRUE); // default is true
+            defaults.put("OptionPane.bannerBackgroundDirection", Boolean.TRUE); // default is
+            // true
 
-            // optionally, you can set a Paint object for BannerPanel. If so, the three UIDefaults
+            // optionally, you can set a Paint object for BannerPanel. If so, the three
+            // UIDefaults
             // related to banner background above will be ignored.
             defaults.put("OptionPane.bannerBackgroundPaint", null);
 
@@ -1506,7 +1518,8 @@ public class MapTool {
     sentry = SentryClientFactory.sentryClient();
     // testSentryAPI(); // purely for testing...
 
-    // Jamz: Overwrite version for testing if passed as command line argument using -v or -version
+    // Jamz: Overwrite version for testing if passed as command line argument using -v or
+    // -version
     Options cmdOptions = new Options();
     cmdOptions.addOption("d", "debug", false, "turn on System.out enhanced debug output");
     cmdOptions.addOption("v", "version", true, "override MapTool version");
@@ -1587,7 +1600,8 @@ public class MapTool {
     } catch (Throwable t) {
       t.printStackTrace();
 
-      // Create an empty frame so there's something to click on if the dialog goes in the background
+      // Create an empty frame so there's something to click on if the dialog goes in the
+      // background
       JFrame frame = new JFrame();
       SwingUtil.centerOnScreen(frame);
       frame.setVisible(true);
@@ -1629,13 +1643,14 @@ public class MapTool {
       // If we are running under Mac OS X then save native menu bar look & feel components
       // Note the order of creation for the AppMenuBar, this specific chronology
       // allows the system to set up system defaults before we go and modify things.
-      // That is, please don't move these lines around unless you test the result on windows and mac
+      // That is, please don't move these lines around unless you test the result on windows
+      // and mac
       String lafname;
       if (AppUtil.MAC_OS_X) {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        menuBar = new AppMenuBar();
         lafname = "net.rptools.maptool.client.TinyLookAndFeelMac";
         UIManager.setLookAndFeel(lafname);
+        menuBar = new AppMenuBar();
         OSXAdapter.macOSXicon();
       }
       // If running on Windows based OS, CJK font is broken when using TinyLAF.
@@ -1740,12 +1755,14 @@ public class MapTool {
                             }
                           });
 
-                      // LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
+                      // LwjglApplicationConfiguration cfg = new
+                      // LwjglApplicationConfiguration();
                       // cfg.title = MapToolGame.TITLE;
                       // cfg.width = MapToolGame.SCREEN_WIDTH;
                       // cfg.height = MapToolGame.SCREEN_HEIGHT;
                       //
-                      // MapToolLwjglApplication = new LwjglApplication(new MapToolGame(), cfg);
+                      // MapToolLwjglApplication = new LwjglApplication(new MapToolGame(),
+                      // cfg);
                     }
 
                     EventQueue.invokeLater(

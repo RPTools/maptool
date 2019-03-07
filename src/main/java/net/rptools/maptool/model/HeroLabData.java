@@ -62,7 +62,7 @@ public class HeroLabData {
   private String portfolioPath;
   private long lastModified = 0L;
 
-  private HashMap<String, MD5Key> heroImageAssets = new HashMap<>();
+  private final HashMap<String, MD5Key> heroImageAssets = new HashMap<>();
 
   private static interface DefaultAssetKey {
     final String PORTRAIT_KEY = "0";
@@ -208,7 +208,7 @@ public class HeroLabData {
   }
 
   public String getStatBlock_location(String type) {
-    return (String) getStatBlocks().get(type).get(StatBlockKey.LOCATION);
+    return getStatBlocks().get(type).get(StatBlockKey.LOCATION);
   }
 
   public String getStatBlock_data(String type) {
@@ -465,6 +465,7 @@ public class HeroLabData {
     heroImageAssets.put(DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getId());
   }
 
+  @Override
   public String toString() {
     return getInfo().toString(4);
   }

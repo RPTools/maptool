@@ -85,8 +85,12 @@ spotless {
         // Now using the Google Java style guide
         //eclipse().configFile('build-resources/eclipse.prefs.formatter.xml')
         googleJavaFormat()
+        // If you get exceptions thrown by spotlessApply, this might
+        // help.  Enable it here if the problem is with a Java file, and
+        // below if it is not.  Don't leave it enabled, as nothing will
+        // actually be updated if you do.
         // https://github.com/diffplug/spotless/blob/master/PADDEDCELL.md
-        paddedCell()
+        //paddedCell()
     }
 
     format 'misc', {
@@ -96,8 +100,7 @@ spotless {
         trimTrailingWhitespace()
         // or spaces. Takes an integer argument if you don't like 4
         indentWithSpaces(4)
-        // https://github.com/diffplug/spotless/blob/master/PADDEDCELL.md
-        paddedCell()
+        //paddedCell()
     }
 }
 

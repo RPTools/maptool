@@ -92,11 +92,11 @@ public class ZoomFunctions extends AbstractFunction {
   }
 
   /**
-   * Given a grid, returns the pixel (arg=true) or cell (arg=false) coordinates of top left (x1, y1)
-   * and bottom right (x2, y2) coordinates of the current view.
+   * Given a grid pixels or cell coordinates of top left (x1, y1) and bottom right (x2, y2) this
+   * function returns a json of rectangular coordinates of the current view
    *
-   * @param arg should be boolean (pixels=true, cells=false)
-   * @return String of coordinates (will work as JSON array)
+   * @param arg should be boolean pixels|grid
+   * @return JSON of coordinates
    * @throws ParserException
    */
   private String getViewArea(List<Object> args) throws ParserException {

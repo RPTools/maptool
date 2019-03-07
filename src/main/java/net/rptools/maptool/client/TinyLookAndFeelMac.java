@@ -29,6 +29,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
     Object fieldInputMap =
         new UIDefaults.LazyInputMap(
             new Object[] {
+              // @formatter:off
               "meta C", DefaultEditorKit.copyAction,
               "meta V", DefaultEditorKit.pasteAction,
               "meta X", DefaultEditorKit.cutAction,
@@ -62,22 +63,22 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
               "KP_RIGHT", DefaultEditorKit.forwardAction,
               "KP_LEFT", DefaultEditorKit.backwardAction,
               "ENTER", JTextField.notifyAction,
-              "ctrl BACK_SLASH", "unselect" /*
-												 * DefaultEditorKit. unselectAction
-												 */,
-              // "control shift O",
-              // "toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
+              "ctrl BACK_SLASH", "unselect", // DefaultEditorKit.unselectAction
+              // "control shift O", "toggle-componentOrientation", //
+              // DefaultEditorKit.toggleComponentOrientation
               // FJE: {
               "meta LEFT", DefaultEditorKit.beginLineAction,
               "meta KP_LEFT", DefaultEditorKit.beginLineAction,
               "meta RIGHT", DefaultEditorKit.endLineAction,
               "meta KP_RIGHT", DefaultEditorKit.endLineAction,
               // }
+              // @formatter:on
             });
 
     Object passwordInputMap =
         new UIDefaults.LazyInputMap(
             new Object[] {
+              // @formatter:off
               "meta C", DefaultEditorKit.copyAction,
               "meta V", DefaultEditorKit.pasteAction,
               "meta X", DefaultEditorKit.cutAction,
@@ -122,11 +123,13 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
               "meta RIGHT", DefaultEditorKit.endLineAction,
               "meta KP_RIGHT", DefaultEditorKit.endLineAction,
               // }
+              // @formatter:on
             });
 
     Object multilineInputMap =
         new UIDefaults.LazyInputMap(
             new Object[] {
+              // @formatter:off
               "meta C", DefaultEditorKit.copyAction,
               "meta V", DefaultEditorKit.pasteAction,
               "meta X", DefaultEditorKit.cutAction,
@@ -158,7 +161,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
               "KP_DOWN", DefaultEditorKit.downAction,
               "PAGE_UP", DefaultEditorKit.pageUpAction,
               "PAGE_DOWN", DefaultEditorKit.pageDownAction,
-              "shift PAGE_UP", "selection-page-up",
+              "shift PAGE_UP", "selection-page-up", // not 'public' in DefaultEditorKit
               "shift PAGE_DOWN", "selection-page-down",
               "ctrl shift PAGE_UP", "selection-page-left",
               "ctrl shift PAGE_DOWN", "selection-page-right",
@@ -175,9 +178,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
               "KP_RIGHT", DefaultEditorKit.forwardAction,
               "KP_LEFT", DefaultEditorKit.backwardAction,
               "TAB", DefaultEditorKit.insertTabAction,
-              "ctrl BACK_SLASH", "unselect" /*
-												 * DefaultEditorKit. unselectAction
-												 */,
+              "ctrl BACK_SLASH", "unselect",
               "ctrl HOME", DefaultEditorKit.beginAction,
               "ctrl END", DefaultEditorKit.endAction,
               "ctrl shift HOME", DefaultEditorKit.selectionBeginAction,
@@ -185,17 +186,21 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
               "ctrl T", "next-link-action",
               "ctrl shift T", "previous-link-action",
               "ctrl SPACE", "activate-link-action",
-              // "control shift O",
-              // "toggle-componentOrientation"/*DefaultEditorKit.toggleComponentOrientation*/
+              // "control shift O", "toggle-componentOrientation", //
+              // DefaultEditorKit.toggleComponentOrientation
               // FJE: {
               "meta LEFT", DefaultEditorKit.beginLineAction,
               "meta KP_LEFT", DefaultEditorKit.beginLineAction,
               "meta RIGHT", DefaultEditorKit.endLineAction,
               "meta KP_RIGHT", DefaultEditorKit.endLineAction,
+              "meta HOME", DefaultEditorKit.beginAction, // added 1.5.0
+              "meta END", DefaultEditorKit.endAction, // added 1.5.0
               // }
+              // @formatter:on
             });
 
     Object[] defaults = {
+      // @formatter:off
       "TextField.focusInputMap",
       fieldInputMap,
       "PasswordField.focusInputMap",
@@ -666,6 +671,7 @@ public class TinyLookAndFeelMac extends TinyLookAndFeel {
         "ctrl ENTER", "press",
         "ctrl released ENTER", "release"
       },
+      // @formatter:on
     };
     table.putDefaults(defaults);
   }

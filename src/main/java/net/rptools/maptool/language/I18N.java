@@ -45,9 +45,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class I18N {
   private static final ResourceBundle BUNDLE;
-
   private static final Logger log = LogManager.getLogger(I18N.class);
-
   private static final String ACCELERATOR_EXTENSION = ".accel";
   private static final String DESCRIPTION_EXTENSION = ".description";
 
@@ -258,6 +256,23 @@ public class I18N {
     }
     String description = getDescription(key);
     if (description != null) action.putValue(Action.SHORT_DESCRIPTION, description);
+  }
+
+  public static KeyStroke getKeystroke(String key) {
+    String accel = getAccelerator(key);
+    KeyStroke k = null;
+    if (accel != null) {
+      k = KeyStroke.getKeyStroke(accel);
+      if (k == null) {
+        log.error("Bad accelerator '" + accel + "' for " + key);
+      } else {
+        int modifiers = k.getModifiers() | AppActions.menuShortcut;
+        if (k.getKeyCode() != 0) k = KeyStroke.getKeyStroke(k.getKeyCode(), modifiers);
+        else k = KeyStroke.getKeyStroke(k.getKeyChar(), modifiers);
+      }
+      // System.err.println("I18N.getKeystroke(\"" + key + "\") = " + k);
+    }
+    return k;
   }
 
   /** Returns all matching keys when given a string regular expression. */

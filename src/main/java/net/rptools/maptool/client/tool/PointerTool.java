@@ -74,7 +74,11 @@ import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
-import net.rptools.maptool.client.ui.*;
+import net.rptools.maptool.client.ui.StampPopupMenu;
+import net.rptools.maptool.client.ui.TokenLocation;
+import net.rptools.maptool.client.ui.TokenPopupMenu;
+import net.rptools.maptool.client.ui.Tool;
+import net.rptools.maptool.client.ui.Toolbox;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
@@ -224,8 +228,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
    * criminal acts on the code base. :(
    */
   @Override
-  protected void addGridBasedKeys(
-      Grid grid, boolean enable) { // XXX Currently not called from anywhere
+  protected void addGridBasedKeys(Grid grid, boolean enable) { // XXX Currently not called from
+    // anywhere
     try {
       if (enable) {
         grid.installMovementKeys(this, keyActionMap);
@@ -234,9 +238,13 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       }
     } catch (Exception e) {
       // If there was an exception just ignore those keystrokes...
-      MapTool.showError(
-          "exception adding grid-based keys; shouldn't get here!",
-          e); // this gives me a hook to set a breakpoint
+      MapTool.showError("exception adding grid-based keys; shouldn't get here!", e); // this
+      // gives
+      // me a
+      // hook
+      // to set
+      // a
+      // breakpoint
     }
   }
 
@@ -495,7 +503,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     if (isDraggingToken) {
       return;
     }
-    dragStartX = e.getX(); // These same two lines are in super.mousePressed(). Why do them here?
+    dragStartX = e.getX(); // These same two lines are in super.mousePressed(). Why do them
+    // here?
     dragStartY = e.getY();
 
     // Properties
@@ -537,9 +546,11 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           isNewTokenSelected = true;
           renderer.clearSelectedTokens();
         }
-        // XXX Isn't Windows standard to use Ctrl-click to add one element and Shift-click to
+        // XXX Isn't Windows standard to use Ctrl-click to add one element and Shift-click
+        // to
         // extend?
-        // XXX Similarly, OSX uses Cmd-click to add one element and Shift-click to extend... Change
+        // XXX Similarly, OSX uses Cmd-click to add one element and Shift-click to extend...
+        // Change
         // it later.
         if (SwingUtil.isShiftDown(e) && renderer.getSelectedTokenSet().contains(token.getId())) {
           renderer.deselectToken(token.getId());
@@ -673,14 +684,19 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
                   renderer.getSelectedTokenSet(), e.getX(), e.getY(), renderer, tokenUnderMouse)
               .showPopup(renderer);
         } else if (AppUtil.playerOwns(tokenUnderMouse)) {
-          // FIXME Every once in awhile we get a report on the forum of the following exception:
-          // java.awt.IllegalComponentStateException: component must be showing on the screen to
+          // FIXME Every once in awhile we get a report on the forum of the following
+          // exception:
+          // java.awt.IllegalComponentStateException: component must be showing on the
+          // screen to
           // determine its location
-          // It's thrown as a result of the showPopup() call on the next line. For the life of me, I
+          // It's thrown as a result of the showPopup() call on the next line. For the
+          // life of me, I
           // can't figure out why the
-          // "renderer" component might not be "showing on the screen"??? Maybe it has something to
+          // "renderer" component might not be "showing on the screen"??? Maybe it has
+          // something to
           // do with a dual-monitor
-          // configuration? Or a monitor added after Java was started and then MT dragged to that
+          // configuration? Or a monitor added after Java was started and then MT dragged
+          // to that
           // monitor?
           new TokenPopupMenu(
                   renderer.getSelectedTokenSet(), e.getX(), e.getY(), renderer, tokenUnderMouse)
@@ -726,7 +742,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     }
 
     if (isDraggingToken) {
-      // FJE If we're dragging the token, wouldn't mouseDragged() be called instead? Can this code
+      // FJE If we're dragging the token, wouldn't mouseDragged() be called instead? Can this
+      // code
       // ever be executed?
       if (isMovingWithKeys) {
         return;
@@ -778,7 +795,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         renderer.repaint();
       }
     }
-    // XXX Updating the status bar is done in super.mouseDragged() -- maybe just call that here? But
+    // XXX Updating the status bar is done in super.mouseDragged() -- maybe just call that here?
+    // But
     // it also causes repaint events...
     CellPoint cellUnderMouse = renderer.getCellAt(new ScreenPoint(mouseX, mouseY));
     if (cellUnderMouse != null) {
@@ -931,9 +949,11 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       int deltaX = point.x - leadToken.getX();
       int deltaY = point.y - leadToken.getY();
       Grid grid = zone.getGrid();
-      // Loop through all tokens. As soon as one of them is blocked, stop processing and return
+      // Loop through all tokens. As soon as one of them is blocked, stop processing and
+      // return
       // false.
-      // Jamz: Option this for lead token only? It's annoying dragging a group when one token has
+      // Jamz: Option this for lead token only? It's annoying dragging a group when one token
+      // has
       // limited vision...
       // Or if ANY token in group can move, finish move?
       for (Iterator<GUID> iter = tokenSet.iterator(); !isBlocked && iter.hasNext(); ) {
@@ -1005,10 +1025,12 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
             int bx = x + fudgeSize + (intervalX * dx / 3);
             bounds.x = bx;
             bounds.y = by;
-            bounds.width =
-                intervalY * (dy + 1) / 3
-                    - intervalY * dy
-                        / 3; // No, this isn't the same as intervalY*1/3 because of integer
+            bounds.width = intervalY * (dy + 1) / 3 - intervalY * dy / 3; // No, this
+            // isn't the
+            // same as
+            // intervalY*1/3
+            // because of
+            // integer
             // arithmetic
             bounds.height = intervalX * (dx + 1) / 3 - intervalX * dx / 3;
 
@@ -1206,7 +1228,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), new MovementKey(this, size, -size));
     actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), new MovementKey(this, -size, 0));
-    // actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(this, 0, 0));
+    // actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(this, 0,
+    // 0));
     actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), new MovementKey(this, size, 0));
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, 0), new MovementKey(this, -size, size));
@@ -1610,7 +1633,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
                   new ImageObserver() {
                     public boolean imageUpdate(
                         Image img, int infoflags, int x, int y, int width, int height) {
-                      // The image was loading, so now rebuild the portrait panel with the real
+                      // The image was loading, so now rebuild the portrait panel with the
+                      // real
                       // image
                       statSheet = null;
                       renderer.repaint();
@@ -1652,8 +1676,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
                 continue;
               }
               MapToolVariableResolver resolver = new MapToolVariableResolver(tokenUnderMouse);
-              // TODO: is the double resolution of properties necessary here. I kept it, but it
-              // seems wasteful and I can't figure out any reason that the first resolution can't be
+              // TODO: is the double resolution of properties necessary here. I kept
+              // it, but it
+              // seems wasteful and I can't figure out any reason that the first
+              // resolution can't be
               // used
               // below.
               resolver.initialize();
@@ -1695,13 +1721,15 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
               }
             }
             layoutWidth = Math.max(1, maxStatsWidth - keyWidth);
-            // Iterate over values, break them into lines as necessary. Figure out longest value
+            // Iterate over values, break them into lines as necessary. Figure out
+            // longest value
             // length.
             for (Entry<String, String> entry : propertyMap.entrySet()) {
               int lineCount = 0;
               for (String line : entry.getValue().split("\n")) {
                 if (line.length() > 0) {
-                  // For each value, make the iterator need and stash data about it
+                  // For each value, make the iterator need and stash data about
+                  // it
                   AttributedString text = new AttributedString(line);
                   text.addAttribute(TextAttribute.FONT, font);
                   AttributedCharacterIterator paragraph = text.getIterator();
@@ -1791,7 +1819,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
               // Draw Value
               for (String line : entry.getValue().split("\n")) {
                 if (line.length() > 0) {
-                  // For each value, make the iterator need and stash data about it
+                  // For each value, make the iterator need and stash data about
+                  // it
                   AttributedString text = new AttributedString(line);
                   text.addAttribute(TextAttribute.FONT, font);
                   AttributedCharacterIterator paragraph = text.getIterator();
@@ -1817,8 +1846,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
               }
 
               // statsG.setFont(font);
-              // int strw = SwingUtilities.computeStringWidth(valueFM, entry.getValue());
-              // statsG.drawString(entry.getValue(), bounds.x + bounds.width - strw -PADDING, y);
+              // int strw = SwingUtilities.computeStringWidth(valueFM,
+              // entry.getValue());
+              // statsG.drawString(entry.getValue(), bounds.x + bounds.width - strw
+              // -PADDING, y);
 
               y += PADDING;
             }

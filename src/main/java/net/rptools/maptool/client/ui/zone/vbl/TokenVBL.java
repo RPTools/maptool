@@ -28,8 +28,8 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
 
 /**
- * A utility class that creates and returns and Area based on image pixels A few convience methods
- * to handle other Token VBL functions
+ * A utility class that creates and returns an Area based on image pixels. A few convenience methods
+ * to handle other Token VBL functions.
  *
  * @author Jamz
  */
@@ -198,7 +198,8 @@ public class TokenVBL {
   }
 
   private static Area createVblArea(BufferedImage image, int alphaSensitivity) {
-    // Assumes all colors form the VBL Area, eg everything except transparent pixels with alpha >=
+    // Assumes all colors form the VBL Area, eg everything except transparent pixels with alpha
+    // >=
     // alphaSensitivity
     if (image == null) return null;
 
@@ -241,7 +242,8 @@ public class TokenVBL {
     // creates an outline of a transparent image, points are stored in an array
     // arg0 - BufferedImage source image
     // arg1 - Int detail (lower = better)
-    // arg2 - Int angle threshold in degrees (will remove points with angle differences below this
+    // arg2 - Int angle threshold in degrees (will remove points with angle differences below
+    // this
     // level; 15 is a good value)
     // making this larger will make the body faster but less accurate;
 
