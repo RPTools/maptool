@@ -1265,8 +1265,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     xmlStatblockRSyntaxTextArea.setWrapStyleWord(true);
     xmlStatblockRSyntaxTextArea.setTabSize(2);
 
-    RTextScrollPane xmlStatblockRTextScrollPane =
-        new RTextScrollPane(xmlStatblockRSyntaxTextArea);
+    RTextScrollPane xmlStatblockRTextScrollPane = new RTextScrollPane(xmlStatblockRSyntaxTextArea);
     xmlStatblockRTextScrollPane.setLineNumbersEnabled(false);
     replaceComponent(
         "xmlStatblockPanel", "xmlStatblockRTextScrollPane", xmlStatblockRTextScrollPane);
