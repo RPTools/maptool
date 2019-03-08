@@ -161,7 +161,7 @@ public class HeroLabFunctions extends AbstractFunction {
       if (token.getHeroLabData() == null)
         throw new ParserException(I18N.getText("macro.function.herolab.null", functionName));
 
-      return token.getHeroLabData().isDirty();
+      return token.getHeroLabData().isDirty() ? BigDecimal.ONE : BigDecimal.ZERO;
     } else if (functionName.equals("herolab.refresh")) {
       Token token;
 
