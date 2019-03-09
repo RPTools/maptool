@@ -39,7 +39,6 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
-import net.rptools.parser.VariableModifiers;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
 import net.sf.json.JSONArray;
@@ -345,7 +344,7 @@ public class MapToolLineParser {
       }
     }
 
-    /** Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them. */	 
+    /** Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them. */
     protected static OptionType optionTypeFromName(String strName) {
       for (OptionType rot : OptionType.values()) {
         if (Pattern.compile("^\\s*" + rot.getNameRegex() + "\\s*$", Pattern.CASE_INSENSITIVE)
@@ -373,7 +372,6 @@ public class MapToolLineParser {
     /** Returns a copy of the default params array for this option type. */
     public Object[] getDefaultParams() {
       if (maxParams == -1) return null;
-				
 
       Object[] retval = new Object[maxParams];
       for (int i = minParams; i < maxParams; i++) {
@@ -394,7 +392,7 @@ public class MapToolLineParser {
         }
         if (p == null) retval += "null";
         else if (p instanceof String) retval += "\"" + p + "\"";
-        else retval += p.toString();				
+        else retval += p.toString();
       }
       retval += "]";
       return retval;
@@ -427,9 +425,9 @@ public class MapToolLineParser {
     /**
      * Parses a roll option and sets the RollOptionType and parameters. <br>
      * Missing optional parameters are set to the default for the type.
-     *				
-     * @param optionString The string containing the option			 
-     * @param start Where in the string to begin parsing from	
+     *
+     * @param optionString The string containing the option
+     * @param start Where in the string to begin parsing from
      * @throws RollOptionException if the option string can't be parsed.
      */
     private void parseOptionString(String optionString, int start) throws RollOptionException {
@@ -501,7 +499,7 @@ public class MapToolLineParser {
 
       // Fill in the found parameters, converting to BigDecimal if possible.
       if (params == null) params = new Object[numParamsFound];
-										
+
       for (int i = 0; i < numParamsFound; i++) {
         params[i] = toNumIfPossible(paramList.get(i));
       }
@@ -553,7 +551,7 @@ public class MapToolLineParser {
 
     /**
      * Gets the text of a parameter if it is a valid identifier.
-     *					
+     *
      * @throws ParserException if the parameter text is not a valid identifier.
      */
     public String getIdentifierParam(int index) throws ParserException {
@@ -608,7 +606,7 @@ public class MapToolLineParser {
         }
         if (p == null) retval += "null";
         else if (p instanceof String) retval += "\"" + p + "\"";
-        else retval += p.toString();								
+        else retval += p.toString();
       }
       retval += ")";
       return retval;
@@ -627,14 +625,14 @@ public class MapToolLineParser {
 
   /**
    * Scans a string of options and builds OptionInfo objects for each option found.
-   *				   
-   * @param optionString A string containing a comma-delimited list of roll options.						   
+   *
+   * @param optionString A string containing a comma-delimited list of roll options.
    * @throws RollOptionException if any of the options are unknown or don't match the template for
    *     that option type.
    */
   private List<OptionInfo> getRollOptionList(String optionString) throws RollOptionException {
     if (optionString == null) return null;
-			   
+
     List<OptionInfo> list = new ArrayList<OptionInfo>();
     optionString = optionString.trim();
     int start = 0;
@@ -806,7 +804,6 @@ public class MapToolLineParser {
                         }
                       }
                     } else outputOpts.add("w:" + arg.toLowerCase());
-																												  
                   }
                   break;
 
@@ -830,14 +827,14 @@ public class MapToolLineParser {
                   try {
                     loopCount = option.getParsedIntParam(0, resolver, tokenInContext);
                     if (loopCount < 0) error = I18N.getText("lineParser.countNonNeg", loopCount);
-																																																	  
+
                   } catch (ParserException pe) {
                     error = I18N.getText("lineParser.errorProcessingOpt", "COUNT", pe.getMessage());
                   }
                   loopSep = option.getStringParam(1);
 
                   if (error != null) throw doError(error, opts, roll);
-										  
+
                   break;
 
                 case FOR:
@@ -871,13 +868,13 @@ public class MapToolLineParser {
                     if (loopStep == 0) error = I18N.getText("lineParser.forNoZeroStep");
                     if ((loopEnd <= loopStart && loopStep > 0)
                         || (loopEnd >= loopStart && loopStep < 0)) loopCount = 0;
-						
+
                   } catch (ParserException pe) {
                     error = I18N.getText("lineParser.errorProcessingOpt", "FOR", pe.getMessage());
                   }
 
                   if (error != null) throw doError(error, opts, roll);
-										  
+
                   break;
 
                 case FOREACH:
@@ -930,7 +927,7 @@ public class MapToolLineParser {
                   }
 
                   if (error != null) throw doError(error, opts, roll);
-										  
+
                   break;
 
                 case WHILE:
@@ -1427,9 +1424,8 @@ public class MapToolLineParser {
     } catch (AbortFunctionException e) {
       log.debug(e);
       boolean catchAbort = BigDecimal.ONE.equals(resolver.getVariable("macro.catchAbort"));
-      if (!catchAbort)
-        throw e;
-      return null;   
+      if (!catchAbort) throw e;
+      return null;
     } catch (AssertFunctionException afe) {
       log.debug(afe);
       throw afe;
@@ -1479,7 +1475,6 @@ public class MapToolLineParser {
     } catch (Exception e) {
       return I18N.getText("lineParser.invalidExpr", roll);
     }
-
   }
 
   public String runMacro(
@@ -1509,7 +1504,6 @@ public class MapToolLineParser {
     }
     // For convenience to macro authors, no error on a blank macro name
     if (macroName.equalsIgnoreCase("")) return "";
-			 
 
     // IF the macro is a @this, then we get the location of the current macro and use that.
     if (macroLocation != null && macroLocation.equalsIgnoreCase("this")) {
@@ -1609,8 +1603,8 @@ public class MapToolLineParser {
         if (result != null) {
           resolver.setVariable("macro.return", result);
           macroOutput = result.toString();
+        }
       }
-			}
       if (macroOutput != null) {
         // Note! Its important that trim is not used to replace the following two lines.
         // If you use String.trim() you may inadvertnatly remove the special characters
@@ -1629,10 +1623,8 @@ public class MapToolLineParser {
    * Returns if the specified macro on the token is secure, that is player would not be able to edit
    * it.
    *
-					
    * @param macroName The name of the macro.
    * @param token the token.
-						 
    * @return true if it is secure.
    */
   private boolean isSecure(String macroName, Token token) {
@@ -1682,9 +1674,7 @@ public class MapToolLineParser {
   /**
    * Searches all maps for a token and returns the body of the requested macro.
    *
-				
    * @param macro The name of the macro to fetch.
-				   
    * @param location The name of the token containing the macro. Must begin with "lib:".
    * @return The body of the requested macro.
    * @throws ParserException if the token name is illegal, the token appears multiple times, or if
@@ -1797,11 +1787,8 @@ public class MapToolLineParser {
    * Throws a helpful ParserException that shows the roll options and body.
    *
    * @param msg The message
-						  
-			   
    * @param opts The roll options
    * @param roll The roll body
-							
    */
   private ParserException doError(String msg, String opts, String roll) {
     return new ParserException(errorString(msg, opts, roll));
@@ -1844,7 +1831,7 @@ public class MapToolLineParser {
   private String rollString(Collection<String> options, String tooltip, String text) {
     StringBuilder s = new StringBuilder("\036");
     if (options != null) s.append("\001" + StringUtils.join(options, ",") + "\002");
-															  
+
     if (tooltip != null) {
       tooltip = tooltip.replaceAll("'", "&#39;");
       s.append(tooltip + "\037");
@@ -1899,7 +1886,7 @@ public class MapToolLineParser {
   /**
    * Convenience method to enter a new trusted context.
    *
-   * @param name The name of the macro.			 
+   * @param name The name of the macro.
    * @param source Where the macro comes from.
    */
   public void enterTrustedContext(String name, String source) {
@@ -1917,8 +1904,8 @@ public class MapToolLineParser {
 
   /**
    * Convenience method to enter a new insecure context.
-   *	   
-   * @param name The name of the macro.			 
+   *
+   * @param name The name of the macro.
    * @param source Where the macro comes from.
    */
   public void enterUntrustedContext(String name, String source) {
@@ -1927,9 +1914,9 @@ public class MapToolLineParser {
 
   /**
    * Convenience method to enter a new context.
-   *	   
-   * @param name The name of the macro.			 
-   * @param source Where the macro comes from.		 
+   *
+   * @param name The name of the macro.
+   * @param source Where the macro comes from.
    * @param secure Is the context secure or not.
    */
   public void enterContext(String name, String source, boolean secure) {
@@ -1974,7 +1961,7 @@ public class MapToolLineParser {
 
   /**
    * Locate the inline rolls within the input line.
-   *		   
+   *
    * @param line The line to search for the rolls in.
    * @return A list of the rolls.
    */
@@ -2076,7 +2063,7 @@ public class MapToolLineParser {
   /**
    * Sets the maximum number of iterations allowed in a macro. Note: this will not set the value
    * smaller than the initial starting value.
-   *					 
+   *
    * @param loopIterations The maximum number of iterations allowed.
    */
   public void setMaxLoopIterations(int loopIterations) {
@@ -2095,7 +2082,7 @@ public class MapToolLineParser {
   /**
    * Sets the maximum recursive depth for macros. Note: this will not set the value smaller than the
    * initial starting value.
-   *					 
+   *
    * @param recursionDepth The maximum recursive depth allowed.
    */
   public void setMaxRecursionDepth(int recursionDepth) {
