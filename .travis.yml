@@ -7,7 +7,14 @@ matrix:
 script: 
   - ./gradlew build -x test
 before_deploy:
- - ./gradlew deploy
+   # Install Sentry.io CLI
+  - curl -sL https://sentry.io/get-cli/ | bash
+  - sentry-cli info
+  - echo Version is $TRAVIS_TAG
+  # Create a Sentry release
+  - sentry-cli releases new "$TRAVIS_TAG"
+  # Create Deploy Artifacts
+  - ./gradlew deploy
 deploy:
   provider: releases
   api_key: $GITHUB_RELEASE_KEY
@@ -32,3 +39,10 @@ notifications:
       - wget $TRAVIS_DISCORD_WEBHOOK_SCRIPT_URL
       - chmod +x send.sh
       - ./send.sh failure $DISCORD_URL
+after_deploy:
+  # Finalize Sentry release
+  - sentry-cli releases finalize "$TRAVIS_TAG"
+  # Associate commits with the Sentry release
+  - sentry-cli releases set-commits "$TRAVIS_TAG" --auto
+  # Tell Sentry.io we have deployed a release
+  - sentry-cli releases deploys "$TRAVIS_TAG" new -e Production
