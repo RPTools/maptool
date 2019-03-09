@@ -54,7 +54,8 @@ public class MapToolLineParser {
 			CurrentInitiativeFunction.getInstance(), DefineMacroFunction.getInstance(), EvalMacroFunctions.getInstance(), FindTokenFunctions.getInstance(), HasImpersonated.getInstance(),
 			InitiativeRoundFunction.getInstance(), InputFunction.getInstance(), IsTrustedFunction.getInstance(), JSONMacroFunctions.getInstance(), LookupTableFunction.getInstance(),
 			MacroArgsFunctions.getInstance(), MacroDialogFunctions.getInstance(), MacroFunctions.getInstance(), MacroLinkFunction.getInstance(), MapFunctions.getInstance(),
-			MiscInitiativeFunction.getInstance(), PlayerFunctions.getInstance(), RemoveAllFromInitiativeFunction.getInstance(), ReturnFunction.getInstance(), StateImageFunction.getInstance(), StringFunctions.getInstance(),
+			MiscInitiativeFunction.getInstance(), PlayerFunctions.getInstance(), RemoveAllFromInitiativeFunction.getInstance(), ReturnFunction.getInstance(), StateImageFunction.getInstance(),
+			StringFunctions.getInstance(),
 			StrListFunctions.getInstance(), StrPropFunctions.getInstance(), SwitchTokenFunction.getInstance(), TokenAddToInitiativeFunction.getInstance(), TokenBarFunction.getInstance(),
 			TokenCopyDeleteFunctions.getInstance(), TokenGMNameFunction.getInstance(), TokenHaloFunction.getInstance(), TokenImage.getInstance(), TokenInitFunction.getInstance(),
 			TokenInitHoldFunction.getInstance(), TokenLabelFunction.getInstance(), TokenLightFunctions.getInstance(), TokenLocationFunctions.getInstance(), TokenNameFunction.getInstance(),
@@ -1431,7 +1432,7 @@ public class MapToolLineParser {
 			try {
 				macroOutput = runMacroBlock(macroResolver, tokenInContext, macroBody, macroContext);
 				// Copy the return value of the macro into our current variable scope.
-			  resolver.setVariable("macro.return", macroResolver.getVariable("macro.return"));
+				resolver.setVariable("macro.return", macroResolver.getVariable("macro.return"));
 			} catch (ReturnFunctionException returnEx) {
 				Object result = returnEx.getResult();
 				if (result != null) {
