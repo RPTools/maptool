@@ -30,6 +30,7 @@ Bug Fixes
 * [#23][i23] - Fixed sendToBack & bringToFront macros broke states and bar changes in the macro. This was an OLD one going back to 1.3b63! You can now safely use these functions in your macro now!
 * [#30][i30] - Players see NPC movement when there are no lights no more! This was another old bug going back to 1.3b-something and only showed itself if you had NO lights (including personal lights, aka darkvision).
 * [#232][i232] - Mouse pointer incorrectly changing to Hand pointer was an oversight which has been corrected, hands down the best bug fix!
+* [#210][i210] - *Non-snap-to-grid Tokens have bad last path info* Tokens now walk the straight and narrow again, no more drunken paths shown.
 
 Enhancements
 -----
@@ -63,6 +64,7 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * [#239][i239] - MapToolScriptTokenMaker now handles function names with . notation and dynamically pulls in all functions names. TokenMakerMaker no longer needs to be ran upon changes to MTScript.
 * [#240][i240] - Macro Editor now has Auto-Completion for macro functions! A brief description and summary can be displayed (these will be added as time permits)
 
+[i210]: https://github.com/RPTools/maptool/issues/210
 [i113]: https://github.com/JamzTheMan/MapTool/issues/113
 [i108]: https://github.com/JamzTheMan/MapTool/issues/108
 [i92]: https://github.com/JamzTheMan/MapTool/issues/92
