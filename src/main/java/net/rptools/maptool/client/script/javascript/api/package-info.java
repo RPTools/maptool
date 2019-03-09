@@ -7,10 +7,13 @@
  * You should have received a copy of the GNU General Public License along with this source Code. If not, see <http://www.gnu.org/licenses/>
  */
 /**
- * Provides the classes that are used to provide an API for the internal JavaScript scripting language. All of the classes that are to be exposed as a variable in the JavaScript scope will need to
- * implement the {@link net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface} interface and be annotated with
- * {@link net.rptools.maptool.client.script.javascript.api.MapToolJSAPIDefinition}.
+ * Provides the classes that are used to provide an API for the internal JavaScript scripting
+ * language. All of the classes that are to be exposed as a variable in the JavaScript scope will
+ * need to implement the {@link
+ * net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface} interface and be
+ * annotated with {@link net.rptools.maptool.client.script.javascript.api.MapToolJSAPIDefinition}.
  *
- * Any object that matches the above two criteria will be picked up at run time, instantiated and registered with the JavaScript engine to provide the API.
+ * <p>Any object that matches the above two criteria will be picked up at run time, instantiated and
+ * registered with the JavaScript engine to provide the API.
  */
 package net.rptools.maptool.client.script.javascript.api;

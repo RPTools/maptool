@@ -5,18 +5,18 @@
 import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 buildscript {
-	dependencies {
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.13.0"
-	}
+    dependencies {
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.13.0"
+    }
 
-	repositories {
-		mavenCentral()
-	}
+    repositories {
+        mavenCentral()
+    }
 }
 
 // Access Git info from build script
 plugins {
-	id "org.ajoberstar.grgit" version "3.0.0"
+    id "org.ajoberstar.grgit" version "3.0.0"
 }
 
 // Apply the java plugin to add support for Java
@@ -41,58 +41,67 @@ applicationDefaultJvmArgs = ["-Xss4M"]
 
 // Custom properties
 ext {
-	gdxVersion = '1.9.6'
-	box2DLightsVersion = '1.4'
-	aiVersion = '1.8.1'
+    gdxVersion = '1.9.6'
+    box2DLightsVersion = '1.4'
+    aiVersion = '1.8.1'
 
-	// Get tag and commit info from Git to use for version numbering
-	def repo = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
-	def head = repo.head()
-	def tags = repo.tag.list().find {
-		it.commit == head
-	}
+    // Get tag and commit info from Git to use for version numbering
+    def repo = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
+    def head = repo.head()
+    def tags = repo.tag.list().find {
+        it.commit == head
+    }
 
-	revision = head.abbreviatedId
-	revisionFull = head.id
+    revision = head.abbreviatedId
+    revisionFull = head.id
 
-	if (tags) {
-		tagVersion = tags.getName()
-		msiVersion = tagVersion
-		enviroment = "Production"
-		sentryDSN = sentry_production_dsn
-	} else {
-		tagVersion = 'SNAPSHOT-' + revision
-		enviroment = "Development"
-		sentryDSN = sentry_development_dsn
-	}
+    if (tags) {
+        tagVersion = tags.getName()
+        msiVersion = tagVersion
+        enviroment = "Production"
+        sentryDSN = sentry_production_dsn
+    } else {
+        tagVersion = 'SNAPSHOT-' + revision
+        enviroment = "Development"
+        sentryDSN = sentry_development_dsn
+    }
 
-	// vendor, tagVersion, msiVersion, and DSN's defaults are set in gradle.properties
-	println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor
+    // vendor, tagVersion, msiVersion, and DSN's defaults are set in gradle.properties
+    println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor
 }
 
 run {
-	args = [ '-v='+version ]
-	applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ]
+    args = [ '-v='+version ]
+    applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ]
 
-	if(System.getProperty("exec.args") != null) {
-		args System.getProperty("exec.args").split()
-	}
+    if(System.getProperty("exec.args") != null) {
+        args System.getProperty("exec.args").split()
+    }
 }
 
 spotless {
-	java {
-		licenseHeaderFile	'spotless.license.java'
-		eclipse().configFile('build-resources/eclipse.prefs.formatter.xml')
-	}
+    java {
+        licenseHeaderFile 'spotless.license.java'
+        // Now using the Google Java style guide
+        //eclipse().configFile('build-resources/eclipse.prefs.formatter.xml')
+        googleJavaFormat()
+        // If you get exceptions thrown by spotlessApply, this might
+        // help.  Enable it here if the problem is with a Java file, and
+        // below if it is not.  Don't leave it enabled, as nothing will
+        // actually be updated if you do.
+        // https://github.com/diffplug/spotless/blob/master/PADDEDCELL.md
+        //paddedCell()
+    }
 
-	format 'misc', {
-		target '**/*.gradle', '**/.gitignore'
+    format 'misc', {
+        target '**/*.gradle', '**/.gitignore'
 
-		// spotless has built-in rules for most basic formatting tasks
-		trimTrailingWhitespace()
-		// or spaces. Takes an integer argument if you don't like 4
-		indentWithTabs()
-	}
+        // spotless has built-in rules for most basic formatting tasks
+        trimTrailingWhitespace()
+        // or spaces. Takes an integer argument if you don't like 4
+        indentWithSpaces(4)
+        //paddedCell()
+    }
 }
 
 jacoco {
@@ -104,283 +113,283 @@ reportsDir = file("$buildDir/reports/jacoco")
 // https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseProject.html
 // https://discuss.gradle.org/t/buildship-1-0-18-is-now-available/19012
 eclipse {
-	project {
-		natures 'org.eclipse.buildship.core.gradleprojectnature'
-		buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
-	}
+    project {
+        natures 'org.eclipse.buildship.core.gradleprojectnature'
+        buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
+    }
 
-	classpath {
-		file {
-			withXml {
-				def node = it.asNode()
-				node.appendNode('classpathentry', [kind: 'con', path: 'org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER'])
-			}
-			whenMerged {
-				entries.each { source ->
-					if (source.kind == 'con' && source.path.startsWith('org.eclipse.jdt.launching.JRE_CONTAINER')) {
-						source.accessRules.add(new AccessRule('0', 'javafx/**'))
-						source.accessRules.add(new AccessRule('0', 'jdk/nashorn/api/**'))
-					}
-				}
-			}
-		}
-	}
+    classpath {
+        file {
+            withXml {
+                def node = it.asNode()
+                node.appendNode('classpathentry', [kind: 'con', path: 'org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER'])
+            }
+            whenMerged {
+                entries.each { source ->
+                    if (source.kind == 'con' && source.path.startsWith('org.eclipse.jdt.launching.JRE_CONTAINER')) {
+                        source.accessRules.add(new AccessRule('0', 'javafx/**'))
+                        source.accessRules.add(new AccessRule('0', 'jdk/nashorn/api/**'))
+                    }
+                }
+            }
+        }
+    }
 }
 
 
 // In this section you declare where to find the dependencies of your project
 repositories {
-	// Use 'jcenter' for resolving your dependencies.
-	// You can declare any Maven/Ivy/file repository here.
-	jcenter()
-	mavenCentral()
-	maven { url = 'http://maptool.craigs-stuff.net/repo/' }
-	maven { url = 'http://www.nerps.net/repo/' }
-	maven { url = 'http://nexus.fyiblue.com/content/groups/public' }
-	mavenLocal()
+    // Use 'jcenter' for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+    mavenCentral()
+    maven { url = 'http://maptool.craigs-stuff.net/repo/' }
+    maven { url = 'http://www.nerps.net/repo/' }
+    maven { url = 'http://nexus.fyiblue.com/content/groups/public' }
+    mavenLocal()
 }
 
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-	// For Sentry bug reporting
-	annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
-	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
-	compile group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.11.0'	// Bridges v1 to v2 for other code in other libs
+    // For Sentry bug reporting
+    annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.11.0'	// Bridges v1 to v2 for other code in other libs
 
-	compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
-	compile group: 'commons-logging', name: 'commons-logging', version: '1.2'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+    compile group: 'commons-logging', name: 'commons-logging', version: '1.2'
 
-	compile group: 'io.sentry', name: 'sentry', version: '1.7.5'
-	compile group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.5'
+    compile group: 'io.sentry', name: 'sentry', version: '1.7.5'
+    compile group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.5'
 
-	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1' // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
+    compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1' // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
 
-	compile 'net.java.abeille:abeille-formsrt:2.0'
-	compile 'net.rptools.clientserver:clientserver:1.4.0.+'
-	compile 'org.hibernate:antlr:2.7.5H3'
+    compile 'net.java.abeille:abeille-formsrt:2.0'
+    compile 'net.rptools.clientserver:clientserver:1.4.0.+'
+    compile 'org.hibernate:antlr:2.7.5H3'
 
-	compile 'commons-beanutils:commons-beanutils-core:1.8.3'
-	compile 'commons-io:commons-io:2.5'
-	compile 'commons-jxpath:commons-jxpath:1.3'
-	compile 'commons-lang:commons-lang:2.6'
-	compile 'commons-net:commons-net:3.2'
-	compile 'commons-cli:commons-cli:1.3'
+    compile 'commons-beanutils:commons-beanutils-core:1.8.3'
+    compile 'commons-io:commons-io:2.5'
+    compile 'commons-jxpath:commons-jxpath:1.3'
+    compile 'commons-lang:commons-lang:2.6'
+    compile 'commons-net:commons-net:3.2'
+    compile 'commons-cli:commons-cli:1.3'
 
-	compile 'net.rptools.decktool:decktool:1.0.b1'
-	compile 'net.rptools.dicelib:dicelib:1.4.0.+'
-	compile 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
-	compile 'net.rptools.parser:parser:1.4.0.+'
+    compile 'net.rptools.decktool:decktool:1.0.b1'
+    compile 'net.rptools.dicelib:dicelib:1.4.0.+'
+    compile 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
+    compile 'net.rptools.parser:parser:1.4.0.+'
 
-	compile 'jide-common:jide-common:3.2.3'
-	compile 'jide-components:jide-components:3.2.3'
-	compile 'jide-dialogs:jide-dialogs:3.2.3'
-	compile 'jide-dock:jide-dock:3.2.3'
-	compile 'jide-editor:jide-editor:3.2.3'
-	compile 'jide-grids:jide-grids:3.2.3'
-	compile 'jide-properties:jide-properties:3.2.3'
-	compile 'jide-shortcut:jide-shortcut:3.2.3'
+    compile 'jide-common:jide-common:3.2.3'
+    compile 'jide-components:jide-components:3.2.3'
+    compile 'jide-dialogs:jide-dialogs:3.2.3'
+    compile 'jide-dock:jide-dock:3.2.3'
+    compile 'jide-editor:jide-editor:3.2.3'
+    compile 'jide-grids:jide-grids:3.2.3'
+    compile 'jide-properties:jide-properties:3.2.3'
+    compile 'jide-shortcut:jide-shortcut:3.2.3'
 
-	compile 'org.eclipse.jetty:jetty-server:9.3.0.M0'
-	compile 'org.eclipse.jetty:jetty-servlet:9.3.0.M0'
-	compile 'org.eclipse.jetty:jetty-webapp:9.3.0.M0'
-	compile 'org.eclipse.jetty:jetty-continuation:9.3.0.M1'
-	compile 'org.eclipse.jetty.websocket:websocket-server:9.3.0.M1'
-	compile 'org.eclipse.jetty.websocket:websocket-client:9.3.0.M1'
-	compile 'org.eclipse.jetty.websocket:websocket-servlet:9.3.0.M1'
-	compile 'org.eclipse.jetty.websocket:websocket-api:9.3.0.M1'
+    compile 'org.eclipse.jetty:jetty-server:9.3.0.M0'
+    compile 'org.eclipse.jetty:jetty-servlet:9.3.0.M0'
+    compile 'org.eclipse.jetty:jetty-webapp:9.3.0.M0'
+    compile 'org.eclipse.jetty:jetty-continuation:9.3.0.M1'
+    compile 'org.eclipse.jetty.websocket:websocket-server:9.3.0.M1'
+    compile 'org.eclipse.jetty.websocket:websocket-client:9.3.0.M1'
+    compile 'org.eclipse.jetty.websocket:websocket-servlet:9.3.0.M1'
+    compile 'org.eclipse.jetty.websocket:websocket-api:9.3.0.M1'
 
-	compile 'net.sf.ezmorph:ezmorph:1.0.5'
-	compile 'net.sf.json-lib:json-lib:2.4:jdk15'
+    compile 'net.sf.ezmorph:ezmorph:1.0.5'
+    compile 'net.sf.json-lib:json-lib:2.4:jdk15'
 
-	compile 'org.reflections:reflections:0.9.10'
-	compile 'com.caucho.hessian:hessian:3.1.6'
-	compile 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
-	compile 'rhino:js:1.7R1'
-	compile 'ca.odell.renderpack:renderpack:1.2004'
-	compile 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
-	compile 'org.swinglabs:swing-worker:1.1'
-	compile 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
-	compile 'com.withay:withay-util:1.0'
-	compile 'xmlpull:xmlpull:1.1.3.1'
-	compile 'xpp3:xpp3_min:1.1.4c'
-	compile 'com.thoughtworks.xstream:xstream:1.4.9'
-	compile 'yasb:yasb:0.2-21012007'
-	compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
+    compile 'org.reflections:reflections:0.9.10'
+    compile 'com.caucho.hessian:hessian:3.1.6'
+    compile 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
+    compile 'rhino:js:1.7R1'
+    compile 'ca.odell.renderpack:renderpack:1.2004'
+    compile 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
+    compile 'org.swinglabs:swing-worker:1.1'
+    compile 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
+    compile 'com.withay:withay-util:1.0'
+    compile 'xmlpull:xmlpull:1.1.3.1'
+    compile 'xpp3:xpp3_min:1.1.4c'
+    compile 'com.thoughtworks.xstream:xstream:1.4.9'
+    compile 'yasb:yasb:0.2-21012007'
+    compile 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
 
-	// For PDF image extraction
-	compile 'org.apache.pdfbox:pdfbox:2.0.10'
-	compile 'org.bouncycastle:bcmail-jdk15on:1.59'								// To decrypt passworded/secured pdf's
-	compile 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
-	compile 'com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
+    // For PDF image extraction
+    compile 'org.apache.pdfbox:pdfbox:2.0.10'
+    compile 'org.bouncycastle:bcmail-jdk15on:1.59'								// To decrypt passworded/secured pdf's
+    compile 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
+    compile 'com.github.jai-imageio:jai-imageio-jpeg2000:1.3.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
 
-	// Image processing lib
-	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
+    // Image processing lib
+    compile group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+    compile group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+    compile group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.3.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
 
-	// For syntax highlighting in macro editor
-	compile group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.2'	// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
-	compile group: 'com.fifesoft', name: 'rstaui', version: '3.0.0'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
-	compile group: 'com.fifesoft', name: 'autocomplete', version: '3.0.0'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
+    // For syntax highlighting in macro editor
+    compile group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.2'	// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
+    compile group: 'com.fifesoft', name: 'rstaui', version: '3.0.0'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
+    compile group: 'com.fifesoft', name: 'autocomplete', version: '3.0.0'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 
-	// For simple xml work in Hero Lab integration
-	compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.18.1'			// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
+    // For simple xml work in Hero Lab integration
+    compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.18.1'			// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
 
-	// box2dlights test
-	compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-	compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-	compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+    // box2dlights test
+    compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
 
-	compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-	compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
-	compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+    compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+    compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+    compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
 
-	// https://mvnrepository.com/artifact/org.locationtech.jts/jts-core
-	// https://locationtech.github.io/jts/jts-features.html
-	compile group: 'org.locationtech.jts', name: 'jts-core', version: '1.15.0'
+    // https://mvnrepository.com/artifact/org.locationtech.jts/jts-core
+    // https://locationtech.github.io/jts/jts-features.html
+    compile group: 'org.locationtech.jts', name: 'jts-core', version: '1.15.0'
 
-	// Not in use at this time, left for easy reference later...
-	//compile "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
-	//compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-	//compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
-	compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-	//compile "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
+    // Not in use at this time, left for easy reference later...
+    //compile "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
+    //compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    //compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
+    compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+    //compile "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
 
-	// Declare the dependency for your favourite test framework you want to use in your tests.
-	// TestNG is also supported by the Gradle Test task. Just change the
-	// testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
-	// 'test.useTestNG()' to your build script.
-	testCompile 'junit:junit:4.12'
+    // Declare the dependency for your favourite test framework you want to use in your tests.
+    // TestNG is also supported by the Gradle Test task. Just change the
+    // testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
+    // 'test.useTestNG()' to your build script.
+    testCompile 'junit:junit:4.12'
 
-	// For mocking features during unit tests
-	testCompile group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+    // For mocking features during unit tests
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
 }
 
 
 task configSentryRelease(type: Copy) {
-	from("build-resources/sentry.properties.template")
-	into("src/main/resources/")
-	rename("sentry.properties.template", "sentry.properties")
-	def tokens = [
-		AppVersion: "${tagVersion}",
-		Environment: "${enviroment}",
-		SentryDSN: "${sentryDSN}"
-	]
-	expand(tokens)
-	inputs.properties(tokens)
+    from("build-resources/sentry.properties.template")
+    into("src/main/resources/")
+    rename("sentry.properties.template", "sentry.properties")
+    def tokens = [
+        AppVersion: "${tagVersion}",
+        Environment: "${enviroment}",
+        SentryDSN: "${sentryDSN}"
+    ]
+    expand(tokens)
+    inputs.properties(tokens)
 }
 
 task uberJar(type: Jar) {
-	group = 'distribution'
-	description = 'Create uber jar for native installers'
+    group = 'distribution'
+    description = 'Create uber jar for native installers'
 
-	baseName project.name + '-' + tagVersion
+    baseName project.name + '-' + tagVersion
 
-	manifest {
-		attributes 'Implementation-Title': project.name,
-		'Implementation-Version': tagVersion,
-		'Implementation-Vendor': vendor,
-		'Git-Commit': revision,
-		'Git-Commit-SHA': revisionFull,
-		'Built-By': System.getProperty('user.name'),
-		'Built-Date': new Date(),
-		'Built-JDK': System.getProperty('java.version'),
-		'Source-Compatibility': project.sourceCompatibility,
-		'Target-Compatibility': project.targetCompatibility,
-		'Main-Class': project.mainClassName
-	}
+    manifest {
+        attributes 'Implementation-Title': project.name,
+        'Implementation-Version': tagVersion,
+        'Implementation-Vendor': vendor,
+        'Git-Commit': revision,
+        'Git-Commit-SHA': revisionFull,
+        'Built-By': System.getProperty('user.name'),
+        'Built-Date': new Date(),
+        'Built-JDK': System.getProperty('java.version'),
+        'Source-Compatibility': project.sourceCompatibility,
+        'Target-Compatibility': project.targetCompatibility,
+        'Main-Class': project.mainClassName
+    }
 
-	from {
-		configurations.compile.collect {
-			it.isDirectory() ? it : zipTree(it)
-		}
-	}
-	with jar
-	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    with jar
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
 }
 
 // For logging Git Commit during CI
 task displayGitInfo {
-	doLast {
-		println 'Git-Commit-SHA: ' + revisionFull
-	}
+    doLast {
+        println 'Git-Commit-SHA: ' + revisionFull
+    }
 }
 
 // Currently includes license files
 task copyPackageExtras(type: Copy) {
-	from('package/license/')
-	into('build/libs/')
-	include('*')
+    from('package/license/')
+    into('build/libs/')
+    include('*')
 }
 
 task prepareInnoSetup(type: Copy) {
-	from("package/windows/MapTool.iss.template")
-	into("package/windows/")
-	rename("MapTool.iss.template", "MapTool.iss")
-	def tokens = [
-		AppName: "${project.name}",
-		AppVersion: "${tagVersion}",
-		Vendor: "${vendor}",
-		WizardImage: "${project.projectDir.absolutePath}/package/windows/${project.name}-setup.bmp",
-		Slash: "\\",
-	]
-	expand(tokens)
-	inputs.properties(tokens)
+    from("package/windows/MapTool.iss.template")
+    into("package/windows/")
+    rename("MapTool.iss.template", "MapTool.iss")
+    def tokens = [
+        AppName: "${project.name}",
+        AppVersion: "${tagVersion}",
+        Vendor: "${vendor}",
+        WizardImage: "${project.projectDir.absolutePath}/package/windows/${project.name}-setup.bmp",
+        Slash: "\\",
+    ]
+    expand(tokens)
+    inputs.properties(tokens)
 }
 
 task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepareInnoSetup]) {
-	group = 'distribution'
-	description = 'Create native installers'
+    group = 'distribution'
+    description = 'Create native installers'
 
-	tasks.findByName('copyPackageExtras').mustRunAfter 'uberJar'
+    tasks.findByName('copyPackageExtras').mustRunAfter 'uberJar'
 
-	doLast {
-		// Using the -deploy Command with Bundler Arguments
-		// 		javapackager -deploy -native exe -BsystemWide=true -BjvmOptions=-Xmx128m -BjvmOptions=-Xms128m -outdir packages -outfile BrickBreaker -srcdir dist
-		//		-srcfiles BrickBreaker.jar -appclass brickbreaker.Main -name BrickBreaker -title "BrickBreaker demo"
-		// *Note: You can specify a JRE using "-Bruntime=../../../deploy-ready-jre"
-		//		  It will bundle system/workspace JDK by default
-		def javapackager_deploy = exec {
-			workingDir "${project.projectDir.absolutePath}"
+    doLast {
+        // Using the -deploy Command with Bundler Arguments
+        // 		javapackager -deploy -native exe -BsystemWide=true -BjvmOptions=-Xmx128m -BjvmOptions=-Xms128m -outdir packages -outfile BrickBreaker -srcdir dist
+        //		-srcfiles BrickBreaker.jar -appclass brickbreaker.Main -name BrickBreaker -title "BrickBreaker demo"
+        // *Note: You can specify a JRE using "-Bruntime=../../../deploy-ready-jre"
+        //		  It will bundle system/workspace JDK by default
+        def javapackager_deploy = exec {
+            workingDir "${project.projectDir.absolutePath}"
 
-			println workingDir
+            println workingDir
 
-			commandLine "javapackager",
-				"-deploy", "-v",
-				"-native", "installer",
-				"-appclass", mainClassName,
-				"-srcdir", "build/libs",
-				"-outdir", "releases/release-" + tagVersion,
-				"-outfile", project.name,
-				"-name", project.name,
-				"-description", project.name + " " + tagVersion + " by " + vendor,
-				"-title", project.name,
-				"-vendor", vendor,
-				"-BdropinResourcesRoot=.",
-				"-BAssociations=cmpgn",
-				"-BinstalldirChooser=true",
-				"-BsystemWide=false",
-				"-BmenuHint=true",
-				"-Bwin.menuGroup=" + vendor,
-				"-BshortcutHint=true",
-				"-BappVersion=" + tagVersion,
-				"-Bwin.msi.productVersion=" + msiVersion,
-				"-BlicenseFile=COPYING.AFFERO",
-				"-BlicenseType='GNU AFFERO GENERAL PUBLIC LICENSE'",
-				"-Bcategory=Games",
-				"-Bemail=maptool@rptools.net",
-				"-BuserJvmOptions=-DMAPTOOL_DATADIR\\==.maptool-" + vendor,
-				"-BuserJvmOptions=-Dfile.encoding\\==UTF-8",
-				"-BuserJvmOptions=-Xss=4M"
+            commandLine "javapackager",
+                "-deploy", "-v",
+                "-native", "installer",
+                "-appclass", mainClassName,
+                "-srcdir", "build/libs",
+                "-outdir", "releases/release-" + tagVersion,
+                "-outfile", project.name,
+                "-name", project.name,
+                "-description", project.name + " " + tagVersion + " by " + vendor,
+                "-title", project.name,
+                "-vendor", vendor,
+                "-BdropinResourcesRoot=.",
+                "-BAssociations=cmpgn",
+                "-BinstalldirChooser=true",
+                "-BsystemWide=false",
+                "-BmenuHint=true",
+                "-Bwin.menuGroup=" + vendor,
+                "-BshortcutHint=true",
+                "-BappVersion=" + tagVersion,
+                "-Bwin.msi.productVersion=" + msiVersion,
+                "-BlicenseFile=COPYING.AFFERO",
+                "-BlicenseType='GNU AFFERO GENERAL PUBLIC LICENSE'",
+                "-Bcategory=Games",
+                "-Bemail=maptool@rptools.net",
+                "-BuserJvmOptions=-DMAPTOOL_DATADIR\\==.maptool-" + vendor,
+                "-BuserJvmOptions=-Dfile.encoding\\==UTF-8",
+                "-BuserJvmOptions=-Xss=4M"
 
-				println commandLine
-		}
-	}
+                println commandLine
+        }
+    }
 }
 
 task createWrapper(type: Wrapper) {
-	gradleVersion = '5.2.1'
+    gradleVersion = '5.2.1'
 }
 
 // Configure current release tag in Sentry.io properties
