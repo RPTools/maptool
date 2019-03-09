@@ -198,7 +198,7 @@ public class ZoneRenderer extends JComponent
   private Area visibleScreenArea;
   private final List<ItemRenderer> itemRenderList = new LinkedList<ItemRenderer>();
   private PlayerView lastView;
-  private Set<GUID> visibleTokenSet; // = new HashSet<GUID>();
+  private Set<GUID> visibleTokenSet = new HashSet<>();
   private CodeTimer timer;
 
   private boolean autoResizeStamp = false;
