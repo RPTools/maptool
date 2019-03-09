@@ -24,7 +24,6 @@ import net.rptools.common.expression.Result;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
 import net.rptools.maptool.client.functions.AssertFunction.AssertFunctionException;
-import net.rptools.maptool.client.functions.ReturnFunction.ReturnFunctionException;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -34,7 +33,6 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
-import net.rptools.parser.VariableModifiers;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
 import net.sf.json.JSONArray;
@@ -44,13 +42,18 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.jadebringer.maptool.functions.AddFrameworkFunction;
+import de.jadebringer.maptool.functions.ReturnFunction;
+import de.jadebringer.maptool.functions.ReturnFunction.ReturnFunctionException;
+
 public class MapToolLineParser {
 
 	// Logger for this class.
 	private static final Logger log = LogManager.getLogger(MapToolLineParser.class);
 
 	/** MapTool functions to add to the parser. */
-	private static final Function[] mapToolParserFunctions = { AbortFunction.getInstance(), AssertFunction.getInstance(), AddAllToInitiativeFunction.getInstance(), ChatFunction.getInstance(),
+	private static final Function[] mapToolParserFunctions = { AbortFunction.getInstance(), AssertFunction.getInstance(), AddAllToInitiativeFunction.getInstance(), 
+			AddFrameworkFunction.getInstance(), ChatFunction.getInstance(),
 			CurrentInitiativeFunction.getInstance(), DefineMacroFunction.getInstance(), EvalMacroFunctions.getInstance(), FindTokenFunctions.getInstance(), HasImpersonated.getInstance(),
 			InitiativeRoundFunction.getInstance(), InputFunction.getInstance(), IsTrustedFunction.getInstance(), JSONMacroFunctions.getInstance(), LookupTableFunction.getInstance(),
 			MacroArgsFunctions.getInstance(), MacroDialogFunctions.getInstance(), MacroFunctions.getInstance(), MacroLinkFunction.getInstance(), MapFunctions.getInstance(),

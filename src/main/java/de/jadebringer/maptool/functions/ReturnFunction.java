@@ -6,7 +6,7 @@
  * You should have received a copy of the GNU Affero General Public License * along with this source Code. If not, please visit <http://www.gnu.org/licenses/> and specifically the Affero license text
  * at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.functions;
+package de.jadebringer.maptool.functions;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,14 +26,8 @@ public class ReturnFunction extends AbstractFunction {
 		super(1, 2, "return");
 	}
 
-	/** The singleton instance. */
 	private final static ReturnFunction instance = new ReturnFunction();
 
-	/**
-	 * Gets the Input instance.
-	 * 
-	 * @return the instance.
-	 */
 	public static ReturnFunction getInstance() {
 		return instance;
 	}
@@ -67,6 +61,8 @@ public class ReturnFunction extends AbstractFunction {
 	/** Exception type thrown by return() function. Semantics are to silently halt the current execution. */
 	public static class ReturnFunctionException extends ParserException {
 
+		private static final long serialVersionUID = -2491876915325835490L;
+		
 		private Object result;
 
 		public Object getResult() {
