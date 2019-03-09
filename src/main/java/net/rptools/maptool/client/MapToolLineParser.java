@@ -24,6 +24,7 @@ import net.rptools.common.expression.Result;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
 import net.rptools.maptool.client.functions.AssertFunction.AssertFunctionException;
+import net.rptools.maptool.client.functions.ReturnFunction.ReturnFunctionException;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -33,6 +34,7 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableModifiers;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
 import net.sf.json.JSONArray;
@@ -52,7 +54,7 @@ public class MapToolLineParser {
 			CurrentInitiativeFunction.getInstance(), DefineMacroFunction.getInstance(), EvalMacroFunctions.getInstance(), FindTokenFunctions.getInstance(), HasImpersonated.getInstance(),
 			InitiativeRoundFunction.getInstance(), InputFunction.getInstance(), IsTrustedFunction.getInstance(), JSONMacroFunctions.getInstance(), LookupTableFunction.getInstance(),
 			MacroArgsFunctions.getInstance(), MacroDialogFunctions.getInstance(), MacroFunctions.getInstance(), MacroLinkFunction.getInstance(), MapFunctions.getInstance(),
-			MiscInitiativeFunction.getInstance(), PlayerFunctions.getInstance(), RemoveAllFromInitiativeFunction.getInstance(), StateImageFunction.getInstance(), StringFunctions.getInstance(),
+			MiscInitiativeFunction.getInstance(), PlayerFunctions.getInstance(), RemoveAllFromInitiativeFunction.getInstance(), ReturnFunction.getInstance(), StateImageFunction.getInstance(), StringFunctions.getInstance(),
 			StrListFunctions.getInstance(), StrPropFunctions.getInstance(), SwitchTokenFunction.getInstance(), TokenAddToInitiativeFunction.getInstance(), TokenBarFunction.getInstance(),
 			TokenCopyDeleteFunctions.getInstance(), TokenGMNameFunction.getInstance(), TokenHaloFunction.getInstance(), TokenImage.getInstance(), TokenInitFunction.getInstance(),
 			TokenInitHoldFunction.getInstance(), TokenLabelFunction.getInstance(), TokenLightFunctions.getInstance(), TokenLocationFunctions.getInstance(), TokenNameFunction.getInstance(),
@@ -1262,7 +1264,10 @@ public class MapToolLineParser {
 			return createParser(resolver, tokenInContext == null ? false : true).evaluate(expression);
 		} catch (AbortFunctionException e) {
 			log.debug(e);
-			throw e;
+			boolean catchAbort = BigDecimal.ONE.equals(resolver.getVariable("macro.catchAbort"));
+			if (!catchAbort)
+				throw e;
+			return null;
 		} catch (AssertFunctionException afe) {
 			log.debug(afe);
 			throw afe;
@@ -1421,9 +1426,19 @@ public class MapToolLineParser {
 			throw new ParserException(I18N.getText("lineParser.maxRecursion"));
 		}
 		try {
-			String macroOutput = runMacroBlock(macroResolver, tokenInContext, macroBody, macroContext);
-			// Copy the return value of the macro into our current variable scope.
-			resolver.setVariable("macro.return", macroResolver.getVariable("macro.return"));
+			String macroOutput = null;
+
+			try {
+				macroOutput = runMacroBlock(macroResolver, tokenInContext, macroBody, macroContext);
+				// Copy the return value of the macro into our current variable scope.
+			  resolver.setVariable("macro.return", macroResolver.getVariable("macro.return"));
+			} catch (ReturnFunctionException returnEx) {
+				Object result = returnEx.getResult();
+				if (result != null) {
+					resolver.setVariable("macro.return", result);
+					macroOutput = result.toString();
+				}
+			}
 			if (macroOutput != null) {
 				// Note! Its important that trim is not used to replace the following two lines.
 				// If you use String.trim() you may inadvertnatly remove the special characters
