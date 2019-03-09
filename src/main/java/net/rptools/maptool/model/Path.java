@@ -168,72 +168,100 @@ public class Path<T extends AbstractPoint> {
       }
 
     } else {
-      // Lee: solo movement
-      if (keyToken.isSnapToGrid()) {
-        for (T cp : cellList) {
-          T np = (T) cp.clone();
-          np.x -= cellOffsetX;
-          np.y -= cellOffsetY;
-          path.addPathCell(np);
-        }
-
-        for (T cp : waypointList) {
-          T np = (T) cp.clone();
-          np.x -= cellOffsetX;
-          np.y -= cellOffsetY;
-          path.addWayPoint(np);
-        }
-      } else {
-        Path<CellPoint> reflectedPath = new Path<CellPoint>();
-        NaiveWalker nw = new NaiveWalker(zone);
-        Path<ZonePoint> wpl = set.getGridlessPath();
-
-        if (cellList.size() > 2) {
-
-          CellPoint prevPoint = grid.convert(new ZonePoint(startPoint.x, startPoint.y));
-          CellPoint terminalPoint = grid.convert(endPoint);
-          CellPoint convPoint;
-
-          // Lee: since we already have the start point
-          ((List<T>) cellList).remove(0);
-
-          for (T p : cellList) {
-            convPoint = grid.convert((ZonePoint) p);
-            reflectedPath.addAllPathCells(nw.calculatePath(prevPoint, convPoint));
-            prevPoint = convPoint;
-          }
-
-        } else {
-          reflectedPath.addAllPathCells(
-              nw.calculatePath(grid.convert(startPoint), grid.convert(endPoint)));
-        }
-
-        ZonePoint buildVal = startPoint;
-        Path<ZonePoint> processPath = new Path<ZonePoint>();
-
-        for (CellPoint p : reflectedPath.getCellPath()) {
-          ZonePoint tempPoint = (ZonePoint) buildVal.clone();
-          processPath.addPathCell(tempPoint);
-
-          if (buildVal.x < endPoint.x) buildVal.x += 100;
-          else if (buildVal.x > endPoint.x) buildVal.x -= 100;
-          if (buildVal.y < endPoint.y) buildVal.y += 100;
-          else if (buildVal.y > endPoint.y) buildVal.y -= 100;
-        }
-
-        // processPath.addWayPoint(startPoint);
-        for (T cp : waypointList) {
-          ZonePoint np = (ZonePoint) cp;
-          if (np != startPoint && np != endPoint) processPath.addWayPoint(np);
-        }
-
-        processPath.addWayPoint(endPoint);
-
-        // Lee: replacing the last point in derived path for the more
-        // accurate landing point
-        processPath.replaceLastPoint(endPoint);
-        path = (Path<T>) processPath;
+      for (T cp : cellList) {
+        T np = (T) cp.clone();
+        np.x -= cellOffsetX;
+        np.y -= cellOffsetY;
+        path.addPathCell(np);
       }
+
+      for (T cp : waypointList) {
+        T np = (T) cp.clone();
+        np.x -= cellOffsetX;
+        np.y -= cellOffsetY;
+        path.addWayPoint(np);
+      }
+
+      /*
+       * Not exactly sure what Lee was trying to do here?
+       * I believe he was trying to return all the "cells" a non-STG token moved though?
+       * I'll leave the code below in case someone wants to clean it up later.
+       * For now, I've restored partial logic back to 1.4.0.5 above.
+       */
+
+      /*
+      	// Lee: solo movement
+      	if (keyToken.isSnapToGrid()) {
+      		for (T cp : cellList) {
+      			T np = (T) cp.clone();
+      			np.x -= cellOffsetX;
+      			np.y -= cellOffsetY;
+      			path.addPathCell(np);
+      		}
+
+      		for (T cp : waypointList) {
+      			T np = (T) cp.clone();
+      			np.x -= cellOffsetX;
+      			np.y -= cellOffsetY;
+      			path.addWayPoint(np);
+      		}
+      	} else {
+      		Path<CellPoint> reflectedPath = new Path<CellPoint>();
+      		NaiveWalker nw = new NaiveWalker(zone);
+      		Path<ZonePoint> wpl = set.getGridlessPath();
+
+      		if (cellList.size() > 2) {
+
+      			CellPoint prevPoint = grid.convert(new ZonePoint(startPoint.x, startPoint.y));
+      			CellPoint terminalPoint = grid.convert(endPoint);
+      			CellPoint convPoint;
+
+      			// Lee: since we already have the start point
+      			((List<T>) cellList).remove(0);
+
+      			for (T p : cellList) {
+      				convPoint = grid.convert((ZonePoint) p);
+      				reflectedPath.addAllPathCells(nw.calculatePath(prevPoint, convPoint));
+      				prevPoint = convPoint;
+      			}
+
+      		} else {
+      			reflectedPath.addAllPathCells(
+      					nw.calculatePath(grid.convert(startPoint), grid.convert(endPoint)));
+      		}
+
+      		ZonePoint buildVal = startPoint;
+      		Path<ZonePoint> processPath = new Path<ZonePoint>();
+
+      		for (CellPoint p : reflectedPath.getCellPath()) {
+      			ZonePoint tempPoint = (ZonePoint) buildVal.clone();
+      			processPath.addPathCell(tempPoint);
+
+      			if (buildVal.x < endPoint.x)
+      				buildVal.x += 100;
+      			else if (buildVal.x > endPoint.x)
+      				buildVal.x -= 100;
+      			if (buildVal.y < endPoint.y)
+      				buildVal.y += 100;
+      			else if (buildVal.y > endPoint.y)
+      				buildVal.y -= 100;
+      		}
+
+      		// processPath.addWayPoint(startPoint);
+      		for (T cp : waypointList) {
+      			ZonePoint np = (ZonePoint) cp;
+      			if (np != startPoint && np != endPoint)
+      				processPath.addWayPoint(np);
+      		}
+
+      		processPath.addWayPoint(endPoint);
+
+      		// Lee: replacing the last point in derived path for the more
+      		// accurate landing point
+      		processPath.replaceLastPoint(endPoint);
+      		path = (Path<T>) processPath;
+      	}
+      */
     }
     return path;
   }
