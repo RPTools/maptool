@@ -122,8 +122,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private GenericDialog dialog;
   private ImageAssetPanel imagePanel;
   // private CharSheetController controller;
-  private final RSyntaxTextArea XMLstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
-  private final RSyntaxTextArea TEXTstatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
+  private final RSyntaxTextArea xmlStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
+  private final RSyntaxTextArea textStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private HeroLabData heroLabData;
 
   private static final ImageIcon REFRESH_ICON_ON =
@@ -310,11 +310,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());
       getHtmlStatblockEditor().setCaretPosition(0);
 
-      XMLstatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_xml());
-      XMLstatblockRSyntaxTextArea.setCaretPosition(0);
+      xmlStatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_xml());
+      xmlStatblockRSyntaxTextArea.setCaretPosition(0);
 
-      TEXTstatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_text());
-      TEXTstatblockRSyntaxTextArea.setCaretPosition(0);
+      textStatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_text());
+      textStatblockRSyntaxTextArea.setCaretPosition(0);
 
       ((JCheckBox) getComponent("isAllyCheckBox")).setSelected(heroLabData.isAlly());
       ((JLabel) getComponent("summaryText")).setText(heroLabData.getSummary());
@@ -1258,30 +1258,29 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     statblockDoc.putProperty("IgnoreCharsetDirective", true);
 
     // Setup the XML panel
-    XMLstatblockRSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
-    XMLstatblockRSyntaxTextArea.setEditable(false);
-    XMLstatblockRSyntaxTextArea.setCodeFoldingEnabled(true);
-    XMLstatblockRSyntaxTextArea.setLineWrap(true);
-    XMLstatblockRSyntaxTextArea.setWrapStyleWord(true);
-    XMLstatblockRSyntaxTextArea.setTabSize(2);
+    xmlStatblockRSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
+    xmlStatblockRSyntaxTextArea.setEditable(false);
+    xmlStatblockRSyntaxTextArea.setCodeFoldingEnabled(true);
+    xmlStatblockRSyntaxTextArea.setLineWrap(true);
+    xmlStatblockRSyntaxTextArea.setWrapStyleWord(true);
+    xmlStatblockRSyntaxTextArea.setTabSize(2);
 
-    RTextScrollPane xmlStatblockRSyntaxScrollPane =
-        new RTextScrollPane(XMLstatblockRSyntaxTextArea);
-    xmlStatblockRSyntaxScrollPane.setLineNumbersEnabled(false);
+    RTextScrollPane xmlStatblockRTextScrollPane = new RTextScrollPane(xmlStatblockRSyntaxTextArea);
+    xmlStatblockRTextScrollPane.setLineNumbersEnabled(false);
     replaceComponent(
-        "xmlStatblockPanel", "XMLstatblockRTextScrollPane", xmlStatblockRSyntaxScrollPane);
+        "xmlStatblockPanel", "xmlStatblockRTextScrollPane", xmlStatblockRTextScrollPane);
 
     // Setup the TEXT panel
-    TEXTstatblockRSyntaxTextArea.setEditable(false);
-    TEXTstatblockRSyntaxTextArea.setLineWrap(true);
-    TEXTstatblockRSyntaxTextArea.setWrapStyleWord(true);
-    TEXTstatblockRSyntaxTextArea.setTabSize(2);
+    textStatblockRSyntaxTextArea.setEditable(false);
+    textStatblockRSyntaxTextArea.setLineWrap(true);
+    textStatblockRSyntaxTextArea.setWrapStyleWord(true);
+    textStatblockRSyntaxTextArea.setTabSize(2);
 
-    RTextScrollPane TEXTstatblockRTextScrollPane =
-        new RTextScrollPane(TEXTstatblockRSyntaxTextArea);
-    TEXTstatblockRTextScrollPane.setLineNumbersEnabled(false);
+    RTextScrollPane textStatblockRTextScrollPane =
+        new RTextScrollPane(textStatblockRSyntaxTextArea);
+    textStatblockRTextScrollPane.setLineNumbersEnabled(false);
     replaceComponent(
-        "textStatblockPanel", "TextStatblockRTextScrollPane", TEXTstatblockRTextScrollPane);
+        "textStatblockPanel", "textStatblockRTextScrollPane", textStatblockRTextScrollPane);
 
     // Setup the refresh button, #refreshes the HeroLabData from the portfolio
     JButton refreshDataButton = (JButton) getComponent("refreshDataButton");
@@ -1306,11 +1305,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());
                 getHtmlStatblockEditor().setCaretPosition(0);
 
-                XMLstatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_xml());
-                XMLstatblockRSyntaxTextArea.setCaretPosition(0);
+                xmlStatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_xml());
+                xmlStatblockRSyntaxTextArea.setCaretPosition(0);
 
-                TEXTstatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_text());
-                TEXTstatblockRSyntaxTextArea.setCaretPosition(0);
+                textStatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_text());
+                textStatblockRSyntaxTextArea.setCaretPosition(0);
 
                 // Update the images
                 MD5Key tokenImageKey = heroLabData.getTokenImage();
@@ -1365,8 +1364,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
             if (searchText.isEmpty()) return;
 
-            XMLstatblockRSyntaxTextArea.setText(heroLabData.parseXML(searchText));
-            XMLstatblockRSyntaxTextArea.setCaretPosition(0);
+            xmlStatblockRSyntaxTextArea.setText(heroLabData.parseXML(searchText));
+            xmlStatblockRSyntaxTextArea.setCaretPosition(0);
           }
         });
 
@@ -1400,7 +1399,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             // context.setSearchForward(forward);
             // context.setWholeWord(false);
 
-            boolean found = SearchEngine.find(TEXTstatblockRSyntaxTextArea, context).wasFound();
+            SearchEngine.find(textStatblockRSyntaxTextArea, context).wasFound();
           }
         });
   }
