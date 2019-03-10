@@ -92,6 +92,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
     // Set the default macro.args to "" so that it is always present.
     try {
       this.setVariable("macro.args", "");
+      this.setVariable("macro.catchAbort", BigDecimal.ZERO);
       this.setVariable("macro.args.num", BigDecimal.ZERO);
       this.setVariable("tokens.denyMove", 0);
       this.setVariable("tokens.moveCount", 1);
