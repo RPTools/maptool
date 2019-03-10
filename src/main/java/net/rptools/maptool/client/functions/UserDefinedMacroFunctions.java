@@ -24,6 +24,7 @@ import java.util.Stack;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
+import net.rptools.maptool.client.ui.syntax.MapToolScriptSyntax;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
@@ -179,6 +180,8 @@ public class UserDefinedMacroFunctions implements Function {
       redefinedFunctions.put(name, fr);
     }
     userDefinedFunctions.put(name, new FunctionDefinition(macro, ignoreOutput, newVariableContext));
+
+    MapToolScriptSyntax.resetScriptSyntax();
   }
 
   public Object executeOldFunction(Parser parser, List<Object> parameters) throws ParserException {

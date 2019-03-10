@@ -121,6 +121,10 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     super.addToken(array, start, end, tokenType, startOffset, hyperlink);
   }
 
+  public static void resetScriptSyntax() {
+    macroFunctionTokenMap = null;
+  }
+
   private TokenMap getMacroFunctionNames() {
     if (macroFunctionTokenMap == null) {
       macroFunctionTokenMap = new TokenMap(true);
