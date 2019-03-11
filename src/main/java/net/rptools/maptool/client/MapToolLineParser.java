@@ -1312,7 +1312,19 @@ public class MapToolLineParser {
                 String callName = result.getValue().toString();
                 result = parseExpression(resolver, tokenInContext, rollBranch);
                 String macroArgs = result.getValue().toString();
-                output_text = runMacro(resolver, tokenInContext, callName, macroArgs);
+                
+                try {
+                	output_text = runMacro(resolver, tokenInContext, callName, macroArgs);
+                } catch (AbortFunctionException e) {
+                    // required to catch abort that are not 
+                	// in a (UDF)function call
+                	// but in a real "macro(...)" call
+                	log.debug(e);
+                    boolean catchAbort = BigDecimal.ONE.equals(resolver.getVariable("macro.catchAbort"));
+                    if (!catchAbort) throw e;
+                    output_text = "";
+                }
+                
                 if (output != Output.NONE) {
                   expressionBuilder.append(output_text);
                 }
@@ -1425,7 +1437,13 @@ public class MapToolLineParser {
       log.debug(e);
       boolean catchAbort = BigDecimal.ONE.equals(resolver.getVariable("macro.catchAbort"));
       if (!catchAbort) throw e;
-      return null;
+      
+      // return an empty result to not collide with tooltips
+      // when catching an abort
+      Result result = new Result("");
+      result.setDetailExpression("");
+      result.setValue("");
+      return result;
     } catch (AssertFunctionException afe) {
       log.debug(afe);
       throw afe;
