@@ -39,6 +39,7 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableModifiers;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
 import net.sf.json.JSONArray;
@@ -62,6 +63,7 @@ public class MapToolLineParser {
     DefineMacroFunction.getInstance(),
     EvalMacroFunctions.getInstance(),
     FindTokenFunctions.getInstance(),
+    FrameworksFunctions.getInstance(),
     HasImpersonated.getInstance(),
     InitiativeRoundFunction.getInstance(),
     InputFunction.getInstance(),
@@ -499,7 +501,6 @@ public class MapToolLineParser {
 
       // Fill in the found parameters, converting to BigDecimal if possible.
       if (params == null) params = new Object[numParamsFound];
-
       for (int i = 0; i < numParamsFound; i++) {
         params[i] = toNumIfPossible(paramList.get(i));
       }
@@ -827,14 +828,12 @@ public class MapToolLineParser {
                   try {
                     loopCount = option.getParsedIntParam(0, resolver, tokenInContext);
                     if (loopCount < 0) error = I18N.getText("lineParser.countNonNeg", loopCount);
-
                   } catch (ParserException pe) {
                     error = I18N.getText("lineParser.errorProcessingOpt", "COUNT", pe.getMessage());
                   }
                   loopSep = option.getStringParam(1);
 
                   if (error != null) throw doError(error, opts, roll);
-
                   break;
 
                 case FOR:
@@ -868,13 +867,11 @@ public class MapToolLineParser {
                     if (loopStep == 0) error = I18N.getText("lineParser.forNoZeroStep");
                     if ((loopEnd <= loopStart && loopStep > 0)
                         || (loopEnd >= loopStart && loopStep < 0)) loopCount = 0;
-
                   } catch (ParserException pe) {
                     error = I18N.getText("lineParser.errorProcessingOpt", "FOR", pe.getMessage());
                   }
 
                   if (error != null) throw doError(error, opts, roll);
-
                   break;
 
                 case FOREACH:
@@ -927,7 +924,6 @@ public class MapToolLineParser {
                   }
 
                   if (error != null) throw doError(error, opts, roll);
-
                   break;
 
                 case WHILE:
@@ -1423,9 +1419,10 @@ public class MapToolLineParser {
       return createParser(resolver, tokenInContext == null ? false : true).evaluate(expression);
     } catch (AbortFunctionException e) {
       log.debug(e);
-      boolean catchAbort = BigDecimal.ONE.equals(resolver.getVariable("macro.catchAbort"));
-      if (!catchAbort) throw e;
-      return null;
+			boolean catchAbort = BigDecimal.ONE.equals(resolver.getVariable("macro.catchAbort"));
+			if (!catchAbort)
+				throw e;
+			return null;
     } catch (AssertFunctionException afe) {
       log.debug(afe);
       throw afe;
@@ -1594,17 +1591,18 @@ public class MapToolLineParser {
     try {
       String macroOutput = null;
 
-      try {
-        macroOutput = runMacroBlock(macroResolver, tokenInContext, macroBody, macroContext);
-        // Copy the return value of the macro into our current variable scope.
-        resolver.setVariable("macro.return", macroResolver.getVariable("macro.return"));
-      } catch (ReturnFunctionException returnEx) {
-        Object result = returnEx.getResult();
-        if (result != null) {
-          resolver.setVariable("macro.return", result);
-          macroOutput = result.toString();
-        }
-      }
+			try {
+				macroOutput = runMacroBlock(macroResolver, tokenInContext, macroBody, macroContext);
+				// Copy the return value of the macro into our current variable scope.
+			  resolver.setVariable("macro.return", macroResolver.getVariable("macro.return"));
+			} catch (ReturnFunctionException returnEx) {
+				Object result = returnEx.getResult();
+				if (result != null) {
+					resolver.setVariable("macro.return", result);
+					macroOutput = result.toString();
+				}
+			}
+      
       if (macroOutput != null) {
         // Note! Its important that trim is not used to replace the following two lines.
         // If you use String.trim() you may inadvertnatly remove the special characters
@@ -1831,7 +1829,6 @@ public class MapToolLineParser {
   private String rollString(Collection<String> options, String tooltip, String text) {
     StringBuilder s = new StringBuilder("\036");
     if (options != null) s.append("\001" + StringUtils.join(options, ",") + "\002");
-
     if (tooltip != null) {
       tooltip = tooltip.replaceAll("'", "&#39;");
       s.append(tooltip + "\037");
