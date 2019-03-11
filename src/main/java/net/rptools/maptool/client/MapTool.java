@@ -60,7 +60,6 @@ import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -75,7 +74,6 @@ import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.box2d.DesktopLauncher;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
@@ -189,7 +187,6 @@ public class MapTool {
   private static String lastWhisperer;
 
   private static final MTWebAppServer webAppServer = new MTWebAppServer();
-  private static DesktopLauncher MapToolLwjglApplication;
 
   // Jamz: To support new command line parameters for multi-monitor support & enhanced PrintStream
   private static boolean debug = false;
@@ -199,8 +196,6 @@ public class MapTool {
   private static int windowHeight = -1;
   private static int windowX = -1;
   private static int windowY = -1;
-  private static boolean startLibGDX = false;
-  public static boolean libgdxLoaded = false;
 
   public static Dimension getThumbnailSize() {
     return THUMBNAIL_SIZE;
@@ -1168,24 +1163,6 @@ public class MapTool {
     return clientFrame;
   }
 
-  public static DesktopLauncher getApp() {
-    return MapToolLwjglApplication;
-  }
-
-  public static void loadBox2dTest() {
-    if (MapToolLwjglApplication == null) {
-      SwingUtilities.invokeLater(
-          new Runnable() {
-            public void run() {
-              MapToolLwjglApplication = new DesktopLauncher(clientFrame);
-              libgdxLoaded = true;
-            }
-          });
-    } else if (!MapToolLwjglApplication.isVisible()) {
-      MapToolLwjglApplication.setVisible(true);
-    }
-  }
-
   private static final void configureJide() {
     LookAndFeelFactory.UIDefaultsCustomizer uiDefaultsCustomizer =
         new LookAndFeelFactory.UIDefaultsCustomizer() {
@@ -1532,10 +1509,6 @@ public class MapTool {
     cmdOptions.addOption("m", "macros", false, "display defined list of macro functions");
     cmdOptions.addOption("r", "reset", false, "reset startup options to defaults");
 
-    // For libGDX testing
-    cmdOptions.addOption("l", "libgdx", false, "start & show libGDX application window");
-    startLibGDX = getCommandLineOption(cmdOptions, "libgdx", args);
-
     debug = getCommandLineOption(cmdOptions, "debug", args);
     version = getCommandLineOption(cmdOptions, "version", version, args);
     graphicsMonitor = getCommandLineOption(cmdOptions, "monitor", graphicsMonitor, args);
@@ -1744,27 +1717,6 @@ public class MapTool {
                   public void run() {
                     clientFrame.setVisible(true);
                     splash.hideSplashScreen();
-
-                    // Add a LibGDX App/window for testing
-                    if (startLibGDX) {
-                      SwingUtilities.invokeLater(
-                          new Runnable() {
-                            public void run() {
-                              MapToolLwjglApplication = new DesktopLauncher(clientFrame);
-                              libgdxLoaded = true;
-                            }
-                          });
-
-                      // LwjglApplicationConfiguration cfg = new
-                      // LwjglApplicationConfiguration();
-                      // cfg.title = MapToolGame.TITLE;
-                      // cfg.width = MapToolGame.SCREEN_WIDTH;
-                      // cfg.height = MapToolGame.SCREEN_HEIGHT;
-                      //
-                      // MapToolLwjglApplication = new LwjglApplication(new MapToolGame(),
-                      // cfg);
-                    }
-
                     EventQueue.invokeLater(
                         new Runnable() {
                           public void run() {

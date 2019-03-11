@@ -2967,18 +2967,6 @@ public class AppActions {
         }
       };
 
-  public static final Action SHOW_BOX2D_TEST =
-      new DefaultClientAction() {
-        {
-          init("Show Box2D Test");
-        }
-
-        @Override
-        public void execute(java.awt.event.ActionEvent e) {
-          MapTool.loadBox2dTest();
-        }
-      };
-
   public static final Action ADD_RESOURCE_TO_LIBRARY =
       new DefaultClientAction() {
         {
