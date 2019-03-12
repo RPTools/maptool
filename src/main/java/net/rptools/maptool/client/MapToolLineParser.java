@@ -1324,6 +1324,16 @@ public class MapToolLineParser {
                       BigDecimal.ONE.equals(resolver.getVariable("macro.catchAbort"));
                   if (!catchAbort) throw e;
                   output_text = "";
+                } catch (AssertFunctionException assertEx) {
+                  // required to catch assert that are not
+                  // in a (UDF)function call
+                  // but in a real "macro(...)" call
+                  log.debug(assertEx);
+                  boolean catchAssert =
+                      BigDecimal.ONE.equals(resolver.getVariable("macro.catchAssert"));
+                  if (!catchAssert) throw assertEx;
+                  MapTool.addLocalMessage(assertEx.getMessage());
+                  output_text = "";
                 }
 
                 if (output != Output.NONE) {
@@ -1445,9 +1455,18 @@ public class MapToolLineParser {
       result.setDetailExpression("");
       result.setValue("");
       return result;
-    } catch (AssertFunctionException afe) {
-      log.debug(afe);
-      throw afe;
+    } catch (AssertFunctionException e) {
+      log.debug(e);
+      boolean catchAssert = BigDecimal.ONE.equals(resolver.getVariable("macro.catchAssert"));
+      if (!catchAssert) throw e;
+      MapTool.addLocalMessage(e.getMessage());
+      
+      // return an empty result to not collide with tooltips
+      // when catching an assert`
+      Result result = new Result("");
+      result.setDetailExpression("");
+      result.setValue("");
+      return result;
     } catch (Exception e) {
       if (e.getCause() instanceof ParserException) {
         log.debug(e.getCause());
