@@ -41,10 +41,6 @@ applicationDefaultJvmArgs = ["-Xss4M"]
 
 // Custom properties
 ext {
-    gdxVersion = '1.9.6'
-    box2DLightsVersion = '1.4'
-    aiVersion = '1.8.1'
-
     // Get tag and commit info from Git to use for version numbering
     def repo = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
     def head = repo.head()
@@ -236,26 +232,10 @@ dependencies {
     // For simple xml work in Hero Lab integration
     compile group: 'com.jcabi', name: 'jcabi-xml', version: '0.18.1'			// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
 
-    // box2dlights test
-    compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-    compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-    compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
 
-    compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-    compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
-    compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
-
-    // https://mvnrepository.com/artifact/org.locationtech.jts/jts-core
+    // For some math functions used in the A* Pathfindinge
     // https://locationtech.github.io/jts/jts-features.html
-    compile group: 'org.locationtech.jts', name: 'jts-core', version: '1.15.0'
-
-    // Not in use at this time, left for easy reference later...
-    //compile "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
-    //compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-    //compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
-    compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
-    //compile "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
-
+    compile group: 'org.locationtech.jts', name: 'jts-core', version: '1.15.0'	// https://mvnrepository.com/artifact/org.locationtech.jts/jts-core
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the
     // testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
