@@ -19,9 +19,14 @@ import java.net.*;
 import java.util.Properties;
 import java.util.jar.*;
 import javax.swing.*;
-import net.rptools.maptool.util.HTTPUtil;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +42,7 @@ public class AppUpdate {
     // AppPreferences.setSkipAutoUpdate(false); // For testing only
     if (AppPreferences.getSkipAutoUpdate()) return false;
 
-    String response = null;
+    String responseBody = null;
     String jarCommit = null;
     String latestGitHubReleaseCommit = "";
     String latestGitHubReleaseTagName = "";
@@ -61,9 +66,17 @@ public class AppUpdate {
     }
 
     try {
-      response =
-          HTTPUtil.getJsonPaylod(getProperty(GIT_HUB_API_URL) + getProperty(GIT_HUB_OAUTH_TOKEN));
-      log.debug("Response: " + response);
+      Request request =
+          new Request.Builder()
+              .url(getProperty(GIT_HUB_API_URL) + getProperty(GIT_HUB_OAUTH_TOKEN))
+              .build();
+
+      Response response = new OkHttpClient().newCall(request).execute();
+      if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+      responseBody = response.body().string();
+
+      log.debug("GitHub API Response: " + responseBody);
     } catch (IOException e) {
       log.error("Unable to reach " + getProperty(GIT_HUB_API_URL), e.getLocalizedMessage());
       return false;
@@ -71,7 +84,7 @@ public class AppUpdate {
 
     JSONObject releases = new JSONObject();
     try {
-      releases = JSONObject.fromObject(response);
+      releases = JSONObject.fromObject(responseBody);
       latestGitHubReleaseCommit = releases.get("target_commitish").toString();
       log.info("target_commitish from GitHub: " + latestGitHubReleaseCommit);
       latestGitHubReleaseTagName = releases.get("tag_name").toString();
