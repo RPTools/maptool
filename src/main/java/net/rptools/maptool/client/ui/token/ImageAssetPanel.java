@@ -14,7 +14,9 @@
  */
 package net.rptools.maptool.client.ui.token;
 
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
+import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
@@ -59,6 +61,7 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
   private ImageObserver[] observers;
 
   private boolean allowEmpty = true;
+  private float opacity = 1.0f;
 
   public ImageAssetPanel() {
     new DropTarget(this, this);
@@ -143,6 +146,7 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
     repaint();
   }
 
+  
   @Override
   protected void paintComponent(Graphics g) {
     Dimension size = getSize();
@@ -161,7 +165,17 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
 
     Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
     SwingUtil.constrainTo(imgSize, size.width - 8, size.height - 8);
-
+        
+    // support opacity of the image
+    // setting JPanel background via alpha level to have opacity
+    // will not work for the image, therefore this is used explicitly
+    Composite originalComposite = null;
+    if (opacity != 1.0f) {
+      AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity);
+      originalComposite = ((Graphics2D) g).getComposite();
+      ((Graphics2D) g).setComposite(alphaComposite);
+    }
+    
     g.drawImage(
         image,
         (size.width - imgSize.width) / 2,
@@ -169,6 +183,19 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
         imgSize.width,
         imgSize.height,
         this);
+    
+    // restore original composite to make sure button etc are not opaque
+    if (originalComposite != null) { ((Graphics2D) g).setComposite(originalComposite); }
+  }
+
+  
+  
+  public float getOpacity() {
+    return opacity;
+  }
+
+  public void setOpacity(float opacity) {
+    this.opacity = opacity;
   }
 
   ////
