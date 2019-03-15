@@ -37,6 +37,8 @@ import java.awt.desktop.QuitHandler;
 import java.awt.desktop.QuitResponse;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
@@ -972,6 +974,46 @@ public class MapToolFrame extends DefaultDockableHolder
             }
           }
         });
+
+    tree.addKeyListener(
+        new KeyListener() {
+
+          @Override
+          public void keyTyped(KeyEvent e) {}
+
+          @Override
+          public void keyReleased(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+              // check to see if this is the required action
+              if (!MapTool.confirmDrawDelete()) {
+                return;
+              }
+              DrawnElement firstElement = null;
+              Set<GUID> selectedDrawSet = new HashSet<GUID>();
+              boolean topLevelOnly = true;
+              for (TreePath path : tree.getSelectionPaths()) {
+                if (path.getPathCount() != 3) topLevelOnly = false;
+                if (path.getLastPathComponent() instanceof DrawnElement) {
+                  DrawnElement de = (DrawnElement) path.getLastPathComponent();
+                  if (firstElement == null) {
+                    firstElement = de;
+                  }
+                  selectedDrawSet.add(de.getDrawable().getId());
+                }
+              }
+
+              for (GUID id : selectedDrawSet) {
+                MapTool.serverCommand().undoDraw(getCurrentZoneRenderer().getZone().getId(), id);
+              }
+              getCurrentZoneRenderer().repaint();
+              MapTool.getFrame().updateDrawTree();
+              MapTool.getFrame().refresh();
+            }
+          }
+
+          @Override
+          public void keyPressed(KeyEvent e) {}
+        });
     // Add mouse Event for right click menu
     tree.addMouseListener(
         new MouseAdapter() {
@@ -1073,6 +1115,79 @@ public class MapToolFrame extends DefaultDockableHolder
     tree.setModel(tokenPanelTreeModel);
     tree.setCellRenderer(new TokenPanelTreeCellRenderer());
     tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+
+    tree.addKeyListener(
+        new KeyListener() {
+
+          @Override
+          public void keyTyped(KeyEvent e) {}
+
+          @Override
+          public void keyReleased(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+              // check to see if this is the required action
+              if (!MapTool.confirmTokenDelete()) {
+                return;
+              }
+              Token firstToken = null;
+              Set<GUID> selectedTokenSet = new HashSet<GUID>();
+              for (TreePath path : tree.getSelectionPaths()) {
+                if (path.getLastPathComponent() instanceof Token) {
+                  Token token = (Token) path.getLastPathComponent();
+                  if (firstToken == null) {
+                    firstToken = token;
+                  }
+                  if (AppUtil.playerOwns(token)) {
+                    selectedTokenSet.add(token.getId());
+                  }
+                }
+              }
+
+              boolean unhideImpersonated = false;
+              boolean unhideSelected = false;
+              if (getCurrentZoneRenderer().getSelectedTokenSet().size() > 10) {
+                if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.IMPERSONATED).isHidden()
+                    == false) {
+                  unhideImpersonated = true;
+                  MapTool.getFrame()
+                      .getDockingManager()
+                      .hideFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
+                }
+                if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.SELECTION).isHidden()
+                    == false) {
+                  unhideSelected = true;
+                  MapTool.getFrame()
+                      .getDockingManager()
+                      .hideFrame(MapToolFrame.MTFrame.SELECTION.name());
+                }
+              }
+              for (GUID tokenGUID : selectedTokenSet) {
+                Token token = getCurrentZoneRenderer().getZone().getToken(tokenGUID);
+
+                if (AppUtil.playerOwns(token)) {
+                  getCurrentZoneRenderer().getZone().removeToken(tokenGUID);
+                  MapTool.serverCommand()
+                      .removeToken(getCurrentZoneRenderer().getZone().getId(), tokenGUID);
+                }
+              }
+              if (unhideImpersonated) {
+                MapTool.getFrame()
+                    .getDockingManager()
+                    .showFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
+              }
+
+              if (unhideSelected) {
+                MapTool.getFrame()
+                    .getDockingManager()
+                    .showFrame(MapToolFrame.MTFrame.SELECTION.name());
+              }
+            }
+          }
+
+          @Override
+          public void keyPressed(KeyEvent e) {}
+        });
+
     tree.addMouseListener(
         new MouseAdapter() {
           // TODO: Make this a handler class, not an aic
