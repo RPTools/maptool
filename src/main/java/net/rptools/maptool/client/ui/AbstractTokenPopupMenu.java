@@ -421,7 +421,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ResetSizeAction extends AbstractAction {
     public ResetSizeAction() {
-      //putValue(Action.NAME, tokenUnderMouse.isStamp() ? "Free Size" : "Native Size");
+      // putValue(Action.NAME, tokenUnderMouse.isStamp() ? "Free Size" : "Native Size");
       putValue(Action.NAME, "Reset Size");
     }
 
@@ -431,14 +431,15 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (token == null) {
           continue;
         }
-        token.setFootprint(renderer.getZone().getGrid(), renderer.getZone().getGrid().getDefaultFootprint() );
+        token.setFootprint(
+            renderer.getZone().getGrid(), renderer.getZone().getGrid().getDefaultFootprint());
         token.setSnapToScale(true);
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
       }
       renderer.repaint();
     }
   }
-  
+
   public class CopyAction extends AbstractAction {
     public CopyAction() {
       putValue(Action.NAME, I18N.getText("action.copyTokens"));
