@@ -38,11 +38,13 @@ public class WindowPreferences extends WindowAdapter {
   private static final String KEY_Y = "y";
   private static final String KEY_WIDTH = "width";
   private static final String KEY_HEIGHT = "height";
+  private static final String KEY_MAXIMIZED = "maximized";
 
   private static int DEFAULT_X;
   private static int DEFAULT_Y;
   private static int DEFAULT_WIDTH;
   private static int DEFAULT_HEIGHT;
+  private static boolean DEFAULT_MAXIMIZED = false;
 
   /**
    * Creates an object that holds the window boundary information after storing it into {@link
@@ -61,6 +63,7 @@ public class WindowPreferences extends WindowAdapter {
     DEFAULT_Y = window.getLocation().y;
     DEFAULT_WIDTH = window.getSize().width;
     DEFAULT_HEIGHT = window.getSize().height;
+    DEFAULT_MAXIMIZED = ((Frame) window).getExtendedState() == Frame.MAXIMIZED_BOTH;
 
     restorePreferences(window);
     window.addWindowListener(this);
@@ -112,22 +115,31 @@ public class WindowPreferences extends WindowAdapter {
     prefs.putInt(KEY_HEIGHT, height);
   }
 
+  protected boolean getMaximized() {
+    return prefs.getBoolean(KEY_MAXIMIZED, DEFAULT_MAXIMIZED);
+  }
+
+  protected void setMaximized(boolean maximized) {
+    prefs.putBoolean(KEY_MAXIMIZED, maximized);
+  }
+
   protected void storePreferences(Window window) {
 
     JFrame frame = (JFrame) window;
     if (frame.getExtendedState() == Frame.MAXIMIZED_BOTH) {
       // support full screen when storing preferences
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
       setX(0);
       setY(0);
-      setWidth(screenSize.width);
-      setHeight(screenSize.height);
+      setWidth(frame.getWidth());
+      setHeight(frame.getHeight());
+      setMaximized(true);
     } else {
       setX(frame.getLocation().x);
       setY(frame.getLocation().y);
 
       setWidth(frame.getSize().width);
       setHeight(frame.getSize().height);
+      setMaximized(false);
     }
   }
 
@@ -137,13 +149,11 @@ public class WindowPreferences extends WindowAdapter {
     int x = Math.max(Math.min(getX(), screenSize.width - getWidth()), 0);
     int y = Math.max(Math.min(getY(), screenSize.height - getHeight()), 0);
 
-    if (screenSize.width == getWidth() && screenSize.height == getHeight()) {
-      frame.setLocation(0, 0);
-      frame.setSize(getWidth(), getHeight());
+    frame.setSize(getWidth(), getHeight());
+    frame.setLocation(x, y);
+
+    if (getMaximized()) {
       ((JFrame) frame).setExtendedState(Frame.MAXIMIZED_BOTH);
-    } else {
-      frame.setSize(getWidth(), getHeight());
-      frame.setLocation(x, y);
     }
   }
 
