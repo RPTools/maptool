@@ -20,10 +20,8 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-
 import javax.swing.JFrame;
 
 /**
@@ -116,7 +114,7 @@ public class WindowPreferences extends WindowAdapter {
 
   protected void storePreferences(Window window) {
 
-    JFrame frame = (JFrame)window;
+    JFrame frame = (JFrame) window;
     if (frame.getExtendedState() == Frame.MAXIMIZED_BOTH) {
       // support full screen when storing preferences
       Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -127,7 +125,7 @@ public class WindowPreferences extends WindowAdapter {
     } else {
       setX(frame.getLocation().x);
       setY(frame.getLocation().y);
-  
+
       setWidth(frame.getSize().width);
       setHeight(frame.getSize().height);
     }
@@ -138,11 +136,11 @@ public class WindowPreferences extends WindowAdapter {
 
     int x = Math.max(Math.min(getX(), screenSize.width - getWidth()), 0);
     int y = Math.max(Math.min(getY(), screenSize.height - getHeight()), 0);
-    
+
     if (screenSize.width == getWidth() && screenSize.height == getHeight()) {
       frame.setLocation(0, 0);
       frame.setSize(getWidth(), getHeight());
-      ((JFrame)frame).setExtendedState(Frame.MAXIMIZED_BOTH);
+      ((JFrame) frame).setExtendedState(Frame.MAXIMIZED_BOTH);
     } else {
       frame.setSize(getWidth(), getHeight());
       frame.setLocation(x, y);
