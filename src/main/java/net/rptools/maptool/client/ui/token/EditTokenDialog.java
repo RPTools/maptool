@@ -185,7 +185,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   public void bind(final Token token) {
     // ICON
     getTokenIconPanel().setImageId(token.getImageAssetId());
-    
+
     // PROPERTIES
     updatePropertyTypeCombo();
     updatePropertiesTable(token.getPropertyType());

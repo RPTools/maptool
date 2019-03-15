@@ -146,7 +146,6 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
     repaint();
   }
 
-  
   @Override
   protected void paintComponent(Graphics g) {
     Dimension size = getSize();
@@ -165,7 +164,7 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
 
     Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
     SwingUtil.constrainTo(imgSize, size.width - 8, size.height - 8);
-        
+
     // support opacity of the image
     // setting JPanel background via alpha level to have opacity
     // will not work for the image, therefore this is used explicitly
@@ -175,7 +174,7 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
       originalComposite = ((Graphics2D) g).getComposite();
       ((Graphics2D) g).setComposite(alphaComposite);
     }
-    
+
     g.drawImage(
         image,
         (size.width - imgSize.width) / 2,
@@ -183,13 +182,13 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
         imgSize.width,
         imgSize.height,
         this);
-    
+
     // restore original composite to make sure button etc are not opaque
-    if (originalComposite != null) { ((Graphics2D) g).setComposite(originalComposite); }
+    if (originalComposite != null) {
+      ((Graphics2D) g).setComposite(originalComposite);
+    }
   }
 
-  
-  
   public float getOpacity() {
     return opacity;
   }
