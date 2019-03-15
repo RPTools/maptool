@@ -47,6 +47,8 @@ import net.sf.json.JSONObject;
  * in VBL
  *
  * <p>getVBL(jsonArray) :: Get the VBL for a given area and return as array of points
+ *
+ * <p>transferVBL(direction[, delete][, tokenId] :: move or copy VBL between token and VBL layer
  */
 public class VBL_Functions extends AbstractFunction {
   private static final VBL_Functions instance = new VBL_Functions();
@@ -54,7 +56,7 @@ public class VBL_Functions extends AbstractFunction {
   private static final String[] paramScale = new String[] {"sx", "sy"};
 
   private VBL_Functions() {
-    super(0, 2, "drawVBL", "eraseVBL", "getVBL", "getTokenVBL", "setTokenVBL", "transferVBL");
+    super(0, 3, "drawVBL", "eraseVBL", "getVBL", "getTokenVBL", "setTokenVBL", "transferVBL");
   }
 
   public static VBL_Functions getInstance() {
@@ -286,7 +288,7 @@ public class VBL_Functions extends AbstractFunction {
     if (functionName.equals("transferVBL")) {
       Token token = null;
 
-      if (parameters.size() > 2)
+      if (parameters.size() > 3)
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.tooManyParam", functionName, 1, parameters.size()));
@@ -299,8 +301,11 @@ public class VBL_Functions extends AbstractFunction {
       if (!MapTool.getParser().isMacroPathTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
-      if (parameters.size() == 2) {
-        token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
+      // make sure only to check the last parameter as token if it is not the BigDecimal for delete
+      if (parameters.size() >= 2
+          && (!(parameters.get(parameters.size() - 1) instanceof BigDecimal))) {
+        token =
+            FindTokenFunctions.findToken(parameters.get(parameters.size() - 1).toString(), null);
 
         if (token == null) {
           throw new ParserException(
@@ -309,13 +314,18 @@ public class VBL_Functions extends AbstractFunction {
                   "getTokenVBL",
                   parameters.get(0).toString()));
         }
-      } else if (parameters.size() == 1) {
+      } else {
         MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
         token = res.getTokenInContext();
         if (token == null) {
           throw new ParserException(
-              I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
+              I18N.getText("macro.function.general.noImpersonated", "transferVBL"));
         }
+      }
+
+      boolean delete = false;
+      if (parameters.size() >= 2 && BigDecimal.ONE.equals(parameters.get(1))) {
+        delete = true;
       }
 
       Object val = parameters.get(0);
@@ -335,8 +345,15 @@ public class VBL_Functions extends AbstractFunction {
 
       if (vblFromToken) {
         TokenVBL.renderVBL(renderer, token.getTransformedVBL(), false);
+        if (delete) {
+          token.setVBL(null);
+        }
       } else {
+        Area vbl = TokenVBL.getVBL_underToken(renderer, token);
         token.setVBL(TokenVBL.getMapVBL_transformed(renderer, token));
+        if (delete) {
+          TokenVBL.renderVBL(renderer, vbl, true);
+        }
       }
     }
 
