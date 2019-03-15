@@ -15,12 +15,16 @@
 package net.rptools.lib.swing.preference;
 
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+
+import javax.swing.JFrame;
 
 /**
  * Automatically keeps track of and restores frame size when opening/closing the application.
@@ -110,12 +114,23 @@ public class WindowPreferences extends WindowAdapter {
     prefs.putInt(KEY_HEIGHT, height);
   }
 
-  protected void storePreferences(Window frame) {
-    setX(frame.getLocation().x);
-    setY(frame.getLocation().y);
+  protected void storePreferences(Window window) {
 
-    setWidth(frame.getSize().width);
-    setHeight(frame.getSize().height);
+    JFrame frame = (JFrame)window;
+    if (frame.getExtendedState() == Frame.MAXIMIZED_BOTH) {
+      // support full screen when storing preferences
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      setX(0);
+      setY(0);
+      setWidth(screenSize.width);
+      setHeight(screenSize.height);
+    } else {
+      setX(frame.getLocation().x);
+      setY(frame.getLocation().y);
+  
+      setWidth(frame.getSize().width);
+      setHeight(frame.getSize().height);
+    }
   }
 
   protected void restorePreferences(Window frame) {
@@ -123,9 +138,15 @@ public class WindowPreferences extends WindowAdapter {
 
     int x = Math.max(Math.min(getX(), screenSize.width - getWidth()), 0);
     int y = Math.max(Math.min(getY(), screenSize.height - getHeight()), 0);
-
-    frame.setSize(getWidth(), getHeight());
-    frame.setLocation(x, y);
+    
+    if (screenSize.width == getWidth() && screenSize.height == getHeight()) {
+      frame.setLocation(0, 0);
+      frame.setSize(getWidth(), getHeight());
+      ((JFrame)frame).setExtendedState(Frame.MAXIMIZED_BOTH);
+    } else {
+      frame.setSize(getWidth(), getHeight());
+      frame.setLocation(x, y);
+    }
   }
 
   ////
