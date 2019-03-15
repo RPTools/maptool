@@ -61,6 +61,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "setLayer",
         "getSize",
         "setSize",
+        "resetSize",
         "getOwners",
         "isOwnedByAll",
         "isOwner",
@@ -268,6 +269,13 @@ public class TokenPropertyFunctions extends AbstractFunction {
       checkNumberOfParameters(functionName, parameters, 1, 2);
       Token token = getTokenFromParam(resolver, functionName, parameters, 1);
       return setSize(token, parameters.get(0).toString());
+    }
+
+    if (functionName.equals("resetSize")) {
+      checkNumberOfParameters(functionName, parameters, 0, 1);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      resetSize(token);
+      return "";
     }
 
     /*
@@ -887,6 +895,19 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
     throw new ParserException(
         I18N.getText("macro.function.tokenProperty.invalidSize", "setSize", size));
+  }
+
+  /**
+   * Resets the size of the token.
+   *
+   * @param token The token to reset the size of.
+   */
+  private void resetSize(Token token) {
+    token.setSnapToScale(true);
+    ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
+    Zone zone = renderer.getZone();
+    Grid grid = zone.getGrid();
+    token.setFootprint(grid, grid.getDefaultFootprint());
   }
 
   /**
