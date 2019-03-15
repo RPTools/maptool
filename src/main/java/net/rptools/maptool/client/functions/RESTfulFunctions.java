@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 
+import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -75,208 +78,200 @@ public class RESTfulFunctions extends AbstractFunction {
     if (!AppPreferences.getAllowExternalMacroAccess())
       throw new ParserException(I18N.getText("macro.function.general.accessDenied", functionName));
 
-    if (parameters.size() == 0)
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
+    // Check do we need this?
+    checkParameters(functionName, parameters, 1, 5);
 
     // Send GET Request to URL
-    String baseURL = parameters.get(0).toString();
-    String responseString = "";
+    if (functionName.equals("REST.get")) return restGet(functionName, parameters);
 
-    /**
-     * REST.get does a RESTful GET request using OkHttp
-     *
-     * <p>String(url) :: Sets the URL target of this request.
-     *
-     * <p>boolean(fullResponse) :: If true, will return full response data as JSON
-     */
-    if (functionName.equals("REST.get")) {
-      if (parameters.size() > 2)
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
-
-      // Special case, syrinscape URI use java.awt.Desktop to launch URI
-      if (baseURL.startsWith("syrinscape")) {
-        if (parameters.size() != 1)
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
-
-        launchSyrinscape(baseURL);
-      }
-
-      // Full Response requested?
-      boolean fullResponse = false;
-      if (parameters.size() == 2)
-        fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(1));
-
-      // Make the RESTful Get Request using OkHttp
-      Request request = new Request.Builder().url(baseURL).build();
-
-      // Check the response...
-      try (Response response = client.newCall(request).execute()) {
-        if (!response.isSuccessful() && !fullResponse)
-          throw new ParserException(
-              I18N.getText("macro.function.rest.error.response", functionName, response.code()));
-
-        if (fullResponse) {
-          responseString = gson.toJson(new RestResponseObj(response));
-        } else {
-          responseString = response.body().string();
-        }
-      } catch (IllegalArgumentException | IOException e) {
-        throw new ParserException(I18N.getText("macro.function.rest.error", functionName));
-      }
-
-      return responseString;
-    }
-
-    /**
-     * REST.post does a RESTful POST request using OkHttp
-     *
-     * <p>String(url) :: Sets the URL target of this request.
-     *
-     * <p>String(payload) :: Sets payload of the request.
-     *
-     * <p>String(content-type) :: Sets content-type of the request.
-     *
-     * <p>boolean(fullResponse) :: If true, will return full response data as JSON
-     */
     if (functionName.equals("REST.post")
         || functionName.equals("REST.put")
         || functionName.equals("REST.patch")
-        || functionName.equals("REST.delete")) {
-      if (parameters.size() < 3 || parameters.size() > 4)
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
-
-      // Get the Payload to POST
-      String payload = parameters.get(1).toString();
-
-      MediaType mediaType = MediaType.parse(parameters.get(2).toString());
-      // Full Response requested?
-      boolean fullResponse = false;
-      if (parameters.size() == 4)
-        fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(3));
-
-      Request request;
-
-      if (functionName.equals("REST.post"))
-        request =
-            new Request.Builder().url(baseURL).post(RequestBody.create(mediaType, payload)).build();
-      else if (functionName.equals("REST.put"))
-        request =
-            new Request.Builder().url(baseURL).put(RequestBody.create(mediaType, payload)).build();
-      else if (functionName.equals("REST.patch"))
-        request =
-            new Request.Builder()
-                .url(baseURL)
-                .patch(RequestBody.create(mediaType, payload))
-                .build();
-      else if (functionName.equals("REST.delete"))
-        request =
-            new Request.Builder()
-                .url(baseURL)
-                .delete(RequestBody.create(mediaType, payload))
-                .build();
-      else
-        throw new ParserException(
-            I18N.getText("macro.function.rest.error.unknown", functionName, 1, parameters.size()));
-
-      try (Response response = client.newCall(request).execute()) {
-        if (!response.isSuccessful() && !fullResponse)
-          throw new ParserException(
-              I18N.getText("macro.function.rest.error.response", functionName, response.code()));
-
-        if (fullResponse) {
-          responseString = gson.toJson(new RestResponseObj(response));
-        } else {
-          responseString = response.body().string();
-        }
-
-      } catch (IllegalArgumentException | IOException e) {
-        throw new ParserException(I18N.getText("macro.function.rest.error", functionName));
-      }
-
-      return responseString;
-    }
-
-    //    /**
-    //     * REST.put does a RESTful put request using OkHttp
-    //     *
-    //     * <p>String(url) :: Sets the URL target of this request.
-    //     *
-    //     * <p>String(payload) :: Sets payload of the request.
-    //     *
-    //     * <p>String(mediaType) :: Sets payload of the request.
-    //     *
-    //     * <p>boolean(fullResponse) :: If true, will return full response data as JSON
-    //     */
-    //    if (functionName.equals("REST.put")) {
-    //      if (parameters.size() < 3 || parameters.size() > 4)
-    //        throw new ParserException(
-    //            I18N.getText(
-    //                "macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
-    //
-    //      // Get the Payload to POST
-    //      String payload = parameters.get(1).toString();
-    //      Map<String, String> params = new HashMap<String, String>();
-    //
-    //      MediaType mediaType = MediaType.parse(parameters.get(1).toString());
-    //      // Full Response requested?
-    //      boolean fullResponse = false;
-    //      if (parameters.size() == 4)
-    //        fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(1));
-    //
-    //      //  Make an RESTful POST Request using OkHttp
-    //      Request request =
-    //          new Request.Builder().url(baseURL).put(RequestBody.create(mediaType,
-    // payload)).build();
-    //
-    //      try (Response response = client.newCall(request).execute()) {
-    //        if (!response.isSuccessful() && !fullResponse)
-    //          throw new ParserException(
-    //              I18N.getText("macro.function.rest.error.response", functionName,
-    // response.code()));
-    //
-    //        if (fullResponse) {
-    //          responseString = gson.toJson(new RestResponseObj(response));
-    //        } else {
-    //          responseString = response.body().string();
-    //        }
-    //
-    //      } catch (IllegalArgumentException | IOException e) {
-    //        log.error("GSON: ", e);
-    //        //        throw new ParserException(I18N.getText("macro.function.rest.error",
-    //        // functionName));
-    //      }
-    //
-    //      return responseString;
-    //    }
-
-    return "No Response";
+        || functionName.equals("REST.delete"))
+      return makeRestfulClientCall(functionName, parameters);
+    else
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
-  private BigDecimal launchSyrinscape(String URI) {
+  /**
+   * Performs a RESTful GET request using OkHttp
+   *
+   * @param functionName
+   * @param parameters include baseURL and if full response is requested
+   * @return HTTP response as JSON
+   * @throws ParserException
+   */
+  private Object restGet(String functionName, List<Object> parameters) throws ParserException {
+    checkParameters(functionName, parameters, 1, 3);
+
+    String baseURL = parameters.get(0).toString();
+    Map<String, List<String>> headerMap = new HashMap<String, List<String>>();
+    boolean fullResponse = false;
+
+    // Special case, syrinscape URI use java.awt.Desktop to launch URI
+    if (baseURL.startsWith("syrinscape")) {
+      checkParameters(functionName, parameters, 1, 1);
+      return launchSyrinscape(baseURL);
+    }
+
+    if (parameters.size() == 2) {
+      if (parameters.get(1) instanceof BigDecimal)
+        fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(1));
+      else
+        headerMap =
+            gson.fromJson(
+                (String) parameters.get(1),
+                new TypeToken<Map<String, List<String>>>() {}.getType());
+    }
+
+    if (parameters.size() == 3) {
+      headerMap =
+          gson.fromJson(
+              (String) parameters.get(1), new TypeToken<Map<String, List<String>>>() {}.getType());
+      fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(2));
+    }
+
+    Request request;
+
+    if (headerMap.isEmpty()) {
+      request = new Request.Builder().url(baseURL).build();
+    } else {
+      request = new Request.Builder().build();
+      Headers.Builder headersBuilder = request.headers().newBuilder();
+     
+      for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
+        String name = entry.getKey();
+        List<String> values = entry.getValue();
+        for (String value : values) headersBuilder.add(name, value);
+      }
+
+      request = new Request.Builder().url(baseURL).headers(headersBuilder.build()).build();
+    }
+
+    // Execute the call and check the response...
+    try (Response response = client.newCall(request).execute()) {
+      if (!response.isSuccessful() && !fullResponse)
+        throw new ParserException(
+            I18N.getText("macro.function.rest.error.response", functionName, response.code()));
+
+      if (fullResponse) {
+        return gson.toJson(new RestResponseObj(response));
+      } else {
+        return response.body().string();
+      }
+    } catch (IllegalArgumentException | IOException e) {
+      throw new ParserException(I18N.getText("macro.function.rest.error", functionName));
+    }
+  }
+
+  /**
+   * Performs a RESTful POST, PATCH, PUT, or DELETE request using OkHttp
+   *
+   * @param functionName
+   * @param parameters include baseURL and if full response is requested
+   * @return HTTP response as JSON
+   * @throws ParserException
+   */
+  private Object makeRestfulClientCall(String functionName, List<Object> parameters)
+      throws ParserException {
+    checkParameters(functionName, parameters, 3, 4);
+
+    Request request;
+    String baseURL = parameters.get(0).toString();
+    String payload = parameters.get(1).toString();
+    MediaType mediaType = MediaType.parse(parameters.get(2).toString());
+
+    // Full Response requested?
+    boolean fullResponse = false;
+    if (parameters.size() == 4)
+      fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(3));
+
+    if (functionName.equals("REST.post"))
+      request =
+          new Request.Builder().url(baseURL).post(RequestBody.create(mediaType, payload)).build();
+    else if (functionName.equals("REST.put"))
+      request =
+          new Request.Builder().url(baseURL).put(RequestBody.create(mediaType, payload)).build();
+    else if (functionName.equals("REST.patch"))
+      request =
+          new Request.Builder().url(baseURL).patch(RequestBody.create(mediaType, payload)).build();
+    else if (functionName.equals("REST.delete") && payload.isEmpty())
+      request = new Request.Builder().url(baseURL).delete().build();
+    else if (functionName.equals("REST.delete") && !payload.isEmpty())
+      request =
+          new Request.Builder().url(baseURL).delete(RequestBody.create(mediaType, payload)).build();
+    else
+      throw new ParserException(
+          I18N.getText("macro.function.rest.error.unknown", functionName, parameters.size()));
+
+    try (Response response = client.newCall(request).execute()) {
+      if (!response.isSuccessful() && !fullResponse)
+        throw new ParserException(
+            I18N.getText("macro.function.rest.error.response", functionName, response.code()));
+
+      if (fullResponse) return gson.toJson(new RestResponseObj(response));
+      else return response.body().string();
+
+    } catch (IllegalArgumentException | IOException e) {
+      throw new ParserException(I18N.getText("macro.function.rest.error", functionName));
+    }
+  }
+
+  /*
+   * @param parameters include baseURL and if full response is requested
+   * @return HTTP response as JSON
+   * @throws ParserException
+   */
+  private BigDecimal launchSyrinscape(String baseURL) throws ParserException {
     if (!AppPreferences.getSyrinscapeActive()) return BigDecimal.ZERO;
 
-    URI uri = null;
+    URI uri;
 
     if (Desktop.isDesktopSupported()) {
       try {
-        uri = new URI(URI);
+        uri = new URI(baseURL);
         Desktop.getDesktop().browse(uri);
       } catch (IOException | URISyntaxException e) {
-        e.printStackTrace();
+        throw new ParserException(I18N.getText("macro.function.rest.syrinscape.error"));
       }
     }
 
     return BigDecimal.ONE;
   }
 
+  /**
+   * @param function's name
+   * @param parameters passed into the function call
+   * @param min number of parameters required
+   * @param max number of parameters required
+   * @throws ParserException
+   */
+  private void checkParameters(String functionName, List<Object> parameters, int min, int max)
+      throws ParserException {
+
+    if (min == max) {
+      if (parameters.size() != max)
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.general.wrongNumParam", functionName, max, parameters.size()));
+
+    } else {
+      if (parameters.size() < min)
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.general.notEnoughParam", functionName, min, parameters.size()));
+
+      if (parameters.size() > max)
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.general.tooManyParam", functionName, max, parameters.size()));
+    }
+  }
+
+  /*
+   * A POJO to hold an HTTP Response object to marshal as a JSON object
+   */
   private final class RestResponseObj {
     private final int status;
     private final String message;
