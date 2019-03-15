@@ -78,12 +78,13 @@ public class RESTfulFunctions extends AbstractFunction {
     checkParameters(functionName, parameters, 1, 5);
 
     // Send GET Request to URL
-    if (functionName.equals("REST.get")) return restGet(functionName, parameters);
+    if (functionName.equalsIgnoreCase("REST.get"))
+      return makeGetRestfulClientCall(functionName, parameters);
 
-    if (functionName.equals("REST.post")
-        || functionName.equals("REST.put")
-        || functionName.equals("REST.patch")
-        || functionName.equals("REST.delete"))
+    if (functionName.equalsIgnoreCase("REST.post")
+        || functionName.equalsIgnoreCase("REST.put")
+        || functionName.equalsIgnoreCase("REST.patch")
+        || functionName.equalsIgnoreCase("REST.delete"))
       return makeRestfulClientCall(functionName, parameters);
     else
       throw new ParserException(
@@ -98,9 +99,11 @@ public class RESTfulFunctions extends AbstractFunction {
    * @return HTTP response as JSON
    * @throws ParserException
    */
-  private Object restGet(String functionName, List<Object> parameters) throws ParserException {
+  private Object makeGetRestfulClientCall(String functionName, List<Object> parameters)
+      throws ParserException {
     checkParameters(functionName, parameters, 1, 3);
 
+    Request request;
     String baseURL = parameters.get(0).toString();
     Map<String, List<String>> headerMap = new HashMap<String, List<String>>();
     boolean fullResponse = false;
@@ -127,8 +130,6 @@ public class RESTfulFunctions extends AbstractFunction {
               (String) parameters.get(1), new TypeToken<Map<String, List<String>>>() {}.getType());
       fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(2));
     }
-
-    Request request;
 
     if (headerMap.isEmpty()) {
       request = new Request.Builder().url(baseURL).build();
@@ -157,12 +158,14 @@ public class RESTfulFunctions extends AbstractFunction {
         return response.body().string();
       }
     } catch (IllegalArgumentException | IOException e) {
-      throw new ParserException(I18N.getText("macro.function.rest.error", functionName));
+      log.debug("FUNCTION makeGetRestfulClientCall error!", e);
+      throw new ParserException(I18N.getText("macro.function.rest.error.unknown", functionName, e));
     }
   }
 
   /**
-   * Performs a RESTful POST, PATCH, PUT, or DELETE request using OkHttp
+   * Performs a RESTful POST, PATCH, PUT, or DELETE request using OkHttp Minimum requirements are
+   * URL, Payload, & MediaType Optional parameters are Headers & Full Response
    *
    * @param functionName
    * @param parameters include baseURL and if full response is requested
@@ -171,17 +174,47 @@ public class RESTfulFunctions extends AbstractFunction {
    */
   private Object makeRestfulClientCall(String functionName, List<Object> parameters)
       throws ParserException {
-    checkParameters(functionName, parameters, 3, 4);
+    checkParameters(functionName, parameters, 3, 5);
 
     Request request;
+    Map<String, List<String>> headerMap = new HashMap<String, List<String>>();
+    boolean fullResponse = false;
+
     String baseURL = parameters.get(0).toString();
     String payload = parameters.get(1).toString();
     MediaType mediaType = MediaType.parse(parameters.get(2).toString());
 
-    // Full Response requested?
-    boolean fullResponse = false;
-    if (parameters.size() == 4)
-      fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(3));
+    if (parameters.size() == 4) {
+      if (parameters.get(3) instanceof BigDecimal)
+        fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(3));
+      else
+        headerMap =
+            gson.fromJson(
+                (String) parameters.get(3),
+                new TypeToken<Map<String, List<String>>>() {}.getType());
+    }
+
+    if (parameters.size() == 5) {
+      headerMap =
+          gson.fromJson(
+              (String) parameters.get(3), new TypeToken<Map<String, List<String>>>() {}.getType());
+      fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(4));
+    }
+
+    if (headerMap.isEmpty()) {
+      request = new Request.Builder().url(baseURL).build();
+    } else {
+      request = new Request.Builder().build();
+      Headers.Builder headersBuilder = request.headers().newBuilder();
+
+      for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
+        String name = entry.getKey();
+        List<String> values = entry.getValue();
+        for (String value : values) headersBuilder.add(name, value);
+      }
+
+      request = new Request.Builder().url(baseURL).headers(headersBuilder.build()).build();
+    }
 
     if (functionName.equals("REST.post"))
       request =
@@ -199,7 +232,7 @@ public class RESTfulFunctions extends AbstractFunction {
           new Request.Builder().url(baseURL).delete(RequestBody.create(mediaType, payload)).build();
     else
       throw new ParserException(
-          I18N.getText("macro.function.rest.error.unknown", functionName, parameters.size()));
+          I18N.getText("macro.function.general.unknownFunction", functionName));
 
     try (Response response = client.newCall(request).execute()) {
       if (!response.isSuccessful() && !fullResponse)
@@ -210,7 +243,7 @@ public class RESTfulFunctions extends AbstractFunction {
       else return response.body().string();
 
     } catch (IllegalArgumentException | IOException e) {
-      throw new ParserException(I18N.getText("macro.function.rest.error", functionName));
+      throw new ParserException(I18N.getText("macro.function.rest.error.unknown", functionName, e));
     }
   }
 
