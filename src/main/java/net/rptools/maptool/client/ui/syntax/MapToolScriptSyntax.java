@@ -30,6 +30,8 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     "bar.name",
     "macro.args",
     "macro.return",
+    "macro.catchAbort",
+    "macro.catchAssert",
     "roll.count",
     "roll.result",
     "state.name",
