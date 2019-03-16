@@ -113,6 +113,7 @@ public class RESTfulFunctions extends AbstractFunction {
     Request request;
     String baseURL = parameters.get(0).toString();
     Map<String, List<String>> headerMap = getHeaderMap(parameters, 1);
+    Headers headers = buildHeaders(headerMap);
 
     // Special case, syrinscape URI use java.awt.Desktop to launch URI
     if (baseURL.startsWith("syrinscape")) {
@@ -131,10 +132,9 @@ public class RESTfulFunctions extends AbstractFunction {
     // If we need to add headers then rebuild a new request with new headers
     if (!headerMap.isEmpty())
       if (functionName.equalsIgnoreCase("REST.get"))
-        request = new Request.Builder().url(baseURL).headers(buildHeaders(headerMap)).build();
+        request = new Request.Builder().url(baseURL).headers(headers).build();
       else if (functionName.equalsIgnoreCase("REST.delete"))
-        request =
-            new Request.Builder().url(baseURL).headers(buildHeaders(headerMap)).delete().build();
+        request = new Request.Builder().url(baseURL).headers(headers).delete().build();
       else
         throw new ParserException(
             I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -161,6 +161,7 @@ public class RESTfulFunctions extends AbstractFunction {
     String payload = parameters.get(1).toString();
     MediaType mediaType = MediaType.parse(parameters.get(2).toString());
     Map<String, List<String>> headerMap = getHeaderMap(parameters, 3);
+    Headers headers = buildHeaders(headerMap);
 
     // Build out the request body
     RequestBody requestBody = RequestBody.create(mediaType, payload);
@@ -179,16 +180,13 @@ public class RESTfulFunctions extends AbstractFunction {
         throw new ParserException(
             I18N.getText("macro.function.general.unknownFunction", functionName));
     } else {
-      // We need a request to create headers, seems stupid, could find another way...
-      Headers headers = buildHeaders(headerMap);
-
       // Now build request with headers
       if (functionName.equals("REST.post"))
-        request = new Request.Builder().url(baseURL).post(requestBody).headers(headers).build();
+        request = new Request.Builder().url(baseURL).headers(headers).post(requestBody).build();
       else if (functionName.equals("REST.put"))
-        request = new Request.Builder().url(baseURL).put(requestBody).headers(headers).build();
+        request = new Request.Builder().url(baseURL).headers(headers).put(requestBody).build();
       else if (functionName.equals("REST.patch"))
-        request = new Request.Builder().url(baseURL).patch(requestBody).headers(headers).build();
+        request = new Request.Builder().url(baseURL).headers(headers).patch(requestBody).build();
     }
 
     return executeClientCall(functionName, request, isFullResponseRequested(parameters));
@@ -220,22 +218,16 @@ public class RESTfulFunctions extends AbstractFunction {
     }
   }
 
-  /**
-   * @param headerMap
-   * @return Headers
-   */
   private Headers buildHeaders(Map<String, List<String>> headerMap) {
-    Request request = new Request.Builder().build();
-    Headers.Builder headersBuilder = request.headers().newBuilder();
+    Headers.Builder headerBuilder = new Headers.Builder();
 
     for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
       String name = entry.getKey();
       List<String> values = entry.getValue();
-      for (String value : values) headersBuilder.add(name, value);
+      for (String value : values) headerBuilder.add(name, value);
     }
 
-    Headers headers = headersBuilder.build();
-    return headers;
+    return headerBuilder.build();
   }
 
   private boolean isLastParamBoolean(List<Object> parameters) {
