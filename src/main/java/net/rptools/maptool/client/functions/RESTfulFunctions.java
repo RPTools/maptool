@@ -41,12 +41,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * New class extending AbstractFunction to create new "Macro Functions" REST.get & REST.post
+ * RESTful based functions REST.get, REST.post, REST.put, REST.patch, REST.delete
  *
- * <p>REST.get(URL) :: Takes a URL as a string and sends a GET request, returning HTTP data.
+ * <p>Functions take 1 to 5 parameters depending on function called. A minimum of a URL is always
+ * required.
  *
- * <p>REST.post(URL, Parameters) :: Takes a URL as a string and a JSON array of Parameters and sends
- * s POST request, returning HTTP data.
+ * <p>A body (payload) & Media Type are always required for post, put, & patch and optional for
+ * delete.
+ *
+ * <p>Headers are optional on all functions passed in as a JSON as a String: String[] array of
+ * Strings
+ *
+ * <p>A boolean at the end is always option to request a full response. A BigDecimal of 1 will
+ * return HTTP status code, headers, message (if present), and body of response. Otherwise just the
+ * body of the response is returned in what ever form the call returns.
  */
 public class RESTfulFunctions extends AbstractFunction {
   private static final Logger log = LogManager.getLogger();
@@ -54,7 +62,7 @@ public class RESTfulFunctions extends AbstractFunction {
   private static final RESTfulFunctions instance = new RESTfulFunctions();
 
   private RESTfulFunctions() {
-    super(1, 4, "REST.get", "REST.post", "REST.put", "REST.patch", "REST.delete");
+    super(1, 5, "REST.get", "REST.post", "REST.put", "REST.patch", "REST.delete");
   }
 
   public static RESTfulFunctions getInstance() {
@@ -77,15 +85,15 @@ public class RESTfulFunctions extends AbstractFunction {
     // Check do we need this?
     checkParameters(functionName, parameters, 1, 5);
 
-    // Send GET Request to URL
-    if (functionName.equalsIgnoreCase("REST.get"))
-      return makeGetRestfulClientCall(functionName, parameters);
+    if (functionName.equalsIgnoreCase("REST.get")) return buildGetRequest(functionName, parameters);
+
+    if (functionName.equalsIgnoreCase("REST.delete"))
+      return buildDeleteRequest(functionName, parameters);
 
     if (functionName.equalsIgnoreCase("REST.post")
         || functionName.equalsIgnoreCase("REST.put")
-        || functionName.equalsIgnoreCase("REST.patch")
-        || functionName.equalsIgnoreCase("REST.delete"))
-      return makeRestfulClientCall(functionName, parameters);
+        || functionName.equalsIgnoreCase("REST.patch"))
+      return buildRequest(functionName, parameters);
     else
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -95,11 +103,12 @@ public class RESTfulFunctions extends AbstractFunction {
    * Performs a RESTful GET request using OkHttp
    *
    * @param functionName
-   * @param parameters include baseURL and if full response is requested
-   * @return HTTP response as JSON
+   * @param parameters include URL, headers (optional) and if full response is requested (optional)
+   * @return HTTP response as JSON (if full response) or server response, usually JSON but can be
+   *     XML, HTML, or other formats.
    * @throws ParserException
    */
-  private Object makeGetRestfulClientCall(String functionName, List<Object> parameters)
+  private Object buildGetRequest(String functionName, List<Object> parameters)
       throws ParserException {
     checkParameters(functionName, parameters, 1, 3);
 
@@ -131,10 +140,11 @@ public class RESTfulFunctions extends AbstractFunction {
       fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(2));
     }
 
-    if (headerMap.isEmpty()) {
-      request = new Request.Builder().url(baseURL).build();
-    } else {
-      request = new Request.Builder().build();
+    // Build the GET request
+    request = new Request.Builder().url(baseURL).build();
+
+    // If we need to add headers then rebuild a new request with new headers
+    if (!headerMap.isEmpty()) {
       Headers.Builder headersBuilder = request.headers().newBuilder();
 
       for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
@@ -146,34 +156,21 @@ public class RESTfulFunctions extends AbstractFunction {
       request = new Request.Builder().url(baseURL).headers(headersBuilder.build()).build();
     }
 
-    // Execute the call and check the response...
-    try (Response response = client.newCall(request).execute()) {
-      if (!response.isSuccessful() && !fullResponse)
-        throw new ParserException(
-            I18N.getText("macro.function.rest.error.response", functionName, response.code()));
-
-      if (fullResponse) {
-        return gson.toJson(new RestResponseObj(response));
-      } else {
-        return response.body().string();
-      }
-    } catch (IllegalArgumentException | IOException e) {
-      log.debug("FUNCTION makeGetRestfulClientCall error!", e);
-      throw new ParserException(I18N.getText("macro.function.rest.error.unknown", functionName, e));
-    }
+    return executeClientCall(functionName, request, fullResponse);
   }
 
   /**
-   * Performs a RESTful POST, PATCH, PUT, or DELETE request using OkHttp Minimum requirements are
-   * URL, Payload, & MediaType Optional parameters are Headers & Full Response
+   * Performs a RESTful POST, PATCH, or PUT request using OkHttp Minimum requirements are URL,
+   * Payload, & MediaType Optional parameters are Headers & Full Response
    *
    * @param functionName
-   * @param parameters include baseURL and if full response is requested
-   * @return HTTP response as JSON
+   * @param parameters include URL, payload, media type of payload, headers (optional) and if full
+   *     response is requested (optional)
+   * @return HTTP response as JSON (if full response) or server response, usually JSON but can be
+   *     XML, HTML, or other formats.
    * @throws ParserException
    */
-  private Object makeRestfulClientCall(String functionName, List<Object> parameters)
-      throws ParserException {
+  private Object buildRequest(String functionName, List<Object> parameters) throws ParserException {
     checkParameters(functionName, parameters, 3, 5);
 
     Request request;
@@ -201,10 +198,25 @@ public class RESTfulFunctions extends AbstractFunction {
       fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(4));
     }
 
+    // Build out the request body
+    RequestBody requestBody = RequestBody.create(mediaType, payload);
+
+    // If we need to add headers then build a new request with new headers
+
     if (headerMap.isEmpty()) {
-      request = new Request.Builder().url(baseURL).build();
+      // Build without any headers...
+      if (functionName.equals("REST.post"))
+        request = new Request.Builder().url(baseURL).post(requestBody).build();
+      else if (functionName.equals("REST.put"))
+        request = new Request.Builder().url(baseURL).put(requestBody).build();
+      else if (functionName.equals("REST.patch"))
+        request = new Request.Builder().url(baseURL).patch(requestBody).build();
+      else
+        throw new ParserException(
+            I18N.getText("macro.function.general.unknownFunction", functionName));
     } else {
-      request = new Request.Builder().build();
+      // We need a request to create headers, seems stupid, could find another way...
+      request = new Request.Builder().url(baseURL).build();
       Headers.Builder headersBuilder = request.headers().newBuilder();
 
       for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
@@ -213,27 +225,93 @@ public class RESTfulFunctions extends AbstractFunction {
         for (String value : values) headersBuilder.add(name, value);
       }
 
-      request = new Request.Builder().url(baseURL).headers(headersBuilder.build()).build();
+      Headers headers = headersBuilder.build();
+
+      // Now build request with headers
+      if (functionName.equals("REST.post"))
+        request = new Request.Builder().url(baseURL).post(requestBody).headers(headers).build();
+      else if (functionName.equals("REST.put"))
+        request = new Request.Builder().url(baseURL).put(requestBody).headers(headers).build();
+      else if (functionName.equals("REST.patch"))
+        request = new Request.Builder().url(baseURL).patch(requestBody).headers(headers).build();
     }
 
-    if (functionName.equals("REST.post"))
-      request =
-          new Request.Builder().url(baseURL).post(RequestBody.create(mediaType, payload)).build();
-    else if (functionName.equals("REST.put"))
-      request =
-          new Request.Builder().url(baseURL).put(RequestBody.create(mediaType, payload)).build();
-    else if (functionName.equals("REST.patch"))
-      request =
-          new Request.Builder().url(baseURL).patch(RequestBody.create(mediaType, payload)).build();
-    else if (functionName.equals("REST.delete") && payload.isEmpty())
-      request = new Request.Builder().url(baseURL).delete().build();
-    else if (functionName.equals("REST.delete") && !payload.isEmpty())
-      request =
-          new Request.Builder().url(baseURL).delete(RequestBody.create(mediaType, payload)).build();
-    else
-      throw new ParserException(
-          I18N.getText("macro.function.general.unknownFunction", functionName));
+    return executeClientCall(functionName, request, fullResponse);
+  }
 
+  /**
+   * Performs a DELETE request using OkHttp Minimum requirements is a URL. Optional parameters are
+   * Headers & Full Response
+   *
+   * @param functionName
+   * @param parameters include URL, headers (optional) and if full response is requested (optional)
+   * @return HTTP response as JSON (if full response) or server response, usually JSON but can be
+   *     XML, HTML, or other formats.
+   * @throws ParserException
+   */
+  private Object buildDeleteRequest(String functionName, List<Object> parameters)
+      throws ParserException {
+    checkParameters(functionName, parameters, 1, 3);
+
+    Request request;
+    String baseURL = parameters.get(0).toString();
+    Map<String, List<String>> headerMap = new HashMap<String, List<String>>();
+    boolean fullResponse = false;
+
+    if (parameters.size() == 2) {
+      if (parameters.get(1) instanceof BigDecimal)
+        fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(1));
+      else
+        headerMap =
+            gson.fromJson(
+                (String) parameters.get(1),
+                new TypeToken<Map<String, List<String>>>() {}.getType());
+    }
+
+    if (parameters.size() == 3) {
+      headerMap =
+          gson.fromJson(
+              (String) parameters.get(1), new TypeToken<Map<String, List<String>>>() {}.getType());
+      fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(2));
+    }
+
+    // Build the Delete request
+    request = new Request.Builder().delete().url(baseURL).build();
+
+    // If we need to add headers then build a new request with new headers
+    if (!headerMap.isEmpty()) {
+      Headers.Builder headersBuilder = request.headers().newBuilder();
+
+      for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
+        String name = entry.getKey();
+        List<String> values = entry.getValue();
+        for (String value : values) headersBuilder.add(name, value);
+      }
+
+      request = new Request.Builder().delete().url(baseURL).headers(headersBuilder.build()).build();
+    }
+
+    Object response = executeClientCall(functionName, request, fullResponse);
+
+    // For deletes, if a full response is not requested then an empty response is successful
+    if (response.toString().isEmpty()) response = BigDecimal.ONE;
+
+    return response;
+  }
+
+  /**
+   * Execute RESTful Client Call for the request and return appropriate response body
+   *
+   * @param functionName
+   * @param request
+   * @param fullResponse
+   * @return
+   * @throws ParserException
+   */
+  private Object executeClientCall(String functionName, Request request, boolean fullResponse)
+      throws ParserException {
+
+    // Execute the call and check the response...
     try (Response response = client.newCall(request).execute()) {
       if (!response.isSuccessful() && !fullResponse)
         throw new ParserException(
@@ -248,8 +326,8 @@ public class RESTfulFunctions extends AbstractFunction {
   }
 
   /*
-   * @param parameters include baseURL and if full response is requested
-   * @return HTTP response as JSON
+   * @param parameters include URI
+   * @return BigDecimal.ONE if successful, BigDecimal.ZERO if Syrinscape is not activated in preferences
    * @throws ParserException
    */
   private BigDecimal launchSyrinscape(String baseURL) throws ParserException {
