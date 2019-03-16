@@ -28,7 +28,7 @@ import net.rptools.parser.function.ParameterException;
  *
  * @author knizia.fan
  */
-public class AssertFunction extends AbstractFunction {
+public class AssertFunction extends AbstractFunction implements DefinesSpecialVariables {
   public AssertFunction() {
     // Defining ourselves to be "non-deterministic" is a small hack that allows
     // comparison operations to be passed in as arguments, due to an error (?)
@@ -76,5 +76,10 @@ public class AssertFunction extends AbstractFunction {
     public AssertFunctionException(String msg) {
       super(msg);
     }
+  }
+
+  @Override
+  public String[] getSpecialVariables() {
+    return new String[] {"macro.catchAssert"};
   }
 }
