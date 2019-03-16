@@ -85,10 +85,8 @@ public class RESTfulFunctions extends AbstractFunction {
     // Check do we need this?
     checkParameters(functionName, parameters, 1, 5);
 
-    if (functionName.equalsIgnoreCase("REST.get")) return buildGetRequest(functionName, parameters);
-
-    if (functionName.equalsIgnoreCase("REST.delete"))
-      return buildDeleteRequest(functionName, parameters);
+    if (functionName.equalsIgnoreCase("REST.get") || functionName.equalsIgnoreCase("REST.delete"))
+      return buildGetOrDeleteRequest(functionName, parameters);
 
     if (functionName.equalsIgnoreCase("REST.post")
         || functionName.equalsIgnoreCase("REST.put")
@@ -100,7 +98,7 @@ public class RESTfulFunctions extends AbstractFunction {
   }
 
   /**
-   * Performs a RESTful GET request using OkHttp
+   * Performs a RESTful GET or DELETE request using OkHttp
    *
    * @param functionName
    * @param parameters include URL, headers (optional) and if full response is requested (optional)
@@ -108,14 +106,13 @@ public class RESTfulFunctions extends AbstractFunction {
    *     XML, HTML, or other formats.
    * @throws ParserException
    */
-  private Object buildGetRequest(String functionName, List<Object> parameters)
+  private Object buildGetOrDeleteRequest(String functionName, List<Object> parameters)
       throws ParserException {
     checkParameters(functionName, parameters, 1, 3);
 
     Request request;
     String baseURL = parameters.get(0).toString();
-    Map<String, List<String>> headerMap = new HashMap<String, List<String>>();
-    boolean fullResponse = false;
+    Map<String, List<String>> headerMap = getHeaderMap(parameters, 1);
 
     // Special case, syrinscape URI use java.awt.Desktop to launch URI
     if (baseURL.startsWith("syrinscape")) {
@@ -123,40 +120,26 @@ public class RESTfulFunctions extends AbstractFunction {
       return launchSyrinscape(baseURL);
     }
 
-    if (parameters.size() == 2) {
-      if (parameters.get(1) instanceof BigDecimal)
-        fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(1));
-      else
-        headerMap =
-            gson.fromJson(
-                (String) parameters.get(1),
-                new TypeToken<Map<String, List<String>>>() {}.getType());
-    }
-
-    if (parameters.size() == 3) {
-      headerMap =
-          gson.fromJson(
-              (String) parameters.get(1), new TypeToken<Map<String, List<String>>>() {}.getType());
-      fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(2));
-    }
-
-    // Build the GET request
-    request = new Request.Builder().url(baseURL).build();
+    if (functionName.equalsIgnoreCase("REST.get"))
+      request = new Request.Builder().url(baseURL).build();
+    else if (functionName.equalsIgnoreCase("REST.delete"))
+      request = new Request.Builder().url(baseURL).delete().build();
+    else
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
 
     // If we need to add headers then rebuild a new request with new headers
-    if (!headerMap.isEmpty()) {
-      Headers.Builder headersBuilder = request.headers().newBuilder();
+    if (!headerMap.isEmpty())
+      if (functionName.equalsIgnoreCase("REST.get"))
+        request = new Request.Builder().url(baseURL).headers(buildHeaders(headerMap)).build();
+      else if (functionName.equalsIgnoreCase("REST.delete"))
+        request =
+            new Request.Builder().url(baseURL).headers(buildHeaders(headerMap)).delete().build();
+      else
+        throw new ParserException(
+            I18N.getText("macro.function.general.unknownFunction", functionName));
 
-      for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
-        String name = entry.getKey();
-        List<String> values = entry.getValue();
-        for (String value : values) headersBuilder.add(name, value);
-      }
-
-      request = new Request.Builder().url(baseURL).headers(headersBuilder.build()).build();
-    }
-
-    return executeClientCall(functionName, request, fullResponse);
+    return executeClientCall(functionName, request, isFullResponseRequested(parameters));
   }
 
   /**
@@ -173,30 +156,11 @@ public class RESTfulFunctions extends AbstractFunction {
   private Object buildRequest(String functionName, List<Object> parameters) throws ParserException {
     checkParameters(functionName, parameters, 3, 5);
 
-    Request request;
-    Map<String, List<String>> headerMap = new HashMap<String, List<String>>();
-    boolean fullResponse = false;
-
+    Request request = null;
     String baseURL = parameters.get(0).toString();
     String payload = parameters.get(1).toString();
     MediaType mediaType = MediaType.parse(parameters.get(2).toString());
-
-    if (parameters.size() == 4) {
-      if (parameters.get(3) instanceof BigDecimal)
-        fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(3));
-      else
-        headerMap =
-            gson.fromJson(
-                (String) parameters.get(3),
-                new TypeToken<Map<String, List<String>>>() {}.getType());
-    }
-
-    if (parameters.size() == 5) {
-      headerMap =
-          gson.fromJson(
-              (String) parameters.get(3), new TypeToken<Map<String, List<String>>>() {}.getType());
-      fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(4));
-    }
+    Map<String, List<String>> headerMap = getHeaderMap(parameters, 3);
 
     // Build out the request body
     RequestBody requestBody = RequestBody.create(mediaType, payload);
@@ -216,16 +180,7 @@ public class RESTfulFunctions extends AbstractFunction {
             I18N.getText("macro.function.general.unknownFunction", functionName));
     } else {
       // We need a request to create headers, seems stupid, could find another way...
-      request = new Request.Builder().url(baseURL).build();
-      Headers.Builder headersBuilder = request.headers().newBuilder();
-
-      for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
-        String name = entry.getKey();
-        List<String> values = entry.getValue();
-        for (String value : values) headersBuilder.add(name, value);
-      }
-
-      Headers headers = headersBuilder.build();
+      Headers headers = buildHeaders(headerMap);
 
       // Now build request with headers
       if (functionName.equals("REST.post"))
@@ -236,67 +191,7 @@ public class RESTfulFunctions extends AbstractFunction {
         request = new Request.Builder().url(baseURL).patch(requestBody).headers(headers).build();
     }
 
-    return executeClientCall(functionName, request, fullResponse);
-  }
-
-  /**
-   * Performs a DELETE request using OkHttp Minimum requirements is a URL. Optional parameters are
-   * Headers & Full Response
-   *
-   * @param functionName
-   * @param parameters include URL, headers (optional) and if full response is requested (optional)
-   * @return HTTP response as JSON (if full response) or server response, usually JSON but can be
-   *     XML, HTML, or other formats.
-   * @throws ParserException
-   */
-  private Object buildDeleteRequest(String functionName, List<Object> parameters)
-      throws ParserException {
-    checkParameters(functionName, parameters, 1, 3);
-
-    Request request;
-    String baseURL = parameters.get(0).toString();
-    Map<String, List<String>> headerMap = new HashMap<String, List<String>>();
-    boolean fullResponse = false;
-
-    if (parameters.size() == 2) {
-      if (parameters.get(1) instanceof BigDecimal)
-        fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(1));
-      else
-        headerMap =
-            gson.fromJson(
-                (String) parameters.get(1),
-                new TypeToken<Map<String, List<String>>>() {}.getType());
-    }
-
-    if (parameters.size() == 3) {
-      headerMap =
-          gson.fromJson(
-              (String) parameters.get(1), new TypeToken<Map<String, List<String>>>() {}.getType());
-      fullResponse = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(2));
-    }
-
-    // Build the Delete request
-    request = new Request.Builder().delete().url(baseURL).build();
-
-    // If we need to add headers then build a new request with new headers
-    if (!headerMap.isEmpty()) {
-      Headers.Builder headersBuilder = request.headers().newBuilder();
-
-      for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
-        String name = entry.getKey();
-        List<String> values = entry.getValue();
-        for (String value : values) headersBuilder.add(name, value);
-      }
-
-      request = new Request.Builder().delete().url(baseURL).headers(headersBuilder.build()).build();
-    }
-
-    Object response = executeClientCall(functionName, request, fullResponse);
-
-    // For deletes, if a full response is not requested then an empty response is successful
-    if (response.toString().isEmpty()) response = BigDecimal.ONE;
-
-    return response;
+    return executeClientCall(functionName, request, isFullResponseRequested(parameters));
   }
 
   /**
@@ -323,6 +218,47 @@ public class RESTfulFunctions extends AbstractFunction {
     } catch (IllegalArgumentException | IOException e) {
       throw new ParserException(I18N.getText("macro.function.rest.error.unknown", functionName, e));
     }
+  }
+
+  /**
+   * @param headerMap
+   * @return Headers
+   */
+  private Headers buildHeaders(Map<String, List<String>> headerMap) {
+    Request request = new Request.Builder().build();
+    Headers.Builder headersBuilder = request.headers().newBuilder();
+
+    for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
+      String name = entry.getKey();
+      List<String> values = entry.getValue();
+      for (String value : values) headersBuilder.add(name, value);
+    }
+
+    Headers headers = headersBuilder.build();
+    return headers;
+  }
+
+  private boolean isLastParamBoolean(List<Object> parameters) {
+    return (parameters.get(parameters.size() - 1) instanceof BigDecimal);
+  }
+
+  private boolean isFullResponseRequested(List<Object> parameters) {
+    if (isLastParamBoolean(parameters))
+      return AbstractTokenAccessorFunction.getBooleanValue(parameters.get(parameters.size() - 1));
+    else return false;
+  }
+
+  private Map<String, List<String>> getHeaderMap(List<Object> parameters, int headerIndex) {
+    // If the parameters only have enough room for either header or full response
+    // and the last parameter is a boolean then headers were not passed in.
+    // of if parameter size is not large enough to hold either value...
+    if (headerIndex >= parameters.size()
+        || (headerIndex == parameters.size() - 1 && isLastParamBoolean(parameters)))
+      return new HashMap<String, List<String>>();
+    else
+      return gson.fromJson(
+          (String) parameters.get(headerIndex),
+          new TypeToken<Map<String, List<String>>>() {}.getType());
   }
 
   /*
