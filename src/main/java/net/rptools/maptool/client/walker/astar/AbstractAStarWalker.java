@@ -100,9 +100,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
   protected abstract double getDiagonalMultiplier(int[] neighborArray);
 
-  public int getDistance() {
+  public double getDistance() {
     if (distance < 0) return 0;
-    else return (int) distance;
+    else return distance;
   }
 
   public Collection<AStarCellPoint> getCheckedPoints() {

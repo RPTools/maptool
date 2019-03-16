@@ -32,7 +32,7 @@ public interface ZoneWalker {
 
   public boolean isWaypoint(CellPoint point);
 
-  public int getDistance();
+  public double getDistance();
 
   public Path<CellPoint> getPath();
 
