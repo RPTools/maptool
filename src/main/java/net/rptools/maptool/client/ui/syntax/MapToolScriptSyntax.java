@@ -31,7 +31,6 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
   static String[] DATA_TYPES = {
     "bar.name",
     "macro.args",
-    "macro.return",
     "roll.count",
     "roll.result",
     "state.name",
