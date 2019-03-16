@@ -118,7 +118,7 @@ public class MapToolLineParser {
               DrawingSetterFunctions.getInstance(),
               DrawingMiscFunctions.getInstance(),
               ExportDataFunctions.getInstance(),
-              HTTP_Functions.getInstance(),
+              RESTfulFunctions.getInstance(),
               HeroLabFunctions.getInstance())
           .collect(Collectors.toList());
 
