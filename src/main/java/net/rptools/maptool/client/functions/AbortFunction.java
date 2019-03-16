@@ -26,7 +26,7 @@ import net.rptools.parser.function.AbstractNumberFunction;
  *
  * @author knizia.fan
  */
-public class AbortFunction extends AbstractNumberFunction {
+public class AbortFunction extends AbstractNumberFunction implements DefinesSpecialVariables {
   public AbortFunction() {
     super(1, 1, "abort");
   }
@@ -65,5 +65,10 @@ public class AbortFunction extends AbstractNumberFunction {
     public AbortFunctionException(String msg) {
       super(msg);
     }
+  }
+
+  @Override
+  public String[] getSpecialVariables() {
+    return new String[] {"macro.catchAbort"};
   }
 }

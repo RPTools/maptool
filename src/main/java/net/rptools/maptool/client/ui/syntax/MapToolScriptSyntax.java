@@ -15,6 +15,8 @@
 package net.rptools.maptool.client.ui.syntax;
 
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.DefinesSpecialVariables;
+import net.rptools.parser.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.rsyntaxtextarea.Token;
@@ -29,7 +31,6 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
   static String[] DATA_TYPES = {
     "bar.name",
     "macro.args",
-    "macro.return",
     "roll.count",
     "roll.result",
     "state.name",
@@ -105,6 +106,15 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
 
     // Add "Events" as OPERATOR
     for (String reservedWord : OPERATORS) macroFunctionTokenMap.put(reservedWord, Token.OPERATOR);
+
+    // Add "highlights defined by functions like Special Variables" as Data Type
+    for (Function function : MapTool.getParser().getMacroFunctions()) {
+      if (function instanceof DefinesSpecialVariables) {
+        for (String specialVariable : ((DefinesSpecialVariables) function).getSpecialVariables()) {
+          macroFunctionTokenMap.put(specialVariable, Token.DATA_TYPE);
+        }
+      }
+    }
   }
 
   @Override

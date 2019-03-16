@@ -16,7 +16,9 @@ package net.rptools.maptool.client.ui.syntax;
 
 import java.util.ResourceBundle;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.DefinesSpecialVariables;
 import net.rptools.maptool.language.I18N;
+import net.rptools.parser.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.BasicCompletion;
@@ -45,6 +47,37 @@ public class MapToolScriptAutoComplete {
     for (String macro : MapTool.getParser().listAllMacroFunctions())
       provider.addCompletion(
           new BasicCompletion(provider, macro, getShortDescription(macro), getSummary(macro)));
+
+    // Add "Special Variables" as Data Type
+    for (String dataType : MapToolScriptSyntax.DATA_TYPES)
+      provider.addCompletion(
+          new BasicCompletion(
+              provider, dataType, getShortDescription(dataType), getSummary(dataType)));
+
+    // Add "Roll Options" as Reserved word
+    for (String reservedWord : MapToolScriptSyntax.RESERVED_WORDS)
+      provider.addCompletion(
+          new BasicCompletion(
+              provider, reservedWord, getShortDescription(reservedWord), getSummary(reservedWord)));
+
+    // Add "Events" as Reserved Word 2
+    for (String reservedWord : MapToolScriptSyntax.RESERVED_WORDS_2)
+      provider.addCompletion(
+          new BasicCompletion(
+              provider, reservedWord, getShortDescription(reservedWord), getSummary(reservedWord)));
+
+    for (Function function : MapTool.getParser().getMacroFunctions()) {
+      if (function instanceof DefinesSpecialVariables) {
+        for (String specialVariable : ((DefinesSpecialVariables) function).getSpecialVariables()) {
+          provider.addCompletion(
+              new BasicCompletion(
+                  provider,
+                  specialVariable,
+                  getShortDescription(specialVariable),
+                  getSummary(specialVariable)));
+        }
+      }
+    }
 
     // FIXME: TERRIBLE! But I'm tired and running out of time, need to add to a .properties
     // file!

@@ -26,7 +26,7 @@ import net.rptools.parser.function.ParameterException;
  *
  * @author oliver.szymanski
  */
-public class ReturnFunction extends AbstractFunction {
+public class ReturnFunction extends AbstractFunction implements DefinesSpecialVariables {
   public ReturnFunction() {
     super(1, 2, "return");
   }
@@ -90,5 +90,10 @@ public class ReturnFunction extends AbstractFunction {
       super("");
       this.result = result;
     }
+  }
+
+  @Override
+  public String[] getSpecialVariables() {
+    return new String[] {"macro.return"};
   }
 }
