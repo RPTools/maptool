@@ -109,7 +109,7 @@ public class ZoomFunctions extends AbstractFunction {
     }
 
     boolean pixels = true;
-    if (args.size() == 1) {
+    if (args.size() >= 1) {
       pixels = parseBoolean(args, 0);
     }
 
@@ -152,9 +152,9 @@ public class ZoomFunctions extends AbstractFunction {
   private Object createBoundsAsStringProps(
       String delim, int offsetX, int offsetY, int width, int height) {
     StringBuffer sb = new StringBuffer();
-    sb.append("offsetX").append(EQUALS).append(offsetX).append(delim).append(" ");
-    sb.append("offsetY").append(EQUALS).append(offsetY).append(delim).append(" ");
-    sb.append("width").append(EQUALS).append(width).append(delim).append(" ");
+    sb.append("offsetX").append(EQUALS).append(offsetX).append(delim);
+    sb.append("offsetY").append(EQUALS).append(offsetY).append(delim);
+    sb.append("width").append(EQUALS).append(width).append(delim);
     sb.append("height").append(EQUALS).append(height);
     return sb.toString();
   }
