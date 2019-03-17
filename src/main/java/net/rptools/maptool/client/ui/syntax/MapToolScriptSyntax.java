@@ -26,7 +26,7 @@ import org.fife.ui.rsyntaxtextarea.TokenTypes;
 public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
   private static final Logger log = LogManager.getLogger(MapToolScriptSyntax.class);
 
-  static TokenMap macroFunctionTokenMap;
+  static volatile TokenMap macroFunctionTokenMap;
 
   static String[] DATA_TYPES = {
     "bar.name",
@@ -122,7 +122,7 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
       char[] array, int start, int end, int tokenType, int startOffset, boolean hyperlink) {
     // This assumes all of your extra tokens would normally be scanned as IDENTIFIER.
     if (tokenType == TokenTypes.IDENTIFIER) {
-      int newType = macroFunctionTokenMap.get(array, start, end);
+      int newType = getMacroFunctionNames().get(array, start, end);
       if (newType > -1) {
         tokenType = newType;
       }
@@ -137,11 +137,13 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
 
   private TokenMap getMacroFunctionNames() {
     if (macroFunctionTokenMap == null) {
-      macroFunctionTokenMap = new TokenMap(true);
+      synchronized (MapToolScriptSyntax.class) {
+        macroFunctionTokenMap = new TokenMap(true);
 
-      for (String macro : MapTool.getParser().listAllMacroFunctions()) {
-        macroFunctionTokenMap.put(macro, Token.FUNCTION);
-        log.debug("Adding \"" + macro + "\" macro function to syntax highlighting.");
+        for (String macro : MapTool.getParser().listAllMacroFunctions()) {
+          macroFunctionTokenMap.put(macro, Token.FUNCTION);
+          log.debug("Adding \"" + macro + "\" macro function to syntax highlighting.");
+        }
       }
     }
 
