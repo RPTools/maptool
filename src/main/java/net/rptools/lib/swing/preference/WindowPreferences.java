@@ -138,11 +138,11 @@ public class WindowPreferences extends WindowAdapter {
       setHeight(frame.getHeight());
       setMaximized(true);
     } else {
-      setX(frame.getLocation().x);
-      setY(frame.getLocation().y);
+      setX(window.getLocation().x);
+      setY(window.getLocation().y);
 
-      setWidth(frame.getSize().width);
-      setHeight(frame.getSize().height);
+      setWidth(window.getSize().width);
+      setHeight(window.getSize().height);
       setMaximized(false);
     }
   }
