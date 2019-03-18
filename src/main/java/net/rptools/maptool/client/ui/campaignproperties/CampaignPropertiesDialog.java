@@ -302,17 +302,19 @@ public class CampaignPropertiesDialog extends JDialog {
       if (sight.getPersonalLightSource() != null) {
         LightSource source = sight.getPersonalLightSource();
 
-        for (Light light : source.getLightList()) {
-          double range = light.getRadius();
+        if (source.getLightList() != null) {
+          for (Light light : source.getLightList()) {
+            double range = light.getRadius();
 
-          builder.append("r").append(StringUtil.formatDecimal(range));
+            builder.append("r").append(StringUtil.formatDecimal(range));
 
-          if (light.getPaint() != null && light.getPaint() instanceof DrawableColorPaint) {
-            Color color = (Color) light.getPaint().getPaint();
-            builder.append(toHex(color));
+            if (light.getPaint() != null && light.getPaint() instanceof DrawableColorPaint) {
+              Color color = (Color) light.getPaint().getPaint();
+              builder.append(toHex(color));
+            }
+
+            builder.append(' ');
           }
-
-          builder.append(' ');
         }
       }
       builder.append('\n');

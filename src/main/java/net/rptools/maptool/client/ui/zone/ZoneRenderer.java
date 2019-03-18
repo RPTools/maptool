@@ -113,7 +113,6 @@ import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridCapabilities;
 import net.rptools.maptool.model.IsometricGrid;
 import net.rptools.maptool.model.Label;
-import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
@@ -121,7 +120,6 @@ import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.Player;
-import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.TokenShape;
@@ -129,7 +127,6 @@ import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -1583,7 +1580,6 @@ public class ZoneRenderer extends JComponent
       // g.setStroke(new BasicStroke(2));
       g.setColor(new Color(255, 255, 255)); // outline around visible area
       g.draw(area);
-      // renderPersonalLightArea(g, area);
       renderHaloArea(g, area);
       SwingUtil.restoreAntiAliasing(g, oldAA);
     }
@@ -1602,24 +1598,6 @@ public class ZoneRenderer extends JComponent
               visionColor.getBlue(),
               AppPreferences.getHaloOverlayOpacity()));
       g.fill(visible);
-    }
-  }
-
-  private void renderPersonalLightArea(Graphics2D g, Area visible) {
-    SightType sight = MapTool.getCampaign().getSightType(tokenUnderMouse.getSightType());
-
-    for (Light light : sight.getPersonalLightSource().getLightList()) {
-
-      if (light.getPaint() != null && light.getPaint() instanceof DrawableColorPaint) {
-        Color personalLightColor = (Color) light.getPaint().getPaint();
-        g.setColor(
-            new Color(
-                personalLightColor.getRed(),
-                personalLightColor.getGreen(),
-                personalLightColor.getBlue(),
-                AppPreferences.getLightOverlayOpacity()));
-        g.fill(visible);
-      }
     }
   }
 
