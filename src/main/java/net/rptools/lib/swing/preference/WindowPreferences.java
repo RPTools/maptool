@@ -63,8 +63,10 @@ public class WindowPreferences extends WindowAdapter {
     DEFAULT_Y = window.getLocation().y;
     DEFAULT_WIDTH = window.getSize().width;
     DEFAULT_HEIGHT = window.getSize().height;
-    DEFAULT_MAXIMIZED = ((Frame) window).getExtendedState() == Frame.MAXIMIZED_BOTH;
-
+    if (window instanceof Frame) {
+      DEFAULT_MAXIMIZED = ((Frame) window).getExtendedState() == Frame.MAXIMIZED_BOTH;
+    }
+    
     restorePreferences(window);
     window.addWindowListener(this);
   }
@@ -125,8 +127,10 @@ public class WindowPreferences extends WindowAdapter {
 
   protected void storePreferences(Window window) {
 
-    JFrame frame = (JFrame) window;
-    if (frame.getExtendedState() == Frame.MAXIMIZED_BOTH) {
+    
+    JFrame frame = null;
+    if (window instanceof JFrame) { frame = (JFrame) window; }
+    if (frame != null && frame.getExtendedState() == Frame.MAXIMIZED_BOTH) {
       // support full screen when storing preferences
       setX(0);
       setY(0);
@@ -143,17 +147,17 @@ public class WindowPreferences extends WindowAdapter {
     }
   }
 
-  protected void restorePreferences(Window frame) {
+  protected void restorePreferences(Window window) {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
     int x = Math.max(Math.min(getX(), screenSize.width - getWidth()), 0);
     int y = Math.max(Math.min(getY(), screenSize.height - getHeight()), 0);
 
-    frame.setSize(getWidth(), getHeight());
-    frame.setLocation(x, y);
+    window.setSize(getWidth(), getHeight());
+    window.setLocation(x, y);
 
-    if (getMaximized()) {
-      ((JFrame) frame).setExtendedState(Frame.MAXIMIZED_BOTH);
+    if (getMaximized() && window instanceof JFrame) {
+      ((JFrame) window).setExtendedState(Frame.MAXIMIZED_BOTH);
     }
   }
 
