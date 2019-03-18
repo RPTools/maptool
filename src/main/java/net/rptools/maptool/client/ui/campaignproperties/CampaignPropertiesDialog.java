@@ -302,8 +302,18 @@ public class CampaignPropertiesDialog extends JDialog {
       if (sight.getPersonalLightSource() != null) {
         LightSource source = sight.getPersonalLightSource();
 
-        double range = source.getMaxRange();
-        builder.append("r").append(StringUtil.formatDecimal(range)).append(' ');
+        for (Light light : source.getLightList()) {
+          double range = light.getRadius();
+
+          builder.append("r").append(StringUtil.formatDecimal(range));
+
+          if (light.getPaint() != null && light.getPaint() instanceof DrawableColorPaint) {
+            Color color = (Color) light.getPaint().getPaint();
+            builder.append(toHex(color));
+          }
+
+          builder.append(' ');
+        }
       }
       builder.append('\n');
     }
@@ -470,6 +480,7 @@ public class CampaignPropertiesDialog extends JDialog {
         int offset = 0;
         double pLightRange = 0;
 
+        personalLight = new LightSource();
         for (String arg : args) {
           assert arg.length() > 0; // The split() uses "one or more spaces", removing empty strings
           try {
@@ -484,14 +495,32 @@ public class CampaignPropertiesDialog extends JDialog {
             continue;
           }
           try {
+
             if (arg.startsWith("x")) {
               toBeParsed = arg.substring(1); // Used in the catch block, below
               errmsg = "msg.error.mtprops.sight.multiplier"; // (ditto)
               magnifier = StringUtil.parseDecimal(toBeParsed);
             } else if (arg.startsWith("r")) { // XXX Why not "r=#" instead of "r#"??
+              Color personalLightColor = null;
               toBeParsed = arg.substring(1);
+
+              split = toBeParsed.indexOf("#");
+              if (split > 0) {
+                String colorString = toBeParsed.substring(split); // Keep the '#'
+                toBeParsed = toBeParsed.substring(0, split);
+                personalLightColor = Color.decode(colorString);
+              }
+
               errmsg = "msg.error.mtprops.sight.range";
               pLightRange = StringUtil.parseDecimal(toBeParsed);
+
+              if (personalLight == null) {
+                personalLight = new LightSource();
+              }
+              DrawableColorPaint personalLightPaint =
+                  personalLightColor != null ? new DrawableColorPaint(personalLightColor) : null;
+              personalLight.add(new Light(shape, 0, pLightRange, arc, personalLightPaint));
+              personalLight.setScaleWithToken(scaleWithToken);
             } else if (arg.startsWith("arc=") && arg.length() > 4) {
               toBeParsed = arg.substring(4);
               errmsg = "msg.error.mtprops.sight.arc";
@@ -515,11 +544,6 @@ public class CampaignPropertiesDialog extends JDialog {
             assert errmsg != null;
             errlog.add(I18N.getText(errmsg, reader.getLineNumber(), toBeParsed));
           }
-        }
-        if (pLightRange > 0) {
-          personalLight = new LightSource();
-          personalLight.add(new Light(shape, 0, pLightRange, arc, null));
-          personalLight.setScaleWithToken(scaleWithToken);
         }
         SightType sight =
             new SightType(label, magnifier, personalLight, shape, arc, scaleWithToken);
