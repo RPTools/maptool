@@ -23,16 +23,14 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+**Technical information (please complete the following):**
+ - OS: [e.g. OSX, Windows 10, Linux]
+ - RAM: [Size of your RAM]
+ - MapTool Version: [e.g. 1.5.0]
+ - Installation Type: [EXE, DMG, JAR]
+ - JRE Version: [Bundled / run Java -version]
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+[Alternately, insert information from MapTool menu Help -> Gather Debug Information.]
 
 **Additional context**
 Add any other context about the problem here.
