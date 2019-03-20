@@ -4,7 +4,7 @@ pull_requests:
 skip_non_tags: false
 platform: x64
 image: 
-  - Ubuntu
+  - Unstable
   - Visual Studio 2017
 init:
   - cmd: git config --global core.autocrlf true
