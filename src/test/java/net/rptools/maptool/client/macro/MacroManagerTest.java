@@ -14,12 +14,17 @@
  */
 package net.rptools.maptool.client.macro;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-public class MacroManagerTest extends TestCase {
+class MacroManagerTest {
 
-  public void testSplit() throws Exception {
+  @Test
+  @DisplayName("Test Split function in StringUtil")
+  void testSplit() throws Exception {
 
     assertEquals(0, MacroManager.split("").size());
 
@@ -39,7 +44,9 @@ public class MacroManagerTest extends TestCase {
     compare(MacroManager.split("\"one \\\"two\\\"\" three"), "one \"two\"", "three");
   }
 
-  public void testPerformSubstitution() throws Exception {
+  @Test
+  @DisplayName("Test Perform Substitution in StringUtil.")
+  void testPerformSubstitution() throws Exception {
 
     compare("", "", "");
     compare("one", "one", "one");
@@ -54,7 +61,7 @@ public class MacroManagerTest extends TestCase {
   private void compare(String text, String details, String result) {
 
     String subResult = MacroManager.performSubstitution(text, details);
-    assertEquals("\"" + subResult + "\" != \"" + result + "\"", result, subResult);
+    assertEquals(result, subResult, "\"" + subResult + "\" != \"" + result + "\"");
   }
 
   private void compare(List<String> parsed, String... expected) {

@@ -14,11 +14,16 @@
  */
 package net.rptools.maptool.util;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class StringUtilTest extends TestCase {
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-  public void testCountOccurances() throws Exception {
+class StringUtilTest {
+
+  @Test
+  @DisplayName("Test of countOccurances in StringUtil")
+  void testCountOccurances() throws Exception {
 
     String str = "<div>";
 
