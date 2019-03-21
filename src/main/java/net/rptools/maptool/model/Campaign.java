@@ -45,7 +45,7 @@ import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
  * <p>Roughly this is equivalent to multiple tabs that will appear on the client and all of the
  * images that will appear on it (and also campaign macro buttons).
  */
-public class Campaign {
+public class Campaign implements Cloneable {
   /** The only built-in property type is "Basic". Any others are user-defined. */
   public static final String DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
 
@@ -555,7 +555,33 @@ public class Campaign {
     return campaignExportDialog;
   }
 
+  public Location getExportLocation() {
+    return exportLocation;
+  }
+
+  public Map<String, Boolean> getExportSettings() {
+    return exportSettings;
+  }
+
+  public List<MacroButtonProperties> getMacroButtonProperties() {
+    return macroButtonProperties;
+  }
+
+  public int getMacroButtonLastIndex() {
+    return macroButtonLastIndex;
+  }
+
+  public Boolean getHasUsedFogToolbar() {
+    return hasUsedFogToolbar;
+  }
+
   public void setExportCampaignDialog(CampaignExportDialog d) {
     campaignExportDialog = d;
   }
+
+  @Override
+  public Object clone() throws CloneNotSupportedException {
+    return super.clone();
+  }
+  
 }

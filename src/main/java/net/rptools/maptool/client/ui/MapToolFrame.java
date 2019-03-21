@@ -232,6 +232,8 @@ public class MapToolFrame extends DefaultDockableHolder
 
   private final FileFilter campaignFilter =
       new MTFileFilter("cmpgn", I18N.getText("file.ext.cmpgn"));
+  private final FileFilter campaignDirectoryFilter =
+      new MTFileFilter("cmpgndir", I18N.getText("file.ext.cmpgnDirectory"), true);
   private final FileFilter mapFilter = new MTFileFilter("rpmap", I18N.getText("file.ext.rpmap"));
   private final FileFilter propertiesFilter =
       new MTFileFilter("mtprops", I18N.getText("file.ext.mtprops"));
@@ -782,14 +784,20 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  private class MTFileFilter extends FileFilter {
+  public static class MTFileFilter extends FileFilter {
     private final String extension;
     private final String description;
+    private final boolean directory;
 
-    MTFileFilter(String exten, String desc) {
+    MTFileFilter(String extension, String description) {
+      this(extension, description, false);
+    }
+    
+    MTFileFilter(String extension, String description, boolean directory) {
       super();
-      extension = exten;
-      description = desc;
+      this.extension = extension;
+      this.description = description;
+      this.directory = directory;
     }
 
     // Accept directories and files matching extension
@@ -798,6 +806,11 @@ public class MapToolFrame extends DefaultDockableHolder
       if (f.isDirectory()) {
         return true;
       }
+      
+      if (this.directory && !f.isDirectory()) {
+        return false;
+      }
+      
       String ext = getExtension(f);
       if (ext != null) {
         if (ext.equals(extension)) {
@@ -809,11 +822,19 @@ public class MapToolFrame extends DefaultDockableHolder
       return false;
     }
 
+    public boolean isDirectory() {
+      return directory;
+    }
+
     @Override
     public String getDescription() {
       return description;
     }
 
+    public String getExtension() {
+      return extension;
+    }
+    
     public String getExtension(File f) {
       String ext = null;
       String s = f.getName();
@@ -828,6 +849,10 @@ public class MapToolFrame extends DefaultDockableHolder
 
   public FileFilter getCmpgnFileFilter() {
     return campaignFilter;
+  }
+  
+  public FileFilter getCmpgnDirectoryFileFilter() {
+    return campaignDirectoryFilter;
   }
 
   public FileFilter getMapFileFilter() {
@@ -856,8 +881,10 @@ public class MapToolFrame extends DefaultDockableHolder
   public JFileChooser getSaveCmpgnFileChooser() {
     if (saveCmpgnFileChooser == null) {
       saveCmpgnFileChooser = new JFileChooser();
+      saveCmpgnFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
       saveCmpgnFileChooser.setCurrentDirectory(AppPreferences.getSaveDir());
       saveCmpgnFileChooser.addChoosableFileFilter(campaignFilter);
+      saveCmpgnFileChooser.addChoosableFileFilter(campaignDirectoryFilter);
       saveCmpgnFileChooser.setDialogTitle(I18N.getText("msg.title.saveCampaign"));
     }
     saveCmpgnFileChooser.setAcceptAllFileFilterUsed(true);
@@ -1563,7 +1590,11 @@ public class MapToolFrame extends DefaultDockableHolder
     if (AppState.getCampaignFile() != null) {
       String s = AppState.getCampaignFile().getName();
       // remove the file extension of the campaign file name
-      s = s.substring(0, s.length() - AppConstants.CAMPAIGN_FILE_EXTENSION.length());
+      if (!AppState.getCampaignFile().isDirectory() && s.endsWith(AppConstants.CAMPAIGN_FILE_EXTENSION)) {
+        s = s.substring(0, s.length() - AppConstants.CAMPAIGN_FILE_EXTENSION.length());
+      } else if (AppState.getCampaignFile().isDirectory() && s.endsWith(AppConstants.CAMPAIGN_DIRECTIORY_EXTENSION)) {
+        s = s.substring(0, s.length() - AppConstants.CAMPAIGN_DIRECTIORY_EXTENSION.length());
+      } 
       campaignName = " - [" + s + "]";
     }
     setTitle(
