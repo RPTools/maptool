@@ -1829,4 +1829,9 @@ public class Zone extends BaseModel {
   public void setWaypointExposureToggle(boolean toggle) {
     exposeFogAtWaypoints = toggle;
   }
+
+  public Map<GUID, Token> getTokenMap() {
+    return tokenMap;
+  }
+  
 }

@@ -71,6 +71,7 @@ import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.ExportDialog;
 import net.rptools.maptool.client.ui.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.client.ui.MapToolFrame.MTFileFilter;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.PreferencesDialog;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
@@ -2285,7 +2286,7 @@ public class AppActions {
           if (MapTool.isCampaignDirty() && !MapTool.confirm("msg.confirm.loseChanges")) return;
           JFileChooser chooser = new CampaignPreviewFileChooser();
           chooser.setDialogTitle(I18N.getText("msg.title.loadCampaign"));
-          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
           if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
             File campaignFile = chooser.getSelectedFile();
@@ -2300,6 +2301,7 @@ public class AppActions {
     CampaignPreviewFileChooser() {
       super();
       addChoosableFileFilter(MapTool.getFrame().getCmpgnFileFilter());
+      addChoosableFileFilter(MapTool.getFrame().getCmpgnDirectoryFileFilter());
     }
 
     @Override
@@ -2340,10 +2342,28 @@ public class AppActions {
             MapTool.getFrame().showFilledGlassPane(progressDialog);
             AppState.setIsLoading(true);
             // Before we do anything, let's back it up
-            if (MapTool.getBackupManager() != null) MapTool.getBackupManager().backup(campaignFile);
+            File backedUpFile = null;
+            if (MapTool.getBackupManager() != null) backedUpFile = MapTool.getBackupManager().backup(campaignFile);
 
+            File loadFile = campaignFile;
+            boolean useTemporaryFile = false;
+            // in case this is a directory and now backup file was 
+            // created get the packed file to be compatible with existing code
+            if (campaignFile.isDirectory()) {
+              if (backedUpFile == null) {
+                loadFile = MapTool.getBackupManager().backup(campaignFile, true);
+                useTemporaryFile = true;
+              } else {
+                loadFile = backedUpFile;
+              }
+            }
+            
             // Load
-            final PersistedCampaign campaign = PersistenceUtil.loadCampaign(campaignFile);
+            final PersistedCampaign campaign = PersistenceUtil.loadCampaign(loadFile);
+            
+            if (useTemporaryFile) {
+              loadFile.delete();
+            }
             if (campaign != null) {
               // current = MapTool.getFrame().getCurrentZoneRenderer();
               // MapTool.getFrame().setCurrentZoneRenderer(null);
@@ -2431,7 +2451,8 @@ public class AppActions {
             doSaveCampaignAs(callback);
             return;
           }
-          doSaveCampaign(MapTool.getCampaign(), AppState.getCampaignFile(), callback);
+          boolean saveUnpackedAsDirectory = AppState.getCampaignFile().isDirectory();
+          doSaveCampaign(MapTool.getCampaign(), AppState.getCampaignFile(), callback, saveUnpackedAsDirectory);
         }
       };
 
@@ -2453,15 +2474,16 @@ public class AppActions {
       };
 
   private static void doSaveCampaign(
-      final Campaign campaign, final File file, final Observer callback) {
-    doSaveCampaign(campaign, file, callback, null);
+      final Campaign campaign, final File file, final Observer callback, boolean saveUnpackedAsDirectory) {
+    doSaveCampaign(campaign, file, callback, null, saveUnpackedAsDirectory);
   }
 
   private static void doSaveCampaign(
       final Campaign campaign,
       final File file,
       final Observer callback,
-      final String campaignVersion) {
+      final String campaignVersion,
+      final boolean saveUnpackedAsDirectory) {
     MapTool.getFrame()
         .showFilledGlassPane(new StaticMessageDialog(I18N.getText("msg.info.campaignSaving")));
     new SwingWorker<Object, Object>() {
@@ -2475,7 +2497,7 @@ public class AppActions {
           MapTool.getAutoSaveManager().pause();
 
           long start = System.currentTimeMillis();
-          PersistenceUtil.saveCampaign(campaign, file, campaignVersion);
+          PersistenceUtil.saveCampaign(campaign, file, campaignVersion, saveUnpackedAsDirectory);
           AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
           MapTool.getFrame().setStatusMessage(I18N.getString("msg.info.campaignSaved"));
 
@@ -2525,14 +2547,20 @@ public class AppActions {
       if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
         return;
       }
-
+      
+      boolean saveUnpackedAsDirectory = ((MTFileFilter)chooser.getFileFilter()).isDirectory();
+      if (campaignFile.isDirectory()) { saveUnpackedAsDirectory = true; }
+      
       String _extension = AppConstants.CAMPAIGN_FILE_EXTENSION;
+      if (saveUnpackedAsDirectory) {
+        _extension = AppConstants.CAMPAIGN_DIRECTIORY_EXTENSION;        
+      }
 
-      if (!campaignFile.getName().toLowerCase().endsWith(_extension)) {
+      if (!saveUnpackedAsDirectory && !campaignFile.getName().toLowerCase().endsWith(_extension)) {
         campaignFile = new File(campaignFile.getAbsolutePath() + _extension);
       }
 
-      doSaveCampaign(campaign, campaignFile, callback);
+      doSaveCampaign(campaign, campaignFile, callback, saveUnpackedAsDirectory);
 
       AppState.setCampaignFile(campaignFile);
       AppPreferences.setSaveDir(campaignFile.getParentFile());
@@ -2554,7 +2582,10 @@ public class AppActions {
         return;
       }
 
-      doSaveCampaign(campaign, campaignFile, null, dialog.getVersionText());
+      boolean saveUnpackedAsDirectory = ((MTFileFilter)dialog.getSelectedMTFileFilter()).isDirectory();
+      if (campaignFile.isDirectory()) { saveUnpackedAsDirectory = true; }
+      
+      doSaveCampaign(campaign, campaignFile, null, dialog.getVersionText(), saveUnpackedAsDirectory);
 
       AppState.setCampaignFile(campaignFile);
       AppPreferences.setSaveDir(campaignFile.getParentFile());

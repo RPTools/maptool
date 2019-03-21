@@ -348,6 +348,19 @@ public class FileUtil {
   }
 
   /**
+   * Copies <code>sourceFile</code> to <code>destFile</code> overwriting as required, and <b>not</b>
+   * preserving the source file's last modified time. The destination directory is created if it
+   * does not exist, and if the destination file exists, it is overwritten.
+   *
+   * @param sourceFile
+   * @param destFile
+   * @throws IOException
+   */
+  public static void copyDirectory(File sourceFile, File destFile) throws IOException {
+    FileUtils.copyDirectory(sourceFile, destFile, false);
+  }
+  
+  /**
    * Unzips the indicated file from the <code>classpathFile</code> location into the indicated
    * <code>destDir</code>.
    *

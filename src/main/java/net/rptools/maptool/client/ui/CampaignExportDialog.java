@@ -29,6 +29,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.MapToolFrame.MTFileFilter;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.CampaignExport;
 import org.apache.logging.log4j.LogManager;
@@ -50,6 +51,7 @@ public class CampaignExportDialog extends JDialog {
   private static JEditorPane versionNotesText;
   private static JComboBox selectVersionCombo;
   private static File campaignFile;
+  private static MTFileFilter selectedFileFilter;
   private static int saveStatus = -1;
 
   /** Only doing this because I don't expect more than one instance of this modal dialog */
@@ -140,11 +142,16 @@ public class CampaignExportDialog extends JDialog {
     return campaignFile;
   }
 
+  public MTFileFilter getSelectedMTFileFilter() {
+    return selectedFileFilter;
+  }
+  
   private void exportButtonAction() {
     try {
       JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
       saveStatus = chooser.showSaveDialog(MapTool.getFrame());
       campaignFile = chooser.getSelectedFile();
+      selectedFileFilter = (MTFileFilter)chooser.getFileFilter();
     } catch (Exception ex) {
       MapTool.showError(I18N.getString("dialog.campaignexport.error.failedExporting"), ex);
     } finally {
