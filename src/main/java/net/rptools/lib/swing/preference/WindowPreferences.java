@@ -66,7 +66,7 @@ public class WindowPreferences extends WindowAdapter {
     if (window instanceof Frame) {
       DEFAULT_MAXIMIZED = ((Frame) window).getExtendedState() == Frame.MAXIMIZED_BOTH;
     }
-    
+
     restorePreferences(window);
     window.addWindowListener(this);
   }
@@ -127,9 +127,10 @@ public class WindowPreferences extends WindowAdapter {
 
   protected void storePreferences(Window window) {
 
-    
     JFrame frame = null;
-    if (window instanceof JFrame) { frame = (JFrame) window; }
+    if (window instanceof JFrame) {
+      frame = (JFrame) window;
+    }
     if (frame != null && frame.getExtendedState() == Frame.MAXIMIZED_BOTH) {
       // support full screen when storing preferences
       setX(0);
