@@ -16,6 +16,7 @@ package net.rptools.maptool.client;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.ThreadContext;
 
 public class LaunchInstructions {
@@ -46,8 +47,15 @@ public class LaunchInstructions {
       JOptionPane.showMessageDialog(new JFrame(), msg, "Usage", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    MapTool.main(args);
-
+    try {
+      MapTool.main(args);
+    } catch (Exception | Error e) {
+      System.out.println(
+          String.format(
+              I18N.getString("msg.error.javaVersionNotSupported"),
+              System.getProperty("java.specification.version")));
+      System.exit(1);
+    }
     AppUpdate.gitHubReleases();
   }
 }

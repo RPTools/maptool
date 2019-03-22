@@ -37,7 +37,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import net.rptools.maptool.client.swing.SplashScreen;
+import net.rptools.maptool.client.swing.SplashScreenJFX;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -101,7 +101,7 @@ public class CreateVersionedInstallSplash extends Application {
 
   public static BufferedImage createLaunchSplash(String versionText) {
     final ImageIcon splashIcon =
-        new ImageIcon(SplashScreen.class.getClassLoader().getResource(resourceImage));
+        new ImageIcon(SplashScreenJFX.class.getClassLoader().getResource(resourceImage));
     final Color versionColor = Color.rgb(3, 78, 149, 1); // Color.rgb(27, 85, 139, 1)
 
     final int imgWidth = 490;
@@ -109,7 +109,7 @@ public class CreateVersionedInstallSplash extends Application {
     final int versionTextX = 48;
     final int versionTextY = 37;
 
-    InputStream is = SplashScreen.class.getResourceAsStream(FONT_RESOURCE);
+    InputStream is = SplashScreenJFX.class.getResourceAsStream(FONT_RESOURCE);
     versionFont = Font.loadFont(is, 28);
 
     BufferedImage buffImage = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_INT_ARGB);

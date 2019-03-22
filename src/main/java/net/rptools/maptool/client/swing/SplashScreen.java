@@ -27,11 +27,11 @@ import javafx.scene.paint.Color;
 import javax.swing.JFrame;
 import net.rptools.maptool.util.CreateVersionedInstallSplash;
 
-public class SplashScreen extends JFrame {
+public class SplashScreenJFX extends JFrame implements ISplashScreen {
   private static int imgWidth = 490;
   private static int imgHeight = 290;
 
-  public SplashScreen(final String versionText) {
+  public SplashScreenJFX(final String versionText) {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     final JFXPanel fxPanel = new JFXPanel();
 
@@ -78,6 +78,10 @@ public class SplashScreen extends JFrame {
     fxPanel.setScene(scene);
   }
 
+  /* (non-Javadoc)
+   * @see net.rptools.maptool.client.swing.ISplashScreen#hideSplashScreen()
+   */
+  @Override
   public void hideSplashScreen() {
     setVisible(false);
     dispose();

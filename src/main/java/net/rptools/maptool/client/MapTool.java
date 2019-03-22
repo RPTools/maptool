@@ -75,9 +75,11 @@ import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
+import net.rptools.maptool.client.swing.ISplashScreen;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
-import net.rptools.maptool.client.swing.SplashScreen;
+import net.rptools.maptool.client.swing.SplashScreenJFX;
+import net.rptools.maptool.client.swing.SplashScreenSwing;
 import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.MapToolFrame;
@@ -1234,19 +1236,35 @@ public class MapTool {
    * <p>This method uses the system property <b>java.specification.version</b> as it seemed the
    * easiest thing to test. :)
    */
-  private static void verifyJavaVersion() {
+  private static Double verifyJavaVersion() {
+    // The specification version can be 1.0 through 1.8, then 9 through 13. It's not the
+    // same as the Java version number string and thus doesn't have multiple periods in
+    // it and should parse as a Double just fine.
     String version = System.getProperty("java.specification.version");
+    Double JavaVersion;
     boolean keepgoing = true;
+
     if (version == null) {
-      keepgoing = confirm("msg.error.unknownJavaVersion");
-      JAVA_VERSION = 1.5;
+      keepgoing = MapTool.confirm("msg.error.unknownJavaVersion");
+      JavaVersion = 1.5;
     } else {
-      JAVA_VERSION = Double.valueOf(version);
-      if (JAVA_VERSION < 1.8) {
-        keepgoing = confirm("msg.error.wrongJavaVersion", version);
+      JavaVersion = Double.valueOf(version);
+      if (JavaVersion < 1.8) {
+        keepgoing = MapTool.confirm("msg.error.javaVersionTooOld", version);
+      } else if (JavaVersion < 11) {
+        // Java 1.8 through Java 10 is fine. Java 9 is where the numbering scheme changed,
+        // and Java 11 is when Oracle started unbundling the JavaFX library. We can handle
+        // up to but not including Java 11.
+      } else {
+        MapTool.showMessage(
+            "msg.error.javaVersionNotSupported",
+            "msg.title.messageDialogError",
+            JOptionPane.ERROR_MESSAGE,
+            new Object[] {JavaVersion});
+        keepgoing = false;
       }
     }
-    if (!keepgoing) System.exit(1);
+    return keepgoing ? JavaVersion : 0.0;
   }
 
   private static void postInitialize() {
@@ -1586,13 +1604,26 @@ public class MapTool {
       System.exit(1);
     }
 
-    verifyJavaVersion();
+    if (verifyJavaVersion() <= 0.01) {
+      // I've always been told never to check floating point numbers for equality. The
+      // function returns "0.0" exactly, but we'll play it safe. :)
+      System.exit(1);
+    }
 
     // System properties
     System.setProperty("swing.aatext", "true");
 
-    final SplashScreen splash =
-        new SplashScreen((isDevelopment()) ? getVersion() : "v" + getVersion());
+    ISplashScreen splash;
+    // If JavaFX isn't available, fallback to the Swing splash screen...
+    try {
+      splash = new SplashScreenJFX((isDevelopment()) ? getVersion() : "v" + getVersion());
+    } catch (java.lang.NoClassDefFoundError | Exception cnfe) {
+      // Pathname copied from CreateVersionedInstallSplash -- ugh. But can't use the class
+      // since it'll trigger yet another JavaFX class to be loaded and hence another
+      // exception.
+      String imgName = "net/rptools/maptool/client/image/maptool_splash_template.png";
+      splash = new SplashScreenSwing(imgName, isDevelopment() ? getVersion() : "v" + getVersion());
+    }
 
     // Protocol handlers
     // cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
@@ -1708,6 +1739,7 @@ public class MapTool {
     // Draw frame contents on resize
     tk.setDynamicLayout(true);
 
+    final ISplashScreen finalSplash = splash;
     EventQueue.invokeLater(
         new Runnable() {
           public void run() {
@@ -1716,7 +1748,7 @@ public class MapTool {
                 new Runnable() {
                   public void run() {
                     clientFrame.setVisible(true);
-                    splash.hideSplashScreen();
+                    finalSplash.hideSplashScreen();
                     EventQueue.invokeLater(
                         new Runnable() {
                           public void run() {
