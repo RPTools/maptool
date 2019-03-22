@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-
 import net.rptools.maptool.util.PersistenceUtil;
 
 public class BackupManager {
@@ -50,7 +49,7 @@ public class BackupManager {
   public File backup(File file) throws IOException {
     return backup(file, false);
   }
-  
+
   public File backup(File file, boolean forceBackup) throws IOException {
 
     // Active ?
@@ -76,11 +75,11 @@ public class BackupManager {
     // Save
     if (file.isDirectory()) {
       PersistenceUtil.pack(file, newFile);
-      //FileUtil.copyDirectory(file, newFile);
+      // FileUtil.copyDirectory(file, newFile);
     } else {
       FileUtil.copyFile(file, newFile);
     }
-    
+
     return newFile;
   }
 

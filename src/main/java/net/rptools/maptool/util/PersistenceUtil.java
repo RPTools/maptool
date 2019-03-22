@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.util;
 
+import com.caucho.hessian.io.HessianInput;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.ConversionException;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -30,33 +33,26 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-
 import javax.imageio.ImageIO;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.caucho.hessian.io.HessianInput;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.ConversionException;
-
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.ModelVersionManager;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
+import net.rptools.lib.net.Location;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppUtil;
@@ -77,6 +73,10 @@ import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
 import net.rptools.maptool.model.transform.campaign.TokenPropertyMapTransform;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
 public class PersistenceUtil {
@@ -168,6 +168,34 @@ public class PersistenceUtil {
     public String mapToolVersion;
   }
 
+  public static class CampaignWrapper {
+    public Location exportLocation;
+    public Map<String, Boolean> exportSettings;
+    public int macroButtonLastIndex;
+    public Boolean hasUsedFogToolbar;
+    public GUID id;
+    public GUID currentZoneId;
+    public String mapToolVersion;
+    public List<MacroFileWrapper> macroFiles;
+    public List<String> zoneFiles;
+  }
+
+  public static class ZoneWrapper {
+    public List<String> tokenFiles;
+    public Zone zone;
+  }
+
+  public static class TokenWrapper {
+    public List<MacroFileWrapper> macroFiles;
+    public Token token;
+  }
+
+  public static class MacroFileWrapper {
+    public String macroFile;
+    public int index;
+    public String saveLocation;
+  }
+
   public static void saveMap(Zone z, File mapFile) throws IOException {
     PersistedMap pMap = new PersistedMap();
     pMap.zone = z;
@@ -200,7 +228,7 @@ public class PersistenceUtil {
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
 
-      PersistedMap persistedMap = (PersistedMap) pakFile.getContent();
+      PersistedMap persistedMap = (PersistedMap) pakFile.getContent(PackedFile.CONTENT_FILE);
 
       // Now load up any images that we need
       loadAssets(persistedMap.assetMap.keySet(), pakFile);
@@ -255,7 +283,8 @@ public class PersistenceUtil {
     return n;
   }
 
-  public static void saveCampaign(Campaign campaign, File campaignFile, String campaignVersion, boolean saveUnpackedAsDirectory)
+  public static void saveCampaign(
+      Campaign campaign, File campaignFile, String campaignVersion, boolean saveUnpackedAsDirectory)
       throws IOException {
     CodeTimer saveTimer; // FJE Previously this was 'private static' -- why?
     saveTimer = new CodeTimer("CampaignSave");
@@ -269,12 +298,14 @@ public class PersistenceUtil {
     File tmpFile = new File(tmpDir.getAbsolutePath(), campaignFile.getName());
     if (tmpFile.exists()) tmpFile.delete();
 
-    if (campaignFile.isDirectory() && campaignFile.exists()) { FileUtil.delete(campaignFile); }
+    if (campaignFile.isDirectory() && campaignFile.exists()) {
+      FileUtil.delete(campaignFile);
+    }
 
     PackedFile pakFile = null;
     try {
       pakFile = new PackedFile(tmpFile);
-      
+
       // Configure the meta file (this is for legacy support)
       PersistedCampaign persistedCampaign = new PersistedCampaign();
       persistedCampaign.campaign = campaign;
@@ -308,51 +339,101 @@ public class PersistenceUtil {
           pakFile = CampaignExport.stripContent(pakFile, persistedCampaign, campaignVersion);
         } else {
           pakFile.setContent(persistedCampaign);
-          /*
-          public Campaign campaign;
-          public Map<MD5Key, Asset> assetMap = new HashMap<MD5Key, Asset>();
-          public GUID currentZoneId;
-          public Scale currentView;
-          public String mapToolVersion;
-          */
-          pakFile.putFile("currentZoneId.xml", persistedCampaign.currentZoneId);
-          pakFile.putFile("currentView.xml", persistedCampaign.currentView);
-          pakFile.putFile("mapToolVersion.xml", persistedCampaign.mapToolVersion);
-          pakFile.putFile("campaign.xml", persistedCampaign.campaign);
-          pakFile.putFile("characterSheets.xml", persistedCampaign.campaign.getCharacterSheets());
-          pakFile.putFile("exportLocation.xml", persistedCampaign.campaign.getExportLocation());
-          pakFile.putFile("exportSettings.xml", persistedCampaign.campaign.getExportSettings());
-          pakFile.putFile("campaignProperties.xml", persistedCampaign.campaign.getCampaignProperties());
-          pakFile.putFile("macroButtonProperties.xml", persistedCampaign.campaign.getMacroButtonProperties());
-          pakFile.putFile("macroButtonLastIndex.xml", persistedCampaign.campaign.getMacroButtonLastIndex());
-          pakFile.putFile("hasUsedFogToolbar.xml", persistedCampaign.campaign.getHasUsedFogToolbar());
 
-          Campaign campaignClone = null;
-          try {
-            campaignClone = (Campaign)campaign.clone();
-          } catch (CloneNotSupportedException e) {
-            // safe to ignore
+          pakFile.putFile("assetMap.xml", persistedCampaign.assetMap);
+          pakFile.putFile("currentView.xml", persistedCampaign.currentView);
+
+          pakFile.getXStream().omitField(Campaign.class, "zones");
+          pakFile.getXStream().omitField(Campaign.class, "macroButtonProperties");
+          pakFile.getXStream().omitField(CampaignProperties.class, "characterSheets");
+          pakFile.putFile("characterSheets.xml", persistedCampaign.campaign.getCharacterSheets());
+          pakFile.putFile(
+              "campaignProperties.xml", persistedCampaign.campaign.getCampaignProperties());
+
+          List<MacroFileWrapper> macroFilesWrapper = new LinkedList<MacroFileWrapper>();
+          for (MacroButtonProperties macro :
+              persistedCampaign.campaign.getMacroButtonProperties()) {
+            String macroFile =
+                "/macros/macro_"
+                    + macro.getMacroUUID()
+                    + "_"
+                    + fixFileName(macro.getLabel())
+                    + ".xml";
+            MacroFileWrapper macroFileWrapper = new MacroFileWrapper();
+            macroFileWrapper.index = macro.getIndex();
+            macroFileWrapper.saveLocation = macro.getSaveLocation();
+            macroFileWrapper.macroFile = macroFile;
+            macroFilesWrapper.add(macroFileWrapper);
+            pakFile.putFile(macroFile, macro);
           }
-          
+
           pakFile.getXStream().omitField(Zone.class, "tokenOrderedList");
           pakFile.getXStream().omitField(Zone.class, "tokenMap");
           pakFile.getXStream().omitField(Token.class, "macroPropertiesMap");
           pakFile.getXStream().omitField(Token.class, "macroMap");
-          for(Zone zone : campaignClone.getZones()) {
-            for(Token token : zone.getAllTokens()) {
-              pakFile.putFile("zones/"+zone.getName()+"/tokens/"+token.getId()+"/token.xml", token);
-            }
-            for(Map.Entry<GUID, Token> tokenEntry : zone.getTokenMap().entrySet()) {
-              pakFile.putFile("zones/"+zone.getName()+"/tokens/"+tokenEntry.getKey()+"/tokenMap.xml", tokenEntry.getValue());
-            
-              for(Map.Entry<Integer, Object> macroEntry : tokenEntry.getValue().getMacroPropertiesMap(false).entrySet()) {
+
+          List<String> zoneFiles = new LinkedList<String>();
+          for (Zone zone : persistedCampaign.campaign.getZones()) {
+            String zonePrefix =
+                "zones/" + fixFileName(zone.getId().toString()) + "_" + fixFileName(zone.getName());
+
+            List<String> tokenFiles = new LinkedList<String>();
+            for (Token token : zone.getAllTokens()) {
+              String tokenPath =
+                  "/tokens/"
+                      + fixFileName(token.getId().toString())
+                      + "_"
+                      + fixFileName(token.getName());
+              String tokenFile =
+                  zonePrefix + tokenPath + "/t_" + "_" + fixFileName(token.getName()) + ".xml";
+              tokenFiles.add(tokenFile);
+
+              List<MacroFileWrapper> tokenMacroFiles = new LinkedList<MacroFileWrapper>();
+              for (Map.Entry<Integer, Object> macroEntry :
+                  token.getMacroPropertiesMap(false).entrySet()) {
                 MacroButtonProperties macro = (MacroButtonProperties) macroEntry.getValue();
-                pakFile.putFile("zones/"+zone.getName()+"/tokens/"+tokenEntry.getKey()+"/macros/macro_"+macroEntry.getKey()+"_"+macro.getLabel()+".xml", macroEntry.getValue());
+                String macroFile =
+                    zonePrefix
+                        + tokenPath
+                        + "/macros/macro_"
+                        + macro.getMacroUUID()
+                        + "_"
+                        + fixFileName(macro.getLabel())
+                        + ".xml";
+                MacroFileWrapper tokenMacroFileWrapper = new MacroFileWrapper();
+                tokenMacroFileWrapper.index = macro.getIndex();
+                tokenMacroFileWrapper.saveLocation = macro.getSaveLocation();
+                tokenMacroFileWrapper.macroFile = macroFile;
+                tokenMacroFiles.add(tokenMacroFileWrapper);
+                pakFile.putFile(macroFile, macroEntry.getValue());
               }
+
+              TokenWrapper tokenWrapper = new TokenWrapper();
+              tokenWrapper.macroFiles = tokenMacroFiles;
+              tokenWrapper.token = token;
+              pakFile.putFile(tokenFile, tokenWrapper);
             }
-            pakFile.putFile("zones/"+zone.getName()+"/zone.xml", zone);            
+
+            String zoneFile = zonePrefix + "/z_" + "_" + fixFileName(zone.getName()) + ".xml";
+            zoneFiles.add(zoneFile);
+            ZoneWrapper zoneWrapper = new ZoneWrapper();
+            zoneWrapper.zone = zone;
+            zoneWrapper.tokenFiles = tokenFiles;
+            pakFile.putFile(zoneFile, zoneWrapper);
           }
-          
+
+          CampaignWrapper campaignWrapper = new CampaignWrapper();
+          campaignWrapper.mapToolVersion = persistedCampaign.mapToolVersion;
+          campaignWrapper.currentZoneId = persistedCampaign.currentZoneId;
+          campaignWrapper.exportLocation = persistedCampaign.campaign.getExportLocation();
+          campaignWrapper.exportSettings = persistedCampaign.campaign.getExportSettings();
+          campaignWrapper.macroButtonLastIndex =
+              persistedCampaign.campaign.getMacroButtonLastIndex();
+          campaignWrapper.hasUsedFogToolbar = persistedCampaign.campaign.getHasUsedFogToolbar();
+          campaignWrapper.zoneFiles = zoneFiles;
+          campaignWrapper.macroFiles = macroFilesWrapper;
+          pakFile.putFile("campaign.xml", campaignWrapper);
+
           pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
           pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
         }
@@ -360,7 +441,7 @@ public class PersistenceUtil {
         saveTimer.stop("Set content");
         saveTimer.start("Save");
         pakFile.save();
-        
+
         saveTimer.stop("Save");
       } catch (OutOfMemoryError oom) {
         /*
@@ -412,7 +493,7 @@ public class PersistenceUtil {
     }
 
     saveTimer.start("Backup tmpFile");
-    
+
     if (saveUnpackedAsDirectory) {
       unpack(tmpFile, campaignFile);
     } else {
@@ -432,28 +513,46 @@ public class PersistenceUtil {
       log.debug(saveTimer);
     }
   }
-  
-  public static void unpack(File src, File dest) throws IOException{
+
+  private static String fixFileName(String fileName) {
+    fileName = fileName.replace(":", "_");
+    fileName = fileName.replace("?", "_");
+    fileName = fileName.replace("*", "_");
+    fileName = fileName.replace("/", "_");
+    fileName = fileName.replace("\\", "_");
+    return fileName;
+  }
+
+  private static String removeLeadingSlash(String fileName) {
+    if (fileName != null && fileName.startsWith("/")) {
+      return fileName.substring(1);
+    }
+    return fileName;
+  }
+
+  public static void unpack(File src, File dest) throws IOException {
     byte[] buffer = new byte[1024];
     ZipInputStream zis = null;
-    
+
     if (!dest.exists()) {
       dest.mkdirs();
     }
-    
+
     try {
       zis = new ZipInputStream(new FileInputStream(src));
       ZipEntry zipEntry = zis.getNextEntry();
       while (zipEntry != null) {
-          File newFile = newFile(dest, zipEntry);
-          if (!newFile.getParentFile().exists()) { newFile.getParentFile().mkdirs(); }
-          FileOutputStream fos = new FileOutputStream(newFile);
-          int len;
-          while ((len = zis.read(buffer)) > 0) {
-              fos.write(buffer, 0, len);
-          }
-          fos.close();
-          zipEntry = zis.getNextEntry();
+        File newFile = newFile(dest, zipEntry);
+        if (!newFile.getParentFile().exists()) {
+          newFile.getParentFile().mkdirs();
+        }
+        FileOutputStream fos = new FileOutputStream(newFile);
+        int len;
+        while ((len = zis.read(buffer)) > 0) {
+          fos.write(buffer, 0, len);
+        }
+        fos.close();
+        zipEntry = zis.getNextEntry();
       }
     } finally {
       if (zis != null) {
@@ -462,65 +561,66 @@ public class PersistenceUtil {
       }
     }
   }
-  
-  public static void pack(File src, File dest) throws IOException{
-    try (
-        FileOutputStream fos = new FileOutputStream(dest);  
+
+  public static void pack(File src, File dest) throws IOException {
+    try (FileOutputStream fos = new FileOutputStream(dest);
         ZipOutputStream zipOut = new ZipOutputStream(fos)) {
       zipFile(src, "", zipOut, true);
     }
   }
 
-  private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut, boolean ignoreRoot) throws IOException {
-    
+  private static void zipFile(
+      File fileToZip, String fileName, ZipOutputStream zipOut, boolean ignoreRoot)
+      throws IOException {
+
     if (fileToZip.isHidden()) {
-        return;
+      return;
     }
-    
+
     if (fileName == null) {
       fileName = "";
     }
-    
+
     if (fileToZip.isDirectory()) {
-        
+
       File[] children = fileToZip.listFiles();
-      
+
       if (fileName.length() > 0 && !fileName.endsWith("/")) {
         fileName = fileName + "/";
       }
 
       if (fileName.length() > 1 && children.length == 0) {
-          zipOut.putNextEntry(new ZipEntry(fileName));
-          zipOut.closeEntry();
+        zipOut.putNextEntry(new ZipEntry(fileName));
+        zipOut.closeEntry();
       }
-   
+
       for (File childFile : children) {
-          zipFile(childFile, fileName + childFile.getName(), zipOut, false);
+        zipFile(childFile, fileName + childFile.getName(), zipOut, false);
       }
       return;
     }
-    
+
     try (FileInputStream fis = new FileInputStream(fileToZip)) {
       ZipEntry zipEntry = new ZipEntry(fileName);
       zipOut.putNextEntry(zipEntry);
       byte[] bytes = new byte[1024];
       int length;
       while ((length = fis.read(bytes)) >= 0) {
-          zipOut.write(bytes, 0, length);
+        zipOut.write(bytes, 0, length);
       }
     }
-}
+  }
 
   private static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
     File destFile = new File(destinationDir, zipEntry.getName());
-     
+
     String destDirPath = destinationDir.getCanonicalPath();
     String destFilePath = destFile.getCanonicalPath();
-     
+
     if (!destFilePath.startsWith(destDirPath + File.separator)) {
-        throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
+      throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
     }
-     
+
     return destFile;
   }
 
@@ -560,6 +660,7 @@ public class PersistenceUtil {
     return new File(AppUtil.getAppHome("campaignthumbs"), fileName + ".jpg");
   }
 
+  @SuppressWarnings("unchecked")
   public static PersistedCampaign loadCampaign(File campaignFile) throws IOException {
     PersistedCampaign persistedCampaign = null;
 
@@ -578,7 +679,89 @@ public class PersistenceUtil {
       campaignVersion = campaignVersion == null ? "1.3.50" : campaignVersion;
 
       try {
-        persistedCampaign = (PersistedCampaign) pakFile.getContent(campaignVersion);
+        if (!pakFile.hasFile("campaignProperties.xml")) {
+          // pre 1.5.1 way to save/load a file with on content.xml
+          persistedCampaign =
+              (PersistedCampaign) pakFile.getContent(campaignVersion, PackedFile.CONTENT_FILE);
+        } else {
+          persistedCampaign = new PersistedCampaign();
+
+          persistedCampaign.assetMap =
+              (Map<MD5Key, Asset>) pakFile.getContent(campaignVersion, "assetMap.xml");
+          persistedCampaign.currentView =
+              (Scale) pakFile.getContent(campaignVersion, "currentView.xml");
+
+          CampaignProperties campaignProperties =
+              (CampaignProperties) pakFile.getContent(campaignVersion, "campaignProperties.xml");
+          Map<String, String> characterSheets =
+              (Map<String, String>) pakFile.getContent(campaignVersion, "characterSheets.xml");
+          campaignProperties.setCharacterSheets(characterSheets);
+
+          CampaignWrapper campaignWrapper =
+              (CampaignWrapper) pakFile.getContent(campaignVersion, "campaign.xml");
+
+          ArrayList<MacroButtonProperties> macroButtonPropertiesList =
+              new ArrayList<MacroButtonProperties>();
+          if (campaignWrapper.macroFiles != null)
+            for (MacroFileWrapper macroFileWrapper : campaignWrapper.macroFiles) {
+              MacroButtonProperties macroButtonProperties =
+                  (MacroButtonProperties)
+                      pakFile.getContent(
+                          campaignVersion, removeLeadingSlash(macroFileWrapper.macroFile));
+              macroButtonProperties.setIndex(macroFileWrapper.index);
+              macroButtonProperties.setSaveLocation(macroFileWrapper.saveLocation);
+              macroButtonPropertiesList.add(macroButtonProperties);
+            }
+
+          Map<GUID, Zone> zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+          if (campaignWrapper.zoneFiles != null)
+            for (String zoneFile : campaignWrapper.zoneFiles) {
+              ZoneWrapper zoneWrapper =
+                  (ZoneWrapper) pakFile.getContent(campaignVersion, removeLeadingSlash(zoneFile));
+              Zone zone = zoneWrapper.zone;
+              zones.put(zone.getId(), zone);
+
+              List<String> tokenFiles = zoneWrapper.tokenFiles;
+              for (String tokenFile : tokenFiles) {
+                TokenWrapper tokenWrapper =
+                    (TokenWrapper)
+                        pakFile.getContent(campaignVersion, removeLeadingSlash(tokenFile));
+                Token token = tokenWrapper.token;
+                List<MacroFileWrapper> tokenMacroFiles = tokenWrapper.macroFiles;
+                zones.put(zone.getId(), zone);
+                zone.putToken(token);
+
+                List<MacroButtonProperties> macroPropertiesList = new LinkedList<>();
+                for (MacroFileWrapper tokenMacroFileWrapper : tokenMacroFiles) {
+                  MacroButtonProperties macroButtonProperties =
+                      (MacroButtonProperties)
+                          pakFile.getContent(
+                              campaignVersion, removeLeadingSlash(tokenMacroFileWrapper.macroFile));
+                  macroButtonProperties.setIndex(tokenMacroFileWrapper.index);
+                  macroButtonProperties.setSaveLocation(tokenMacroFileWrapper.saveLocation);
+                  macroPropertiesList.add(macroButtonProperties);
+                }
+                token.replaceMacroList(macroPropertiesList);
+                zone.fixZOrder();
+              }
+            }
+
+          Campaign campaign =
+              new Campaign(
+                  campaignWrapper.id,
+                  campaignProperties,
+                  campaignWrapper.exportSettings,
+                  campaignWrapper.exportLocation,
+                  campaignWrapper.hasUsedFogToolbar,
+                  campaignWrapper.macroButtonLastIndex,
+                  macroButtonPropertiesList,
+                  zones);
+          persistedCampaign.campaign = campaign;
+          persistedCampaign.mapToolVersion = campaignWrapper.mapToolVersion;
+          persistedCampaign.currentZoneId = campaignWrapper.currentZoneId;
+          //          persistedCampaign = (PersistedCampaign) pakFile.getContent(campaignVersion,
+          // PackedFile.CONTENT_FILE);
+        }
       } catch (ConversionException ce) {
         // Ignore the exception and check for "campaign == null" below...
         MapTool.showError("PersistenceUtil.error.campaignVersion", ce);
@@ -749,7 +932,7 @@ public class PersistenceUtil {
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
 
-      token = (Token) pakFile.getContent(progVersion);
+      token = (Token) pakFile.getContent(progVersion, PackedFile.CONTENT_FILE);
       loadAssets(token.getAllImageAssets(), pakFile);
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.tokenVersion", ce);
@@ -949,7 +1132,7 @@ public class PersistenceUtil {
       if (!versionCheck(progVersion)) return null;
       CampaignProperties props = null;
       try {
-        props = (CampaignProperties) pakFile.getContent();
+        props = (CampaignProperties) pakFile.getContent(PackedFile.CONTENT_FILE);
         loadAssets(props.getAllImageAssets(), pakFile);
       } catch (ConversionException ce) {
         MapTool.showError("PersistenceUtil.error.campaignPropertiesVersion", ce);
@@ -1022,7 +1205,8 @@ public class PersistenceUtil {
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
 
-      MacroButtonProperties macroButton = (MacroButtonProperties) pakFile.getContent();
+      MacroButtonProperties macroButton =
+          (MacroButtonProperties) pakFile.getContent(PackedFile.CONTENT_FILE);
       return macroButton;
     } catch (IOException e) {
       if (pakFile != null) pakFile.close();
@@ -1084,7 +1268,7 @@ public class PersistenceUtil {
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
 
-      macroButtonSet = (List<MacroButtonProperties>) pakFile.getContent();
+      macroButtonSet = (List<MacroButtonProperties>) pakFile.getContent(PackedFile.CONTENT_FILE);
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
     } catch (IOException e) {
@@ -1147,7 +1331,7 @@ public class PersistenceUtil {
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
 
-      LookupTable lookupTable = (LookupTable) pakFile.getContent();
+      LookupTable lookupTable = (LookupTable) pakFile.getContent(PackedFile.CONTENT_FILE);
       loadAssets(lookupTable.getAllAssetIds(), pakFile);
       return lookupTable;
     } catch (ConversionException ce) {

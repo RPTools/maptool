@@ -2343,11 +2343,12 @@ public class AppActions {
             AppState.setIsLoading(true);
             // Before we do anything, let's back it up
             File backedUpFile = null;
-            if (MapTool.getBackupManager() != null) backedUpFile = MapTool.getBackupManager().backup(campaignFile);
+            if (MapTool.getBackupManager() != null)
+              backedUpFile = MapTool.getBackupManager().backup(campaignFile);
 
             File loadFile = campaignFile;
             boolean useTemporaryFile = false;
-            // in case this is a directory and now backup file was 
+            // in case this is a directory and now backup file was
             // created get the packed file to be compatible with existing code
             if (campaignFile.isDirectory()) {
               if (backedUpFile == null) {
@@ -2357,10 +2358,10 @@ public class AppActions {
                 loadFile = backedUpFile;
               }
             }
-            
+
             // Load
             final PersistedCampaign campaign = PersistenceUtil.loadCampaign(loadFile);
-            
+
             if (useTemporaryFile) {
               loadFile.delete();
             }
@@ -2452,7 +2453,8 @@ public class AppActions {
             return;
           }
           boolean saveUnpackedAsDirectory = AppState.getCampaignFile().isDirectory();
-          doSaveCampaign(MapTool.getCampaign(), AppState.getCampaignFile(), callback, saveUnpackedAsDirectory);
+          doSaveCampaign(
+              MapTool.getCampaign(), AppState.getCampaignFile(), callback, saveUnpackedAsDirectory);
         }
       };
 
@@ -2474,7 +2476,10 @@ public class AppActions {
       };
 
   private static void doSaveCampaign(
-      final Campaign campaign, final File file, final Observer callback, boolean saveUnpackedAsDirectory) {
+      final Campaign campaign,
+      final File file,
+      final Observer callback,
+      boolean saveUnpackedAsDirectory) {
     doSaveCampaign(campaign, file, callback, null, saveUnpackedAsDirectory);
   }
 
@@ -2547,13 +2552,15 @@ public class AppActions {
       if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
         return;
       }
-      
-      boolean saveUnpackedAsDirectory = ((MTFileFilter)chooser.getFileFilter()).isDirectory();
-      if (campaignFile.isDirectory()) { saveUnpackedAsDirectory = true; }
-      
+
+      boolean saveUnpackedAsDirectory = ((MTFileFilter) chooser.getFileFilter()).isDirectory();
+      if (campaignFile.isDirectory()) {
+        saveUnpackedAsDirectory = true;
+      }
+
       String _extension = AppConstants.CAMPAIGN_FILE_EXTENSION;
       if (saveUnpackedAsDirectory) {
-        _extension = AppConstants.CAMPAIGN_DIRECTIORY_EXTENSION;        
+        _extension = AppConstants.CAMPAIGN_DIRECTIORY_EXTENSION;
       }
 
       if (!saveUnpackedAsDirectory && !campaignFile.getName().toLowerCase().endsWith(_extension)) {
@@ -2582,10 +2589,14 @@ public class AppActions {
         return;
       }
 
-      boolean saveUnpackedAsDirectory = ((MTFileFilter)dialog.getSelectedMTFileFilter()).isDirectory();
-      if (campaignFile.isDirectory()) { saveUnpackedAsDirectory = true; }
-      
-      doSaveCampaign(campaign, campaignFile, null, dialog.getVersionText(), saveUnpackedAsDirectory);
+      boolean saveUnpackedAsDirectory =
+          ((MTFileFilter) dialog.getSelectedMTFileFilter()).isDirectory();
+      if (campaignFile.isDirectory()) {
+        saveUnpackedAsDirectory = true;
+      }
+
+      doSaveCampaign(
+          campaign, campaignFile, null, dialog.getVersionText(), saveUnpackedAsDirectory);
 
       AppState.setCampaignFile(campaignFile);
       AppPreferences.setSaveDir(campaignFile.getParentFile());

@@ -93,7 +93,7 @@ import org.apache.logging.log4j.Logger;
 public class PackedFile {
 
   private static final String PROPERTY_FILE = "properties.xml";
-  private static final String CONTENT_FILE = "content.xml";
+  public static final String CONTENT_FILE = "content.xml";
 
   private static final Logger log = LogManager.getLogger(PackedFile.class);
 
@@ -194,11 +194,12 @@ public class PackedFile {
    * Retrieves the contents of the <code>CONTENT_FILE</code> as a POJO. This object is the top-level
    * data structure for all information regarding the content of the PackedFile.
    *
+   * @param file file to load
    * @return the results of the deserialization
    * @throws IOException
    */
-  public Object getContent() throws IOException {
-    return getContent(versionManager, (String) getProperty("version"));
+  public Object getContent(String file) throws IOException {
+    return getContent(versionManager, (String) getProperty("version"), file);
   }
 
   /**
@@ -208,11 +209,12 @@ public class PackedFile {
    * the transformation as a simplified XSTL process.)
    *
    * @param fileVersion such as "1.3.70"
+   * @param file file to load
    * @return the results of the deserialization
    * @throws IOException
    */
-  public Object getContent(String fileVersion) throws IOException {
-    return getContent(versionManager, fileVersion);
+  public Object getContent(String fileVersion, String file) throws IOException {
+    return getContent(versionManager, fileVersion, file);
   }
 
   /**
@@ -221,22 +223,23 @@ public class PackedFile {
    *
    * @param versionManager which set of transforms to apply to older file versions
    * @param fileVersion such as "1.3.70"
+   * @param file file to load
    * @return the results of the deserialization
    * @throws IOException
    */
-  public Object getContent(ModelVersionManager versionManager, String fileVersion)
+  public Object getContent(ModelVersionManager versionManager, String fileVersion, String file)
       throws IOException {
     Reader r = null;
     try {
       if (versionManager != null && versionManager.isTransformationRequired(fileVersion)) {
-        r = getFileAsReader(CONTENT_FILE);
+        r = getFileAsReader(file);
         String xml = IOUtils.toString(r);
         xml = versionManager.transform(xml, fileVersion);
         xstream.ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new
         // classes/fields added.
         return xstream.fromXML(xml);
       } else {
-        return getFileObject(CONTENT_FILE);
+        return getFileObject(file);
       }
     } catch (NullPointerException npe) {
       log.error("Problem finding/converting content file", npe);

@@ -1878,6 +1878,10 @@ public class Token extends BaseModel implements Cloneable {
     if (exposedAreaGUID == null) {
       exposedAreaGUID = new GUID();
     }
+
+    if (macroPropertiesMap == null) {
+      macroPropertiesMap = new HashMap<Integer, Object>();
+    }
     return this;
   }
 

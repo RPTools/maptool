@@ -359,7 +359,7 @@ public class FileUtil {
   public static void copyDirectory(File sourceFile, File destFile) throws IOException {
     FileUtils.copyDirectory(sourceFile, destFile, false);
   }
-  
+
   /**
    * Unzips the indicated file from the <code>classpathFile</code> location into the indicated
    * <code>destDir</code>.
