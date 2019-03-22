@@ -15,12 +15,14 @@
 package net.rptools.lib.swing.preference;
 
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import javax.swing.JFrame;
 
 /**
  * Automatically keeps track of and restores frame size when opening/closing the application.
@@ -36,11 +38,13 @@ public class WindowPreferences extends WindowAdapter {
   private static final String KEY_Y = "y";
   private static final String KEY_WIDTH = "width";
   private static final String KEY_HEIGHT = "height";
+  private static final String KEY_MAXIMIZED = "maximized";
 
   private static int DEFAULT_X;
   private static int DEFAULT_Y;
   private static int DEFAULT_WIDTH;
   private static int DEFAULT_HEIGHT;
+  private static boolean DEFAULT_MAXIMIZED = false;
 
   /**
    * Creates an object that holds the window boundary information after storing it into {@link
@@ -59,6 +63,9 @@ public class WindowPreferences extends WindowAdapter {
     DEFAULT_Y = window.getLocation().y;
     DEFAULT_WIDTH = window.getSize().width;
     DEFAULT_HEIGHT = window.getSize().height;
+    if (window instanceof Frame) {
+      DEFAULT_MAXIMIZED = ((Frame) window).getExtendedState() == Frame.MAXIMIZED_BOTH;
+    }
 
     restorePreferences(window);
     window.addWindowListener(this);
@@ -110,22 +117,49 @@ public class WindowPreferences extends WindowAdapter {
     prefs.putInt(KEY_HEIGHT, height);
   }
 
-  protected void storePreferences(Window frame) {
-    setX(frame.getLocation().x);
-    setY(frame.getLocation().y);
-
-    setWidth(frame.getSize().width);
-    setHeight(frame.getSize().height);
+  protected boolean getMaximized() {
+    return prefs.getBoolean(KEY_MAXIMIZED, DEFAULT_MAXIMIZED);
   }
 
-  protected void restorePreferences(Window frame) {
+  protected void setMaximized(boolean maximized) {
+    prefs.putBoolean(KEY_MAXIMIZED, maximized);
+  }
+
+  protected void storePreferences(Window window) {
+
+    JFrame frame = null;
+    if (window instanceof JFrame) {
+      frame = (JFrame) window;
+    }
+    if (frame != null && frame.getExtendedState() == Frame.MAXIMIZED_BOTH) {
+      // support full screen when storing preferences
+      setX(0);
+      setY(0);
+      setWidth(frame.getWidth());
+      setHeight(frame.getHeight());
+      setMaximized(true);
+    } else {
+      setX(window.getLocation().x);
+      setY(window.getLocation().y);
+
+      setWidth(window.getSize().width);
+      setHeight(window.getSize().height);
+      setMaximized(false);
+    }
+  }
+
+  protected void restorePreferences(Window window) {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
     int x = Math.max(Math.min(getX(), screenSize.width - getWidth()), 0);
     int y = Math.max(Math.min(getY(), screenSize.height - getHeight()), 0);
 
-    frame.setSize(getWidth(), getHeight());
-    frame.setLocation(x, y);
+    window.setSize(getWidth(), getHeight());
+    window.setLocation(x, y);
+
+    if (getMaximized() && window instanceof JFrame) {
+      ((JFrame) window).setExtendedState(Frame.MAXIMIZED_BOTH);
+    }
   }
 
   ////
