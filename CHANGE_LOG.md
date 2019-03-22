@@ -64,8 +64,12 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * [#239][i239] - MapToolScriptTokenMaker now handles function names with . notation and dynamically pulls in all functions names. TokenMakerMaker no longer needs to be ran upon changes to MTScript.
 * [#240][i240] - Macro Editor now has Auto-Completion for macro functions! A brief description and summary can be displayed (these will be added as time permits)
 * [#332][i332] - Allow to set color for personal lights in campaign Sight types
+* [#324][i324] - fix output of getViewPort. This might break existing macro using workaround to interpret the broken result before the fix.
+* [#326][i326] - defineFunction with open edit window
 
 [i332]: https://github.com/RPTools/maptool/issues/332
+[i324]: https://github.com/RPTools/maptool/issues/324
+[i326]: https://github.com/RPTools/maptool/issues/326
 [i210]: https://github.com/RPTools/maptool/issues/210
 [i113]: https://github.com/JamzTheMan/MapTool/issues/113
 [i108]: https://github.com/JamzTheMan/MapTool/issues/108

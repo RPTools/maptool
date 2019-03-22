@@ -287,7 +287,7 @@ task uberJar(type: Jar) {
     }
 
     from {
-        configurations.compile.collect {
+        configurations.runtimeClasspath.collect {
             it.isDirectory() ? it : zipTree(it)
         }
     }

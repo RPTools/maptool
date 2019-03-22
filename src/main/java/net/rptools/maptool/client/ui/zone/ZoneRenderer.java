@@ -52,6 +52,7 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -178,6 +179,7 @@ public class ZoneRenderer extends JComponent
   private final Map<Token, BufferedImage> replacementImageMap = new HashMap<Token, BufferedImage>();
   private final Map<Token, BufferedImage> flipImageMap = new HashMap<Token, BufferedImage>();
   private final Map<Token, BufferedImage> flipIsoImageMap = new HashMap<Token, BufferedImage>();
+  private final Map<Token, BufferedImage> opacityImageMap = new HashMap<Token, BufferedImage>();
   private Token tokenUnderMouse;
 
   private ScreenPoint pointUnderMouse;
@@ -630,6 +632,7 @@ public class ZoneRenderer extends JComponent
     }
     flipImageMap.remove(token);
     flipIsoImageMap.remove(token);
+    opacityImageMap.remove(token);
     replacementImageMap.remove(token);
     labelRenderingCache.remove(token.getId());
 
@@ -665,6 +668,7 @@ public class ZoneRenderer extends JComponent
     replacementImageMap.clear();
     flipImageMap.clear();
     flipIsoImageMap.clear();
+    opacityImageMap.clear();
     fogBuffer = null;
     renderedLightMap = null;
     renderedAuraMap = null;
@@ -2264,9 +2268,9 @@ public class ZoneRenderer extends JComponent
                 String distance = "";
                 if (walker != null) { // This wouldn't be true unless token.isSnapToGrid() &&
                   // grid.isPathingSupported()
-                  int distanceTraveled = walker.getDistance();
-                  if (distanceTraveled >= 1) {
-                    distance = Integer.toString(distanceTraveled);
+                  double distanceTraveled = walker.getDistance();
+                  if (distanceTraveled >= 0) {
+                    distance = NumberFormat.getInstance().format(distanceTraveled);
                   }
                 } else {
                   double c = 0;
@@ -2283,7 +2287,7 @@ public class ZoneRenderer extends JComponent
                   }
                   c /= zone.getGrid().getSize(); // Number of "cells"
                   c *= zone.getUnitsPerCell(); // "actual" distance traveled
-                  distance = String.format("%.1f", c);
+                  distance = NumberFormat.getInstance().format(c);
                 }
                 if (!distance.isEmpty()) {
                   delayRendering(new LabelRenderer(distance, x, y));
@@ -2635,7 +2639,7 @@ public class ZoneRenderer extends JComponent
     double iwidth = cwidth * size;
     double iheight = cheight * size;
 
-    String distanceText = "" + (int) distance;
+    String distanceText = NumberFormat.getInstance().format(distance);
     ScreenPoint sp = ScreenPoint.fromZonePoint(this, point);
 
     int cellX = (int) (sp.x - iwidth / 2);
@@ -3135,15 +3139,19 @@ public class ZoneRenderer extends JComponent
       // Apply Alpha Transparency
       float opacity = token.getTokenOpacity();
       if (opacity < 1.0f) {
-        BufferedImage dest =
-            new BufferedImage(
-                workImage.getWidth(), workImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D gAlpha = dest.createGraphics();
-        gAlpha.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-        gAlpha.drawImage(workImage, 0, 0, null);
-        gAlpha.dispose();
-
-        workImage = dest;
+        if (opacityImageMap.get(token) == null) {
+          BufferedImage dest =
+              new BufferedImage(
+                  workImage.getWidth(), workImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+          Graphics2D gAlpha = dest.createGraphics();
+          gAlpha.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+          gAlpha.drawImage(workImage, 0, 0, null);
+          gAlpha.dispose();
+          workImage = dest;
+          opacityImageMap.put(token, workImage);
+        } else {
+          workImage = opacityImageMap.get(token);
+        }
       }
 
       timer.start("tokenlist-7");
