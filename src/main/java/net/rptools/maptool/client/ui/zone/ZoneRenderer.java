@@ -179,6 +179,7 @@ public class ZoneRenderer extends JComponent
   private final Map<Token, BufferedImage> replacementImageMap = new HashMap<Token, BufferedImage>();
   private final Map<Token, BufferedImage> flipImageMap = new HashMap<Token, BufferedImage>();
   private final Map<Token, BufferedImage> flipIsoImageMap = new HashMap<Token, BufferedImage>();
+  private final Map<Token, BufferedImage> opacityImageMap = new HashMap<Token, BufferedImage>();
   private Token tokenUnderMouse;
 
   private ScreenPoint pointUnderMouse;
@@ -631,6 +632,7 @@ public class ZoneRenderer extends JComponent
     }
     flipImageMap.remove(token);
     flipIsoImageMap.remove(token);
+    opacityImageMap.remove(token);
     replacementImageMap.remove(token);
     labelRenderingCache.remove(token.getId());
 
@@ -666,6 +668,7 @@ public class ZoneRenderer extends JComponent
     replacementImageMap.clear();
     flipImageMap.clear();
     flipIsoImageMap.clear();
+    opacityImageMap.clear();
     fogBuffer = null;
     renderedLightMap = null;
     renderedAuraMap = null;
@@ -3136,15 +3139,19 @@ public class ZoneRenderer extends JComponent
       // Apply Alpha Transparency
       float opacity = token.getTokenOpacity();
       if (opacity < 1.0f) {
-        BufferedImage dest =
-            new BufferedImage(
-                workImage.getWidth(), workImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D gAlpha = dest.createGraphics();
-        gAlpha.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-        gAlpha.drawImage(workImage, 0, 0, null);
-        gAlpha.dispose();
-
-        workImage = dest;
+        if (opacityImageMap.get(token) == null) {
+          BufferedImage dest =
+              new BufferedImage(
+                  workImage.getWidth(), workImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+          Graphics2D gAlpha = dest.createGraphics();
+          gAlpha.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+          gAlpha.drawImage(workImage, 0, 0, null);
+          gAlpha.dispose();
+          workImage = dest;
+          opacityImageMap.put(token, workImage);
+        } else {
+          workImage = opacityImageMap.get(token);
+        }
       }
 
       timer.start("tokenlist-7");
