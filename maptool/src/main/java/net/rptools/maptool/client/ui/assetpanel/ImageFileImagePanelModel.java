@@ -331,7 +331,6 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 	 *
 	 * @see net.rptools.lib.swing.ImagePanelModel#getCaption(int, boolean)
 	 */
-	@Override
 	public String getCaption(int index, boolean withDimensions) {
 		if (index < 0 || index >= fileList.size()) {
 			return null;
