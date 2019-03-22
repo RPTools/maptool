@@ -660,7 +660,7 @@ public class MapToolFrame extends DefaultDockableHolder
     MTFileFilter(String extension, String description) {
       this(extension, description, false);
     }
-    
+
     MTFileFilter(String extension, String description, boolean directory) {
       super();
       this.extension = extension;
@@ -674,11 +674,11 @@ public class MapToolFrame extends DefaultDockableHolder
       if (f.isDirectory()) {
         return true;
       }
-      
+
       if (this.directory && !f.isDirectory()) {
         return false;
       }
-      
+
       String ext = getExtension(f);
       if (ext != null) {
         if (ext.equals(extension)) {
@@ -702,7 +702,7 @@ public class MapToolFrame extends DefaultDockableHolder
     public String getExtension() {
       return extension;
     }
-    
+
     public String getExtension(File f) {
       String ext = null;
       String s = f.getName();
@@ -718,7 +718,7 @@ public class MapToolFrame extends DefaultDockableHolder
   public FileFilter getCmpgnFileFilter() {
     return campaignFilter;
   }
-  
+
   public FileFilter getCmpgnDirectoryFileFilter() {
     return campaignDirectoryFilter;
   }
@@ -1452,11 +1452,13 @@ public class MapToolFrame extends DefaultDockableHolder
     if (AppState.getCampaignFile() != null) {
       String s = AppState.getCampaignFile().getName();
       // remove the file extension of the campaign file name
-      if (!AppState.getCampaignFile().isDirectory() && s.endsWith(AppConstants.CAMPAIGN_FILE_EXTENSION)) {
+      if (!AppState.getCampaignFile().isDirectory()
+          && s.endsWith(AppConstants.CAMPAIGN_FILE_EXTENSION)) {
         s = s.substring(0, s.length() - AppConstants.CAMPAIGN_FILE_EXTENSION.length());
-      } else if (AppState.getCampaignFile().isDirectory() && s.endsWith(AppConstants.CAMPAIGN_DIRECTIORY_EXTENSION)) {
+      } else if (AppState.getCampaignFile().isDirectory()
+          && s.endsWith(AppConstants.CAMPAIGN_DIRECTIORY_EXTENSION)) {
         s = s.substring(0, s.length() - AppConstants.CAMPAIGN_DIRECTIORY_EXTENSION.length());
-      } 
+      }
       campaignName = " - [" + s + "]";
     }
     setTitle(

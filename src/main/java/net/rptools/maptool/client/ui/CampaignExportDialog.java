@@ -145,13 +145,13 @@ public class CampaignExportDialog extends JDialog {
   public MTFileFilter getSelectedMTFileFilter() {
     return selectedFileFilter;
   }
-  
+
   private void exportButtonAction() {
     try {
       JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
       saveStatus = chooser.showSaveDialog(MapTool.getFrame());
       campaignFile = chooser.getSelectedFile();
-      selectedFileFilter = (MTFileFilter)chooser.getFileFilter();
+      selectedFileFilter = (MTFileFilter) chooser.getFileFilter();
     } catch (Exception ex) {
       MapTool.showError(I18N.getString("dialog.campaignexport.error.failedExporting"), ex);
     } finally {

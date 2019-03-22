@@ -45,7 +45,7 @@ import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
  * <p>Roughly this is equivalent to multiple tabs that will appear on the client and all of the
  * images that will appear on it (and also campaign macro buttons).
  */
-public class Campaign implements Cloneable {
+public class Campaign {
   /** The only built-in property type is "Basic". Any others are user-defined. */
   public static final String DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
 
@@ -106,6 +106,29 @@ public class Campaign implements Cloneable {
   public Campaign() {
     macroButtonLastIndex = 0;
     macroButtonProperties = new ArrayList<MacroButtonProperties>();
+  }
+
+  public Campaign(
+      GUID id,
+      CampaignProperties campaignProperties,
+      Map<String, Boolean> exportSettings,
+      Location exportLocation,
+      Boolean hasUsedFogToolbar,
+      Integer macroButtonLastIndex,
+      ArrayList<MacroButtonProperties> macroButtonPropertiesList,
+      Map<GUID, Zone> zones) {
+    this.id = id;
+    this.exportLocation = exportLocation;
+    this.exportSettings = exportSettings;
+    this.campaignProperties = campaignProperties;
+    this.macroButtonProperties = macroButtonPropertiesList;
+    this.zones = zones;
+    if (macroButtonLastIndex != null) {
+      this.macroButtonLastIndex = macroButtonLastIndex;
+    }
+    if (hasUsedFogToolbar != null) {
+      this.hasUsedFogToolbar = hasUsedFogToolbar;
+    }
   }
 
   private void checkCampaignPropertyConversion() {
@@ -380,7 +403,7 @@ public class Campaign implements Cloneable {
   }
 
   public void setHasUsedFogToolbar(boolean b) {
-    hasUsedFogToolbar = new Boolean(b);
+    hasUsedFogToolbar = Boolean.valueOf(b);
   }
 
   public void mergeCampaignProperties(CampaignProperties properties) {
@@ -578,10 +601,4 @@ public class Campaign implements Cloneable {
   public void setExportCampaignDialog(CampaignExportDialog d) {
     campaignExportDialog = d;
   }
-
-  @Override
-  public Object clone() throws CloneNotSupportedException {
-    return super.clone();
-  }
-  
 }
