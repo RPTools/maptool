@@ -4,7 +4,7 @@ pull_requests:
 skip_non_tags: false
 platform: x64
 image: 
-  - Ubuntu
+  - Unstable
   - Visual Studio 2017
 init:
   - cmd: git config --global core.autocrlf true
@@ -23,7 +23,7 @@ install:
   - ./gradlew -version
   - java -version
 build_script:
-  - ./gradlew build -x test
+  - ./gradlew build 
 after_build:
   - sh: if [[ $APPVEYOR_REPO_TAG == "true" ]]; then ./gradlew deploy; else echo "Not creating deploy artifacts because this is not a tag build."; fi
   - cmd: IF "%APPVEYOR_REPO_TAG%"=="true" (gradlew deploy) ELSE (echo Not creating deploy artifacts because this is not a tag build.)
