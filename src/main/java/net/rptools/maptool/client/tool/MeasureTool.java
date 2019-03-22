@@ -23,6 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -85,7 +86,7 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
 
       int y = (int) sp.y - 10;
       int x = (int) sp.x + (int) (renderer.getScaledGridSize() / 2);
-      GraphicsUtil.drawBoxedString(g, Integer.toString(walker.getDistance()), x, y);
+      GraphicsUtil.drawBoxedString(g, Double.toString(walker.getDistance()), x, y);
     } else {
       Object oldAA = SwingUtil.useAntiAliasing(g);
       g.setColor(Color.black);
@@ -122,7 +123,7 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
       c /= renderer.getZone().getGrid().getSize();
       c *= renderer.getZone().getUnitsPerCell();
 
-      String distance = String.format("%.1f", c);
+      String distance = NumberFormat.getInstance().format(c);
       ScreenPoint sp = ScreenPoint.fromZonePoint(renderer, lastZP.x, lastZP.y);
       GraphicsUtil.drawBoxedString(g, distance, (int) sp.x, (int) sp.y - 20);
 
