@@ -1766,6 +1766,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
 
     public MTMultilineStringPopupPanel(String paramString) {
+      this.setResizable(true);
       JScrollPane localJScrollPane = new RTextScrollPane(j);
       localJScrollPane.setVerticalScrollBarPolicy(22);
       localJScrollPane.setAutoscrolls(true);
