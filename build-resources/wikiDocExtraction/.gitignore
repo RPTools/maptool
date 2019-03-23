@@ -1,0 +1,9 @@
+# These are all generated files/directories and don't need to be checked
+# in.  Perhaps, at some point in the future, when Craig's MediaWiki
+# pages go away, we'll want to commit the contents of the `lmwcs.com`
+# directory as the "last state" of the wiki.  (Be sure to run the first
+# two steps documented in the `README.md` file before doing that.)
+
+lmwcs.com/
+processed/
+processed.txt

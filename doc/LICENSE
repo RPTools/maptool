@@ -3,31 +3,39 @@ Licensing Overview
 The original version of some pieces of this application were covered by
 the Apache Software License (Version 2.0) as described below.
 
-Revisions to this code (application and libraries) as made by the RPTools.net team
-are licensed differently, using the GPL v3 for the application and LGPL v3 for libraries.
-These licenses are "upward compatible" (since the Apache license has no restrictions
-and the GPL/LGPL only adds compatible requirements).  This license simply states that
-if someone distributes binaries created from this source code, they must make the
-source code itself (with their modifications) available.  See the detailed text, below.
+Revisions to this code (application and libraries) as made by the
+RPTools.net team are licensed differently, using the Affero GPL v3
+for the application and LGPL v3 for libraries.  These licenses are
+"upward compatible" (since the Apache license has no restrictions
+and the GPL/LGPL only adds compatible requirements).  This license
+simply states that if someone distributes binaries created from
+this source code, they must make the source code itself (with their
+modifications) available.  See the detailed text, below.
 
-The Apache license requires credit where credit is due, so each library has a "readme"
-file that is part of the source distribution (and is included in the deployment packages)
-specifying the details for the relevant library.
+The Apache license requires credit where credit is due, so each
+library has a "readme" file that is part of the source distribution
+(and is included in the deployment packages) specifying the details
+for the relevant library.
 
-The RPTools team originally felt that the "forced redistribution of source code" was too
-onerous, but in this day of ubiquitous high speed Internet connections, free web site
-hosting, and free source code repositories for open source projects, this hardly seems
-the case any more.  Thus, with the blessing of the original RPTools team the license
-going forward will be GPL v3 for all application code and LGPL v3 for all libraries.
+The original RPTools team felt that the "forced redistribution of
+source code" was too onerous, but in this day of ubiquitous high
+speed Internet connections, free web site hosting, and free source
+code repositories for open source projects, this hardly seems the
+case any more.  Thus, with the blessing of the original RPTools
+members the license going forward will be Affero GPL v3 for all
+application code and LGPL v3 for all libraries.  If you are interested
+in obtaining the source code yourself, please visit our GitHub page
+at https://github.com/RPTools/ for more information on our team's
+current software projects.
 
-Included herein are summaries of each license; see the specified URLs and aforementioned
-readme files for details.
+Included herein are summaries of each license; see the specified readme
+file for a particular library for details.
 
 ============================================================================
 The Apache Software License, Version 2.0
 ============================================================================
 
-   Copyright [yyyy] [name of copyright owner]
+   Copyright [filled in year] [filled in name of copyright owner]
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -46,18 +54,20 @@ The GNU Affero General Public License, Version 3
 The GNU Lesser General Public License, Version 3
 ============================================================================
 
-    This file is part of all RPTools applications.
+    This file is part of an RPTools.net application.
 
-    MapTool is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published
-    by the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+    Our applications are free software: you can redistribute them
+    and/or modify them under the terms of the GNU Affero General
+    Public License as published by the Free Software Foundation,
+    either version 3 of the License, or (at your option) any later
+    version.
 
-    MapTool is distributed in the hope that it will be useful,
+    Applications are distributed in the hope that they will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with MapTool.  If not, see <http://www.gnu.org/licenses/>,
-    specifically <http://www.gnu.org/licenses/agpl.html>.
+    You should have received a copy of the GNU Affero General Public
+    License along with the application.  If not, please visit
+    <http://www.gnu.org/licenses/>, and specifically the Affero license
+    text at <http://www.gnu.org/licenses/agpl.html>.

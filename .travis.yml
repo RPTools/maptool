@@ -1,7 +1,48 @@
 language: java
-script: gradle build
-jdk:
-- oraclejdk8
+sudo: false
+matrix:
+  include:
+  - os: osx
+    osx_image: xcode10
+script: 
+  - ./gradlew build -x test
+before_deploy:
+   # Install Sentry.io CLI
+  - curl -sL https://sentry.io/get-cli/ | bash
+  - sentry-cli info
+  - echo Version is $TRAVIS_TAG
+  # Create a Sentry release
+  - sentry-cli releases new "$TRAVIS_TAG"
+  # Create Deploy Artifacts
+  - ./gradlew deploy
+deploy:
+  provider: releases
+  api_key: $GITHUB_RELEASE_KEY
+  file_glob: true
+  file: releases/release-*/*
+  overwrite: true
+  skip_cleanup: true
+  target_commitish: $TRAVIS_COMMIT
+  tag_name: $TRAVIS_TAG
+  draft: true
+  on:
+    repo: $REPO
+    tags: true
+    all_branches: true
 notifications:
-  slack:
-    secure: Issnni/GrSCwmvwAC/JRdLAZe3863ahnY46muQnt2yhgmcT9ygWsjkyCewwPtkfb0sFT+PRmymeOrMwFJk/4DaCr8F0kFY6bbSICWzy5ovrbJypCqsrS6am0GTxWvGkwcYyihh94HW6mIR+siiJF0s0S6J4nzWqW0h8T7p3iZNY38FlZImaAH4xXI9t3kJ1uuZ4QvI7d738rwaGHDRy1uhCF465oWDgaRujM4R6PZPf/lJE8JQRquULjYdHwdzIy/57zNX8/knrpbMpN3mpBjMdoM7RQKkW22eQfwGwVzx/1NZBPcOn2BAYL5rMVpRPQOnqf2dO8uzP+z5MbtQ7j588BfRuvQ3AVYlJgLIrltMmb6S+XQmHG9wiQ9efhH7/1Nbv+MchHujUGym/cVIbrWhWKJbfVg7zP9QiMDQdP24rVE2OjL6Fg1YI/81faFlOPKRx0JwLCAnfmwxudc7H6vb4jaWmrPWYbA5n67ZPEAb7RkFTG1ZQu6XBioIsvz8HjiRegL3hPpHSScEyK6TZCkcFIawPIauM6en5uD+nfZ7RI7AtG8IK8dSyJoV+PxNMRQHqwQHSUQSa4xd2uJlNSKej9pQwmtTL4qVsW4UqPt/wyZMRIBweOedwFvCkG5rupEGo7WouiVymnLH2BUlLuI3TpJDL9oeH1EZKlFYltzlY=
+  webhooks:
+    on_success:
+      - wget $TRAVIS_DISCORD_WEBHOOK_SCRIPT_URL
+      - chmod +x send.sh
+      - ./send.sh success $DISCORD_URL
+    on_failure:
+      - wget $TRAVIS_DISCORD_WEBHOOK_SCRIPT_URL
+      - chmod +x send.sh
+      - ./send.sh failure $DISCORD_URL
+after_deploy:
+  # Finalize Sentry release
+  - sentry-cli releases finalize "$TRAVIS_TAG"
+  # Associate commits with the Sentry release
+  - sentry-cli releases set-commits "$TRAVIS_TAG" --auto
+  # Tell Sentry.io we have deployed a release
+  - sentry-cli releases deploys "$TRAVIS_TAG" new -e Production

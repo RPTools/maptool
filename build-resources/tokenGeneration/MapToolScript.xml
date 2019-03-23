@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<TokenMakerDefinition>
+  <general>
+    <package>net.rptools.maptool.client.ui.syntax</package>
+    <className>MapToolScriptTokenMaker</className>
+    <extendedClass>AbstractJFlexCTokenMaker</extendedClass>
+    <classComment>Auto-generated source created using TokenMakerMaker
+https://github.com/bobbylight/TokenMakerMaker</classComment>
+    <ignoreCase>true</ignoreCase>
+    <booleanLiterals>true</booleanLiterals>
+  </general>
+  <comments>
+    <lineComments enabled="false" start=""/>
+    <multiLineComments enabled="true" end="--&gt;" start="&lt;!--"/>
+    <docComments enabled="false" end="--&gt;']" start="[h: '&lt;!--"/>
+  </comments>
+  <keywords>
+    <keyword>c</keyword>
+    <keyword>code</keyword>
+    <keyword>count</keyword>
+    <keyword>dialog</keyword>
+    <keyword>e</keyword>
+    <keyword>expanded</keyword>
+    <keyword>for</keyword>
+    <keyword>foreach</keyword>
+    <keyword>frame</keyword>
+    <keyword>g</keyword>
+    <keyword>gm</keyword>
+    <keyword>gmtt</keyword>
+    <keyword>gt</keyword>
+    <keyword>h</keyword>
+    <keyword>hidden</keyword>
+    <keyword>hide</keyword>
+    <keyword>if</keyword>
+    <keyword>macro</keyword>
+    <keyword>r</keyword>
+    <keyword>result</keyword>
+    <keyword>s</keyword>
+    <keyword>self</keyword>
+    <keyword>selftt</keyword>
+    <keyword>st</keyword>
+    <keyword>switch</keyword>
+    <keyword>t</keyword>
+    <keyword>token</keyword>
+    <keyword>tooltip</keyword>
+    <keyword>u</keyword>
+    <keyword>unformatted</keyword>
+    <keyword>w</keyword>
+    <keyword>while</keyword>
+    <keyword>whisper</keyword>
+  </keywords>
+  <keywords2>
+  </keywords2>
+  <dataTypes>
+    <dataType>bar.name</dataType>
+    <dataType>macro.args</dataType>
+    <dataType>macro.return</dataType>
+    <dataType>roll.count</dataType>
+    <dataType>roll.result</dataType>
+    <dataType>state.name</dataType>
+    <dataType>token.gm name</dataType>
+    <dataType>token.halo</dataType>
+    <dataType>token.init</dataType>
+    <dataType>token.initHold</dataType>
+    <dataType>token.label</dataType>
+    <dataType>token.name</dataType>
+    <dataType>token.visible</dataType>
+    <dataType>tokens.denyMove</dataType>
+    <dataType>tokens.moveCount</dataType>
+  </dataTypes>
+  <functions>
+  </functions>
+  <numbers>
+    <hexLiteral>0x{HexDigit}+</hexLiteral>
+    <intLiteral>{Digit}+</intLiteral>
+    <floatLiteral>({Digit}+)("."{Digit}+)?(e[+-]?{Digit}+)? | ({Digit}+)?("."{Digit}+)(e[+-]?{Digit}+)?</floatLiteral>
+  </numbers>
+  <stringLiterals enabled="true" multiLine="true"/>
+  <charLiterals enabled="true" multiLine="true"/>
+  <backtickLiterals enabled="false"/>
+  <operators>
+    <operator>!</operator>
+    <operator>%</operator>
+    <operator>&amp;</operator>
+    <operator>&amp;&amp;</operator>
+    <operator>*</operator>
+    <operator>+</operator>
+    <operator>,</operator>
+    <operator>-</operator>
+    <operator>/</operator>
+    <operator>:</operator>
+    <operator>&lt;</operator>
+    <operator>&lt;=</operator>
+    <operator>=</operator>
+    <operator>==</operator>
+    <operator>&gt;</operator>
+    <operator>&gt;=</operator>
+    <operator>|</operator>
+    <operator>||</operator>
+  </operators>
+</TokenMakerDefinition>

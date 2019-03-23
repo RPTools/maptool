@@ -1,7 +1,3 @@
-.gradle/
-build/
-/bin/
-
 # OS generated files
 ################################################################################
 .DS_Store
@@ -16,10 +12,21 @@ Thumbs.db
 
 # Others
 ################################################################################
-*.log
-*~
+.gradle
+build/
+/bin/
 target/
 out/
+/releases/
+*.log
+*~
+\${sys:appHome}/
+
+
+# Automatically Generated
+################################################################################
+package/windows/MapTool.iss
+src/main/resources/sentry.properties
 
 
 # IDEs
@@ -32,12 +39,7 @@ out/
 .settings/
 .classpath
 .history
-
+workbench.xmi
 
 # Keystore
 build-resources/rptools-keystore
-
-# Generated
-build-resources/jWrapper/
-#build-resources/jWrapper/JWrapperLaunchTemp
-#build-resources/jWrapper/jwrapper.xml

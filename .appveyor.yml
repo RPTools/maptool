@@ -1,0 +1,52 @@
+version: '{branch}.{build}'
+pull_requests:
+  do_not_increment_build_number: true
+skip_non_tags: false
+platform: x64
+image: 
+  - Ubuntu
+  - Visual Studio 2017
+init:
+  - cmd: git config --global core.autocrlf true
+install:
+  - sh: cd ..
+  - sh: mkdir java
+  - sh: cd java
+  - sh: wget http://www.nerps.net/jdk10/jdk-10.0.2_linux-x64_bin.tar.gz
+  - sh: tar zxf jdk-10.0.2_linux-x64_bin.tar.gz
+  - sh: export JAVA_HOME=$(pwd)/jdk-10.0.2
+  - sh: echo java home is $JAVA_HOME
+  - sh: export PATH=$JAVA_HOME/bin:$PATH
+  - sh: echo $PATH
+  - sh: cd ../maptool
+  - sh: sudo apt install -y fakeroot
+  - ./gradlew -version
+  - java -version
+build_script:
+  - ./gradlew build -x test
+after_build:
+  - sh: if [[ $APPVEYOR_REPO_TAG == "true" ]]; then ./gradlew deploy; else echo "Not creating deploy artifacts because this is not a tag build."; fi
+  - cmd: IF "%APPVEYOR_REPO_TAG%"=="true" (gradlew deploy) ELSE (echo Not creating deploy artifacts because this is not a tag build.)
+artifacts:
+  - path: build\libs\MapTool-*.jar
+    name: MapTool-Jar
+  - path: releases\release-*\MapTool-*.exe
+    name: MapTool-Windows
+  - path: releases\release-*\MapTool-*.deb
+    name: MapTool-Linux
+deploy:
+  - provider: GitHub
+    description: Release build from AppVeyor
+    auth_token: $(GITHUB_RELEASE_KEY)
+    artifact: MapTool-Jar, MapTool-Windows, MapTool-Linux
+    draft: false
+    prerelease: true
+    force_update: false
+    on:
+      APPVEYOR_REPO_TAG: true
+on_success:
+  - ps: Invoke-RestMethod $env:APPVEYOR_DISCORD_WEBHOOK_SCRIPT_URL -o send.ps1
+  - ps: ./send.ps1 success $env:DISCORD_URL
+on_failure:
+  - ps: Invoke-RestMethod $env:APPVEYOR_DISCORD_WEBHOOK_SCRIPT_URL -o send.ps1
+  - ps: ./send.ps1 failure $env:DISCORD_URL
