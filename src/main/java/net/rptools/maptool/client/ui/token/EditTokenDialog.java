@@ -82,7 +82,6 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
-import javax.swing.ListCellRenderer;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -133,7 +132,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private final RSyntaxTextArea textStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private HeroLabData heroLabData;
   private final WordWrapCellRenderer propertyCellRenderer = new WordWrapCellRenderer();
-  
+
   private static final ImageIcon REFRESH_ICON_ON =
       new ImageIcon(
           EditTokenDialog.class
@@ -971,13 +970,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     JPanel buttonsAndPropertyTable = new JPanel();
     buttonsAndPropertyTable.setLayout(new BorderLayout());
     JCheckBox wrapToggle = new JCheckBox(I18N.getString("EditTokenDialog.msg.wrap"));
-    wrapToggle.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        propertyCellRenderer.setLineWrap(wrapToggle.isSelected());
-        propertyTable.repaint();
-      }
-    });
+    wrapToggle.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            propertyCellRenderer.setLineWrap(wrapToggle.isSelected());
+            propertyTable.repaint();
+          }
+        });
     buttonsAndPropertyTable.add(wrapToggle, BorderLayout.PAGE_END);
 
     PropertyPane pane = new PropertyPane(propertyTable);
@@ -1507,7 +1507,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       }
       return propertyMap;
     }
-   
 
     private List<TokenProperty> getPropertyList() {
       if (propertyList == null) {
@@ -1550,7 +1549,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         this.key = key;
         setCellEditor(new MTMultilineStringCellEditor());
       }
-      
+
       @Override
       public Object getValue() {
         return getPropertyMap().get(key);
@@ -1755,7 +1754,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
   }
 
-  //the property popup table
+  // the property popup table
   private static class MTMultilineStringPopupPanel extends PopupPanel {
     private RSyntaxTextArea j = createTextArea();
 
@@ -1775,12 +1774,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       setDefaultFocusComponent(j);
       j.setLineWrap(false);
       JCheckBox wrapToggle = new JCheckBox(I18N.getString("EditTokenDialog.msg.wrap"));
-      wrapToggle.addActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-          j.setLineWrap(!j.getLineWrap());
-        }
-      });
+      wrapToggle.addActionListener(
+          new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              j.setLineWrap(!j.getLineWrap());
+            }
+          });
 
       DefaultComboBoxModel syntaxListModel = new DefaultComboBoxModel();
       syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_NONE);
@@ -1789,14 +1789,15 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_HTML);
       syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_XML);
       JComboBox syntaxComboBox = new JComboBox(syntaxListModel);
-      syntaxComboBox.addActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-           j.setSyntaxEditingStyle(syntaxComboBox.getSelectedItem().toString());
-        }
-      });
+      syntaxComboBox.addActionListener(
+          new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              j.setSyntaxEditingStyle(syntaxComboBox.getSelectedItem().toString());
+            }
+          });
 
-      //content.add(wrapToggle);
+      // content.add(wrapToggle);
       add(syntaxComboBox, BorderLayout.BEFORE_FIRST_LINE);
       add(wrapToggle, BorderLayout.AFTER_LAST_LINE);
     }
@@ -1815,7 +1816,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
 
     protected RSyntaxTextArea createTextArea() {
-      RSyntaxTextArea textArea =  new RSyntaxTextArea();
+      RSyntaxTextArea textArea = new RSyntaxTextArea();
       textArea.setAnimateBracketMatching(true);
       textArea.setBracketMatchingEnabled(true);
       textArea.setLineWrap(false);
@@ -1823,7 +1824,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       return textArea;
     }
   }
-  
+
   // cell renderer for properties table
   private static class WordWrapCellRenderer extends RSyntaxTextArea implements TableCellRenderer {
     WordWrapCellRenderer() {
