@@ -218,6 +218,20 @@ public class PackedFile {
   }
 
   /**
+   * Same as {@link #getContent()} except that the version can be specified. This allows a newer
+   * release of an application to provide automatic transformation information that will be applied
+   * to the content. The default transformation manager is used.
+   *
+   * @param fileVersion such as "1.3.70"
+   * @param file file to load
+   * @return the results of the deserialization
+   * @throws IOException
+   */
+  public String getContentAsString(String fileVersion, String file) throws IOException {
+    return getContentAsString(versionManager, fileVersion, file);
+  }
+
+  /**
    * Same as {@link #getContent(String)} except that the transformation manager, <code>
    * versionManager</code>, is specified as a parameter.
    *
@@ -240,6 +254,38 @@ public class PackedFile {
         return xstream.fromXML(xml);
       } else {
         return getFileObject(file);
+      }
+    } catch (NullPointerException npe) {
+      log.error("Problem finding/converting content file", npe);
+      return null;
+    } finally {
+      IOUtils.closeQuietly(r);
+    }
+  }
+
+  /**
+   * Same as {@link #getContent(String)} except that the transformation manager, <code>
+   * versionManager</code>, is specified as a parameter.
+   *
+   * @param versionManager which set of transforms to apply to older file versions
+   * @param fileVersion such as "1.3.70"
+   * @param file file to load
+   * @return the results of the deserialization
+   * @throws IOException
+   */
+  public String getContentAsString(
+      ModelVersionManager versionManager, String fileVersion, String file) throws IOException {
+    Reader r = null;
+    try {
+      if (versionManager != null && versionManager.isTransformationRequired(fileVersion)) {
+        r = getFileAsReader(file);
+        String content = IOUtils.toString(r);
+        content = versionManager.transform(content, fileVersion);
+        return content;
+      } else {
+        r = getFileAsReader(file);
+        String content = IOUtils.toString(r);
+        return content;
       }
     } catch (NullPointerException npe) {
       log.error("Problem finding/converting content file", npe);
@@ -487,6 +533,26 @@ public class PackedFile {
     BufferedWriter bw = new BufferedWriter(osw);
 
     xstream.toXML(obj, bw);
+
+    bw.newLine(); // Not necessary but editing the file looks nicer. ;-)
+    IOUtils.closeQuietly(bw);
+  }
+
+  /**
+   * Write the String to the given path in the ZIP file; character set encoding will take place as
+   * the data is written to the (temporary) file.
+   *
+   * @param path location within the ZIP file
+   * @param obj the object to be written
+   * @throws IOException
+   */
+  public void putFileAsString(String path, String content) throws IOException {
+    File explodedFile = putFileImpl(path);
+    FileOutputStream fos = new FileOutputStream(explodedFile);
+    OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+    BufferedWriter bw = new BufferedWriter(osw);
+    bw.append(content);
+    // xstream.toXML(obj, bw);
 
     bw.newLine(); // Not necessary but editing the file looks nicer. ;-)
     IOUtils.closeQuietly(bw);
