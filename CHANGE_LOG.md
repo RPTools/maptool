@@ -66,7 +66,9 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * [#332][i332] - Allow to set color for personal lights in campaign Sight types
 * [#324][i324] - fix output of getViewPort. This might break existing macro using workaround to interpret the broken result before the fix.
 * [#326][i326] - defineFunction with open edit window
+* [#102][i102] - Save campaigns as directory structure
 
+[i102]: https://github.com/RPTools/maptool/issues/102
 [i332]: https://github.com/RPTools/maptool/issues/332
 [i324]: https://github.com/RPTools/maptool/issues/324
 [i326]: https://github.com/RPTools/maptool/issues/326
