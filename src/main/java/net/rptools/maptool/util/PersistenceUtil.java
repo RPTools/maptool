@@ -797,7 +797,6 @@ public class PersistenceUtil {
                           pakFile.getContent(campaignVersion, removeLeadingSlash(tokenFile));
                   Token token = tokenWrapper.token;
                   List<MacroFileWrapper> tokenMacroFiles = tokenWrapper.macroFiles;
-                  zones.put(zone.getId(), zone);
                   zone.putToken(token);
 
                   // check for macros defined in token file
