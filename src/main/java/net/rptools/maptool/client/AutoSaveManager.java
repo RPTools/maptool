@@ -113,7 +113,7 @@ public class AutoSaveManager implements ActionListener {
                   pause();
                   long startSave = System.currentTimeMillis();
                   try {
-                    PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE, null);
+                    PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE, null, false);
                     MapTool.getFrame()
                         .setStatusMessage(
                             I18N.getText(

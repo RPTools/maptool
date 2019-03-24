@@ -1,8 +1,19 @@
+Feature Branch
+=====
+Feature branch to test Campaign Dir
+
+
+Enhancements
+-----
+* [#102][i102] - Save campaigns as directory structure
+
+[i102]: https://github.com/RPTools/maptool/issues/102
+___
+
 MapTool 1.5.1
 =====
 A minor update to 1.5.0 consisting of bug fixes and small enhancements.
-
-___
+c
 
 Bug Fixes
 -----
@@ -97,7 +108,6 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * [#237][i237] - Added support to use shift-enter to insert newlines into the command entry box (also known as the chat entry box)
 * [#239][i239] - MapToolScriptTokenMaker now handles function names with . notation and dynamically pulls in all functions names. TokenMakerMaker no longer needs to be ran upon changes to MTScript.
 * [#240][i240] - Macro Editor now has Auto-Completion for macro functions! A brief description and summary can be displayed (these will be added as time permits)
-
 
 [i210]: https://github.com/RPTools/maptool/issues/210
 [i113]: https://github.com/JamzTheMan/MapTool/issues/113

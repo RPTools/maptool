@@ -108,6 +108,29 @@ public class Campaign {
     macroButtonProperties = new ArrayList<MacroButtonProperties>();
   }
 
+  public Campaign(
+      GUID id,
+      CampaignProperties campaignProperties,
+      Map<String, Boolean> exportSettings,
+      Location exportLocation,
+      Boolean hasUsedFogToolbar,
+      Integer macroButtonLastIndex,
+      ArrayList<MacroButtonProperties> macroButtonPropertiesList,
+      Map<GUID, Zone> zones) {
+    this.id = id;
+    this.exportLocation = exportLocation;
+    this.exportSettings = exportSettings;
+    this.campaignProperties = campaignProperties;
+    this.macroButtonProperties = macroButtonPropertiesList;
+    this.zones = zones;
+    if (macroButtonLastIndex != null) {
+      this.macroButtonLastIndex = macroButtonLastIndex;
+    }
+    if (hasUsedFogToolbar != null) {
+      this.hasUsedFogToolbar = hasUsedFogToolbar;
+    }
+  }
+
   private void checkCampaignPropertyConversion() {
     if (campaignProperties == null) {
       campaignProperties = new CampaignProperties();
@@ -380,7 +403,7 @@ public class Campaign {
   }
 
   public void setHasUsedFogToolbar(boolean b) {
-    hasUsedFogToolbar = new Boolean(b);
+    hasUsedFogToolbar = Boolean.valueOf(b);
   }
 
   public void mergeCampaignProperties(CampaignProperties properties) {
@@ -553,6 +576,26 @@ public class Campaign {
     }
 
     return campaignExportDialog;
+  }
+
+  public Location getExportLocation() {
+    return exportLocation;
+  }
+
+  public Map<String, Boolean> getExportSettings() {
+    return exportSettings;
+  }
+
+  public List<MacroButtonProperties> getMacroButtonProperties() {
+    return macroButtonProperties;
+  }
+
+  public int getMacroButtonLastIndex() {
+    return macroButtonLastIndex;
+  }
+
+  public Boolean getHasUsedFogToolbar() {
+    return hasUsedFogToolbar;
   }
 
   public void setExportCampaignDialog(CampaignExportDialog d) {

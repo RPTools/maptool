@@ -1478,14 +1478,29 @@ public class Token extends BaseModel implements Cloneable {
     // used by the token edit dialog, which will handle resetting panels and putting token to
     // zone
     macroPropertiesMap.clear();
+    List<MacroButtonProperties> macrosWithDuplicateIndex = new LinkedList<>();
+    int index = -1;
     for (MacroButtonProperties macro : newMacroList) {
       if (macro.getLabel() == null
           || macro.getLabel().trim().length() == 0
           || macro.getCommand().trim().length() == 0) {
         continue;
       }
-      macroPropertiesMap.put(macro.getIndex(), macro);
+      if (macro.getIndex() == -1 || macroPropertiesMap.containsKey(macro.getIndex())) {
+        macrosWithDuplicateIndex.add(macro);
+      } else {
+        macroPropertiesMap.put(macro.getIndex(), macro);
+        index = Integer.max(index, macro.getIndex());
+      }
+      // Allows the token macro panels to update only if a macro changes
+      fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
+    }
 
+    // fill macros with already used index with a new index and add again
+    for (MacroButtonProperties macro : macrosWithDuplicateIndex) {
+      index++;
+      macro.setIndex(index);
+      macroPropertiesMap.put(macro.getIndex(), macro);
       // Allows the token macro panels to update only if a macro changes
       fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
     }
@@ -1877,6 +1892,10 @@ public class Token extends BaseModel implements Cloneable {
     // 1.3 b77
     if (exposedAreaGUID == null) {
       exposedAreaGUID = new GUID();
+    }
+
+    if (macroPropertiesMap == null) {
+      macroPropertiesMap = new HashMap<Integer, Object>();
     }
     return this;
   }
