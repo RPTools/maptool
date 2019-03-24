@@ -32,8 +32,6 @@ defaultTasks 'clean', 'build'
 sourceCompatibility = 10
 targetCompatibility = 10
 
-// Don't fail build if tests fail until tests are cleaned up
-test.ignoreFailures = true
 
 // Used by gradle assemble & run tasks
 mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
@@ -246,7 +244,9 @@ dependencies {
     // TestNG is also supported by the Gradle Test task. Just change the
     // testimplementation dependency to testimplementation 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
-    testCompileOnly 'junit:junit:4.12'
+    //testCompile 'junit:junit:4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 
     // For mocking features during unit tests
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
@@ -372,6 +372,10 @@ task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepa
                 println commandLine
         }
     }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 task createWrapper(type: Wrapper) {

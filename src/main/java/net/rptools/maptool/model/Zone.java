@@ -143,7 +143,7 @@ public class Zone extends BaseModel {
 
   private int tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE;
 
-  private int unitsPerCell = DEFAULT_UNITS_PER_CELL;
+  private double unitsPerCell = DEFAULT_UNITS_PER_CELL;
 
   private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
   private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
@@ -247,7 +247,7 @@ public class Zone extends BaseModel {
       // TODO: This is here to provide transition between pre 1.3b19 an 1.3b19. Remove later
       tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE;
     }
-    return (tokenVisionDistance * grid.getSize() / getUnitsPerCell());
+    return Double.valueOf(tokenVisionDistance * grid.getSize() / getUnitsPerCell()).intValue();
   }
 
   public void setFogPaint(DrawablePaint paint) {
@@ -926,11 +926,11 @@ public class Zone extends BaseModel {
     return exposedArea;
   }
 
-  public int getUnitsPerCell() {
-    return Math.max(unitsPerCell, 1);
+  public double getUnitsPerCell() {
+    return Math.max(unitsPerCell, 0);
   }
 
-  public void setUnitsPerCell(int unitsPerCell) {
+  public void setUnitsPerCell(double unitsPerCell) {
     this.unitsPerCell = unitsPerCell;
   }
 

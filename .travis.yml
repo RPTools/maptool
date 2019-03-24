@@ -5,7 +5,7 @@ matrix:
   - os: osx
     osx_image: xcode10
 script: 
-  - ./gradlew build -x test
+  - ./gradlew build
 before_deploy:
    # Install Sentry.io CLI
   - curl -sL https://sentry.io/get-cli/ | bash

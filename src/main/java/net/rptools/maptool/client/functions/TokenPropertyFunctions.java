@@ -86,6 +86,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "isSnapToGrid",
         "setOwner",
         "setOwnedByAll",
+        "getTokenNativeWidth",
+        "getTokenNativeHeight",
         "getTokenWidth",
         "getTokenHeight",
         "setTokenWidth",
@@ -698,27 +700,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       checkNumberOfParameters(functionName, parameters, 0, 1);
 
       Token token;
-      // TODO: should just call getTokenFromParam? This doesn't check if the macro is trusted
-      // though...
-      if (parameters.isEmpty()) {
-        token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
-        if (token == null)
-          throw new ParserException(
-              I18N.getText("macro.function.general.noImpersonated", functionName));
-      } else {
-        token =
-            getTokenFromParam(
-                (MapToolVariableResolver) parser.getVariableResolver(),
-                functionName,
-                parameters,
-                0);
-        if (token == null)
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.general.unknownToken",
-                  functionName,
-                  parameters.get(0).toString()));
-      }
+      token = getTokenFromContextOrParam(parser, functionName, parameters);
       return token.getShape().toString();
     }
 
@@ -766,31 +748,31 @@ public class TokenPropertyFunctions extends AbstractFunction {
      *
      * Returns pixel width/height for a given token. Useful for free size tokens.
      */
+    if (functionName.equals("getTokenNativeWidth") || functionName.equals("getTokenNativeHeight")) {
+      checkNumberOfParameters(functionName, parameters, 0, 1);
+
+      Token token;
+      token = getTokenFromContextOrParam(parser, functionName, parameters);
+
+      if (functionName.equals("getTokenNativeWidth")) {
+        return BigDecimal.valueOf(token.getWidth());
+      } else { // it wasn't 'getTokenWidth' which means functionName equals 'getTokenHeight'
+        return BigDecimal.valueOf(token.getHeight());
+      }
+    }
+
+    /*
+     * String newShape = getTokenWidth(String tokenId: currentToken())
+     *
+     * String newShape = getTokenHeight(String tokenId: currentToken())
+     *
+     * Returns pixel width/height for a given token. Useful for free size tokens.
+     */
     if (functionName.equals("getTokenWidth") || functionName.equals("getTokenHeight")) {
       checkNumberOfParameters(functionName, parameters, 0, 1);
 
       Token token;
-      // TODO: should just call getTokenFromParam? This doesn't check if the macro is trusted
-      // though...
-      if (parameters.isEmpty()) {
-        token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
-        if (token == null)
-          throw new ParserException(
-              I18N.getText("macro.function.general.noImpersonated", functionName));
-      } else {
-        token =
-            getTokenFromParam(
-                (MapToolVariableResolver) parser.getVariableResolver(),
-                functionName,
-                parameters,
-                0);
-        if (token == null)
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.general.unknownToken",
-                  functionName,
-                  parameters.get(0).toString()));
-      }
+      token = getTokenFromContextOrParam(parser, functionName, parameters);
       // Get the pixel width or height of a given token
       Rectangle tokenBounds = token.getBounds(zone);
 
@@ -837,6 +819,26 @@ public class TokenPropertyFunctions extends AbstractFunction {
       return "";
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
+  }
+
+  private Token getTokenFromContextOrParam(
+      Parser parser, String functionName, List<Object> parameters) throws ParserException {
+    Token token;
+    if (parameters.isEmpty()) {
+      token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
+      if (token == null)
+        throw new ParserException(
+            I18N.getText("macro.function.general.noImpersonated", functionName));
+    } else {
+      token =
+          getTokenFromParam(
+              (MapToolVariableResolver) parser.getVariableResolver(), functionName, parameters, 0);
+      if (token == null)
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
+    }
+    return token;
   }
 
   /**

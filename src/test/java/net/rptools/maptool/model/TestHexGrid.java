@@ -14,10 +14,16 @@
  */
 package net.rptools.maptool.model;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class TestHexGrid extends TestCase {
-  public void testConvertCellToZone() throws Exception {
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class TestHexGrid {
+
+  @Test
+  @DisplayName("Convert Cell to Zone.")
+  void testConvertCellToZone() {
     int start = -100;
     // int start = 0;
     HexGrid grid = new HexGridHorizontal();
@@ -28,18 +34,5 @@ public class TestHexGrid extends TestCase {
         assertEquals(cp, grid.convert(zp));
       }
     }
-  }
-
-  public void testSpotCheck() throws Exception {
-    HexGrid grid = new HexGridHorizontal();
-
-    CellPoint cp1 = new CellPoint(4, 1);
-    CellPoint cp2 = new CellPoint(3, 1);
-
-    ZonePoint zp1 = grid.convert(cp1);
-    ZonePoint zp2 = grid.convert(cp2);
-
-    System.out.println(zp1 + " - " + grid.convert(zp1));
-    System.out.println(zp2 + " - " + grid.convert(zp2));
   }
 }

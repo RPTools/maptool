@@ -331,7 +331,7 @@ public class TokenLocationFunctions extends AbstractFunction {
       }
 
       // Get the distances from each source to target cell and keep the minimum one
-      int distance = Integer.MAX_VALUE;
+      double distance = Double.MAX_VALUE;
       for (CellPoint scell : sourceCells) {
         for (CellPoint tcell : targetCells) {
           walker.setWaypoints(scell, tcell);
@@ -402,7 +402,7 @@ public class TokenLocationFunctions extends AbstractFunction {
       }
 
       // Get the distances from each source to target cell and keep the minimum one
-      int distance = Integer.MAX_VALUE;
+      double distance = Double.MAX_VALUE;
       CellPoint targetCell = new CellPoint(x, y);
       for (CellPoint scell : sourceCells) {
         walker.setWaypoints(scell, targetCell);
@@ -663,7 +663,7 @@ public class TokenLocationFunctions extends AbstractFunction {
    *
    * @return the distance for each cell.
    */
-  private int getDistancePerCell() {
+  private double getDistancePerCell() {
     return MapTool.getFrame().getCurrentZoneRenderer().getZone().getUnitsPerCell();
   }
 

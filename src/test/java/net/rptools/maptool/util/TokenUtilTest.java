@@ -14,17 +14,22 @@
  */
 package net.rptools.maptool.util;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
-import junit.framework.TestCase;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.model.Token;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-public class TokenUtilTest extends TestCase {
+class TokenUtilTest {
 
-  public void testGuessTokenType() throws Exception {
+  @Test
+  @DisplayName("Test Guess Token Type")
+  void testGuessTokenType() throws Exception {
 
     // SQUARE
     BufferedImage img = new BufferedImage(100, 100, Transparency.BITMASK);
