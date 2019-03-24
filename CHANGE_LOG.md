@@ -6,11 +6,11 @@ ___
 
 Bug Fixes
 -----
-* [#107][i107] - getNativeHeight/Width Script Function
+* [#107][i107] - getTokeNativeHeight/Width Script Function
 * [#189][i189] - transferVBL function is misnamed
 * [#278][i278] - Fix existing unit tests and enable unit tests in build
 * [#326][i326] - defineFunction causes error with macro edit window open
-* [#324][i324] - fix output of getViewPort. This might break existing macro using workaround to interpret the broken result before the fix.
+* [#324][i324] - fix output of setViewArea. This might break existing macro using workaround to interpret the broken result before the fix.
 
 Enhancements
 -----
