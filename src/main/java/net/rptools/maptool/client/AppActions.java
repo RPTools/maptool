@@ -2563,8 +2563,11 @@ public class AppActions {
         _extension = AppConstants.CAMPAIGN_DIRECTIORY_EXTENSION;
       }
 
-      if (!saveUnpackedAsDirectory && !campaignFile.getName().toLowerCase().endsWith(_extension)) {
-        campaignFile = new File(campaignFile.getAbsolutePath() + _extension);
+      if (!campaignFile.getName().toLowerCase().endsWith(_extension)) {
+        // if it is a directory and it exists already do not add an extension
+        if (!campaignFile.isDirectory() || !campaignFile.exists()) {
+          campaignFile = new File(campaignFile.getAbsolutePath() + _extension);
+        }
       }
 
       doSaveCampaign(campaign, campaignFile, callback, saveUnpackedAsDirectory);
