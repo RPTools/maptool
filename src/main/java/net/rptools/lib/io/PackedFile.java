@@ -552,9 +552,6 @@ public class PackedFile {
     OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
     BufferedWriter bw = new BufferedWriter(osw);
     bw.append(content);
-    // xstream.toXML(obj, bw);
-
-    bw.newLine(); // Not necessary but editing the file looks nicer. ;-)
     IOUtils.closeQuietly(bw);
   }
 

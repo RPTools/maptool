@@ -43,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -82,6 +84,22 @@ import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
 public class PersistenceUtil {
+  private static final String TABLE_FILE_PREFIX = "tbl/tbl_";
+
+  private static final String MACRO_FILE_SUFFIX = "/m/m_";
+
+  private static final String TOKENS_DIRECTORY = "/t/";
+
+  private static final String MACRO_FILES_PREFIX = "m/m_";
+
+  private static final String XML_FILE_SUFFIX = ".xml";
+
+  private static final String ZONE_FILE_PREFIX = "/z_";
+
+  private static final String TOKEN_FILE_PREFIX = "/t_";
+
+  private static final String MTSCRIPT_SUFFIX = ".mtscript";
+
   private static final Logger log = LogManager.getLogger(PersistenceUtil.class);
 
   public static final String PROP_VERSION = "version"; // $NON-NLS-1$
@@ -356,7 +374,8 @@ public class PersistenceUtil {
           // save tables
           for (Entry<String, LookupTable> tableEntry :
               persistedCampaign.campaign.getLookupTableMap().entrySet()) {
-            String tableFile = "/tables/table_" + fixFileName(tableEntry.getKey()) + ".xml";
+            String tableFile =
+                TABLE_FILE_PREFIX + fixFileName(tableEntry.getKey()) + XML_FILE_SUFFIX;
             pakFile.putFile(tableFile, tableEntry.getValue());
           }
 
@@ -366,17 +385,17 @@ public class PersistenceUtil {
           for (MacroButtonProperties macro :
               persistedCampaign.campaign.getMacroButtonProperties()) {
             String macroFile =
-                "/macros/macro_"
+                MACRO_FILE_SUFFIX
                     + macro.getMacroUUID()
                     + "_"
                     + fixFileName(macro.getLabel())
-                    + ".xml";
+                    + XML_FILE_SUFFIX;
             String macroContentFile =
-                "/macros/macro_"
+                MACRO_FILE_SUFFIX
                     + macro.getMacroUUID()
                     + "_"
                     + fixFileName(macro.getLabel())
-                    + ".macro";
+                    + MTSCRIPT_SUFFIX;
             MacroFileWrapper macroFileWrapper = new MacroFileWrapper();
             macroFileWrapper.index = macro.getIndex();
             macroFileWrapper.saveLocation = macro.getSaveLocation();
@@ -396,17 +415,22 @@ public class PersistenceUtil {
           // save zone
           for (Zone zone : persistedCampaign.campaign.getZones()) {
             String zonePrefix =
-                "zones/" + fixFileName(zone.getId().toString()) + "_" + fixFileName(zone.getName());
+                "z/" + fixFileName(zone.getId().toString()) + "_" + fixFileName(zone.getName());
 
             List<String> tokenFiles = new LinkedList<String>();
             for (Token token : zone.getAllTokens()) {
               String tokenPath =
-                  "/tokens/"
+                  TOKENS_DIRECTORY
                       + fixFileName(token.getId().toString())
                       + "_"
                       + fixFileName(token.getName());
               String tokenFile =
-                  zonePrefix + tokenPath + "/t_" + "_" + fixFileName(token.getName()) + ".xml";
+                  zonePrefix
+                      + tokenPath
+                      + TOKEN_FILE_PREFIX
+                      + "_"
+                      + fixFileName(token.getName())
+                      + XML_FILE_SUFFIX;
               tokenFiles.add(tokenFile);
 
               List<MacroFileWrapper> tokenMacroFiles = new LinkedList<MacroFileWrapper>();
@@ -416,19 +440,19 @@ public class PersistenceUtil {
                 String macroFile =
                     zonePrefix
                         + tokenPath
-                        + "/macros/macro_"
+                        + MACRO_FILE_SUFFIX
                         + macro.getMacroUUID()
                         + "_"
                         + fixFileName(macro.getLabel())
-                        + ".xml";
+                        + XML_FILE_SUFFIX;
                 String macroContentFile =
                     zonePrefix
                         + tokenPath
-                        + "/macros/macro_"
+                        + MACRO_FILE_SUFFIX
                         + macro.getMacroUUID()
                         + "_"
                         + fixFileName(macro.getLabel())
-                        + ".macro";
+                        + MTSCRIPT_SUFFIX;
                 MacroFileWrapper tokenMacroFileWrapper = new MacroFileWrapper();
                 tokenMacroFileWrapper.index = macro.getIndex();
                 tokenMacroFileWrapper.saveLocation = macro.getSaveLocation();
@@ -446,7 +470,8 @@ public class PersistenceUtil {
               pakFile.putFile(tokenFile, tokenWrapper);
             }
 
-            String zoneFile = zonePrefix + "/z_" + "_" + fixFileName(zone.getName()) + ".xml";
+            String zoneFile =
+                zonePrefix + ZONE_FILE_PREFIX + "_" + fixFileName(zone.getName()) + XML_FILE_SUFFIX;
             ZoneWrapper zoneWrapper = new ZoneWrapper();
             zoneWrapper.zone = zone;
 
@@ -544,38 +569,29 @@ public class PersistenceUtil {
     }
   }
 
-  private static String fixFileName(String fileName) {
-    fileName = fileName.replace(":", "_");
-    fileName = fileName.replace(" ", "_");
-    fileName = fileName.replace("\t", "_");
-    fileName = fileName.replace("\n", "_");
-    fileName = fileName.replace("\r", "_");
-    fileName = fileName.replace(".", "_");
-    fileName = fileName.replace("+", "_");
-    fileName = fileName.replace("=", "_");
-    fileName = fileName.replace("^", "_");
-    fileName = fileName.replace("(", "_");
-    fileName = fileName.replace(")", "_");
-    fileName = fileName.replace("[", "_");
-    fileName = fileName.replace("]", "_");
-    fileName = fileName.replace("{", "_");
-    fileName = fileName.replace("}", "_");
-    fileName = fileName.replace("|", "_");
-    fileName = fileName.replace(";", "_");
-    fileName = fileName.replace("?", "_");
-    fileName = fileName.replace("!", "_");
-    fileName = fileName.replace("*", "_");
-    fileName = fileName.replace("/", "_");
-    fileName = fileName.replace("\\", "_");
-    fileName = fileName.replace("<", "_");
-    fileName = fileName.replace(">", "_");
-    fileName = fileName.replace("%", "_");
-    fileName = fileName.replace("&", "_");
-    fileName = fileName.replace("$", "_");
-    fileName = fileName.replace("\"", "_");
-    fileName = fileName.replace("'", "_");
-    fileName = fileName.replace("#", "_");
-    return fileName;
+  private static final Pattern PATTERN = Pattern.compile("[^A-Za-z0-9_\\-]");
+
+  // max name for each file path component that is checked
+  private static final int MAX_LENGTH = 50;
+
+  public static String fixFileName(String in) {
+
+    StringBuffer sb = new StringBuffer();
+    Matcher m = PATTERN.matcher(in);
+
+    while (m.find()) {
+      // Convert matched character to percent-encoded.
+      // which is everything that is not allowed
+      String replacement = "%" + Integer.toHexString(m.group().charAt(0)).toUpperCase();
+      m.appendReplacement(sb, replacement);
+    }
+    m.appendTail(sb);
+
+    String encoded = sb.toString();
+
+    // Truncate the string.
+    int end = Math.min(encoded.length(), MAX_LENGTH);
+    return encoded.substring(0, end);
   }
 
   private static String removeLeadingSlash(String fileName) {
@@ -769,7 +785,8 @@ public class PersistenceUtil {
             // which they shouldn't be. but could have been while migrating in test phase.
             Map<String, LookupTable> lookupTableMap = new HashMap<String, LookupTable>();
             for (String potentialFile : pakFile.getPaths()) {
-              if (potentialFile.startsWith("tables/table_") && potentialFile.endsWith(".xml")) {
+              if (potentialFile.startsWith(TABLE_FILE_PREFIX)
+                  && potentialFile.endsWith(XML_FILE_SUFFIX)) {
                 String tableFile = removeLeadingSlash(potentialFile);
                 // we add it dynamically
                 LookupTable lookupTable =
@@ -788,7 +805,7 @@ public class PersistenceUtil {
             // check for macros that are configured in campaign save file
             for (MacroFileWrapper macroFileWrapper : campaignWrapper.macroFiles) {
               String macroFile = removeLeadingSlash(macroFileWrapper.macroFile);
-              String macroContentFile = changeFileEndingTo(macroFile, ".macro");
+              String macroContentFile = changeFileEndingTo(macroFile, MTSCRIPT_SUFFIX);
               // make sure file was not removed
               if (pakFile.hasFile(macroFile)) {
                 MacroButtonProperties macroButtonProperties =
@@ -809,9 +826,10 @@ public class PersistenceUtil {
           }
           // check for macro files that are added to directories but not in campaign file
           for (String potentialFile : pakFile.getPaths()) {
-            if (potentialFile.startsWith("macros/macro_") && potentialFile.endsWith(".xml")) {
+            if (potentialFile.startsWith(MACRO_FILES_PREFIX)
+                && potentialFile.endsWith(XML_FILE_SUFFIX)) {
               String macroFile = removeLeadingSlash(potentialFile);
-              String macroContentFile = changeFileEndingTo(macroFile, ".macro");
+              String macroContentFile = changeFileEndingTo(macroFile, MTSCRIPT_SUFFIX);
               if (!definedMacroFiles.contains(macroFile)) {
                 // it's a new file not in the campaign xml yet
                 // we add it dynamically
@@ -830,9 +848,9 @@ public class PersistenceUtil {
           // load zones dynamically from zones directory
           Map<GUID, Zone> zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
           for (String potentialFile : pakFile.getPaths()) {
-            if (potentialFile.startsWith("zones/")
-                && potentialFile.contains("/z_")
-                && potentialFile.endsWith(".xml")) {
+            if (potentialFile.startsWith("z/")
+                && potentialFile.contains(ZONE_FILE_PREFIX)
+                && potentialFile.endsWith(XML_FILE_SUFFIX)) {
 
               String zoneFile = potentialFile;
               ZoneWrapper zoneWrapper =
@@ -841,15 +859,16 @@ public class PersistenceUtil {
               checkIDs(guids, zone, zoneFile);
               zones.put(zone.getId(), zone);
 
-              String zoneDirectory = zoneFile.substring(0, zoneFile.indexOf("/z_"));
+              String zoneDirectory = zoneFile.substring(0, zoneFile.indexOf(ZONE_FILE_PREFIX));
 
               // load token dynamically if there are token files
               for (String potentialTokenFile : pakFile.getPaths()) {
-                if (potentialTokenFile.startsWith(zoneDirectory + "/token")
-                    && potentialTokenFile.contains("/t_")
-                    && potentialTokenFile.endsWith(".xml")) {
+                if (potentialTokenFile.startsWith(zoneDirectory + TOKENS_DIRECTORY)
+                    && potentialTokenFile.contains(TOKEN_FILE_PREFIX)
+                    && potentialTokenFile.endsWith(XML_FILE_SUFFIX)) {
                   String tokenFile = potentialTokenFile;
-                  String tokenDirectory = tokenFile.substring(0, tokenFile.indexOf("/t_"));
+                  String tokenDirectory =
+                      tokenFile.substring(0, tokenFile.indexOf(TOKEN_FILE_PREFIX));
 
                   TokenWrapper tokenWrapper =
                       (TokenWrapper)
@@ -864,7 +883,7 @@ public class PersistenceUtil {
                   List<MacroButtonProperties> macroPropertiesList = new LinkedList<>();
                   for (MacroFileWrapper tokenMacroFileWrapper : tokenMacroFiles) {
                     String macroFile = removeLeadingSlash(tokenMacroFileWrapper.macroFile);
-                    String macroContentFile = changeFileEndingTo(macroFile, ".macro");
+                    String macroContentFile = changeFileEndingTo(macroFile, MTSCRIPT_SUFFIX);
                     // make sure file was not removed
                     if (pakFile.hasFile(macroFile)) {
                       MacroButtonProperties macroButtonProperties =
@@ -887,11 +906,11 @@ public class PersistenceUtil {
                   // not defined in token
                   for (String potentialTokenMacroFile : pakFile.getPaths()) {
                     if (potentialTokenMacroFile.startsWith(tokenDirectory)
-                        && potentialTokenMacroFile.contains("/macros/macro_")
-                        && potentialTokenMacroFile.endsWith(".xml")
+                        && potentialTokenMacroFile.contains(MACRO_FILE_SUFFIX)
+                        && potentialTokenMacroFile.endsWith(XML_FILE_SUFFIX)
                         && !definedTokenMacroFiles.contains(potentialTokenMacroFile)) {
                       String macroFile = removeLeadingSlash(potentialTokenMacroFile);
-                      String macroContentFile = changeFileEndingTo(macroFile, ".macro");
+                      String macroContentFile = changeFileEndingTo(macroFile, MTSCRIPT_SUFFIX);
                       MacroButtonProperties macroButtonProperties =
                           (MacroButtonProperties) pakFile.getContent(campaignVersion, macroFile);
                       loadMacroContentFile(

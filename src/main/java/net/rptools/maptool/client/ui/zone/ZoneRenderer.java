@@ -4432,7 +4432,7 @@ public class ZoneRenderer extends JComponent
       // MapTool.addMessage(msg);
     }
     // Copy them to the clipboard so that we can quickly copy them onto the map
-    AppActions.copyTokens(tokens);
+    AppActions.copyTokens(tokens, false);
     requestFocusInWindow();
     repaint();
   }

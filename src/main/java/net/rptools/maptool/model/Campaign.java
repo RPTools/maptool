@@ -163,11 +163,13 @@ public class Campaign {
     id = campaign.id;
 
     /*
-     * JFJ 2010-10-27 Don't forget that since these are new zones AND new tokens created here from the old one, if you have any data that needs to transfer over you will need to manually copy it
+     * JFJ 2010-10-27 Don't forget that since these are new zones AND new tokens
+     * created here from the old one, if you have any data that needs
+     * to transfer over you will need to manually copy it
      * as is done below for the campaign properties and macro buttons.
      */
     for (Entry<GUID, Zone> entry : campaign.zones.entrySet()) {
-      Zone copy = new Zone(entry.getValue());
+      Zone copy = new Zone(entry.getValue(), true);
       zones.put(copy.getId(), copy);
     }
     campaignProperties = new CampaignProperties(campaign.campaignProperties);

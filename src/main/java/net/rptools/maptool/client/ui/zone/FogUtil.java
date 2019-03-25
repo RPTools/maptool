@@ -341,7 +341,7 @@ public class FogUtil {
        * token. Commenting out and replacing... for (CellPoint cell : lastPath.getCellPath()) {
        */
       final ExposedAreaMetaData metaCopy = meta;
-      final Token tokenClone = new Token(token);
+      final Token tokenClone = new Token(token, false);
       final ZoneView zoneView = renderer.getZoneView();
       Area visionArea = new Area();
 

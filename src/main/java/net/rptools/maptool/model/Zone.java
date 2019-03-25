@@ -287,7 +287,11 @@ public class Zone extends BaseModel {
    * the old one being passed in, if you have any data that needs to transfer over, you will need to
    * manually copy it as is done below for various items.
    */
-  public Zone(Zone zone) {
+  public Zone(Zone zone, boolean copyId) {
+    if (copyId && zone.grid != null) {
+      id = zone.id;
+    }
+
     backgroundPaint = zone.backgroundPaint;
     mapAsset = zone.mapAsset;
     fogPaint = zone.fogPaint;
@@ -351,7 +355,7 @@ public class Zone extends BaseModel {
       Iterator<GUID> i = zone.tokenMap.keySet().iterator();
       while (i.hasNext()) {
         Token old = zone.tokenMap.get(i.next());
-        Token token = new Token(old);
+        Token token = new Token(old, copyId);
         if (old.getExposedAreaGUID() != null) {
           GUID guid = new GUID();
           token.setExposedAreaGUID(guid);
@@ -389,7 +393,6 @@ public class Zone extends BaseModel {
     topology = (Area) zone.topology.clone();
     isVisible = zone.isVisible;
     hasFog = zone.hasFog;
-    id = zone.id;
   }
 
   public GUID getId() {

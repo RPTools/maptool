@@ -151,7 +151,7 @@ public class TokenLayoutPanel extends JPanel {
   }
 
   public void setToken(Token token) {
-    this.token = new Token(token);
+    this.token = new Token(token, false);
     setTokenImage(token.getImageAssetId());
   }
 

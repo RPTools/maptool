@@ -582,7 +582,7 @@ public class TransferableHelper extends TransferHandler {
           // A token from an image asset needs additional configuration.
           configureTokens.add(true);
         } else if (working instanceof Token) {
-          Token token = new Token((Token) working);
+          Token token = new Token((Token) working, true);
           // token.setName(MapToolUtil.nextTokenId(zone, token));
           tokens.add(token);
           // A token from an .rptok file is already fully configured.
@@ -595,7 +595,7 @@ public class TransferableHelper extends TransferHandler {
           // Make a copy so that it gets a new unique GUID
           tokens =
               Collections.singletonList(
-                  new Token((Token) t.getTransferData(TransferableToken.dataFlavor)));
+                  new Token((Token) t.getTransferData(TransferableToken.dataFlavor), true));
           // A token from the Resource Library is already fully configured.
           configureTokens = Collections.singletonList(new Boolean(false));
         } catch (Exception e) {
