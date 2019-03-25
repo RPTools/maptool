@@ -842,7 +842,7 @@ public class AppActions {
     // lose what might already be in the clipboard.
     boolean anythingDeleted = false;
     if (!tokenSet.isEmpty()) {
-      copyTokens(tokenSet);
+      copyTokens(tokenSet, true);
 
       // delete tokens
       for (GUID tokenGUID : tokenSet) {
@@ -875,7 +875,7 @@ public class AppActions {
         @Override
         public void execute(ActionEvent e) {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-          copyTokens(renderer.getSelectedTokenSet());
+          copyTokens(renderer.getSelectedTokenSet(), false);
         }
       };
 
@@ -887,7 +887,7 @@ public class AppActions {
    * @param tokenSet the set of tokens to copy; if empty, plays the {@link
    *     MapTool#SND_INVALID_OPERATION} sound.
    */
-  public static final void copyTokens(Set<GUID> tokenSet) {
+  public static final void copyTokens(Set<GUID> tokenSet, boolean keepGUIDs) {
     List<Token> tokenList = null;
     boolean anythingCopied = false;
     if (!tokenSet.isEmpty()) {
@@ -907,7 +907,7 @@ public class AppActions {
     // Only cut if some tokens are selected. Don't want to accidentally
     // lose what might already be in the clipboard.
     if (anythingCopied) {
-      copyTokens(tokenList);
+      copyTokens(tokenList, keepGUIDs);
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
     }
@@ -964,7 +964,7 @@ public class AppActions {
    * @param tokenList the list of tokens to copy; if empty, plays the {@link
    *     MapTool#SND_INVALID_OPERATION} sound.
    */
-  public static final void copyTokens(List<Token> tokenList) {
+  public static final void copyTokens(List<Token> tokenList, boolean keepGUIDs) {
     // Only cut if some tokens are selected. Don't want to accidentally
     // lose what might already be in the clipboard.
     if (!tokenList.isEmpty()) {
@@ -977,7 +977,7 @@ public class AppActions {
         if (originalToken.getY() < topLeft.getY() || originalToken.getX() < topLeft.getX()) {
           topLeft = originalToken;
         }
-        Token newToken = new Token(originalToken);
+        Token newToken = new Token(originalToken, keepGUIDs);
         tokenCopySet.add(newToken);
       }
       /*
@@ -1079,7 +1079,7 @@ public class AppActions {
     List<String> failedPaste = new ArrayList<String>(tokenList.size());
 
     for (Token origToken : tokenList) {
-      Token token = new Token(origToken);
+      Token token = new Token(origToken, true);
 
       // need this here to get around times when a token is copied and pasted into the
       // same zone, such as a framework "template"
@@ -1395,7 +1395,7 @@ public class AppActions {
           String zoneName =
               JOptionPane.showInputDialog("New map name:", "Copy of " + zone.getName());
           if (zoneName != null) {
-            Zone zoneCopy = new Zone(zone);
+            Zone zoneCopy = new Zone(zone, false);
             zoneCopy.setName(zoneName);
             MapTool.addZone(zoneCopy);
           }

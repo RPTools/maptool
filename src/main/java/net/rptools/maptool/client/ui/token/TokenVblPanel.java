@@ -106,7 +106,7 @@ public class TokenVblPanel extends JPanel {
   }
 
   public void setToken(Token token) {
-    this.token = new Token(token);
+    this.token = new Token(token, false);
     setTokenVBL(token.getVBL());
     if (token.getAlphaSensitivity() >= 0) alphaSensitivity = token.getAlphaSensitivity();
   }

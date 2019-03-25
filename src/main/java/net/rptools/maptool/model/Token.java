@@ -244,9 +244,12 @@ public class Token extends BaseModel implements Cloneable {
 
   private HeroLabData heroLabData;
 
-  public Token(Token token) {
+  public Token(Token token, boolean copyId) {
     this(token.name, token.getImageAssetId());
-    id = token.id;
+    if (copyId && token.id != null) {
+      id = token.id;
+    }
+
     currentImageAsset = token.currentImageAsset;
 
     x = token.x;

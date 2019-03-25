@@ -108,7 +108,7 @@ public class MapFunctions extends AbstractFunction {
       String oldName = parameters.get(0).toString();
       String newName = parameters.get(1).toString();
       Zone oldMap = getNamedMap(functionName, oldName).getZone();
-      Zone newMap = new Zone(oldMap);
+      Zone newMap = new Zone(oldMap, false);
       newMap.setName(newName);
       MapTool.addZone(newMap, false);
       MapTool.serverCommand().putZone(newMap);
