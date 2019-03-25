@@ -978,6 +978,9 @@ public class AppActions {
           topLeft = originalToken;
         }
         Token newToken = new Token(originalToken, keepGUIDs);
+        if (!keepGUIDs) {
+          newToken.clearID();
+        }
         tokenCopySet.add(newToken);
       }
       /*
@@ -1120,6 +1123,11 @@ public class AppActions {
         // asking it could be seriously confusing. Yet we don't want to popup a confirmation every
         // time the GM pastes either. :(
         tokenNeedsNewName = token.getType() != Token.Type.PC;
+        
+        // we don't need a new name is the name is not used yet, e.g. when cut&paste
+        if (zone.getTokenByName(token.getName()) == null) {
+          tokenNeedsNewName = false;
+        }
       } else {
         // For Players, check to see if the name is already in use. If it is already in use, make
         // sure the current Player
