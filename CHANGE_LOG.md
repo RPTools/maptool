@@ -5,7 +5,7 @@ Feature branch to test Campaign Dir
 
 Enhancements
 -----
-* [#102][i102] - Save campaigns as directory structure
+* [#102][i102] - Save campaigns as directory structure, add new exports
 
 [i102]: https://github.com/RPTools/maptool/issues/102
 ___
