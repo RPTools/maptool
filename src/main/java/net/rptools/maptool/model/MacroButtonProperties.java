@@ -243,6 +243,35 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     save();
   }
 
+  // constructor for creating a new copy of an existing token button, auto-saves
+  public MacroButtonProperties(Token token, MacroButtonProperties properties) {
+    this(properties.index);
+    setSaveLocation("Token");
+    setTokenId(token);
+    setColorKey(properties.getColorKey());
+    // use the default hot key
+    setCommand(properties.getCommand());
+    setLabel(properties.getLabel());
+    setGroup(properties.getGroup());
+    setSortby(properties.getSortby());
+    setAutoExecute(properties.getAutoExecute());
+    setIncludeLabel(properties.getIncludeLabel());
+    setApplyToTokens(properties.getApplyToTokens());
+    setFontColorKey(properties.getFontColorKey());
+    setFontSize(properties.getFontSize());
+    setMinWidth(properties.getMinWidth());
+    setMaxWidth(properties.getMaxWidth());
+    setAllowPlayerEdits(properties.getAllowPlayerEdits());
+    setCompareIncludeLabel(properties.getCompareIncludeLabel());
+    setCompareAutoExecute(properties.getCompareAutoExecute());
+    setCompareApplyToSelectedTokens(properties.getCompareApplyToSelectedTokens());
+    setCompareGroup(properties.getCompareGroup());
+    setCompareSortPrefix(properties.getCompareSortPrefix());
+    setCompareCommand(properties.getCompareCommand());
+    setToolTip(properties.getToolTip());
+    macroUUID = null;
+  }
+
   // constructor for creating common macro buttons on selection panel
   public MacroButtonProperties(int index, MacroButtonProperties properties) {
     this(index);
@@ -270,6 +299,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setToolTip(properties.getToolTip());
     commonMacro = true;
   }
+
+  public MacroButtonProperties(MacroButtonProperties orginal) {}
 
   public MacroButtonProperties(Token token, Map<String, String> props) {
     this(

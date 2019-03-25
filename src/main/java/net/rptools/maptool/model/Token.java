@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -328,7 +329,17 @@ public class Token extends BaseModel implements Cloneable {
       getPropertyMap().putAll(token.propertyMapCI);
     }
     if (token.macroPropertiesMap != null) {
-      macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap);
+
+      if (!copyId) {
+        macroPropertiesMap = new HashMap<Integer, Object>();
+        for (Entry<Integer, Object> macroEntry : token.macroPropertiesMap.entrySet()) {
+          MacroButtonProperties macro =
+              new MacroButtonProperties(this, (MacroButtonProperties) macroEntry.getValue());
+          macroPropertiesMap.put(macroEntry.getKey(), macro);
+        }
+      } else {
+        macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap);
+      }
     }
     // convert old-style macros
     if (token.macroMap != null) {
@@ -849,6 +860,9 @@ public class Token extends BaseModel implements Cloneable {
 
   @Override
   public int hashCode() {
+    if (id == null) {
+      return -1;
+    }
     return id.hashCode();
   }
 
@@ -940,12 +954,23 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public GUID getId() {
+    if (id == null) {
+      resetId();
+    }
     return id;
   }
 
   public GUID resetId() {
     id = new GUID();
     return id;
+  }
+
+  /**
+   * needed so that when copy/pasting the ID can be cleared on copy and a new one is generated for
+   * every paste.
+   */
+  public void clearID() {
+    id = null;
   }
 
   public int getX() {
