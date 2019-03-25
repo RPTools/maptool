@@ -389,9 +389,15 @@ public class Zone extends BaseModel {
     topology = (Area) zone.topology.clone();
     isVisible = zone.isVisible;
     hasFog = zone.hasFog;
+    id = zone.id;
   }
 
   public GUID getId() {
+    return id;
+  }
+
+  public GUID resetId() {
+    id = new GUID();
     return id;
   }
 

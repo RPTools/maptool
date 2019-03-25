@@ -60,6 +60,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -335,7 +336,11 @@ public class PersistenceUtil {
         // specified campaignVersion
         if (campaignVersion != null) {
           pakFile = CampaignExport.stripContent(pakFile, persistedCampaign, campaignVersion);
-        } else {
+        }
+
+        // save in new splitted file format
+        // if not exporting to an old version that used the content.xml file
+        if (campaignVersion == null || !pakFile.hasFile(PackedFile.CONTENT_FILE)) {
           pakFile.putFile("assetMap.xml", persistedCampaign.assetMap);
           pakFile.putFile("currentView.xml", persistedCampaign.currentView);
 
@@ -728,20 +733,22 @@ public class PersistenceUtil {
           // load campaign as a directory structure
           persistedCampaign = new PersistedCampaign();
 
+          // load the campaign properties files.
           persistedCampaign.assetMap =
               (Map<MD5Key, Asset>) pakFile.getContent(campaignVersion, "assetMap.xml");
           persistedCampaign.currentView =
               (Scale) pakFile.getContent(campaignVersion, "currentView.xml");
-
           CampaignProperties campaignProperties =
               (CampaignProperties) pakFile.getContent(campaignVersion, "campaignProperties.xml");
           Map<String, String> characterSheets =
               (Map<String, String>) pakFile.getContent(campaignVersion, "characterSheets.xml");
           campaignProperties.setCharacterSheets(characterSheets);
-
           CampaignWrapper campaignWrapper =
               (CampaignWrapper) pakFile.getContent(campaignVersion, "campaign.xml");
 
+          Set<String> guids = new HashSet<String>();
+
+          // load the campaign macros
           ArrayList<MacroButtonProperties> macroButtonPropertiesList =
               new ArrayList<MacroButtonProperties>();
           List<String> definedMacroFiles = new LinkedList<>();
@@ -749,25 +756,40 @@ public class PersistenceUtil {
             // check for macros that are configured in campaign save file
             for (MacroFileWrapper macroFileWrapper : campaignWrapper.macroFiles) {
               String macroFile = removeLeadingSlash(macroFileWrapper.macroFile);
-              MacroButtonProperties macroButtonProperties =
-                  (MacroButtonProperties) pakFile.getContent(campaignVersion, macroFile);
-              macroButtonProperties.setIndex(macroFileWrapper.index);
-              macroButtonProperties.setSaveLocation(macroFileWrapper.saveLocation);
-              macroButtonPropertiesList.add(macroButtonProperties);
-              definedMacroFiles.add(macroFile);
+              String macroContentFile = changeFileEndingTo(macroFile, ".macro");
+              // make sure file was not removed
+              if (pakFile.hasFile(macroFile)) {
+                MacroButtonProperties macroButtonProperties =
+                    (MacroButtonProperties) pakFile.getContent(campaignVersion, macroFile);
+                loadMacroContentFile(
+                    pakFile, campaignVersion, macroContentFile, macroButtonProperties);
+                macroButtonProperties.setIndex(macroFileWrapper.index);
+                macroButtonProperties.setSaveLocation(macroFileWrapper.saveLocation);
+                macroButtonPropertiesList.add(macroButtonProperties);
+                definedMacroFiles.add(macroFile);
+                checkIDs(guids, macroButtonProperties, macroFile);
+              } else {
+                // just ignore non found file and show message
+                MapTool.addLocalMessage(
+                    I18N.getText("PersistenceUtil.warn.fileNotFound", macroFile));
+              }
             }
           // check for macro files that are added to directories but not in campaign file
           for (String potentialFile : pakFile.getPaths()) {
             if (potentialFile.startsWith("macros/") && potentialFile.endsWith(".xml")) {
               String macroFile = removeLeadingSlash(potentialFile);
+              String macroContentFile = changeFileEndingTo(macroFile, ".macro");
               if (!definedMacroFiles.contains(macroFile)) {
                 // it's a new file not in the campaign xml yet
                 // we add it dynamically
                 MacroButtonProperties macroButtonProperties =
                     (MacroButtonProperties) pakFile.getContent(campaignVersion, macroFile);
+                loadMacroContentFile(
+                    pakFile, campaignVersion, macroContentFile, macroButtonProperties);
                 campaignWrapper.macroButtonLastIndex++;
                 macroButtonProperties.setIndex(campaignWrapper.macroButtonLastIndex);
                 macroButtonPropertiesList.add(macroButtonProperties);
+                checkIDs(guids, macroButtonProperties, macroFile);
               }
             }
           }
@@ -775,12 +797,15 @@ public class PersistenceUtil {
           // load zones dynamically from zones directory
           Map<GUID, Zone> zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
           for (String potentialFile : pakFile.getPaths()) {
-            if (potentialFile.startsWith("zones/") && potentialFile.contains("/z_")) {
+            if (potentialFile.startsWith("zones/")
+                && potentialFile.contains("/z_")
+                && potentialFile.endsWith(".xml")) {
 
               String zoneFile = potentialFile;
               ZoneWrapper zoneWrapper =
                   (ZoneWrapper) pakFile.getContent(campaignVersion, removeLeadingSlash(zoneFile));
               Zone zone = zoneWrapper.zone;
+              checkIDs(guids, zone, zoneFile);
               zones.put(zone.getId(), zone);
 
               String zoneDirectory = zoneFile.substring(0, zoneFile.indexOf("/z_"));
@@ -788,7 +813,8 @@ public class PersistenceUtil {
               // load token dynamically if there are token files
               for (String potentialTokenFile : pakFile.getPaths()) {
                 if (potentialTokenFile.startsWith(zoneDirectory + "/token")
-                    && potentialTokenFile.contains("/t_")) {
+                    && potentialTokenFile.contains("/t_")
+                    && potentialTokenFile.endsWith(".xml")) {
                   String tokenFile = potentialTokenFile;
                   String tokenDirectory = tokenFile.substring(0, tokenFile.indexOf("/t_"));
 
@@ -796,8 +822,8 @@ public class PersistenceUtil {
                       (TokenWrapper)
                           pakFile.getContent(campaignVersion, removeLeadingSlash(tokenFile));
                   Token token = tokenWrapper.token;
+                  checkIDs(guids, token, tokenFile);
                   List<MacroFileWrapper> tokenMacroFiles = tokenWrapper.macroFiles;
-                  zones.put(zone.getId(), zone);
                   zone.putToken(token);
 
                   // check for macros defined in token file
@@ -806,14 +832,22 @@ public class PersistenceUtil {
                   for (MacroFileWrapper tokenMacroFileWrapper : tokenMacroFiles) {
                     String macroFile = removeLeadingSlash(tokenMacroFileWrapper.macroFile);
                     String macroContentFile = changeFileEndingTo(macroFile, ".macro");
-                    MacroButtonProperties macroButtonProperties =
-                        (MacroButtonProperties) pakFile.getContent(campaignVersion, macroFile);
-                    String content = pakFile.getContentAsString(campaignVersion, macroContentFile);
-                    macroButtonProperties.setIndex(tokenMacroFileWrapper.index);
-                    macroButtonProperties.setSaveLocation(tokenMacroFileWrapper.saveLocation);
-                    macroButtonProperties.setCommand(content);
-                    macroPropertiesList.add(macroButtonProperties);
-                    definedTokenMacroFiles.add(macroFile);
+                    // make sure file was not removed
+                    if (pakFile.hasFile(macroFile)) {
+                      MacroButtonProperties macroButtonProperties =
+                          (MacroButtonProperties) pakFile.getContent(campaignVersion, macroFile);
+                      loadMacroContentFile(
+                          pakFile, campaignVersion, macroContentFile, macroButtonProperties);
+                      macroButtonProperties.setIndex(tokenMacroFileWrapper.index);
+                      macroButtonProperties.setSaveLocation(tokenMacroFileWrapper.saveLocation);
+                      checkIDs(guids, macroButtonProperties, macroFile);
+                      macroPropertiesList.add(macroButtonProperties);
+                      definedTokenMacroFiles.add(macroFile);
+                    } else {
+                      // just ignore non found file and show message
+                      MapTool.addLocalMessage(
+                          I18N.getText("PersistenceUtil.warn.fileNotFound", macroContentFile));
+                    }
                   }
 
                   // check dynamically for macro files that are under token directory but
@@ -827,9 +861,9 @@ public class PersistenceUtil {
                       String macroContentFile = changeFileEndingTo(macroFile, ".macro");
                       MacroButtonProperties macroButtonProperties =
                           (MacroButtonProperties) pakFile.getContent(campaignVersion, macroFile);
-                      String content =
-                          pakFile.getContentAsString(campaignVersion, macroContentFile);
-                      macroButtonProperties.setCommand(content);
+                      loadMacroContentFile(
+                          pakFile, campaignVersion, macroContentFile, macroButtonProperties);
+                      checkIDs(guids, macroButtonProperties, macroFile);
                       macroPropertiesList.add(macroButtonProperties);
                     }
                   }
@@ -897,6 +931,68 @@ public class PersistenceUtil {
     persistedCampaign = loadLegacyCampaign(campaignFile);
     if (persistedCampaign == null) MapTool.showWarning("PersistenceUtil.warn.campaignNotLoaded");
     return persistedCampaign;
+  }
+
+  private static void loadMacroContentFile(
+      PackedFile pakFile,
+      String campaignVersion,
+      String macroContentFile,
+      MacroButtonProperties macroButtonProperties)
+      throws IOException {
+    if (pakFile.hasFile(macroContentFile)) {
+      String content = pakFile.getContentAsString(campaignVersion, macroContentFile);
+      macroButtonProperties.setCommand(content);
+    } else {
+      // just ignore non found file and show message
+      macroButtonProperties.setCommand("");
+      MapTool.addLocalMessage(I18N.getText("PersistenceUtil.warn.fileNotFound", macroContentFile));
+    }
+  }
+
+  private static void showIdWarning(String fileName, String id, String newId) {
+    if (id == null) {
+      MapTool.addLocalMessage(I18N.getText("PersistenceUtil.warn.noID", fileName, newId));
+    } else {
+      MapTool.addLocalMessage(
+          I18N.getText("PersistenceUtil.warn.duplicateID", fileName, id, newId));
+    }
+  }
+
+  private static void showIdWarning(String fileName, GUID id, GUID newId) {
+    String idAsString = (id == null) ? null : id.toString();
+    String newIdAsString = (newId == null) ? null : newId.toString();
+    showIdWarning(fileName, idAsString, newIdAsString);
+  }
+
+  private static void checkIDs(
+      Set<String> ids, MacroButtonProperties macroButtonProperties, String fileName) {
+    String id = macroButtonProperties.getMacroUUID();
+    while (id == null || ids.contains(id)) {
+      String newId = macroButtonProperties.resetMacroUUID();
+      showIdWarning(fileName, id, newId);
+      id = newId;
+    }
+    ids.add(id);
+  }
+
+  private static void checkIDs(Set<String> ids, Zone zone, String fileName) {
+    GUID id = zone.getId();
+    while (id == null || ids.contains(id.toString())) {
+      GUID newId = zone.resetId();
+      showIdWarning(fileName, id, newId);
+      id = newId;
+    }
+    ids.add(id.toString());
+  }
+
+  private static void checkIDs(Set<String> ids, Token token, String fileName) {
+    GUID id = token.getId();
+    while (id == null || ids.contains(id.toString())) {
+      GUID newId = token.resetId();
+      showIdWarning(fileName, id, newId);
+      id = newId;
+    }
+    ids.add(id.toString());
   }
 
   public static PersistedCampaign loadLegacyCampaign(File campaignFile) {

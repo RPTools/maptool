@@ -246,6 +246,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public Token(Token token) {
     this(token.name, token.getImageAssetId());
+    id = token.id;
     currentImageAsset = token.currentImageAsset;
 
     x = token.x;
@@ -939,8 +940,9 @@ public class Token extends BaseModel implements Cloneable {
     return id;
   }
 
-  public void setId(GUID id) {
-    this.id = id;
+  public GUID resetId() {
+    id = new GUID();
+    return id;
   }
 
   public int getX() {
