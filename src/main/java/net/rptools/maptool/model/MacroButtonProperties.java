@@ -242,7 +242,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setToolTip(tt);
     save();
   }
-  
+
   // constructor for creating a new copy of an existing token button, auto-saves
   public MacroButtonProperties(Token token, MacroButtonProperties properties) {
     this(properties.index);
@@ -298,11 +298,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setCompareCommand(properties.getCompareCommand());
     setToolTip(properties.getToolTip());
     commonMacro = true;
-  }  
-  
-  public MacroButtonProperties(MacroButtonProperties orginal) {
-    
   }
+
+  public MacroButtonProperties(MacroButtonProperties orginal) {}
 
   public MacroButtonProperties(Token token, Map<String, String> props) {
     this(

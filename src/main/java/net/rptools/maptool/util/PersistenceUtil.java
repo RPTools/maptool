@@ -17,7 +17,6 @@ package net.rptools.maptool.util;
 import com.caucho.hessian.io.HessianInput;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.ConversionException;
-
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -100,8 +99,6 @@ public class PersistenceUtil {
   private static final String TOKEN_FILE_SUFFIX = ".tok";
   private static final String MACRO_FILE_SUFFIX = ".m";
   private static final String MTSCRIPT_FILE_SUFFIX = ".mtscript";
-
-
 
   private static final Logger log = LogManager.getLogger(PersistenceUtil.class);
 
@@ -377,9 +374,10 @@ public class PersistenceUtil {
           // save tables
           for (Entry<String, LookupTable> tableEntry :
               persistedCampaign.campaign.getLookupTableMap().entrySet()) {
-            String tableFile = joinFilePaths(
-                TABLES_DIRECTORY, 
-                TABLE_FILE_PREFIX + fixFileName(tableEntry.getKey()) + TABLE_FILE_SUFFIX);
+            String tableFile =
+                joinFilePaths(
+                    TABLES_DIRECTORY,
+                    TABLE_FILE_PREFIX + fixFileName(tableEntry.getKey()) + TABLE_FILE_SUFFIX);
             pakFile.putFile(tableFile, tableEntry.getValue());
           }
 
@@ -388,12 +386,18 @@ public class PersistenceUtil {
           pakFile.getXStream().omitField(MacroButtonProperties.class, "command");
           for (MacroButtonProperties macro :
               persistedCampaign.campaign.getMacroButtonProperties()) {
-            String macroFile = joinFilePaths(
-                MACROS_DIRECTORY, 
-                fixFileName(macro.getLabel()) + "_"+ macro.getMacroUUID() + MACRO_FILE_SUFFIX);
-            String macroContentFile = joinFilePaths(
-                MACROS_DIRECTORY, 
-                MACRO_FILE_PREFIX + fixFileName(macro.getLabel()) + "_"+ macro.getMacroUUID() + MTSCRIPT_FILE_SUFFIX);
+            String macroFile =
+                joinFilePaths(
+                    MACROS_DIRECTORY,
+                    fixFileName(macro.getLabel()) + "_" + macro.getMacroUUID() + MACRO_FILE_SUFFIX);
+            String macroContentFile =
+                joinFilePaths(
+                    MACROS_DIRECTORY,
+                    MACRO_FILE_PREFIX
+                        + fixFileName(macro.getLabel())
+                        + "_"
+                        + macro.getMacroUUID()
+                        + MTSCRIPT_FILE_SUFFIX);
             MacroFileWrapper macroFileWrapper = new MacroFileWrapper();
             macroFileWrapper.index = macro.getIndex();
             macroFileWrapper.saveLocation = macro.getSaveLocation();
@@ -412,19 +416,23 @@ public class PersistenceUtil {
 
           // save zone
           for (Zone zone : persistedCampaign.campaign.getZones()) {
-            String zonePath = joinFilePaths(
-                ZONES_DIRECTORY, fixFileName(zone.getName()) + "_" + fixFileName(zone.getId().toString()));
+            String zonePath =
+                joinFilePaths(
+                    ZONES_DIRECTORY,
+                    fixFileName(zone.getName()) + "_" + fixFileName(zone.getId().toString()));
 
             // save tokens in zone
             List<String> tokenFiles = new LinkedList<String>();
             for (Token token : zone.getAllTokens()) {
-              String tokenPath = joinFilePaths(
-                  TOKENS_DIRECTORY, 
-                  fixFileName(token.getName()) + "_" + fixFileName(token.getId().toString()));
-              String tokenFile = joinFilePaths(
-                  zonePath,
-                  tokenPath,
-                  TOKEN_FILE_PREFIX + fixFileName(token.getName()) + TOKEN_FILE_SUFFIX);
+              String tokenPath =
+                  joinFilePaths(
+                      TOKENS_DIRECTORY,
+                      fixFileName(token.getName()) + "_" + fixFileName(token.getId().toString()));
+              String tokenFile =
+                  joinFilePaths(
+                      zonePath,
+                      tokenPath,
+                      TOKEN_FILE_PREFIX + fixFileName(token.getName()) + TOKEN_FILE_SUFFIX);
               tokenFiles.add(tokenFile);
 
               // save token macros
@@ -432,16 +440,26 @@ public class PersistenceUtil {
               for (Map.Entry<Integer, Object> macroEntry :
                   token.getMacroPropertiesMap(false).entrySet()) {
                 MacroButtonProperties macro = (MacroButtonProperties) macroEntry.getValue();
-                String macroFile = joinFilePaths(
-                    zonePath,
-                    tokenPath,
-                    MACROS_DIRECTORY,
-                    MACRO_FILE_PREFIX + fixFileName(macro.getLabel()) + "_" + macro.getMacroUUID() + MACRO_FILE_SUFFIX);
-                String macroContentFile = joinFilePaths(
-                    zonePath,
-                    tokenPath,
-                    MACROS_DIRECTORY,
-                    MACRO_FILE_PREFIX + fixFileName(macro.getLabel()) + "_" + macro.getMacroUUID() + MTSCRIPT_FILE_SUFFIX);
+                String macroFile =
+                    joinFilePaths(
+                        zonePath,
+                        tokenPath,
+                        MACROS_DIRECTORY,
+                        MACRO_FILE_PREFIX
+                            + fixFileName(macro.getLabel())
+                            + "_"
+                            + macro.getMacroUUID()
+                            + MACRO_FILE_SUFFIX);
+                String macroContentFile =
+                    joinFilePaths(
+                        zonePath,
+                        tokenPath,
+                        MACROS_DIRECTORY,
+                        MACRO_FILE_PREFIX
+                            + fixFileName(macro.getLabel())
+                            + "_"
+                            + macro.getMacroUUID()
+                            + MTSCRIPT_FILE_SUFFIX);
                 MacroFileWrapper tokenMacroFileWrapper = new MacroFileWrapper();
                 tokenMacroFileWrapper.index = macro.getIndex();
                 tokenMacroFileWrapper.saveLocation = macro.getSaveLocation();
@@ -459,9 +477,9 @@ public class PersistenceUtil {
               pakFile.putFile(tokenFile, tokenWrapper);
             }
 
-            String zoneFile = joinFilePaths(
-                zonePath,
-                ZONE_FILE_PREFIX + fixFileName(zone.getName()) + ZONE_FILE_SUFFIX);
+            String zoneFile =
+                joinFilePaths(
+                    zonePath, ZONE_FILE_PREFIX + fixFileName(zone.getName()) + ZONE_FILE_SUFFIX);
             ZoneWrapper zoneWrapper = new ZoneWrapper();
             zoneWrapper.zone = zone;
 
@@ -564,17 +582,21 @@ public class PersistenceUtil {
   // max name for each file path component that is checked
   private static final int MAX_LENGTH = 50;
 
-  public static String joinFilePaths(String ... paths) {
+  public static String joinFilePaths(String... paths) {
     StringBuilder sb = new StringBuilder();
     for (String path : paths) {
-      if (sb.toString().length() > 0 && !sb.toString().endsWith("/") && !path.startsWith("/") && path.length() > 0) {
+      if (sb.toString().length() > 0
+          && !sb.toString().endsWith("/")
+          && !path.startsWith("/")
+          && path.length() > 0) {
         sb.append("/");
       }
       sb.append(path);
     }
-    
+
     return sb.toString();
   }
+
   public static String fixFileName(String in) {
 
     StringBuffer sb = new StringBuffer();
@@ -583,7 +605,7 @@ public class PersistenceUtil {
     while (m.find()) {
       // Convert matched character to percent-encoded.
       // which is everything that is not allowed
-      String replacement = "_"; //"%" + Integer.toHexString(m.group().charAt(0)).toUpperCase();
+      String replacement = "_"; // "%" + Integer.toHexString(m.group().charAt(0)).toUpperCase();
       m.appendReplacement(sb, replacement);
     }
     m.appendTail(sb);
@@ -921,7 +943,8 @@ public class PersistenceUtil {
                   for (String potentialTokenMacroFile : pakFile.getPaths()) {
                     String fileNameTokenMacro = getFileName(potentialFile);
                     String filePathTokenMacro = getPath(potentialFile);
-                    if (filePathTokenMacro.startsWith(joinFilePaths(tokenDirectory, MACROS_DIRECTORY))
+                    if (filePathTokenMacro.startsWith(
+                            joinFilePaths(tokenDirectory, MACROS_DIRECTORY))
                         && fileNameTokenMacro.startsWith(MACRO_FILE_PREFIX)
                         && fileNameTokenMacro.endsWith(MACRO_FILE_SUFFIX)
                         && !definedTokenMacroFiles.contains(potentialTokenMacroFile)) {
@@ -1005,18 +1028,18 @@ public class PersistenceUtil {
     if (fileName == null || !fileName.contains("/")) {
       return "/";
     }
-    
-    return fileName.substring(0, fileName.lastIndexOf("/")+1);
+
+    return fileName.substring(0, fileName.lastIndexOf("/") + 1);
   }
-  
+
   private static String getFileName(String fileNameWithPath) {
     if (fileNameWithPath == null || !fileNameWithPath.contains("/")) {
       return fileNameWithPath;
     }
-    
-    return fileNameWithPath.substring(fileNameWithPath.lastIndexOf("/")+1);
+
+    return fileNameWithPath.substring(fileNameWithPath.lastIndexOf("/") + 1);
   }
-  
+
   private static void loadMacroContentFile(
       PackedFile pakFile,
       String campaignVersion,
@@ -1033,7 +1056,8 @@ public class PersistenceUtil {
     }
   }
 
-  private static void showIdWarning(String fileName, String originalFileName, String id, String newId) {
+  private static void showIdWarning(
+      String fileName, String originalFileName, String id, String newId) {
     if (id == null) {
       MapTool.addLocalMessage(I18N.getText("PersistenceUtil.warn.noID", fileName, newId));
     } else {
@@ -1049,8 +1073,9 @@ public class PersistenceUtil {
   }
 
   /**
-   * This checks if the ID might be a duplicate or not even set.
-   * If that is the case it generates a new ID.
+   * This checks if the ID might be a duplicate or not even set. If that is the case it generates a
+   * new ID.
+   *
    * @param ids
    * @param macroButtonProperties
    * @param fileName
@@ -1071,8 +1096,9 @@ public class PersistenceUtil {
   }
 
   /**
-   * This checks if the ID might be a duplicate or not even set.
-   * If that is the case it generates a new ID.
+   * This checks if the ID might be a duplicate or not even set. If that is the case it generates a
+   * new ID.
+   *
    * @param ids
    * @param macroButtonProperties
    * @param fileName
@@ -1092,8 +1118,9 @@ public class PersistenceUtil {
   }
 
   /**
-   * This checks if the ID might be a duplicate or not even set.
-   * If that is the case it generates a new ID.
+   * This checks if the ID might be a duplicate or not even set. If that is the case it generates a
+   * new ID.
+   *
    * @param ids
    * @param macroButtonProperties
    * @param fileName

@@ -329,11 +329,12 @@ public class Token extends BaseModel implements Cloneable {
       getPropertyMap().putAll(token.propertyMapCI);
     }
     if (token.macroPropertiesMap != null) {
-          
+
       if (!copyId) {
         macroPropertiesMap = new HashMap<Integer, Object>();
-        for(Entry<Integer, Object> macroEntry : token.macroPropertiesMap.entrySet()) {
-          MacroButtonProperties macro = new MacroButtonProperties(this, (MacroButtonProperties)macroEntry.getValue());
+        for (Entry<Integer, Object> macroEntry : token.macroPropertiesMap.entrySet()) {
+          MacroButtonProperties macro =
+              new MacroButtonProperties(this, (MacroButtonProperties) macroEntry.getValue());
           macroPropertiesMap.put(macroEntry.getKey(), macro);
         }
       } else {
@@ -963,11 +964,10 @@ public class Token extends BaseModel implements Cloneable {
     id = new GUID();
     return id;
   }
-  
+
   /**
-   * needed so that when copy/pasting
-   * the ID can be cleared on copy and
-   * a new one is generated for every paste.
+   * needed so that when copy/pasting the ID can be cleared on copy and a new one is generated for
+   * every paste.
    */
   public void clearID() {
     id = null;
