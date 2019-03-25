@@ -761,7 +761,8 @@ public class PersistenceUtil {
               if (pakFile.hasFile(macroFile)) {
                 MacroButtonProperties macroButtonProperties =
                     (MacroButtonProperties) pakFile.getContent(campaignVersion, macroFile);
-                loadMacroContentFile(pakFile, campaignVersion, macroContentFile, macroButtonProperties);
+                loadMacroContentFile(
+                    pakFile, campaignVersion, macroContentFile, macroButtonProperties);
                 macroButtonProperties.setIndex(macroFileWrapper.index);
                 macroButtonProperties.setSaveLocation(macroFileWrapper.saveLocation);
                 macroButtonPropertiesList.add(macroButtonProperties);
@@ -783,7 +784,8 @@ public class PersistenceUtil {
                 // we add it dynamically
                 MacroButtonProperties macroButtonProperties =
                     (MacroButtonProperties) pakFile.getContent(campaignVersion, macroFile);
-                loadMacroContentFile(pakFile, campaignVersion, macroContentFile, macroButtonProperties);
+                loadMacroContentFile(
+                    pakFile, campaignVersion, macroContentFile, macroButtonProperties);
                 campaignWrapper.macroButtonLastIndex++;
                 macroButtonProperties.setIndex(campaignWrapper.macroButtonLastIndex);
                 macroButtonPropertiesList.add(macroButtonProperties);
@@ -834,7 +836,8 @@ public class PersistenceUtil {
                     if (pakFile.hasFile(macroFile)) {
                       MacroButtonProperties macroButtonProperties =
                           (MacroButtonProperties) pakFile.getContent(campaignVersion, macroFile);
-                      loadMacroContentFile(pakFile, campaignVersion, macroContentFile, macroButtonProperties);
+                      loadMacroContentFile(
+                          pakFile, campaignVersion, macroContentFile, macroButtonProperties);
                       macroButtonProperties.setIndex(tokenMacroFileWrapper.index);
                       macroButtonProperties.setSaveLocation(tokenMacroFileWrapper.saveLocation);
                       checkIDs(guids, macroButtonProperties, macroFile);
@@ -858,7 +861,8 @@ public class PersistenceUtil {
                       String macroContentFile = changeFileEndingTo(macroFile, ".macro");
                       MacroButtonProperties macroButtonProperties =
                           (MacroButtonProperties) pakFile.getContent(campaignVersion, macroFile);
-                      loadMacroContentFile(pakFile, campaignVersion, macroContentFile, macroButtonProperties);
+                      loadMacroContentFile(
+                          pakFile, campaignVersion, macroContentFile, macroButtonProperties);
                       checkIDs(guids, macroButtonProperties, macroFile);
                       macroPropertiesList.add(macroButtonProperties);
                     }
@@ -929,17 +933,19 @@ public class PersistenceUtil {
     return persistedCampaign;
   }
 
-  private static void loadMacroContentFile(PackedFile pakFile, String campaignVersion, String macroContentFile,
-      MacroButtonProperties macroButtonProperties) throws IOException {
+  private static void loadMacroContentFile(
+      PackedFile pakFile,
+      String campaignVersion,
+      String macroContentFile,
+      MacroButtonProperties macroButtonProperties)
+      throws IOException {
     if (pakFile.hasFile(macroContentFile)) {
-      String content =
-          pakFile.getContentAsString(campaignVersion, macroContentFile);
+      String content = pakFile.getContentAsString(campaignVersion, macroContentFile);
       macroButtonProperties.setCommand(content);
     } else {
       // just ignore non found file and show message
       macroButtonProperties.setCommand("");
-      MapTool.addLocalMessage(
-          I18N.getText("PersistenceUtil.warn.fileNotFound", macroContentFile));
+      MapTool.addLocalMessage(I18N.getText("PersistenceUtil.warn.fileNotFound", macroContentFile));
     }
   }
 
@@ -947,18 +953,19 @@ public class PersistenceUtil {
     if (id == null) {
       MapTool.addLocalMessage(I18N.getText("PersistenceUtil.warn.noID", fileName, newId));
     } else {
-      MapTool.addLocalMessage(I18N.getText("PersistenceUtil.warn.duplicateID", fileName, id, newId));
+      MapTool.addLocalMessage(
+          I18N.getText("PersistenceUtil.warn.duplicateID", fileName, id, newId));
     }
   }
-  
+
   private static void showIdWarning(String fileName, GUID id, GUID newId) {
-    String idAsString = (id == null)? null : id.toString();
-    String newIdAsString = (newId == null)? null : newId.toString();
+    String idAsString = (id == null) ? null : id.toString();
+    String newIdAsString = (newId == null) ? null : newId.toString();
     showIdWarning(fileName, idAsString, newIdAsString);
   }
 
-  
-  private static void checkIDs(Set<String> ids, MacroButtonProperties macroButtonProperties, String fileName) {
+  private static void checkIDs(
+      Set<String> ids, MacroButtonProperties macroButtonProperties, String fileName) {
     String id = macroButtonProperties.getMacroUUID();
     while (id == null || ids.contains(id)) {
       String newId = macroButtonProperties.resetMacroUUID();
