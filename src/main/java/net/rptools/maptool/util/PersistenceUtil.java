@@ -546,6 +546,7 @@ public class PersistenceUtil {
 
   private static String fixFileName(String fileName) {
     fileName = fileName.replace(":", "_");
+    fileName = fileName.replace(".", "_");
     fileName = fileName.replace("+", "_");
     fileName = fileName.replace("=", "_");
     fileName = fileName.replace("^", "_");
