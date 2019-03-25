@@ -156,7 +156,10 @@ public class DrawablesPanel extends JComponent {
       if (bounds == null) bounds = drawnBounds;
       else bounds.add(drawnBounds);
     }
-    if (bounds != null) return bounds;
+    // Fix for Sentry MAPTOOL-20
+    if (bounds != null && bounds.getWidth() > 0 && bounds.getHeight() > 0) {
+      return bounds;
+    }
     return new Rectangle(0, 0, -1, -1);
   }
 }
