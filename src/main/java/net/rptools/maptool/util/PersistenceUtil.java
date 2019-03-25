@@ -335,7 +335,11 @@ public class PersistenceUtil {
         // specified campaignVersion
         if (campaignVersion != null) {
           pakFile = CampaignExport.stripContent(pakFile, persistedCampaign, campaignVersion);
-        } else {
+        }
+
+        // save in new splitted file format
+        // if not exporting to an old version that used the content.xml file
+        if (campaignVersion == null || !pakFile.hasFile(PackedFile.CONTENT_FILE)) {
           pakFile.putFile("assetMap.xml", persistedCampaign.assetMap);
           pakFile.putFile("currentView.xml", persistedCampaign.currentView);
 
