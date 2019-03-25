@@ -41,6 +41,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -347,10 +348,19 @@ public class PersistenceUtil {
           pakFile.getXStream().omitField(Campaign.class, "zones");
           pakFile.getXStream().omitField(Campaign.class, "macroButtonProperties");
           pakFile.getXStream().omitField(CampaignProperties.class, "characterSheets");
+          pakFile.getXStream().omitField(CampaignProperties.class, "lookupTableMap");
           pakFile.putFile("characterSheets.xml", persistedCampaign.campaign.getCharacterSheets());
           pakFile.putFile(
               "campaignProperties.xml", persistedCampaign.campaign.getCampaignProperties());
 
+          // save tables
+          for (Entry<String, LookupTable> tableEntry :
+              persistedCampaign.campaign.getLookupTableMap().entrySet()) {
+            String tableFile = "/tables/table_" + fixFileName(tableEntry.getKey()) + ".xml";
+            pakFile.putFile(tableFile, tableEntry.getValue());
+          }
+
+          // save campaign macros
           List<MacroFileWrapper> macroFilesWrapper = new LinkedList<MacroFileWrapper>();
           pakFile.getXStream().omitField(MacroButtonProperties.class, "command");
           for (MacroButtonProperties macro :
@@ -383,6 +393,7 @@ public class PersistenceUtil {
           pakFile.getXStream().omitField(Token.class, "macroPropertiesMap");
           pakFile.getXStream().omitField(Token.class, "macroMap");
 
+          // save zone
           for (Zone zone : persistedCampaign.campaign.getZones()) {
             String zonePrefix =
                 "zones/" + fixFileName(zone.getId().toString()) + "_" + fixFileName(zone.getName());
@@ -535,6 +546,7 @@ public class PersistenceUtil {
 
   private static String fixFileName(String fileName) {
     fileName = fileName.replace(":", "_");
+    fileName = fileName.replace(".", "_");
     fileName = fileName.replace("+", "_");
     fileName = fileName.replace("=", "_");
     fileName = fileName.replace("^", "_");
@@ -748,11 +760,27 @@ public class PersistenceUtil {
 
           Set<String> guids = new HashSet<String>();
 
+          if (campaignProperties.getLookupTableMap().isEmpty()) {
+            // load tables if they were not part of the properties file
+            // which they shouldn't be. but could have been while migrating in test phase.
+            Map<String, LookupTable> lookupTableMap = new HashMap<String, LookupTable>();
+            for (String potentialFile : pakFile.getPaths()) {
+              if (potentialFile.startsWith("tables/table_") && potentialFile.endsWith(".xml")) {
+                String tableFile = removeLeadingSlash(potentialFile);
+                // we add it dynamically
+                LookupTable lookupTable =
+                    (LookupTable) pakFile.getContent(campaignVersion, tableFile);
+                lookupTableMap.put(lookupTable.getName(), lookupTable);
+              }
+            }
+            campaignProperties.setLookupTableMap(lookupTableMap);
+          }
+
           // load the campaign macros
           ArrayList<MacroButtonProperties> macroButtonPropertiesList =
               new ArrayList<MacroButtonProperties>();
           List<String> definedMacroFiles = new LinkedList<>();
-          if (campaignWrapper.macroFiles != null)
+          if (campaignWrapper.macroFiles != null) {
             // check for macros that are configured in campaign save file
             for (MacroFileWrapper macroFileWrapper : campaignWrapper.macroFiles) {
               String macroFile = removeLeadingSlash(macroFileWrapper.macroFile);
@@ -774,9 +802,10 @@ public class PersistenceUtil {
                     I18N.getText("PersistenceUtil.warn.fileNotFound", macroFile));
               }
             }
+          }
           // check for macro files that are added to directories but not in campaign file
           for (String potentialFile : pakFile.getPaths()) {
-            if (potentialFile.startsWith("macros/") && potentialFile.endsWith(".xml")) {
+            if (potentialFile.startsWith("macros/macro_") && potentialFile.endsWith(".xml")) {
               String macroFile = removeLeadingSlash(potentialFile);
               String macroContentFile = changeFileEndingTo(macroFile, ".macro");
               if (!definedMacroFiles.contains(macroFile)) {
