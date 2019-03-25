@@ -940,6 +940,11 @@ public class Token extends BaseModel implements Cloneable {
     return id;
   }
 
+  public GUID resetId() {
+    id = new GUID();
+    return id;
+  }
+
   public int getX() {
     return x;
   }

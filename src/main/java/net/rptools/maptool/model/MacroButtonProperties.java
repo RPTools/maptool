@@ -977,6 +977,11 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     return macroUUID;
   }
 
+  public String resetMacroUUID() {
+    macroUUID = UUID.randomUUID().toString();
+    return macroUUID;
+  }
+
   public Object readResolve() {
     if (commonMacro == null) commonMacro = false;
     if (compareGroup == null) compareGroup = true;

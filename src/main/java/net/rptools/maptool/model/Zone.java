@@ -396,6 +396,11 @@ public class Zone extends BaseModel {
     return id;
   }
 
+  public GUID resetId() {
+    id = new GUID();
+    return id;
+  }
+
   /**
    * Should be invoked only when a Zone has been imported from an external source and needs to be
    * cleaned up before being used. Currently this cleanup consists of allocating a new GUID, setting
