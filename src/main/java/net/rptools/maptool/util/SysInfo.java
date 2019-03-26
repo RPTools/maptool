@@ -55,6 +55,7 @@ import net.sbbi.upnp.messages.UPNPResponseException;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Retrieves certain characteristics of the execution environment for the purposes of problem
@@ -128,12 +129,10 @@ public class SysInfo {
     appendInfo("MapTool Home...: " + AppUtil.getAppHome());
     appendInfo(
         "Max mem avail..: "
-            + format.format(Runtime.getRuntime().maxMemory() / (1024 * 1024))
-            + "M");
+            + FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory()));
     appendInfo(
         "Max mem used...: "
-            + format.format(MemoryStatusBar.getInstance().getLargestMemoryUsed())
-            + "M");
+            + FileUtils.byteCountToDisplaySize(MemoryStatusBar.getInstance().getLargestMemoryUsed()));
     for (String prop : p.stringPropertyNames()) {
       if (prop.startsWith("MAPTOOL_")) {
         appendInfo("Custom Property: -D" + prop + "=" + p.getProperty(prop));
