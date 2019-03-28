@@ -220,7 +220,8 @@ public class PersistenceUtil {
       } else {
         // TODO: Not a map but it is something with a property.xml file in it.
         // Should we have a filetype property in there?
-        MapTool.showWarning(I18N.getText("PersistenceUtil.warn.importWrongFileType",o.getClass().getSimpleName()));
+        MapTool.showWarning(
+            I18N.getText("PersistenceUtil.warn.importWrongFileType", o.getClass().getSimpleName()));
       }
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.mapVersion", ce);
