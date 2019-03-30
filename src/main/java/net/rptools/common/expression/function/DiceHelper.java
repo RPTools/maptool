@@ -203,7 +203,9 @@ public class DiceHelper {
     int result = 0;
 
     for (int i = 0; i < times; i++) {
-      result += Math.min(Math.max(rollDice(1, sides) - sub, lower), upper);
+      int roll = Math.min(Math.max(rollDice(1, sides) - sub, lower), upper);
+      result += roll;
+      System.out.println("\t" + roll);
     }
 
     return result;
