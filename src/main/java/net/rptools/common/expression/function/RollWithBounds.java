@@ -65,6 +65,7 @@ public class RollWithBounds extends AbstractNumberFunction {
         lower = ((BigDecimal) parameters.get(3)).intValue();
         break;
     }
+    System.out.println("times = " + times + ", sides = " + sides + ", mod = " + mod + ", lower = " + lower);
     return DiceHelper.rollModWithBounds(times, sides, mod, lower, upper);
   }
 }
