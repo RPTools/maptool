@@ -137,10 +137,10 @@ public class ExpressionParser {
 			new String[] { "\\b[dD](\\d+)[uU](\\d+)\\b", "rollWithUpper(1, $1, $2)" },
 
 			// Dragon Quest
-			new String[] { "\\b(\\d+)[dD](\\d+)q:([+-]?\\d+)\\b", "rollAddWithLower($1, $2, $3, 1)" },
-			new String[] { "\\b[dD](\\d+)q:([+-]?\\d+)\\b", "rollAddWithLower(1, $1, $2, 1)" },
-            new String[] { "\\b(\\d+)[dD](\\d+)q\\b", "rollAddWithLower($1, $2, 0, 1)" },
-            new String[] { "\\b[dD](\\d+)q\\b", "rollAddWithLower(1, $1, 0, 1)" }
+			new String[] { "\\b(\\d+)[dD](\\d+)[qQ]:([+-]?\\d+)\\b", "rollAddWithLower($1, $2, $3, 1)" },
+			new String[] { "\\b[dD](\\d+)[qQ]:([+-]?\\d+)\\b", "rollAddWithLower(1, $1, $2, 1)" },
+            new String[] { "\\b(\\d+)[dD](\\d+)[qQ]\\b", "rollAddWithLower($1, $2, 0, 1)" },
+            new String[] { "\\b[dD](\\d+)[qQ]\\b", "rollAddWithLower(1, $1, 0, 1)" }
 
 	};
 

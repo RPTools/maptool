@@ -15,6 +15,7 @@ package net.rptools.common.expression.function;
 
 import java.util.Arrays;
 
+import java.util.Comparator;
 import net.rptools.common.expression.RunData;
 import net.rptools.parser.function.*;
 
@@ -69,6 +70,10 @@ public class DiceHelper {
 		return dropDice(times, sides, times - keep);
 	}
 
+	public static int keepLowestDice(int times, int sides, int keep) throws EvaluationException {
+		return dropDiceHighest(times, sides, times - keep);
+	}
+
 	public static int dropDice(int times, int sides, int drop) throws EvaluationException {
 		if (times - drop <= 0)
 			throw new EvaluationException("You cannot drop more dice than you roll");
@@ -87,7 +92,7 @@ public class DiceHelper {
 		return result;
 	}
 
-	public static int dropDiceLowest(int times, int sides, int drop) throws EvaluationException {
+	public static int dropDiceHighest(int times, int sides, int drop) throws EvaluationException {
 		if (times - drop <= 0)
 			throw new EvaluationException("You cannot drop more dice than you roll");
 
@@ -95,11 +100,11 @@ public class DiceHelper {
 
 		int[] values = runData.randomInts(times, sides);
 
-		Arrays.sort(values);
+		int[] descValues = Arrays.stream(values).boxed().sorted(Comparator.reverseOrder()).mapToInt(Integer::intValue).toArray();
 
 		int result = 0;
 		for (int i = drop; i < times; i++) {
-			result += values[i];
+			result += descValues[i];
 		}
 
 		return result;
