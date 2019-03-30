@@ -42,8 +42,8 @@ public class ExpressionParser {
         new String[] {"\\b[dD](\\d+)[dD](\\d+)\\b", "drop(1, $1, $2)"},
 
         // drop highest
-        new String[] {"\\b(\\d+)[dD](\\d+)[dD](\\d+)\\b", "dropHighest($1, $2, $3)"},
-        new String[] {"\\b[dD](\\d+)[dD](\\d+)\\b", "dropHighest(1, $1, $2)"},
+        new String[] {"\\b(\\d+)[dD](\\d+)[dD][hH](\\d+)\\b", "dropHighest($1, $2, $3)"},
+        new String[] {"\\b[dD](\\d+)[dD][hH](\\d+)\\b", "dropHighest(1, $1, $2)"},
 
         // keep
         new String[] {"\\b(\\d+)[dD](\\d+)[kK](\\d+)\\b", "keep($1, $2, $3)"},
@@ -149,8 +149,8 @@ public class ExpressionParser {
         new String[] {"\\b[dD](\\d+)[uU](\\d+)\\b", "rollWithUpper(1, $1, $2)"},
 
         // Dragon Quest
-        new String[] {"\\b(\\d+)[dD](\\d+)[qQ]:([+-]?\\d+)\\b", "rollAddWithLower($1, $2, $3, 1)"},
-        new String[] {"\\b[dD](\\d+)[qQ]:([+-]?\\d+)\\b", "rollAddWithLower(1, $1, $2, 1)"},
+        new String[] {"\\b(\\d+)[dD](\\d+)[qQ]#([+-]?\\d+)\\b", "rollAddWithLower($1, $2, $3, 1)"},
+        new String[] {"\\b[dD](\\d+)[qQ]#([+-]?\\d+)\\b", "rollAddWithLower(1, $1, $2, 1)"},
         new String[] {"\\b(\\d+)[dD](\\d+)[qQ]\\b", "rollAddWithLower($1, $2, 0, 1)"},
         new String[] {"\\b[dD](\\d+)[qQ]\\b", "rollAddWithLower(1, $1, 0, 1)"}
       };
