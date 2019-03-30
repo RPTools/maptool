@@ -186,6 +186,10 @@ public class ExpressionParser {
     parser.addFunction(new Roll());
     parser.addFunction(new ExplodingSuccessDice());
     parser.addFunction(new OpenTestDice());
+    parser.addFunction(new RollWithBounds());
+    parser.addFunction(new DropHighestRoll());
+    parser.addFunction(new KeepLowestRoll());
+
 
     parser.addFunction(new If());
 

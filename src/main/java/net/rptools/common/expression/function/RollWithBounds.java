@@ -23,7 +23,7 @@ import net.rptools.parser.function.AbstractNumberFunction;
 public class RollWithBounds extends AbstractNumberFunction {
 
   public RollWithBounds() {
-    super(3, 4, false, "rollSubWithLower", "rollWithLower", "rollAddWithUpper", "rollWithUpper");
+    super(3, 4, false, "rollSubWithLower", "rollWithLower", "rollAddWithUpper", "rollWithUpper", "rollAddWithLower");
   }
 
   @Override
