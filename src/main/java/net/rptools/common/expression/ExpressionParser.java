@@ -34,9 +34,17 @@ public class ExpressionParser {
 			new String[] { "\\b(\\d+)[dD](\\d+)[dD](\\d+)\\b", "drop($1, $2, $3)" },
 			new String[] { "\\b[dD](\\d+)[dD](\\d+)\\b", "drop(1, $1, $2)" },
 
+			// drop highest
+			new String[] { "\\b(\\d+)[dD](\\d+)[dD](\\d+)\\b", "dropHighest($1, $2, $3)" },
+			new String[] { "\\b[dD](\\d+)[dD](\\d+)\\b", "dropHighest(1, $1, $2)" },
+
 			// keep
 			new String[] { "\\b(\\d+)[dD](\\d+)[kK](\\d+)\\b", "keep($1, $2, $3)" },
 			new String[] { "\\b[dD](\\d+)[kK](\\d+)\\b", "keep(1, $1, $2)" },
+
+			// keep lowest
+			new String[] { "\\b(\\d+)[dD](\\d+)[kK][lL](\\d+)\\b", "keepLowest($1, $2, $3)" },
+			new String[] { "\\b[dD](\\d+)[kK][lL](\\d+)\\b", "keepLowest(1, $1, $2)" },
 
 			// re-roll
 			new String[] { "\\b(\\d+)[dD](\\d+)[rR](\\d+)\\b", "reroll($1, $2, $3)" },

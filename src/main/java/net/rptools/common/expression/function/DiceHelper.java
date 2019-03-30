@@ -87,6 +87,24 @@ public class DiceHelper {
 		return result;
 	}
 
+	public static int dropDiceLowest(int times, int sides, int drop) throws EvaluationException {
+		if (times - drop <= 0)
+			throw new EvaluationException("You cannot drop more dice than you roll");
+
+		RunData runData = RunData.getCurrent();
+
+		int[] values = runData.randomInts(times, sides);
+
+		Arrays.sort(values);
+
+		int result = 0;
+		for (int i = drop; i < times; i++) {
+			result += values[i];
+		}
+
+		return result;
+	}
+
 	public static int rerollDice(int times, int sides, int lowerBound) throws EvaluationException {
 		RunData runData = RunData.getCurrent();
 
