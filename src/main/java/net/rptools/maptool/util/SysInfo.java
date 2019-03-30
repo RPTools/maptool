@@ -147,7 +147,6 @@ public class SysInfo {
     appendInfo("Java Vendor.: " + p.getProperty("java.vendor"));
     appendInfo("Java Home...: " + p.getProperty("java.home"));
     appendInfo("Java Version: " + p.getProperty("java.version"));
-    appendInfo(getJavaVersionInfo());
   }
 
   private void getLocaleInfo() {
@@ -245,21 +244,6 @@ public class SysInfo {
     } catch (SocketException se) {
       appendInfo("*** Could net get list of network interfaces ***");
     }
-  }
-
-  private String getJavaVersionInfo() {
-    String info = "Result of executing 'java -version':\n";
-    try {
-      Process result = Runtime.getRuntime().exec("java -version");
-
-      BufferedReader output = new BufferedReader(new InputStreamReader(result.getErrorStream()));
-
-      String line = output.readLine();
-      while ((line = output.readLine()) != null) info = info.concat("............: " + line + "\n");
-    } catch (Exception e) {
-      MapTool.showError("Exception running 'java -version' to get version number information", e);
-    }
-    return info;
   }
 
   private void getDisplayInfo() {
