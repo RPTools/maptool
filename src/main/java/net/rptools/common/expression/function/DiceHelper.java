@@ -15,6 +15,7 @@ package net.rptools.common.expression.function;
 
 import java.util.Arrays;
 
+import java.util.Comparator;
 import net.rptools.common.expression.RunData;
 import net.rptools.parser.function.*;
 
@@ -69,6 +70,10 @@ public class DiceHelper {
 		return dropDice(times, sides, times - keep);
 	}
 
+	public static int keepLowestDice(int times, int sides, int keep) throws EvaluationException {
+		return dropDiceHighest(times, sides, times - keep);
+	}
+
 	public static int dropDice(int times, int sides, int drop) throws EvaluationException {
 		if (times - drop <= 0)
 			throw new EvaluationException("You cannot drop more dice than you roll");
@@ -82,6 +87,24 @@ public class DiceHelper {
 		int result = 0;
 		for (int i = drop; i < times; i++) {
 			result += values[i];
+		}
+
+		return result;
+	}
+
+	public static int dropDiceHighest(int times, int sides, int drop) throws EvaluationException {
+		if (times - drop <= 0)
+			throw new EvaluationException("You cannot drop more dice than you roll");
+
+		RunData runData = RunData.getCurrent();
+
+		int[] values = runData.randomInts(times, sides);
+
+		int[] descValues = Arrays.stream(values).boxed().sorted(Comparator.reverseOrder()).mapToInt(Integer::intValue).toArray();
+
+		int result = 0;
+		for (int i = drop; i < times; i++) {
+			result += descValues[i];
 		}
 
 		return result;
@@ -180,4 +203,15 @@ public class DiceHelper {
 
 		return result;
 	}
+
+	public static int rollModWithBounds(int times, int sides, int sub, int lower, int upper) {
+		int result = 0;
+
+		for (int i = 0; i < times; i++) {
+			result += Math.min(Math.max(rollDice(1, sides) - sub, lower), upper);
+		}
+
+		return result;
+	}
+
 }
