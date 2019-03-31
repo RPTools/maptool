@@ -636,12 +636,12 @@ public class AppPreferences {
     return prefs.getInt(KEY_DEFAULT_GRID_SIZE, DEFAULT_DEFAULT_GRID_SIZE);
   }
 
-  public static void setDefaultUnitsPerCell(int size) {
-    prefs.putInt(KEY_DEFAULT_UNITS_PER_CELL, size);
+  public static void setDefaultUnitsPerCell(double size) {
+    prefs.putDouble(KEY_DEFAULT_UNITS_PER_CELL, size);
   }
 
-  public static int getDefaultUnitsPerCell() {
-    return prefs.getInt(KEY_DEFAULT_UNITS_PER_CELL, DEFAULT_DEFAULT_UNITS_PER_CELL);
+  public static double getDefaultUnitsPerCell() {
+    return prefs.getDouble(KEY_DEFAULT_UNITS_PER_CELL, DEFAULT_DEFAULT_UNITS_PER_CELL);
   }
 
   public static void setDefaultVisionDistance(int dist) {
