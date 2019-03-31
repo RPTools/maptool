@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -575,7 +576,7 @@ public class TokenMoveFunctions extends AbstractFunction {
       }
       c /= zone.getGrid().getSize(); // Number of "cells"
       c *= zone.getUnitsPerCell(); // "actual" distance traveled
-      return String.format("%.1f", c);
+      return NumberFormat.getInstance().format(c);
     }
     return "";
   }
@@ -643,10 +644,13 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   public double calculateGridDistance(
-      List<CellPoint> path, int feetPerCell, WalkerMetric metric, boolean oneTwoOneFractionOnly) {
+      List<CellPoint> path,
+      double unitsPerCell,
+      WalkerMetric metric,
+      boolean oneTwoOneFractionOnly) {
     if (path == null || path.size() == 0) return 0;
 
-    final double feetDistance;
+    final double unitsDistance;
 
     {
       double numDiag = 0;
@@ -693,9 +697,9 @@ public class TokenMoveFunctions extends AbstractFunction {
           break;
       }
 
-      feetDistance = cellDistance * feetPerCell;
+      unitsDistance = cellDistance * unitsPerCell;
     }
 
-    return feetDistance;
+    return unitsDistance;
   }
 }

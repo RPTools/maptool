@@ -23,10 +23,13 @@ import net.rptools.maptool.model.Grid;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
+import net.sf.json.JSONObject;
 
 public class ZoomFunctions extends AbstractFunction {
   /** Singleton for class * */
   private static final ZoomFunctions instance = new ZoomFunctions();
+
+  private static final String EQUALS = "=";
 
   private ZoomFunctions() {
     super(0, 6, "getZoom", "setZoom", "getViewArea", "setViewArea");
@@ -95,17 +98,25 @@ public class ZoomFunctions extends AbstractFunction {
    * Given a grid pixels or cell coordinates of top left (x1, y1) and bottom right (x2, y2) this
    * function returns a json of rectangular coordinates of the current view
    *
-   * @param arg should be boolean pixels|grid
-   * @return JSON of coordinates
+   * @param arg should be optional boolean pixels|grid, optional String delim
+   * @return JSON of coordinates or String props with delim
    * @throws ParserException
    */
-  private String getViewArea(List<Object> args) throws ParserException {
-    if (args.size() > 1) {
+  private Object getViewArea(List<Object> args) throws ParserException {
+    if (args.size() > 2) {
       throw new ParserException(
-          I18N.getText("macro.function.general.wrongNumParam", "getViewArea", 1, args.size()));
+          I18N.getText("macro.function.general.tooManyParam", "getViewArea", 2, args.size()));
     }
 
-    boolean pixels = parseBoolean(args, 0);
+    boolean pixels = true;
+    if (args.size() >= 1) {
+      pixels = parseBoolean(args, 0);
+    }
+
+    String delim = ";";
+    if (args.size() == 2) {
+      delim = args.get(1).toString();
+    }
 
     int offsetX = MapTool.getFrame().getCurrentZoneRenderer().getViewOffsetX() * -1;
     int offsetY = MapTool.getFrame().getCurrentZoneRenderer().getViewOffsetY() * -1;
@@ -113,9 +124,11 @@ public class ZoomFunctions extends AbstractFunction {
     int height = MapTool.getFrame().getCurrentZoneRenderer().getHeight();
 
     if (pixels) {
-      Rectangle bounds = new Rectangle(offsetX, offsetY, width, height);
-
-      return bounds.toString();
+      if ("json".equalsIgnoreCase(delim)) {
+        return createBoundsAsJSON(offsetX, offsetY, width, height);
+      } else {
+        return createBoundsAsStringProps(delim, offsetX, offsetY, width, height);
+      }
     } else {
       Grid mapGrid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
       double cellWidth = mapGrid.getCellWidth();
@@ -128,11 +141,31 @@ public class ZoomFunctions extends AbstractFunction {
       offsetY = (int) (offsetY / cellHeight);
       width = (int) (width / cellWidth);
       height = (int) (height / cellHeight);
-
-      Rectangle bounds = new Rectangle(offsetX, offsetY, width, height);
-
-      return bounds.toString();
+      if ("json".equalsIgnoreCase(delim)) {
+        return createBoundsAsJSON(offsetX, offsetY, width, height);
+      } else {
+        return createBoundsAsStringProps(delim, offsetX, offsetY, width, height);
+      }
     }
+  }
+
+  private Object createBoundsAsStringProps(
+      String delim, int offsetX, int offsetY, int width, int height) {
+    StringBuffer sb = new StringBuffer();
+    sb.append("offsetX").append(EQUALS).append(offsetX).append(delim);
+    sb.append("offsetY").append(EQUALS).append(offsetY).append(delim);
+    sb.append("width").append(EQUALS).append(width).append(delim);
+    sb.append("height").append(EQUALS).append(height);
+    return sb.toString();
+  }
+
+  private JSONObject createBoundsAsJSON(int offsetX, int offsetY, int width, int height) {
+    JSONObject bounds = new JSONObject();
+    bounds.put("offsetX", offsetX);
+    bounds.put("offsetY", offsetY);
+    bounds.put("width", width);
+    bounds.put("height", height);
+    return bounds;
   }
 
   /**

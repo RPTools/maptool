@@ -14,40 +14,42 @@
  */
 package net.rptools.maptool.client.utilities;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.Arrays;
-import junit.framework.TestCase;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
  * JUnit test suite for {@link net.rptools.maptool.client.utilities.RandomSuffixFactory}.
  *
  * @author Alexander "d4rkAlf" Johansson Werne
  */
-public class RandomSuffixFactoryTest extends TestCase {
+class RandomSuffixFactoryTest {
   RandomSuffixFactory rsf;
 
-  @Override
-  @Before
-  public void setUp() throws Exception {
+  @BeforeEach
+  void setUp() throws Exception {
     rsf = new RandomSuffixFactory();
   }
 
-  @Override
-  @After
-  public void tearDown() throws Exception {
+  @AfterEach
+  void tearDown() throws Exception {
     rsf = null;
   }
 
   @Test
-  public void testGetASuffix() {
+  @DisplayName("Test getting a Random Suffix.")
+  void testGetASuffix() {
     int s = rsf.nextSuffixForToken("d4rkAlf");
     assertTrue(1 <= s && s < 257);
   }
 
   @Test
-  public void testGetAllSuffixes() {
+  @DisplayName("Test Getting all Suffixes.")
+  void testGetAllSuffixes() {
     RandomSuffixFactory testRSF = new RandomSuffixFactory();
     boolean[] bytes = new boolean[256];
     Arrays.fill(bytes, false);
@@ -56,12 +58,13 @@ public class RandomSuffixFactoryTest extends TestCase {
       bytes[suffix - 1] = true;
     }
     for (int i = 0; i < 256; i++) {
-      assertTrue("Suffix number " + i + " is missing", bytes[i]);
+      assertTrue(bytes[i], "Suffix number " + i + " is missing");
     }
   }
 
   @Test
-  public void testGetMoreThan256Suffixes() {
+  @DisplayName("Test More then 256 suffixes")
+  void testGetMoreThan256Suffixes() {
     int max = 0;
     for (int i = 0; i < 512; i++) {
       int suffix = rsf.nextSuffixForToken("Too many monsters!");
@@ -72,7 +75,8 @@ public class RandomSuffixFactoryTest extends TestCase {
   }
 
   @Test
-  public void testThatSuffixesAreUnique() {
+  @DisplayName("Test that the suffixes are unique")
+  void testThatSuffixesAreUnique() {
     boolean[] uniqueSuffixes = new boolean[10_000_000];
     for (int i = 1; i < uniqueSuffixes.length + 1; i++) {
       int suffix = rsf.nextSuffixForToken("Special Snowflake");

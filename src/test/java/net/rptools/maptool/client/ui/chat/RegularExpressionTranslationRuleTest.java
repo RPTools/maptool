@@ -14,11 +14,16 @@
  */
 package net.rptools.maptool.client.ui.chat;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class RegularExpressionTranslationRuleTest extends TestCase {
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-  public void testIt() throws Exception {
+class RegularExpressionTranslationRuleTest {
+
+  @Test
+  @DisplayName("Test Chat Regular Expression Translation Rule.")
+  void testIt() throws Exception {
 
     ChatTranslationRule rule = new RegularExpressionTranslationRule("one", "two");
     assertEquals("two two three", rule.translate("one two three"));

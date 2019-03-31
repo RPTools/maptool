@@ -14,13 +14,19 @@
  */
 package net.rptools.maptool.model;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
+
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-public class TestScreenPoint extends TestCase {
-  public void testConversion() throws Exception {
+class TestScreenPoint {
+
+  @Test
+  @DisplayName("Test Conversion of Screen Points")
+  void testConversion() throws Exception {
     ZoneRenderer renderer = ZoneRendererFactory.newRenderer(new Zone());
     renderer.moveViewBy(-100, -100);
 

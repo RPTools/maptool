@@ -14,15 +14,20 @@
  */
 package net.rptools.maptool.transfer;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-public class AssetTransferManagerTest extends TestCase {
+class AssetTransferManagerTest {
 
-  public void testBasicTransfer() throws Exception {
+  @Test
+  @DisplayName("Basic Transfer Test")
+  void testBasicTransfer() throws Exception {
 
     byte[] data = new byte[1024];
     for (int i = 0; i < 1024; i++) {
@@ -71,7 +76,9 @@ public class AssetTransferManagerTest extends TestCase {
     consumer.getFilename().delete();
   }
 
-  private File createTempFile(byte[] data) throws IOException {
+  @Test
+  @DisplayName("Test Create Temporary File.")
+  File createTempFile(byte[] data) throws IOException {
 
     File file = new File("tmp.dat");
     FileOutputStream out = new FileOutputStream(file);
