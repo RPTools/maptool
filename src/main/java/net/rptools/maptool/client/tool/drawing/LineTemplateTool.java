@@ -120,7 +120,9 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
     if (painting && renderer != null) {
       Pen pen = getPenForOverlay();
       AffineTransform old = g.getTransform();
-      g.setTransform(getPaintTransform(renderer));
+      AffineTransform newTransform = g.getTransform();
+      newTransform.concatenate(getPaintTransform(renderer));
+      g.setTransform(newTransform);
       ZonePoint vertex = template.getVertex();
       ZonePoint pathVertex = ((LineTemplate) template).getPathVertex();
       template.draw(g, pen);
@@ -189,6 +191,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
     LineTemplate lt = (LineTemplate) template;
     ZonePoint pathVertex = lt.getPathVertex();
     ZonePoint vertex = lt.getVertex();
+    
     if (!anchorSet) {
       setCellAtMouse(e, vertex);
       controlOffset = null;

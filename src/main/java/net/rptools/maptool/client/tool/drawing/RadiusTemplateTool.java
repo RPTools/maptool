@@ -328,7 +328,9 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
     if (painting && renderer != null) {
       Pen pen = getPenForOverlay();
       AffineTransform old = g.getTransform();
-      g.setTransform(getPaintTransform(renderer));
+      AffineTransform newTransform = g.getTransform();
+      newTransform.concatenate(getPaintTransform(renderer));
+      g.setTransform(newTransform);
       template.draw(g, pen);
       Paint paint = pen.getPaint() != null ? pen.getPaint().getPaint() : null;
       paintCursor(g, paint, pen.getThickness(), template.getVertex());
