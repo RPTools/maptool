@@ -1,3 +1,19 @@
+Maptool 1.5.2
+=====
+
+___
+
+Bug Fixes
+-----
+* [#398][i398] - Fixed insertion of newline being only at the end of the command pane
+
+Enhancements
+-----
+
+
+
+[i398]: https://github.com/RPTools/maptool/issues/398
+
 MapTool 1.5.1
 =====
 A minor update to 1.5.0 consisting of bug fixes and small enhancements.
@@ -11,6 +27,7 @@ Bug Fixes
 * [#278][i278] - Fix existing unit tests and enable unit tests in build
 * [#326][i326] - defineFunction causes error with macro edit window open
 * [#324][i324] - fix output of setViewArea. This might break existing macro using workaround to interpret the broken result before the fix.
+* [#392][i392] - support decimal unitPerCell in preferences
 
 Enhancements
 -----
@@ -97,6 +114,9 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * [#237][i237] - Added support to use shift-enter to insert newlines into the command entry box (also known as the chat entry box)
 * [#239][i239] - MapToolScriptTokenMaker now handles function names with . notation and dynamically pulls in all functions names. TokenMakerMaker no longer needs to be ran upon changes to MTScript.
 * [#240][i240] - Macro Editor now has Auto-Completion for macro functions! A brief description and summary can be displayed (these will be added as time permits)
+* [#332][i332] - Allow to set color for personal lights in campaign Sight types
+* [#324][i324] - fix output of getViewArea. This might break existing macro using workaround to interpret the broken result before the fix.
+* [#326][i326] - defineFunction with open edit window
 
 
 [i210]: https://github.com/RPTools/maptool/issues/210
@@ -144,3 +164,4 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 [i239]: https://github.com/RPTools/maptool/issues/239
 [i240]: https://github.com/RPTools/maptool/issues/240
 [i232]: https://github.com/RPTools/maptool/issues/232
+[i392]: https://github.com/RPTools/maptool/issues/392
