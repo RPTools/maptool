@@ -191,7 +191,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
     LineTemplate lt = (LineTemplate) template;
     ZonePoint pathVertex = lt.getPathVertex();
     ZonePoint vertex = lt.getVertex();
-    
+
     if (!anchorSet) {
       setCellAtMouse(e, vertex);
       controlOffset = null;

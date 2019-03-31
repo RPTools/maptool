@@ -22,7 +22,6 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
-import net.rptools.maptool.model.drawing.AbstractTemplate.Direction;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
 
 /**
@@ -33,7 +32,7 @@ import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
  *     azhrei_fje $
  */
 public class RadiusCellTemplate extends AbstractTemplate {
-  
+
   /** Renderer for the blast. The {@link Shape} is just a rectangle. */
   private final ShapeDrawable renderer = new ShapeDrawable(new Rectangle());
 
@@ -58,13 +57,13 @@ public class RadiusCellTemplate extends AbstractTemplate {
   protected void paintBorderAtRadius(
       Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance, int radius) {
     // At the border?
-      // Paint lines between vertical boundaries if needed
-      
+    // Paint lines between vertical boundaries if needed
+
     if (getDistance(x, y + 1) == radius && getDistance(x + 1, y + 1) > radius) {
       paintFarVerticalBorder(g, xOff, yOff, gridSize, Quadrant.NORTH_EAST);
     }
     if (distance == radius && getDistance(x + 1, y) > radius) {
-        paintFarVerticalBorder(g, xOff, yOff, gridSize, Quadrant.SOUTH_EAST);
+      paintFarVerticalBorder(g, xOff, yOff, gridSize, Quadrant.SOUTH_EAST);
     }
     if (getDistance(x + 1, y + 1) == radius && getDistance(x + 2, y + 1) > radius) {
       paintFarVerticalBorder(g, xOff, yOff, gridSize, Quadrant.NORTH_WEST);
@@ -72,15 +71,15 @@ public class RadiusCellTemplate extends AbstractTemplate {
     if (getDistance(x + 1, y) == radius && getDistance(x + 2, y) > radius) {
       paintFarVerticalBorder(g, xOff, yOff, gridSize, Quadrant.SOUTH_WEST);
     } // endif
-    if (x==0 && y+1 == radius) {
-      paintFarVerticalBorder(g, xOff-gridSize, yOff, gridSize, Quadrant.SOUTH_EAST);
+    if (x == 0 && y + 1 == radius) {
+      paintFarVerticalBorder(g, xOff - gridSize, yOff, gridSize, Quadrant.SOUTH_EAST);
     }
-    if (x==0 && y+2 == radius) {
-      paintFarVerticalBorder(g, xOff-gridSize, yOff, gridSize, Quadrant.NORTH_WEST);
+    if (x == 0 && y + 2 == radius) {
+      paintFarVerticalBorder(g, xOff - gridSize, yOff, gridSize, Quadrant.NORTH_WEST);
     }
 
     // Paint lines between horizontal boundaries if needed
-    if (getDistance(x, y +1) == radius && getDistance(x, y + 2) > radius) {
+    if (getDistance(x, y + 1) == radius && getDistance(x, y + 2) > radius) {
       paintFarHorizontalBorder(g, xOff, yOff, gridSize, Quadrant.NORTH_EAST);
     }
     if (getDistance(x, y) == radius && getDistance(x, y + 1) > radius) {
@@ -120,7 +119,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
     // if (x == 0 && y == 0)
     // g.fillRect(getVertex().x + xOff - 4, getVertex().y + yOff - 4, 7, 7);
   }
-  
+
   @Override
   protected void paintArea(
       Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance) {
@@ -130,21 +129,20 @@ public class RadiusCellTemplate extends AbstractTemplate {
     if (distance <= radius) {
       paintArea(g, xOff, yOff, gridSize, Quadrant.SOUTH_EAST);
     }
-    
-    if (getDistance(x, y+1) <= radius) {
+
+    if (getDistance(x, y + 1) <= radius) {
       paintArea(g, xOff, yOff, gridSize, Quadrant.NORTH_EAST);
     }
-    
-    if (getDistance(x+1, y) <= radius) {
+
+    if (getDistance(x + 1, y) <= radius) {
       paintArea(g, xOff, yOff, gridSize, Quadrant.SOUTH_WEST);
     }
-    
-    if (getDistance(x+1, y+1) <= radius) {
+
+    if (getDistance(x + 1, y + 1) <= radius) {
       paintArea(g, xOff, yOff, gridSize, Quadrant.NORTH_WEST);
     } // endif
-    
   }
-  
+
   /**
    * Paint the border or area of the template
    *
@@ -155,7 +153,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
   protected void paint(Graphics2D g, boolean border, boolean area) {
     int radius = getRadius();
     GUID zoneId = getZoneId();
-    
+
     if (radius == 0) return;
     Zone zone = MapTool.getCampaign().getZone(zoneId);
     if (zone == null) return;
@@ -175,7 +173,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
       } // endfor
     } // endfor
   }
-  
+
   /**
    * Fill the area of a cell.
    *
@@ -211,7 +209,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
   protected int getYMult(Quadrant q) {
     return ((q == Quadrant.NORTH_WEST || q == Quadrant.NORTH_EAST) ? -1 : +1);
   }
-  
+
   /*---------------------------------------------------------------------------------------------
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
@@ -249,14 +247,14 @@ public class RadiusCellTemplate extends AbstractTemplate {
     r.y -= getRadius() * gridSize;
     r.width = r.height = (getRadius() * 2 + 1) * gridSize;
   }
-  
+
   /** @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int) */
   @Override
   public void setRadius(int squares) {
     super.setRadius(squares);
     adjustShape();
   }
-  
+
   /**
    * Get the distance to a specific coordinate.
    *
@@ -271,7 +269,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
     else distance = y + (x / 2) + 1 + (x & 1);
     return distance;
   }
-  
+
   /**
    * @see
    *     net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(net.rptools.maptool.model.ZonePoint)
@@ -281,7 +279,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
     super.setVertex(vertex);
     adjustShape();
   }
-  
+
   public Area getArea() {
     // I don't feel like figuring out the exact shape of this right now
     return null;

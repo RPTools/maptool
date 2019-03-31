@@ -36,7 +36,6 @@ import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.RadiusCellTemplate;
-import net.rptools.maptool.model.drawing.RadiusTemplate;
 
 /**
  * Draw a template for an effect with a radius. Make the template show the squares that are
@@ -177,8 +176,8 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
     g.setStroke(new BasicStroke(thickness));
     int grid = renderer.getZone().getGrid().getSize();
     g.drawRect(vertex.x, vertex.y, grid, grid);
-    
-    if (1==1) return;
+
+    if (1 == 1) return;
     int halfCursor = CURSOR_WIDTH / 2;
     g.setPaint(paint);
     g.setStroke(new BasicStroke(thickness));
