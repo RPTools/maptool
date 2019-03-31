@@ -878,7 +878,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         }
         startTokenDrag(tokenUnderMouse);
         isDraggingToken = true;
-        SwingUtil.hidePointer(renderer);
       }
       return;
     }
@@ -899,16 +898,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
    */
   public boolean handleDragToken(ZonePoint zonePoint, int dx, int dy) {
     Grid grid = renderer.getZone().getGrid();
-    if (tokenBeingDragged.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-      // cellUnderMouse is actually token position if the token is being dragged with keys.
-      CellPoint cellUnderMouse = grid.convert(zonePoint);
-      zonePoint.translate(grid.getCellOffset().width / 2, grid.getCellOffset().height / 2);
-      // Convert the zone point to a cell point and back to force the snap to grid on drag
-      zonePoint = grid.convert(grid.convert(zonePoint));
-      MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
-    } else {
-      // Nothing
-    }
     // Don't bother if there isn't any movement
     if (!renderer.hasMoveSelectionSetMoved(tokenBeingDragged.getId(), zonePoint)) {
       return false;

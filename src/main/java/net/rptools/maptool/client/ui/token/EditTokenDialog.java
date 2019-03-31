@@ -18,6 +18,8 @@ import com.jeta.forms.gui.form.GridView;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
+import com.jidesoft.combobox.MultilineStringExComboBox;
+import com.jidesoft.combobox.PopupPanel;
 import com.jidesoft.grid.AbstractPropertyTableModel;
 import com.jidesoft.grid.MultilineStringCellEditor;
 import com.jidesoft.grid.Property;
@@ -26,6 +28,7 @@ import com.jidesoft.grid.PropertyTable;
 import com.jidesoft.swing.CheckBoxListWithSelectable;
 import com.jidesoft.swing.DefaultSelectable;
 import com.jidesoft.swing.Selectable;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -50,7 +53,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.swing.AbstractButton;
@@ -82,6 +87,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -125,6 +131,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private final RSyntaxTextArea xmlStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private final RSyntaxTextArea textStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private HeroLabData heroLabData;
+  private final WordWrapCellRenderer propertyCellRenderer = new WordWrapCellRenderer();
 
   private static final ImageIcon REFRESH_ICON_ON =
       new ImageIcon(
@@ -962,10 +969,24 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     propertyTable.setFillsViewportHeight(true); // XXX This is Java6-only -- need Java5 solution
     propertyTable.setName("propertiesTable");
 
+    // wrap button and functionality
+    JPanel buttonsAndPropertyTable = new JPanel();
+    buttonsAndPropertyTable.setLayout(new BorderLayout());
+    JCheckBox wrapToggle = new JCheckBox(I18N.getString("EditTokenDialog.msg.wrap"));
+    wrapToggle.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            propertyCellRenderer.setLineWrap(wrapToggle.isSelected());
+            propertyTable.repaint();
+          }
+        });
+    buttonsAndPropertyTable.add(wrapToggle, BorderLayout.PAGE_END);
+
     PropertyPane pane = new PropertyPane(propertyTable);
     // pane.setPreferredSize(new Dimension(100, 300));
-
-    replaceComponent("propertiesPanel", "propertiesTable", pane);
+    buttonsAndPropertyTable.add(pane, BorderLayout.CENTER);
+    replaceComponent("propertiesPanel", "propertiesTable", buttonsAndPropertyTable);
   }
 
   public void initTokenDetails() {
@@ -1521,14 +1542,15 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
 
     class EditTokenProperty extends Property {
-      private static final long serialVersionUID = 4129033551005743554L;
 
+      private static final long serialVersionUID = 4129033551005743554L;
       private final String key;
 
       public EditTokenProperty(String key) {
         super(key, key, String.class, (String) getPropertyTypeCombo().getSelectedItem());
+        this.setTableCellRenderer(propertyCellRenderer);
         this.key = key;
-        setCellEditor(new MultilineStringCellEditor());
+        setCellEditor(new MTMultilineStringCellEditor());
       }
 
       @Override
@@ -1706,6 +1728,125 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         map.put(row.getLeft(), row.getRight());
       }
       return map;
+    }
+  }
+
+  // needed to change the popup for properties
+  private static class MTMultilineStringExComboBox extends MultilineStringExComboBox {
+    final ResourceBundle a = ResourceBundle.getBundle("com.jidesoft.combobox.combobox");
+
+    public ResourceBundle getResourceBundle(Locale paramLocale) {
+      return ResourceBundle.getBundle("com.jidesoft.combobox.combobox", paramLocale);
+    }
+
+    public PopupPanel createPopupComponent() {
+      MTMultilineStringPopupPanel pp =
+          new MTMultilineStringPopupPanel(
+              getResourceBundle(Locale.getDefault()).getString("ComboBox.multilineStringTitle"));
+      return pp;
+    }
+  }
+
+  // the cell editor for property popups
+  private static class MTMultilineStringCellEditor extends MultilineStringCellEditor {
+    protected MTMultilineStringExComboBox createMultilineStringComboBox() {
+      MTMultilineStringExComboBox localMultilineStringExComboBox =
+          new MTMultilineStringExComboBox();
+      localMultilineStringExComboBox.setEditable(true);
+      return localMultilineStringExComboBox;
+    }
+  }
+
+  // the property popup table
+  private static class MTMultilineStringPopupPanel extends PopupPanel {
+    private RSyntaxTextArea j = createTextArea();
+
+    public MTMultilineStringPopupPanel() {
+      this("");
+    }
+
+    public MTMultilineStringPopupPanel(String paramString) {
+      this.setResizable(true);
+      JScrollPane localJScrollPane = new RTextScrollPane(j);
+      localJScrollPane.setVerticalScrollBarPolicy(22);
+      localJScrollPane.setAutoscrolls(true);
+      localJScrollPane.setPreferredSize(new Dimension(300, 200));
+      setBorder(BorderFactory.createEmptyBorder(10, 5, 5, 5));
+      setLayout(new BorderLayout());
+      setTitle(paramString);
+      add(localJScrollPane, "Center");
+      setDefaultFocusComponent(j);
+      j.setLineWrap(false);
+      JCheckBox wrapToggle = new JCheckBox(I18N.getString("EditTokenDialog.msg.wrap"));
+      wrapToggle.addActionListener(
+          new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              j.setLineWrap(!j.getLineWrap());
+            }
+          });
+
+      DefaultComboBoxModel syntaxListModel = new DefaultComboBoxModel();
+      syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_NONE);
+      syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_JSON);
+      syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_PROPERTIES_FILE);
+      syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_HTML);
+      syntaxListModel.addElement(SyntaxConstants.SYNTAX_STYLE_XML);
+      JComboBox syntaxComboBox = new JComboBox(syntaxListModel);
+      syntaxComboBox.addActionListener(
+          new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              j.setSyntaxEditingStyle(syntaxComboBox.getSelectedItem().toString());
+            }
+          });
+
+      // content.add(wrapToggle);
+      add(syntaxComboBox, BorderLayout.BEFORE_FIRST_LINE);
+      add(wrapToggle, BorderLayout.AFTER_LAST_LINE);
+    }
+
+    public Object getSelectedObject() {
+      return j.getText();
+    }
+
+    public void setSelectedObject(Object paramObject) {
+      if (paramObject != null) {
+        j.setText(paramObject.toString());
+        if (PopupPanel.i == 0) {}
+      } else {
+        j.setText("");
+      }
+    }
+
+    protected RSyntaxTextArea createTextArea() {
+      RSyntaxTextArea textArea = new RSyntaxTextArea();
+      textArea.setAnimateBracketMatching(true);
+      textArea.setBracketMatchingEnabled(true);
+      textArea.setLineWrap(false);
+      textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
+      return textArea;
+    }
+  }
+
+  // cell renderer for properties table
+  private static class WordWrapCellRenderer extends RSyntaxTextArea implements TableCellRenderer {
+    WordWrapCellRenderer() {
+      setLineWrap(false);
+      setWrapStyleWord(true);
+    }
+
+    public Component getTableCellRendererComponent(
+        JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+      if (value == null) {
+        value = "";
+      }
+      setText(value.toString());
+      setSize(table.getColumnModel().getColumn(column).getWidth(), getPreferredSize().height);
+      if (table.getRowHeight(row) != getPreferredSize().height) {
+        table.setRowHeight(row, getPreferredSize().height);
+      }
+      return this;
     }
   }
 }
