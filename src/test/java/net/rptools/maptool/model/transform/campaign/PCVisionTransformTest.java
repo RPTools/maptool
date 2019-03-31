@@ -14,11 +14,11 @@
  */
 package net.rptools.maptool.model.transform.campaign;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class PCVisionTransformTest extends TestCase {
+class PCVisionTransformTest {
 
-  public void testIt() throws Exception {
+  void testIt() {
 
     String str =
         "one two three <tokenType>PC</tokenType>blah blah blah<hasSight>false</hasSight>something something";

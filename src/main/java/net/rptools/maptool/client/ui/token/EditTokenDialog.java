@@ -515,8 +515,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     public void stateChanged(ChangeEvent e) {
       JSlider source = (JSlider) e.getSource();
       if (!source.getValueIsAdjusting()) {
-        int value = source.getValue();
-        getTokenOpacityValueLabel().setText(new BigDecimal(value).toString() + "%");
+        BigDecimal value = new BigDecimal(source.getValue());
+        getTokenOpacityValueLabel().setText(value.toString() + "%");
+        float opacity = value.divide(new BigDecimal(100)).floatValue();
+        getTokenIconPanel().setOpacity(opacity);
+        getTokenIconPanel().repaint();
       }
     }
   }

@@ -217,7 +217,7 @@ public class MapPropertiesDialog extends JDialog {
 
   private void copyZoneToUI() {
     getNameTextField().setText(zone.getName());
-    getDistanceTextField().setText(Integer.toString(zone.getUnitsPerCell()));
+    getDistanceTextField().setText(Double.toString(zone.getUnitsPerCell()));
     getPixelsPerCellTextField().setText(Integer.toString(zone.getGrid().getSize()));
     getDefaultVisionTextField().setText(Integer.toString(zone.getTokenVisionDistance()));
     getHexVerticalRadio().setSelected(zone.getGrid() instanceof HexGridVertical);
@@ -234,7 +234,7 @@ public class MapPropertiesDialog extends JDialog {
   private void copyUIToZone() {
     zone.setName(getNameTextField().getText().trim());
     zone.setUnitsPerCell(
-        StringUtil.parseInteger(getDistanceTextField().getText(), zone.getUnitsPerCell()));
+        StringUtil.parseDecimal(getDistanceTextField().getText(), zone.getUnitsPerCell()));
     zone.setGrid(createZoneGrid());
     zone.setTokenVisionDistance(
         StringUtil.parseInteger(

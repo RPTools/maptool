@@ -17,16 +17,21 @@ package net.rptools.maptool.client.functions;
 import java.awt.Rectangle;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Grid;
+import net.rptools.maptool.model.ZonePoint;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
+import net.sf.json.JSONObject;
 
 public class ZoomFunctions extends AbstractFunction {
   /** Singleton for class * */
   private static final ZoomFunctions instance = new ZoomFunctions();
+
+  private static final String EQUALS = "=";
 
   private ZoomFunctions() {
     super(0, 6, "getZoom", "setZoom", "getViewArea", "setViewArea");
@@ -95,17 +100,25 @@ public class ZoomFunctions extends AbstractFunction {
    * Given a grid pixels or cell coordinates of top left (x1, y1) and bottom right (x2, y2) this
    * function returns a json of rectangular coordinates of the current view
    *
-   * @param arg should be boolean pixels|grid
-   * @return JSON of coordinates
+   * @param arg should be optional boolean pixels|grid, optional String delim
+   * @return JSON of coordinates or String props with delim
    * @throws ParserException
    */
-  private String getViewArea(List<Object> args) throws ParserException {
-    if (args.size() > 1) {
+  private Object getViewArea(List<Object> args) throws ParserException {
+    if (args.size() > 2) {
       throw new ParserException(
-          I18N.getText("macro.function.general.wrongNumParam", "getViewArea", 1, args.size()));
+          I18N.getText("macro.function.general.tooManyParam", "getViewArea", 2, args.size()));
     }
 
-    boolean pixels = parseBoolean(args, 0);
+    boolean pixels = true;
+    if (args.size() >= 1) {
+      pixels = parseBoolean(args, 0);
+    }
+
+    String delim = ";";
+    if (args.size() == 2) {
+      delim = args.get(1).toString();
+    }
 
     int offsetX = MapTool.getFrame().getCurrentZoneRenderer().getViewOffsetX() * -1;
     int offsetY = MapTool.getFrame().getCurrentZoneRenderer().getViewOffsetY() * -1;
@@ -113,26 +126,54 @@ public class ZoomFunctions extends AbstractFunction {
     int height = MapTool.getFrame().getCurrentZoneRenderer().getHeight();
 
     if (pixels) {
-      Rectangle bounds = new Rectangle(offsetX, offsetY, width, height);
-
-      return bounds.toString();
+      if ("json".equalsIgnoreCase(delim)) {
+        return createBoundsAsJSON(offsetX, offsetY, offsetX + width, offsetY + height);
+      } else {
+        return createBoundsAsStringProps(
+            delim, offsetX, offsetY, offsetX + width, offsetY + height);
+      }
     } else {
-      Grid mapGrid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-      double cellWidth = mapGrid.getCellWidth();
-      double cellHeight = mapGrid.getCellHeight();
+      ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+      CellPoint z1 =
+          zoneRenderer.getZone().getGrid().convert(convertToZone(zoneRenderer, offsetX, offsetY));
+      CellPoint z2 =
+          zoneRenderer
+              .getZone()
+              .getGrid()
+              .convert(convertToZone(zoneRenderer, offsetX + width, offsetY + height));
 
-      System.out.println("mapgrid w: " + mapGrid.getCellWidth());
-      System.out.println("mapgrid h: " + mapGrid.getCellHeight());
-
-      offsetX = (int) (offsetX / cellWidth);
-      offsetY = (int) (offsetY / cellHeight);
-      width = (int) (width / cellWidth);
-      height = (int) (height / cellHeight);
-
-      Rectangle bounds = new Rectangle(offsetX, offsetY, width, height);
-
-      return bounds.toString();
+      if ("json".equalsIgnoreCase(delim)) {
+        return createBoundsAsJSON(z1.x, z1.y, z2.x, z2.y);
+      } else {
+        return createBoundsAsStringProps(delim, z1.x, z1.y, z2.x, z2.y);
+      }
     }
+  }
+
+  public static ZonePoint convertToZone(ZoneRenderer renderer, double x, double y) {
+    double scale = renderer.getScale();
+    double zX = (int) Math.floor(x / scale);
+    double zY = (int) Math.floor(y / scale);
+    return new ZonePoint((int) zX, (int) zY);
+  }
+
+  private Object createBoundsAsStringProps(
+      String delim, int offsetX, int offsetY, int width, int height) {
+    StringBuffer sb = new StringBuffer();
+    sb.append("startX").append(EQUALS).append(offsetX).append(delim);
+    sb.append("startY").append(EQUALS).append(offsetY).append(delim);
+    sb.append("endX").append(EQUALS).append(width).append(delim);
+    sb.append("endY").append(EQUALS).append(height);
+    return sb.toString();
+  }
+
+  private JSONObject createBoundsAsJSON(int offsetX, int offsetY, int width, int height) {
+    JSONObject bounds = new JSONObject();
+    bounds.put("startX", offsetX);
+    bounds.put("startY", offsetY);
+    bounds.put("endX", width);
+    bounds.put("endY", height);
+    return bounds;
   }
 
   /**

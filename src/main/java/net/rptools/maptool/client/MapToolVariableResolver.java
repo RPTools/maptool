@@ -93,6 +93,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
     try {
       this.setVariable("macro.args", "");
       this.setVariable("macro.catchAbort", BigDecimal.ZERO);
+      this.setVariable("macro.catchAssert", BigDecimal.ZERO);
       this.setVariable("macro.args.num", BigDecimal.ZERO);
       this.setVariable("tokens.denyMove", 0);
       this.setVariable("tokens.moveCount", 1);
