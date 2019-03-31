@@ -527,7 +527,7 @@ public class CommandPanel extends JPanel implements Observer {
   /** Inserts a newline into the chat input box. */
   public void insertNewline() {
     String text = commandTextArea.getText();
-    commandTextArea.replaceSelection("\n");
+    commandTextArea.setText(text + "\n");
   }
 
   public void startMacro() {
