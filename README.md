@@ -1,4 +1,9 @@
-[![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=merge-from-nerps)](https://travis-ci.org/RPTools/maptool)
+| Branch  | Travis | AppVeyor |
+| :---    |  :--:  |  :--:    |
+| master  | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=master)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/master?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/master)
+| develop | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=develop)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/develop?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/develop)
+
+
 
 MapTool
 =======

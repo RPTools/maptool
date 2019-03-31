@@ -53,6 +53,7 @@ import net.sbbi.upnp.devices.UPNPRootDevice;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.UPNPResponseException;
 import net.sf.json.JSONObject;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -127,13 +128,11 @@ public class SysInfo {
     appendInfo("MapTool Version: " + MapTool.getVersion());
     appendInfo("MapTool Home...: " + AppUtil.getAppHome());
     appendInfo(
-        "Max mem avail..: "
-            + format.format(Runtime.getRuntime().maxMemory() / (1024 * 1024))
-            + "M");
+        "Max mem avail..: " + FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory()));
     appendInfo(
         "Max mem used...: "
-            + format.format(MemoryStatusBar.getInstance().getLargestMemoryUsed())
-            + "M");
+            + FileUtils.byteCountToDisplaySize(
+                MemoryStatusBar.getInstance().getLargestMemoryUsed()));
     for (String prop : p.stringPropertyNames()) {
       if (prop.startsWith("MAPTOOL_")) {
         appendInfo("Custom Property: -D" + prop + "=" + p.getProperty(prop));
@@ -147,7 +146,6 @@ public class SysInfo {
     appendInfo("Java Vendor.: " + p.getProperty("java.vendor"));
     appendInfo("Java Home...: " + p.getProperty("java.home"));
     appendInfo("Java Version: " + p.getProperty("java.version"));
-    appendInfo(getJavaVersionInfo());
   }
 
   private void getLocaleInfo() {
@@ -245,21 +243,6 @@ public class SysInfo {
     } catch (SocketException se) {
       appendInfo("*** Could net get list of network interfaces ***");
     }
-  }
-
-  private String getJavaVersionInfo() {
-    String info = "Result of executing 'java -version':\n";
-    try {
-      Process result = Runtime.getRuntime().exec("java -version");
-
-      BufferedReader output = new BufferedReader(new InputStreamReader(result.getErrorStream()));
-
-      String line = output.readLine();
-      while ((line = output.readLine()) != null) info = info.concat("............: " + line + "\n");
-    } catch (Exception e) {
-      MapTool.showError("Exception running 'java -version' to get version number information", e);
-    }
-    return info;
   }
 
   private void getDisplayInfo() {

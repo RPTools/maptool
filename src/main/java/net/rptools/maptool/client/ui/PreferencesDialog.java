@@ -61,7 +61,7 @@ public class PreferencesDialog extends JDialog {
   private static final Logger log = LogManager.getLogger(PreferencesDialog.class);
 
   /** @author frank */
-  private abstract class DocumentListenerProxy implements DocumentListener {
+  private abstract class DocumentListenerProxy<T> implements DocumentListener {
     JTextField comp;
 
     public DocumentListenerProxy(JTextField tf) {
@@ -82,14 +82,15 @@ public class PreferencesDialog extends JDialog {
 
     protected void updateValue() {
       try {
-        int value = StringUtil.parseInteger(comp.getText()); // Localized
-        storeNumericValue(value);
+        storeNumericValue(convertString(comp.getText())); // Localized
       } catch (ParseException nfe) {
         // Ignore it
       }
     }
 
-    protected abstract void storeNumericValue(int value);
+    protected abstract T convertString(String value) throws ParseException;
+
+    protected abstract void storeNumericValue(T value);
   }
 
   /** @author frank */
@@ -353,21 +354,31 @@ public class PreferencesDialog extends JDialog {
     toolTipInitialDelay
         .getDocument()
         .addDocumentListener(
-            new DocumentListenerProxy(toolTipInitialDelay) {
+            new DocumentListenerProxy<Integer>(toolTipInitialDelay) {
               @Override
-              protected void storeNumericValue(int value) {
+              protected void storeNumericValue(Integer value) {
                 AppPreferences.setToolTipInitialDelay(value);
                 ToolTipManager.sharedInstance().setInitialDelay(value);
+              }
+
+              @Override
+              protected Integer convertString(String value) throws ParseException {
+                return StringUtil.parseInteger(value);
               }
             });
     toolTipDismissDelay
         .getDocument()
         .addDocumentListener(
-            new DocumentListenerProxy(toolTipDismissDelay) {
+            new DocumentListenerProxy<Integer>(toolTipDismissDelay) {
               @Override
-              protected void storeNumericValue(int value) {
+              protected void storeNumericValue(Integer value) {
                 AppPreferences.setToolTipDismissDelay(value);
                 ToolTipManager.sharedInstance().setDismissDelay(value);
+              }
+
+              @Override
+              protected Integer convertString(String value) throws ParseException {
+                return StringUtil.parseInteger(value);
               }
             });
 
@@ -571,38 +582,58 @@ public class PreferencesDialog extends JDialog {
     defaultGridSizeTextField
         .getDocument()
         .addDocumentListener(
-            new DocumentListenerProxy(defaultGridSizeTextField) {
+            new DocumentListenerProxy<Integer>(defaultGridSizeTextField) {
               @Override
-              protected void storeNumericValue(int value) {
+              protected void storeNumericValue(Integer value) {
                 AppPreferences.setDefaultGridSize(value);
+              }
+
+              @Override
+              protected Integer convertString(String value) throws ParseException {
+                return StringUtil.parseInteger(value);
               }
             });
 
     defaultUnitsPerCellTextField
         .getDocument()
         .addDocumentListener(
-            new DocumentListenerProxy(defaultUnitsPerCellTextField) {
+            new DocumentListenerProxy<Double>(defaultUnitsPerCellTextField) {
               @Override
-              protected void storeNumericValue(int value) {
+              protected void storeNumericValue(Double value) {
                 AppPreferences.setDefaultUnitsPerCell(value);
+              }
+
+              @Override
+              protected Double convertString(String value) throws ParseException {
+                return StringUtil.parseDecimal(value);
               }
             });
     defaultVisionDistanceTextField
         .getDocument()
         .addDocumentListener(
-            new DocumentListenerProxy(defaultVisionDistanceTextField) {
+            new DocumentListenerProxy<Integer>(defaultVisionDistanceTextField) {
               @Override
-              protected void storeNumericValue(int value) {
+              protected void storeNumericValue(Integer value) {
                 AppPreferences.setDefaultVisionDistance(value);
+              }
+
+              @Override
+              protected Integer convertString(String value) throws ParseException {
+                return StringUtil.parseInteger(value);
               }
             });
     statsheetPortraitSize
         .getDocument()
         .addDocumentListener(
-            new DocumentListenerProxy(statsheetPortraitSize) {
+            new DocumentListenerProxy<Integer>(statsheetPortraitSize) {
               @Override
-              protected void storeNumericValue(int value) {
+              protected void storeNumericValue(Integer value) {
                 AppPreferences.setPortraitSize(value);
+              }
+
+              @Override
+              protected Integer convertString(String value) throws ParseException {
+                return StringUtil.parseInteger(value);
               }
             });
     haloLineWidthSpinner.addChangeListener(
@@ -692,10 +723,15 @@ public class PreferencesDialog extends JDialog {
     fontSizeTextField
         .getDocument()
         .addDocumentListener(
-            new DocumentListenerProxy(fontSizeTextField) {
+            new DocumentListenerProxy<Integer>(fontSizeTextField) {
               @Override
-              protected void storeNumericValue(int value) {
+              protected void storeNumericValue(Integer value) {
                 AppPreferences.setFontSize(value);
+              }
+
+              @Override
+              protected Integer convertString(String value) throws ParseException {
+                return StringUtil.parseInteger(value);
               }
             });
 
@@ -732,10 +768,15 @@ public class PreferencesDialog extends JDialog {
     upnpDiscoveryTimeoutTextField
         .getDocument()
         .addDocumentListener(
-            new DocumentListenerProxy(upnpDiscoveryTimeoutTextField) {
+            new DocumentListenerProxy<Integer>(upnpDiscoveryTimeoutTextField) {
               @Override
-              protected void storeNumericValue(int value) {
+              protected void storeNumericValue(Integer value) {
                 AppPreferences.setUpnpDiscoveryTimeout(value);
+              }
+
+              @Override
+              protected Integer convertString(String value) throws ParseException {
+                return StringUtil.parseInteger(value);
               }
             });
     fileSyncPathButton.addActionListener(
@@ -991,7 +1032,7 @@ public class PreferencesDialog extends JDialog {
     forceFacingArrowCheckBox.setSelected(AppPreferences.getForceFacingArrow());
     backgroundsStartSnapToGridCheckBox.setSelected(AppPreferences.getBackgroundsStartSnapToGrid());
     defaultGridSizeTextField.setText(Integer.toString(AppPreferences.getDefaultGridSize()));
-    defaultUnitsPerCellTextField.setText(Integer.toString(AppPreferences.getDefaultUnitsPerCell()));
+    defaultUnitsPerCellTextField.setText(Double.toString(AppPreferences.getDefaultUnitsPerCell()));
     defaultVisionDistanceTextField.setText(
         Integer.toString(AppPreferences.getDefaultVisionDistance()));
     statsheetPortraitSize.setText(Integer.toString(AppPreferences.getPortraitSize()));
