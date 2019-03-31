@@ -1,3 +1,19 @@
+Maptool 1.5.2
+=====
+
+___
+
+Bug Fixes
+-----
+* [#398][i398] - Fixed insertion of newline being only at the end of the command pane
+
+Enhancements
+-----
+
+
+
+[i398]: https://github.com/RPTools/maptool/issues/398
+
 MapTool 1.5.1
 =====
 A minor update to 1.5.0 consisting of bug fixes and small enhancements.
