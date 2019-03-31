@@ -117,8 +117,12 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * [#332][i332] - Allow to set color for personal lights in campaign Sight types
 * [#324][i324] - fix output of getViewArea. This might break existing macro using workaround to interpret the broken result before the fix.
 * [#326][i326] - defineFunction with open edit window
+* [#365][i365] - Support wrap and syntax in property editor
 
-
+[i332]: https://github.com/RPTools/maptool/issues/332
+[i324]: https://github.com/RPTools/maptool/issues/324
+[i326]: https://github.com/RPTools/maptool/issues/326
+[i365]: https://github.com/RPTools/maptool/issues/365
 [i210]: https://github.com/RPTools/maptool/issues/210
 [i113]: https://github.com/JamzTheMan/MapTool/issues/113
 [i108]: https://github.com/JamzTheMan/MapTool/issues/108
