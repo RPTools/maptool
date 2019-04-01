@@ -23,7 +23,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ZonePoint;
@@ -124,7 +123,7 @@ public class LineCellTemplate extends AbstractTemplate {
       int xOff = p.x * gridSize;
       int yOff = p.y * gridSize;
       int distance = getDistance(p.x, p.y);
-      
+
       if (quadrant.equals(Quadrant.NORTH_EAST.name())) {
         yOff = yOff - gridSize;
       } else if (quadrant.equals(Quadrant.SOUTH_WEST.name())) {
@@ -133,7 +132,7 @@ public class LineCellTemplate extends AbstractTemplate {
         xOff = xOff - gridSize;
         yOff = yOff - gridSize;
       }
-      
+
       // Paint what is needed.
       if (area) {
         paintArea(g, p.x, p.y, xOff, yOff, gridSize, distance);
@@ -176,7 +175,7 @@ public class LineCellTemplate extends AbstractTemplate {
     // Is there a slope?
     ZonePoint vertex = getVertex();
     if (vertex.equals(pathVertex)) return null;
-    
+
     double dx = pathVertex.x - vertex.x;
     double dy = pathVertex.y - vertex.y;
     setQuadrant(
@@ -188,7 +187,7 @@ public class LineCellTemplate extends AbstractTemplate {
     clearPath();
     path = new ArrayList<CellPoint>();
     path.add(getPointFromPool(0, 0));
-   
+
     MathContext mc = MathContext.DECIMAL128;
     MathContext rmc = new MathContext(MathContext.DECIMAL64.getPrecision(), RoundingMode.CEILING);
     if (dx != 0 && dy != 0) {
@@ -199,7 +198,7 @@ public class LineCellTemplate extends AbstractTemplate {
       while (getDistance(p.x, p.y) < radius) {
         int x = p.x;
         int y = p.y;
-        
+
         // Which border does the point exit the cell?
         double xValue = BigDecimal.valueOf(y + 1).divide(m, mc).round(rmc).doubleValue();
         double yValue = BigDecimal.valueOf(x + 1).multiply(m, mc).round(rmc).doubleValue();
@@ -240,7 +239,7 @@ public class LineCellTemplate extends AbstractTemplate {
         y += yInc;
       } // endwhile
     } // endif
-    
+
     return path;
   }
 
