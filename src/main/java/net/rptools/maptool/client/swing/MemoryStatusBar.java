@@ -81,14 +81,16 @@ public class MemoryStatusBar extends JProgressBar {
     return getMinimumSize();
   }
 
-  public double getLargestMemoryUsed() {
+  /**
+   * Returns the largest memory amount that has been used during running of the program.
+   *
+   * @return Memory size as a long
+   */
+  public long getLargestMemoryUsed() {
     return largestMemoryUsed;
   }
 
   private void update() {
-    // double totalMegs = Runtime.getRuntime().totalMemory() / (1024 * 1024);
-    // double freeMegs = Runtime.getRuntime().freeMemory() / (1024 * 1024);
-
     long totalMemory = Runtime.getRuntime().totalMemory();
     long freeMemory = Runtime.getRuntime().freeMemory();
     long maxMemory = Runtime.getRuntime().maxMemory();
@@ -97,7 +99,6 @@ public class MemoryStatusBar extends JProgressBar {
 
     setMaximum((int) (totalMemory / (1024 * 1024)));
     setValue((int) ((totalMemory - freeMemory) / (1024 * 1024)));
-    // setString(format.format(totalMegs - freeMegs) + "M/" + format.format(totalMegs) + "M");
 
     setString(
         FileUtil.byteCountToDisplaySize((totalMemory - freeMemory))
