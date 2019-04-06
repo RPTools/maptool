@@ -103,7 +103,7 @@ public class ImageCacheStatusBar extends JLabel {
     if (System.currentTimeMillis() - lastChecked >= POLLING_INTERVAL) {
       setText(AppUtil.getDiskSpaceUsed(CACHE_DIR));
       lastChecked = System.currentTimeMillis();
-      LOGGER.info("ImageCacheStatusBar updated...");
+      LOGGER.debug("ImageCacheStatusBar updated...");
     }
   }
 }

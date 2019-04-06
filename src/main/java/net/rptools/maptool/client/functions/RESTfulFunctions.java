@@ -57,8 +57,6 @@ import org.apache.logging.log4j.Logger;
  * body of the response is returned in what ever form the call returns.
  */
 public class RESTfulFunctions extends AbstractFunction {
-  private static final Logger log = LogManager.getLogger();
-
   private static final RESTfulFunctions instance = new RESTfulFunctions();
 
   private RESTfulFunctions() {

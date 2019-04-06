@@ -24,6 +24,8 @@ import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
 import io.sentry.event.BreadcrumbBuilder;
 import io.sentry.event.UserBuilder;
+
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -52,6 +54,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -59,6 +64,9 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
@@ -83,6 +91,8 @@ import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
+import net.rptools.maptool.client.ui.logger.JTextAreaAppender;
+import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
@@ -116,11 +126,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 /** */
 public class MapTool {
   private static final Logger log = LogManager.getLogger(MapTool.class);
+  //  private static final Logger log = LogManager.getLogger("My Logger");
+
   private static SentryClient sentry;
 
   /**
@@ -172,6 +186,7 @@ public class MapTool {
   private static JMenuBar menuBar;
   private static MapToolFrame clientFrame;
   private static NoteFrame profilingNoteFrame;
+  private static LogConsoleFrame logConsoleFrame;
   private static MapToolServer server;
   private static ServerCommand serverCommand;
   private static ServerPolicy serverPolicy;
@@ -737,6 +752,17 @@ public class MapTool {
       if (clientFrame != null) SwingUtil.centerOver(profilingNoteFrame, clientFrame);
     }
     return profilingNoteFrame;
+  }
+
+  public static JFrame getLogConsoleNoteFrame() {
+    if (logConsoleFrame == null) {
+      logConsoleFrame = new LogConsoleFrame();
+      logConsoleFrame.setVisible(true);
+
+      if (clientFrame != null) SwingUtil.centerOver(logConsoleFrame, clientFrame);
+    }
+
+    return logConsoleFrame;
   }
 
   public static String getVersion() {
@@ -1472,11 +1498,20 @@ public class MapTool {
     org.apache.logging.log4j.core.Logger loggerImpl = (org.apache.logging.log4j.core.Logger) log;
     Appender appender = loggerImpl.getAppenders().get("LogFile");
 
-    if (appender != null) return ((FileAppender) appender).getFileName();
-    else return "NOT_CONFIGURED";
+    if (appender != null)
+      if (appender instanceof FileAppender) return ((FileAppender) appender).getFileName();
+      else if (appender instanceof RollingFileAppender)
+        return ((RollingFileAppender) appender).getFileName();
+
+    return "NOT_CONFIGURED";
   }
 
   public static void main(String[] args) {
+    log.info("********************************************************************************");
+    log.info("**                                                                            **");
+    log.info("**                              MapTool Started!                              **");
+    log.info("**                                                                            **");
+    log.info("********************************************************************************");
     log.info("AppHome System Property: " + System.getProperty("appHome"));
     log.info("Logging to: " + getLoggerFileName());
 

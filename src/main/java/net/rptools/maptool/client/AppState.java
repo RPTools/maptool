@@ -38,6 +38,7 @@ public class AppState {
   private static boolean zoomLocked = false;
 
   private static boolean collectProfilingData = false;
+  private static boolean isLoggingToConsole = false;  
   private static boolean isSaving = false;
   private static boolean isLoading = false;
 
@@ -60,6 +61,14 @@ public class AppState {
     collectProfilingData = flag;
   }
 
+  public static boolean isLoggingToConsole() {
+    return isLoggingToConsole;
+  }
+
+  public static void setLoggingToConsole(boolean flag) {
+    isLoggingToConsole = flag;
+  }
+  
   public static int getGridSize() {
     return gridSize;
   }
