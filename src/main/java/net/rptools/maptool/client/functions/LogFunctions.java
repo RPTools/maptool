@@ -14,35 +14,21 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import okhttp3.Response;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
-import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
-import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 
 /**
  * Log functions to dynamically set log levels and configurations
@@ -102,31 +88,36 @@ public class LogFunctions extends AbstractFunction {
 
     if (parameters.size() == 3) {
       String logPattern = parameters.get(2).toString();
-      
-      
-//      ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
-//      builder.setStatusLevel(Level.ERROR);
-//      builder.setConfigurationName("BuilderTest");
-//      builder.add(builder.newFilter("ThresholdFilter", Filter.Result.ACCEPT, Filter.Result.NEUTRAL).addAttribute("level", Level.DEBUG));
-//      builder.get
-//      AppenderComponentBuilder appenderBuilder = builder.newAppender("Stdout", "CONSOLE").addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
-//      appenderBuilder.add(builder.newLayout("PatternLayout").addAttribute("pattern", "%d Thread:[%t] %-5level: MSG: %msg%n%throwable"));
-//      appenderBuilder.add(builder.newFilter("MarkerFilter", Filter.Result.DENY, Filter.Result.NEUTRAL).addAttribute("marker", "FLOW"));
-//
-//      builder.add(appenderBuilder);
-//      builder.add(builder.newLogger("org.apache.logging.log4j", Level.DEBUG).add(builder.newAppenderRef("Stdout")).addAttribute("additivity", false));
-//      builder.add(builder.newRootLogger(Level.ERROR).add(builder.newAppenderRef("Stdout")));
-//      Configurator.initialize(builder.build());
-//      
-//      appenderBuilder.add(
-//          builder
-//              .newLayout("PatternLayout")
-//              .addAttribute("pattern", logPattern));
+
+      //      ConfigurationBuilder<BuiltConfiguration> builder =
+      // ConfigurationBuilderFactory.newConfigurationBuilder();
+      //      builder.setStatusLevel(Level.ERROR);
+      //      builder.setConfigurationName("BuilderTest");
+      //      builder.add(builder.newFilter("ThresholdFilter", Filter.Result.ACCEPT,
+      // Filter.Result.NEUTRAL).addAttribute("level", Level.DEBUG));
+      //      builder.get
+      //      AppenderComponentBuilder appenderBuilder = builder.newAppender("Stdout",
+      // "CONSOLE").addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
+      //      appenderBuilder.add(builder.newLayout("PatternLayout").addAttribute("pattern", "%d
+      // Thread:[%t] %-5level: MSG: %msg%n%throwable"));
+      //      appenderBuilder.add(builder.newFilter("MarkerFilter", Filter.Result.DENY,
+      // Filter.Result.NEUTRAL).addAttribute("marker", "FLOW"));
+      //
+      //      builder.add(appenderBuilder);
+      //      builder.add(builder.newLogger("org.apache.logging.log4j",
+      // Level.DEBUG).add(builder.newAppenderRef("Stdout")).addAttribute("additivity", false));
+      //      builder.add(builder.newRootLogger(Level.ERROR).add(builder.newAppenderRef("Stdout")));
+      //      Configurator.initialize(builder.build());
+      //
+      //      appenderBuilder.add(
+      //          builder
+      //              .newLayout("PatternLayout")
+      //              .addAttribute("pattern", logPattern));
 
     }
 
     Configurator.setLevel(loggerName, newLevel);
-  
+
     return newLevel.toString();
   }
 

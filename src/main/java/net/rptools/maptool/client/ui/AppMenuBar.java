@@ -184,7 +184,7 @@ public class AppMenuBar extends JMenuBar {
 
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_COLLECT_PROFILING_DATA, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_LOG_CONSOLE, menu));
-    
+
     return menu;
   }
 
