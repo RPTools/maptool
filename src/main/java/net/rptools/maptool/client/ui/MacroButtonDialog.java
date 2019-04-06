@@ -497,7 +497,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JMenuBar mb = MapTool.getFrame().getJMenuBar();
     for (int i = 0; i < mb.getMenuCount(); i++) {
       JMenu menu = mb.getMenu(i);
-      if (menu.getText().equalsIgnoreCase("Edit")) {
+      if (menu.getText().equalsIgnoreCase(I18N.getText("menu.edit"))) {
         // This is the menu we want to add onto...
         addMenuItems(menu);
         return;
@@ -544,7 +544,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JMenuBar mb = MapTool.getFrame().getJMenuBar();
     for (int i = 0; i < mb.getMenuCount(); i++) {
       JMenu menu = mb.getMenu(i);
-      if (menu.getText().equalsIgnoreCase("Edit")) {
+      if (menu.getText().equalsIgnoreCase(I18N.getText("menu.edit"))) {
         // This is the menu we want to cleanup...
         removeMenuItems(menu, menu.getItemCount());
         return;
