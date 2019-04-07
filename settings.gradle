@@ -17,7 +17,6 @@ include 'services:webservice'
 
 rootProject.name = 'MapTool'
 
-
 sourceControl {
     gitRepository(uri("https://github.com/RPTools/dicelib")) {
         producesModule("net.rptools.dicelib:dicelib")

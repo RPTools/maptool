@@ -21,6 +21,7 @@ import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
+import java.text.NumberFormat;
 import java.util.Set;
 import javax.swing.*;
 import net.rptools.maptool.client.AppUtil;
@@ -126,14 +127,14 @@ public class ToolHelper {
       g.drawLine(wx, wy - 20, wx, wy - 10);
       // g.setPaintMode();
       String displayString =
-          String.format(
-              "%1.1f",
-              isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(ex, ey)));
+          NumberFormat.getInstance()
+              .format(
+                  isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(ex, ey)));
       GraphicsUtil.drawBoxedString(g, displayString, nx + 25, ny - 25);
       displayString =
-          String.format(
-              "%1.1f",
-              isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(wx, wy)));
+          NumberFormat.getInstance()
+              .format(
+                  isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(wx, wy)));
       GraphicsUtil.drawBoxedString(g, displayString, nx - 25, ny - 25);
     }
   }
@@ -173,17 +174,18 @@ public class ToolHelper {
 
     // Horizontal number
     String displayString =
-        String.format(
-            "%1.1f",
-            euclideanDistance(renderer, new ScreenPoint(left, top), new ScreenPoint(right, top)));
+        NumberFormat.getInstance()
+            .format(
+                euclideanDistance(
+                    renderer, new ScreenPoint(left, top), new ScreenPoint(right, top)));
     GraphicsUtil.drawBoxedString(g, displayString, left + (right - left) / 2, top - 15);
 
     // Verical number
     displayString =
-        String.format(
-            "%1.1f",
-            euclideanDistance(
-                renderer, new ScreenPoint(right, top), new ScreenPoint(right, bottom)));
+        NumberFormat.getInstance()
+            .format(
+                euclideanDistance(
+                    renderer, new ScreenPoint(right, top), new ScreenPoint(right, bottom)));
     GraphicsUtil.drawBoxedString(g, displayString, right + 18, bottom + (top - bottom) / 2);
   }
 
@@ -195,7 +197,7 @@ public class ToolHelper {
     boolean dirUp = startPoint.y < endPoint.y;
 
     String displayString =
-        String.format("%1.1f", euclideanDistance(renderer, startPoint, endPoint));
+        NumberFormat.getInstance().format(euclideanDistance(renderer, startPoint, endPoint));
 
     GraphicsUtil.drawBoxedString(
         g,
@@ -213,9 +215,9 @@ public class ToolHelper {
    * @param x The x location of the measurement
    * @param y The y location of the measurement
    */
-  public static void drawMeasurement(Graphics2D g, int distance, int x, int y) {
+  public static void drawMeasurement(Graphics2D g, double distance, int x, int y) {
     if (!MapTool.getFrame().isPaintDrawingMeasurement()) return;
-    String radius = Integer.toString(distance);
+    String radius = NumberFormat.getInstance().format(distance);
     GraphicsUtil.drawBoxedString(g, radius, x, y);
   }
 

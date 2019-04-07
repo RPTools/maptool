@@ -35,7 +35,7 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.drawing.RadiusTemplate;
+import net.rptools.maptool.model.drawing.RadiusCellTemplate;
 
 /**
  * Draw a template for an effect with a radius. Make the template show the squares that are
@@ -47,7 +47,7 @@ import net.rptools.maptool.model.drawing.RadiusTemplate;
  * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
  *     azhrei_fje $
  */
-public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMotionListener {
+public class RadiusCellTemplateTool extends AbstractDrawingTool implements MouseMotionListener {
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
    *-------------------------------------------------------------------------------------------*/
@@ -90,7 +90,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    *-------------------------------------------------------------------------------------------*/
 
   /** Add the icon to the toggle button. */
-  public RadiusTemplateTool() {
+  public RadiusCellTemplateTool() {
     try {
       setIcon(
           new ImageIcon(
@@ -114,7 +114,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    * @return The radius template that is to be drawn.
    */
   protected AbstractTemplate createBaseTemplate() {
-    return new RadiusTemplate();
+    return new RadiusCellTemplate();
   }
 
   /**
@@ -144,16 +144,9 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    * @return The cell at the mouse point in screen coordinates.
    */
   protected ZonePoint getCellAtMouse(MouseEvent e) {
-    // Find the cell that the mouse is in.
     ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
     CellPoint cp = renderer.getZone().getGrid().convert(mouse);
-    ZonePoint working = renderer.getZone().getGrid().convert(cp);
-
-    // If the mouse is over half way to the next vertex, move it there (both X & Y)
-    int grid = (int) (renderer.getZone().getGrid().getSize() * renderer.getScale());
-    if (mouse.x - working.x >= grid / 2) working.x += renderer.getZone().getGrid().getSize();
-    if (mouse.y - working.y >= grid / 2) working.y += renderer.getZone().getGrid().getSize();
-    return working;
+    return renderer.getZone().getGrid().convert(cp);
   }
 
   /**
@@ -179,6 +172,12 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    * @param vertex The vertex holding the cursor.
    */
   protected void paintCursor(Graphics2D g, Paint paint, float thickness, ZonePoint vertex) {
+    g.setPaint(paint);
+    g.setStroke(new BasicStroke(thickness));
+    int grid = renderer.getZone().getGrid().getSize();
+    g.drawRect(vertex.x, vertex.y, grid, grid);
+
+    if (1 == 1) return;
     int halfCursor = CURSOR_WIDTH / 2;
     g.setPaint(paint);
     g.setStroke(new BasicStroke(thickness));
