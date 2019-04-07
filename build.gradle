@@ -251,11 +251,7 @@ dependencies {
     // For mocking features during unit tests
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
 
-    compile ('net.rptools.dicelib:dicelib') {
-        version {
-            branch = 'spotless-format'
-        }
-    }
+    compile ('net.rptools.dicelib:dicelib:1.5.2')
 }
 
 
