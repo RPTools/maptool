@@ -19,10 +19,7 @@ rootProject.name = 'MapTool'
 
 
 sourceControl {
-    /*gitRepository(uri("https://github.com/RPTools/dicelib")) {
-        producesModule("net.rptools.dicelib:dicelib")
-    }*/
-    gitRepository("../dicelib") {
+    gitRepository(uri("https://github.com/RPTools/dicelib")) {
         producesModule("net.rptools.dicelib:dicelib")
     }
 }

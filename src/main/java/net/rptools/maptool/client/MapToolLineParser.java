@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
@@ -119,7 +120,8 @@ public class MapToolLineParser {
               DrawingMiscFunctions.getInstance(),
               ExportDataFunctions.getInstance(),
               RESTfulFunctions.getInstance(),
-              HeroLabFunctions.getInstance())
+              HeroLabFunctions.getInstance(),
+              LastRolledFunction.getInstance())
           .collect(Collectors.toList());
 
   /** Name and Source or macros that come from chat. */
@@ -154,6 +156,12 @@ public class MapToolLineParser {
 
   /** The maximum amount of loop iterations. */
   private int maxLoopIterations = DEFAULT_MAX_LOOP_ITERATIONS;
+
+  /** The dice rolls that occurred. */
+  private List<Integer> lastRolled = new LinkedList<>();
+
+  /** The dice rolls that occurred in the previous parse this one. */
+  private List<Integer> rolled = new LinkedList<>();
 
   private enum Output { // Mutually exclusive output formats
     NONE,
@@ -693,6 +701,12 @@ public class MapToolLineParser {
   public String parseLine(
       MapToolVariableResolver res, Token tokenInContext, String line, MapToolMacroContext context)
       throws ParserException {
+
+    // copy previous rolls and clear out for new rolls.
+    lastRolled.clear();
+    lastRolled.addAll(rolled);
+    rolled.clear();
+
     if (line == null) {
       return "";
     }
@@ -1451,7 +1465,11 @@ public class MapToolLineParser {
         b.append(expression);
         log.debug(b.toString());
       }
-      return createParser(resolver, tokenInContext == null ? false : true).evaluate(expression);
+      Result res =
+          createParser(resolver, tokenInContext == null ? false : true).evaluate(expression);
+      rolled.addAll(res.getRolled());
+
+      return res;
     } catch (AbortFunctionException e) {
       log.debug(e);
       boolean catchAbort = BigDecimal.ONE.equals(resolver.getVariable("macro.catchAbort"));
@@ -2147,5 +2165,14 @@ public class MapToolLineParser {
 
   public int getContextStackSize() {
     return contextStack.size();
+  }
+
+
+  public List<Integer> getRolled() {
+    return List.copyOf(rolled);
+  }
+
+  public List<Integer> getLastRolled() {
+    return List.copyOf(lastRolled);
   }
 }
