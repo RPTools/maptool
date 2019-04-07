@@ -46,7 +46,6 @@ public class RunData {
     int[] ret = new int[num];
     for (int i = 0; i < num; i++) {
       ret[i] = randomInt(maxValue);
-      rolled.add(ret[i]);
     }
     return ret;
   }
@@ -57,6 +56,8 @@ public class RunData {
     randomMax += maxValue;
 
     int result = RANDOM.nextInt(maxValue - minValue + 1) + minValue;
+
+    rolled.add(result);
 
     randomValue += result;
 
