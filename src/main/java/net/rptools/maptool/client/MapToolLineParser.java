@@ -2167,7 +2167,6 @@ public class MapToolLineParser {
     return contextStack.size();
   }
 
-
   public List<Integer> getRolled() {
     return List.copyOf(rolled);
   }

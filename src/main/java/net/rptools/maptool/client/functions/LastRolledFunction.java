@@ -44,5 +44,4 @@ public class LastRolledFunction extends AbstractFunction {
 
     return jarr;
   }
-
 }
