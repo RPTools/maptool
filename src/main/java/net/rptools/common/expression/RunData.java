@@ -15,6 +15,9 @@
 package net.rptools.common.expression;
 
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 public class RunData {
@@ -26,6 +29,8 @@ public class RunData {
   private long randomValue;
   private long randomMax;
   private long randomMin;
+
+  private List<Integer> rolled = new LinkedList<>();
 
   public RunData(Result result) {
     this.result = result;
@@ -39,7 +44,10 @@ public class RunData {
   /** Returns a list of random integers between 1 and <code>maxValue</code> */
   public int[] randomInts(int num, int maxValue) {
     int[] ret = new int[num];
-    for (int i = 0; i < num; i++) ret[i] = randomInt(maxValue);
+    for (int i = 0; i < num; i++) {
+      ret[i] = randomInt(maxValue);
+      rolled.add(ret[i]);
+    }
     return ret;
   }
 
@@ -90,5 +98,9 @@ public class RunData {
   // random.
   public static void setSeed(long seed) {
     RANDOM = new Random(seed);
+  }
+
+  public List<Integer> getRolled() {
+    return Collections.unmodifiableList(rolled);
   }
 }

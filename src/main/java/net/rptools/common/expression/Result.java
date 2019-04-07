@@ -14,7 +14,10 @@
  */
 package net.rptools.common.expression;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Result {
@@ -22,6 +25,7 @@ public class Result {
   private String detailExpression;
   private Object value;
   private String description;
+  private List<Integer> rolled;
 
   private final Map<String, String> properties = new HashMap<String, String>();
 
@@ -59,6 +63,14 @@ public class Result {
 
   public Map<String, String> getProperties() {
     return this.properties;
+  }
+
+  public void setRolled(List<Integer> rolls) {
+    rolled = new ArrayList<>(rolls);
+  }
+
+  public List<Integer> getRolled() {
+    return Collections.unmodifiableList(rolled);
   }
 
   public String format() {
