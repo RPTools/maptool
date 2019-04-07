@@ -23,7 +23,15 @@ import net.rptools.parser.function.AbstractNumberFunction;
 public class RollWithBounds extends AbstractNumberFunction {
 
   public RollWithBounds() {
-    super(3, 4, false, "rollSubWithLower", "rollWithLower", "rollAddWithUpper", "rollWithUpper", "rollAddWithLower");
+    super(
+        3,
+        4,
+        false,
+        "rollSubWithLower",
+        "rollWithLower",
+        "rollAddWithUpper",
+        "rollWithUpper",
+        "rollAddWithLower");
   }
 
   @Override
@@ -65,7 +73,6 @@ public class RollWithBounds extends AbstractNumberFunction {
         lower = ((BigDecimal) parameters.get(3)).intValue();
         break;
     }
-    System.out.println("times = " + times + ", sides = " + sides + ", mod = " + mod + ", lower = " + lower);
     return DiceHelper.rollModWithBounds(times, sides, mod, lower, upper);
   }
 }

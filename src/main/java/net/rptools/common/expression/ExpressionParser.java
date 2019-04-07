@@ -190,7 +190,6 @@ public class ExpressionParser {
     parser.addFunction(new DropHighestRoll());
     parser.addFunction(new KeepLowestRoll());
 
-
     parser.addFunction(new If());
 
     StringLiteralTransformer slt = new StringLiteralTransformer();
@@ -208,13 +207,15 @@ public class ExpressionParser {
     Result ret = new Result(expression);
     RunData oldData = RunData.hasCurrent() ? RunData.getCurrent() : null;
     try {
-      RunData.setCurrent(new RunData(ret));
+      RunData newRunData = new RunData(ret);
+      RunData.setCurrent(newRunData);
 
       synchronized (parser) {
         Expression xp = parser.parseExpression(expression);
         Expression dxp = xp.getDeterministicExpression();
         ret.setDetailExpression(dxp.format());
         ret.setValue(dxp.evaluate());
+        ret.setRolled(newRunData.getRolled());
       }
     } finally {
       RunData.setCurrent(oldData);

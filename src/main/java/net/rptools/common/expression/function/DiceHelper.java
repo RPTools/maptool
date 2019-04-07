@@ -205,9 +205,7 @@ public class DiceHelper {
     for (int i = 0; i < times; i++) {
       int roll = rollDice(1, sides);
       int val = Math.min(Math.max(roll + sub, lower), upper);
-      //int roll = Math.min(Math.max(rollDice(1, sides) - sub, lower), upper);
       result += val;
-      System.out.println("\t" + roll + " - " + val);
     }
 
     return result;
