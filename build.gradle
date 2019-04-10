@@ -16,7 +16,7 @@ buildscript {
 
 // Access Git info from build script
 plugins {
-    id "org.ajoberstar.grgit" version "3.0.0"
+    id "org.ajoberstar.grgit" version "3.1.1"
 }
 
 // Apply the java plugin to add support for Java
@@ -40,9 +40,9 @@ applicationDefaultJvmArgs = ["-Xss4M"]
 // Custom properties
 ext {
     // Get tag and commit info from Git to use for version numbering
-    def repo = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
-    def head = repo.head()
-    def tags = repo.tag.list().find {
+    def grgit = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
+    def head = grgit.head()
+    def tags = grgit.tag.list().find {
         it.commit == head
     }
 
@@ -59,6 +59,12 @@ ext {
         enviroment = "Development"
         sentryDSN = sentry_development_dsn
     }
+
+    // not doing anything as of a bug in grgit when opening with currentDir/dir
+    // https://github.com/ajoberstar/grgit/issues/288
+    grgit.close()
+    // therefore close the underlying repository manually
+    grgit.repository.jgit.getRepository().close()
 
     // vendor, tagVersion, msiVersion, and DSN's defaults are set in gradle.properties
     println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor
