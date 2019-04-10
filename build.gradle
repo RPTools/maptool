@@ -177,7 +177,7 @@ dependencies {
     implementation 'commons-cli:commons-cli:1.3'
 
     implementation 'net.rptools.decktool:decktool:1.0.b1'
-    implementation 'net.rptools.dicelib:dicelib:1.4.0.+'
+
     implementation 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
     implementation 'net.rptools.parser:parser:1.4.0.+'
 
@@ -256,6 +256,8 @@ dependencies {
 
     // For mocking features during unit tests
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+
+    compile ('net.rptools.dicelib:dicelib:1.5.2')
 }
 
 
@@ -385,7 +387,7 @@ test {
 }
 
 task createWrapper(type: Wrapper) {
-    gradleVersion = '5.2.1'
+    gradleVersion = '5.3'
 }
 
 // Configure current release tag in Sentry.io properties
