@@ -43,9 +43,7 @@ import net.rptools.maptool.model.drawing.RadiusCellTemplate;
  * wheel to set the radius. This allows the user to move the entire template where it is to be used
  * before placing it which is very important when casting a spell.
  *
- * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
+ * @author naciron
  */
 public class RadiusCellTemplateTool extends AbstractDrawingTool implements MouseMotionListener {
   /*---------------------------------------------------------------------------------------------
