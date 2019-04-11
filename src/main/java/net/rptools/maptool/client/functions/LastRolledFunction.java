@@ -25,7 +25,7 @@ public class LastRolledFunction extends AbstractFunction {
   private static final LastRolledFunction instance = new LastRolledFunction();
 
   private LastRolledFunction() {
-    super(0, 1, "lastRolled", "getRolled");
+    super(0, 1, "lastRolled", "getRolled", "clearRolls", "getNewRolls");
   }
 
   public static LastRolledFunction getInstance() {
@@ -38,8 +38,12 @@ public class LastRolledFunction extends AbstractFunction {
     JSONArray jarr = new JSONArray();
     if (functionName.equalsIgnoreCase("lastRolled")) {
       jarr.addAll(MapTool.getParser().getLastRolled());
-    } else {
+    } else if (functionName.equalsIgnoreCase("getRolled")) {
       jarr.addAll(MapTool.getParser().getRolled());
+    } else if (functionName.equalsIgnoreCase("clearRolls")) {
+      MapTool.getParser().clearRolls();
+    } else {
+      jarr.addAll(MapTool.getParser().getNewRolls());
     }
 
     return jarr;
