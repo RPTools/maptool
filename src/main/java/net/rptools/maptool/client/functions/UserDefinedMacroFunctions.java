@@ -54,16 +54,17 @@ public class UserDefinedMacroFunctions implements Function {
   }
 
   private static class FunctionDefinition {
-
-    public FunctionDefinition(String macroName, boolean ignoreOutput, boolean newVariableContext) {
+    public FunctionDefinition(String macroName, boolean ignoreOutput, boolean newVariableContext, String description) {
       this.macroName = macroName;
       this.ignoreOutput = ignoreOutput;
       this.newVariableContext = newVariableContext;
+      this.description = description;
     }
 
     String macroName;
     boolean ignoreOutput;
     boolean newVariableContext;
+    String description;
   }
 
   private static class FunctionRedefinition {
@@ -166,6 +167,8 @@ public class UserDefinedMacroFunctions implements Function {
       FunctionRedefinition fr = new FunctionRedefinition();
       fr.function = parser.getFunction(name);
       fr.functionName = name;
+      //fr.description = "<html>This is a test doc!</html>";
+      
       if (isFunctionDefined(name)) {
         // If it is already defined as what this then do nothing...
         if (userDefinedFunctions.get(name).equals(macro)) {
@@ -179,7 +182,7 @@ public class UserDefinedMacroFunctions implements Function {
       }
       redefinedFunctions.put(name, fr);
     }
-    userDefinedFunctions.put(name, new FunctionDefinition(macro, ignoreOutput, newVariableContext));
+    userDefinedFunctions.put(name, new FunctionDefinition(macro, ignoreOutput, newVariableContext, "<html>This is a test doc!</html>"));
 
     MapToolScriptSyntax.resetScriptSyntax();
   }
@@ -198,7 +201,16 @@ public class UserDefinedMacroFunctions implements Function {
   public boolean isFunctionDefined(String name) {
     return userDefinedFunctions.containsKey(name);
   }
-
+  
+//  public String getDescription(String name) {
+//    if(isFunctionDefined(name)) {
+//     FunctionDefinition test = userDefinedFunctions.get(name);
+//     
+//     return test;
+//    }
+//    else
+//      return "";
+//  }
   public void loadCampaignLibFunctions() {
     userDefinedFunctions.clear();
 

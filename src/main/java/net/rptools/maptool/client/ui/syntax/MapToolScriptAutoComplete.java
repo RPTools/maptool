@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.syntax;
 import java.util.ResourceBundle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
+import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.function.Function;
 import org.apache.logging.log4j.LogManager;
@@ -78,6 +79,16 @@ public class MapToolScriptAutoComplete {
         }
       }
     }
+
+//    for (Function function : MapTool.getParser().getMacroFunctions()) {
+//      if (function instanceof UserDefinedMacroFunctions) {
+//        for (String description : ((UserDefinedMacroFunctions) function)) {
+//          provider.addCompletion(
+//              new BasicCompletion(
+//                  provider, getShortDescription(description), getSummary("User Defined Function")));
+//        }
+//      }
+//    }
 
     // FIXME: TERRIBLE! But I'm tired and running out of time, need to add to a .properties
     // file!
