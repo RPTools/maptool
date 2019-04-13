@@ -32,7 +32,6 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
  */
 @Plugin(name = "JTextAreaAppender", category = "Core", elementType = "appender", printObject = true)
 public class JTextAreaAppender extends AbstractAppender {
-  private static final long serialVersionUID = 1L;
   private static volatile ArrayList<JTextArea> jTextAreaList = new ArrayList<JTextArea>();
 
   private int maxLines = 0;
@@ -69,8 +68,7 @@ public class JTextAreaAppender extends AbstractAppender {
 
   @Override
   public void append(LogEvent event) {
-    // TODO Auto-generated method stub
-    final String message = new String(this.getLayout().toByteArray(event));
+    String message = new String(this.getLayout().toByteArray(event));
 
     // Append formatted message to text area using the Thread.
     try {

@@ -41,10 +41,13 @@ import org.apache.logging.log4j.Logger;
 public class LogConsoleFrame extends JFrame {
   private static final Logger log = LogManager.getLogger(LogConsoleFrame.class);
 
-  //  private RSyntaxTextArea jLoggingConsole;
+  // private RSyntaxTextArea jLoggingConsole; // Doesn't look like RSyntaxTextArea can keep up with
+  // large amounts of logging
   private JTextArea jLoggingConsole;
 
   private static final String LOGGER_IMAGE = "net/rptools/maptool/client/image/log4j_icon.png";
+  private static final Font LOGGER_FONT = new Font("Lucida Console", Font.PLAIN, 12);
+
   private JButton clearButton;
   private JButton closeButton;
 
@@ -97,7 +100,7 @@ public class LogConsoleFrame extends JFrame {
       jLoggingConsole.setLineWrap(true);
       jLoggingConsole.setWrapStyleWord(true);
       jLoggingConsole.setEditable(false);
-      jLoggingConsole.setFont(new Font("Courier", Font.PLAIN, 12));
+      jLoggingConsole.setFont(LOGGER_FONT);
 
       // Subscribe the text area to JTextAreaAppender
       JTextAreaAppender.addTextArea(jLoggingConsole);

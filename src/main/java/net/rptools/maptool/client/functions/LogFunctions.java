@@ -30,19 +30,25 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configurator;
 
-/**
- * Log functions to dynamically set log levels and configurations
- *
- * <p>TBD
- */
+/** Log functions to dynamically set log levels, log configurations, and log messages from macros */
 public class LogFunctions extends AbstractFunction {
   private static final Logger log = LogManager.getLogger(LogFunctions.class);
-  //  private static final Logger logger = LogManager.getLogger("My Logger");
+  private static final Logger logger = LogManager.getLogger("macro-logger");
 
   private static final LogFunctions instance = new LogFunctions();
 
   private LogFunctions() {
-    super(0, 2, "log.setLevel", "log.getLoggers", "log.openConsole");
+    super(
+        0,
+        2,
+        "log.getLoggers",
+        "log.setLevel",
+        // "log.setPattern",
+        "log.fatal",
+        "log.error",
+        "log.warn",
+        "log.info",
+        "log.debug");
   }
 
   public static LogFunctions getInstance() {
@@ -56,97 +62,131 @@ public class LogFunctions extends AbstractFunction {
     if (!MapTool.getParser().isMacroPathTrusted())
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
-    if (functionName.equalsIgnoreCase("log.setLevel")) return setLogLevel(functionName, parameters);
-    else if (functionName.equalsIgnoreCase("log.getLoggers"))
+    if (functionName.equalsIgnoreCase("log.getLoggers"))
       return getLoggers(functionName, parameters);
-    else if (functionName.equalsIgnoreCase("log.openConsole"))
-      return openConsole(functionName, parameters);
+    else if (functionName.equalsIgnoreCase("log.setLevel"))
+      return setLogLevel(functionName, parameters);
+    else if (functionName.equalsIgnoreCase("log.setPattern"))
+      return setPattern(functionName, parameters);
+    else if (functionName.toLowerCase().startsWith("log."))
+      return logMessage(functionName, parameters);
     else
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
+   * Returns all currently configured loggers from Log4J2 Log Manager
+   *
+   * @param functionName
+   * @return JSON Array of logger name and logger level
+   * @throws ParserException
+   */
+  private Object getLoggers(String functionName, List<Object> parameters) throws ParserException {
+    checkParameters(functionName, parameters, 0, 0);
+
+    LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
+    List<LoggerResponse> loggerLevels = new ArrayList<>();
+
+    for (Logger logger : logContext.getLoggers())
+      try {
+        loggerLevels.add(new LoggerResponse(logger.getName(), logger.getLevel().name()));
+      } catch (IOException ioe) {
+        log.error("Unable to get loggers from LogManager!", ioe);
+      }
+
+    Gson gson = new Gson();
+    String jsonResponse = gson.toJson(loggerLevels);
+
+    return jsonResponse;
+  }
+
+  /**
    * Dynamically set the log level for macros
    *
    * @param functionName
-   * @param parameters include URL, headers (optional) and if full response is requested (optional)
-   * @return HTTP response as JSON (if full response) or server response, usually JSON but can be
-   *     XML, HTML, or other formats.
+   * @param newLevel
+   * @return new log level if level is valid, else BigDecimal.ZERO if invalid level is passed
    * @throws ParserException
    */
   private Object setLogLevel(String functionName, List<Object> parameters) throws ParserException {
-    checkParameters(functionName, parameters, 2, 3);
-
-    log.debug("Macro function setLogLevel called with " + parameters.toString());
+    checkParameters(functionName, parameters, 2, 2);
 
     String loggerName = parameters.get(0).toString();
 
     // Convert the parameter string to a logger Level and return false if no match is found
-    Level newLevel = Level.getLevel(parameters.get(1).toString());
+    Level newLevel = Level.getLevel(parameters.get(1).toString().toUpperCase());
     if (newLevel == null) return BigDecimal.ZERO;
-
-    if (parameters.size() == 3) {
-      String logPattern = parameters.get(2).toString();
-
-      //      ConfigurationBuilder<BuiltConfiguration> builder =
-      // ConfigurationBuilderFactory.newConfigurationBuilder();
-      //      builder.setStatusLevel(Level.ERROR);
-      //      builder.setConfigurationName("BuilderTest");
-      //      builder.add(builder.newFilter("ThresholdFilter", Filter.Result.ACCEPT,
-      // Filter.Result.NEUTRAL).addAttribute("level", Level.DEBUG));
-      //      builder.get
-      //      AppenderComponentBuilder appenderBuilder = builder.newAppender("Stdout",
-      // "CONSOLE").addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
-      //      appenderBuilder.add(builder.newLayout("PatternLayout").addAttribute("pattern", "%d
-      // Thread:[%t] %-5level: MSG: %msg%n%throwable"));
-      //      appenderBuilder.add(builder.newFilter("MarkerFilter", Filter.Result.DENY,
-      // Filter.Result.NEUTRAL).addAttribute("marker", "FLOW"));
-      //
-      //      builder.add(appenderBuilder);
-      //      builder.add(builder.newLogger("org.apache.logging.log4j",
-      // Level.DEBUG).add(builder.newAppenderRef("Stdout")).addAttribute("additivity", false));
-      //      builder.add(builder.newRootLogger(Level.ERROR).add(builder.newAppenderRef("Stdout")));
-      //      Configurator.initialize(builder.build());
-      //
-      //      appenderBuilder.add(
-      //          builder
-      //              .newLayout("PatternLayout")
-      //              .addAttribute("pattern", logPattern));
-
-    }
 
     Configurator.setLevel(loggerName, newLevel);
 
     return newLevel.toString();
   }
 
-  private Object getLoggers(String functionName, List<Object> parameters) throws ParserException {
-    checkParameters(functionName, parameters, 0, 0);
+  private Object logMessage(String functionName, List<Object> parameters) throws ParserException {
+    checkParameters(functionName, parameters, 1, 1);
 
-    LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
-    //    Map<String, String> loggerLevels = new HashMap<>();
-    List<LoggerResponse> loggerLevels = new ArrayList<>();
+    String logMessage = parameters.get(0).toString();
 
-    for (Logger logger : logContext.getLoggers())
-      try {
-        loggerLevels.add(new LoggerResponse(logger.getName(), logger.getLevel().name()));
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-
-    Gson gson = new Gson();
-    String jsonResponse = gson.toJson(loggerLevels);
-
-    log.debug(jsonResponse);
-
-    return jsonResponse;
-  }
-
-  private Object openConsole(String functionName, List<Object> parameters) {
+    if (functionName.equalsIgnoreCase("log.fatal")) logger.fatal(logMessage);
+    else if (functionName.equalsIgnoreCase("log.error")) logger.error(logMessage);
+    else if (functionName.equalsIgnoreCase("log.warn")) logger.warn(logMessage);
+    else if (functionName.equalsIgnoreCase("log.info")) logger.info(logMessage);
+    else if (functionName.equalsIgnoreCase("log.debug")) logger.debug(logMessage);
+    else
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
 
     return null;
+  }
+
+  /**
+   * TODO: WORK IN PROGRESS Dynamically set pattern string for loggers
+   *
+   * @param functionName
+   * @param valid Log4J2 Pattern
+   * @return BigDecimal.ONE if successfully set, otherwise BigDecimal.ZERO
+   * @throws ParserException
+   */
+  private Object setPattern(String functionName, List<Object> parameters) throws ParserException {
+    checkParameters(functionName, parameters, 1, 1);
+
+    String logPattern = parameters.get(0).toString();
+
+    // SAMPLE CODE BELOW but is for "new" configurations
+    // Need to pull in configuration from XML and modify PatternLayout...
+
+    //    ConfigurationBuilder<BuiltConfiguration> builder =
+    //        ConfigurationBuilderFactory.newConfigurationBuilder();
+    //    builder.setStatusLevel(Level.ERROR);
+    //    builder.setConfigurationName("BuilderTest");
+    //    builder.add(
+    //        builder
+    //            .newFilter("ThresholdFilter", Filter.Result.ACCEPT, Filter.Result.NEUTRAL)
+    //            .addAttribute("level", Level.DEBUG));
+    //
+    //    AppenderComponentBuilder appenderBuilder =
+    //        builder
+    //            .newAppender("Stdout", "CONSOLE")
+    //            .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
+    //    appenderBuilder.add(
+    //        builder
+    //            .newLayout("PatternLayout")
+    //            .addAttribute("pattern", "TEST %d Thread:[%t] %-5level: MSG: %msg%n%throwable"));
+    //
+    //    builder.add(appenderBuilder);
+    //
+    //    builder.add(
+    //        builder
+    //            .newLogger("org.apache.logging.log4j", Level.DEBUG)
+    //            .add(builder.newAppenderRef("Stdout"))
+    //            .addAttribute("additivity", false));
+    //    builder.add(builder.newRootLogger(Level.ERROR).add(builder.newAppenderRef("Stdout")));
+    //    Configurator.initialize(builder.build());
+
+    // appenderBuilder.add(builder.newLayout("PatternLayout").addAttribute("pattern", logPattern));
+
+    return logPattern;
   }
 
   /**
