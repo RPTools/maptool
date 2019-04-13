@@ -122,7 +122,8 @@ public class MapToolLineParser {
               RESTfulFunctions.getInstance(),
               HeroLabFunctions.getInstance(),
               LogFunctions.getInstance(),
-              LastRolledFunction.getInstance())
+              LastRolledFunction.getInstance(),
+              Base64Functions.getInstance())
           .collect(Collectors.toList());
 
   /** Name and Source or macros that come from chat. */
