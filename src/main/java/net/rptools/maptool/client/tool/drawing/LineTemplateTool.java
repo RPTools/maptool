@@ -66,7 +66,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
                   getClass()
                       .getClassLoader()
                       .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/temp-blue-line.png"))));
+                          "net/rptools/maptool/client/image/tool/temp-blue-vertex-line.png"))));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     } // endtry

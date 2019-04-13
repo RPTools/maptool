@@ -98,9 +98,9 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
                   getClass()
                       .getClassLoader()
                       .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/temp-blue.png"))));
+                          "net/rptools/maptool/client/image/tool/temp-blue-vertex-radius.png"))));
     } catch (IOException ioe) {
-      MapTool.showError("Can't find image resource 'temp-blue.png'", ioe);
+      MapTool.showError("Can't find image resource 'temp-blue-vertex-radius.png'", ioe);
     } // endtry
   }
 

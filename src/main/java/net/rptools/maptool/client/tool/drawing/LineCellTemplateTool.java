@@ -61,7 +61,7 @@ public class LineCellTemplateTool extends RadiusCellTemplateTool {
                   getClass()
                       .getClassLoader()
                       .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/temp-blue-line.png"))));
+                          "net/rptools/maptool/client/image/tool/temp-blue-cell-line.png"))));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     } // endtry

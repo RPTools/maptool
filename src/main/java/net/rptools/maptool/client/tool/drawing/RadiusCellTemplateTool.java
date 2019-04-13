@@ -96,9 +96,9 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
                   getClass()
                       .getClassLoader()
                       .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/temp-blue.png"))));
+                          "net/rptools/maptool/client/image/tool/temp-blue-cell-radius.png"))));
     } catch (IOException ioe) {
-      MapTool.showError("Can't find image resource 'temp-blue.png'", ioe);
+      MapTool.showError("Can't find image resource 'temp-blue-cell-radius.png'", ioe);
     } // endtry
   }
 
