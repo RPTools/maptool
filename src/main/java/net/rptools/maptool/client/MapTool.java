@@ -123,7 +123,6 @@ import org.apache.logging.log4j.core.config.Configurator;
 /** */
 public class MapTool {
   private static final Logger log = LogManager.getLogger(MapTool.class);
-  //  private static final Logger log = LogManager.getLogger("My Logger");
 
   private static SentryClient sentry;
 
