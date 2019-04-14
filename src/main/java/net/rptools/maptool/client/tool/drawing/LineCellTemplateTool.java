@@ -22,6 +22,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -56,19 +57,22 @@ public class LineCellTemplateTool extends RadiusCellTemplateTool {
   public LineCellTemplateTool() {
     try {
       setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/temp-blue-cell-line.png"))));
+          ImageUtil.resizeImage(
+              new ImageIcon(
+                  ImageIO.read(
+                      getClass()
+                          .getClassLoader()
+                          .getResourceAsStream(
+                              "net/rptools/maptool/client/image/tool/temp-blue-cell-line.png"))),
+              TOOLBAR_ICON_SIZE,
+              TOOLBAR_ICON_SIZE));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     } // endtry
   }
 
   /*---------------------------------------------------------------------------------------------
-   * Overidden RadiusTemplateTool Methods
+   * Overridden RadiusTemplateTool Methods
    *-------------------------------------------------------------------------------------------*/
 
   /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip() */

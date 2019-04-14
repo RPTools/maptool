@@ -24,6 +24,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.ScreenPoint;
@@ -61,12 +62,15 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
   public LineTemplateTool() {
     try {
       setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/temp-blue-vertex-line.png"))));
+          ImageUtil.resizeImage(
+              new ImageIcon(
+                  ImageIO.read(
+                      getClass()
+                          .getClassLoader()
+                          .getResourceAsStream(
+                              "net/rptools/maptool/client/image/tool/temp-blue-vertex-line.png"))),
+              TOOLBAR_ICON_SIZE,
+              TOOLBAR_ICON_SIZE));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     } // endtry
@@ -74,7 +78,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
   }
 
   /*---------------------------------------------------------------------------------------------
-   * Overidden RadiusTemplateTool Methods
+   * Overridden RadiusTemplateTool Methods
    *-------------------------------------------------------------------------------------------*/
 
   /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip() */

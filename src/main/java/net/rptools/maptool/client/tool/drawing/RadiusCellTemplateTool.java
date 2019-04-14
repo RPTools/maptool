@@ -25,6 +25,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
@@ -91,12 +92,15 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
   public RadiusCellTemplateTool() {
     try {
       setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/temp-blue-cell-radius.png"))));
+          ImageUtil.resizeImage(
+              new ImageIcon(
+                  ImageIO.read(
+                      getClass()
+                          .getClassLoader()
+                          .getResourceAsStream(
+                              "net/rptools/maptool/client/image/tool/temp-blue-cell-radius.png"))),
+              TOOLBAR_ICON_SIZE,
+              TOOLBAR_ICON_SIZE));
     } catch (IOException ioe) {
       MapTool.showError("Can't find image resource 'temp-blue-cell-radius.png'", ioe);
     } // endtry
@@ -388,7 +392,7 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
   /** @see net.rptools.maptool.client.ui.Tool#getTooltip() */
   @Override
   public String getTooltip() {
-    return "tool.radiustemplate.tooltip";
+    return "tool.radiusCellTemplate.tooltip";
   }
 
   /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
