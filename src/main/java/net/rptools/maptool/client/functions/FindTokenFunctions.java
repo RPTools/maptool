@@ -700,9 +700,10 @@ public class FindTokenFunctions extends AbstractFunction {
     }
     return null;
   }
-  
+
   /**
    * find a token on all maps (first matching is returned)
+   *
    * @param identifier to check for
    * @return the token
    */
