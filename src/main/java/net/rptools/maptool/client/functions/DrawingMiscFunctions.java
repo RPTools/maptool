@@ -14,9 +14,16 @@
  */
 package net.rptools.maptool.client.functions;
 
+import java.awt.BasicStroke;
+import java.awt.Point;
+import java.awt.geom.Area;
+import java.awt.geom.Line2D;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -25,6 +32,7 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.sf.ezmorph.bean.MorphDynaBean;
 import net.sf.json.JSONArray;
 
 public class DrawingMiscFunctions extends DrawingFunctions {
@@ -35,7 +43,14 @@ public class DrawingMiscFunctions extends DrawingFunctions {
   }
 
   private DrawingMiscFunctions() {
-    super(2, 3, "findDrawings", "refreshDrawing", "bringDrawingToFront", "sendDrawingToBack");
+    super(
+        2,
+        3,
+        "findDrawings",
+        "refreshDrawing",
+        "bringDrawingToFront",
+        "sendDrawingToBack",
+        "movedOverDrawing");
   }
 
   @Override
@@ -45,7 +60,13 @@ public class DrawingMiscFunctions extends DrawingFunctions {
     String mapName = parameters.get(0).toString();
     String drawing = parameters.get(1).toString();
     Zone map = getNamedMap(functionName, mapName).getZone();
-    if ("findDrawings".equalsIgnoreCase(functionName)) {
+    if ("movedOverDrawing".equalsIgnoreCase(functionName)) {
+      checkNumberOfParameters(functionName, parameters, 3, 3);
+      String jsonPath = parameters.get(2).toString();
+      GUID guid = getGUID(functionName, drawing);
+      DrawnElement de = getDrawnElement(functionName, map, guid);
+      return getCrossedPoints(map, de, jsonPath);
+    } else if ("findDrawings".equalsIgnoreCase(functionName)) {
       checkNumberOfParameters(functionName, parameters, 2, 3);
       List<DrawnElement> drawableList = map.getAllDrawnElements();
       List<String> drawingList = findDrawings(drawableList, drawing);
@@ -69,6 +90,53 @@ public class DrawingMiscFunctions extends DrawingFunctions {
       }
     }
     return null;
+  }
+
+  private Object getCrossedPoints(final Zone map, final DrawnElement de, final String pathString) {
+    List<Map<String, Integer>> pathPoints = convertJSONStringToList(pathString);
+    List<Map<String, Integer>> returnPoints = new ArrayList<Map<String, Integer>>();
+    Area a = de.getDrawable().getArea();
+    int cnt = 0;
+    Point previousPoint = new Point();
+    for (Map<String, Integer> entry : pathPoints) {
+      Point currentPoint = new Point(entry.get("x"), entry.get("y"));
+      if (cnt > 0) {
+        Line2D l2d = new Line2D.Double(previousPoint, currentPoint);
+        BasicStroke stroke = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+        Area lineArea = new Area(stroke.createStrokedShape(l2d));
+        lineArea.intersect(a);
+        if (!lineArea.isEmpty()) {
+          Map<String, Integer> firstPoint = new HashMap<String, Integer>();
+          Map<String, Integer> secondPoint = new HashMap<String, Integer>();
+          firstPoint.put("x1", (int) previousPoint.getX());
+          firstPoint.put("y1", (int) previousPoint.getY());
+          secondPoint.put("x2", (int) currentPoint.getX());
+          secondPoint.put("y2", (int) currentPoint.getY());
+          returnPoints.add(firstPoint);
+          returnPoints.add(secondPoint);
+        }
+      }
+      previousPoint = new Point(entry.get("x"), entry.get("y"));
+      cnt++;
+    }
+    return returnPoints;
+  }
+
+  private List<Map<String, Integer>> convertJSONStringToList(final String pointsString) {
+    Object jsonObject = JSONMacroFunctions.asJSON(pointsString);
+
+    ArrayList<Map<String, Integer>> pathPoints = new ArrayList<Map<String, Integer>>();
+    if (jsonObject instanceof JSONArray) {
+      ArrayList<?> tempPoints = (ArrayList<?>) JSONArray.toCollection((JSONArray) jsonObject);
+      for (Object o : tempPoints) {
+        MorphDynaBean bean = (MorphDynaBean) o;
+        Map<String, Integer> point = new HashMap<String, Integer>();
+        point.put("x", (Integer) bean.get("x"));
+        point.put("y", (Integer) bean.get("y"));
+        pathPoints.add(point);
+      }
+    }
+    return pathPoints;
   }
 
   /**
