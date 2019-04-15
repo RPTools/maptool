@@ -16,7 +16,7 @@ buildscript {
 
 // Access Git info from build script
 plugins {
-    id "org.ajoberstar.grgit" version "3.0.0"
+    id "org.ajoberstar.grgit" version "3.1.1"
 }
 
 // Apply the java plugin to add support for Java
@@ -40,9 +40,9 @@ applicationDefaultJvmArgs = ["-Xss4M"]
 // Custom properties
 ext {
     // Get tag and commit info from Git to use for version numbering
-    def repo = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
-    def head = repo.head()
-    def tags = repo.tag.list().find {
+    def grgit = org.ajoberstar.grgit.Grgit.open(currentDir: file('.'))
+    def head = grgit.head()
+    def tags = grgit.tag.list().find {
         it.commit == head
     }
 
@@ -59,6 +59,12 @@ ext {
         enviroment = "Development"
         sentryDSN = sentry_development_dsn
     }
+
+    // not doing anything as of a bug in grgit when opening with currentDir/dir
+    // https://github.com/ajoberstar/grgit/issues/288
+    grgit.close()
+    // therefore close the underlying repository manually
+    grgit.repository.jgit.getRepository().close()
 
     // vendor, tagVersion, msiVersion, and DSN's defaults are set in gradle.properties
     println 'Configuring for ' + project.name + " " + tagVersion + " by " + vendor
@@ -135,12 +141,12 @@ eclipse {
 repositories {
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    mavenLocal()
     mavenCentral()
+    jcenter()
     maven { url = 'http://maptool.craigs-stuff.net/repo/' }
     maven { url = 'http://www.nerps.net/repo/' }
-    maven { url = 'http://nexus.fyiblue.com/content/groups/public' }
-    mavenLocal()
+    maven { url = 'https://jitpack.io' }
 }
 
 
@@ -171,7 +177,7 @@ dependencies {
     implementation 'commons-cli:commons-cli:1.3'
 
     implementation 'net.rptools.decktool:decktool:1.0.b1'
-    implementation 'net.rptools.dicelib:dicelib:1.4.0.+'
+
     implementation 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
     implementation 'net.rptools.parser:parser:1.4.0.+'
 
@@ -237,8 +243,8 @@ dependencies {
     // For RESTful functions
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.13.1'
 
-     // Better JSON functions...
-     implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
+    // Better JSON functions...
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the
@@ -250,6 +256,11 @@ dependencies {
 
     // For mocking features during unit tests
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+
+    // sourceControl gitRepository currently not producing classpath for Eclipse
+    // using jitpack.io for now
+    // compile ('net.rptools.dicelib:dicelib:1.5.2')
+    implementation 'com.github.RPTools:dicelib:1.5.3'
 }
 
 
@@ -379,7 +390,7 @@ test {
 }
 
 task createWrapper(type: Wrapper) {
-    gradleVersion = '5.2.1'
+    gradleVersion = '5.3.1'
 }
 
 // Configure current release tag in Sentry.io properties

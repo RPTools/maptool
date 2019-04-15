@@ -58,9 +58,16 @@ public class DrawablesGroup extends AbstractDrawing {
   public Area getArea() {
     Area area = null;
     for (DrawnElement element : drawableList) {
-      if (area == null) area = element.getDrawable().getArea();
-      else area.add(element.getDrawable().getArea());
-      ;
+      boolean isEraser = element.getPen().isEraser();
+      if (area == null) {
+        if (!isEraser) area = new Area(element.getDrawable().getArea());
+      } else {
+        if (isEraser) {
+          area.subtract(element.getDrawable().getArea());
+        } else {
+          area.add(element.getDrawable().getArea());
+        }
+      }
     }
     return area;
   }

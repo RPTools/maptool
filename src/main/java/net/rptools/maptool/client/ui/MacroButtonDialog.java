@@ -417,6 +417,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     ac.setAutoActivationEnabled(true);
     ac.setAutoActivationDelay(500);
     ac.setShowDescWindow(true);
+    ac.setAutoCompleteSingleChoices(false);
     ac.install(macroEditorRSyntaxTextArea);
 
     // Set the color style via Theme
