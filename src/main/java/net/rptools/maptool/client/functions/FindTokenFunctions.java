@@ -700,4 +700,25 @@ public class FindTokenFunctions extends AbstractFunction {
     }
     return null;
   }
+  
+  /**
+   * find a token on all maps (first matching is returned)
+   * @param identifier to check for
+   * @return the token
+   */
+  public static Token findToken(final String identifier) {
+    final Zone currentZone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    Token token = currentZone.resolveToken(identifier);
+    if (token == null) {
+      final List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+      for (final ZoneRenderer zr : zrenderers) {
+        final Zone zone = zr.getZone();
+        token = zone.resolveToken(identifier);
+        if (token != null) {
+          return token;
+        }
+      }
+    }
+    return token;
+  }
 }

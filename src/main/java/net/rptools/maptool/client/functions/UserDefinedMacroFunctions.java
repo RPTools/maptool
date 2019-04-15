@@ -273,11 +273,13 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
         if (fullMacroName != null && fullMacroName.indexOf("@") > 0) {
           String tokenName = fullMacroName.substring(fullMacroName.indexOf("@")+1);
           String macroName = fullMacroName.substring(0, fullMacroName.indexOf("@"));
-          Token token = FindTokenFunctions.findToken(tokenName, null);
-          List<MacroButtonProperties> macros = token.getMacroList(false);
-          for(MacroButtonProperties macro : macros) {
-            if (macroName.equals(macro.getLabel())) {
-              return macro.getToolTip();
+          Token token = FindTokenFunctions.findToken(tokenName);
+          if (token != null) {
+            List<MacroButtonProperties> macros = token.getMacroList(false);
+            for(MacroButtonProperties macro : macros) {
+              if (macroName.equals(macro.getLabel())) {
+                return macro.getToolTip();
+              }
             }
           }
         }
@@ -298,11 +300,13 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
         if (fullMacroName != null && fullMacroName.indexOf("@") > 0) {
           final String tokenName = fullMacroName.substring(fullMacroName.indexOf("@")+1);
           final String macroName = fullMacroName.substring(0, fullMacroName.indexOf("@"));
-          final Token token = FindTokenFunctions.findToken(tokenName, null);
+          final Token token = FindTokenFunctions.findToken(tokenName);
+          if (token != null) {
           final List<MacroButtonProperties> macros = token.getMacroList(false);
-          for(MacroButtonProperties macro : macros) {
-            if (macroName.equals(macro.getLabel())) {
-              return "(Token " + tokenName + ")";
+            for(MacroButtonProperties macro : macros) {
+              if (macroName.equals(macro.getLabel())) {
+                return "(Token " + tokenName + ")";
+              }
             }
           }
         }
@@ -310,5 +314,5 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     }
     return null;
   }
-
+  
 }
