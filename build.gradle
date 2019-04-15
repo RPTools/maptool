@@ -146,7 +146,7 @@ repositories {
     jcenter()
     maven { url = 'http://maptool.craigs-stuff.net/repo/' }
     maven { url = 'http://www.nerps.net/repo/' }
-    maven { url = "https://jitpack.io" }
+    maven { url = 'https://jitpack.io' }
 }
 
 
@@ -257,8 +257,10 @@ dependencies {
     // For mocking features during unit tests
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
 
-    implementation ('net.rptools.dicelib:dicelib:1.5.2')
-    //implementation 'com.github.RPTools:dicelib:develop-SNAPSHOT'
+    // sourceControl gitRepository currently not producing classpath for Eclipse
+    // using jitpack.io for now
+    // compile ('net.rptools.dicelib:dicelib:1.5.2')
+    implementation 'com.github.RPTools:dicelib:1.5.3'
 }
 
 
@@ -388,7 +390,7 @@ test {
 }
 
 task createWrapper(type: Wrapper) {
-    gradleVersion = '5.3'
+    gradleVersion = '5.3.1'
 }
 
 // Configure current release tag in Sentry.io properties
