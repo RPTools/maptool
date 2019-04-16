@@ -276,20 +276,24 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
 
   @Override
   public String getFunctionSummary(String functionName) {
-    if (functionName == null) { return null; }
-    
-    for(Entry<String, FunctionDefinition> function : userDefinedFunctions.entrySet()) {
+    if (functionName == null) {
+      return null;
+    }
+
+    for (Entry<String, FunctionDefinition> function : userDefinedFunctions.entrySet()) {
       if (functionName.equals(function.getKey())) {
         FunctionDefinition funcDef = function.getValue();
         String fullMacroName = funcDef.macroName;
         if (fullMacroName != null && fullMacroName.indexOf("@") > 0) {
-          String tokenName = fullMacroName.substring(fullMacroName.indexOf("@")+1);
+          String tokenName = fullMacroName.substring(fullMacroName.indexOf("@") + 1);
           String macroName = fullMacroName.substring(0, fullMacroName.indexOf("@"));
-          Token token = FindTokenFunctions.findToken(tokenName, null);
-          List<MacroButtonProperties> macros = token.getMacroList(false);
-          for(MacroButtonProperties macro : macros) {
-            if (macroName.equals(macro.getLabel())) {
-              return macro.getToolTip();
+          Token token = FindTokenFunctions.findToken(tokenName);
+          if (token != null) {
+            List<MacroButtonProperties> macros = token.getMacroList(false);
+            for (MacroButtonProperties macro : macros) {
+              if (macroName.equals(macro.getLabel())) {
+                return macro.getToolTip();
+              }
             }
           }
         }
@@ -298,23 +302,26 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     return null;
   }
 
-  
   @Override
   public String getFunctionDescription(String functionName) {
-    if (functionName == null) { return null; }
-    
-    for(Entry<String, FunctionDefinition> function : userDefinedFunctions.entrySet()) {
+    if (functionName == null) {
+      return null;
+    }
+
+    for (Entry<String, FunctionDefinition> function : userDefinedFunctions.entrySet()) {
       if (functionName.equals(function.getKey())) {
         final FunctionDefinition funcDef = function.getValue();
         final String fullMacroName = funcDef.macroName;
         if (fullMacroName != null && fullMacroName.indexOf("@") > 0) {
-          final String tokenName = fullMacroName.substring(fullMacroName.indexOf("@")+1);
+          final String tokenName = fullMacroName.substring(fullMacroName.indexOf("@") + 1);
           final String macroName = fullMacroName.substring(0, fullMacroName.indexOf("@"));
-          final Token token = FindTokenFunctions.findToken(tokenName, null);
-          final List<MacroButtonProperties> macros = token.getMacroList(false);
-          for(MacroButtonProperties macro : macros) {
-            if (macroName.equals(macro.getLabel())) {
-              return "(Token " + tokenName + ")";
+          final Token token = FindTokenFunctions.findToken(tokenName);
+          if (token != null) {
+            final List<MacroButtonProperties> macros = token.getMacroList(false);
+            for (MacroButtonProperties macro : macros) {
+              if (macroName.equals(macro.getLabel())) {
+                return "(Token " + tokenName + ")";
+              }
             }
           }
         }
@@ -322,5 +329,4 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     }
     return null;
   }
-
 }
