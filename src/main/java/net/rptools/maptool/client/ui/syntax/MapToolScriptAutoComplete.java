@@ -145,13 +145,15 @@ public class MapToolScriptAutoComplete {
   }
 
   private String getShortDescription(String macro) {
-    final String shortDesc = I18N.getString(macro + I18N_SHORT_DESCRIPTION, MACRO_DESCRIPTIONS_BUNDLE);
+    final String shortDesc =
+        I18N.getString(macro + I18N_SHORT_DESCRIPTION, MACRO_DESCRIPTIONS_BUNDLE);
 
     // if there is no shortDesc try if one of the functions has one
     if (shortDesc == null) {
-      for(Function function : MapTool.getParser().getMacroFunctions()) {
+      for (Function function : MapTool.getParser().getMacroFunctions()) {
         if (function instanceof AdditionalFunctionDescription) {
-          final AdditionalFunctionDescription functionExtended = (AdditionalFunctionDescription) function;
+          final AdditionalFunctionDescription functionExtended =
+              (AdditionalFunctionDescription) function;
           // try if the function has a summary for this macro
           final String shortDescExtended = functionExtended.getFunctionDescription(macro);
           if (shortDescExtended != null) {
@@ -161,7 +163,7 @@ public class MapToolScriptAutoComplete {
       }
       return null;
     }
-    
+
     if (shortDesc.equals(I18N_PLACEHOLDER_TEXT)) return null;
     else return shortDesc;
   }
@@ -171,9 +173,10 @@ public class MapToolScriptAutoComplete {
 
     // if there is no summary try if one of the functions has one
     if (summary == null) {
-      for(final Function function : MapTool.getParser().getMacroFunctions()) {
+      for (final Function function : MapTool.getParser().getMacroFunctions()) {
         if (function instanceof AdditionalFunctionDescription) {
-          final AdditionalFunctionDescription functionExtended = (AdditionalFunctionDescription) function;
+          final AdditionalFunctionDescription functionExtended =
+              (AdditionalFunctionDescription) function;
           // try if the function has a summary for this macro
           final String summaryExtended = functionExtended.getFunctionSummary(macro);
           if (summaryExtended != null) {
