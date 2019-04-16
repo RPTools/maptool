@@ -1632,7 +1632,11 @@ public class MapToolLineParser {
       }
       boolean secure = isSecure(macroName, token);
       macroContext = new MapToolMacroContext(macroName, macroLocation, secure);
+
+      MacroButtonProperties mbp = token.getMacro(macroName, false);
+      log.info(macroName + "::" + macroLocation + "::" + mbp.getToolTip());
     }
+
     // Error if macro not found
     if (macroBody == null) {
       throw new ParserException(I18N.getText("lineParser.unknownMacro", macroName));

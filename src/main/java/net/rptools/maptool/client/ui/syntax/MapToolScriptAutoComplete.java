@@ -80,8 +80,7 @@ public class MapToolScriptAutoComplete {
       }
     }
 
-    // FIXME: TERRIBLE! But I'm tired and running out of time, need to add to a .properties
-    // file!
+    // FIXME: TERRIBLE! But I'm tired and running out of time, need to add to a .properties file!
     provider.addCompletion(
         new ShorthandCompletion(
             provider,
@@ -91,12 +90,7 @@ public class MapToolScriptAutoComplete {
     provider.addCompletion(
         new ShorthandCompletion(
             provider, "if", "[h, if(condition): true_body]", "A basic hidden IF statement")); // Can
-    // also
-    // add
-    // a
-    // full
-    // HTML
-    // description
+    // also add a full HTML description
     provider.addCompletion(
         new ShorthandCompletion(
             provider,

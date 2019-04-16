@@ -56,7 +56,6 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   }
 
   private static class FunctionDefinition {
-
     public FunctionDefinition(String macroName, boolean ignoreOutput, boolean newVariableContext) {
       this.macroName = macroName;
       this.ignoreOutput = ignoreOutput;
@@ -168,6 +167,8 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       FunctionRedefinition fr = new FunctionRedefinition();
       fr.function = parser.getFunction(name);
       fr.functionName = name;
+      // fr.description = "<html>This is a test doc!</html>";
+
       if (isFunctionDefined(name)) {
         // If it is already defined as what this then do nothing...
         if (userDefinedFunctions.get(name).equals(macro)) {
@@ -216,9 +217,8 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
                   });
 
       for (Token token : tokenList) {
-        // If the token is not owned by everyone and all owners are GMs
-        // then we are in
-        // its a trusted Lib:token so we can run the macro
+        // If the token is not owned by everyone and all owners are GMs then we are in its a trusted
+        // Lib:token so we can run the macro
         if (token != null) {
           if (token.isOwnedByAll()) {
             continue;
