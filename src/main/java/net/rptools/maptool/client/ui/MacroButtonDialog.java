@@ -396,7 +396,6 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     getToolTipTextField().setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_HTML);
     getToolTipTextField().setLineWrap(true);
     getToolTipTextField().setWrapStyleWord(true);
-    getToolTipTextField().setCodeFoldingEnabled(true);
     getToolTipTextField().setTabSize(2);
 
     // Macro Editor setup
