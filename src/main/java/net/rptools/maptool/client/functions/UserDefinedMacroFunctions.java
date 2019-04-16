@@ -56,17 +56,15 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   }
 
   private static class FunctionDefinition {
-    public FunctionDefinition(String macroName, boolean ignoreOutput, boolean newVariableContext, String description) {
+    public FunctionDefinition(String macroName, boolean ignoreOutput, boolean newVariableContext) {
       this.macroName = macroName;
       this.ignoreOutput = ignoreOutput;
       this.newVariableContext = newVariableContext;
-      this.description = description;
     }
 
     String macroName;
     boolean ignoreOutput;
     boolean newVariableContext;
-    String description;
   }
 
   private static class FunctionRedefinition {
@@ -169,8 +167,8 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       FunctionRedefinition fr = new FunctionRedefinition();
       fr.function = parser.getFunction(name);
       fr.functionName = name;
-      //fr.description = "<html>This is a test doc!</html>";
-      
+      // fr.description = "<html>This is a test doc!</html>";
+
       if (isFunctionDefined(name)) {
         // If it is already defined as what this then do nothing...
         if (userDefinedFunctions.get(name).equals(macro)) {
@@ -184,7 +182,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       }
       redefinedFunctions.put(name, fr);
     }
-    userDefinedFunctions.put(name, new FunctionDefinition(macro, ignoreOutput, newVariableContext, "<html>This is a test doc!</html>"));
+    userDefinedFunctions.put(name, new FunctionDefinition(macro, ignoreOutput, newVariableContext));
 
     MapToolScriptSyntax.resetScriptSyntax();
   }
@@ -203,16 +201,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   public boolean isFunctionDefined(String name) {
     return userDefinedFunctions.containsKey(name);
   }
-  
-//  public String getDescription(String name) {
-//    if(isFunctionDefined(name)) {
-//     FunctionDefinition test = userDefinedFunctions.get(name);
-//     
-//     return test;
-//    }
-//    else
-//      return "";
-//  }
+
   public void loadCampaignLibFunctions() {
     userDefinedFunctions.clear();
 
@@ -228,9 +217,8 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
                   });
 
       for (Token token : tokenList) {
-        // If the token is not owned by everyone and all owners are GMs
-        // then we are in
-        // its a trusted Lib:token so we can run the macro
+        // If the token is not owned by everyone and all owners are GMs then we are in its a trusted
+        // Lib:token so we can run the macro
         if (token != null) {
           if (token.isOwnedByAll()) {
             continue;

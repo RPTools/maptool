@@ -80,8 +80,7 @@ public class MapToolScriptAutoComplete {
       }
     }
 
-    // FIXME: TERRIBLE! But I'm tired and running out of time, need to add to a .properties
-    // file!
+    // FIXME: TERRIBLE! But I'm tired and running out of time, need to add to a .properties file!
     provider.addCompletion(
         new ShorthandCompletion(
             provider,
