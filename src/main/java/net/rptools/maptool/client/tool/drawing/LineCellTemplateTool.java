@@ -18,31 +18,26 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
-import net.rptools.maptool.model.drawing.LineTemplate;
+import net.rptools.maptool.model.drawing.LineCellTemplate;
 import net.rptools.maptool.model.drawing.Pen;
 
 /**
  * Draw the effected area of a spell area type of line.
  *
- * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
+ * @author naciron
  */
-public class LineTemplateTool extends RadiusTemplateTool implements PropertyChangeListener {
+public class LineCellTemplateTool extends RadiusCellTemplateTool {
 
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
@@ -59,7 +54,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    *-------------------------------------------------------------------------------------------*/
 
   /** Add the icon to the toggle button. */
-  public LineTemplateTool() {
+  public LineCellTemplateTool() {
     try {
       setIcon(
           ImageUtil.resizeImage(
@@ -68,13 +63,12 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
                       getClass()
                           .getClassLoader()
                           .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-vertex-line.png"))),
+                              "net/rptools/maptool/client/image/tool/temp-blue-cell-line.png"))),
               TOOLBAR_ICON_SIZE,
               TOOLBAR_ICON_SIZE));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     } // endtry
-    AppState.addPropertyChangeListener(AppState.USE_DOUBLE_WIDE_PROP_NAME, this);
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -84,19 +78,19 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
   /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip() */
   @Override
   public String getTooltip() {
-    return "tool.linetemplate.tooltip";
+    return "tool.LineCellTemplate.tooltip";
   }
 
   /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
   @Override
   public String getInstructions() {
-    return "tool.linetemplate.instructions";
+    return "tool.LineCellTemplate.instructions";
   }
 
   /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate() */
   @Override
   protected AbstractTemplate createBaseTemplate() {
-    return new LineTemplate();
+    return new LineCellTemplate();
   }
 
   /**
@@ -107,7 +101,6 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
   protected void resetTool(ZonePoint aVertex) {
     super.resetTool(aVertex);
     pathAnchorSet = false;
-    ((LineTemplate) template).setDoubleWide(AppState.useDoubleWideLine());
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -128,7 +121,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
       newTransform.concatenate(getPaintTransform(renderer));
       g.setTransform(newTransform);
       ZonePoint vertex = template.getVertex();
-      ZonePoint pathVertex = ((LineTemplate) template).getPathVertex();
+      ZonePoint pathVertex = ((LineCellTemplate) template).getPathVertex();
       template.draw(g, pen);
       Paint paint = pen.getPaint() != null ? pen.getPaint().getPaint() : null;
       paintCursor(g, paint, pen.getThickness(), vertex);
@@ -148,7 +141,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    */
   @Override
   protected int getRadiusAtMouse(MouseEvent aE) {
-    int radius = super.getRadiusAtMouse(aE);
+    int radius = super.getRadiusAtMouse(aE) + 1;
     return Math.max(0, radius - 1);
   }
 
@@ -169,7 +162,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
         return;
       } // endif
       if (!pathAnchorSet) {
-        LineTemplate lt = (LineTemplate) template;
+        LineCellTemplate lt = (LineCellTemplate) template;
         ZonePoint pathVertex = lt.getPathVertex();
         ZonePoint vertex = lt.getVertex();
         // If the anchor vertex and path anchor vertex are the same, the line is invalid, so do not
@@ -192,7 +185,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
   @Override
   protected void handleMouseMovement(MouseEvent e) {
     // Setting anchor point?
-    LineTemplate lt = (LineTemplate) template;
+    LineCellTemplate lt = (LineCellTemplate) template;
     ZonePoint pathVertex = lt.getPathVertex();
     ZonePoint vertex = lt.getVertex();
 
@@ -264,14 +257,5 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
         renderer.repaint();
       } // endif
     } // endif
-  }
-
-  /*---------------------------------------------------------------------------------------------
-   * PropertyChangeListener Interface Methods
-   *-------------------------------------------------------------------------------------------*/
-
-  /** @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent) */
-  public void propertyChange(PropertyChangeEvent aEvt) {
-    ((LineTemplate) template).setDoubleWide(((Boolean) aEvt.getNewValue()).booleanValue());
   }
 }
