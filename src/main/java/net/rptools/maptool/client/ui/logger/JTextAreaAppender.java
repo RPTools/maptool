@@ -1,16 +1,5 @@
 /*
- * This software Copyright by the RPTools.net development team, and
- * licensed under the Affero GPL Version 3 or, at your option, any later
- * version.
- *
- * MapTool Source Code is distributed in the hope that it will be
- * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- * You should have received a copy of the GNU Affero General Public
- * License * along with this source Code.  If not, please visit
- * <http://www.gnu.org/licenses/> and specifically the Affero license
- * text at <http://www.gnu.org/licenses/agpl.html>.
+ * Shamelessly pulled from https://stackoverflow.com/questions/24005748/how-to-output-logs-to-a-jtextarea-using-log4j2
  */
 package net.rptools.maptool.client.ui.logger;
 
@@ -27,9 +16,6 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
-/*
- * Shamelessly pulled from https://stackoverflow.com/questions/24005748/how-to-output-logs-to-a-jtextarea-using-log4j2
- */
 @Plugin(name = "JTextAreaAppender", category = "Core", elementType = "appender", printObject = true)
 public class JTextAreaAppender extends AbstractAppender {
   private static volatile ArrayList<JTextArea> jTextAreaList = new ArrayList<JTextArea>();
