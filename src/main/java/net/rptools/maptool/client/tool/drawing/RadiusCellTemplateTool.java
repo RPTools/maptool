@@ -25,6 +25,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
@@ -43,9 +44,7 @@ import net.rptools.maptool.model.drawing.RadiusCellTemplate;
  * wheel to set the radius. This allows the user to move the entire template where it is to be used
  * before placing it which is very important when casting a spell.
  *
- * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
+ * @author naciron
  */
 public class RadiusCellTemplateTool extends AbstractDrawingTool implements MouseMotionListener {
   /*---------------------------------------------------------------------------------------------
@@ -93,14 +92,17 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
   public RadiusCellTemplateTool() {
     try {
       setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/temp-blue.png"))));
+          ImageUtil.resizeImage(
+              new ImageIcon(
+                  ImageIO.read(
+                      getClass()
+                          .getClassLoader()
+                          .getResourceAsStream(
+                              "net/rptools/maptool/client/image/tool/temp-blue-cell-radius.png"))),
+              TOOLBAR_ICON_SIZE,
+              TOOLBAR_ICON_SIZE));
     } catch (IOException ioe) {
-      MapTool.showError("Can't find image resource 'temp-blue.png'", ioe);
+      MapTool.showError("Can't find image resource 'temp-blue-cell-radius.png'", ioe);
     } // endtry
   }
 
@@ -390,7 +392,7 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
   /** @see net.rptools.maptool.client.ui.Tool#getTooltip() */
   @Override
   public String getTooltip() {
-    return "tool.radiustemplate.tooltip";
+    return "tool.radiusCellTemplate.tooltip";
   }
 
   /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
