@@ -14,8 +14,10 @@
  */
 package net.rptools.maptool.client.ui.syntax;
 
+import java.util.Map;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
+import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.parser.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -101,11 +103,11 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
       macroFunctionTokenMap.put(reservedWord, Token.RESERVED_WORD);
 
     // Add "Events" as Reserved Word 2
-    for (String reservedWord : RESERVED_WORDS_2)
-      macroFunctionTokenMap.put(reservedWord, Token.RESERVED_WORD_2);
+    for (String reservedWord2 : RESERVED_WORDS_2)
+      macroFunctionTokenMap.put(reservedWord2, Token.RESERVED_WORD_2);
 
-    // Add "Events" as OPERATOR
-    for (String reservedWord : OPERATORS) macroFunctionTokenMap.put(reservedWord, Token.OPERATOR);
+    // Add "Operators" as OPERATOR
+    for (String operators : OPERATORS) macroFunctionTokenMap.put(operators, Token.OPERATOR);
 
     // Add "highlights defined by functions like Special Variables" as Data Type
     for (Function function : MapTool.getParser().getMacroFunctions()) {
@@ -140,8 +142,13 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
       synchronized (MapToolScriptSyntax.class) {
         macroFunctionTokenMap = new TokenMap(true);
 
-        for (String macro : MapTool.getParser().listAllMacroFunctions()) {
-          macroFunctionTokenMap.put(macro, Token.FUNCTION);
+        Map<String, String> macroMap = MapTool.getParser().listAllMacroFunctions();
+
+        for (String macro : macroMap.keySet()) {
+          if (macroMap.get(macro).equals(UserDefinedMacroFunctions.class.getName()))
+            macroFunctionTokenMap.put(macro, Token.ANNOTATION);
+          else macroFunctionTokenMap.put(macro, Token.FUNCTION);
+
           log.debug("Adding \"" + macro + "\" macro function to syntax highlighting.");
         }
       }
