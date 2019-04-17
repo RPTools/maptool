@@ -137,7 +137,7 @@ public class LogFunctions extends AbstractFunction {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
 
-    return null;
+    return "";
   }
 
   /**
