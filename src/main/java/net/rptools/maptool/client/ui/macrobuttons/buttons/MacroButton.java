@@ -155,7 +155,7 @@ public class MacroButton extends JButton implements MouseListener {
     // if there is no hotkey (HOTKEY[0]) then no need to add hint
     String hotKey = properties.getHotKey();
     String result = null;
-    if (hotKey.equals(MacroButtonHotKeyManager.HOTKEYS[0]))
+    if (hotKey.equals(MacroButtonHotKeyManager.HOTKEYS[0]) || !properties.getDisplayHotKey())
       result = "<html>" + div + formatButtonLabel;
     else
       result =
