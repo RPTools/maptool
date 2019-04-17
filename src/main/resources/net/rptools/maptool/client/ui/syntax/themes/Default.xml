@@ -6,11 +6,11 @@
 	See theme.dtd and org.fife.ui.rsyntaxtextarea.Theme for more information.
 -->
 <RSyntaxTheme version="1.0">
-	
-	<!-- Omitting baseFont will use a system-appropriate monospaced. -->
-	<baseFont size="18"/>
-	
-	<!--  General editor colors. -->
+
+   <!-- Omitting baseFont will use a system-appropriate monospaced. -->
+   <baseFont size="13"/>
+   
+ 	<!--  General editor colors. -->
 	<background color="ffffff"/>
 	<caret color="ff0000"/>
 	<selection fg="default" useFG="false" bg="c8c8ff"/>
@@ -25,12 +25,14 @@
 		<language index="2" bg="dafeda"/>
 		<language index="3" bg="ffe0f0"/>
 	</secondaryLanguages>
+
 	
 	<!-- Gutter styling. -->
 	<gutterBorder color="dddddd"/>
 	<lineNumbers fg="787878"/>
 	<foldIndicator fg="808080" iconBg="ffffff"/>
 	<iconRowHeader activeLineRange="3399ff"/>
+
 	
 	<!-- Syntax tokens. -->
 	<tokenStyles>
@@ -68,11 +70,13 @@
 		<style token="SEPARATOR" fg="ff0000"/>
 		<style token="VARIABLE" fg="ee8800" bold="true"/>
 		<style token="WHITESPACE" fg="000000"/>
+
 		
 		<style token="ERROR_IDENTIFIER" fg="000000" bg="ffcccc"/>
 		<style token="ERROR_NUMBER_FORMAT" fg="000000" bg="ffcccc"/>
 		<style token="ERROR_STRING_DOUBLE" fg="000000" bg="ffcccc"/>
 		<style token="ERROR_CHAR" fg="000000" bg="ffcccc"/>
 	</tokenStyles>
+
 	
 </RSyntaxTheme>

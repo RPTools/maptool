@@ -18,9 +18,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Matcher;
@@ -215,11 +217,19 @@ public class MapToolLineParser {
     return mapToolParserFunctions;
   }
 
-  public List<String> listAllMacroFunctions() {
-    List<String> functionList = new ArrayList<String>();
+  public Map<String, String> listAllMacroFunctions() {
+    Map<String, String> functionList = new HashMap<String, String>();
 
     for (Function function : getMacroFunctions()) {
-      functionList.addAll(Arrays.asList(function.getAliases()));
+      if (function instanceof AdditionalFunctionDescription) {
+        for (String alias : Arrays.asList(function.getAliases())) {
+          functionList.put(alias, function.getClass().getName());
+          //          log.info(alias + " : " + function.getClass().getName());
+        }
+      } else {
+        for (String alias : Arrays.asList(function.getAliases()))
+          functionList.put(alias, function.getClass().getName());
+      }
     }
 
     return functionList;
@@ -1634,7 +1644,6 @@ public class MapToolLineParser {
       macroContext = new MapToolMacroContext(macroName, macroLocation, secure);
 
       MacroButtonProperties mbp = token.getMacro(macroName, false);
-      log.info(macroName + "::" + macroLocation + "::" + mbp.getToolTip());
     }
 
     // Error if macro not found

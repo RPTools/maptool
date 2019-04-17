@@ -168,6 +168,9 @@ public class AppPreferences {
   private static final String KEY_USE_ASTAR_PATHFINDING = "useAstarPathfinding";
   private static final boolean DEFAULT_USE_ASTAR_PATHFINDING = true;
 
+  private static final String MACRO_EDITOR_THEME = "macroEditorTheme";
+  private static final String DEFAULT_MACRO_EDITOR_THEME = "default";
+
   public static void setFillSelectionBox(boolean fill) {
     prefs.putBoolean(KEY_FILL_SELECTION_BOX, fill);
   }
@@ -1121,5 +1124,13 @@ public class AppPreferences {
 
   public static void setUseAstarPathfinding(boolean show) {
     prefs.putBoolean(KEY_USE_ASTAR_PATHFINDING, show);
+  }
+
+  public static String getDefaultMacroEditorTheme() {
+    return prefs.get(MACRO_EDITOR_THEME, DEFAULT_MACRO_EDITOR_THEME);
+  }
+
+  public static void setDefaultMacroEditorTheme(String type) {
+    prefs.put(MACRO_EDITOR_THEME, type);
   }
 }
