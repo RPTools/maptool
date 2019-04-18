@@ -103,7 +103,7 @@ public class AssetCacheStatusBar extends JLabel {
     if (System.currentTimeMillis() - lastChecked >= POLLING_INTERVAL) {
       setText(AppUtil.getDiskSpaceUsed(CACHE_DIR));
       lastChecked = System.currentTimeMillis();
-      log.info("AssetCacheStatusBar updated...");
+      log.debug("AssetCacheStatusBar updated...");
     }
   }
 }
