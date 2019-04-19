@@ -8,9 +8,7 @@
 			<PatternLayout pattern="%d{HH:mm:ss.SSS} (%F:%L) [%t] %-5level %logger{36} - %msg%n" />
 		</Console>
 		<RollingFile name="LogFile" fileName="${sys:appHome}/maptool.log" filePattern="${sys:appHome}/archive/maptool_%d{yyy-MM-dd_HH-mm-ss}.log.zip" ignoreExceptions="false">
-			<PatternLayout>
-				<Pattern>%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
-			</PatternLayout>
+			<PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n" />
 			<Policies>
 				<OnStartupTriggeringPolicy />
 				<SizeBasedTriggeringPolicy size="10 MB" />
@@ -23,9 +21,7 @@
 			</DefaultRolloverStrategy>
 		</RollingFile>
 		<JTextAreaAppender name="jtextarea-log" maxLines="5000">
-			<PatternLayout>
-				<pattern>%d{HH:mm:ss.SSS} %-5level %logger - %msg%n</pattern>
-			</PatternLayout>
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %logger - %msg%n" />
 		</JTextAreaAppender>
 	</Appenders>
 	<Loggers>
