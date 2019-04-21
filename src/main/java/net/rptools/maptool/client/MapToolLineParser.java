@@ -710,10 +710,12 @@ public class MapToolLineParser {
       throws ParserException {
 
     // copy previous rolls and clear out for new rolls.
-    lastRolled.clear();
-    lastRolled.addAll(rolled);
-    rolled.clear();
-    newRolls.clear();
+    if (parserRecurseDepth == 0 && macroRecurseDepth == 0) {
+      lastRolled.clear();
+      lastRolled.addAll(rolled);
+      rolled.clear();
+      newRolls.clear();
+    }
 
     if (line == null) {
       return "";
