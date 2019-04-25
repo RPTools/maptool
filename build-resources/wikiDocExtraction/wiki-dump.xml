@@ -1,5 +1,3 @@
-
-Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; GeSHi has a deprecated constructor in /home1/lmwcscom/public_html/maptool/extensions/SyntaxHighlight_GeSHi/geshi/geshi.php on line 259
 <mediawiki xmlns="http://www.mediawiki.org/xml/export-0.10/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.10/ http://www.mediawiki.org/xml/export-0.10.xsd" version="0.10" xml:lang="en">
   <siteinfo>
     <sitename>MapToolDoc</sitename>

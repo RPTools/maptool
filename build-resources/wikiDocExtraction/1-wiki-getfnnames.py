@@ -60,7 +60,7 @@ setMaxRecursionDepth
 setTableImage
 """
 
-names.update(dict.fromkeys(added.split(), 2))
+#names.update(dict.fromkeys(added.split(), 2))
 all_names = list(names.keys())
 all_names.sort()
 print("\n".join(all_names))

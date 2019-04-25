@@ -1,3 +1,8 @@
+REST.delete
+REST.get
+REST.patch
+REST.post
+REST.put
 abort
 absolutevalue
 add
@@ -10,6 +15,8 @@ arg
 argCount
 assert
 average
+base64.decode
+base64.encode
 bitwiseand
 bitwisenot
 bitwiseor
@@ -20,6 +27,7 @@ broadcast
 canSeeToken
 ceiling
 clearLights
+clearRolls
 clearTable
 closeDialog
 closeFrame
@@ -46,11 +54,10 @@ eraseVBL
 eval
 evalMacro
 execLink
-execMacro
 explode
 explodingSuccess
 exportData
-exposeAllOwnedArea
+exposeAllOwnedAreas
 exposeFOW
 exposeFogAtWaypoints
 exposePCOnlyArea
@@ -69,6 +76,7 @@ getCurrentMapName
 getDistance
 getDistanceToXY
 getDrawingEraser
+getDrawingInfo
 getDrawingLayer
 getDrawingOpacity
 getDrawingProperties
@@ -114,11 +122,11 @@ getMatchingLibProperties
 getMatchingProperties
 getMaxLoopIterations
 getMaxRecursionDepth
-getMaxRecusionDepth
 getMoveCount
 getNPC
 getNPCNames
 getName
+getNewRolls
 getNotes
 getOwned
 getOwnedNames
@@ -136,6 +144,7 @@ getPropertyNamesRaw
 getPropertyType
 getRawProperty
 getRecursionDepth
+getRolled
 getSelected
 getSelectedNames
 getSightType
@@ -159,6 +168,8 @@ getTokenHeight
 getTokenImage
 getTokenLabel
 getTokenNames
+getTokenNativeHeight
+getTokenNativeWidth
 getTokenOpacity
 getTokenPortrait
 getTokenRotation
@@ -262,6 +273,13 @@ listInsert
 listReplace
 listSort
 ln
+log.debug
+log.error
+log.fatal
+log.getLoggers
+log.info
+log.setLevel
+log.warn
 log10
 lower
 macroLink
@@ -275,6 +293,7 @@ mod
 moveToken
 moveTokenFromMap
 moveTokenToMap
+movedOverDrawing
 movedOverPoints
 movedOverToken
 multiply
@@ -296,6 +315,7 @@ reroll
 resetFrame
 resetProperty
 restoreFoW
+return
 roll
 round
 selectTokens
@@ -331,7 +351,6 @@ setMapName
 setMapVisible
 setMaxLoopIterations
 setMaxRecursionDepth
-setMaxRecusionDepth
 setNPC
 setName
 setNotes
