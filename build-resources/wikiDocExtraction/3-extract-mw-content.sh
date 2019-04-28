@@ -17,6 +17,6 @@ find lmwcs.com/rptools/wiki -type f |
         if [[ "$fname" -nt "$output" ]]; then
             echo "Processing $fname ..."
             rm -f "$output"
-            xsltproc --html "$XSL" "$fname" | xmllint --format - > "$output"
+            xsltproc "$XSL" "$fname" | xmllint --format - > "$output"
         fi
     done
