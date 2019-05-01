@@ -54,6 +54,7 @@ eraseVBL
 eval
 evalMacro
 execLink
+execMacro
 explode
 explodingSuccess
 exportData
