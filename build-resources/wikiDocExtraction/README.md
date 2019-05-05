@@ -13,7 +13,7 @@ under the name `i18n.properties`.
 
 The process is as follows:
 
-1.  `1-wiki-getfnnames.py`
+1.  `1-wiki-getfnnames.py > wiki-has.txt`
 
     This Python3 script reads Craig's MediaWiki dump file and makes a
     list of all pages that appear to describe macro functions.  This
