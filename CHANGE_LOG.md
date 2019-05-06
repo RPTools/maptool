@@ -37,9 +37,31 @@ Enhancements
 * [#389][i389] - File -> Export -> Campaign File As... now supports non-decimal map units-per-cell values.
 * [#332][i332] - Added support for multiple personal lights and setting color for personal lights. 
 
-
-
+[i106]: https://github.com/RPTools/maptool/issues/106
+[i118]: https://github.com/RPTools/maptool/issues/118
+[i292]: https://github.com/RPTools/maptool/issues/292
+[i299]: https://github.com/RPTools/maptool/issues/299
+[i335]: https://github.com/RPTools/maptool/issues/335
+[i338]: https://github.com/RPTools/maptool/issues/338
+[i339]: https://github.com/RPTools/maptool/issues/339
+[i345]: https://github.com/RPTools/maptool/issues/345
+[i349]: https://github.com/RPTools/maptool/issues/349
+[i355]: https://github.com/RPTools/maptool/issues/355
+[i362]: https://github.com/RPTools/maptool/issues/362
+[i377]: https://github.com/RPTools/maptool/issues/377
+[i384]: https://github.com/RPTools/maptool/issues/384
+[i386]: https://github.com/RPTools/maptool/issues/386
+[i389]: https://github.com/RPTools/maptool/issues/389
+[i395]: https://github.com/RPTools/maptool/issues/395
 [i398]: https://github.com/RPTools/maptool/issues/398
+[i400]: https://github.com/RPTools/maptool/issues/400
+[i406]: https://github.com/RPTools/maptool/issues/406
+[i407]: https://github.com/RPTools/maptool/issues/407
+[i416]: https://github.com/RPTools/maptool/issues/416
+[i424]: https://github.com/RPTools/maptool/issues/424
+[i426]: https://github.com/RPTools/maptool/issues/426
+[i429]: https://github.com/RPTools/maptool/issues/429
+[i441]: https://github.com/RPTools/maptool/issues/441
 
 MapTool 1.5.1
 =====
