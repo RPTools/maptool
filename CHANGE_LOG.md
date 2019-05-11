@@ -1,18 +1,77 @@
 Maptool 1.5.2
 =====
-
+More bug fixes and 
 ___
 
 Bug Fixes
 -----
-* [#398][i398] - Fixed insertion of newline being only at the end of the command pane
+* [#362][i362] - README updated to reflect current version.
+* [#118][i118] - Fixed console problem with spaces being in the Java path.
+* [#441][i441] - Draw Explorer no longer allows attempting to merge a drawing and a template.
+* [#395][i395] - Fix for Edit menu issues if language not set to English.
+* [#292][i292] - Out-of-date/bad URLs in Help menu updated/corrected.
+* [#339][i339] - Fixed Templates not previewing at correct location.
+* [#377][i377] - Returned values from getViewArea() corrected to be compatible with setViewArea().
+* [#392][i392] - Default Map Preferences updated to allow decimal Units per Cell values.
+* [#400][i400] - Selecting a filetype other than an RPTools map file when using Import Map no longer throws exception.
+* [#386][i386] - Output of *java -version* no longer included in Help -> Debug output.
+* [#398][i398] - Newlines can now be inserted into the middle of command lines in the chat window.
+* [#338][i338] - Templates added for Bugs, Features and Technical Questions to MapTool GitHub issues.
 
 Enhancements
 -----
+* [#335][i335] - New macro functions for controlling logging. [See log.* functions on Wiki](http://www.lmwcs.com/rptools/wiki/Category:Log_Function)
+* [#429][i429] - New macro functions for getting/setting terrain modifiers: [getTerrainModifier][igtm](), [setTerrainModifier][istm]()
+* [#345][i345] - New dicelib version with new dice expressions and new macro functions for accessing individual die roll values:
+  * [getRolled][igrd]()
+  * [getNewRolls][ignr]()
+  * [clearRolls][icrl]()
+* [#406][i406] - New [dice expression](http://www.lmwcs.com/rptools/wiki/Dice_Expressions) **XdYdhZ** (drop highest) and 7 others. 
+* [#355][i355] - Macro Editor details tab reorganized to give some fields more room. Macro button tooltip entry field made into a larger text area with HTML highlighting.  Checkbox to enable/disable hotkey display on button.  UDFs now show in auto-complete of macro editor with their tooltip as help text.
+* [#426][i426] - New Line & Radius templates that start at cells. New icons for all template types.
+* [#424][i424] - Auto-completion in macro editor now works even if complete function name has already been entered.
+* [#349][i349] - New macro functions for base64 encoding/decoding: [base64.encode][ibe64](), [base64.decode][ibd64]().
+* [#416][i416] - New macro function [movedOverDrawing](http://www.lmwcs.com/rptools/wiki/movedOverDrawing)().
+* [#407][i407] - New macro function [getDrawingInfo](http://www.lmwcs.com/rptools/wiki/getDrawingInfo)().
+* [#384][i384] - Warning message removed when using Import Map option.
+* [#365][i365] - Editing token properties now supports word wrap and syntax highlighting.
+* [#106][i106] - Reset Size added to right-click menu for tokens/stamps.
+* [#299][i299] - Mouse pointer now visible when dragging tokens.
+* [#389][i389] - File -> Export -> Campaign File As... now supports converting back to non-decimal map units-per-cell values.
+* [#332][i332] - Added support for multiple personal lights and setting color for personal lights. 
 
-
-
+[igrd]: http://www.lmwcs.com/rptools/wiki/getRolled
+[ignr]: http://www.lmwcs.com/rptools/wiki/getNewRolls
+[icrl]: http://www.lmwcs.com/rptools/wiki/clearRolls
+[ibd64]: http://www.lmwcs.com/rptools/wiki/base64.decode
+[ibe64]: http://www.lmwcs.com/rptools/wiki/base64.encode
+[igtm]: http://www.lmwcs.com/rptools/wiki/getTerrainModifier
+[istm]: http://www.lmwcs.com/rptools/wiki/setTerrainModifier
+[i106]: https://github.com/RPTools/maptool/issues/106
+[i118]: https://github.com/RPTools/maptool/issues/118
+[i292]: https://github.com/RPTools/maptool/issues/292
+[i299]: https://github.com/RPTools/maptool/issues/299
+[i335]: https://github.com/RPTools/maptool/issues/335
+[i338]: https://github.com/RPTools/maptool/issues/338
+[i339]: https://github.com/RPTools/maptool/issues/339
+[i345]: https://github.com/RPTools/maptool/issues/345
+[i349]: https://github.com/RPTools/maptool/issues/349
+[i355]: https://github.com/RPTools/maptool/issues/355
+[i362]: https://github.com/RPTools/maptool/issues/362
+[i377]: https://github.com/RPTools/maptool/issues/377
+[i384]: https://github.com/RPTools/maptool/issues/384
+[i386]: https://github.com/RPTools/maptool/issues/386
+[i389]: https://github.com/RPTools/maptool/issues/389
+[i395]: https://github.com/RPTools/maptool/issues/395
 [i398]: https://github.com/RPTools/maptool/issues/398
+[i400]: https://github.com/RPTools/maptool/issues/400
+[i406]: https://github.com/RPTools/maptool/issues/406
+[i407]: https://github.com/RPTools/maptool/issues/407
+[i416]: https://github.com/RPTools/maptool/issues/416
+[i424]: https://github.com/RPTools/maptool/issues/424
+[i426]: https://github.com/RPTools/maptool/issues/426
+[i429]: https://github.com/RPTools/maptool/issues/429
+[i441]: https://github.com/RPTools/maptool/issues/441
 
 MapTool 1.5.1
 =====
@@ -27,7 +86,7 @@ Bug Fixes
 * [#278][i278] - Fix existing unit tests and enable unit tests in build
 * [#326][i326] - defineFunction causes error with macro edit window open
 * [#324][i324] - fix output of setViewArea. This might break existing macro using workaround to interpret the broken result before the fix.
-* [#392][i392] - support decimal unitPerCell in preferences
+
 
 Enhancements
 -----
