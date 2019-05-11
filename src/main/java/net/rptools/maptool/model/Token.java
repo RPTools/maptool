@@ -1206,12 +1206,6 @@ public class Token extends BaseModel implements Cloneable {
     TokenFootprint footprint = getFootprint(grid);
     Rectangle footprintBounds =
         footprint.getBounds(grid, grid.convert(new ZonePoint(getX(), getY())));
-    // if (getShape() == TokenShape.FIGURE) {
-    // double th = this.height * Double.valueOf(footprintBounds.width) / this.width;
-    // double ho = footprintBounds.height - th;
-    // footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y + (int)ho,
-    // footprintBounds.width, (int)th);
-    // }
 
     double w = footprintBounds.width;
     double h = footprintBounds.height;
@@ -1220,6 +1214,10 @@ public class Token extends BaseModel implements Cloneable {
     if (!isSnapToScale()) {
       w = getWidth() * getScaleX();
       h = getHeight() * getScaleY();
+      if (grid.isIsometric() && getShape() == Token.TokenShape.FIGURE) {
+        // Native size figure tokens need to follow iso rules
+        h = (w / 2);
+      }
     } else {
       w = footprintBounds.width * footprint.getScale() * sizeScale;
       h = footprintBounds.height * footprint.getScale() * sizeScale;
