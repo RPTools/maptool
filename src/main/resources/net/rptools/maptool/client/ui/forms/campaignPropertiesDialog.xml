@@ -24,7 +24,8 @@
     </at>
     <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
    </super>
-   <at name="id">D:\Development\git\JamzTheMan\MapTool\src\main\resources\net\rptools\maptool\client\ui\forms\campaignPropertiesDialog.xml</at>
+   <at name="id">C:\code\rptools\mtfx\maptool\src\main\resources\net\rptools\maptool\client\ui\forms\campaignPropertiesDialog.xml</at>
+   <at name="path">campaignPropertiesDialog.xml</at>
    <at name="rowspecs">CENTER:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
    <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
    <at name="components">
@@ -108,7 +109,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1773213223</at>
+                     <at name="id">embedded.1939622216</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -158,14 +159,14 @@
                                </object>
                               </at>
                               <at name="name">tokenPropertiesPanel</at>
-                              <at name="width">1013</at>
+                              <at name="width">1368</at>
                               <at name="text">Token Properties Panel</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="height">716</at>
+                              <at name="height">936</at>
                              </object>
                             </at>
                            </object>
@@ -291,7 +292,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.747219785</at>
+                     <at name="id">embedded.726173673</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -341,7 +342,7 @@
                                </object>
                               </at>
                               <at name="name">newServer</at>
-                              <at name="width">854</at>
+                              <at name="width">1209</at>
                               <at name="height">20</at>
                              </object>
                             </at>
@@ -453,7 +454,7 @@
                               <at name="scrollableTracksViewportHeight">true</at>
                               <at name="scrollableTracksViewportWidth">true</at>
                               <at name="name">repoList</at>
-                              <at name="width">923</at>
+                              <at name="width">1278</at>
                               <at name="items">
                                <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                 <at name="name">items</at>
@@ -486,7 +487,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="height">603</at>
+                              <at name="height">823</at>
                              </object>
                             </at>
                            </object>
@@ -511,7 +512,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.712188119</at>
+                          <at name="id">embedded.2044594169</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -671,7 +672,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.572563482</at>
+                          <at name="id">embedded.912851845</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -944,7 +945,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.928832541</at>
+                     <at name="id">embedded.1007760175</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -996,7 +997,7 @@
                               <at name="scrollableTracksViewportHeight">true</at>
                               <at name="scrollableTracksViewportWidth">true</at>
                               <at name="name">sightPanel</at>
-                              <at name="width">1011</at>
+                              <at name="width">1366</at>
                               <at name="scollBars">
                                <object classname="com.jeta.forms.store.properties.ScrollBarsProperty">
                                 <at name="name">scollBars</at>
@@ -1024,7 +1025,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="height">512</at>
+                              <at name="height">732</at>
                              </object>
                             </at>
                            </object>
@@ -1077,8 +1078,8 @@
                                </object>
                               </at>
                               <at name="name"></at>
-                              <at name="width">1013</at>
-                              <at name="text">&lt;html&gt;&lt;b&gt;Format:&lt;/b&gt; &amp;nbsp&amp;nbsp&amp;nbsp;Name : options &lt;p&gt;&lt;p&gt; Each sight type can have zero or more options,  use spaces between each option.  Having zero options implies using defaults for all values (e.g. Normal vision).&lt;p&gt;&lt;p&gt; &lt;b&gt;  Options:&lt;/b&gt; &lt;p&gt;&lt;p&gt;  shape - shape may be circle, square, or cone&lt;br&gt; distance=y - Distance is the range at which this vision type ends.  Can be a decimal value. Ex: distance=10&lt;br&gt; scale - An optional keyword that adds the token&apos;s footprint (size) to the distance so vision starts at token&apos;s edge vs the token&apos;s center&lt;br&gt; arc=y -  When used with the cone shape, it signifies how large a field of vision the token has.  Can be an interger value. Ex: arc=120&lt;br&gt; offset=y -  When used with the cone shape, it signifies how much offest the cone begins from the center of the tokens facing.  Can be an interger value. Ex: offset=120&lt;br&gt; x# - Maginifier, multiplies each light source radius by this value.  Can be a decimal value.  Ex: x2&lt;br&gt;  r# - Range of personal light.  You can define multiple personal lights per sight type. Can have an optional #rrggbb hex color component appended to it as per typical CSS rules. The token will have a light source centered on them that only they can see with a radius of this value.  Ex: r60&lt;br&gt;   </at>
+                              <at name="width">1368</at>
+                              <at name="text">&lt;html&gt;&lt;b&gt;Format:&lt;/b&gt; &amp;nbsp&amp;nbsp&amp;nbsp;Name : options &lt;p&gt;&lt;p&gt; Each sight type can have zero or more options,  use spaces between each option.  Having zero options implies using defaults for all values (e.g. Normal vision).&lt;p&gt;&lt;p&gt; &lt;b&gt;  Options:&lt;/b&gt; &lt;p&gt;&lt;p&gt;  shape - shape may be circle, square, hex, grid or cone&lt;br&gt; distance=y - Distance is the range at which this vision type ends.  Can be a decimal value. Ex: distance=10&lt;br&gt; scale - An optional keyword that adds the token&apos;s footprint (size) to the distance so vision starts at token&apos;s edge vs the token&apos;s center&lt;br&gt; arc=y -  When used with the cone shape, it signifies how large a field of vision the token has.  Can be an interger value. Ex: arc=120&lt;br&gt; offset=y -  When used with the cone shape, it signifies how much offest the cone begins from the center of the tokens facing.  Can be an interger value. Ex: offset=120&lt;br&gt; x# - Maginifier, multiplies each light source radius by this value.  Can be a decimal value.  Ex: x2&lt;br&gt;  r# - Range of personal light.  You can define multiple personal lights per sight type. Can have an optional #rrggbb hex color component appended to it as per typical CSS rules. The token will have a light source centered on them that only they can see with a radius of this value.  Ex: r60&lt;br&gt;   </at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -1216,7 +1217,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1700522232</at>
+                     <at name="id">embedded.1294349242</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:GROW(1.0),CENTER:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -1269,7 +1270,7 @@
                               <at name="scrollableTracksViewportHeight">true</at>
                               <at name="scrollableTracksViewportWidth">true</at>
                               <at name="name">lightPanel</at>
-                              <at name="width">1011</at>
+                              <at name="width">1366</at>
                               <at name="scollBars">
                                <object classname="com.jeta.forms.store.properties.ScrollBarsProperty">
                                 <at name="name">scollBars</at>
@@ -1297,7 +1298,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="height">380</at>
+                              <at name="height">490</at>
                              </object>
                             </at>
                            </object>
@@ -1349,13 +1350,14 @@
                                 </at>
                                </object>
                               </at>
+                              <at name="selectionStart">4341</at>
                               <at name="autoscrolls">false</at>
-                              <at name="background" object="color">238,238,238</at>
                               <at name="editable">false</at>
                               <at name="scrollableTracksViewportWidth">true</at>
+                              <at name="selectionEnd">4341</at>
+                              <at name="background" object="color">238,238,238</at>
                               <at name="name">lightHelp</at>
-                              <at name="width">996</at>
-                              <at name="y">-2</at>
+                              <at name="width">1351</at>
                               <at name="text">&lt;html&gt;
   &lt;head&gt;
     
@@ -1390,28 +1392,30 @@ name &lt;b&gt;:&lt;/b&gt; &lt;i&gt;type&lt;/i&gt; &lt;i&gt;shape&lt;/i&gt; &lt;b
       An optional type for the light. Currently only &lt;b&gt;aura&lt;/b&gt; is valid. 
       (See below for a description of auras.)&lt;br&gt;&lt;b&gt;shape:&lt;/b&gt; An optional 
       shape for the light emanation. Can be &lt;b&gt;circle&lt;/b&gt; (default), &lt;b&gt;square&lt;/b&gt;, 
-      or &lt;b&gt;cone&lt;/b&gt; (cones also have an &lt;b&gt;arc=&lt;i&gt;angle&lt;/i&gt;&lt;/b&gt; field). 
-      Shapes apply from the point they are included in the definition until 
-      the end of the definition or until another shape is specified. This 
-      means multiple light shapes can be created under a single name and 
-      turned on or off as a unit.&lt;br&gt;&lt;b&gt;scale:&lt;/b&gt; An optional keyword that 
-      adds the token&apos;s footprint (size) to the range so the light/aura starts 
-      at token&apos;s edge vs the token&apos;s center&lt;br&gt;&lt;b&gt;range:&lt;/b&gt; A distance 
-      measured in map units (defined when the map is created). Units are 
-      measured from the centerpoint of the grid cell, hence the extra 2 &amp;#189; feet 
-      added in the below example to make neat squares. Can have an optional &lt;i&gt;#rrggbb&lt;/i&gt; 
-      hex color component appended to it as per typical CSS rules.&lt;br&gt;&lt;b&gt;lumens:&lt;/b&gt; 
-      An optional setting for the light with x equaling an integer that may be 
-      negative. If set to a negative number, the light will instead act as 
-      darkness and subtract it&apos;s area from the FoW. Lights are processed in 
-      order of their absolute value of lumens. eg. Darkness with lumens=-20 
-      will cover over any light with lumens &amp;lt;= 20 and any light with lumens &amp;gt;= 
-      21 will expose through anything with a lumens value of -1 to -20.&lt;br&gt;&lt;i&gt;*Note:&lt;/i&gt; 
-      Personal Lights defined in &lt;i&gt;Sight&lt;/i&gt; have a lumens value of 100. So a 
-      typical sight defined for Darkvision will see through anything with a 
-      lumens value if -1 through -99. To overcome Darkvision, use lumens 
-      values &amp;lt;= -100.&lt;br&gt;&lt;b&gt;OPTIONS:&lt;/b&gt; The only valid options are &lt;b&gt;GM&lt;/b&gt; 
-      and &lt;b&gt;OWNER&lt;/b&gt; and they apply only to auras (see below).
+      &lt;b&gt;cone&lt;/b&gt; (cones also have an &lt;b&gt;arc=&lt;i&gt;angle&lt;/i&gt;&lt;/b&gt; field) or &lt;b&gt;grid&lt;/b&gt; 
+      (for systems like Pathfinder if you want to see exactly which grid cells 
+      are affected by a Light/Aura). Shapes apply from the point they are 
+      included in the definition until the end of the definition or until 
+      another shape is specified. This means multiple light shapes can be 
+      created under a single name and turned on or off as a unit.&lt;br&gt;&lt;b&gt;scale:&lt;/b&gt; 
+      An optional keyword that adds the token&apos;s footprint (size) to the range 
+      so the light/aura starts at token&apos;s edge vs the token&apos;s center&lt;br&gt;&lt;b&gt;range:&lt;/b&gt; 
+      A distance measured in map units (defined when the map is created). 
+      Units are measured from the centerpoint of the grid cell, hence the 
+      extra 2 &amp;#189; feet added in the below example to make neat squares. Can have 
+      an optional &lt;i&gt;#rrggbb&lt;/i&gt; hex color component appended to it as per 
+      typical CSS rules.&lt;br&gt;&lt;b&gt;lumens:&lt;/b&gt; An optional setting for the light 
+      with x equaling an integer that may be negative. If set to a negative 
+      number, the light will instead act as darkness and subtract it&apos;s area 
+      from the FoW. Lights are processed in order of their absolute value of 
+      lumens. eg. Darkness with lumens=-20 will cover over any light with 
+      lumens &amp;lt;= 20 and any light with lumens &amp;gt;= 21 will expose through 
+      anything with a lumens value of -1 to -20.&lt;br&gt;&lt;i&gt;*Note:&lt;/i&gt; Personal 
+      Lights defined in &lt;i&gt;Sight&lt;/i&gt; have a lumens value of 100. So a typical 
+      sight defined for Darkvision will see through anything with a lumens 
+      value if -1 through -99. To overcome Darkvision, use lumens values &amp;lt;= 
+      -100.&lt;br&gt;&lt;b&gt;OPTIONS:&lt;/b&gt; The only valid options are &lt;b&gt;GM&lt;/b&gt; and &lt;b&gt;OWNER&lt;/b&gt; 
+      and they apply only to auras (see below).
     &lt;/p&gt;
     &lt;br&gt;
     &lt;hr&gt;
@@ -1520,7 +1524,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                </object>
                               </at>
-                              <at name="height">1247</at>
+                              <at name="height">1171</at>
                              </object>
                             </at>
                            </object>
@@ -1652,7 +1656,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.822445146</at>
+                     <at name="id">embedded.627221139</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,FILL:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:DEFAULT:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:25PX:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:50PX:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:50PX:NONE,FILL:0PX:GROW(1.0),FILL:4DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -2269,7 +2273,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               <at name="scrollableTracksViewportHeight">true</at>
                               <at name="scrollableTracksViewportWidth">true</at>
                               <at name="name">tokenStatesStates</at>
-                              <at name="width">908</at>
+                              <at name="width">1263</at>
                               <at name="items">
                                <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                 <at name="name">items</at>
@@ -2304,7 +2308,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                </object>
                               </at>
                               <at name="selectionMode">0</at>
-                              <at name="height">479</at>
+                              <at name="height">699</at>
                              </object>
                             </at>
                            </object>
@@ -2417,7 +2421,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                </object>
                               </at>
                               <at name="name">tokenStatesImageFile</at>
-                              <at name="width">863</at>
+                              <at name="width">1218</at>
                               <at name="height">20</at>
                              </object>
                             </at>
@@ -2999,7 +3003,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1733728444</at>
+                          <at name="id">embedded.1627780194</at>
                           <at name="rowspecs">TOP:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -3407,7 +3411,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.709698452</at>
+                          <at name="id">embedded.699655277</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:0PX:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:4DLU:NONE,FILL:0PX:GROW(1.0)</at>
                           <at name="components">
@@ -3457,7 +3461,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                     </object>
                                    </at>
                                    <at name="name">tokenStatesName</at>
-                                   <at name="width">398</at>
+                                   <at name="width">575</at>
                                    <at name="height">20</at>
                                   </object>
                                  </at>
@@ -3571,7 +3575,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                     </object>
                                    </at>
                                    <at name="name">tokenStatesGroup</at>
-                                   <at name="width">397</at>
+                                   <at name="width">575</at>
                                    <at name="height">20</at>
                                   </object>
                                  </at>
@@ -3679,7 +3683,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1345717294</at>
+                          <at name="id">embedded.640922562</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -3701,7 +3705,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.2078602771</at>
+                               <at name="id">embedded.1928485630</at>
                                <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:8DLU:NONE,FILL:DEFAULT:NONE,FILL:8DLU:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -4362,7 +4366,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.875541429</at>
+                     <at name="id">embedded.1867346761</at>
                      <at name="rowspecs">FILL:DEFAULT:GROW(1.0)</at>
                      <at name="colspecs">FILL:DEFAULT:GROW(1.0)</at>
                      <at name="components">
@@ -4384,7 +4388,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.502613770</at>
+                          <at name="id">embedded.98702567</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,FILL:DEFAULT:NONE,CENTER:4DLU:NONE,FILL:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:DEFAULT:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:25PX:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:50PX:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:50PX:NONE,FILL:0PX:GROW(1.0),FILL:4DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -5190,7 +5194,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    <at name="scrollableTracksViewportHeight">true</at>
                                    <at name="scrollableTracksViewportWidth">true</at>
                                    <at name="name">tokenBarImages</at>
-                                   <at name="width">854</at>
+                                   <at name="width">1209</at>
                                    <at name="items">
                                     <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                      <at name="name">items</at>
@@ -5553,7 +5557,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.171268325</at>
+                               <at name="id">embedded.266361982</at>
                                <at name="rowspecs">TOP:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -5961,7 +5965,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.1897106158</at>
+                               <at name="id">embedded.766398237</at>
                                <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:0PX:GROW(1.0)</at>
                                <at name="components">
@@ -6011,7 +6015,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                          </object>
                                         </at>
                                         <at name="name">tokenBarName</at>
-                                        <at name="width">851</at>
+                                        <at name="width">1206</at>
                                         <at name="height">20</at>
                                        </object>
                                       </at>
@@ -6119,7 +6123,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.425909256</at>
+                               <at name="id">embedded.49228292</at>
                                <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -6141,7 +6145,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                      </at>
                                      <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                     </super>
-                                    <at name="id">embedded.1351201977</at>
+                                    <at name="id">embedded.1781579884</at>
                                     <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                                     <at name="colspecs">FILL:DEFAULT:NONE,FILL:8DLU:NONE,FILL:DEFAULT:NONE,FILL:8DLU:NONE,FILL:DEFAULT:NONE</at>
                                     <at name="components">
@@ -6519,7 +6523,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.586061855</at>
+                               <at name="id">embedded.600138166</at>
                                <at name="rowspecs">TOP:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -6987,7 +6991,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.1149870045</at>
+                               <at name="id">embedded.596928333</at>
                                <at name="rowspecs">FILL:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:4DLU:NONE,FILL:DEFAULT:GROW(1.0)</at>
                                <at name="components">
@@ -7039,7 +7043,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="scrollableTracksViewportHeight">true</at>
                                         <at name="scrollableTracksViewportWidth">true</at>
                                         <at name="name">tokenBarBars</at>
-                                        <at name="width">857</at>
+                                        <at name="width">1212</at>
                                         <at name="items">
                                          <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                           <at name="name">items</at>
@@ -7074,7 +7078,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                          </object>
                                         </at>
                                         <at name="selectionMode">0</at>
-                                        <at name="height">270</at>
+                                        <at name="height">490</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7132,7 +7136,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="name">tokenBarTest</at>
                                         <at name="width">47</at>
                                         <at name="majorTickSpacing">20</at>
-                                        <at name="height">254</at>
+                                        <at name="height">474</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7489,9 +7493,9 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
               </at>
              </object>
             </at>
-            <at name="width">1076</at>
+            <at name="width">1431</at>
             <at name="tabCount">6</at>
-            <at name="height">824</at>
+            <at name="height">1044</at>
            </object>
           </at>
          </object>
@@ -7516,7 +7520,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.42991153</at>
+        <at name="id">embedded.968023958</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE</at>
         <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
         <at name="components">
