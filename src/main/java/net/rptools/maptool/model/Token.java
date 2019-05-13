@@ -467,7 +467,11 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMNotes() {
-    return gmNotes;
+    if (MapTool.getPlayer().isGM()) {
+      return gmNotes;
+    } else {
+      return "";
+    }
   }
 
   public void setGMNotes(String notes) {
@@ -475,7 +479,11 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMName() {
-    return gmName;
+    if (MapTool.getPlayer().isGM()) {
+      return gmName;
+    } else {
+      return "";
+    }
   }
 
   public void setGMName(String name) {

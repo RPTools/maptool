@@ -34,6 +34,7 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.sf.ezmorph.bean.MorphDynaBean;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 public class DrawingMiscFunctions extends DrawingFunctions {
   private static final DrawingMiscFunctions instance = new DrawingMiscFunctions();
@@ -92,9 +93,9 @@ public class DrawingMiscFunctions extends DrawingFunctions {
     return null;
   }
 
-  private Object getCrossedPoints(final Zone map, final DrawnElement de, final String pathString) {
-    List<Map<String, Integer>> pathPoints = convertJSONStringToList(pathString);
-    List<Map<String, Integer>> returnPoints = new ArrayList<Map<String, Integer>>();
+  private JSONArray getCrossedPoints(final Zone map, final DrawnElement de, final String pathStr) {
+    List<Map<String, Integer>> pathPoints = convertJSONStringToList(pathStr);
+    JSONArray returnPoints = new JSONArray();
     Area a = de.getDrawable().getArea();
     int cnt = 0;
     Point previousPoint = new Point();
@@ -106,8 +107,8 @@ public class DrawingMiscFunctions extends DrawingFunctions {
         Area lineArea = new Area(stroke.createStrokedShape(l2d));
         lineArea.intersect(a);
         if (!lineArea.isEmpty()) {
-          Map<String, Integer> firstPoint = new HashMap<String, Integer>();
-          Map<String, Integer> secondPoint = new HashMap<String, Integer>();
+          JSONObject firstPoint = new JSONObject();
+          JSONObject secondPoint = new JSONObject();
           firstPoint.put("x1", (int) previousPoint.getX());
           firstPoint.put("y1", (int) previousPoint.getY());
           secondPoint.put("x2", (int) currentPoint.getX());
