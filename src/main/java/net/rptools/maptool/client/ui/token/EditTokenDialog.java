@@ -185,6 +185,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     bind(token);
 
     getRootPane().setDefaultButton(getOKButton());
+    ((JTextArea) getComponent("@GMNotes")).setEnabled(MapTool.getPlayer().isGM());
+    ((JTextField) getComponent("@GMName")).setEnabled(MapTool.getPlayer().isGM());
     dialog.showDialog();
   }
 
