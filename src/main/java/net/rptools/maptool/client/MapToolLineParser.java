@@ -123,8 +123,10 @@ public class MapToolLineParser {
               ExportDataFunctions.getInstance(),
               RESTfulFunctions.getInstance(),
               HeroLabFunctions.getInstance(),
+              LogFunctions.getInstance(),
               LastRolledFunction.getInstance(),
-              Base64Functions.getInstance())
+              Base64Functions.getInstance(),
+              TokenTerrainModifierFunctions.getInstance())
           .collect(Collectors.toList());
 
   /** Name and Source or macros that come from chat. */
@@ -719,10 +721,12 @@ public class MapToolLineParser {
       throws ParserException {
 
     // copy previous rolls and clear out for new rolls.
-    lastRolled.clear();
-    lastRolled.addAll(rolled);
-    rolled.clear();
-    newRolls.clear();
+    if (parserRecurseDepth == 0 && macroRecurseDepth == 0) {
+      lastRolled.clear();
+      lastRolled.addAll(rolled);
+      rolled.clear();
+      newRolls.clear();
+    }
 
     if (line == null) {
       return "";

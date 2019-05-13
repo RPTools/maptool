@@ -84,7 +84,8 @@ public class LineCellTemplateTool extends RadiusCellTemplateTool {
   /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
   @Override
   public String getInstructions() {
-    return "tool.LineCellTemplate.instructions";
+    // No reason to create new instructions
+    return "tool.linetemplate.instructions";
   }
 
   /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate() */

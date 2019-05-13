@@ -81,16 +81,15 @@ run {
 
 spotless {
     java {
+        target project.fileTree(project.rootDir) {
+            include 'src/**/*.java'
+            exclude '**/JTextAreaAppender.java'
+        }
         licenseHeaderFile 'spotless.license.java'
+
+
         // Now using the Google Java style guide
-        //eclipse().configFile('build-resources/eclipse.prefs.formatter.xml')
         googleJavaFormat()
-        // If you get exceptions thrown by spotlessApply, this might
-        // help.  Enable it here if the problem is with a Java file, and
-        // below if it is not.  Don't leave it enabled, as nothing will
-        // actually be updated if you do.
-        // https://github.com/diffplug/spotless/blob/master/PADDEDCELL.md
-        //paddedCell()
     }
 
     format 'misc', {
@@ -100,7 +99,6 @@ spotless {
         trimTrailingWhitespace()
         // or spaces. Takes an integer argument if you don't like 4
         indentWithSpaces(4)
-        //paddedCell()
     }
 }
 
@@ -153,9 +151,9 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
     // For Sentry bug reporting
-    annotationProcessor group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.11.0'	// Bridges v1 to v2 for other code in other libs
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.2'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.11.2'	// Bridges v1 to v2 for other code in other libs
 
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
