@@ -162,14 +162,14 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
     Image image = null;
     try {
-      image = null;
-      if (dir.isHeroLabPortfolio()) {
+      if (dir == null) {
+        // Nothing - let it return the transfering image.
+        image = ImageManager.TRANSFERING_IMAGE;
+      } else if (dir.isHeroLabPortfolio()) {
         image = ((AssetDirectory) dir).getImageFor(fileList.get(index));
       } else if (dir instanceof AssetDirectory) {
         image = ((AssetDirectory) dir).getImageFor(fileList.get(index));
-      }
-      if (dir instanceof PdfAsDirectory) {
-        // System.out.println("Here I am for: " + dir.hashCode());
+      } else if (dir instanceof PdfAsDirectory) {
         image = ((PdfAsDirectory) dir).getImageFor(fileList.get(index));
       }
     } catch (IndexOutOfBoundsException e) {
