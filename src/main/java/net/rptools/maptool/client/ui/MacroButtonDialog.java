@@ -22,6 +22,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashSet;
 import javax.swing.Action;
@@ -47,6 +49,7 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.swing.preference.WindowPreferences;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -421,23 +424,9 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
     // Set the color style via Theme
     try {
-      // Theme theme =
-      // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/default.xml"));
-      // Theme theme =
-      // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/dark.xml"));
-      // Theme theme =
-      // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/eclipse.xml"));
-      // Theme theme =
-      // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/idea.xml"));
-      // Theme theme =
-      // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/vs.xml"));
-      Theme theme =
-          Theme.load(
-              getClass()
-                  .getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/nerps.xml"));
-      // Theme theme =
-      // Theme.load(getClass().getResourceAsStream("/net/rptools/maptool/client/ui/syntax/themes/nerps-dark.xml"));
-
+      File themeFile =
+          new File(AppConstants.THEMES_DIR, AppPreferences.getDefaultMacroEditorTheme() + ".xml");
+      Theme theme = Theme.load(new FileInputStream(themeFile));
       theme.apply(macroEditorRSyntaxTextArea);
       theme.apply(getToolTipTextField());
 

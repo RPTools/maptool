@@ -22,10 +22,14 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.ServiceConfigurationError;
+import java.util.stream.Stream;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -44,6 +48,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.walker.WalkerMetric;
@@ -54,6 +59,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UserJvmPrefs;
 import net.rptools.maptool.util.UserJvmPrefs.JVM_OPTION;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -153,6 +159,8 @@ public class PreferencesDialog extends JDialog {
   private final JSpinner chatAutosaveTime;
   private final JTextField chatFilenameFormat;
   private final JSpinner typingNotificationDuration;
+
+  private final JComboBox macroEditorThemeCombo;
 
   // Chat Notification
   private final JETAColorWell chatNotificationColor;
@@ -288,6 +296,8 @@ public class PreferencesDialog extends JDialog {
 
     chatAutosaveTime = panel.getSpinner("chatAutosaveTime");
     chatFilenameFormat = panel.getTextField("chatFilenameFormat");
+
+    macroEditorThemeCombo = panel.getComboBox("macroEditorThemeCombo");
 
     fitGMView = panel.getCheckBox("fitGMView");
     hideNPCs = panel.getCheckBox("hideNPCs");
@@ -979,7 +989,32 @@ public class PreferencesDialog extends JDialog {
             AppPreferences.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
           }
         });
-    // showInitGainMessage
+
+    DefaultComboBoxModel macroEditorThemeModel = new DefaultComboBoxModel();
+    try (Stream<Path> paths = Files.list(AppConstants.THEMES_DIR.toPath())) {
+      paths
+          .filter(Files::isRegularFile)
+          .filter(p -> p.toString().toLowerCase().endsWith(".xml"))
+          .forEach(
+              p ->
+                  macroEditorThemeModel.addElement(
+                      FilenameUtils.removeExtension(p.getFileName().toString())));
+
+      macroEditorThemeModel.setSelectedItem(AppPreferences.getDefaultMacroEditorTheme());
+    } catch (IOException ioe) {
+      log.warn("Unable to list macro editor themes.", ioe);
+      macroEditorThemeModel.addElement("default");
+    }
+
+    macroEditorThemeCombo.setModel(macroEditorThemeModel);
+
+    macroEditorThemeCombo.addItemListener(
+        new ItemListener() {
+          public void itemStateChanged(ItemEvent e) {
+            AppPreferences.setDefaultMacroEditorTheme(
+                (String) macroEditorThemeModel.getSelectedItem());
+          }
+        });
 
     add(panel);
     pack();

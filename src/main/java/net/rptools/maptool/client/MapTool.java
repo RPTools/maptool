@@ -1573,7 +1573,7 @@ public class MapTool {
 
     if (listMacros) {
       String logOutput = "";
-      List<String> macroList = parser.listAllMacroFunctions();
+      List<String> macroList = new ArrayList<>(parser.listAllMacroFunctions().keySet());
       Collections.sort(macroList);
 
       for (String macro : macroList) {
