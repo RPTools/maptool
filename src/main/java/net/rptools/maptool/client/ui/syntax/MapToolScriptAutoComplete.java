@@ -45,7 +45,7 @@ public class MapToolScriptAutoComplete {
       };
 
   public MapToolScriptAutoComplete() {
-    for (String macro : MapTool.getParser().listAllMacroFunctions())
+    for (String macro : MapTool.getParser().listAllMacroFunctions().keySet())
       provider.addCompletion(
           new BasicCompletion(provider, macro, getShortDescription(macro), getSummary(macro)));
 
