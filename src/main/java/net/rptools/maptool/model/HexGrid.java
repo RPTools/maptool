@@ -229,7 +229,8 @@ public abstract class HexGrid extends Grid {
     // don't use size. it has already been used to set the minorRadius
     // and will only introduce a rounding error.
     Area a = new Area(createShape(minorRadius, edgeProjection, edgeLength));
-//    System.out.println("HexGrid.createCellShape(): " + a.getBounds().width + ":" + a.getBounds().height);
+    //    System.out.println("HexGrid.createCellShape(): " + a.getBounds().width + ":" +
+    // a.getBounds().height);
     return a;
   }
 
