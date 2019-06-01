@@ -634,17 +634,31 @@ public class Token extends BaseModel implements Cloneable {
     this.facing = facing;
   }
 
+  /**
+   * Facing is in the map space where 0 degrees is along the X axis to the right and proceeding CCW
+   * for positive angles.
+   *
+   * <p>Round/Square tokens that have no facing set, return null. Top Down tokens default to -90.
+   *
+   * @return null or angle in degrees
+   */
   public Integer getFacing() {
     return facing;
   }
 
+  /**
+   * This returns the rotation of the facing of the token from the default facing of down or -90.
+   * Positive for CW and negative for CCW.
+   *
+   * @return angle in degrees
+   */
   public Integer getFacingInDegrees() {
-    if (facing == null) return -1;
+    if (facing == null) return 0;
     else return -(facing + 90);
   }
 
   public Integer getFacingInRealDegrees() {
-    if (facing == null) return -1;
+    if (facing == null) return 270;
 
     if (facing >= 0) return facing;
     else return facing + 360;
