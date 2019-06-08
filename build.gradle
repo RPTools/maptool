@@ -378,9 +378,5 @@ test {
     useJUnitPlatform()
 }
 
-task createWrapper(type: Wrapper) {
-    gradleVersion = '5.2.1'
-}
-
 // Configure current release tag in Sentry.io properties
 processResources.dependsOn configSentryRelease
