@@ -10,6 +10,6 @@ Install Java SE Development Kit 10
    https://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase10-4425482.html
    You will need an Oracle account to download.
 2. Click the "Accept License Agreement" radio button for the JDK.
-3. Download the Java SE Development Kit. At the time of writing the file is `jdk-10.0.2_windows-x64_bin.exe`
-4. Run the installer file you have just downloaded. This will try and install to a directory like: `C:\Program Files\Java\jdk1.7.75`, which is fine. If the directory says JRE instead of JDK then you have downloaded the wrong file. Don't worry if you have both, the JDK contains a JRE.
+3. Download the Java SE Development Kit. At the time of writing, the current version was 10.0.2.  Select the appropriate file for your operating system.
+4. Install the JDK as appropriate for your operating system.
 5. Check that running `java -version` from a command line shows Java 10.  Also check your command path to verify that the Java 10 JDK is the only one in your path.
