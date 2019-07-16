@@ -14,13 +14,12 @@
  */
 package net.rptools.maptool.client.walker.astar;
 
+import java.util.Arrays;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Zone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Arrays;
 
 public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
   private static final Logger log = LogManager.getLogger(AStarSquareEuclideanWalker.class);
