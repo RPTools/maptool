@@ -1,6 +1,47 @@
+Maptool 1.5.3
+=====
+More bug fixes and enhancements
+___
+
+Bug Fixes
+-----
+* [#487][i487] Restored previous token dragging behavior as default.
+* [#481][i481] Token VBL no longer rotated -1 degrees.
+* [#476][i476] Added catch for missing/null directories cause an NPE in ImageFileImagePanelModel.getImage()
+* [#473][i473] Shutting down server should no longer throw an NPE when closing port with UPnP
+* [#467][i467] Updated layout of Start Server dialog so that server setting labels can go across the full dialog instead of being cutoff.
+* [#461][i461] GM Notes and GM Name for tokens no longer visible to players.
+* [#450][i450] Corrected footprint problems with native-size figure tokens which affected halos and vision.
+* [#288][i288] Added missing Grid shape to Light help and missing Hex and Cone to Sight help of Campaign Properties dialog.
+* [#261][i261] Selecting white in the color picker for the background of new maps threw exception.
+* [#191][i191] Auto-Resize dialog couldn't handle larger font sizes. Fixed.
+* [#166][i166] Tokens dropped on hex grids now pick up pick up map grid size instead of default.
+
+Enhancements
+-----
+* [#487][i487] New Preferences settings for choosing between snapped and non-snapped token dragging as well as hide/show mouse pointer during dragging.  Further tweaks to token dragging to improve tracking of token image to mouse pointer position.
+* [#376][i376] RPTools Gallery Index button removed from Campaign Properties.  Gallery no longer exists.
+* [#298][i298] New Preferences selection for Macro editor themes. Themes can be found in C:\Users\\<username\>\\.maptool-rptools\themes\syntax
+
+[i487]: https://github.com/RPTools/maptool/issues/487
+[i376]: https://github.com/RPTools/maptool/issues/376
+[i298]: https://github.com/RPTools/maptool/issues/298
+[i487]: https://github.com/RPTools/maptool/issues/487
+[i481]: https://github.com/RPTools/maptool/issues/481
+[i476]: https://github.com/RPTools/maptool/issues/476
+[i473]: https://github.com/RPTools/maptool/issues/473
+[i467]: https://github.com/RPTools/maptool/issues/467
+[i461]: https://github.com/RPTools/maptool/issues/461
+[i450]: https://github.com/RPTools/maptool/issues/450
+[i288]: https://github.com/RPTools/maptool/issues/288
+[i261]: https://github.com/RPTools/maptool/issues/261
+[i191]: https://github.com/RPTools/maptool/issues/191
+[i166]: https://github.com/RPTools/maptool/issues/166
+
+
 Maptool 1.5.2
 =====
-More bug fixes and 
+More bug fixes and enhancements
 ___
 
 Bug Fixes
