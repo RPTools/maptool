@@ -218,14 +218,6 @@ public class VBL_Functions extends AbstractFunction {
       if (parameters.size() == 2) {
         token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
 
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.general.unknownToken",
-                  "getTokenVBL",
-                  parameters.get(0).toString()));
-        }
-
         if (!(jsonArea instanceof JSONObject || jsonArea instanceof JSONArray)) {
           throw new ParserException(
               I18N.getText(
@@ -236,10 +228,7 @@ public class VBL_Functions extends AbstractFunction {
       } else if (parameters.size() == 1) {
         MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
         token = res.getTokenInContext();
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
-        }
+
         if (!(jsonArea instanceof JSONObject || jsonArea instanceof JSONArray)) {
           throw new ParserException(
               I18N.getText(
@@ -247,6 +236,10 @@ public class VBL_Functions extends AbstractFunction {
                   jsonArea == null ? parameters.get(0).toString() : jsonArea.toString(),
                   functionName));
         }
+      }
+      if (token == null) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
       }
 
       Area tokenVBL = new Area();
@@ -273,16 +266,26 @@ public class VBL_Functions extends AbstractFunction {
             if (alpha < 0 || alpha > 255)
               throw new ParserException(
                   I18N.getText("macro.function.input.illegalArgumentType", alpha, "0-255"));
-            System.out.println("Alpha: " + alpha);
             tokenVBL = TokenVBL.createVblArea(token, alpha);
             break;
           case NONE:
-            tokenVBL = null;
+            // Setting to null causes various Token VBL updating to be skipped
+            // during event handling. Leaving it as an empty Area fixed that.
+            // tokenVBL = null;
             break;
         }
       }
 
+      // Replace with new VBL
       token.setVBL(tokenVBL);
+
+      // Force a TOPOLOGY_CHANGED event. This made the client performing the
+      // VBL change actually show the change but not the other clients.
+      renderer.getZone().tokenTopologyChanged();
+      renderer.repaint();
+
+      // Make sure the other clients get the updated token.
+      MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
     }
 
     if (functionName.equals("transferVBL")) {
