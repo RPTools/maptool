@@ -14,19 +14,13 @@
  */
 package net.rptools.maptool.client;
 
-import java.awt.EventQueue;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.awt.*;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
 import java.util.regex.Pattern;
-import javax.swing.JOptionPane;
-import javax.swing.JTextPane;
+import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.model.AssetManager;
 import org.apache.commons.io.FileUtils;
@@ -43,7 +37,8 @@ public class AppSetup {
 
   public static void install() {
     try {
-      installDefaultTokens();
+      // Only init once
+      if (!new File(AppConstants.UNZIP_DIR, "README").exists()) installDefaultTokens();
     } catch (IOException ioe) {
       log.error(ioe);
     }
@@ -52,9 +47,6 @@ public class AppSetup {
   }
 
   public static void installDefaultTokens() throws IOException {
-    // Only init once
-    if (AppUtil.getAppHome().listFiles().length > 0) return;
-
     installLibrary("Default", AppSetup.class.getClassLoader().getResource("default_images.zip"));
   }
 

@@ -117,6 +117,8 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox newMapsHaveFOWCheckBox;
   private final JCheckBox tokensPopupWarningWhenDeletedCheckBox;
   private final JCheckBox tokensStartSnapToGridCheckBox;
+  private final JCheckBox tokensSnapWhileDraggingCheckBox;
+  private final JCheckBox hideMousePointerWhileDraggingCheckBox;
   private final JCheckBox newMapsVisibleCheckBox;
   private final JCheckBox newTokensVisibleCheckBox;
   private final JCheckBox tokensStartFreeSizeCheckBox;
@@ -252,6 +254,8 @@ public class PreferencesDialog extends JDialog {
         panel.getCheckBox("tokensPopupWarningWhenDeletedCheckBox"); // new
     // JCheckBox();//panel.getCheckBox("testCheckBox");
     tokensStartSnapToGridCheckBox = panel.getCheckBox("tokensStartSnapToGridCheckBox");
+    tokensSnapWhileDraggingCheckBox = panel.getCheckBox("tokensSnapWhileDragging");
+    hideMousePointerWhileDraggingCheckBox = panel.getCheckBox("hideMousePointerWhileDragging");
     newMapsVisibleCheckBox = panel.getCheckBox("newMapsVisibleCheckBox");
     newTokensVisibleCheckBox = panel.getCheckBox("newTokensVisibleCheckBox");
     stampsStartFreeSizeCheckBox = panel.getCheckBox("stampsStartFreeSize");
@@ -519,6 +523,19 @@ public class PreferencesDialog extends JDialog {
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             AppPreferences.setTokensStartSnapToGrid(tokensStartSnapToGridCheckBox.isSelected());
+          }
+        });
+    tokensSnapWhileDraggingCheckBox.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            AppPreferences.setTokensSnapWhileDragging(tokensSnapWhileDraggingCheckBox.isSelected());
+          }
+        });
+    hideMousePointerWhileDraggingCheckBox.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            AppPreferences.setHideMousePointerWhileDragging(
+                hideMousePointerWhileDraggingCheckBox.isSelected());
           }
         });
     newMapsVisibleCheckBox.addActionListener(
@@ -1055,6 +1072,9 @@ public class PreferencesDialog extends JDialog {
     newMapsHaveFOWCheckBox.setSelected(AppPreferences.getNewMapsHaveFOW());
     tokensPopupWarningWhenDeletedCheckBox.setSelected(AppPreferences.getTokensWarnWhenDeleted());
     tokensStartSnapToGridCheckBox.setSelected(AppPreferences.getTokensStartSnapToGrid());
+    tokensSnapWhileDraggingCheckBox.setSelected(AppPreferences.getTokensSnapWhileDragging());
+    hideMousePointerWhileDraggingCheckBox.setSelected(
+        AppPreferences.getHideMousePointerWhileDragging());
     newMapsVisibleCheckBox.setSelected(AppPreferences.getNewMapsVisible());
     newTokensVisibleCheckBox.setSelected(AppPreferences.getNewTokensVisible());
     stampsStartFreeSizeCheckBox.setSelected(AppPreferences.getObjectsStartFreesize());
