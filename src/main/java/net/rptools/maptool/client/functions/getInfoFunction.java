@@ -219,7 +219,7 @@ public class getInfoFunction extends AbstractFunction {
         sp.isRestrictedImpersonation() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put("individual views", sp.isUseIndividualViews() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put("individual fow", sp.isUseIndividualFOW() ? BigDecimal.ONE : BigDecimal.ZERO);
-    
+
     sinfo.put(
         "strict token management",
         sp.useStrictTokenManagement() ? BigDecimal.ONE : BigDecimal.ZERO);
