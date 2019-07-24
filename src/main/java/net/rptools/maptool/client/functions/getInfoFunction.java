@@ -211,11 +211,15 @@ public class getInfoFunction extends AbstractFunction {
         sp.getUseToolTipsForDefaultRollFormat() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put(
         "players can reveal", sp.getPlayersCanRevealVision() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.put(
+        "auto reveal on movement", sp.isAutoRevealOnMovement() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put("movement locked", sp.isMovementLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put(
         "restricted impersonation",
         sp.isRestrictedImpersonation() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put("individual views", sp.isUseIndividualViews() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.put("individual fow", sp.isUseIndividualFOW() ? BigDecimal.ONE : BigDecimal.ZERO);
+    
     sinfo.put(
         "strict token management",
         sp.useStrictTokenManagement() ? BigDecimal.ONE : BigDecimal.ZERO);
