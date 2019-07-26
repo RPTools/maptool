@@ -87,7 +87,7 @@ public class FogOfWarFunctions extends AbstractFunction {
       return "<!---->";
     }
     /*
-     * String empty = exposeFOW(optional String mapName)
+     * String empty = restoreFOW(optional String mapName)
      */
     if (functionName.equals("restoreFOW") || functionName.equals("restoreFoW")) {
       FogUtil.restoreFoW(zoneRenderer);
@@ -121,8 +121,8 @@ public class FogOfWarFunctions extends AbstractFunction {
   }
 
   private Set<GUID> getTokenSelectedSet(final ZoneRenderer zr) {
-    Set<GUID> tokens = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
-    Set<GUID> ownedTokens = MapTool.getFrame().getCurrentZoneRenderer().getOwnedTokens(tokens);
+    Set<GUID> tokens = zr.getSelectedTokenSet();
+    Set<GUID> ownedTokens = zr.getOwnedTokens(tokens);
     return ownedTokens;
   }
 
