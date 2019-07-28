@@ -6,6 +6,8 @@ ___
 Bug Fixes
 -----
 * [#487][i487] Restored previous token dragging behavior as default.
+  * [#315][i315] Tokens move less erratically.
+  * [#300][i300] Tokens have less drift.
 * [#485][i485] VBL changes made with Clear VBL on Edit Token Dialog and via setTokenVBL() were not updating local client view nor propagating to other clients.  Fixed.
 * [#481][i481] Token VBL no longer rotated -1 degrees.
 * [#476][i476] Added catch for missing/null directories cause an NPE in ImageFileImagePanelModel.getImage()
@@ -14,6 +16,7 @@ Bug Fixes
 * [#461][i461] GM Notes and GM Name for tokens no longer visible to players.
 * [#450][i450] Corrected footprint problems with native-size figure tokens which affected halos and vision.
 * [#442][i442] Pathing for 1-1-1 movement corrected to no longer look bad.
+* [#376][i376] RPTools Gallery Index button removed from Campaign Properties.  Gallery no longer exists.
 * [#288][i288] Added missing Grid shape to Light help and missing Hex and Cone to Sight help of Campaign Properties dialog.
 * [#261][i261] Selecting white in the color picker for the background of new maps threw exception.
 * [#191][i191] Auto-Resize dialog couldn't handle larger font sizes. Fixed.
@@ -22,12 +25,13 @@ Bug Fixes
 Enhancements
 -----
 * [#487][i487] New Preferences settings for choosing between snapped and non-snapped token dragging as well as hide/show mouse pointer during dragging.  Further tweaks to token dragging to improve tracking of token image to mouse pointer position.
-* [#376][i376] RPTools Gallery Index button removed from Campaign Properties.  Gallery no longer exists.
+  * [#479][i479] Snap restored as default.
 * [#298][i298] New Preferences selection for Macro editor themes. Themes can be found in C:\Users\\<username\>\\.maptool-rptools\themes\syntax
 
 [i485]: https://github.com/RPTools/maptool/issues/485
 [i442]: https://github.com/RPTools/maptool/issues/442
 [i487]: https://github.com/RPTools/maptool/issues/487
+[i479]: https://github.com/RPTools/maptool/issues/479
 [i376]: https://github.com/RPTools/maptool/issues/376
 [i298]: https://github.com/RPTools/maptool/issues/298
 [i487]: https://github.com/RPTools/maptool/issues/487
@@ -37,6 +41,8 @@ Enhancements
 [i467]: https://github.com/RPTools/maptool/issues/467
 [i461]: https://github.com/RPTools/maptool/issues/461
 [i450]: https://github.com/RPTools/maptool/issues/450
+[i315]: https://github.com/RPTools/maptool/issues/315
+[i300]: https://github.com/RPTools/maptool/issues/300
 [i288]: https://github.com/RPTools/maptool/issues/288
 [i261]: https://github.com/RPTools/maptool/issues/261
 [i191]: https://github.com/RPTools/maptool/issues/191
