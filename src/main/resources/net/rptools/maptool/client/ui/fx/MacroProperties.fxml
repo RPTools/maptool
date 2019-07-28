@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<Accordion prefHeight="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="net.rptools.maptool.client.ui.fx.controller.MacroProperties_Controller">
+    <panes>
+        <TitledPane fx:id="macroDetailsTitledPane" expanded="false" text="Details">
+            <content>
+                <ScrollPane>
+                    <content>
+                        <GridPane hgap="8.0" vgap="5.0">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="RIGHT" hgrow="NEVER"/>
+                                <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0"/>
+                                <ColumnConstraints/>
+                                <ColumnConstraints/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints minHeight="10.0"/>
+                                <RowConstraints minHeight="10.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                            </rowConstraints>
+                            <children>
+                                <Label contentDisplay="TOP" text="Name"/>
+                                <Label contentDisplay="TOP" text="Group" GridPane.rowIndex="1"/>
+                                <TextField GridPane.columnIndex="1"/>
+                                <TextField GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                <HBox/>
+                                <Label fx:id="buttonLabel" contentDisplay="RIGHT" text="Button" GridPane.rowIndex="5"/>
+                                <Label fx:id="wdithLabel" contentDisplay="RIGHT" text="Width" GridPane.rowIndex="2"/>
+                                <Label fx:id="fontLabel" contentDisplay="RIGHT" text="Font" GridPane.rowIndex="4"/>
+                                <Label fx:id="hotKeyLabel" contentDisplay="RIGHT" text="Hotkey" GridPane.rowIndex="6"/>
+                                <Label fx:id="sortOrder" contentDisplay="RIGHT" text="Sort Order"
+                                       GridPane.rowIndex="3"/>
+                                <CheckBox fx:id="displayHotkeyCheckbox" mnemonicParsing="false" text="Display Hotkey"
+                                          GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="LEFT"
+                                          GridPane.rowIndex="7"/>
+                                <CheckBox fx:id="includeLabelCheckbox" mnemonicParsing="false" text="Include Label"
+                                          GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="LEFT"
+                                          GridPane.rowIndex="8"/>
+                                <CheckBox fx:id="autoExecuteCheckbox" mnemonicParsing="false" text="Auto Execute"
+                                          GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.halignment="LEFT"
+                                          GridPane.rowIndex="9"/>
+                                <CheckBox fx:id="applyToSelectedTokensCheckbox" mnemonicParsing="false"
+                                          text="Apply to Selected Tokens" GridPane.columnIndex="1"
+                                          GridPane.columnSpan="2" GridPane.halignment="LEFT" GridPane.rowIndex="10"/>
+                                <ColorPicker GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                                <HBox fx:id="widthHbox" spacing="15.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                    <children>
+                                        <Label text="Min">
+                                            <graphic>
+                                                <TextField prefWidth="60.0"/>
+                                            </graphic>
+                                        </Label>
+                                        <Label text="Max">
+                                            <graphic>
+                                                <TextField prefWidth="60.0"/>
+                                            </graphic>
+                                        </Label>
+                                    </children>
+                                </HBox>
+                                <HBox fx:id="fontHbox" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                    <children>
+                                        <ColorPicker/>
+                                        <ChoiceBox/>
+                                    </children>
+                                </HBox>
+                                <ChoiceBox GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                                <TextField GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                                <TextArea prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1"
+                                          GridPane.rowIndex="12" GridPane.rowSpan="4"/>
+                                <Label text="Tool Tip" GridPane.rowIndex="12"/>
+                                <CheckBox mnemonicParsing="false" text="Allow Players to Edit" GridPane.columnIndex="1"
+                                          GridPane.rowIndex="11"/>
+                            </children>
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+                        </GridPane>
+                    </content>
+                </ScrollPane>
+            </content>
+        </TitledPane>
+        <TitledPane fx:id="macroCommonalityTitledPane" expanded="false" text="Macro Commonality">
+            <content>
+                <VBox spacing="10.0">
+                    <children>
+                        <CheckBox mnemonicParsing="false" text="Use Group"/>
+                        <CheckBox mnemonicParsing="false" text="Use Sort Prefix"/>
+                        <CheckBox mnemonicParsing="false" text="Use Command"/>
+                        <CheckBox layoutX="20.0" layoutY="20.0" mnemonicParsing="false" text="Use Include Label"/>
+                        <CheckBox layoutX="20.0" layoutY="37.0" mnemonicParsing="false" text="Use Auto Execute"/>
+                        <CheckBox layoutX="20.0" layoutY="54.0" mnemonicParsing="false"
+                                  text="Use Apply to Selected Tokens"/>
+                    </children>
+                </VBox>
+            </content>
+        </TitledPane>
+    </panes>
+</Accordion>

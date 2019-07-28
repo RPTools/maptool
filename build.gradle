@@ -215,6 +215,9 @@ dependencies {
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
 
+    // Avoid Repetition...
+    implementation 'org.projectlombok:lombok:1.18.+'
+
     // For PDF image extraction
     implementation 'org.apache.pdfbox:pdfbox:2.0.10'
     implementation 'org.bouncycastle:bcmail-jdk15on:1.59'								// To decrypt passworded/secured pdf's

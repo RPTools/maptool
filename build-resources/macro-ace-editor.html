@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,height=device-height"/>
+    <title>Ace Kitchen Sink</title>
+    <meta name="author" content="Fabian Jakobs">
+
+    <link rel="stylesheet" href="ace-builds/demo/kitchen-sink/styles.css" type="text/css" media="screen"
+          charset="utf-8">
+
+    <script async="true" src="https://use.edgefonts.net/source-code-pro.js"></script>
+
+    <link href="ace-builds/doc/site/images/favicon.ico" rel="icon" type="image/x-icon">
+</head>
+<body>
+
+<div id="editor-container"></div>
+
+<div style="position:absolute;height:100%;width:260px">
+    <img src="ace-builds/demo/kitchen-sink/ace-logo.png"
+         style="width: 100px; display: block;  margin-left: auto;  margin-right: auto;  width: 40%;"/>
+
+    <div style="position: absolute; overflow: hidden; top:100px; bottom:0">
+        <div id="optionsPanel" style="width: 120%; height:100%; overflow-y: scroll"/>
+    </div>
+</div>
+
+<script src="ace-builds/src/ace.js" data-ace-base="ace-builds/src" type="text/javascript" charset="utf-8"></script>
+<script src="ace-builds/src/keybinding-vim.js"></script>
+<script src="ace-builds/src/keybinding-emacs.js"></script>
+<script src="ace-builds/demo/kitchen-sink/demo.js"></script>
+<script type="text/javascript" charset="utf-8">
+        require("kitchen-sink/demo");
+</script>
+</body>
+</html>

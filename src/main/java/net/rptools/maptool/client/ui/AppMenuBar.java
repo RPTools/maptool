@@ -21,23 +21,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JSeparator;
+import javax.swing.*;
 import net.rptools.lib.FileUtil;
-import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.OpenUrlAction;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppSetup;
-import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MRUCampaignManager;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
@@ -372,6 +359,9 @@ public class AppMenuBar extends JMenuBar {
     }
     menu.addSeparator();
     menu.add(new JMenuItem(AppActions.SHOW_TRANSFER_WINDOW));
+
+    menu.addSeparator();
+    menu.add(new JCheckBoxMenuItem(AppActions.SHOW_MACRO_EDITOR));
 
     return menu;
   }
