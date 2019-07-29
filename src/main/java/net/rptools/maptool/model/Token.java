@@ -47,6 +47,7 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.JSONMacroFunctions;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.ImageManager;
@@ -961,6 +962,22 @@ public class Token extends BaseModel implements Cloneable {
     return id;
   }
 
+  public ZoneRenderer getZoneRenderer() { // Returns the ZoneRenderer the token is on
+    ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    Token token = zoneRenderer.getZone().getToken(getId());
+
+    if (token == null) {
+      List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+      for (ZoneRenderer zr : zrenderers) {
+        token = zr.getZone().getToken(getId());
+        if (token != null) {
+          zoneRenderer = zr;
+        }
+      }
+    }
+    return zoneRenderer;
+  }
+
   public void setId(GUID id) {
     this.id = id;
   }
@@ -1531,8 +1548,7 @@ public class Token extends BaseModel implements Cloneable {
   public void saveMacroButtonProperty(MacroButtonProperties prop) {
     getMacroPropertiesMap(false).put(prop.getIndex(), prop);
     MapTool.getFrame().resetTokenPanels();
-    MapTool.serverCommand()
-        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+    MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
 
     // Lets the token macro panels update only if a macro changes
     fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
