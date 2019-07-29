@@ -116,6 +116,13 @@ public class AppPreferences {
   private static final String KEY_TOKENS_START_SNAP_TO_GRID = "newTokensStartSnapToGrid";
   private static final boolean DEFAULT_TOKENS_START_SNAP_TO_GRID = true;
 
+  private static final String KEY_TOKENS_SNAP_WHILE_DRAGGING = "tokensSnapWhileDragging";
+  private static final boolean DEFAULT_KEY_TOKENS_SNAP_WHILE_DRAGGING = true;
+
+  private static final String KEY_HIDE_MOUSE_POINTER_WHILE_DRAGGING =
+      "hideMousePointerWhileDragging";
+  private static final boolean DEFAULT_KEY_HIDE_MOUSE_POINTER_WHILE_DRAGGING = true;
+
   private static final String KEY_OBJECTS_START_SNAP_TO_GRID = "newStampsStartSnapToGrid";
   private static final boolean DEFAULT_OBJECTS_START_SNAP_TO_GRID = false;
 
@@ -167,6 +174,9 @@ public class AppPreferences {
 
   private static final String KEY_USE_ASTAR_PATHFINDING = "useAstarPathfinding";
   private static final boolean DEFAULT_USE_ASTAR_PATHFINDING = true;
+
+  private static final String MACRO_EDITOR_THEME = "macroEditorTheme";
+  private static final String DEFAULT_MACRO_EDITOR_THEME = "default";
 
   public static void setFillSelectionBox(boolean fill) {
     prefs.putBoolean(KEY_FILL_SELECTION_BOX, fill);
@@ -636,12 +646,12 @@ public class AppPreferences {
     return prefs.getInt(KEY_DEFAULT_GRID_SIZE, DEFAULT_DEFAULT_GRID_SIZE);
   }
 
-  public static void setDefaultUnitsPerCell(int size) {
-    prefs.putInt(KEY_DEFAULT_UNITS_PER_CELL, size);
+  public static void setDefaultUnitsPerCell(double size) {
+    prefs.putDouble(KEY_DEFAULT_UNITS_PER_CELL, size);
   }
 
-  public static int getDefaultUnitsPerCell() {
-    return prefs.getInt(KEY_DEFAULT_UNITS_PER_CELL, DEFAULT_DEFAULT_UNITS_PER_CELL);
+  public static double getDefaultUnitsPerCell() {
+    return prefs.getDouble(KEY_DEFAULT_UNITS_PER_CELL, DEFAULT_DEFAULT_UNITS_PER_CELL);
   }
 
   public static void setDefaultVisionDistance(int dist) {
@@ -722,6 +732,23 @@ public class AppPreferences {
 
   public static boolean getTokensStartSnapToGrid() {
     return prefs.getBoolean(KEY_TOKENS_START_SNAP_TO_GRID, DEFAULT_TOKENS_START_SNAP_TO_GRID);
+  }
+
+  public static void setTokensSnapWhileDragging(boolean flag) {
+    prefs.putBoolean(KEY_TOKENS_SNAP_WHILE_DRAGGING, flag);
+  }
+
+  public static boolean getTokensSnapWhileDragging() {
+    return prefs.getBoolean(KEY_TOKENS_SNAP_WHILE_DRAGGING, DEFAULT_KEY_TOKENS_SNAP_WHILE_DRAGGING);
+  }
+
+  public static void setHideMousePointerWhileDragging(boolean flag) {
+    prefs.putBoolean(KEY_HIDE_MOUSE_POINTER_WHILE_DRAGGING, flag);
+  }
+
+  public static boolean getHideMousePointerWhileDragging() {
+    return prefs.getBoolean(
+        KEY_HIDE_MOUSE_POINTER_WHILE_DRAGGING, DEFAULT_KEY_HIDE_MOUSE_POINTER_WHILE_DRAGGING);
   }
 
   public static void setObjectsStartSnapToGrid(boolean flag) {
@@ -1121,5 +1148,13 @@ public class AppPreferences {
 
   public static void setUseAstarPathfinding(boolean show) {
     prefs.putBoolean(KEY_USE_ASTAR_PATHFINDING, show);
+  }
+
+  public static String getDefaultMacroEditorTheme() {
+    return prefs.get(MACRO_EDITOR_THEME, DEFAULT_MACRO_EDITOR_THEME);
+  }
+
+  public static void setDefaultMacroEditorTheme(String type) {
+    prefs.put(MACRO_EDITOR_THEME, type);
   }
 }

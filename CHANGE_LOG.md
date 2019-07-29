@@ -1,3 +1,129 @@
+Maptool 1.5.3
+=====
+More bug fixes and enhancements
+___
+
+Bug Fixes
+-----
+* [#487][i487] Restored previous token dragging behavior as default.
+  * [#315][i315] Tokens move less erratically.
+  * [#300][i300] Tokens have less drift.
+* [#485][i485] VBL changes made with Clear VBL on Edit Token Dialog and via setTokenVBL() were not updating local client view nor propagating to other clients.  Fixed.
+* [#481][i481] Token VBL no longer rotated -1 degrees.
+* [#476][i476] Added catch for missing/null directories cause an NPE in ImageFileImagePanelModel.getImage()
+* [#473][i473] Shutting down server should no longer throw an NPE when closing port with UPnP
+* [#467][i467] Updated layout of Start Server dialog so that server setting labels can go across the full dialog instead of being cutoff.
+* [#461][i461] GM Notes and GM Name for tokens no longer visible to players.
+* [#450][i450] Corrected footprint problems with native-size figure tokens which affected halos and vision.
+* [#442][i442] Pathing for 1-1-1 movement corrected to no longer look bad.
+* [#376][i376] RPTools Gallery Index button removed from Campaign Properties.  Gallery no longer exists.
+* [#288][i288] Added missing Grid shape to Light help and missing Hex and Cone to Sight help of Campaign Properties dialog.
+* [#261][i261] Selecting white in the color picker for the background of new maps threw exception.
+* [#191][i191] Auto-Resize dialog couldn't handle larger font sizes. Fixed.
+* [#166][i166] Tokens dropped on hex grids now pick up pick up map grid size instead of default.
+
+Enhancements
+-----
+* [#487][i487] New Preferences settings for choosing between snapped and non-snapped token dragging as well as hide/show mouse pointer during dragging.  Further tweaks to token dragging to improve tracking of token image to mouse pointer position.
+  * [#479][i479] Snap restored as default.
+* [#298][i298] New Preferences selection for Macro editor themes. Themes can be found in C:\Users\\<username\>\\.maptool-rptools\themes\syntax
+
+[i485]: https://github.com/RPTools/maptool/issues/485
+[i442]: https://github.com/RPTools/maptool/issues/442
+[i487]: https://github.com/RPTools/maptool/issues/487
+[i479]: https://github.com/RPTools/maptool/issues/479
+[i376]: https://github.com/RPTools/maptool/issues/376
+[i298]: https://github.com/RPTools/maptool/issues/298
+[i487]: https://github.com/RPTools/maptool/issues/487
+[i481]: https://github.com/RPTools/maptool/issues/481
+[i476]: https://github.com/RPTools/maptool/issues/476
+[i473]: https://github.com/RPTools/maptool/issues/473
+[i467]: https://github.com/RPTools/maptool/issues/467
+[i461]: https://github.com/RPTools/maptool/issues/461
+[i450]: https://github.com/RPTools/maptool/issues/450
+[i315]: https://github.com/RPTools/maptool/issues/315
+[i300]: https://github.com/RPTools/maptool/issues/300
+[i288]: https://github.com/RPTools/maptool/issues/288
+[i261]: https://github.com/RPTools/maptool/issues/261
+[i191]: https://github.com/RPTools/maptool/issues/191
+[i166]: https://github.com/RPTools/maptool/issues/166
+
+
+Maptool 1.5.2
+=====
+More bug fixes and enhancements
+___
+
+Bug Fixes
+-----
+* [#362][i362] - README updated to reflect current version.
+* [#118][i118] - Fixed console problem with spaces being in the Java path.
+* [#441][i441] - Draw Explorer no longer allows attempting to merge a drawing and a template.
+* [#395][i395] - Fix for Edit menu issues if language not set to English.
+* [#292][i292] - Out-of-date/bad URLs in Help menu updated/corrected.
+* [#339][i339] - Fixed Templates not previewing at correct location.
+* [#377][i377] - Returned values from getViewArea() corrected to be compatible with setViewArea().
+* [#392][i392] - Default Map Preferences updated to allow decimal Units per Cell values.
+* [#400][i400] - Selecting a filetype other than an RPTools map file when using Import Map no longer throws exception.
+* [#386][i386] - Output of *java -version* no longer included in Help -> Debug output.
+* [#398][i398] - Newlines can now be inserted into the middle of command lines in the chat window.
+* [#338][i338] - Templates added for Bugs, Features and Technical Questions to MapTool GitHub issues.
+
+Enhancements
+-----
+* [#335][i335] - New macro functions for controlling logging. [See log.* functions on Wiki](http://www.lmwcs.com/rptools/wiki/Category:Log_Function)
+* [#429][i429] - New macro functions for getting/setting terrain modifiers: [getTerrainModifier][igtm](), [setTerrainModifier][istm]()
+* [#345][i345] - New dicelib version with new dice expressions and new macro functions for accessing individual die roll values:
+  * [getRolled][igrd]()
+  * [getNewRolls][ignr]()
+  * [clearRolls][icrl]()
+* [#406][i406] - New [dice expression](http://www.lmwcs.com/rptools/wiki/Dice_Expressions) **XdYdhZ** (drop highest) and 7 others. 
+* [#355][i355] - Macro Editor details tab reorganized to give some fields more room. Macro button tooltip entry field made into a larger text area with HTML highlighting.  Checkbox to enable/disable hotkey display on button.  UDFs now show in auto-complete of macro editor with their tooltip as help text.
+* [#426][i426] - New Line & Radius templates that start at cells. New icons for all template types.
+* [#424][i424] - Auto-completion in macro editor now works even if complete function name has already been entered.
+* [#349][i349] - New macro functions for base64 encoding/decoding: [base64.encode][ibe64](), [base64.decode][ibd64]().
+* [#416][i416] - New macro function [movedOverDrawing](http://www.lmwcs.com/rptools/wiki/movedOverDrawing)().
+* [#407][i407] - New macro function [getDrawingInfo](http://www.lmwcs.com/rptools/wiki/getDrawingInfo)().
+* [#384][i384] - Warning message removed when using Import Map option.
+* [#365][i365] - Editing token properties now supports word wrap and syntax highlighting.
+* [#106][i106] - Reset Size added to right-click menu for tokens/stamps.
+* [#299][i299] - Mouse pointer now visible when dragging tokens.
+* [#389][i389] - File -> Export -> Campaign File As... now supports converting back to non-decimal map units-per-cell values.
+* [#332][i332] - Added support for multiple personal lights and setting color for personal lights. 
+
+[igrd]: http://www.lmwcs.com/rptools/wiki/getRolled
+[ignr]: http://www.lmwcs.com/rptools/wiki/getNewRolls
+[icrl]: http://www.lmwcs.com/rptools/wiki/clearRolls
+[ibd64]: http://www.lmwcs.com/rptools/wiki/base64.decode
+[ibe64]: http://www.lmwcs.com/rptools/wiki/base64.encode
+[igtm]: http://www.lmwcs.com/rptools/wiki/getTerrainModifier
+[istm]: http://www.lmwcs.com/rptools/wiki/setTerrainModifier
+[i106]: https://github.com/RPTools/maptool/issues/106
+[i118]: https://github.com/RPTools/maptool/issues/118
+[i292]: https://github.com/RPTools/maptool/issues/292
+[i299]: https://github.com/RPTools/maptool/issues/299
+[i335]: https://github.com/RPTools/maptool/issues/335
+[i338]: https://github.com/RPTools/maptool/issues/338
+[i339]: https://github.com/RPTools/maptool/issues/339
+[i345]: https://github.com/RPTools/maptool/issues/345
+[i349]: https://github.com/RPTools/maptool/issues/349
+[i355]: https://github.com/RPTools/maptool/issues/355
+[i362]: https://github.com/RPTools/maptool/issues/362
+[i377]: https://github.com/RPTools/maptool/issues/377
+[i384]: https://github.com/RPTools/maptool/issues/384
+[i386]: https://github.com/RPTools/maptool/issues/386
+[i389]: https://github.com/RPTools/maptool/issues/389
+[i395]: https://github.com/RPTools/maptool/issues/395
+[i398]: https://github.com/RPTools/maptool/issues/398
+[i400]: https://github.com/RPTools/maptool/issues/400
+[i406]: https://github.com/RPTools/maptool/issues/406
+[i407]: https://github.com/RPTools/maptool/issues/407
+[i416]: https://github.com/RPTools/maptool/issues/416
+[i424]: https://github.com/RPTools/maptool/issues/424
+[i426]: https://github.com/RPTools/maptool/issues/426
+[i429]: https://github.com/RPTools/maptool/issues/429
+[i441]: https://github.com/RPTools/maptool/issues/441
+
 MapTool 1.5.1
 =====
 A minor update to 1.5.0 consisting of bug fixes and small enhancements.
@@ -11,6 +137,7 @@ Bug Fixes
 * [#278][i278] - Fix existing unit tests and enable unit tests in build
 * [#326][i326] - defineFunction causes error with macro edit window open
 * [#324][i324] - fix output of setViewArea. This might break existing macro using workaround to interpret the broken result before the fix.
+
 
 Enhancements
 -----
@@ -97,8 +224,15 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * [#237][i237] - Added support to use shift-enter to insert newlines into the command entry box (also known as the chat entry box)
 * [#239][i239] - MapToolScriptTokenMaker now handles function names with . notation and dynamically pulls in all functions names. TokenMakerMaker no longer needs to be ran upon changes to MTScript.
 * [#240][i240] - Macro Editor now has Auto-Completion for macro functions! A brief description and summary can be displayed (these will be added as time permits)
+* [#332][i332] - Allow to set color for personal lights in campaign Sight types
+* [#324][i324] - fix output of getViewArea. This might break existing macro using workaround to interpret the broken result before the fix.
+* [#326][i326] - defineFunction with open edit window
+* [#365][i365] - Support wrap and syntax in property editor
 
-
+[i332]: https://github.com/RPTools/maptool/issues/332
+[i324]: https://github.com/RPTools/maptool/issues/324
+[i326]: https://github.com/RPTools/maptool/issues/326
+[i365]: https://github.com/RPTools/maptool/issues/365
 [i210]: https://github.com/RPTools/maptool/issues/210
 [i113]: https://github.com/JamzTheMan/MapTool/issues/113
 [i108]: https://github.com/JamzTheMan/MapTool/issues/108
@@ -144,3 +278,4 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 [i239]: https://github.com/RPTools/maptool/issues/239
 [i240]: https://github.com/RPTools/maptool/issues/240
 [i232]: https://github.com/RPTools/maptool/issues/232
+[i392]: https://github.com/RPTools/maptool/issues/392

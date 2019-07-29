@@ -48,7 +48,6 @@ import java.util.zip.ZipOutputStream;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -1359,6 +1358,24 @@ public class AppActions {
         }
       };
 
+  public static final Action TOGGLE_LOG_CONSOLE =
+      new DefaultClientAction() {
+        {
+          init("action.openLogConsole");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.isLoggingToConsole();
+        }
+
+        @Override
+        public void execute(ActionEvent e) {
+          AppState.setLoggingToConsole(!AppState.isLoggingToConsole());
+          MapTool.getLogConsoleNoteFrame().setVisible(AppState.isLoggingToConsole());
+        }
+      };
+
   public static final Action TOGGLE_SHOW_MOVEMENT_MEASUREMENTS =
       new DefaultClientAction() {
         {
@@ -2639,59 +2656,14 @@ public class AppActions {
         @Override
         public void execute(ActionEvent ae) {
           boolean isConnected = !MapTool.isHostingServer() && !MapTool.isPersonalServer();
-          if (getSeenWarning() == false) {
-            // If we're connected to a remote server and we are logged in as GM, this is true
-            boolean isRemoteGM =
-                isConnected && MapTool.getPlayer() != null && MapTool.getPlayer().isGM();
-            isRemoteGM = true;
-            if (isRemoteGM) {
-              // Returns true if they select OK and false otherwise
-              // setSeenWarning(MapTool.confirm("action.loadMap.warning"));
-              ImageIcon icon = null;
-              try {
-                Image img = ImageUtil.getImage("net/rptools/maptool/client/image/book_open.png");
-                img = ImageUtil.createCompatibleImage(img, 16, 16, null);
-                icon = new ImageIcon(img);
-              } catch (IOException ex) {
-              }
-              JButton b = new JButton("Help", icon);
-              Object[] options = {b, "Yes", "No"};
-              int result =
-                  JOptionPane.showOptionDialog(
-                      MapTool.getFrame(),
-                      // FIXME This string doesn't render as HTML properly -- no BOLD shows up?!
-                      "<html>This is an <b>experimental</b> feature.  Save your campaign before using this feature (you are a GM logged in remotely).",
-                      I18N.getText("msg.title.messageDialogConfirm"),
-                      JOptionPane.DEFAULT_OPTION,
-                      JOptionPane.WARNING_MESSAGE,
-                      null,
-                      options,
-                      options[2]);
-              if (result == 1) setSeenWarning(true); // Yes
-              else {
-                if (result == 0) { // Help
-                  // TODO We really need a better way to disseminate this information. Perhaps we
-                  // could assign every
-                  // external link a UUID, then have MapTool load a mapping from UUID-to-URL at
-                  // runtime? The
-                  // mapping could come from the rptools.net site initially and be cached for future
-                  // use, with a
-                  // periodic "Check for new updates" option available from the Help menu...?
-                  MapTool.showDocument("http://forums.rptools.net/viewtopic.php?f=3&t=23614");
-                }
-                return;
-              }
-            } else setSeenWarning(true);
-          }
-          if (getSeenWarning()) {
-            JFileChooser chooser = new MapPreviewFileChooser();
-            chooser.setDialogTitle(I18N.getText("msg.title.loadMap"));
-            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          JFileChooser chooser = new MapPreviewFileChooser();
+          chooser.setDialogTitle(I18N.getText("msg.title.loadMap"));
+          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          chooser.setFileFilter(MapTool.getFrame().getMapFileFilter());
 
-            if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
-              File mapFile = chooser.getSelectedFile();
-              loadMap(mapFile);
-            }
+          if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+            File mapFile = chooser.getSelectedFile();
+            loadMap(mapFile);
           }
         }
       };

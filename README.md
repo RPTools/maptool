@@ -1,9 +1,14 @@
-[![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=master)](https://travis-ci.org/RPTools/maptool)
+| Branch  | Travis | AppVeyor |
+| :---    |  :--:  |  :--:    |
+| master  | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=master)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/master?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/master)
+| develop | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=develop)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/develop?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/develop)
+
+
 
 MapTool
 =======
 
-Welcome to the MapTool 1.4 repository. The old version (1.3) still resides on [SourceForge](http://sourceforge.net/p/rptools/svn/HEAD/tree/) but will not be updated going forward.
+Welcome to the MapTool repository for versions 1.4+. The old version (1.3) still resides on [SourceForge](http://sourceforge.net/p/rptools/svn/HEAD/tree/) but will not be updated going forward.
 
 So what is MapTool? 
 -------------------
@@ -17,13 +22,13 @@ And we don't stop there! Not content with just emulating the tabletop, we seek t
 Requirements
 ------------
 
-- MapTool 1.4 requires [Java 1.7+](https://java.com/en/download/) although current iterations have an embedded JRE that will install along with MapTool
+- MapTool 1.5 requires [Java 10](https://www.oracle.com/technetwork/java/javase/archive-139210.html) although current iterations have an embedded JRE that will install along with MapTool
 - Building MapTool requires the Java Development Kit (JDK): [How To Install JDK](doc/How_To_Install_JDK.md)
 
 Version Numbers
 ---------------
 
-The RPTools team intends to use the "1.4" moniker until such time as changes are made that break backward compatibility with reading user data files (campaigns, maps, tokens, etc).  At that point, the version number will be bumped to "1.5".  (Note that the format of exported data may change without bumping the version number, as long as the older file format can still be read and used.)  In any case, the next digit will be even-numbered for stable releases and odd-numbered for development builds.
+The RPTools team intends to use the "1.5" moniker until such time as changes are made that break backward compatibility with reading user data files (campaigns, maps, tokens, etc).  At that point, the version number will be bumped to "1.6".  (Note that the format of exported data may change without bumping the version number, as long as the older file format can still be read and used.)  In any case, the next digit will be even-numbered for stable releases and odd-numbered for development builds.
 
 All of the exciting new features will be happening in the development builds.  Major bugs or security fixes will be ported between the stable and development branches so that they are available in both.
 
@@ -47,21 +52,20 @@ git clone git@github.com:RPTools/maptool.git
 
 From here on, it is expected that you are running these commands from within the directory that was created when you cloned the repository (referred to as the _working directory_ in Git-speak).
 
-[Gradle](http://gradle.org/) is used to build MapTool 1.4. You do not need Gradle installed to perform the build as the repository has a small wrapper that will download and install it in a subdirectory for you. This means that the first time you run Gradle, you will need to be connected to the Internet and it will take a while as it downloads everything it needs.
+[Gradle](http://gradle.org/) is used to build MapTool. You do not need Gradle installed to perform the build as the repository has a small wrapper that will download and install it in a subdirectory for you. This means that the first time you run Gradle, you will need to be connected to the Internet and it will take a while as it downloads everything it needs.
 
-(Note that Java 9 requires Gradle 4.x+ -- older versions of Gradle _will not work_!)
 
 * On Linux and macOS (and other Unix systems):
 ```
-./gradlew wrapper --gradle-version=4.5.1 --distribution-type=bin
+./gradlew wrapper --gradle-version=5.3.1 --distribution-type=bin
 ```
 
 * On Windows, remember to use the backslash instead:
 ```
-.\gradlew wrapper --gradle-version=4.5.1 --distribution-type=bin
+.\gradlew wrapper --gradle-version=5.3.1 --distribution-type=bin
 ```
 
-You now have Gradle updated to version 4.5.1 with any updates applied to
+You now have Gradle updated to version 5.3.1 with any updates applied to
 the wrapper script itself as well.
 
 Building MapTool

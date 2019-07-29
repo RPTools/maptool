@@ -14,6 +14,11 @@
  */
 package net.rptools.maptool.util;
 
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import java.io.IOException;
 import net.rptools.lib.io.PackedFile;
 import net.rptools.maptool.client.MapTool;
@@ -45,7 +50,7 @@ public class CampaignExport {
 
   // A list of versions we can export back to. There should be a corresponding note in the language
   // files.
-  private static final String[] VERSION_ARRAY = {"1.4.0.1"};
+  private static final String[] VERSION_ARRAY = {"1.4.0.0", "1.4.0.1", "1.4.1..1.5.0", "1.5.1"};
 
   /**
    * This method strips out the extra classes & fields using X-Stream based on which MapTool Version
@@ -84,16 +89,51 @@ public class CampaignExport {
         pakFile.getXStream().omitField(Token.class, "heroLabData");
         pakFile.getXStream().omitField(MacroButtonProperties.class, "macroUUID");
 
-        // DrawnElement was added in 1.4.0.1
-        // FIXME: Stripping the class still leaves an empty XML tag so unable to export to 1.4.0.0
-        // at this time :(
         if (VERSION_BUILD == 0) {
           // pakFile.getXStream().registerConverter(new DrawablesGroupConverter());
+          pakFile.getXStream().omitField(Zone.class, "drawables");
+          pakFile.getXStream().omitField(Zone.class, "gmDrawables");
+          pakFile.getXStream().omitField(Zone.class, "objectDrawables");
+          pakFile.getXStream().omitField(Zone.class, "backgroundDrawables");
         }
       }
     }
 
-    pakFile.setContent(persistedCampaign);
+    // care for the unitsPerCell change from integer to double
+    if ((VERSION_MAJOR == 1 && VERSION_MINOR <= 4)
+        || (VERSION_MAJOR == 1 && VERSION_MINOR == 5 && VERSION_RELEASE < 1)) {
+      pakFile
+          .getXStream()
+          .registerLocalConverter(
+              Zone.class,
+              "unitsPerCell",
+              new Converter() {
+
+                @Override
+                public boolean canConvert(@SuppressWarnings("rawtypes") Class type) {
+                  return Double.class.equals(type);
+                }
+
+                @Override
+                public Object unmarshal(
+                    HierarchicalStreamReader reader, UnmarshallingContext context) {
+                  return null;
+                }
+
+                @Override
+                public void marshal(
+                    Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+                  writer.setValue(Integer.valueOf(((Double) source).intValue()).toString());
+                }
+              });
+    }
+
+    // write the old content.xml file instead of the new splitted xml files
+    if ((VERSION_MAJOR == 1 && VERSION_MINOR <= 4)
+        || (VERSION_MAJOR == 1 && VERSION_MINOR == 5 && VERSION_RELEASE <= 1)) {
+      pakFile.setContent(persistedCampaign);
+    }
+
     pakFile.setProperty(
         PersistenceUtil.PROP_CAMPAIGN_VERSION,
         VERSION_MAJOR + "." + VERSION_MINOR + "." + VERSION_RELEASE);
@@ -122,7 +162,11 @@ public class CampaignExport {
       VERSION_MAJOR = Integer.parseInt(mapToolVersions[0]);
       VERSION_MINOR = Integer.parseInt(mapToolVersions[1]);
       VERSION_RELEASE = Integer.parseInt(mapToolVersions[2]);
-      VERSION_BUILD = Integer.parseInt(mapToolVersions[3]);
+      if (mapToolVersions.length >= 4 && !StringUtil.isEmpty(mapToolVersions[3])) {
+        VERSION_BUILD = Integer.parseInt(mapToolVersions[3]);
+      } else {
+        VERSION_BUILD = 0;
+      }
     } catch (ArrayIndexOutOfBoundsException ex) {
       MapTool.showError(I18N.getString("dialog.campaignexport.error.invalidversion"), ex);
       return false;

@@ -129,7 +129,7 @@ public class FileUtil {
     InputStream inStream = null;
     OutputStream outStream = null;
     try {
-      inStream = FileUtil.class.getClassLoader().getResourceAsStream(resource);
+      inStream = FileUtil.class.getResourceAsStream(resource);
       outStream = new BufferedOutputStream(new FileOutputStream(outFilename));
       IOUtils.copy(inStream, outStream);
     } finally {

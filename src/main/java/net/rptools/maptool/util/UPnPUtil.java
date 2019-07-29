@@ -219,10 +219,10 @@ public class UPnPUtil {
           // NewPortMappingDescription=MapTool
           boolean unmapped = gd.deletePortMapping(null, port, "TCP");
           if (unmapped) {
-            iter.remove();
             count++;
             if (log.isInfoEnabled())
               log.info("UPnP: Port unmapped from " + igds.get(gd).getDisplayName());
+            iter.remove();
           } else {
             if (log.isInfoEnabled())
               log.info("UPnP: Failed to unmap port from " + igds.get(gd).getDisplayName());

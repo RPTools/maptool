@@ -37,8 +37,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * RESTful based functions REST.get, REST.post, REST.put, REST.patch, REST.delete
@@ -57,8 +55,6 @@ import org.apache.logging.log4j.Logger;
  * body of the response is returned in what ever form the call returns.
  */
 public class RESTfulFunctions extends AbstractFunction {
-  private static final Logger log = LogManager.getLogger();
-
   private static final RESTfulFunctions instance = new RESTfulFunctions();
 
   private RESTfulFunctions() {

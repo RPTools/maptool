@@ -1,17 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="INFO">
-	<Appenders>
-		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%d{HH:mm:ss.SSS} (%F:%L) [%t] %-5level %logger{36} - %msg%n" />
-		</Console>
-		<File name="LogFile" fileName="${sys:appHome}/log.txt" immediateFlush="true" append="false">
-			<PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
-		</File>
-	</Appenders>
-	<Loggers>
-		<Root level="INFO">
-			<AppenderRef ref="Console" level="DEBUG" />
-			<AppenderRef ref="LogFile" />
-		</Root>
-	</Loggers>
+<Configuration status="INFO" packages="net.rptools.maptool.client.ui.logger">
+    <Properties>
+        <Property name="log-path">log</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} (%F:%L) [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+        <RollingFile
+                name="LogFile"
+                fileName="${sys:appHome}/maptool.log"
+                filePattern="${sys:appHome}/archive/maptool_%d{yyyy-MM-dd_HH-mm-ss}.log.zip"
+                ignoreExceptions="false">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10">
+                <Delete basePath="${sys:appHome}/archive">
+                    <IfFileName glob="maptool_*.log.zip"/>
+                    <IfLastModified age="14d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <JTextAreaAppender name="jtextarea-log" maxLines="5000">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %logger - %msg%n"/>
+        </JTextAreaAppender>
+    </Appenders>
+    <Loggers>
+        <Logger name="MapToolConsole" level="INFO" additivity="false">
+            <AppenderRef ref="jtextarea-log" level="debug"/>
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="Console" level="DEBUG"/>
+            <AppenderRef ref="LogFile"/>
+            <AppenderRef ref="jtextarea-log" level="debug"/>
+        </Root>
+    </Loggers>
 </Configuration>

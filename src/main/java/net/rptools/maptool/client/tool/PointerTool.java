@@ -92,6 +92,7 @@ import net.rptools.maptool.model.MovementKey;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool.model.Pointer;
+import net.rptools.maptool.model.SquareGrid;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
@@ -150,10 +151,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
   private static int STATSHEET_EXTERIOR_PADDING = 5;
 
   // Offset from token's X,Y when dragging. Values are in zone coordinates.
-  private int dragOffsetX;
-  private int dragOffsetY;
-  private int dragStartX;
-  private int dragStartY;
+  private int dragOffsetX = 0;
+  private int dragOffsetY = 0;
+  private int dragStartX = 0;
+  private int dragStartY = 0;
 
   public PointerTool() {
     try {
@@ -839,11 +840,13 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
               new ZonePoint(
                   tokenUnderMouse.getX() + r.width / 2, tokenUnderMouse.getY() + r.height / 2);
         ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
-        if (tokenUnderMouse.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-          zp.translate(-r.width / 2, -r.height / 2);
-          last.translate(-r.width / 2, -r.height / 2);
-        }
-        zp.translate(-dragOffsetX, -dragOffsetY);
+        // These lines were causing tokens to end up in the wrong grid cell in
+        // relation to the the mouse location.
+        // if (tokenUnderMouse.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
+        //          zp.translate(-r.width / 2, -r.height / 2);
+        //          last.translate(-r.width / 2, -r.height / 2);
+        // }
+        //        zp.translate(-dragOffsetX, -dragOffsetY);
         int dx = zp.x - last.x;
         int dy = zp.y - last.y;
         handleDragToken(zp, dx, dy);
@@ -878,7 +881,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         }
         startTokenDrag(tokenUnderMouse);
         isDraggingToken = true;
-        SwingUtil.hidePointer(renderer);
+        if (AppPreferences.getHideMousePointerWhileDragging()) SwingUtil.hidePointer(renderer);
       }
       return;
     }
@@ -899,16 +902,20 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
    */
   public boolean handleDragToken(ZonePoint zonePoint, int dx, int dy) {
     Grid grid = renderer.getZone().getGrid();
-    if (tokenBeingDragged.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-      // cellUnderMouse is actually token position if the token is being dragged with keys.
-      CellPoint cellUnderMouse = grid.convert(zonePoint);
-      zonePoint.translate(grid.getCellOffset().width / 2, grid.getCellOffset().height / 2);
+    // For snapped dragging
+    if (tokenBeingDragged.isSnapToGrid()
+        && grid.getCapabilities().isSnapToGridSupported()
+        && AppPreferences.getTokensSnapWhileDragging()) {
       // Convert the zone point to a cell point and back to force the snap to grid on drag
       zonePoint = grid.convert(grid.convert(zonePoint));
-      MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
     } else {
-      // Nothing
+      // Non-snapped while dragging.  Snaps when mouse-button released.
+      if (!(grid instanceof SquareGrid)) {
+        zonePoint.translate(-dragOffsetX, -dragOffsetY);
+      }
     }
+    CellPoint cellUnderMouse = grid.convert(zonePoint);
+    MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
     // Don't bother if there isn't any movement
     if (!renderer.hasMoveSelectionSetMoved(tokenBeingDragged.getId(), zonePoint)) {
       return false;
