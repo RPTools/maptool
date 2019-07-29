@@ -462,7 +462,18 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   }
 
   public Token getToken() {
-    return MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(this.tokenId);
+    Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(this.tokenId);
+
+    // If token not in current map, look for token in other maps.
+    if (token == null) {
+      List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+      for (ZoneRenderer zr : zrenderers) {
+        if (token == null) {
+          token = zr.getZone().getToken(this.tokenId);
+        }
+      }
+    }
+    return token;
   }
 
   public void setTokenId(Token token) {
