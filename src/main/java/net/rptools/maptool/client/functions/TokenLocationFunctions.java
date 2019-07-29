@@ -641,13 +641,13 @@ public class TokenLocationFunctions extends AbstractFunction {
       if (!(args.get(0) instanceof BigDecimal)) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.argumentTypeN", "moveToken", 1, args.get(0).toString()));
+                "macro.function.general.argumentTypeN", "goto", 1, args.get(0).toString()));
       }
 
       if (!(args.get(1) instanceof BigDecimal)) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.argumentTypeN", "moveToken", 2, args.get(1).toString()));
+                "macro.function.general.argumentTypeN", "goto", 2, args.get(1).toString()));
       }
 
       x = ((BigDecimal) args.get(0)).intValue();
