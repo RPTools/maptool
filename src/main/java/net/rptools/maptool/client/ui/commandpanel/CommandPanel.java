@@ -441,7 +441,7 @@ public class CommandPanel extends JPanel implements Observer {
    * FIXME: this is insufficient for stopping faked rolls; the user can still do something like &{"laquo;"}.
    */
   public static final Pattern CHEATER_PATTERN =
-      Pattern.compile("\u00AB|\u00BB|&#171|&#187|&laquo|&raquo|\036|\037|&#xAB|&#xBB");
+      Pattern.compile("\u00AB|\u00BB|&#171;?|&#187;?|&laquo;?|&raquo;?|&#xAB;?|&#xBB;?|\036|\037");
 
   /** Execute the command in the command field. */
   public void commitCommand() {
