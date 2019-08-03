@@ -2359,11 +2359,13 @@ public class ZoneRenderer extends JComponent
         zp.y += grid.getCellHeight() / 2 + cellOffset.height;
         highlightCell(g, zp, grid.getCellHighlight(), 1.0f);
       }
-      for (CellPoint p : cellPath) {
-        ZonePoint zp = grid.convert(p);
-        zp.x += grid.getCellWidth() / 2 + cellOffset.width;
-        zp.y += grid.getCellHeight() / 2 + cellOffset.height;
-        addDistanceText(g, zp, 1.0f, p.getDistanceTraveled(zone));
+      if (AppState.getShowMovementMeasurements()) {
+        for (CellPoint p : cellPath) {
+          ZonePoint zp = grid.convert(p);
+          zp.x += grid.getCellWidth() / 2 + cellOffset.width;
+          zp.y += grid.getCellHeight() / 2 + cellOffset.height;
+          addDistanceText(g, zp, 1.0f, p.getDistanceTraveled(zone));
+        }
       }
       int w = 0;
       for (ZonePoint p : waypointList) {
