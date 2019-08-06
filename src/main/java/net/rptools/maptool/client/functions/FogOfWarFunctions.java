@@ -71,10 +71,18 @@ public class FogOfWarFunctions extends AbstractFunction {
               maxParamSize,
               parameters.size()));
     }
-    ZoneRenderer zoneRenderer =
-        (parameters.size() >= 1 && parameters.get(0) instanceof String)
-            ? getZoneRenderer((String) parameters.get(0))
-            : getZoneRenderer(null);
+
+    ZoneRenderer zoneRenderer;
+    if (parameters.size() >= 1) {
+      String mapName = parameters.get(0).toString();
+      zoneRenderer = MapTool.getFrame().getZoneRenderer(mapName);
+      if (zoneRenderer == null) {
+        throw new ParserException(
+            I18N.getText("macro.function.moveTokenMap.unknownMap", functionName, mapName));
+      }
+    } else {
+      zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    }
 
     /*
      * String empty = exposePCOnlyArea(optional String mapName)
@@ -182,17 +190,5 @@ public class FogOfWarFunctions extends AbstractFunction {
       }
     }
     return tokenSet;
-  }
-
-  private ZoneRenderer getZoneRenderer(final String name) {
-    if (name == null) {
-      return MapTool.getFrame().getCurrentZoneRenderer();
-    }
-    for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
-      if (zr.getZone().getName().equals(name.toString())) {
-        return zr;
-      }
-    }
-    return MapTool.getFrame().getCurrentZoneRenderer();
   }
 }

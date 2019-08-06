@@ -57,13 +57,8 @@ public class MapFunctions extends AbstractFunction {
       checkNumberOfParameters(functionName, parameters, 1, 1);
       String mapName = parameters.get(0).toString();
       ZoneRenderer zr = getNamedMap(functionName, mapName);
-      if (zr != null) {
-        MapTool.getFrame().setCurrentZoneRenderer(zr);
-        return mapName;
-      }
-      throw new ParserException(
-          I18N.getText("macro.function.moveTokenMap.unknownMap", functionName, mapName));
-
+      MapTool.getFrame().setCurrentZoneRenderer(zr);
+      return mapName;
     } else if ("getMapVisible".equalsIgnoreCase(functionName)) {
       checkNumberOfParameters(functionName, parameters, 0, 1);
       if (parameters.size() > 0) {
@@ -143,12 +138,12 @@ public class MapFunctions extends AbstractFunction {
    * @return ZoneRenderer The map/zone.
    * @throws ParserException if the map is not found
    */
-  private ZoneRenderer getNamedMap(String functionName, String mapName) throws ParserException {
-    for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
-      if (mapName.equals(zr.getZone().getName())) {
-        return zr;
-      }
-    }
+  private ZoneRenderer getNamedMap(final String functionName, final String mapName)
+      throws ParserException {
+    ZoneRenderer zr = MapTool.getFrame().getZoneRenderer(mapName);
+
+    if (zr != null) return zr;
+
     throw new ParserException(
         I18N.getText("macro.function.moveTokenMap.unknownMap", functionName, mapName));
   }
