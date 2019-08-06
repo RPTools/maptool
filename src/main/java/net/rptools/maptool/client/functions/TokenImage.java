@@ -23,7 +23,6 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.Parser;
@@ -60,7 +59,7 @@ public class TokenImage extends AbstractFunction {
   private TokenImage() {
     super(
         0,
-        2,
+        3,
         "getTokenImage",
         "getTokenPortrait",
         "getTokenHandout",
@@ -85,41 +84,19 @@ public class TokenImage extends AbstractFunction {
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
     Token token;
-    BigDecimal size = null;
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    Zone zone;
+    MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
 
     if (functionName.equals("setTokenOpacity")) {
       if (!MapTool.getParser().isMacroPathTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
-      if (args.size() > 2)
-        throw new ParserException(
-            I18N.getText("macro.function.general.tooManyParam", functionName, 1, args.size()));
+      checkNumberOfParameters(functionName, args, 1, 3);
+      String opacityValue = args.get(0).toString();
+      token = getTokenFromParam(resolver, functionName, args, 1, 2);
+      zone = token.getZoneRenderer().getZone();
 
-      if (args.isEmpty())
-        throw new ParserException(
-            I18N.getText("macro.function.general.notenoughparms", functionName, 1, args.size()));
-
-      token = null;
-
-      if (args.size() == 2) {
-        token = FindTokenFunctions.findToken(args.get(1).toString(), null);
-
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.general.unknownToken", functionName, args.get(0).toString()));
-        }
-      } else if (args.size() == 1) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-        token = res.getTokenInContext();
-
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.noImpersonated", functionName));
-        }
-      }
-      float newOpacity = token.setTokenOpacity(Float.parseFloat(args.get(0).toString()));
+      float newOpacity = token.setTokenOpacity(Float.parseFloat(opacityValue));
       zone.putToken(token);
       MapTool.serverCommand().putToken(zone.getId(), token);
       return newOpacity;
@@ -129,124 +106,74 @@ public class TokenImage extends AbstractFunction {
       if (!MapTool.getParser().isMacroPathTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
-      if (args.size() == 1) {
-        token = FindTokenFunctions.findToken(args.get(0).toString(), null);
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.general.unknownToken", functionName, args.get(0).toString()));
-        }
-      } else if (args.size() == 0) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-        token = res.getTokenInContext();
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.noImpersonated", functionName));
-        }
-      } else {
-        throw new ParserException(
-            I18N.getText("macro.function.general.tooManyParam", functionName, 1, args.size()));
-      }
+      checkNumberOfParameters(functionName, args, 0, 2);
+      token = getTokenFromParam(resolver, functionName, args, 0, 1);
 
       return token.getTokenOpacity();
     }
 
     if (functionName.equals("setTokenImage")) {
-      if (args.size() != 1) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.wrongNumParam", "setTokenImage", 1, args.size()));
-      }
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "setTokenImage"));
-      }
-      setImage(token, args.get(0).toString());
+      checkNumberOfParameters(functionName, args, 1, 3);
+
+      String assetName = args.get(0).toString();
+      token = getTokenFromParam(resolver, functionName, args, 1, 2);
+      zone = token.getZoneRenderer().getZone();
+
+      setImage(token, assetName);
       zone.putToken(token);
       MapTool.serverCommand().putToken(zone.getId(), token);
       return "";
     }
 
     if (functionName.equals("setTokenPortrait")) {
-      if (args.size() != 1) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.wrongNumParam", "setTokenPortrait", 1, args.size()));
-      }
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "setTokenPortrait"));
-      }
-      setPortrait(token, args.get(0).toString());
+      checkNumberOfParameters(functionName, args, 1, 3);
+
+      String assetName = args.get(0).toString();
+      token = getTokenFromParam(resolver, functionName, args, 1, 2);
+      zone = token.getZoneRenderer().getZone();
+
+      setPortrait(token, assetName);
       zone.putToken(token);
       MapTool.serverCommand().putToken(zone.getId(), token);
       return "";
     }
 
     if (functionName.equals("setTokenHandout")) {
-      if (args.size() != 1) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.wrongNumParam", "setTokenHandout", 1, args.size()));
-      }
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "setTokenHandout"));
-      }
-      setHandout(token, args.get(0).toString());
+      checkNumberOfParameters(functionName, args, 1, 3);
+
+      String assetName = args.get(0).toString();
+      token = getTokenFromParam(resolver, functionName, args, 1, 2);
+      zone = token.getZoneRenderer().getZone();
+
+      setHandout(token, assetName);
       zone.putToken(token);
       MapTool.serverCommand().putToken(zone.getId(), token);
       return "";
     }
 
+    /** getImage, getTokenImage, getTokenPortrait, or getTokenHandout */
+    int indexSize = -1; // by default, no size added to asset id
     if (functionName.equals("getImage")) {
-      if (args.size() == 0) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.notEnoughParam", functionName, 1, args.size()));
-      } else if (args.size() > 2) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.tooManyParam", functionName, 2, args.size()));
-      }
+      checkNumberOfParameters(functionName, args, 1, 2);
+
       token = findImageToken(args.get(0).toString(), "getImage");
 
-      // Lee: would interfere with the "" return, commenting out...
-      // if (token == null) {
-      // throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName,
-      // args.get(0).toString()));
-      // }
-      if (args.size() > 1) {
-        size = (BigDecimal) args.get(1);
-      }
-    } else if (args.size() > 0) {
-      if (args.get(0) instanceof GUID) {
-        token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken((GUID) args.get(0));
-      } else if (args.get(0) instanceof BigDecimal) {
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-        token = res.getTokenInContext();
-        size = (BigDecimal) args.get(0);
-      } else
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeInvalid",
-                functionName,
-                1,
-                args.get(0).toString()));
-    } else {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", functionName));
-      }
-    }
+      // Lee: people want a blank instead of an error
+      if (token == null) return "";
 
-    // Lee: people want a blank instead of an error
-    if (token == null) return "";
+      if (args.size() > 1) {
+        indexSize = 1;
+      }
+    } else { // getTokenImage, getTokenPortrait, or getTokenHandout
+
+      checkNumberOfParameters(functionName, args, 0, 3);
+
+      if (args.size() > 0) {
+        indexSize = 0;
+      }
+
+      token = getTokenFromParam(resolver, functionName, args, 1, 2);
+    }
 
     StringBuilder assetId = new StringBuilder("asset://");
     if (functionName.equals("getTokenImage")) {
@@ -264,18 +191,31 @@ public class TokenImage extends AbstractFunction {
         return "";
       }
       assetId.append(token.getImageAssetId().toString());
-    } else {
+    } else { // getTokenHandout, or different capitalization
       if (token.getCharsheetImage() == null) {
         return "";
       }
       assetId.append(token.getCharsheetImage().toString());
     }
-    if (size != null) {
-      assetId.append("-");
-      // Constrain it slightly, so its greater than 1
-      int i = Math.max(size.intValue(), 1);
-      assetId.append(i);
+
+    if (indexSize >= 0
+        && !"".equals(args.get(indexSize).toString())) { // if size parameter entered and not ""
+      if (args.get(indexSize) instanceof BigDecimal) {
+        assetId.append("-");
+        BigDecimal size = (BigDecimal) args.get(indexSize);
+        // Constrain it slightly, so its greater than 1
+        int i = Math.max(size.intValue(), 1);
+        assetId.append(i);
+      } else {
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.general.argumentTypeInvalid",
+                functionName,
+                indexSize + 1,
+                args.get(indexSize).toString()));
+      }
     }
+
     return assetId.toString();
   }
 
@@ -310,8 +250,7 @@ public class TokenImage extends AbstractFunction {
       default:
         throw new IllegalArgumentException("unknown image type " + type);
     }
-    MapTool.serverCommand()
-        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token);
+    MapTool.serverCommand().putToken(token.getZoneRenderer().getZone().getId(), token);
   }
 
   public static void setImage(Token token, String assetName) throws ParserException {
@@ -364,5 +303,76 @@ public class TokenImage extends AbstractFunction {
     return null;
     // throw new ParserException(I18N.getText("macro.function.general.unknownToken", functionName,
     // name));
+  }
+
+  /**
+   * Gets the token from the specified index or returns the token in context. This method will check
+   * the list size before trying to retrieve the token so it is safe to use for functions that have
+   * the token as a optional argument.
+   *
+   * @param res the variable resolver
+   * @param functionName The function name (used for generating exception messages).
+   * @param param The parameters for the function.
+   * @param indexToken The index to find the token at.
+   * @param indexMap The index to find the map name at. If -1, use current map instead.
+   * @return the token.
+   * @throws ParserException if a token is specified but the macro is not trusted, or the specified
+   *     token can not be found, or if no token is specified and no token is impersonated.
+   */
+  private Token getTokenFromParam(
+      MapToolVariableResolver res,
+      String functionName,
+      List<Object> param,
+      int indexToken,
+      int indexMap)
+      throws ParserException {
+
+    String mapName =
+        indexMap >= 0 && param.size() > indexMap ? param.get(indexMap).toString() : null;
+    Token token;
+    if (param.size() > indexToken) {
+      if (!MapTool.getParser().isMacroTrusted()) {
+        throw new ParserException(I18N.getText("macro.function.general.noPermOther", functionName));
+      }
+      token = FindTokenFunctions.findToken(param.get(indexToken).toString(), mapName);
+      if (token == null) {
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.general.unknownToken",
+                functionName,
+                param.get(indexToken).toString()));
+      }
+    } else {
+      token = res.getTokenInContext();
+      if (token == null) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.noImpersonated", functionName));
+      }
+    }
+    return token;
+  }
+
+  /**
+   * Checks that the number of objects in the list <code>parameters</code> is within given bounds
+   * (inclusive). Throws a <code>ParserException</code> if the check fails.
+   *
+   * @param functionName this is used in the exception message
+   * @param parameters a list of parameters
+   * @param min the minimum amount of parameters (inclusive)
+   * @param max the maximum amount of parameters (inclusive)
+   * @throws ParserException if there were more or less parameters than allowed
+   */
+  private void checkNumberOfParameters(
+      String functionName, List<Object> parameters, int min, int max) throws ParserException {
+    int numberOfParameters = parameters.size();
+    if (numberOfParameters < min) {
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.general.notEnoughParam", functionName, min, numberOfParameters));
+    } else if (numberOfParameters > max) {
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.general.tooManyParam", functionName, max, numberOfParameters));
+    }
   }
 }

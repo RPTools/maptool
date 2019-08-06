@@ -971,7 +971,7 @@ public class Token extends BaseModel implements Cloneable {
       for (ZoneRenderer zr : zrenderers) {
         token = zr.getZone().getToken(getId());
         if (token != null) {
-          zoneRenderer = zr;
+          return zr;
         }
       }
     }
