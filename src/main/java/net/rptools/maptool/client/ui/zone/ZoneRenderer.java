@@ -838,10 +838,15 @@ public class ZoneRenderer extends JComponent
           iter.remove();
         }
       }
-      if (selectedTokens.isEmpty())
-        selectedTokens = zone.getOwnedTokensWithSight(MapTool.getPlayer());
-    } else {
-      selectedTokens = zone.getOwnedTokensWithSight(MapTool.getPlayer());
+    }
+    if (selectedTokens == null || selectedTokens.isEmpty()) {
+      // if no selected token qualifying for view, use owned tokens or player tokens with sight
+      final boolean checkOwnership =
+          MapTool.getServerPolicy().isUseIndividualViews() || MapTool.isPersonalServer();
+      selectedTokens =
+          checkOwnership
+              ? zone.getOwnedTokensWithSight(MapTool.getPlayer())
+              : zone.getPlayerTokensWithSight();
     }
     return new PlayerView(role, selectedTokens);
   }
