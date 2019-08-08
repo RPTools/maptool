@@ -131,8 +131,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
       token.setPropertyType(parameters.get(0).toString());
       MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(
-          token); // TODO: FJE Should this be here? Added because other places have it...?!
       return "";
     }
 
@@ -210,7 +208,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
       token.setType(Token.Type.PC);
       MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
       zoneR.flushLight();
       MapTool.getFrame().updateTokenTree();
       return "";
@@ -227,7 +224,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
       token.setType(Token.Type.NPC);
       MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
       zoneR.flushLight();
       MapTool.getFrame().updateTokenTree();
       return "";
@@ -257,7 +253,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
       String layer = setLayer(token, parameters.get(0).toString(), forceShape);
       MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
       zoneR.flushLight();
       MapTool.getFrame().updateTokenTree();
       return layer;
@@ -331,7 +326,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
       token.resetProperty(parameters.get(0).toString());
       MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
       return "";
     }
 
@@ -346,7 +340,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
       token.setProperty(parameters.get(0).toString(), parameters.get(1).toString());
       MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
       return "";
     }
 
@@ -463,8 +456,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Zone zone = zoneR.getZone();
 
       token.setGMNotes(parameters.get(0).toString());
-      MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
+      // Faster to not update clients through MapTool.serverCommand().putToken(token)
       return token.getGMNotes();
     }
 
@@ -488,8 +480,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Zone zone = zoneR.getZone();
 
       token.setNotes(parameters.get(0).toString());
-      MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
+      // Faster to not update clients through MapTool.serverCommand().putToken(token)
       return token.getNotes();
     }
 
@@ -505,7 +496,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
       token.setZOrder(zone.getLargestZOrder() + 1);
 
       MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
 
       return BigDecimal.valueOf(token.getZOrder());
     }
@@ -522,7 +512,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
       token.setZOrder(zone.getSmallestZOrder() - 1);
 
       MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
 
       return BigDecimal.valueOf(token.getZOrder());
     }
@@ -564,9 +553,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Token token = MapTool.getParser().getTokenMacroLib(location);
       token.setProperty(parameters.get(0).toString(), parameters.get(1).toString());
       Zone z = MapTool.getParser().getTokenMacroLibZone(location);
+      // Note: not `zone' since we want only the zone this particular token came from
       MapTool.serverCommand().putToken(z.getId(), token);
-      z.putToken(
-          token); // Note: not `zone' since we want only the zone this particular token came from
       return "";
     }
 
@@ -654,7 +642,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
       zoneR
           .flushLight(); // FJE This isn't needed unless the token had a light source, right? Should
       // we check for that?
-      zone.putToken(token);
       return "";
     }
 
@@ -670,7 +657,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
       token.setFacing(null);
       MapTool.serverCommand().putToken(zone.getId(), token);
       zoneR.flushLight();
-      zone.putToken(token);
       return "";
     }
 
@@ -715,7 +701,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
         token.addOwner(
             myself); // If not trusted we must have been in the owner list -- keep us there.
       MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
       return "";
     }
 
@@ -740,7 +725,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
       }
 
       MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
       return token.isOwnedByAll() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
@@ -771,8 +755,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
               parameters.get(0).toString().toUpperCase().trim().replace(" ", "_"));
       token.setShape(newShape);
 
-      MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
+      // Faster to not update clients through MapTool.serverCommand().putToken(token)
       return token.getShape().toString();
     }
 
@@ -847,8 +830,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
         token.setScaleY(magnitude / token.getHeight());
       }
 
-      MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
+      // Faster to not update clients through MapTool.serverCommand().putToken(token)
       return magnitude;
     }
 
@@ -866,8 +848,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Object param = parameters.get(0);
       token.setSnapToGrid(AbstractTokenAccessorFunction.getBooleanValue(param));
 
-      MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
+      // Faster to not update clients through MapTool.serverCommand().putToken(token)
       return param;
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -914,7 +895,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
         renderer.flush(token);
         renderer.repaint();
         MapTool.serverCommand().putToken(zone.getId(), token);
-        zone.putToken(token);
         MapTool.getFrame().updateTokenTree();
         return getSize(token);
       }
@@ -934,9 +914,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     Zone zone = renderer.getZone();
     Grid grid = zone.getGrid();
     token.setFootprint(grid, grid.getDefaultFootprint());
-
-    MapTool.serverCommand().putToken(zone.getId(), token);
-    zone.putToken(token);
+    // Faster to not update clients through MapTool.serverCommand().putToken(token)
   }
 
   /**
