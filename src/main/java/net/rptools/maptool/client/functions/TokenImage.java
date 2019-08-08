@@ -97,7 +97,6 @@ public class TokenImage extends AbstractFunction {
       zone = token.getZoneRenderer().getZone();
 
       float newOpacity = token.setTokenOpacity(Float.parseFloat(opacityValue));
-      zone.putToken(token);
       MapTool.serverCommand().putToken(zone.getId(), token);
       return newOpacity;
     }
@@ -120,8 +119,6 @@ public class TokenImage extends AbstractFunction {
       zone = token.getZoneRenderer().getZone();
 
       setImage(token, assetName);
-      zone.putToken(token);
-      MapTool.serverCommand().putToken(zone.getId(), token);
       return "";
     }
 
@@ -133,8 +130,6 @@ public class TokenImage extends AbstractFunction {
       zone = token.getZoneRenderer().getZone();
 
       setPortrait(token, assetName);
-      zone.putToken(token);
-      MapTool.serverCommand().putToken(zone.getId(), token);
       return "";
     }
 
@@ -146,8 +141,6 @@ public class TokenImage extends AbstractFunction {
       zone = token.getZoneRenderer().getZone();
 
       setHandout(token, assetName);
-      zone.putToken(token);
-      MapTool.serverCommand().putToken(zone.getId(), token);
       return "";
     }
 
