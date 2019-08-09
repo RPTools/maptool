@@ -152,7 +152,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
      * String names = getMatchingProperties(String pattern, String delim: ",", String tokenId: currentToken())
      */
     if (functionName.equals("getMatchingProperties")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
+      checkNumberOfParameters(functionName, parameters, 1, 3);
       Token token = getTokenFromParam(resolver, functionName, parameters, 2);
       String pattern = parameters.get(0).toString();
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";

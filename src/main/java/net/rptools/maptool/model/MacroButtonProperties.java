@@ -31,6 +31,7 @@ import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
@@ -325,7 +326,12 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
   public void save() {
     if (saveLocation.equals("Token") && tokenId != null) {
-      getToken().saveMacroButtonProperty(this);
+      Token token = getToken();
+      if (token != null) {
+        token.saveMacroButtonProperty(this);
+      } else {
+        MapTool.showError(I18N.getText("msg.error.macro.buttonNullToken", getLabel(), tokenId));
+      }
     } else if (saveLocation.equals("GlobalPanel")) {
       MacroButtonPrefs.savePreferences(this);
     } else if (saveLocation.equals("CampaignPanel")) {
@@ -462,7 +468,19 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   }
 
   public Token getToken() {
-    return MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(this.tokenId);
+    Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(this.tokenId);
+
+    // If token not in current map, look for token in other maps.
+    if (token == null) {
+      List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+      for (ZoneRenderer zr : zrenderers) {
+        token = zr.getZone().getToken(this.tokenId);
+        if (token != null) {
+          break;
+        }
+      }
+    }
+    return token;
   }
 
   public void setTokenId(Token token) {
