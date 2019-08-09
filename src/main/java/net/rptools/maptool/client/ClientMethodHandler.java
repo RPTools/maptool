@@ -230,6 +230,17 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 MapTool.getFrame().refresh();
                 return;
 
+              case setTokenProperty:
+                zoneGUID = (GUID) parameters[0];
+                ZoneRenderer zoneRenderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+                if (zoneRenderer == null) return;
+
+                Token mytoken = zoneRenderer.getZone().getToken((GUID) parameters[1]);
+                if (mytoken != null) {
+                  mytoken.setProperty(parameters[2].toString(), parameters[3].toString());
+                }
+                return;
+
               case removeToken:
                 zoneGUID = (GUID) parameters[0];
                 zone = MapTool.getCampaign().getZone(zoneGUID);

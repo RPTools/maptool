@@ -124,6 +124,11 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case putLabel:
           putLabel(context.getGUID(0), (Label) context.get(1));
           break;
+        case setTokenProperty:
+          setTokenProperty(
+              context.getGUID(0), context.getGUID(1), context.getString(2), context.getString(3));
+          break;
+
         case putToken:
           putToken(context.getGUID(0), (Token) context.get(1));
           break;
@@ -555,6 +560,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         .getConnection()
         .broadcastCallMethod(
             ClientCommand.COMMAND.removeToken.name(), RPCContext.getCurrent().parameters);
+  }
+
+  public void setTokenProperty(GUID zoneGUID, GUID tokenGUID, String property, String value) {
+    forwardToAllClients();
   }
 
   public void removeZone(GUID zoneGUID) {
