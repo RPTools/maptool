@@ -318,8 +318,7 @@ public class LookupTableFunction extends AbstractFunction {
       } else { // We want the image URI
 
         if (result.getImageId() == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.LookupTableFunctions.noImage", function, name));
+          return "";
         }
 
         BigDecimal size = null;
