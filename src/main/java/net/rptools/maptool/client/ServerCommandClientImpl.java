@@ -127,6 +127,10 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.removeToken, zoneGUID, tokenGUID);
   }
 
+  public void setTokenProperty(GUID zoneGUID, GUID tokenGUID, String property, String value) {
+    makeServerCall(COMMAND.setTokenProperty, zoneGUID, tokenGUID, property, value);
+  }
+
   public void putLabel(GUID zoneGUID, Label label) {
     makeServerCall(COMMAND.putLabel, zoneGUID, label);
   }

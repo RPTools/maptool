@@ -328,9 +328,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equals("setProperty")) {
       checkNumberOfParameters(functionName, parameters, 2, 3);
       Token token = getTokenFromParam(resolver, functionName, parameters, 2);
-      token.setProperty(parameters.get(0).toString(), parameters.get(1).toString());
-      MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
+      MapTool.serverCommand()
+          .setTokenProperty(
+              zone.getId(),
+              token.getId(),
+              parameters.get(0).toString(),
+              parameters.get(1).toString());
       return "";
     }
 
