@@ -307,39 +307,49 @@ public class LookupTableFunction extends AbstractFunction {
 
       LookupEntry result = lookupTable.getLookup(roll);
 
-      if (function.equals("table") || function.equals("tbl")) {
-        String val = result.getValue();
-        try {
+      Object retVal = "";  //Object to hold BigDecimal or String
+      String retImage = "";  //String to hold assetId of image
+      
+      String val = result.getValue();
+      try {
           BigDecimal bival = new BigDecimal(val);
-          return bival;
+          retVal = bival;
         } catch (NumberFormatException nfe) {
-          return val;
+          retVal = val;
         }
-      } else { // We want the image URI
-
-        if (result.getImageId() == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.LookupTableFunctions.noImage", function, name));
-        }
-
-        BigDecimal size = null;
-        if (params.size() > 2) {
-          if (params.get(2) instanceof BigDecimal) {
-            size = (BigDecimal) params.get(2);
-          } else {
-            throw new ParserException(
-                I18N.getText("macro.function.LookupTableFunctions.invalidSize", function));
+      
+      if (result.getImageId() == null) {
+      	retImage = "";  //Issue #538
+      } else {
+          BigDecimal size = null;
+          if (params.size() > 2) {
+            if (params.get(2) instanceof BigDecimal) {
+              size = (BigDecimal) params.get(2);
+            } else {
+              throw new ParserException(
+                  I18N.getText("macro.function.LookupTableFunctions.invalidSize", function));
+            }
           }
-        }
 
-        StringBuilder assetId = new StringBuilder("asset://");
-        assetId.append(result.getImageId().toString());
-        if (size != null) {
-          int i = Math.max(size.intValue(), 1); // Constrain to a minimum of 1
-          assetId.append("-");
-          assetId.append(i);
-        }
-        return assetId.toString();
+          StringBuilder assetId = new StringBuilder("asset://");
+          assetId.append(result.getImageId().toString());
+          if (size != null) {
+            int i = Math.max(size.intValue(), 1); // Constrain to a minimum of 1
+            assetId.append("-");
+            assetId.append(i);
+          }
+          retImage = assetId.toString();
+      }
+      
+      if (function.equals("table") || function.equals("tbl")) {
+    	  return retVal;
+      } else if (function.equals("tableImage") || function.equals("tblImage")) {
+    	  return retImage;
+      } else {  //getTableEntry  Issue #539
+		  Map<String, Object> tinfo = new HashMap<String, Object>();
+		  tinfo.put("value", retVal);
+		  tinfo.put("image", retImage);
+		  return JSONObject.fromObject(tinfo);
       }
     }
   }
