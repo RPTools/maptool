@@ -239,7 +239,8 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 
                 Token mytoken = zoneRenderer.getZone().getToken((GUID) parameters[1]);
                 if (mytoken != null) {
-                  mytoken.updateProperty(parameters[2].toString(), (Object[]) parameters[3]);
+                  mytoken.updateProperty(
+                      zoneRenderer, parameters[2].toString(), (Object[]) parameters[3]);
                 }
                 return;
 
