@@ -2027,6 +2027,19 @@ public class Token extends BaseModel implements Cloneable {
       case "setGMNotes":
         setGMNotes(parameters[0].toString());
         break;
+      case "setX":
+        setX((int) parameters[0]);
+        MapTool.getFrame().refresh();
+        break;
+      case "setY":
+        setY((int) parameters[0]);
+        MapTool.getFrame().refresh();
+        break;
+      case "setXY":
+        setX((int) parameters[0]);
+        setY((int) parameters[1]);
+        MapTool.getFrame().refresh();
+        break;
     }
     fireModelChangeEvent(
         new ModelChangeEvent(zone, Zone.Event.TOKEN_CHANGED, this)); // fire onChangeToken
