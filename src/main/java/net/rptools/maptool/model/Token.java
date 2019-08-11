@@ -1954,11 +1954,15 @@ public class Token extends BaseModel implements Cloneable {
    * ClientMethodHandler to deal with sent change to token
    *
    * @param methodName the method to be used
+   * @param zoneRenderer the zone renderer where the token is
    * @param parameters an array of parameters
    */
-  public void updateProperty(String methodName, Object[] parameters) {
-    Zone zone = getZoneRenderer().getZone();
+  public void updateProperty(ZoneRenderer zoneRenderer, String methodName, Object[] parameters) {
+    Zone zone = zoneRenderer.getZone();
     switch (methodName) {
+      case "setState":
+        setState(parameters[0].toString(), parameters[1]);
+        MapTool.getFrame().refresh();
       case "setPropertyType":
         setPropertyType(parameters[0].toString());
         break;

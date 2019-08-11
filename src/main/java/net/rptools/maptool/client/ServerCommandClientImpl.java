@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -149,10 +150,11 @@ public class ServerCommandClientImpl implements ServerCommand {
    * @param Object[] an array of parameters
    */
   public void updateTokenProperty(Token token, String methodName, Object... parameters) {
+    ZoneRenderer zoneRenderer = token.getZoneRenderer();
     GUID tokenGUID = token.getId();
-    GUID zoneGUID = token.getZoneRenderer().getZone().getId();
+    GUID zoneGUID = zoneRenderer.getZone().getId();
 
-    token.updateProperty(methodName, parameters);
+    token.updateProperty(zoneRenderer, methodName, parameters); // update locally right away
     updateTokenProperty(zoneGUID, tokenGUID, methodName, parameters);
   }
 
