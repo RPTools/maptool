@@ -49,7 +49,7 @@ public interface ServerCommand {
     removeAsset,
     putToken,
     removeToken,
-    setTokenProperty,
+    updateTokenProperty,
     draw,
     updateDrawing,
     clearAllDrawings,
@@ -135,7 +135,10 @@ public interface ServerCommand {
 
   public void removeToken(GUID zoneGUID, GUID tokenGUID);
 
-  public void setTokenProperty(GUID zoneGUID, GUID tokenGUID, String property, String value);
+  public void updateTokenProperty(
+      GUID zoneGUID, GUID tokenGUID, String methodName, Object[] parameters);
+
+  public void updateTokenProperty(Token token, String methodName, Object... parameters);
 
   public void putLabel(GUID zoneGUID, Label label);
 

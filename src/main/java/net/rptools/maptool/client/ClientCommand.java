@@ -28,7 +28,7 @@ public class ClientCommand {
     getAsset,
     removeAsset,
     putToken,
-    setTokenProperty,
+    updateTokenProperty,
     removeToken,
     draw,
     clearAllDrawings,

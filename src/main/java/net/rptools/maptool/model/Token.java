@@ -1948,4 +1948,83 @@ public class Token extends BaseModel implements Cloneable {
   public void setHeroLabData(HeroLabData heroLabData) {
     this.heroLabData = heroLabData;
   }
+
+  /**
+   * Call the relevant setter from methodName with an array of parameters Called by
+   * ClientMethodHandler to deal with sent change to token
+   *
+   * @param methodName the method to be used
+   * @param parameters an array of parameters
+   */
+  public void updateProperty(String methodName, Object[] parameters) {
+    Zone zone = getZoneRenderer().getZone();
+    switch (methodName) {
+      case "setPropertyType":
+        setPropertyType(parameters[0].toString());
+        break;
+      case "setPC":
+        setType(Type.PC);
+        break;
+      case "setNPC":
+        setType(Type.NPC);
+        break;
+      case "setLayer":
+        setLayer((Zone.Layer) parameters[0]);
+        MapTool.getFrame().refresh();
+        break;
+      case "setShape":
+        setShape((TokenShape) parameters[0]);
+        MapTool.getFrame().refresh();
+        break;
+      case "setSnapToScale":
+        setSnapToScale((Boolean) parameters[0]);
+        MapTool.getFrame().refresh(); // refresh change on map
+        break;
+      case "setSnapToGrid":
+        setSnapToGrid((Boolean) parameters[0]);
+        MapTool.getFrame().refresh();
+        break;
+      case "setFootprint":
+        setFootprint((Grid) parameters[0], (TokenFootprint) parameters[1]);
+        MapTool.getFrame().refresh();
+        break;
+      case "setProperty":
+        setProperty(parameters[0].toString(), parameters[1].toString());
+        break;
+      case "setZOrder":
+        setZOrder((int) parameters[0]);
+        zone.sortZOrder(); // update new ZOrder
+        MapTool.getFrame().refresh();
+        break;
+      case "setFacing":
+        setFacing((Integer) parameters[0]);
+        MapTool.getFrame().refresh();
+        break;
+      case "clearAllOwners":
+        clearAllOwners();
+        break;
+      case "setOwnedByAll":
+        setOwnedByAll((Boolean) parameters[0]);
+        break;
+      case "addOwner":
+        addOwner(parameters[0].toString());
+        break;
+      case "setScaleX":
+        setScaleX((double) parameters[0]);
+        MapTool.getFrame().refresh();
+        break;
+      case "setScaleY":
+        setScaleY((double) parameters[0]);
+        MapTool.getFrame().refresh();
+        break;
+      case "setNotes":
+        setNotes(parameters[0].toString());
+        break;
+      case "setGMNotes":
+        setGMNotes(parameters[0].toString());
+        break;
+    }
+    fireModelChangeEvent(
+        new ModelChangeEvent(zone, Zone.Event.TOKEN_CHANGED, this)); // fire onChangeToken
+  }
 }

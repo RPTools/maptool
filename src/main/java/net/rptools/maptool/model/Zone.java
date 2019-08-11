@@ -944,6 +944,11 @@ public class Zone extends BaseModel {
     return tokenOrderedList.size() > 0 ? tokenOrderedList.get(0).getZOrder() : 0;
   }
 
+  /** Sort the tokens by their ZOrder */
+  public void sortZOrder() {
+    Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
+  }
+
   ///////////////////////////////////////////////////////////////////////////
   // labels
   ///////////////////////////////////////////////////////////////////////////
