@@ -177,10 +177,6 @@ public class TokenStateFunction extends AbstractFunction {
     val = args.get(1);
 
     setBooleanTokenState(token, stateName, val);
-    ((MapToolVariableResolver) parser.getVariableResolver())
-        .addDelayedAction(
-            new MapToolVariableResolver.PutTokenAction(
-                MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token));
 
     return val;
   }
@@ -223,8 +219,6 @@ public class TokenStateFunction extends AbstractFunction {
     for (Object stateName : MapTool.getCampaign().getTokenStatesMap().keySet()) {
       setBooleanTokenState(token, stateName.toString(), val);
     }
-    MapTool.serverCommand()
-        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token);
     return val;
   }
 
@@ -284,7 +278,7 @@ public class TokenStateFunction extends AbstractFunction {
       } catch (NumberFormatException e) {
         set = Boolean.parseBoolean(val.toString());
       }
-      token.setState(stateName, set);
+      MapTool.serverCommand().updateTokenProperty(token, "setState", stateName, set);
     }
   }
 

@@ -18,6 +18,7 @@ import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.geom.Area;
 import java.io.IOException;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -228,6 +229,19 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 Label label = (Label) parameters[1];
                 zone.putLabel(label);
                 MapTool.getFrame().refresh();
+                return;
+
+              case updateTokenProperty: // select token from sent zoneGUID & tokenGUID, then call
+                // Token.updateProperty()
+                zoneGUID = (GUID) parameters[0];
+                ZoneRenderer zoneRenderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+                if (zoneRenderer == null) return;
+
+                Token mytoken = zoneRenderer.getZone().getToken((GUID) parameters[1]);
+                if (mytoken != null) {
+                  mytoken.updateProperty(
+                      zoneRenderer, parameters[2].toString(), (Object[]) parameters[3]);
+                }
                 return;
 
               case removeToken:
