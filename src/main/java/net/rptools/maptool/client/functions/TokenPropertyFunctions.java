@@ -201,6 +201,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       checkNumberOfParameters(functionName, parameters, 0, 2);
       Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, functionName);
+      ZoneRenderer zoneR = token.getZoneRenderer();
       zoneR.flushLight();
       MapTool.getFrame().updateTokenTree();
       return "";
@@ -213,6 +214,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       checkNumberOfParameters(functionName, parameters, 0, 2);
       Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, functionName);
+      ZoneRenderer zoneR = token.getZoneRenderer();
       zoneR.flushLight();
       MapTool.getFrame().updateTokenTree();
       return "";
@@ -325,7 +327,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       String property = parameters.get(0).toString();
       String value = parameters.get(1).toString();
 
-      Token token = getTokenFromParam(resolver, functionName, parameters, 2,3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 2, 3);
       MapTool.serverCommand().updateTokenProperty(token, "setProperty", property, value);
       return "";
     }
@@ -470,6 +472,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equals("bringToFront")) {
       checkNumberOfParameters(functionName, parameters, 0, 2);
       Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      Zone zone = token.getZoneRenderer().getZone();
       MapTool.serverCommand().updateTokenProperty(token, "setZOrder", zone.getLargestZOrder() + 1);
       return BigDecimal.valueOf(token.getZOrder());
     }
@@ -480,6 +483,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equals("sendToBack")) {
       checkNumberOfParameters(functionName, parameters, 0, 2);
       Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      Zone zone = token.getZoneRenderer().getZone();
       MapTool.serverCommand().updateTokenProperty(token, "setZOrder", zone.getSmallestZOrder() - 1);
       return BigDecimal.valueOf(token.getZOrder());
     }
@@ -603,6 +607,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       BigDecimal facing = getBigDecimalFromParam(functionName, parameters, 0);
       Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
       MapTool.serverCommand().updateTokenProperty(token, "setFacing", facing.intValue());
+      ZoneRenderer zoneR = token.getZoneRenderer();
       zoneR
           .flushLight(); // FJE This isn't needed unless the token had a light source, right? Should
       // we check for that?
@@ -616,6 +621,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       checkNumberOfParameters(functionName, parameters, 0, 2);
       Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, "setFacing", (Integer) null);
+      ZoneRenderer zoneR = token.getZoneRenderer();
       zoneR.flushLight();
       return "";
     }
@@ -799,21 +805,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equals("setTokenSnapToGrid")) {
       checkNumberOfParameters(functionName, parameters, 1, 3);
       Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      ZoneRenderer zoneR = token.getZoneRenderer();
-      Zone zone = zoneR.getZone();
-
-      Object toGrid = parameters.get(0);
-      MapTool.serverCommand()
-          .updateTokenProperty(
-              token, "setSnapToGrid", AbstractTokenAccessorFunction.getBooleanValue(toGrid));
-      return "";
-    }
-    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
-  }
->>>>>>> Change functions in TokenPropertyFunctions.java to only send modified data
-
-      // Faster to not update clients through MapTool.serverCommand().putToken(token)
-      return param;
+      Boolean toGrid = AbstractTokenAccessorFunction.getBooleanValue((Object) parameters.get(0));
+      MapTool.serverCommand().updateTokenProperty(token, "setSnapToGrid", toGrid);
+      return toGrid;
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
