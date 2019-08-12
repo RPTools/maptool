@@ -111,47 +111,46 @@ public class TokenPropertyFunctions extends AbstractFunction {
       throws ParserException {
     MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
 
-    // Cached for all those putToken() calls that are needed
-    ZoneRenderer zoneR = MapTool.getFrame().getCurrentZoneRenderer();
-    Zone zone = zoneR.getZone();
-
     /*
-     * String type = getPropertyType(String tokenId: currentToken())
+     * String type = getPropertyType(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getPropertyType")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.getPropertyType();
     }
 
     /*
-     * String empty = setPropertyType(String propTypeName, String tokenId: currentToken())
+     * String empty = setPropertyType(String propTypeName, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setPropertyType")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
-      MapTool.serverCommand()
-          .updateTokenProperty(token, functionName, parameters.get(0).toString());
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
+      token.setPropertyType(parameters.get(0).toString());
+      MapTool.serverCommand().putToken(zone.getId(), token);
       return "";
     }
 
     /*
-     * String names = getPropertyNames(String delim: ",", String tokenId: currentToken())
+     * String names = getPropertyNames(String delim: ",", String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getPropertyNames") || functionName.equals("getPropertyNamesRaw")) {
-      checkNumberOfParameters(functionName, parameters, 0, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      checkNumberOfParameters(functionName, parameters, 0, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
       String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
       String pattern = ".*";
       return getPropertyNames(token, delim, pattern, functionName.equals("getPropertyNamesRaw"));
     }
 
     /*
-     * String names = getMatchingProperties(String pattern, String delim: ",", String tokenId: currentToken())
+     * String names = getMatchingProperties(String pattern, String delim: ",", String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getMatchingProperties")) {
-      checkNumberOfParameters(functionName, parameters, 1, 3);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 2);
+      checkNumberOfParameters(functionName, parameters, 1, 4);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 2, 3);
       String pattern = parameters.get(0).toString();
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
       return getPropertyNames(token, delim, pattern, false);
@@ -172,112 +171,126 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
-     * Number zeroOne = hasProperty(String propName, String tokenId: currentToken())
+     * Number zeroOne = hasProperty(String propName, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("hasProperty")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return hasProperty(token, parameters.get(0).toString()) ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
     /*
-     * Number zeroOne = isNPC(String tokenId: currentToken())
+     * Number zeroOne = isNPC(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("isNPC")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.getType() == Token.Type.NPC ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
     /*
-     * Number zeroOne = isPC(String tokenId: currentToken())
+     * Number zeroOne = isPC(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("isPC")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.getType() == Token.Type.PC ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
     /*
-     * String empty = setPC(String tokenId: currentToken())
+     * String empty = setPC(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setPC")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
-      MapTool.serverCommand().updateTokenProperty(token, functionName);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
+      token.setType(Token.Type.PC);
+      MapTool.serverCommand().putToken(zone.getId(), token);
       zoneR.flushLight();
       MapTool.getFrame().updateTokenTree();
       return "";
     }
 
     /*
-     * String empty = setNPC(String tokenId: currentToken())
+     * String empty = setNPC(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setNPC")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
-      MapTool.serverCommand().updateTokenProperty(token, functionName);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
+      token.setType(Token.Type.NPC);
+      MapTool.serverCommand().putToken(zone.getId(), token);
       zoneR.flushLight();
       MapTool.getFrame().updateTokenTree();
       return "";
     }
 
     /*
-     * String layer = getLayer(String tokenId: currentToken())
+     * String layer = getLayer(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getLayer")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.getLayer().name();
     }
 
     /*
-     * String layer = setLayer(String layer, String tokenId: currentToken(), boolean forceShape: true)
+     * String layer = setLayer(String layer, String tokenId: currentToken(), boolean forceShape: true, string mapName: current map)
      */
     if (functionName.equals("setLayer")) {
       boolean forceShape = true;
-      checkNumberOfParameters(functionName, parameters, 1, 3);
-      if (parameters.size() == 3) {
+      checkNumberOfParameters(functionName, parameters, 1, 4);
+      if (parameters.size() > 2) {
         forceShape = !BigDecimal.ZERO.equals(parameters.get(2));
       }
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 3);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
       String layer = setLayer(token, parameters.get(0).toString(), forceShape);
+      MapTool.serverCommand().putToken(zone.getId(), token);
       zoneR.flushLight();
       MapTool.getFrame().updateTokenTree();
       return layer;
     }
 
     /*
-     * String size = getSize(String tokenId: currentToken())
+     * String size = getSize(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getSize")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return getSize(token);
     }
 
     /*
-     * String size = setSize(String size, String tokenId: currentToken())
+     * String size = setSize(String size, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setSize")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
+
       return setSize(token, parameters.get(0).toString());
     }
 
     if (functionName.equals("resetSize")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       resetSize(token);
+
       return "";
     }
 
     /*
-     * String owners = getOwners(String delim: ",", String tokenId: currentToken())
+     * String owners = getOwners(String delim: ",", String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getOwners")) {
-      checkNumberOfParameters(functionName, parameters, 0, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      checkNumberOfParameters(functionName, parameters, 0, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return getOwners(token, parameters.size() > 0 ? parameters.get(0).toString() : ",");
     }
 
@@ -285,17 +298,17 @@ public class TokenPropertyFunctions extends AbstractFunction {
      * Number zeroOne = isOwnedByAll(String tokenId: currentToken())
      */
     if (functionName.equals("isOwnedByAll")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.isOwnedByAll() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
     /*
-     * Number zeroOne = isOwner(String player: self, String tokenId: currentToken())
+     * Number zeroOne = isOwner(String player: self, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("isOwner")) {
-      checkNumberOfParameters(functionName, parameters, 0, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      checkNumberOfParameters(functionName, parameters, 0, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
       if (parameters.size() > 0) {
         return token.isOwner(parameters.get(0).toString()) ? BigDecimal.ONE : BigDecimal.ZERO;
       }
@@ -303,36 +316,39 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
-     * String empty = resetProperty(String propName, String tokenId: currentToken())
+     * String empty = resetProperty(String propName, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("resetProperty")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
       token.resetProperty(parameters.get(0).toString());
       MapTool.serverCommand().putToken(zone.getId(), token);
-      zone.putToken(token);
       return "";
     }
 
     /*
-     * String empty = setProperty(String propName, String value, String tokenId: currentToken())
+     * String empty = setProperty(String propName, String value, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setProperty")) {
-      checkNumberOfParameters(functionName, parameters, 2, 3);
-      String property = parameters.get(0).toString();
-      String value = parameters.get(1).toString();
+      checkNumberOfParameters(functionName, parameters, 2, 4);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 2, 3);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
 
-      Token token = getTokenFromParam(resolver, functionName, parameters, 2);
-      MapTool.serverCommand().updateTokenProperty(token, "setProperty", property, value);
+      token.setProperty(parameters.get(0).toString(), parameters.get(1).toString());
+      MapTool.serverCommand().putToken(zone.getId(), token);
       return "";
     }
 
     /*
-     * {String|Number} value = getRawProperty(String propName, String tokenId: currentToken())
+     * {String|Number} value = getRawProperty(String propName, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getRawProperty")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
       Object val = token.getProperty(parameters.get(0).toString());
       if (val == null) {
         return "";
@@ -351,11 +367,11 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
-     * {String|Number} value = getProperty(String propName, String tokenId: currentToken())
+     * {String|Number} value = getProperty(String propName, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getProperty")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
       Object val = token.getEvaluatedProperty(parameters.get(0).toString());
 
       if (val instanceof String) {
@@ -371,11 +387,11 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
-     * Number zeroOne = isPropertyEmpty(String propName, String tokenId: currentToken())
+     * Number zeroOne = isPropertyEmpty(String propName, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("isPropertyEmpty")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
       return token.getProperty(parameters.get(0).toString()) == null
           ? BigDecimal.ONE
           : BigDecimal.ZERO;
@@ -421,63 +437,82 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
-     * String notes = getGMNotes(String tokenId: currentToken())
+     * String notes = getGMNotes(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getGMNotes")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       String notes = token.getGMNotes();
       return notes != null ? notes : "";
     }
 
     /*
-     * String notes = setGMNotes(String notes, String tokenId: currentToken())
+     * String notes = setGMNotes(String notes, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setGMNotes")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
-      MapTool.serverCommand()
-          .updateTokenProperty(token, "setGMNotes", parameters.get(0).toString());
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
+      token.setGMNotes(parameters.get(0).toString());
+      // Faster to not update clients through MapTool.serverCommand().putToken(token)
       return token.getGMNotes();
     }
 
     /*
-     * String notes = getNotes(String tokenId: currentToken())
+     * String notes = getNotes(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getNotes")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       String notes = token.getNotes();
       return notes != null ? notes : "";
     }
 
     /*
-     * String notes = setNotes(String notes, String tokenId: currentToken())
+     * String notes = setNotes(String notes, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setNotes")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
-      MapTool.serverCommand().updateTokenProperty(token, "setNotes", parameters.get(0).toString());
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
+      token.setNotes(parameters.get(0).toString());
+      // Faster to not update clients through MapTool.serverCommand().putToken(token)
       return token.getNotes();
     }
 
     /*
-     * String empty = bringToFront(String tokenId: currentToken())
+     * String empty = bringToFront(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("bringToFront")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
-      MapTool.serverCommand().updateTokenProperty(token, "setZOrder", zone.getLargestZOrder() + 1);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
+      token.setZOrder(zone.getLargestZOrder() + 1);
+
+      MapTool.serverCommand().putToken(zone.getId(), token);
+
       return BigDecimal.valueOf(token.getZOrder());
     }
 
     /*
-     * String empty = sendToBack(String tokenId: currentToken())
+     * String empty = sendToBack(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("sendToBack")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
-      MapTool.serverCommand().updateTokenProperty(token, "setZOrder", zone.getSmallestZOrder() - 1);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
+      token.setZOrder(zone.getSmallestZOrder() - 1);
+
+      MapTool.serverCommand().putToken(zone.getId(), token);
+
       return BigDecimal.valueOf(token.getZOrder());
     }
 
@@ -509,9 +544,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
      */
     if (functionName.equals("setLibProperty")) {
       checkNumberOfParameters(functionName, parameters, 2, 3);
-      String property = parameters.get(0).toString();
-      String value = parameters.get(1).toString();
-
       String location;
       if (parameters.size() > 2) {
         location = parameters.get(2).toString();
@@ -519,7 +551,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
         location = MapTool.getParser().getMacroSource();
       }
       Token token = MapTool.getParser().getTokenMacroLib(location);
-      MapTool.serverCommand().updateTokenProperty(token, "setProperty", property, value);
+      token.setProperty(parameters.get(0).toString(), parameters.get(1).toString());
+      Zone z = MapTool.getParser().getTokenMacroLibZone(location);
+      // Note: not `zone' since we want only the zone this particular token came from
+      MapTool.serverCommand().putToken(z.getId(), token);
       return "";
     }
 
@@ -571,11 +606,11 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
-     * Number facing = getTokenFacing(String tokenId: currentToken())
+     * Number facing = getTokenFacing(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getTokenFacing")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       if (token.getFacing() == null) {
         return ""; // XXX Should be -1 instead of a string?
       }
@@ -583,23 +618,27 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
-     * Number degrees = getTokenRotation(String tokenId: currentToken())
+     * Number degrees = getTokenRotation(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("getTokenRotation")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
 
       return BigDecimal.valueOf(token.getFacingInDegrees());
     }
 
     /*
-     * String empty = setTokenFacing(Number facing, String tokenId: currentToken())
+     * String empty = setTokenFacing(Number facing, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setTokenFacing")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
+      checkNumberOfParameters(functionName, parameters, 1, 3);
       BigDecimal facing = getBigDecimalFromParam(functionName, parameters, 0);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
-      MapTool.serverCommand().updateTokenProperty(token, "setFacing", facing.intValue());
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
+      token.setFacing(facing.intValue());
+      MapTool.serverCommand().putToken(zone.getId(), token);
       zoneR
           .flushLight(); // FJE This isn't needed unless the token had a light source, right? Should
       // we check for that?
@@ -607,37 +646,43 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
-     * String empty = removeTokenFacing(String tokenId: currentToken())
+     * String empty = removeTokenFacing(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("removeTokenFacing")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
-      MapTool.serverCommand().updateTokenProperty(token, "setFacing", (Integer) null);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
+      token.setFacing(null);
+      MapTool.serverCommand().putToken(zone.getId(), token);
       zoneR.flushLight();
       return "";
     }
 
     /*
-     * Number zeroOne = isSnapToGrid(String tokenId: currentToken())
+     * Number zeroOne = isSnapToGrid(String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("isSnapToGrid")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.isSnapToGrid() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
     /*
-     * String empty = setOwner(String playerName | JSONArray playerNames, String tokenId: currentToken())
+     * String empty = setOwner(String playerName | JSONArray playerNames, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setOwner")) {
-      checkNumberOfParameters(functionName, parameters, 0, 2);
+      checkNumberOfParameters(functionName, parameters, 0, 3);
       boolean trusted = MapTool.getParser().isMacroTrusted();
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
       // Remove current owners, but if this macro is untrusted and the current player is an owner,
       // keep the
       // ownership there.
       String myself = MapTool.getPlayer().getName();
-      MapTool.serverCommand().updateTokenProperty(token, "clearAllOwners");
+      token.clearAllOwners();
       String s = parameters.get(0).toString();
       if (StringUtil.isEmpty(s)) {
         // Do nothing when trusted, since all ownership should be turned off for an empty string
@@ -646,79 +691,85 @@ public class TokenPropertyFunctions extends AbstractFunction {
         Object json = JSONMacroFunctions.asJSON(parameters.get(0));
         if (json != null && json instanceof JSONArray) {
           for (Object o : (JSONArray) json) {
-            MapTool.serverCommand().updateTokenProperty(token, "addOwner", o.toString());
+            token.addOwner(o.toString());
           }
         } else {
-          MapTool.serverCommand().updateTokenProperty(token, "addOwner", s);
+          token.addOwner(s);
         }
       }
       if (!trusted)
-        MapTool.serverCommand()
-            .updateTokenProperty(
-                token,
-                "addOwner",
-                myself); // If not trusted we must have been in the owner list -- keep us there.
+        token.addOwner(
+            myself); // If not trusted we must have been in the owner list -- keep us there.
+      MapTool.serverCommand().putToken(zone.getId(), token);
       return "";
     }
 
     /*
-     * String empty = setOwner(0|1, String tokenId: currentToken())
+     * String empty = setOwnedByAll(0|1, String tokenId: currentToken(), string mapName: current map)
      */
     if (functionName.equals("setOwnedByAll")) {
       // If not trusted, do nothing and return -1 result
       if (!MapTool.getParser().isMacroTrusted()) return -1;
 
-      checkNumberOfParameters(functionName, parameters, 1, 2);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
       BigDecimal ownedByAll = getBigDecimalFromParam(functionName, parameters, 0);
 
       if (ownedByAll.compareTo(BigDecimal.ZERO) == 0) {
-        MapTool.serverCommand().updateTokenProperty(token, "setOwnedByAll", false);
+        token.setOwnedByAll(false);
       } else {
-        MapTool.serverCommand().updateTokenProperty(token, "setOwnedByAll", true);
+        token.setOwnedByAll(true);
       }
+
+      MapTool.serverCommand().putToken(zone.getId(), token);
       return token.isOwnedByAll() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
     /*
-     * String newShape = getTokenShape(String tokenId: currentToken())
+     * String newShape = getTokenShape(String tokenId: currentToken(), string mapName: current map)
      *
      * See Token.TokenShape for return values. Currently "Top down", "Circle", and "Square".
      */
     if (functionName.equals("getTokenShape")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
-
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       return token.getShape().toString();
     }
 
     /*
-     * String newShape = setTokenShape(String shape, String tokenId: currentToken())
+     * String newShape = setTokenShape(String shape, String tokenId: currentToken(), string mapName: current map)
      *
      * See Token.TokenShape for shape values. Currently "Top down", "Top_down", "Circle", and "Square".
      */
     if (functionName.equals("setTokenShape")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
+      checkNumberOfParameters(functionName, parameters, 0, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
 
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
       Token.TokenShape newShape =
           Token.TokenShape.valueOf(
               parameters.get(0).toString().toUpperCase().trim().replace(" ", "_"));
-      MapTool.serverCommand().updateTokenProperty(token, "setShape", newShape);
+      token.setShape(newShape);
+
+      // Faster to not update clients through MapTool.serverCommand().putToken(token)
       return token.getShape().toString();
     }
 
     /*
-     * String newShape = getTokenWidth(String tokenId: currentToken())
+     * String newShape = getTokenWidth(String tokenId: currentToken(), string mapName: current map)
      *
-     * String newShape = getTokenHeight(String tokenId: currentToken())
+     * String newShape = getTokenHeight(String tokenId: currentToken(), string mapName: current map)
      *
      * Returns pixel width/height for a given token. Useful for free size tokens.
      */
     if (functionName.equals("getTokenNativeWidth") || functionName.equals("getTokenNativeHeight")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
 
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
 
       if (functionName.equals("getTokenNativeWidth")) {
         return BigDecimal.valueOf(token.getWidth());
@@ -728,16 +779,19 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
-     * String newShape = getTokenWidth(String tokenId: currentToken())
+     * String newShape = getTokenWidth(String tokenId: currentToken(), string mapName: current map)
      *
-     * String newShape = getTokenHeight(String tokenId: currentToken())
+     * String newShape = getTokenHeight(String tokenId: currentToken(), string mapName: current map)
      *
      * Returns pixel width/height for a given token. Useful for free size tokens.
      */
     if (functionName.equals("getTokenWidth") || functionName.equals("getTokenHeight")) {
-      checkNumberOfParameters(functionName, parameters, 0, 1);
+      checkNumberOfParameters(functionName, parameters, 0, 2);
 
-      Token token = getTokenFromParam(resolver, functionName, parameters, 0);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
       // Get the pixel width or height of a given token
       Rectangle tokenBounds = token.getBounds(zone);
 
@@ -749,64 +803,55 @@ public class TokenPropertyFunctions extends AbstractFunction {
     }
 
     /*
+     * String newWidth   = setTokenWidth(String width, String tokenId: currentToken(), string mapName: current map)
+     *
+     * String newHeight  = setTokenHeight(String height, String tokenId: currentToken(), string mapName: current map)
+     *
      * Sets the width/height for a given token. Useful for free size tokens.
      */
     if (functionName.equals("setTokenWidth") || functionName.equals("setTokenHeight")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
+
       double magnitude = getBigDecimalFromParam(functionName, parameters, 0).doubleValue();
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+
       Rectangle tokenBounds = token.getBounds(zone);
       double oldWidth = tokenBounds.width;
       double oldHeight = tokenBounds.height;
-      MapTool.serverCommand().updateTokenProperty(token, "setSnapToScale", false);
+      token.setSnapToScale(false);
 
-      double newScaleX;
-      double newScaleY;
       if (functionName.equals("setTokenWidth")) {
-        newScaleX = magnitude / token.getWidth();
-        newScaleY = oldHeight / token.getHeight();
+        token.setScaleX(magnitude / token.getWidth());
+        token.setScaleY(oldHeight / token.getHeight());
       } else { // it wasn't 'setTokenWidth' which means functionName equals 'setTokenHeight'
-        newScaleX = oldWidth / token.getWidth();
-        newScaleY = magnitude / token.getHeight();
+        token.setScaleX(oldWidth / token.getWidth());
+        token.setScaleY(magnitude / token.getHeight());
       }
-      MapTool.serverCommand().updateTokenProperty(token, "setScaleX", newScaleX);
-      MapTool.serverCommand().updateTokenProperty(token, "setScaleY", newScaleY);
-      return "";
+
+      // Faster to not update clients through MapTool.serverCommand().putToken(token)
+      return magnitude;
     }
 
-    /* Sets whether the token should snap to the grid or not */
+    /*
+     * Number newSnapToGrid   = setTokenSnapToGrid(Bool snapToGrid, String tokenId: currentToken(), string mapName: current map)
+     *
+     * Sets whether the token should snap to the grid or not
+     */
     if (functionName.equals("setTokenSnapToGrid")) {
-      checkNumberOfParameters(functionName, parameters, 1, 2);
+      checkNumberOfParameters(functionName, parameters, 1, 3);
+      Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      ZoneRenderer zoneR = token.getZoneRenderer();
+      Zone zone = zoneR.getZone();
 
       Object param = parameters.get(0);
-      Token token = getTokenFromParam(resolver, functionName, parameters, 1);
+      token.setSnapToGrid(AbstractTokenAccessorFunction.getBooleanValue(param));
 
-      MapTool.serverCommand()
-          .updateTokenProperty(
-              token, "setSnapToGrid", AbstractTokenAccessorFunction.getBooleanValue(param));
-      return "";
+      // Faster to not update clients through MapTool.serverCommand().putToken(token)
+      return param;
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
-  }
-
-  private Token getTokenFromContextOrParam(
-      Parser parser, String functionName, List<Object> parameters) throws ParserException {
-    Token token;
-    if (parameters.isEmpty()) {
-      token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
-      if (token == null)
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", functionName));
-    } else {
-      token =
-          getTokenFromParam(
-              (MapToolVariableResolver) parser.getVariableResolver(), functionName, parameters, 0);
-      if (token == null)
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
-    }
-    return token;
   }
 
   /**
@@ -816,7 +861,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
    * @return the size of the token.
    */
   private String getSize(Token token) {
-    Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
+    Grid grid = token.getZoneRenderer().getZone().getGrid();
     if (token.isSnapToScale()) {
       for (TokenFootprint footprint : grid.getFootprints()) {
         if (token.getFootprint(grid) == footprint) {
@@ -837,18 +882,19 @@ public class TokenPropertyFunctions extends AbstractFunction {
    */
   private String setSize(Token token, String size) throws ParserException {
     if (size.equalsIgnoreCase("native") || size.equalsIgnoreCase("free")) {
-      MapTool.serverCommand().updateTokenProperty(token, "setSnapToScale", false);
+      token.setSnapToScale(false);
       return getSize(token);
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setSnapToScale", true);
+    token.setSnapToScale(true);
     ZoneRenderer renderer = token.getZoneRenderer();
     Zone zone = renderer.getZone();
     Grid grid = zone.getGrid();
     for (TokenFootprint footprint : grid.getFootprints()) {
       if (footprint.getName().equalsIgnoreCase(size)) {
-        MapTool.serverCommand().updateTokenProperty(token, "setFootprint", grid, footprint);
+        token.setFootprint(grid, footprint);
         renderer.flush(token);
         renderer.repaint();
+        MapTool.serverCommand().putToken(zone.getId(), token);
         MapTool.getFrame().updateTokenTree();
         return getSize(token);
       }
@@ -863,12 +909,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
    * @param token The token to reset the size of.
    */
   private void resetSize(Token token) {
-    MapTool.serverCommand().updateTokenProperty(token, "setSnapToScale", true);
+    token.setSnapToScale(true);
     ZoneRenderer renderer = token.getZoneRenderer();
     Zone zone = renderer.getZone();
     Grid grid = zone.getGrid();
-    MapTool.serverCommand()
-        .updateTokenProperty(token, "setFootprint", grid, grid.getDefaultFootprint());
+    token.setFootprint(grid, grid.getDefaultFootprint());
+    // Faster to not update clients through MapTool.serverCommand().putToken(token)
   }
 
   /**
@@ -897,27 +943,22 @@ public class TokenPropertyFunctions extends AbstractFunction {
       throw new ParserException(
           I18N.getText("macro.function.tokenProperty.unknownLayer", "setLayer", layerName));
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setLayer", layer);
+    token.setLayer(layer);
     if (forceShape) {
-      Token.TokenShape tokenShape = null;
       switch (layer) {
         case BACKGROUND:
         case OBJECT:
-          tokenShape = Token.TokenShape.TOP_DOWN;
+          token.setShape(Token.TokenShape.TOP_DOWN);
           break;
         case GM:
         case TOKEN:
           Image image = ImageManager.getImage(token.getImageAssetId());
           if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
-
-            tokenShape = Token.TokenShape.TOP_DOWN;
+            token.setShape(Token.TokenShape.TOP_DOWN);
           } else {
-            tokenShape = TokenUtil.guessTokenType(image);
+            token.setShape(TokenUtil.guessTokenType(image));
           }
           break;
-      }
-      if (tokenShape != null) {
-        MapTool.serverCommand().updateTokenProperty(token, "setShape", tokenShape);
       }
     }
     return layerName;
@@ -1094,24 +1135,34 @@ public class TokenPropertyFunctions extends AbstractFunction {
    * @param res the variable resolver
    * @param functionName The function name (used for generating exception messages).
    * @param param The parameters for the function.
-   * @param index The index to find the token at.
+   * @param indexToken The index to find the token at.
+   * @param indexMap The index to find the map name at. If -1, use current map instead.
    * @return the token.
    * @throws ParserException if a token is specified but the macro is not trusted, or the specified
    *     token can not be found, or if no token is specified and no token is impersonated.
    */
   private Token getTokenFromParam(
-      MapToolVariableResolver res, String functionName, List<Object> param, int index)
+      MapToolVariableResolver res,
+      String functionName,
+      List<Object> param,
+      int indexToken,
+      int indexMap)
       throws ParserException {
+
+    String mapName =
+        indexMap >= 0 && param.size() > indexMap ? param.get(indexMap).toString() : null;
     Token token;
-    if (param.size() > index) {
+    if (param.size() > indexToken) {
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPermOther", functionName));
       }
-      token = FindTokenFunctions.findToken(param.get(index).toString(), null);
+      token = FindTokenFunctions.findToken(param.get(indexToken).toString(), mapName);
       if (token == null) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.unknownToken", functionName, param.get(index).toString()));
+                "macro.function.general.unknownToken",
+                functionName,
+                param.get(indexToken).toString()));
       }
     } else {
       token = res.getTokenInContext();
