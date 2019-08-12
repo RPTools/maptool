@@ -81,7 +81,7 @@ public class ZoomFunctions extends AbstractFunction {
     } catch (NumberFormatException ne) {
       throw new ParserException(
           I18N.getText(
-              "macro.function.general.argumentTypeN", "moveToken", 1, args.get(0).toString()));
+              "macro.function.general.argumentTypeN", "setZoom", 1, args.get(0).toString()));
     }
     MapTool.getFrame().getCurrentZoneRenderer().setScale(zoom);
 
