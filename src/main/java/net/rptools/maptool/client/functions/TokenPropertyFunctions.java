@@ -201,8 +201,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       checkNumberOfParameters(functionName, parameters, 0, 2);
       Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, functionName);
-      ZoneRenderer zoneR = token.getZoneRenderer();
-      zoneR.flushLight();
+      token.getZoneRenderer().flushLight();
       MapTool.getFrame().updateTokenTree();
       return "";
     }
@@ -214,8 +213,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       checkNumberOfParameters(functionName, parameters, 0, 2);
       Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, functionName);
-      ZoneRenderer zoneR = token.getZoneRenderer();
-      zoneR.flushLight();
+      token.getZoneRenderer().flushLight();
       MapTool.getFrame().updateTokenTree();
       return "";
     }
@@ -239,11 +237,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
         forceShape = !BigDecimal.ZERO.equals(parameters.get(2));
       }
       Token token = getTokenFromParam(resolver, functionName, parameters, 1, 3);
-      ZoneRenderer zoneR = token.getZoneRenderer();
-      Zone zone = zoneR.getZone();
-
       String layer = setLayer(token, parameters.get(0).toString(), forceShape);
-      zoneR.flushLight();
+      token.getZoneRenderer().flushLight();
       MapTool.getFrame().updateTokenTree();
       return layer;
     }
@@ -607,8 +602,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
       BigDecimal facing = getBigDecimalFromParam(functionName, parameters, 0);
       Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
       MapTool.serverCommand().updateTokenProperty(token, "setFacing", facing.intValue());
-      ZoneRenderer zoneR = token.getZoneRenderer();
-      zoneR
+      token
+          .getZoneRenderer()
           .flushLight(); // FJE This isn't needed unless the token had a light source, right? Should
       // we check for that?
       return "";
@@ -621,8 +616,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       checkNumberOfParameters(functionName, parameters, 0, 2);
       Token token = getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, "setFacing", (Integer) null);
-      ZoneRenderer zoneR = token.getZoneRenderer();
-      zoneR.flushLight();
+      token.getZoneRenderer().flushLight();
       return "";
     }
 
@@ -792,8 +786,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
         newScaleX = oldWidth / token.getWidth();
         newScaleY = magnitude / token.getHeight();
       }
-      MapTool.serverCommand().updateTokenProperty(token, "setScaleX", newScaleX);
-      MapTool.serverCommand().updateTokenProperty(token, "setScaleY", newScaleY);
+      MapTool.serverCommand().updateTokenProperty(token, "setScaleXY", newScaleX, newScaleY);
       return magnitude;
     }
 
