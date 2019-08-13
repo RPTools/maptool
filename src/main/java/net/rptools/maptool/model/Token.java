@@ -1342,6 +1342,17 @@ public class Token extends BaseModel implements Cloneable {
     return state.put(aState, aValue);
   }
 
+  /**
+   * Set the value of every state for this Token.
+   *
+   * @param aValue The new value for the property.
+   */
+  public void setAllStates(Object aValue) {
+    for (Object sname : MapTool.getCampaign().getTokenStatesMap().keySet()) {
+      setState(sname.toString(), aValue);
+    }
+  }
+
   public void resetProperty(String key) {
     getPropertyMap().remove(key);
   }
@@ -1963,6 +1974,11 @@ public class Token extends BaseModel implements Cloneable {
       case "setState":
         setState(parameters[0].toString(), parameters[1]);
         MapTool.getFrame().refresh();
+        break;
+      case "setAllStates":
+        setAllStates(parameters[0]);
+        MapTool.getFrame().refresh();
+        break;
       case "setPropertyType":
         setPropertyType(parameters[0].toString());
         break;

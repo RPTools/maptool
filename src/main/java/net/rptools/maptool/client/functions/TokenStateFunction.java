@@ -47,20 +47,33 @@ public class TokenStateFunction extends AbstractFunction {
   }
 
   private TokenStateFunction() {
-    super(0, 3, "getState", "setState", "setAllStates", "getTokenStates");
+    super(0, 4, "getState", "setState", "setAllStates", "getTokenStates");
   }
 
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
+    MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
 
     if (functionName.equals("setAllStates")) {
-      return setAllStates(parser, args);
+      checkNumberOfParameters(functionName, args, 1, 3);
+      Boolean val = getBooleanFromValue(args.get(0));
+      Token token = getTokenFromParam(resolver, functionName, args, 1, 2);
+      MapTool.serverCommand().updateTokenProperty(token, functionName, val);
+      return val ? BigDecimal.valueOf(1) : BigDecimal.valueOf(0);
     } else if (functionName.equals("getState")) {
-      return getState(parser, args);
+      checkNumberOfParameters(functionName, args, 1, 3);
+      String stateName = args.get(0).toString();
+      Token token = getTokenFromParam(resolver, functionName, args, 1, 2);
+      return getState(token, stateName);
     } else if (functionName.equals("setState")) {
-      return setState(parser, args);
+      checkNumberOfParameters(functionName, args, 2, 4);
+      String stateName = args.get(0).toString();
+      Object value = args.get(1);
+      Token token = getTokenFromParam(resolver, functionName, args, 2, 3);
+      return setState(token, stateName, value);
     } else if (functionName.equals("getTokenStates")) {
+      checkNumberOfParameters(functionName, args, 0, 2);
       return getTokenStates(parser, args);
     } else {
       throw new ParserException(
@@ -81,148 +94,6 @@ public class TokenStateFunction extends AbstractFunction {
   }
 
   /**
-   * Sets the state of the specified token.
-   *
-   * @param token The token to set.
-   * @param stateName the name of the state or {@link #ALL_STATES}
-   * @param value the value to set it to.
-   * @throws ParserException if the state is unknown.
-   */
-  public void setState(Token token, String stateName, Object value) throws ParserException {
-    if (stateName.equals(ALL_STATES)) {
-      for (Object sname : MapTool.getCampaign().getTokenStatesMap().keySet()) {
-        setState(token, sname.toString(), value);
-      }
-    } else {
-      setBooleanTokenState(token, stateName, value);
-    }
-  }
-
-  /**
-   * Gets the state of the token.
-   *
-   * @param parser The parser that called the object.
-   * @param args The arguments.
-   * @return the state.
-   * @throws ParserException if an error occurs.
-   */
-  private Object getState(Parser parser, List<Object> args) throws ParserException {
-    Token token;
-    String stateName;
-
-    if (args.size() == 1) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      token = res.getTokenInContext();
-      if (token == null) {
-        return I18N.getText("macro.function.general.noImpersonated", "getState");
-      }
-    } else if (args.size() == 2) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        return I18N.getText("macro.function.general.noPermOther", "getState");
-      }
-
-      token = FindTokenFunctions.findToken(args.get(1).toString(), null);
-      if (token == null) {
-        return I18N.getText(
-            "macro.function.general.unknownToken", "getState", args.get(1).toString());
-      }
-    } else if (args.size() == 0) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.notEnoughParam", "getState", 1, args.size()));
-    } else {
-      throw new ParserException(
-          I18N.getText("macro.function.general.tooManyParam", "getState", 2, args.size()));
-    }
-    stateName = args.get(0).toString();
-
-    return getState(token, stateName);
-  }
-
-  /**
-   * Sets the state of the token.
-   *
-   * @param parser The parser that called the object.
-   * @param args The arguments.
-   * @return the state.
-   * @throws ParserException if an error occurs.
-   */
-  private Object setState(Parser parser, List<Object> args) throws ParserException {
-    Token token;
-    String stateName;
-    Object val;
-
-    if (args.size() == 3) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        return I18N.getText("macro.function.general.noPermOther", "setState");
-      }
-      token = FindTokenFunctions.findToken(args.get(2).toString(), null);
-      if (token == null) {
-        return I18N.getText(
-            "macro.function.general.unknownToken", "setState", args.get(2).toString());
-      }
-    } else if (args.size() == 2) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      token = res.getTokenInContext();
-      if (token == null) {
-        return I18N.getText("macro.function.general.noImpersonated", "setState");
-      }
-    } else if (args.size() == 0) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.notEnoughParam", "setState", 2, args.size()));
-    } else {
-      throw new ParserException(
-          I18N.getText("macro.function.general.tooManyParam", "setState", 3, args.size()));
-    }
-    stateName = args.get(0).toString();
-    val = args.get(1);
-
-    setBooleanTokenState(token, stateName, val);
-
-    return val;
-  }
-
-  /**
-   * Sets the state of the token.
-   *
-   * @param parser The parser that called the object.
-   * @param args The arguments.
-   * @return the state.
-   * @throws ParserException if an error occurs.
-   */
-  private Object setAllStates(Parser parser, List<Object> args) throws ParserException {
-    Token token;
-
-    if (args.size() == 1) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      token = res.getTokenInContext();
-      if (token == null) {
-        return I18N.getText("macro.function.general.noImpersonated", "setAllStates");
-      }
-    } else if (args.size() == 2) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        return I18N.getText("macro.function.general.noPermOther", "setAllStates");
-      }
-      token = FindTokenFunctions.findToken(args.get(1).toString(), null);
-      if (token == null) {
-        return I18N.getText(
-            "macro.function.general.unknownToken", "setAllStates", args.get(1).toString());
-      }
-    } else if (args.size() == 0) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.notEnoughParam", "setAllStates", 1, args.size()));
-    } else {
-      throw new ParserException(
-          I18N.getText("macro.function.general.tooManyParam", "setAllStates", 2, args.size()));
-    }
-    Object val = args.get(0);
-
-    for (Object stateName : MapTool.getCampaign().getTokenStatesMap().keySet()) {
-      setBooleanTokenState(token, stateName.toString(), val);
-    }
-    return val;
-  }
-
-  /**
    * Gets the boolean value of the tokens state.
    *
    * @param token The token to get the state of.
@@ -236,49 +107,51 @@ public class TokenStateFunction extends AbstractFunction {
           I18N.getText("macro.function.tokenStateFunctions.unknownState", stateName));
     }
     Object val = token.getState(stateName);
-    if (val == null) { // If state does not exist then it can't be set ;)
-      return false;
-    }
-    if (val instanceof Integer) {
-      return ((Integer) val).intValue() != 0;
-    } else if (val instanceof Boolean) {
-      return ((Boolean) val).booleanValue();
-    } else {
-      try {
-        return Integer.parseInt(val.toString()) != 0;
-      } catch (NumberFormatException e) {
-        return Boolean.parseBoolean(val.toString());
-      }
-    }
+    return (getBooleanFromValue(val));
   }
 
   /**
-   * Sets the boolean state of a token.
+   * Sets the state of the specified token.
    *
-   * @param token The token to set the state of.
-   * @param stateName The state to set.
-   * @param val set or unset the state.
-   * @throws ParserException if an error occurs.
+   * @param token The token to set.
+   * @param stateName the name of the state or {@link #ALL_STATES}
+   * @param value the value to set it to.
+   * @return the value of the state.
+   * @throws ParserException if the state is unknown.
    */
-  private void setBooleanTokenState(Token token, String stateName, Object val)
-      throws ParserException {
-    if (!MapTool.getCampaign().getTokenStatesMap().containsKey(stateName)) {
-      throw new ParserException(
-          I18N.getText("macro.function.tokenStateFunctions.unknownState", stateName));
-    }
-
-    boolean set;
-    if (val instanceof Integer) {
-      set = ((Integer) val).intValue() != 0;
-    } else if (val instanceof Boolean) {
-      set = ((Boolean) val).booleanValue();
+  public BigDecimal setState(Token token, String stateName, Object val) throws ParserException {
+    boolean set = getBooleanFromValue(val);
+    if (stateName.equals(ALL_STATES)) {
+      MapTool.serverCommand().updateTokenProperty(token, "setAllStates", set);
     } else {
-      try {
-        set = Integer.parseInt(val.toString()) != 0;
-      } catch (NumberFormatException e) {
-        set = Boolean.parseBoolean(val.toString());
+      if (!MapTool.getCampaign().getTokenStatesMap().containsKey(stateName)) {
+        throw new ParserException(
+            I18N.getText("macro.function.tokenStateFunctions.unknownState", stateName));
       }
       MapTool.serverCommand().updateTokenProperty(token, "setState", stateName, set);
+    }
+    return set ? BigDecimal.valueOf(1) : BigDecimal.valueOf(0);
+  }
+
+  /**
+   * Gets the boolean value of an object
+   *
+   * @param Object the object to get the value from
+   */
+  private boolean getBooleanFromValue(Object value) {
+    if (value == null) { // If state does not exist then it can't be set ;)
+      return false;
+    }
+    if (value instanceof Integer) {
+      return ((Integer) value).intValue() != 0;
+    } else if (value instanceof Boolean) {
+      return ((Boolean) value).booleanValue();
+    } else {
+      try {
+        return Integer.parseInt(value.toString()) != 0;
+      } catch (NumberFormatException e) {
+        return Boolean.parseBoolean(value.toString());
+      }
     }
   }
 
@@ -318,5 +191,76 @@ public class TokenStateFunction extends AbstractFunction {
       }
       return sb.toString();
     }
+  }
+
+  /**
+   * Checks that the number of objects in the list <code>parameters</code> is within given bounds
+   * (inclusive). Throws a <code>ParserException</code> if the check fails.
+   *
+   * @param functionName this is used in the exception message
+   * @param parameters a list of parameters
+   * @param min the minimum amount of parameters (inclusive)
+   * @param max the maximum amount of parameters (inclusive)
+   * @throws ParserException if there were more or less parameters than allowed
+   */
+  private void checkNumberOfParameters(
+      String functionName, List<Object> parameters, int min, int max) throws ParserException {
+    int numberOfParameters = parameters.size();
+    if (numberOfParameters < min) {
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.general.notEnoughParam", functionName, min, numberOfParameters));
+    } else if (numberOfParameters > max) {
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.general.tooManyParam", functionName, max, numberOfParameters));
+    }
+  }
+
+  /**
+   * Gets the token from the specified index or returns the token in context. This method will check
+   * the list size before trying to retrieve the token so it is safe to use for functions that have
+   * the token as a optional argument.
+   *
+   * @param res the variable resolver
+   * @param functionName The function name (used for generating exception messages).
+   * @param param The parameters for the function.
+   * @param indexToken The index to find the token at.
+   * @param indexMap The index to find the map name at. If -1, use current map instead.
+   * @return the token.
+   * @throws ParserException if a token is specified but the macro is not trusted, or the specified
+   *     token can not be found, or if no token is specified and no token is impersonated.
+   */
+  private Token getTokenFromParam(
+      MapToolVariableResolver res,
+      String functionName,
+      List<Object> param,
+      int indexToken,
+      int indexMap)
+      throws ParserException {
+
+    String mapName =
+        indexMap >= 0 && param.size() > indexMap ? param.get(indexMap).toString() : null;
+    Token token;
+    if (param.size() > indexToken) {
+      if (!MapTool.getParser().isMacroTrusted()) {
+        throw new ParserException(I18N.getText("macro.function.general.noPermOther", functionName));
+      }
+      token = FindTokenFunctions.findToken(param.get(indexToken).toString(), mapName);
+      if (token == null) {
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.general.unknownToken",
+                functionName,
+                param.get(indexToken).toString()));
+      }
+    } else {
+      token = res.getTokenInContext();
+      if (token == null) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.noImpersonated", functionName));
+      }
+    }
+    return token;
   }
 }
