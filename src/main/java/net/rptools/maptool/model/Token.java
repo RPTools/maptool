@@ -2021,6 +2021,11 @@ public class Token extends BaseModel implements Cloneable {
         setScaleY((double) parameters[0]);
         MapTool.getFrame().refresh();
         break;
+      case "setScaleXY":
+        setScaleX((double) parameters[0]);
+        setScaleY((double) parameters[1]);
+        MapTool.getFrame().refresh();
+        break;
       case "setNotes":
         setNotes(parameters[0].toString());
         break;
