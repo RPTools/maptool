@@ -910,7 +910,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       zonePoint = grid.convert(grid.convert(zonePoint));
     } else {
       // Non-snapped while dragging.  Snaps when mouse-button released.
-      if (!(grid instanceof SquareGrid)) {
+      if (!(grid instanceof SquareGrid) || !tokenBeingDragged.isSnapToGrid()) {
         zonePoint.translate(-dragOffsetX, -dragOffsetY);
       }
     }
