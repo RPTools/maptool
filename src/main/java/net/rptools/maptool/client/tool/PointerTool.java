@@ -562,7 +562,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
         Rectangle tokenBounds = token.getBounds(renderer.getZone());
 
-        if (token.isSnapToGrid()) {
+        if (token.isSnapToGrid() && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
           dragOffsetX = (pos.x - tokenBounds.x) - (tokenBounds.width / 2);
           dragOffsetY = (pos.y - tokenBounds.y) - (tokenBounds.height / 2);
         } else {
@@ -910,7 +910,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       zonePoint = grid.convert(grid.convert(zonePoint));
     } else {
       // Non-snapped while dragging.  Snaps when mouse-button released.
-      if (!(grid instanceof SquareGrid)) {
+      if (!(grid instanceof SquareGrid) || !tokenBeingDragged.isSnapToGrid()) {
         zonePoint.translate(-dragOffsetX, -dragOffsetY);
       }
     }
