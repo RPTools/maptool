@@ -1970,15 +1970,22 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
   private String createHoverNote(Token marker) {
     boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(marker.getGMNotes());
+    boolean showNotes = !StringUtil.isEmpty(marker.getNotes());
 
     StringBuilder builder = new StringBuilder();
 
     if (marker.getPortraitImage() != null) {
       builder.append("<table><tr><td valign=top>");
     }
-    if (!StringUtil.isEmpty(marker.getNotes())) {
-      builder.append("<b><span class='title'>").append(marker.getName()).append("</span></b><br>");
-      builder.append(markerUnderMouse.getNotes());
+    if (showGMNotes || showNotes) {
+      builder.append("<b><span class='title'>").append(marker.getName());
+      if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(marker.getGMName())) {
+        builder.append(" (").append(marker.getGMName()).append(")");
+      }
+      builder.append("</span></b><br>");
+    }
+    if (showNotes) {
+      builder.append(marker.getNotes());
       // add a gap between player and gmNotes
       if (showGMNotes) {
         builder.append("\n\n");
@@ -1986,9 +1993,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     }
     if (showGMNotes) {
       builder.append("<b><span class='title'>GM Notes");
-      if (!StringUtil.isEmpty(marker.getGMName())) {
-        builder.append(" - ").append(marker.getGMName());
-      }
       builder.append("</span></b><br>");
       builder.append(marker.getGMNotes());
     }
