@@ -281,7 +281,7 @@ public class LookupTableFunction extends AbstractFunction {
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return 1;
 
-    } else {
+    } else { // if tbl, table, tblImage or tableImage
       checkNumberOfParameters(function, params, 1, 3);
       String name = params.get(0).toString();
 
@@ -315,11 +315,10 @@ public class LookupTableFunction extends AbstractFunction {
         } catch (NumberFormatException nfe) {
           return val;
         }
-      } else { // We want the image URI
+      } else { // We want the image URI through tblImage or tableImage
 
         if (result.getImageId() == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.LookupTableFunctions.noImage", function, name));
+          return ""; // empty string if no image is found (#538)
         }
 
         BigDecimal size = null;
