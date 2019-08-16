@@ -388,11 +388,15 @@ public class TokenPropertyFunctions extends AbstractFunction {
      */
     if (functionName.equals("getPropertyDefault")) {
       checkNumberOfParameters(functionName, parameters, 1, 2);
-      Token token = resolver.getTokenInContext();
       String name = parameters.get(0).toString();
-      String propType =
-          parameters.size() > 1 ? parameters.get(1).toString() : token.getPropertyType();
 
+      String propType;
+      if (parameters.size() > 1) {
+        propType = parameters.get(1).toString();
+      } else {
+        Token token = getTokenFromParam(resolver, functionName, parameters, 1, -1);
+        propType = token.getPropertyType();
+      }
       Object val = null;
 
       List<TokenProperty> propertyList =
@@ -800,7 +804,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Token token = getTokenFromParam(resolver, functionName, parameters, 1, 2);
       Boolean toGrid = AbstractTokenAccessorFunction.getBooleanValue((Object) parameters.get(0));
       MapTool.serverCommand().updateTokenProperty(token, "setSnapToGrid", toGrid);
-      return toGrid;
+      return token.isSnapToGrid() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
