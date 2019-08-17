@@ -8933,7 +8933,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                           <at name="name">fill</at>
                                          </object>
                                         </at>
-                                        <at name="toolTipText">&lt;html&gt;Player-editable macros cannot call &lt;b&gt;trusted&lt;/b&gt; functions.  When developing a framework, this should be disabled.</at>
+                                        <at name="toolTipText">Timeout period in milliseconds to wait when looking for UPnP gateways.</at>
                                         <at name="height">14</at>
                                        </object>
                                       </at>

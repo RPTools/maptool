@@ -838,10 +838,15 @@ public class ZoneRenderer extends JComponent
           iter.remove();
         }
       }
-      if (selectedTokens.isEmpty())
-        selectedTokens = zone.getOwnedTokensWithSight(MapTool.getPlayer());
-    } else {
-      selectedTokens = zone.getOwnedTokensWithSight(MapTool.getPlayer());
+    }
+    if (selectedTokens == null || selectedTokens.isEmpty()) {
+      // if no selected token qualifying for view, use owned tokens or player tokens with sight
+      final boolean checkOwnership =
+          MapTool.getServerPolicy().isUseIndividualViews() || MapTool.isPersonalServer();
+      selectedTokens =
+          checkOwnership
+              ? zone.getOwnedTokensWithSight(MapTool.getPlayer())
+              : zone.getPlayerTokensWithSight();
     }
     return new PlayerView(role, selectedTokens);
   }
@@ -2359,11 +2364,13 @@ public class ZoneRenderer extends JComponent
         zp.y += grid.getCellHeight() / 2 + cellOffset.height;
         highlightCell(g, zp, grid.getCellHighlight(), 1.0f);
       }
-      for (CellPoint p : cellPath) {
-        ZonePoint zp = grid.convert(p);
-        zp.x += grid.getCellWidth() / 2 + cellOffset.width;
-        zp.y += grid.getCellHeight() / 2 + cellOffset.height;
-        addDistanceText(g, zp, 1.0f, p.getDistanceTraveled(zone));
+      if (AppState.getShowMovementMeasurements()) {
+        for (CellPoint p : cellPath) {
+          ZonePoint zp = grid.convert(p);
+          zp.x += grid.getCellWidth() / 2 + cellOffset.width;
+          zp.y += grid.getCellHeight() / 2 + cellOffset.height;
+          addDistanceText(g, zp, 1.0f, p.getDistanceTraveled(zone));
+        }
       }
       int w = 0;
       for (ZonePoint p : waypointList) {
