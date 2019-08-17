@@ -47,7 +47,6 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.JSONMacroFunctions;
-import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
@@ -2064,18 +2063,18 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case "clearLightSources":
         clearLightSources();
-        FogUtil.exposeVisibleArea(zoneRenderer, Collections.singleton(getId()), true); // update FoW
-        zoneRenderer.repaint();
         break;
       case "removeLightSource":
         removeLightSource((LightSource) parameters[0]);
-        FogUtil.exposeVisibleArea(zoneRenderer, Collections.singleton(getId()), true); // update FoW
-        zoneRenderer.repaint();
         break;
       case "addLightSource":
         addLightSource((LightSource) parameters[0], (Direction) parameters[1]);
-        FogUtil.exposeVisibleArea(zoneRenderer, Collections.singleton(getId()), true); // update FoW
-        zoneRenderer.repaint();
+        break;
+      case "setHasSight":
+        setHasSight((boolean) parameters[0]);
+        break;
+      case "setSightType":
+        setSightType((String) parameters[0]);
         break;
     }
     fireModelChangeEvent(
