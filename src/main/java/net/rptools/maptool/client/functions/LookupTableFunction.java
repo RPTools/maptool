@@ -26,6 +26,7 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 
 public class LookupTableFunction extends AbstractFunction {
@@ -53,6 +54,7 @@ public class LookupTableFunction extends AbstractFunction {
         "getTableImage",
         "setTableImage",
         "copyTable",
+        "getTableEntry",
         "setTableEntry");
   }
 
@@ -280,6 +282,30 @@ public class LookupTableFunction extends AbstractFunction {
         }
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return 1;
+    } else if ("getTableEntry".equalsIgnoreCase(function)) {
+
+      checkNumberOfParameters(function, params, 2, 2);
+      String name = params.get(0).toString();
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      String roll = params.get(1).toString();
+      LookupEntry entry = lookupTable.getLookup(roll);
+      if (entry == null) return ""; // no entry was found
+      int rollInt = Integer.parseInt(roll);
+      if (rollInt < entry.getMin() || rollInt > entry.getMax())
+        return ""; // entry was found but doesn't match
+
+      JSONObject entryDetails = new JSONObject();
+      entryDetails.put("min", entry.getMin());
+      entryDetails.put("max", entry.getMax());
+      entryDetails.put("value", entry.getValue());
+
+      MD5Key imageId = entry.getImageId();
+      if (imageId != null) {
+        entryDetails.put("assetid", "asset://" + imageId.toString());
+      } else {
+        entryDetails.put("assetid", "");
+      }
+      return entryDetails;
 
     } else { // if tbl, table, tblImage or tableImage
       checkNumberOfParameters(function, params, 1, 3);
