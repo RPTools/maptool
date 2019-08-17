@@ -1,10 +1,18 @@
-Maptool 1.5.3
+Maptool 1.5.4
 =====
 More bug fixes and enhancements mostly thanks to the tireless efforts of new contributor, Guillaume "Merudo" Filteau.
 ___
 
 Bug Fixes & Enhancements
 -----
+* [#578][i578] Added optional token id and map name parameters to sight macro functions.
+  * Functions Affected: canSeeToken(), getSightType(), hasSight(), setHasSight(), setSightType()
+* [#574][i574] Bug fixes and enhancments for several light macro functions
+  * hasLightSource(), setLight(), and getLights() no longer causes an NPE if the light type entered doesn't exist
+  * FoW now automatically updates after using clearLights() or setLights()
+  * functions now take optional token id and map name parameters
+  * functions no longer send entire token object on change to clients
+* [#573][i573] MapTool credits in Help -> About window updated.
 * [#569][i569] Documented undocumented parameters of getPropertyDefault and setLayer.  Fixed NPE caused when getPropertyDefault is given only one parameter and there is no current token.
   * getPropertyDefault() - Accepts second parameter for Token (Property) Type and returns the default for that type.
   * setLayer() - A third parameter, forceShape, forces tokens to be of type Top Down if moved to Object layer and to either Circle or Square for the token layer.
@@ -23,6 +31,8 @@ Bug Fixes & Enhancements
   * bringToFront, getGMNotes, getLayer, getMatchingProperties, getNotes, getOwners, getProperty, getPropertyDefault, getPropertyNames, getPropertyNamesRaw, getPropertyType, getRawProperty, getSize, getTokenFacing, getTokenHeight, getTokenNativeHeight, getTokenNativeWidth, getTokenRotation, getTokenShape, getTokenWidth, hasProperty, isNPC, isOwnedByAll, isOwner, isPC, isPropertyEmpty, isSnapToGrid, removeTokenFacing, resetProperty, resetSize, sendToBack, setGMNotes, setLayer, setNPC, setNotes, setOwnedByAll, setOwner, setPC, setProperty, setPropertyType, setSize, setTokenFacing, setTokenHeight, setTokenShape, setTokenSnapToGrid, setTokenWidth
 * [#541][i541] - Map name added as optional parameter to the following functions.
   * getTokenImage, getTokenPortrait, getTokenHandout, setTokenImage, setTokenPortrait, setTokenHandout, setTokenOpacity, getTokenOpacity
+* [#540][i540] - Non-snap-to-grid tokens were dragging by top-left corner on square grids.  Fixed.
+* [#539][i539] - New Macro function getTableEntry() returns raw table entry in JSON format.
 * [#538][i538] - Macro function tableImage() was throwing an exception if the table entry did not have an image attached.  Now returns an empty string.
 * [#534][i534] - Macro function getMatchingProperties() was not accepting 3rd parameter token ID.  Fixed.
 * [#532][i532] - Fog of War macro functions did not return an error message if an invalid map name was passed in.  Fixed.
@@ -42,6 +52,9 @@ Bug Fixes & Enhancements
 * [#357][i357] - Vision for Non-Individual Views was broken.  For a long time.  Fixed!
 * [#116][i116] - strPropFromVars function was creating an extra, empty entry.  Fixed.  Second parameter made optional and defaults to "UNSUFFIXED".
 
+[i578]: https://github.com/RPTools/maptool/issues/578
+[i574]: https://github.com/RPTools/maptool/issues/574
+[i573]: https://github.com/RPTools/maptool/issues/573
 [i569]: https://github.com/RPTools/maptool/issues/569
 [i563]: https://github.com/RPTools/maptool/issues/563
 [i560]: https://github.com/RPTools/maptool/issues/560
@@ -53,6 +66,8 @@ Bug Fixes & Enhancements
 [i547]: https://github.com/RPTools/maptool/issues/547
 [i545]: https://github.com/RPTools/maptool/issues/545
 [i541]: https://github.com/RPTools/maptool/issues/541
+[i540]: https://github.com/RPTools/maptool/issues/540
+[i539]: https://github.com/RPTools/maptool/issues/539
 [i538]: https://github.com/RPTools/maptool/issues/538
 [i534]: https://github.com/RPTools/maptool/issues/534
 [i532]: https://github.com/RPTools/maptool/issues/532
