@@ -28,6 +28,7 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Token;
+import net.sf.json.JSONObject;
 
 @SuppressWarnings("serial")
 public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
@@ -207,6 +208,27 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
           frame.tokenChanged(token);
         }
       }
+    }
+  }
+
+  /**
+   * Return a json with the width, height and title of the frame
+   *
+   * @param name The name of the frame.
+   * @return A json with the width, height and title of the frame
+   */
+  public static Object getFrameProperties(String name) {
+    if (frames.containsKey(name)) {
+      HTMLFrame frame = frames.get(name);
+      JSONObject frameProperties = new JSONObject();
+
+      frameProperties.put("width", frame.getWidth());
+      frameProperties.put("height", frame.getHeight());
+      frameProperties.put("title", frame.getTitle());
+
+      return frameProperties;
+    } else {
+      return "";
     }
   }
 

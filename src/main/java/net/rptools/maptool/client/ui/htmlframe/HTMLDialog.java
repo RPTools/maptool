@@ -20,6 +20,7 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JDialog;
@@ -27,6 +28,7 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Token;
+import net.sf.json.JSONObject;
 
 @SuppressWarnings("serial")
 public class HTMLDialog extends JDialog implements HTMLPanelContainer {
@@ -147,6 +149,32 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       dialog.setVisible(true);
     }
     return dialog;
+  }
+
+  private boolean getTemporary() {
+    return this.temporary;
+  }
+
+  /**
+   * Return a json with the width, height, temporary variable and title of the dialog
+   *
+   * @param name The name of the frame.
+   * @return A json with the width, height, temporary and title of dialog
+   */
+  public static Object getDialogProperties(String name) {
+    if (dialogs.containsKey(name)) {
+      HTMLDialog dialog = dialogs.get(name);
+      JSONObject dialogProperties = new JSONObject();
+
+      dialogProperties.put("width", dialog.getWidth());
+      dialogProperties.put("height", dialog.getHeight());
+      dialogProperties.put("temporary", dialog.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
+      dialogProperties.put("title", dialog.getTitle());
+
+      return dialogProperties;
+    } else {
+      return "";
+    }
   }
 
   /** The selected token list has changed. */
