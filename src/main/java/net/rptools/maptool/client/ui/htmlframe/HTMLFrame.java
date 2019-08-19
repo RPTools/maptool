@@ -121,8 +121,9 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param height The height of the frame.
    */
   private HTMLFrame(Frame parent, String name, String title, int width, int height) {
-    super(title, new ImageIcon(AppStyle.chatPanelImage));
+    super(name, new ImageIcon(AppStyle.chatPanelImage));
 
+    setTitle(title);
     setPreferredSize(new Dimension(width, height));
     panel = new HTMLPanel(this, true, true); // closeOnSubmit is true so we don't get close button
     add(panel);
