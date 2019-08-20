@@ -16,6 +16,8 @@ package net.rptools.maptool.client.ui.htmlframe;
 
 import com.jidesoft.docking.DockContext;
 import com.jidesoft.docking.DockableFrame;
+import com.jidesoft.docking.event.DockableFrameAdapter;
+import com.jidesoft.docking.event.DockableFrameEvent;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
@@ -143,6 +145,13 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     this.getContext().setInitMode(DockContext.STATE_FLOATING);
     MapTool.getFrame().getDockingManager().addFrame(this);
     this.setVisible(true);
+    addDockableFrameListener(
+        new DockableFrameAdapter() {
+          @Override
+          public void dockableFrameHidden(DockableFrameEvent dockableFrameEvent) {
+            closeRequest();
+          }
+        });
   }
 
   public static void center(String name) {
