@@ -141,11 +141,11 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     HTMLDialog dialog;
     if (dialogs.containsKey(name)) {
       dialog = dialogs.get(name);
-      dialog.updateContents(html, temp, closeButton, input, value);
+      dialog.updateContents(html, title, temp, closeButton, input, value);
     } else {
       dialog = new HTMLDialog(MapTool.getFrame(), name, title, !frame, closeButton, width, height);
       dialogs.put(name, dialog);
-      dialog.updateContents(html, temp, closeButton, input, value);
+      dialog.updateContents(html, title, temp, closeButton, input, value);
     }
     // dialog.canResize = false;
     if (!dialog.isVisible()) {
@@ -273,15 +273,17 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * Updates the contents of the dialog.
    *
    * @param html The html contents of the dialog.
+   * @param title The title of the dialog.
    * @param temp Is the dialog temporary or not.
    * @param closeButton does the dialog have a close button.
    */
   private void updateContents(
-      String html, boolean temp, boolean closeButton, boolean input, Object val) {
+      String html, String title, boolean temp, boolean closeButton, boolean input, Object val) {
     this.input = input;
     this.closeButton = closeButton;
     this.temporary = temp;
     this.value = val;
+    this.setTitle(title);
     macroCallbacks.clear();
     panel.updateContents(html, closeButton);
   }
