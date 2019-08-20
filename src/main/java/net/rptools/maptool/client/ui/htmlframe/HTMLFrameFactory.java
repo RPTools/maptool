@@ -116,7 +116,7 @@ public class HTMLFrameFactory {
       }
     }
     if (isFrame) {
-      HTMLFrame.showFrame(name, title, width, height, frameValue, html);
+      HTMLFrame.showFrame(name, title, width, height, temporary, frameValue, html);
     } else {
       HTMLDialog.showDialog(
           name, title, width, height, hasFrame, input, temporary, closeButton, frameValue, html);

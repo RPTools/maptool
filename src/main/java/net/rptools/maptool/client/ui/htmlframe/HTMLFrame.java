@@ -36,8 +36,10 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   private static final Map<String, HTMLFrame> frames = new HashMap<String, HTMLFrame>();
   private final Map<String, String> macroCallbacks = new HashMap<String, String>();
 
+  private boolean temporary;
   private Object value;
   private final HTMLPanel panel;
+  private final String name;
 
   /**
    * Returns if the frame is visible or not.
@@ -72,18 +74,19 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param title The title of the frame.
    * @param width The width of the frame in pixels.
    * @param height The height of the frame in pixels.
+   * @param temp Is the frame temporary.
    * @param val A value that can be returned by getFrameProperties().
    * @param html The html to display in the frame.
    * @return The HTMLFrame that is displayed.
    */
   public static HTMLFrame showFrame(
-      String name, String title, int width, int height, Object val, String html) {
+      String name, String title, int width, int height, boolean temp, Object val, String html) {
     HTMLFrame frame;
 
     if (frames.containsKey(name)) {
       frame = frames.get(name);
       frame.setTitle(title);
-      frame.updateContents(html, val);
+      frame.updateContents(html, temp, val);
       if (!frame.isVisible()) {
         frame.setVisible(true);
         frame.getDockingManager().showFrame(name);
@@ -95,11 +98,12 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
 
       frame = new HTMLFrame(MapTool.getFrame(), name, title, width, height);
       frames.put(name, frame);
-      frame.updateContents(html, val);
+      frame.updateContents(html, temp, val);
       frame.getDockingManager().showFrame(name);
       // Jamz: why undock frames to center them?
       if (!frame.isDocked()) center(name);
     }
+    frame.setTemporary(temp);
     return frame;
   }
 
@@ -109,6 +113,14 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
 
   public Object getValue() {
     return value;
+  }
+
+  public void setTemporary(boolean temp) {
+    this.temporary = temp;
+  }
+
+  public boolean getTemporary() {
+    return this.temporary;
   }
 
   /**
@@ -123,6 +135,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   private HTMLFrame(Frame parent, String name, String title, int width, int height) {
     super(name, new ImageIcon(AppStyle.chatPanelImage));
 
+    this.name = name;
     setTitle(title);
     setPreferredSize(new Dimension(width, height));
     panel = new HTMLPanel(this, true, true); // closeOnSubmit is true so we don't get close button
@@ -151,11 +164,13 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * Updates the html contents of the frame.
    *
    * @param html the html contents.
+   * @param temp Is the frame temporary or not.
    * @param val the value of the frame.
    */
-  public void updateContents(String html, Object val) {
+  public void updateContents(String html, boolean temp, Object val) {
     macroCallbacks.clear();
     panel.updateContents(html, false);
+    setTemporary(temp);
     setValue(val);
   }
 
@@ -227,10 +242,10 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   }
 
   /**
-   * Return a json with the width, height and title of the frame
+   * Return a json with the width, height, title, temporary, and value of the frame
    *
    * @param name The name of the frame.
-   * @return A json with the width, height, title, and value of the frame
+   * @return A json with the width, height, title, temporary, and value of the frame
    */
   public static Object getFrameProperties(String name) {
     if (frames.containsKey(name)) {
@@ -239,6 +254,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
 
       frameProperties.put("width", frame.getWidth());
       frameProperties.put("height", frame.getHeight());
+      frameProperties.put("temporary", frame.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
       frameProperties.put("title", frame.getTitle());
 
       Object frameValue = frame.getValue();
@@ -265,6 +281,11 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     MapTool.getFrame().getDockingManager().hideFrame(getKey());
     setVisible(false);
     panel.flush();
+    if (getTemporary()) {
+      MapTool.getFrame().getDockingManager().removeFrame(this.name, false);
+      frames.remove(this.name);
+      dispose();
+    }
   }
 
   public void actionPerformed(ActionEvent e) {
