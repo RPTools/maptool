@@ -46,6 +46,7 @@ public class HTMLFrameFactory {
     int width = -1;
     int height = -1;
     String title = name;
+    Object frameValue = null;
     boolean hasFrame = true;
     boolean closeButton = true;
 
@@ -109,14 +110,16 @@ public class HTMLFrameFactory {
           } catch (NumberFormatException e) {
             // Ignoring the value; shouldn't we warn the user?
           }
+        } else if (keyLC.equals("value")) {
+          frameValue = value;
         }
       }
     }
     if (isFrame) {
-      HTMLFrame.showFrame(name, title, width, height, html);
+      HTMLFrame.showFrame(name, title, width, height, frameValue, html);
     } else {
       HTMLDialog.showDialog(
-          name, title, width, height, hasFrame, input, temporary, closeButton, html);
+          name, title, width, height, hasFrame, input, temporary, closeButton, frameValue, html);
     }
   }
 

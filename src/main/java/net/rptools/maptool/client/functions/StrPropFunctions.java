@@ -437,6 +437,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param varList A comma-separated list of variable names.
    * @param varStyle Either "SUFFIXED" or "UNSUFFIXED", indicating how to decorate the variable
    *     names when fetching values.
+   * @param delim A string containing a delimiter for the list to be returned.
    * @return A property string containing the settings of all the variables.
    */
   public Object strPropFromVars(
@@ -451,8 +452,8 @@ public class StrPropFunctions extends AbstractFunction {
     Object retval = null;
     String delim = ";";
 
-    int minParams = 2;
-    int maxParams = minParams + 1;
+    int minParams = 1;
+    int maxParams = 3;
     checkVaryingParameters(
         "strPropFromVars()",
         minParams,
@@ -460,8 +461,8 @@ public class StrPropFunctions extends AbstractFunction {
         parameters,
         new Class[] {String.class, String.class});
     if (parameters.size() == maxParams) delim = lastParam;
+    String varStyleString = parameters.size() > 1 ? parameters.get(1).toString() : "UNSUFFIXED";
 
-    String varStyleString = parameters.get(1).toString();
     int varStyle;
     if (varStyleString.equalsIgnoreCase("SUFFIXED")) {
       varStyle = 0;
@@ -474,13 +475,18 @@ public class StrPropFunctions extends AbstractFunction {
     List<String> varList = new ArrayList<String>();
     StrListFunctions.parse(parameters.get(0).toString(), varList, ",");
     StringBuilder sb = new StringBuilder();
+    int i = 0;
+    int varListSize = varList.size();
     for (String var : varList) {
       String varToGet = (varStyle == 0) ? var + "_" : var;
       sb.append(var);
       sb.append("=");
       String value = parser.getVariable(varToGet).toString();
       sb.append(value);
-      sb.append(" " + delim + " ");
+      i += 1;
+      if (i < varListSize) {
+        sb.append(" " + delim + " ");
+      }
     }
     retval = sb.toString();
     return retval;
@@ -686,8 +692,7 @@ public class StrPropFunctions extends AbstractFunction {
             I18N.getText("macro.function.strLst.incorrectParamExact", funcName, minParams));
       } else {
         throw new ParameterException(
-            I18N.getText(
-                "macro.function.strLst.incorrectParamExact", funcName, minParams, maxParams));
+            I18N.getText("macro.function.strLst.incorrectParam", funcName, minParams, maxParams));
       }
     }
 
@@ -698,7 +703,7 @@ public class StrPropFunctions extends AbstractFunction {
       if (expected[i] != null && !(expected[i].isInstance(parameters.get(i))))
         throw new ParameterException(
             I18N.getText(
-                "macro.function.strLst.incorrectParamExact",
+                "macro.function.strLst.incorrectParamType",
                 funcName,
                 i + 1,
                 expected[i].getSimpleName(),

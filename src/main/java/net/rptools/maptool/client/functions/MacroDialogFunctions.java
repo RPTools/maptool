@@ -16,6 +16,7 @@ package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
 import java.util.List;
+import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.parser.Parser;
@@ -26,7 +27,16 @@ public class MacroDialogFunctions extends AbstractFunction {
   private static final MacroDialogFunctions instance = new MacroDialogFunctions();
 
   private MacroDialogFunctions() {
-    super(1, 1, "isDialogVisible", "isFrameVisible", "closeDialog", "resetFrame", "closeFrame");
+    super(
+        1,
+        1,
+        "isDialogVisible",
+        "isFrameVisible",
+        "closeDialog",
+        "resetFrame",
+        "closeFrame",
+        "getFrameProperties",
+        "getDialogProperties");
   }
 
   public static MacroDialogFunctions getInstance() {
@@ -57,6 +67,12 @@ public class MacroDialogFunctions extends AbstractFunction {
     if (functionName.equals("resetFrame")) {
       HTMLFrame.center(parameters.get(0).toString());
       return "";
+    }
+    if (functionName.equals("getFrameProperties")) {
+      return HTMLFrame.getFrameProperties(parameters.get(0).toString());
+    }
+    if (functionName.equals("getDialogProperties")) {
+      return HTMLDialog.getDialogProperties(parameters.get(0).toString());
     }
     return null;
   }

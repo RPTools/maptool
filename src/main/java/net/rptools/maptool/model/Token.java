@@ -1342,6 +1342,17 @@ public class Token extends BaseModel implements Cloneable {
     return state.put(aState, aValue);
   }
 
+  /**
+   * Set the value of every state for this Token.
+   *
+   * @param aValue The new value for the property.
+   */
+  public void setAllStates(Object aValue) {
+    for (Object sname : MapTool.getCampaign().getTokenStatesMap().keySet()) {
+      setState(sname.toString(), aValue);
+    }
+  }
+
   public void resetProperty(String key) {
     getPropertyMap().remove(key);
   }
@@ -1947,5 +1958,121 @@ public class Token extends BaseModel implements Cloneable {
 
   public void setHeroLabData(HeroLabData heroLabData) {
     this.heroLabData = heroLabData;
+  }
+
+  /**
+   * Call the relevant setter from methodName with an array of parameters Called by
+   * ClientMethodHandler to deal with sent change to token
+   *
+   * @param methodName the method to be used
+   * @param zoneRenderer the zone renderer where the token is
+   * @param parameters an array of parameters
+   */
+  public void updateProperty(ZoneRenderer zoneRenderer, String methodName, Object[] parameters) {
+    Zone zone = zoneRenderer.getZone();
+    switch (methodName) {
+      case "setState":
+        setState(parameters[0].toString(), parameters[1]);
+        break;
+      case "setAllStates":
+        setAllStates(parameters[0]);
+        break;
+      case "setPropertyType":
+        setPropertyType(parameters[0].toString());
+        break;
+      case "setPC":
+        setType(Type.PC);
+        break;
+      case "setNPC":
+        setType(Type.NPC);
+        break;
+      case "setLayer":
+        setLayer((Zone.Layer) parameters[0]);
+        break;
+      case "setShape":
+        setShape((TokenShape) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setSnapToScale":
+        setSnapToScale((Boolean) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setSnapToGrid":
+        setSnapToGrid((Boolean) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setFootprint":
+        setFootprint((Grid) parameters[0], (TokenFootprint) parameters[1]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setProperty":
+        setProperty(parameters[0].toString(), parameters[1].toString());
+        break;
+      case "setZOrder":
+        setZOrder((int) parameters[0]);
+        zone.sortZOrder(); // update new ZOrder
+        break;
+      case "setFacing":
+        setFacing((Integer) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "clearAllOwners":
+        clearAllOwners();
+        break;
+      case "setOwnedByAll":
+        setOwnedByAll((Boolean) parameters[0]);
+        break;
+      case "addOwner":
+        addOwner(parameters[0].toString());
+        break;
+      case "setScaleX":
+        setScaleX((double) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setScaleY":
+        setScaleY((double) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setScaleXY":
+        setScaleX((double) parameters[0]);
+        setScaleY((double) parameters[1]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setNotes":
+        setNotes(parameters[0].toString());
+        break;
+      case "setGMNotes":
+        setGMNotes(parameters[0].toString());
+        break;
+      case "setX":
+        setX((int) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setY":
+        setY((int) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setXY":
+        setX((int) parameters[0]);
+        setY((int) parameters[1]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "clearLightSources":
+        clearLightSources();
+        break;
+      case "removeLightSource":
+        removeLightSource((LightSource) parameters[0]);
+        break;
+      case "addLightSource":
+        addLightSource((LightSource) parameters[0], (Direction) parameters[1]);
+        break;
+      case "setHasSight":
+        setHasSight((boolean) parameters[0]);
+        break;
+      case "setSightType":
+        setSightType((String) parameters[0]);
+        break;
+    }
+    zone.tokenChanged(this); // fireModelChangeEvent Event.TOKEN_CHANGED
   }
 }
