@@ -835,10 +835,16 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         TokenFootprint tf = tokenUnderMouse.getFootprint(grid);
         Rectangle r = tf.getBounds(grid);
         ZonePoint last = renderer.getLastWaypoint(tokenUnderMouse.getId());
-        if (last == null)
-          last =
-              new ZonePoint(
-                  tokenUnderMouse.getX() + r.width / 2, tokenUnderMouse.getY() + r.height / 2);
+        if (last == null) {
+          // This makes no sense to me. Why create a fake last point that is
+          // half the token width away from the current point? (Phil)
+          // last =  new ZonePoint(
+          //        tokenUnderMouse.getX() + r.width / 2,
+          //        tokenUnderMouse.getY() + r.height / 2);
+
+          // Just make a last ZP that is the same.
+          last = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
+        }
         ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
         // These lines were causing tokens to end up in the wrong grid cell in
         // relation to the the mouse location.
@@ -847,6 +853,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         //          last.translate(-r.width / 2, -r.height / 2);
         // }
         //        zp.translate(-dragOffsetX, -dragOffsetY);
+
+        // Now the dx/dy are calculated on Zone Points that haven't been
+        // translated for drag offset or for snapping. That is being done in
+        // handleDragToken().
         int dx = zp.x - last.x;
         int dy = zp.y - last.y;
         handleDragToken(zp, dx, dy);

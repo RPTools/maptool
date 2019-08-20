@@ -1973,11 +1973,9 @@ public class Token extends BaseModel implements Cloneable {
     switch (methodName) {
       case "setState":
         setState(parameters[0].toString(), parameters[1]);
-        MapTool.getFrame().refresh();
         break;
       case "setAllStates":
         setAllStates(parameters[0]);
-        MapTool.getFrame().refresh();
         break;
       case "setPropertyType":
         setPropertyType(parameters[0].toString());
@@ -1990,23 +1988,22 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case "setLayer":
         setLayer((Zone.Layer) parameters[0]);
-        MapTool.getFrame().refresh();
         break;
       case "setShape":
         setShape((TokenShape) parameters[0]);
-        MapTool.getFrame().refresh();
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setSnapToScale":
         setSnapToScale((Boolean) parameters[0]);
-        MapTool.getFrame().refresh(); // refresh change on map
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setSnapToGrid":
         setSnapToGrid((Boolean) parameters[0]);
-        MapTool.getFrame().refresh();
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setFootprint":
         setFootprint((Grid) parameters[0], (TokenFootprint) parameters[1]);
-        MapTool.getFrame().refresh();
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setProperty":
         setProperty(parameters[0].toString(), parameters[1].toString());
@@ -2014,11 +2011,10 @@ public class Token extends BaseModel implements Cloneable {
       case "setZOrder":
         setZOrder((int) parameters[0]);
         zone.sortZOrder(); // update new ZOrder
-        MapTool.getFrame().refresh();
         break;
       case "setFacing":
         setFacing((Integer) parameters[0]);
-        MapTool.getFrame().refresh();
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "clearAllOwners":
         clearAllOwners();
@@ -2031,16 +2027,16 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case "setScaleX":
         setScaleX((double) parameters[0]);
-        MapTool.getFrame().refresh();
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setScaleY":
         setScaleY((double) parameters[0]);
-        MapTool.getFrame().refresh();
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setScaleXY":
         setScaleX((double) parameters[0]);
         setScaleY((double) parameters[1]);
-        MapTool.getFrame().refresh();
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setNotes":
         setNotes(parameters[0].toString());
@@ -2050,16 +2046,16 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case "setX":
         setX((int) parameters[0]);
-        MapTool.getFrame().refresh();
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setY":
         setY((int) parameters[0]);
-        MapTool.getFrame().refresh();
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setXY":
         setX((int) parameters[0]);
         setY((int) parameters[1]);
-        MapTool.getFrame().refresh();
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "clearLightSources":
         clearLightSources();
@@ -2077,7 +2073,6 @@ public class Token extends BaseModel implements Cloneable {
         setSightType((String) parameters[0]);
         break;
     }
-    fireModelChangeEvent(
-        new ModelChangeEvent(zone, Zone.Event.TOKEN_CHANGED, this)); // fire onChangeToken
+    zone.tokenChanged(this); // fireModelChangeEvent Event.TOKEN_CHANGED
   }
 }
