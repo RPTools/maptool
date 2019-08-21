@@ -5,6 +5,14 @@ ___
 
 Bug Fixes & Enhancements
 -----
+* [#589][i589] Title option for dialog() command only worked on first use.  Subsequent uses did not update the dialog title. Fixed.
+* [#587][i587] Using title option in frame() would keep the frame from being reopened again once closed. Fixed.
+* [#585][i585] The _temporary_ property of frames was not being obeyed.  Fixed.
+* [#584][i584] New functions for getting Frame/Dialog properties.
+  * getFrameProperties(frameName)
+  * getDialogProperties(dialogName)
+  * New property `value` added to frame() and dialog() roll options and can be read with above.  See MapTool wiki for more details.
+* [#582][i582] Modifying tokens was not updating VBL for tokens with attached VBL. This particular bug was not in released builds. Fixed.
 * [#578][i578] Added optional token id and map name parameters to sight macro functions.
   * Functions Affected: canSeeToken(), getSightType(), hasSight(), setHasSight(), setSightType()
 * [#574][i574] Bug fixes and enhancments for several light macro functions
@@ -28,7 +36,7 @@ Bug Fixes & Enhancements
   * Functions Affected:  setTokenImage, setTokenPortrait, setTokenHandout and setTokenOpacity
 * [#547][i547] - Map name added as optional parameter to getName() and setName() functions.
 * [#545][i545] - Map name added as optional parameter to the following functions.
-  * bringToFront, getGMNotes, getLayer, getMatchingProperties, getNotes, getOwners, getProperty, getPropertyDefault, getPropertyNames, getPropertyNamesRaw, getPropertyType, getRawProperty, getSize, getTokenFacing, getTokenHeight, getTokenNativeHeight, getTokenNativeWidth, getTokenRotation, getTokenShape, getTokenWidth, hasProperty, isNPC, isOwnedByAll, isOwner, isPC, isPropertyEmpty, isSnapToGrid, removeTokenFacing, resetProperty, resetSize, sendToBack, setGMNotes, setLayer, setNPC, setNotes, setOwnedByAll, setOwner, setPC, setProperty, setPropertyType, setSize, setTokenFacing, setTokenHeight, setTokenShape, setTokenSnapToGrid, setTokenWidth
+  * bringToFront, getGMNotes, getLayer, getMatchingProperties, getNotes, getOwners, getProperty, getPropertyNames, getPropertyNamesRaw, getPropertyType, getRawProperty, getSize, getTokenFacing, getTokenHeight, getTokenNativeHeight, getTokenNativeWidth, getTokenRotation, getTokenShape, getTokenWidth, hasProperty, isNPC, isOwnedByAll, isOwner, isPC, isPropertyEmpty, isSnapToGrid, removeTokenFacing, resetProperty, resetSize, sendToBack, setGMNotes, setLayer, setNPC, setNotes, setOwnedByAll, setOwner, setPC, setProperty, setPropertyType, setSize, setTokenFacing, setTokenHeight, setTokenShape, setTokenSnapToGrid, setTokenWidth
 * [#541][i541] - Map name added as optional parameter to the following functions.
   * getTokenImage, getTokenPortrait, getTokenHandout, setTokenImage, setTokenPortrait, setTokenHandout, setTokenOpacity, getTokenOpacity
 * [#540][i540] - Non-snap-to-grid tokens were dragging by top-left corner on square grids.  Fixed.
@@ -52,6 +60,11 @@ Bug Fixes & Enhancements
 * [#357][i357] - Vision for Non-Individual Views was broken.  For a long time.  Fixed!
 * [#116][i116] - strPropFromVars function was creating an extra, empty entry.  Fixed.  Second parameter made optional and defaults to "UNSUFFIXED".
 
+[i589]: https://github.com/RPTools/maptool/issues/590
+[i587]: https://github.com/RPTools/maptool/issues/587
+[i585]: https://github.com/RPTools/maptool/issues/585
+[i584]: https://github.com/RPTools/maptool/issues/584
+[i582]: https://github.com/RPTools/maptool/issues/582
 [i578]: https://github.com/RPTools/maptool/issues/578
 [i574]: https://github.com/RPTools/maptool/issues/574
 [i573]: https://github.com/RPTools/maptool/issues/573
