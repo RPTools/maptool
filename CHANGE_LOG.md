@@ -7,6 +7,7 @@ Bug Fixes & Enhancements
 -----
 * [#589][i589] Title option for dialog() command only worked on first use.  Subsequent uses did not update the dialog title. Fixed.
 * [#587][i587] Using title option in frame() would keep the frame from being reopened again once closed. Fixed.
+* [#585][i585] The _temporary_ property of frames was not being obeyed.  Fixed.
 * [#584][i584] New functions for getting Frame/Dialog properties.
   * getFrameProperties(frameName)
   * getDialogProperties(dialogName)
@@ -61,6 +62,9 @@ Bug Fixes & Enhancements
 
 [i589]: https://github.com/RPTools/maptool/issues/590
 [i587]: https://github.com/RPTools/maptool/issues/587
+[i585]: https://github.com/RPTools/maptool/issues/585
+[i584]: https://github.com/RPTools/maptool/issues/584
+[i582]: https://github.com/RPTools/maptool/issues/582
 [i578]: https://github.com/RPTools/maptool/issues/578
 [i574]: https://github.com/RPTools/maptool/issues/574
 [i573]: https://github.com/RPTools/maptool/issues/573
