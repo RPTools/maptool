@@ -2309,7 +2309,14 @@ public class ZoneRenderer extends JComponent
     }
   }
 
-  // Jamz: HERE BE RENDERING!
+  /**
+   * Render the path of a token. Highlight the cells and draw the waypoints, distance numbers, and
+   * line path.
+   *
+   * @param g The Graphics2D renderer.
+   * @param path The path of the token.
+   * @param footprint The footprint of the token.
+   */
   @SuppressWarnings("unchecked")
   public void renderPath(
       Graphics2D g, Path<? extends AbstractPoint> path, TokenFootprint footprint) {
@@ -2365,10 +2372,11 @@ public class ZoneRenderer extends JComponent
         highlightCell(g, zp, grid.getCellHighlight(), 1.0f);
       }
       if (AppState.getShowMovementMeasurements()) {
+        double cellAdj = grid.isHex() ? 2.5 : 2;
         for (CellPoint p : cellPath) {
           ZonePoint zp = grid.convert(p);
-          zp.x += grid.getCellWidth() / 2 + cellOffset.width;
-          zp.y += grid.getCellHeight() / 2 + cellOffset.height;
+          zp.x += grid.getCellWidth() / cellAdj + cellOffset.width;
+          zp.y += grid.getCellHeight() / cellAdj + cellOffset.height;
           addDistanceText(g, zp, 1.0f, p.getDistanceTraveled(zone));
         }
       }
@@ -2380,10 +2388,15 @@ public class ZoneRenderer extends JComponent
 
       // Line path
       if (grid.getCapabilities().isPathLineSupported()) {
-        ZonePoint lineOffset =
-            new ZonePoint(
-                footprintBounds.x + footprintBounds.width / 2 - grid.getOffsetX(),
-                footprintBounds.y + footprintBounds.height / 2 - grid.getOffsetY());
+        ZonePoint lineOffset;
+        if (grid.isHex()) {
+          lineOffset = new ZonePoint(0, 0);
+        } else {
+          lineOffset =
+              new ZonePoint(
+                  footprintBounds.x + footprintBounds.width / 2 - grid.getOffsetX(),
+                  footprintBounds.y + footprintBounds.height / 2 - grid.getOffsetY());
+        }
 
         int xOffset = (int) (lineOffset.x * scale);
         int yOffset = (int) (lineOffset.y * scale);
