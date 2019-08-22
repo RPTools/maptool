@@ -805,9 +805,14 @@ public class PersistenceUtil {
         props = (CampaignProperties) pakFile.getContent();
         loadAssets(props.getAllImageAssets(), pakFile);
       } catch (ConversionException ce) {
-        MapTool.showError("PersistenceUtil.error.campaignPropertiesVersion", ce);
+        MapTool.showError(I18N.getText("PersistenceUtil.error.campaignPropertiesVersion"), ce);
       } catch (IOException ioe) {
-        MapTool.showError("Could not load campaign properties", ioe);
+        MapTool.showError(I18N.getText("PersistenceUtil.error.campaignPropertiesRead"), ioe);
+      } catch (ClassCastException cce) {
+        MapTool.showWarning(
+            I18N.getText(
+                "PersistenceUtil.warn.campaignProperties.importWrongFileType",
+                pakFile.getContent().getClass().getSimpleName()));
       }
       return props;
     } catch (IOException e) {
