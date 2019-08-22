@@ -1,12 +1,10 @@
 Maptool 1.5.4
 =====
-More bug fixes and enhancements.  Mostly thanks to the tireless efforts of new contributor, Guillaume "Merudo" Filteau.
+More bug fixes and enhancements mostly thanks to the tireless efforts of new contributor, Guillaume "Merudo" Filteau.
 ___
 
 Bug Fixes & Enhancements
 -----
-* [#][i] - 
-* [#][i] - 
 * [#603][i603] - Attempting to import a campaign file as campaign properties was throwing ClassCastException. Now displays a proper error message.
 * [#594][i594] - Dragging tokens on hex grids did not display the blue path line and move count was slightly outside of the hex cell.  Fixed.
 * [#589][i589] - Title option for dialog() command only worked on first use.  Subsequent uses did not update the dialog title. Fixed.
@@ -60,6 +58,7 @@ Bug Fixes & Enhancements
 * [#505][i505] - Bug was preventing the exposeFOW() function from accepting a map name argument.  Fixed.  Wiki page for restoreFOW() updated to note that it also accepts a map name argument.
 * [#504][i504] - Result for getInfo("server") call did not include Auto Reveal on Movement and Individual FoW settings.  Fixed.
 * [#470][i470] - Show Movement Distance setting was being ignored.  Fixed.
+* [#434][i434] - Pinned frames displayed frame name instead of title. Fixed.  New _tabtitle_ property also added to frame() macro function.
 * [#404][i404] - Manipulating a token while on a different map could lead to duplicate tokens. Fixed.
 * [#357][i357] - Vision for Non-Individual Views was broken.  For a long time.  Fixed!
 * [#226][i226] - Attempting to adjust map grid (Ctrl-Shift-A) after a Dialog was opened caused exception. Fixed.
@@ -117,6 +116,7 @@ Bug Fixes & Enhancements
 [i505]: https://github.com/RPTools/maptool/issues/505
 [i504]: https://github.com/RPTools/maptool/issues/504
 [i470]: https://github.com/RPTools/maptool/issues/470
+[i434]: https://github.com/RPTools/maptool/issues/434
 [i404]: https://github.com/RPTools/maptool/issues/404
 [i357]: https://github.com/RPTools/maptool/issues/357
 [i226]: https://github.com/RPTools/maptool/issues/226
