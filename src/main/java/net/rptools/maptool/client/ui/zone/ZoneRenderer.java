@@ -144,8 +144,6 @@ public class ZoneRenderer extends JComponent
     implements DropTargetListener, Comparable<ZoneRenderer> {
   private static final long serialVersionUID = 3832897780066104884L;
   private static final Logger log = LogManager.getLogger(ZoneRenderer.class);
-  
-  private static final long REPAINT_DEBOUNCE_INTERVAL = 34;
 
   private static final Color TRANSLUCENT_YELLOW =
       new Color(Color.yellow.getRed(), Color.yellow.getGreen(), Color.yellow.getBlue(), 50);
@@ -312,7 +310,7 @@ public class ZoneRenderer extends JComponent
 
   public void clearShowPaths() {
     showPathList.clear();
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   public Scale getZoneScale() {
@@ -334,7 +332,7 @@ public class ZoneRenderer extends JComponent
               // flushFog = true;
             }
             visibleScreenArea = null;
-            repaint(REPAINT_DEBOUNCE_INTERVAL);
+            repaint();
           }
         });
   }
@@ -360,7 +358,7 @@ public class ZoneRenderer extends JComponent
       return;
     }
     tokenUnderMouse = token;
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   @Override
@@ -377,7 +375,7 @@ public class ZoneRenderer extends JComponent
       }
     }
     selectionSetMap.put(keyToken, new SelectionSet(playerId, keyToken, tokenList));
-    repaint(REPAINT_DEBOUNCE_INTERVAL); // Jamz: Seems to have no affect?
+    repaint(); // Jamz: Seems to have no affect?
   }
 
   public boolean hasMoveSelectionSetMoved(GUID keyToken, ZonePoint point) {
@@ -399,7 +397,7 @@ public class ZoneRenderer extends JComponent
     }
     Token token = zone.getToken(keyToken);
     set.setOffset(offset.x - token.getX(), offset.y - token.getY());
-    repaint(REPAINT_DEBOUNCE_INTERVAL); // Jamz: may cause flicker when using AI
+    repaint(); // Jamz: may cause flicker when using AI
   }
 
   public void toggleMoveSelectionSetWaypoint(GUID keyToken, ZonePoint location) {
@@ -408,7 +406,7 @@ public class ZoneRenderer extends JComponent
       return;
     }
     set.toggleWaypoint(location);
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   public ZonePoint getLastWaypoint(GUID keyToken) {
@@ -424,7 +422,7 @@ public class ZoneRenderer extends JComponent
     if (set == null) {
       return;
     }
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   public void commitMoveSelectionSet(GUID keyTokenId) {
@@ -619,7 +617,7 @@ public class ZoneRenderer extends JComponent
 
     setViewOffset(x, y);
 
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   public void centerOn(CellPoint point) {
@@ -682,13 +680,13 @@ public class ZoneRenderer extends JComponent
     renderedLightMap = null;
     renderedAuraMap = null;
     zoneView.flush();
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   public void flushFog() {
     flushFog = true;
     visibleScreenArea = null;
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   public Zone getZone() {
@@ -2720,7 +2718,7 @@ public class ZoneRenderer extends JComponent
     if (!keepSelectedTokenSet) selectedTokenSet.clear();
     else keepSelectedTokenSet = false; // Always reset it back, temp boolean only
 
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   /**
@@ -3622,7 +3620,7 @@ public class ZoneRenderer extends JComponent
     // flushFog = true; // could call flushFog() but also clears visibleScreenArea and I don't know
     // if we want
     // that...
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   public boolean selectToken(GUID tokenGUID) {
@@ -3634,7 +3632,7 @@ public class ZoneRenderer extends JComponent
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
     // flushFog = true;
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
     return true;
   }
 
@@ -3647,7 +3645,7 @@ public class ZoneRenderer extends JComponent
     }
     addToSelectionHistory(selectedTokenSet);
 
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
   }
@@ -3669,7 +3667,7 @@ public class ZoneRenderer extends JComponent
     selectedTokenSet.clear();
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   public void undoSelectToken() {
@@ -3702,7 +3700,7 @@ public class ZoneRenderer extends JComponent
     // disable the undo button.
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   private void addToSelectionHistory(Set<GUID> selectionSet) {
@@ -3873,7 +3871,7 @@ public class ZoneRenderer extends JComponent
 
   public void adjustGridSize(int delta) {
     zone.getGrid().setSize(Math.max(0, zone.getGrid().getSize() + delta));
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   public void moveGridBy(int dx, int dy) {
@@ -3890,7 +3888,7 @@ public class ZoneRenderer extends JComponent
       gridOffsetX = gridOffsetX - (int) zone.getGrid().getCellWidth();
     }
     zone.getGrid().setOffset(gridOffsetX, gridOffsetY);
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   /**
@@ -3929,7 +3927,7 @@ public class ZoneRenderer extends JComponent
   /** This makes sure that any image updates get refreshed. This could be a little smarter. */
   @Override
   public boolean imageUpdate(Image img, int infoflags, int x, int y, int w, int h) {
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
     return super.imageUpdate(img, infoflags, x, y, w, h);
   }
 
@@ -4436,7 +4434,7 @@ public class ZoneRenderer extends JComponent
     // Copy them to the clipboard so that we can quickly copy them onto the map
     AppActions.copyTokens(tokens);
     requestFocusInWindow();
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   /**
@@ -4524,7 +4522,7 @@ public class ZoneRenderer extends JComponent
         flushFog = true;
       }
       MapTool.getFrame().updateTokenTree();
-      repaint(REPAINT_DEBOUNCE_INTERVAL);
+      repaint();
     }
   }
 
@@ -4546,7 +4544,7 @@ public class ZoneRenderer extends JComponent
 
   public void setHighlightCommonMacros(List<Token> affectedTokens) {
     highlightCommonMacros = affectedTokens;
-    repaint(REPAINT_DEBOUNCE_INTERVAL);
+    repaint();
   }
 
   // End token common macro identification
