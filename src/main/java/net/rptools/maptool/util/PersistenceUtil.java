@@ -458,6 +458,11 @@ public class PersistenceUtil {
     } catch (OutOfMemoryError oom) {
       MapTool.showError("Out of memory while reading campaign.", oom);
       return null;
+    } catch (ClassCastException cce) {
+      MapTool.showWarning(
+          I18N.getText(
+              "PersistenceUtil.warn.campaignWrongFileType",
+              pakFile.getContent().getClass().getSimpleName()));
     } catch (RuntimeException rte) {
       MapTool.showError("PersistenceUtil.error.campaignRead", rte);
     } catch (Error e) {
