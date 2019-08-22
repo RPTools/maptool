@@ -1,27 +1,31 @@
 Maptool 1.5.4
 =====
-More bug fixes and enhancements mostly thanks to the tireless efforts of new contributor, Guillaume "Merudo" Filteau.
+More bug fixes and enhancements.  Mostly thanks to the tireless efforts of new contributor, Guillaume "Merudo" Filteau.
 ___
 
 Bug Fixes & Enhancements
 -----
-* [#589][i589] Title option for dialog() command only worked on first use.  Subsequent uses did not update the dialog title. Fixed.
-* [#587][i587] Using title option in frame() would keep the frame from being reopened again once closed. Fixed.
-* [#585][i585] The _temporary_ property of frames was not being obeyed.  Fixed.
-* [#584][i584] New functions for getting Frame/Dialog properties.
+* [#][i] - 
+* [#][i] - 
+* [#603][i603] - Attempting to import a campaign file as campaign properties was throwing ClassCastException. Now displays a proper error message.
+* [#594][i594] - Dragging tokens on hex grids did not display the blue path line and move count was slightly outside of the hex cell.  Fixed.
+* [#589][i589] - Title option for dialog() command only worked on first use.  Subsequent uses did not update the dialog title. Fixed.
+* [#587][i587] - Using title option in frame() would keep the frame from being reopened again once closed. Fixed.
+* [#585][i585] - The _temporary_ property of frames was not being obeyed.  Fixed.
+* [#584][i584] - New functions for getting Frame/Dialog properties.
   * getFrameProperties(frameName)
   * getDialogProperties(dialogName)
   * New property `value` added to frame() and dialog() roll options and can be read with above.  See MapTool wiki for more details.
-* [#582][i582] Modifying tokens was not updating VBL for tokens with attached VBL. This particular bug was not in released builds. Fixed.
-* [#578][i578] Added optional token id and map name parameters to sight macro functions.
+* [#582][i582] - Modifying tokens was not updating VBL for tokens with attached VBL. This particular bug was not in released builds. Fixed.
+* [#578][i578] - Added optional token id and map name parameters to sight macro functions.
   * Functions Affected: canSeeToken(), getSightType(), hasSight(), setHasSight(), setSightType()
-* [#574][i574] Bug fixes and enhancments for several light macro functions
+* [#574][i574] - Bug fixes and enhancments for several light macro functions
   * hasLightSource(), setLight(), and getLights() no longer causes an NPE if the light type entered doesn't exist
   * FoW now automatically updates after using clearLights() or setLights()
   * functions now take optional token id and map name parameters
   * functions no longer send entire token object on change to clients
-* [#573][i573] MapTool credits in Help -> About window updated.
-* [#569][i569] Documented undocumented parameters of getPropertyDefault and setLayer.  Fixed NPE caused when getPropertyDefault is given only one parameter and there is no current token.
+* [#573][i573] - MapTool credits in Help -> About window updated.
+* [#569][i569] - Documented undocumented parameters of getPropertyDefault and setLayer.  Fixed NPE caused when getPropertyDefault is given only one parameter and there is no current token.
   * getPropertyDefault() - Accepts second parameter for Token (Property) Type and returns the default for that type.
   * setLayer() - A third parameter, forceShape, forces tokens to be of type Top Down if moved to Object layer and to either Circle or Square for the token layer.
 * [#563][i563] - Additional parameter map name added to getState, setState, and setAllStates macro functions.
@@ -56,11 +60,29 @@ Bug Fixes & Enhancements
 * [#505][i505] - Bug was preventing the exposeFOW() function from accepting a map name argument.  Fixed.  Wiki page for restoreFOW() updated to note that it also accepts a map name argument.
 * [#504][i504] - Result for getInfo("server") call did not include Auto Reveal on Movement and Individual FoW settings.  Fixed.
 * [#470][i470] - Show Movement Distance setting was being ignored.  Fixed.
-* [#404][i404] - Manipulating a token while on a different map could lead to duplicate tokens.  Fixed.
+* [#404][i404] - Manipulating a token while on a different map could lead to duplicate tokens. Fixed.
 * [#357][i357] - Vision for Non-Individual Views was broken.  For a long time.  Fixed!
+* [#226][i226] - Attempting to adjust map grid (Ctrl-Shift-A) after a Dialog was opened caused exception. Fixed.
+* [#225][i225] - Attempting to load a file other than a campaign file was throwing a Class Cast exception. Open Campaign dialog now defaults to only showing campaign files and CCEs caught with appropriate error message shown.
+* [#213][i213] - The following operations do not cause auto-exposure of FoW for tokens.  Documenting current behavior as of 1.5.4.  See ticket for more details.
+  * Edit Token Dialog
+    * Changing Sight Type
+    * Changing Has Sight
+  * Right-Click Menu
+    * Setting Light On
+  * Macro Functions
+    * Setting Light On
+    * Changing Sight Type
+    * Changing Has Sight
+* [#152][i152] - Undo (Ctrl-Z) was frequently buggy producing unpredictable results. Fixed(in 1.5.0).
+  * Undo buffers are specific to each client. Undo/Redos only affect the client taking action.
+* [#150][i150] - Using sendToBack() and bringToFront() macros could break states or bars on tokens.  Fixed(in 1.5.0).
+* [#132][i132] - Calling getname() (lower case 'n') was falling through to setName and returned incorrect error message. Fixed with other changes to token macro functions.
 * [#116][i116] - strPropFromVars function was creating an extra, empty entry.  Fixed.  Second parameter made optional and defaults to "UNSUFFIXED".
 
-[i589]: https://github.com/RPTools/maptool/issues/590
+[i603]: https://github.com/RPTools/maptool/issues/603
+[i594]: https://github.com/RPTools/maptool/issues/594
+[i589]: https://github.com/RPTools/maptool/issues/589
 [i587]: https://github.com/RPTools/maptool/issues/587
 [i585]: https://github.com/RPTools/maptool/issues/585
 [i584]: https://github.com/RPTools/maptool/issues/584
@@ -97,6 +119,12 @@ Bug Fixes & Enhancements
 [i470]: https://github.com/RPTools/maptool/issues/470
 [i404]: https://github.com/RPTools/maptool/issues/404
 [i357]: https://github.com/RPTools/maptool/issues/357
+[i226]: https://github.com/RPTools/maptool/issues/226
+[i225]: https://github.com/RPTools/maptool/issues/225
+[i213]: https://github.com/RPTools/maptool/issues/213
+[i152]: https://github.com/RPTools/maptool/issues/152
+[i150]: https://github.com/RPTools/maptool/issues/150
+[i132]: https://github.com/RPTools/maptool/issues/132
 [i116]: https://github.com/RPTools/maptool/issues/116
 
 Maptool 1.5.3
