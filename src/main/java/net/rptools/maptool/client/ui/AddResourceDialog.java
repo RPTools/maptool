@@ -340,6 +340,14 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
           return false;
         }
         for (Object obj : selectedRows) {
+          // Somehow a String is being returned instead of a LibraryRow object
+          // in some cases.  See issue #343 on GitHub.
+          if (obj instanceof String) {
+            MapTool.showMessage(
+                "dialog.addresource.warn.badresourceid", "Error", JOptionPane.ERROR_MESSAGE, obj);
+            // Move on to next one...
+            continue;
+          }
           LibraryRow row = (LibraryRow) obj;
 
           // validate the url format
