@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui;
 
 import com.jidesoft.swing.FolderChooser;
+import io.sentry.Sentry;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -345,6 +346,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
           if (obj instanceof String) {
             MapTool.showMessage(
                 "dialog.addresource.warn.badresourceid", "Error", JOptionPane.ERROR_MESSAGE, obj);
+            Sentry.capture("Add Resource to Library Error\nResource: " + obj);
             // Move on to next one...
             continue;
           }
