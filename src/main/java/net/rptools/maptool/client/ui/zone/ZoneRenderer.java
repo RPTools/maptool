@@ -3439,6 +3439,15 @@ public class ZoneRenderer extends JComponent
 
       // Token names and labels
       boolean showCurrentTokenLabel = AppState.isShowTokenNames() || token == tokenUnderMouse;
+
+      // if policy does not auto-reveal FoW, check if fog covers the token (slow)
+      if (showCurrentTokenLabel
+          && !isGMView
+          && (!zoneView.isUsingVision() || !MapTool.getServerPolicy().isAutoRevealOnMovement())) {
+        if (!zone.isTokenVisible(token)) {
+          showCurrentTokenLabel = false;
+        }
+      }
       if (showCurrentTokenLabel) {
         GUID tokId = token.getId();
         int offset = 3; // Keep it from tramping on the token border.
