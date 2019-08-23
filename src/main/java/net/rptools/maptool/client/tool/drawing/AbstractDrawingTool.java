@@ -54,6 +54,8 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 
   private static Zone.Layer selectedLayer = Zone.Layer.TOKEN;
 
+  protected static final int TOOLBAR_ICON_SIZE = 32;
+
   static {
     layerSelectionDialog =
         new LayerSelectionDialog(

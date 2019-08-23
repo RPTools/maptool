@@ -42,6 +42,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.AbstractDrawing;
+import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -203,7 +204,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
             renderer.getZone().getDrawnElements(elementUnderMouse.getDrawable().getLayer());
         for (GUID id : selectedDrawSet) {
           DrawnElement de = renderer.getZone().getDrawnElement(id);
-          if (!zoneList.contains(de)) {
+          if (!zoneList.contains(de) || isDrawnElementTemplate(de)) {
             enabled = false;
             break;
           }
@@ -252,7 +253,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
             renderer.getZone().getDrawnElements(elementUnderMouse.getDrawable().getLayer());
         for (GUID id : selectedDrawSet) {
           DrawnElement de = renderer.getZone().getDrawnElement(id);
-          if (!zoneList.contains(de) || isDrawnElementGroup(de)) {
+          if (!zoneList.contains(de) || isDrawnElementGroup(de) || isDrawnElementTemplate(de)) {
             enabled = false;
             break;
           }
@@ -410,6 +411,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
       List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
       for (GUID guid : selectedDrawSet) {
         DrawnElement de = findDrawnElement(drawableList, guid);
+        if (de.getDrawable() instanceof AbstractTemplate) continue;
         if (de != null) VblTool(de.getDrawable(), pathOnly, isEraser);
       }
     }
@@ -473,7 +475,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
   private JMenu createPathVblMenu() {
     JMenu pathVblMenu = new JMenu("Path to VBL");
-    pathVblMenu.setEnabled(hasPath(elementUnderMouse));
+    pathVblMenu.setEnabled(hasPath(selectedDrawSet));
     pathVblMenu.add(new JMenuItem(new VblAction(true, false)));
     pathVblMenu.add(new JMenuItem(new VblAction(true, true)));
     return pathVblMenu;
@@ -481,7 +483,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
   private JMenu createShapeVblMenu() {
     JMenu shapeVblMenu = new JMenu("Shape to VBL");
-    shapeVblMenu.setEnabled(hasPath(elementUnderMouse));
+    shapeVblMenu.setEnabled(hasPath(selectedDrawSet));
     shapeVblMenu.add(new JMenuItem(new VblAction(false, false)));
     shapeVblMenu.add(new JMenuItem(new VblAction(false, true)));
     return shapeVblMenu;
@@ -496,6 +498,21 @@ public class DrawPanelPopupMenu extends JPopupMenu {
       return new AssetPaint(dtp.getAsset());
     }
     return null;
+  }
+
+  /**
+   * Tests to see if all the selected objects have a drawn path
+   *
+   * @param selectedDrawSet
+   * @return boolean
+   */
+  private boolean hasPath(Set<GUID> selectedDrawSet) {
+    List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
+    for (GUID guid : selectedDrawSet) {
+      DrawnElement de = findDrawnElement(drawableList, guid);
+      if (!hasPath(de)) return false;
+    }
+    return true;
   }
 
   /**
@@ -517,6 +534,13 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   private boolean isDrawnElementGroup(Object object) {
     if (object instanceof DrawnElement)
       return ((DrawnElement) object).getDrawable() instanceof DrawablesGroup;
+    return false;
+  }
+
+  private boolean isDrawnElementTemplate(Object object) {
+    if (object instanceof DrawnElement) {
+      return ((DrawnElement) object).getDrawable() instanceof AbstractTemplate;
+    }
     return false;
   }
 

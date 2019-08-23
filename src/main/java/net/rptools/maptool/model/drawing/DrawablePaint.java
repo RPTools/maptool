@@ -16,6 +16,7 @@ package net.rptools.maptool.model.drawing;
 
 import java.awt.Color;
 import java.awt.Paint;
+import java.awt.TexturePaint;
 import java.awt.image.ImageObserver;
 import java.io.Serializable;
 import net.rptools.maptool.client.ui.AssetPaint;
@@ -32,11 +33,18 @@ public abstract class DrawablePaint implements Serializable {
       return null;
     }
     if (paint instanceof Color) {
+      // Colors from swatch/HSV/RGB pickers
       return new DrawableColorPaint((Color) paint);
     }
     if (paint instanceof AssetPaint) {
+      // Texture Picker
       Asset asset = ((AssetPaint) paint).getAsset();
       return new DrawableTexturePaint(asset);
+    }
+    if (paint instanceof TexturePaint) {
+      //  This only happens if you select the top-left White swatch and only
+      //  the first click.  After that it always returns a Color.
+      return new DrawableColorPaint(Color.WHITE);
     }
     throw new IllegalArgumentException("Invalid type of paint: " + paint.getClass().getName());
   }

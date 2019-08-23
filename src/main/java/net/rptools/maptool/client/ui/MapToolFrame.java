@@ -1596,6 +1596,15 @@ public class MapToolFrame extends DefaultDockableHolder
     return null;
   }
 
+  public ZoneRenderer getZoneRenderer(final String zoneName) {
+    for (ZoneRenderer renderer : zoneRendererList) {
+      if (zoneName.equals(renderer.getZone().getName())) {
+        return renderer;
+      }
+    }
+    return null;
+  }
+
   /**
    * Get the paintDrawingMeasurements for this MapToolClient.
    *

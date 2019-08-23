@@ -14,44 +14,62 @@
  */
 package net.rptools.maptool.client;
 
-import java.awt.EventQueue;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.awt.*;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import javax.swing.JOptionPane;
-import javax.swing.JTextPane;
+import java.util.Set;
+import java.util.regex.Pattern;
+import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.model.AssetManager;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jdesktop.swingworker.SwingWorker;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
 
 /** Executes only the first time the application is run. */
 public class AppSetup {
   private static final Logger log = LogManager.getLogger(AppSetup.class);
 
   public static void install() {
-    File appDir = AppUtil.getAppHome();
-
-    // Only init once
-    if (appDir.listFiles().length > 0) {
-      return;
-    }
     try {
-      installDefaultTokens();
+      // Only init once
+      if (!new File(AppConstants.UNZIP_DIR, "README").exists()) installDefaultTokens();
     } catch (IOException ioe) {
-      ioe.printStackTrace();
+      log.error(ioe);
     }
+
+    installDefaultMacroEditorThemes();
   }
 
   public static void installDefaultTokens() throws IOException {
     installLibrary("Default", AppSetup.class.getClassLoader().getResource("default_images.zip"));
+  }
+
+  public static void installDefaultMacroEditorThemes() {
+    // Install only once
+    if (AppConstants.THEMES_DIR.listFiles().length > 0) return;
+
+    Reflections reflections =
+        new Reflections(AppConstants.DEFAULT_MACRO_THEMES, new ResourcesScanner());
+    Set<String> resourcePathSet = reflections.getResources(Pattern.compile(".*"));
+
+    for (String resourcePath : resourcePathSet) {
+      URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
+      String resourceName = resourcePath.substring(AppConstants.DEFAULT_MACRO_THEMES.length());
+      File resourceFile = new File(AppConstants.THEMES_DIR, resourceName);
+
+      try {
+        log.info("Installing theme: " + resourceFile);
+        FileUtils.copyURLToFile(inputUrl, resourceFile);
+      } catch (IOException e) {
+        log.error("ERROR copying " + inputUrl + " to " + resourceFile, e);
+      }
+    }
   }
 
   /**

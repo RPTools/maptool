@@ -29,16 +29,6 @@ deploy:
     repo: $REPO
     tags: true
     all_branches: true
-notifications:
-  webhooks:
-    on_success:
-      - wget $TRAVIS_DISCORD_WEBHOOK_SCRIPT_URL
-      - chmod +x send.sh
-      - ./send.sh success $DISCORD_URL
-    on_failure:
-      - wget $TRAVIS_DISCORD_WEBHOOK_SCRIPT_URL
-      - chmod +x send.sh
-      - ./send.sh failure $DISCORD_URL
 after_deploy:
   # Finalize Sentry release
   - sentry-cli releases finalize "$TRAVIS_TAG"
@@ -46,3 +36,11 @@ after_deploy:
   - sentry-cli releases set-commits "$TRAVIS_TAG" --auto
   # Tell Sentry.io we have deployed a release
   - sentry-cli releases deploys "$TRAVIS_TAG" new -e Production
+after_success:
+  - wget $TRAVIS_DISCORD_WEBHOOK_SCRIPT_URL
+  - chmod +x send.sh
+  - ./send.sh success $DISCORD_URL
+after_failure:
+  - wget $TRAVIS_DISCORD_WEBHOOK_SCRIPT_URL
+  - chmod +x send.sh
+  - ./send.sh failure $DISCORD_URL

@@ -52,6 +52,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -185,6 +186,8 @@ public class PersistenceUtil {
 
   public static PersistedMap loadMap(File mapFile) throws IOException {
     PackedFile pakFile = null;
+    PersistedMap persistedMap = null;
+
     try {
       pakFile = new PackedFile(mapFile);
 
@@ -192,27 +195,34 @@ public class PersistenceUtil {
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
 
-      PersistedMap persistedMap = (PersistedMap) pakFile.getContent();
+      Object o = pakFile.getContent();
+      if (o instanceof PersistedMap) {
+        persistedMap = (PersistedMap) o;
 
-      // Now load up any images that we need
-      loadAssets(persistedMap.assetMap.keySet(), pakFile);
+        // Now load up any images that we need
+        loadAssets(persistedMap.assetMap.keySet(), pakFile);
 
-      // FJE We only want the token's graphical data, so loop through all tokens and
-      // destroy all properties and macros. Keep some fields, though. Since that type
-      // of object editing doesn't belong here, we just call Token.imported() and let
-      // that method Do The Right Thing.
-      for (Iterator<Token> iter = persistedMap.zone.getAllTokens().iterator(); iter.hasNext(); ) {
-        Token token = iter.next();
-        token.imported();
+        // FJE We only want the token's graphical data, so loop through all tokens and
+        // destroy all properties and macros. Keep some fields, though. Since that type
+        // of object editing doesn't belong here, we just call Token.imported() and let
+        // that method Do The Right Thing.
+        for (Iterator<Token> iter = persistedMap.zone.getAllTokens().iterator(); iter.hasNext(); ) {
+          Token token = iter.next();
+          token.imported();
+        }
+        // XXX FJE This doesn't work the way I want it to. But doing this the Right Way
+        // is too much work right now. :-}
+        Zone z = persistedMap.zone;
+        String n = fixupZoneName(z.getName());
+        z.setName(n);
+        z.imported(); // Resets creation timestamp and init panel, among other things
+        z.optimize(); // Collapses overlaid or redundant drawables
+      } else {
+        // TODO: Not a map but it is something with a property.xml file in it.
+        // Should we have a filetype property in there?
+        MapTool.showWarning(
+            I18N.getText("PersistenceUtil.warn.importWrongFileType", o.getClass().getSimpleName()));
       }
-      // XXX FJE This doesn't work the way I want it to. But doing this the Right Way
-      // is too much work right now. :-}
-      Zone z = persistedMap.zone;
-      String n = fixupZoneName(z.getName());
-      z.setName(n);
-      z.imported(); // Resets creation timestamp and init panel, among other things
-      z.optimize(); // Collapses overlaid or redundant drawables
-      return persistedMap;
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.mapVersion", ce);
     } catch (IOException ioe) {
@@ -220,7 +230,7 @@ public class PersistenceUtil {
     } finally {
       if (pakFile != null) pakFile.close();
     }
-    return null;
+    return persistedMap;
   }
 
   /**
@@ -448,6 +458,11 @@ public class PersistenceUtil {
     } catch (OutOfMemoryError oom) {
       MapTool.showError("Out of memory while reading campaign.", oom);
       return null;
+    } catch (ClassCastException cce) {
+      MapTool.showWarning(
+          I18N.getText(
+              "PersistenceUtil.warn.campaignWrongFileType",
+              pakFile.getContent().getClass().getSimpleName()));
     } catch (RuntimeException rte) {
       MapTool.showError("PersistenceUtil.error.campaignRead", rte);
     } catch (Error e) {
@@ -795,9 +810,14 @@ public class PersistenceUtil {
         props = (CampaignProperties) pakFile.getContent();
         loadAssets(props.getAllImageAssets(), pakFile);
       } catch (ConversionException ce) {
-        MapTool.showError("PersistenceUtil.error.campaignPropertiesVersion", ce);
+        MapTool.showError(I18N.getText("PersistenceUtil.error.campaignPropertiesVersion"), ce);
       } catch (IOException ioe) {
-        MapTool.showError("Could not load campaign properties", ioe);
+        MapTool.showError(I18N.getText("PersistenceUtil.error.campaignPropertiesRead"), ioe);
+      } catch (ClassCastException cce) {
+        MapTool.showWarning(
+            I18N.getText(
+                "PersistenceUtil.warn.campaignProperties.importWrongFileType",
+                pakFile.getContent().getClass().getSimpleName()));
       }
       return props;
     } catch (IOException e) {

@@ -20,6 +20,7 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JDialog;
@@ -27,6 +28,7 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Token;
+import net.sf.json.JSONObject;
 
 @SuppressWarnings("serial")
 public class HTMLDialog extends JDialog implements HTMLPanelContainer {
@@ -35,6 +37,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
   private final Map<String, String> macroCallbacks = new HashMap<String, String>();
   private boolean temporary;
   private boolean input;
+  private Object value;
   private final HTMLPanel panel;
   private final String name;
   private final boolean canResize = true;
@@ -119,7 +122,8 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param frame If the dialog is decorated with frame or not.
    * @param input Is the dialog an input only dialog.
    * @param temp Is the dialog temporary.
-   * @param closeButton should the close button be displayed or not.
+   * @param closeButton Should the close button be displayed or not.
+   * @param value A value to be returned by getDialogProperties().
    * @param html The HTML to display in the dialog.
    * @return The dialog.
    */
@@ -132,21 +136,70 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       boolean input,
       boolean temp,
       boolean closeButton,
+      Object value,
       String html) {
     HTMLDialog dialog;
     if (dialogs.containsKey(name)) {
       dialog = dialogs.get(name);
-      dialog.updateContents(html, temp, closeButton, input);
+      dialog.updateContents(html, title, temp, closeButton, input, value);
     } else {
       dialog = new HTMLDialog(MapTool.getFrame(), name, title, !frame, closeButton, width, height);
       dialogs.put(name, dialog);
-      dialog.updateContents(html, temp, closeButton, input);
+      dialog.updateContents(html, title, temp, closeButton, input, value);
     }
     // dialog.canResize = false;
     if (!dialog.isVisible()) {
       dialog.setVisible(true);
     }
     return dialog;
+  }
+
+  public void setValue(Object value) {
+    this.value = value;
+  }
+
+  public Object getValue() {
+    return value;
+  }
+
+  private boolean getTemporary() {
+    return this.temporary;
+  }
+
+  /**
+   * Return a json with the width, height, temporary variable and title of the dialog
+   *
+   * @param name The name of the frame.
+   * @return A json with the width, height, temporary, title, and value of dialog
+   */
+  public static Object getDialogProperties(String name) {
+    if (dialogs.containsKey(name)) {
+      HTMLDialog dialog = dialogs.get(name);
+      JSONObject dialogProperties = new JSONObject();
+
+      dialogProperties.put("width", dialog.getWidth());
+      dialogProperties.put("height", dialog.getHeight());
+      dialogProperties.put("temporary", dialog.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
+      dialogProperties.put("title", dialog.getTitle());
+
+      Object dialogValue = dialog.getValue();
+      if (dialogValue == null) {
+        dialogValue = "";
+      } else {
+        if (dialogValue instanceof String) {
+          // try to convert to a number
+          try {
+            dialogValue = new BigDecimal(dialogValue.toString());
+          } catch (Exception e) {
+          }
+        }
+      }
+      dialogProperties.put("value", dialogValue);
+
+      return dialogProperties;
+    } else {
+      return "";
+    }
   }
 
   /** The selected token list has changed. */
@@ -220,13 +273,17 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * Updates the contents of the dialog.
    *
    * @param html The html contents of the dialog.
+   * @param title The title of the dialog.
    * @param temp Is the dialog temporary or not.
    * @param closeButton does the dialog have a close button.
    */
-  private void updateContents(String html, boolean temp, boolean closeButton, boolean input) {
+  private void updateContents(
+      String html, String title, boolean temp, boolean closeButton, boolean input, Object val) {
     this.input = input;
     this.closeButton = closeButton;
     this.temporary = temp;
+    this.value = val;
+    this.setTitle(title);
     macroCallbacks.clear();
     panel.updateContents(html, closeButton);
   }
@@ -275,6 +332,9 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
         Boolean val = Boolean.valueOf(mtae.getContent());
         SwingUtil.centerOver(this, parent);
         temporary = val;
+      } else if (mtae.getName().equalsIgnoreCase("value")) {
+        SwingUtil.centerOver(this, parent);
+        setValue(mtae.getContent());
       }
     }
     if (e.getActionCommand().equals("Close")) {

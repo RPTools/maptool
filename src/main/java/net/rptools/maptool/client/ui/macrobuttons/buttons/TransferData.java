@@ -35,6 +35,7 @@ public class TransferData implements Serializable {
   public String maxWidth = "";
   public String panelClass = "";
   public String toolTip = "";
+  public boolean displayHotKey = true;
 
   public TransferData(MacroButton button) {
     MacroButtonProperties prop = button.getProperties();
@@ -54,5 +55,6 @@ public class TransferData implements Serializable {
     this.minWidth = prop.getMinWidth();
     this.maxWidth = prop.getMaxWidth();
     this.toolTip = prop.getToolTip();
+    this.displayHotKey = prop.getDisplayHotKey();
   }
 }

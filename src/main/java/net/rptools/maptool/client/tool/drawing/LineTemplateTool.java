@@ -24,6 +24,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.ScreenPoint;
@@ -61,12 +62,15 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
   public LineTemplateTool() {
     try {
       setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/temp-blue-line.png"))));
+          ImageUtil.resizeImage(
+              new ImageIcon(
+                  ImageIO.read(
+                      getClass()
+                          .getClassLoader()
+                          .getResourceAsStream(
+                              "net/rptools/maptool/client/image/tool/temp-blue-vertex-line.png"))),
+              TOOLBAR_ICON_SIZE,
+              TOOLBAR_ICON_SIZE));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     } // endtry
@@ -74,7 +78,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
   }
 
   /*---------------------------------------------------------------------------------------------
-   * Overidden RadiusTemplateTool Methods
+   * Overridden RadiusTemplateTool Methods
    *-------------------------------------------------------------------------------------------*/
 
   /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip() */
@@ -120,7 +124,9 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
     if (painting && renderer != null) {
       Pen pen = getPenForOverlay();
       AffineTransform old = g.getTransform();
-      g.setTransform(getPaintTransform(renderer));
+      AffineTransform newTransform = g.getTransform();
+      newTransform.concatenate(getPaintTransform(renderer));
+      g.setTransform(newTransform);
       ZonePoint vertex = template.getVertex();
       ZonePoint pathVertex = ((LineTemplate) template).getPathVertex();
       template.draw(g, pen);
@@ -189,6 +195,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
     LineTemplate lt = (LineTemplate) template;
     ZonePoint pathVertex = lt.getPathVertex();
     ZonePoint vertex = lt.getVertex();
+
     if (!anchorSet) {
       setCellAtMouse(e, vertex);
       controlOffset = null;

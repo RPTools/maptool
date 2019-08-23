@@ -53,14 +53,16 @@ getEnvironmentVariable
 getLibPropertyNames
 getMaxRecursionDepth
 getTableImage
+getTerrainModifier
 getTokenRotation
 getViewArea
 isExternalMacroAccessAllowed
 setMaxRecursionDepth
 setTableImage
+setTerrainModifier
 """
 
-names.update(dict.fromkeys(added.split(), 2))
+#names.update(dict.fromkeys(added.split(), 2))
 all_names = list(names.keys())
 all_names.sort()
 print("\n".join(all_names))

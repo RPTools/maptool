@@ -16,6 +16,7 @@ package net.rptools.maptool.client.ui.syntax;
 
 import java.util.ResourceBundle;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.AdditionalFunctionDescription;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.function.Function;
@@ -44,7 +45,7 @@ public class MapToolScriptAutoComplete {
       };
 
   public MapToolScriptAutoComplete() {
-    for (String macro : MapTool.getParser().listAllMacroFunctions())
+    for (String macro : MapTool.getParser().listAllMacroFunctions().keySet())
       provider.addCompletion(
           new BasicCompletion(provider, macro, getShortDescription(macro), getSummary(macro)));
 
@@ -79,8 +80,7 @@ public class MapToolScriptAutoComplete {
       }
     }
 
-    // FIXME: TERRIBLE! But I'm tired and running out of time, need to add to a .properties
-    // file!
+    // FIXME: TERRIBLE! But I'm tired and running out of time, need to add to a .properties file!
     provider.addCompletion(
         new ShorthandCompletion(
             provider,
@@ -90,12 +90,7 @@ public class MapToolScriptAutoComplete {
     provider.addCompletion(
         new ShorthandCompletion(
             provider, "if", "[h, if(condition): true_body]", "A basic hidden IF statement")); // Can
-    // also
-    // add
-    // a
-    // full
-    // HTML
-    // description
+    // also add a full HTML description
     provider.addCompletion(
         new ShorthandCompletion(
             provider,
@@ -144,18 +139,47 @@ public class MapToolScriptAutoComplete {
   }
 
   private String getShortDescription(String macro) {
-    String shortDesc = I18N.getString(macro + I18N_SHORT_DESCRIPTION, MACRO_DESCRIPTIONS_BUNDLE);
+    final String shortDesc =
+        I18N.getString(macro + I18N_SHORT_DESCRIPTION, MACRO_DESCRIPTIONS_BUNDLE);
 
-    if (shortDesc == null) return null;
+    // if there is no shortDesc try if one of the functions has one
+    if (shortDesc == null) {
+      for (Function function : MapTool.getParser().getMacroFunctions()) {
+        if (function instanceof AdditionalFunctionDescription) {
+          final AdditionalFunctionDescription functionExtended =
+              (AdditionalFunctionDescription) function;
+          // try if the function has a summary for this macro
+          final String shortDescExtended = functionExtended.getFunctionDescription(macro);
+          if (shortDescExtended != null) {
+            return shortDescExtended;
+          }
+        }
+      }
+      return null;
+    }
 
     if (shortDesc.equals(I18N_PLACEHOLDER_TEXT)) return null;
     else return shortDesc;
   }
 
   private String getSummary(String macro) {
-    String summary = I18N.getString(macro + I18N_SUMMARY, MACRO_DESCRIPTIONS_BUNDLE);
+    final String summary = I18N.getString(macro + I18N_SUMMARY, MACRO_DESCRIPTIONS_BUNDLE);
 
-    if (summary == null) return null;
+    // if there is no summary try if one of the functions has one
+    if (summary == null) {
+      for (final Function function : MapTool.getParser().getMacroFunctions()) {
+        if (function instanceof AdditionalFunctionDescription) {
+          final AdditionalFunctionDescription functionExtended =
+              (AdditionalFunctionDescription) function;
+          // try if the function has a summary for this macro
+          final String summaryExtended = functionExtended.getFunctionSummary(macro);
+          if (summaryExtended != null) {
+            return summaryExtended;
+          }
+        }
+      }
+      return null;
+    }
 
     if (summary.equals(I18N_PLACEHOLDER_TEXT)) return null;
     else return summary;

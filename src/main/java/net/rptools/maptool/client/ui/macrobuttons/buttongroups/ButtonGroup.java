@@ -115,7 +115,8 @@ public class ButtonGroup extends AbstractButtonGroup {
               data.fontSize,
               data.minWidth,
               data.maxWidth,
-              data.toolTip);
+              data.toolTip,
+              data.displayHotKey);
 
       if (panelClass.equals("GlobalPanel")) {
         event.acceptDrop(event.getDropAction());

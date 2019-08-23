@@ -115,7 +115,7 @@ public class CampaignPropertiesDialog extends JDialog {
     initOKButton();
     initCancelButton();
     initAddRepoButton();
-    initAddGalleryIndexButton();
+    //    initAddGalleryIndexButton();
     initDeleteRepoButton();
 
     initImportButton();
@@ -167,17 +167,17 @@ public class CampaignPropertiesDialog extends JDialog {
         });
   }
 
-  private void initAddGalleryIndexButton() {
-    JButton button = (JButton) formPanel.getButton("addGalleryIndexButton");
-    button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            // TODO: Check for uniqueness
-            ((DefaultListModel) getRepositoryList().getModel())
-                .addElement("http://www.rptools.net/image-indexes/gallery.rpax.gz");
-          }
-        });
-  }
+  //  private void initAddGalleryIndexButton() {
+  //    JButton button = (JButton) formPanel.getButton("addGalleryIndexButton");
+  //    button.addActionListener(
+  //        new ActionListener() {
+  //          public void actionPerformed(ActionEvent e) {
+  //            // TODO: Check for uniqueness
+  //            ((DefaultListModel) getRepositoryList().getModel())
+  //                .addElement("http://www.rptools.net/image-indexes/gallery.rpax.gz");
+  //          }
+  //        });
+  //  }
 
   public void initDeleteRepoButton() {
     JButton button = (JButton) formPanel.getButton("deleteRepoButton");

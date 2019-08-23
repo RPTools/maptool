@@ -44,6 +44,7 @@ public class MacroButtonPrefs {
   private static final String PREF_MIN_WIDTH = "minWidth";
   private static final String PREF_MAX_WIDTH = "maxWidth";
   private static final String PREF_TOOLTIP = "toolTip";
+  private static final String PREF_DISPLAY_HOT_KEY = "displayHotKey";
 
   private static final String FORMAT_STRING = "%010d";
 
@@ -162,6 +163,7 @@ public class MacroButtonPrefs {
               String minWidth = buttonPref.get(PREF_MIN_WIDTH, "");
               String maxWidth = buttonPref.get(PREF_MAX_WIDTH, "");
               String toolTip = buttonPref.get(PREF_TOOLTIP, "");
+              boolean displayHotKey = buttonPref.getBoolean(PREF_DISPLAY_HOT_KEY, true);
 
               buttonProperties.add(
                   new MacroButtonProperties(
@@ -179,7 +181,8 @@ public class MacroButtonPrefs {
                       fontSize,
                       minWidth,
                       maxWidth,
-                      toolTip));
+                      toolTip,
+                      displayHotKey));
             }
           }
           // set old pref to be removed (regardless it was copied or not)
@@ -200,6 +203,7 @@ public class MacroButtonPrefs {
         String maxWidth = buttonPref.get(PREF_MAX_WIDTH, "");
         String hotKey = buttonPref.get(PREF_HOTKEY_KEY, MacroButtonHotKeyManager.HOTKEYS[0]);
         String toolTip = buttonPref.get(PREF_TOOLTIP, "");
+        boolean displayHotKey = buttonPref.getBoolean(PREF_DISPLAY_HOT_KEY, true);
 
         buttonProperties.add(
             new MacroButtonProperties(
@@ -217,7 +221,8 @@ public class MacroButtonPrefs {
                 fontSize,
                 minWidth,
                 maxWidth,
-                toolTip));
+                toolTip,
+                displayHotKey));
       }
     } catch (BackingStoreException e) {
       // exception due to prefsRoot.childrenNames()

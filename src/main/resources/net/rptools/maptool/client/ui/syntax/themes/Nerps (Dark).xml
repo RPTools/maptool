@@ -8,10 +8,10 @@
 <RSyntaxTheme version="1.0">
 
    <!-- Omitting baseFont will use a system-appropriate monospaced. -->
-   <!--<baseFont family="..." size="13"/>-->
+   <baseFont family="Lucida Console" size="16"/>
    
    <!--  General editor colors. -->
-   <background color="293134"/>
+   <background color="101010"/>
    <caret color="c1cbc2"/>
    <selection useFG="false" bg="404E51" roundedEdges="false"/>
    <currentLineHighlight color="2F393C" fade="false"/>
@@ -37,13 +37,13 @@
       <style token="IDENTIFIER" fg="E0E2E4"/>
       <style token="RESERVED_WORD" fg="93C763" bold="true"/>
       <style token="RESERVED_WORD_2" fg="93C763" bold="true"/>
-      <style token="ANNOTATION" fg="E8E2B7"/>
+      <style token="ANNOTATION" fg="dd77bb" bold="true"/>
       <style token="COMMENT_DOCUMENTATION" fg="6C788C"/>
       <style token="COMMENT_EOL" fg="66747B"/>
       <style token="COMMENT_MULTILINE" fg="66747B"/>
       <style token="COMMENT_KEYWORD" fg="ae9fbf"/>
       <style token="COMMENT_MARKUP" fg="ae9fbf"/>
-      <style token="FUNCTION" fg="E0E2E4"/>
+      <style token="FUNCTION" fg="888ccc" bold="true"/>
       <style token="DATA_TYPE" fg="678CB1" bold="true"/>
       <style token="LITERAL_BOOLEAN" fg="93C763" bold="true"/>
       <style token="LITERAL_NUMBER_DECIMAL_INT" fg="FFCD22"/>

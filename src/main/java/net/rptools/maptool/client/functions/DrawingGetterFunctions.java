@@ -47,7 +47,8 @@ public class DrawingGetterFunctions extends DrawingFunctions {
         "getFillColor",
         "getDrawingEraser",
         "getPenWidth",
-        "getLineCap");
+        "getLineCap",
+        "getDrawingInfo");
   }
 
   @Override
@@ -77,6 +78,8 @@ public class DrawingGetterFunctions extends DrawingFunctions {
       return getPen(functionName, map, guid).getThickness();
     } else if ("getLineCap".equalsIgnoreCase(functionName)) {
       return getPen(functionName, map, guid).getSquareCap() ? BigDecimal.ONE : BigDecimal.ZERO;
+    } else if ("getDrawingInfo".equalsIgnoreCase(functionName)) {
+      return getDrawingJSONInfo(functionName, map, guid);
     }
     return null;
   }

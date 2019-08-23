@@ -25,6 +25,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
@@ -93,14 +94,17 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
   public RadiusTemplateTool() {
     try {
       setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/temp-blue.png"))));
+          ImageUtil.resizeImage(
+              new ImageIcon(
+                  ImageIO.read(
+                      getClass()
+                          .getClassLoader()
+                          .getResourceAsStream(
+                              "net/rptools/maptool/client/image/tool/temp-blue-vertex-radius.png"))),
+              TOOLBAR_ICON_SIZE,
+              TOOLBAR_ICON_SIZE));
     } catch (IOException ioe) {
-      MapTool.showError("Can't find image resource 'temp-blue.png'", ioe);
+      MapTool.showError("Can't find image resource 'temp-blue-vertex-radius.png'", ioe);
     } // endtry
   }
 
@@ -328,7 +332,9 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
     if (painting && renderer != null) {
       Pen pen = getPenForOverlay();
       AffineTransform old = g.getTransform();
-      g.setTransform(getPaintTransform(renderer));
+      AffineTransform newTransform = g.getTransform();
+      newTransform.concatenate(getPaintTransform(renderer));
+      g.setTransform(newTransform);
       template.draw(g, pen);
       Paint paint = pen.getPaint() != null ? pen.getPaint().getPaint() : null;
       paintCursor(g, paint, pen.getThickness(), template.getVertex());

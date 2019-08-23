@@ -74,7 +74,7 @@ second level of categorization involves functionality:  what do you
 want to do?  The videos are generally short, none are more than 8-9
 minutes, and are narrated so that each part of the graphical interface
 is explained.  You can find them on the
-L<Tutorials|http://www.rptools.net/?page=tutorials> page on our
+L<Tutorials|https://www.rptools.net/tutorials/> page on our
 main web site.
 
 We suggest you start on the L<FAQ|http://www.rptools.net/?page=faq>

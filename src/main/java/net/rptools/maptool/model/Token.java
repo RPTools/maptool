@@ -47,6 +47,7 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.JSONMacroFunctions;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.ImageManager;
@@ -467,7 +468,11 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMNotes() {
-    return gmNotes;
+    if (MapTool.getPlayer().isGM()) {
+      return gmNotes;
+    } else {
+      return "";
+    }
   }
 
   public void setGMNotes(String notes) {
@@ -475,7 +480,11 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMName() {
-    return gmName;
+    if (MapTool.getPlayer().isGM()) {
+      return gmName;
+    } else {
+      return "";
+    }
   }
 
   public void setGMName(String name) {
@@ -626,17 +635,31 @@ public class Token extends BaseModel implements Cloneable {
     this.facing = facing;
   }
 
+  /**
+   * Facing is in the map space where 0 degrees is along the X axis to the right and proceeding CCW
+   * for positive angles.
+   *
+   * <p>Round/Square tokens that have no facing set, return null. Top Down tokens default to -90.
+   *
+   * @return null or angle in degrees
+   */
   public Integer getFacing() {
     return facing;
   }
 
+  /**
+   * This returns the rotation of the facing of the token from the default facing of down or -90.
+   * Positive for CW and negative for CCW.
+   *
+   * @return angle in degrees
+   */
   public Integer getFacingInDegrees() {
-    if (facing == null) return -1;
+    if (facing == null) return 0;
     else return -(facing + 90);
   }
 
   public Integer getFacingInRealDegrees() {
-    if (facing == null) return -1;
+    if (facing == null) return 270;
 
     if (facing >= 0) return facing;
     else return facing + 360;
@@ -939,6 +962,22 @@ public class Token extends BaseModel implements Cloneable {
     return id;
   }
 
+  public ZoneRenderer getZoneRenderer() { // Returns the ZoneRenderer the token is on
+    ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    Token token = zoneRenderer.getZone().getToken(getId());
+
+    if (token == null) {
+      List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+      for (ZoneRenderer zr : zrenderers) {
+        token = zr.getZone().getToken(getId());
+        if (token != null) {
+          return zr;
+        }
+      }
+    }
+    return zoneRenderer;
+  }
+
   public void setId(GUID id) {
     this.id = id;
   }
@@ -1206,12 +1245,6 @@ public class Token extends BaseModel implements Cloneable {
     TokenFootprint footprint = getFootprint(grid);
     Rectangle footprintBounds =
         footprint.getBounds(grid, grid.convert(new ZonePoint(getX(), getY())));
-    // if (getShape() == TokenShape.FIGURE) {
-    // double th = this.height * Double.valueOf(footprintBounds.width) / this.width;
-    // double ho = footprintBounds.height - th;
-    // footprintBounds = new Rectangle(footprintBounds.x, footprintBounds.y + (int)ho,
-    // footprintBounds.width, (int)th);
-    // }
 
     double w = footprintBounds.width;
     double h = footprintBounds.height;
@@ -1220,6 +1253,10 @@ public class Token extends BaseModel implements Cloneable {
     if (!isSnapToScale()) {
       w = getWidth() * getScaleX();
       h = getHeight() * getScaleY();
+      if (grid.isIsometric() && getShape() == Token.TokenShape.FIGURE) {
+        // Native size figure tokens need to follow iso rules
+        h = (w / 2);
+      }
     } else {
       w = footprintBounds.width * footprint.getScale() * sizeScale;
       h = footprintBounds.height * footprint.getScale() * sizeScale;
@@ -1303,6 +1340,17 @@ public class Token extends BaseModel implements Cloneable {
   public Object setState(String aState, Object aValue) {
     if (aValue == null) return state.remove(aState);
     return state.put(aState, aValue);
+  }
+
+  /**
+   * Set the value of every state for this Token.
+   *
+   * @param aValue The new value for the property.
+   */
+  public void setAllStates(Object aValue) {
+    for (Object sname : MapTool.getCampaign().getTokenStatesMap().keySet()) {
+      setState(sname.toString(), aValue);
+    }
   }
 
   public void resetProperty(String key) {
@@ -1511,8 +1559,7 @@ public class Token extends BaseModel implements Cloneable {
   public void saveMacroButtonProperty(MacroButtonProperties prop) {
     getMacroPropertiesMap(false).put(prop.getIndex(), prop);
     MapTool.getFrame().resetTokenPanels();
-    MapTool.serverCommand()
-        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+    MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
 
     // Lets the token macro panels update only if a macro changes
     fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
@@ -1911,5 +1958,121 @@ public class Token extends BaseModel implements Cloneable {
 
   public void setHeroLabData(HeroLabData heroLabData) {
     this.heroLabData = heroLabData;
+  }
+
+  /**
+   * Call the relevant setter from methodName with an array of parameters Called by
+   * ClientMethodHandler to deal with sent change to token
+   *
+   * @param methodName the method to be used
+   * @param zoneRenderer the zone renderer where the token is
+   * @param parameters an array of parameters
+   */
+  public void updateProperty(ZoneRenderer zoneRenderer, String methodName, Object[] parameters) {
+    Zone zone = zoneRenderer.getZone();
+    switch (methodName) {
+      case "setState":
+        setState(parameters[0].toString(), parameters[1]);
+        break;
+      case "setAllStates":
+        setAllStates(parameters[0]);
+        break;
+      case "setPropertyType":
+        setPropertyType(parameters[0].toString());
+        break;
+      case "setPC":
+        setType(Type.PC);
+        break;
+      case "setNPC":
+        setType(Type.NPC);
+        break;
+      case "setLayer":
+        setLayer((Zone.Layer) parameters[0]);
+        break;
+      case "setShape":
+        setShape((TokenShape) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setSnapToScale":
+        setSnapToScale((Boolean) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setSnapToGrid":
+        setSnapToGrid((Boolean) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setFootprint":
+        setFootprint((Grid) parameters[0], (TokenFootprint) parameters[1]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setProperty":
+        setProperty(parameters[0].toString(), parameters[1].toString());
+        break;
+      case "setZOrder":
+        setZOrder((int) parameters[0]);
+        zone.sortZOrder(); // update new ZOrder
+        break;
+      case "setFacing":
+        setFacing((Integer) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "clearAllOwners":
+        clearAllOwners();
+        break;
+      case "setOwnedByAll":
+        setOwnedByAll((Boolean) parameters[0]);
+        break;
+      case "addOwner":
+        addOwner(parameters[0].toString());
+        break;
+      case "setScaleX":
+        setScaleX((double) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setScaleY":
+        setScaleY((double) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setScaleXY":
+        setScaleX((double) parameters[0]);
+        setScaleY((double) parameters[1]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setNotes":
+        setNotes(parameters[0].toString());
+        break;
+      case "setGMNotes":
+        setGMNotes(parameters[0].toString());
+        break;
+      case "setX":
+        setX((int) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setY":
+        setY((int) parameters[0]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setXY":
+        setX((int) parameters[0]);
+        setY((int) parameters[1]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "clearLightSources":
+        clearLightSources();
+        break;
+      case "removeLightSource":
+        removeLightSource((LightSource) parameters[0]);
+        break;
+      case "addLightSource":
+        addLightSource((LightSource) parameters[0], (Direction) parameters[1]);
+        break;
+      case "setHasSight":
+        setHasSight((boolean) parameters[0]);
+        break;
+      case "setSightType":
+        setSightType((String) parameters[0]);
+        break;
+    }
+    zone.tokenChanged(this); // fireModelChangeEvent Event.TOKEN_CHANGED
   }
 }

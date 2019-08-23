@@ -34,13 +34,13 @@ exit(0);
 
 sub processFile {
     my ($fn) = @_;
-    my $t;
     my $tree = HTML::TreeBuilder->new;
-    $tree->implicit_tags(0); # "<html>" is still added...?!
+    $tree->warn(1);
+    $tree->implicit_tags(1); # "<html>" is still added...?!
     $tree->no_expand_entities(1); # it'll be valid HTML when written
     $tree->parse_file($fn);
 
-    $e = $tree->look_down(
+    my $e = $tree->look_down(
         ('_tag', 'div'),
         ('class', 'template_description')
     );
@@ -60,7 +60,7 @@ sub processFile {
     foreach my $elem ($e->content_list()) {
         push(@t, ref($elem) ? $elem->as_HTML() : $elem);
     }
-    $t = join(" ", @t);
+    my $t = join(" ", @t);
     # This looks for the end of the first sentence and deletes
     # everything after that point.  This doesn't work, though.
     # What if there's a "." inside an HTML tag, such as:

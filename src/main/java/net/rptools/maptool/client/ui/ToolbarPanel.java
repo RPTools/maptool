@@ -51,6 +51,7 @@ import net.rptools.maptool.client.tool.drawing.FreehandTool;
 import net.rptools.maptool.client.tool.drawing.HollowDiamondTopologyTool;
 import net.rptools.maptool.client.tool.drawing.HollowOvalTopologyTool;
 import net.rptools.maptool.client.tool.drawing.HollowRectangleTopologyTool;
+import net.rptools.maptool.client.tool.drawing.LineCellTemplateTool;
 import net.rptools.maptool.client.tool.drawing.LineTemplateTool;
 import net.rptools.maptool.client.tool.drawing.LineTool;
 import net.rptools.maptool.client.tool.drawing.OvalExposeTool;
@@ -59,6 +60,7 @@ import net.rptools.maptool.client.tool.drawing.OvalTopologyTool;
 import net.rptools.maptool.client.tool.drawing.PolyLineTopologyTool;
 import net.rptools.maptool.client.tool.drawing.PolygonExposeTool;
 import net.rptools.maptool.client.tool.drawing.PolygonTopologyTool;
+import net.rptools.maptool.client.tool.drawing.RadiusCellTemplateTool;
 import net.rptools.maptool.client.tool.drawing.RadiusTemplateTool;
 import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
 import net.rptools.maptool.client.tool.drawing.RectangleTool;
@@ -243,8 +245,10 @@ public class ToolbarPanel extends JToolBar {
   private OptionPanel createTemplatePanel() {
     OptionPanel panel = new OptionPanel();
     panel.add(RadiusTemplateTool.class);
+    panel.add(RadiusCellTemplateTool.class);
     panel.add(ConeTemplateTool.class);
     panel.add(LineTemplateTool.class);
+    panel.add(LineCellTemplateTool.class);
     panel.add(BurstTemplateTool.class);
     panel.add(BlastTemplateTool.class);
     panel.add(WallTemplateTool.class);

@@ -50,7 +50,7 @@ public abstract class AbstractTemplate extends AbstractDrawing {
    *-------------------------------------------------------------------------------------------*/
 
   /** Maximum radius value allowed. */
-  public static final int MAX_RADIUS = 30;
+  public static final int MAX_RADIUS = 100;
 
   /** Minimum radius value allowed. */
   public static final int MIN_RADIUS = 1;
@@ -126,7 +126,6 @@ public abstract class AbstractTemplate extends AbstractDrawing {
    * @param squares The number of squares in the radius for this template.
    */
   public void setRadius(int squares) {
-    if (squares > MAX_RADIUS) squares = MAX_RADIUS;
     radius = squares;
   }
 

@@ -31,6 +31,7 @@ import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
@@ -77,6 +78,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   private String maxWidth;
   private Boolean allowPlayerEdits = true;
   private String toolTip;
+  private Boolean displayHotKey = true;
 
   // constructor that creates a new instance, doesn't auto-save
   public MacroButtonProperties(
@@ -94,7 +96,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
       String fontSize,
       String minWidth,
       String maxWidth,
-      String toolTip) {
+      String toolTip,
+      boolean displayHotKey) {
     setIndex(index);
     setColorKey(colorKey);
     setHotKey(hotKey);
@@ -113,6 +116,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setTokenId((GUID) null);
     setSaveLocation("");
     setAllowPlayerEdits(AppPreferences.getAllowPlayerMacroEditsDefault());
+    setDisplayHotKey(displayHotKey);
     setCompareGroup(true);
     setCompareSortPrefix(true);
     setCompareCommand(true);
@@ -142,6 +146,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setTokenId((GUID) null);
     setSaveLocation("");
     setAllowPlayerEdits(AppPreferences.getAllowPlayerMacroEditsDefault());
+    setDisplayHotKey(true);
     setCompareGroup(true);
     setCompareSortPrefix(true);
     setCompareCommand(true);
@@ -157,6 +162,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setSaveLocation(panelClass);
     setGroup(group);
     setAllowPlayerEdits(AppPreferences.getAllowPlayerMacroEditsDefault());
+    setDisplayHotKey(true);
     setCompareGroup(true);
     setCompareSortPrefix(true);
     setCompareCommand(true);
@@ -174,6 +180,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setTokenId(token);
     setGroup(group);
     setAllowPlayerEdits(AppPreferences.getAllowPlayerMacroEditsDefault());
+    setDisplayHotKey(true);
     setCompareGroup(true);
     setCompareSortPrefix(true);
     setCompareCommand(true);
@@ -202,6 +209,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setMinWidth(properties.getMinWidth());
     setMaxWidth(properties.getMaxWidth());
     setAllowPlayerEdits(properties.getAllowPlayerEdits());
+    setDisplayHotKey(properties.getDisplayHotKey());
     setCompareIncludeLabel(properties.getCompareIncludeLabel());
     setCompareAutoExecute(properties.getCompareAutoExecute());
     setCompareApplyToSelectedTokens(properties.getCompareApplyToSelectedTokens());
@@ -232,6 +240,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setMinWidth(properties.getMinWidth());
     setMaxWidth(properties.getMaxWidth());
     setAllowPlayerEdits(properties.getAllowPlayerEdits());
+    setDisplayHotKey(properties.getDisplayHotKey());
     setCompareIncludeLabel(properties.getCompareIncludeLabel());
     setCompareAutoExecute(properties.getCompareAutoExecute());
     setCompareApplyToSelectedTokens(properties.getCompareApplyToSelectedTokens());
@@ -261,6 +270,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setMinWidth(properties.getMinWidth());
     setMaxWidth(properties.getMaxWidth());
     setAllowPlayerEdits(properties.getAllowPlayerEdits());
+    setDisplayHotKey(properties.getDisplayHotKey());
     setCompareIncludeLabel(properties.getCompareIncludeLabel());
     setCompareAutoExecute(properties.getCompareAutoExecute());
     setCompareApplyToSelectedTokens(properties.getCompareApplyToSelectedTokens());
@@ -296,6 +306,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (props.containsKey("maxWidth")) setMaxWidth(props.get("maxWidth"));
     if (props.containsKey("allowPlayerEdits"))
       setAllowPlayerEdits(Boolean.valueOf(props.get("allowPlayerEdits")));
+    if (props.containsKey("displayHotKey"))
+      setAllowPlayerEdits(Boolean.valueOf(props.get("displayHotKey")));
     if (props.containsKey("toolTip")) setToolTip(props.get("toolTip"));
     if (props.containsKey("commonMacro")) setCommonMacro(Boolean.valueOf(props.get("commonMacro")));
     if (props.containsKey("compareGroup"))
@@ -314,7 +326,12 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
   public void save() {
     if (saveLocation.equals("Token") && tokenId != null) {
-      getToken().saveMacroButtonProperty(this);
+      Token token = getToken();
+      if (token != null) {
+        token.saveMacroButtonProperty(this);
+      } else {
+        MapTool.showError(I18N.getText("msg.error.macro.buttonNullToken", getLabel(), tokenId));
+      }
     } else if (saveLocation.equals("GlobalPanel")) {
       MacroButtonPrefs.savePreferences(this);
     } else if (saveLocation.equals("CampaignPanel")) {
@@ -451,7 +468,19 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   }
 
   public Token getToken() {
-    return MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(this.tokenId);
+    Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(this.tokenId);
+
+    // If token not in current map, look for token in other maps.
+    if (token == null) {
+      List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+      for (ZoneRenderer zr : zrenderers) {
+        token = zr.getZone().getToken(this.tokenId);
+        if (token != null) {
+          break;
+        }
+      }
+    }
+    return token;
   }
 
   public void setTokenId(Token token) {
@@ -638,6 +667,16 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
   public void setAllowPlayerEdits(Boolean value) {
     allowPlayerEdits = value;
+  }
+
+  public Boolean getDisplayHotKey() {
+    if (displayHotKey == null) displayHotKey = true;
+
+    return displayHotKey;
+  }
+
+  public void setDisplayHotKey(Boolean value) {
+    displayHotKey = value;
   }
 
   public String getSaveLocation() {

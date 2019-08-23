@@ -146,6 +146,10 @@ public abstract class Grid implements Cloneable {
     return false;
   }
 
+  public boolean isHex() {
+    return false;
+  }
+
   @Override
   public Object clone() throws CloneNotSupportedException {
     return super.clone();

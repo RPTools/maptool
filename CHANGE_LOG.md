@@ -1,3 +1,261 @@
+<<<<<<< HEAD
+=======
+Maptool 1.5.4
+=====
+More bug fixes and enhancements mostly thanks to the tireless efforts of new contributor, Guillaume "Merudo" Filteau.
+___
+
+Bug Fixes & Enhancements
+-----
+* [#603][i603] - Attempting to import a campaign file as campaign properties was throwing ClassCastException. Now displays a proper error message.
+* [#594][i594] - Dragging tokens on hex grids did not display the blue path line and move count was slightly outside of the hex cell.  Fixed.
+* [#589][i589] - Title option for dialog() command only worked on first use.  Subsequent uses did not update the dialog title. Fixed.
+* [#587][i587] - Using title option in frame() would keep the frame from being reopened again once closed. Fixed.
+* [#585][i585] - The _temporary_ property of frames was not being obeyed.  Fixed.
+* [#584][i584] - New functions for getting Frame/Dialog properties.
+  * getFrameProperties(frameName)
+  * getDialogProperties(dialogName)
+  * New property `value` added to frame() and dialog() roll options and can be read with above.  See MapTool wiki for more details.
+* [#582][i582] - Modifying tokens was not updating VBL for tokens with attached VBL. This particular bug was not in released builds. Fixed.
+* [#578][i578] - Added optional token id and map name parameters to sight macro functions.
+  * Functions Affected: canSeeToken(), getSightType(), hasSight(), setHasSight(), setSightType()
+* [#574][i574] - Bug fixes and enhancments for several light macro functions
+  * hasLightSource(), setLight(), and getLights() no longer causes an NPE if the light type entered doesn't exist
+  * FoW now automatically updates after using clearLights() or setLights()
+  * functions now take optional token id and map name parameters
+  * functions no longer send entire token object on change to clients
+* [#573][i573] - MapTool credits in Help -> About window updated.
+* [#569][i569] - Documented undocumented parameters of getPropertyDefault and setLayer.  Fixed NPE caused when getPropertyDefault is given only one parameter and there is no current token.
+  * getPropertyDefault() - Accepts second parameter for Token (Property) Type and returns the default for that type.
+  * setLayer() - A third parameter, forceShape, forces tokens to be of type Top Down if moved to Object layer and to either Circle or Square for the token layer.
+* [#563][i563] - Additional parameter map name added to getState, setState, and setAllStates macro functions.
+* [#560][i560] - Corrected error message if setZoom() was passed argument.
+* [#558][i558] - Popup notes for Hidden/Object tokens did not include the GM name if only player notes field had content and if only the GM notes had content no name was shown.  Fixed.
+* [#555][i555] - A number of macro functions that set properties on tokens have been updated to use new internal server commands to only pass the relevant data from server to client instead of the entire token object.
+  * Functions:  bringToFront, moveToken, removeTokenFacing, resetProperty, resetSize, sendToBack, setAllStates, setGMNotes, setLayer, setLibProperty, setNotes, setNPC, setOwnedByAll, setOwner, setPC, setProperty, setPropertyType, setSize, setState, setTokenDrawOrder, setTokenFacing, setTokenHeight, setTokenShape, setTokenSnapToGrid, setTokenWidth
+* [#552][i552] - A number of macro functions were only making changes to tokens locally and not pushing them out to the other clients.  Fixed.  See also #555.
+  * Functions Affected:  setGMNotes, setNotes, setTokenShape, setTokenWidth, setTokenHeight, setTokenSnapToGrid, resetSize
+* [#551][i551] - Opening and closing the Edit Token dialog on a Player Client was enabling Visible of FoW even though players did not have access to the setting.  Fixed.
+* [#549][i549] - A number of macro functions were internally calling both Zone.putToken() as well as ServerCommand.putToken() which resulted in the token being sent out to clients twice. Fixed.
+  * Functions Affected:  setTokenImage, setTokenPortrait, setTokenHandout and setTokenOpacity
+* [#547][i547] - Map name added as optional parameter to getName() and setName() functions.
+* [#545][i545] - Map name added as optional parameter to the following functions.
+  * bringToFront, getGMNotes, getLayer, getMatchingProperties, getNotes, getOwners, getProperty, getPropertyNames, getPropertyNamesRaw, getPropertyType, getRawProperty, getSize, getTokenFacing, getTokenHeight, getTokenNativeHeight, getTokenNativeWidth, getTokenRotation, getTokenShape, getTokenWidth, hasProperty, isNPC, isOwnedByAll, isOwner, isPC, isPropertyEmpty, isSnapToGrid, removeTokenFacing, resetProperty, resetSize, sendToBack, setGMNotes, setLayer, setNPC, setNotes, setOwnedByAll, setOwner, setPC, setProperty, setPropertyType, setSize, setTokenFacing, setTokenHeight, setTokenShape, setTokenSnapToGrid, setTokenWidth
+* [#541][i541] - Map name added as optional parameter to the following functions.
+  * getTokenImage, getTokenPortrait, getTokenHandout, setTokenImage, setTokenPortrait, setTokenHandout, setTokenOpacity, getTokenOpacity
+* [#540][i540] - Non-snap-to-grid tokens were dragging by top-left corner on square grids.  Fixed.
+* [#539][i539] - New Macro function getTableEntry() returns raw table entry in JSON format.
+* [#538][i538] - Macro function tableImage() was throwing an exception if the table entry did not have an image attached.  Now returns an empty string.
+* [#534][i534] - Macro function getMatchingProperties() was not accepting 3rd parameter token ID.  Fixed.
+* [#532][i532] - Fog of War macro functions did not return an error message if an invalid map name was passed in.  Fixed.
+  * Functions Affected: exposePCOnlyArea, exposeFOW, exposeAllOwnedArea, restoreFoW
+* [#531][i531] - New macro function getViewCenter() returns the location in either pixels or cell coordinates.
+* [#525][i525] - Macro function exposeFogAtWaypoints() was returning the i18 string name instead of the actual error message.
+* [#523][i523] - Various HTML entities that could be used to spoof valid roll results trapped from entry into chat.
+* [#522][i522] - Incorrect tooltip for Preferences -> Application -> UPnP -> Discovery Timeout.  Fixed.
+* [#519][i519] - With AI enabled, using token.denyMove = 1 in the special onTokenMove macro did not block movement allowing tokens to be moved to inaccessible areas.
+* [#513][i513] - Saving a change to a macro from a different map was throwing an NPE and failing to update macro.  Fixed.
+* [#510][i510] - Passing invalid parameters to the goto() function was incorrectly blaming moveToken().  Blame properly assigned now.
+* [#509][i509] - Optional tokens and delimiter parameters added to exposeFOW() function allowing user to choose tokens that aren't selected.
+* [#505][i505] - Bug was preventing the exposeFOW() function from accepting a map name argument.  Fixed.  Wiki page for restoreFOW() updated to note that it also accepts a map name argument.
+* [#504][i504] - Result for getInfo("server") call did not include Auto Reveal on Movement and Individual FoW settings.  Fixed.
+* [#470][i470] - Show Movement Distance setting was being ignored.  Fixed.
+* [#434][i434] - Pinned frames displayed frame name instead of title. Fixed.  New _tabtitle_ property also added to frame() macro function.
+* [#404][i404] - Manipulating a token while on a different map could lead to duplicate tokens. Fixed.
+* [#357][i357] - Vision for Non-Individual Views was broken.  For a long time.  Fixed!
+* [#226][i226] - Attempting to adjust map grid (Ctrl-Shift-A) after a Dialog was opened caused exception. Fixed.
+* [#225][i225] - Attempting to load a file other than a campaign file was throwing a Class Cast exception. Open Campaign dialog now defaults to only showing campaign files and CCEs caught with appropriate error message shown.
+* [#213][i213] - The following operations do not cause auto-exposure of FoW for tokens.  Documenting current behavior as of 1.5.4.  See ticket for more details.
+  * Edit Token Dialog
+    * Changing Sight Type
+    * Changing Has Sight
+  * Right-Click Menu
+    * Setting Light On
+  * Macro Functions
+    * Setting Light On
+    * Changing Sight Type
+    * Changing Has Sight
+* [#152][i152] - Undo (Ctrl-Z) was frequently buggy producing unpredictable results. Fixed(in 1.5.0).
+  * Undo buffers are specific to each client. Undo/Redos only affect the client taking action.
+* [#150][i150] - Using sendToBack() and bringToFront() macros could break states or bars on tokens.  Fixed(in 1.5.0).
+* [#132][i132] - Calling getname() (lower case 'n') was falling through to setName and returned incorrect error message. Fixed with other changes to token macro functions.
+* [#116][i116] - strPropFromVars function was creating an extra, empty entry.  Fixed.  Second parameter made optional and defaults to "UNSUFFIXED".
+
+[i603]: https://github.com/RPTools/maptool/issues/603
+[i594]: https://github.com/RPTools/maptool/issues/594
+[i589]: https://github.com/RPTools/maptool/issues/589
+[i587]: https://github.com/RPTools/maptool/issues/587
+[i585]: https://github.com/RPTools/maptool/issues/585
+[i584]: https://github.com/RPTools/maptool/issues/584
+[i582]: https://github.com/RPTools/maptool/issues/582
+[i578]: https://github.com/RPTools/maptool/issues/578
+[i574]: https://github.com/RPTools/maptool/issues/574
+[i573]: https://github.com/RPTools/maptool/issues/573
+[i569]: https://github.com/RPTools/maptool/issues/569
+[i563]: https://github.com/RPTools/maptool/issues/563
+[i560]: https://github.com/RPTools/maptool/issues/560
+[i558]: https://github.com/RPTools/maptool/issues/558
+[i555]: https://github.com/RPTools/maptool/issues/555
+[i552]: https://github.com/RPTools/maptool/issues/552
+[i551]: https://github.com/RPTools/maptool/issues/551
+[i549]: https://github.com/RPTools/maptool/issues/549
+[i547]: https://github.com/RPTools/maptool/issues/547
+[i545]: https://github.com/RPTools/maptool/issues/545
+[i541]: https://github.com/RPTools/maptool/issues/541
+[i540]: https://github.com/RPTools/maptool/issues/540
+[i539]: https://github.com/RPTools/maptool/issues/539
+[i538]: https://github.com/RPTools/maptool/issues/538
+[i534]: https://github.com/RPTools/maptool/issues/534
+[i532]: https://github.com/RPTools/maptool/issues/532
+[i531]: https://github.com/RPTools/maptool/issues/531
+[i525]: https://github.com/RPTools/maptool/issues/525
+[i523]: https://github.com/RPTools/maptool/issues/523
+[i522]: https://github.com/RPTools/maptool/issues/522
+[i519]: https://github.com/RPTools/maptool/issues/519
+[i513]: https://github.com/RPTools/maptool/issues/513
+[i510]: https://github.com/RPTools/maptool/issues/510
+[i509]: https://github.com/RPTools/maptool/issues/509
+[i505]: https://github.com/RPTools/maptool/issues/505
+[i504]: https://github.com/RPTools/maptool/issues/504
+[i470]: https://github.com/RPTools/maptool/issues/470
+[i434]: https://github.com/RPTools/maptool/issues/434
+[i404]: https://github.com/RPTools/maptool/issues/404
+[i357]: https://github.com/RPTools/maptool/issues/357
+[i226]: https://github.com/RPTools/maptool/issues/226
+[i225]: https://github.com/RPTools/maptool/issues/225
+[i213]: https://github.com/RPTools/maptool/issues/213
+[i152]: https://github.com/RPTools/maptool/issues/152
+[i150]: https://github.com/RPTools/maptool/issues/150
+[i132]: https://github.com/RPTools/maptool/issues/132
+[i116]: https://github.com/RPTools/maptool/issues/116
+
+Maptool 1.5.3
+=====
+More bug fixes and enhancements
+___
+
+Bug Fixes
+-----
+* [#487][i487] Restored previous token dragging behavior as default.
+  * [#315][i315] Tokens move less erratically.
+  * [#300][i300] Tokens have less drift.
+* [#485][i485] VBL changes made with Clear VBL on Edit Token Dialog and via setTokenVBL() were not updating local client view nor propagating to other clients.  Fixed.
+* [#481][i481] Token VBL no longer rotated -1 degrees.
+* [#476][i476] Added catch for missing/null directories cause an NPE in ImageFileImagePanelModel.getImage()
+* [#473][i473] Shutting down server should no longer throw an NPE when closing port with UPnP
+* [#467][i467] Updated layout of Start Server dialog so that server setting labels can go across the full dialog instead of being cutoff.
+* [#461][i461] GM Notes and GM Name for tokens no longer visible to players.
+* [#450][i450] Corrected footprint problems with native-size figure tokens which affected halos and vision.
+* [#442][i442] Pathing for 1-1-1 movement corrected to no longer look bad.
+* [#376][i376] RPTools Gallery Index button removed from Campaign Properties.  Gallery no longer exists.
+* [#288][i288] Added missing Grid shape to Light help and missing Hex and Cone to Sight help of Campaign Properties dialog.
+* [#261][i261] Selecting white in the color picker for the background of new maps threw exception.
+* [#191][i191] Auto-Resize dialog couldn't handle larger font sizes. Fixed.
+* [#166][i166] Tokens dropped on hex grids now pick up pick up map grid size instead of default.
+
+Enhancements
+-----
+* [#487][i487] New Preferences settings for choosing between snapped and non-snapped token dragging as well as hide/show mouse pointer during dragging.  Further tweaks to token dragging to improve tracking of token image to mouse pointer position.
+  * [#479][i479] Snap restored as default.
+* [#298][i298] New Preferences selection for Macro editor themes. Themes can be found in C:\Users\\<username\>\\.maptool-rptools\themes\syntax
+
+[i485]: https://github.com/RPTools/maptool/issues/485
+[i442]: https://github.com/RPTools/maptool/issues/442
+[i487]: https://github.com/RPTools/maptool/issues/487
+[i479]: https://github.com/RPTools/maptool/issues/479
+[i376]: https://github.com/RPTools/maptool/issues/376
+[i298]: https://github.com/RPTools/maptool/issues/298
+[i487]: https://github.com/RPTools/maptool/issues/487
+[i481]: https://github.com/RPTools/maptool/issues/481
+[i476]: https://github.com/RPTools/maptool/issues/476
+[i473]: https://github.com/RPTools/maptool/issues/473
+[i467]: https://github.com/RPTools/maptool/issues/467
+[i461]: https://github.com/RPTools/maptool/issues/461
+[i450]: https://github.com/RPTools/maptool/issues/450
+[i315]: https://github.com/RPTools/maptool/issues/315
+[i300]: https://github.com/RPTools/maptool/issues/300
+[i288]: https://github.com/RPTools/maptool/issues/288
+[i261]: https://github.com/RPTools/maptool/issues/261
+[i191]: https://github.com/RPTools/maptool/issues/191
+[i166]: https://github.com/RPTools/maptool/issues/166
+
+
+Maptool 1.5.2
+=====
+More bug fixes and enhancements
+___
+
+Bug Fixes
+-----
+* [#362][i362] - README updated to reflect current version.
+* [#118][i118] - Fixed console problem with spaces being in the Java path.
+* [#441][i441] - Draw Explorer no longer allows attempting to merge a drawing and a template.
+* [#395][i395] - Fix for Edit menu issues if language not set to English.
+* [#292][i292] - Out-of-date/bad URLs in Help menu updated/corrected.
+* [#339][i339] - Fixed Templates not previewing at correct location.
+* [#377][i377] - Returned values from getViewArea() corrected to be compatible with setViewArea().
+* [#392][i392] - Default Map Preferences updated to allow decimal Units per Cell values.
+* [#400][i400] - Selecting a filetype other than an RPTools map file when using Import Map no longer throws exception.
+* [#386][i386] - Output of *java -version* no longer included in Help -> Debug output.
+* [#398][i398] - Newlines can now be inserted into the middle of command lines in the chat window.
+* [#338][i338] - Templates added for Bugs, Features and Technical Questions to MapTool GitHub issues.
+
+Enhancements
+-----
+* [#335][i335] - New macro functions for controlling logging. [See log.* functions on Wiki](http://www.lmwcs.com/rptools/wiki/Category:Log_Function)
+* [#429][i429] - New macro functions for getting/setting terrain modifiers: [getTerrainModifier][igtm](), [setTerrainModifier][istm]()
+* [#345][i345] - New dicelib version with new dice expressions and new macro functions for accessing individual die roll values:
+  * [getRolled][igrd]()
+  * [getNewRolls][ignr]()
+  * [clearRolls][icrl]()
+* [#406][i406] - New [dice expression](http://www.lmwcs.com/rptools/wiki/Dice_Expressions) **XdYdhZ** (drop highest) and 7 others. 
+* [#355][i355] - Macro Editor details tab reorganized to give some fields more room. Macro button tooltip entry field made into a larger text area with HTML highlighting.  Checkbox to enable/disable hotkey display on button.  UDFs now show in auto-complete of macro editor with their tooltip as help text.
+* [#426][i426] - New Line & Radius templates that start at cells. New icons for all template types.
+* [#424][i424] - Auto-completion in macro editor now works even if complete function name has already been entered.
+* [#349][i349] - New macro functions for base64 encoding/decoding: [base64.encode][ibe64](), [base64.decode][ibd64]().
+* [#416][i416] - New macro function [movedOverDrawing](http://www.lmwcs.com/rptools/wiki/movedOverDrawing)().
+* [#407][i407] - New macro function [getDrawingInfo](http://www.lmwcs.com/rptools/wiki/getDrawingInfo)().
+* [#384][i384] - Warning message removed when using Import Map option.
+* [#365][i365] - Editing token properties now supports word wrap and syntax highlighting.
+* [#106][i106] - Reset Size added to right-click menu for tokens/stamps.
+* [#299][i299] - Mouse pointer now visible when dragging tokens.
+* [#389][i389] - File -> Export -> Campaign File As... now supports converting back to non-decimal map units-per-cell values.
+* [#332][i332] - Added support for multiple personal lights and setting color for personal lights. 
+
+[igrd]: http://www.lmwcs.com/rptools/wiki/getRolled
+[ignr]: http://www.lmwcs.com/rptools/wiki/getNewRolls
+[icrl]: http://www.lmwcs.com/rptools/wiki/clearRolls
+[ibd64]: http://www.lmwcs.com/rptools/wiki/base64.decode
+[ibe64]: http://www.lmwcs.com/rptools/wiki/base64.encode
+[igtm]: http://www.lmwcs.com/rptools/wiki/getTerrainModifier
+[istm]: http://www.lmwcs.com/rptools/wiki/setTerrainModifier
+[i106]: https://github.com/RPTools/maptool/issues/106
+[i118]: https://github.com/RPTools/maptool/issues/118
+[i292]: https://github.com/RPTools/maptool/issues/292
+[i299]: https://github.com/RPTools/maptool/issues/299
+[i335]: https://github.com/RPTools/maptool/issues/335
+[i338]: https://github.com/RPTools/maptool/issues/338
+[i339]: https://github.com/RPTools/maptool/issues/339
+[i345]: https://github.com/RPTools/maptool/issues/345
+[i349]: https://github.com/RPTools/maptool/issues/349
+[i355]: https://github.com/RPTools/maptool/issues/355
+[i362]: https://github.com/RPTools/maptool/issues/362
+[i377]: https://github.com/RPTools/maptool/issues/377
+[i384]: https://github.com/RPTools/maptool/issues/384
+[i386]: https://github.com/RPTools/maptool/issues/386
+[i389]: https://github.com/RPTools/maptool/issues/389
+[i395]: https://github.com/RPTools/maptool/issues/395
+[i398]: https://github.com/RPTools/maptool/issues/398
+[i400]: https://github.com/RPTools/maptool/issues/400
+[i406]: https://github.com/RPTools/maptool/issues/406
+[i407]: https://github.com/RPTools/maptool/issues/407
+[i416]: https://github.com/RPTools/maptool/issues/416
+[i424]: https://github.com/RPTools/maptool/issues/424
+[i426]: https://github.com/RPTools/maptool/issues/426
+[i429]: https://github.com/RPTools/maptool/issues/429
+[i441]: https://github.com/RPTools/maptool/issues/441
+
+>>>>>>> upstream/develop
 MapTool 1.5.1
 =====
 A minor update to 1.5.0 consisting of bug fixes and small enhancements.
@@ -11,6 +269,7 @@ Bug Fixes
 * [#278][i278] - Fix existing unit tests and enable unit tests in build
 * [#326][i326] - defineFunction causes error with macro edit window open
 * [#324][i324] - fix output of setViewArea. This might break existing macro using workaround to interpret the broken result before the fix.
+
 
 Enhancements
 -----
@@ -97,8 +356,15 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * [#237][i237] - Added support to use shift-enter to insert newlines into the command entry box (also known as the chat entry box)
 * [#239][i239] - MapToolScriptTokenMaker now handles function names with . notation and dynamically pulls in all functions names. TokenMakerMaker no longer needs to be ran upon changes to MTScript.
 * [#240][i240] - Macro Editor now has Auto-Completion for macro functions! A brief description and summary can be displayed (these will be added as time permits)
+* [#332][i332] - Allow to set color for personal lights in campaign Sight types
+* [#324][i324] - fix output of getViewArea. This might break existing macro using workaround to interpret the broken result before the fix.
+* [#326][i326] - defineFunction with open edit window
+* [#365][i365] - Support wrap and syntax in property editor
 
-
+[i332]: https://github.com/RPTools/maptool/issues/332
+[i324]: https://github.com/RPTools/maptool/issues/324
+[i326]: https://github.com/RPTools/maptool/issues/326
+[i365]: https://github.com/RPTools/maptool/issues/365
 [i210]: https://github.com/RPTools/maptool/issues/210
 [i113]: https://github.com/JamzTheMan/MapTool/issues/113
 [i108]: https://github.com/JamzTheMan/MapTool/issues/108
@@ -144,3 +410,4 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 [i239]: https://github.com/RPTools/maptool/issues/239
 [i240]: https://github.com/RPTools/maptool/issues/240
 [i232]: https://github.com/RPTools/maptool/issues/232
+[i392]: https://github.com/RPTools/maptool/issues/392

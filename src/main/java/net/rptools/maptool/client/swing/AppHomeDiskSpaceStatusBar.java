@@ -98,7 +98,7 @@ public class AppHomeDiskSpaceStatusBar extends JLabel {
     if (System.currentTimeMillis() - lastChecked >= POLLING_INTERVAL) {
       setText(AppUtil.getFreeDiskSpace(CACHE_DIR));
       lastChecked = System.currentTimeMillis();
-      LOGGER.info("AppHomeDiskSpaceStatusBar updated...");
+      LOGGER.debug("AppHomeDiskSpaceStatusBar updated...");
     }
   }
 }
