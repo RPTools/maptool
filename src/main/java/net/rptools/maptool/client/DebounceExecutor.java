@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +34,15 @@ import org.apache.logging.log4j.Logger;
  */
 public class DebounceExecutor {
 
+  /**
+   * Thread factory for creating named threads. Other than thread naming, this factory relies on
+   * defaultThreadFactory and should not add overhead.
+   */
+  private static final ThreadFactory threadFactory =
+      (new com.google.common.util.concurrent.ThreadFactoryBuilder())
+          .setNameFormat("debounce-executor-%d")
+          .build();
+
   /** The time, in milliseconds, during which to throttle subsequent requests to run the task. */
   private final long delay;
 
@@ -40,16 +50,20 @@ public class DebounceExecutor {
    * A {@link ScheduledExecutorService} that will be used to run the debounced task when the delay
    * elapses.
    */
-  private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+  private final ScheduledExecutorService executor =
+      Executors.newSingleThreadScheduledExecutor(threadFactory);
 
   /** A {@link ScheduledFuture} that represents the debounced task. */
   private ScheduledFuture<?> future;
 
+  /**
+   * The synchronization lock used during the critical section for determining how to dispose of any
+   * single request.
+   */
+  private final Object syncLock = new Object();
+
   /** A {@link Runnable} representing the task to be managed. */
   private final Runnable task;
-
-  /** A wrapper to provide additional servicing for running the task. */
-  private final Runnable taskWrapper;
 
   /**
    * A {@link long} indicating the time, in milliseconds, when the task last entered a pending
@@ -75,31 +89,29 @@ public class DebounceExecutor {
   public DebounceExecutor(long delay, Runnable task) {
     this.delay = delay;
     this.task = task;
-    this.taskWrapper =
-        new Runnable() {
-
-          @Override
-          public void run() {
-            if (task != null) {
-              task.run();
-            }
-          };
-        };
   }
 
   /** Dispatches a task to be executed by this {@link DebounceExecutor} instance. */
   public void dispatch() {
-    long now = (new Date()).getTime();
+    if (this.task == null) {
+      log.info("Exited debouncer because of a null task.");
+      return;
+    }
     if (this.delay < 1) {
       this.task.run();
-    } else if (this.taskPendingSince == -1 || now - this.taskPendingSince >= this.delay) {
-      this.taskPendingSince = now;
-      // With very particular timing, this could overwrite a running
-      // _future_.  This should not be problematic when it does happen,
-      // since _future_ is never read from.
-      this.future = this.executor.schedule(task, delay, TimeUnit.MILLISECONDS);
-    } else {
-      log.info("Task execution was debounced.");
+      return;
+    }
+    synchronized (syncLock) {
+      long now = (new Date()).getTime();
+      if (this.taskPendingSince == -1 || now - this.taskPendingSince >= this.delay) {
+        this.taskPendingSince = now;
+        this.future = this.executor.schedule(this.task, this.delay, TimeUnit.MILLISECONDS);
+      } else {
+        log.info(
+            String.format(
+                "Task execution was debounced. (now: %d; taskPendingSince: %d; delay: %d; now - taskPendingSince: %d)",
+                now, this.taskPendingSince, this.delay, now - this.taskPendingSince));
+      }
     }
   }
 }
