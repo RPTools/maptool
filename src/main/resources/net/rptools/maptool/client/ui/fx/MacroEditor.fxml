@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
+
 <VBox prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.fx.controller.MacroEditor_Controller">
   <children>
     <MenuBar VBox.vgrow="NEVER">
@@ -54,9 +70,9 @@
                         </TextField>
                     <AnchorPane fx:id="macroListPane" VBox.vgrow="ALWAYS">
                            <children>
-                              <TreeTableView fx:id="macroTreeTableView" onMouseClicked="#macroTreeTableView_OnMouseClicked" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                              <TreeTableView fx:id="macroTreeTableView" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                 <columns>
-                                  <TreeTableColumn fx:id="macroTreeTableColumn" minWidth="-1.0" prefWidth="-1.0" text="&lt;&lt;&lt; CLICK TO SORT &gt;&gt;&gt;" />
+                                  <TreeTableColumn fx:id="macroTreeTableColumn" minWidth="-1.0" prefWidth="500.0" text="&lt;&lt;&lt; CLICK TO SORT &gt;&gt;&gt;" />
                                 </columns>
                                  <columnResizePolicy>
                                     <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

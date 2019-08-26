@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.fx.model;
 
+import javafx.scene.control.Label;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,5 +29,11 @@ public class MacroEditorData {
   private String macroGroup;
   private String command;
 
+  private String mapName;
+
   //  private MacroButtonProperties macroButtonProperties;
+
+  public Label getFxLabel() {
+    return new Label(label);
+  }
 }

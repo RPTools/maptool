@@ -14,22 +14,16 @@
  */
 package net.rptools.maptool.client.ui.fx.controller;
 
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -39,16 +33,22 @@ import lombok.extern.log4j.Log4j2;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.fx.model.MacroEditorData;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import org.fife.rsta.ui.CollapsibleSectionPanel;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
 
 @Log4j2
 public class MacroEditor_Controller {
-  private final RSyntaxTextArea macroEditorRSyntaxTextArea = new RSyntaxTextArea(2, 2);
-  private CollapsibleSectionPanel csp;
   private WebView webView = new WebView();
   private WebEngine webEngine;
   private TreeItem<MacroEditorData> treeItemRoot = new TreeItem<>();
@@ -63,8 +63,6 @@ public class MacroEditor_Controller {
   @FXML private AnchorPane macroEditPane;
   @FXML private AnchorPane macroDetailsPane;
 
-  @FXML private TreeView<String> macroTreeView;
-
   @FXML private TreeTableView<MacroEditorData> macroTreeTableView;
   @FXML private TreeTableColumn<MacroEditorData, String> macroTreeTableColumn;
   @FXML private Button macroTreeRefreshButton;
@@ -78,7 +76,7 @@ public class MacroEditor_Controller {
   @FXML private Color x4;
 
   @FXML
-  void initialize() {
+  private void initialize() {
     assert macroEditorSplitPane != null
         : "fx:id=\"macroEditorSplitPane\" was not injected: check your FXML file 'MacroEditor_Controller.fxml'.";
     assert macroListPane != null
@@ -87,8 +85,6 @@ public class MacroEditor_Controller {
         : "fx:id=\"macroEditPane\" was not injected: check your FXML file 'MacroEditor_Controller.fxml'.";
     assert macroDetailsPane != null
         : "fx:id=\"macroDetailsPane\" was not injected: check your FXML file 'MacroEditor_Controller.fxml'.";
-    assert macroTreeView != null
-        : "fx:id=\"macroTreeView\" was not injected: check your FXML file 'MacroEditor_Controller.fxml'.";
     assert macroTreeTableView != null
         : "fx:id=\"macroTreeTableView\" was not injected: check your FXML file 'MacroEditor_Controller.fxml'.";
     assert macroTreeTableColumn != null
@@ -118,17 +114,17 @@ public class MacroEditor_Controller {
         .textProperty()
         .addListener((observable, oldValue, newValue) -> filterChanged(newValue));
 
-    //    macroTreeTableView
-    //        .getSelectionModel()
-    //        .selectedIndexProperty()
-    //        .addListener((observable, oldValue, newValue) -> treeTableViewSelected(newValue));
+    macroTreeTableView
+        .getSelectionModel()
+        .selectedItemProperty()
+        .addListener((observable, oldValue, newValue) -> treeTableViewSelected(newValue));
 
     initMacroTreeView();
     initMacroCommandView();
   }
 
   @FXML
-  void refreshButton_onAction(ActionEvent event) {
+  private void refreshButton_onAction(ActionEvent event) {
     macroTreeFilterTextField.clear();
     update();
   }
@@ -138,22 +134,19 @@ public class MacroEditor_Controller {
     Desktop.getDesktop().browse(new URI("http://www.lmwcs.com/rptools/wiki/Main_Page"));
   }
 
-  @FXML
-  void macroTreeTableView_OnMouseClicked(MouseEvent event) {
-    TreeItem<MacroEditorData> selectedItem =
-        macroTreeTableView.getSelectionModel().getSelectedItem();
+  private void treeTableViewSelected(TreeItem<MacroEditorData> selectedItem) {
+    if (selectedItem == null) return;
 
-    if (selectedItem != null)
-      if (selectedItem.isLeaf()) {
-        String command = selectedItem.getValue().getCommand();
-        String macroCommandText = toJavaScriptString(command);
-        String aceFunctionCall =
-            "editor.setValue(" + macroCommandText + ", 0); editor.clearSelection();";
+    if (selectedItem.isLeaf()) {
+      String command = selectedItem.getValue().getCommand();
+      String macroCommandText = toJavaScriptString(command);
+      String aceFunctionCall =
+          "editor.setValue(" + macroCommandText + ", 0); editor.clearSelection();";
 
-        // log.info("aceFunctionCall: " + aceFunctionCall);
+      // log.info("aceFunctionCall: " + aceFunctionCall);
 
-        if (webEngine != null) webEngine.executeScript(aceFunctionCall);
-      }
+      if (webEngine != null) webEngine.executeScript(aceFunctionCall);
+    }
   }
 
   private static String toJavaScriptString(String value) {
@@ -194,11 +187,6 @@ public class MacroEditor_Controller {
   }
 
   private void initMacroTreeView() {
-    log.info("initMacroTreeView()...");
-
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-    if (zone == null) return;
-
     TreeItem<MacroEditorData> treeItemCampaign = createItemCategory(treeItemRoot, "Campaign");
     TreeItem<MacroEditorData> treeItemLibs = createItemCategory(treeItemRoot, "Libraries");
     TreeItem<MacroEditorData> treeItemNPCs = createItemCategory(treeItemRoot, "NPCs");
@@ -206,52 +194,55 @@ public class MacroEditor_Controller {
     TreeItem<MacroEditorData> treeItemGlobal = createItemCategory(treeItemRoot, "Global");
 
     // Add Campaign Macros
-    for (MacroButtonProperties macroButtonProperties :
-        MapTool.getCampaign().getMacroButtonPropertiesArray()) {
-      String name = macroButtonProperties.getLabel();
-
-      createItem(
-          treeItemCampaign,
-          new MacroEditorData(
-              macroButtonProperties.getLabel(),
-              macroButtonProperties.getGroup(),
-              macroButtonProperties.getCommand()));
-    }
-
-    // Add Token Macros
-    for (Token token : zone.getAllTokens()) {
-      // Don't add tokens if they contain no macros
-      if (token.getMacroList(true).isEmpty()) continue;
-
-      String name = getFormattedTokenName(token);
-      TreeItem<MacroEditorData> treeItem = new TreeItem<>();
-
-      if (name.matches("(?i)^lib:.*")) treeItem = createItemCategory(treeItemLibs, name);
-      else if (token.getType() == Token.Type.NPC) treeItem = createItemCategory(treeItemNPCs, name);
-      else if (token.getType() == Token.Type.PC) treeItem = createItemCategory(treeItemPCs, name);
-
-      addTokenMacros(token, treeItem);
-    }
+    MapTool.getCampaign()
+        .getMacroButtonPropertiesArray()
+        .forEach(macroButtonProperties -> createItem(treeItemCampaign, macroButtonProperties));
 
     // Add Global Macros
-    for (MacroButtonProperties macroButtonProperties : MacroButtonPrefs.getButtonProperties()) {
-      String name = macroButtonProperties.getLabel();
+    MacroButtonPrefs.getButtonProperties()
+        .forEach(macroButtonProperties -> createItem(treeItemGlobal, macroButtonProperties));
 
-      createItem(
-          treeItemGlobal,
-          new MacroEditorData(
-              macroButtonProperties.getLabel(),
-              macroButtonProperties.getGroup(),
-              macroButtonProperties.getCommand()));
+    // Add Token Macros
+    List<ZoneRenderer> zoneRenderers = MapTool.getFrame().getZoneRenderers();
+    for (ZoneRenderer zoneRenderer : zoneRenderers) {
+      Zone zone = zoneRenderer.getZone();
+      if (zone == null) continue;
+
+      for (Token token : zone.getAllTokens()) {
+        // Don't add tokens if they contain no macros
+        if (token.getMacroList(true).isEmpty()) continue;
+
+        String tokenName = getFormattedTokenName(token);
+        String mapName = zone.getName();
+
+        TreeItem<MacroEditorData> treeItem = new TreeItem<>();
+
+        if (tokenName.matches("(?i)^lib:.*"))
+          treeItem = createItemCategory(treeItemLibs, tokenName);
+        else if (token.getType() == Token.Type.NPC)
+          treeItem = createItemCategory(createItemCategory(treeItemNPCs, mapName), tokenName);
+        else if (token.getType() == Token.Type.PC)
+          treeItem = createItemCategory(createItemCategory(treeItemPCs, mapName), tokenName);
+
+        addTokenMacros(token, treeItem);
+      }
     }
 
-    treeItemRoot
-        .getChildren()
-        .setAll(treeItemCampaign, treeItemLibs, treeItemNPCs, treeItemPCs, treeItemGlobal);
+    // Add them all to the root
+    //    treeItemRoot
+    //        .getChildren()
+    //        .setAll(treeItemCampaign, treeItemLibs, treeItemNPCs, treeItemPCs, treeItemGlobal);
 
-    treeItemLibs.setExpanded(true);
-    treeItemNPCs.setExpanded(false);
-    treeItemPCs.setExpanded(false);
+    treeItemRoot.getChildren().clear();
+
+    if (!treeItemCampaign.isLeaf()) treeItemRoot.getChildren().add(treeItemCampaign);
+    if (!treeItemLibs.isLeaf()) treeItemRoot.getChildren().add(treeItemLibs);
+    if (!treeItemNPCs.isLeaf()) treeItemRoot.getChildren().add(treeItemNPCs);
+    if (!treeItemPCs.isLeaf()) treeItemRoot.getChildren().add(treeItemPCs);
+    if (!treeItemGlobal.isLeaf()) treeItemRoot.getChildren().add(treeItemGlobal);
+
+    // If we decide to make a item expanded on start...
+    // treeItemLibs.setExpanded(true);
 
     macroTreeTableView.setRoot(treeItemRoot);
     macroTreeTableView.setShowRoot(false);
@@ -271,6 +262,22 @@ public class MacroEditor_Controller {
   }
 
   private TreeItem<MacroEditorData> createItem(
+      TreeItem<MacroEditorData> parent, MacroButtonProperties macroButtonProperties) {
+
+    String group = macroButtonProperties.getGroup();
+
+    MacroEditorData macroEditorData =
+        new MacroEditorData(
+            macroButtonProperties.getLabel(),
+            macroButtonProperties.getGroup(),
+            macroButtonProperties.getCommand(),
+            "");
+
+    if (!group.isEmpty()) return createItem(createItemCategory(parent, group), macroEditorData);
+    else return createItem(parent, macroEditorData);
+  }
+
+  private TreeItem<MacroEditorData> createItem(
       TreeItem<MacroEditorData> parent, MacroEditorData macroEditorData) {
 
     TreeItem<MacroEditorData> treeItem = getTreeViewItem(parent, macroEditorData);
@@ -279,6 +286,22 @@ public class MacroEditor_Controller {
       treeItem = new TreeItem<>();
       treeItem.setValue(macroEditorData);
       // treeItem.setExpanded(true);
+
+      File file =
+          new File(
+              "D:/Google Drive/Map Tool Resources/! Resources !/Token States/#Macro Buttons/exit.png");
+
+      if (macroEditorData.getLabel().contains("<img"))
+        file =
+            new File(
+                "D:/Google Drive/Map Tool Resources/! Resources !/Token States/#Macro Buttons/breath-weapon.png");
+
+      Image image = new Image(file.toURI().toString(), false);
+      ImageView imageView = new ImageView(image);
+      imageView.setFitWidth(20);
+      imageView.setFitHeight(20);
+
+      treeItem.setGraphic(imageView);
 
       parent.getChildren().add(treeItem);
     }

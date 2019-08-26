@@ -24,23 +24,7 @@ import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
 import io.sentry.event.BreadcrumbBuilder;
 import io.sentry.event.UserBuilder;
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.List;
 import javafx.application.Platform;
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.plaf.FontUIResource;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.*;
 import net.rptools.lib.image.ThumbnailManager;
@@ -76,6 +60,23 @@ import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.apache.logging.log4j.core.config.Configurator;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.*;
 
 /** */
 public class MapTool {
@@ -1190,7 +1191,7 @@ public class MapTool {
             defaults.put("OptionPane.buttonOrientation", SwingConstants.RIGHT);
           }
         };
-    uiDefaultsCustomizer.customize(UIManager.getDefaults());
+   // uiDefaultsCustomizer.customize(UIManager.getDefaults());
   }
 
   /**

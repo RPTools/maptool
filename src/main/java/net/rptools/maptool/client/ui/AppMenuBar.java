@@ -14,6 +14,14 @@
  */
 package net.rptools.maptool.client.ui;
 
+import net.rptools.lib.FileUtil;
+import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.AppActions.OpenUrlAction;
+import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Zone;
+
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -21,13 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.*;
-import net.rptools.lib.FileUtil;
-import net.rptools.maptool.client.*;
-import net.rptools.maptool.client.AppActions.OpenUrlAction;
-import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Zone;
 
 public class AppMenuBar extends JMenuBar {
   private static MRUCampaignManager mruManager;
@@ -362,6 +363,9 @@ public class AppMenuBar extends JMenuBar {
 
     menu.addSeparator();
     menu.add(new JCheckBoxMenuItem(AppActions.SHOW_MACRO_EDITOR));
+
+    menu.addSeparator();
+    menu.add(new JCheckBoxMenuItem(AppActions.SHOW_WEB_BROWSER));
 
     return menu;
   }

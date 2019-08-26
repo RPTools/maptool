@@ -37,6 +37,18 @@ targetCompatibility = 10
 mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
 applicationDefaultJvmArgs = ["-Xss4M"]
 
+// OS needed for proper OpenJFX dependency management
+// https://openjfx.io/openjfx-docs/#gradle
+def currentOS = org.gradle.internal.os.OperatingSystem.current()
+def platform
+if (currentOS.isWindows()) {
+    platform = 'win'
+} else if (currentOS.isLinux()) {
+    platform = 'linux'
+} else if (currentOS.isMacOsX()) {
+    platform = 'mac'
+}
+
 // Custom properties
 ext {
     // Get tag and commit info from Git to use for version numbering
@@ -150,6 +162,19 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
+    implementation files('lib/packager.jar')
+
+    // TODO: Ultimately need mutli platform so we need to add all 3 OS versions of FX for the JAR (or have OS specific JARs)
+    // Can we specify dependencies only when building JAR in gradle so the JAR includes all 3? Or create a second UberJar task to include specific JARs?)
+    implementation group: 'org.openjfx', name: 'javafx-base', version: '12', classifier: platform
+    implementation group: 'org.openjfx', name: 'javafx-controls', version: '12', classifier: platform
+    implementation group: 'org.openjfx', name: 'javafx-graphics', version: '12', classifier: platform
+    implementation group: 'org.openjfx', name: 'javafx-fxml', version: '12', classifier: platform
+    implementation group: 'org.openjfx', name: 'javafx-media', version: '12', classifier: platform
+    implementation group: 'org.openjfx', name: 'javafx-swing', version: '12', classifier: platform
+    implementation group: 'org.openjfx', name: 'javafx-web', version: '12', classifier: platform
+
+
     // For Sentry bug reporting
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'

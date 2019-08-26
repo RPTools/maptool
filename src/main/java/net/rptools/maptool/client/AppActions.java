@@ -15,27 +15,11 @@
 package net.rptools.maptool.client;
 
 import com.jidesoft.docking.DockableFrame;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.List;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javax.swing.*;
-import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -47,6 +31,7 @@ import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
 import net.rptools.maptool.client.ui.fx.controller.MacroEditor_Controller;
+import net.rptools.maptool.client.ui.fx.controller.WebBrowser_Controller;
 import net.rptools.maptool.client.ui.io.*;
 import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
@@ -69,6 +54,23 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jdesktop.swingworker.SwingWorker;
+
+import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.*;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * This class acts as a container for a wide variety of {@link Action}s that are used throughout the
@@ -1548,15 +1550,13 @@ public class AppActions {
         }
       };
 
-  // For testing only
-  public static void main(String[] args) {
-    SwingUtilities.invokeLater(() -> initAndShowMacroEditorFX());
-  }
 
-  private static JFrame
-      macroEditorJFrame; // = new JFrame(I18N.getText("msg.info.showMacroEditor"));
-  public static final String MACRO_EDITOR_FXML =
+  // For new Macro Editor written using FX
+  private static JFrame macroEditorJFrame;
+
+  private static final String MACRO_EDITOR_FXML =
       "/net/rptools/maptool/client/ui/fx/MacroEditor.fxml";
+
   public static final Action SHOW_MACRO_EDITOR =
       new DefaultClientAction() {
         {
@@ -1619,6 +1619,63 @@ public class AppActions {
       macroEditor_Controller.update();
     } catch (IOException ex) {
       log.error("Error loading macroEditorJfxPanel.", ex);
+    }
+  }
+
+  // For new Macro Web Browser Window written using FX
+  private static JFrame webBrowserJFrame;
+
+  private static final String WEB_BROWSER_FXML =
+          "/net/rptools/maptool/client/ui/fx/WebBrowser.fxml";
+
+  public static final Action SHOW_WEB_BROWSER =
+          new DefaultClientAction() {
+            {
+              init("msg.info.showWebBrowser");
+            }
+
+            @Override
+            public boolean isAvailable() {
+              return (MapTool.getPlayer() != null);
+            }
+
+            @Override
+            public void execute(ActionEvent e) {
+              EventQueue.invokeLater(() -> initAndShowWebBrowserFX());
+            }
+          };
+
+  // Invoked this on the EventQueue thread...
+  private static void initAndShowWebBrowserFX() {
+    if (webBrowserJFrame != null) {
+      if (webBrowserJFrame.isShowing()) webBrowserJFrame.dispose();
+      else webBrowserJFrame.setVisible(true);
+    } else {
+      webBrowserJFrame = new JFrame(I18N.getText("msg.info.showWebBrowser"));
+
+      final JFXPanel fxPanel = new JFXPanel();
+      webBrowserJFrame.add(fxPanel);
+      webBrowserJFrame.setSize(1150, 1400);
+      webBrowserJFrame.setLocation(new Point(0,0));
+      webBrowserJFrame.setVisible(true);
+      webBrowserJFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+
+      Platform.runLater(() -> initWebBrowserFX(fxPanel));
+    }
+  }
+
+  // Invoked this on the JavaFX thread...
+  private static void initWebBrowserFX(JFXPanel fxPanel) {
+    try {
+      FXMLLoader loader = new FXMLLoader(AppActions.class.getResource(WEB_BROWSER_FXML));
+      Parent root = loader.load();
+      Scene scene = new Scene(root);
+      fxPanel.setScene(scene);
+
+      WebBrowser_Controller webBrowser_Controller = loader.getController();
+      //webBrowser_Controller.update();
+    } catch (IOException ex) {
+      log.error("Error loading webBrowserJfxPanel.", ex);
     }
   }
 
