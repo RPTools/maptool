@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.fx.controller.MacroEditor_Controller">
+  <children>
+    <MenuBar VBox.vgrow="NEVER">
+      <menus>
+        <Menu mnemonicParsing="false" text="Edit">
+          <items>
+            <MenuItem mnemonicParsing="false" text="Undo" />
+            <MenuItem mnemonicParsing="false" text="Redo" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Cut" />
+            <MenuItem mnemonicParsing="false" text="Copy" />
+            <MenuItem mnemonicParsing="false" text="Paste" />
+            <MenuItem mnemonicParsing="false" text="Delete" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Select All" />
+            <MenuItem mnemonicParsing="false" text="Unselect All" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+          <items>
+            <MenuItem mnemonicParsing="false" onAction="#launchWiki" text="View Wiki" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+      <AnchorPane VBox.vgrow="ALWAYS">
+         <children>
+          <SplitPane fx:id="macroEditorSplitPane" dividerPositions="0.25, 0.75" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <items>
+                  <VBox SplitPane.resizableWithParent="false">
+                     <children>
+                        <ButtonBar buttonMinWidth="0.0">
+                          <buttons>
+                              <ToggleButton mnemonicParsing="false" text="Lib" ButtonBar.buttonData="LEFT" />
+                              <ToggleButton layoutX="72.0" layoutY="18.0" mnemonicParsing="false" text="PC" ButtonBar.buttonData="LEFT" />
+                              <ToggleButton layoutX="115.0" layoutY="18.0" mnemonicParsing="false" text="NPC" ButtonBar.buttonData="LEFT" />
+                              <Button fx:id="macroTreeRefreshButton" layoutX="157.0" layoutY="18.0" mnemonicParsing="false" onAction="#refreshButton_onAction" text="Refresh" ButtonBar.buttonData="RIGHT" />
+                          </buttons>
+                           <VBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </VBox.margin>
+                        </ButtonBar>
+                        <TextField fx:id="macroTreeFilterTextField" promptText="Filter by Token or Macro name">
+                           <VBox.margin>
+                              <Insets left="5.0" right="5.0" />
+                           </VBox.margin>
+                        </TextField>
+                    <AnchorPane fx:id="macroListPane" VBox.vgrow="ALWAYS">
+                           <children>
+                              <TreeTableView fx:id="macroTreeTableView" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                <columns>
+                                  <TreeTableColumn fx:id="macroTreeTableColumn" minWidth="-1.0" prefWidth="500.0" text="&lt;&lt;&lt; CLICK TO SORT &gt;&gt;&gt;" />
+                                </columns>
+                                 <columnResizePolicy>
+                                    <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                 </columnResizePolicy>
+                              </TreeTableView>
+                           </children>
+                    </AnchorPane>
+                        <ButtonBar buttonMinWidth="0.0" layoutX="15.0" layoutY="15.0">
+                           <buttons>
+                              <CheckBox mnemonicParsing="false" text="Auto Save" ButtonBar.buttonData="LEFT" />
+                              <Button layoutX="266.0" layoutY="10.0" mnemonicParsing="false" text="Run Macro" />
+                              <Button layoutX="138.0" layoutY="10.0" mnemonicParsing="false" text="Save" />
+                           </buttons>
+                           <VBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" />
+                           </VBox.margin>
+                        </ButtonBar>
+                     </children>
+                  </VBox>
+            <AnchorPane id="Content" fx:id="macroEditPane" minHeight="-1.0" minWidth="-1.0" prefHeight="711.0" prefWidth="449.0">
+               </AnchorPane>
+              <AnchorPane fx:id="macroDetailsPane" SplitPane.resizableWithParent="false">
+                <children>
+                        <fx:include source="MacroProperties.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                </children>
+              </AnchorPane>
+            </items>
+          </SplitPane>
+         </children>
+      </AnchorPane>
+    <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+      <children>
+        <Label fx:id="leftStatusLabel" maxHeight="1.7976931348623157E308" maxWidth="-1.0" text="Left status" HBox.hgrow="ALWAYS">
+          <font>
+            <Font size="11.0" fx:id="x3" />
+          </font>
+          <textFill>
+            <Color blue="0.625" green="0.625" red="0.625" fx:id="x4" />
+          </textFill>
+        </Label>
+        <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
+        <Label font="$x3" maxWidth="-1.0" text="Right status" textFill="$x4" HBox.hgrow="NEVER" />
+      </children>
+      <padding>
+        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+      </padding>
+    </HBox>
+  </children>
+</VBox>
