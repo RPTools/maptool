@@ -564,6 +564,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 
   public void updateTokenProperty(
       GUID zoneGUID, GUID tokenGUID, String methodName, Object[] parameters) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    Token token = zone.getToken(tokenGUID);
+    token.updateProperty(zone, methodName, parameters); // update server version of token
+
     forwardToClients();
   }
 

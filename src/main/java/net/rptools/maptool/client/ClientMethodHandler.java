@@ -102,7 +102,9 @@ public class ClientMethodHandler extends AbstractMethodHandler {
           @SuppressWarnings("unchecked")
           public void run() {
             GUID zoneGUID;
+            GUID tokenGUID;
             Zone zone;
+            Token token;
             Set<GUID> selectedToks = null;
 
             switch (cmd) {
@@ -218,7 +220,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               case putToken:
                 zoneGUID = (GUID) parameters[0];
                 zone = MapTool.getCampaign().getZone(zoneGUID);
-                Token token = (Token) parameters[1];
+                token = (Token) parameters[1];
                 zone.putToken(token);
                 MapTool.getFrame().refresh();
                 return;
@@ -234,20 +236,18 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               case updateTokenProperty: // select token from sent zoneGUID & tokenGUID, then call
                 // Token.updateProperty()
                 zoneGUID = (GUID) parameters[0];
-                ZoneRenderer zoneRenderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
-                if (zoneRenderer == null) return;
-
-                Token mytoken = zoneRenderer.getZone().getToken((GUID) parameters[1]);
-                if (mytoken != null) {
-                  mytoken.updateProperty(
-                      zoneRenderer, parameters[2].toString(), (Object[]) parameters[3]);
+                zone = MapTool.getCampaign().getZone(zoneGUID);
+                tokenGUID = (GUID) parameters[1];
+                token = zone.getToken(tokenGUID);
+                if (token != null) {
+                  token.updateProperty(zone, parameters[2].toString(), (Object[]) parameters[3]);
                 }
                 return;
 
               case removeToken:
                 zoneGUID = (GUID) parameters[0];
                 zone = MapTool.getCampaign().getZone(zoneGUID);
-                GUID tokenGUID = (GUID) parameters[1];
+                tokenGUID = (GUID) parameters[1];
                 zone.removeToken(tokenGUID);
                 MapTool.getFrame().refresh();
                 return;
