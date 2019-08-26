@@ -14,14 +14,14 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Event;
 
 public class HTMLFrameFactory {
@@ -46,6 +46,7 @@ public class HTMLFrameFactory {
     int width = -1;
     int height = -1;
     String title = name;
+    String tabTitle = null;
     Object frameValue = null;
     boolean hasFrame = true;
     boolean closeButton = true;
@@ -112,11 +113,14 @@ public class HTMLFrameFactory {
           }
         } else if (keyLC.equals("value")) {
           frameValue = value;
+        } else if (keyLC.equals("tabtitle")) {
+          tabTitle = value;
         }
       }
     }
+    if (tabTitle == null) tabTitle = title; // if tabTitle not set, make it same as title
     if (isFrame) {
-      HTMLFrame.showFrame(name, title, width, height, temporary, frameValue, html);
+      HTMLFrame.showFrame(name, title, tabTitle, width, height, temporary, frameValue, html);
     } else {
       HTMLDialog.showDialog(
           name, title, width, height, hasFrame, input, temporary, closeButton, frameValue, html);
@@ -149,16 +153,26 @@ public class HTMLFrameFactory {
 
     public void modelChanged(ModelChangeEvent event) {
       if (event.eventType == Event.TOKEN_CHANGED) {
-        Token token = (Token) event.getArg();
-        if (MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet().contains(token)) {
-          selectedListChanged();
-        }
         final CommandPanel cpanel = MapTool.getFrame().getCommandPanel();
-        if (token.getName().equals(cpanel.getIdentity())
-            || token.getId().equals(cpanel.getIdentityGUID())) {
-          impersonateToken();
+
+        List<Token> tokens; // could be receiving a list from putTokens()
+        if (event.getArg() instanceof Token) {
+          tokens = Collections.singletonList((Token) event.getArg());
+        } else tokens = (List<Token>) event.getArg();
+        Set<GUID> selectedTokens =
+            MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
+        boolean selectedChange = false;
+        Token token;
+        for (int i = 0; i < tokens.size(); i++) {
+          token = tokens.get(i);
+          if (selectedTokens.contains(token)) selectedChange = true;
+          if (token.getName().equals(cpanel.getIdentity())
+              || token.getId().equals(cpanel.getIdentityGUID())) {
+            impersonateToken();
+          }
+          tokenChanged(token);
         }
-        tokenChanged(token);
+        if (selectedChange) selectedListChanged();
       }
     }
 

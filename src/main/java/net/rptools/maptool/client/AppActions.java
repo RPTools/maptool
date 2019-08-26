@@ -2383,6 +2383,7 @@ public class AppActions {
           JFileChooser chooser = new CampaignPreviewFileChooser();
           chooser.setDialogTitle(I18N.getText("msg.title.loadCampaign"));
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          chooser.setFileFilter(MapTool.getFrame().getCmpgnFileFilter());
 
           if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
             File campaignFile = chooser.getSelectedFile();

@@ -458,6 +458,11 @@ public class PersistenceUtil {
     } catch (OutOfMemoryError oom) {
       MapTool.showError("Out of memory while reading campaign.", oom);
       return null;
+    } catch (ClassCastException cce) {
+      MapTool.showWarning(
+          I18N.getText(
+              "PersistenceUtil.warn.campaignWrongFileType",
+              pakFile.getContent().getClass().getSimpleName()));
     } catch (RuntimeException rte) {
       MapTool.showError("PersistenceUtil.error.campaignRead", rte);
     } catch (Error e) {
@@ -805,9 +810,14 @@ public class PersistenceUtil {
         props = (CampaignProperties) pakFile.getContent();
         loadAssets(props.getAllImageAssets(), pakFile);
       } catch (ConversionException ce) {
-        MapTool.showError("PersistenceUtil.error.campaignPropertiesVersion", ce);
+        MapTool.showError(I18N.getText("PersistenceUtil.error.campaignPropertiesVersion"), ce);
       } catch (IOException ioe) {
-        MapTool.showError("Could not load campaign properties", ioe);
+        MapTool.showError(I18N.getText("PersistenceUtil.error.campaignPropertiesRead"), ioe);
+      } catch (ClassCastException cce) {
+        MapTool.showWarning(
+            I18N.getText(
+                "PersistenceUtil.warn.campaignProperties.importWrongFileType",
+                pakFile.getContent().getClass().getSimpleName()));
       }
       return props;
     } catch (IOException e) {

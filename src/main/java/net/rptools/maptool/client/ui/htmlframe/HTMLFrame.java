@@ -16,6 +16,8 @@ package net.rptools.maptool.client.ui.htmlframe;
 
 import com.jidesoft.docking.DockContext;
 import com.jidesoft.docking.DockableFrame;
+import com.jidesoft.docking.event.DockableFrameAdapter;
+import com.jidesoft.docking.event.DockableFrameEvent;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
@@ -80,12 +82,20 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @return The HTMLFrame that is displayed.
    */
   public static HTMLFrame showFrame(
-      String name, String title, int width, int height, boolean temp, Object val, String html) {
+      String name,
+      String title,
+      String tabTitle,
+      int width,
+      int height,
+      boolean temp,
+      Object val,
+      String html) {
     HTMLFrame frame;
 
     if (frames.containsKey(name)) {
       frame = frames.get(name);
       frame.setTitle(title);
+      frame.setTabTitle(tabTitle);
       frame.updateContents(html, temp, val);
       if (!frame.isVisible()) {
         frame.setVisible(true);
@@ -100,6 +110,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       frames.put(name, frame);
       frame.updateContents(html, temp, val);
       frame.getDockingManager().showFrame(name);
+      frame.setTabTitle(tabTitle);
       // Jamz: why undock frames to center them?
       if (!frame.isDocked()) center(name);
     }
@@ -143,6 +154,13 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     this.getContext().setInitMode(DockContext.STATE_FLOATING);
     MapTool.getFrame().getDockingManager().addFrame(this);
     this.setVisible(true);
+    addDockableFrameListener(
+        new DockableFrameAdapter() {
+          @Override
+          public void dockableFrameHidden(DockableFrameEvent dockableFrameEvent) {
+            closeRequest();
+          }
+        });
   }
 
   public static void center(String name) {
@@ -298,7 +316,9 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       macroCallbacks.put(rmae.getType(), rmae.getMacro());
     }
     if (e instanceof HTMLPane.ChangeTitleActionEvent) {
-      this.setTitle(((HTMLPane.ChangeTitleActionEvent) e).getNewTitle());
+      String newTitle = ((HTMLPane.ChangeTitleActionEvent) e).getNewTitle();
+      this.setTitle(newTitle);
+      this.setTabTitle(newTitle);
     }
     if (e instanceof HTMLPane.MetaTagActionEvent) {
       HTMLPane.MetaTagActionEvent mtae = (HTMLPane.MetaTagActionEvent) e;

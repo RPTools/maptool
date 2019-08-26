@@ -1964,12 +1964,11 @@ public class Token extends BaseModel implements Cloneable {
    * Call the relevant setter from methodName with an array of parameters Called by
    * ClientMethodHandler to deal with sent change to token
    *
-   * @param methodName the method to be used
-   * @param zoneRenderer the zone renderer where the token is
-   * @param parameters an array of parameters
+   * @param methodName The method to be used
+   * @param zone The zone where the token is
+   * @param parameters An array of parameters
    */
-  public void updateProperty(ZoneRenderer zoneRenderer, String methodName, Object[] parameters) {
-    Zone zone = zoneRenderer.getZone();
+  public void updateProperty(Zone zone, String methodName, Object[] parameters) {
     switch (methodName) {
       case "setState":
         setState(parameters[0].toString(), parameters[1]);
