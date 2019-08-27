@@ -145,6 +145,7 @@ public class AppActions {
 
   private static Set<Token> tokenCopySet = null;
   public static final int menuShortcut = getMenuShortcutKeyMask();
+  private static boolean keepIdsOnPaste = false;
 
   private static int getMenuShortcutKeyMask() {
     int key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -854,6 +855,7 @@ public class AppActions {
     }
     if (anythingDeleted) {
       MapTool.getFrame().getCurrentZoneRenderer().clearSelectedTokens();
+      keepIdsOnPaste = true; // pasted tokens should have same ids as cut ones
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
     }
@@ -906,6 +908,7 @@ public class AppActions {
     // lose what might already be in the clipboard.
     if (anythingCopied) {
       copyTokens(tokenList);
+      keepIdsOnPaste = false;
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
     }
@@ -976,6 +979,8 @@ public class AppActions {
           topLeft = originalToken;
         }
         Token newToken = new Token(originalToken);
+        newToken.setId(
+            originalToken.getId()); // keep same ids. Will be changed on paste if need be.
         tokenCopySet.add(newToken);
       }
       /*
@@ -1026,6 +1031,7 @@ public class AppActions {
           }
           ZonePoint zonePoint = screenPoint.convertToZone(renderer);
           pasteTokens(zonePoint, renderer.getActiveLayer());
+          keepIdsOnPaste = false; // once pasted, subsequent paste should have new ids
           renderer.repaint();
         }
       };
@@ -1078,6 +1084,9 @@ public class AppActions {
 
     for (Token origToken : tokenList) {
       Token token = new Token(origToken);
+      if (keepIdsOnPaste) {
+        token.setId(origToken.getId()); // keep ids if first paste since cut
+      }
 
       // need this here to get around times when a token is copied and pasted into the
       // same zone, such as a framework "template"
