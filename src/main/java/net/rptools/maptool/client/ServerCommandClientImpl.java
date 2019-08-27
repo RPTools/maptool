@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -135,7 +134,7 @@ public class ServerCommandClientImpl implements ServerCommand {
    * @param zoneGUID the GUID of the zone the token is on
    * @param tokenGUID the GUID of the token
    * @param methodName the string with the setter for the token
-   * @param Object[] an array of parameters
+   * @param parameters an array of parameters
    */
   public void updateTokenProperty(
       GUID zoneGUID, GUID tokenGUID, String methodName, Object[] parameters) {
@@ -145,16 +144,16 @@ public class ServerCommandClientImpl implements ServerCommand {
   /**
    * Simplifies the arguments for the method above.
    *
-   * @param Token the token to be updated
+   * @param token the token to be updated
    * @param methodName the method to be used
-   * @param Object[] an array of parameters
+   * @param parameters an array of parameters
    */
   public void updateTokenProperty(Token token, String methodName, Object... parameters) {
-    ZoneRenderer zoneRenderer = token.getZoneRenderer();
+    Zone zone = token.getZoneRenderer().getZone();
     GUID tokenGUID = token.getId();
-    GUID zoneGUID = zoneRenderer.getZone().getId();
+    GUID zoneGUID = zone.getId();
 
-    token.updateProperty(zoneRenderer, methodName, parameters); // update locally right away
+    token.updateProperty(zone, methodName, parameters); // update locally right away
     updateTokenProperty(zoneGUID, tokenGUID, methodName, parameters);
   }
 
