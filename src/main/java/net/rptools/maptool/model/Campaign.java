@@ -135,6 +135,11 @@ public class Campaign {
     return campaignProperties.getRemoteRepositoryList();
   }
 
+  /**
+   * Create a new campaign with an old campaign's properties.
+   *
+   * @param campaign The campaign to copy from.
+   */
   public Campaign(Campaign campaign) {
     zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
 
@@ -143,7 +148,7 @@ public class Campaign {
      * as is done below for the campaign properties and macro buttons.
      */
     for (Entry<GUID, Zone> entry : campaign.zones.entrySet()) {
-      Zone copy = new Zone(entry.getValue());
+      Zone copy = new Zone(entry.getValue(), true);
       zones.put(copy.getId(), copy);
     }
     campaignProperties = new CampaignProperties(campaign.campaignProperties);
