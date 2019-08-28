@@ -79,7 +79,6 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.ImageLabel;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
@@ -4460,8 +4459,6 @@ public class ZoneRenderer extends JComponent
       // msg.setChannel(Channel.ME);
       // MapTool.addMessage(msg);
     }
-    // Copy them to the clipboard so that we can quickly copy them onto the map
-    AppActions.copyTokens(tokens);
     requestFocusInWindow();
     repaint();
   }
