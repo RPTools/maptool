@@ -908,7 +908,6 @@ public class AppActions {
     // lose what might already be in the clipboard.
     if (anythingCopied) {
       copyTokens(tokenList);
-      keepIdsOnPaste = false;
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
     }
@@ -1002,6 +1001,7 @@ public class AppActions {
         token.setX(token.getX() - x);
         token.setY(token.getY() - y);
       }
+      keepIdsOnPaste = false; // if last operation is Copy, don't keep token ids.
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
     }
