@@ -30,6 +30,7 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.AbstractDrawing;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.sf.ezmorph.bean.MorphDynaBean;
@@ -62,20 +63,20 @@ public class DrawingMiscFunctions extends DrawingFunctions {
     String drawing = parameters.get(1).toString();
     Zone map = getNamedMap(functionName, mapName).getZone();
     if ("movedOverDrawing".equalsIgnoreCase(functionName)) {
-      checkNumberOfParameters(functionName, parameters, 3, 3);
+      FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
       String jsonPath = parameters.get(2).toString();
       GUID guid = getGUID(functionName, drawing);
       DrawnElement de = getDrawnElement(functionName, map, guid);
       return getCrossedPoints(map, de, jsonPath);
     } else if ("findDrawings".equalsIgnoreCase(functionName)) {
-      checkNumberOfParameters(functionName, parameters, 2, 3);
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 3);
       List<DrawnElement> drawableList = map.getAllDrawnElements();
       List<String> drawingList = findDrawings(drawableList, drawing);
       String delim = parameters.size() > 2 ? parameters.get(2).toString() : ",";
       if ("json".equalsIgnoreCase(delim)) return JSONArray.fromObject(drawingList);
       else return StringFunctions.getInstance().join(drawingList, delim);
     } else {
-      checkNumberOfParameters(functionName, parameters, 2, 2);
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
       GUID guid = getGUID(functionName, drawing);
       if ("refreshDrawing".equalsIgnoreCase(functionName)) {
         DrawnElement de = getDrawnElement(functionName, map, guid);
