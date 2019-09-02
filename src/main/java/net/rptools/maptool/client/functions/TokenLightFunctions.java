@@ -68,7 +68,7 @@ public class TokenLightFunctions extends AbstractFunction {
 
       String type = parameters.get(0).toString();
       String name = parameters.get(1).toString();
-      BigDecimal value = FunctionUtil.paramAsBigDecimal(functionName, parameters, 2);
+      BigDecimal value = FunctionUtil.paramAsBigDecimal(functionName, parameters, 2, false);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 3, 4);
       return setLight(token, type, name, value);
     }
