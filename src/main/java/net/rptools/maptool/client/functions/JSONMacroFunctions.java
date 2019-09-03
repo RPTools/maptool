@@ -20,6 +20,7 @@ import net.rptools.common.expression.ExpressionParser;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.*;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
@@ -40,6 +41,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         1,
         UNLIMITED_PARAMETERS,
         "json.get",
+        "json.get.path",
         "json.type",
         "json.fields",
         "json.length",
@@ -144,6 +146,20 @@ public class JSONMacroFunctions extends AbstractFunction {
                 "macro.function.general.notEnoughParam", functionName, 2, parameters.size()));
       }
       return JSONGet(asJSON(parameters.get(0)), parameters.subList(1, parameters.size()));
+    }
+
+    if (functionName.equalsIgnoreCase("json.get.path")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, UNLIMITED_PARAMETERS);
+      int pCount = parameters.size();
+      Object json = FunctionUtil.paramAsJson(functionName, parameters, 0);
+      List<Object> paths = pCount > 1 ? parameters.subList(1, pCount) : null;
+      // if paths contains only a single element that could be a json array
+      if (paths != null && paths.size() == 1 && paths.get(0) instanceof String) {
+        Object jpath = convertToJSON((String) paths.get(0)); // null if convert fails
+        if (jpath instanceof JSONArray)
+          paths = JSONArrayToList((JSONArray) jpath); // convert to list
+      }
+      return (jsonGetPath(json, paths));
     }
 
     if (functionName.equals("json.append")) {
@@ -1071,6 +1087,23 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   /**
+   * Returns a List from a JSONArray
+   *
+   * @param jsonArray The JSON array.
+   * @return the List (actual List, not a string)
+   */
+  public static List<Object> JSONArrayToList(JSONArray jsonArray) {
+    List<Object> list = new ArrayList<Object>();
+    if (jsonArray != null) {
+      int len = jsonArray.size();
+      for (int i = 0; i < len; i++) {
+        list.add(jsonArray.get(i));
+      }
+    }
+    return list;
+  }
+
+  /**
    * Append a value to a JSON array.
    *
    * @param obj The JSON object.
@@ -1100,10 +1133,57 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   /**
+   * Returns the object from a json at a given path
+   *
+   * @param obj The JSON Array or Object to get the object from
+   * @param paths an array of paths to the object
+   * @return the object found at the path
+   * @throws ParserException if the path is not valid
+   */
+  private Object jsonGetPath(Object obj, List<Object> paths) throws ParserException {
+    if (paths == null) return obj;
+    String strPath;
+    Integer index;
+    JSONObject jObj;
+    for (int i = 0; i < paths.size(); i++) {
+      obj = convertToJSON(obj.toString()); // null if convert fails
+      strPath = paths.get(i).toString();
+      if (obj instanceof JSONObject) {
+        jObj = (JSONObject) obj;
+        if (jObj.has(strPath)) {
+          obj = jObj.get(strPath);
+        } else {
+          String atPath = i > 0 ? " at " + paths.subList(0, i).toString() : "";
+          throw new ParserException(
+              I18N.getText(
+                  "macro.function.json.pathInvalidValue", "json.get.path", strPath, atPath));
+        }
+      } else if (obj instanceof JSONArray) {
+        try {
+          index = Integer.valueOf(strPath);
+          obj = ((JSONArray) obj).get(index);
+        } catch (NumberFormatException | IndexOutOfBoundsException ne) {
+          String atPath = i > 0 ? " at " + paths.subList(0, i).toString() : "";
+          Integer pSize = ((JSONArray) obj).size();
+          throw new ParserException(
+              I18N.getText(
+                  "macro.function.json.pathInvalidIndex", "json.get.path", strPath, atPath, pSize));
+        }
+      } else {
+        String atPath = i > 0 ? " at " + paths.subList(0, i).toString() : "";
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.json.pathInvalidObject", "json.get.path", strPath, atPath));
+      }
+    }
+    return obj;
+  }
+
+  /**
    * Gets a value from the JSON Object or Array.
    *
    * @param obj The JSON Object or Array.
-   * @param key The key for the object or index for the array.
+   * @param keys The keys for the object or indexes for the array.
    * @return the value.
    * @throws ParserException
    */
@@ -1230,7 +1310,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @return The string list of the object.
    * @throws ParserException If the object is not a JSON object.
    */
-  private Object JSONToList(Object obj, String delim) throws ParserException {
+  private String JSONToList(Object obj, String delim) throws ParserException {
 
     StringBuilder sb = new StringBuilder();
     if (obj instanceof JSONObject) {
