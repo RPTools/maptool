@@ -1152,6 +1152,8 @@ public class JSONMacroFunctions extends AbstractFunction {
         jObj = (JSONObject) obj;
         if (jObj.has(strPath)) {
           obj = jObj.get(strPath);
+        } else if (i == paths.size() - 1) {
+          return ""; // Returns "" if no value in the deepest json
         } else {
           String atPath = i > 0 ? " at " + paths.subList(0, i).toString() : "";
           throw new ParserException(
