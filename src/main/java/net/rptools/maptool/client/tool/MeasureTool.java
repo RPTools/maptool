@@ -44,6 +44,8 @@ import net.rptools.maptool.util.GraphicsUtil;
 /** */
 public class MeasureTool extends DefaultTool implements ZoneOverlay {
 
+  public static final String CURSOR_NAME = "Measure tool";
+
   private ZoneWalker walker;
   private Path<ZonePoint> gridlessPath;
   private Cursor measureCursor;
@@ -58,10 +60,22 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
               .createCustomCursor(
                   ImageUtil.getImage("net/rptools/maptool/client/image/cursor-tape-measure.png"),
                   new Point(2, 28),
-                  "Measure tool");
+                  CURSOR_NAME);
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
+  }
+
+  @Override
+  protected void attachTo(ZoneRenderer renderer) {
+    renderer.setCursor(measureCursor);
+    super.attachTo(renderer);
+  }
+
+  @Override
+  protected void detachFrom(ZoneRenderer renderer) {
+    renderer.setCursor(Cursor.getDefaultCursor());
+    super.detachFrom(renderer);
   }
 
   @Override
@@ -75,8 +89,6 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
   }
 
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
-    renderer.setCursor(measureCursor);
-
     if (walker == null && gridlessPath == null) {
       return;
     }

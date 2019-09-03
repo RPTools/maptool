@@ -447,6 +447,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
     public void actionPerformed(ActionEvent e) {
       AppActions.copyTokens(selectedTokenSet);
+      AppActions.updateActions();
     }
   }
 
@@ -457,6 +458,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
     public void actionPerformed(ActionEvent e) {
       AppActions.cutTokens(renderer.getZone(), selectedTokenSet);
+      AppActions.updateActions();
     }
   }
 

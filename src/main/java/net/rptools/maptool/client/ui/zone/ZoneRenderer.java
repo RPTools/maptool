@@ -4487,6 +4487,7 @@ public class ZoneRenderer extends JComponent
     }
     // Copy them to the clipboard so that we can quickly copy them onto the map
     AppActions.copyTokens(tokens);
+    AppActions.updateActions();
     requestFocusInWindow();
     repaintDebouncer.dispatch();
   }
