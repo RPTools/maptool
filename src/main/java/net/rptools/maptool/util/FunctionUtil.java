@@ -45,6 +45,7 @@ public class FunctionUtil {
   private static final String KEY_NOT_JSON_ARRAY = "macro.function.general.argumentTypeA";
   private static final String KEY_NOT_JSON_OBJECT = "macro.function.general.argumentTypeO";
   private static final String KEY_NOT_NUMBER = "macro.function.general.argumentTypeN";
+  private static final String KEY_NOT_STRING = "macro.function.general.argumentTypeS";
 
   private static final String KEY_NO_PERM = "macro.function.general.noPermOther";
   private static final String KEY_UNKNOWN_MAP = "macro.function.moveTokenMap.unknownMap";
@@ -131,23 +132,23 @@ public class FunctionUtil {
    *
    * @param functionName this is used in the exception message
    * @param parameters the list of parameters
-   * @param index the index of the parameter to return as Float
+   * @param index the index of the parameter to return as BigDecimal
+   * @param allowString should text that can be converted to BigDecimal be allowed?
    * @return the BigDecimal value of the parameter
-   * @throws ParserException if the parameter can't be converted to Float
+   * @throws ParserException if can't be converted to BigDecimal, or if disallowed text
    */
   public static BigDecimal paramAsBigDecimal(
-      String functionName, List<Object> parameters, int index) throws ParserException {
+      String functionName, List<Object> parameters, int index, boolean allowString)
+      throws ParserException {
     Object parameter = parameters.get(index);
     if (parameter instanceof BigDecimal) return (BigDecimal) parameter;
-
-    BigDecimal val;
     try {
-      val = new BigDecimal(parameter.toString());
+      if (!allowString && parameter instanceof String) throw new NumberFormatException("String");
+      return (new BigDecimal(parameter.toString()));
     } catch (NumberFormatException ne) {
       throw new ParserException(
           I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, parameter.toString()));
     }
-    return val;
   }
 
   /**
@@ -156,10 +157,18 @@ public class FunctionUtil {
    * @param functionName this is used in the exception message
    * @param parameters the list of parameters
    * @param index the index of the parameter to return as String
+   * @param allowNumber should numbers be allowed?
    * @return the parameter as a string
+   * @throws ParserException if the parameter is disallowed number
    */
-  public static String paramAsString(String functionName, List<Object> parameters, int index) {
-    return parameters.get(index).toString();
+  public static String paramAsString(
+      String functionName, List<Object> parameters, int index, boolean allowNumber)
+      throws ParserException {
+    Object parameter = parameters.get(index);
+    if (!allowNumber && !(parameter instanceof String)) {
+      throw new ParserException(I18N.getText(KEY_NOT_STRING, functionName, parameter.toString()));
+    }
+    return parameter.toString();
   }
 
   /**
@@ -169,38 +178,47 @@ public class FunctionUtil {
    * @param functionName this is used in the exception message
    * @param parameters the list of parameters
    * @param index the index of the parameter to return as Boolean
+   * @param allowString should text parameters be allowed
    * @return the parameter as a Boolean
-   * @throws ParserException if the parameter isn't of type BigDecimal
+   * @throws ParserException if can't be converted to BigDecimal, or if disallowed text
    */
-  public static Boolean paramAsBoolean(String functionName, List<Object> parameters, int index)
+  public static Boolean paramAsBoolean(
+      String functionName, List<Object> parameters, int index, boolean allowString)
       throws ParserException {
     Object parameter = parameters.get(index);
-    if (!(parameter instanceof BigDecimal)) {
+    try {
+      if (!allowString && parameter instanceof String) throw new NumberFormatException("String");
+      BigDecimal val = new BigDecimal(parameter.toString());
+      return !val.equals(BigDecimal.ZERO); // true if any value except zero
+    } catch (NumberFormatException ne) {
       throw new ParserException(
           I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, parameter.toString()));
     }
-    BigDecimal val = (BigDecimal) parameter;
-    return !val.equals(BigDecimal.ZERO); // true if any value except zero
   }
 
   /**
    * Return the Integer value of a parameter. Throws a <code>ParserException</code> if the parameter
-   * isn't a BigDecimal.
+   * can't be converted to integer
    *
    * @param functionName this is used in the exception message
    * @param parameters the list of parameters
-   * @param index the index of the parameter to return as Boolean
+   * @param index the index of the parameter to return as integer
+   * @param allowString should text be allowed as parameter
    * @return the parameter as an integer
-   * @throws ParserException if the parameter isn't of type BigDecimal
+   * @throws ParserException if the parameter can't be converted to BigDecimal, or if disallowed
+   *     text
    */
-  public static Integer paramAsInteger(String functionName, List<Object> parameters, int index)
+  public static Integer paramAsInteger(
+      String functionName, List<Object> parameters, int index, boolean allowString)
       throws ParserException {
     Object parameter = parameters.get(index);
-    if (!(parameter instanceof BigDecimal)) {
+    try {
+      if (!allowString && parameter instanceof String) throw new NumberFormatException("String");
+      return Integer.valueOf(parameter.toString());
+    } catch (NumberFormatException ne) {
       throw new ParserException(
           I18N.getText(KEY_NOT_INT, functionName, index + 1, parameter.toString()));
     }
-    return ((BigDecimal) parameter).intValue();
   }
 
   /**
@@ -210,20 +228,21 @@ public class FunctionUtil {
    * @param functionName this is used in the exception message
    * @param parameters the list of parameters
    * @param index the index of the parameter to return as Double
+   * @param allowString should text be allowed
    * @return the parameter as a Double
-   * @throws ParserException if the parameter can't be converted to Double
+   * @throws ParserException if can't be converted to Double, or disallowed text
    */
-  public static Double paramAsDouble(String functionName, List<Object> parameters, int index)
+  public static Double paramAsDouble(
+      String functionName, List<Object> parameters, int index, boolean allowString)
       throws ParserException {
     Object parameter = parameters.get(index);
-    Double val;
     try {
-      val = Double.valueOf(parameter.toString());
+      if (!allowString && parameter instanceof String) throw new NumberFormatException("String");
+      return (Double.valueOf(parameter.toString()));
     } catch (NumberFormatException ne) {
       throw new ParserException(
           I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, parameter.toString()));
     }
-    return val;
   }
 
   /**
@@ -233,20 +252,21 @@ public class FunctionUtil {
    * @param functionName this is used in the exception message
    * @param parameters the list of parameters
    * @param index the index of the parameter to return as Float
+   * @param allowString should text be allowed
    * @return the parameter as a Float
-   * @throws ParserException if the parameter can't be converted to Float
+   * @throws ParserException if can't be converted to Float, or if disallowed text
    */
-  public static Float paramAsFloat(String functionName, List<Object> parameters, int index)
+  public static Float paramAsFloat(
+      String functionName, List<Object> parameters, int index, boolean allowString)
       throws ParserException {
     Object parameter = parameters.get(index);
-    Float val;
     try {
-      val = Float.valueOf(parameter.toString());
+      if (!allowString && parameter instanceof String) throw new NumberFormatException("String");
+      return (Float.valueOf(parameter.toString()));
     } catch (NumberFormatException ne) {
       throw new ParserException(
           I18N.getText(KEY_NOT_NUMBER, functionName, index + 1, parameter.toString()));
     }
-    return val;
   }
 
   /**
