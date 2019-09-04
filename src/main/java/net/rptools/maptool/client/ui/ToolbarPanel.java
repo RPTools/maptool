@@ -205,7 +205,7 @@ public class ToolbarPanel extends JToolBar {
   }
 
   private JButton createZoneSelectionButton() {
-    final String title = "Select Map";
+    final String title = I18N.getText("tools.zoneselector.tooltip");
     final JButton button =
         new JButton(
             title,
