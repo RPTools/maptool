@@ -96,7 +96,12 @@ public class JSONMacroFunctions extends AbstractFunction {
       String jsonStr = parameters.get(0).toString();
       String path = parameters.get(1).toString();
 
-      return JsonPath.parse(jsonStr).read(path);
+      try {
+        return JsonPath.parse(jsonStr).read(path);
+      } catch (Exception e) {
+        throw new ParserException(
+            I18N.getText("macro.function.json.path.read", functionName, e.getLocalizedMessage()));
+      }
     }
 
     if (functionName.equals("json.fromStrProp")) {
