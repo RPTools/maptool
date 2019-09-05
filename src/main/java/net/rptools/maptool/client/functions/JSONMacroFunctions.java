@@ -14,12 +14,14 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.jayway.jsonpath.*;
 import java.math.BigDecimal;
 import java.util.*;
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.*;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
@@ -40,6 +42,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         1,
         UNLIMITED_PARAMETERS,
         "json.get",
+        "json.path.read",
         "json.type",
         "json.fields",
         "json.length",
@@ -86,6 +89,14 @@ public class JSONMacroFunctions extends AbstractFunction {
         delim = parameters.get(1).toString();
       }
       return fromStrList(parameters.get(0).toString(), delim);
+    }
+
+    if (functionName.equals("json.path.read")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+      String jsonStr = parameters.get(0).toString();
+      String path = parameters.get(1).toString();
+
+      return JsonPath.parse(jsonStr).read(path);
     }
 
     if (functionName.equals("json.fromStrProp")) {
