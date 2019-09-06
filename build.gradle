@@ -215,7 +215,7 @@ dependencies {
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
 
-    compile 'com.jayway.jsonpath:json-path:2.4.0'
+    implementation 'com.jayway.jsonpath:json-path:2.4.0'
 
     // For PDF image extraction
     implementation 'org.apache.pdfbox:pdfbox:2.0.10'
