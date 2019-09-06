@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 
@@ -55,7 +56,7 @@ public class DrawingGetterFunctions extends DrawingFunctions {
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
     checkTrusted(functionName);
-    checkNumberOfParameters(functionName, parameters, 2, 2);
+    FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
     String mapName = parameters.get(0).toString();
     String id = parameters.get(1).toString();
     Zone map = getNamedMap(functionName, mapName).getZone();

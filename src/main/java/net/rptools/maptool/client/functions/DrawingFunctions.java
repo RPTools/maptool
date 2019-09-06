@@ -101,30 +101,6 @@ public class DrawingFunctions extends AbstractFunction {
   }
 
   /**
-   * Checks that the number of objects in the list <code>parameters</code> is within given bounds
-   * (inclusive). Throws a <code>ParserException</code> if the check fails.
-   *
-   * @param functionName this is used in the exception message
-   * @param parameters a list of parameters
-   * @param min the minimum amount of parameters (inclusive)
-   * @param max the maximum amount of parameters (inclusive)
-   * @throws ParserException if there were more or less parameters than allowed
-   */
-  protected void checkNumberOfParameters(
-      String functionName, List<Object> parameters, int min, int max) throws ParserException {
-    int numberOfParameters = parameters.size();
-    if (numberOfParameters < min) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.notEnoughParam", functionName, min, numberOfParameters));
-    } else if (numberOfParameters > max) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.tooManyParam", functionName, max, numberOfParameters));
-    }
-  }
-
-  /**
    * Checks whether or not the function is trusted
    *
    * @param functionName Name of the macro function

@@ -19,6 +19,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 
@@ -47,7 +48,7 @@ public class DrawingSetterFunctions extends DrawingFunctions {
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
     checkTrusted(functionName);
-    checkNumberOfParameters(functionName, parameters, 3, 3);
+    FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
     String mapName = parameters.get(0).toString();
     String id = parameters.get(1).toString();
     Zone map = getNamedMap(functionName, mapName).getZone();
