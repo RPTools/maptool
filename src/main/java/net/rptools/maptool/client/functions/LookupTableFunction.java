@@ -22,6 +22,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -76,7 +77,7 @@ public class LookupTableFunction extends AbstractFunction {
 
     if ("getTableNames".equalsIgnoreCase(function)) {
 
-      checkNumberOfParameters("getTableNames", params, 0, 1);
+      FunctionUtil.checkNumberParam("getTableNames", params, 0, 1);
       String delim = ",";
       if (params.size() > 0) {
         delim = params.get(0).toString();
@@ -89,7 +90,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("getTableVisible".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("getTableVisible", params, 1, 1);
+      FunctionUtil.checkNumberParam("getTableVisible", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       return lookupTable.getVisible() ? "1" : "0";
@@ -97,7 +98,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("setTableVisible".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("setTableVisible", params, 2, 2);
+      FunctionUtil.checkNumberParam("setTableVisible", params, 2, 2);
       String name = params.get(0).toString();
       String visible = params.get(1).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
@@ -108,7 +109,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("getTableAccess".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("getTableAccess", params, 1, 1);
+      FunctionUtil.checkNumberParam("getTableAccess", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       return lookupTable.getAllowLookup() ? "1" : "0";
@@ -116,7 +117,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("setTableAccess".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("setTableAccess", params, 2, 2);
+      FunctionUtil.checkNumberParam("setTableAccess", params, 2, 2);
       String name = params.get(0).toString();
       String access = params.get(1).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
@@ -126,7 +127,7 @@ public class LookupTableFunction extends AbstractFunction {
 
     } else if ("getTableRoll".equalsIgnoreCase(function)) {
 
-      checkNumberOfParameters("getTableRoll", params, 1, 1);
+      FunctionUtil.checkNumberParam("getTableRoll", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       return lookupTable.getRoll();
@@ -134,7 +135,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("setTableRoll".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("setTableRoll", params, 2, 2);
+      FunctionUtil.checkNumberParam("setTableRoll", params, 2, 2);
       String name = params.get(0).toString();
       String roll = params.get(1).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
@@ -145,7 +146,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("clearTable".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("clearTable", params, 1, 1);
+      FunctionUtil.checkNumberParam("clearTable", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       lookupTable.clearEntries();
@@ -155,7 +156,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("addTableEntry".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("addTableEntry", params, 4, 5);
+      FunctionUtil.checkNumberParam("addTableEntry", params, 4, 5);
       String name = params.get(0).toString();
       String min = params.get(1).toString();
       String max = params.get(2).toString();
@@ -172,7 +173,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("deleteTableEntry".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("deleteTableEntry", params, 2, 2);
+      FunctionUtil.checkNumberParam("deleteTableEntry", params, 2, 2);
       String name = params.get(0).toString();
       String roll = params.get(1).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
@@ -190,7 +191,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("createTable".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("createTable", params, 3, 4);
+      FunctionUtil.checkNumberParam("createTable", params, 3, 4);
       String name = params.get(0).toString();
       String visible = params.get(1).toString();
       String lookups = params.get(2).toString();
@@ -210,7 +211,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("deleteTable".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("deleteTable", params, 1, 1);
+      FunctionUtil.checkNumberParam("deleteTable", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       if (lookupTable != null) {
@@ -222,7 +223,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("getTableImage".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("getTableImage", params, 1, 1);
+      FunctionUtil.checkNumberParam("getTableImage", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       return lookupTable.getTableImage();
@@ -230,7 +231,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("setTableImage".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("setTableImage", params, 2, 2);
+      FunctionUtil.checkNumberParam("setTableImage", params, 2, 2);
       String name = params.get(0).toString();
       MD5Key asset = getAssetFromString(params.get(1).toString());
       LookupTable lookupTable = getMaptoolTable(name, function);
@@ -241,7 +242,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("copyTable".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("copyTable", params, 2, 2);
+      FunctionUtil.checkNumberParam("copyTable", params, 2, 2);
       String oldName = params.get(0).toString();
       String newName = params.get(1).toString();
       LookupTable oldTable = getMaptoolTable(oldName, function);
@@ -256,7 +257,7 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("setTableEntry".equalsIgnoreCase(function)) {
 
       checkTrusted(function);
-      checkNumberOfParameters("setTableEntry", params, 3, 4);
+      FunctionUtil.checkNumberParam("setTableEntry", params, 3, 4);
       String name = params.get(0).toString();
       String roll = params.get(1).toString();
       String result = params.get(2).toString();
@@ -284,7 +285,7 @@ public class LookupTableFunction extends AbstractFunction {
       return 1;
     } else if ("getTableEntry".equalsIgnoreCase(function)) {
 
-      checkNumberOfParameters(function, params, 2, 2);
+      FunctionUtil.checkNumberParam(function, params, 2, 2);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
       String roll = params.get(1).toString();
@@ -308,7 +309,7 @@ public class LookupTableFunction extends AbstractFunction {
       return entryDetails;
 
     } else { // if tbl, table, tblImage or tableImage
-      checkNumberOfParameters(function, params, 1, 3);
+      FunctionUtil.checkNumberParam(function, params, 1, 3);
       String name = params.get(0).toString();
 
       String roll = null;
@@ -366,30 +367,6 @@ public class LookupTableFunction extends AbstractFunction {
         }
         return assetId.toString();
       }
-    }
-  }
-
-  /**
-   * Checks that the number of objects in the list <code>parameters</code> is within given bounds
-   * (inclusive). Throws a <code>ParserException</code> if the check fails.
-   *
-   * @param functionName this is used in the exception message
-   * @param parameters a list of parameters
-   * @param min the minimum amount of parameters (inclusive)
-   * @param max the maximum amount of parameters (inclusive)
-   * @throws ParserException if there were more or less parameters than allowed
-   */
-  private void checkNumberOfParameters(
-      String functionName, List<Object> parameters, int min, int max) throws ParserException {
-    int numberOfParameters = parameters.size();
-    if (numberOfParameters < min) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.notEnoughParam", functionName, min, numberOfParameters));
-    } else if (numberOfParameters > max) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.tooManyParam", functionName, max, numberOfParameters));
     }
   }
 
