@@ -838,10 +838,15 @@ public class ZoneRenderer extends JComponent
           iter.remove();
         }
       }
-      if (selectedTokens.isEmpty())
-        selectedTokens = zone.getOwnedTokensWithSight(MapTool.getPlayer());
-    } else {
-      selectedTokens = zone.getOwnedTokensWithSight(MapTool.getPlayer());
+    }
+    if (selectedTokens == null || selectedTokens.isEmpty()) {
+      // if no selected token qualifying for view, use owned tokens or player tokens with sight
+      final boolean checkOwnership =
+          MapTool.getServerPolicy().isUseIndividualViews() || MapTool.isPersonalServer();
+      selectedTokens =
+          checkOwnership
+              ? zone.getOwnedTokensWithSight(MapTool.getPlayer())
+              : zone.getPlayerTokensWithSight();
     }
     return new PlayerView(role, selectedTokens);
   }
@@ -2304,7 +2309,14 @@ public class ZoneRenderer extends JComponent
     }
   }
 
-  // Jamz: HERE BE RENDERING!
+  /**
+   * Render the path of a token. Highlight the cells and draw the waypoints, distance numbers, and
+   * line path.
+   *
+   * @param g The Graphics2D renderer.
+   * @param path The path of the token.
+   * @param footprint The footprint of the token.
+   */
   @SuppressWarnings("unchecked")
   public void renderPath(
       Graphics2D g, Path<? extends AbstractPoint> path, TokenFootprint footprint) {
@@ -2359,11 +2371,14 @@ public class ZoneRenderer extends JComponent
         zp.y += grid.getCellHeight() / 2 + cellOffset.height;
         highlightCell(g, zp, grid.getCellHighlight(), 1.0f);
       }
-      for (CellPoint p : cellPath) {
-        ZonePoint zp = grid.convert(p);
-        zp.x += grid.getCellWidth() / 2 + cellOffset.width;
-        zp.y += grid.getCellHeight() / 2 + cellOffset.height;
-        addDistanceText(g, zp, 1.0f, p.getDistanceTraveled(zone));
+      if (AppState.getShowMovementMeasurements()) {
+        double cellAdj = grid.isHex() ? 2.5 : 2;
+        for (CellPoint p : cellPath) {
+          ZonePoint zp = grid.convert(p);
+          zp.x += grid.getCellWidth() / cellAdj + cellOffset.width;
+          zp.y += grid.getCellHeight() / cellAdj + cellOffset.height;
+          addDistanceText(g, zp, 1.0f, p.getDistanceTraveled(zone));
+        }
       }
       int w = 0;
       for (ZonePoint p : waypointList) {
@@ -2373,10 +2388,15 @@ public class ZoneRenderer extends JComponent
 
       // Line path
       if (grid.getCapabilities().isPathLineSupported()) {
-        ZonePoint lineOffset =
-            new ZonePoint(
-                footprintBounds.x + footprintBounds.width / 2 - grid.getOffsetX(),
-                footprintBounds.y + footprintBounds.height / 2 - grid.getOffsetY());
+        ZonePoint lineOffset;
+        if (grid.isHex()) {
+          lineOffset = new ZonePoint(0, 0);
+        } else {
+          lineOffset =
+              new ZonePoint(
+                  footprintBounds.x + footprintBounds.width / 2 - grid.getOffsetX(),
+                  footprintBounds.y + footprintBounds.height / 2 - grid.getOffsetY());
+        }
 
         int xOffset = (int) (lineOffset.x * scale);
         int yOffset = (int) (lineOffset.y * scale);
@@ -3419,6 +3439,15 @@ public class ZoneRenderer extends JComponent
 
       // Token names and labels
       boolean showCurrentTokenLabel = AppState.isShowTokenNames() || token == tokenUnderMouse;
+
+      // if policy does not auto-reveal FoW, check if fog covers the token (slow)
+      if (showCurrentTokenLabel
+          && !isGMView
+          && (!zoneView.isUsingVision() || !MapTool.getServerPolicy().isAutoRevealOnMovement())) {
+        if (!zone.isTokenVisible(token)) {
+          showCurrentTokenLabel = false;
+        }
+      }
       if (showCurrentTokenLabel) {
         GUID tokId = token.getId();
         int offset = 3; // Keep it from tramping on the token border.

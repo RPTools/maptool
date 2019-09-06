@@ -562,7 +562,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
         Rectangle tokenBounds = token.getBounds(renderer.getZone());
 
-        if (token.isSnapToGrid()) {
+        if (token.isSnapToGrid() && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
           dragOffsetX = (pos.x - tokenBounds.x) - (tokenBounds.width / 2);
           dragOffsetY = (pos.y - tokenBounds.y) - (tokenBounds.height / 2);
         } else {
@@ -835,10 +835,16 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         TokenFootprint tf = tokenUnderMouse.getFootprint(grid);
         Rectangle r = tf.getBounds(grid);
         ZonePoint last = renderer.getLastWaypoint(tokenUnderMouse.getId());
-        if (last == null)
-          last =
-              new ZonePoint(
-                  tokenUnderMouse.getX() + r.width / 2, tokenUnderMouse.getY() + r.height / 2);
+        if (last == null) {
+          // This makes no sense to me. Why create a fake last point that is
+          // half the token width away from the current point? (Phil)
+          // last =  new ZonePoint(
+          //        tokenUnderMouse.getX() + r.width / 2,
+          //        tokenUnderMouse.getY() + r.height / 2);
+
+          // Just make a last ZP that is the same.
+          last = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
+        }
         ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
         // These lines were causing tokens to end up in the wrong grid cell in
         // relation to the the mouse location.
@@ -847,6 +853,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         //          last.translate(-r.width / 2, -r.height / 2);
         // }
         //        zp.translate(-dragOffsetX, -dragOffsetY);
+
+        // Now the dx/dy are calculated on Zone Points that haven't been
+        // translated for drag offset or for snapping. That is being done in
+        // handleDragToken().
         int dx = zp.x - last.x;
         int dy = zp.y - last.y;
         handleDragToken(zp, dx, dy);
@@ -910,7 +920,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       zonePoint = grid.convert(grid.convert(zonePoint));
     } else {
       // Non-snapped while dragging.  Snaps when mouse-button released.
-      if (!(grid instanceof SquareGrid)) {
+      if (!(grid instanceof SquareGrid) || !tokenBeingDragged.isSnapToGrid()) {
         zonePoint.translate(-dragOffsetX, -dragOffsetY);
       }
     }
@@ -1970,15 +1980,22 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
   private String createHoverNote(Token marker) {
     boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(marker.getGMNotes());
+    boolean showNotes = !StringUtil.isEmpty(marker.getNotes());
 
     StringBuilder builder = new StringBuilder();
 
     if (marker.getPortraitImage() != null) {
       builder.append("<table><tr><td valign=top>");
     }
-    if (!StringUtil.isEmpty(marker.getNotes())) {
-      builder.append("<b><span class='title'>").append(marker.getName()).append("</span></b><br>");
-      builder.append(markerUnderMouse.getNotes());
+    if (showGMNotes || showNotes) {
+      builder.append("<b><span class='title'>").append(marker.getName());
+      if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(marker.getGMName())) {
+        builder.append(" (").append(marker.getGMName()).append(")");
+      }
+      builder.append("</span></b><br>");
+    }
+    if (showNotes) {
+      builder.append(marker.getNotes());
       // add a gap between player and gmNotes
       if (showGMNotes) {
         builder.append("\n\n");
@@ -1986,9 +2003,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     }
     if (showGMNotes) {
       builder.append("<b><span class='title'>GM Notes");
-      if (!StringUtil.isEmpty(marker.getGMName())) {
-        builder.append(" - ").append(marker.getGMName());
-      }
       builder.append("</span></b><br>");
       builder.append(marker.getGMNotes());
     }

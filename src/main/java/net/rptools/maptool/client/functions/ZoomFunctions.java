@@ -34,7 +34,7 @@ public class ZoomFunctions extends AbstractFunction {
   private static final String EQUALS = "=";
 
   private ZoomFunctions() {
-    super(0, 6, "getZoom", "setZoom", "getViewArea", "setViewArea");
+    super(0, 6, "getZoom", "setZoom", "getViewArea", "setViewArea", "getViewCenter");
   }
 
   public static ZoomFunctions getInstance() {
@@ -55,6 +55,9 @@ public class ZoomFunctions extends AbstractFunction {
     }
     if ("setViewArea".equals(functionName)) {
       return setViewArea(args);
+    }
+    if ("getViewCenter".equals(functionName)) {
+      return getViewCenter(args);
     }
     return null;
   }
@@ -78,7 +81,7 @@ public class ZoomFunctions extends AbstractFunction {
     } catch (NumberFormatException ne) {
       throw new ParserException(
           I18N.getText(
-              "macro.function.general.argumentTypeN", "moveToken", 1, args.get(0).toString()));
+              "macro.function.general.argumentTypeN", "setZoom", 1, args.get(0).toString()));
     }
     MapTool.getFrame().getCurrentZoneRenderer().setScale(zoom);
 
@@ -249,6 +252,52 @@ public class ZoomFunctions extends AbstractFunction {
               "setViewArea",
               param,
               args.get(param).toString()));
+    }
+  }
+
+  /**
+   * This function returns a json or String props of coordinates of the center of the current view
+   *
+   * @param arg should be optional boolean pixels|grid, optional String delim
+   * @return JSON of coordinates or String props with delim
+   * @throws ParserException
+   */
+  private Object getViewCenter(List<Object> args) throws ParserException {
+    boolean pixels = true;
+    if (args.size() > 0) pixels = parseBoolean(args, 0);
+
+    String delim = ";";
+    if (args.size() > 1) {
+      delim = args.get(1).toString();
+    }
+
+    ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+
+    int offsetX = zoneRenderer.getViewOffsetX() * -1;
+    int width = zoneRenderer.getWidth();
+    int centerX = (int) offsetX + (width / 2);
+
+    int offsetY = zoneRenderer.getViewOffsetY() * -1;
+    int height = zoneRenderer.getHeight();
+    int centerY = (int) offsetY + (height / 2);
+
+    if (!pixels) {
+      CellPoint centerPoint =
+          zoneRenderer.getZone().getGrid().convert(convertToZone(zoneRenderer, centerX, centerY));
+      centerX = centerPoint.x;
+      centerY = centerPoint.y;
+    }
+
+    if ("json".equalsIgnoreCase(delim)) {
+      JSONObject center = new JSONObject();
+      center.put("centerX", centerX);
+      center.put("centerY", centerY);
+      return center;
+    } else {
+      StringBuffer center = new StringBuffer();
+      center.append("centerX").append(EQUALS).append(centerX).append(delim);
+      center.append("centerY").append(EQUALS).append(centerY).append(delim);
+      return center.toString();
     }
   }
 }

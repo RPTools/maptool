@@ -289,7 +289,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     if (MapTool.getPlayer().isGM()) {
       tabbedPane.setEnabledAt(tabbedPane.indexOfTab("VBL"), true);
       getTokenVblPanel().setToken(token);
-      getAlwaysVisibleButton().setSelected(token.isAlwaysVisible());
       getAlphaSensitivitySpinner().setValue(getTokenVblPanel().getAlphaSensitivity());
       getVisibilityToleranceSpinner().setValue(token.getAlwaysVisibleTolerance());
     } else {
@@ -297,6 +296,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("VBL"))
         tabbedPane.setSelectedIndex(0);
     }
+    getAlwaysVisibleButton().setSelected(token.isAlwaysVisible());
 
     // Jamz: Init the Hero Lab tab...
     heroLabData = token.getHeroLabData();

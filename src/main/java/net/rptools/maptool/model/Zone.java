@@ -696,6 +696,10 @@ public class Zone extends BaseModel {
     return topology;
   }
 
+  public void tokenChanged(Token token) {
+    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, token));
+  }
+
   // Clears FoW for ALL tokens, including NPC's
   public void clearExposedArea() {
     exposedArea = new Area();
@@ -942,6 +946,11 @@ public class Zone extends BaseModel {
 
   public int getSmallestZOrder() {
     return tokenOrderedList.size() > 0 ? tokenOrderedList.get(0).getZOrder() : 0;
+  }
+
+  /** Sort the tokens by their ZOrder */
+  public void sortZOrder() {
+    Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
   }
 
   ///////////////////////////////////////////////////////////////////////////

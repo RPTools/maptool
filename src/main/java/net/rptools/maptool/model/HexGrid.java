@@ -46,6 +46,11 @@ public abstract class HexGrid extends Grid {
   /** One DirectionCalculator object is shared by all instances of this hex grid class. */
   private static final DirectionCalculator calculator = new DirectionCalculator();
 
+  @Override
+  public boolean isHex() {
+    return true;
+  }
+
   static {
     try {
       pathHighlight =
@@ -66,7 +71,7 @@ public abstract class HexGrid extends Grid {
         }
 
         public boolean isPathLineSupported() {
-          return false;
+          return true;
         }
 
         public boolean isSecondDimensionAdjustmentSupported() {
