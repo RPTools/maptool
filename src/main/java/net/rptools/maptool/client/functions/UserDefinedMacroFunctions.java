@@ -78,7 +78,9 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
 
   private UserDefinedMacroFunctions() {}
 
-  public void checkParameters(List<Object> parameters) throws ParameterException {
+  @Override
+  public void checkParameters(String functionName, List<Object> parameters)
+      throws ParameterException {
     // Do nothing as we do not know what we will need.
   }
 
@@ -188,13 +190,13 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   }
 
   public Object executeOldFunction(Parser parser, List<Object> parameters) throws ParserException {
-    FunctionRedefinition functionRedef = redefinedFunctions.get(currentFunction.peek());
+    String functionName = currentFunction.peek();
+    FunctionRedefinition functionRedef = redefinedFunctions.get(functionName);
     if (functionRedef == null) {
-      throw new ParserException(
-          "Old definition for function " + currentFunction.peek() + "does not exist");
+      throw new ParserException("Old definition for function " + functionName + " does not exist");
     }
     Function function = functionRedef.function;
-    function.checkParameters(parameters);
+    function.checkParameters(functionName, parameters);
     return function.evaluate(parser, functionRedef.functionName, parameters);
   }
 
