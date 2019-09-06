@@ -333,6 +333,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
       for (Token token : tokenList) {
         broadcastToAllClients(ClientCommand.COMMAND.putToken.name(), zoneGUID, token);
       }
+      zone.sortZOrder(); // update new ZOrder on server zone
     }
   }
 
@@ -606,6 +607,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
       for (Token token : tokenList) {
         broadcastToAllClients(ClientCommand.COMMAND.putToken.name(), zoneGUID, token);
       }
+      zone.sortZOrder(); // update new ZOrder on server zone
     }
   }
 

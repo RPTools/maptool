@@ -5,6 +5,7 @@ ___
 
 Bug Fixes & Enhancements
 -----
+* [#617][i617] - Using the right-click Arrange -> Send to Back/Bring to Front functions could undo recent token changes. Fixed.
 * [#603][i603] - Attempting to import a campaign file as campaign properties was throwing ClassCastException. Now displays a proper error message.
 * [#594][i594] - Dragging tokens on hex grids did not display the blue path line and move count was slightly outside of the hex cell.  Fixed.
 * [#589][i589] - Title option for dialog() command only worked on first use.  Subsequent uses did not update the dialog title. Fixed.
@@ -79,6 +80,7 @@ Bug Fixes & Enhancements
 * [#132][i132] - Calling getname() (lower case 'n') was falling through to setName and returned incorrect error message. Fixed with other changes to token macro functions.
 * [#116][i116] - strPropFromVars function was creating an extra, empty entry.  Fixed.  Second parameter made optional and defaults to "UNSUFFIXED".
 
+[i617]: https://github.com/RPTools/maptool/issues/603
 [i603]: https://github.com/RPTools/maptool/issues/603
 [i594]: https://github.com/RPTools/maptool/issues/594
 [i589]: https://github.com/RPTools/maptool/issues/589
