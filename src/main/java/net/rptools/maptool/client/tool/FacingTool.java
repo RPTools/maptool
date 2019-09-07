@@ -14,7 +14,7 @@
  */
 package net.rptools.maptool.client.tool;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -22,9 +22,7 @@ import java.awt.geom.Area;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -114,15 +112,34 @@ public class FacingTool extends DefaultTool {
         continue;
       }
       token.setFacing(degrees);
-      // if has fog(required)
-      // and ((isGM with pref set) OR serverPolicy allows auto reveal by players)
-      if (renderer.getZone().hasFog()
-              && ((AppPreferences.getAutoRevealVisionOnGMMovement() && MapTool.getPlayer().isGM()))
-          || MapTool.getServerPolicy().isAutoRevealOnMovement()) {
+
+      // Old Logic
+      // if (renderer.getZone().hasFog()
+      //        && ((AppPreferences.getAutoRevealVisionOnGMMovement() &&
+      // MapTool.getPlayer().isGM()))
+      //    || MapTool.getServerPolicy().isAutoRevealOnMovement()) {
+      //  visibleArea = renderer.getZoneView().getVisibleArea(token);
+      //  remoteSelected.add(token.getId());
+      //  renderer.getZone().exposeArea(visibleArea, token);
+      // }
+
+      boolean revealFog = false;
+      if (renderer.getZone().hasFog()) {
+        if ((AppPreferences.getAutoRevealVisionOnGMMovement() && MapTool.getPlayer().isGM())
+            || MapTool.getServerPolicy().isAutoRevealOnMovement()) {
+          if (token.isOwner(MapTool.getPlayer().getName())) revealFog = true;
+          else if (MapTool.getPlayer().isGM())
+            if (token.hasOwners() || MapTool.getServerPolicy().getGmRevealsVisionForUnownedTokens())
+              revealFog = true;
+        }
+      }
+
+      if (revealFog) {
         visibleArea = renderer.getZoneView().getVisibleArea(token);
         remoteSelected.add(token.getId());
         renderer.getZone().exposeArea(visibleArea, token);
       }
+
       renderer.flushFog();
     }
     // XXX Instead of calling exposeFoW() when visibleArea is null, shouldn't we just skip it?
