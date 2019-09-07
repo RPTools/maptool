@@ -29,6 +29,7 @@ public class ServerPolicy {
   private boolean strictTokenMovement;
   private boolean isMovementLocked;
   private boolean playersCanRevealVision;
+  private boolean gmRevealsVisionForUnownedTokens;
   private boolean useIndividualViews;
   private boolean restrictedImpersonation;
   private boolean playersReceiveCampaignMacros;
@@ -72,6 +73,14 @@ public class ServerPolicy {
 
   public boolean getPlayersCanRevealVision() {
     return playersCanRevealVision;
+  }
+
+  public void setGmRevealsVisionForUnownedTokens(boolean flag) {
+    gmRevealsVisionForUnownedTokens = flag;
+  }
+
+  public boolean getGmRevealsVisionForUnownedTokens() {
+    return gmRevealsVisionForUnownedTokens;
   }
 
   public void setAutoRevealOnMovement(boolean revealFlag) {
@@ -178,6 +187,9 @@ public class ServerPolicy {
     sinfo.put(
         "tooltips for default roll format",
         getUseToolTipsForDefaultRollFormat() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.put(
+        "GM reveals vision for unowned tokens",
+        getGmRevealsVisionForUnownedTokens() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put("players can reveal", getPlayersCanRevealVision() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put("movement locked", isMovementLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put(
@@ -197,6 +209,7 @@ public class ServerPolicy {
     sinfo.put("timeDate", getTimeDate());
 
     sinfo.put("gm", MapTool.getGMs());
+    sinfo.put("hosting server", MapTool.isHostingServer());
 
     InitiativePanel ip = MapTool.getFrame().getInitiativePanel();
     if (ip != null) {
