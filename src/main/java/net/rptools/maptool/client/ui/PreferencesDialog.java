@@ -144,6 +144,7 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox autoRevealVisionOnGMMoveCheckBox;
   private final JCheckBox showSmiliesCheckBox;
   private final JCheckBox playSystemSoundCheckBox;
+  private final JCheckBox playStreamsCheckBox;
   private final JCheckBox playSystemSoundOnlyWhenNotFocusedCheckBox;
   private final JCheckBox syrinscapeActiveCheckBox;
 
@@ -280,6 +281,7 @@ public class PreferencesDialog extends JDialog {
     autoRevealVisionOnGMMoveCheckBox = panel.getCheckBox("autoRevealVisionOnGMMoveCheckBox");
     showSmiliesCheckBox = panel.getCheckBox("showSmiliesCheckBox");
     playSystemSoundCheckBox = panel.getCheckBox("playSystemSounds");
+    playStreamsCheckBox = panel.getCheckBox("playStreams");
     playSystemSoundOnlyWhenNotFocusedCheckBox = panel.getCheckBox("soundsOnlyWhenNotFocused");
     syrinscapeActiveCheckBox = panel.getCheckBox("syrinscapeActive");
     showAvatarInChat = panel.getCheckBox("showChatAvatar");
@@ -732,6 +734,13 @@ public class PreferencesDialog extends JDialog {
           }
         });
 
+    playStreamsCheckBox.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            AppPreferences.setPlayStreams(playStreamsCheckBox.isSelected());
+          }
+        });
+
     playSystemSoundOnlyWhenNotFocusedCheckBox.addActionListener(
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -1108,6 +1117,7 @@ public class PreferencesDialog extends JDialog {
     autoRevealVisionOnGMMoveCheckBox.setSelected(AppPreferences.getAutoRevealVisionOnGMMovement());
     showSmiliesCheckBox.setSelected(AppPreferences.getShowSmilies());
     playSystemSoundCheckBox.setSelected(AppPreferences.getPlaySystemSounds());
+    playStreamsCheckBox.setSelected(AppPreferences.getPlayStreams());
     playSystemSoundOnlyWhenNotFocusedCheckBox.setSelected(
         AppPreferences.getPlaySystemSoundsOnlyWhenNotFocused());
     syrinscapeActiveCheckBox.setSelected(AppPreferences.getSyrinscapeActive());
