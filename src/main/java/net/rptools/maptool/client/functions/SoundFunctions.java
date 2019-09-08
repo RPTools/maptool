@@ -66,23 +66,13 @@ public class SoundFunctions extends AbstractFunction {
       String strUrl = psize > 0 ? args.get(0).toString() : "*";
       int cycleCount = psize > 1 ? FunctionUtil.paramAsInteger(functionName, args, 1, true) : 1;
       double volume = psize > 2 ? FunctionUtil.paramAsDouble(functionName, args, 2, true) : 1;
-      if (strUrl.equals("*")) {
-        for (HashMap.Entry mapElement : mapStreams.entrySet())
-          editStream((String) mapElement.getKey(), cycleCount, volume);
-      } else {
-        editStream(strUrl, cycleCount, volume);
-      }
+      editStream(strUrl, cycleCount, volume);
       return "";
     } else if (functionName.equalsIgnoreCase("stopStream")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
       String strUrl = psize > 0 ? args.get(0).toString() : "*";
       boolean del = psize > 1 ? FunctionUtil.paramAsBoolean(functionName, args, 1, true) : true;
-      if (strUrl.equals("*")) {
-        for (HashMap.Entry mapElement : mapStreams.entrySet())
-          stopStream((String) mapElement.getKey(), del);
-      } else {
-        stopStream(strUrl, del);
-      }
+      stopStream(strUrl, del);
       return "";
     }
     return null;
@@ -138,20 +128,35 @@ public class SoundFunctions extends AbstractFunction {
    * @param strUrl the String url of the stream
    * @param remove should the stream be disposed
    */
-  private static void stopStream(String strUrl, boolean remove) {
+  public static void stopStream(String strUrl, boolean remove) {
     Platform.runLater(
         new Runnable() {
           @Override
           public void run() {
-            if (mapStreams.containsKey(strUrl)) {
-              mapStreams.get(strUrl).stop(); // stop previous stream of the same name
-              if (remove) {
-                mapStreams.get(strUrl).dispose();
-                mapStreams.remove(strUrl);
-              }
+            if (strUrl.equals("*")) {
+              for (HashMap.Entry mapElement : mapStreams.entrySet())
+                fxStopStream((String) mapElement.getKey(), remove);
+            } else {
+              fxStopStream(strUrl, remove);
             }
           }
         });
+  }
+
+  /**
+   * Stop a given stream from its url string. Should be ran from JavaFX app thread.
+   *
+   * @param strUrl the String url of the stream
+   * @param remove should the stream be disposed
+   */
+  private static void fxStopStream(String strUrl, boolean remove) {
+    if (mapStreams.containsKey(strUrl)) {
+      mapStreams.get(strUrl).stop(); // stop previous stream of the same name
+      if (remove) {
+        mapStreams.get(strUrl).dispose();
+        mapStreams.remove(strUrl);
+      }
+    }
   }
 
   /**
@@ -166,13 +171,29 @@ public class SoundFunctions extends AbstractFunction {
         new Runnable() {
           @Override
           public void run() {
-            if (mapStreams.containsKey(strUrl)) {
-              MediaPlayer mediaPlayer = mapStreams.get(strUrl);
-              mediaPlayer.setCycleCount(cycleCount);
-              mediaPlayer.setVolume(volume);
+            if (strUrl.equals("*")) {
+              for (HashMap.Entry mapElement : mapStreams.entrySet())
+                fxEditStream((String) mapElement.getKey(), cycleCount, volume);
+            } else {
+              fxEditStream(strUrl, cycleCount, volume);
             }
           }
         });
+  }
+
+  /**
+   * Edit a given stream from its url string. Should be accessed from JavaFX app thread.
+   *
+   * @param strUrl the String url of the stream
+   * @param cycleCount how many times should the stream play
+   * @param volume the volume level of the stream (0-1)
+   */
+  private static void fxEditStream(String strUrl, int cycleCount, double volume) {
+    if (mapStreams.containsKey(strUrl)) {
+      MediaPlayer mediaPlayer = mapStreams.get(strUrl);
+      mediaPlayer.setCycleCount(cycleCount);
+      mediaPlayer.setVolume(volume);
+    }
   }
 
   /**

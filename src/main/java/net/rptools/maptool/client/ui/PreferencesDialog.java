@@ -51,6 +51,7 @@ import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.SoundFunctions;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
@@ -738,6 +739,7 @@ public class PreferencesDialog extends JDialog {
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             AppPreferences.setPlayStreams(playStreamsCheckBox.isSelected());
+            if (!playStreamsCheckBox.isSelected()) SoundFunctions.stopStream("*", true);
           }
         });
 
