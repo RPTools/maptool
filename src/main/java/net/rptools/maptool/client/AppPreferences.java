@@ -354,6 +354,9 @@ public class AppPreferences {
   private static final String KEY_PLAY_SYSTEM_SOUNDS = "playSystemSounds";
   private static final boolean DEFAULT_PLAY_SYSTEM_SOUNDS = true;
 
+  private static final String KEY_PLAY_STREAMS = "playStreams";
+  private static final boolean DEFAULT_PLAY_STREAMS = true;
+
   public static void setHaloLineWidth(int size) {
     prefs.putInt(KEY_HALO_LINE_WIDTH, size);
   }
@@ -574,8 +577,16 @@ public class AppPreferences {
     prefs.putBoolean(KEY_PLAY_SYSTEM_SOUNDS, play);
   }
 
+  public static void setPlayStreams(boolean play) {
+    prefs.putBoolean(KEY_PLAY_STREAMS, play);
+  }
+
   public static boolean getPlaySystemSounds() {
     return prefs.getBoolean(KEY_PLAY_SYSTEM_SOUNDS, DEFAULT_PLAY_SYSTEM_SOUNDS);
+  }
+
+  public static boolean getPlayStreams() {
+    return prefs.getBoolean(KEY_PLAY_STREAMS, DEFAULT_PLAY_STREAMS);
   }
 
   public static void setPlaySystemSoundsOnlyWhenNotFocused(boolean play) {
