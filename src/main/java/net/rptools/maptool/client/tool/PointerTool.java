@@ -14,23 +14,7 @@
  */
 package net.rptools.maptool.client.tool;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.GradientPaint;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Stroke;
-import java.awt.TexturePaint;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -46,60 +30,26 @@ import java.io.IOException;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.text.BreakIterator;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppActions;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppStyle;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
-import net.rptools.maptool.client.ui.StampPopupMenu;
-import net.rptools.maptool.client.ui.TokenLocation;
-import net.rptools.maptool.client.ui.TokenPopupMenu;
-import net.rptools.maptool.client.ui.Tool;
-import net.rptools.maptool.client.ui.Toolbox;
+import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.ExposedAreaMetaData;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.MovementKey;
-import net.rptools.maptool.model.Player;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Player.Role;
-import net.rptools.maptool.model.Pointer;
-import net.rptools.maptool.model.SquareGrid;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.TokenFootprint;
-import net.rptools.maptool.model.TokenProperty;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -316,11 +266,18 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         if (token == null) {
           continue;
         }
-        // Jamz: Changed to allow NPC FoW
-        // if (token.getType() == Token.Type.PC) {
-        if (MapTool.getPlayer().isGM() || token.isOwner(MapTool.getPlayer().getName())) {
+
+        // Old logic
+        // if (MapTool.getPlayer().isGM() || token.isOwner(MapTool.getPlayer().getName())) {
+        //  exposeSet.add(tokenGUID);
+        // }
+
+        // Jamz: New logic so GM only reveals FoW for unowned tokens if server option is enabled
+        if (token.isOwner(MapTool.getPlayer().getName())) exposeSet.add(tokenGUID);
+        else if (MapTool.getPlayer().isGM() && token.hasOwners()) exposeSet.add(tokenGUID);
+        else if (MapTool.getPlayer().isGM()
+            && MapTool.getServerPolicy().getGmRevealsVisionForUnownedTokens())
           exposeSet.add(tokenGUID);
-        }
       }
 
       if (p != null) {

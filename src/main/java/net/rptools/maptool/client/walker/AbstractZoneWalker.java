@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.walker;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import net.rptools.maptool.client.ui.zone.RenderPathWorker;
@@ -23,7 +24,8 @@ import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.Zone;
 
 public abstract class AbstractZoneWalker implements ZoneWalker {
-  protected List<PartialPath> partialPaths = new ArrayList<PartialPath>();
+  protected List<PartialPath> partialPaths =
+      Collections.synchronizedList(new ArrayList<PartialPath>());
   protected final Zone zone;
   protected boolean restrictMovement = false;
   protected RenderPathWorker renderPathWorker;
@@ -37,11 +39,10 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   }
 
   public CellPoint getLastPoint() {
-    if (partialPaths.isEmpty()) {
-      return null;
+    synchronized (partialPaths) {
+      if (partialPaths.isEmpty()) return null;
+      else return partialPaths.get(partialPaths.size() - 1).end;
     }
-    PartialPath lastPath = partialPaths.get(partialPaths.size() - 1);
-    return lastPath.end;
   }
 
   public void setWaypoints(CellPoint... points) {
@@ -96,20 +97,26 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
     Path<CellPoint> path = new Path<CellPoint>();
 
     PartialPath last = null;
-    for (PartialPath partial : partialPaths) {
-      if (partial.path != null && partial.path.size() > 1) {
-        path.addAllPathCells(partial.path.subList(0, partial.path.size() - 1));
+
+    synchronized (partialPaths) {
+      for (PartialPath partial : partialPaths) {
+        if (partial.path != null && partial.path.size() > 1) {
+          path.addAllPathCells(partial.path.subList(0, partial.path.size() - 1));
+        }
+        last = partial;
       }
-      last = partial;
     }
+
     if (last != null) {
       path.addPathCell(last.end);
     }
+
     for (CellPoint cp : path.getCellPath()) {
       if (isWaypoint(cp)) {
         path.addWayPoint(cp);
       }
     }
+
     return path;
   }
 

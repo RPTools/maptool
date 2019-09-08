@@ -35,6 +35,7 @@ public class StartServerDialogPreferences {
   private static final String KEY_RPTOOLS_NAME = "rptoolsName";
   private static final String KEY_RPTOOLS_PRIVATE = "rptoolsPrivate";
   private static final String KEY_PLAYERS_CAN_REVEAL_VISION = "playersCanRevealVisionCheckbox";
+  private static final String KEY_GM_REVEALS_VISION = "gmRevealsVisionForUnownedTokens";
   private static final String KEY_USE_INDIVIDUAL_VIEWS = "useIndividualViews";
   private static final String KEY_USE_UPNP = "useUPnP";
   private static final String KEY_RESTRICTED_IMPERSONATION = "restrictedImpersonation";
@@ -132,6 +133,14 @@ public class StartServerDialogPreferences {
 
   public boolean getPlayersCanRevealVision() {
     return prefs.getBoolean(KEY_PLAYERS_CAN_REVEAL_VISION, false);
+  }
+
+  public void setGmRevealsVisionForUnownedTokens(boolean flag) {
+    prefs.putBoolean(KEY_GM_REVEALS_VISION, flag);
+  }
+
+  public boolean getGmRevealsVisionForUnownedTokens() {
+    return prefs.getBoolean(KEY_GM_REVEALS_VISION, false);
   }
 
   public void setUseIndividualViews(boolean flag) {
