@@ -23,6 +23,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.parser.*;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
 @SuppressWarnings("unchecked")
@@ -1330,17 +1331,17 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   /**
-   * JSONify the given value, inducing JSON type from the Maptool string value.
-   *
-   * <p>Because Maptool arbitrarily convert null, true, and false from incoming json data into
-   * "null", "true" and "false", this function does the opposite to allow Maptool to send json data
+   * JSONify the given value, inducing JSON type from the Maptool string value. Because Maptool
+   * arbitrarily convert null, true, and false from incoming json data into "null", "true" and
+   * "false", this function does the opposite to allow Maptool to send json data
    *
    * @param value A Maptool value.
    * @return null, true or false instead of "null", "true, or "false", or the value unchanged
    */
   private Object jsonify(Object value) {
+    // the json library does not use the java null object, but one singleton of its own
     if ("null".equals(value)) {
-      return null;
+      return JSONNull.getInstance();
     } else if ("true".equals(value)) {
       return true;
     } else if ("false".equals(value)) {
