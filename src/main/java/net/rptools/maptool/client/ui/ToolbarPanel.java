@@ -21,17 +21,14 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
+import java.util.Hashtable;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.FacingTool;
 import net.rptools.maptool.client.tool.GridTool;
@@ -132,6 +129,39 @@ public class ToolbarPanel extends JToolBar {
     add(horizontalSpacer);
     add(optionPanel);
     add(Box.createGlue());
+
+    // the Volume icon
+    add(
+        createMuteButton(
+            "net/rptools/maptool/client/image/tool/mute.png",
+            "net/rptools/maptool/client/image/tool/volume.png",
+            I18N.getText("tools.mute.tooltip"),
+            I18N.getText("tools.unmute.tooltip")));
+
+    // the Volume slider
+    final int MAX_SLIDER = 10;
+    final int INIT_VALUE = (int) Math.round(MediaPlayerAdapter.getGlobalVolume() * MAX_SLIDER);
+    JSlider jslider = new JSlider(0, MAX_SLIDER, INIT_VALUE);
+    jslider.addChangeListener(
+        new ChangeListener() {
+          public void stateChanged(ChangeEvent e) {
+            MediaPlayerAdapter.setGlobalVolume((double) jslider.getValue() / MAX_SLIDER);
+          }
+        });
+
+    // Create the label table
+    Hashtable labelTable = new Hashtable();
+    labelTable.put(0, new JLabel("0"));
+    labelTable.put(MAX_SLIDER, new JLabel("100"));
+    jslider.setLabelTable(labelTable);
+    jslider.setPaintLabels(true);
+
+    add(jslider);
+    // End slider
+
+    add(Box.createHorizontalStrut(10));
+    add(new JSeparator(JSeparator.VERTICAL));
+    add(Box.createHorizontalStrut(10));
 
     // New button to toggle AI on/off
     add(
@@ -343,6 +373,31 @@ public class ToolbarPanel extends JToolBar {
     }
 
     if (AppPreferences.isUsingAstarPathfinding()) button.doClick();
+
+    return button;
+  }
+
+  private JToggleButton createMuteButton(
+      final String icon, final String offIcon, String mutetooltip, String unmutetooltip) {
+    final JToggleButton button = new JToggleButton();
+    button.setToolTipText(mutetooltip);
+    button.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            MediaPlayerAdapter.setGlobalMute(button.isSelected());
+            if (button.isSelected()) button.setToolTipText(unmutetooltip);
+            else button.setToolTipText(mutetooltip);
+          }
+        });
+
+    try {
+      button.setIcon(new ImageIcon(ImageUtil.getImage(offIcon)));
+      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage(icon)));
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
+    }
+
+    if (MediaPlayerAdapter.getGlobalMute()) button.doClick();
 
     return button;
   }
