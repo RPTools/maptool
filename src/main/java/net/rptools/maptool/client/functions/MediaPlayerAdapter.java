@@ -52,6 +52,16 @@ public class MediaPlayerAdapter {
     this.strUri = strUri;
     this.media = media;
     this.player = new MediaPlayer(media);
+    this.player.setOnEndOfMedia(
+        new Runnable() {
+          @Override
+          public void run() {
+            int curCount = player.getCurrentCount();
+            int cycCount = player.getCycleCount();
+            if (cycCount != MediaPlayer.INDEFINITE && curCount >= cycCount)
+              player.stop(); // otherwise, status stuck on "PLAYING" at end
+          }
+        });
   };
   /**
    * Start a given stream from its url string. If already streaming the file, dispose of the

@@ -50,8 +50,8 @@ public class SoundFunctions extends AbstractFunction {
       String strUri = args.get(0).toString();
       int cycleCount = psize > 1 ? FunctionUtil.paramAsInteger(functionName, args, 1, true) : 1;
       double volume = psize > 2 ? FunctionUtil.paramAsDouble(functionName, args, 2, true) : 1;
-      double start = psize > 3 ? FunctionUtil.paramAsDouble(functionName, args, 3, true) : 0;
-      double stop = psize > 4 ? FunctionUtil.paramAsDouble(functionName, args, 4, true) : -1;
+      double start = psize > 3 ? FunctionUtil.paramAsDouble(functionName, args, 3, true) * 1000 : 0;
+      double stop = psize > 4 ? FunctionUtil.paramAsDouble(functionName, args, 4, true) * 1000 : -1;
 
       return MediaPlayerAdapter.playStream(strUri, cycleCount, volume, start, stop)
           ? BigDecimal.ONE
@@ -70,9 +70,9 @@ public class SoundFunctions extends AbstractFunction {
       if (psize > 2 && !args.get(2).equals(""))
         volume = FunctionUtil.paramAsDouble(functionName, args, 2, true);
       if (psize > 3 && !args.get(3).equals(""))
-        start = FunctionUtil.paramAsDouble(functionName, args, 3, true);
+        start = FunctionUtil.paramAsDouble(functionName, args, 3, true) * 1000;
       if (psize > 4 && !args.get(4).equals(""))
-        stop = FunctionUtil.paramAsDouble(functionName, args, 4, true);
+        stop = FunctionUtil.paramAsDouble(functionName, args, 4, true) * 1000;
 
       MediaPlayerAdapter.editStream(strUri, cycleCount, volume, start, stop);
       return "";
