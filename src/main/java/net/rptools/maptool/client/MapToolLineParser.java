@@ -83,6 +83,7 @@ public class MapToolLineParser {
               PlayerFunctions.getInstance(),
               RemoveAllFromInitiativeFunction.getInstance(),
               ReturnFunction.getInstance(),
+              SoundFunctions.getInstance(),
               StateImageFunction.getInstance(),
               StringFunctions.getInstance(),
               StrListFunctions.getInstance(),

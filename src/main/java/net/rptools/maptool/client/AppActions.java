@@ -15,98 +15,41 @@
 package net.rptools.maptool.client;
 
 import com.jidesoft.docking.DockableFrame;
-import java.awt.Dimension;
-import java.awt.Event;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Observer;
-import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JTextPane;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.GridTool;
-import net.rptools.maptool.client.ui.AddResourceDialog;
-import net.rptools.maptool.client.ui.AppMenuBar;
-import net.rptools.maptool.client.ui.CampaignExportDialog;
-import net.rptools.maptool.client.ui.ClientConnectionPanel;
-import net.rptools.maptool.client.ui.ConnectToServerDialog;
-import net.rptools.maptool.client.ui.ConnectToServerDialogPreferences;
-import net.rptools.maptool.client.ui.ConnectionInfoDialog;
-import net.rptools.maptool.client.ui.ConnectionStatusPanel;
-import net.rptools.maptool.client.ui.ExportDialog;
-import net.rptools.maptool.client.ui.MapPropertiesDialog;
-import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
-import net.rptools.maptool.client.ui.PreferencesDialog;
-import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
-import net.rptools.maptool.client.ui.StartServerDialog;
-import net.rptools.maptool.client.ui.StartServerDialogPreferences;
-import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
-import net.rptools.maptool.client.ui.io.FTPClient;
-import net.rptools.maptool.client.ui.io.FTPTransferObject;
+import net.rptools.maptool.client.ui.io.*;
 import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
-import net.rptools.maptool.client.ui.io.LoadSaveImpl;
-import net.rptools.maptool.client.ui.io.ProgressBarList;
-import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignFactory;
-import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.ExposedAreaMetaData;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.LookupTable;
-import net.rptools.maptool.model.Player;
-import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
-import net.rptools.maptool.model.ZoneFactory;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
@@ -145,6 +88,7 @@ public class AppActions {
 
   private static Set<Token> tokenCopySet = null;
   public static final int menuShortcut = getMenuShortcutKeyMask();
+  private static boolean keepIdsOnPaste = false;
 
   private static int getMenuShortcutKeyMask() {
     int key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -854,6 +798,7 @@ public class AppActions {
     }
     if (anythingDeleted) {
       MapTool.getFrame().getCurrentZoneRenderer().clearSelectedTokens();
+      keepIdsOnPaste = true; // pasted tokens should have same ids as cut ones
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
     }
@@ -976,6 +921,8 @@ public class AppActions {
           topLeft = originalToken;
         }
         Token newToken = new Token(originalToken);
+        newToken.setId(
+            originalToken.getId()); // keep same ids. Will be changed on paste if need be.
         tokenCopySet.add(newToken);
       }
       /*
@@ -997,6 +944,7 @@ public class AppActions {
         token.setX(token.getX() - x);
         token.setY(token.getY() - y);
       }
+      keepIdsOnPaste = false; // if last operation is Copy, don't keep token ids.
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
     }
@@ -1026,6 +974,7 @@ public class AppActions {
           }
           ZonePoint zonePoint = screenPoint.convertToZone(renderer);
           pasteTokens(zonePoint, renderer.getActiveLayer());
+          keepIdsOnPaste = false; // once pasted, subsequent paste should have new ids
           renderer.repaint();
         }
       };
@@ -1078,6 +1027,9 @@ public class AppActions {
 
     for (Token origToken : tokenList) {
       Token token = new Token(origToken);
+      if (keepIdsOnPaste) {
+        token.setId(origToken.getId()); // keep ids if first paste since cut
+      }
 
       // need this here to get around times when a token is copied and pasted into the
       // same zone, such as a framework "template"
@@ -2071,6 +2023,8 @@ public class AppActions {
                   ServerPolicy policy = new ServerPolicy();
                   policy.setAutoRevealOnMovement(serverProps.isAutoRevealOnMovement());
                   policy.setUseStrictTokenManagement(serverProps.getUseStrictTokenOwnership());
+                  policy.setGmRevealsVisionForUnownedTokens(
+                      serverProps.getGmRevealsVisionForUnownedTokens());
                   policy.setPlayersCanRevealVision(serverProps.getPlayersCanRevealVision());
                   policy.setUseIndividualViews(serverProps.getUseIndividualViews());
                   policy.setPlayersReceiveCampaignMacros(

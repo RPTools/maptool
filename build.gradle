@@ -177,7 +177,7 @@ dependencies {
     implementation 'net.rptools.decktool:decktool:1.0.b1'
 
     implementation 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
-    implementation 'net.rptools.parser:parser:1.4.0.+'
+    implementation 'com.github.RPTools:parser:1.5.4'
 
     implementation 'jide-common:jide-common:3.2.3'
     implementation 'jide-components:jide-components:3.2.3'
@@ -214,6 +214,8 @@ dependencies {
     implementation 'com.thoughtworks.xstream:xstream:1.4.9'
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
+
+    implementation 'com.jayway.jsonpath:json-path:2.4.0'
 
     // For PDF image extraction
     implementation 'org.apache.pdfbox:pdfbox:2.0.10'

@@ -638,8 +638,9 @@ public class StrListFunctions extends AbstractFunction {
   }
 
   @Override
-  public void checkParameters(List<Object> parameters) throws ParameterException {
-    super.checkParameters(parameters);
+  public void checkParameters(String functionName, List<Object> parameters)
+      throws ParameterException {
+    super.checkParameters(functionName, parameters);
     // The work is done in checkVaryingParameters() instead.
   }
 

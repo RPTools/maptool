@@ -14,12 +14,14 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.jayway.jsonpath.*;
 import java.math.BigDecimal;
 import java.util.*;
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.*;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
@@ -41,6 +43,11 @@ public class JSONMacroFunctions extends AbstractFunction {
         1,
         UNLIMITED_PARAMETERS,
         "json.get",
+        "json.path.read",
+        "json.path.add",
+        "json.path.put",
+        "json.path.set",
+        "json.path.delete",
         "json.type",
         "json.fields",
         "json.length",
@@ -87,6 +94,75 @@ public class JSONMacroFunctions extends AbstractFunction {
         delim = parameters.get(1).toString();
       }
       return fromStrList(parameters.get(0).toString(), delim);
+    }
+
+    if (functionName.equals("json.path.read")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+      String jsonStr = parameters.get(0).toString();
+      String path = parameters.get(1).toString();
+
+      try {
+        return JsonPath.parse(jsonStr).read(path);
+      } catch (Exception e) {
+        throw new ParserException(
+            I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
+      }
+    }
+
+    if (functionName.equals("json.path.add")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
+      String jsonStr = parameters.get(0).toString();
+      String path = parameters.get(1).toString();
+      Object value = parameters.get(2);
+
+      try {
+        return JsonPath.parse(jsonStr).add(path, value).jsonString(); // add element to array
+      } catch (Exception e) {
+        throw new ParserException(
+            I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
+      }
+    }
+
+    if (functionName.equals("json.path.set")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
+      String jsonStr = parameters.get(0).toString();
+      String path = parameters.get(1).toString();
+      Object value = parameters.get(2);
+
+      try {
+        return JsonPath.parse(jsonStr).set(path, value).jsonString(); // set element in array/object
+      } catch (Exception e) {
+        throw new ParserException(
+            I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
+      }
+    }
+
+    if (functionName.equals("json.path.put")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 4, 4);
+      String jsonStr = parameters.get(0).toString();
+      String path = parameters.get(1).toString();
+      String key = parameters.get(2).toString();
+      Object value = parameters.get(3);
+
+      try {
+        return JsonPath.parse(jsonStr).put(path, key, value).jsonString(); // add value in object
+      } catch (Exception e) {
+        throw new ParserException(
+            I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
+      }
+    }
+
+    if (functionName.equals("json.path.delete")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+      String jsonStr = parameters.get(0).toString();
+      String path = parameters.get(1).toString();
+
+      try {
+        return JsonPath.parse(jsonStr).delete(path).jsonString(); // delete path
+      } catch (Exception e) {
+        throw new ParserException(
+            I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
+      }
     }
 
     if (functionName.equals("json.fromStrProp")) {
