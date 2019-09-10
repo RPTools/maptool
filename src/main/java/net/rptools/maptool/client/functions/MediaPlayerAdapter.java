@@ -22,6 +22,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -131,18 +134,19 @@ public class MediaPlayerAdapter {
    *
    * @param strUri the String url of the stream
    * @param remove should the stream be disposed
+   * @param fadeout time in ms to fadeout (0: no fadeout)
    */
-  public static void stopStream(String strUri, boolean remove) {
+  public static void stopStream(String strUri, boolean remove, double fadeout) {
     Platform.runLater(
         new Runnable() {
           @Override
           public void run() {
             if (strUri.equals("*")) {
               for (HashMap.Entry mapElement : mapStreams.entrySet())
-                ((MediaPlayerAdapter) mapElement.getValue()).stopStream(remove);
+                ((MediaPlayerAdapter) mapElement.getValue()).stopStream(remove, fadeout);
             } else {
               MediaPlayerAdapter adapter = mapStreams.get(strUri);
-              if (adapter != null) adapter.stopStream(remove);
+              if (adapter != null) adapter.stopStream(remove, fadeout);
             }
           }
         });
@@ -158,6 +162,26 @@ public class MediaPlayerAdapter {
       player.dispose();
       mapStreams.remove(this.strUri);
     } else player.stop();
+  }
+
+  /**
+   * Stop the stream. Should be ran from JavaFX app thread.
+   *
+   * @param remove should the stream be disposed and map updated
+   * @param fadeout time in ms to fadeout (0: no fadeout)
+   */
+  private void stopStream(boolean remove, double fadeout) {
+    if (fadeout <= 0) stopStream(remove);
+    else {
+      Timeline timeline =
+          new Timeline(
+              new KeyFrame(Duration.millis(fadeout), new KeyValue(player.volumeProperty(), 0)));
+      timeline.setOnFinished(
+          (event -> {
+            stopStream(remove); // stop the stream at the end
+          }));
+      timeline.play();
+    }
   }
 
   /**

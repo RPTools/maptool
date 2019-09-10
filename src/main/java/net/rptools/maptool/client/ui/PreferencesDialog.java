@@ -739,7 +739,7 @@ public class PreferencesDialog extends JDialog {
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             AppPreferences.setPlayStreams(playStreamsCheckBox.isSelected());
-            if (!playStreamsCheckBox.isSelected()) MediaPlayerAdapter.stopStream("*", true);
+            if (!playStreamsCheckBox.isSelected()) MediaPlayerAdapter.stopStream("*", true, 0);
           }
         });
 

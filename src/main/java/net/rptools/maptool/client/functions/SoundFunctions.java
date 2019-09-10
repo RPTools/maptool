@@ -77,10 +77,11 @@ public class SoundFunctions extends AbstractFunction {
       MediaPlayerAdapter.editStream(strUri, cycleCount, volume, start, stop);
       return "";
     } else if (functionName.equalsIgnoreCase("stopStream")) {
-      FunctionUtil.checkNumberParam(functionName, args, 0, 2);
+      FunctionUtil.checkNumberParam(functionName, args, 0, 3);
       String strUri = psize > 0 ? args.get(0).toString() : "*";
       boolean del = psize > 1 ? FunctionUtil.paramAsBoolean(functionName, args, 1, true) : true;
-      MediaPlayerAdapter.stopStream(strUri, del);
+      double fade = psize > 2 ? FunctionUtil.paramAsDouble(functionName, args, 2, true) * 1000 : 0;
+      MediaPlayerAdapter.stopStream(strUri, del, fade);
       return "";
     } else if (functionName.equalsIgnoreCase("getStreamProperties")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 1);
