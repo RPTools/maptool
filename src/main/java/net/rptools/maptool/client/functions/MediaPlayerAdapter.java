@@ -42,6 +42,7 @@ public class MediaPlayerAdapter {
       new ConcurrentHashMap<>();
 
   private static double globalVolume = 1;
+  private static boolean globalMute = false;
 
   private final String strUri;
   private final Media media;
@@ -114,6 +115,7 @@ public class MediaPlayerAdapter {
             player.setStartTime(durStart);
             player.setStopTime(durStop);
 
+            player.setMute(globalMute);
             player.seek(durStart); // start playing from the start
             if (cycleCount != 0) {
               if (old) player.play();
@@ -352,5 +354,35 @@ public class MediaPlayerAdapter {
    */
   public static double getGlobalVolume() {
     return globalVolume;
+  }
+
+  /**
+   * Set the global mute status
+   *
+   * @param mute the mute status
+   */
+  public static void setGlobalMute(boolean mute) {
+    globalMute = mute;
+    Platform.runLater(
+        new Runnable() {
+          @Override
+          public void run() {
+            for (HashMap.Entry mapElement : mapStreams.entrySet())
+              ((MediaPlayerAdapter) mapElement.getValue()).updateMute();
+          }
+        });
+  }
+
+  /** Update the mute of the stream */
+  private void updateMute() {
+    player.setMute(globalMute);
+  }
+  /**
+   * Get the global mute status
+   *
+   * @return the mute status
+   */
+  public static boolean getGlobalMute() {
+    return globalMute;
   }
 }
