@@ -85,6 +85,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.client.DebounceExecutor;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ScreenPoint;
@@ -147,6 +148,13 @@ public class ZoneRenderer extends JComponent
 
   private static final Color TRANSLUCENT_YELLOW =
       new Color(Color.yellow.getRed(), Color.yellow.getGreen(), Color.yellow.getBlue(), 50);
+
+  /** The interval, in milliseconds, during which calls to repaint() will be debounced. */
+  private static final int REPAINT_DEBOUNCE_INTERVAL = 33;
+
+  /** DebounceExecutor for throttling repaint() requests. */
+  private final DebounceExecutor repaintDebouncer =
+      new DebounceExecutor(REPAINT_DEBOUNCE_INTERVAL, this::repaint);
 
   public static final int MIN_GRID_SIZE = 10;
   private static LightSourceIconOverlay lightSourceIconOverlay = new LightSourceIconOverlay();
@@ -310,7 +318,10 @@ public class ZoneRenderer extends JComponent
 
   public void clearShowPaths() {
     showPathList.clear();
-    repaint();
+    // [PNICHOLS04] This call is unnecessary, because we are in a method that is
+    // only called once (from clearSelectedTokens), and the caller requires a
+    // repaint after we return.
+    // repaintDebouncer.dispatch();
   }
 
   public Scale getZoneScale() {
@@ -332,7 +343,7 @@ public class ZoneRenderer extends JComponent
               // flushFog = true;
             }
             visibleScreenArea = null;
-            repaint();
+            repaintDebouncer.dispatch();
           }
         });
   }
@@ -358,7 +369,7 @@ public class ZoneRenderer extends JComponent
       return;
     }
     tokenUnderMouse = token;
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   @Override
@@ -375,7 +386,7 @@ public class ZoneRenderer extends JComponent
       }
     }
     selectionSetMap.put(keyToken, new SelectionSet(playerId, keyToken, tokenList));
-    repaint(); // Jamz: Seems to have no affect?
+    repaintDebouncer.dispatch(); // Jamz: Seems to have no affect?
   }
 
   public boolean hasMoveSelectionSetMoved(GUID keyToken, ZonePoint point) {
@@ -397,7 +408,7 @@ public class ZoneRenderer extends JComponent
     }
     Token token = zone.getToken(keyToken);
     set.setOffset(offset.x - token.getX(), offset.y - token.getY());
-    repaint(); // Jamz: may cause flicker when using AI
+    repaintDebouncer.dispatch(); // Jamz: may cause flicker when using AI
   }
 
   public void toggleMoveSelectionSetWaypoint(GUID keyToken, ZonePoint location) {
@@ -406,7 +417,7 @@ public class ZoneRenderer extends JComponent
       return;
     }
     set.toggleWaypoint(location);
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public ZonePoint getLastWaypoint(GUID keyToken) {
@@ -422,7 +433,7 @@ public class ZoneRenderer extends JComponent
     if (set == null) {
       return;
     }
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public void commitMoveSelectionSet(GUID keyTokenId) {
@@ -616,8 +627,7 @@ public class ZoneRenderer extends JComponent
     y = getSize().height / 2 - (int) (y * getScale()) - 1;
 
     setViewOffset(x, y);
-
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public void centerOn(CellPoint point) {
@@ -680,13 +690,13 @@ public class ZoneRenderer extends JComponent
     renderedLightMap = null;
     renderedAuraMap = null;
     zoneView.flush();
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public void flushFog() {
     flushFog = true;
     visibleScreenArea = null;
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public Zone getZone() {
@@ -2738,7 +2748,7 @@ public class ZoneRenderer extends JComponent
     if (!keepSelectedTokenSet) selectedTokenSet.clear();
     else keepSelectedTokenSet = false; // Always reset it back, temp boolean only
 
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   /**
@@ -3649,7 +3659,7 @@ public class ZoneRenderer extends JComponent
     // flushFog = true; // could call flushFog() but also clears visibleScreenArea and I don't know
     // if we want
     // that...
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public boolean selectToken(GUID tokenGUID) {
@@ -3661,7 +3671,7 @@ public class ZoneRenderer extends JComponent
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
     // flushFog = true;
-    repaint();
+    repaintDebouncer.dispatch();
     return true;
   }
 
@@ -3674,7 +3684,7 @@ public class ZoneRenderer extends JComponent
     }
     addToSelectionHistory(selectedTokenSet);
 
-    repaint();
+    repaintDebouncer.dispatch();
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
   }
@@ -3696,7 +3706,7 @@ public class ZoneRenderer extends JComponent
     selectedTokenSet.clear();
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public void undoSelectToken() {
@@ -3729,7 +3739,7 @@ public class ZoneRenderer extends JComponent
     // disable the undo button.
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   private void addToSelectionHistory(Set<GUID> selectionSet) {
@@ -3900,7 +3910,7 @@ public class ZoneRenderer extends JComponent
 
   public void adjustGridSize(int delta) {
     zone.getGrid().setSize(Math.max(0, zone.getGrid().getSize() + delta));
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public void moveGridBy(int dx, int dy) {
@@ -3917,7 +3927,7 @@ public class ZoneRenderer extends JComponent
       gridOffsetX = gridOffsetX - (int) zone.getGrid().getCellWidth();
     }
     zone.getGrid().setOffset(gridOffsetX, gridOffsetY);
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   /**
@@ -3956,7 +3966,7 @@ public class ZoneRenderer extends JComponent
   /** This makes sure that any image updates get refreshed. This could be a little smarter. */
   @Override
   public boolean imageUpdate(Image img, int infoflags, int x, int y, int w, int h) {
-    repaint();
+    repaintDebouncer.dispatch();
     return super.imageUpdate(img, infoflags, x, y, w, h);
   }
 
@@ -4166,8 +4176,6 @@ public class ZoneRenderer extends JComponent
     /**
      * Retrieves the last waypoint, or if there isn't one then the start point of the first path
      * segment.
-     *
-     * @param location
      */
     public ZonePoint getLastWaypoint() {
       ZonePoint zp;
@@ -4464,7 +4472,7 @@ public class ZoneRenderer extends JComponent
     AppActions.copyTokens(tokens);
     AppActions.updateActions();
     requestFocusInWindow();
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   /**
@@ -4552,7 +4560,7 @@ public class ZoneRenderer extends JComponent
         flushFog = true;
       }
       MapTool.getFrame().updateTokenTree();
-      repaint();
+      repaintDebouncer.dispatch();
     }
   }
 
@@ -4574,7 +4582,7 @@ public class ZoneRenderer extends JComponent
 
   public void setHighlightCommonMacros(List<Token> affectedTokens) {
     highlightCommonMacros = affectedTokens;
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   // End token common macro identification
