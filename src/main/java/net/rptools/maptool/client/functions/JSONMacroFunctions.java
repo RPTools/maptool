@@ -1148,6 +1148,26 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   /**
+   * JSONify the given value, inducing JSON type from the Maptool string value. Because Maptool
+   * arbitrarily convert null, true, and false from incoming json data into "null", "true" and
+   * "false", this function does the opposite to allow Maptool to send json data
+   *
+   * @param value A Maptool value.
+   * @return null, true or false instead of "null", "true, or "false", or the value unchanged
+   */
+  public static Object jsonify(Object value) {
+    // the json library does not use the java null object, but one singleton of its own
+    if ("null".equals(value)) {
+      return JSONNull.getInstance();
+    } else if ("true".equals(value)) {
+      return true;
+    } else if ("false".equals(value)) {
+      return false;
+    }
+    return value;
+  }
+
+  /**
    * Append a value to a JSON array.
    *
    * @param obj The JSON object.
@@ -1404,26 +1424,6 @@ public class JSONMacroFunctions extends AbstractFunction {
               obj == null ? "NULL" : obj.toString(),
               "json.length"));
     }
-  }
-
-  /**
-   * JSONify the given value, inducing JSON type from the Maptool string value. Because Maptool
-   * arbitrarily convert null, true, and false from incoming json data into "null", "true" and
-   * "false", this function does the opposite to allow Maptool to send json data
-   *
-   * @param value A Maptool value.
-   * @return null, true or false instead of "null", "true, or "false", or the value unchanged
-   */
-  private Object jsonify(Object value) {
-    // the json library does not use the java null object, but one singleton of its own
-    if ("null".equals(value)) {
-      return JSONNull.getInstance();
-    } else if ("true".equals(value)) {
-      return true;
-    } else if ("false".equals(value)) {
-      return false;
-    }
-    return value;
   }
 
   /**
