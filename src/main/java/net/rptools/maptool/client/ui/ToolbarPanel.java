@@ -22,6 +22,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.Hashtable;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -133,8 +134,8 @@ public class ToolbarPanel extends JToolBar {
     // the Volume icon
     add(
         createMuteButton(
-            "net/rptools/maptool/client/image/tool/mute.png",
-            "net/rptools/maptool/client/image/tool/volume.png",
+            "net/rptools/maptool/client/image/audio/mute.png",
+            "net/rptools/maptool/client/image/audio/volume.png",
             I18N.getText("tools.mute.tooltip"),
             I18N.getText("tools.unmute.tooltip")));
 
@@ -391,8 +392,8 @@ public class ToolbarPanel extends JToolBar {
         });
 
     try {
-      button.setIcon(new ImageIcon(ImageUtil.getImage(offIcon)));
-      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage(icon)));
+      button.setIcon(createIcon(offIcon, 25, 25));
+      button.setSelectedIcon(createIcon(icon, 25, 25));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
@@ -400,6 +401,13 @@ public class ToolbarPanel extends JToolBar {
     if (MediaPlayerAdapter.getGlobalMute()) button.doClick();
 
     return button;
+  }
+
+  private ImageIcon createIcon(String strResource, int w, int h) throws IOException {
+    return ImageUtil.resizeImage(
+        new ImageIcon(ImageIO.read(getClass().getClassLoader().getResourceAsStream(strResource))),
+        w,
+        h);
   }
 
   private JToggleButton createTokenSelectionButton(
