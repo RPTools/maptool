@@ -164,7 +164,11 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.1' // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
 
     implementation 'net.java.abeille:abeille-formsrt:2.0'
-    implementation 'net.rptools.clientserver:clientserver:1.4.0.+'
+
+    // sourceControl gitRepository currently not producing classpath for Eclipse
+    // using jitpack.io for now
+    // implementation 'net.rptools.clientserver:clientserver:1.4.0.+'
+    implementation 'com.github.RPTools:clientserver:1.4.0.0'
     implementation 'org.hibernate:antlr:2.7.5H3'
 
     implementation 'commons-beanutils:commons-beanutils-core:1.8.3'
