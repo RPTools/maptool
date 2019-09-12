@@ -16,10 +16,7 @@ package net.rptools.maptool.client.functions;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import javafx.animation.KeyFrame;
@@ -408,5 +405,35 @@ public class MediaPlayerAdapter {
    */
   public static boolean getGlobalMute() {
     return globalMute;
+  }
+
+  /**
+   * Convert a string into a uri string. Spaces are replaced by %20, among other things
+   *
+   * @param string the string to convert
+   * @return the converted string
+   */
+  public static String convertToURI(Object string) {
+    String strUri = string.toString().trim();
+    if (!isWeb(strUri) && !strUri.toUpperCase().startsWith("FILE")) {
+      strUri = "FILE:/" + strUri;
+    }
+
+    try {
+      String decodedURL = URLDecoder.decode(strUri, "UTF-8");
+      URL url = new URL(decodedURL);
+      URI uri =
+          new URI(
+              url.getProtocol(),
+              url.getUserInfo(),
+              url.getHost(),
+              url.getPort(),
+              url.getPath(),
+              url.getQuery(),
+              url.getRef());
+      return uri.toString();
+    } catch (Exception ex) {
+      return strUri;
+    }
   }
 }
