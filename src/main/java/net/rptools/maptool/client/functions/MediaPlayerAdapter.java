@@ -16,12 +16,12 @@ package net.rptools.maptool.client.functions;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -42,6 +42,7 @@ public class MediaPlayerAdapter {
       new ConcurrentHashMap<>();
 
   private static double globalVolume = 1;
+  private static boolean globalMute = false;
 
   private final String strUri;
   private final Media media;
@@ -114,6 +115,7 @@ public class MediaPlayerAdapter {
             player.setStartTime(durStart);
             player.setStopTime(durStop);
 
+            player.setMute(globalMute);
             player.seek(durStart); // start playing from the start
             if (cycleCount != 0) {
               if (old) player.play();
@@ -129,18 +131,19 @@ public class MediaPlayerAdapter {
    *
    * @param strUri the String url of the stream
    * @param remove should the stream be disposed
+   * @param fadeout time in ms to fadeout (0: no fadeout)
    */
-  public static void stopStream(String strUri, boolean remove) {
+  public static void stopStream(String strUri, boolean remove, double fadeout) {
     Platform.runLater(
         new Runnable() {
           @Override
           public void run() {
             if (strUri.equals("*")) {
               for (HashMap.Entry mapElement : mapStreams.entrySet())
-                ((MediaPlayerAdapter) mapElement.getValue()).stopStream(remove);
+                ((MediaPlayerAdapter) mapElement.getValue()).stopStream(remove, fadeout);
             } else {
               MediaPlayerAdapter adapter = mapStreams.get(strUri);
-              if (adapter != null) adapter.stopStream(remove);
+              if (adapter != null) adapter.stopStream(remove, fadeout);
             }
           }
         });
@@ -156,6 +159,26 @@ public class MediaPlayerAdapter {
       player.dispose();
       mapStreams.remove(this.strUri);
     } else player.stop();
+  }
+
+  /**
+   * Stop the stream. Should be ran from JavaFX app thread.
+   *
+   * @param remove should the stream be disposed and map updated
+   * @param fadeout time in ms to fadeout (0: no fadeout)
+   */
+  private void stopStream(boolean remove, double fadeout) {
+    if (fadeout <= 0) stopStream(remove);
+    else {
+      Timeline timeline =
+          new Timeline(
+              new KeyFrame(Duration.millis(fadeout), new KeyValue(player.volumeProperty(), 0)));
+      timeline.setOnFinished(
+          (event -> {
+            stopStream(remove); // stop the stream at the end
+          }));
+      timeline.play();
+    }
   }
 
   /**
@@ -352,5 +375,67 @@ public class MediaPlayerAdapter {
    */
   public static double getGlobalVolume() {
     return globalVolume;
+  }
+
+  /**
+   * Set the global mute status
+   *
+   * @param mute the mute status
+   */
+  public static void setGlobalMute(boolean mute) {
+    globalMute = mute;
+    Platform.runLater(
+        new Runnable() {
+          @Override
+          public void run() {
+            for (HashMap.Entry mapElement : mapStreams.entrySet())
+              ((MediaPlayerAdapter) mapElement.getValue()).updateMute();
+          }
+        });
+  }
+
+  /** Update the mute of the stream */
+  private void updateMute() {
+    player.setMute(globalMute);
+  }
+  /**
+   * Get the global mute status
+   *
+   * @return the mute status
+   */
+  public static boolean getGlobalMute() {
+    return globalMute;
+  }
+
+  /**
+   * Convert a string into a uri string. Spaces are replaced by %20, among other things. The string
+   * "*" is returned as-is
+   *
+   * @param string the string to convert
+   * @return the converted string
+   */
+  public static String convertToURI(Object string) {
+    String strUri = string.toString().trim();
+    if (strUri.equals("*")) return strUri;
+    if (!isWeb(strUri) && !strUri.toUpperCase().startsWith("FILE")) {
+      strUri = "FILE:/" + strUri;
+    }
+
+    try {
+      String decodedURL = URLDecoder.decode(strUri, "UTF-8");
+      URL url = new URL(decodedURL);
+      URI uri =
+          new URI(
+              url.getProtocol(),
+              url.getUserInfo(),
+              url.getHost(),
+              url.getPort(),
+              url.getPath(),
+              url.getQuery(),
+              url.getRef());
+      return uri.toString();
+    } catch (Exception ex) {
+      return strUri;
+    }
   }
 }
