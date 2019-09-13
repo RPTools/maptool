@@ -408,13 +408,15 @@ public class MediaPlayerAdapter {
   }
 
   /**
-   * Convert a string into a uri string. Spaces are replaced by %20, among other things
+   * Convert a string into a uri string. Spaces are replaced by %20, among other things. The string
+   * "*" is returned as-is
    *
    * @param string the string to convert
    * @return the converted string
    */
   public static String convertToURI(Object string) {
     String strUri = string.toString().trim();
+    if (strUri.equals("*")) return strUri;
     if (!isWeb(strUri) && !strUri.toUpperCase().startsWith("FILE")) {
       strUri = "FILE:/" + strUri;
     }
