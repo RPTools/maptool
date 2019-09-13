@@ -47,7 +47,7 @@ public class SoundFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("playStream")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 5);
       if (!AppPreferences.getPlayStreams()) return -1; // do nothing if disabled in preferences
-      String strUri = args.get(0).toString();
+      String strUri = MediaPlayerAdapter.convertToURI(args.get(0));
       int cycleCount = psize > 1 ? FunctionUtil.paramAsInteger(functionName, args, 1, true) : 1;
       double volume = psize > 2 ? FunctionUtil.paramAsDouble(functionName, args, 2, true) : 1;
       double start = psize > 3 ? FunctionUtil.paramAsDouble(functionName, args, 3, true) * 1000 : 0;
@@ -58,7 +58,7 @@ public class SoundFunctions extends AbstractFunction {
           : BigDecimal.ZERO;
     } else if (functionName.equalsIgnoreCase("editStream")) {
       FunctionUtil.checkNumberParam(functionName, args, 2, 5);
-      String strUri = args.get(0).toString();
+      String strUri = MediaPlayerAdapter.convertToURI(args.get(0));
 
       Integer cycleCount = null;
       Double volume = null;
@@ -78,14 +78,14 @@ public class SoundFunctions extends AbstractFunction {
       return "";
     } else if (functionName.equalsIgnoreCase("stopStream")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 3);
-      String strUri = psize > 0 ? args.get(0).toString() : "*";
+      String strUri = psize > 0 ? MediaPlayerAdapter.convertToURI(args.get(0)) : "*";
       boolean del = psize > 1 ? FunctionUtil.paramAsBoolean(functionName, args, 1, true) : true;
       double fade = psize > 2 ? FunctionUtil.paramAsDouble(functionName, args, 2, true) * 1000 : 0;
       MediaPlayerAdapter.stopStream(strUri, del, fade);
       return "";
     } else if (functionName.equalsIgnoreCase("getStreamProperties")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 1);
-      String strUri = psize > 0 ? args.get(0).toString() : "*";
+      String strUri = psize > 0 ? MediaPlayerAdapter.convertToURI(args.get(0)) : "*";
       return MediaPlayerAdapter.getStreamProperties(strUri);
     }
     return null;
