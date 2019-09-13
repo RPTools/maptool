@@ -1952,6 +1952,12 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
+  /** @return is token an image/lib token */
+  public boolean isImgOrLib() {
+    return (getName().toLowerCase().startsWith("image:")
+        || getName().toLowerCase().startsWith("lib:"));
+  }
+
   public HeroLabData getHeroLabData() {
     return heroLabData;
   }

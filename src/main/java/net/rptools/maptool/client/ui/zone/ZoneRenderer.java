@@ -4526,6 +4526,14 @@ public class ZoneRenderer extends JComponent
     return visibleTokenSet;
   }
 
+  public List<Token> getVisibleTokens() {
+    List<Token> tokenList = new ArrayList<Token>(visibleTokenSet.size());
+    for (GUID id : visibleTokenSet) {
+      tokenList.add(zone.getToken(id));
+    }
+    return tokenList;
+  }
+
   /*
    * (non-Javadoc)
    *
