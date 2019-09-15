@@ -221,6 +221,11 @@ public class IsometricGrid extends Grid {
   }
 
   @Override
+  public boolean useMetric() {
+    return true;
+  }
+
+  @Override
   public ZoneWalker createZoneWalker() {
     WalkerMetric metric =
         MapTool.isPersonalServer()

@@ -55,8 +55,9 @@ public class AStarSquareEuclideanWalker extends AbstractAStarWalker {
         neighborMap =
             new int[][] {NORTH, EAST, SOUTH, WEST, NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST};
         break;
-      case ONE_ONE_ONE:
       case MANHATTAN:
+        diagonalMultiplier = 2;
+      case ONE_ONE_ONE:
         // promote straight directions to avoid 'only-diagonals' effect
         neighborMap =
             new int[][] {NORTH, EAST, SOUTH, WEST, NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST};
