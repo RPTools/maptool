@@ -25,6 +25,7 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.*;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
 @SuppressWarnings("unchecked")
@@ -1147,6 +1148,26 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   /**
+   * JSONify the given value, inducing JSON type from the Maptool string value. Because Maptool
+   * arbitrarily convert null, true, and false from incoming json data into "null", "true" and
+   * "false", this function does the opposite to allow Maptool to send json data
+   *
+   * @param value A Maptool value.
+   * @return null, true or false instead of "null", "true, or "false", or the value unchanged
+   */
+  public static Object jsonify(Object value) {
+    // the json library does not use the java null object, but one singleton of its own
+    if ("null".equals(value)) {
+      return JSONNull.getInstance();
+    } else if ("true".equals(value)) {
+      return true;
+    } else if ("false".equals(value)) {
+      return false;
+    }
+    return value;
+  }
+
+  /**
    * Append a value to a JSON array.
    *
    * @param obj The JSON object.
@@ -1163,7 +1184,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       // Create a new JSON Array to support immutable types in macros.
       JSONArray jarr = JSONArray.fromObject(obj);
       for (Object val : values.subList(1, values.size())) {
-        jarr.add(val);
+        jarr.add(jsonify(val));
       }
       return jarr;
     } else {
@@ -1427,14 +1448,14 @@ public class JSONMacroFunctions extends AbstractFunction {
       // Create a new JSON object to preserve macro object immutable types.
       JSONObject jobj = JSONObject.fromObject(obj);
       for (int i = 1; i < param.size(); i += 2) {
-        jobj.put(param.get(i).toString(), param.get(i + 1));
+        jobj.put(param.get(i).toString(), jsonify(param.get(i + 1)));
       }
       return jobj;
     } else if (obj instanceof JSONArray) {
       // Create a new JSON array to preserve macro object immutable types.
       JSONArray jarr = JSONArray.fromObject(obj);
       for (int i = 1; i < param.size(); i += 2) {
-        jarr.set(Integer.parseInt(param.get(i).toString()), param.get(i + 1));
+        jarr.set(Integer.parseInt(param.get(i).toString()), jsonify(param.get(i + 1)));
       }
       return jarr;
     } else {
