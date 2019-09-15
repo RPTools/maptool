@@ -14,7 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -427,6 +427,37 @@ public class TokenLocationFunctions extends AbstractFunction {
       }
       return h;
     }
+  }
+
+  /**
+   * Return true if token is at one of (x,y) cell coordinates, false otherwise. If using no-grid
+   * map, check if part of the token overlaps each x-y pixel. Intended for getTokens() macro call to
+   * get better performances.
+   *
+   * @param token The token to check the overlap status of
+   * @param zone The map
+   * @param points An array of points (cells coordinates)
+   * @return true if overlap, false otherwise
+   */
+  public static boolean isTokenAtXY(Token token, Zone zone, Point[] points) {
+    Grid grid = zone.getGrid();
+    if (grid.getCapabilities().isPathingSupported()) {
+      Set<CellPoint> tokenCells = token.getOccupiedCells(grid);
+      int cellx, celly;
+      for (CellPoint cell : tokenCells) {
+        cellx = cell.x;
+        celly = cell.y;
+        for (int i = 0; i < points.length; i++) {
+          if (cellx == points[i].x && celly == points[i].y) return true;
+        }
+      }
+    } else {
+      Rectangle bounds = token.getBounds(zone);
+      for (int i = 0; i < points.length; i++) {
+        if (bounds.contains(points[i])) return true;
+      }
+    }
+    return false;
   }
 
   /**

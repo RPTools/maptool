@@ -14,8 +14,10 @@
  */
 package net.rptools.maptool.client.functions;
 
+import java.awt.*;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -329,11 +331,8 @@ public class FindTokenFunctions extends AbstractFunction {
         layers.add(o.toString());
       }
     }
-    allTokens =
-        MapTool.getFrame()
-            .getCurrentZoneRenderer()
-            .getZone()
-            .getTokensFiltered(new LayerFilter(layers));
+    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    allTokens = zone.getTokensFiltered(new LayerFilter(layers));
     List<Token> tokenList = new ArrayList<Token>(allTokens.size());
     tokenList.addAll(allTokens);
     JSONObject range = null;
@@ -477,7 +476,8 @@ public class FindTokenFunctions extends AbstractFunction {
       }
       CellPoint cp = instance.getTokenCell(token);
 
-      Set<Token> matching = new HashSet<Token>();
+      Point[] points = new Point[offsets.size()];
+      int ip = 0; // create an array of points for each cell
       for (Object o : offsets) {
         if (!(o instanceof JSONObject)) {
           throw new ParserException(
@@ -488,16 +488,14 @@ public class FindTokenFunctions extends AbstractFunction {
           throw new ParserException(
               I18N.getText("macro.function.findTokenFunctions.offsetArray", "getTokens"));
         }
-        int x = joff.getInt("x");
-        int y = joff.getInt("y");
-        for (Token targetToken : tokenList) {
-          if (!matching.contains(targetToken)) {
-            Double distance = instance.getDistance(targetToken, cp.x + x, cp.y + y, false, metric);
-            if (distance >= 0 && distance < 1) {
-              matching.add(targetToken);
-            }
-          }
-        }
+        // note: cp.x and cp.y returns the top left cell (pixel for gridless
+        points[ip] = new Point(joff.getInt("x") + cp.x, joff.getInt("y") + cp.y);
+        ip += 1;
+      }
+      Set<Token> matching = new HashSet<Token>();
+      for (Token targetToken : tokenList) {
+        if (TokenLocationFunctions.isTokenAtXY(targetToken, zone, points))
+          matching.add(targetToken);
       }
       tokenList.retainAll(matching);
     }
