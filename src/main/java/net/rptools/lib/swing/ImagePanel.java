@@ -102,7 +102,7 @@ public class ImagePanel extends JComponent
 
   public void setGridSize(int size) {
     // Min
-    size = Math.min(25, size);
+    size = Math.max(25, size);
     if (size != gridSize) {
       gridSize = size;
       revalidate();
