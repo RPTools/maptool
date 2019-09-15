@@ -146,6 +146,10 @@ public abstract class Grid implements Cloneable {
     return false;
   }
 
+  public boolean useMetric() {
+    return false; // only square & iso use metrics
+  }
+
   public boolean isHex() {
     return false;
   }

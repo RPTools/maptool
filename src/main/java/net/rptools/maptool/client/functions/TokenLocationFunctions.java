@@ -28,7 +28,6 @@ import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.SquareGrid;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -317,7 +316,7 @@ public class TokenLocationFunctions extends AbstractFunction {
               .getOccupiedCells(grid.convert(new ZonePoint(target.getX(), target.getY())));
 
       ZoneWalker walker;
-      if (metric != null && grid instanceof SquareGrid) {
+      if (metric != null && grid.useMetric()) {
         try {
           WalkerMetric wmetric = WalkerMetric.valueOf(metric);
           walker = new AStarSquareEuclideanWalker(renderer.getZone(), wmetric);
@@ -388,7 +387,7 @@ public class TokenLocationFunctions extends AbstractFunction {
               .getOccupiedCells(grid.convert(new ZonePoint(source.getX(), source.getY())));
 
       ZoneWalker walker;
-      if (metric != null && grid instanceof SquareGrid) {
+      if (metric != null && grid.useMetric()) {
         try {
           WalkerMetric wmetric = WalkerMetric.valueOf(metric);
           walker = new AStarSquareEuclideanWalker(renderer.getZone(), wmetric);
