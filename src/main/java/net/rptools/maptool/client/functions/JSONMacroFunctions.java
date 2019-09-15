@@ -114,6 +114,8 @@ public class JSONMacroFunctions extends AbstractFunction {
       String jsonStr = parameters.get(0).toString();
       String path = parameters.get(1).toString();
       Object value = parameters.get(2);
+      Object json = convertToJSON(value.toString());
+      if (json != null) value = json; // to prevent quotes getting turned into \" and \"
 
       try {
         return JsonPath.parse(jsonStr).add(path, value).jsonString(); // add element to array
@@ -128,6 +130,8 @@ public class JSONMacroFunctions extends AbstractFunction {
       String jsonStr = parameters.get(0).toString();
       String path = parameters.get(1).toString();
       Object value = parameters.get(2);
+      Object json = convertToJSON(value.toString());
+      if (json != null) value = json;
 
       try {
         return JsonPath.parse(jsonStr).set(path, value).jsonString(); // set element in array/object
@@ -143,6 +147,8 @@ public class JSONMacroFunctions extends AbstractFunction {
       String path = parameters.get(1).toString();
       String key = parameters.get(2).toString();
       Object value = parameters.get(3);
+      Object json = convertToJSON(value.toString());
+      if (json != null) value = json;
 
       try {
         return JsonPath.parse(jsonStr).put(path, key, value).jsonString(); // add value in object
