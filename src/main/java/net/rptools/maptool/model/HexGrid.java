@@ -24,6 +24,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import net.rptools.lib.image.ImageUtil;
@@ -227,6 +228,12 @@ public abstract class HexGrid extends Grid {
 
   public HexGrid() {
     super();
+  }
+
+  @Override
+  public Point2D.Double getCellCenter(CellPoint cell) {
+    // hex grids have their pixel xy at their center
+    return new Point2D.Double(cell.x, cell.y);
   }
 
   @Override
