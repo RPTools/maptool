@@ -36,6 +36,7 @@ import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.Zone.Event;
@@ -495,6 +496,32 @@ public abstract class Grid implements Cloneable {
     if (xDist > yDist) distance = 1.5 * yDist + (xDist - yDist);
     else distance = 1.5 * xDist + (yDist - xDist);
 
+    return distance;
+  }
+
+  /**
+   * Return the cell distance between two cells. Does not take into account terrain or VBL.
+   * Overridden by Hex & Gridless grids.
+   *
+   * @param cellA the first cell
+   * @param cellB the second cell
+   * @param wmetric the walker metric
+   * @return the distance (in cells) between the two cells
+   */
+  public double cellDistance(CellPoint cellA, CellPoint cellB, WalkerMetric wmetric) {
+    int distance;
+    int distX = Math.abs(cellA.x - cellB.x);
+    int distY = Math.abs(cellA.y - cellB.y);
+    if (wmetric == WalkerMetric.NO_DIAGONALS || wmetric == WalkerMetric.MANHATTAN) {
+      distance = distX + distY;
+    } else if (wmetric == WalkerMetric.ONE_ONE_ONE) {
+      distance = Math.max(distX, distY);
+    } else if (wmetric == WalkerMetric.ONE_TWO_ONE) {
+      distance = Math.max(distX, distY) + Math.min(distX, distY) / 2;
+    } else {
+      System.out.println("Incorrect WalkerMetric in method cellDistance of Grid.java");
+      distance = -1; // error, should not happen;
+    }
     return distance;
   }
 

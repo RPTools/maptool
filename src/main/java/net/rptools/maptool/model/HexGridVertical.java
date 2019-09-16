@@ -29,6 +29,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarVertHexEuclideanWalker;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
@@ -74,6 +75,20 @@ public class HexGridVertical extends HexGrid {
   public HexGridVertical(boolean faceEdges, boolean faceVertices) {
     super();
     setFacings(faceEdges, faceVertices);
+  }
+
+  @Override
+  public double cellDistance(CellPoint cellA, CellPoint cellB, WalkerMetric wmetric) {
+    int x1 = cellA.x;
+    int x2 = cellB.x;
+    int y1 = cellA.y - (int) Math.floor(x1 / 2.0); // convert to 60-degree angle coordinates
+    int y2 = cellB.y - (int) Math.floor(x2 / 2.0);
+
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+
+    if (Integer.signum(dx) == Integer.signum(dy)) return Math.abs(dx + dy);
+    else return Math.max(Math.abs(dx), Math.abs(dy));
   }
 
   @Override
