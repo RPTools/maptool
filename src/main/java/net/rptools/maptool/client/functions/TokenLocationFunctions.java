@@ -376,6 +376,7 @@ public class TokenLocationFunctions extends AbstractFunction {
    * @param y the y co-ordinate to get the distance to.
    * @param units get the distance in the units specified for the map.
    * @param metric The metric used.
+   * @param pixels Are x & y for pixels coordinates? false: grid coords
    * @return the distance between the token and the x,y coordinates
    * @throws ParserException when an error occurs
    */
@@ -421,7 +422,7 @@ public class TokenLocationFunctions extends AbstractFunction {
       }
     } else {
       double targetX, targetY;
-      if (pixels) {
+      if (!pixels) {
         // get center of target cell
         Point2D.Double targetPoint = grid.getCellCenter(new CellPoint(x, y));
         targetX = targetPoint.x;
