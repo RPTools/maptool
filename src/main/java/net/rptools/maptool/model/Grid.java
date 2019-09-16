@@ -18,11 +18,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashSet;
@@ -105,6 +101,13 @@ public abstract class Grid implements Cloneable {
   public int[] getFacingAngles() {
     return null;
   }
+
+  /**
+   * Return the Point (double precision) for pixel center of Cell
+   *
+   * @param cell The cell to get the center of.
+   */
+  public abstract Point2D.Double getCellCenter(CellPoint cell);
 
   protected List<TokenFootprint> loadFootprints(String path, OffsetTranslator... translators)
       throws IOException {

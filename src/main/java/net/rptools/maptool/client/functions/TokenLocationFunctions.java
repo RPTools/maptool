@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.functions;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +56,7 @@ public class TokenLocationFunctions extends AbstractFunction {
   private TokenLocationFunctions() {
     super(
         0,
-        5,
+        6,
         "getTokenX",
         "getTokenY",
         "getTokenDrawOrder",
@@ -115,6 +116,7 @@ public class TokenLocationFunctions extends AbstractFunction {
       return getDistance(res, parameters);
     }
     if (functionName.equals("getDistanceToXY")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 6);
       return getDistanceToXY(res, parameters);
     }
     if (functionName.equals("goto")) {
@@ -351,14 +353,15 @@ public class TokenLocationFunctions extends AbstractFunction {
       }
     } else {
       // take distance between center of the two tokens
-      double d = source.getFootprint(grid).getScale();
-      double sourceCenterX = source.getX() + (d * grid.getSize()) / 2;
-      double sourceCenterY = source.getY() + (d * grid.getSize()) / 2;
-      d = target.getFootprint(grid).getScale();
-      double targetCenterX = target.getX() + (d * grid.getSize()) / 2;
-      double targetCenterY = target.getY() + (d * grid.getSize()) / 2;
-      double a = sourceCenterX - targetCenterX;
-      double b = sourceCenterY - targetCenterY;
+      Rectangle sourceBounds = source.getBounds(zone);
+      double sourceCenterX = sourceBounds.x + sourceBounds.width / 2.0;
+      double sourceCenterY = sourceBounds.y + sourceBounds.height / 2.0;
+      Rectangle targetBounds = target.getBounds(zone);
+      double targetCenterX = targetBounds.x + targetBounds.width / 2.0;
+      double targetCenterY = targetBounds.y + targetBounds.height / 2.0;
+
+      double a = (int) (sourceCenterX - targetCenterX);
+      double b = (int) (sourceCenterY - targetCenterY);
       distance = Math.sqrt(a * a + b * b) / grid.getSize();
       if (units) distance *= zone.getUnitsPerCell();
     }
@@ -373,27 +376,28 @@ public class TokenLocationFunctions extends AbstractFunction {
    * @param y the y co-ordinate to get the distance to.
    * @param units get the distance in the units specified for the map.
    * @param metric The metric used.
-   * @return
+   * @return the distance between the token and the x,y coordinates
    * @throws ParserException when an error occurs
    */
-  public double getDistance(Token source, int x, int y, boolean units, String metric)
+  public double getDistance(
+      Token source, int x, int y, boolean units, String metric, boolean pixels)
       throws ParserException {
-    ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-    Grid grid = renderer.getZone().getGrid();
+    Zone zone = source.getZoneRenderer().getZone();
+    Grid grid = zone.getGrid();
 
     if (grid.getCapabilities().isPathingSupported() && !NO_GRID.equals(metric)) {
-
       // Get which cells our tokens occupy
-      Set<CellPoint> sourceCells =
-          source
-              .getFootprint(grid)
-              .getOccupiedCells(grid.convert(new ZonePoint(source.getX(), source.getY())));
+      Set<CellPoint> sourceCells = source.getOccupiedCells(grid);
+
+      CellPoint targetCell;
+      if (!pixels) targetCell = new CellPoint(x, y);
+      else targetCell = grid.convert(new ZonePoint(x, y));
 
       ZoneWalker walker;
       if (metric != null && grid.useMetric()) {
         try {
           WalkerMetric wmetric = WalkerMetric.valueOf(metric);
-          walker = new AStarSquareEuclideanWalker(renderer.getZone(), wmetric);
+          walker = new AStarSquareEuclideanWalker(zone, wmetric);
 
         } catch (IllegalArgumentException e) {
           throw new ParserException(
@@ -405,7 +409,6 @@ public class TokenLocationFunctions extends AbstractFunction {
 
       // Get the distances from each source to target cell and keep the minimum one
       double distance = Double.MAX_VALUE;
-      CellPoint targetCell = new CellPoint(x, y);
       for (CellPoint scell : sourceCells) {
         walker.setWaypoints(scell, targetCell);
         distance = Math.min(distance, walker.getDistance());
@@ -417,17 +420,25 @@ public class TokenLocationFunctions extends AbstractFunction {
         return distance / getDistancePerCell();
       }
     } else {
-
-      double d = source.getFootprint(grid).getScale();
-      double sourceCenterX = source.getX() + (d * grid.getSize()) / 2;
-      double sourceCenterY = source.getY() + (d * grid.getSize()) / 2;
-      double a = sourceCenterX - x;
-      double b = sourceCenterY - y;
-      double h = Math.sqrt(a * a + b * b);
-      h /= renderer.getZone().getGrid().getSize();
-      if (units) {
-        h *= renderer.getZone().getUnitsPerCell();
+      double targetX, targetY;
+      if (pixels) {
+        // get center of target cell
+        Point2D.Double targetPoint = grid.getCellCenter(new CellPoint(x, y));
+        targetX = targetPoint.x;
+        targetY = targetPoint.y;
+      } else {
+        targetX = x;
+        targetY = y;
       }
+
+      // get the pixel coords for the center of the token
+      Rectangle sourceBounds = source.getBounds(zone);
+      double sourceCenterX = sourceBounds.x + sourceBounds.width / 2.0;
+      double sourceCenterY = sourceBounds.y + sourceBounds.height / 2.0;
+      double a = (int) (sourceCenterX - targetX);
+      double b = (int) (sourceCenterY - targetY);
+      double h = Math.sqrt(a * a + b * b) / grid.getSize();
+      if (units) h *= zone.getUnitsPerCell();
       return h;
     }
   }
@@ -516,53 +527,19 @@ public class TokenLocationFunctions extends AbstractFunction {
    */
   private BigDecimal getDistanceToXY(MapToolVariableResolver res, List<Object> args)
       throws ParserException {
-    if (args.size() < 2) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.notEnoughParam", "getDistance", 2, args.size()));
-    }
+    final String fName = "getDistanceToXY";
 
-    Token source = FunctionUtil.getTokenFromParam(res, "getDistanceToXY", args, 3, -1);
-
-    if (!(args.get(0) instanceof BigDecimal)) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.argumentTypeN",
-              "getDistanceToXY",
-              1,
-              args.get(0).toString()));
-    }
-    if (!(args.get(1) instanceof BigDecimal)) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.argumentTypeN",
-              "getDistanceToXY",
-              2,
-              args.get(1).toString()));
-    }
-
-    int x = ((BigDecimal) args.get(0)).intValue();
-    int y = ((BigDecimal) args.get(1)).intValue();
+    int x = FunctionUtil.paramAsInteger(fName, args, 0, false);
+    int y = FunctionUtil.paramAsInteger(fName, args, 1, false);
 
     boolean useDistancePerCell = true;
-    if (args.size() > 2) {
-      if (!(args.get(2) instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeN",
-                "getDistanceXY",
-                3,
-                args.get(2).toString()));
-      }
-      BigDecimal val = (BigDecimal) args.get(2);
-      useDistancePerCell = val.equals(BigDecimal.ZERO) ? false : true;
-    }
+    if (args.size() > 2) useDistancePerCell = FunctionUtil.paramAsBoolean(fName, args, 2, true);
 
-    String metric = null;
-    if (args.size() > 4) {
-      metric = (String) args.get(4);
-    }
+    Token source = FunctionUtil.getTokenFromParam(res, fName, args, 3, -1);
+    String metric = args.size() > 4 ? args.get(4).toString() : null;
+    boolean pixel = args.size() > 5 ? FunctionUtil.paramAsBoolean(fName, args, 5, true) : false;
 
-    double dist = getDistance(source, x, y, useDistancePerCell, metric);
+    double dist = getDistance(source, x, y, useDistancePerCell, metric, pixel);
 
     if (dist == Math.floor(dist)) {
       return BigDecimal.valueOf((int) dist);

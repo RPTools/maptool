@@ -17,6 +17,7 @@ package net.rptools.maptool.model;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +73,12 @@ public class GridlessGrid extends Grid {
   @Override
   public int[] getFacingAngles() {
     return FACING_ANGLES;
+  }
+
+  @Override
+  public Point2D.Double getCellCenter(CellPoint cell) {
+    // For gridless grids, cell = pixel;
+    return new Point2D.Double(cell.x, cell.y);
   }
 
   @Override
