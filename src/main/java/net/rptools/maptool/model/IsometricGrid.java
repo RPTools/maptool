@@ -151,8 +151,10 @@ public class IsometricGrid extends Grid {
   @Override
   public Point2D.Double getCellCenter(CellPoint cell) {
     // iso grids have their x at their center;
-    double targetY = cell.y + getCellHeight() / 2.0;
-    return new Point2D.Double(cell.x, targetY);
+    ZonePoint zonePoint = convert(cell);
+    double x = zonePoint.x;
+    double y = zonePoint.y + getCellHeight() / 2.0;
+    return new Point2D.Double(x, y);
   }
 
   private static final GridCapabilities GRID_CAPABILITIES =

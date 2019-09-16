@@ -273,9 +273,10 @@ public class SquareGrid extends Grid {
   @Override
   public Point2D.Double getCellCenter(CellPoint cell) {
     // square have their xy at their top left
-    double targetX = cell.x + getCellWidth() / 2.0;
-    double targetY = cell.y + getCellHeight() / 2.0;
-    return new Point2D.Double(targetX, targetY);
+    ZonePoint zonePoint = convert(cell);
+    double x = zonePoint.x + getCellWidth() / 2.0;
+    double y = zonePoint.y + getCellHeight() / 2.0;
+    return new Point2D.Double(x, y);
   }
 
   @Override
