@@ -25,6 +25,7 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
+import net.rptools.maptool.client.walker.WalkerMetric;
 
 public class GridlessGrid extends Grid {
   private static List<TokenFootprint> footprintList;
@@ -71,6 +72,13 @@ public class GridlessGrid extends Grid {
   @Override
   public int[] getFacingAngles() {
     return FACING_ANGLES;
+  }
+
+  @Override
+  public double cellDistance(CellPoint cellA, CellPoint cellB, WalkerMetric wmetric) {
+    int dX = cellA.x - cellB.x;
+    int dY = cellA.y - cellB.y;
+    return Math.sqrt(dX * dX + dY * dY) / this.getSize(); // returns in cell units
   }
 
   /*

@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -289,62 +290,67 @@ public class TokenLocationFunctions extends AbstractFunction {
   }
 
   /**
-   * Gets the distance between two tokens.
+   * Gets the distance between two tokens following map movement rules. Always use closedForm
+   * because VBL & terrain are currently ignored. The other walker-based approach is kept as it will
+   * be needed if we implement distance based on terrain & VBL.
    *
-   * @param source
-   * @param target
-   * @param units
-   * @param metric
-   * @return
-   * @throws ParserException
+   * @param source The token to get the distance from.
+   * @param target The token to calculate the distance to.
+   * @param units get the distance in the units specified for the map.
+   * @param metric The metric used.
+   * @return the distance.
+   * @throws ParserException when an error occurs
    */
   public double getDistance(Token source, Token target, boolean units, String metric)
       throws ParserException {
-    ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-    Grid grid = renderer.getZone().getGrid();
+    boolean closedForm = true; // VBL & terrain ignored, so closedForm always work
+    Zone zone = source.getZoneRenderer().getZone();
+    Grid grid = zone.getGrid();
+    double distance;
 
     if (grid.getCapabilities().isPathingSupported() && !NO_GRID.equals(metric)) {
+      Set<CellPoint> sourceCells = source.getOccupiedCells(grid);
+      Set<CellPoint> targetCells = target.getOccupiedCells(grid);
 
-      // Get which cells our tokens occupy
-      Set<CellPoint> sourceCells =
-          source
-              .getFootprint(grid)
-              .getOccupiedCells(grid.convert(new ZonePoint(source.getX(), source.getY())));
-      Set<CellPoint> targetCells =
-          target
-              .getFootprint(grid)
-              .getOccupiedCells(grid.convert(new ZonePoint(target.getX(), target.getY())));
-
-      ZoneWalker walker;
+      WalkerMetric wmetric = null;
       if (metric != null && grid.useMetric()) {
         try {
-          WalkerMetric wmetric = WalkerMetric.valueOf(metric);
-          walker = new AStarSquareEuclideanWalker(renderer.getZone(), wmetric);
-
+          wmetric = WalkerMetric.valueOf(metric);
         } catch (IllegalArgumentException e) {
           throw new ParserException(
               I18N.getText("macro.function.getDistance.invalidMetric", metric));
         }
-      } else {
-        walker = grid.createZoneWalker();
       }
 
-      // Get the distances from each source to target cell and keep the minimum one
-      double distance = Double.MAX_VALUE;
-      for (CellPoint scell : sourceCells) {
-        for (CellPoint tcell : targetCells) {
-          walker.setWaypoints(scell, tcell);
-          distance = Math.min(distance, walker.getDistance());
+      distance = Double.MAX_VALUE;
+      if (closedForm) {
+        if (wmetric == null && grid.useMetric()) wmetric = AppPreferences.getMovementMetric();
+        // explicitly find difference without walkers
+        double curDist;
+        for (CellPoint scell : sourceCells) {
+          for (CellPoint tcell : targetCells) {
+            curDist = grid.cellDistance(scell, tcell, wmetric);
+            distance = Math.min(distance, curDist);
+          }
         }
-      }
-
-      if (units) {
-        return distance;
+        if (units) distance *= zone.getUnitsPerCell();
       } else {
-        return distance / getDistancePerCell();
+        // walker approach, slow but could eventually take into account VBL & terrain
+        ZoneWalker walker =
+            grid.useMetric() && wmetric != null
+                ? new AStarSquareEuclideanWalker(zone, wmetric)
+                : grid.createZoneWalker();
+
+        for (CellPoint scell : sourceCells) {
+          for (CellPoint tcell : targetCells) {
+            walker.setWaypoints(scell, tcell);
+            distance = Math.min(distance, walker.getDistance());
+          }
+        }
+        if (!units) distance /= zone.getUnitsPerCell();
       }
     } else {
-
+      // take distance between center of the two tokens
       double d = source.getFootprint(grid).getScale();
       double sourceCenterX = source.getX() + (d * grid.getSize()) / 2;
       double sourceCenterY = source.getY() + (d * grid.getSize()) / 2;
@@ -353,13 +359,10 @@ public class TokenLocationFunctions extends AbstractFunction {
       double targetCenterY = target.getY() + (d * grid.getSize()) / 2;
       double a = sourceCenterX - targetCenterX;
       double b = sourceCenterY - targetCenterY;
-      double h = Math.sqrt(a * a + b * b);
-      h /= renderer.getZone().getGrid().getSize();
-      if (units) {
-        h *= renderer.getZone().getUnitsPerCell();
-      }
-      return h;
+      distance = Math.sqrt(a * a + b * b) / grid.getSize();
+      if (units) distance *= zone.getUnitsPerCell();
     }
+    return distance;
   }
 
   /**
