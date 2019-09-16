@@ -21,10 +21,7 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
@@ -149,6 +146,13 @@ public class IsometricGrid extends Grid {
   @Override
   public int[] getFacingAngles() {
     return FACING_ANGLES;
+  }
+
+  @Override
+  public Point2D.Double getCellCenter(CellPoint cell) {
+    // iso grids have their x at their center;
+    double targetY = cell.y + getCellHeight() / 2.0;
+    return new Point2D.Double(cell.x, targetY);
   }
 
   private static final GridCapabilities GRID_CAPABILITIES =
