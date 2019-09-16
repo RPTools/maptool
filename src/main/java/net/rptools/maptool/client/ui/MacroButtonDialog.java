@@ -550,6 +550,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   /** Is called when the dialog is about to disappear. We use it to do any menu cleanup. */
   private void destroyMenuBar() {
     JMenuBar mb = MapTool.getFrame().getJMenuBar();
+    if (mb == null) return;
     for (int i = 0; i < mb.getMenuCount(); i++) {
       JMenu menu = mb.getMenu(i);
       if (menu.getText().equalsIgnoreCase(I18N.getText("menu.edit"))) {
