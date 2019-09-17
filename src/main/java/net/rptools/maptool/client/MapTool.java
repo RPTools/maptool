@@ -534,6 +534,11 @@ public class MapTool {
     return soundManager;
   }
 
+  /**
+   * Play the sound registered to an eventId.
+   *
+   * @param eventId the eventId of the sound.
+   */
   public static void playSound(String eventId) {
     if (AppPreferences.getPlaySystemSounds()) {
       if (AppPreferences.getPlaySystemSoundsOnlyWhenNotFocused() && isInFocus()) {
