@@ -106,6 +106,7 @@ public abstract class Grid implements Cloneable {
    * Return the Point (double precision) for pixel center of Cell
    *
    * @param cell The cell to get the center of.
+   * @return Point of the coordinates.
    */
   public abstract Point2D.Double getCellCenter(CellPoint cell);
 
