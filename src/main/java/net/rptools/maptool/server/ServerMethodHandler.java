@@ -725,8 +725,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   public void updateCampaignMacros(List<MacroButtonProperties> properties) {
-    MapTool.getCampaign()
-        .setMacroButtonPropertiesArray(new ArrayList<MacroButtonProperties>(properties));
+    ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
+    MapTool.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
+    server.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
     forwardToClients();
   }
 
