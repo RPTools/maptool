@@ -16,10 +16,7 @@ package net.rptools.maptool.server;
 
 import java.awt.geom.Area;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.ClientCommand;
@@ -117,6 +114,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           break;
         case message:
           message((TextMessage) context.get(0));
+          break;
+        case execLink:
+          execLink((String) context.get(0), (String) context.get(1));
           break;
         case putAsset:
           putAsset((Asset) context.get(0));
@@ -506,6 +506,11 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 
   public void message(TextMessage message) {
     forwardToClients();
+  }
+
+  @Override
+  public void execLink(String link, String target) {
+    forwardToAllClients();
   }
 
   public void putAsset(Asset asset) {

@@ -193,6 +193,11 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.message, message);
   }
 
+  @Override
+  public void execLink(String link, String target) {
+    makeServerCall(COMMAND.execLink, link, target);
+  }
+
   public void showPointer(String player, Pointer pointer) {
     makeServerCall(COMMAND.showPointer, player, pointer);
   }
