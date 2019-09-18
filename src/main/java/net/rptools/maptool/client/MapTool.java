@@ -901,10 +901,26 @@ public class MapTool {
    */
   public static void addGlobalMessage(String message, List<String> targets) {
     for (String target : targets) {
-      if ("gm".equalsIgnoreCase(target)) {
-        addMessage(TextMessage.gm(null, message));
-      } else {
-        addMessage(TextMessage.whisper(null, target, message));
+      switch (target.toLowerCase()) {
+        case "gm-self":
+          if (!MapTool.getPlayer().isGM()) {
+            // don't duplicate message if self is GM
+            addMessage(TextMessage.whisper(null, MapTool.getPlayer().getName(), message));
+          } // FALLTHRU
+        case "gm":
+          addMessage(TextMessage.gm(null, message));
+          break;
+        case "self":
+          addMessage(TextMessage.whisper(null, MapTool.getPlayer().getName(), message));
+          break;
+        case "all":
+          addGlobalMessage(message);
+          break;
+        case "none":
+          break;
+        default:
+          addMessage(TextMessage.whisper(null, target, message));
+          break;
       }
     }
   }
