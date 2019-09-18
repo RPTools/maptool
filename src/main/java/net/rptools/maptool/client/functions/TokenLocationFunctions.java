@@ -326,7 +326,11 @@ public class TokenLocationFunctions extends AbstractFunction {
 
       distance = Double.MAX_VALUE;
       if (closedForm) {
-        if (wmetric == null && grid.useMetric()) wmetric = AppPreferences.getMovementMetric();
+        if (wmetric == null && grid.useMetric())
+          wmetric =
+              MapTool.isPersonalServer()
+                  ? AppPreferences.getMovementMetric()
+                  : MapTool.getServerPolicy().getMovementMetric();
         // explicitly find difference without walkers
         double curDist;
         for (CellPoint scell : sourceCells) {
