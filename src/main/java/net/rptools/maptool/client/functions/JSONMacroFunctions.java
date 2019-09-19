@@ -56,6 +56,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         "json.fromStrProp",
         "json.toStrProp",
         "json.toList",
+        "json.toVars",
         "json.append",
         "json.remove",
         "json.indent",
@@ -177,6 +178,25 @@ public class JSONMacroFunctions extends AbstractFunction {
         delim = parameters.get(1).toString();
       }
       return fromStrProp(parameters.get(0).toString(), delim);
+    }
+
+    if (functionName.equalsIgnoreCase("json.toVars")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      JSONObject jsonObject = FunctionUtil.paramAsJsonObject(functionName, parameters, 0);
+      boolean suffix =
+          parameters.size() > 1 && "SUFFIXED".equalsIgnoreCase(parameters.get(1).toString());
+
+      int count = 0;
+      for (Object keyStr : jsonObject.keySet()) {
+        String varName = keyStr.toString() + (suffix ? "_" : "");
+        Object value = jsonObject.get(keyStr);
+        // don't allow spaces in var name
+        if (!varName.contains(" ")) {
+          parser.setVariable(varName, value);
+          count += 1;
+        }
+      }
+      return count;
     }
 
     if (functionName.equals("json.set")) {
@@ -1206,7 +1226,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * Gets a value from the JSON Object or Array.
    *
    * @param obj The JSON Object or Array.
-   * @param key The key for the object or index for the array.
+   * @param keys The key for the object or index for the array.
    * @return the value.
    * @throws ParserException
    */
