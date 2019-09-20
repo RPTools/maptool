@@ -181,22 +181,27 @@ public class JSONMacroFunctions extends AbstractFunction {
     }
 
     if (functionName.equalsIgnoreCase("json.toVars")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       JSONObject jsonObject = FunctionUtil.paramAsJsonObject(functionName, parameters, 0);
-      boolean suffix =
-          parameters.size() > 1 && "SUFFIXED".equalsIgnoreCase(parameters.get(1).toString());
+      String prefix = parameters.size() > 1 ? parameters.get(1).toString() : "";
+      String suffix = parameters.size() > 2 ? parameters.get(2).toString() : "";
 
-      int count = 0;
+      JSONArray jsonNames = new JSONArray();
       for (Object keyStr : jsonObject.keySet()) {
-        String varName = keyStr.toString() + (suffix ? "_" : "");
-        Object value = jsonObject.get(keyStr);
-        // don't allow spaces in var name
-        if (!varName.contains(" ")) {
+        // add prefix and suffix
+        String varName = prefix + keyStr.toString().trim() + suffix;
+        // replace spaces by underscores
+        varName = varName.replaceAll("\\s", "_");
+        // delete special characters other than "." & "_" in var name
+        varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
+
+        if (!varName.equals("")) {
+          Object value = jsonObject.get(keyStr);
           parser.setVariable(varName, value);
-          count += 1;
+          jsonNames.add(varName);
         }
       }
-      return count;
+      return jsonNames;
     }
 
     if (functionName.equals("json.set")) {
