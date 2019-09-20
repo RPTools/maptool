@@ -55,6 +55,7 @@ public interface ServerCommand {
     clearAllDrawings,
     setZoneGridSize,
     message,
+    execLink,
     undoDraw,
     showPointer,
     movePointer,
@@ -153,6 +154,8 @@ public interface ServerCommand {
   public void setZoneGridSize(GUID zoneGUID, int xOffset, int yOffset, int size, int color);
 
   public void message(TextMessage message);
+
+  public void execLink(String link, String target);
 
   public void showPointer(String player, Pointer pointer);
 
