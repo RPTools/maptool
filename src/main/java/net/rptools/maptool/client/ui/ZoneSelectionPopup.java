@@ -34,13 +34,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 
-public class ZoneSelectionPopup extends JPopupMenu {
+public class ZoneSelectionPopup extends JScrollPopupMenu {
 
   private static final int PADDING = 5;
 
