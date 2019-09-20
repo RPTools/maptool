@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.FogUtil;
@@ -369,6 +370,10 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               case message:
                 TextMessage message = (TextMessage) parameters[0];
                 MapTool.addServerMessage(message);
+                return;
+
+              case execLink:
+                MacroLinkFunction.receiveExecLink((String) parameters[0], (String) parameters[1]);
                 return;
 
               case showPointer:
