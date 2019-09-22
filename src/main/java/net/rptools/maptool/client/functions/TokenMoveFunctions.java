@@ -227,7 +227,8 @@ public class TokenMoveFunctions extends AbstractFunction {
 
   /**
    * @param zone
-   * @param target
+   * @param tokenInContext
+   * @param pointsString
    * @param pathPoints
    * @return
    */

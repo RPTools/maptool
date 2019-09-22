@@ -107,7 +107,7 @@ public class ImageManager {
   /**
    * Loads the asset's raw image data into a buffered image, and waits for the image to load.
    *
-   * @param asset Load image data from this asset
+   * @param assetId Load image data from this asset
    * @return BufferedImage Return the loaded image
    */
   public static BufferedImage getImageAndWait(MD5Key assetId) {
@@ -131,7 +131,7 @@ public class ImageManager {
   /**
    * Loads the asset's raw image data into a buffered image, and waits for the image to load.
    *
-   * @param asset Load image data from this asset
+   * @param assetId Load image data from this asset
    * @param hintMap Hints used when loading the image
    * @return BufferedImage Return the loaded image
    */
@@ -225,7 +225,6 @@ public class ImageManager {
    * completed loading.
    *
    * @param assetId Waiting for this asset to load
-   * @param hints Load the asset image with these hints
    * @param observers Observers to be notified
    */
   public static void addObservers(MD5Key assetId, ImageObserver... observers) {

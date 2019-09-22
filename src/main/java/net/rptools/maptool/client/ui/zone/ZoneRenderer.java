@@ -3621,6 +3621,7 @@ public class ZoneRenderer extends JComponent
    * Convenience method to return a set of tokens filtered by ownership.
    *
    * @param tokenSet the set of GUIDs to filter
+   * @return the set of GUIDs
    */
   public Set<GUID> getOwnedTokens(Set<GUID> tokenSet) {
     Set<GUID> ownedTokens = new LinkedHashSet<GUID>();
@@ -3636,9 +3637,9 @@ public class ZoneRenderer extends JComponent
   }
 
   /**
-   * A convienence method to get selected tokens ordered by name
+   * A convenience method to get selected tokens ordered by name
    *
-   * @return List<Token>
+   * @return List of tokens
    */
   public List<Token> getSelectedTokensList() {
     List<Token> tokenList = new ArrayList<Token>();

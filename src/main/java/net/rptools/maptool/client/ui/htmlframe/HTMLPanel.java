@@ -109,7 +109,7 @@ public class HTMLPanel extends JPanel {
   /**
    * Updates if this panel is an input panel or not.
    *
-   * @param input is this panel has a close button or not.
+   * @param closeButton is this panel has a close button or not.
    */
   void updateContents(boolean closeButton) {
     if (closeButton) {

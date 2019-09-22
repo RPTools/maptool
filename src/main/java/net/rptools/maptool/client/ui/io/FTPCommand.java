@@ -22,7 +22,7 @@ import org.apache.commons.net.ftp.FTPClientConfig;
 // import sun.net.ftp.FtpClient;
 
 /**
- * This class extends the Apache Commons {@link Net.FtpClient} class to ease future modification.
+ * This class extends the Apache Commons {@link FTPClient} class to ease future modification.
  *
  * <p>This class creates its own connection to the specified host and does not try to reuse an
  * existing connection. This has significant downsides, not the least of which is the need to

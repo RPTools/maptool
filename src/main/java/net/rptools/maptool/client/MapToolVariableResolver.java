@@ -419,7 +419,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
    * Sets the value of all token states.
    *
    * @param token The token to set the state of.
-   * @param val set or unset the state.
+   * @param value set or unset the state.
    */
   private void setAllBooleanTokenStates(Token token, Object value) {
     for (Object stateName : MapTool.getCampaign().getTokenStatesMap().keySet()) {

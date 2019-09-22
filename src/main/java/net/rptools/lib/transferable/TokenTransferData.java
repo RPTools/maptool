@@ -23,7 +23,7 @@ import javax.swing.ImageIcon;
 import net.rptools.lib.MD5Key;
 
 /**
- * Class used to transfer token information between applications. Used in Drag & Drop. Some
+ * Class used to transfer token information between applications. Used in Drag &amp; Drop. Some
  * properties are shared between applications, and some are specific. Those specific properties are
  * stored in the map with a key that indicates what app owns that data.
  *
@@ -116,7 +116,10 @@ public class TokenTransferData extends HashMap<String, Object> implements Serial
   /** Maptool's name for the portrait. The value is an {@link ImageIcon}. */
   public static final String PORTRAIT = MAPTOOL + "portrait";
 
-  /** Maptool's name for the portrait. The value is an {@link Map}<code><String, String></code>. */
+  /**
+   * Maptool's name for the portrait. The value is an {@link Map map} <code>&lt;String, String&gt;
+   * </code>.
+   */
   public static final String MACROS = MAPTOOL + "macros";
 
   /** Serial version id to hide changes during transfer */

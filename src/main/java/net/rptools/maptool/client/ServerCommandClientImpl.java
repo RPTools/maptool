@@ -38,8 +38,14 @@ import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.server.ServerCommand;
+import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
 
+/**
+ * This class is used by a client to send commands to the server. The methods of this class are
+ * typically accessed through MapTool.serverCommand(). Once sent, the commands are then received by
+ * the {@link ServerMethodHandler ServerMethodHandler}
+ */
 public class ServerCommandClientImpl implements ServerCommand {
 
   private final TimedEventQueue movementUpdateQueue = new TimedEventQueue(100);

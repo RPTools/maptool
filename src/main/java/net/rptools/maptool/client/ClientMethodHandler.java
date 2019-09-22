@@ -52,12 +52,18 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.server.ServerMethodHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetChunk;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
 
-/** @author drice */
+/**
+ * This class is used by the clients to receive server commands sent through {@link
+ * ServerMethodHandler ServerMethodHandler}.
+ *
+ * @author drice
+ */
 public class ClientMethodHandler extends AbstractMethodHandler {
   public ClientMethodHandler() {}
 

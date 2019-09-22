@@ -229,8 +229,8 @@ public class FogUtil {
   }
 
   /**
-   * This function is called by Meta-Shift-O, the token right-click, Expose -> only Currently
-   * visible menu, from the Client/Server methods calls from
+   * This function is called by Meta-Shift-O, the token right-click, Expose {@code ->} only
+   * Currently visible menu, from the Client/Server methods calls from
    * net.rptools.maptool.server.ServerMethodHandler.exposePCArea(GUID), and the macro
    * exposePCOnlyArea().
    *

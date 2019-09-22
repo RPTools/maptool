@@ -32,7 +32,7 @@ import net.rptools.maptool.model.drawing.Pen;
  * Combo box showing the available pen widths and a preview of each.
  *
  * @author Jay
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:&
+ * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013)$
  */
 public class PenWidthChooser extends JComboBox {
 

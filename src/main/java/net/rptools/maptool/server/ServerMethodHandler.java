@@ -20,7 +20,9 @@ import java.util.*;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.ClientCommand;
+import net.rptools.maptool.client.ClientMethodHandler;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ServerCommandClientImpl;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.common.MapToolConstants;
@@ -46,7 +48,15 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.transfer.AssetProducer;
 
-/** @author drice */
+/**
+ * This class is used by the server host to receive client commands sent through {@link
+ * ServerCommandClientImpl ServerCommandClientImpl}. Once the command is received, this will update
+ * the server data, before forwarding the command to the clients. Clients will then handle the
+ * command through {@link ClientMethodHandler ClientMethodHandler}. Updating the server itself is
+ * important as new client receive the server's campaign data when connecting.
+ *
+ * @author drice *
+ */
 public class ServerMethodHandler extends AbstractMethodHandler implements ServerCommand {
   private final MapToolServer server;
   private final Object MUTEX = new Object();
