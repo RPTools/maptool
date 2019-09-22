@@ -1,10 +1,10 @@
 Maptool 1.5.5
 =====
-Several contributors have brought us new features including a scroll bar added to the Select Map dropdown, audio macro functions, performance and UI improvements, and, of course, bug fixes.
+Several contributors have brought us new features including a scroll bar added to the Select Map drop-down, audio macro functions, performance and UI improvements, and, of course, bug fixes.
 
 Enhancements
 -----
-* [#718][i718] Added additional keywords to the broadcast` macro funciton: "self", "all", "gm-self" and "none".
+* [#718][i718] Added new keywords to the `broadcast` macro function: "self", "all", "gm-self" and "none".
 * [#716][i716] Added new parameters *targets* and *delim* to macro function `execLink`.  Accepts a list of players or the following keywords: "gm", "self", "all", "gm-self" and "none".
 * [#709][i709] New volume slider and mute button now control systems sounds as well as audio streams.
 * [#708][i708] Significant performance improvements as well as quality improvements made to Resource Library image panel.
@@ -88,14 +88,7 @@ Bug Fixes
 [i591]: https://github.com/RPTools/maptool/issues/591
 [i356]: https://github.com/RPTools/maptool/issues/356
 [i328]: https://github.com/RPTools/maptool/issues/328
-[i]: https://github.com/RPTools/maptool/issues/
-[i]: https://github.com/RPTools/maptool/issues/
-[i]: https://github.com/RPTools/maptool/issues/
-[i]: https://github.com/RPTools/maptool/issues/
-[i]: https://github.com/RPTools/maptool/issues/
-[i]: https://github.com/RPTools/maptool/issues/
-[i]: https://github.com/RPTools/maptool/issues/
-[i]: https://github.com/RPTools/maptool/issues/
+[i187]: https://github.com/RPTools/maptool/issues/187
 
 Maptool 1.5.4
 =====
