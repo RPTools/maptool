@@ -181,10 +181,10 @@ public class MacroFunctions extends AbstractFunction {
   /**
    * Sets the properties for a specified macro button on the specified token.
    *
-   * @param mbp
-   * @param propString
-   * @param delim
-   * @throws ParserException
+   * @param mbp the properties of the button
+   * @param propString the String of the list
+   * @param delim the delimiter
+   * @throws ParserException if user doesn't have permission
    */
   public void setMacroProps(MacroButtonProperties mbp, String propString, String delim)
       throws ParserException {
@@ -845,8 +845,8 @@ public class MacroFunctions extends AbstractFunction {
    * remove. The second argument in param is the token to remove the button from, if the token is
    * not specified then the token in context is used.
    *
-   * @param resolver The variable resolver.
-   * @param parameters The arguments.
+   * @param res The variable resolver.
+   * @param param The arguments.
    * @return the details of the button that was removed.
    * @throws ParserException if an error occurs.
    */

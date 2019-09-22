@@ -73,7 +73,7 @@ public class AppUtil {
    *
    * @param subdir of the maptool home directory
    * @return the maptool data directory name subdir
-   * @see getAppHome()
+   * @see AppUtil#getAppHome
    */
   public static File getAppHome(String subdir) {
     File path = getDataDir();

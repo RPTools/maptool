@@ -149,11 +149,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   /** The size used to constrain the icon. */
   public static final int SIZE = 64;
 
-  /**
-   * Create a new token notes dialog.
-   *
-   * @param token The token being displayed.
-   */
+  /** Create a new token notes dialog. */
   public EditTokenDialog() {
     super("net/rptools/maptool/client/ui/forms/tokenPropertiesDialog.xml");
     panelInit();

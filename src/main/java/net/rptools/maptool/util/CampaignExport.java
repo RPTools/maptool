@@ -53,8 +53,8 @@ public class CampaignExport {
   private static final String[] VERSION_ARRAY = {"1.4.0.0", "1.4.0.1", "1.4.1..1.5.0", "1.5.1"};
 
   /**
-   * This method strips out the extra classes & fields using X-Stream based on which MapTool Version
-   * you want go back to.
+   * This method strips out the extra classes and fields using X-Stream based on which MapTool
+   * Version you want go back to.
    *
    * @author Jamz
    * @since 1.4.1.4

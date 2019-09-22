@@ -715,7 +715,10 @@ public class ZoneView implements ModelChangeListener {
     }
   }
 
-  /** @return */
+  /**
+   * @param tokens the list of token
+   * @return if the token has VBL or not
+   */
   private boolean processTokenAddChangeEvent(List<Token> tokens) {
     boolean hasSight = false;
     boolean hasVBL = false;

@@ -1033,7 +1033,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
    *
    * <p>
    *
-   * <table>
+   * <table summary="">
    * <tr>
    * <td>Meta R
    * <td>Select the FacingTool (to allow rotating with the left/right arrows)
@@ -1070,7 +1070,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
    * <tr>
    * <td>NumPad digits
    * <td>Move token (specifics based on the grid type are not implemented yet):<br>
-   * <table>
+   * <table summary="">
    * <tr>
    * <td>7 (up/left)
    * <td>8 (up)

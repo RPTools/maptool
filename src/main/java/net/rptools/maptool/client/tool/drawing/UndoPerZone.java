@@ -135,7 +135,7 @@ public class UndoPerZone implements ModelChangeListener {
   /**
    * This shouldn't need to be used since all operations are handled internally.
    *
-   * @return
+   * @return the UndoManager
    */
   @Deprecated
   public UndoManager getUndoManager() {

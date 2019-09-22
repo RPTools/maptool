@@ -535,8 +535,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   /**
    * Creates the slide-up panel at the bottom of the macro editor dialog panel.
    *
-   * @param key string key to lookup in the properties file (used to call {@link
-   *     I18N#getKeystroke()} and {@link I18N#getText()}
+   * @param key string key to lookup in the properties file (used to call {@link I18N#getKeystroke}
+   *     and {@link I18N#getText}
    * @param tb the toolbar that is meant to slide up
    * @return new JMenuItem containing the new {@link Action}
    */

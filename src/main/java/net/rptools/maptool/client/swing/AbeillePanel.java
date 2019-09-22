@@ -51,7 +51,6 @@ import yasb.swing.BindingResolver;
  * characteristics to link view fields with model fields.
  *
  * @author tcroft
- * @param <T>
  */
 @SuppressWarnings("serial")
 public class AbeillePanel<T> extends JPanel {
@@ -126,7 +125,7 @@ public class AbeillePanel<T> extends JPanel {
    * <p>Also, this code calls the protected method {@link #preModelBind()} to allow subclasses to
    * modify the binding characteristics before copying the model fields to the view.
    *
-   * @param model
+   * @param model the model
    */
   public void bind(T model) {
     if (this.model != null) {

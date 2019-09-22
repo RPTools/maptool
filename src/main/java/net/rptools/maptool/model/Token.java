@@ -893,8 +893,8 @@ public class Token extends BaseModel implements Cloneable {
    * name, they could determine which token names the GM is already using. Fortunately, the
    * showError() call makes this extremely unlikely due to the interactive nature of a failure.
    *
-   * @param name
-   * @throws IOException
+   * @param name the new name of the token
+   * @throws IllegalArgumentException thrown if a token has the same name
    */
   public void setName(String name) throws IllegalArgumentException {
     // Let's see if there is another Token with that name (only if Player is not GM)
@@ -1138,7 +1138,7 @@ public class Token extends BaseModel implements Cloneable {
 
   /**
    * This method returns the vbl stored on the token with AffineTransformations applied for scale,
-   * position, rotation, & flipping.
+   * position, rotation, &amp; flipping.
    *
    * @author Jamz
    * @since 1.4.1.5

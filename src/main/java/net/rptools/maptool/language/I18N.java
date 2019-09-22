@@ -162,7 +162,7 @@ public class I18N {
 
   /**
    * Returns the text associated with the given key after removing any menu mnemonic. So for the key
-   * <b>action.loadMap</b> that has the value "&Load Map" in the properties file, this method
+   * <b>action.loadMap</b> that has the value {@code &Load Map} in the properties file, this method
    * returns "Load Map".
    *
    * @param key the component to search for

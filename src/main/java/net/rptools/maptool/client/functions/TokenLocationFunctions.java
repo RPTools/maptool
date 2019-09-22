@@ -293,8 +293,8 @@ public class TokenLocationFunctions extends AbstractFunction {
 
   /**
    * Gets the distance between two tokens following map movement rules. Always use closedForm
-   * because VBL & terrain are currently ignored. The other walker-based approach is kept as it will
-   * be needed if we implement distance based on terrain & VBL.
+   * because VBL &amp; terrain are currently ignored. The other walker-based approach is kept as it
+   * will be needed if we implement distance based on terrain &amp; VBL.
    *
    * @param source The token to get the distance from.
    * @param target The token to calculate the distance to.
@@ -380,7 +380,7 @@ public class TokenLocationFunctions extends AbstractFunction {
    * @param y the y co-ordinate to get the distance to.
    * @param units get the distance in the units specified for the map.
    * @param metric The metric used.
-   * @param pixels Are x & y for pixels coordinates? false: cell coords
+   * @param pixels Are {@code x & y} for pixels coordinates? false: cell coords
    * @return the distance between the token and the x,y coordinates
    * @throws ParserException when an error occurs
    */

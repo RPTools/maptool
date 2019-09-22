@@ -21,8 +21,10 @@ import java.awt.geom.Ellipse2D;
 /** An oval. */
 public class Oval extends Rectangle {
   /**
-   * @param x
-   * @param y
+   * @param x the x offset
+   * @param y the y offset
+   * @param width the width of the oval
+   * @param height the height of the oval
    */
   public Oval(int x, int y, int width, int height) {
     super(x, y, width, height);
