@@ -39,7 +39,7 @@ public class RadiusTemplate extends AbstractTemplate {
    * @param yOff Distance from vertex along Y axis in screen coordinates.
    * @param gridSize The size of one side of the grid in screen coordinates.
    * @param distance The distance in cells from the vertex to the cell which is offset from the
-   *     vertex by <code>x</code> & <code>y</code>.
+   *     vertex by {@code x & y}.
    * @param radius The radius where the border is painted.
    * @see net.rptools.maptool.model.drawing.AbstractTemplate#paintBorder(java.awt.Graphics2D, int,
    *     int, int, int, int, int)

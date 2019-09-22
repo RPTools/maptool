@@ -129,7 +129,7 @@ public class ServerPolicy {
    * Gets if ToolTips should be used instead of extended output for [ ] rolls with no formatting
    * option.
    *
-   * @returns true if tool tips should be used.
+   * @return true if tool tips should be used.
    */
   public boolean getUseToolTipsForDefaultRollFormat() {
     return useToolTipsForDefaultRollFormat;

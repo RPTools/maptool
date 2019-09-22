@@ -458,7 +458,7 @@ public class PackedFile {
    * binary there is no charset conversion.
    *
    * @param path location within the ZIP file
-   * @param data the binary data to be written in the form of an InputStream
+   * @param is the binary data to be written in the form of an InputStream
    * @throws IOException
    */
   public void putFile(String path, InputStream is) throws IOException {
@@ -496,7 +496,7 @@ public class PackedFile {
    * <p>FIXME Should the MIME type of the InputStream be checked??
    *
    * @param path location within the ZIP file
-   * @param data the binary data to be written
+   * @param url the url of the binary data to be written
    * @throws IOException
    */
   public void putFile(String path, URL url) throws IOException {

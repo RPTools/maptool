@@ -14,24 +14,28 @@
  */
 package net.rptools.maptool.client.ui;
 
+import java.io.InputStream;
+
 /**
  * An ImageStream created from a Component. The Component may be very large in terms of XY size: it
  * will be rendered piecemeal by modifying its bounds().
  *
  * @author mcl
  */
-/*
- * public class PNGInputStream extends InputStream {
- *
- * Component largeComponent; Rectangle origBounds; Dimension origSize;
- *
- * ImageWriter pngWriter = null;
- *
- *//** @param largeComponent the Component to be turned into a PNG input stream *//*
-                                                                                   * public PNGInputStream(Component c) { largeComponent = c;
-                                                                                   *
-                                                                                   * origBounds = largeComponent.getBounds(); origSize = largeComponent.getSize(); }
-                                                                                   *
-                                                                                   * @Override public int read() throws IOException { if (pngWriter != null) { } else { pngWriter = (ImageWriter)ImageIO.getImageWritersByFormatName("png").next(); pngWriter.setOutput(output);
-                                                                                   * IIOImage image = new IIOImage(cachedZoneImage, null, null); pngWriter.write(null, image, iwp); } return 0; } }
-                                                                                   */
+public abstract class PNGInputStream extends InputStream {
+  /**
+   * Component largeComponent; Rectangle origBounds; Dimension origSize;
+   *
+   * <p>ImageWriter pngWriter = null;
+   *
+   * @param largeComponent the Component to be turned into a PNG input stream
+   */
+  /*
+   * public PNGInputStream(Component c) { largeComponent = c;
+   *
+   * origBounds = largeComponent.getBounds(); origSize = largeComponent.getSize(); }
+   *
+   * @Override public int read() throws IOException { if (pngWriter != null) { } else { pngWriter = (ImageWriter)ImageIO.getImageWritersByFormatName("png").next(); pngWriter.setOutput(output);
+   * IIOImage image = new IIOImage(cachedZoneImage, null, null); pngWriter.write(null, image, iwp); } return 0; } }
+   */
+}

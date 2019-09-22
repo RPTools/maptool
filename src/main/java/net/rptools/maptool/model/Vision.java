@@ -77,7 +77,7 @@ public abstract class Vision {
   /**
    * Distance in zone points
    *
-   * @param distance
+   * @param distance the distance in zone points
    */
   public void setDistance(int distance) {
     this.distance = distance;

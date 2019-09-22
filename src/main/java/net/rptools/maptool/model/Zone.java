@@ -776,11 +776,10 @@ public class Zone extends BaseModel {
 
   /**
    * Retrieves the selected tokens and adds the passed in area to their exposed area. (Why are we
-   * passing in a <code>Set&lt;GUID></code> when <code>Set&lt;Token></code> would be much more
-   * efficient?)
+   * passing in a {@code Set<GUID>} when {@code Set<Token>} would be much more efficient?)
    *
-   * @param area
-   * @param selectedToks
+   * @param area the area to expose
+   * @param selectedToks the set GUID of selected tokens
    */
   public void exposeArea(Area area, Set<GUID> selectedToks) {
     if (area == null || area.isEmpty()) {
@@ -1170,8 +1169,9 @@ public class Zone extends BaseModel {
   }
 
   /**
-   * Same as {@link #putToken(List)} but optimizes map updates by accepting a list of Tokens. Note
-   * that this method fires a single <code>ModelChangeEvent</code> using <code>Event.TOKEN_ADDED
+   * Same as {@link #putToken(Token)} but optimizes map updates by accepting a list of Tokens. Note
+   * that this method fires a single <code>ModelChangeEvent</code> using <code>
+   * Event.TOKEN_ADDED
    * </code> and passes the list of added tokens as a parameter. Ditto for <code>Event.TOKEN_CHANGED
    * </code>.
    *
@@ -1470,7 +1470,7 @@ public class Zone extends BaseModel {
    *
    * @author updated by Jamz
    * @since updated 1.4.1.0
-   * @param Player p
+   * @param p the player
    * @return
    */
   public List<Token> getOwnedTokensWithSight(Player p) {
@@ -1850,7 +1850,7 @@ public class Zone extends BaseModel {
   /**
    * Lee: Tells fog utilities to expose fog normally or only at way points
    *
-   * @param boolean toggle for exposure method
+   * @param toggle toggle for exposure method
    */
   public void setWaypointExposureToggle(boolean toggle) {
     exposeFogAtWaypoints = toggle;

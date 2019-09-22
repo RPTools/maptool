@@ -65,7 +65,7 @@ public class Base64Functions extends AbstractFunction {
    * Encodes passed in string to Base64
    *
    * @param functionName
-   * @param string to encode
+   * @param parameters a list, with the message as the first element
    * @return Base64 encoded string
    * @throws ParserException
    */
@@ -79,7 +79,7 @@ public class Base64Functions extends AbstractFunction {
    * Decodes a passed in string from Base64
    *
    * @param functionName
-   * @param string to decode
+   * @param parameters a list of parameters with string to decode as first element.
    * @return String decoded from a Base64 encoded string
    * @throws ParserException
    */
@@ -90,7 +90,7 @@ public class Base64Functions extends AbstractFunction {
   }
 
   /**
-   * @param function's name
+   * @param functionName the name of the function
    * @param parameters passed into the function call
    * @param min number of parameters required
    * @param max number of parameters required

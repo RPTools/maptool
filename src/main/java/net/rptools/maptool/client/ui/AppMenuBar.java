@@ -295,7 +295,7 @@ public class AppMenuBar extends JMenuBar {
 
   /**
    * Builds the help menu. This menu contains a block of special url items. These items are
-   * populated from {@link I18N#getUrlActionKeys()}.
+   * populated from {@link I18N#getMatchingKeys}.
    *
    * @return the help menu
    */

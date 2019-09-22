@@ -40,6 +40,8 @@ public class LineSegment extends AbstractDrawing {
   /**
    * Manipulate the points by calling {@link #getPoints} and then adding {@link Point} objects to
    * the returned {@link List}.
+   *
+   * @return the list of point
    */
   public List<Point> getPoints() {
     // This is really, really ugly, but we need to flush the area on any change to the shape

@@ -451,7 +451,7 @@ public class CommandPanel extends JPanel implements Observer {
   /**
    * Disables the chat notification toggle if the GM enforces notification
    *
-   * @param boolean whether to disable the toggle
+   * @param disable whether to disable the toggle
    */
   public void disableNotifyButton(Boolean disable) {
     // Little clumsy, but when the menu item is _enabled_, the button should be _disabled_

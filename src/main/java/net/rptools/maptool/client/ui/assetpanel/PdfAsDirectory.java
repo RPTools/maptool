@@ -70,8 +70,8 @@ public class PdfAsDirectory extends Directory {
    * Returns the asset associated with this file, or null if the file has not yet been loaded as an
    * asset
    *
-   * @param imageFile
-   * @return
+   * @param imageFile the file
+   * @return the image of the file
    */
   public Image getImageFor(File imageFile) {
     FutureTask<Image> future = imageMap.get(imageFile);

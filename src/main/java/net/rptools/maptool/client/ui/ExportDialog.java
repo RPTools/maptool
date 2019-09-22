@@ -61,8 +61,6 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>This uses a modal dialog based on an Abeille form. It creates a PNG file at the resolution of
  * the 'board' image/tile. The file can be saved to disk or sent to an FTP location.
- *
- * @return a dialog box
  */
 @SuppressWarnings("serial")
 public class ExportDialog extends JDialog implements IIOWriteProgressListener {
@@ -536,8 +534,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 
   /**
    * This is the top-level screen-capture routine. It sends the resulting PNG image to the location
-   * previously selected by the user. TODO: It currently calls {@link MapTool#takeMapScreenShot()}
-   * for "normal" screenshots, but that's just until this code is considered stable enough.
+   * previously selected by the user. TODO: It currently calls {@link MapTool#takeMapScreenShot} for
+   * "normal" screenshots, but that's just until this code is considered stable enough.
    *
    * @throws Exception
    */

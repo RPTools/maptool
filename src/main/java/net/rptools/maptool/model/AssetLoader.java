@@ -87,7 +87,7 @@ public class AssetLoader {
    * corrupted by the caller.
    *
    * @param repo the name of the repository, probably from the campaign properties
-   * @return an immutable <code>Map&lt;String, String></code>
+   * @return an immutable {@code Map<String, String>}
    */
   public Map<String, String> getRepositoryMap(String repo) {
     return repositoryMap.get(repo);
@@ -101,9 +101,9 @@ public class AssetLoader {
    * store it into the cache.
    *
    * <p>Once the index file has been located, {@link #parseIndex(List)} is called to convert the
-   * text file into a <code>Map&lt;String, Sting></code> for the return value.
+   * text file into a {@code Map<String, String>} for the return value.
    *
-   * @param repository
+   * @param repository repository to extract the map from
    * @return
    */
   protected Map<String, String> getIndexMap(String repository) {

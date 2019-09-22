@@ -276,7 +276,7 @@ public class TokenBarController
   }
 
   /**
-   * Handle all of the buttons & bar combo box
+   * Handle all of the buttons and bar combo box
    *
    * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
    */

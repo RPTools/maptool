@@ -23,7 +23,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.ZonePoint;
 
 /**
- * The blast template draws a square for D&D 4e
+ * The blast template draws a square for DnD 4e
  *
  * @author jgorrell
  * @version $Revision: $ $Date: $ $Author: $

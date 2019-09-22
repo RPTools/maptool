@@ -23,9 +23,8 @@ import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 
 /**
- * This code is taken directly from:
- *
- * <p>http://forum.java.sun.com/thread.jspa?forumID=57&threadID=701797&start=2
+ * This code is taken directly from <a
+ * href="http://forum.java.sun.com/thread.jspa?forumID=57&threadID=701797&start=2">this</a>.
  *
  * <p>In direct response to this bug:
  *

@@ -60,7 +60,7 @@ public class TokenGMNameFunction extends AbstractFunction {
    * Sets the GMName of the token.
    *
    * @param token the token to set the GMName of.
-   * @param naeme The name to set the GMName to.
+   * @param name The name to set the GMName to.
    * @throws ParserException if the user does not have the permission.
    */
   public void setGMName(Token token, String name) throws ParserException {

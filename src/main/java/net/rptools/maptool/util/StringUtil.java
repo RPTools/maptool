@@ -52,7 +52,6 @@ public class StringUtil {
    * method is locale-aware.
    *
    * @param text string to convert to a number
-   * @param def default value to use if a ParseException is thrown
    * @return the result
    */
   public static Double parseDecimal(String text) throws ParseException {
@@ -86,7 +85,6 @@ public class StringUtil {
    * locale-aware (which doesn't mean much for integers).
    *
    * @param text string to convert to a number
-   * @param def default value to use if a ParseException is thrown
    * @return the result
    */
   public static Integer parseInteger(String text) throws ParseException {

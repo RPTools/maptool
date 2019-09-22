@@ -71,7 +71,7 @@ public class AddTokenStateMacro implements Macro {
     CORNER_MAP.put("se", Quadrant.SOUTH_EAST);
   }
 
-  /** @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String) */
+  /** @see net.rptools.maptool.client.macro.Macro#execute execute(java.lang.String) */
   public void execute(MacroContext context, String aMacro, MapToolMacroContext executionContext) {
     // Split the command line into an array and get the tokens
     String[] tokens = aMacro.split("\\s");

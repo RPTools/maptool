@@ -304,8 +304,8 @@ public class TwoToneTextPane extends JTextPane {
      * GlyphPainter to determine what characters it should render glyphs for.
      *
      * @param v Read the text from this glyph view's document.
-     * @param p0 the starting document offset >= 0
-     * @param p1 the ending document offset >= p0
+     * @param p0 the starting document offset &gt;= 0
+     * @param p1 the ending document offset &gt;= p0
      * @return the <code>Segment</code> containing the text
      */
     public Segment getText(GlyphView v, int p0, int p1) {

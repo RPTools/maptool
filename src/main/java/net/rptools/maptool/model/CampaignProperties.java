@@ -415,7 +415,7 @@ public class CampaignProperties {
     return initiativeMovementLock;
   }
 
-  /** @param initiativeOwnerPermissions Setter for initiativeMovementLock */
+  /** @param initiativeMovementLock Setter for initiativeMovementLock */
   public void setInitiativeMovementLock(boolean initiativeMovementLock) {
     this.initiativeMovementLock = initiativeMovementLock;
   }

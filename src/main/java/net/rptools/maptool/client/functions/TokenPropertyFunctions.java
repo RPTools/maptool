@@ -1049,7 +1049,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
    * @param index the index to find the BigDecimal at
    * @return the parameter cast to BigDecimal
    * @throws ParserException if the parameter did not contain a BigDecimal
-   * @see FunctionUtil.checkNumberParam
+   * @see FunctionUtil#checkNumberParam
    */
   private BigDecimal getBigDecimalFromParam(String functionName, List<Object> parameters, int index)
       throws ParserException {

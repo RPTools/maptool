@@ -91,7 +91,7 @@ public class Campaign {
 
   /**
    * This flag indicates whether the manual fog tools have been used in this campaign while a server
-   * is not running. See {@link ToolbarPanel#createFogPanel()} for details.
+   * is not running. See {@link ToolbarPanel} for details.
    *
    * <p>
    *

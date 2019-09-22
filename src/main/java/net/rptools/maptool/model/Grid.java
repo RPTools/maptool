@@ -236,7 +236,10 @@ public abstract class Grid implements Cloneable {
     this.cellShape = cellShape;
   }
 
-  /** @param Both The grid's x and y offset components */
+  /**
+   * @param offsetX The grid's x offset component
+   * @param offsetY The grid's y offset component
+   */
   public void setOffset(int offsetX, int offsetY) {
     this.offsetX = offsetX;
     this.offsetY = offsetY;
@@ -272,7 +275,7 @@ public abstract class Grid implements Cloneable {
   }
 
   /**
-   * Constrains size to MIN_GRID_SIZE <= size <= MAX_GRID_SIZE
+   * Constrains size to {@code MIN_GRID_SIZE <= size <= MAX_GRID_SIZE}
    *
    * @return The size after it has been constrained
    */
@@ -505,7 +508,7 @@ public abstract class Grid implements Cloneable {
 
   /**
    * Return the cell distance between two cells. Does not take into account terrain or VBL.
-   * Overridden by Hex & Gridless grids.
+   * Overridden by Hex &amp; Gridless grids.
    *
    * @param cellA the first cell
    * @param cellB the second cell
@@ -567,7 +570,6 @@ public abstract class Grid implements Cloneable {
    * Override if getCapabilities.isSecondDimensionAdjustmentSupported() returns true
    *
    * @param length the second settable dimension
-   * @return
    */
   public void setSecondDimension(double length) {}
 
@@ -690,8 +692,8 @@ public abstract class Grid implements Cloneable {
   /**
    * Returns an area based upon the token's cell footprint
    *
-   * @param token
-   * @return
+   * @param bounds
+   * @return area
    */
   public Area getTokenCellArea(Rectangle bounds) {
     // Get the cell footprint
