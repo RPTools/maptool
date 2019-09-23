@@ -16,21 +16,20 @@ package net.rptools.maptool.client.functions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.stream.Collectors;
-import java.io.BufferedReader;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
-import net.sf.json.JSONObject;
 import net.sf.json.JSONArray;
-import net.sf.json.JSONNull;
+import net.sf.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -66,14 +65,19 @@ class TestJSONMacroFunctions {
     JSONObject json_from_file = null;
     if (is != null) {
       BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-      json_from_file = JSONObject.fromObject(reader.lines().collect(Collectors.joining(System.lineSeparator())));
-    } 
+      json_from_file =
+          JSONObject.fromObject(reader.lines().collect(Collectors.joining(System.lineSeparator())));
+    }
 
     if (json_from_file != null) {
       for (Object k : json_from_file.keySet()) {
         Object value = json_from_file.get(k);
-        if (value instanceof JSONObject) {o_samples.put((String) k, (JSONObject) value);}
-        if (value instanceof JSONArray) {a_samples.put((String) k, (JSONArray) value);}
+        if (value instanceof JSONObject) {
+          o_samples.put((String) k, (JSONObject) value);
+        }
+        if (value instanceof JSONArray) {
+          a_samples.put((String) k, (JSONArray) value);
+        }
       }
     }
   }
@@ -96,7 +100,7 @@ class TestJSONMacroFunctions {
   // java to mt json object
   // take a json java object and use MT fonctions to build an identical json object (hopefully)
   private static JSONObject j2m(JSONObject o) {
-    return o;// TODO
+    return o; // TODO
   }
 
   // asJSON works on complex json type (objects and arrays)
@@ -104,12 +108,12 @@ class TestJSONMacroFunctions {
   // this function merges the 2 functionality in one.
   private static Object jsonify(Object mt_value) {
     if (mt_value instanceof String) {
-      String trimmed = ((String)mt_value).trim();
+      String trimmed = ((String) mt_value).trim();
       // complex json data types
       if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
         return JSONMacroFunctions.asJSON(mt_value);
-       } 
-     // simple json data types
+      }
+      // simple json data types
       return JSONMacroFunctions.jsonify(mt_value);
     }
     return mt_value;
@@ -184,11 +188,11 @@ class TestJSONMacroFunctions {
   @Test
   @DisplayName("JSONLength testing.")
   void testJSONLength() throws ParserException {
-    for (JSONArray java_array: a_samples.values()) {
+    for (JSONArray java_array : a_samples.values()) {
       JSONArray mt_array = JSONArray.fromObject("[]");
-        for (Object elem: java_array) {
-          mt_array = (JSONArray) run("json.append", mt_array, elem);
-        }
+      for (Object elem : java_array) {
+        mt_array = (JSONArray) run("json.append", mt_array, elem);
+      }
       assertEquals(sanitize(java_array.size()), run("json.length", mt_array));
     }
   }
