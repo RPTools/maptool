@@ -191,10 +191,13 @@ public class ServerPolicy {
         "GM reveals vision for unowned tokens",
         getGmRevealsVisionForUnownedTokens() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put("players can reveal", getPlayersCanRevealVision() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.put(
+        "auto reveal on movement", isAutoRevealOnMovement() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put("movement locked", isMovementLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put(
         "restricted impersonation", isRestrictedImpersonation() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put("individual views", isUseIndividualViews() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.put("individual fow", isUseIndividualFOW() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put(
         "strict token management", useStrictTokenManagement() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.put(
