@@ -22,6 +22,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
+import java.io.BufferedReader;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONObject;
@@ -58,27 +62,25 @@ class TestJSONMacroFunctions {
 
   @BeforeAll
   static void setUpOnce() {
-    JSONObject s1 = new JSONObject();
-    s1.put("key0", 42);
-    s1.put("key1", true);
-    s1.put("key2", "true");
-    s1.put("key3", 125.12);
-    s1.put("key4", "false");
-    s1.put("key5", false);
-    s1.put("key6", 0);
-    s1.put("key7", "unicode_é");
-    s1.put("key8", JSONNull.getInstance());
-    s1.put("key9", "null");
-    o_samples.put("o_sample1", s1);
-    o_samples.put("o_empty", new JSONObject());
-    o_samples.put("o_nested", JSONObject.fromObject("{\"key_o\": {\"key\": 0}, \"key_a\": [0,1,2,3]}}"));
-    a_samples.put("a_nested", JSONArray.fromObject("[0,1,2,3,[5,6,7]]"));
-    a_samples.put("a_empty", JSONArray.fromObject("[]"));
+    InputStream is = TestJSONMacroFunctions.class.getResourceAsStream("json_macro.json");
+    JSONObject json_from_file = null;
+    if (is != null) {
+      BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+      json_from_file = JSONObject.fromObject(reader.lines().collect(Collectors.joining(System.lineSeparator())));
+    } 
+
+    if (json_from_file != null) {
+      for (Object k : json_from_file.keySet()) {
+        Object value = json_from_file.get(k);
+        if (value instanceof JSONObject) {o_samples.put((String) k, (JSONObject) value);}
+        if (value instanceof JSONArray) {a_samples.put((String) k, (JSONArray) value);}
+      }
+    }
   }
 
   private static Object sanitize(Object obj) {
     // MT always use BigDecimal for the json type "Number"
-    // the Java lib may use Integer or Double, sanitize the java data
+    // the Java lib may use Integer or Double, sanitize the java data9
     // to be ready for comparisons
     if (obj instanceof Integer) {
       return new BigDecimal((Integer) obj);
@@ -89,6 +91,12 @@ class TestJSONMacroFunctions {
       return (new BigDecimal((Double) obj)).setScale(5, RoundingMode.HALF_UP).stripTrailingZeros();
     }
     return obj;
+  }
+
+  // java to mt json object
+  // take a json java object and use MT fonctions to build an identical json object (hopefully)
+  private static JSONObject j2m(JSONObject o) {
+    return o;// TODO
   }
 
   // asJSON works on complex json type (objects and arrays)
@@ -150,15 +158,22 @@ class TestJSONMacroFunctions {
   void testJSONEmpty() throws ParserException {
     BigDecimal _true = new BigDecimal(1);
     BigDecimal _false = new BigDecimal(0);
+    // explicit use of test fixtures
+    assertEquals(_true, (BigDecimal) run("json.isEmpty", o_samples.get("o_empty")));
+    assertEquals(_false, (BigDecimal) run("json.isEmpty", o_samples.get("o_nested")));
+    assertEquals(_true, (BigDecimal) run("json.isEmpty", a_samples.get("a_empty")));
+    assertEquals(_false, (BigDecimal) run("json.isEmpty", a_samples.get("a_nested")));
+
+    // using json.set("", "key", "v") should not yield an empty object
     assertEquals(_false, (BigDecimal) run("json.isEmpty", run("json.set", "", "a_key", "a_value")));
-    // adding and removing a key from an already empty json obejct should yield an empty object
+    // adding and removing a key from an already empty json object should yield an empty object
     assertEquals(
         _true,
         (BigDecimal)
             run(
                 "json.isEmpty",
                 run("json.remove", run("json.set", "", "a_key", "a_value"), "a_key")));
-    // iterate over all predefined jsons object and test the MT impl. against the java impl.
+    // iterate over all fixtures objects and test the MT impl. against the java impl.
     for (String k : o_samples.keySet()) {
       JSONObject jobj = o_samples.get(k);
       // match MT impl. against java library
@@ -169,6 +184,12 @@ class TestJSONMacroFunctions {
   @Test
   @DisplayName("JSONLength testing.")
   void testJSONLength() throws ParserException {
-
+    for (JSONArray java_array: a_samples.values()) {
+      JSONArray mt_array = JSONArray.fromObject("[]");
+        for (Object elem: java_array) {
+          mt_array = (JSONArray) run("json.append", mt_array, elem);
+        }
+      assertEquals(sanitize(java_array.size()), run("json.length", mt_array));
+    }
   }
 }
