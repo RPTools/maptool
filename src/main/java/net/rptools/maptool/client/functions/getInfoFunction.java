@@ -26,9 +26,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
-import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
@@ -203,47 +201,10 @@ public class getInfoFunction extends AbstractFunction {
    * @return the server side preferences
    */
   private JSONObject getServerInfo() {
-    Map<String, Object> sinfo = new HashMap<String, Object>();
     ServerPolicy sp = MapTool.getServerPolicy();
+    JSONObject sinfo = sp.toJSON();
 
-    sinfo.put(
-        "tooltips for default roll format",
-        sp.getUseToolTipsForDefaultRollFormat() ? BigDecimal.ONE : BigDecimal.ZERO);
-    sinfo.put(
-        "players can reveal", sp.getPlayersCanRevealVision() ? BigDecimal.ONE : BigDecimal.ZERO);
-    sinfo.put(
-        "auto reveal on movement", sp.isAutoRevealOnMovement() ? BigDecimal.ONE : BigDecimal.ZERO);
-    sinfo.put("movement locked", sp.isMovementLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
-    sinfo.put(
-        "restricted impersonation",
-        sp.isRestrictedImpersonation() ? BigDecimal.ONE : BigDecimal.ZERO);
-    sinfo.put("individual views", sp.isUseIndividualViews() ? BigDecimal.ONE : BigDecimal.ZERO);
-    sinfo.put("individual fow", sp.isUseIndividualFOW() ? BigDecimal.ONE : BigDecimal.ZERO);
-
-    sinfo.put(
-        "strict token management",
-        sp.useStrictTokenManagement() ? BigDecimal.ONE : BigDecimal.ZERO);
-    sinfo.put(
-        "players receive campaign macros",
-        sp.playersReceiveCampaignMacros() ? BigDecimal.ONE : BigDecimal.ZERO);
-    WalkerMetric metric =
-        MapTool.isPersonalServer()
-            ? AppPreferences.getMovementMetric()
-            : MapTool.getServerPolicy().getMovementMetric();
-    sinfo.put("movement metric", metric.toString());
-
-    sinfo.put("timeInMs", sp.getSystemTime());
-    sinfo.put("timeDate", sp.getTimeDate());
-
-    sinfo.put("gm", MapTool.getGMs());
-
-    InitiativePanel ip = MapTool.getFrame().getInitiativePanel();
-    if (ip != null) {
-      sinfo.put(
-          "initiative owner permissions",
-          ip.isOwnerPermissions() ? BigDecimal.ONE : BigDecimal.ZERO);
-    }
-    return JSONObject.fromObject(sinfo);
+    return (sinfo);
   }
 
   /**
