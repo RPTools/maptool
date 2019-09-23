@@ -99,21 +99,19 @@ public class ZoomFunctions extends AbstractFunction {
     int width = zoneRenderer.getWidth();
     int height = zoneRenderer.getHeight();
 
+    // convert zoomed pixels to true pixels
+    ZonePoint topLeft = convertToZone(zoneRenderer, offsetX, offsetY);
+    ZonePoint bottomRight = convertToZone(zoneRenderer, offsetX + width, offsetY + height);
+
     if (pixels) {
       if ("json".equalsIgnoreCase(delim)) {
-        return createBoundsAsJSON(offsetX, offsetY, offsetX + width, offsetY + height);
+        return createBoundsAsJSON(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
       } else {
-        return createBoundsAsStringProps(
-            delim, offsetX, offsetY, offsetX + width, offsetY + height);
+        return createBoundsAsStringProps(delim, topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
       }
     } else {
-      CellPoint z1 =
-          zoneRenderer.getZone().getGrid().convert(convertToZone(zoneRenderer, offsetX, offsetY));
-      CellPoint z2 =
-          zoneRenderer
-              .getZone()
-              .getGrid()
-              .convert(convertToZone(zoneRenderer, offsetX + width, offsetY + height));
+      CellPoint z1 = zoneRenderer.getZone().getGrid().convert(topLeft);
+      CellPoint z2 = zoneRenderer.getZone().getGrid().convert(bottomRight);
 
       if ("json".equalsIgnoreCase(delim)) {
         return createBoundsAsJSON(z1.x, z1.y, z2.x, z2.y);
@@ -139,17 +137,17 @@ public class ZoomFunctions extends AbstractFunction {
   }
 
   private static Object createBoundsAsStringProps(
-      String delim, int offsetX, int offsetY, int width, int height) {
+      String delim, int offsetX, int offsetY, int endX, int endY) {
     return "startX" + EQUALS + offsetX + delim + "startY" + EQUALS + offsetY + delim + "endX"
-        + EQUALS + width + delim + "endY" + EQUALS + height;
+        + EQUALS + endX + delim + "endY" + EQUALS + endY;
   }
 
-  private static JSONObject createBoundsAsJSON(int offsetX, int offsetY, int width, int height) {
+  private static JSONObject createBoundsAsJSON(int offsetX, int offsetY, int endX, int endY) {
     JSONObject bounds = new JSONObject();
     bounds.put("startX", offsetX);
     bounds.put("startY", offsetY);
-    bounds.put("endX", width);
-    bounds.put("endY", height);
+    bounds.put("endX", endX);
+    bounds.put("endY", endY);
     return bounds;
   }
 
@@ -204,15 +202,19 @@ public class ZoomFunctions extends AbstractFunction {
 
     int offsetX = zoneRenderer.getViewOffsetX() * -1;
     int width = zoneRenderer.getWidth();
-    int centerX = offsetX + (width / 2);
 
     int offsetY = zoneRenderer.getViewOffsetY() * -1;
     int height = zoneRenderer.getHeight();
-    int centerY = offsetY + (height / 2);
+
+    ZonePoint topLeft = convertToZone(zoneRenderer, offsetX, offsetY);
+    ZonePoint bottomRight = convertToZone(zoneRenderer, offsetX + width, offsetY + height);
+
+    int centerX = (topLeft.x + bottomRight.x) / 2;
+    int centerY = (topLeft.y + bottomRight.y) / 2;
 
     if (!pixels) {
       CellPoint centerPoint =
-          zoneRenderer.getZone().getGrid().convert(convertToZone(zoneRenderer, centerX, centerY));
+          zoneRenderer.getZone().getGrid().convert(new ZonePoint(centerX, centerY));
       centerX = centerPoint.x;
       centerY = centerPoint.y;
     }

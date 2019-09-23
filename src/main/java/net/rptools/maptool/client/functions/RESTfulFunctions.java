@@ -44,7 +44,7 @@ import okhttp3.Response;
  * <p>Functions take 1 to 5 parameters depending on function called. A minimum of a URL is always
  * required.
  *
- * <p>A body (payload) & Media Type are always required for post, put, & patch and optional for
+ * <p>A body (payload) and Media Type are always required for post, put, patch and optional for
  * delete.
  *
  * <p>Headers are optional on all functions passed in as a JSON as a String: String[] array of
@@ -272,7 +272,7 @@ public class RESTfulFunctions extends AbstractFunction {
   }
 
   /**
-   * @param function's name
+   * @param functionName the name of the function
    * @param parameters passed into the function call
    * @param min number of parameters required
    * @param max number of parameters required

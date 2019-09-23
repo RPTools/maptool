@@ -56,6 +56,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         "json.fromStrProp",
         "json.toStrProp",
         "json.toList",
+        "json.toVars",
         "json.append",
         "json.remove",
         "json.indent",
@@ -114,6 +115,8 @@ public class JSONMacroFunctions extends AbstractFunction {
       String jsonStr = parameters.get(0).toString();
       String path = parameters.get(1).toString();
       Object value = parameters.get(2);
+      Object json = convertToJSON(value.toString());
+      if (json != null) value = json; // to prevent quotes getting turned into \" and \"
 
       try {
         return JsonPath.parse(jsonStr).add(path, value).jsonString(); // add element to array
@@ -128,6 +131,8 @@ public class JSONMacroFunctions extends AbstractFunction {
       String jsonStr = parameters.get(0).toString();
       String path = parameters.get(1).toString();
       Object value = parameters.get(2);
+      Object json = convertToJSON(value.toString());
+      if (json != null) value = json;
 
       try {
         return JsonPath.parse(jsonStr).set(path, value).jsonString(); // set element in array/object
@@ -143,6 +148,8 @@ public class JSONMacroFunctions extends AbstractFunction {
       String path = parameters.get(1).toString();
       String key = parameters.get(2).toString();
       Object value = parameters.get(3);
+      Object json = convertToJSON(value.toString());
+      if (json != null) value = json;
 
       try {
         return JsonPath.parse(jsonStr).put(path, key, value).jsonString(); // add value in object
@@ -171,6 +178,30 @@ public class JSONMacroFunctions extends AbstractFunction {
         delim = parameters.get(1).toString();
       }
       return fromStrProp(parameters.get(0).toString(), delim);
+    }
+
+    if (functionName.equalsIgnoreCase("json.toVars")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      JSONObject jsonObject = FunctionUtil.paramAsJsonObject(functionName, parameters, 0);
+      String prefix = parameters.size() > 1 ? parameters.get(1).toString() : "";
+      String suffix = parameters.size() > 2 ? parameters.get(2).toString() : "";
+
+      JSONArray jsonNames = new JSONArray();
+      for (Object keyStr : jsonObject.keySet()) {
+        // add prefix and suffix
+        String varName = prefix + keyStr.toString().trim() + suffix;
+        // replace spaces by underscores
+        varName = varName.replaceAll("\\s", "_");
+        // delete special characters other than "." & "_" in var name
+        varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
+
+        if (!varName.equals("")) {
+          Object value = jsonObject.get(keyStr);
+          parser.setVariable(varName, value);
+          jsonNames.add(varName);
+        }
+      }
+      return jsonNames;
     }
 
     if (functionName.equals("json.set")) {
@@ -1200,7 +1231,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * Gets a value from the JSON Object or Array.
    *
    * @param obj The JSON Object or Array.
-   * @param key The key for the object or index for the array.
+   * @param keys The key for the object or index for the array.
    * @return the value.
    * @throws ParserException
    */

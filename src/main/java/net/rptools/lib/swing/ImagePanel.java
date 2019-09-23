@@ -14,38 +14,15 @@
  */
 package net.rptools.lib.swing;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.datatransfer.Transferable;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragGestureEvent;
-import java.awt.dnd.DragGestureListener;
-import java.awt.dnd.DragSource;
-import java.awt.dnd.DragSourceDragEvent;
-import java.awt.dnd.DragSourceDropEvent;
-import java.awt.dnd.DragSourceEvent;
-import java.awt.dnd.DragSourceListener;
-import java.awt.dnd.DragSourceMotionListener;
+import java.awt.dnd.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import javax.swing.JComponent;
-import javax.swing.JScrollPane;
-import javax.swing.Scrollable;
-import javax.swing.SwingUtilities;
-import javax.swing.ToolTipManager;
+import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 
 @SuppressWarnings("serial")
@@ -55,6 +32,7 @@ public class ImagePanel extends JComponent
         DragSourceListener,
         MouseListener,
         DragSourceMotionListener {
+
   public enum SelectionMode {
     SINGLE,
     MULTIPLE,
@@ -64,7 +42,8 @@ public class ImagePanel extends JComponent
   private ImagePanelModel model;
 
   private int gridSize = 50;
-  private final int gridPadding = 5;
+  private final Dimension gridPadding = new Dimension(9, 11);
+  private final int captionPadding = 5;
 
   private final Map<Rectangle, Integer> imageBoundsMap = new HashMap<Rectangle, Integer>();
 
@@ -77,7 +56,7 @@ public class ImagePanel extends JComponent
   private final List<Object> selectedIDList = new ArrayList<Object>();
   private final List<SelectionListener> selectionListenerList = new ArrayList<SelectionListener>();
 
-  private int fontHeight;
+  private int fontHeight = -1;
 
   public ImagePanel() {
     DragSource.getDefaultDragSource()
@@ -90,14 +69,45 @@ public class ImagePanel extends JComponent
     toolTipManager.registerComponent(this);
   }
 
+  /**
+   * Ensures that the font height has been set. Needed for methods that do measuring outside the
+   * paint loop.
+   *
+   * @param g The graphics context from which to obtain font metrics. If this is null, the method
+   *     will create and dispose its own graphics context.
+   */
+  private void ensureFontHeight(Graphics2D g) {
+    if (fontHeight == -1) {
+      boolean mustDisposeGraphics = false;
+      if (g == null) {
+        g =
+            Objects.requireNonNullElseGet(
+                (Graphics2D) getGraphics(),
+                () -> {
+                  var img =
+                      GraphicsEnvironment.getLocalGraphicsEnvironment()
+                          .getDefaultScreenDevice()
+                          .getDefaultConfiguration()
+                          .createCompatibleImage(1, 1, Transparency.OPAQUE);
+                  return (Graphics2D) img.getGraphics();
+                });
+        mustDisposeGraphics = true;
+      }
+      fontHeight = g.getFontMetrics(UIManager.getFont("Label.font")).getHeight();
+      if (mustDisposeGraphics) {
+        g.dispose();
+      }
+    }
+  }
+
   public void setGridSize(int size) {
     // Min
-    if (size < 25) {
-      size = 25;
+    size = Math.max(25, size);
+    if (size != gridSize) {
+      gridSize = size;
+      revalidate();
+      repaint();
     }
-    gridSize = size;
-    revalidate();
-    repaint();
   }
 
   public int getGridSize() {
@@ -109,19 +119,25 @@ public class ImagePanel extends JComponent
   }
 
   public void setSelectionMode(SelectionMode mode) {
-    selectionMode = mode;
-    selectedIDList.clear();
-    repaint();
+    if (selectionMode != mode) {
+      selectionMode = mode;
+      selectedIDList.clear();
+      repaint();
+    }
   }
 
   public void setShowCaptions(boolean enabled) {
-    showCaptions = enabled;
-    repaint();
+    if (showCaptions != enabled) {
+      showCaptions = enabled;
+      repaint();
+    }
   }
 
   public void setShowImageBorders(boolean enabled) {
-    showImageBorder = enabled;
-    repaint();
+    if (showImageBorder != enabled) {
+      showImageBorder = enabled;
+      repaint();
+    }
   }
 
   public ImagePanelModel getModel() {
@@ -129,15 +145,18 @@ public class ImagePanel extends JComponent
   }
 
   public void setModel(ImagePanelModel model) {
-    this.model = model;
-    revalidate();
-    final JScrollPane scrollPane =
-        (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+    if (this.model != model) {
+      this.model = model;
+      revalidate();
 
-    if (scrollPane != null) {
-      scrollPane.setWheelScrollingEnabled(true);
-      scrollPane.revalidate();
-      scrollPane.repaint();
+      final JScrollPane scrollPane =
+          (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+
+      if (scrollPane != null) {
+        scrollPane.setWheelScrollingEnabled(true);
+        scrollPane.revalidate();
+        scrollPane.repaint();
+      }
     }
   }
 
@@ -166,13 +185,15 @@ public class ImagePanel extends JComponent
   }
 
   @Override
-  protected void paintComponent(Graphics g) {
+  protected void paintComponent(Graphics gfx) {
+    var g = (Graphics2D) gfx;
     CodeTimer timer = new CodeTimer("ImagePanel.paintComponent");
     timer.setEnabled(false); // Change this to turn on perf data to System.out
 
     Rectangle clipBounds = g.getClipBounds();
-
     Dimension size = getSize();
+    var savedFont = g.getFont();
+    g.setFont(UIManager.getFont("Label.font"));
     FontMetrics fm = g.getFontMetrics();
     fontHeight = fm.getHeight();
 
@@ -184,8 +205,8 @@ public class ImagePanel extends JComponent
     }
     imageBoundsMap.clear();
 
-    int x = gridPadding;
-    int y = gridPadding;
+    int x = gridPadding.width;
+    int y = gridPadding.height;
     int numToProcess = model.getImageCount();
     String timerField = null;
     if (timer.isEnabled()) {
@@ -193,31 +214,46 @@ public class ImagePanel extends JComponent
       timer.start(timerField);
     }
     for (int i = 0; i < numToProcess; i++) {
-      Image image = model.getImage(i);
+      Image image;
 
       Rectangle bounds = new Rectangle(x, y, gridSize, gridSize);
-      imageBoundsMap.put(bounds, i);
+      imageBoundsMap.put(
+          new Rectangle(
+              x, y, gridSize, gridSize + (showCaptions ? captionPadding + fontHeight : 0)),
+          i);
 
       // Background
       Paint paint = model.getBackground(i);
       if (paint != null) {
-        ((Graphics2D) g).setPaint(paint);
+        g.setPaint(paint);
         g.fillRect(x - 2, y - 2, gridSize + 4, gridSize + 4); // bleed out a little
       }
-      if (image != null && bounds.intersects(clipBounds)) {
-        Dimension dim = constrainSize(image, gridSize);
-        g.drawImage(
-            image,
-            x + (gridSize - dim.width) / 2,
-            y + (gridSize - dim.height) / 2,
-            dim.width,
-            dim.height,
-            this);
+      if (bounds.intersects(clipBounds)) {
+        image = model.getImage(i);
+        if (image != null) {
+          Dimension dim = constrainSize(image, gridSize);
+          var savedRenderingHints = g.getRenderingHints();
+          if (dim.width < image.getWidth(null) || dim.height < image.getHeight(null)) {
+            g.setRenderingHint(
+                RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+          } else if (dim.width > image.getWidth(null) || dim.height > image.getHeight(null)) {
+            g.setRenderingHint(
+                RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+          }
+          g.drawImage(
+              image,
+              x + (gridSize - dim.width) / 2,
+              y + (gridSize - dim.height) / 2,
+              dim.width,
+              dim.height,
+              this);
 
-        // Image border
-        if (showImageBorder) {
-          g.setColor(Color.black);
-          g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+          // Image border
+          g.setRenderingHints(savedRenderingHints);
+          if (showImageBorder) {
+            g.setColor(Color.black);
+            g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+          }
         }
       }
       // Selected
@@ -250,31 +286,34 @@ public class ImagePanel extends JComponent
         if (caption != null) {
           boolean nameTooLong = false;
           int strWidth = fm.stringWidth(caption);
-          while (strWidth > bounds.width) {
-            nameTooLong = true;
-            caption = caption.substring(0, caption.length() - 1);
-            strWidth = fm.stringWidth(caption + "...");
-          }
-          if (nameTooLong) {
-            caption += "...";
+          if (strWidth > bounds.width) {
+            var avgCharWidth = (double) strWidth / caption.length();
+            var fittableChars = (int) (bounds.width / avgCharWidth);
+            caption = String.format("%s...", caption.substring(0, fittableChars - 2));
+            strWidth = fm.stringWidth(caption);
           }
           int cx = x + (gridSize - strWidth) / 2;
           int cy = y + gridSize + fm.getHeight();
 
           g.setColor(getForeground());
+          var savedRenderingHints = g.getRenderingHints();
+          g.setRenderingHint(
+              RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
           g.drawString(caption, cx, cy);
+          g.setRenderingHints(savedRenderingHints);
         }
       }
       // Line wrap
-      x += gridSize + gridPadding;
-      if (x > size.width - gridPadding - gridSize) {
-        x = gridPadding;
-        y += gridSize + gridPadding;
+      x += gridSize + gridPadding.width;
+      if ((x + gridSize) > (size.width - gridPadding.width)) {
+        x = gridPadding.width;
+        y += gridSize + gridPadding.height;
         if (showCaptions) {
           y += fontHeight;
         }
       }
     }
+    g.setFont(savedFont);
     if (timer.isEnabled()) {
       timer.stop(timerField);
       System.out.println(timer);
@@ -322,22 +361,23 @@ public class ImagePanel extends JComponent
 
   @Override
   public Dimension getPreferredSize() {
-    int width = getSize().width;
-
-    int rowCount = 0;
-    if (width < gridSize + gridPadding * 2) {
-      rowCount = model != null ? model.getImageCount() : 0;
-    } else {
-      rowCount =
-          (int)
-              (model != null
-                  ? Math.ceil(model.getImageCount() / Math.floor(width / (gridSize + gridPadding)))
-                  : 0);
+    if (model == null || model.getImageCount() == 0) {
+      return new Dimension();
     }
-    int height =
-        (model != null
-            ? rowCount * (gridSize + gridPadding + fontHeight) + gridPadding
-            : gridSize + gridPadding);
+
+    ensureFontHeight(null);
+    int width = getWidth();
+
+    int itemWidth = gridSize + gridPadding.width;
+    int itemHeight =
+        gridSize + gridPadding.height + (showCaptions ? fontHeight + captionPadding : 0);
+    int rowCount;
+    if (width < gridSize + gridPadding.width * 2) {
+      rowCount = model.getImageCount();
+    } else {
+      rowCount = model.getImageCount() / (width / itemWidth);
+    }
+    int height = rowCount * itemHeight;
     return new Dimension(width, height);
   }
 
@@ -371,7 +411,8 @@ public class ImagePanel extends JComponent
   }
 
   public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-    return (gridSize + gridPadding) * 2;
+    ensureFontHeight(null);
+    return ((gridSize + gridPadding.height * 2) + (showCaptions ? fontHeight + captionPadding : 0));
   }
 
   public boolean getScrollableTracksViewportHeight() {

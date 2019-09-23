@@ -58,11 +58,7 @@ public class AboutDialog extends JDialog {
     super.setVisible(b);
   }
 
-  /**
-   * This method initializes this
-   *
-   * @return void
-   */
+  /** This method initializes this */
   private void initialize() {
     this.setSize(354, 354);
     this.setTitle("About");

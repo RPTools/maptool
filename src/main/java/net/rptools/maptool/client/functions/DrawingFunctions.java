@@ -64,7 +64,6 @@ public class DrawingFunctions extends AbstractFunction {
    *
    * @param map the zone that should contain the drawing
    * @param guid the id of the drawing.
-   * @throws ParserException if there were more or less parameters than allowed
    */
   protected void bringToFront(Zone map, GUID guid) {
     List<DrawnElement> drawableList = map.getAllDrawnElements();

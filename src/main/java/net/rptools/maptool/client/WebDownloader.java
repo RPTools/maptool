@@ -35,6 +35,7 @@ public class WebDownloader {
    * Read the data at the given URL. This method should not be called on the EDT.
    *
    * @return File pointer to the location of the data, file will be deleted at program end
+   * @throws IOException if error while reading
    */
   public String read() throws IOException {
     URLConnection conn = url.openConnection();

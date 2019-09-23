@@ -15,22 +15,43 @@
 package net.rptools.lib.sound;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import javafx.application.Platform;
+import javafx.scene.media.AudioClip;
+import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 
+/**
+ * This class stores AudioClip for system sounds and sound events. Event sounds are played through
+ * the playSoundEvent method.
+ */
 public class SoundManager {
-  private final Map<String, URL> registeredSoundMap = new HashMap<String, URL>();
-  private final Map<String, URL> soundEventMap = new HashMap<String, URL>();
+  private final Map<String, AudioClip> registeredSoundMap = new HashMap<String, AudioClip>();
+  private final Map<String, AudioClip> soundEventMap = new HashMap<String, AudioClip>();
 
+  /**
+   * Loads the sound list and register the system sounds.
+   *
+   * @param configPath The path for the sound resources
+   * @throws IOException when configPath can't be read
+   */
   public void configure(String configPath) throws IOException {
     Properties props = new Properties();
-    props.load(SoundManager.class.getClassLoader().getResourceAsStream(configPath));
+    InputStream clipList = SoundManager.class.getClassLoader().getResourceAsStream(configPath);
+    if (clipList == null) throw new IOException();
+    props.load(clipList);
     configure(props);
   }
 
+  /**
+   * Register the system sounds from a Properties file.
+   *
+   * @param properties the property file
+   */
   @SuppressWarnings("unchecked")
   public void configure(Properties properties) {
     for (Enumeration<String> e = (Enumeration<String>) properties.propertyNames();
@@ -41,53 +62,69 @@ public class SoundManager {
   }
 
   /**
-   * These represent the built-in sounds. This is different than user contributed sounds which have
-   * an actual path to them.
+   * Register a system sound from a path. If path incorrect or null, remove sound.
+   *
+   * @param name the name of the sound
+   * @param path the path to the sound
    */
-  public void registerSound(String name, URL sound) {
-    if (sound != null) {
-      registeredSoundMap.put(name, sound);
-    } else {
-      registeredSoundMap.remove(name);
-    }
+  public void registerSound(String name, String path) {
+    if (path != null && path.trim().length() == 0) path = null;
+
+    URL url = path != null ? getClass().getClassLoader().getResource(path) : null;
+    AudioClip clip = url != null ? new AudioClip(url.toExternalForm()) : null;
+
+    if (clip != null) registeredSoundMap.put(name, clip);
+    else registeredSoundMap.remove(name);
   }
 
   /**
-   * These represent the built-in sounds. This is different than user contributed sounds which have
-   * an actual path to them. The file is pulled from the class path.
+   * Return a registered sound.
+   *
+   * @param name the name of the sound
+   * @return the audioclip of the sound
    */
-  public void registerSound(String name, String path) {
-    if (path != null && path.trim().length() == 0) {
-      path = null;
-    }
-    registerSound(
-        name, path != null ? SoundManager.class.getClassLoader().getResource(path) : null);
-  }
-
-  public URL getRegisteredSound(String name) {
+  public AudioClip getRegisteredSound(String name) {
     return registeredSoundMap.get(name);
   }
 
-  /** A sound event plays the sound associated with the event ID, this adds a new event type */
-  public void registerSoundEvent(String eventId, URL sound) {
-    soundEventMap.put(eventId, sound);
+  /**
+   * Associate a sound with an eventId.
+   *
+   * @param eventId a string for the eventId
+   * @param clip the audio clip for the sound
+   */
+  public void registerSoundEvent(String eventId, AudioClip clip) {
+    soundEventMap.put(eventId, clip);
   }
 
-  /** A sound event plays the sound associated with the event ID, this adds a new event type */
+  /**
+   * Associate a blank sound with an eventId.
+   *
+   * @param eventId a string for the eventId
+   */
   public void registerSoundEvent(String eventId) {
     registerSoundEvent(eventId, null);
   }
 
-  /** Play the sound associated with the eventId */
+  /**
+   * Play the sound associated with the eventId.
+   *
+   * @param eventId a string for the eventId
+   */
   public void playSoundEvent(String eventId) {
-    URL sound = soundEventMap.get(eventId);
+    AudioClip clip = soundEventMap.get(eventId);
+    double volume = MediaPlayerAdapter.getGlobalVolume();
 
-    if (sound != null) {
-      try {
-        SoundPlayer.play(sound);
-      } catch (IOException ioe) {
-        ioe.printStackTrace();
-      }
+    if (clip != null && !MediaPlayerAdapter.getGlobalMute() && volume > 0) {
+      Platform.runLater(
+          // Run on the JavaFX app thread
+          new Runnable() {
+            @Override
+            public void run() {
+              clip.setVolume(volume);
+              clip.play();
+            }
+          });
     }
   }
 }

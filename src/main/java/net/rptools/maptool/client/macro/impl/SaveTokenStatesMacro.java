@@ -42,7 +42,9 @@ import net.rptools.maptool.language.I18N;
   description = "savetokenstates.description"
 )
 public class SaveTokenStatesMacro implements Macro {
-  /** @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String) */
+  /**
+   * @see net.rptools.maptool.client.macro.Macro#execute(MacroContext, String, MapToolMacroContext)
+   */
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     // Read the file from the command line
     File aliasFile = null;

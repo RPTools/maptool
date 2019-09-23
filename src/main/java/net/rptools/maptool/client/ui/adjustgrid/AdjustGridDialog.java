@@ -57,7 +57,12 @@ public class AdjustGridDialog extends JDialog {
   private JSlider zoomSlider;
   private JETAColorWell colorWell;
 
-  /** This is the default constructor */
+  /**
+   * This is the default constructor
+   *
+   * @param owner the JFrame
+   * @param image the image of the zone
+   */
   public AdjustGridDialog(JFrame owner, BufferedImage image) {
     super(owner, "Adjust Grid", true);
     setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
@@ -75,11 +80,7 @@ public class AdjustGridDialog extends JDialog {
     getAdjustGridPanel().setZoneImage(image);
   }
 
-  /**
-   * This method initializes this
-   *
-   * @return void
-   */
+  /** This method initializes this */
   private void initialize() {
     this.setSize(500, 500);
 

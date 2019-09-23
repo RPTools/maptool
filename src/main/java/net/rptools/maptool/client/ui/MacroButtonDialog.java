@@ -535,8 +535,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   /**
    * Creates the slide-up panel at the bottom of the macro editor dialog panel.
    *
-   * @param key string key to lookup in the properties file (used to call {@link
-   *     I18N#getKeystroke()} and {@link I18N#getText()}
+   * @param key string key to lookup in the properties file (used to call {@link I18N#getKeystroke}
+   *     and {@link I18N#getText}
    * @param tb the toolbar that is meant to slide up
    * @return new JMenuItem containing the new {@link Action}
    */
@@ -550,6 +550,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   /** Is called when the dialog is about to disappear. We use it to do any menu cleanup. */
   private void destroyMenuBar() {
     JMenuBar mb = MapTool.getFrame().getJMenuBar();
+    if (mb == null) return;
     for (int i = 0; i < mb.getMenuCount(); i++) {
       JMenu menu = mb.getMenu(i);
       if (menu.getText().equalsIgnoreCase(I18N.getText("menu.edit"))) {

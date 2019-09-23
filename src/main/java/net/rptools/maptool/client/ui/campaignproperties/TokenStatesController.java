@@ -137,7 +137,7 @@ public class TokenStatesController
 
   /**
    * Name of the combo box containing a {@link String} value that one of the four corners of the
-   * token and is used in the {@link ColorDotTokenOverlay} & {@link CornerImageTokenOverlay}
+   * token and is used in the {@link ColorDotTokenOverlay} and {@link CornerImageTokenOverlay}
    */
   public static final String CORNER = "tokenStatesCorner";
 
@@ -268,7 +268,7 @@ public class TokenStatesController
   }
 
   /**
-   * Handle all of the buttons & state combo box
+   * Handle all of the buttons and state combo box
    *
    * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
    */

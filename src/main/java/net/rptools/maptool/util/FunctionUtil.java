@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
@@ -298,13 +296,12 @@ public class FunctionUtil {
    * @return the parameter as a jsonObject
    * @throws ParserException if the parameter can't be converted to jsonObject
    */
-  public static JsonObject paramAsJsonObject(
+  public static JSONObject paramAsJsonObject(
       String functionName, List<Object> parameters, int index) throws ParserException {
     Object obj = JSONMacroFunctions.asJSON(parameters.get(index));
     if (!(obj instanceof JSONObject)) {
       throw new ParserException(I18N.getText(KEY_NOT_JSON_OBJECT, functionName, index + 1));
-    }
-    return (JsonObject) obj;
+    } else return (JSONObject) obj;
   }
 
   /**
@@ -317,12 +314,11 @@ public class FunctionUtil {
    * @return the parameter as a jsonArray
    * @throws ParserException if the parameter can't be converted to jsonArray
    */
-  public static JsonArray paramAsJsonArray(String functionName, List<Object> parameters, int index)
+  public static JSONArray paramAsJsonArray(String functionName, List<Object> parameters, int index)
       throws ParserException {
     Object obj = JSONMacroFunctions.asJSON(parameters.get(index));
     if (!(obj instanceof JSONArray)) {
       throw new ParserException(I18N.getText(KEY_NOT_JSON_ARRAY, functionName, index + 1));
-    }
-    return (JsonArray) obj;
+    } else return (JSONArray) obj;
   }
 }

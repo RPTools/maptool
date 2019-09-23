@@ -41,7 +41,9 @@ import net.rptools.maptool.language.I18N;
   description = "loadtokenstates.description"
 )
 public class LoadTokenStatesMacro implements Macro {
-  /** @see net.rptools.maptool.client.macro.Macro#execute(java.lang.String) */
+  /**
+   * @see net.rptools.maptool.client.macro.Macro#execute(MacroContext, String, MapToolMacroContext)
+   */
   @SuppressWarnings("unchecked")
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     // Was the token states file passed?

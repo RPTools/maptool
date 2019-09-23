@@ -485,6 +485,8 @@ public class ZoneRenderer extends JComponent
       BigDecimal tmc = null;
       moveTimer.stop("setup");
 
+      int offsetX, offsetY;
+
       moveTimer.start("eachtoken");
       for (GUID tokenGUID : selectionSet) {
         Token token = zone.getToken(tokenGUID);
@@ -497,16 +499,34 @@ public class ZoneRenderer extends JComponent
           tokenCell = zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
         else tokenCell = new ZonePoint(token.getX(), token.getY());
 
-        int cellOffX = originPoint.x - tokenCell.x;
-        int cellOffY = originPoint.y - tokenCell.y;
+        int cellOffX, cellOffY;
+        if (token.isSnapToGrid() == keyToken.isSnapToGrid()) {
+          cellOffX = originPoint.x - tokenCell.x;
+          cellOffY = originPoint.y - tokenCell.y;
+        } else cellOffX = cellOffY = 0; // not used unless both are of same SnapToGrid
+
+        if (token.isSnapToGrid()
+            && (!AppPreferences.getTokensSnapWhileDragging() || !keyToken.isSnapToGrid())) {
+          // convert to Cellpoint and back to ensure token ends up at correct X and Y
+          CellPoint cellEnd =
+              zone.getGrid()
+                  .convert(
+                      new ZonePoint(
+                          token.getX() + set.getOffsetX(), token.getY() + set.getOffsetY()));
+          ZonePoint pointEnd = cellEnd.convertToZonePoint(zone.getGrid());
+          offsetX = pointEnd.x - token.getX();
+          offsetY = pointEnd.y - token.getY();
+        } else {
+          offsetX = set.getOffsetX();
+          offsetY = set.getOffsetY();
+        }
 
         /*
          * Lee: the problem now is to keep the precise coordinate computations for unsnapped tokens following a snapped key token. The derived path in the following section contains rounded
          * down values because the integer cell values were passed. If these were double in nature, the precision would be kept, but that would be too difficult to change at this stage...
          */
 
-        token.applyMove(
-            set, path, set.getOffsetX(), set.getOffsetY(), keyToken, cellOffX, cellOffY);
+        token.applyMove(set, path, offsetX, offsetY, keyToken, cellOffX, cellOffY);
 
         // Lee: setting originPoint to landing point
         token.setOriginPoint(new ZonePoint(token.getX(), token.getY()));
@@ -3601,6 +3621,7 @@ public class ZoneRenderer extends JComponent
    * Convenience method to return a set of tokens filtered by ownership.
    *
    * @param tokenSet the set of GUIDs to filter
+   * @return the set of GUIDs
    */
   public Set<GUID> getOwnedTokens(Set<GUID> tokenSet) {
     Set<GUID> ownedTokens = new LinkedHashSet<GUID>();
@@ -3616,9 +3637,9 @@ public class ZoneRenderer extends JComponent
   }
 
   /**
-   * A convienence method to get selected tokens ordered by name
+   * A convenience method to get selected tokens ordered by name
    *
-   * @return List<Token>
+   * @return List of tokens
    */
   public List<Token> getSelectedTokensList() {
     List<Token> tokenList = new ArrayList<Token>();
