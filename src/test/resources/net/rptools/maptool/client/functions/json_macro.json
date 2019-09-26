@@ -1,0 +1,22 @@
+{
+  "o_empty": {},
+  "o_primitive": {
+    "key0": 42,
+    "key1": true,
+    "key2": "true",
+    "key3": 125.12,
+    "key4": "false",
+    "key5": false,
+    "key6": 0,
+    "key7": "unicode_é",
+    "key8": null,
+    "key9": "null"
+  },
+  "o_nested": {
+    "key_o": {"foo" : 0},
+    "key_a": [0,1,2,3]
+  },
+  "a_empty": [],
+  "a_nested": [0, 1, null, [2, 3]]
+}
+}
