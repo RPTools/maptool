@@ -44,6 +44,7 @@ Bug Fixes
 * [#683][i683] Macro function `getTokens()` was very slow when _distance_ condition was used. On maps with 7000+ tokens the speed increase varies from 3x to 12x depending on grid type.  **Fixed.**
 * [#681][i681] Using "*" wildcard in `stopStream()` and `getStreamProperties()` stopped working.  Fixed.
 * [#679][i679] Continuous integration builds were failing.  Fixed.
+* [#670][i670] Macro function json.set() and json.put() will now put in the actual Java data types `null`, `true` and `false` when passed those strings.
 * [#658][i658] Sometimes Send to Back and Bring to Front right-click menu options didn't work.  Fixed.
 * [#653][i653] _Select Map_ button did not have i18n translation key.  Fixed and French translation added.
 * [#637][i637] Incorrect error message from `asset()` if second parameter is a number.  Fixed.
@@ -71,6 +72,7 @@ Bug Fixes
 [i681]: https://github.com/RPTools/maptool/issues/681
 [i679]: https://github.com/RPTools/maptool/issues/679
 [i676]: https://github.com/RPTools/maptool/issues/676
+[i670]: https://github.com/RPTools/maptool/issues/670
 [i667]: https://github.com/RPTools/maptool/issues/667
 [i665]: https://github.com/RPTools/maptool/issues/665
 [i663]: https://github.com/RPTools/maptool/issues/663
