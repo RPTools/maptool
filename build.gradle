@@ -181,7 +181,7 @@ dependencies {
     implementation 'net.rptools.decktool:decktool:1.0.b1'
 
     implementation 'net.rptools.maptool.resource:maptool.resource:1.0.b18'
-    implementation 'com.github.RPTools:parser:1.5.4'
+    implementation 'com.github.RPTools:parser:1.5.5'
 
     implementation 'jide-common:jide-common:3.2.3'
     implementation 'jide-components:jide-components:3.2.3'
