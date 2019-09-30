@@ -53,6 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import javax.imageio.ImageIO;
+import javax.imageio.spi.IIORegistry;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -1652,6 +1653,11 @@ public class MapTool {
     }
 
     URL.setURLStreamHandlerFactory(factory);
+
+    // Register ImageReaderSpi for jpeg2000 from JAI manually (issue due to uberJar packaging)
+    // https://github.com/jai-imageio/jai-imageio-core/issues/29
+    IIORegistry registry = IIORegistry.getDefaultInstance();
+    registry.registerServiceProvider(new com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi());
 
     final Toolkit tk = Toolkit.getDefaultToolkit();
     tk.getSystemEventQueue().push(new MapToolEventQueue());
