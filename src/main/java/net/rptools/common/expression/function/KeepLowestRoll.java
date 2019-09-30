@@ -18,28 +18,22 @@ import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.parser.Parser;
 import net.rptools.parser.function.AbstractNumberFunction;
+import net.rptools.parser.function.EvaluationException;
 
-/**
- * ubiquity(range)
- *
- * <p>Generate a random number form 1 to <code>sides</code>, <code>times</code> number of times. If
- * <code>times</code> is not supplied it defaults to 1.
- *
- * <p>Example: ubiquity(4) = 4dU (0..4 successes)
- */
-public class UbiquityRoll extends AbstractNumberFunction {
+public class KeepLowestRoll extends AbstractNumberFunction {
 
-  public UbiquityRoll() {
-    super(1, 1, false, "u", "ubiquity");
+  public KeepLowestRoll() {
+    super(3, 3, false, "keepLowest");
   }
 
   @Override
-  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters) {
+  public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
+      throws EvaluationException {
     int n = 0;
+    int times = ((BigDecimal) parameters.get(n++)).intValue();
+    int sides = ((BigDecimal) parameters.get(n++)).intValue();
+    int keep = ((BigDecimal) parameters.get(n++)).intValue();
 
-    int times = 1;
-    if (parameters.size() == 1) times = ((BigDecimal) parameters.get(n++)).intValue();
-
-    return new BigDecimal(DiceHelper.ubiquityDice(times));
+    return new BigDecimal(DiceHelper.keepLowestDice(times, sides, keep));
   }
 }
