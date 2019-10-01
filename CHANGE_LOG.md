@@ -32,6 +32,9 @@ Enhancements
 
 Bug Fixes
 -----
+* [#751][i751] PDF extraction of JPEG2000 images was broken.  Fixed.
+* [#746][i746] Move to current dicelib version to that multiple parser versions are not being pulled in.
+* [#731][i731] Code cleanup so that JavaDoc generation works.
 * [#724][i724] Macro functions `getViewArea` and `getViewCenter` were returning _zoomed_ map pixels.  Fixed.
 * [#713][i713] Campaign macro changes made after server started were not propagating to clients.  Fixed.
 * [#700][i700] Exception thrown when closing MapTool and macro editor is open.  Fixed.
@@ -56,6 +59,9 @@ Bug Fixes
 * [#187][i187] GM tokens with vision were exposing map areas to players. Fixed.  See also [#665][i665].
 
 
+[i751]: https://github.com/RPTools/maptool/issues/751
+[i746]: https://github.com/RPTools/maptool/issues/746
+[i731]: https://github.com/RPTools/maptool/issues/731
 [i724]: https://github.com/RPTools/maptool/issues/724
 [i718]: https://github.com/RPTools/maptool/issues/718
 [i716]: https://github.com/RPTools/maptool/issues/716
