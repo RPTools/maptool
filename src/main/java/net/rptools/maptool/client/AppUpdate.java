@@ -32,12 +32,25 @@ public class AppUpdate {
   private static final Logger log = LogManager.getLogger(AppUpdate.class);
 
   static final String GIT_HUB_API_URL = "github.api.url";
+  static final String GIT_HUB_RELEASES = "github.api.releases";
   static final String GIT_HUB_OAUTH_TOKEN =
       "github.api.oauth.token"; // Grants read-only access to public information
 
+  /**
+   * Look for a newer version of MapTool. If a newer release is found and the AppPreferences tell us
+   * the update should not be ignored, give a prompt to update. If current version is a release,
+   * update to the most recent release. If the current version is a pre-release, update to the most
+   * recent version (pre-release or release).
+   *
+   * @return has an update been made
+   */
   public static boolean gitHubReleases() {
     // AppPreferences.setSkipAutoUpdate(false); // For testing only
     if (AppPreferences.getSkipAutoUpdate()) return false;
+
+    String version = MapTool.getVersion().toLowerCase();
+    boolean prerelease =
+        version.contains("rc") || version.contains("alpha") || version.contains("beta");
 
     String responseBody = null;
     String jarCommit = null;
@@ -62,11 +75,12 @@ public class AppUpdate {
       return false;
     }
 
+    // if prerelease, get list of all releases, otherwise get latest release
+    String strURL = prerelease ? getProperty(GIT_HUB_RELEASES) : getProperty(GIT_HUB_API_URL);
+
     try {
       Request request =
-          new Request.Builder()
-              .url(getProperty(GIT_HUB_API_URL) + getProperty(GIT_HUB_OAUTH_TOKEN))
-              .build();
+          new Request.Builder().url(strURL + getProperty(GIT_HUB_OAUTH_TOKEN)).build();
 
       Response response = new OkHttpClient().newCall(request).execute();
       if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
@@ -75,13 +89,16 @@ public class AppUpdate {
 
       log.debug("GitHub API Response: " + responseBody);
     } catch (IOException e) {
-      log.error("Unable to reach " + getProperty(GIT_HUB_API_URL), e.getLocalizedMessage());
+      log.error("Unable to reach " + strURL, e.getLocalizedMessage());
       return false;
     }
 
-    JSONObject releases = new JSONObject();
+    JSONObject releases;
     try {
-      releases = JSONObject.fromObject(responseBody);
+      if (prerelease) {
+        JSONArray releasesList = JSONArray.fromObject(responseBody);
+        releases = JSONObject.fromObject(releasesList.get(0)); // the latest is at top of list
+      } else releases = JSONObject.fromObject(responseBody);
       latestGitHubReleaseCommit = releases.get("target_commitish").toString();
       log.info("target_commitish from GitHub: " + latestGitHubReleaseCommit);
       latestGitHubReleaseTagName = releases.get("tag_name").toString();
