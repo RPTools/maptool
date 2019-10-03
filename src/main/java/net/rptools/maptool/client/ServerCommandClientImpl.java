@@ -296,6 +296,10 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.updateCampaignMacros, properties);
   }
 
+  public void updateGmCampaignMacros(List<MacroButtonProperties> properties) {
+    makeServerCall(COMMAND.updateGmCampaignMacros, properties);
+  }
+
   public void clearExposedArea(GUID zoneGUID) {
     // System.out.println("in ServerCommandClientImpl");
     makeServerCall(COMMAND.clearExposedArea, zoneGUID);

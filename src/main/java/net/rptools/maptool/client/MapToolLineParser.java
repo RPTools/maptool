@@ -1625,6 +1625,19 @@ public class MapToolLineParser {
       }
       macroBody = mbp.getCommand();
       macroContext = new MapToolMacroContext(macroName, "campaign", !mbp.getAllowPlayerEdits());
+    } else if (macroLocation.equalsIgnoreCase("GMCAMPAIGN")) {
+      MacroButtonProperties mbp = null;
+      for (MacroButtonProperties m : MapTool.getCampaign().getMacroGmButtonPropertiesArray()) {
+        if (m.getLabel().equals(macroName)) {
+          mbp = m;
+          break;
+        }
+      }
+      if (mbp == null) {
+        throw new ParserException(I18N.getText("lineParser.unknownCampaignMacro", macroName));
+      }
+      macroBody = mbp.getCommand();
+      macroContext = new MapToolMacroContext(macroName, "gmCampaign", true);
     } else if (macroLocation.equalsIgnoreCase("GLOBAL")) {
       macroContext = new MapToolMacroContext(macroName, "global", MapTool.getPlayer().isGM());
       MacroButtonProperties mbp = null;

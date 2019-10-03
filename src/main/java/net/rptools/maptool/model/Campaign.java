@@ -72,11 +72,15 @@ public class Campaign {
 
   // campaign macro button properties. these are saved along with the campaign.
   // as of 1.3b32
-  private List<MacroButtonProperties> macroButtonProperties =
-      new ArrayList<MacroButtonProperties>();
+  private List<MacroButtonProperties> macroButtonProperties;
   // need to have a counter for additions to macroButtonProperties array
   // otherwise deletions/insertions from/to that array will go out of sync
   private int macroButtonLastIndex = 0;
+  private int macroGmButtonLastIndex = 0;
+
+  // campaign GM macro button properties. these are saved along with the campaign.
+  // as of 1.5.6
+  private List<MacroButtonProperties> macroGmButtonProperties;
 
   // DEPRECATED: As of 1.3b20 these are now in campaignProperties, but are here for backward
   // compatibility
@@ -105,7 +109,9 @@ public class Campaign {
 
   public Campaign() {
     macroButtonLastIndex = 0;
+    macroGmButtonLastIndex = 0;
     macroButtonProperties = new ArrayList<MacroButtonProperties>();
+    macroGmButtonProperties = new ArrayList<MacroButtonProperties>();
   }
 
   private void checkCampaignPropertyConversion() {
@@ -154,6 +160,8 @@ public class Campaign {
     campaignProperties = new CampaignProperties(campaign.campaignProperties);
     macroButtonProperties =
         new ArrayList<MacroButtonProperties>(campaign.getMacroButtonPropertiesArray());
+    macroGmButtonProperties =
+        new ArrayList<MacroButtonProperties>(campaign.getMacroGmButtonPropertiesArray());
   }
 
   public GUID getId() {
@@ -399,11 +407,18 @@ public class Campaign {
   /**
    * Get a copy of the properties. This is for persistence. Modification of the properties do not
    * affect this campaign
+   *
+   * @return a copy of the properties
    */
   public CampaignProperties getCampaignProperties() {
     return new CampaignProperties(campaignProperties);
   }
 
+  /**
+   * Getter for the array of Campaign macros
+   *
+   * @return the Campaign macros
+   */
   public List<MacroButtonProperties> getMacroButtonPropertiesArray() {
     if (macroButtonProperties == null) {
       // macroButtonProperties is null if you are loading an old campaign file < 1.3b32
@@ -412,8 +427,35 @@ public class Campaign {
     return macroButtonProperties;
   }
 
+  /**
+   * Setter for the list of Campaign macros
+   *
+   * @param properties the List of Campaign Macros
+   */
   public void setMacroButtonPropertiesArray(List<MacroButtonProperties> properties) {
     macroButtonProperties = properties;
+  }
+
+  /**
+   * Getter for the array of Campaign macros
+   *
+   * @return the Campaign macros
+   */
+  public List<MacroButtonProperties> getMacroGmButtonPropertiesArray() {
+    if (macroGmButtonProperties == null) {
+      // macroGmButtonProperties is null if you are loading an old campaign file < 1.5.6
+      macroGmButtonProperties = new ArrayList<MacroButtonProperties>();
+    }
+    return macroGmButtonProperties;
+  }
+
+  /**
+   * Setter for the list of Campaign macros
+   *
+   * @param properties the List of Campaign Macros
+   */
+  public void setMacroGmButtonPropertiesArray(List<MacroButtonProperties> properties) {
+    macroGmButtonProperties = properties;
   }
 
   public void saveMacroButtonProperty(MacroButtonProperties properties) {
@@ -444,6 +486,34 @@ public class Campaign {
     MapTool.getFrame().getCampaignPanel().reset();
   }
 
+  public void saveMacroGmButtonProperty(MacroButtonProperties properties) {
+    // find the matching property in the array
+    // TODO: hashmap? or equals()? or what?
+    for (MacroButtonProperties prop : macroGmButtonProperties) {
+      if (prop.getIndex() == properties.getIndex()) {
+        prop.setColorKey(properties.getColorKey());
+        prop.setAutoExecute(properties.getAutoExecute());
+        prop.setCommand(properties.getCommand());
+        prop.setHotKey(properties.getHotKey());
+        prop.setIncludeLabel(properties.getIncludeLabel());
+        prop.setApplyToTokens(properties.getApplyToTokens());
+        prop.setLabel(properties.getLabel());
+        prop.setGroup(properties.getGroup());
+        prop.setSortby(properties.getSortby());
+        prop.setFontColorKey(properties.getFontColorKey());
+        prop.setFontSize(properties.getFontSize());
+        prop.setMinWidth(properties.getMinWidth());
+        prop.setMaxWidth(properties.getMaxWidth());
+        prop.setToolTip(properties.getToolTip());
+        prop.setAllowPlayerEdits(properties.getAllowPlayerEdits());
+        MapTool.getFrame().getGmCampaignPanel().reset();
+        return;
+      }
+    }
+    macroGmButtonProperties.add(properties);
+    MapTool.getFrame().getGmCampaignPanel().reset();
+  }
+
   public int getMacroButtonNextIndex() {
     for (MacroButtonProperties prop : macroButtonProperties) {
       if (prop.getIndex() > macroButtonLastIndex) {
@@ -453,9 +523,23 @@ public class Campaign {
     return ++macroButtonLastIndex;
   }
 
+  public int getMacroGmButtonNextIndex() {
+    for (MacroButtonProperties prop : macroGmButtonProperties) {
+      if (prop.getIndex() > macroGmButtonLastIndex) {
+        macroGmButtonLastIndex = prop.getIndex();
+      }
+    }
+    return ++macroGmButtonLastIndex;
+  }
+
   public void deleteMacroButton(MacroButtonProperties properties) {
     macroButtonProperties.remove(properties);
     MapTool.getFrame().getCampaignPanel().reset();
+  }
+
+  public void deleteMacroGmButton(MacroButtonProperties properties) {
+    macroGmButtonProperties.remove(properties);
+    MapTool.getFrame().getGmCampaignPanel().reset();
   }
 
   /**

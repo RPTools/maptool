@@ -592,8 +592,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                             (ArrayList<MacroButtonProperties>) parameters[0]));
                 MapTool.getFrame().getCampaignPanel().reset();
                 return;
-                // moved this down into the event queue section so that the threading works as
-                // expected
+
+              case updateGmCampaignMacros:
+                MapTool.getCampaign()
+                    .setMacroGmButtonPropertiesArray(
+                        new ArrayList<MacroButtonProperties>(
+                            (ArrayList<MacroButtonProperties>) parameters[0]));
+                MapTool.getFrame().getGmCampaignPanel().reset();
+                return;
 
               case setLiveTypingLabel:
                 if ((Boolean) parameters[1]) {

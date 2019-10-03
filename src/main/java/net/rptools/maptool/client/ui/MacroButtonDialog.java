@@ -785,6 +785,12 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
       MapTool.getFrame().getCampaignPanel().reset();
     }
 
+    if (button.getPanelClass().equals("GmCampaignPanel")) {
+      MapTool.serverCommand()
+          .updateGmCampaignMacros(MapTool.getCampaign().getMacroGmButtonPropertiesArray());
+      MapTool.getFrame().getGmCampaignPanel().reset();
+    }
+
     if (closeDialog) {
       // setVisible(false);
       updateOpenMacroList(false);

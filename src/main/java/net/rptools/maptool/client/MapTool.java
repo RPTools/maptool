@@ -969,6 +969,7 @@ public class MapTool {
 
     AssetManager.updateRepositoryList();
     MapTool.getFrame().getCampaignPanel().reset();
+    MapTool.getFrame().getGmCampaignPanel().reset();
     UserDefinedMacroFunctions.getInstance().loadCampaignLibFunctions();
   }
 

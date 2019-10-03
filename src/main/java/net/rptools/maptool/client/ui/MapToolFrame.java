@@ -124,10 +124,7 @@ import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
 import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
-import net.rptools.maptool.client.ui.macrobuttons.panels.CampaignPanel;
-import net.rptools.maptool.client.ui.macrobuttons.panels.GlobalPanel;
-import net.rptools.maptool.client.ui.macrobuttons.panels.ImpersonatePanel;
-import net.rptools.maptool.client.ui.macrobuttons.panels.SelectionPanel;
+import net.rptools.maptool.client.ui.macrobuttons.panels.*;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeCellRenderer;
@@ -245,6 +242,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private EditTokenDialog tokenPropertiesDialog;
 
   private final CampaignPanel campaignPanel = new CampaignPanel();
+  private final GmCampaignPanel gmCampaignPanel = new GmCampaignPanel();
   private final GlobalPanel globalPanel = new GlobalPanel();
   private final SelectionPanel selectionPanel = new SelectionPanel();
   private final ImpersonatePanel impersonatePanel = new ImpersonatePanel();
@@ -628,6 +626,7 @@ public class MapToolFrame extends DefaultDockableHolder
     LOOKUP_TABLES("Tables"),
     GLOBAL("Global"),
     CAMPAIGN("Campaign"),
+    GMCAMPAIGN("GmCampaign"),
     SELECTION("Selected"),
     IMPERSONATED("Impersonate");
     // @formatter:on
@@ -670,6 +669,7 @@ public class MapToolFrame extends DefaultDockableHolder
     getDockingManager().addFrame(getFrame(MTFrame.LOOKUP_TABLES));
     getDockingManager().addFrame(getFrame(MTFrame.GLOBAL));
     getDockingManager().addFrame(getFrame(MTFrame.CAMPAIGN));
+    getDockingManager().addFrame(getFrame(MTFrame.GMCAMPAIGN));
     getDockingManager().addFrame(getFrame(MTFrame.SELECTION));
     getDockingManager().addFrame(getFrame(MTFrame.IMPERSONATED));
 
@@ -726,6 +726,7 @@ public class MapToolFrame extends DefaultDockableHolder
             MTFrame.INITIATIVE, initiativePanel, new ImageIcon(AppStyle.initiativePanelImage)));
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
+    JScrollPane gmCampaign = scrollPaneFactory(gmCampaignPanel);
     JScrollPane global = scrollPaneFactory(globalPanel);
     JScrollPane selection = scrollPaneFactory(selectionPanel);
     JScrollPane impersonate = scrollPaneFactory(impersonatePanel);
@@ -735,6 +736,10 @@ public class MapToolFrame extends DefaultDockableHolder
     frameMap.put(
         MTFrame.CAMPAIGN,
         createDockingFrame(MTFrame.CAMPAIGN, campaign, new ImageIcon(AppStyle.campaignPanelImage)));
+    frameMap.put(
+        MTFrame.GMCAMPAIGN,
+        createDockingFrame(
+            MTFrame.GMCAMPAIGN, gmCampaign, new ImageIcon(AppStyle.campaignPanelImage)));
     frameMap.put(
         MTFrame.SELECTION,
         createDockingFrame(
@@ -1887,6 +1892,10 @@ public class MapToolFrame extends DefaultDockableHolder
     return campaignPanel;
   }
 
+  public GmCampaignPanel getGmCampaignPanel() {
+    return gmCampaignPanel;
+  }
+
   public GlobalPanel getGlobalPanel() {
     return globalPanel;
   }
@@ -1908,6 +1917,7 @@ public class MapToolFrame extends DefaultDockableHolder
   public void resetPanels() {
     MacroButtonHotKeyManager.clearKeyStrokes();
     campaignPanel.reset();
+    gmCampaignPanel.reset();
     globalPanel.reset();
     impersonatePanel.reset();
     selectionPanel.reset();
