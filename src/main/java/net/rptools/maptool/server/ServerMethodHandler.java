@@ -249,6 +249,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case updateCampaignMacros:
           updateCampaignMacros((List<MacroButtonProperties>) context.get(0));
           break;
+        case updateGmMacros:
+          updateGmMacros((List<MacroButtonProperties>) context.get(0));
+          break;
         case setTokenLocation:
           setTokenLocation(
               context.getGUID(0), context.getGUID(1), context.getInt(2), context.getInt(3));
@@ -743,6 +746,13 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
     MapTool.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
     server.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
+    forwardToClients();
+  }
+
+  public void updateGmMacros(List<MacroButtonProperties> properties) {
+    ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
+    MapTool.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
+    server.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
     forwardToClients();
   }
 

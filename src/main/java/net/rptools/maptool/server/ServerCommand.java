@@ -85,6 +85,7 @@ public interface ServerCommand {
     updateTokenInitiative,
     setVisionType,
     updateCampaignMacros,
+    updateGmMacros,
     setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be
     // depended on for general purpose token movement
     setLiveTypingLabel, // Experimental
@@ -195,6 +196,8 @@ public interface ServerCommand {
   public void setVisionType(GUID zoneGUID, VisionType visionType);
 
   public void updateCampaignMacros(List<MacroButtonProperties> properties);
+
+  public void updateGmMacros(List<MacroButtonProperties> properties);
 
   public void setBoard(GUID zoneGUID, MD5Key mapAsset, int X, int Y);
 

@@ -336,6 +336,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
       MacroButtonPrefs.savePreferences(this);
     } else if (saveLocation.equals("CampaignPanel")) {
       MapTool.getCampaign().saveMacroButtonProperty(this);
+    } else if (saveLocation.equals("GmPanel")) {
+      MapTool.getCampaign().saveGmMacroButtonProperty(this);
     }
   }
 
@@ -437,6 +439,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
             trusted = MapTool.getPlayer().isGM();
           } else if (saveLocation.equals("CampaignPanel")) {
             loc = "campaign";
+          } else if (saveLocation.equals("GmPanel")) {
+            loc = "gm";
+            trusted = MapTool.getPlayer().isGM();
           } else if (contextToken != null) {
             // Should this IF stmt really be:
             // contextToken.matches("^[^:\\s]+:")
@@ -606,7 +611,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
    * if it's not then the color is converted to CSS format <b>#FF00FF</b> format and that string is
    * returned.
    *
-   * @return
+   * @return string of the color
    */
   public String getFontColorAsHtml() {
     Color c = null;
@@ -726,6 +731,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     List<MacroButtonProperties> existingMacroList = null;
     if (source.equalsIgnoreCase("CampaignPanel")) {
       existingMacroList = MapTool.getCampaign().getMacroButtonPropertiesArray();
+    } else if (source.equalsIgnoreCase("GmPanel")) {
+      existingMacroList = MapTool.getCampaign().getGmMacroButtonPropertiesArray();
     } else if (source.equalsIgnoreCase("GlobalPanel")) {
       existingMacroList = MacroButtonPrefs.getButtonProperties();
     } else if (token != null) {
