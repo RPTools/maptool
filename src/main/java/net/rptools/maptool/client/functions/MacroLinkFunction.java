@@ -17,13 +17,9 @@ package net.rptools.maptool.client.functions;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.lib.MD5Key;
@@ -40,10 +36,12 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -145,14 +143,28 @@ public class MacroLinkFunction extends AbstractFunction {
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
       }
+      FunctionUtil.checkNumberParam(functionName, args, 1, 4);
 
-      boolean defer = false;
-      if (args.size() > 1) {
-        if (args.get(1) instanceof BigDecimal) {
-          defer = BigDecimal.ZERO.equals(args.get(1)) ? false : true;
-        }
+      String link = args.get(0).toString();
+      boolean defer =
+          args.size() > 1 ? FunctionUtil.paramAsBoolean(functionName, args, 1, true) : false;
+      String strTargets = args.size() > 2 ? args.get(2).toString().trim() : "self";
+      String delim = args.size() > 3 ? args.get(3).toString() : ",";
+
+      JSONArray jsonTargets;
+      if ("json".equals(delim) || strTargets.charAt(0) == '[')
+        jsonTargets = JSONArray.fromObject(strTargets);
+      else {
+        jsonTargets = new JSONArray();
+        for (String t : strTargets.split(delim)) jsonTargets.add(t.trim());
       }
-      execLink((String) args.get(0), defer);
+      if (jsonTargets.isEmpty()) return ""; // dont send to empty lists
+
+      @SuppressWarnings("unchecked")
+      Collection<String> targets =
+          JSONArray.toCollection(jsonTargets, List.class); // Returns an ArrayList<String>
+
+      sendExecLink(link, defer, targets);
       return "";
     }
 
@@ -168,16 +180,70 @@ public class MacroLinkFunction extends AbstractFunction {
     return sb.toString();
   }
 
-  private void execLink(final String link, boolean defer) {
+  /**
+   * Send the execLink to targets, either immediately or with a delay
+   *
+   * @param link the macroLinkText
+   * @param defer should the execLink be delayed
+   * @param targets the list of targets
+   */
+  private static void sendExecLink(final String link, boolean defer, Collection<String> targets) {
     if (defer) {
       EventQueue.invokeLater(
           new Runnable() {
             public void run() {
-              runMacroLink(link);
+              sendExecLink(link, targets);
             }
           });
     } else {
-      this.runMacroLink(link);
+      sendExecLink(link, targets);
+    }
+  }
+
+  /**
+   * Send the execLink. If target is local, run locally instead.
+   *
+   * @param link the macroLinkText
+   * @param targets the list of targets
+   */
+  private static void sendExecLink(final String link, Collection<String> targets) {
+    boolean isGM = MapTool.getPlayer().isGM();
+
+    for (String target : targets) {
+      switch (target.toLowerCase()) {
+        case "gm-self":
+          MapTool.serverCommand().execLink(link, "gm");
+          if (isGM) break; // // FALLTHRU if not a GM
+        case "self":
+          runMacroLink(link);
+          break;
+        case "none":
+          break;
+        default:
+          MapTool.serverCommand().execLink(link, target);
+      }
+    }
+  }
+
+  /**
+   * Receive an execLink, and run it if the player is a target.
+   *
+   * @param link the macroLinkText
+   * @param target the target. Can also be "gm" or "all".
+   */
+  public static void receiveExecLink(final String link, String target) {
+    String playerName = MapTool.getPlayer().getName();
+    boolean isGM = MapTool.getPlayer().isGM();
+    switch (target.toLowerCase()) {
+      case "gm":
+        if (isGM) runMacroLink(link);
+        break;
+      case "all":
+        runMacroLink(link);
+        break;
+      default:
+        if (target.equals(playerName)) runMacroLink(link);
+        break;
     }
   }
 
@@ -193,8 +259,8 @@ public class MacroLinkFunction extends AbstractFunction {
    * @param macroName such as <code>MacroName@Lib:Core</code>
    * @param who where output should go
    * @param target the string <code>impersonated</code>, <code>all</code>
-   * @param args
-   * @return
+   * @param args the arguments to append to the end of the macro invocation
+   * @return the String of the macro invocation
    * @throws ParserException
    */
   public String createMacroText(String macroName, String who, String target, String args)
@@ -240,7 +306,7 @@ public class MacroLinkFunction extends AbstractFunction {
    * @return a property list representation of the arguments.
    * @throws ParserException if the argument encoding is incorrect.
    */
-  public String argsToStrPropList(String args) throws ParserException {
+  public static String argsToStrPropList(String args) throws ParserException {
     String vals[] = args.split("&");
     StringBuilder propList = new StringBuilder();
 
@@ -368,7 +434,7 @@ public class MacroLinkFunction extends AbstractFunction {
    *
    * @param link the link to the macro.
    */
-  public void runMacroLink(String link) {
+  public static void runMacroLink(String link) {
     runMacroLink(link, false);
   }
 
@@ -383,7 +449,7 @@ public class MacroLinkFunction extends AbstractFunction {
    *     macro.args.
    */
   @SuppressWarnings("unchecked")
-  public void runMacroLink(String link, boolean setVars) {
+  public static void runMacroLink(String link, boolean setVars) {
     if (link == null || link.length() == 0) {
       return;
     }
@@ -475,7 +541,8 @@ public class MacroLinkFunction extends AbstractFunction {
     }
   }
 
-  private void doOutput(Token token, OutputTo outputTo, String line, Set<String> playerList) {
+  private static void doOutput(
+      Token token, OutputTo outputTo, String line, Set<String> playerList) {
     /*
      * First we check our player list to make sure we are not sending things out multiple times or the wrong way. This looks a little ugly, but all it is doing is searching for the strings "say",
      * "gm", or "gmself", and if it contains no other strings changes it to a more appropriate for such as /togm, /self, etc. If it contains other names then gm, self etc will be replaced with
@@ -573,7 +640,7 @@ public class MacroLinkFunction extends AbstractFunction {
     }
   }
 
-  private void doWhisper(String message, Token token, String playerName) {
+  private static void doWhisper(String message, Token token, String playerName) {
     ObservableList<Player> playerList = MapTool.getPlayerList();
     List<String> players = new ArrayList<String>();
     for (int count = 0; count < playerList.size(); count++) {
@@ -612,7 +679,7 @@ public class MacroLinkFunction extends AbstractFunction {
             null));
   }
 
-  private String getSelf() {
+  private static String getSelf() {
     return MapTool.getPlayer().getName();
   }
 
@@ -688,7 +755,7 @@ public class MacroLinkFunction extends AbstractFunction {
     return false;
   }
 
-  private void doSay(String msg, Token token, boolean trusted, String macroName) {
+  private static void doSay(String msg, Token token, boolean trusted, String macroName) {
     StringBuilder sb = new StringBuilder();
 
     String identity = token == null ? MapTool.getPlayer().getName() : token.getName();

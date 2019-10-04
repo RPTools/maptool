@@ -91,7 +91,7 @@ public class Campaign {
 
   /**
    * This flag indicates whether the manual fog tools have been used in this campaign while a server
-   * is not running. See {@link ToolbarPanel#createFogPanel()} for details.
+   * is not running. See {@link ToolbarPanel} for details.
    *
    * <p>
    *
@@ -135,6 +135,11 @@ public class Campaign {
     return campaignProperties.getRemoteRepositoryList();
   }
 
+  /**
+   * Create a new campaign with an old campaign's properties.
+   *
+   * @param campaign The campaign to copy from.
+   */
   public Campaign(Campaign campaign) {
     zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
 
@@ -143,7 +148,7 @@ public class Campaign {
      * as is done below for the campaign properties and macro buttons.
      */
     for (Entry<GUID, Zone> entry : campaign.zones.entrySet()) {
-      Zone copy = new Zone(entry.getValue());
+      Zone copy = new Zone(entry.getValue(), true);
       zones.put(copy.getId(), copy);
     }
     campaignProperties = new CampaignProperties(campaign.campaignProperties);

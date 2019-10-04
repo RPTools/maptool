@@ -45,7 +45,7 @@ import org.apache.logging.log4j.Logger;
  * desired display string on the UI. This isn't strictly necessary, because for {@code Map}s the
  * String key is used, but when the data structure is a {@code List} of some type, there is no key.
  * This class copies all of the elements into a {@code Map} using the results of converting the
- * object into a {@c String} as the key. The strings are then sorted and added to the UI.
+ * object into a {@code String} as the key. The strings are then sorted and added to the UI.
  *
  * @author crash
  */

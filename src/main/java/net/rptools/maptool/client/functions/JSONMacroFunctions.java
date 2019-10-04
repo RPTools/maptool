@@ -14,15 +14,18 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.jayway.jsonpath.*;
 import java.math.BigDecimal;
 import java.util.*;
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.*;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
 @SuppressWarnings("unchecked")
@@ -40,6 +43,11 @@ public class JSONMacroFunctions extends AbstractFunction {
         1,
         UNLIMITED_PARAMETERS,
         "json.get",
+        "json.path.read",
+        "json.path.add",
+        "json.path.put",
+        "json.path.set",
+        "json.path.delete",
         "json.type",
         "json.fields",
         "json.length",
@@ -48,6 +56,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         "json.fromStrProp",
         "json.toStrProp",
         "json.toList",
+        "json.toVars",
         "json.append",
         "json.remove",
         "json.indent",
@@ -88,12 +97,111 @@ public class JSONMacroFunctions extends AbstractFunction {
       return fromStrList(parameters.get(0).toString(), delim);
     }
 
+    if (functionName.equals("json.path.read")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+      String jsonStr = parameters.get(0).toString();
+      String path = parameters.get(1).toString();
+
+      try {
+        return JsonPath.parse(jsonStr).read(path);
+      } catch (Exception e) {
+        throw new ParserException(
+            I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
+      }
+    }
+
+    if (functionName.equals("json.path.add")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
+      String jsonStr = parameters.get(0).toString();
+      String path = parameters.get(1).toString();
+      Object value = parameters.get(2);
+      Object json = convertToJSON(value.toString());
+      if (json != null) value = json; // to prevent quotes getting turned into \" and \"
+
+      try {
+        return JsonPath.parse(jsonStr).add(path, value).jsonString(); // add element to array
+      } catch (Exception e) {
+        throw new ParserException(
+            I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
+      }
+    }
+
+    if (functionName.equals("json.path.set")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
+      String jsonStr = parameters.get(0).toString();
+      String path = parameters.get(1).toString();
+      Object value = parameters.get(2);
+      Object json = convertToJSON(value.toString());
+      if (json != null) value = json;
+
+      try {
+        return JsonPath.parse(jsonStr).set(path, value).jsonString(); // set element in array/object
+      } catch (Exception e) {
+        throw new ParserException(
+            I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
+      }
+    }
+
+    if (functionName.equals("json.path.put")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 4, 4);
+      String jsonStr = parameters.get(0).toString();
+      String path = parameters.get(1).toString();
+      String key = parameters.get(2).toString();
+      Object value = parameters.get(3);
+      Object json = convertToJSON(value.toString());
+      if (json != null) value = json;
+
+      try {
+        return JsonPath.parse(jsonStr).put(path, key, value).jsonString(); // add value in object
+      } catch (Exception e) {
+        throw new ParserException(
+            I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
+      }
+    }
+
+    if (functionName.equals("json.path.delete")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+      String jsonStr = parameters.get(0).toString();
+      String path = parameters.get(1).toString();
+
+      try {
+        return JsonPath.parse(jsonStr).delete(path).jsonString(); // delete path
+      } catch (Exception e) {
+        throw new ParserException(
+            I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
+      }
+    }
+
     if (functionName.equals("json.fromStrProp")) {
       String delim = ";";
       if (parameters.size() > 1) {
         delim = parameters.get(1).toString();
       }
       return fromStrProp(parameters.get(0).toString(), delim);
+    }
+
+    if (functionName.equalsIgnoreCase("json.toVars")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      JSONObject jsonObject = FunctionUtil.paramAsJsonObject(functionName, parameters, 0);
+      String prefix = parameters.size() > 1 ? parameters.get(1).toString() : "";
+      String suffix = parameters.size() > 2 ? parameters.get(2).toString() : "";
+
+      JSONArray jsonNames = new JSONArray();
+      for (Object keyStr : jsonObject.keySet()) {
+        // add prefix and suffix
+        String varName = prefix + keyStr.toString().trim() + suffix;
+        // replace spaces by underscores
+        varName = varName.replaceAll("\\s", "_");
+        // delete special characters other than "." & "_" in var name
+        varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
+
+        if (!varName.equals("")) {
+          Object value = jsonObject.get(keyStr);
+          parser.setVariable(varName, value);
+          jsonNames.add(varName);
+        }
+      }
+      return jsonNames;
     }
 
     if (functionName.equals("json.set")) {
@@ -1071,6 +1179,26 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   /**
+   * JSONify the given value, inducing JSON type from the Maptool string value. Because Maptool
+   * arbitrarily convert null, true, and false from incoming json data into "null", "true" and
+   * "false", this function does the opposite to allow Maptool to send json data
+   *
+   * @param value A Maptool value.
+   * @return null, true or false instead of "null", "true, or "false", or the value unchanged
+   */
+  public static Object jsonify(Object value) {
+    // the json library does not use the java null object, but one singleton of its own
+    if ("null".equals(value)) {
+      return JSONNull.getInstance();
+    } else if ("true".equals(value)) {
+      return true;
+    } else if ("false".equals(value)) {
+      return false;
+    }
+    return value;
+  }
+
+  /**
    * Append a value to a JSON array.
    *
    * @param obj The JSON object.
@@ -1087,7 +1215,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       // Create a new JSON Array to support immutable types in macros.
       JSONArray jarr = JSONArray.fromObject(obj);
       for (Object val : values.subList(1, values.size())) {
-        jarr.add(val);
+        jarr.add(jsonify(val));
       }
       return jarr;
     } else {
@@ -1103,7 +1231,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * Gets a value from the JSON Object or Array.
    *
    * @param obj The JSON Object or Array.
-   * @param key The key for the object or index for the array.
+   * @param keys The key for the object or index for the array.
    * @return the value.
    * @throws ParserException
    */
@@ -1351,14 +1479,14 @@ public class JSONMacroFunctions extends AbstractFunction {
       // Create a new JSON object to preserve macro object immutable types.
       JSONObject jobj = JSONObject.fromObject(obj);
       for (int i = 1; i < param.size(); i += 2) {
-        jobj.put(param.get(i).toString(), param.get(i + 1));
+        jobj.put(param.get(i).toString(), jsonify(param.get(i + 1)));
       }
       return jobj;
     } else if (obj instanceof JSONArray) {
       // Create a new JSON array to preserve macro object immutable types.
       JSONArray jarr = JSONArray.fromObject(obj);
       for (int i = 1; i < param.size(); i += 2) {
-        jarr.set(Integer.parseInt(param.get(i).toString()), param.get(i + 1));
+        jarr.set(Integer.parseInt(param.get(i).toString()), jsonify(param.get(i + 1)));
       }
       return jarr;
     } else {

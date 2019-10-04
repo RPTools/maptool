@@ -18,11 +18,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashSet;
@@ -36,6 +32,7 @@ import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.Zone.Event;
@@ -105,6 +102,14 @@ public abstract class Grid implements Cloneable {
     return null;
   }
 
+  /**
+   * Return the Point (double precision) for pixel center of Cell
+   *
+   * @param cell The cell to get the center of.
+   * @return Point of the coordinates.
+   */
+  public abstract Point2D.Double getCellCenter(CellPoint cell);
+
   protected List<TokenFootprint> loadFootprints(String path, OffsetTranslator... translators)
       throws IOException {
     Object obj = FileUtil.objFromResource(path);
@@ -144,6 +149,10 @@ public abstract class Grid implements Cloneable {
 
   public boolean isIsometric() {
     return false;
+  }
+
+  public boolean useMetric() {
+    return false; // only square & iso use metrics
   }
 
   public boolean isHex() {
@@ -227,7 +236,10 @@ public abstract class Grid implements Cloneable {
     this.cellShape = cellShape;
   }
 
-  /** @param Both The grid's x and y offset components */
+  /**
+   * @param offsetX The grid's x offset component
+   * @param offsetY The grid's y offset component
+   */
   public void setOffset(int offsetX, int offsetY) {
     this.offsetX = offsetX;
     this.offsetY = offsetY;
@@ -263,7 +275,7 @@ public abstract class Grid implements Cloneable {
   }
 
   /**
-   * Constrains size to MIN_GRID_SIZE <= size <= MAX_GRID_SIZE
+   * Constrains size to {@code MIN_GRID_SIZE <= size <= MAX_GRID_SIZE}
    *
    * @return The size after it has been constrained
    */
@@ -494,6 +506,32 @@ public abstract class Grid implements Cloneable {
     return distance;
   }
 
+  /**
+   * Return the cell distance between two cells. Does not take into account terrain or VBL.
+   * Overridden by Hex &amp; Gridless grids.
+   *
+   * @param cellA the first cell
+   * @param cellB the second cell
+   * @param wmetric the walker metric
+   * @return the distance (in cells) between the two cells
+   */
+  public double cellDistance(CellPoint cellA, CellPoint cellB, WalkerMetric wmetric) {
+    int distance;
+    int distX = Math.abs(cellA.x - cellB.x);
+    int distY = Math.abs(cellA.y - cellB.y);
+    if (wmetric == WalkerMetric.NO_DIAGONALS || wmetric == WalkerMetric.MANHATTAN) {
+      distance = distX + distY;
+    } else if (wmetric == WalkerMetric.ONE_ONE_ONE) {
+      distance = Math.max(distX, distY);
+    } else if (wmetric == WalkerMetric.ONE_TWO_ONE) {
+      distance = Math.max(distX, distY) + Math.min(distX, distY) / 2;
+    } else {
+      System.out.println("Incorrect WalkerMetric in method cellDistance of Grid.java");
+      distance = -1; // error, should not happen;
+    }
+    return distance;
+  }
+
   private Area createHex(double x, double y, double radius, double rotation) {
     GeneralPath hexPath = new GeneralPath();
 
@@ -532,7 +570,6 @@ public abstract class Grid implements Cloneable {
    * Override if getCapabilities.isSecondDimensionAdjustmentSupported() returns true
    *
    * @param length the second settable dimension
-   * @return
    */
   public void setSecondDimension(double length) {}
 
@@ -655,8 +692,8 @@ public abstract class Grid implements Cloneable {
   /**
    * Returns an area based upon the token's cell footprint
    *
-   * @param token
-   * @return
+   * @param bounds
+   * @return area
    */
   public Area getTokenCellArea(Rectangle bounds) {
     // Get the cell footprint

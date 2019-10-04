@@ -93,6 +93,10 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
    * token is moving, does it have sight, and so on). Currently that information is not available
    * here, but perhaps an option Token parameter could be specified to the constructor? Or maybe as
    * the tree was scanned, since I believe all Grids share a common ZoneWalker.
+   *
+   * @param x the x of the CellPoint
+   * @param y the y of the CellPoint
+   * @return the array of (x,y) for the neighbor cells
    */
   protected abstract int[][] getNeighborMap(int x, int y);
 

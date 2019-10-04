@@ -102,7 +102,12 @@ public class StrListFunctions extends AbstractFunction {
     }
   }
 
-  /** Prepares a string for use in regex operations. */
+  /**
+   * Prepares a string for use in regex operations.
+   *
+   * @param s the String that could have non-alphanumeric characters
+   * @return a new String, with the non-alphanumeric characters escaped
+   */
   public static String fullyQuoteString(String s) {
     // We escape each non-alphanumeric character in the delimiter string
     StringBuilder sb = new StringBuilder();
@@ -151,8 +156,10 @@ public class StrListFunctions extends AbstractFunction {
   /**
    * MapTool call: <code>listGet(list, index [,delim])</code>
    *
-   * @param index A zero-based number
-   * @param delim An optional list delimiter (default ",")
+   * @param parameters the parameters of the function call
+   * @param listStr the String of the list
+   * @param lastParam the last parameter
+   * @param list the list that will contain the elements
    * @return The item at position <code>index</code>, or <code>""</code> if out of bounds.
    */
   public Object listGet(
@@ -189,8 +196,10 @@ public class StrListFunctions extends AbstractFunction {
   /**
    * <code>listDelete(list, index [,delim])</code>
    *
-   * @param index A number from 0 to (list length)-1. Out of range values are ignored.
-   * @param delim An optional list delimiter (default ",")
+   * @param parameters the parameters of the function call
+   * @param listStr the String of the list
+   * @param lastParam the last parameter
+   * @param list the list that will contain the parsed element
    * @return A new list with the item at position <code>index</code> deleted.
    */
   public Object listDelete(
@@ -233,7 +242,10 @@ public class StrListFunctions extends AbstractFunction {
   /**
    * MapTool call: <code>listCount(list [,delim])</code>
    *
-   * @param delim An optional list delimiter (default ",")
+   * @param parameters the parameters of the function call
+   * @param listStr the String of the list
+   * @param lastParam the last parameter
+   * @param list the list that will contain the parsed element
    * @return The number of entries in the list.
    */
   public Object listCount(
@@ -258,8 +270,10 @@ public class StrListFunctions extends AbstractFunction {
   /**
    * MapTool call: <code>listFind(list, target [,delim])</code>
    *
-   * @param target A string or number to search for
-   * @param delim An optional list delimiter (default ",")
+   * @param parameters the parameters of the function call
+   * @param listStr the String of the list
+   * @param lastParam the last parameter
+   * @param list the list that will contain the parsed element
    * @return The index of the first occurence of <code>target</code>, or -1 if not found.
    */
   public Object listFind(
@@ -292,8 +306,10 @@ public class StrListFunctions extends AbstractFunction {
   /**
    * MapTool call: <code>listContains(list, target [,delim])</code>
    *
-   * @param target A string or number to search for
-   * @param delim An optional list delimiter (default ",")
+   * @param parameters the parameters of the function call
+   * @param listStr the String of the list
+   * @param lastParam the last parameter
+   * @param list the list that will contain the parsed element
    * @return Number of occurrences of <code>target</code> in <code>list</code>.
    */
   public Object listContains(
@@ -325,8 +341,10 @@ public class StrListFunctions extends AbstractFunction {
   /**
    * MapTool call: <code>listAppend(list, target [,delim])</code>
    *
-   * @param target A string or number to append.
-   * @param delim An optional list delimiter (default ",")
+   * @param parameters the parameters of the function call
+   * @param listStr the String of the list
+   * @param lastParam the last parameter
+   * @param list the list that will contain the parsed element
    * @return A new list with <code>target</code> appended.
    */
   public Object listAppend(
@@ -359,10 +377,10 @@ public class StrListFunctions extends AbstractFunction {
   /**
    * MapTool call: <code>listInsert(list, index, target [,delim])</code>
    *
-   * @param index A zero-based number from 0 to the list length (if equal to list length, <code>
-   *     target</code> is appended)
-   * @param target A string or number to insert
-   * @param delim An optional list delimiter (default ",")
+   * @param parameters the parameters of the function call
+   * @param listStr the String of the list
+   * @param lastParam the last parameter
+   * @param list the list that will contain the parsed element
    * @return A new list with <code>target</code> inserted before the item at position <code>index
    *     </code>
    */
@@ -414,9 +432,10 @@ public class StrListFunctions extends AbstractFunction {
   /**
    * MapTool call: <code>listReplace(list, index, target [,delim])</code>
    *
-   * @param index A number from 0 to (list length)-1. Out of range values are ignored.
-   * @param target A string or number to be placed in the list
-   * @param delim An optional list delimiter (default ",")
+   * @param parameters the parameters of the function call
+   * @param listStr the String of the list
+   * @param lastParam the last parameter
+   * @param list the list that will contain the parsed element
    * @return A new list with the entry at <code>index</code> repaced by <code>target</code>
    */
   public Object listReplace(
@@ -461,9 +480,12 @@ public class StrListFunctions extends AbstractFunction {
   /**
    * MapTool call: <code>listSort(list, sortType [,delim])</code>
    *
-   * @param sortType Either "A" or "N" for alphabetic vs. numeric sorting, and optional second
-   *     character "+" or "-" to control ascending vs. descending sort.
+   * @param parameters the parameters of the function call
+   * @param listStr the String of the list
+   * @param lastParam the last parameter
+   * @param list the list that will contain the parsed element
    * @return A new sorted list
+   * @throws ParameterException if the number of parameters is incorrect
    */
   public Object listSort(
       List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -507,10 +529,12 @@ public class StrListFunctions extends AbstractFunction {
   /**
    * MapTool call: <code>listFormat(list, listFormat, itemFormat, separator [,delim])</code>
    *
-   * @param listFormat Controls overall format of the output, with "%list" where the list goes.
-   * @param itemFormat Controls appearance of each item, with "%item" where the item goes.
-   * @param separator Placed between each output item.
+   * @param parameters the parameters of the function call
+   * @param listStr the String of the list
+   * @param lastParam the last parameter
+   * @param list the list that will contain the parsed element
    * @return A string containing the formatted list.
+   * @throws ParameterException
    */
   public Object listFormat(
       List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -638,8 +662,9 @@ public class StrListFunctions extends AbstractFunction {
   }
 
   @Override
-  public void checkParameters(List<Object> parameters) throws ParameterException {
-    super.checkParameters(parameters);
+  public void checkParameters(String functionName, List<Object> parameters)
+      throws ParameterException {
+    super.checkParameters(functionName, parameters);
     // The work is done in checkVaryingParameters() instead.
   }
 

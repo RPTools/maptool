@@ -257,10 +257,10 @@ public class FileUtil {
   }
 
   /**
-   * Returns a {@link BufferedReader from the given <code>File</code> object. The contents of the file are expected to be UTF-8.
+   * Returns a {@link BufferedReader} from the given {@code File} object. The contents of the file
+   * are expected to be UTF-8.
    *
-   * @param file
-   *            the input data source
+   * @param file the input data source
    * @return a String representing the data
    * @throws IOException
    */
@@ -504,7 +504,7 @@ public class FileUtil {
   /**
    * Recursively deletes the given file or directory
    *
-   * @see {@link FileUtils#deleteQuietly(File)}
+   * @see FileUtils#deleteQuietly(File)
    * @param file to recursively delete
    */
   public static void delete(File file) {
@@ -517,8 +517,8 @@ public class FileUtil {
    *
    * @author Jamz
    * @since 1.4.0.2
-   * @param fileName
-   * @return
+   * @param fileName the name of the file
+   * @return the fileName with invalid characters replaced by _
    */
   public static String stripInvalidCharacters(String fileName) {
     return fileName = fileName.replaceAll("[^\\w\\s.,-]", "_");

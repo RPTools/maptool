@@ -18,10 +18,10 @@ import java.awt.Rectangle;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -44,106 +44,74 @@ public class ZoomFunctions extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
-    if ("getZoom".equals(functionName)) {
-      return getZ();
+    if ("getZoom".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 0, 0);
+      return Double.valueOf(MapTool.getFrame().getCurrentZoneRenderer().getScale()).toString();
     }
-    if ("setZoom".equals(functionName)) {
-      return setZ(args);
+    if ("setZoom".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 1, 1);
+      Double zoom = FunctionUtil.paramAsDouble(functionName, args, 0, true);
+      MapTool.getFrame().getCurrentZoneRenderer().setScale(zoom);
+      return "";
     }
-    if ("getViewArea".equals(functionName)) {
-      return getViewArea(args);
+    if ("getViewArea".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 0, 2);
+      boolean pixels =
+          args.size() > 0 ? FunctionUtil.paramAsBoolean(functionName, args, 0, true) : true;
+      String delim = args.size() > 1 ? args.get(1).toString() : ",";
+      return getViewArea(pixels, delim);
     }
-    if ("setViewArea".equals(functionName)) {
-      return setViewArea(args);
+    if ("setViewArea".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 4, 6);
+      Integer x1 = FunctionUtil.paramAsInteger(functionName, args, 0, true);
+      Integer y1 = FunctionUtil.paramAsInteger(functionName, args, 1, true);
+      Integer x2 = FunctionUtil.paramAsInteger(functionName, args, 2, true);
+      Integer y2 = FunctionUtil.paramAsInteger(functionName, args, 3, true);
+      boolean pixels =
+          args.size() > 4 ? FunctionUtil.paramAsBoolean(functionName, args, 4, true) : true;
+      boolean allPlayers =
+          args.size() > 5 ? FunctionUtil.paramAsBoolean(functionName, args, 5, true) : false;
+      return setViewArea(x1, y1, x2, y2, pixels, allPlayers);
     }
-    if ("getViewCenter".equals(functionName)) {
-      return getViewCenter(args);
+    if ("getViewCenter".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 0, 2);
+      boolean pixels =
+          args.size() > 0 ? FunctionUtil.paramAsBoolean(functionName, args, 0, true) : true;
+      String delim = args.size() > 1 ? args.get(1).toString() : ",";
+      return getViewCenter(pixels, delim);
     }
     return null;
-  }
-
-  /**
-   * Sets the scale or zoom distance on the current zone where a value of 0.5 = 50%, 1 = 100% and 2
-   * = 200%
-   *
-   * @param args
-   * @return String
-   * @throws ParserException
-   */
-  private String setZ(List<Object> args) throws ParserException {
-    if (args.size() != 1) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.wrongNumParam", "setZoom", 1, args.size()));
-    }
-    double zoom = 1;
-    try {
-      zoom = Double.valueOf(args.get(0).toString());
-    } catch (NumberFormatException ne) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.argumentTypeN", "setZoom", 1, args.get(0).toString()));
-    }
-    MapTool.getFrame().getCurrentZoneRenderer().setScale(zoom);
-
-    return "";
-  }
-
-  /**
-   * Returns the scale or zoom distance on the current zone where a value of 0.5 = 50%, 1 = 100% and
-   * 2 = 200%
-   *
-   * @return String
-   * @throws ParserException
-   */
-  private String getZ() throws ParserException {
-    return Double.valueOf(MapTool.getFrame().getCurrentZoneRenderer().getScale()).toString();
   }
 
   /**
    * Given a grid pixels or cell coordinates of top left (x1, y1) and bottom right (x2, y2) this
    * function returns a json of rectangular coordinates of the current view
    *
-   * @param arg should be optional boolean pixels|grid, optional String delim
+   * @param pixels boolean pixels|grid
+   * @param delim the delimiter for the return string
    * @return JSON of coordinates or String props with delim
-   * @throws ParserException
    */
-  private Object getViewArea(List<Object> args) throws ParserException {
-    if (args.size() > 2) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.tooManyParam", "getViewArea", 2, args.size()));
-    }
+  private static Object getViewArea(boolean pixels, String delim) {
+    ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
 
-    boolean pixels = true;
-    if (args.size() >= 1) {
-      pixels = parseBoolean(args, 0);
-    }
+    int offsetX = zoneRenderer.getViewOffsetX() * -1;
+    int offsetY = zoneRenderer.getViewOffsetY() * -1;
+    int width = zoneRenderer.getWidth();
+    int height = zoneRenderer.getHeight();
 
-    String delim = ";";
-    if (args.size() == 2) {
-      delim = args.get(1).toString();
-    }
-
-    int offsetX = MapTool.getFrame().getCurrentZoneRenderer().getViewOffsetX() * -1;
-    int offsetY = MapTool.getFrame().getCurrentZoneRenderer().getViewOffsetY() * -1;
-    int width = MapTool.getFrame().getCurrentZoneRenderer().getWidth();
-    int height = MapTool.getFrame().getCurrentZoneRenderer().getHeight();
+    // convert zoomed pixels to true pixels
+    ZonePoint topLeft = convertToZone(zoneRenderer, offsetX, offsetY);
+    ZonePoint bottomRight = convertToZone(zoneRenderer, offsetX + width, offsetY + height);
 
     if (pixels) {
       if ("json".equalsIgnoreCase(delim)) {
-        return createBoundsAsJSON(offsetX, offsetY, offsetX + width, offsetY + height);
+        return createBoundsAsJSON(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
       } else {
-        return createBoundsAsStringProps(
-            delim, offsetX, offsetY, offsetX + width, offsetY + height);
+        return createBoundsAsStringProps(delim, topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
       }
     } else {
-      ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
-      CellPoint z1 =
-          zoneRenderer.getZone().getGrid().convert(convertToZone(zoneRenderer, offsetX, offsetY));
-      CellPoint z2 =
-          zoneRenderer
-              .getZone()
-              .getGrid()
-              .convert(convertToZone(zoneRenderer, offsetX + width, offsetY + height));
+      CellPoint z1 = zoneRenderer.getZone().getGrid().convert(topLeft);
+      CellPoint z2 = zoneRenderer.getZone().getGrid().convert(bottomRight);
 
       if ("json".equalsIgnoreCase(delim)) {
         return createBoundsAsJSON(z1.x, z1.y, z2.x, z2.y);
@@ -153,6 +121,14 @@ public class ZoomFunctions extends AbstractFunction {
     }
   }
 
+  /**
+   * Returns zonePoint from x and y pixel coordinates, and from the scale of the renderer
+   *
+   * @param renderer the renderer of the zone
+   * @param x the x coordinate
+   * @param y the y coordinate
+   * @return ZonePoint of the coordinates
+   */
   public static ZonePoint convertToZone(ZoneRenderer renderer, double x, double y) {
     double scale = renderer.getScale();
     double zX = (int) Math.floor(x / scale);
@@ -160,22 +136,18 @@ public class ZoomFunctions extends AbstractFunction {
     return new ZonePoint((int) zX, (int) zY);
   }
 
-  private Object createBoundsAsStringProps(
-      String delim, int offsetX, int offsetY, int width, int height) {
-    StringBuffer sb = new StringBuffer();
-    sb.append("startX").append(EQUALS).append(offsetX).append(delim);
-    sb.append("startY").append(EQUALS).append(offsetY).append(delim);
-    sb.append("endX").append(EQUALS).append(width).append(delim);
-    sb.append("endY").append(EQUALS).append(height);
-    return sb.toString();
+  private static Object createBoundsAsStringProps(
+      String delim, int offsetX, int offsetY, int endX, int endY) {
+    return "startX" + EQUALS + offsetX + delim + "startY" + EQUALS + offsetY + delim + "endX"
+        + EQUALS + endX + delim + "endY" + EQUALS + endY;
   }
 
-  private JSONObject createBoundsAsJSON(int offsetX, int offsetY, int width, int height) {
+  private static JSONObject createBoundsAsJSON(int offsetX, int offsetY, int endX, int endY) {
     JSONObject bounds = new JSONObject();
     bounds.put("startX", offsetX);
     bounds.put("startY", offsetY);
-    bounds.put("endX", width);
-    bounds.put("endY", height);
+    bounds.put("endX", endX);
+    bounds.put("endY", endY);
     return bounds;
   }
 
@@ -183,30 +155,20 @@ public class ZoomFunctions extends AbstractFunction {
    * Given a grid pixels or cell coordinates of top left (x1, y1) and bottom right (x2, y2) this
    * function centres the screen over this area.
    *
-   * @param args should contain int x1, int y1, int x2, int y2, boolean pixels, boolean enforceView
-   * @return
-   * @throws ParserException
+   * @param x1 x coordinate of the cell that will mark the upper left corner of the displayed area.
+   * @param y1 y coordinate of the cell that will mark the upper left corner of the displayed area.
+   * @param x2 x coordinate of the cell that will mark the lower right corner of the displayed area.
+   * @param y2 y coordinate of the cell that will mark the lower right corner of the displayed area
+   * @param pixels if 1 the coordinates are measured in pixels, otherwise measured in cells
+   * @param allPlayers if 1 and called from a trusted macro, all players views will be set
+   * @return empty string
    */
-  private String setViewArea(List<Object> args) throws ParserException {
-    if (args.size() < 4) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.notEnoughParam", "setViewArea", 4, args.size()));
-    }
-    int x1 = 0;
-    int y1 = 0;
-    int x2 = 0;
-    int y2 = 0;
-    boolean pixels = true;
-    boolean enforce = false;
-    x1 = parseInteger(args, 0);
-    y1 = parseInteger(args, 1);
-    x2 = parseInteger(args, 2);
-    y2 = parseInteger(args, 3);
-    if (args.size() >= 5) pixels = parseBoolean(args, 4);
-    if (args.size() >= 6) enforce = parseBoolean(args, 5);
+  private static String setViewArea(
+      Integer x1, Integer y1, Integer x2, Integer y2, Boolean pixels, Boolean allPlayers) {
+    ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
     // If x & y not in pixels, use grid cell coordinates and convert to pixels
     if (!pixels) {
-      Grid mapGrid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
+      Grid mapGrid = zoneRenderer.getZone().getGrid();
       Rectangle fromBounds = mapGrid.getBounds(new CellPoint(x1, y1));
       x1 = fromBounds.x;
       y1 = fromBounds.y;
@@ -219,71 +181,40 @@ public class ZoomFunctions extends AbstractFunction {
     int height = y2 - y1;
     int centreX = x1 + (width / 2);
     int centreY = y1 + (height / 2);
-    MapTool.getFrame().getCurrentZoneRenderer().enforceView(centreX, centreY, 1, width, height);
+    zoneRenderer.enforceView(centreX, centreY, 1, width, height);
     // if requested, set all players to map and match view
-    if (enforce && MapTool.getParser().isMacroTrusted()) {
-      MapTool.serverCommand()
-          .enforceZone(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId());
-      MapTool.getFrame().getCurrentZoneRenderer().forcePlayersView();
+    if (allPlayers && MapTool.getParser().isMacroTrusted()) {
+      MapTool.serverCommand().enforceZone(zoneRenderer.getZone().getId());
+      zoneRenderer.forcePlayersView();
     }
     return "";
-  }
-
-  private int parseInteger(List<Object> args, int param) throws ParserException {
-    try {
-      return Integer.valueOf(args.get(param).toString());
-    } catch (NumberFormatException ne) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.argumentKeyType",
-              "setViewArea",
-              param,
-              args.get(param).toString()));
-    }
-  }
-
-  private boolean parseBoolean(List<Object> args, int param) throws ParserException {
-    try {
-      return AbstractTokenAccessorFunction.getBooleanValue(args.get(param));
-    } catch (NumberFormatException ne) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.argumentTypeInvalid",
-              "setViewArea",
-              param,
-              args.get(param).toString()));
-    }
   }
 
   /**
    * This function returns a json or String props of coordinates of the center of the current view
    *
-   * @param arg should be optional boolean pixels|grid, optional String delim
+   * @param pixels boolean pixels|grid
+   * @param delim the delimiter for the return string
    * @return JSON of coordinates or String props with delim
-   * @throws ParserException
    */
-  private Object getViewCenter(List<Object> args) throws ParserException {
-    boolean pixels = true;
-    if (args.size() > 0) pixels = parseBoolean(args, 0);
-
-    String delim = ";";
-    if (args.size() > 1) {
-      delim = args.get(1).toString();
-    }
-
+  private static Object getViewCenter(boolean pixels, String delim) {
     ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
 
     int offsetX = zoneRenderer.getViewOffsetX() * -1;
     int width = zoneRenderer.getWidth();
-    int centerX = (int) offsetX + (width / 2);
 
     int offsetY = zoneRenderer.getViewOffsetY() * -1;
     int height = zoneRenderer.getHeight();
-    int centerY = (int) offsetY + (height / 2);
+
+    ZonePoint topLeft = convertToZone(zoneRenderer, offsetX, offsetY);
+    ZonePoint bottomRight = convertToZone(zoneRenderer, offsetX + width, offsetY + height);
+
+    int centerX = (topLeft.x + bottomRight.x) / 2;
+    int centerY = (topLeft.y + bottomRight.y) / 2;
 
     if (!pixels) {
       CellPoint centerPoint =
-          zoneRenderer.getZone().getGrid().convert(convertToZone(zoneRenderer, centerX, centerY));
+          zoneRenderer.getZone().getGrid().convert(new ZonePoint(centerX, centerY));
       centerX = centerPoint.x;
       centerY = centerPoint.y;
     }
@@ -294,10 +225,7 @@ public class ZoomFunctions extends AbstractFunction {
       center.put("centerY", centerY);
       return center;
     } else {
-      StringBuffer center = new StringBuffer();
-      center.append("centerX").append(EQUALS).append(centerX).append(delim);
-      center.append("centerY").append(EQUALS).append(centerY).append(delim);
-      return center.toString();
+      return "centerX" + EQUALS + centerX + delim + "centerY" + EQUALS + centerY;
     }
   }
 }

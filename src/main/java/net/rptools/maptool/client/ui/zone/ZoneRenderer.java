@@ -85,6 +85,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.client.DebounceExecutor;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ScreenPoint;
@@ -147,6 +148,13 @@ public class ZoneRenderer extends JComponent
 
   private static final Color TRANSLUCENT_YELLOW =
       new Color(Color.yellow.getRed(), Color.yellow.getGreen(), Color.yellow.getBlue(), 50);
+
+  /** The interval, in milliseconds, during which calls to repaint() will be debounced. */
+  private static final int REPAINT_DEBOUNCE_INTERVAL = 33;
+
+  /** DebounceExecutor for throttling repaint() requests. */
+  private final DebounceExecutor repaintDebouncer =
+      new DebounceExecutor(REPAINT_DEBOUNCE_INTERVAL, this::repaint);
 
   public static final int MIN_GRID_SIZE = 10;
   private static LightSourceIconOverlay lightSourceIconOverlay = new LightSourceIconOverlay();
@@ -310,7 +318,10 @@ public class ZoneRenderer extends JComponent
 
   public void clearShowPaths() {
     showPathList.clear();
-    repaint();
+    // [PNICHOLS04] This call is unnecessary, because we are in a method that is
+    // only called once (from clearSelectedTokens), and the caller requires a
+    // repaint after we return.
+    // repaintDebouncer.dispatch();
   }
 
   public Scale getZoneScale() {
@@ -332,7 +343,7 @@ public class ZoneRenderer extends JComponent
               // flushFog = true;
             }
             visibleScreenArea = null;
-            repaint();
+            repaintDebouncer.dispatch();
           }
         });
   }
@@ -358,7 +369,7 @@ public class ZoneRenderer extends JComponent
       return;
     }
     tokenUnderMouse = token;
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   @Override
@@ -375,7 +386,7 @@ public class ZoneRenderer extends JComponent
       }
     }
     selectionSetMap.put(keyToken, new SelectionSet(playerId, keyToken, tokenList));
-    repaint(); // Jamz: Seems to have no affect?
+    repaintDebouncer.dispatch(); // Jamz: Seems to have no affect?
   }
 
   public boolean hasMoveSelectionSetMoved(GUID keyToken, ZonePoint point) {
@@ -397,7 +408,7 @@ public class ZoneRenderer extends JComponent
     }
     Token token = zone.getToken(keyToken);
     set.setOffset(offset.x - token.getX(), offset.y - token.getY());
-    repaint(); // Jamz: may cause flicker when using AI
+    repaintDebouncer.dispatch(); // Jamz: may cause flicker when using AI
   }
 
   public void toggleMoveSelectionSetWaypoint(GUID keyToken, ZonePoint location) {
@@ -406,7 +417,7 @@ public class ZoneRenderer extends JComponent
       return;
     }
     set.toggleWaypoint(location);
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public ZonePoint getLastWaypoint(GUID keyToken) {
@@ -422,7 +433,7 @@ public class ZoneRenderer extends JComponent
     if (set == null) {
       return;
     }
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public void commitMoveSelectionSet(GUID keyTokenId) {
@@ -474,6 +485,8 @@ public class ZoneRenderer extends JComponent
       BigDecimal tmc = null;
       moveTimer.stop("setup");
 
+      int offsetX, offsetY;
+
       moveTimer.start("eachtoken");
       for (GUID tokenGUID : selectionSet) {
         Token token = zone.getToken(tokenGUID);
@@ -486,16 +499,34 @@ public class ZoneRenderer extends JComponent
           tokenCell = zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
         else tokenCell = new ZonePoint(token.getX(), token.getY());
 
-        int cellOffX = originPoint.x - tokenCell.x;
-        int cellOffY = originPoint.y - tokenCell.y;
+        int cellOffX, cellOffY;
+        if (token.isSnapToGrid() == keyToken.isSnapToGrid()) {
+          cellOffX = originPoint.x - tokenCell.x;
+          cellOffY = originPoint.y - tokenCell.y;
+        } else cellOffX = cellOffY = 0; // not used unless both are of same SnapToGrid
+
+        if (token.isSnapToGrid()
+            && (!AppPreferences.getTokensSnapWhileDragging() || !keyToken.isSnapToGrid())) {
+          // convert to Cellpoint and back to ensure token ends up at correct X and Y
+          CellPoint cellEnd =
+              zone.getGrid()
+                  .convert(
+                      new ZonePoint(
+                          token.getX() + set.getOffsetX(), token.getY() + set.getOffsetY()));
+          ZonePoint pointEnd = cellEnd.convertToZonePoint(zone.getGrid());
+          offsetX = pointEnd.x - token.getX();
+          offsetY = pointEnd.y - token.getY();
+        } else {
+          offsetX = set.getOffsetX();
+          offsetY = set.getOffsetY();
+        }
 
         /*
          * Lee: the problem now is to keep the precise coordinate computations for unsnapped tokens following a snapped key token. The derived path in the following section contains rounded
          * down values because the integer cell values were passed. If these were double in nature, the precision would be kept, but that would be too difficult to change at this stage...
          */
 
-        token.applyMove(
-            set, path, set.getOffsetX(), set.getOffsetY(), keyToken, cellOffX, cellOffY);
+        token.applyMove(set, path, offsetX, offsetY, keyToken, cellOffX, cellOffY);
 
         // Lee: setting originPoint to landing point
         token.setOriginPoint(new ZonePoint(token.getX(), token.getY()));
@@ -616,8 +647,7 @@ public class ZoneRenderer extends JComponent
     y = getSize().height / 2 - (int) (y * getScale()) - 1;
 
     setViewOffset(x, y);
-
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public void centerOn(CellPoint point) {
@@ -680,13 +710,13 @@ public class ZoneRenderer extends JComponent
     renderedLightMap = null;
     renderedAuraMap = null;
     zoneView.flush();
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public void flushFog() {
     flushFog = true;
     visibleScreenArea = null;
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public Zone getZone() {
@@ -2738,7 +2768,7 @@ public class ZoneRenderer extends JComponent
     if (!keepSelectedTokenSet) selectedTokenSet.clear();
     else keepSelectedTokenSet = false; // Always reset it back, temp boolean only
 
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   /**
@@ -3591,6 +3621,7 @@ public class ZoneRenderer extends JComponent
    * Convenience method to return a set of tokens filtered by ownership.
    *
    * @param tokenSet the set of GUIDs to filter
+   * @return the set of GUIDs
    */
   public Set<GUID> getOwnedTokens(Set<GUID> tokenSet) {
     Set<GUID> ownedTokens = new LinkedHashSet<GUID>();
@@ -3606,9 +3637,9 @@ public class ZoneRenderer extends JComponent
   }
 
   /**
-   * A convienence method to get selected tokens ordered by name
+   * A convenience method to get selected tokens ordered by name
    *
-   * @return List<Token>
+   * @return List of tokens
    */
   public List<Token> getSelectedTokensList() {
     List<Token> tokenList = new ArrayList<Token>();
@@ -3649,7 +3680,7 @@ public class ZoneRenderer extends JComponent
     // flushFog = true; // could call flushFog() but also clears visibleScreenArea and I don't know
     // if we want
     // that...
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public boolean selectToken(GUID tokenGUID) {
@@ -3661,7 +3692,7 @@ public class ZoneRenderer extends JComponent
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
     // flushFog = true;
-    repaint();
+    repaintDebouncer.dispatch();
     return true;
   }
 
@@ -3674,7 +3705,7 @@ public class ZoneRenderer extends JComponent
     }
     addToSelectionHistory(selectedTokenSet);
 
-    repaint();
+    repaintDebouncer.dispatch();
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
   }
@@ -3696,7 +3727,7 @@ public class ZoneRenderer extends JComponent
     selectedTokenSet.clear();
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public void undoSelectToken() {
@@ -3729,7 +3760,7 @@ public class ZoneRenderer extends JComponent
     // disable the undo button.
     MapTool.getFrame().resetTokenPanels();
     HTMLFrameFactory.selectedListChanged();
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   private void addToSelectionHistory(Set<GUID> selectionSet) {
@@ -3900,7 +3931,7 @@ public class ZoneRenderer extends JComponent
 
   public void adjustGridSize(int delta) {
     zone.getGrid().setSize(Math.max(0, zone.getGrid().getSize() + delta));
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   public void moveGridBy(int dx, int dy) {
@@ -3917,7 +3948,7 @@ public class ZoneRenderer extends JComponent
       gridOffsetX = gridOffsetX - (int) zone.getGrid().getCellWidth();
     }
     zone.getGrid().setOffset(gridOffsetX, gridOffsetY);
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   /**
@@ -3956,7 +3987,7 @@ public class ZoneRenderer extends JComponent
   /** This makes sure that any image updates get refreshed. This could be a little smarter. */
   @Override
   public boolean imageUpdate(Image img, int infoflags, int x, int y, int w, int h) {
-    repaint();
+    repaintDebouncer.dispatch();
     return super.imageUpdate(img, infoflags, x, y, w, h);
   }
 
@@ -4166,8 +4197,6 @@ public class ZoneRenderer extends JComponent
     /**
      * Retrieves the last waypoint, or if there isn't one then the start point of the first path
      * segment.
-     *
-     * @param location
      */
     public ZonePoint getLastWaypoint() {
       ZonePoint zp;
@@ -4462,8 +4491,9 @@ public class ZoneRenderer extends JComponent
     }
     // Copy them to the clipboard so that we can quickly copy them onto the map
     AppActions.copyTokens(tokens);
+    AppActions.updateActions();
     requestFocusInWindow();
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   /**
@@ -4517,6 +4547,14 @@ public class ZoneRenderer extends JComponent
     return visibleTokenSet;
   }
 
+  public List<Token> getVisibleTokens() {
+    List<Token> tokenList = new ArrayList<Token>(visibleTokenSet.size());
+    for (GUID id : visibleTokenSet) {
+      tokenList.add(zone.getToken(id));
+    }
+    return tokenList;
+  }
+
   /*
    * (non-Javadoc)
    *
@@ -4551,7 +4589,7 @@ public class ZoneRenderer extends JComponent
         flushFog = true;
       }
       MapTool.getFrame().updateTokenTree();
-      repaint();
+      repaintDebouncer.dispatch();
     }
   }
 
@@ -4573,7 +4611,7 @@ public class ZoneRenderer extends JComponent
 
   public void setHighlightCommonMacros(List<Token> affectedTokens) {
     highlightCommonMacros = affectedTokens;
-    repaint();
+    repaintDebouncer.dispatch();
   }
 
   // End token common macro identification

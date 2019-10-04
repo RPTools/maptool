@@ -78,7 +78,8 @@ public class LogFunctions extends AbstractFunction {
   /**
    * Returns all currently configured loggers from Log4J2 Log Manager
    *
-   * @param functionName
+   * @param functionName the function name
+   * @param parameters the list of parameters
    * @return JSON Array of logger name and logger level
    * @throws ParserException
    */
@@ -104,8 +105,8 @@ public class LogFunctions extends AbstractFunction {
   /**
    * Dynamically set the log level for macros
    *
-   * @param functionName
-   * @param newLevel
+   * @param functionName the function name
+   * @param parameters the parameters of the function
    * @return new log level if level is valid, else BigDecimal.ZERO if invalid level is passed
    * @throws ParserException
    */
@@ -143,8 +144,8 @@ public class LogFunctions extends AbstractFunction {
   /**
    * TODO: WORK IN PROGRESS Dynamically set pattern string for loggers
    *
-   * @param functionName
-   * @param valid Log4J2 Pattern
+   * @param functionName the function name
+   * @param parameters a list with the log pattern as the first element
    * @return BigDecimal.ONE if successfully set, otherwise BigDecimal.ZERO
    * @throws ParserException
    */
@@ -190,7 +191,7 @@ public class LogFunctions extends AbstractFunction {
   }
 
   /**
-   * @param function's name
+   * @param functionName the name of the function
    * @param parameters passed into the function call
    * @param min number of parameters required
    * @param max number of parameters required

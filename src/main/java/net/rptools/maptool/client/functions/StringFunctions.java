@@ -469,7 +469,7 @@ public class StringFunctions extends AbstractFunction {
   /**
    * Joins the array together as a string with a default delimiter of ','.
    *
-   * @param array The array to join.
+   * @param list The list to join.
    * @return the resulting string.
    */
   public String join(List<String> list) {
@@ -479,7 +479,8 @@ public class StringFunctions extends AbstractFunction {
   /**
    * Joins the array together as a string with a default delimiter of ','.
    *
-   * @param array The array to join.
+   * @param list The array to join.
+   * @param delim the delimiter of the list
    * @return the resulting string.
    */
   public String join(List<String> list, String delim) {
@@ -492,7 +493,7 @@ public class StringFunctions extends AbstractFunction {
    * Joins the array together as a string with the specified delimiter.
    *
    * @param array The array to join.
-   * @param demlim The delimiter to use between elements.
+   * @param delim The delimiter to use between elements.
    * @return the resulting string.
    */
   public String join(String[] array, String delim) {

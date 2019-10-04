@@ -1,3 +1,103 @@
+Maptool 1.5.5
+=====
+Several contributors have brought us new features including a scroll bar added to the Select Map drop-down, audio macro functions, performance and UI improvements, and, of course, bug fixes.
+
+Enhancements
+-----
+* [#718][i718] Added new keywords to the `broadcast` macro function: "self", "all", "gm-self" and "none".
+* [#716][i716] Added new parameters *targets* and *delim* to macro function `execLink`.  Accepts a list of players or the following keywords: "gm", "self", "all", "gm-self" and "none".
+* [#709][i709] New volume slider and mute button now control systems sounds as well as audio streams.
+* [#708][i708] Significant performance improvements as well as quality improvements made to Resource Library image panel.
+* [#676][i676] New _PropertyType_ option for `getTokens()` to allow getting only tokens with the specified property type.
+* [#667][i667] New macro functions for playing audio on the local client.
+  * playStream() - plays local or remote audio files (.mp3 & .wav).
+  * stopStream() - stops the specified stream.
+  * editStream() - modifies a playing stream.
+  * getStreamProperties() - get the properties of loaded/playing streams.
+* [#665][i665] New server option _GM reveals vision On Movement for Unowned Tokens_. If unchecked (default) GM movement of unowned tokens with vision will not expose FoW.
+* [#663][i663] New getInfo("server") info added: _isHostingServer_ and _gmRevealsVision_
+* [#649][i649] Zoom macro functions updated to use consolidated code. Bugs fixed.
+  * getZoom() & setViewArea() were no displaying errors when too many parameters passed.
+  * getViewCenter() was returning extra delimiter
+* [#629][i629] Parameter count error messages for macro functions will now include the name of the function.
+* [#613][i613] Multiple instances of checkNumberOfParameters() and getTokenFromParam() were declared in different macro function classes.  Consolidated into FunctionUtil class.  No change for end users.
+* [#612][i612] New macro JSON functions for deep access to complex JSON objects.
+  * json.path.add()
+  * json.path.delete()
+  * json.path.read()
+  * json.path.set()
+  * json.path.put()
+* [#591][i591] New macro function `json.toVars()` converts the key values of a JSON object to variables holding the associated values.
+* [#356][i356] Select Map drop-down now has as scroll bar to handle large numbers of maps.
+
+Bug Fixes
+-----
+* [#751][i751] PDF extraction of JPEG2000 images was broken.  Fixed.
+* [#746][i746] Move to current dicelib version to that multiple parser versions are not being pulled in.
+* [#731][i731] Code cleanup so that JavaDoc generation works.
+* [#724][i724] Macro functions `getViewArea` and `getViewCenter` were returning _zoomed_ map pixels.  Fixed.
+* [#713][i713] Campaign macro changes made after server started were not propagating to clients.  Fixed.
+* [#700][i700] Exception thrown when closing MapTool and macro editor is open.  Fixed.
+* [#699][i699] `getDistance` macro function was returning erratic results in some cases.  Fixed.
+* [#696][i696] MapTool was overly sensitive to mouse movement when trying to right-click on tokens.  Fixed.
+* [#694][i694] Resource Library image panel zoom was temporarily broken.  Fixed.
+* [#688][i688] Macro distance functions were returning incorrect values if diagonal move metric "Manhattan" is used. Distance functions were ignoring metric on Isometric maps. Fixed.
+  * Affected macros: `getDistance()`, `getDistanceToXY()`, `getTokens()`
+* [#684][i684] Macro function `getDistanceToXY()` returned incorrect values if **NO_GRID** metric was used.  Fixed.
+* [#683][i683] Macro function `getTokens()` was very slow when _distance_ condition was used. On maps with 7000+ tokens the speed increase varies from 3x to 12x depending on grid type.  **Fixed.**
+* [#681][i681] Using "*" wildcard in `stopStream()` and `getStreamProperties()` stopped working.  Fixed.
+* [#679][i679] Continuous integration builds were failing.  Fixed.
+* [#670][i670] Macro function json.set() and json.put() will now put in the actual Java data types `null`, `true` and `false` when passed those strings.
+* [#658][i658] Sometimes Send to Back and Bring to Front right-click menu options didn't work.  Fixed.
+* [#653][i653] _Select Map_ button did not have i18n translation key.  Fixed and French translation added.
+* [#637][i637] Incorrect error message from `asset()` if second parameter is a number.  Fixed.
+* [#624][i624] Cut and paste of a token would result in an ID change. ID is now kept for the first paste after a cut action.
+* [#621][i621] Paste from the Edit menu was not being enabled after Cut/Copy from the right-click menu or after a drag-n-drop operation.  Fixed.
+* [#619][i619] Token IDs were changing after a server start.  Fixed.
+* [#601][i601] Switching to Pointer tool from Measuring tool wasn't updating the mouse pointer immediately.  Fixed.
+* [#328][i328] Concurrent Modification Exception thrown by AbstractZoneWalker. Synchronization/locking added to partialPaths list handling.  Fixed.
+* [#187][i187] GM tokens with vision were exposing map areas to players. Fixed.  See also [#665][i665].
+
+
+[i751]: https://github.com/RPTools/maptool/issues/751
+[i746]: https://github.com/RPTools/maptool/issues/746
+[i731]: https://github.com/RPTools/maptool/issues/731
+[i724]: https://github.com/RPTools/maptool/issues/724
+[i718]: https://github.com/RPTools/maptool/issues/718
+[i716]: https://github.com/RPTools/maptool/issues/716
+[i713]: https://github.com/RPTools/maptool/issues/713
+[i709]: https://github.com/RPTools/maptool/issues/709
+[i708]: https://github.com/RPTools/maptool/issues/708
+[i700]: https://github.com/RPTools/maptool/issues/700
+[i699]: https://github.com/RPTools/maptool/issues/699
+[i696]: https://github.com/RPTools/maptool/issues/696
+[i694]: https://github.com/RPTools/maptool/issues/694
+[i688]: https://github.com/RPTools/maptool/issues/688
+[i684]: https://github.com/RPTools/maptool/issues/684
+[i683]: https://github.com/RPTools/maptool/issues/683
+[i681]: https://github.com/RPTools/maptool/issues/681
+[i679]: https://github.com/RPTools/maptool/issues/679
+[i676]: https://github.com/RPTools/maptool/issues/676
+[i670]: https://github.com/RPTools/maptool/issues/670
+[i667]: https://github.com/RPTools/maptool/issues/667
+[i665]: https://github.com/RPTools/maptool/issues/665
+[i663]: https://github.com/RPTools/maptool/issues/663
+[i658]: https://github.com/RPTools/maptool/issues/658
+[i653]: https://github.com/RPTools/maptool/issues/653
+[i649]: https://github.com/RPTools/maptool/issues/649
+[i637]: https://github.com/RPTools/maptool/issues/637
+[i629]: https://github.com/RPTools/maptool/issues/629
+[i624]: https://github.com/RPTools/maptool/issues/624
+[i621]: https://github.com/RPTools/maptool/issues/621
+[i619]: https://github.com/RPTools/maptool/issues/619
+[i613]: https://github.com/RPTools/maptool/issues/613
+[i612]: https://github.com/RPTools/maptool/issues/612
+[i601]: https://github.com/RPTools/maptool/issues/601
+[i591]: https://github.com/RPTools/maptool/issues/591
+[i356]: https://github.com/RPTools/maptool/issues/356
+[i328]: https://github.com/RPTools/maptool/issues/328
+[i187]: https://github.com/RPTools/maptool/issues/187
+
 Maptool 1.5.4
 =====
 More bug fixes and enhancements mostly thanks to the tireless efforts of new contributor, Guillaume "Merudo" Filteau.

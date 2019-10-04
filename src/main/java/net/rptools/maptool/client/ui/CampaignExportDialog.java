@@ -39,8 +39,6 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>This uses a modal dialog based on an Abeille form. It allows the user to select a version of
  * MapTool to save the campaign file as for backward compatibility.
- *
- * @return a dialog box
  */
 @SuppressWarnings("serial")
 public class CampaignExportDialog extends JDialog {

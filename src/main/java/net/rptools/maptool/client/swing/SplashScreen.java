@@ -47,6 +47,7 @@ public class SplashScreen extends JFrame {
       setBackground(new java.awt.Color(0, 0, 0));
     }
 
+    Platform.setImplicitExit(false); // necessary to use JavaFX later
     Platform.runLater(
         new Runnable() {
           @Override

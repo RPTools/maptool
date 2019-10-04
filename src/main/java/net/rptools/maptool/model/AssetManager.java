@@ -127,7 +127,7 @@ public class AssetManager {
    * done loading.
    *
    * @param key MD5Key of the asset
-   * @param listener Listener to notify when the asset is done loading
+   * @param listeners Listener to notify when the asset is done loading
    */
   public static void addAssetListener(MD5Key key, AssetAvailableListener... listeners) {
 
@@ -415,7 +415,7 @@ public class AssetManager {
   /**
    * Create an asset from a file.
    *
-   * @param file File to use for asset
+   * @param url File to use for asset
    * @return Asset associated with the file
    * @throws IOException
    */
@@ -547,6 +547,7 @@ public class AssetManager {
    * current one. FJE
    *
    * @param image
+   * @throws IOException
    */
   public static void rememberLocalImageReference(File image) throws IOException {
 
@@ -610,7 +611,7 @@ public class AssetManager {
    *
    * @param id MD5 sum of the asset
    * @return True if asset is in the persistent cache, false otherwise
-   * @see assetIsInPersistentCache(Asset asset)
+   * @see this#assetIsInPersistentCache(Asset)
    */
   private static boolean assetIsInPersistentCache(MD5Key id) {
 
@@ -630,9 +631,9 @@ public class AssetManager {
   /**
    * Return the assets cache file, if any
    *
-   * @param is MD5 sum of the asset
+   * @param id MD5 sum of the asset
    * @return The assets cache file, or null if it doesn't have one
-   * @see getAssetCacheFile(Asset asset)
+   * @see AssetManager#getAssetCacheFile(Asset asset)
    */
   public static File getAssetCacheFile(MD5Key id) {
     return new File(cacheDir.getAbsolutePath() + File.separator + id);
@@ -653,7 +654,7 @@ public class AssetManager {
    *
    * @param id MD5 sum of the asset
    * @return File - The assets info file, or null if it doesn't have one
-   * @see getAssetInfoFile(Asset asset)
+   * @see this@getAssetInfoFile(Asset asset)
    */
   private static File getAssetInfoFile(MD5Key id) {
     return new File(cacheDir.getAbsolutePath() + File.separator + id + ".info");

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.rptools.lib.io.PackedFile;
+import net.rptools.maptool.util.PersistenceUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 
@@ -106,14 +107,14 @@ public class ModelVersionManager {
   }
 
   /**
-   * Converts the input string <code>xml</b> by applying all transformations
-   * that are registered for versions after <code>fileVersion</code>. Transformations are guaranteed to be applied in the order provided for any given version, and versions will be applied in order
-   * based on a simple String-based sort (this is wrong for single-digit versions compared against double-digit versions).
+   * Converts the input string <code>xml</code> by applying all transformations that are registered
+   * for versions after <code>fileVersion</code>. Transformations are guaranteed to be applied in
+   * the order provided for any given version, and versions will be applied in order based on a
+   * simple String-based sort (this is wrong for single-digit versions compared against double-digit
+   * versions).
    *
-   * @param xml
-   *            normally XML input, but could be any string
-   * @param fileVersion
-   *            typically of the form <b>a.b.c</b> but can have any number of components
+   * @param xml normally XML input, but could be any string
+   * @param fileVersion typically of the form <b>a.b.c</b> but can have any number of components
    * @return the resulting string after all transforms are complete
    */
   public synchronized String transform(String xml, String fileVersion) {

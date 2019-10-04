@@ -53,6 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import javax.imageio.ImageIO;
+import javax.imageio.spi.IIORegistry;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -534,6 +535,11 @@ public class MapTool {
     return soundManager;
   }
 
+  /**
+   * Play the sound registered to an eventId.
+   *
+   * @param eventId the eventId of the sound.
+   */
   public static void playSound(String eventId) {
     if (AppPreferences.getPlaySystemSounds()) {
       if (AppPreferences.getPlaySystemSoundsOnlyWhenNotFocused() && isInFocus()) {
@@ -896,10 +902,26 @@ public class MapTool {
    */
   public static void addGlobalMessage(String message, List<String> targets) {
     for (String target : targets) {
-      if ("gm".equalsIgnoreCase(target)) {
-        addMessage(TextMessage.gm(null, message));
-      } else {
-        addMessage(TextMessage.whisper(null, target, message));
+      switch (target.toLowerCase()) {
+        case "gm-self":
+          if (!MapTool.getPlayer().isGM()) {
+            // don't duplicate message if self is GM
+            addMessage(TextMessage.whisper(null, MapTool.getPlayer().getName(), message));
+          } // FALLTHRU
+        case "gm":
+          addMessage(TextMessage.gm(null, message));
+          break;
+        case "self":
+          addMessage(TextMessage.whisper(null, MapTool.getPlayer().getName(), message));
+          break;
+        case "all":
+          addGlobalMessage(message);
+          break;
+        case "none":
+          break;
+        default:
+          addMessage(TextMessage.whisper(null, target, message));
+          break;
       }
     }
   }
@@ -1631,6 +1653,11 @@ public class MapTool {
     }
 
     URL.setURLStreamHandlerFactory(factory);
+
+    // Register ImageReaderSpi for jpeg2000 from JAI manually (issue due to uberJar packaging)
+    // https://github.com/jai-imageio/jai-imageio-core/issues/29
+    IIORegistry registry = IIORegistry.getDefaultInstance();
+    registry.registerServiceProvider(new com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi());
 
     final Toolkit tk = Toolkit.getDefaultToolkit();
     tk.getSystemEventQueue().push(new MapToolEventQueue());

@@ -17,6 +17,7 @@ package net.rptools.maptool.model;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
+import net.rptools.maptool.client.walker.WalkerMetric;
 
 public class GridlessGrid extends Grid {
   private static List<TokenFootprint> footprintList;
@@ -71,6 +73,19 @@ public class GridlessGrid extends Grid {
   @Override
   public int[] getFacingAngles() {
     return FACING_ANGLES;
+  }
+
+  @Override
+  public Point2D.Double getCellCenter(CellPoint cell) {
+    // For gridless grids, cell = pixel;
+    return new Point2D.Double(cell.x, cell.y);
+  }
+
+  @Override
+  public double cellDistance(CellPoint cellA, CellPoint cellB, WalkerMetric wmetric) {
+    int dX = cellA.x - cellB.x;
+    int dY = cellA.y - cellB.y;
+    return Math.sqrt(dX * dX + dY * dY) / this.getSize(); // returns in cell units
   }
 
   /*

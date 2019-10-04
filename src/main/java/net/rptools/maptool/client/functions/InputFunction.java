@@ -87,8 +87,7 @@ import org.apache.commons.lang.StringUtils;
 // as of 6/2/18
 // https://github.com/diffplug/spotless/issues/191
 /**
- * pre tag here <span style= "font-family:sans-serif;">The input() function prompts the user to
- * input several variable values at once.
+ * The input() function prompts the user to input several variable values at once.
  *
  * <p>Each of the string parameters has the following format:
  * "varname|value|prompt|inputType|options"
@@ -121,8 +120,7 @@ import org.apache.commons.lang.StringUtils;
  * be shown at start (default SELECT=FALSE).
  *
  * <p>All inputTypes except TAB accept the option SPAN=TRUE, which causes the prompt to be hidden
- * and the input control to span both columns of the dialog layout (default FALSE). </span> /pre end
- * tag here
+ * and the input control to span both columns of the dialog layout (default FALSE).
  *
  * @author knizia.fan
  */
@@ -143,11 +141,7 @@ public class InputFunction extends AbstractFunction {
     return instance;
   }
 
-  /**
-   * ****************************************************************** Enum of input types; also
-   * stores their default option values.
-   * ******************************************************************
-   */
+  /** Enum of input types; also stores their default option values. */
   public enum InputType {
     // The regexp for the option strings is strict: no spaces, and trailing semicolon required.
     // @formatter: off
@@ -218,10 +212,7 @@ public class InputFunction extends AbstractFunction {
       return ret;
     }
 
-    /**
-     * ******************************************************* Stores option settings as
-     * case-insensitive strings. *******************************************************
-     */
+    /** Stores option settings as case-insensitive strings. */
     @SuppressWarnings("serial")
     public final class OptionMap extends HashMap<String, String> {
       /** Case-insensitive put. */
@@ -240,6 +231,10 @@ public class InputFunction extends AbstractFunction {
        * Case-insensitive numeric get. <br>
        * Returns <code>defaultValue</code> if the option's value is non-numeric. <br>
        * Use when caller wants to override erroneous option settings.
+       *
+       * @param key the key of the property
+       * @param defaultValue the default value, if none is available
+       * @return the value or default value
        */
       public int getNumeric(String key, int defaultValue) {
         int ret;
@@ -255,6 +250,9 @@ public class InputFunction extends AbstractFunction {
        * Case-insensitive numeric get. <br>
        * Returns the default value for the input type if option's value is non-numeric. <br>
        * Use when caller wants to ignore erroneous option settings.
+       *
+       * @param key the key
+       * @return the value of the key
        */
       public int getNumeric(String key) {
         String defstr = getDefault(key);
@@ -268,7 +266,13 @@ public class InputFunction extends AbstractFunction {
         return getNumeric(key, def);
       }
 
-      /** Tests for a given option value. */
+      /**
+       * Tests for a given option value.
+       *
+       * @param key the key to test
+       * @param value the value to be tested against
+       * @return are the values equal
+       */
       public boolean optionEquals(String key, String value) {
         if (get(key) == null) return false;
         return get(key).equalsIgnoreCase(value);
@@ -289,11 +293,7 @@ public class InputFunction extends AbstractFunction {
     }
   } ///////////////////// end of InputType enum
 
-  /**
-   * ******************************************************************************** Variable
-   * Specifier structure - holds extracted bits of info for a variable.
-   * ********************************************************************************
-   */
+  /** Variable Specifier structure - holds extracted bits of info for a variable. */
   final class VarSpec {
     public String name, value, prompt;
     public InputType inputType;
@@ -1181,8 +1181,9 @@ public class InputFunction extends AbstractFunction {
   }
 
   @Override
-  public void checkParameters(List<Object> parameters) throws ParameterException {
-    super.checkParameters(parameters);
+  public void checkParameters(String functionName, List<Object> parameters)
+      throws ParameterException {
+    super.checkParameters(functionName, parameters);
 
     for (Object param : parameters) {
       if (!(param instanceof String))

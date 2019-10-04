@@ -83,8 +83,8 @@ public class AssetDirectory extends Directory {
    * Returns the asset associated with this file, or null if the file has not yet been loaded as an
    * asset
    *
-   * @param imageFile
-   * @return
+   * @param imageFile the file to get the asset of
+   * @return the Image asset
    */
   public Image getImageFor(File imageFile) {
     FutureTask<Image> future = imageMap.get(imageFile);

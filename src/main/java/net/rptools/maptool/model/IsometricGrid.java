@@ -21,10 +21,7 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
@@ -151,6 +148,15 @@ public class IsometricGrid extends Grid {
     return FACING_ANGLES;
   }
 
+  @Override
+  public Point2D.Double getCellCenter(CellPoint cell) {
+    // iso grids have their x at their center;
+    ZonePoint zonePoint = convert(cell);
+    double x = zonePoint.x;
+    double y = zonePoint.y + getCellHeight() / 2.0;
+    return new Point2D.Double(x, y);
+  }
+
   private static final GridCapabilities GRID_CAPABILITIES =
       new GridCapabilities() {
         public boolean isPathingSupported() {
@@ -218,6 +224,11 @@ public class IsometricGrid extends Grid {
   public Rectangle getBounds(CellPoint cp) {
     ZonePoint zp = convert(cp);
     return new Rectangle(zp.x - getSize(), zp.y, getSize() * 2, getSize());
+  }
+
+  @Override
+  public boolean useMetric() {
+    return true;
   }
 
   @Override

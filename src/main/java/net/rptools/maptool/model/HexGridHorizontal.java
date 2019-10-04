@@ -31,6 +31,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarHorizHexEuclideanWalker;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
@@ -98,6 +99,20 @@ public class HexGridHorizontal extends HexGrid {
     } else {
       FACING_ANGLES = new int[] {90};
     }
+  }
+
+  @Override
+  public double cellDistance(CellPoint cellA, CellPoint cellB, WalkerMetric wmetric) {
+    int y1 = cellA.y;
+    int y2 = cellB.y;
+    int x1 = cellA.x - (int) Math.floor(y1 / 2.0); // convert to 60-degree angle coordinates
+    int x2 = cellB.x - (int) Math.floor(y2 / 2.0);
+
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+
+    if (Integer.signum(dx) == Integer.signum(dy)) return Math.abs(dx + dy);
+    else return Math.max(Math.abs(dx), Math.abs(dy));
   }
 
   @Override

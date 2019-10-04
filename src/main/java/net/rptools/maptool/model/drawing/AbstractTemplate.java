@@ -354,7 +354,7 @@ public abstract class AbstractTemplate extends AbstractDrawing {
    * @param yOff Distance from vertex along Y axis in screen coordinates.
    * @param gridSize The size of one side of the grid in screen coordinates.
    * @param distance The distance in cells from the vertex to the cell which is offset from the
-   *     vertex by <code>x</code> & <code>y</code>.
+   *     vertex by <code>x</code> &amp; <code>y</code>.
    */
   protected abstract void paintBorder(
       Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance);
@@ -370,7 +370,7 @@ public abstract class AbstractTemplate extends AbstractDrawing {
    * @param yOff Distance from vertex along Y axis in screen coordinates.
    * @param gridSize The size of one side of the grid in screen coordinates.
    * @param distance The distance in cells from the vertex to the cell which is offset from the
-   *     vertex by <code>x</code> & <code>y</code>.
+   *     vertex by <code>x</code> &amp; <code>y</code>.
    */
   protected abstract void paintArea(
       Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance);

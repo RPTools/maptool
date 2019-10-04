@@ -47,6 +47,11 @@ public class AssertFunction extends AbstractFunction implements DefinesSpecialVa
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
+    if (!(parameters.get(1) instanceof String))
+      throw new ParameterException(
+          I18N.getText(
+              "macro.function.assert.mustBeString", "assert", parameters.get(1).toString()));
+
     if (BigDecimal.ZERO.equals(parameters.get(0))) {
       if (parameters.size() > 2 && parameters.get(2).equals(BigDecimal.ZERO)) {
         throw new AssertFunctionException(parameters.get(1).toString());
@@ -56,19 +61,6 @@ public class AssertFunction extends AbstractFunction implements DefinesSpecialVa
       }
     }
     return new BigDecimal(1);
-  }
-
-  @Override
-  public void checkParameters(List<Object> parameters) throws ParameterException {
-    super.checkParameters(parameters);
-    if (!(parameters.get(1) instanceof String)) {
-      throw new ParameterException(
-          I18N.getText(
-              "macro.function.assert.message",
-              "macro.function.assert.mustBeString",
-              "assert()",
-              parameters.get(1).toString()));
-    }
   }
 
   /** Exception type thrown by assert() function, allowing a user-defined error message. */

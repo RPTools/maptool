@@ -156,7 +156,7 @@ public class FileUtil {
    * Formats a file's name into a proper canonical filename and strips invalid characters. Also
    * checks for duplicate file names, appending a _# where # increases until a unique name is found.
    *
-   * @param filePath system path
+   * @param path system path
    * @param fileName file's base without path or extension name
    * @param extension file extension
    * @return the File object with new name
