@@ -321,4 +321,29 @@ public class FunctionUtil {
       throw new ParserException(I18N.getText(KEY_NOT_JSON_ARRAY, functionName, index + 1));
     } else return (JSONArray) obj;
   }
+
+  /**
+   * Convert an object into a boolean value. Never returns an error.
+   *
+   * @param value Convert this object. Must be {@link Boolean}, {@link BigDecimal}, or will have its
+   *     string value be converted to one of those types.
+   * @return The boolean value of the object
+   */
+  public static boolean getBooleanValue(Object value) {
+    boolean set = false;
+    if (value instanceof Boolean) {
+      set = ((Boolean) value).booleanValue();
+    } else if (value instanceof Number) {
+      set = ((Number) value).doubleValue() != 0;
+    } else if (value == null) {
+      set = false;
+    } else {
+      try {
+        set = !new BigDecimal(value.toString()).equals(BigDecimal.ZERO);
+      } catch (NumberFormatException e) {
+        set = Boolean.parseBoolean(value.toString());
+      } // endif
+    } // endif
+    return set;
+  }
 }

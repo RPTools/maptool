@@ -28,6 +28,7 @@ import java.util.Map;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -232,7 +233,7 @@ public class RESTfulFunctions extends AbstractFunction {
 
   private boolean isFullResponseRequested(List<Object> parameters) {
     if (isLastParamBoolean(parameters))
-      return AbstractTokenAccessorFunction.getBooleanValue(parameters.get(parameters.size() - 1));
+      return FunctionUtil.getBooleanValue(parameters.get(parameters.size() - 1));
     else return false;
   }
 
