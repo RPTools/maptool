@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.functions;
 
 import com.jayway.jsonpath.*;
+import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import java.math.BigDecimal;
 import java.util.*;
 import net.rptools.common.expression.ExpressionParser;
@@ -37,6 +38,9 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   private static final JSONMacroFunctions instance = new JSONMacroFunctions();
+
+  private static final Configuration jaywayConfig =
+      Configuration.builder().jsonProvider(new GsonJsonProvider()).build();
 
   private JSONMacroFunctions() {
     super(
@@ -103,7 +107,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       String path = parameters.get(1).toString();
 
       try {
-        return JsonPath.parse(jsonStr).read(path);
+        return JsonPath.using(jaywayConfig).parse(jsonStr).read(path).toString();
       } catch (Exception e) {
         throw new ParserException(
             I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
