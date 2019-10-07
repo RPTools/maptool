@@ -22,6 +22,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -61,7 +62,7 @@ public class AddAllToInitiativeFunction extends AbstractFunction {
     InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
     boolean allowDuplicates = false;
     if (!args.isEmpty()) {
-      allowDuplicates = TokenInitFunction.getBooleanValue(args.get(0));
+      allowDuplicates = FunctionUtil.getBooleanValue(args.get(0));
       args.remove(0);
     } // endif
 

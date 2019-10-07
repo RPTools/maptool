@@ -210,7 +210,7 @@ public class VBL_Functions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
 
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       Object jsonArea = JSONMacroFunctions.asJSON(parameters.get(0).toString().toLowerCase());
@@ -277,15 +277,12 @@ public class VBL_Functions extends AbstractFunction {
       }
 
       // Replace with new VBL
-      token.setVBL(tokenVBL);
+      MapTool.serverCommand().updateTokenProperty(token, "setVBL", tokenVBL);
 
       // Force a TOPOLOGY_CHANGED event. This made the client performing the
       // VBL change actually show the change but not the other clients.
       renderer.getZone().tokenTopologyChanged();
       renderer.repaint();
-
-      // Make sure the other clients get the updated token.
-      MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
     }
 
     if (functionName.equals("transferVBL")) {

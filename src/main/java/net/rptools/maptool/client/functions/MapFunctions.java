@@ -73,7 +73,7 @@ public class MapFunctions extends AbstractFunction {
     } else if ("setMapVisible".equalsIgnoreCase(functionName)) {
       checkTrusted(functionName);
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
-      boolean visible = AbstractTokenAccessorFunction.getBooleanValue(parameters.get(0).toString());
+      boolean visible = FunctionUtil.getBooleanValue(parameters.get(0).toString());
       Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
       if (parameters.size() > 1) {
         String mapName = parameters.get(1).toString();

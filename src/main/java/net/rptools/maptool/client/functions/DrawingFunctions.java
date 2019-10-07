@@ -41,6 +41,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.LineSegment;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -379,7 +380,7 @@ public class DrawingFunctions extends AbstractFunction {
   protected boolean parseBoolean(String functionName, List<Object> args, int param)
       throws ParserException {
     try {
-      return AbstractTokenAccessorFunction.getBooleanValue(args.get(param));
+      return FunctionUtil.getBooleanValue(args.get(param));
     } catch (NumberFormatException ne) {
       throw new ParserException(
           I18N.getText(

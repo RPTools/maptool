@@ -17,9 +17,11 @@ package net.rptools.maptool.client.functions;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -33,7 +35,7 @@ public class TokenRemoveFromInitiativeFunction extends AbstractFunction {
 
   /** Handle adding one, all, all PCs or all NPC tokens. */
   private TokenRemoveFromInitiativeFunction() {
-    super(0, 1, "removeFromInitiative");
+    super(0, 2, "removeFromInitiative");
   }
 
   /** singleton instance of this function */
@@ -52,8 +54,11 @@ public class TokenRemoveFromInitiativeFunction extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
-    InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
-    Token token = AbstractTokenAccessorFunction.getTarget(parser, args, 1);
+    MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+    Token token = FunctionUtil.getTokenFromParam(res, functionName, args, 0, 1);
+
+    InitiativeList list = token.getZoneRenderer().getZone().getInitiativeList();
+
     if (!MapTool.getParser().isMacroTrusted()) {
       if (!MapTool.getFrame().getInitiativePanel().hasOwnerPermission(token)) {
         String message = I18N.getText("macro.function.initiative.gmOnly", functionName);
