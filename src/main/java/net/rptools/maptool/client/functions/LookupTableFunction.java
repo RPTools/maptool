@@ -102,7 +102,7 @@ public class LookupTableFunction extends AbstractFunction {
       String name = params.get(0).toString();
       String visible = params.get(1).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      lookupTable.setVisible(AbstractTokenAccessorFunction.getBooleanValue(visible));
+      lookupTable.setVisible(FunctionUtil.getBooleanValue(visible));
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return lookupTable.getVisible() ? "1" : "0";
 
@@ -121,7 +121,7 @@ public class LookupTableFunction extends AbstractFunction {
       String name = params.get(0).toString();
       String access = params.get(1).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      lookupTable.setAllowLookup(AbstractTokenAccessorFunction.getBooleanValue(access));
+      lookupTable.setAllowLookup(FunctionUtil.getBooleanValue(access));
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return lookupTable.getAllowLookup() ? "1" : "0";
 
@@ -201,8 +201,8 @@ public class LookupTableFunction extends AbstractFunction {
       }
       LookupTable lookupTable = new LookupTable();
       lookupTable.setName(name);
-      lookupTable.setVisible(AbstractTokenAccessorFunction.getBooleanValue(visible));
-      lookupTable.setAllowLookup(AbstractTokenAccessorFunction.getBooleanValue(lookups));
+      lookupTable.setVisible(FunctionUtil.getBooleanValue(visible));
+      lookupTable.setAllowLookup(FunctionUtil.getBooleanValue(lookups));
       if (asset != null) lookupTable.setTableImage(asset);
       MapTool.getCampaign().getLookupTableMap().put(name, lookupTable);
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());

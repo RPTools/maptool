@@ -19,7 +19,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -49,7 +49,7 @@ public class TokenGMNameFunction extends AbstractFunction {
    * @return the GMName.
    * @throws ParserException if the user does not have the permission.
    */
-  public String getGMName(Token token) throws ParserException {
+  public static String getGMName(Token token) throws ParserException {
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", "getGMName"));
     }
@@ -63,7 +63,7 @@ public class TokenGMNameFunction extends AbstractFunction {
    * @param name The name to set the GMName to.
    * @throws ParserException if the user does not have the permission.
    */
-  public void setGMName(Token token, String name) throws ParserException {
+  public static void setGMName(Token token, String name) throws ParserException {
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", "setGMName"));
     }
@@ -122,33 +122,13 @@ public class TokenGMNameFunction extends AbstractFunction {
    * @throws ParserException when an error occurs.
    */
   private Object setGMName(Parser parser, List<Object> args) throws ParserException {
-    Token token;
-    if (args.size() == 2) {
-      token = FindTokenFunctions.findToken(args.get(1).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.unknownToken", "setGMName", args.get(1).toString()));
-      }
-    } else if (args.size() == 1) {
-      MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "setGMName"));
-      }
-    } else if (args.size() == 0) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.notEnoughParam", "setGMName", 1, args.size()));
-    } else {
-      throw new ParserException(
-          I18N.getText("macro.function.general.tooManyParam", "setGMName", 2, args.size()));
-    }
-    token.setGMName(args.get(0).toString());
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-    MapTool.serverCommand().putToken(zone.getId(), token);
-    zone.putToken(token);
+    MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
+    FunctionUtil.checkNumberParam("setGMName", args, 1, 3);
+    String gmName = args.get(0).toString();
+    Token token = FunctionUtil.getTokenFromParam(resolver, "setGMName", args, 1, 2);
 
-    return args.get(0);
+    MapTool.serverCommand().updateTokenProperty(token, "setGMName", gmName);
+
+    return gmName;
   }
 }
