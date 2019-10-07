@@ -304,14 +304,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = resetProperty(String propName, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("resetProperty")) {
+    if (functionName.equalsIgnoreCase("resetProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      String property = parameters.get(0).toString();
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      ZoneRenderer zoneR = token.getZoneRenderer();
-      Zone zone = zoneR.getZone();
 
-      token.resetProperty(parameters.get(0).toString());
-      MapTool.serverCommand().putToken(zone.getId(), token);
+      MapTool.serverCommand().updateTokenProperty(token, "resetProperty", property);
       return "";
     }
 
@@ -803,7 +801,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equals("setTokenSnapToGrid")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      Boolean toGrid = AbstractTokenAccessorFunction.getBooleanValue((Object) parameters.get(0));
+      Boolean toGrid = FunctionUtil.getBooleanValue((Object) parameters.get(0));
       MapTool.serverCommand().updateTokenProperty(token, "setSnapToGrid", toGrid);
       return token.isSnapToGrid() ? BigDecimal.ONE : BigDecimal.ZERO;
     }

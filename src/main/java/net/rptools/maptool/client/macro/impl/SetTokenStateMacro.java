@@ -151,11 +151,9 @@ public class SetTokenStateMacro implements Macro {
     } else {
       newValue = Boolean.valueOf(value);
     }
-    token.setState(state, newValue);
-    MapTool.serverCommand()
-        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token);
+    MapTool.serverCommand().updateTokenProperty(token, "setState", state, newValue);
 
-    if (newValue.booleanValue()) {
+    if (newValue) {
       MapTool.addLocalMessage(I18N.getText("settokenstate.marked", token.getName(), state));
     } else {
       MapTool.addLocalMessage(I18N.getText("settokenstate.unmarked", token.getName(), state));
