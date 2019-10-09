@@ -828,10 +828,23 @@ public class MapTool {
     return messageList;
   }
 
-  /** These are the messages that originate from the server */
+  /**
+   * These are the messages that originate from the server
+   *
+   * @param message the message to display
+   */
   public static void addServerMessage(TextMessage message) {
     // Filter
     if (message.isGM() && !getPlayer().isGM()) {
+      return;
+    }
+    if (message.isGmMe() && !getPlayer().isGM() && !message.isFromSelf()) {
+      return;
+    }
+    if ((message.isNotGm() || message.isNotGmMe()) && getPlayer().isGM()) {
+      return;
+    }
+    if ((message.isNotMe() || message.isNotGmMe()) && message.isFromSelf()) {
       return;
     }
     if (message.isWhisper() && !getPlayer().getName().equalsIgnoreCase(message.getTarget())) {
@@ -863,7 +876,7 @@ public class MapTool {
   /**
    * Add a message only this client can see. This is a shortcut for addMessage(ME, ...)
    *
-   * @param message
+   * @param message message to be sent
    */
   public static void addLocalMessage(String message) {
     addMessage(TextMessage.me(null, message));
@@ -872,7 +885,7 @@ public class MapTool {
   /**
    * Add a message all clients can see. This is a shortcut for addMessage(SAY, ...)
    *
-   * @param message
+   * @param message message to be sent
    */
   public static void addGlobalMessage(String message) {
     addMessage(TextMessage.say(null, message));
@@ -904,15 +917,22 @@ public class MapTool {
     for (String target : targets) {
       switch (target.toLowerCase()) {
         case "gm-self":
-          if (!MapTool.getPlayer().isGM()) {
-            // don't duplicate message if self is GM
-            addMessage(TextMessage.whisper(null, MapTool.getPlayer().getName(), message));
-          } // FALLTHRU
+          addMessage(TextMessage.gmMe(null, message));
+          break;
         case "gm":
           addMessage(TextMessage.gm(null, message));
           break;
         case "self":
-          addMessage(TextMessage.whisper(null, MapTool.getPlayer().getName(), message));
+          addLocalMessage(message);
+          break;
+        case "not-gm":
+          addMessage(TextMessage.notGm(null, message));
+          break;
+        case "not-self":
+          addMessage(TextMessage.notMe(null, message));
+          break;
+        case "not-gm-self":
+          addMessage(TextMessage.notGmMe(null, message));
           break;
         case "all":
           addGlobalMessage(message);
