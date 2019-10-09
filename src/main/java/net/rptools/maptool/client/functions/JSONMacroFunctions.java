@@ -186,23 +186,41 @@ public class JSONMacroFunctions extends AbstractFunction {
 
     if (functionName.equalsIgnoreCase("json.toVars")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
-      JSONObject jsonObject = FunctionUtil.paramAsJsonObject(functionName, parameters, 0);
-      String prefix = parameters.size() > 1 ? parameters.get(1).toString() : "";
-      String suffix = parameters.size() > 2 ? parameters.get(2).toString() : "";
-
+      Object json = FunctionUtil.paramAsJson(functionName, parameters, 0);
       JSONArray jsonNames = new JSONArray();
-      for (Object keyStr : jsonObject.keySet()) {
-        // add prefix and suffix
-        String varName = prefix + keyStr.toString().trim() + suffix;
+      if (json instanceof JSONObject) {
+        JSONObject jsonObject = (JSONObject) json;
+        String prefix = parameters.size() > 1 ? parameters.get(1).toString() : "";
+        String suffix = parameters.size() > 2 ? parameters.get(2).toString() : "";
+
+        for (Object keyStr : jsonObject.keySet()) {
+          // add prefix and suffix
+          String varName = prefix + keyStr.toString().trim() + suffix;
+          // replace spaces by underscores
+          varName = varName.replaceAll("\\s", "_");
+          // delete special characters other than "." & "_" in var name
+          varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
+
+          if (!varName.equals("")) {
+            parser.setVariable(varName, jsonObject.get(keyStr));
+            jsonNames.add(varName);
+          }
+        }
+      } else {
+        FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+        JSONArray jsonArray = (JSONArray) json;
+
+        String varName = parameters.get(1).toString();
         // replace spaces by underscores
         varName = varName.replaceAll("\\s", "_");
         // delete special characters other than "." & "_" in var name
         varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
 
         if (!varName.equals("")) {
-          Object value = jsonObject.get(keyStr);
-          parser.setVariable(varName, value);
-          jsonNames.add(varName);
+          for (int i = 0; i < jsonArray.size(); i++) {
+            parser.setVariable(varName + i, jsonArray.get(i));
+            jsonNames.add(varName + i);
+          }
         }
       }
       return jsonNames;
