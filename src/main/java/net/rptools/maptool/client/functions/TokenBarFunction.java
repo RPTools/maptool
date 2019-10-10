@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
@@ -49,6 +50,7 @@ public class TokenBarFunction extends AbstractFunction {
       throws ParserException {
     MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
     String bar = (String) parameters.get(0);
+    verifyBar(functionName, bar);
 
     if (functionName.equals("getBar")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
@@ -75,11 +77,11 @@ public class TokenBarFunction extends AbstractFunction {
    *
    * @param token Get the value from this token
    * @param bar For this bar
-   * @return A {@link BigDecimal} value.
-   * @throws ParserException
+   * @return A {@link BigDecimal} value, or an empty string "" if bar is not visible
    */
-  public static Object getValue(Token token, String bar) throws ParserException {
-    return token.getState(bar);
+  public static Object getValue(Token token, String bar) {
+    Object value = token.getState(bar);
+    return value != null ? value : "";
   }
 
   /**
@@ -94,10 +96,21 @@ public class TokenBarFunction extends AbstractFunction {
     return val;
   }
 
+  /**
+   * @param token Get the value of this token
+   * @param bar For this bar
+   * @return If the bar visible or not
+   */
   public static BigDecimal isVisible(Token token, String bar) {
     return token.getState(bar) == null ? BigDecimal.ZERO : BigDecimal.ONE;
   }
 
+  /**
+   * @param token Set the value of this token
+   * @param bar For this bar
+   * @param show Should this bar be visible
+   * @return If the bar visible or not
+   */
   public static BigDecimal setVisible(Token token, String bar, boolean show) {
     BigDecimal value = show ? BigDecimal.ONE : null;
     MapTool.serverCommand().updateTokenProperty(token, "setState", bar, value);
@@ -125,5 +138,17 @@ public class TokenBarFunction extends AbstractFunction {
       } // endtry
     } // endif
     return val;
+  }
+
+  /**
+   * @param functionName the name of the function
+   * @param bar the name of the bar
+   * @throws ParserException if the bar doesn't exist
+   */
+  private static void verifyBar(String functionName, String bar) throws ParserException {
+    if (!MapTool.getCampaign().getTokenBarsMap().containsKey(bar)) {
+      throw new ParserException(
+          I18N.getText("macro.function.tokenBarFunction.unknownBar", functionName, bar));
+    }
   }
 }
