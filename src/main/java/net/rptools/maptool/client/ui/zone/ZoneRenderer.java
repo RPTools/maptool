@@ -2006,6 +2006,12 @@ public class ZoneRenderer extends JComponent
       bbg.setPaint(paint);
       bbg.fillRect(0, 0, size.width, size.height);
 
+      // Only want to apply noise if its a textured paint otherwise it will also be applied to single color backgrounds.
+      if (paint instanceof TexturePaint) {
+        bbg.setPaint(noise.getPaint(getViewOffsetX(), getViewOffsetY(), getScale()));
+        bbg.fillRect(0, 0, size.width, size.height);
+      }
+
       // Map
       if (zone.getMapAssetId() != null) {
         BufferedImage mapImage = ImageManager.getImage(zone.getMapAssetId(), this);
@@ -4716,5 +4722,18 @@ public class ZoneRenderer extends JComponent
     } catch (Exception e) {
     }
     return c;
+  }
+
+  public float getNoiseAlpha() {
+    return noise.getNoiseAlpha();
+  }
+
+  public long getNoiseSeed() {
+    return noise.getNoiseSeed();
+  }
+
+  public void setNoiseValues(long seed, float alpha) {
+    noise.setNoiseValues(seed, alpha);
+    drawBackground = true;
   }
 }
