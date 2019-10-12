@@ -93,7 +93,8 @@ public class TokenLightFunctions extends AbstractFunction {
    * @return a string list containing the lights that are on.
    * @throws ParserException if the light type can't be found.
    */
-  private String getLights(Token token, String category, String delim) throws ParserException {
+  private static String getLights(Token token, String category, String delim)
+      throws ParserException {
     ArrayList<String> lightList = new ArrayList<String>();
     Map<String, Map<GUID, LightSource>> lightSourcesMap =
         MapTool.getCampaign().getLightSourcesMap();
@@ -135,7 +136,7 @@ public class TokenLightFunctions extends AbstractFunction {
    * @return 0 if the light was not found, otherwise 1;
    * @throws ParserException if the light type can't be found.
    */
-  private BigDecimal setLight(Token token, String category, String name, BigDecimal val)
+  private static BigDecimal setLight(Token token, String category, String name, BigDecimal val)
       throws ParserException {
     boolean found = false;
     Map<String, Map<GUID, LightSource>> lightSourcesMap =
@@ -175,7 +176,8 @@ public class TokenLightFunctions extends AbstractFunction {
    * @return true if the token has the light source.
    * @throws ParserException if the light type can't be found.
    */
-  private boolean hasLightSource(Token token, String category, String name) throws ParserException {
+  public static boolean hasLightSource(Token token, String category, String name)
+      throws ParserException {
     if (category.equals("*") && name.equals("*")) {
       return token.hasLightSources();
     }

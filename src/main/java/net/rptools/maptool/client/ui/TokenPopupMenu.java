@@ -49,7 +49,6 @@ import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.functions.AbstractTokenAccessorFunction;
 import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
@@ -67,6 +66,7 @@ import net.rptools.maptool.model.Player.Role;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.util.FunctionUtil;
 
 public class TokenPopupMenu extends AbstractTokenPopupMenu {
   private static final long serialVersionUID = -622385975780832588L;
@@ -598,7 +598,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
   private JCheckBoxMenuItem createStateItem(String state, JMenu menu, Token token) {
     JCheckBoxMenuItem item = new JCheckBoxMenuItem(new ChangeStateAction(state));
     Object value = token.getState(state);
-    if (AbstractTokenAccessorFunction.getBooleanValue(value)) item.setSelected(true);
+    if (FunctionUtil.getBooleanValue(value)) item.setSelected(true);
     menu.add(item);
     return item;
   }

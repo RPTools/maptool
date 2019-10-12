@@ -73,6 +73,7 @@ public class LoadSaveImpl {
             addDataObjects("Campaign/Properties/Bars", cmpgn.getTokenBarsMap());
             addDataObjects("Campaign/Properties/Tables", cmpgn.getLookupTableMap());
             addDataObjects("Campaign/CampaignMacros", cmpgn.getMacroButtonPropertiesArray());
+            addDataObjects("Campaign/GmMacros", cmpgn.getGmMacroButtonPropertiesArray());
             addDataObjects("Campaign/Maps", cmpgn.getZones());
           }
         });

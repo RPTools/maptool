@@ -17,7 +17,6 @@ package net.rptools.maptool.client.functions;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -53,17 +52,14 @@ public class TokenNameFunction extends AbstractFunction {
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 0, 1);
     } else {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
+      String name = args.get(0).toString();
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
 
       if (args.get(0).toString().equals("")) {
         throw new ParserException(
             I18N.getText("macro.function.tokenName.emptyTokenNameForbidden", "setName"));
       }
-
-      token.setName(args.get(0).toString());
-
-      ZoneRenderer renderer = token.getZoneRenderer();
-      MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+      MapTool.serverCommand().updateTokenProperty(token, "setName", name);
     }
     return token.getName();
   }
@@ -74,7 +70,7 @@ public class TokenNameFunction extends AbstractFunction {
    * @param token the token to get the name of.
    * @return the name of the token.
    */
-  public String getName(Token token) {
+  public static String getName(Token token) {
     return token.getName();
   }
 
@@ -84,7 +80,7 @@ public class TokenNameFunction extends AbstractFunction {
    * @param token The token to set the name of.
    * @param name the name of the token.
    */
-  public void setName(Token token, String name) {
+  public static void setName(Token token, String name) {
     token.setName(name);
   }
 }

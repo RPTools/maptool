@@ -17,8 +17,8 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import net.rptools.maptool.client.functions.AbstractTokenAccessorFunction;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.FunctionUtil;
 
 /**
  * An overlay that may be applied to a token to show state.
@@ -52,7 +52,7 @@ public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value) {
-    if (AbstractTokenAccessorFunction.getBooleanValue(value)) {
+    if (FunctionUtil.getBooleanValue(value)) {
       // Apply Alpha Transparency
       float opacity = token.getTokenOpacity();
       if (opacity < 1.0f)

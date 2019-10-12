@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.functions;
 
+import static net.rptools.maptool.client.functions.JSONMacroFunctions.convertToJSON;
+
 import java.awt.*;
 import java.math.BigDecimal;
 import java.util.*;
@@ -22,10 +24,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -92,6 +92,30 @@ public class FindTokenFunctions extends AbstractFunction {
       // Filter out the utility lib: and image: tokens
       boolean isPC = t.getType() == Token.Type.PC && !t.isImgOrLib();
       return match == isPC;
+    }
+  }
+
+  /** Filter for Light */
+  private class LightFilter implements Zone.Filter {
+    private final String type;
+    private final String name;
+    private final boolean match;
+
+    public LightFilter(String type, String name, boolean match) {
+      this.type = type;
+      this.name = name;
+      this.match = match;
+    }
+
+    @Override
+    public boolean matchToken(Token t) {
+      try {
+        return match == TokenLightFunctions.hasLightSource(t, type, name);
+      } catch (ParserException e) {
+        // Should not happen: a test was done already
+        MapTool.showError(e.getLocalizedMessage());
+        return false;
+      }
     }
   }
 
@@ -374,6 +398,36 @@ public class FindTokenFunctions extends AbstractFunction {
           types.add(o.toString());
         }
         tokenList = getTokensFiltered(new PropertyTypeFilter(types), tokenList);
+      } else if ("light".equalsIgnoreCase(searchType)) {
+        String value = jobj.get(searchType).toString();
+        String type, name;
+        if ("true".equalsIgnoreCase(value) || "1".equals(value)) {
+          match = true;
+          type = name = "*";
+        } else if ("false".equalsIgnoreCase(value) || "0".equals(value)) {
+          match = false;
+          type = name = "*";
+        } else {
+          Object jsonLight = convertToJSON(value);
+          if (jsonLight instanceof JSONObject) {
+            JSONObject jobjLight = (JSONObject) jsonLight;
+            match = !jobjLight.has("value") || FunctionUtil.getBooleanValue(jobjLight.get("value"));
+            type = jobjLight.has("category") ? jobjLight.get("category").toString() : "*";
+            name = jobjLight.has("name") ? jobjLight.get("name").toString() : "*";
+
+            Map<String, Map<GUID, LightSource>> lightSourcesMap =
+                MapTool.getCampaign().getLightSourcesMap();
+
+            if (!"*".equals(type) && !lightSourcesMap.containsKey(type))
+              throw new ParserException(
+                  I18N.getText("macro.function.tokenLight.unknownLightType", "light", type));
+
+          } else {
+            throw new ParserException(
+                I18N.getText("macro.function.json.onlyObject", value.toString(), "light"));
+          }
+        }
+        tokenList = getTokensFiltered(new LightFilter(type, name, match), tokenList);
       } else {
         match = booleanCheck(jobj, searchType);
         if ("npc".equalsIgnoreCase(searchType)) {

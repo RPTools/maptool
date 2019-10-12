@@ -53,6 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import javax.imageio.ImageIO;
+import javax.imageio.spi.IIORegistry;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -827,10 +828,23 @@ public class MapTool {
     return messageList;
   }
 
-  /** These are the messages that originate from the server */
+  /**
+   * These are the messages that originate from the server
+   *
+   * @param message the message to display
+   */
   public static void addServerMessage(TextMessage message) {
     // Filter
     if (message.isGM() && !getPlayer().isGM()) {
+      return;
+    }
+    if (message.isGmMe() && !getPlayer().isGM() && !message.isFromSelf()) {
+      return;
+    }
+    if ((message.isNotGm() || message.isNotGmMe()) && getPlayer().isGM()) {
+      return;
+    }
+    if ((message.isNotMe() || message.isNotGmMe()) && message.isFromSelf()) {
       return;
     }
     if (message.isWhisper() && !getPlayer().getName().equalsIgnoreCase(message.getTarget())) {
@@ -862,7 +876,7 @@ public class MapTool {
   /**
    * Add a message only this client can see. This is a shortcut for addMessage(ME, ...)
    *
-   * @param message
+   * @param message message to be sent
    */
   public static void addLocalMessage(String message) {
     addMessage(TextMessage.me(null, message));
@@ -871,7 +885,7 @@ public class MapTool {
   /**
    * Add a message all clients can see. This is a shortcut for addMessage(SAY, ...)
    *
-   * @param message
+   * @param message message to be sent
    */
   public static void addGlobalMessage(String message) {
     addMessage(TextMessage.say(null, message));
@@ -903,15 +917,22 @@ public class MapTool {
     for (String target : targets) {
       switch (target.toLowerCase()) {
         case "gm-self":
-          if (!MapTool.getPlayer().isGM()) {
-            // don't duplicate message if self is GM
-            addMessage(TextMessage.whisper(null, MapTool.getPlayer().getName(), message));
-          } // FALLTHRU
+          addMessage(TextMessage.gmMe(null, message));
+          break;
         case "gm":
           addMessage(TextMessage.gm(null, message));
           break;
         case "self":
-          addMessage(TextMessage.whisper(null, MapTool.getPlayer().getName(), message));
+          addLocalMessage(message);
+          break;
+        case "not-gm":
+          addMessage(TextMessage.notGm(null, message));
+          break;
+        case "not-self":
+          addMessage(TextMessage.notMe(null, message));
+          break;
+        case "not-gm-self":
+          addMessage(TextMessage.notGmMe(null, message));
           break;
         case "all":
           addGlobalMessage(message);
@@ -969,6 +990,7 @@ public class MapTool {
 
     AssetManager.updateRepositoryList();
     MapTool.getFrame().getCampaignPanel().reset();
+    MapTool.getFrame().getGmPanel().reset();
     UserDefinedMacroFunctions.getInstance().loadCampaignLibFunctions();
   }
 
@@ -1652,6 +1674,11 @@ public class MapTool {
     }
 
     URL.setURLStreamHandlerFactory(factory);
+
+    // Register ImageReaderSpi for jpeg2000 from JAI manually (issue due to uberJar packaging)
+    // https://github.com/jai-imageio/jai-imageio-core/issues/29
+    IIORegistry registry = IIORegistry.getDefaultInstance();
+    registry.registerServiceProvider(new com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi());
 
     final Toolkit tk = Toolkit.getDefaultToolkit();
     tk.getSystemEventQueue().push(new MapToolEventQueue());

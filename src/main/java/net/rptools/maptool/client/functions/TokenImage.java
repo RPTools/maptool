@@ -85,25 +85,23 @@ public class TokenImage extends AbstractFunction {
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
     Token token;
-    Zone zone;
     MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
 
     if (functionName.equals("setTokenOpacity")) {
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
-      String opacityValue = args.get(0).toString();
+      String strOpacity = args.get(0).toString();
+      FunctionUtil.paramAsFloat(functionName, args, 0, true);
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
-      zone = token.getZoneRenderer().getZone();
 
-      float newOpacity = token.setTokenOpacity(Float.parseFloat(opacityValue));
-      MapTool.serverCommand().putToken(zone.getId(), token);
-      return newOpacity;
+      MapTool.serverCommand().updateTokenProperty(token, "setTokenOpacity", strOpacity);
+      return token.getTokenOpacity();
     }
 
     if (functionName.equals("getTokenOpacity")) {
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
@@ -117,7 +115,6 @@ public class TokenImage extends AbstractFunction {
 
       String assetName = args.get(0).toString();
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
-      zone = token.getZoneRenderer().getZone();
 
       setImage(token, assetName);
       return "";
@@ -128,7 +125,6 @@ public class TokenImage extends AbstractFunction {
 
       String assetName = args.get(0).toString();
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
-      zone = token.getZoneRenderer().getZone();
 
       setPortrait(token, assetName);
       return "";
@@ -139,7 +135,6 @@ public class TokenImage extends AbstractFunction {
 
       String assetName = args.get(0).toString();
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
-      zone = token.getZoneRenderer().getZone();
 
       setHandout(token, assetName);
       return "";
@@ -233,18 +228,19 @@ public class TokenImage extends AbstractFunction {
     }
     switch (type) {
       case TOKEN_IMAGE:
-        token.setImageAsset(null, new MD5Key(assetId));
+        MapTool.serverCommand()
+            .updateTokenProperty(token, "setImageAsset", null, new MD5Key(assetId));
         break;
       case TOKEN_PORTRAIT:
-        token.setPortraitImage(new MD5Key(assetId));
+        MapTool.serverCommand().updateTokenProperty(token, "setPortraitImage", new MD5Key(assetId));
         break;
       case TOKEN_HANDOUT:
-        token.setCharsheetImage(new MD5Key(assetId));
+        MapTool.serverCommand()
+            .updateTokenProperty(token, "setCharsheetImage", new MD5Key(assetId));
         break;
       default:
         throw new IllegalArgumentException("unknown image type " + type);
     }
-    MapTool.serverCommand().putToken(token.getZoneRenderer().getZone().getId(), token);
   }
 
   public static void setImage(Token token, String assetName) throws ParserException {

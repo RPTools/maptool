@@ -95,7 +95,6 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.functions.AbstractTokenAccessorFunction;
 import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
@@ -113,6 +112,7 @@ import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.util.ExtractHeroLab;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -213,8 +213,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       Component[] states = ((Container) statePanels[j]).getComponents();
       for (int i = 0; i < states.length; i++) {
         JCheckBox state = (JCheckBox) states[i];
-        state.setSelected(
-            AbstractTokenAccessorFunction.getBooleanValue(token.getState(state.getText())));
+        state.setSelected(FunctionUtil.getBooleanValue(token.getState(state.getText())));
       }
     }
 
