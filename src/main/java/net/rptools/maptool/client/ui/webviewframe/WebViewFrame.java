@@ -1,5 +1,18 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.ui.webviewframe;
-
 
 import com.jidesoft.docking.DockContext;
 import com.jidesoft.docking.DockableFrame;
@@ -39,7 +52,6 @@ public class WebViewFrame extends DockableFrame {
     return webViewFrame;
   }
 
-
   public static void show(String name) throws ParserException {
     WebViewFrame webViewFrame = webViewFrameMap.get(name);
     if (webViewFrame == null) {
@@ -48,8 +60,6 @@ public class WebViewFrame extends DockableFrame {
 
     webViewFrame.getDockingManager().showFrame(name);
   }
-
-
 
   public static void hide(String name) throws ParserException {
     WebViewFrame webViewFrame = webViewFrameMap.get(name);
@@ -60,7 +70,6 @@ public class WebViewFrame extends DockableFrame {
     webViewFrame.getDockingManager().hideFrame(name);
   }
 
-
   private WebViewFrame(String name) {
     super(name);
     this.name = name;
@@ -69,7 +78,6 @@ public class WebViewFrame extends DockableFrame {
 
     getContext().setInitMode(DockContext.STATE_FLOATING);
     MapTool.getFrame().getDockingManager().addFrame(this);
-
 
     Platform.runLater(() -> initWebView(jfxPanel));
   }
@@ -85,6 +93,4 @@ public class WebViewFrame extends DockableFrame {
   private void loadURL(String url) {
     Platform.runLater(() -> webView.getEngine().load(url));
   }
-
-
 }

@@ -158,11 +158,8 @@ public class ZoneRenderer extends JComponent
   private final DebounceExecutor repaintDebouncer =
       new DebounceExecutor(REPAINT_DEBOUNCE_INTERVAL, this::repaint);
 
-
   /** Noise for mask on repeating tiles. */
   private final DrawableNoisePaint noise = new DrawableNoisePaint();
-
-
 
   public static final int MIN_GRID_SIZE = 10;
   private static LightSourceIconOverlay lightSourceIconOverlay = new LightSourceIconOverlay();
@@ -2006,7 +2003,8 @@ public class ZoneRenderer extends JComponent
       bbg.setPaint(paint);
       bbg.fillRect(0, 0, size.width, size.height);
 
-      // Only want to apply noise if its a textured paint otherwise it will also be applied to single color backgrounds.
+      // Only want to apply noise if its a textured paint otherwise it will also be applied to
+      // single color backgrounds.
       if (paint instanceof TexturePaint) {
         bbg.setPaint(noise.getPaint(getViewOffsetX(), getViewOffsetY(), getScale()));
         bbg.fillRect(0, 0, size.width, size.height);
