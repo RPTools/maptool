@@ -90,7 +90,7 @@ public class TokenStateFunction extends AbstractFunction {
    * @return the value of the state.
    * @throws ParserException if the state is unknown.
    */
-  public Object getState(Token token, String stateName) throws ParserException {
+  public static Object getState(Token token, String stateName) throws ParserException {
     return getBooleanTokenState(token, stateName) ? BigDecimal.valueOf(1) : BigDecimal.valueOf(0);
   }
 
@@ -102,7 +102,7 @@ public class TokenStateFunction extends AbstractFunction {
    * @return the value of the state.
    * @throws ParserException if an error occurs.
    */
-  public boolean getBooleanTokenState(Token token, String stateName) throws ParserException {
+  public static boolean getBooleanTokenState(Token token, String stateName) throws ParserException {
     if (!MapTool.getCampaign().getTokenStatesMap().containsKey(stateName)) {
       throw new ParserException(
           I18N.getText("macro.function.tokenStateFunctions.unknownState", stateName));
@@ -120,7 +120,8 @@ public class TokenStateFunction extends AbstractFunction {
    * @return the value of the state.
    * @throws ParserException if the state is unknown.
    */
-  public BigDecimal setState(Token token, String stateName, Object val) throws ParserException {
+  public static BigDecimal setState(Token token, String stateName, Object val)
+      throws ParserException {
     boolean set = getBooleanFromValue(val);
     if (stateName.equals(ALL_STATES)) {
       MapTool.serverCommand().updateTokenProperty(token, "setAllStates", set);
@@ -139,7 +140,7 @@ public class TokenStateFunction extends AbstractFunction {
    *
    * @param value the object to get the value from
    */
-  private boolean getBooleanFromValue(Object value) {
+  private static boolean getBooleanFromValue(Object value) {
     if (value == null) { // If state does not exist then it can't be set ;)
       return false;
     }

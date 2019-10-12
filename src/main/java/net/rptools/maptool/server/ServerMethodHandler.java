@@ -249,6 +249,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case updateCampaignMacros:
           updateCampaignMacros((List<MacroButtonProperties>) context.get(0));
           break;
+        case updateGmMacros:
+          updateGmMacros((List<MacroButtonProperties>) context.get(0));
+          break;
         case setTokenLocation:
           setTokenLocation(
               context.getGUID(0), context.getGUID(1), context.getInt(2), context.getInt(3));
@@ -287,12 +290,36 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
             new String[] {}, RPCContext.getCurrent().method, RPCContext.getCurrent().parameters);
   }
 
+  /**
+   * Broadcast a method to all clients excluding one client
+   *
+   * @param exclude the client to exclude
+   * @param method the method to send
+   * @param parameters an array of parameters related to the method
+   */
   private void broadcastToClients(String exclude, String method, Object... parameters) {
     server.getConnection().broadcastCallMethod(new String[] {exclude}, method, parameters);
   }
 
+  /**
+   * Broadcast a method to all clients
+   *
+   * @param method the method to send
+   * @param parameters an array of parameters related to the method
+   */
   private void broadcastToAllClients(String method, Object... parameters) {
     server.getConnection().broadcastCallMethod(new String[] {}, method, parameters);
+  }
+
+  /**
+   * Broadcast a method to a single client
+   *
+   * @param client the client to send the method to
+   * @param method the method to send
+   * @param parameters an array of parameters related to the method
+   */
+  private void broadcastToClient(String client, String method, Object... parameters) {
+    server.getConnection().callMethod(client, method, parameters);
   }
 
   ////
@@ -536,19 +563,23 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   public void putToken(GUID zoneGUID, Token token) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
 
+    int zOrder = 0;
     boolean newToken = zone.getToken(token.getId()) == null;
     synchronized (MUTEX) {
       // Set z-order for new tokens
       if (newToken) {
-        token.setZOrder(zone.getLargestZOrder() + 1);
+        zOrder = zone.getLargestZOrder() + 1;
+        token.setZOrder(zOrder);
       }
       zone.putToken(token);
     }
     if (newToken) {
-      forwardToAllClients();
-    } else {
-      forwardToClients();
+      // don't send whole token back to sender, instead just send new ZOrder
+      Object[] parameters = {zoneGUID, token.getId(), "setZOrder", new Object[] {zOrder}};
+      broadcastToClient(
+          RPCContext.getCurrent().id, ClientCommand.COMMAND.updateTokenProperty.name(), parameters);
     }
+    forwardToClients();
   }
 
   public void putZone(Zone zone) {
@@ -743,6 +774,13 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
     MapTool.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
     server.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
+    forwardToClients();
+  }
+
+  public void updateGmMacros(List<MacroButtonProperties> properties) {
+    ArrayList campaignMacros = new ArrayList<MacroButtonProperties>(properties);
+    MapTool.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
+    server.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
     forwardToClients();
   }
 

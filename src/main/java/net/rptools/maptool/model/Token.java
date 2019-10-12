@@ -525,6 +525,21 @@ public class Token extends BaseModel implements Cloneable {
     return tokenOpacity;
   }
 
+  /**
+   * Set the token opacity from a string trimmed to [0.05f, 1.0f]
+   *
+   * @param alpha the String of the opacity value.
+   * @return the float of the opacity
+   */
+  public float setTokenOpacity(String alpha) {
+    return setTokenOpacity(Float.parseFloat(alpha));
+  }
+  /**
+   * Set the token opacity from a float trimmed to [0.05f, 1.0f]
+   *
+   * @param alpha the float of the opacity.
+   * @return the float of the opacity trimmed.
+   */
   public float setTokenOpacity(float alpha) {
     if (alpha > 1.0f) alpha = 1.0f;
     if (alpha <= 0.0f) alpha = 0.05f;
@@ -1836,6 +1851,55 @@ public class Token extends BaseModel implements Cloneable {
     return bool.booleanValue();
   }
 
+  /**
+   * Set the initiatives of the token
+   *
+   * @param value the new value of the initiatives
+   */
+  public void setInitiative(String value) {
+    List<InitiativeList.TokenInitiative> tis = getInitiatives();
+    for (InitiativeList.TokenInitiative ti : tis) ti.setState(value);
+  }
+
+  /**
+   * Set the hold on token initiative
+   *
+   * @param set the boolean value for the hold
+   */
+  public void setInitiativeHold(boolean set) {
+    List<InitiativeList.TokenInitiative> tis = getInitiatives();
+    for (InitiativeList.TokenInitiative ti : tis) ti.setHolding(set);
+  }
+
+  /**
+   * Get the list of initiatives for the token
+   *
+   * @return The List of initiative
+   */
+  @SuppressWarnings("unchecked")
+  public List<InitiativeList.TokenInitiative> getInitiatives() {
+    Zone zone = getZoneRenderer().getZone();
+    List<Integer> list = zone.getInitiativeList().indexOf(this);
+    if (list.isEmpty()) return Collections.EMPTY_LIST;
+    List<InitiativeList.TokenInitiative> ret =
+        new ArrayList<InitiativeList.TokenInitiative>(list.size());
+    for (Integer index : list)
+      ret.add(zone.getInitiativeList().getTokenInitiative(index.intValue()));
+    return ret;
+  }
+
+  /**
+   * Get the first initiative of the token
+   *
+   * @return The first token initiative value for the token
+   */
+  public InitiativeList.TokenInitiative getInitiative() {
+    Zone zone = getZoneRenderer().getZone();
+    List<Integer> list = zone.getInitiativeList().indexOf(this);
+    if (list.isEmpty()) return null;
+    return zone.getInitiativeList().getTokenInitiative(list.get(0).intValue());
+  }
+
   public static boolean isTokenFile(String filename) {
     return filename != null && filename.toLowerCase().endsWith(FILE_EXTENSION);
   }
@@ -2013,6 +2077,9 @@ public class Token extends BaseModel implements Cloneable {
       case "setProperty":
         setProperty(parameters[0].toString(), parameters[1].toString());
         break;
+      case "resetProperty":
+        resetProperty(parameters[0].toString());
+        break;
       case "setZOrder":
         setZOrder((int) parameters[0]);
         zone.sortZOrder(); // update new ZOrder
@@ -2049,6 +2116,12 @@ public class Token extends BaseModel implements Cloneable {
       case "setGMNotes":
         setGMNotes(parameters[0].toString());
         break;
+      case "setInitiative":
+        setInitiative((String) parameters[0]);
+        break;
+      case "setInitiativeHold":
+        setInitiativeHold((boolean) parameters[0]);
+        break;
       case "setX":
         setX((int) parameters[0]);
         if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
@@ -2061,6 +2134,45 @@ public class Token extends BaseModel implements Cloneable {
         setX((int) parameters[0]);
         setY((int) parameters[1]);
         if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
+      case "setHaloColor":
+        setHaloColor((Color) parameters[0]);
+        break;
+      case "setLabel":
+        setLabel((String) parameters[0]);
+        break;
+      case "setName":
+        setName((String) parameters[0]);
+        break;
+      case "setGMName":
+        setGMName((String) parameters[0]);
+        break;
+      case "setVisible":
+        setVisible((boolean) parameters[0]);
+        break;
+      case "setVisibleOnlyToOwner":
+        setVisibleOnlyToOwner((boolean) parameters[0]);
+        break;
+      case "setIsAlwaysVisible":
+        setIsAlwaysVisible((boolean) parameters[0]);
+        break;
+      case "setTokenOpacity":
+        setTokenOpacity((String) parameters[0]);
+        break;
+      case "setTerrainModifier":
+        setTerrainModifier((double) parameters[0]);
+        break;
+      case "setVBL":
+        setVBL((Area) parameters[0]);
+        break;
+      case "setImageAsset":
+        setImageAsset((String) parameters[0], (MD5Key) parameters[1]);
+        break;
+      case "setPortraitImage":
+        setPortraitImage((MD5Key) parameters[0]);
+        break;
+      case "setCharsheetImage":
+        setCharsheetImage((MD5Key) parameters[0]);
         break;
       case "clearLightSources":
         clearLightSources();
