@@ -30,6 +30,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.TexturePaint;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.dnd.DropTargetDragEvent;
@@ -129,6 +130,7 @@ import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
+import net.rptools.maptool.model.drawing.DrawableNoisePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -155,6 +157,9 @@ public class ZoneRenderer extends JComponent
   /** DebounceExecutor for throttling repaint() requests. */
   private final DebounceExecutor repaintDebouncer =
       new DebounceExecutor(REPAINT_DEBOUNCE_INTERVAL, this::repaint);
+
+  /** Noise for mask on repeating tiles. */
+  private final DrawableNoisePaint noise = new DrawableNoisePaint();
 
   public static final int MIN_GRID_SIZE = 10;
   private static LightSourceIconOverlay lightSourceIconOverlay = new LightSourceIconOverlay();
@@ -271,6 +276,7 @@ public class ZoneRenderer extends JComponent
           }
         });
     // fps.start();
+
   }
 
   public void setAutoResizeStamp(boolean value) {
@@ -1996,6 +2002,13 @@ public class ZoneRenderer extends JComponent
           zone.getBackgroundPaint().getPaint(getViewOffsetX(), getViewOffsetY(), getScale(), this);
       bbg.setPaint(paint);
       bbg.fillRect(0, 0, size.width, size.height);
+
+      // Only want to apply noise if its a textured paint otherwise it will also be applied to
+      // single color backgrounds.
+      if (paint instanceof TexturePaint) {
+        bbg.setPaint(noise.getPaint(getViewOffsetX(), getViewOffsetY(), getScale()));
+        bbg.fillRect(0, 0, size.width, size.height);
+      }
 
       // Map
       if (zone.getMapAssetId() != null) {
@@ -4707,5 +4720,18 @@ public class ZoneRenderer extends JComponent
     } catch (Exception e) {
     }
     return c;
+  }
+
+  public float getNoiseAlpha() {
+    return noise.getNoiseAlpha();
+  }
+
+  public long getNoiseSeed() {
+    return noise.getNoiseSeed();
+  }
+
+  public void setNoiseValues(long seed, float alpha) {
+    noise.setNoiseValues(seed, alpha);
+    drawBackground = true;
   }
 }
