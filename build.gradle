@@ -265,6 +265,11 @@ dependencies {
     // using jitpack.io for now
     // compile ('net.rptools.dicelib:dicelib:1.5.2')
     implementation 'com.github.RPTools:dicelib:1.5.5'
+
+
+    // Noise Generator
+    implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3'
+
 }
 
 

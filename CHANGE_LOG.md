@@ -1,3 +1,13 @@
+Maptool 1.5.6
+=====
+Emergency fix for MacOS.  Otherwise the same as 1.5.5.
+
+Bug Fixes
+-----
+* [#763][i763] Fixed null-pointer exception thrown on launch for MacOS.
+
+[i763]: https://github.com/RPTools/maptool/issues/763
+
 Maptool 1.5.5
 =====
 Several contributors have brought us new features including a scroll bar added to the Select Map drop-down, audio macro functions, performance and UI improvements, and, of course, bug fixes.
