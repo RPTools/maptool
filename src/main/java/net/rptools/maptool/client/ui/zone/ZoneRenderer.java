@@ -152,7 +152,7 @@ public class ZoneRenderer extends JComponent
       new Color(Color.yellow.getRed(), Color.yellow.getGreen(), Color.yellow.getBlue(), 50);
 
   /** The interval, in milliseconds, during which calls to repaint() will be debounced. */
-  private static final int REPAINT_DEBOUNCE_INTERVAL = 33;
+  private static final int REPAINT_DEBOUNCE_INTERVAL = 1000 / AppPreferences.getFrameRateCap();
 
   /** DebounceExecutor for throttling repaint() requests. */
   private final DebounceExecutor repaintDebouncer =
