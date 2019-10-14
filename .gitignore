@@ -44,6 +44,3 @@ workbench.xmi
 
 # Keystore
 build-resources/rptools-keystore
-.nb-gradle/private/cache/maptool-d41d8cd98f00b204e9800998ecf8427e
-.nb-gradle-properties
-.nb-gradle/profiles/private/aux-config
