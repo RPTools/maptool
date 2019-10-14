@@ -27,17 +27,34 @@ import net.rptools.maptool.language.I18N;
   aliases = {"tn"},
   description = "texturenoise.description"
 )
+/**
+ * This class implements the slash command for adjusting the values for noise to be applied to repeating background textures.
+ */
 public class TextureNoise implements Macro {
 
   @Override
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
     if (macro.length() == 0) {
-      MapTool.addLocalMessage(
-          I18N.getText("texturenoise.currentvals", zr.getNoiseAlpha(), zr.getNoiseSeed()));
+      if (zr.isBgTextureNoiseFilterOn()) {
+        MapTool.addLocalMessage(
+            I18N.getText("texturenoise.currentValsOn", zr.getNoiseAlpha(), zr.getNoiseSeed()));
+      } else {
+        I18N.getText("texturenoise.currentValsOff");
+      }
       MapTool.addLocalMessage(I18N.getText("texturenoise.usage"));
     } else {
       String args[] = macro.split("\\s+");
+
+      if ("off".equalsIgnoreCase(args[0])) {
+        zr.setBgTextureNoiseFilterOn(false);
+        return;
+      }
+
+      if ("on".equalsIgnoreCase(args[0])) {
+        zr.setBgTextureNoiseFilterOn(true);
+        return;
+      }
 
       float alpha;
       try {
