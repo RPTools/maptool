@@ -130,7 +130,7 @@ import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawableNoisePaint;
+import net.rptools.maptool.model.drawing.DrawableNoise;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -159,7 +159,10 @@ public class ZoneRenderer extends JComponent
       new DebounceExecutor(REPAINT_DEBOUNCE_INTERVAL, this::repaint);
 
   /** Noise for mask on repeating tiles. */
-  private final DrawableNoisePaint noise = new DrawableNoisePaint();
+  private final DrawableNoise noise = new DrawableNoise();
+
+  /** Is the noise filter on for disrupting pattens in background tiled textures. */
+  private boolean bgTextureNoiseFilterOn = false;
 
   public static final int MIN_GRID_SIZE = 10;
   private static LightSourceIconOverlay lightSourceIconOverlay = new LightSourceIconOverlay();
@@ -2003,9 +2006,8 @@ public class ZoneRenderer extends JComponent
       bbg.setPaint(paint);
       bbg.fillRect(0, 0, size.width, size.height);
 
-      // Only want to apply noise if its a textured paint otherwise it will also be applied to
-      // single color backgrounds.
-      if (paint instanceof TexturePaint) {
+      // Only apply the noise if the feature is on and the background a textured paint
+      if (bgTextureNoiseFilterOn && paint instanceof TexturePaint) {
         bbg.setPaint(noise.getPaint(getViewOffsetX(), getViewOffsetY(), getScale()));
         bbg.fillRect(0, 0, size.width, size.height);
       }
@@ -4722,16 +4724,56 @@ public class ZoneRenderer extends JComponent
     return c;
   }
 
+  /**
+   * Returns the alpha level used to apply the noise to back ground repeating textures.
+   *
+   * @return the alpha level used to apply the noise.
+   */
   public float getNoiseAlpha() {
     return noise.getNoiseAlpha();
   }
 
+  /**
+   * Returns the seed value used to generate the noise that is applied to tback ground repeating
+   * images.
+   *
+   * @return the seed value used to generate the noise.
+   */
   public long getNoiseSeed() {
     return noise.getNoiseSeed();
   }
 
+  /**
+   * Sets the seed value and alpha level used for the noise applied to repeating background
+   * textures.
+   *
+   * @param seed The seed value used to generate the noise to be applied.
+   * @param alpha The alpha level to apply the noise.
+   */
   public void setNoiseValues(long seed, float alpha) {
     noise.setNoiseValues(seed, alpha);
     drawBackground = true;
+  }
+
+  /**
+   * Returns if the setting for applying background noise to textures is on or off.
+   *
+   * @return <code>true</code> if noise will be applied to repeating background textures, otherwise
+   *     <code>false</code>
+   */
+  public boolean isBgTextureNoiseFilterOn() {
+    return bgTextureNoiseFilterOn;
+  }
+
+  /**
+   * Turn on / off application of noise to repeated background textures.
+   *
+   * @param on <code>true</code> to turn on, <code>false</code> to turn off.
+   */
+  public void setBgTextureNoiseFilterOn(boolean on) {
+    if (on != bgTextureNoiseFilterOn) {
+      bgTextureNoiseFilterOn = on;
+      drawBackground = true;
+    }
   }
 }
