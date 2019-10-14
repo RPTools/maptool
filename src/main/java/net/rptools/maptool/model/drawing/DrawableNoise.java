@@ -24,19 +24,19 @@ import net.rptools.noiselib.PerlinNoise;
  * This class is used to generate a image from a noise function that can be used to break up
  * repeating patterns in other images.
  */
-public class DrawableNoisePaint {
+public class DrawableNoise {
 
   /**
    * Small offset in the X direction in case width period of noise is a multiple of texture its used
    * to break up.
    */
-  private static int OFFFSET_X_TWEAK = 5;
+  private static final int OFFFSET_X_TWEAK = 5;
 
   /**
    * Small offset in the Y direction in case height period of noise is a multiple of texture its
    * used to break up.
    */
-  private static int OFFFSET_Y_TWEAK = 5;
+  private static final int OFFFSET_Y_TWEAK = 5;
 
   /** The number of times the noise pattern fits into the noise image width. */
   private static final double WIDTH_DIVISOR = 12.0;
@@ -90,7 +90,7 @@ public class DrawableNoisePaint {
    * @param seed The seed used to generate the noise.
    * @param alpha The alpha value the noise will be applied with.
    */
-  public DrawableNoisePaint(long seed, float alpha) {
+  public DrawableNoise(long seed, float alpha) {
     noiseSeed = seed;
     perlinNoise = new PerlinNoise(seed);
     noiseAlpha = alpha;
@@ -98,7 +98,7 @@ public class DrawableNoisePaint {
   }
 
   /** Creates a new <code>DrawableNoisePant</code> object with default seed and alpha values. */
-  public DrawableNoisePaint() {
+  public DrawableNoise() {
     this(DEFAULT_SEED, DEFAULT_ALPHA);
   }
 

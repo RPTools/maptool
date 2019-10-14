@@ -130,7 +130,7 @@ import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawableNoisePaint;
+import net.rptools.maptool.model.drawing.DrawableNoise;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -159,7 +159,7 @@ public class ZoneRenderer extends JComponent
       new DebounceExecutor(REPAINT_DEBOUNCE_INTERVAL, this::repaint);
 
   /** Noise for mask on repeating tiles. */
-  private final DrawableNoisePaint noise = new DrawableNoisePaint();
+  private final DrawableNoise noise = new DrawableNoise();
 
   /** Is the noise filter on for disrupting pattens in background tiled textures. */
   private boolean bgTextureNoiseFilterOn = false;
