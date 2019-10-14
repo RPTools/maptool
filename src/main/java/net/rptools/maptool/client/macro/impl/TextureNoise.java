@@ -28,7 +28,8 @@ import net.rptools.maptool.language.I18N;
   description = "texturenoise.description"
 )
 /**
- * This class implements the slash command for adjusting the values for noise to be applied to repeating background textures.
+ * This class implements the slash command for adjusting the values for noise to be applied to
+ * repeating background textures.
  */
 public class TextureNoise implements Macro {
 

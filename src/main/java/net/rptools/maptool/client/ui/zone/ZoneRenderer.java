@@ -4771,6 +4771,9 @@ public class ZoneRenderer extends JComponent
    * @param on <code>true</code> to turn on, <code>false</code> to turn off.
    */
   public void setBgTextureNoiseFilterOn(boolean on) {
-    bgTextureNoiseFilterOn = on;
+    if (on != bgTextureNoiseFilterOn) {
+      bgTextureNoiseFilterOn = on;
+      drawBackground = true;
+    }
   }
 }

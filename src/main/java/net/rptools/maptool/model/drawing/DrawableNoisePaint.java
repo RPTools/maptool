@@ -26,15 +26,21 @@ import net.rptools.noiselib.PerlinNoise;
  */
 public class DrawableNoisePaint {
 
-  /** Small offset in the X direction in case width period of noise is a multiple of texture its used to break up. */
+  /**
+   * Small offset in the X direction in case width period of noise is a multiple of texture its used
+   * to break up.
+   */
   private static int OFFFSET_X_TWEAK = 5;
 
-  /** Small offset in the Y direction in case height period of noise is a multiple of texture its used to break up. */
+  /**
+   * Small offset in the Y direction in case height period of noise is a multiple of texture its
+   * used to break up.
+   */
   private static int OFFFSET_Y_TWEAK = 5;
 
-  /**  The number of times the noise pattern fits into the noise image width. */
+  /** The number of times the noise pattern fits into the noise image width. */
   private static final double WIDTH_DIVISOR = 12.0;
-  /**  The number of times the noise pattern fits into the noise image height. */
+  /** The number of times the noise pattern fits into the noise image height. */
   private static final double HEIGHT_DIVISOR = 9.0;
 
   /** The width of the noise image. */
@@ -63,9 +69,7 @@ public class DrawableNoisePaint {
   /** The buffered image of the rendered noise. */
   private BufferedImage noiseImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
 
-  /**
-   * Recalculate the noise image.
-   */
+  /** Recalculate the noise image. */
   private void recalc() {
     needsRecalc = false;
     int[] array = new int[WIDTH * HEIGHT];
@@ -93,9 +97,7 @@ public class DrawableNoisePaint {
     recalc();
   }
 
-  /**
-   * Creates a new <code>DrawableNoisePant</code> object with default seed and alpha values.
-   */
+  /** Creates a new <code>DrawableNoisePant</code> object with default seed and alpha values. */
   public DrawableNoisePaint() {
     this(DEFAULT_SEED, DEFAULT_ALPHA);
   }
@@ -111,6 +113,7 @@ public class DrawableNoisePaint {
 
   /**
    * Sets the alpha level that is used to apply the noise.
+   *
    * @param alpha the alpha level that is used to apply the noise.
    */
   public void setNoiseAlpha(float alpha) {
@@ -121,6 +124,7 @@ public class DrawableNoisePaint {
 
   /**
    * Returns the seed used to generate the noise..
+   *
    * @return The seed used to generate the noise.
    */
   public long getNoiseSeed() {
@@ -140,16 +144,20 @@ public class DrawableNoisePaint {
 
   /**
    * Returns a {@link Paint} object of the noise.
+   *
    * @param offsetX The x offset of the view.
    * @param offsetY The y offset of the view.
    * @param scale The scale of the view.
-   *
    * @return a {@link Paint} object that can be used to paint the noise.
    */
   public Paint getPaint(int offsetX, int offsetY, double scale) {
     return new TexturePaint(
         noiseImage,
-        new Rectangle(offsetX + OFFFSET_X_TWEAK, offsetY + OFFFSET_Y_TWEAK, (int) (WIDTH * scale), (int) (HEIGHT * scale)));
+        new Rectangle(
+            offsetX + OFFFSET_X_TWEAK,
+            offsetY + OFFFSET_Y_TWEAK,
+            (int) (WIDTH * scale),
+            (int) (HEIGHT * scale)));
   }
 
   /**
