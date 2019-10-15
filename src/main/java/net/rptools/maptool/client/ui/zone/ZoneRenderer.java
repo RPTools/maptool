@@ -151,12 +151,8 @@ public class ZoneRenderer extends JComponent
   private static final Color TRANSLUCENT_YELLOW =
       new Color(Color.yellow.getRed(), Color.yellow.getGreen(), Color.yellow.getBlue(), 50);
 
-  /** The interval, in milliseconds, during which calls to repaint() will be debounced. */
-  private static final int REPAINT_DEBOUNCE_INTERVAL = 33;
-
   /** DebounceExecutor for throttling repaint() requests. */
-  private final DebounceExecutor repaintDebouncer =
-      new DebounceExecutor(REPAINT_DEBOUNCE_INTERVAL, this::repaint);
+  private final DebounceExecutor repaintDebouncer;
 
   /** Noise for mask on repeating tiles. */
   private final DrawableNoise noise = new DrawableNoise();
@@ -240,6 +236,10 @@ public class ZoneRenderer extends JComponent
     }
     this.zone = zone;
     zone.addModelChangeListener(new ZoneModelChangeListener());
+
+    // The interval, in milliseconds, during which calls to repaint() will be debounced.
+    int repaintDebounceInterval = 1000 / AppPreferences.getFrameRateCap();
+    repaintDebouncer = new DebounceExecutor(repaintDebounceInterval, this::repaint);
 
     setFocusable(true);
     setZoneScale(new Scale());

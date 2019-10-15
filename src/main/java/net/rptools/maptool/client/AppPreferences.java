@@ -426,6 +426,9 @@ public class AppPreferences {
   private static final String KEY_TYPING_NOTIFICATION_DURATION = "typingNotificationDuration";
   private static final int DEFAULT_TYPING_NOTIFICATION_DURATION = 5000;
 
+  private static final String KEY_FRAME_RATE_CAP = "frameRateCap";
+  private static final int DEFAULT_FRAME_RATE_CAP = 60;
+
   private static final String KEY_UPNP_DISCOVERY_TIMEOUT = "upnpDiscoveryTimeout";
   private static final int DEFAULT_UPNP_DISCOVERY_TIMEOUT = 5000;
 
@@ -853,6 +856,14 @@ public class AppPreferences {
 
   public static void setMovementMetric(WalkerMetric metric) {
     prefs.put(KEY_MOVEMENT_METRIC, metric.toString());
+  }
+
+  public static void setFrameRateCap(int cap) {
+    prefs.putInt(KEY_FRAME_RATE_CAP, cap);
+  }
+
+  public static int getFrameRateCap() {
+    return prefs.getInt(KEY_FRAME_RATE_CAP, DEFAULT_FRAME_RATE_CAP);
   }
 
   public static void setUpnpDiscoveryTimeout(int timeout) {

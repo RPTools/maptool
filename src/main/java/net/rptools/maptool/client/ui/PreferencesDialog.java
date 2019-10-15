@@ -190,6 +190,7 @@ public class PreferencesDialog extends JDialog {
   // Application
   private final JCheckBox fitGMView;
   private final JCheckBox fillSelectionCheckBox;
+  private final JTextField frameRateCapTextField;
   // private final JCheckBox initEnableServerSyncCheckBox;
   private final JCheckBox hideNPCs;
   private final JCheckBox ownerPermissions;
@@ -247,6 +248,7 @@ public class PreferencesDialog extends JDialog {
     showNumberingCombo = panel.getComboBox("showNumberingCombo");
     saveReminderCheckBox = panel.getCheckBox("saveReminderCheckBox");
     fillSelectionCheckBox = panel.getCheckBox("fillSelectionCheckBox");
+    frameRateCapTextField = panel.getTextField("frameRateCapTextField");
     // initEnableServerSyncCheckBox = panel.getCheckBox("initEnableServerSyncCheckBox");
     autoSaveSpinner = panel.getSpinner("autoSaveSpinner");
     duplicateTokenCombo = panel.getComboBox("duplicateTokenCombo");
@@ -483,6 +485,20 @@ public class PreferencesDialog extends JDialog {
             AppPreferences.setFillSelectionBox(fillSelectionCheckBox.isSelected());
           }
         });
+    frameRateCapTextField
+        .getDocument()
+        .addDocumentListener(
+            new DocumentListenerProxy<Integer>(frameRateCapTextField) {
+              @Override
+              protected void storeNumericValue(Integer value) {
+                AppPreferences.setFrameRateCap(value);
+              }
+
+              @Override
+              protected Integer convertString(String value) throws ParseException {
+                return StringUtil.parseInteger(value);
+              }
+            });
     // initEnableServerSyncCheckBox.addActionListener(new ActionListener() {
     // public void actionPerformed(ActionEvent e) {
     // AppPreferences.setInitEnableServerSync(initEnableServerSyncCheckBox.isSelected());
@@ -1078,6 +1094,7 @@ public class PreferencesDialog extends JDialog {
     showDialogOnNewToken.setSelected(AppPreferences.getShowDialogOnNewToken());
     saveReminderCheckBox.setSelected(AppPreferences.getSaveReminder());
     fillSelectionCheckBox.setSelected(AppPreferences.getFillSelectionBox());
+    frameRateCapTextField.setText(Integer.toString(AppPreferences.getFrameRateCap()));
     // initEnableServerSyncCheckBox.setSelected(AppPreferences.getInitEnableServerSync());
     autoSaveSpinner.setValue(AppPreferences.getAutoSaveIncrement());
     newMapsHaveFOWCheckBox.setSelected(AppPreferences.getNewMapsHaveFOW());
