@@ -14,12 +14,12 @@
 -->
 <properties>
   <comment>Smilies</comment>
-  <entry key="\b([\:\=]\))\b">net/rptools/maptool/client/image/smiley/emsmile.png|:)</entry>
-  <entry key="\b([\:\=]\()\b">net/rptools/maptool/client/image/smiley/emfrown.png|:(</entry>
-  <entry key="\b([\:\=]\'\()\b">net/rptools/maptool/client/image/smiley/emcry.png|:'(</entry>
-  <entry key="\b([\:\=][sS])\b">net/rptools/maptool/client/image/smiley/emcurl.png|:s</entry>
-  <entry key="\b([\:\=][oO])\b">net/rptools/maptool/client/image/smiley/emgasp.png|:o</entry>
-  <entry key="\b([\:\=]D)\b">net/rptools/maptool/client/image/smiley/emgrin.png|:D</entry>
-  <entry key="\b(\;\))\b">net/rptools/maptool/client/image/smiley/emwink.png|;)</entry>
-  <entry key="\b([\:\=][pP])\b">net/rptools/maptool/client/image/smiley/emtongue.png|:P</entry>
+  <entry key="([\:\=]\))">net/rptools/maptool/client/image/smiley/emsmile.png|:)</entry>
+  <entry key="([\:\=]\()">net/rptools/maptool/client/image/smiley/emfrown.png|:(</entry>
+  <entry key="([\:\=]\'\()">net/rptools/maptool/client/image/smiley/emcry.png|:'(</entry>
+  <entry key="([\:\=][sS])">net/rptools/maptool/client/image/smiley/emcurl.png|:s</entry>
+  <entry key="([\:\=][oO])">net/rptools/maptool/client/image/smiley/emgasp.png|:o</entry>
+  <entry key="([\:\=]D)">net/rptools/maptool/client/image/smiley/emgrin.png|:D</entry>
+  <entry key="(\;\))">net/rptools/maptool/client/image/smiley/emwink.png|;)</entry>
+  <entry key="([\:\=][pP])">net/rptools/maptool/client/image/smiley/emtongue.png|:P</entry>
 </properties>
