@@ -1,3 +1,44 @@
+Maptool 1.5.7
+=====
+** Draft Notes ** This release includes a variety of bug fixes, improvements and new features.
+
+**Highlights**
+* New accessibility features allows the user to apply [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise) to tiled textures to reduce obvious patterning.
+* New user preference (Edit -> Preferences -> Application -> Performance) for Max Frame Rate allows users to set a desired Max Frame Rate.
+* More updated macro functions to improve performance.
+* New GM macro panel for GM only macros.
+
+Enhancements
+-----
+* [#784][i784] Macro function `json.toVars( now accepts JSON arrays as well as objects.
+* [#782][i782] Macro function `broadcast` no accepts "not-gm", "not-self" and "not-gm-self" as targets.
+* [#766][i766] New perlin noise overlay on tiled textures to reduce visible repetition.
+* [#761][i761] Bulk macro function changes.
+  * These functions no longer force whole token updates when used: addToInitiative, setInitiative, setInitiativeHold, setBar, setBarVisible, setName, setGMName, setHalo, setTokenOpacity, setTokenImage, setTokenPortrait, getTokenHandout, setLabel, resetProperty, setTerrainModifier, setVisible, setOwnerOnlyVisible, setAlwaysVisible, setTokenVBL
+  * These functions now accept additional Token ID and Map Name parameters: setBar, getBar, isBarVisible, setBarVisible, addToInitiative, setInitiative, setInitiativeHold
+* [#745][i745] Macro functions `getTokens()` and `getTokenNames` now take optional Light condition for getting tokens with lights.
+* [#642][i642] New GM macro panel can be opened from the Window menu. Macros on the GM panel are not visible to players.
+
+Bug Fixes
+-----
+* [#786][i786] Bugs with the various bar functions returning incorrect error messages or no error when passed a bad bar name fixed.
+* [#775][i775] `json.path.read` was returning invalid JSON for JSON arrays of objects. Fixed.
+* [#769][i769] Tokens created with `copyToken` could not be modified in same macro without jumping through hoops. Fixed.
+* [#767][i767] A recent change to improve program responsiveness had capped frame rate at 30 fps making for jerky map panning. Default is now 60 fps and can be adjusted in preferences under Application -> Performance -> Max Frame Rate.  Note either reloading the current campaign or restarting MapTool is required after making a change.
+* [#627][i627] Version check on MapTool startup should no longer prompt for updates when using release candidates.
+* [#529][i529] Smileys are now working again.
+
+[i786]: https://github.com/RPTools/maptool/issues/786
+[i784]: https://github.com/RPTools/maptool/issues/784
+[i782]: https://github.com/RPTools/maptool/issues/782
+[i775]: https://github.com/RPTools/maptool/issues/775
+[i769]: https://github.com/RPTools/maptool/issues/769
+[i761]: https://github.com/RPTools/maptool/issues/761
+[i745]: https://github.com/RPTools/maptool/issues/745
+[i642]: https://github.com/RPTools/maptool/issues/642
+[i627]: https://github.com/RPTools/maptool/issues/627
+[i629]: https://github.com/RPTools/maptool/issues/629
+
 Maptool 1.5.6
 =====
 Emergency fix for MacOS.  Otherwise the same as 1.5.5.
