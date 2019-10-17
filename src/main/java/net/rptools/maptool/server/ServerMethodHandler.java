@@ -125,6 +125,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case message:
           message((TextMessage) context.get(0));
           break;
+        case execFunction:
+          execFunction((String) context.get(0), (String) context.get(1));
+          break;
         case execLink:
           execLink((String) context.get(0), (String) context.get(1));
           break;
@@ -543,6 +546,11 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 
   public void message(TextMessage message) {
     forwardToClients();
+  }
+
+  @Override
+  public void execFunction(String functionText, String target) {
+    forwardToAllClients();
   }
 
   @Override

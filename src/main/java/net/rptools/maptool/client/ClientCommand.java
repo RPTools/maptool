@@ -38,6 +38,7 @@ public class ClientCommand {
     playerConnected,
     playerDisconnected,
     message,
+    execFunction,
     execLink,
     undoDraw,
     showPointer,
