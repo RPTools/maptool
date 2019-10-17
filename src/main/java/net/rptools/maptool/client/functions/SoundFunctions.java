@@ -16,6 +16,7 @@ package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
 import java.util.List;
+import net.rptools.lib.sound.SoundManager;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
@@ -28,7 +29,16 @@ public class SoundFunctions extends AbstractFunction {
   private static final SoundFunctions instance = new SoundFunctions();
 
   private SoundFunctions() {
-    super(0, 5, "playStream", "stopStream", "editStream", "getStreamProperties");
+    super(
+        0,
+        5,
+        "playStream",
+        "stopStream",
+        "editStream",
+        "getStreamProperties",
+        "playClip",
+        "stopClip",
+        "getClipProperties");
   }
 
   /**
@@ -87,6 +97,23 @@ public class SoundFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 0, 1);
       String strUri = psize > 0 ? MediaPlayerAdapter.convertToURI(args.get(0)) : "*";
       return MediaPlayerAdapter.getStreamProperties(strUri);
+    } else if (functionName.equalsIgnoreCase("playClip")) {
+      FunctionUtil.checkNumberParam(functionName, args, 1, 3);
+      if (!AppPreferences.getPlayStreams()) return -1; // do nothing if disabled in preferences
+      String strUri = MediaPlayerAdapter.convertToURI(args.get(0));
+      int cycleCount = psize > 1 ? FunctionUtil.paramAsInteger(functionName, args, 1, true) : 1;
+      double volume = psize > 2 ? FunctionUtil.paramAsDouble(functionName, args, 2, true) : 1;
+      return SoundManager.playClip(strUri, cycleCount, volume) ? BigDecimal.ONE : BigDecimal.ZERO;
+    } else if (functionName.equalsIgnoreCase("stopClip")) {
+      FunctionUtil.checkNumberParam(functionName, args, 0, 2);
+      String strUri = psize > 0 ? MediaPlayerAdapter.convertToURI(args.get(0)) : "*";
+      boolean del = psize > 1 ? FunctionUtil.paramAsBoolean(functionName, args, 1, true) : true;
+      SoundManager.stopClip(strUri, del);
+      return "";
+    } else if (functionName.equalsIgnoreCase("getClipProperties")) {
+      FunctionUtil.checkNumberParam(functionName, args, 0, 1);
+      String strUri = psize > 0 ? MediaPlayerAdapter.convertToURI(args.get(0)) : "*";
+      return SoundManager.getClipProperties(strUri);
     }
     return null;
   }
