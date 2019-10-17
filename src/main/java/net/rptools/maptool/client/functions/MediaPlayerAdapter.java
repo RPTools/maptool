@@ -332,12 +332,12 @@ public class MediaPlayerAdapter {
       info.put("uri", strUri);
       info.put("cycleCount", player.getCycleCount());
       info.put("volume", volume);
-      info.put("startTime", " " + player.getStartTime().toSeconds());
-      info.put("stopTime", " " + objStop);
-      info.put("currentTime", " " + player.getCurrentTime().toSeconds());
-      info.put("totalTime", " " + objTotal);
-      info.put("bufferTime", " " + player.getBufferProgressTime().toSeconds());
-      info.put("currentCount", " " + player.getCurrentCount());
+      info.put("startTime", player.getStartTime().toSeconds());
+      info.put("stopTime", objStop);
+      info.put("currentTime", player.getCurrentTime().toSeconds());
+      info.put("totalTime", objTotal);
+      info.put("bufferTime", player.getBufferProgressTime().toSeconds());
+      info.put("currentCount", player.getCurrentCount());
       info.put("status", player.getStatus().toString());
       return info;
     } catch (Exception e) {
