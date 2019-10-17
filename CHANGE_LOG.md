@@ -33,6 +33,7 @@ Bug Fixes
 
 [i804]: https://github.com/RPTools/maptool/issues/804
 [i803]: https://github.com/RPTools/maptool/issues/803
+[i800]: https://github.com/RPTools/maptool/issues/800
 [i786]: https://github.com/RPTools/maptool/issues/786
 [i784]: https://github.com/RPTools/maptool/issues/784
 [i782]: https://github.com/RPTools/maptool/issues/782
