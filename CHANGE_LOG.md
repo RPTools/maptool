@@ -10,6 +10,7 @@ Maptool 1.5.7
 
 Enhancements
 -----
+* [#804][i804] Chat notification flash now picks flash color based on task bar color.
 * [#784][i784] Macro function `json.toVars( now accepts JSON arrays as well as objects.
 * [#782][i782] Macro function `broadcast` no accepts "not-gm", "not-self" and "not-gm-self" as targets.
 * [#766][i766] New perlin noise overlay on tiled textures to reduce visible repetition.
@@ -21,6 +22,8 @@ Enhancements
 
 Bug Fixes
 -----
+* [#803][i803] `getStreamProps` was returning malformed JSON. Fixed.
+* [#800][i800] Incorrect tooltip on Chat Notification Background preference. Fixed.
 * [#786][i786] Bugs with the various bar functions returning incorrect error messages or no error when passed a bad bar name fixed.
 * [#775][i775] `json.path.read` was returning invalid JSON for JSON arrays of objects. Fixed.
 * [#769][i769] Tokens created with `copyToken` could not be modified in same macro without jumping through hoops. Fixed.
@@ -28,6 +31,8 @@ Bug Fixes
 * [#627][i627] Version check on MapTool startup should no longer prompt for updates when using release candidates.
 * [#529][i529] Smileys are now working again.
 
+[i804]: https://github.com/RPTools/maptool/issues/804
+[i803]: https://github.com/RPTools/maptool/issues/803
 [i786]: https://github.com/RPTools/maptool/issues/786
 [i784]: https://github.com/RPTools/maptool/issues/784
 [i782]: https://github.com/RPTools/maptool/issues/782
