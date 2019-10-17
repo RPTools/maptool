@@ -36,11 +36,12 @@ public class TaskBarFlasher {
     Color flashColor;
     // W3C formula for calculating perceived brightness - basically RGB -> YIQ but just Y.
     // https://www.w3.org/TR/AERT/#color-contrast
-    int brightness = (bgColor.getRed() * 299 + bgColor.getGreen() * 587 + bgColor.getBlue() * 114) / 1000;
+    int brightness =
+        (bgColor.getRed() * 299 + bgColor.getGreen() * 587 + bgColor.getBlue() * 114) / 1000;
     if (brightness < 128) {
-        flashColor = bgColor.brighter();
+      flashColor = bgColor.brighter();
     } else {
-        flashColor = bgColor.darker();
+      flashColor = bgColor.darker();
     }
     originalImage = frame.getIconImage();
     flashImage =
