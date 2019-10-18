@@ -174,9 +174,7 @@ public class TokenStateFunction extends AbstractFunction {
   private String getTokenStates(String delim, String group, Token token) {
     Set<String> stateNames;
 
-    if ("*".equals(group) && token != null) {
-      stateNames = token.getStatePropertyNames(); // return states of token
-    } else if ("*".equals(group)) {
+    if ("*".equals(group)) { // get all Campaign states
       stateNames = MapTool.getCampaign().getTokenStatesMap().keySet();
     } else {
       Map<String, BooleanTokenOverlay> states = MapTool.getCampaign().getTokenStatesMap();
@@ -185,9 +183,13 @@ public class TokenStateFunction extends AbstractFunction {
         // return states of the group that matches
         if (group.equals(bto.getGroup())) stateNames.add(bto.getName());
       }
-      if (token != null) {
-        stateNames.retainAll(token.getStatePropertyNames()); // keep only states enabled on token
-      }
+    }
+
+    if (token != null) {
+      // only keep states set to true on token
+      Set<String> tokenStates = token.getStatePropertyNames(true);
+      tokenStates.retainAll(stateNames);
+      stateNames = tokenStates;
     }
 
     StringBuilder sb = new StringBuilder();
