@@ -554,33 +554,27 @@ public class TokenLocationFunctions extends AbstractFunction {
   }
 
   /**
-   * Moves a token to the specified x,y location. If <code>units</code> is true, the incoming (x,y)
-   * is treated as a <code>ZonePoint</code>. If <code>units</code> is false, the incoming (x,y) is
-   * treated as a <code>CellPoint</code> and is converted to a ZonePoint by calling {@link
+   * Get a ZonePoint of the specified x,y location. If <code>units</code> is true, the incoming
+   * (x,y) is treated as a <code>ZonePoint</code>. If <code>units</code> is false, the incoming
+   * (x,y) is treated as a <code>CellPoint</code> and is converted to a ZonePoint by calling {@link
    * Grid#convert(CellPoint)}.
    *
-   * @param token The token to move.
    * @param x the x co-ordinate of the destination.
    * @param y the y co-ordinate of the destination.
    * @param units whether the (x,y) coordinate is a <code>ZonePoint</code> (true) or <code>CellPoint
    *     </code> (false)
+   * @return the ZonePoint of the coordinates
    */
-  public void moveToken(Token token, int x, int y, boolean units) {
-    Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
-    int newX;
-    int newY;
-
+  public static ZonePoint getZonePoint(int x, int y, boolean units) {
+    ZonePoint zp;
     if (units) {
-      ZonePoint zp = new ZonePoint(x, y);
-      newX = zp.x;
-      newY = zp.y;
+      zp = new ZonePoint(x, y);
     } else {
+      Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
       CellPoint cp = new CellPoint(x, y);
-      ZonePoint zp = grid.convert(cp);
-      newX = zp.x;
-      newY = zp.y;
+      zp = grid.convert(cp);
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setXY", newX, newY);
+    return zp;
   }
 
   /**
@@ -589,44 +583,19 @@ public class TokenLocationFunctions extends AbstractFunction {
    * @param res the variable resolver.
    * @param args the arguments to the function.
    */
-  private String moveToken(MapToolVariableResolver res, List<Object> args) throws ParserException {
-    Token token = FunctionUtil.getTokenFromParam(res, "moveToken", args, 3, -1);
-    boolean useDistance = true;
+  private static String moveToken(MapToolVariableResolver res, List<Object> args)
+      throws ParserException {
+    FunctionUtil.checkNumberParam("moveToken", args, 2, 5);
 
-    if (args.size() < 2) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.notEnoughParam", "moveToken", 2, args.size()));
-    }
+    int x = FunctionUtil.paramAsInteger("moveToken", args, 0, false);
+    int y = FunctionUtil.paramAsInteger("moveToken", args, 1, false);
+    boolean useDistance =
+        args.size() > 2 ? FunctionUtil.paramAsBoolean("moveToken", args, 2, false) : true;
+    Token token = FunctionUtil.getTokenFromParam(res, "moveToken", args, 3, 4);
 
-    int x, y;
-
-    if (!(args.get(0) instanceof BigDecimal)) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.argumentTypeN", "moveToken", 1, args.get(0).toString()));
-    }
-    if (!(args.get(1) instanceof BigDecimal)) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.argumentTypeN", "moveToken", 2, args.get(1).toString()));
-    }
-
-    x = ((BigDecimal) args.get(0)).intValue();
-    y = ((BigDecimal) args.get(1)).intValue();
-
-    if (args.size() > 2) {
-      if (!(args.get(2) instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeN", "moveToken", 3, args.get(2).toString()));
-      }
-      BigDecimal val = (BigDecimal) args.get(2);
-      useDistance = val.equals(BigDecimal.ZERO) ? false : true;
-    }
-    moveToken(token, x, y, useDistance);
-    ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-    Zone zone = renderer.getZone();
-    renderer.flushLight();
+    ZonePoint zp = getZonePoint(x, y, useDistance);
+    MapTool.serverCommand().updateTokenProperty(token, "setXY", zp.x, zp.y);
+    token.getZoneRenderer().flushLight();
     return "";
   }
 

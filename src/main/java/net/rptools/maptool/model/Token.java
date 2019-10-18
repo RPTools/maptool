@@ -2071,6 +2071,11 @@ public class Token extends BaseModel implements Cloneable {
       case "setLayer":
         setLayer((Zone.Layer) parameters[0]);
         break;
+      case "setLayerShape":
+        setLayer((Zone.Layer) parameters[0]);
+        setShape((TokenShape) parameters[1]);
+        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
+        break;
       case "setShape":
         setShape((TokenShape) parameters[0]);
         if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any

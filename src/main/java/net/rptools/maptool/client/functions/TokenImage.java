@@ -213,8 +213,7 @@ public class TokenImage extends AbstractFunction {
     return null;
   }
 
-  private static void assignImage(Token token, String assetName, imageType type, String func)
-      throws ParserException {
+  public static MD5Key getMD5Key(String assetName, String func) throws ParserException {
     Matcher m = assetRE.matcher(assetName);
 
     String assetId;
@@ -226,36 +225,25 @@ public class TokenImage extends AbstractFunction {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentTypeInvalid", func, 1, assetName));
     }
-    switch (type) {
-      case TOKEN_IMAGE:
-        MapTool.serverCommand()
-            .updateTokenProperty(token, "setImageAsset", null, new MD5Key(assetId));
-        break;
-      case TOKEN_PORTRAIT:
-        MapTool.serverCommand().updateTokenProperty(token, "setPortraitImage", new MD5Key(assetId));
-        break;
-      case TOKEN_HANDOUT:
-        MapTool.serverCommand()
-            .updateTokenProperty(token, "setCharsheetImage", new MD5Key(assetId));
-        break;
-      default:
-        throw new IllegalArgumentException("unknown image type " + type);
-    }
+    return new MD5Key(assetId);
   }
 
-  public static void setImage(Token token, String assetName) throws ParserException {
-    assignImage(token, assetName, imageType.TOKEN_IMAGE, SET_IMAGE);
+  private static void setImage(Token token, String assetName) throws ParserException {
+    MD5Key md5key = getMD5Key(assetName, SET_IMAGE);
+    MapTool.serverCommand().updateTokenProperty(token, "setImageAsset", null, md5key);
   }
 
-  public static void setPortrait(Token token, String assetName) throws ParserException {
-    assignImage(token, assetName, imageType.TOKEN_PORTRAIT, SET_PORTRAIT);
+  private static void setPortrait(Token token, String assetName) throws ParserException {
+    MD5Key md5key = getMD5Key(assetName, SET_PORTRAIT);
+    MapTool.serverCommand().updateTokenProperty(token, "setPortraitImage", md5key);
   }
 
-  public static void setHandout(Token token, String assetName) throws ParserException {
-    assignImage(token, assetName, imageType.TOKEN_HANDOUT, SET_HANDOUT);
+  private static void setHandout(Token token, String assetName) throws ParserException {
+    MD5Key md5key = getMD5Key(assetName, SET_HANDOUT);
+    MapTool.serverCommand().updateTokenProperty(token, "setCharsheetImage", md5key);
   }
 
-  public static Token findImageToken(final String name, String functionName)
+  private static Token findImageToken(final String name, String functionName)
       throws ParserException {
     Token imageToken = null;
     if (name != null && name.length() > 0) {
