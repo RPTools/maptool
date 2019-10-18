@@ -1624,6 +1624,19 @@ public class Token extends BaseModel implements Cloneable {
     return state.keySet();
   }
 
+  /**
+   * Get a set containing the names of all the states that match the passed value.
+   *
+   * @return The set of state property names that match the passed value.
+   */
+  public Set<String> getStatePropertyNames(Object value) {
+    Map<String, Object> matches = new HashMap(state);
+    for (Map.Entry<String, Object> entry : state.entrySet()) {
+      if (!value.equals(entry.getValue())) matches.remove(entry.getKey());
+    }
+    return matches.keySet();
+  }
+
   /** @return Getter for notes */
   public String getNotes() {
     return notes;
