@@ -213,17 +213,30 @@ public class TokenImage extends AbstractFunction {
     return null;
   }
 
-  public static MD5Key getMD5Key(String assetName, String func) throws ParserException {
+  /**
+   * Get the MD5Key corresponding to an asset.
+   *
+   * @param assetName either an assetId or the name of an image token.
+   * @param functionName the name of the function, to display the exception message.
+   * @return the MD5Key associated with the asset.
+   * @throws ParserException if assetName not found or assetName doesn't
+   */
+  public static MD5Key getMD5Key(String assetName, String functionName) throws ParserException {
     Matcher m = assetRE.matcher(assetName);
 
     String assetId;
     if (m.matches()) {
       assetId = m.group(1);
     } else if (assetName.toLowerCase().startsWith("image:")) {
-      assetId = findImageToken(assetName, func).getImageAssetId().toString();
+      Token imageToken = findImageToken(assetName, functionName);
+      if (imageToken == null) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.unknownToken", functionName, assetName));
+      }
+      assetId = imageToken.getImageAssetId().toString();
     } else {
       throw new ParserException(
-          I18N.getText("macro.function.general.argumentTypeInvalid", func, 1, assetName));
+          I18N.getText("macro.function.general.argumentTypeInvalid", functionName, 1, assetName));
     }
     return new MD5Key(assetId);
   }

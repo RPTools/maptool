@@ -287,21 +287,29 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       }
     }
 
+    // legacy use, from pre 1.5.7.
+    if (!newVals.containsKey("tokenHandout") && newVals.containsKey("handoutImage")) {
+      // handoutImage -> tokenHandout
+      newVals.put("tokenHandout", newVals.get("handoutImage"));
+    }
+    if (!newVals.containsKey("tokenPortrait") && newVals.containsKey("portraitImage")) {
+      // portraitImage -> tokenPortrait
+      newVals.put("tokenPortrait", newVals.get("portraitImage"));
+    }
+
     // tokenImage
     if (newVals.containsKey("tokenImage")) {
-      MD5Key md5key = TokenImage.getMD5Key(newVals.getString("tokenImage"), TokenImage.SET_IMAGE);
+      MD5Key md5key = TokenImage.getMD5Key(newVals.getString("tokenImage"), COPY_FUNC);
       token.setImageAsset(null, md5key);
     }
     // handoutImage
-    if (newVals.containsKey("handoutImage")) {
-      MD5Key md5key =
-          TokenImage.getMD5Key(newVals.getString("handoutImage"), TokenImage.SET_HANDOUT);
+    if (newVals.containsKey("tokenHandout")) {
+      MD5Key md5key = TokenImage.getMD5Key(newVals.getString("tokenHandout"), COPY_FUNC);
       token.setCharsheetImage(md5key);
     }
     // portraitImage
-    if (newVals.containsKey("portraitImage")) {
-      MD5Key md5key =
-          TokenImage.getMD5Key(newVals.getString("portraitImage"), TokenImage.SET_PORTRAIT);
+    if (newVals.containsKey("tokenPortrait")) {
+      MD5Key md5key = TokenImage.getMD5Key(newVals.getString("tokenPortrait"), COPY_FUNC);
       token.setPortraitImage(md5key);
     }
   }
