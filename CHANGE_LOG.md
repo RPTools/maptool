@@ -11,7 +11,7 @@ Maptool 1.5.7
 Enhancements
 -----
 * [#804][i804] Chat notification flash now picks flash color based on task bar color.
-* [#784][i784] Macro function `json.toVars( now accepts JSON arrays as well as objects.
+* [#784][i784] Macro function `json.toVars` (now accepts JSON arrays as well as objects).
 * [#782][i782] Macro function `broadcast` no accepts "not-gm", "not-self" and "not-gm-self" as targets.
 * [#766][i766] New perlin noise overlay on tiled textures to reduce visible repetition.
 * [#761][i761] Bulk macro function changes.
