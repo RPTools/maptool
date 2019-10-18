@@ -5,19 +5,20 @@ Maptool 1.5.7
 **Highlights**
 * New accessibility features allows the user to apply [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise) to tiled textures to reduce obvious patterning.
 * New user preference (Edit -> Preferences -> Application -> Performance) for Max Frame Rate allows users to set a desired Max Frame Rate.
-* More updated macro functions to improve performance.
+* More updated macro functions for improved performance and reliability.
 * New GM macro panel for GM only macros.
 
 Enhancements
 -----
 * [#804][i804] Chat notification flash now picks flash color based on task bar color.
-* [#784][i784] Macro function `json.toVars( now accepts JSON arrays as well as objects.
+* [#801][i801] Macro function `getTokenStates` now accepts Token ID and Map Name parameters.
+* [#784][i784] Macro function `json.toVars` now accepts JSON arrays as well as objects.
 * [#782][i782] Macro function `broadcast` no accepts "not-gm", "not-self" and "not-gm-self" as targets.
 * [#766][i766] New perlin noise overlay on tiled textures to reduce visible repetition.
 * [#761][i761] Bulk macro function changes.
   * These functions no longer force whole token updates when used: addToInitiative, setInitiative, setInitiativeHold, setBar, setBarVisible, setName, setGMName, setHalo, setTokenOpacity, setTokenImage, setTokenPortrait, getTokenHandout, setLabel, resetProperty, setTerrainModifier, setVisible, setOwnerOnlyVisible, setAlwaysVisible, setTokenVBL
   * These functions now accept additional Token ID and Map Name parameters: setBar, getBar, isBarVisible, setBarVisible, addToInitiative, setInitiative, setInitiativeHold
-* [#745][i745] Macro functions `getTokens()` and `getTokenNames` now take optional Light condition for getting tokens with lights.
+* [#745][i745] Macro functions `getTokens` and `getTokenNames` now take optional Light condition for getting tokens with lights.
 * [#642][i642] New GM macro panel can be opened from the Window menu. Macros on the GM panel are not visible to players.
 
 Bug Fixes
@@ -33,17 +34,20 @@ Bug Fixes
 
 [i804]: https://github.com/RPTools/maptool/issues/804
 [i803]: https://github.com/RPTools/maptool/issues/803
+[i801]: https://github.com/RPTools/maptool/issues/801
 [i800]: https://github.com/RPTools/maptool/issues/800
 [i786]: https://github.com/RPTools/maptool/issues/786
 [i784]: https://github.com/RPTools/maptool/issues/784
 [i782]: https://github.com/RPTools/maptool/issues/782
 [i775]: https://github.com/RPTools/maptool/issues/775
 [i769]: https://github.com/RPTools/maptool/issues/769
+[i767]: https://github.com/RPTools/maptool/issues/767
+[i766]: https://github.com/RPTools/maptool/issues/766
 [i761]: https://github.com/RPTools/maptool/issues/761
 [i745]: https://github.com/RPTools/maptool/issues/745
 [i642]: https://github.com/RPTools/maptool/issues/642
 [i627]: https://github.com/RPTools/maptool/issues/627
-[i629]: https://github.com/RPTools/maptool/issues/629
+[i529]: https://github.com/RPTools/maptool/issues/529
 
 Maptool 1.5.6
 =====
