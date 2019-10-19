@@ -200,6 +200,11 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   @Override
+  public void execFunction(String functionText, String target) {
+    makeServerCall(COMMAND.execFunction, functionText, target);
+  }
+
+  @Override
   public void execLink(String link, String target) {
     makeServerCall(COMMAND.execLink, link, target);
   }
