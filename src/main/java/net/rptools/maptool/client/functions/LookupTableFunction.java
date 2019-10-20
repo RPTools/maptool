@@ -231,7 +231,7 @@ public class LookupTableFunction extends AbstractFunction {
         // Returning null causes an NPE when output is dumped to chat.
         return "";
       } else {
-        return img ;
+        return img;
       }
 
     } else if ("setTableImage".equalsIgnoreCase(function)) {
@@ -446,10 +446,10 @@ public class LookupTableFunction extends AbstractFunction {
    * @return MD5Key asset id or null
    */
   private MD5Key getAssetFromString(String assetString) {
-    if(assetString.isEmpty()) {
+    if (assetString.isEmpty()) {
       return null;
     }
-      
+
     if (assetString.toLowerCase().startsWith("asset://")) {
       String id = assetString.substring(8);
       return new MD5Key(id);
