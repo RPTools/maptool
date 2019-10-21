@@ -380,11 +380,13 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 return;
 
               case execFunction:
-                ExecFunction.receiveExecFunction((String) parameters[0], (String) parameters[1]);
+                ExecFunction.receiveExecFunction(
+                    (String) parameters[0], (String) parameters[1], (String) parameters[2]);
                 return;
 
               case execLink:
-                MacroLinkFunction.receiveExecLink((String) parameters[0], (String) parameters[1]);
+                MacroLinkFunction.receiveExecLink(
+                    (String) parameters[0], (String) parameters[1], (String) parameters[2]);
                 return;
 
               case showPointer:

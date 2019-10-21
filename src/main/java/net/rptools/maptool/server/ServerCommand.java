@@ -157,9 +157,9 @@ public interface ServerCommand {
 
   public void message(TextMessage message);
 
-  public void execFunction(String functionText, String target);
+  public void execFunction(String functionText, String target, String source);
 
-  public void execLink(String link, String target);
+  public void execLink(String link, String target, String source);
 
   public void showPointer(String player, Pointer pointer);
 

@@ -126,10 +126,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           message((TextMessage) context.get(0));
           break;
         case execFunction:
-          execFunction((String) context.get(0), (String) context.get(1));
+          execFunction((String) context.get(0), (String) context.get(1), (String) context.get(2));
           break;
         case execLink:
-          execLink((String) context.get(0), (String) context.get(1));
+          execLink((String) context.get(0), (String) context.get(1), (String) context.get(2));
           break;
         case putAsset:
           putAsset((Asset) context.get(0));
@@ -549,13 +549,13 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   @Override
-  public void execFunction(String functionText, String target) {
-    forwardToAllClients();
+  public void execFunction(String functionText, String target, String source) {
+    forwardToClients();
   }
 
   @Override
-  public void execLink(String link, String target) {
-    forwardToAllClients();
+  public void execLink(String link, String target, String source) {
+    forwardToClients();
   }
 
   public void putAsset(Asset asset) {

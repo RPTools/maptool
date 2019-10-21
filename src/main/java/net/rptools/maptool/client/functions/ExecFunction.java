@@ -48,7 +48,7 @@ public class ExecFunction extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
-    FunctionUtil.checkNumberParam(functionName, args, 1, 5);
+    FunctionUtil.checkNumberParam(functionName, args, 2, 5);
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
@@ -97,8 +97,7 @@ public class ExecFunction extends AbstractFunction {
    * @param targets the list of targets
    */
   private static void sendExecFunction(
-      final String execName, List<Object> execArgs, boolean defer, Collection<String> targets)
-      throws ParserException {
+      final String execName, List<Object> execArgs, boolean defer, Collection<String> targets) {
     if (defer) {
       EventQueue.invokeLater(
           new Runnable() {
@@ -121,26 +120,10 @@ public class ExecFunction extends AbstractFunction {
   private static void sendExecFunction(
       final String execName, List<Object> execArgs, Collection<String> targets) {
     String functionText = getExecFunctionText(execName, execArgs);
-    boolean isGM = MapTool.getPlayer().isGM();
-    String selfName = MapTool.getPlayer().getName();
+    String source = MapTool.getPlayer().getName();
 
     for (String target : targets) {
-      if (target.equals(selfName)) {
-        target = "self";
-      }
-      switch (target.toLowerCase()) {
-        case "gm-self":
-          MapTool.serverCommand().execFunction(functionText, "gm");
-          if (isGM) break; // FALLTHRU if not a GM
-        case "self":
-          runExecFunction(functionText);
-          break;
-        case "none":
-          break;
-        default:
-          MapTool.serverCommand().execFunction(functionText, target);
-          break;
-      }
+      MapTool.serverCommand().execFunction(functionText, target, source);
     }
   }
 
@@ -149,26 +132,53 @@ public class ExecFunction extends AbstractFunction {
    *
    * @param functionText the text of the function call.
    * @param target the target player.
+   * @param source the name of the player who sent the link.
    */
-  public static void receiveExecFunction(final String functionText, String target) {
+  public static void receiveExecFunction(final String functionText, String target, String source) {
+    if (isMessageForMe(target, source)) {
+      runExecFunction(functionText);
+    }
+  }
+
+  /**
+   * Determines if the message / execLink / execFunction should be ran on the client.
+   *
+   * @param target the target player.
+   * @param source the name of the player who sent the link.
+   * @return is the message for the player or not
+   */
+  public static boolean isMessageForMe(String target, String source) {
     boolean isGM = MapTool.getPlayer().isGM();
-    String selfName = MapTool.getPlayer().getName();
+    boolean fromSelf = source.equals(MapTool.getPlayer().getName());
+    boolean targetSelf = target.equals(MapTool.getPlayer().getName());
 
     switch (target.toLowerCase()) {
       case "gm":
-        if (isGM) {
-          runExecFunction(functionText);
-        }
-        break;
+        return isGM;
+      case "self":
+        return fromSelf;
+      case "gm-self":
+        return isGM || fromSelf;
+      case "not-self":
+        return !fromSelf;
+      case "not-gm":
+        return !isGM;
+      case "not-gm-self":
+        return !isGM && !fromSelf;
+      case "none":
+        return false;
       case "all":
-        runExecFunction(functionText);
-        break;
+        return true;
       default:
-        if (target.equals(selfName)) {
-          runExecFunction(functionText);
-        }
-        break;
+        return targetSelf;
     }
+  }
+
+  public static boolean isMessageGlobal(String target, String source) {
+    if (target.equals(source)) return false;
+    if (target.equalsIgnoreCase("none")) return false;
+    if (target.equalsIgnoreCase("self")) return false;
+    return true;
   }
 
   /**
