@@ -320,6 +320,14 @@ public class ImagePanel extends JComponent
     }
   }
 
+  /**
+   * Go through the image bounds map to see if any of the entries encompass the passed in X,Y values
+   * and return the index.
+   *
+   * @param x
+   * @param y
+   * @return the index or -1 if not found
+   */
   protected int getIndex(int x, int y) {
     for (Entry<Rectangle, Integer> entry : imageBoundsMap.entrySet()) {
       if (entry.getKey().contains(x, y)) {
@@ -329,8 +337,19 @@ public class ImagePanel extends JComponent
     return -1;
   }
 
+  /**
+   * Get the ID for the image currently displayed at X,Y
+   *
+   * @param x
+   * @param y
+   * @return Asset ID or null if no selection
+   */
   protected Object getImageIDAt(int x, int y) {
-    return model != null ? model.getID(getIndex(x, y)) : null;
+    int index = getIndex(x, y);
+    if (index == -1 || model == null) {
+      return null;
+    }
+    return model.getID(index);
   }
 
   protected void fireSelectionEvent() {
@@ -406,29 +425,35 @@ public class ImagePanel extends JComponent
   }
 
   // SCROLLABLE
+  @Override
   public Dimension getPreferredScrollableViewportSize() {
     return getPreferredSize();
   }
 
+  @Override
   public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
     ensureFontHeight(null);
     return ((gridSize + gridPadding.height * 2) + (showCaptions ? fontHeight + captionPadding : 0));
   }
 
+  @Override
   public boolean getScrollableTracksViewportHeight() {
     Dimension parentSize = SwingUtilities.getAncestorOfClass(JScrollPane.class, this).getSize();
     return getPreferredSize().height < parentSize.height;
   }
 
+  @Override
   public boolean getScrollableTracksViewportWidth() {
     return true;
   }
 
+  @Override
   public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
     return gridSize / 4;
   }
 
   // DRAG GESTURE LISTENER
+  @Override
   public void dragGestureRecognized(DragGestureEvent dge) {
     if (model == null || !isDraggingEnabled) {
       return;
@@ -452,28 +477,38 @@ public class ImagePanel extends JComponent
   }
 
   // DRAG SOURCE LISTENER
+  @Override
   public void dragDropEnd(DragSourceDropEvent dsde) {
     DragSource.getDefaultDragSource().removeDragSourceMotionListener(this);
   }
 
+  @Override
   public void dragEnter(DragSourceDragEvent dsde) {}
 
+  @Override
   public void dragExit(DragSourceEvent dse) {}
 
+  @Override
   public void dragOver(DragSourceDragEvent dsde) {}
 
+  @Override
   public void dropActionChanged(DragSourceDragEvent dsde) {}
 
   // DRAG SOURCE MOTION LISTENER
+  @Override
   public void dragMouseMoved(DragSourceDragEvent dsde) {}
 
   // MOUSE LISTENER
+  @Override
   public void mouseClicked(MouseEvent e) {}
 
+  @Override
   public void mouseEntered(MouseEvent e) {}
 
+  @Override
   public void mouseExited(MouseEvent e) {}
 
+  @Override
   public void mousePressed(MouseEvent e) {
     if (selectionMode == SelectionMode.NONE) {
       return;
@@ -491,5 +526,6 @@ public class ImagePanel extends JComponent
     fireSelectionEvent();
   }
 
+  @Override
   public void mouseReleased(MouseEvent e) {}
 }
