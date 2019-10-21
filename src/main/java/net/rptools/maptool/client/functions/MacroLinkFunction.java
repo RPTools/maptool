@@ -207,21 +207,10 @@ public class MacroLinkFunction extends AbstractFunction {
    * @param targets the list of targets
    */
   private static void sendExecLink(final String link, Collection<String> targets) {
-    boolean isGM = MapTool.getPlayer().isGM();
+    String source = MapTool.getPlayer().getName();
 
     for (String target : targets) {
-      switch (target.toLowerCase()) {
-        case "gm-self":
-          MapTool.serverCommand().execLink(link, "gm");
-          if (isGM) break; // // FALLTHRU if not a GM
-        case "self":
-          runMacroLink(link);
-          break;
-        case "none":
-          break;
-        default:
-          MapTool.serverCommand().execLink(link, target);
-      }
+      MapTool.serverCommand().execLink(link, target, source);
     }
   }
 
@@ -229,21 +218,12 @@ public class MacroLinkFunction extends AbstractFunction {
    * Receive an execLink, and run it if the player is a target.
    *
    * @param link the macroLinkText
-   * @param target the target. Can also be "gm" or "all".
+   * @param target the target.
+   * @param source the name of the source.
    */
-  public static void receiveExecLink(final String link, String target) {
-    String playerName = MapTool.getPlayer().getName();
-    boolean isGM = MapTool.getPlayer().isGM();
-    switch (target.toLowerCase()) {
-      case "gm":
-        if (isGM) runMacroLink(link);
-        break;
-      case "all":
-        runMacroLink(link);
-        break;
-      default:
-        if (target.equals(playerName)) runMacroLink(link);
-        break;
+  public static void receiveExecLink(final String link, String target, String source) {
+    if (ExecFunction.isMessageForMe(target, source)) {
+      runMacroLink(link);
     }
   }
 
