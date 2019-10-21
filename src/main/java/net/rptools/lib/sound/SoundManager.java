@@ -24,6 +24,7 @@ import java.util.Properties;
 import javafx.application.Platform;
 import javafx.scene.media.AudioClip;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
+import net.rptools.maptool.client.functions.SoundFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONArray;
@@ -67,7 +68,8 @@ public class SoundManager {
   }
 
   /**
-   * Register a system sound from a path. If path incorrect or null, remove sound.
+   * Register a system sound from a path. If path incorrect or null, remove sound. Also add define
+   * the sound to be used in SoundFunctions.
    *
    * @param name the name of the sound
    * @param path the path to the sound
@@ -78,8 +80,12 @@ public class SoundManager {
     URL url = path != null ? SoundManager.class.getClassLoader().getResource(path) : null;
     AudioClip clip = url != null ? new AudioClip(url.toExternalForm()) : null;
 
-    if (clip != null) registeredSoundMap.put(name, clip);
-    else registeredSoundMap.remove(name);
+    if (clip != null) {
+      registeredSoundMap.put(name, clip);
+      SoundFunctions.defineSound(name, url.toExternalForm()); // add sound with defineAudioSource
+    } else {
+      registeredSoundMap.remove(name);
+    }
   }
 
   /**
@@ -146,7 +152,7 @@ public class SoundManager {
       throws ParserException {
     if (!userSounds.containsKey(strUri)) {
       try {
-        if (!MediaPlayerAdapter.uriExists(strUri))
+        if (!SoundFunctions.uriExists(strUri))
           return false; // leave without error message if uri ok but no file
       } catch (Exception e) {
         throw new ParserException(
@@ -238,6 +244,7 @@ public class SoundManager {
       info.put("uri", strUri);
       String status = clip.isPlaying() ? "PLAYING" : "STOPPED";
       info.put("status", status);
+      info.put("type", "clip");
       return info;
     } catch (Exception e) {
       return null;
