@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.client.functions;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.*;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,7 +79,8 @@ public class MediaPlayerAdapter {
       throws ParserException {
     final Media media;
     try {
-      if (!uriExists(strUri)) return false; // leave without error message if uri ok but no file
+      if (!SoundFunctions.uriExists(strUri))
+        return false; // leave without error message if uri ok but no file
       media = new Media(strUri);
     } catch (Exception e) {
       throw new ParserException(
@@ -237,54 +236,6 @@ public class MediaPlayerAdapter {
   }
 
   /**
-   * Return the existence status of resource from String uri
-   *
-   * @param strUri the String uri of the resource
-   * @return true if resource exists, false otherwise
-   * @throws IOException if uri is url, but url is incorrect
-   * @throws URISyntaxException if uri is for local file, but uri is incorrect
-   */
-  public static boolean uriExists(String strUri) throws IOException, URISyntaxException {
-    return isWeb(strUri) ? urlExist(strUri) : fileExist(strUri);
-  }
-
-  /**
-   * Returns true if the uri is for a web resource, false otherwise
-   *
-   * @param strUri the String uri of the resource
-   * @return true if String uri is URL, false otherwise
-   */
-  private static boolean isWeb(String strUri) {
-    String s = strUri.trim().toLowerCase();
-    return s.startsWith("http://") || s.startsWith("https://");
-  }
-
-  /**
-   * Return the existence status of web resource from String uri
-   *
-   * @param strUri the String uri of the resource
-   * @return true if resource exists, false otherwise
-   * @throws IOException if uri is incorrect
-   */
-  private static boolean urlExist(String strUri) throws IOException {
-    HttpURLConnection.setFollowRedirects(false);
-    HttpURLConnection con = (HttpURLConnection) new URL(strUri).openConnection();
-    con.setRequestMethod("HEAD");
-    return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
-  }
-
-  /**
-   * Return the existence status of local resource from String uri
-   *
-   * @param strUri the String uri of the resource
-   * @return true if resource exists, false otherwise
-   * @throws URISyntaxException if uri is incorrect
-   */
-  private static boolean fileExist(String strUri) throws URISyntaxException {
-    return new File(new URI(strUri).getPath()).exists();
-  }
-
-  /**
    * Return the properties of a stream from its uri
    *
    * @param strUri the String uri of the stream
@@ -339,6 +290,7 @@ public class MediaPlayerAdapter {
       info.put("bufferTime", player.getBufferProgressTime().toSeconds());
       info.put("currentCount", player.getCurrentCount());
       info.put("status", player.getStatus().toString());
+      info.put("type", "stream");
       return info;
     } catch (Exception e) {
       return null;
@@ -405,37 +357,5 @@ public class MediaPlayerAdapter {
    */
   public static boolean getGlobalMute() {
     return globalMute;
-  }
-
-  /**
-   * Convert a string into a uri string. Spaces are replaced by %20, among other things. The string
-   * "*" is returned as-is
-   *
-   * @param string the string to convert
-   * @return the converted string
-   */
-  public static String convertToURI(Object string) {
-    String strUri = string.toString().trim();
-    if (strUri.equals("*")) return strUri;
-    if (!isWeb(strUri) && !strUri.toUpperCase().startsWith("FILE")) {
-      strUri = "FILE:/" + strUri;
-    }
-
-    try {
-      String decodedURL = URLDecoder.decode(strUri, "UTF-8");
-      URL url = new URL(decodedURL);
-      URI uri =
-          new URI(
-              url.getProtocol(),
-              url.getUserInfo(),
-              url.getHost(),
-              url.getPort(),
-              url.getPath(),
-              url.getQuery(),
-              url.getRef());
-      return uri.toString();
-    } catch (Exception ex) {
-      return strUri;
-    }
   }
 }
