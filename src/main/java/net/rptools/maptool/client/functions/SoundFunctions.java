@@ -20,7 +20,9 @@ import java.math.BigDecimal;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.util.FunctionUtil;
@@ -29,6 +31,7 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
 
+/** This class handles functions to play, stop, and edit audio clips and streams. */
 public class SoundFunctions extends AbstractFunction {
 
   /** The singleton instance. */
@@ -37,7 +40,7 @@ public class SoundFunctions extends AbstractFunction {
   private SoundFunctions() {
     super(
         0,
-        5,
+        7,
         "playStream",
         "playClip",
         "stopSound",
@@ -65,60 +68,107 @@ public class SoundFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 1, 5);
       if (!AppPreferences.getPlayStreams()) return -1; // do nothing if disabled in preferences
       String strUri = convertToURI(args.get(0), true);
-      int cycleCount = psize > 1 ? FunctionUtil.paramAsInteger(functionName, args, 1, true) : 1;
-      double volume = psize > 2 ? FunctionUtil.paramAsDouble(functionName, args, 2, true) : 1;
-      double start = psize > 3 ? FunctionUtil.paramAsDouble(functionName, args, 3, true) * 1000 : 0;
-      double stop = psize > 4 ? FunctionUtil.paramAsDouble(functionName, args, 4, true) * 1000 : -1;
 
-      return MediaPlayerAdapter.playStream(strUri, cycleCount, volume, start, stop)
+      Integer cycleCount = getCycleCount(functionName, args, 1);
+      Double volume = getDouble(functionName, args, 2);
+      Double start = getDouble(functionName, args, 3);
+      Double stop = getDouble(functionName, args, 4);
+
+      return MediaPlayerAdapter.playStream(strUri, cycleCount, volume, start, stop, false)
           ? BigDecimal.ONE
           : BigDecimal.ZERO;
+    } else if (functionName.equalsIgnoreCase("playClip")) {
+      FunctionUtil.checkNumberParam(functionName, args, 1, 3);
+      if (!AppPreferences.getPlayStreams()) return -1; // do nothing if disabled in preferences
+      String strUri = convertToURI(args.get(0), true);
+
+      Integer cycleCount = getCycleCount(functionName, args, 1);
+      Double volume = getDouble(functionName, args, 2);
+      return SoundManager.playClip(strUri, cycleCount, volume, false)
+          ? BigDecimal.ONE
+          : BigDecimal.ZERO;
+
     } else if (functionName.equalsIgnoreCase("editStream")) {
       FunctionUtil.checkNumberParam(functionName, args, 2, 5);
       String strUri = convertToURI(args.get(0), true);
 
-      Integer cycleCount = null;
-      Double volume = null;
-      Double start = null;
-      Double stop = null;
-
-      if (psize > 1 && !args.get(1).equals(""))
-        cycleCount = FunctionUtil.paramAsInteger(functionName, args, 1, true);
-      if (psize > 2 && !args.get(2).equals(""))
-        volume = FunctionUtil.paramAsDouble(functionName, args, 2, true);
-      if (psize > 3 && !args.get(3).equals(""))
-        start = FunctionUtil.paramAsDouble(functionName, args, 3, true) * 1000;
-      if (psize > 4 && !args.get(4).equals(""))
-        stop = FunctionUtil.paramAsDouble(functionName, args, 4, true) * 1000;
+      Integer cycleCount = getCycleCount(functionName, args, 1);
+      Double volume = getDouble(functionName, args, 2);
+      Double start = getDouble(functionName, args, 3);
+      Double stop = getDouble(functionName, args, 4);
 
       MediaPlayerAdapter.editStream(strUri, cycleCount, volume, start, stop);
       return "";
     } else if (functionName.equalsIgnoreCase("stopSound")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 3);
       String strUri = psize > 0 ? convertToURI(args.get(0), true) : "*";
+
       boolean del = psize > 1 ? FunctionUtil.paramAsBoolean(functionName, args, 1, true) : true;
-      double fade = psize > 2 ? FunctionUtil.paramAsDouble(functionName, args, 2, true) * 1000 : 0;
+      double fade = psize > 2 ? FunctionUtil.paramAsDouble(functionName, args, 2, true) : 0;
       stopSound(strUri, del, fade); // stop clip and/or stream
       return "";
     } else if (functionName.equalsIgnoreCase("getSoundProperties")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 1);
       String strUri = psize > 0 ? convertToURI(args.get(0), true) : "*";
       return getSoundProperties(strUri);
-    } else if (functionName.equalsIgnoreCase("playClip")) {
-      FunctionUtil.checkNumberParam(functionName, args, 1, 3);
-      if (!AppPreferences.getPlayStreams()) return -1; // do nothing if disabled in preferences
-      String strUri = convertToURI(args.get(0), true);
-      int cycleCount = psize > 1 ? FunctionUtil.paramAsInteger(functionName, args, 1, true) : 1;
-      double volume = psize > 2 ? FunctionUtil.paramAsDouble(functionName, args, 2, true) : 1;
-      return SoundManager.playClip(strUri, cycleCount, volume) ? BigDecimal.ONE : BigDecimal.ZERO;
     } else if (functionName.equalsIgnoreCase("defineAudioSource")) {
-      FunctionUtil.checkNumberParam(functionName, args, 2, 2);
+      FunctionUtil.checkNumberParam(functionName, args, 2, 7);
       String nickName = args.get(0).toString();
       String strUri = convertToURI(args.get(1), false);
       defineSound(nickName, strUri);
+
+      String preload = args.size() > 2 ? args.get(2).toString() : "none";
+      if (!preload.equalsIgnoreCase("none")) {
+        Integer cycleCount = getCycleCount(functionName, args, 3);
+        Double volume = getDouble(functionName, args, 4);
+        Double start = getDouble(functionName, args, 5);
+        Double stop = getDouble(functionName, args, 6);
+
+        if (preload.equalsIgnoreCase("clip")) {
+          SoundManager.playClip(strUri, cycleCount, volume, true);
+        } else if (preload.equalsIgnoreCase("stream")) {
+          MediaPlayerAdapter.playStream(strUri, cycleCount, volume, start, stop, true);
+        }
+      }
       return "";
     }
     return null;
+  }
+
+  /**
+   * Return the cycle count, or a null
+   *
+   * @param functionName the name of the function
+   * @param args the arguments to the function
+   * @param index the index of the cycleCount
+   * @return an integer for the cycleCount or a null
+   * @throws ParserException if the parameter is of incorrect type
+   */
+  private static Integer getCycleCount(String functionName, List<Object> args, int index)
+      throws ParserException {
+    if (args.size() > index && !args.get(index).equals("")) {
+      return FunctionUtil.paramAsInteger(functionName, args, index, true);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Return the double of the parameter, or a null
+   *
+   * @param functionName the name of the function
+   * @param args the arguments to the function
+   * @param index the index of the parameter
+   * @return a double, or a null if parameter is "" or not set
+   * @throws ParserException if the parameter is of incorrect type
+   */
+  private static Double getDouble(String functionName, List<Object> args, int index)
+      throws ParserException {
+    if (args.size() > index && !args.get(index).equals("")) {
+      return FunctionUtil.paramAsDouble(functionName, args, index, true);
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -263,5 +313,20 @@ public class SoundFunctions extends AbstractFunction {
    */
   private static boolean fileExist(String strUri) throws URISyntaxException {
     return new File(new URI(strUri).getPath()).exists();
+  }
+
+  /**
+   * Return the nicknames associated with a string uri
+   *
+   * @param strUri the String uri of the resource
+   * @return a list with the nicknames corresponding to the resource
+   */
+  public static List<String> getNicks(String strUri) {
+    return mapSounds
+        .entrySet()
+        .stream()
+        .filter(entry -> strUri.equals(entry.getValue()))
+        .map(Map.Entry::getKey)
+        .collect(Collectors.toList());
   }
 }
