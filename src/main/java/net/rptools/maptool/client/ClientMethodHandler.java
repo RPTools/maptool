@@ -205,6 +205,11 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 MapTool.getFrame().hideGlassPane();
                 return;
 
+              case setCampaignName:
+                MapTool.getCampaign().setName((String) parameters[0]);
+                MapTool.getFrame().setTitle();
+                return;
+
               case putZone:
                 zone = (Zone) parameters[0];
                 MapTool.getCampaign().putZone(zone);

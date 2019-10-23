@@ -79,6 +79,12 @@ public class ServerCommandClientImpl implements ServerCommand {
     }
   }
 
+  public void setCampaignName(String name) {
+    MapTool.getCampaign().setName(name);
+    MapTool.getFrame().setTitle();
+    makeServerCall(COMMAND.setCampaignName, name);
+  }
+
   public void setVisionType(GUID zoneGUID, VisionType visionType) {
     makeServerCall(COMMAND.setVisionType, zoneGUID, visionType);
   }
