@@ -2324,6 +2324,7 @@ public class AppActions {
               AppState.setCampaignFile(campaignFile);
               AppPreferences.setLoadDir(campaignFile.getParentFile());
               AppMenuBar.getMruManager().addMRUCampaign(campaignFile);
+              campaign.campaign.setName(AppState.getCampaignName()); // Update campaign name
 
               /*
                * Bypass the serialization when we are hosting the server.
@@ -2509,7 +2510,9 @@ public class AppActions {
       AppState.setCampaignFile(campaignFile);
       AppPreferences.setSaveDir(campaignFile.getParentFile());
       AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
-      MapTool.getFrame().setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
+      if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
+        MapTool.serverCommand().setCampaignName(AppState.getCampaignName());
+      }
     }
   }
 
@@ -2531,7 +2534,9 @@ public class AppActions {
       AppState.setCampaignFile(campaignFile);
       AppPreferences.setSaveDir(campaignFile.getParentFile());
       AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
-      MapTool.getFrame().setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
+      if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
+        MapTool.serverCommand().setCampaignName(AppState.getCampaignName());
+      }
     }
   }
 

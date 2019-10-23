@@ -51,6 +51,7 @@ public class Campaign {
 
   private GUID id = new GUID();
   private Map<GUID, Zone> zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+  private String name; // the name of the campaign, to be displayed in the MapToolFrame title bar
 
   @SuppressWarnings("unused")
   private static transient ExportDialog exportInfo =
@@ -108,6 +109,7 @@ public class Campaign {
   private Boolean hasUsedFogToolbar = null;
 
   public Campaign() {
+    name = "Default";
     macroButtonLastIndex = 0;
     gmMacroButtonLastIndex = 0;
     macroButtonProperties = new ArrayList<MacroButtonProperties>();
@@ -147,6 +149,7 @@ public class Campaign {
    * @param campaign The campaign to copy from.
    */
   public Campaign(Campaign campaign) {
+    name = campaign.getName();
     zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
 
     /*
@@ -166,6 +169,14 @@ public class Campaign {
 
   public GUID getId() {
     return id;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   /**

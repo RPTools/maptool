@@ -41,6 +41,7 @@ public interface ServerCommand {
     // @formatter:off
     bootPlayer,
     setCampaign,
+    setCampaignName,
     getZone,
     putZone,
     removeZone,
@@ -119,6 +120,8 @@ public interface ServerCommand {
   public void restoreZoneView(GUID zoneGUID);
 
   public void setCampaign(Campaign campaign);
+
+  public void setCampaignName(String name);
 
   public void getZone(GUID zoneGUID);
 

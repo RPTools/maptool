@@ -74,6 +74,7 @@ public class ClientCommand {
     setBoard,
     updateExposedAreaMeta,
     clearExposedArea,
+    setCampaignName,
     restoreZoneView // Jamz: New command to restore player's view and let GM temporarily center and
     // scale a player's view
     // @formatter:on

@@ -166,6 +166,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case setCampaign:
           setCampaign((Campaign) context.get(0));
           break;
+        case setCampaignName:
+          setCampaignName((String) context.get(0));
+          break;
         case setZoneGridSize:
           setZoneGridSize(
               context.getGUID(0),
@@ -667,6 +670,11 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 
   public void setCampaign(Campaign campaign) {
     server.setCampaign(campaign);
+    forwardToClients();
+  }
+
+  public void setCampaignName(String name) {
+    server.getCampaign().setName(name);
     forwardToClients();
   }
 

@@ -98,7 +98,6 @@ import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.ClientAction;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -1561,20 +1560,28 @@ public class MapToolFrame extends DefaultDockableHolder
     getZoomStatusBar().update();
   }
 
+  /**
+   * Set the MapTool title bar. The title includes the name of the app, the player name, the
+   * campaign name and the name of the specified zone.
+   *
+   * @param renderer the ZoneRenderer of the zone.
+   */
   public void setTitleViaRenderer(ZoneRenderer renderer) {
-    String campaignName = " - [Default]";
-    if (AppState.getCampaignFile() != null) {
-      String s = AppState.getCampaignFile().getName();
-      // remove the file extension of the campaign file name
-      s = s.substring(0, s.length() - AppConstants.CAMPAIGN_FILE_EXTENSION.length());
-      campaignName = " - [" + s + "]";
-    }
+    String campaignName = " - [" + MapTool.getCampaign().getName() + "]";
     setTitle(
         AppConstants.APP_NAME
             + " - "
             + MapTool.getPlayer()
             + campaignName
             + (renderer != null ? " - " + renderer.getZone().getName() : ""));
+  }
+
+  /**
+   * Set the MapTool title bar. The title includes the name of the app, the player name, the
+   * campaign name and the current zone name.
+   */
+  public void setTitle() {
+    setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
   }
 
   public Toolbox getToolbox() {
