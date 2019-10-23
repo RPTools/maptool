@@ -185,7 +185,6 @@ public class MapTool {
   private static AssetTransferManager assetTransferManager;
   private static ServiceAnnouncer announcer;
   private static AutoSaveManager autoSaveManager;
-  private static SoundManager soundManager;
   private static TaskBarFlasher taskbarFlasher;
   private static EventDispatcher eventDispatcher;
   private static MapToolLineParser parser = new MapToolLineParser();
@@ -531,10 +530,6 @@ public class MapTool {
     }
   }
 
-  public static SoundManager getSoundManager() {
-    return soundManager;
-  }
-
   /**
    * Play the sound registered to an eventId.
    *
@@ -545,7 +540,7 @@ public class MapTool {
       if (AppPreferences.getPlaySystemSoundsOnlyWhenNotFocused() && isInFocus()) {
         return;
       }
-      soundManager.playSoundEvent(eventId);
+      SoundManager.playSoundEvent(eventId);
     }
   }
 
@@ -689,11 +684,10 @@ public class MapTool {
     eventDispatcher = new EventDispatcher();
     registerEvents();
 
-    soundManager = new SoundManager();
     try {
-      soundManager.configure(SOUND_PROPERTIES);
-      soundManager.registerSoundEvent(
-          SND_INVALID_OPERATION, soundManager.getRegisteredSound("Dink"));
+      SoundManager.configure(SOUND_PROPERTIES);
+      SoundManager.registerSoundEvent(
+          SND_INVALID_OPERATION, SoundManager.getRegisteredSound("Dink"));
     } catch (IOException ioe) {
       MapTool.showError("While initializing (configuring sound)", ioe);
     }

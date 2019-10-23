@@ -17,10 +17,7 @@ package net.rptools.lib.sound;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import javafx.application.Platform;
 import javafx.scene.media.AudioClip;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
@@ -35,9 +32,57 @@ import net.sf.json.JSONObject;
  * the playSoundEvent method.
  */
 public class SoundManager {
-  private static final Map<String, AudioClip> registeredSoundMap = new HashMap<String, AudioClip>();
-  private static final Map<String, AudioClip> soundEventMap = new HashMap<String, AudioClip>();
-  private static final Map<String, AudioClip> userSounds = new HashMap<String, AudioClip>();
+  private static final Map<String, AudioClip> registeredSoundMap = new HashMap<>();
+  private static final Map<String, AudioClip> soundEventMap = new HashMap<>();
+  private static final Map<String, SoundManager> userSounds = new HashMap<>();
+
+  private final String strUri;
+  private final AudioClip clip;
+  private int cycleCount; // store to remember last cycleCount used. Never 0.
+  private double volume; // store because player volume also depends on global volume.
+
+  private SoundManager(String strUri, Integer cycleCount, Double volume) {
+    this.strUri = strUri;
+    this.clip = new AudioClip(strUri);
+
+    editClip(cycleCount, volume, true);
+  }
+
+  /**
+   * Edit the SoundManager values, and update the AudioClip. Should be accessed from JavaFX app
+   * thread. If a parameter is null and useDefault is false, no change * to that value. If null and
+   * useDefault is true, change to the defaults.
+   *
+   * @param cycleCount how many times should the clip play (-1: infinite, default: 1)
+   * @param volume the volume level of the clip (0-1, default: 1)
+   */
+  private void editClip(Integer cycleCount, Double volume, boolean useDefault) {
+    if (cycleCount != null && cycleCount != 0) {
+      this.cycleCount = cycleCount;
+    } else if (useDefault) {
+      this.cycleCount = 1;
+    }
+    if (volume != null) {
+      this.volume = volume;
+    } else if (useDefault) {
+      this.volume = 1.0;
+    }
+    updateClip(cycleCount != null && cycleCount == 0);
+  }
+
+  /**
+   * Update the clip with the values in the adapter
+   *
+   * @param stopPlay should the clip be stopped
+   */
+  private void updateClip(boolean stopPlay) {
+    this.clip.setCycleCount(this.cycleCount);
+    this.clip.setVolume(this.volume * MediaPlayerAdapter.getGlobalVolume());
+
+    if (stopPlay) {
+      this.clip.stop();
+    }
+  }
 
   /**
    * Loads the sound list and register the system sounds.
@@ -132,8 +177,7 @@ public class SoundManager {
           new Runnable() {
             @Override
             public void run() {
-              clip.setVolume(volume);
-              clip.play();
+              clip.play(volume);
             }
           });
     }
@@ -144,11 +188,13 @@ public class SoundManager {
    *
    * @param strUri the String url of the clip
    * @param cycleCount how many times should the clip play. -1: infinite
-   * @param volume the volume level of the clip (0-1)
+   * @param volume the volume level of the clip (0-1), null keeps previous value
+   * @param preloadOnly should the stream be only preloaded and not played
    * @return false if the file doesn't exist, true otherwise
    * @throws ParserException if issue with file
    */
-  public static boolean playClip(String strUri, int cycleCount, double volume)
+  public static boolean playClip(
+      String strUri, Integer cycleCount, Double volume, boolean preloadOnly)
       throws ParserException {
     if (!userSounds.containsKey(strUri)) {
       try {
@@ -169,14 +215,22 @@ public class SoundManager {
         new Runnable() {
           @Override
           public void run() {
-            AudioClip clip = userSounds.get(strUri);
-            if (clip == null) {
-              clip = new AudioClip(strUri);
-              userSounds.put(strUri, clip);
+            SoundManager manager = userSounds.get(strUri);
+            if (manager != null) {
+              manager.editClip(cycleCount, volume, false);
+            } else {
+              manager = new SoundManager(strUri, cycleCount, volume);
+              userSounds.put(strUri, manager);
             }
-            double playVolume = volume * MediaPlayerAdapter.getGlobalVolume();
-            if (cycleCount != 0 && playVolume > 0 && !MediaPlayerAdapter.getGlobalMute()) {
-              clip.setCycleCount(cycleCount);
+            AudioClip clip = manager.clip;
+
+            double playVolume = manager.volume * MediaPlayerAdapter.getGlobalVolume();
+            boolean play =
+                (cycleCount == null || cycleCount != 0)
+                    && playVolume > 0
+                    && !MediaPlayerAdapter.getGlobalMute()
+                    && !preloadOnly;
+            if (play) {
               clip.play(playVolume);
             }
           }
@@ -197,12 +251,12 @@ public class SoundManager {
           public void run() {
             if (strUri.equals("*")) {
               for (HashMap.Entry mapElement : userSounds.entrySet()) {
-                ((AudioClip) mapElement.getValue()).stop();
+                ((SoundManager) mapElement.getValue()).clip.stop();
               }
               if (remove) userSounds.clear();
             } else {
-              AudioClip clip = userSounds.get(strUri);
-              if (clip != null) clip.stop();
+              SoundManager manager = userSounds.get(strUri);
+              if (manager != null) manager.clip.stop();
               if (remove) userSounds.remove(strUri);
             }
           }
@@ -220,12 +274,14 @@ public class SoundManager {
     if (strUri.equals("*")) {
       JSONArray infoArray = new JSONArray();
       for (HashMap.Entry mapElement : userSounds.entrySet()) {
-        info = getInfo((String) mapElement.getKey());
+        info = ((SoundManager) mapElement.getValue()).getInfo();
         if (info != null) infoArray.add(info);
       }
       return infoArray;
     } else {
-      info = getInfo(strUri);
+      SoundManager manager = userSounds.get(strUri);
+      if (manager == null) return "";
+      else info = manager.getInfo();
       if (info == null) return "";
       else return info;
     }
@@ -236,13 +292,18 @@ public class SoundManager {
    *
    * @return JSONObject of the properties
    */
-  private static JSONObject getInfo(String strUri) {
-    AudioClip clip = userSounds.get(strUri);
-    if (clip == null) return null;
+  private JSONObject getInfo() {
     try {
       JSONObject info = new JSONObject();
-      info.put("uri", strUri);
-      String status = clip.isPlaying() ? "PLAYING" : "STOPPED";
+
+      List<String> listNicks = SoundFunctions.getNicks(this.strUri);
+      if (listNicks.size() > 0) {
+        info.put("nicknames", String.join(",", listNicks));
+      }
+      info.put("uri", this.strUri);
+      info.put("cycleCount", this.cycleCount);
+      info.put("volume", this.volume);
+      String status = this.clip.isPlaying() ? "PLAYING" : "STOPPED";
       info.put("status", status);
       info.put("type", "clip");
       return info;
