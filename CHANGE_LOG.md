@@ -7,11 +7,14 @@ Maptool 1.5.7
 - New user preference (Edit -> Preferences -> Application -> Performance) for Max Frame Rate allows users to set a desired Max Frame Rate.
 - More updated macro functions for improved performance and reliability.
 - New GM macro panel for GM only macros. These macros are saved as part of the campaign.
+- Bug fixes!
 
 Enhancements
 -----
+- [#810][i810] New macro function `playClip` more suited for short sound FX clips. New convenience function `defineAudioSource` to allow you to assign a nickname to audio sources and refer to the nickname in the audio functions.  Two existing audio functions were renamed as part of the other changes:  `stopStream` -> `stopSound`, `getStreamProperties` -> `getSoundProperties`.
 - [#804][i804] Chat notification flash now picks flash color based on task bar color.
 - [#801][i801] Macro function `getTokenStates` now accepts Token ID and Map Name parameters.
+- [#790][i790] New `execFunction` macro that works like `execLink` but is used for built-in macro functions and UDFs. 
 - [#784][i784] Macro function `json.toVars` now accepts JSON arrays as well as objects.
 - [#782][i782] Macro function `broadcast` no accepts "not-gm", "not-self" and "not-gm-self" as targets.
 - [#766][i766] New perlin noise overlay on tiled textures to reduce visible repetition.
@@ -30,14 +33,18 @@ Bug Fixes
 - [#775][i775] `json.path.read` was returning invalid JSON for JSON arrays of objects. Fixed.
 - [#769][i769] Tokens created with `copyToken` could not be modified in same macro without jumping through hoops. Fixed.
 - [#767][i767] A recent change to improve program responsiveness had capped frame rate at 30 fps making for jerky map panning. Default is now 60 fps and can be adjusted in preferences under Application -> Performance -> Max Frame Rate.  Note either reloading the current campaign or restarting MapTool is required after making a change.
+- [#740][i740] Selecting New Map in the Library image pane with no image underneath would thrown an exception. Fixed.
+- [#687][i687] The table functions `addTableEntry`, `createTable`, `setTableImage` and `setTableEntry` if passed an empty `AssetID` string would incorrectly put an empty "Asset://" into the entries asset id field. Fixed.  `getTableImage` would thrown an exeption if no table image was set. Fixed.
 - [#627][i627] Version check on MapTool startup should no longer prompt for updates when using release candidates.
 - [#529][i529] Smileys are now working again.
 
 [i814]: https://github.com/RPTools/maptool/issues/814
+[i810]: https://github.com/RPTools/maptool/issues/810
 [i804]: https://github.com/RPTools/maptool/issues/804
 [i803]: https://github.com/RPTools/maptool/issues/803
 [i801]: https://github.com/RPTools/maptool/issues/801
 [i800]: https://github.com/RPTools/maptool/issues/800
+[i790]: https://github.com/RPTools/maptool/issues/790
 [i786]: https://github.com/RPTools/maptool/issues/786
 [i784]: https://github.com/RPTools/maptool/issues/784
 [i782]: https://github.com/RPTools/maptool/issues/782
@@ -47,6 +54,8 @@ Bug Fixes
 [i766]: https://github.com/RPTools/maptool/issues/766
 [i761]: https://github.com/RPTools/maptool/issues/761
 [i745]: https://github.com/RPTools/maptool/issues/745
+[i740]: https://github.com/RPTools/maptool/issues/740
+[i687]: https://github.com/RPTools/maptool/issues/687
 [i642]: https://github.com/RPTools/maptool/issues/642
 [i627]: https://github.com/RPTools/maptool/issues/627
 [i529]: https://github.com/RPTools/maptool/issues/529
