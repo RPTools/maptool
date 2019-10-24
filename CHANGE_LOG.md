@@ -26,10 +26,13 @@ Enhancements
 
 Bug Fixes
 -----
-- [#814][i814] Some `update` keywords for `copyToken` were producing exceptions. Fixed.  Alternate keywords *tokenPortrait* and *tokenHandout* added 
+- [#822][i822] `playStream was ignoring stream parameters set with `editStream`. Fixed.
+- [#820][i820] Functions `execLink` and `execFunction` were not running immediately on local client. Fixed.
+- [#814][i814] Some `update` keywords for `copyToken` were producing exceptions. Fixed. Alternate keywords *tokenPortrait* and *tokenHandout* added 
 - [#803][i803] `getStreamProps` was returning malformed JSON. Fixed.
 - [#800][i800] Incorrect tooltip on Chat Notification Background preference. Fixed.
-- [#786][i786] Bugs with the various bar functions returning incorrect error messages or no error when passed a bad bar name fixed.
+- [#788][i788] Player clients were showing the last campaign file they had loaded in the title bar when connected to servers. Fixed.
+- [#786][i786] Bugs with the various bar functions returning incorrect error messages or no error when passed a bad bar name. Fixed.
 - [#775][i775] `json.path.read` was returning invalid JSON for JSON arrays of objects. Fixed.
 - [#769][i769] Tokens created with `copyToken` could not be modified in same macro without jumping through hoops. Fixed.
 - [#767][i767] A recent change to improve program responsiveness had capped frame rate at 30 fps making for jerky map panning. Default is now 60 fps and can be adjusted in preferences under Application -> Performance -> Max Frame Rate.  Note either reloading the current campaign or restarting MapTool is required after making a change.
@@ -38,6 +41,8 @@ Bug Fixes
 - [#627][i627] Version check on MapTool startup should no longer prompt for updates when using release candidates.
 - [#529][i529] Smileys are now working again.
 
+[i822]: https://github.com/RPTools/maptool/issues/822
+[i820]: https://github.com/RPTools/maptool/issues/820
 [i814]: https://github.com/RPTools/maptool/issues/814
 [i810]: https://github.com/RPTools/maptool/issues/810
 [i804]: https://github.com/RPTools/maptool/issues/804
@@ -45,6 +50,7 @@ Bug Fixes
 [i801]: https://github.com/RPTools/maptool/issues/801
 [i800]: https://github.com/RPTools/maptool/issues/800
 [i790]: https://github.com/RPTools/maptool/issues/790
+[i788]: https://github.com/RPTools/maptool/issues/788
 [i786]: https://github.com/RPTools/maptool/issues/786
 [i784]: https://github.com/RPTools/maptool/issues/784
 [i782]: https://github.com/RPTools/maptool/issues/782
