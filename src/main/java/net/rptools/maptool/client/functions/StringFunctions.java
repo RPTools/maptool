@@ -405,7 +405,6 @@ public class StringFunctions extends AbstractFunction {
    * uppercase.
    *
    * @param str The string converted to title case.
-   *
    * @return The string converted to title case.
    */
   private String titleCase(String str) {
