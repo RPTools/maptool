@@ -242,7 +242,7 @@ dependencies {
 
     // For some math functions used in the A* Pathfinding
     // https://locationtech.github.io/jts/jts-features.html
-    implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.15.0'	// https://mvnrepository.com/artifact/org.locationtech.jts/jts-core
+    implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.16.1'	// https://mvnrepository.com/artifact/org.locationtech.jts/jts-core
 
     // For RESTful functions
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.13.1'
