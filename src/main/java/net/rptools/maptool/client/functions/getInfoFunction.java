@@ -160,6 +160,7 @@ public class getInfoFunction extends AbstractFunction {
     cinfo.put("portrait size", AppPreferences.getPortraitSize());
     cinfo.put("show portrait", AppPreferences.getShowPortrait());
     cinfo.put("show stat sheet", AppPreferences.getShowStatSheet());
+    cinfo.put("file sync directory", AppPreferences.getFileSyncPath());
     cinfo.put("version", MapTool.getVersion());
     cinfo.put("isFullScreen", MapTool.getFrame().isFullScreen() ? BigDecimal.ONE : BigDecimal.ZERO);
     cinfo.put("timeInMs", System.currentTimeMillis());
