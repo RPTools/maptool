@@ -158,7 +158,7 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
 
-    implementation group: 'io.sentry', name: 'sentry', version: '1.7.28'
+    implementation group: 'io.sentry', name: 'sentry', version: '1.7.5'
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.5'
 
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.1' // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
