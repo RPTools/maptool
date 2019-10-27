@@ -212,7 +212,7 @@ public class ServerPolicy {
     sinfo.put("timeDate", getTimeDate());
 
     sinfo.put("gm", MapTool.getGMs());
-    sinfo.put("hosting server", MapTool.isHostingServer());
+    sinfo.put("hosting server", MapTool.isHostingServer() ? BigDecimal.ONE : BigDecimal.ZERO);
 
     InitiativePanel ip = MapTool.getFrame().getInitiativePanel();
     if (ip != null) {
