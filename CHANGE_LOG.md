@@ -11,6 +11,9 @@ Maptool 1.5.7
 
 Enhancements
 -----
+- [#850][i850] New macro function `log.trace` added for log messages at `TRACE` level.
+- [#848][i848] File Sync Directory preference setting adding to `getInfo("client")` result.
+- [#829][i829] New macro function `capitalize` will change the first character at each word break to upper case.  e.g. "jolly green giant" -> "Jolly Green Giant".
 - [#810][i810] New macro function `playClip` more suited for short sound FX clips. New convenience function `defineAudioSource` to allow you to assign a nickname to audio sources and refer to the nickname in the audio functions.  Two existing audio functions were renamed as part of the other changes:  `stopStream` -> `stopSound`, `getStreamProperties` -> `getSoundProperties`.
 - [#804][i804] Chat notification flash now picks flash color based on task bar color.
 - [#801][i801] Macro function `getTokenStates` now accepts Token ID and Map Name parameters.
@@ -26,7 +29,8 @@ Enhancements
 
 Bug Fixes
 -----
-- [#822][i822] `playStream was ignoring stream parameters set with `editStream`. Fixed.
+- [#846][i846] `getInfo("server")` was returning true/false instead of 1/0 for "hosting server". Fixed.
+- [#822][i822] `playStream` was ignoring stream parameters set with `editStream`. Fixed.
 - [#820][i820] Functions `execLink` and `execFunction` were not running immediately on local client. Fixed.
 - [#814][i814] Some `update` keywords for `copyToken` were producing exceptions. Fixed. Alternate keywords *tokenPortrait* and *tokenHandout* added 
 - [#803][i803] `getStreamProps` was returning malformed JSON. Fixed.
@@ -41,6 +45,10 @@ Bug Fixes
 - [#627][i627] Version check on MapTool startup should no longer prompt for updates when using release candidates.
 - [#529][i529] Smileys are now working again.
 
+[i850]: https://github.com/RPTools/maptool/issues/850
+[i850]: https://github.com/RPTools/maptool/issues/848
+[i846]: https://github.com/RPTools/maptool/issues/846
+[i829]: https://github.com/RPTools/maptool/issues/829
 [i822]: https://github.com/RPTools/maptool/issues/822
 [i820]: https://github.com/RPTools/maptool/issues/820
 [i814]: https://github.com/RPTools/maptool/issues/814
