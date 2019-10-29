@@ -198,7 +198,7 @@ dependencies {
     implementation 'org.eclipse.jetty:jetty-continuation:9.3.0.M1'
     implementation 'org.eclipse.jetty.websocket:websocket-server:9.3.0.M1'
     implementation 'org.eclipse.jetty.websocket:websocket-client:9.3.0.M1'
-    implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.3.0.M1'
+    implementation 'org.eclipse.jetty.websocket:websocket-servlet:10.0.0-alpha0'
     implementation 'org.eclipse.jetty.websocket:websocket-api:9.3.0.M1'
 
     implementation 'net.sf.ezmorph:ezmorph:1.0.5'
