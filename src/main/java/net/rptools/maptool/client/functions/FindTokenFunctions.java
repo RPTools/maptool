@@ -215,7 +215,7 @@ public class FindTokenFunctions extends AbstractFunction {
   private FindTokenFunctions() {
     super(
         0,
-        2,
+        3,
         "findToken",
         "currentToken",
         "getTokenName",
@@ -257,55 +257,53 @@ public class FindTokenFunctions extends AbstractFunction {
       }
     }
     if (functionName.equals("findToken")) {
-      if (parameters.size() < 1) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-      }
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       String mapName = parameters.size() > 1 ? parameters.get(1).toString() : null;
       return findTokenId(parameters.get(0).toString(), mapName);
     }
     String delim = ",";
     FindType findType;
     String findArgs = null;
+    ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
     if (functionName.equals("currentToken")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
       findType = FindType.CURRENT;
     } else if (functionName.startsWith("getSelected")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.SELECTED;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
     } else if (functionName.startsWith("getImpersonated")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
       findType = FindType.IMPERSONATED;
     } else if (functionName.startsWith("getPC")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.PC;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
     } else if (functionName.startsWith("getNPC")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.NPC;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
     } else if (functionName.startsWith("getToken")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
       findType = FindType.ALL;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
+      zoneRenderer = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 2);
     } else if (functionName.startsWith("getExposedToken")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.EXPOSED;
       delim = !parameters.isEmpty() ? parameters.get(0).toString() : delim;
     } else if (functionName.startsWith("getWithState")) {
-      if (parameters.size() < 1) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-      }
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       findType = FindType.STATE;
       findArgs = parameters.get(0).toString();
       delim = parameters.size() > 1 ? parameters.get(1).toString() : delim;
     } else if (functionName.startsWith("getOwned")) {
-      if (parameters.size() < 1) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
-      }
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       findType = FindType.OWNED;
       findArgs = parameters.get(0).toString();
       delim = parameters.size() > 1 ? parameters.get(1).toString() : delim;
     } else if (functionName.startsWith("getVisibleToken")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.VISIBLE;
       delim = parameters.size() > 0 ? parameters.get(0).toString() : delim;
     } else {
@@ -319,9 +317,9 @@ public class FindTokenFunctions extends AbstractFunction {
 
     // Special case of getToken,getTokenNames where a JSON object supplies arguments
     if (findType == FindType.ALL && parameters.size() > 1) {
-      return getTokenList(parser, nameOnly, delim, parameters.get(1).toString());
+      return getTokenList(parser, nameOnly, delim, parameters.get(1).toString(), zoneRenderer);
     }
-    return getTokens(parser, findType, nameOnly, delim, findArgs);
+    return getTokens(parser, findType, nameOnly, delim, findArgs, zoneRenderer);
   }
 
   /**
@@ -332,10 +330,12 @@ public class FindTokenFunctions extends AbstractFunction {
    * @param nameOnly whether to return only token names (<code>false</code> = token GUIDs)
    * @param delim either <code>json</code> or a string delimiter between output entries
    * @param jsonString incoming JSON data structure to filter results
+   * @param zoneRenderer the zone renderer of the map where the tokens are
    * @return list of filtered tokens
    * @throws ParserException
    */
-  private Object getTokenList(Parser parser, boolean nameOnly, String delim, String jsonString)
+  private Object getTokenList(
+      Parser parser, boolean nameOnly, String delim, String jsonString, ZoneRenderer zoneRenderer)
       throws ParserException {
     JSONObject jobj = JSONObject.fromObject(jsonString);
 
@@ -355,7 +355,7 @@ public class FindTokenFunctions extends AbstractFunction {
         layers.add(o.toString());
       }
     }
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    Zone zone = zoneRenderer.getZone();
     allTokens = zone.getTokensFiltered(new LayerFilter(layers));
     List<Token> tokenList = new ArrayList<Token>(allTokens.size());
     tokenList.addAll(allTokens);
@@ -377,7 +377,8 @@ public class FindTokenFunctions extends AbstractFunction {
         match = "setStates".equalsIgnoreCase(searchType);
         // Looking for tokens that either match or don't match the states
         for (Object item : states) {
-          tokenList = getTokenList(parser, FindType.STATE, item.toString(), match, tokenList);
+          tokenList =
+              getTokenList(parser, FindType.STATE, item.toString(), match, tokenList, zoneRenderer);
         }
       } else if ("range".equalsIgnoreCase(searchType)) {
         // We will do this as one of the last steps as it's one of the most expensive so we want to
@@ -431,20 +432,27 @@ public class FindTokenFunctions extends AbstractFunction {
       } else {
         match = booleanCheck(jobj, searchType);
         if ("npc".equalsIgnoreCase(searchType)) {
-          tokenList = getTokenList(parser, FindType.NPC, "", match, tokenList);
+          tokenList = getTokenList(parser, FindType.NPC, "", match, tokenList, zoneRenderer);
         } else if ("pc".equalsIgnoreCase(searchType)) {
-          tokenList = getTokenList(parser, FindType.PC, "", match, tokenList);
+          tokenList = getTokenList(parser, FindType.PC, "", match, tokenList, zoneRenderer);
         } else if ("selected".equalsIgnoreCase(searchType)) {
-          tokenList = getTokenList(parser, FindType.SELECTED, "", match, tokenList);
+          tokenList = getTokenList(parser, FindType.SELECTED, "", match, tokenList, zoneRenderer);
         } else if ("visible".equalsIgnoreCase(searchType)) {
-          tokenList = getTokenList(parser, FindType.VISIBLE, "", match, tokenList);
+          tokenList = getTokenList(parser, FindType.VISIBLE, "", match, tokenList, zoneRenderer);
         } else if ("owned".equalsIgnoreCase(searchType)) {
           tokenList =
-              getTokenList(parser, FindType.OWNED, MapTool.getPlayer().getName(), match, tokenList);
+              getTokenList(
+                  parser,
+                  FindType.OWNED,
+                  MapTool.getPlayer().getName(),
+                  match,
+                  tokenList,
+                  zoneRenderer);
         } else if ("current".equalsIgnoreCase(searchType)) {
-          tokenList = getTokenList(parser, FindType.CURRENT, "", match, tokenList);
+          tokenList = getTokenList(parser, FindType.CURRENT, "", match, tokenList, zoneRenderer);
         } else if ("impersonated".equalsIgnoreCase(searchType)) {
-          tokenList = getTokenList(parser, FindType.IMPERSONATED, "", match, tokenList);
+          tokenList =
+              getTokenList(parser, FindType.IMPERSONATED, "", match, tokenList, zoneRenderer);
         }
       }
     }
@@ -462,8 +470,7 @@ public class FindTokenFunctions extends AbstractFunction {
         }
       } else {
         GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
-        if (guid != null)
-          token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
+        if (guid != null) token = zone.getToken(guid);
         else token = findToken(MapTool.getFrame().getCommandPanel().getIdentity(), null);
         if (token == null) {
           throw new ParserException(
@@ -511,8 +518,7 @@ public class FindTokenFunctions extends AbstractFunction {
         }
       } else {
         GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
-        if (guid != null)
-          token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
+        if (guid != null) token = zone.getToken(guid);
         else token = findToken(MapTool.getFrame().getCommandPanel().getIdentity(), null);
         if (token == null) {
           throw new ParserException(
@@ -597,15 +603,20 @@ public class FindTokenFunctions extends AbstractFunction {
    * @param findArgs additional argument for the search
    * @param match should the property match? true: only include matches, false: exclude matches
    * @param originalList the list of tokens to search from
+   * @param zoneRenderer the zone render of the map where the tokens are
    * @return tokenList satisfying the requirement
    */
   private List<Token> getTokenList(
-      Parser parser, FindType findType, String findArgs, boolean match, List<Token> originalList)
+      Parser parser,
+      FindType findType,
+      String findArgs,
+      boolean match,
+      List<Token> originalList,
+      ZoneRenderer zoneRenderer)
       throws ParserException {
     List<Token> tokenList = new LinkedList<Token>();
     if (originalList.size() == 0) return tokenList;
 
-    ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
     Zone zone = zoneRenderer.getZone();
     switch (findType) {
       case ALL:
@@ -629,7 +640,7 @@ public class FindTokenFunctions extends AbstractFunction {
       case IMPERSONATED:
         Token t;
         GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
-        if (guid != null) t = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(guid);
+        if (guid != null) t = zone.getToken(guid);
         else t = zone.resolveToken(MapTool.getFrame().getCommandPanel().getIdentity());
         if (t != null) {
           tokenList = getTokensFiltered(Collections.singletonList(t), originalList, match);
@@ -680,22 +691,29 @@ public class FindTokenFunctions extends AbstractFunction {
   }
 
   /**
-   * Gets the names or ids of the tokens on the current map.
+   * Gets the names or ids of the tokens on a map.
    *
    * @param parser The parser that called the function.
    * @param findType The type of tokens to find.
    * @param nameOnly If a list of names is wanted.
    * @param delim The delimiter to use for lists, or "json" for a json array.
    * @param findArgs Any arguments for the find function
+   * @param zoneRenderer the zone renderer of the map
    * @return a string list that contains the ids or names of the tokens.
    * @throws ParserException if this code adds a new enum but doesn't properly handle it
    */
   private String getTokens(
-      Parser parser, FindType findType, boolean nameOnly, String delim, String findArgs)
+      Parser parser,
+      FindType findType,
+      boolean nameOnly,
+      String delim,
+      String findArgs,
+      ZoneRenderer zoneRenderer)
       throws ParserException {
     ArrayList<String> values = new ArrayList<String>();
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-    List<Token> tokens = getTokenList(parser, findType, findArgs, true, zone.getAllTokens());
+    Zone zone = zoneRenderer.getZone();
+    List<Token> tokens =
+        getTokenList(parser, findType, findArgs, true, zone.getAllTokens(), zoneRenderer);
 
     if (tokens != null && !tokens.isEmpty()) {
       for (Token token : tokens) {
@@ -728,6 +746,7 @@ public class FindTokenFunctions extends AbstractFunction {
    * Finds the specified token.
    *
    * @param identifier the name of the token.
+   * @param zoneName the name of the zone.
    * @return the token.
    */
   public static Token findToken(String identifier, String zoneName) {
