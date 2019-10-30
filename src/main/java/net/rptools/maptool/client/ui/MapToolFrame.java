@@ -677,10 +677,17 @@ public class MapToolFrame extends DefaultDockableHolder
           .loadInitialLayout(
               MapToolFrame.class.getClassLoader().getResourceAsStream(INITIAL_LAYOUT_XML));
     } catch (ParserConfigurationException | SAXException | IOException e) {
+      MapTool.showError("msg.error.layoutInitial", e);
+    }
+    try {
+      getDockingManager()
+          .loadLayoutDataFromFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
+    } catch (IllegalArgumentException e) {
+      // This error sometimes comes up when using three monitors due to a bug in the java jdk
+      // incorrectly
+      // reporting screen size as zero.
       MapTool.showError("msg.error.layoutParse", e);
     }
-    getDockingManager()
-        .loadLayoutDataFromFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
   }
 
   public DockableFrame getFrame(MTFrame frame) {
