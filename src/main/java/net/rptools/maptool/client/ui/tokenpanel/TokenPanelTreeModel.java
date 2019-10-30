@@ -220,7 +220,7 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
         }
       } catch (NullPointerException e) {
         // This seems to happen when there was a problem creating the initial window. Lets just
-        // ignore this filter for now
+        // ignore this filter for now.
         log.warn("NullPointerException encountered while trying to update TokenPanelTreeModel", e);
         continue;
       }

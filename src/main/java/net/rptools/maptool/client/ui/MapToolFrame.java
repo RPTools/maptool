@@ -683,6 +683,9 @@ public class MapToolFrame extends DefaultDockableHolder
       getDockingManager()
           .loadLayoutDataFromFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
     } catch (IllegalArgumentException e) {
+      // This error sometimes comes up when using three monitors due to a bug in the java jdk
+      // incorrectly
+      // reporting screen size as zero.
       MapTool.showError("msg.error.layoutParse", e);
     }
   }

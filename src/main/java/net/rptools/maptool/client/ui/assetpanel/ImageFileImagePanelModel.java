@@ -595,10 +595,10 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       MapTool.getFrame().getAssetPanel().updateGlobalSearchLabel(fileList.size());
     } catch (NullPointerException e) {
       // This currently throws a NPE if the frame was not finished initializing when runs. For now,
-      // lets log a message
-      // and continue.
+      // lets log a message and continue.
       log.warn(
-          "NullPointerException encountered while trying to update ImageFileImagePanelModel global search label", e);
+          "NullPointerException encountered while trying to update ImageFileImagePanelModel global search label",
+          e);
     }
   }
 
