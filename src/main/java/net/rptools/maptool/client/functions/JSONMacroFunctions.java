@@ -29,7 +29,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
-@SuppressWarnings("unchecked")
+/** Functions for JSON Arrays and JSON Objects. */
 public class JSONMacroFunctions extends AbstractFunction {
   public enum JSONObjectType {
     OBJECT,
@@ -102,12 +102,14 @@ public class JSONMacroFunctions extends AbstractFunction {
     }
 
     if (functionName.equals("json.path.read")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 3);
       String jsonStr = parameters.get(0).toString();
       String path = parameters.get(1).toString();
+      String strConf = parameters.size() > 2 ? parameters.get(2).toString() : null;
+      Configuration config = getConfig(strConf);
 
       try {
-        return JsonPath.using(jaywayConfig).parse(jsonStr).read(path).toString();
+        return JsonPath.using(config).parse(jsonStr).read(path).toString();
       } catch (Exception e) {
         throw new ParserException(
             I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
@@ -663,7 +665,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    *
    * @param parameters The arguments to the function.
    * @return a JSON array containing the difference of all the arguments.
-   * @throws ParserException
+   * @throws ParserException if parameter not a json
    */
   private Object JSONDifference(List<Object> parameters) throws ParserException {
     Set<Object> s = new HashSet<Object>();
@@ -704,7 +706,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    *
    * @param parameters The arguments to the function.
    * @return a JSON array containing the union of all the arguments.
-   * @throws ParserException
+   * @throws ParserException if parameter not a json
    */
   private Object JSONUnion(List<Object> parameters) throws ParserException {
     Set<Object> s = new HashSet<Object>();
@@ -741,7 +743,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    *
    * @param parameters The arguments to the function.
    * @return a JSON array containing the intersection of all the arguments.
-   * @throws ParserException
+   * @throws ParserException if parameter not a json
    */
   private Object JSONIntersection(List<Object> parameters) throws ParserException {
     Set<Object> s = new HashSet<Object>();
@@ -918,7 +920,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param searchFor the value to search for.
    * @param start the index to start searching at.
    * @return the number of times the value occurs.
-   * @throws ParserException
+   * @throws ParserException if parameter is not a json.
    */
   private BigDecimal JSONCount(Object json, Object searchFor, int start) throws ParserException {
     if (!(json instanceof JSONArray)) {
@@ -969,8 +971,8 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param json The JSON array to check.
    * @param searchFor The value to search for.
    * @param start The index to start from.
-   * @return The index of the first occurance of the value in the array or -1 if it does not occur.
-   * @throws ParserException
+   * @return The index of the first occurrence of the value in the array or -1 if it does not occur.
+   * @throws ParserException if parameter is not a json
    */
   private BigDecimal JSONIndexOf(Object json, Object searchFor, int start) throws ParserException {
     if (!(json instanceof JSONArray)) {
@@ -1255,7 +1257,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param obj The JSON Object or Array.
    * @param keys The key for the object or index for the array.
    * @return the value.
-   * @throws ParserException
+   * @throws ParserException if object is not a json, or the index is invalid
    */
   private Object JSONGet(Object obj, List<Object> keys) throws ParserException {
     Object val = null;
@@ -1608,7 +1610,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * Deletes a field from a JSON object or element from a JSON array.
    *
    * @param obj The JSON object.
-   * @param key
+   * @param key the key or index of the element to delete
    * @return The new JSON object.
    * @throws ParserException if obj can not be converted to a JSON object.
    */
@@ -1661,7 +1663,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param obj The JSON Object.
    * @param key The key to check for.
    * @return true if the JSON object contains the key.
-   * @throws ParserException
+   * @throws ParserException if object is not a json
    */
   private boolean JSONContains(Object obj, String key) throws ParserException {
 
@@ -1863,6 +1865,14 @@ public class JSONMacroFunctions extends AbstractFunction {
     return convertToJSON(o.toString());
   }
 
+  /**
+   * Rolls the dice expression the requested number of times and returns a JSON Array of the
+   * results.
+   *
+   * @param param The list of parameters
+   * @return a JSON array containing the rolls
+   * @throws ParserException if parameters not valid
+   */
   public JSONArray JSONRolls(List<Object> param) throws ParserException {
     String roll = param.get(0).toString();
     if (!(param.get(1) instanceof BigDecimal)) {
@@ -1903,6 +1913,14 @@ public class JSONMacroFunctions extends AbstractFunction {
     }
   }
 
+  /**
+   * Rolls the dice expression the requested number of times and returns a JSON Object of the
+   * results.
+   *
+   * @param param The list of parameters
+   * @return a JSON object containing the rolls
+   * @throws ParserException if parameters not valid
+   */
   public JSONObject JSONObjRolls(List<Object> param) throws ParserException {
     JSONArray names;
     Object[] stats;
@@ -1958,5 +1976,35 @@ public class JSONMacroFunctions extends AbstractFunction {
     }
 
     return jobj;
+  }
+
+  /**
+   * Create the Jayway configuration from a String
+   *
+   * @param strConf The String containing the configuration options
+   * @return the Jayway Configuration
+   */
+  private static Configuration getConfig(String strConf) {
+    Configuration config = jaywayConfig;
+    if (strConf == null) {
+      return config;
+    }
+    strConf = strConf.toUpperCase();
+    if (strConf.contains("AS_PATH_LIST")) {
+      config = config.addOptions(Option.AS_PATH_LIST);
+    }
+    if (strConf.contains("DEFAULT_PATH_LEAF_TO_NULL")) {
+      config = config.addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
+    }
+    if (strConf.contains("SUPPRESS_EXCEPTIONS")) {
+      config = config.addOptions(Option.SUPPRESS_EXCEPTIONS);
+    }
+    if (strConf.contains("ALWAYS_RETURN_LIST")) {
+      config = config.addOptions(Option.ALWAYS_RETURN_LIST);
+    }
+    if (strConf.contains("REQUIRE_PROPERTIES")) {
+      config = config.addOptions(Option.REQUIRE_PROPERTIES);
+    }
+    return config;
   }
 }
