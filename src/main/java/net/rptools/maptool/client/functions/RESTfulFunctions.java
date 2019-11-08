@@ -82,12 +82,12 @@ public class RESTfulFunctions extends AbstractFunction {
     // Check do we need this?
     checkParameters(functionName, parameters, 1, 5);
 
-    if (functionName.equalsIgnoreCase("REST.get") || functionName.equalsIgnoreCase("REST.delete"))
-      return buildGetOrDeleteRequest(functionName, parameters);
+    if (functionName.equalsIgnoreCase("REST.get")) return buildGetRequest(functionName, parameters);
 
     if (functionName.equalsIgnoreCase("REST.post")
         || functionName.equalsIgnoreCase("REST.put")
-        || functionName.equalsIgnoreCase("REST.patch"))
+        || functionName.equalsIgnoreCase("REST.patch")
+        || functionName.equalsIgnoreCase("REST.delete"))
       return buildRequest(functionName, parameters);
     else
       throw new ParserException(
@@ -95,7 +95,7 @@ public class RESTfulFunctions extends AbstractFunction {
   }
 
   /**
-   * Performs a RESTful GET or DELETE request using OkHttp
+   * Performs a RESTful GET request using OkHttp
    *
    * @param functionName
    * @param parameters include URL, headers (optional) and if full response is requested (optional)
@@ -103,7 +103,7 @@ public class RESTfulFunctions extends AbstractFunction {
    *     XML, HTML, or other formats.
    * @throws ParserException
    */
-  private Object buildGetOrDeleteRequest(String functionName, List<Object> parameters)
+  private Object buildGetRequest(String functionName, List<Object> parameters)
       throws ParserException {
     checkParameters(functionName, parameters, 1, 3);
 
@@ -120,8 +120,6 @@ public class RESTfulFunctions extends AbstractFunction {
 
     if (functionName.equalsIgnoreCase("REST.get"))
       request = new Request.Builder().url(baseURL).build();
-    else if (functionName.equalsIgnoreCase("REST.delete"))
-      request = new Request.Builder().url(baseURL).delete().build();
     else
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -130,8 +128,6 @@ public class RESTfulFunctions extends AbstractFunction {
     if (!headerMap.isEmpty())
       if (functionName.equalsIgnoreCase("REST.get"))
         request = new Request.Builder().url(baseURL).headers(headers).build();
-      else if (functionName.equalsIgnoreCase("REST.delete"))
-        request = new Request.Builder().url(baseURL).headers(headers).delete().build();
       else
         throw new ParserException(
             I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -140,8 +136,8 @@ public class RESTfulFunctions extends AbstractFunction {
   }
 
   /**
-   * Performs a RESTful POST, PATCH, or PUT request using OkHttp Minimum requirements are URL,
-   * Payload, & MediaType Optional parameters are Headers & Full Response
+   * Performs a RESTful POST, PATCH, PUT or DELETE request using OkHttp Minimum requirements are
+   * URL, Payload, & MediaType Optional parameters are Headers & Full Response
    *
    * @param functionName
    * @param parameters include URL, payload, media type of payload, headers (optional) and if full
@@ -173,6 +169,8 @@ public class RESTfulFunctions extends AbstractFunction {
         request = new Request.Builder().url(baseURL).put(requestBody).build();
       else if (functionName.equals("REST.patch"))
         request = new Request.Builder().url(baseURL).patch(requestBody).build();
+      else if (functionName.equals("REST.delete"))
+        request = new Request.Builder().url(baseURL).delete(requestBody).build();
       else
         throw new ParserException(
             I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -184,6 +182,11 @@ public class RESTfulFunctions extends AbstractFunction {
         request = new Request.Builder().url(baseURL).headers(headers).put(requestBody).build();
       else if (functionName.equals("REST.patch"))
         request = new Request.Builder().url(baseURL).headers(headers).patch(requestBody).build();
+      else if (functionName.equals("REST.delete"))
+        request = new Request.Builder().url(baseURL).headers(headers).delete(requestBody).build();
+      else
+        throw new ParserException(
+            I18N.getText("macro.function.general.unknownFunction", functionName));
     }
 
     return executeClientCall(functionName, request, isFullResponseRequested(parameters));
