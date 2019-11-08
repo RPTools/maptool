@@ -591,7 +591,15 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     }
 
     Collections.sort(fileList, filenameComparator);
-    MapTool.getFrame().getAssetPanel().updateGlobalSearchLabel(fileList.size());
+    try {
+      MapTool.getFrame().getAssetPanel().updateGlobalSearchLabel(fileList.size());
+    } catch (NullPointerException e) {
+      // This currently throws a NPE if the frame was not finished initializing when runs. For now,
+      // lets log a message and continue.
+      log.warn(
+          "NullPointerException encountered while trying to update ImageFileImagePanelModel global search label",
+          e);
+    }
   }
 
   private static class ListFilesSwingWorker extends SwingWorker<Void, Integer> {

@@ -17,7 +17,7 @@ Enhancements
 - [#810][i810] New macro function `playClip` more suited for short sound FX clips. New convenience function `defineAudioSource` to allow you to assign a nickname to audio sources and refer to the nickname in the audio functions.  Two existing audio functions were renamed as part of the other changes:  `stopStream` -> `stopSound`, `getStreamProperties` -> `getSoundProperties`.
 - [#804][i804] Chat notification flash now picks flash color based on task bar color.
 - [#801][i801] Macro function `getTokenStates` now accepts Token ID and Map Name parameters.
-- [#790][i790] New `execFunction` macro that works like `execLink` but is used for built-in macro functions and UDFs. 
+- [#790][i790] New `execFunction` macro that works like `execLink` but is used for built-in macro functions and UDFs.
 - [#784][i784] Macro function `json.toVars` now accepts JSON arrays as well as objects.
 - [#782][i782] Macro function `broadcast` no accepts "not-gm", "not-self" and "not-gm-self" as targets.
 - [#766][i766] New perlin noise overlay on tiled textures to reduce visible repetition.
@@ -32,7 +32,7 @@ Bug Fixes
 - [#846][i846] `getInfo("server")` was returning true/false instead of 1/0 for "hosting server". Fixed.
 - [#822][i822] `playStream` was ignoring stream parameters set with `editStream`. Fixed.
 - [#820][i820] Functions `execLink` and `execFunction` were not running immediately on local client. Fixed.
-- [#814][i814] Some `update` keywords for `copyToken` were producing exceptions. Fixed. Alternate keywords *tokenPortrait* and *tokenHandout* added 
+- [#814][i814] Some `update` keywords for `copyToken` were producing exceptions. Fixed. Alternate keywords *tokenPortrait* and *tokenHandout* added
 - [#803][i803] `getStreamProps` was returning malformed JSON. Fixed.
 - [#800][i800] Incorrect tooltip on Chat Notification Background preference. Fixed.
 - [#788][i788] Player clients were showing the last campaign file they had loaded in the title bar when connected to servers. Fixed.
@@ -44,6 +44,7 @@ Bug Fixes
 - [#687][i687] The table functions `addTableEntry`, `createTable`, `setTableImage` and `setTableEntry` if passed an empty `AssetID` string would incorrectly put an empty "Asset://" into the entries asset id field. Fixed.  `getTableImage` would thrown an exeption if no table image was set. Fixed.
 - [#627][i627] Version check on MapTool startup should no longer prompt for updates when using release candidates.
 - [#529][i529] Smileys are now working again.
+- [#640][i640] Workaround for errors which occured when three monitors are in use.
 
 [i850]: https://github.com/RPTools/maptool/issues/850
 [i850]: https://github.com/RPTools/maptool/issues/848
@@ -73,6 +74,7 @@ Bug Fixes
 [i642]: https://github.com/RPTools/maptool/issues/642
 [i627]: https://github.com/RPTools/maptool/issues/627
 [i529]: https://github.com/RPTools/maptool/issues/529
+[i640]: https://github.com/RPTools/maptool/issues/640
 
 Maptool 1.5.6
 =====
@@ -394,7 +396,7 @@ Enhancements
   * [getRolled][igrd]()
   * [getNewRolls][ignr]()
   * [clearRolls][icrl]()
-* [#406][i406] - New [dice expression](http://www.lmwcs.com/rptools/wiki/Dice_Expressions) **XdYdhZ** (drop highest) and 7 others. 
+* [#406][i406] - New [dice expression](http://www.lmwcs.com/rptools/wiki/Dice_Expressions) **XdYdhZ** (drop highest) and 7 others.
 * [#355][i355] - Macro Editor details tab reorganized to give some fields more room. Macro button tooltip entry field made into a larger text area with HTML highlighting.  Checkbox to enable/disable hotkey display on button.  UDFs now show in auto-complete of macro editor with their tooltip as help text.
 * [#426][i426] - New Line & Radius templates that start at cells. New icons for all template types.
 * [#424][i424] - Auto-completion in macro editor now works even if complete function name has already been entered.
@@ -406,7 +408,7 @@ Enhancements
 * [#106][i106] - Reset Size added to right-click menu for tokens/stamps.
 * [#299][i299] - Mouse pointer now visible when dragging tokens.
 * [#389][i389] - File -> Export -> Campaign File As... now supports converting back to non-decimal map units-per-cell values.
-* [#332][i332] - Added support for multiple personal lights and setting color for personal lights. 
+* [#332][i332] - Added support for multiple personal lights and setting color for personal lights.
 
 [igrd]: http://www.lmwcs.com/rptools/wiki/getRolled
 [ignr]: http://www.lmwcs.com/rptools/wiki/getNewRolls
@@ -465,8 +467,8 @@ Enhancements
 
 
 
-[i50]: https://github.com/RPTools/maptool/issues/50 
-[i107]: https://github.com/RPTools/maptool/issues/107 
+[i50]: https://github.com/RPTools/maptool/issues/50
+[i107]: https://github.com/RPTools/maptool/issues/107
 [i189]: https://github.com/RPTools/maptool/issues/189
 [i255]: https://github.com/RPTools/maptool/issues/255
 [i278]: https://github.com/RPTools/maptool/issues/278
@@ -537,7 +539,7 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * New RESTful functions getRequest & postRequest to send GET & POST requests to a URI. *Note: You must first turn access on in Preferences for these macro functions to work.
 * New function exportData exportData(FilePath file, String data, boolean appendToFile) which saves string data to external file.
 * New function getEnvironmentVariable(String name), Returns the value stored in the Environment Variable.
-* New menu option added to the "Connections" window. Right clicking a player will offer a "Whisper" command that prepopulates the chat window with a whisper macro.  
+* New menu option added to the "Connections" window. Right clicking a player will offer a "Whisper" command that prepopulates the chat window with a whisper macro.
 * [#237][i237] - Added support to use shift-enter to insert newlines into the command entry box (also known as the chat entry box)
 * [#239][i239] - MapToolScriptTokenMaker now handles function names with . notation and dynamically pulls in all functions names. TokenMakerMaker no longer needs to be ran upon changes to MTScript.
 * [#240][i240] - Macro Editor now has Auto-Completion for macro functions! A brief description and summary can be displayed (these will be added as time permits)
