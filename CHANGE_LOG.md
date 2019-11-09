@@ -11,6 +11,7 @@ Maptool 1.5.7
 
 Enhancements
 -----
+- [#872][i872] Metadata added to JSON returned from `getMacroProps` function to add in external managment of macros.
 - [#850][i850] New macro function `log.trace` added for log messages at `TRACE` level.
 - [#848][i848] File Sync Directory preference setting adding to `getInfo("client")` result.
 - [#829][i829] New macro function `capitalize` will change the first character at each word break to upper case.  e.g. "jolly green giant" -> "Jolly Green Giant".
@@ -29,6 +30,7 @@ Enhancements
 
 Bug Fixes
 -----
+- [#874][i874] `REST.delete` did not support a header and payload.  Fixed.
 - [#846][i846] `getInfo("server")` was returning true/false instead of 1/0 for "hosting server". Fixed.
 - [#822][i822] `playStream` was ignoring stream parameters set with `editStream`. Fixed.
 - [#820][i820] Functions `execLink` and `execFunction` were not running immediately on local client. Fixed.
@@ -42,12 +44,14 @@ Bug Fixes
 - [#767][i767] A recent change to improve program responsiveness had capped frame rate at 30 fps making for jerky map panning. Default is now 60 fps and can be adjusted in preferences under Application -> Performance -> Max Frame Rate.  Note either reloading the current campaign or restarting MapTool is required after making a change.
 - [#740][i740] Selecting New Map in the Library image pane with no image underneath would thrown an exception. Fixed.
 - [#687][i687] The table functions `addTableEntry`, `createTable`, `setTableImage` and `setTableEntry` if passed an empty `AssetID` string would incorrectly put an empty "Asset://" into the entries asset id field. Fixed.  `getTableImage` would thrown an exeption if no table image was set. Fixed.
+- [#640][i640] Workaround for errors which occured when three monitors are in use.
 - [#627][i627] Version check on MapTool startup should no longer prompt for updates when using release candidates.
 - [#529][i529] Smileys are now working again.
-- [#640][i640] Workaround for errors which occured when three monitors are in use.
 
+[i874]: https://github.com/RPTools/maptool/issues/874
+[i872]: https://github.com/RPTools/maptool/issues/872
 [i850]: https://github.com/RPTools/maptool/issues/850
-[i850]: https://github.com/RPTools/maptool/issues/848
+[i848]: https://github.com/RPTools/maptool/issues/848
 [i846]: https://github.com/RPTools/maptool/issues/846
 [i829]: https://github.com/RPTools/maptool/issues/829
 [i822]: https://github.com/RPTools/maptool/issues/822
@@ -72,9 +76,9 @@ Bug Fixes
 [i740]: https://github.com/RPTools/maptool/issues/740
 [i687]: https://github.com/RPTools/maptool/issues/687
 [i642]: https://github.com/RPTools/maptool/issues/642
+[i640]: https://github.com/RPTools/maptool/issues/640
 [i627]: https://github.com/RPTools/maptool/issues/627
 [i529]: https://github.com/RPTools/maptool/issues/529
-[i640]: https://github.com/RPTools/maptool/issues/640
 
 Maptool 1.5.6
 =====
