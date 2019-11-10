@@ -11,6 +11,7 @@ Maptool 1.5.7
 
 Enhancements
 -----
+- [#878][i878] ISO 8601 time date field added to result of `getInfo("client")`.
 - [#872][i872] Metadata added to JSON returned from `getMacroProps` function to add in external managment of macros.
 - [#850][i850] New macro function `log.trace` added for log messages at `TRACE` level.
 - [#848][i848] File Sync Directory preference setting adding to `getInfo("client")` result.
@@ -48,6 +49,7 @@ Bug Fixes
 - [#627][i627] Version check on MapTool startup should no longer prompt for updates when using release candidates.
 - [#529][i529] Smileys are now working again.
 
+[i878]: https://github.com/RPTools/maptool/issues/878
 [i874]: https://github.com/RPTools/maptool/issues/874
 [i872]: https://github.com/RPTools/maptool/issues/872
 [i850]: https://github.com/RPTools/maptool/issues/850
