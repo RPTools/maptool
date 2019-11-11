@@ -114,7 +114,7 @@ public class JSONMacroFunctions extends AbstractFunction {
             // Maybe it's a number.
             BigDecimal bd = obj.getAsBigDecimal();
             return bd;
-          } catch (NumberFormatException e){
+          } catch (NumberFormatException e) {
             // So, not a number.
             // Doing a toString() was wrapping the returned string in quotes.
             return obj.getAsString();
