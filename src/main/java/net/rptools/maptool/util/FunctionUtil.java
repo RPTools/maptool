@@ -14,18 +14,19 @@
  */
 package net.rptools.maptool.util;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
-import net.rptools.maptool.client.functions.JSONMacroFunctions;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 /**
  * Provides static methods to help handle macro functions.
@@ -277,13 +278,13 @@ public class FunctionUtil {
    * @return the parameter as a jsonObject or jsonArray
    * @throws ParserException if the parameter can't be converted to jsonObject or jsonArray
    */
-  public static Object paramAsJson(String functionName, List<Object> parameters, int index)
+  public static JsonElement paramAsJson(String functionName, List<Object> parameters, int index)
       throws ParserException {
-    Object obj = JSONMacroFunctions.asJSON(parameters.get(index));
-    if (!(obj instanceof JSONArray) && !(obj instanceof JSONObject)) {
+    JsonElement jsonElement =  JSONMacroFunctions.getInstance().asJsonElement(parameters.get(index));
+    if (!jsonElement.isJsonObject() && !jsonElement.isJsonArray()) {
       throw new ParserException(I18N.getText(KEY_NOT_JSON, functionName, index + 1));
     }
-    return obj;
+    return jsonElement;
   }
 
   /**
@@ -296,12 +297,14 @@ public class FunctionUtil {
    * @return the parameter as a jsonObject
    * @throws ParserException if the parameter can't be converted to jsonObject
    */
-  public static JSONObject paramAsJsonObject(
+  public static JsonObject paramAsJsonObject(
       String functionName, List<Object> parameters, int index) throws ParserException {
-    Object obj = JSONMacroFunctions.asJSON(parameters.get(index));
-    if (!(obj instanceof JSONObject)) {
+    JsonElement jsonElement = paramAsJson(functionName, parameters, index);
+    if (!jsonElement.isJsonObject()) {
       throw new ParserException(I18N.getText(KEY_NOT_JSON_OBJECT, functionName, index + 1));
-    } else return (JSONObject) obj;
+    }
+
+    return jsonElement.getAsJsonObject();
   }
 
   /**
@@ -314,12 +317,14 @@ public class FunctionUtil {
    * @return the parameter as a jsonArray
    * @throws ParserException if the parameter can't be converted to jsonArray
    */
-  public static JSONArray paramAsJsonArray(String functionName, List<Object> parameters, int index)
+  public static JsonArray paramAsJsonArray(String functionName, List<Object> parameters, int index)
       throws ParserException {
-    Object obj = JSONMacroFunctions.asJSON(parameters.get(index));
-    if (!(obj instanceof JSONArray)) {
+    JsonElement jsonElement = paramAsJson(functionName, parameters, index);
+    if (!jsonElement.isJsonArray()) {
       throw new ParserException(I18N.getText(KEY_NOT_JSON_ARRAY, functionName, index + 1));
-    } else return (JSONArray) obj;
+    }
+
+    return jsonElement.getAsJsonArray();
   }
 
   /**
@@ -345,5 +350,19 @@ public class FunctionUtil {
       } // endif
     } // endif
     return set;
+  }
+
+  /**
+   * Checks to see if the the macro is executing an a trusted context and if not will throw
+   * an exception.
+   *
+   * @param functionName The name of the function being executed.
+   *
+   * @throws ParserException If the macro execution context does not have enough permission.
+   */
+  public static void enforceTrusted(String functionName) throws ParserException {
+    if (!MapTool.getParser().isMacroTrusted()) {
+      throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+    }
   }
 }

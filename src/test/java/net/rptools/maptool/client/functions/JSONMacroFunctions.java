@@ -48,7 +48,7 @@ class TestJSONMacroFunctions {
     List<Object> fparams = new ArrayList<Object>();
     fparams.add(json);
     fparams.addAll(keys);
-    return JSONMacroFunctions.getInstance().childEvaluate(parser, function_name, fparams);
+    return JSONMacroFunctionsOld.getInstance().childEvaluate(parser, function_name, fparams);
   }
 
   Object run(String function_name, Object jobj, Object... objs) throws ParserException {
@@ -111,10 +111,10 @@ class TestJSONMacroFunctions {
       String trimmed = ((String) mt_value).trim();
       // complex json data types
       if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
-        return JSONMacroFunctions.asJSON(mt_value);
+        return JSONMacroFunctionsOld.asJSON(mt_value);
       }
       // simple json data types
-      return JSONMacroFunctions.jsonify(mt_value);
+      return JSONMacroFunctionsOld.jsonify(mt_value);
     }
     return mt_value;
   }

@@ -197,7 +197,7 @@ public class MacroFunctions extends AbstractFunction {
       // We are either a JSON string or an illegal string.
       jobj = JSONObject.fromObject(propString);
     } else {
-      jobj = JSONMacroFunctions.getInstance().fromStrProp(propString, delim);
+      jobj = JSONMacroFunctionsOld.getInstance().fromStrProp(propString, delim);
     }
     if (jobj.containsKey("command") && !MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(

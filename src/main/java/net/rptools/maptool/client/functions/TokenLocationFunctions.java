@@ -154,7 +154,7 @@ public class TokenLocationFunctions extends AbstractFunction {
 
     List<String> tokens = new ArrayList<String>();
 
-    Object json = JSONMacroFunctions.asJSON(tokenString);
+    Object json = JSONMacroFunctionsOld.asJSON(tokenString);
     if (json instanceof JSONArray) {
       tokens.addAll((JSONArray) json);
     } else {

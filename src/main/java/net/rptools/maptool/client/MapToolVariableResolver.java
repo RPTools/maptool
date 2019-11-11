@@ -253,7 +253,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
 
       // First we try convert it to a JSON object.
       if (result.toString().trim().startsWith("[") || result.toString().trim().startsWith("{")) {
-        Object obj = JSONMacroFunctions.convertToJSON(result.toString());
+        Object obj = JSONMacroFunctionsOld.convertToJSON(result.toString());
         if (obj != null) {
           return obj;
         }

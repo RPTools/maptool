@@ -163,7 +163,7 @@ public class FogOfWarFunctions extends AbstractFunction {
 
     if (delim.equalsIgnoreCase("json")) {
       // A JSON Array was supplied
-      Object json = JSONMacroFunctions.convertToJSON(paramStr);
+      Object json = JSONMacroFunctionsOld.convertToJSON(paramStr);
       if (json instanceof JSONArray) {
         for (Object o : (JSONArray) json) {
           String identifier = (String) o;

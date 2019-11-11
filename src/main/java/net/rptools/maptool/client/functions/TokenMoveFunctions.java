@@ -195,7 +195,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 
   private List<Map<String, Integer>> crossedToken(
       final Zone zone, final Token tokenInContext, final Token target, final String pathString) {
-    Object jsonObject = JSONMacroFunctions.asJSON(pathString);
+    Object jsonObject = JSONMacroFunctionsOld.asJSON(pathString);
 
     ArrayList<Map<String, Integer>> pathPoints = new ArrayList<Map<String, Integer>>();
     if (jsonObject instanceof JSONArray) {
@@ -628,7 +628,7 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   private List<Map<String, Integer>> convertJSONStringToList(final String pointsString) {
-    Object jsonObject = JSONMacroFunctions.asJSON(pointsString);
+    Object jsonObject = JSONMacroFunctionsOld.asJSON(pointsString);
 
     ArrayList<Map<String, Integer>> pathPoints = new ArrayList<Map<String, Integer>>();
     if (jsonObject instanceof JSONArray) {

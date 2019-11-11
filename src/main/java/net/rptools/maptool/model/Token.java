@@ -46,7 +46,7 @@ import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.JSONMacroFunctions;
+import net.rptools.maptool.client.functions.JSONMacroFunctionsOld;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
@@ -1415,7 +1415,7 @@ public class Token extends BaseModel implements Cloneable {
     }
     // First we try convert it to a JSON object.
     if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
-      Object obj = JSONMacroFunctions.convertToJSON(val.toString());
+      Object obj = JSONMacroFunctionsOld.convertToJSON(val.toString());
       if (obj != null) {
         return obj;
       }

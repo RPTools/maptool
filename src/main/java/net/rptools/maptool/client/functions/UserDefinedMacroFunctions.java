@@ -126,7 +126,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       output = resolver.getVariable("macro.return").toString();
       stripOutput = output;
     }
-    Object out = JSONMacroFunctions.convertToJSON(stripOutput);
+    Object out = JSONMacroFunctionsOld.convertToJSON(stripOutput);
     if (out != null) {
       return out;
     }

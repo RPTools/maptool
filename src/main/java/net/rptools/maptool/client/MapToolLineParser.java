@@ -73,7 +73,7 @@ public class MapToolLineParser {
               InitiativeRoundFunction.getInstance(),
               InputFunction.getInstance(),
               IsTrustedFunction.getInstance(),
-              JSONMacroFunctions.getInstance(),
+              JSONMacroFunctionsOld.getInstance(),
               LookupTableFunction.getInstance(),
               MacroArgsFunctions.getInstance(),
               MacroDialogFunctions.getInstance(),
@@ -842,7 +842,7 @@ public class MapToolLineParser {
                             .getValue()
                             .toString();
                     if (arg.trim().startsWith("[")) {
-                      Object json = JSONMacroFunctions.convertToJSON(arg);
+                      Object json = JSONMacroFunctionsOld.convertToJSON(arg);
                       if (json instanceof JSONArray) {
                         for (Object name : (JSONArray) json) {
                           outputOpts.add("w:" + name.toString().toLowerCase());
@@ -942,7 +942,7 @@ public class MapToolLineParser {
                     foreachList = null;
                     if (listString.trim().startsWith("{") || listString.trim().startsWith("[")) {
                       // if String starts with [ or { it is JSON -- try to treat it as a JSON String
-                      Object obj = JSONMacroFunctions.convertToJSON(listString);
+                      Object obj = JSONMacroFunctionsOld.convertToJSON(listString);
                       if (obj != null) {
                         foreachList = new ArrayList<String>();
                         if (obj instanceof JSONArray) {
@@ -1676,7 +1676,7 @@ public class MapToolLineParser {
       macroResolver = resolver;
     }
     macroResolver.setVariable("macro.args", args);
-    Object obj = JSONMacroFunctions.convertToJSON(args);
+    Object obj = JSONMacroFunctionsOld.convertToJSON(args);
     if (obj instanceof JSONArray) {
       JSONArray jarr = (JSONArray) obj;
       macroResolver.setVariable("macro.args.num", BigDecimal.valueOf(jarr.size()));

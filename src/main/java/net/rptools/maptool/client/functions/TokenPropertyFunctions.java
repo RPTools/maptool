@@ -651,7 +651,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
         // Do nothing when trusted, since all ownership should be turned off for an empty string
         // used in such a macro.
       } else {
-        Object json = JSONMacroFunctions.asJSON(parameters.get(0));
+        Object json = JSONMacroFunctionsOld.asJSON(parameters.get(0));
         if (json != null && json instanceof JSONArray) {
           for (Object o : (JSONArray) json) {
             MapTool.serverCommand().updateTokenProperty(token, "addOwner", o.toString());

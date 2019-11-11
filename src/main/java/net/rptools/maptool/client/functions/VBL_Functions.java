@@ -91,7 +91,7 @@ public class VBL_Functions extends AbstractFunction {
 
       if (functionName.equals("eraseVBL")) erase = true;
 
-      Object j = JSONMacroFunctions.asJSON(parameters.get(0).toString().toLowerCase());
+      Object j = JSONMacroFunctionsOld.asJSON(parameters.get(0).toString().toLowerCase());
       if (!(j instanceof JSONObject || j instanceof JSONArray)) {
         throw new ParserException(
             I18N.getText(
@@ -145,7 +145,7 @@ public class VBL_Functions extends AbstractFunction {
 
       if (parameters.size() == 2 && !parameters.get(1).equals(BigDecimal.ZERO)) simpleJSON = true;
 
-      Object j = JSONMacroFunctions.asJSON(parameters.get(0).toString().toLowerCase());
+      Object j = JSONMacroFunctionsOld.asJSON(parameters.get(0).toString().toLowerCase());
       if (!(j instanceof JSONObject || j instanceof JSONArray)) {
         throw new ParserException(
             I18N.getText(
@@ -213,7 +213,7 @@ public class VBL_Functions extends AbstractFunction {
       if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
-      Object jsonArea = JSONMacroFunctions.asJSON(parameters.get(0).toString().toLowerCase());
+      Object jsonArea = JSONMacroFunctionsOld.asJSON(parameters.get(0).toString().toLowerCase());
 
       if (parameters.size() == 2) {
         token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);

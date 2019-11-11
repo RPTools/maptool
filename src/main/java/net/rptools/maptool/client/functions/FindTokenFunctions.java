@@ -14,7 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
-import static net.rptools.maptool.client.functions.JSONMacroFunctions.convertToJSON;
+import static net.rptools.maptool.client.functions.JSONMacroFunctionsOld.convertToJSON;
 
 import java.awt.*;
 import java.math.BigDecimal;

@@ -125,7 +125,7 @@ public class DrawingMiscFunctions extends DrawingFunctions {
   }
 
   private List<Map<String, Integer>> convertJSONStringToList(final String pointsString) {
-    Object jsonObject = JSONMacroFunctions.asJSON(pointsString);
+    Object jsonObject = JSONMacroFunctionsOld.asJSON(pointsString);
 
     ArrayList<Map<String, Integer>> pathPoints = new ArrayList<Map<String, Integer>>();
     if (jsonObject instanceof JSONArray) {

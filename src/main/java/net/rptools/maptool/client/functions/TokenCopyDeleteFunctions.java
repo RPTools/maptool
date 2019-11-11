@@ -102,7 +102,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
         throw new ParserException(
             I18N.getText("macro.function.general.tooManyParam", COPY_FUNC, 4, size));
       case 4:
-        Object o = JSONMacroFunctions.asJSON(param.get(3));
+        Object o = JSONMacroFunctionsOld.asJSON(param.get(3));
         if (!(o instanceof JSONObject)) {
           throw new ParserException(
               I18N.getText("macro.function.general.argumentTypeO", COPY_FUNC, 4));
@@ -172,7 +172,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
   private void setTokenValues(Token token, JSONObject vals, Zone zone, MapToolVariableResolver res)
       throws ParserException {
     JSONObject newVals = JSONObject.fromObject(vals);
-    newVals = (JSONObject) JSONMacroFunctions.getInstance().JSONEvaluate(res, newVals);
+    newVals = (JSONObject) JSONMacroFunctionsOld.getInstance().JSONEvaluate(res, newVals);
 
     // FJE Should we remove the keys as we process them? We could then warn the user
     // if there are still keys in the hash at the end...
