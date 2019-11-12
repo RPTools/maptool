@@ -110,8 +110,15 @@ public class JSONMacroFunctions extends AbstractFunction {
       try {
         JsonElement obj = JsonPath.using(jaywayConfig).parse(jsonStr).read(path);
         if (obj.isJsonPrimitive()) {
-          // Doing a toString() was wrapping the string in quotes.
-          return obj.getAsString();
+          try {
+            // Maybe it's a number.
+            BigDecimal bd = obj.getAsBigDecimal();
+            return bd;
+          } catch (NumberFormatException e) {
+            // So, not a number.
+            // Doing a toString() was wrapping the returned string in quotes.
+            return obj.getAsString();
+          }
         } else {
           // Curiously using getAsString() on JsonObjects threw an exception but using
           // toString() works fine for objects and arrays.
