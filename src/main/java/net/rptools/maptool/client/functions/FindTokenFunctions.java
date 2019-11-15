@@ -215,7 +215,7 @@ public class FindTokenFunctions extends AbstractFunction {
   private FindTokenFunctions() {
     super(
         0,
-        2,
+        3,
         "findToken",
         "currentToken",
         "getTokenName",
@@ -261,9 +261,11 @@ public class FindTokenFunctions extends AbstractFunction {
       String mapName = parameters.size() > 1 ? parameters.get(1).toString() : null;
       return findTokenId(parameters.get(0).toString(), mapName);
     }
+    int psize = parameters.size();
     String delim = ",";
     FindType findType;
     String findArgs = null;
+    ZoneRenderer zoneRenderer = null;
     if (functionName.equals("currentToken")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
       findType = FindType.CURRENT;
@@ -294,16 +296,17 @@ public class FindTokenFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       findType = FindType.STATE;
       findArgs = parameters.get(0).toString();
-      delim = parameters.size() > 1 ? parameters.get(1).toString() : delim;
+      delim = psize > 1 ? parameters.get(1).toString() : delim;
     } else if (functionName.startsWith("getOwned")) {
-      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
       findType = FindType.OWNED;
-      findArgs = parameters.get(0).toString();
-      delim = parameters.size() > 1 ? parameters.get(1).toString() : delim;
+      findArgs = psize > 0 ? parameters.get(0).toString() : MapTool.getPlayer().getName();
+      delim = psize > 1 ? parameters.get(1).toString() : delim;
+      zoneRenderer = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 2);
     } else if (functionName.startsWith("getVisibleToken")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       findType = FindType.VISIBLE;
-      delim = parameters.size() > 0 ? parameters.get(0).toString() : delim;
+      delim = psize > 0 ? parameters.get(0).toString() : delim;
     } else {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -317,7 +320,7 @@ public class FindTokenFunctions extends AbstractFunction {
     if (findType == FindType.ALL && parameters.size() > 1) {
       return getTokenList(parser, nameOnly, delim, parameters.get(1).toString());
     }
-    return getTokens(parser, findType, nameOnly, delim, findArgs);
+    return getTokens(parser, findType, nameOnly, delim, findArgs, zoneRenderer);
   }
 
   /**
@@ -710,14 +713,22 @@ public class FindTokenFunctions extends AbstractFunction {
    * @param nameOnly If a list of names is wanted.
    * @param delim The delimiter to use for lists, or "json" for a json array.
    * @param findArgs Any arguments for the find function
+   * @param zoneRenderer the zone renderer, or null if using the current one
    * @return a string list that contains the ids or names of the tokens.
    * @throws ParserException if this code adds a new enum but doesn't properly handle it
    */
   private String getTokens(
-      Parser parser, FindType findType, boolean nameOnly, String delim, String findArgs)
+      Parser parser,
+      FindType findType,
+      boolean nameOnly,
+      String delim,
+      String findArgs,
+      ZoneRenderer zoneRenderer)
       throws ParserException {
     ArrayList<String> values = new ArrayList<String>();
-    ZoneRenderer zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    if (zoneRenderer == null) {
+      zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    }
     Zone zone = zoneRenderer.getZone();
     List<Token> tokens =
         getTokenList(parser, findType, findArgs, true, zone.getAllTokens(), zoneRenderer);
