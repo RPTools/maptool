@@ -245,6 +245,24 @@ public class Token extends BaseModel implements Cloneable {
 
   private HeroLabData heroLabData;
 
+  /**
+   * Constructor from another token, with the option to keep the token id
+   *
+   * @param token the token to copy
+   * @param keepId should the Id be kept
+   */
+  public Token(Token token, boolean keepId) {
+    this(token);
+    if (keepId) {
+      this.setId(token.getId());
+    }
+  }
+
+  /**
+   * Constructor from another token. The token id is not kept.
+   *
+   * @param token the token to copy
+   */
   public Token(Token token) {
     this(token.name, token.getImageAssetId());
     currentImageAsset = token.currentImageAsset;
