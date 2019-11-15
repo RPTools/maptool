@@ -921,9 +921,8 @@ public class AppActions {
         if (originalToken.getY() < topLeft.getY() || originalToken.getX() < topLeft.getX()) {
           topLeft = originalToken;
         }
-        Token newToken = new Token(originalToken);
-        newToken.setId(
-            originalToken.getId()); // keep same ids. Will be changed on paste if need be.
+        Token newToken =
+            new Token(originalToken, true); // keep same ids. Changed on paste if need be.
         tokenCopySet.add(newToken);
       }
       /*
@@ -1027,10 +1026,7 @@ public class AppActions {
     List<String> failedPaste = new ArrayList<String>(tokenList.size());
 
     for (Token origToken : tokenList) {
-      Token token = new Token(origToken);
-      if (keepIdsOnPaste) {
-        token.setId(origToken.getId()); // keep ids if first paste since cut
-      }
+      Token token = new Token(origToken, keepIdsOnPaste); // keep id if first paste since cut
 
       // need this here to get around times when a token is copied and pasted into the
       // same zone, such as a framework "template"
@@ -2080,10 +2076,7 @@ public class AppActions {
                      * You need to modify either Campaign(Campaign) or Zone(Zone) to get any data you need to persist from the pre-server campaign to the post server start up campaign.
                      */
                     MapTool.startServer(
-                        dialog.getUsernameTextField().getText(),
-                        config,
-                        policy,
-                        new Campaign(campaign));
+                        dialog.getUsernameTextField().getText(), config, policy, campaign, true);
 
                     // Connect to server
                     String playerType = dialog.getRoleCombo().getSelectedItem().toString();
