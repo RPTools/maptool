@@ -3,11 +3,14 @@ package net.rptools.maptool.client.functions.json;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
 
@@ -444,4 +447,316 @@ public class JsonArrayFunctions {
   public boolean isEmpty(JsonArray jsonArray) {
     return jsonArray.size() == 0;
   }
+
+  /**
+   * Returns the number of occurrences of a value in a {@link JsonArray} starting at a specific index.
+   *
+   * @param jsonArray The {@link JsonArray} to search through.
+   * @param value The value to search for.
+   * @param start The first index in the {@link JsonArray} to search from.
+   * @return The number of times the value occurs in the array.
+   */
+  public long count(JsonArray jsonArray, JsonElement value, int start) {
+    long count = 0;
+    for (int i = start; i < jsonArray.size(); i++) {
+      JsonElement jsonElement = jsonArray.get(i);
+      if (jsonElement.equals(value)) {
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  /**
+   * Returns the index of the first occurrence of a value in a {@link JsonArray} starting at the
+   * specified index. If the value is not found then -1 is returned.
+   *
+   * @param jsonArray The {@link JsonArray} to check.
+   * @param value The value to check for.
+   * @param start The index in the array to start at.
+   *
+   * @return the index of the value or -1 if it is not found.
+   */
+  public long indexOf(JsonArray jsonArray, JsonElement value, int start) {
+    for (int i = start; i < jsonArray.size(); i++) {
+      JsonElement jsonElement = jsonArray.get(i);
+      if (jsonElement.equals(value)) {
+        return i;
+      }
+    }
+
+    return -1;
+  }
+
+  /**
+   * Returns a new {@link JsonArray} which contains the contents of all passed in arrays merged.
+   *
+   * @param arrays The arrays to merge.
+   *
+   * @return The merged array.
+   */
+  public JsonArray merge(List<JsonArray> arrays) {
+    JsonArray result = new JsonArray();
+    for (JsonArray array : arrays) {
+      result.addAll(array);
+    }
+
+    return result;
+  }
+
+  /**
+   * Returns a new {@link JsonArray} with the unique contents of the passed in array.
+   *
+   * @param jsonArray the {@link JsonArray} to get the unique values of.
+   * @return a new {@link JsonArray} containing the unique values in the passed in array.
+   */
+  public JsonArray unique(JsonArray jsonArray) {
+    List<JsonElement> list = jsonArrayToList(jsonArray);
+    List<JsonElement> unique = list.stream().distinct().collect(Collectors.toList());
+
+    return listToJsonArray(unique);
+  }
+
+  /**
+   * Merges multiple lists of {@link JsonElement}s into a single new list.
+   *
+   * @param lists The list of lists to merge.
+   * @return the new list with all elements merged.
+   */
+  private List<JsonElement> mergeLists(List<List<JsonElement>> lists) {
+    List<JsonElement> result = new ArrayList<>();
+    for (var list : lists) {
+      result.addAll(list);
+    }
+
+    return result;
+  }
+
+  /**
+   * Merges a list of {@link JsonElement}s into a single new list.
+   *
+   * @param arrays The list of arrays to merge.
+   * @return the new list with all elements merged.
+   */
+  private List<JsonElement> mergeJsonArraysToList(List<JsonArray> arrays) {
+    List<List<JsonElement>> lists = new ArrayList<>();
+    for (var array : arrays) {
+      lists.add(jsonArrayToList(array));
+    }
+
+    return mergeLists(lists);
+  }
+
+
+  /**
+   * Returns a new {@link JsonArray} with the contents of the other passed in arrays removed from it.
+   *
+   * @param jsonArray The array with initial values.
+   * @param removed The list of arrays of values to remove.
+   *
+   * @return The new resulting array.
+   */
+  public JsonArray removeAll(JsonArray jsonArray, List<JsonArray> removed) {
+    List<JsonElement> result = jsonArrayToList(jsonArray);
+    List<JsonElement> toRemove = mergeJsonArraysToList(removed);
+
+    result.removeAll(toRemove);
+
+    return listToJsonArray(result);
+  }
+
+
+  /**
+   * Converts the keys of a {@link JsonObject} to a list of {@link JsonElement}s (actually {@link JsonPrimitive}).
+   *
+   * @param jsonObject the {@link JsonElement} to extract the keys from.
+   *
+   * @return a list of the keys.
+   */
+  private List<JsonElement> objectKeysAsElements(JsonObject jsonObject) {
+    List<JsonElement> jsonElements = new ArrayList<>();
+    for (String key : jsonObject.keySet()) {
+      jsonElements.add(new JsonPrimitive(key));
+    }
+
+    return jsonElements;
+  }
+
+
+  /**
+   * Performs a union on multiple {@link JsonArray}/{@link JsonObject}s returning a new {@link JsonArray} with the result.
+   * Note: this is not a merge, if the same value appears more than once in the input {@link JsonArray}/{@link JsonObject}
+   * it will only appear once in the output.
+   *
+   * @param elements The {@link JsonArray}s to perform the merge on.
+   *
+   * @return the result of the union.
+   */
+  public JsonArray union(List<JsonElement> elements) {
+    List<JsonElement> allElements = new ArrayList<>();
+    for (JsonElement jsonElement : elements) {
+      if (jsonElement.isJsonObject()) {
+        allElements.addAll(objectKeysAsElements(jsonElement.getAsJsonObject()));
+      } else {
+        allElements.addAll(jsonArrayToList(jsonElement.getAsJsonArray()));
+      }
+    }
+    List<JsonElement> unique = allElements.stream().distinct().collect(Collectors.toList());
+
+    return listToJsonArray(unique);
+  }
+
+  /**
+   * Returns a new {@link JsonArray} with an intersection of all passed in {@link JsonArray}/{@link JsonObject}s.
+   *
+   * @param elements The {@link JsonArray}s to take the intersection of.
+   *
+   * @return a {@link JsonArray} containing an intersection of the passed in {@link JsonArray}/{@link JsonObject}s.
+   */
+  public JsonArray intersection(List<JsonElement> elements) {
+    List<JsonElement> intersection = new ArrayList<>();
+
+    boolean firstTime = true;
+    for (JsonElement jsonElement : elements) {
+      List<JsonElement> ele;
+      if (jsonElement.isJsonArray()) {
+        ele = jsonArrayToList(jsonElement.getAsJsonArray());
+      } else {
+        ele = objectKeysAsElements(jsonElement.getAsJsonObject());
+      }
+      if (firstTime) {
+        intersection.addAll(ele);
+        firstTime = false;
+      } else {
+        intersection.retainAll(ele);
+      }
+    }
+
+    return listToJsonArray(intersection);
+  }
+
+  /**
+   * Returns a new {@link JsonArray} containing the elements in the first {@link JsonArray}/{@link JsonObject} which
+   * are not in the other {@link JsonArray}/{@link JsonObject}.
+   *
+   * @param elements the {@link JsonArray}/{@link JsonObject} to get the difference of.
+   *
+   * @return the resultant {@link JsonArray}.
+   */
+  public JsonArray difference(List<JsonElement> elements) {
+    List<JsonElement> difference = new ArrayList<>();
+
+    boolean firstTime = true;
+    for (JsonElement jsonElement : elements) {
+      List<JsonElement> ele;
+      if (jsonElement.isJsonArray()) {
+        ele = jsonArrayToList(jsonElement.getAsJsonArray());
+      } else {
+        ele = objectKeysAsElements(jsonElement.getAsJsonObject());
+      }
+      if (firstTime) {
+        difference.addAll(ele);
+        firstTime = false;
+      } else {
+        difference.removeAll(ele);
+      }
+    }
+
+    return listToJsonArray(difference);
+  }
+
+  /**
+   * Returns if all the keys/values in {@link JsonObject}/{@link JsonArray}s are contained in the
+   * first {@link JsonObject}/{@link JsonArray} passed in.
+   *
+   * @param elements the {@link JsonObject}/{@link JsonArray}s to check.
+   *
+   * @return <code>true</code> if the first value is a superset of all subsequent values.
+   */
+  public boolean isSubset(List<JsonElement> elements) {
+    List<JsonElement> first;
+    if (elements.get(0).isJsonObject()) {
+      first = objectKeysAsElements(elements.get(0).getAsJsonObject());
+    } else {
+      first = jsonArrayToList(elements.get(0).getAsJsonArray());
+    }
+
+    Set<JsonElement> remaining = new HashSet<>();
+    for (int i = 1; i < elements.size(); i++) {
+      JsonElement jsonElement = elements.get(i);
+      if (jsonElement.isJsonObject()) {
+         remaining.addAll(objectKeysAsElements(jsonElement.getAsJsonObject()));
+      } else {
+        remaining.addAll(jsonArrayToList(jsonElement.getAsJsonArray()));
+      }
+    }
+
+    return first.containsAll(remaining);
+  }
+
+
+  /**
+   * Returns a new {@link JsonArray} that contains the values in <code>removeFrom</code> with the
+   * first occurrence of each values in <code>toRemove</code> removed.
+   * @param removeFrom the {@link JsonArray} that contains the values to start with.
+   * @param toRemove the {@link JsonArray} that contains the values to remove the first occurrence of.
+   *
+   * @return the resulting {@link JsonArray}.
+   */
+  public JsonArray removeFirst(JsonArray removeFrom, JsonArray toRemove) {
+    List<JsonElement> removeFromList = jsonArrayToList(removeFrom);
+    List<JsonElement> toRemoveList = jsonArrayToList( toRemove);
+
+    for (JsonElement jsonElement : toRemoveList) {
+      removeFromList.remove(jsonElement);
+    }
+
+    return listToJsonArray(removeFromList);
+  }
+
+
+  /**
+   * Converts a {@link JsonArray} into a list of MT Script objects.
+   * @param jsonArray The {@link JsonArray} to convert.
+   *
+   * @return the list of {@link JsonArray} objects.
+   */
+  public List<Object> jsonArrayAsMTScriptList(JsonArray jsonArray) {
+    List<Object> list = new ArrayList<>();
+    for (JsonElement jsonElement : jsonArray) {
+      list.add(typeConversion.asScriptType(jsonElement));
+    }
+
+    return list;
+  }
+
+
+  /**
+   * Parses a <code>String</code> and returns it as a {@link JsonArray}.
+   *
+   * @param json the <code>String</code> to parse.
+   *
+   * @return the parsed {@link JsonArray}.
+   */
+  public JsonArray parseJsonArray(String json) {
+    JsonElement jsonElement =  typeConversion.asJsonElement(json);
+    return jsonElement.getAsJsonArray();
+  }
+
+
+  /**
+   * Converts the elements in a {@link JsonArray} into a list of <code>String</code>s.
+   * @param jsonArray The {@link JsonArray} to convert to a list of <code>String</code>s.
+   * @return The list of <code>String</code>s.
+   */
+  public List<String> jsonArrayToListOfStrings(JsonArray jsonArray) {
+    List<String> list = new ArrayList<>(jsonArray.size());
+    for (JsonElement jsonElement : jsonArray) {
+      list.add(jsonElement.getAsString());
+    }
+
+    return list;
+  }
+
 }

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import net.rptools.common.expression.ExpressionParser;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.EvalMacroFunctions;
 import net.rptools.maptool.language.I18N;
@@ -30,6 +31,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 
   /** Object used to convert between json and MTS primitive types. */
   private final JsonMTSTypeConversion typeConversion;
+
 
   /** Class used for Json Array related functions */
   private final JsonArrayFunctions jsonArrayFunctions;
@@ -241,115 +243,236 @@ public class JSONMacroFunctions extends AbstractFunction {
           start = FunctionUtil.paramAsInteger(functionName, args, 2, true);
         }
         JsonArray jsonArray = FunctionUtil.paramAsJsonArray(functionName, args, 0);
+        JsonElement value = asJsonElement(args.get(1));
 
-        return BigDecimal.valueOf(jsonArrayFunctions.count(jsonArray, args.get(1), start));
+        return BigDecimal.valueOf(jsonArrayFunctions.count(jsonArray, value, start));
       }
-      case "json.indexOf":
+      case "json.indexOf": {
         FunctionUtil.checkNumberParam(functionName, args, 2, 3);
-        return jsonIndexOf(functionName, args.get(0), args.get(1), args.size() > 2 ? args.get(2) : null);
-      case "json.merge":
-      case "json.unique":
-      case "json.removeAll":
-      case "json.union":
-      case "json.intersection":
-      case "json.difference":
-      case "json.isSubset":
-      case "json.removeFirst":
-      case "json.rolls":
-      case "json.objrolls":
+        JsonArray jsonArray = FunctionUtil.paramAsJsonArray(functionName, args, 0);
+        JsonElement value = asJsonElement(args.get(1));
+        int start = 0;
+        if (args.size() > 2) {
+          start = FunctionUtil.paramAsInteger(functionName, args, 2, true);
+        }
+        return BigDecimal.valueOf(jsonArrayFunctions.indexOf(jsonArray, value, start));
+      }
+      case "json.merge": {
+        FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
+        JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+        if (jsonElement.isJsonArray()) {
+          return jsonArrayFunctions.merge(paramsAsJsonArrays(functionName, args));
+        } else {
+          return jsonObjectFunctions.merge(paramsAsJsonObjects(functionName, args));
+        }
+      }
+      case "json.unique": {
+        FunctionUtil.checkNumberParam(functionName, args, 1, 1);
+        JsonArray jsonArray = FunctionUtil.paramAsJsonArray(functionName, args, 0);
+
+        return jsonArrayFunctions.unique(jsonArray);
+      }
+      case "json.removeAll": {
+        FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
+        JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+        if (jsonElement.isJsonArray()) {
+          List<JsonArray> arrays = (paramsAsJsonArrays(functionName, args));
+          return jsonArrayFunctions.removeAll(arrays.get(0), arrays.subList(1, arrays.size()));
+        } else {
+          List<JsonObject> objects = paramsAsJsonObjects(functionName, args);
+          return jsonObjectFunctions.removeAll(objects.get(0), objects.subList(1, objects.size()));
+        }
+      }
+      case "json.union": {
+        FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
+        List<JsonElement> elements = paramsAsJsonElements(functionName, args);
+        return jsonArrayFunctions.union(elements);
+      }
+      case "json.intersection": {
+        FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
+        List<JsonElement> elements = paramsAsJsonElements(functionName, args);
+        return jsonArrayFunctions.intersection(elements);
+      }
+      case "json.difference": {
+        FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
+        List<JsonElement> elements = paramsAsJsonElements(functionName, args);
+        return jsonArrayFunctions.difference(elements);
+      }
+      case "json.isSubset": {
+        FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
+        List<JsonElement> elements = paramsAsJsonElements(functionName, args);
+        return jsonArrayFunctions.isSubset(elements);
+      }
+      case "json.removeFirst": {
+        FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
+        JsonArray removeFrom = FunctionUtil.paramAsJsonArray(functionName, args, 0);
+        JsonArray toRemove = FunctionUtil.paramAsJsonArray(functionName, args, 1);
+        return jsonArrayFunctions.removeFirst(removeFrom, toRemove);
+      }
+      case "json.rolls": {
+        FunctionUtil.checkNumberParam(functionName, args, 2, 3);
+        String rollString = args.get(0).toString();
+        int outerDim = FunctionUtil.paramAsInteger(functionName, args, 1, true);
+        int innerDim;
+        if (args.size() > 2) {
+          innerDim = FunctionUtil.paramAsInteger(functionName, args, 2, true);
+        } else {
+          innerDim = 1;
+        }
+
+        return jsonRolls(rollString, outerDim, innerDim);
+      }
+      case "json.objrolls": {
+        FunctionUtil.checkNumberParam(functionName, args, 3, 3);
+        JsonArray names = FunctionUtil.paramAsJsonArray(functionName, args, 0);
+        JsonArray stats = FunctionUtil.paramAsJsonArray(functionName, args, 1);
+        String rollString = args.get(2).toString();
+        return jsonObjRolls(names, stats, rollString);
+      }
     }
 
     return null; // TODO CDW
   }
 
-
-
-  private Object jsonIndexOf(String functionName, Object json, Object val, Object ind)
+  /**
+   * Creates a {@link JsonObject} with the <code>rollString</code> evaluated for each of the <code>stats</code>
+   * creating an inner object for each of the <code>names</code>.
+   *
+   * @param names The names to use as top level keys in the {@link JsonObject}.
+   * @param stats The stats to use as keys in each of the inner {@link JsonObject}s.
+   * @param rollString The roll expression.
+   *
+   * @return The resulting {@link JsonObject}.
+   *
+   * @throws ParserException if an error occurs parsing the roll expression.
+   */
+  private JsonObject jsonObjRolls(JsonArray names, JsonArray stats, String rollString)
       throws ParserException {
-    int start = 0;
+    ExpressionParser parser = new ExpressionParser(new MapToolVariableResolver(null));
 
-    if (ind != null) {
-      if (!(ind instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.argumentTypeN", functionName, ind.toString())
-        );
+    JsonObject outerObj = new JsonObject();
+
+    for (JsonElement name : names) {
+      JsonObject innerObj = new JsonObject();
+      for (JsonElement stat : stats) {
+        JsonElement val = asJsonElement(parser.evaluate(rollString).getValue());
+        innerObj.add(stat.getAsString(), val);
       }
-      start = ((BigDecimal) ind).intValue();
+      outerObj.add(name.getAsString(), innerObj);
     }
 
-    JsonElement jsonElement = asJsonElement(json);
-    if (!jsonElement.isJsonArray()) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.json.onlyArray",
-              json == null ? "NULL" : json.toString(),
-              functionName));
-    }
-
-    JsonArray jsonArray = jsonElement.getAsJsonArray();
-    JsonElement lookFor = asJsonElement(val);
-    for (int i = start; i < jsonArray.size(); i++) {
-      if (lookFor.equals(jsonArray.get(i))) {
-        return BigDecimal.valueOf(i);
-      }
-    }
-
-    return BigDecimal.ZERO;
+    return outerObj;
   }
 
-  private BigDecimal jsonCount(String functionName, Object json, Object val, Object ind)
+  /**
+   * Populates a {@link JsonArray} with the results of rolls performed in the <code>rollString</code>/
+   * @param rollString The roll expression to perform.
+   * @param amount The amount of times to perform the roll.
+   * @param parser The {@link ExpressionParser} used to perform the rolls.
+   *
+   * @return A {@link JsonArray} containing the rolls.
+   *
+   * @throws ParserException when an error occurs while trying to perform the rolls.
+   */
+  private JsonArray jsonRolls(String rollString, int amount, ExpressionParser parser)
       throws ParserException {
-    int start = 0;
-    int count = 0;
-
-    if (ind != null) {
-      if (!(ind instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.argumentTypeN", functionName, ind.toString())
-        );
-      }
-      start = ((BigDecimal) ind).intValue();
+    JsonArray array = new JsonArray();
+    for (int i = 0; i < amount; i++) {
+      array.add(asJsonElement(parser.evaluate(rollString).getValue()));
     }
 
-    JsonElement jsonElement = asJsonElement(json);
-    if (!jsonElement.isJsonArray()) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.json.onlyArray",
-              json == null ? "NULL" : json.toString(),
-              functionName));
-    }
-
-    JsonArray jsonArray = jsonElement.getAsJsonArray();
-    JsonElement lookFor = asJsonElement(val);
-    for (int i = start; i < jsonArray.size(); i++) {
-      if (lookFor.equals(jsonArray.get(i))) {
-        count++;
-      }
-    }
-
-    return BigDecimal.valueOf(count);
+    return array;
   }
 
-  private BigDecimal jsonEquals(Object left, Object right) {
-    JsonElement leftJson = asJsonElement(left);
-    JsonElement rightJson = asJsonElement(right);
+  /**
+   * Populates a {@link JsonArray} with the results of rolls performed in the <code>rollString</code>/
+   * If <code>innerDim</code> is <code>1</code> then a 1 dimensional array is returned, otherwise
+   * a 2 dimensional array is returned.
+   *
+   * @param rollString The roll expression to perform.
+   * @param outerDim The number of groups.
+   * @param innerDim The number of rolls in each group.
+   *
+   * @return a {@link JsonArray} of the evaluated rolls.
+   *
+   * @throws ParserException when an error occurs evaluating the roll expression.
+   */
+  private JsonArray jsonRolls(String rollString, int outerDim, int innerDim) throws ParserException {
+    ExpressionParser parser = new ExpressionParser(new MapToolVariableResolver(null));
 
-    return leftJson.equals(rightJson) ? BigDecimal.ONE : BigDecimal.ZERO;
-  }
-
-  private BigDecimal jsonIsEmpty(Object json) {
-    JsonElement jsonElement = asJsonElement(json);
-    if (jsonElement.isJsonObject()) {
-      JsonObject jsonObject = jsonElement.getAsJsonObject();
-      return jsonObject.size() > 0 ? BigDecimal.ZERO : BigDecimal.ONE;
-    } else if (jsonElement.isJsonArray()) {
-      JsonArray jsonArray = jsonElement.getAsJsonArray();
-      return jsonArray.size() > 0 ? BigDecimal.ZERO : BigDecimal.ONE;
-    } else {
-      return jsonElement.getAsString().length() > 0 ? BigDecimal.ZERO : BigDecimal.ONE;
+    if (innerDim == 1) {
+      return jsonRolls(rollString, outerDim, parser);
     }
+
+    JsonArray array = new JsonArray();
+    for (int i = 0; i < outerDim; i++) {
+      array.add(jsonRolls(rollString, innerDim, parser));
+    }
+
+    return array;
   }
+
+  /**
+   * Returns the parameter list as a list of {@link JsonArray}s.
+   *
+   * @param functionName The name of the MT Script function that was called.
+   * @param params The parameters to extract as {@link JsonArray}s.
+   *
+   * @return The list of {@link JsonArray}s.
+   *
+   * @throws ParserException if the parameters can not be converted to {@link JsonArray}s.
+   */
+  private List<JsonArray> paramsAsJsonArrays(String functionName, List<Object> params)
+      throws ParserException {
+    List<JsonArray> arrays = new ArrayList<>();
+    for (int i = 0; i < params.size(); i++) {
+      arrays.add(FunctionUtil.paramAsJsonArray(functionName, params, i));
+    }
+
+    return arrays;
+  }
+
+  /**
+   * Returns the parameter list as a list of {@link JsonObject}s.
+   *
+   * @param functionName The name of the MT Script function that was called.
+   * @param params The parameters to extract as {@link JsonObject}s.
+   *
+   * @return The list of {@link JsonObject}s.
+   *
+   * @throws ParserException if the parameters can not be converted to {@link JsonObject}s.
+   */
+  private List<JsonObject> paramsAsJsonObjects(String functionName, List<Object> params)
+      throws ParserException {
+    List<JsonObject> objects = new ArrayList<>();
+    for (int i = 0; i < params.size(); i++) {
+      objects.add(FunctionUtil.paramAsJsonObject(functionName, params, i));
+    }
+
+    return objects;
+  }
+
+  /**
+   * Returns the parameter list as a list of {@link JsonElement}s.
+   *
+   * @param functionName The name of the MT Script function that was called.
+   * @param params The parameters to extract as {@link JsonElement}s.
+   *
+   * @return The list of {@link JsonElement}s.
+   *
+   * @throws ParserException if the parameters can not be converted to {@link JsonElement}s.
+   */
+  private List<JsonElement> paramsAsJsonElements(String functionName, List<Object> params)
+      throws ParserException {
+    List<JsonElement> elements = new ArrayList<>();
+    for (int i = 0; i < params.size(); i++) {
+      elements.add(FunctionUtil.paramAsJson(functionName, params, i));
+    }
+
+    return elements;
+  }
+
+
 
   /**
    * Converts the argument passed to json and runs all the values contained within through the parser
@@ -364,7 +487,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    */
   private JsonElement jsonEvaluateArg(MapToolVariableResolver resolver,  Object json)
       throws ParserException {
-    JsonElement jsonElement = typeConversion.asJsonElement(json);
+    JsonElement jsonElement = asJsonElement(json);
 
     return jsonEvaluate(jsonElement, resolver);
   }
@@ -471,20 +594,20 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   private Object jsonPathDelete(Object json, String path) {
-    JsonElement jsonElement = asClonedJsonElement(json);
+    JsonElement jsonElement = typeConversion.asClonedJsonElement(json);
 
     return JsonPath.parse(jsonElement).delete(path).json();
   }
 
   private JsonElement jsonPathPut(Object json, String path, String key, Object info) {
-    JsonElement jsonElement = asClonedJsonElement(json);
+    JsonElement jsonElement = typeConversion.asClonedJsonElement(json);
     Object value = asJsonElement(info);
 
     return JsonPath.parse(jsonElement).put(path, key, value).json();
   }
 
   private Object jsonPathSet(Object json, String path, Object info) {
-    JsonElement jsonElement = asClonedJsonElement(json);
+    JsonElement jsonElement = typeConversion.asClonedJsonElement(json);
     Object value = asJsonElement(info);
 
     return JsonPath.parse(jsonElement).set(path, value).json();
@@ -499,7 +622,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @return a copy of the json with the new information added.
    */
   private JsonElement jsonPathAdd(Object json, String path, Object info) {
-    JsonElement jsonElement = asClonedJsonElement(json);
+    JsonElement jsonElement = typeConversion.asClonedJsonElement(json);
     Object value = asJsonElement(info);
 
     return JsonPath.parse(jsonElement).add(path, value).json();
@@ -515,30 +638,25 @@ public class JSONMacroFunctions extends AbstractFunction {
    */
   private Object jsonPathRead(Object json, String path) {
     JsonElement jsonElement = asJsonElement(json);
-    return asScriptType(JsonPath.using(jaywayConfig).parse(jsonElement).read(path));
+    return typeConversion.asScriptType(JsonPath.using(jaywayConfig).parse(jsonElement).read(path));
   }
 
-  private JsonElement jsonParse(String json) {
-    return jsonParser.parse(json);
-  }
-
-  private List<JsonElement> jsonArrayToList(JsonArray jsonArray) {
-    List<JsonElement> list = new ArrayList<>(jsonArray.size());
-    for (JsonElement ele : jsonArray) {
-      list.add(ele);
-    }
-
-    return list;
-  }
-
-  private JsonArray listToJsonArray(List<JsonElement> list) {
-    JsonArray jsonArray = new JsonArray();
-    for (JsonElement ele : list) {
-      jsonArray.add(ele);
-    }
-
-    return jsonArray;
+  /**
+   * Returns the object used to perform functions on {@link JsonArray}s.
+   * @return the object used to perform functions on {@link JsonArray}s.
+   */
+  public JsonArrayFunctions getJsonArrayFunctions() {
+    return jsonArrayFunctions;
   }
 
 
+  /**
+   * This method returns the object passed in as the appropriate json type.
+   *
+   * @param o the object to convert.
+   * @return the json representation..
+   */
+  public JsonElement asJsonElement(Object o) {
+    return typeConversion.asJsonElement(o);
+  }
 }
