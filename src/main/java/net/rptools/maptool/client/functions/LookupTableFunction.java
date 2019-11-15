@@ -102,7 +102,7 @@ public class LookupTableFunction extends AbstractFunction {
       String name = params.get(0).toString();
       String visible = params.get(1).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      lookupTable.setVisible(AbstractTokenAccessorFunction.getBooleanValue(visible));
+      lookupTable.setVisible(FunctionUtil.getBooleanValue(visible));
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return lookupTable.getVisible() ? "1" : "0";
 
@@ -121,7 +121,7 @@ public class LookupTableFunction extends AbstractFunction {
       String name = params.get(0).toString();
       String access = params.get(1).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      lookupTable.setAllowLookup(AbstractTokenAccessorFunction.getBooleanValue(access));
+      lookupTable.setAllowLookup(FunctionUtil.getBooleanValue(access));
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return lookupTable.getAllowLookup() ? "1" : "0";
 
@@ -201,8 +201,8 @@ public class LookupTableFunction extends AbstractFunction {
       }
       LookupTable lookupTable = new LookupTable();
       lookupTable.setName(name);
-      lookupTable.setVisible(AbstractTokenAccessorFunction.getBooleanValue(visible));
-      lookupTable.setAllowLookup(AbstractTokenAccessorFunction.getBooleanValue(lookups));
+      lookupTable.setVisible(FunctionUtil.getBooleanValue(visible));
+      lookupTable.setAllowLookup(FunctionUtil.getBooleanValue(lookups));
       if (asset != null) lookupTable.setTableImage(asset);
       MapTool.getCampaign().getLookupTableMap().put(name, lookupTable);
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
@@ -226,7 +226,13 @@ public class LookupTableFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam("getTableImage", params, 1, 1);
       String name = params.get(0).toString();
       LookupTable lookupTable = getMaptoolTable(name, function);
-      return lookupTable.getTableImage();
+      MD5Key img = lookupTable.getTableImage();
+      if (img == null) {
+        // Returning null causes an NPE when output is dumped to chat.
+        return "";
+      } else {
+        return img;
+      }
 
     } else if ("setTableImage".equalsIgnoreCase(function)) {
 
@@ -437,9 +443,13 @@ public class LookupTableFunction extends AbstractFunction {
    * "asset://" urls.
    *
    * @param assetString String containing either an asset ID or asset URL.
-   * @return MD5Key asset id.
+   * @return MD5Key asset id or null
    */
   private MD5Key getAssetFromString(String assetString) {
+    if (assetString.isEmpty()) {
+      return null;
+    }
+
     if (assetString.toLowerCase().startsWith("asset://")) {
       String id = assetString.substring(8);
       return new MD5Key(id);

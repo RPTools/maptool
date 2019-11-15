@@ -74,8 +74,14 @@ public class TokenStateFunction extends AbstractFunction {
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 2, 3);
       return setState(token, stateName, value);
     } else if (functionName.equals("getTokenStates")) {
-      FunctionUtil.checkNumberParam(functionName, args, 0, 2);
-      return getTokenStates(parser, args);
+      FunctionUtil.checkNumberParam(functionName, args, 0, 4);
+      String delim = args.size() > 0 ? args.get(0).toString() : ",";
+      String group = args.size() > 1 ? args.get(1).toString() : "*";
+      Token token =
+          args.size() > 2
+              ? FunctionUtil.getTokenFromParam(resolver, functionName, args, 2, 3)
+              : null;
+      return getTokenStates(delim, group, token);
     } else {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -90,7 +96,7 @@ public class TokenStateFunction extends AbstractFunction {
    * @return the value of the state.
    * @throws ParserException if the state is unknown.
    */
-  public Object getState(Token token, String stateName) throws ParserException {
+  public static Object getState(Token token, String stateName) throws ParserException {
     return getBooleanTokenState(token, stateName) ? BigDecimal.valueOf(1) : BigDecimal.valueOf(0);
   }
 
@@ -102,7 +108,7 @@ public class TokenStateFunction extends AbstractFunction {
    * @return the value of the state.
    * @throws ParserException if an error occurs.
    */
-  public boolean getBooleanTokenState(Token token, String stateName) throws ParserException {
+  public static boolean getBooleanTokenState(Token token, String stateName) throws ParserException {
     if (!MapTool.getCampaign().getTokenStatesMap().containsKey(stateName)) {
       throw new ParserException(
           I18N.getText("macro.function.tokenStateFunctions.unknownState", stateName));
@@ -120,7 +126,8 @@ public class TokenStateFunction extends AbstractFunction {
    * @return the value of the state.
    * @throws ParserException if the state is unknown.
    */
-  public BigDecimal setState(Token token, String stateName, Object val) throws ParserException {
+  public static BigDecimal setState(Token token, String stateName, Object val)
+      throws ParserException {
     boolean set = getBooleanFromValue(val);
     if (stateName.equals(ALL_STATES)) {
       MapTool.serverCommand().updateTokenProperty(token, "setAllStates", set);
@@ -139,7 +146,7 @@ public class TokenStateFunction extends AbstractFunction {
    *
    * @param value the object to get the value from
    */
-  private boolean getBooleanFromValue(Object value) {
+  private static boolean getBooleanFromValue(Object value) {
     if (value == null) { // If state does not exist then it can't be set ;)
       return false;
     }
@@ -157,27 +164,32 @@ public class TokenStateFunction extends AbstractFunction {
   }
 
   /**
-   * Gets a list of the valid token states.
+   * Gets a list of the token states, either from the Campaign or from a token.
    *
-   * @param parser The parser.
-   * @param args The arguments.
+   * @param delim The delimiter to use to return the list.
+   * @param group The group to get the states of. If "*" returns states of all groups.
+   * @param token The token to get the states of. If null, get the Campaign states instead.
    * @return A string with the states.
    */
-  private String getTokenStates(Parser parser, List<Object> args) {
-    String delim = args.size() > 0 ? args.get(0).toString() : ",";
+  private String getTokenStates(String delim, String group, Token token) {
     Set<String> stateNames;
 
-    if (args.size() > 1) {
-      String group = (String) args.get(1);
+    if ("*".equals(group)) { // get all Campaign states
+      stateNames = MapTool.getCampaign().getTokenStatesMap().keySet();
+    } else {
       Map<String, BooleanTokenOverlay> states = MapTool.getCampaign().getTokenStatesMap();
       stateNames = new HashSet<String>();
       for (BooleanTokenOverlay bto : states.values()) {
-        if (group.equals(bto.getGroup())) {
-          stateNames.add(bto.getName());
-        }
+        // return states of the group that matches
+        if (group.equals(bto.getGroup())) stateNames.add(bto.getName());
       }
-    } else {
-      stateNames = MapTool.getCampaign().getTokenStatesMap().keySet();
+    }
+
+    if (token != null) {
+      // only keep states set to true on token
+      Set<String> tokenStates = token.getStatePropertyNames(true);
+      tokenStates.retainAll(stateNames);
+      stateNames = tokenStates;
     }
 
     StringBuilder sb = new StringBuilder();

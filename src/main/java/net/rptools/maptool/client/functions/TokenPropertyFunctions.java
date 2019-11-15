@@ -304,14 +304,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
     /*
      * String empty = resetProperty(String propName, String tokenId: currentToken(), string mapName: current map)
      */
-    if (functionName.equals("resetProperty")) {
+    if (functionName.equalsIgnoreCase("resetProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      String property = parameters.get(0).toString();
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      ZoneRenderer zoneR = token.getZoneRenderer();
-      Zone zone = zoneR.getZone();
 
-      token.resetProperty(parameters.get(0).toString());
-      MapTool.serverCommand().putToken(zone.getId(), token);
+      MapTool.serverCommand().updateTokenProperty(token, "resetProperty", property);
       return "";
     }
 
@@ -803,7 +801,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equals("setTokenSnapToGrid")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-      Boolean toGrid = AbstractTokenAccessorFunction.getBooleanValue((Object) parameters.get(0));
+      Boolean toGrid = FunctionUtil.getBooleanValue((Object) parameters.get(0));
       MapTool.serverCommand().updateTokenProperty(token, "setSnapToGrid", toGrid);
       return token.isSnapToGrid() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
@@ -873,18 +871,14 @@ public class TokenPropertyFunctions extends AbstractFunction {
   }
 
   /**
-   * Sets the layer of the token.
+   * Get the Zone.Layer element corresponding to a layerName
    *
-   * @param token The token to move to a different layer.
-   * @param layerName the name of the layer to move the token to.
-   * @param forceShape normally <code>true</code>, but can be optionally set to <code>false</code>
-   *     by MTscript
-   * @return the name of the layer the token was moved to.
+   * @param layerName the String of the name of the layer
    * @throws ParserException if the layer name is invalid.
+   * @return the Zone.Layer corresponding to the layerName
    */
-  public String setLayer(Token token, String layerName, boolean forceShape) throws ParserException {
+  public static Zone.Layer getLayer(String layerName) throws ParserException {
     Zone.Layer layer;
-
     if (layerName.equalsIgnoreCase(Zone.Layer.TOKEN.toString())) {
       layer = Zone.Layer.TOKEN;
     } else if (layerName.equalsIgnoreCase(Zone.Layer.BACKGROUND.toString())) {
@@ -898,9 +892,21 @@ public class TokenPropertyFunctions extends AbstractFunction {
       throw new ParserException(
           I18N.getText("macro.function.tokenProperty.unknownLayer", "setLayer", layerName));
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setLayer", layer);
+    return layer;
+  }
+
+  /**
+   * Get the token shape corresponding to the token & layer. Returns null if can't find match, or if
+   * forceShape is set to false.
+   *
+   * @param token the token to get the new shape of.
+   * @param layer the layer of the token.
+   * @param forceShape should we even get a new shape?
+   * @return the new TokenShape of the token
+   */
+  public static Token.TokenShape getTokenShape(Token token, Zone.Layer layer, boolean forceShape) {
+    Token.TokenShape tokenShape = null;
     if (forceShape) {
-      Token.TokenShape tokenShape = null;
       switch (layer) {
         case BACKGROUND:
         case OBJECT:
@@ -910,16 +916,34 @@ public class TokenPropertyFunctions extends AbstractFunction {
         case TOKEN:
           Image image = ImageManager.getImage(token.getImageAssetId());
           if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
-
             tokenShape = Token.TokenShape.TOP_DOWN;
           } else {
             tokenShape = TokenUtil.guessTokenType(image);
           }
           break;
       }
-      if (tokenShape != null) {
-        MapTool.serverCommand().updateTokenProperty(token, "setShape", tokenShape);
-      }
+    }
+    return tokenShape;
+  }
+  /**
+   * Sets the layer of the token.
+   *
+   * @param token The token to move to a different layer.
+   * @param layerName the name of the layer to move the token to.
+   * @param forceShape normally <code>true</code>, but can be optionally set to <code>false</code>
+   *     by MTscript
+   * @return the name of the layer the token was moved to.
+   * @throws ParserException if the layer name is invalid.
+   */
+  private static String setLayer(Token token, String layerName, boolean forceShape)
+      throws ParserException {
+    Zone.Layer layer = getLayer(layerName);
+    Token.TokenShape tokenShape = getTokenShape(token, layer, forceShape);
+
+    if (tokenShape != null) {
+      MapTool.serverCommand().updateTokenProperty(token, "setLayerShape", layer, tokenShape);
+    } else {
+      MapTool.serverCommand().updateTokenProperty(token, "setLayer", layer);
     }
     return layerName;
   }

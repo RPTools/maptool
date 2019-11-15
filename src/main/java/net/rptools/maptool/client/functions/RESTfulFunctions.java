@@ -28,6 +28,7 @@ import java.util.Map;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -55,6 +56,7 @@ import okhttp3.Response;
  * body of the response is returned in what ever form the call returns.
  */
 public class RESTfulFunctions extends AbstractFunction {
+
   private static final RESTfulFunctions instance = new RESTfulFunctions();
 
   private RESTfulFunctions() {
@@ -72,29 +74,34 @@ public class RESTfulFunctions extends AbstractFunction {
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
 
-    if (!MapTool.getParser().isMacroPathTrusted())
+    if (!MapTool.getParser().isMacroPathTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+    }
 
-    if (!AppPreferences.getAllowExternalMacroAccess())
+    if (!AppPreferences.getAllowExternalMacroAccess()) {
       throw new ParserException(I18N.getText("macro.function.general.accessDenied", functionName));
+    }
 
     // Check do we need this?
     checkParameters(functionName, parameters, 1, 5);
 
-    if (functionName.equalsIgnoreCase("REST.get") || functionName.equalsIgnoreCase("REST.delete"))
-      return buildGetOrDeleteRequest(functionName, parameters);
+    if (functionName.equalsIgnoreCase("REST.get")) {
+      return buildGetRequest(functionName, parameters);
+    }
 
     if (functionName.equalsIgnoreCase("REST.post")
         || functionName.equalsIgnoreCase("REST.put")
-        || functionName.equalsIgnoreCase("REST.patch"))
+        || functionName.equalsIgnoreCase("REST.patch")
+        || functionName.equalsIgnoreCase("REST.delete")) {
       return buildRequest(functionName, parameters);
-    else
+    } else {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
+    }
   }
 
   /**
-   * Performs a RESTful GET or DELETE request using OkHttp
+   * Performs a RESTful GET request using OkHttp
    *
    * @param functionName
    * @param parameters include URL, headers (optional) and if full response is requested (optional)
@@ -102,7 +109,7 @@ public class RESTfulFunctions extends AbstractFunction {
    *     XML, HTML, or other formats.
    * @throws ParserException
    */
-  private Object buildGetOrDeleteRequest(String functionName, List<Object> parameters)
+  private Object buildGetRequest(String functionName, List<Object> parameters)
       throws ParserException {
     checkParameters(functionName, parameters, 1, 3);
 
@@ -117,30 +124,29 @@ public class RESTfulFunctions extends AbstractFunction {
       return launchSyrinscape(baseURL);
     }
 
-    if (functionName.equalsIgnoreCase("REST.get"))
+    if (functionName.equalsIgnoreCase("REST.get")) {
       request = new Request.Builder().url(baseURL).build();
-    else if (functionName.equalsIgnoreCase("REST.delete"))
-      request = new Request.Builder().url(baseURL).delete().build();
-    else
+    } else {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
+    }
 
     // If we need to add headers then rebuild a new request with new headers
-    if (!headerMap.isEmpty())
-      if (functionName.equalsIgnoreCase("REST.get"))
+    if (!headerMap.isEmpty()) {
+      if (functionName.equalsIgnoreCase("REST.get")) {
         request = new Request.Builder().url(baseURL).headers(headers).build();
-      else if (functionName.equalsIgnoreCase("REST.delete"))
-        request = new Request.Builder().url(baseURL).headers(headers).delete().build();
-      else
+      } else {
         throw new ParserException(
             I18N.getText("macro.function.general.unknownFunction", functionName));
+      }
+    }
 
     return executeClientCall(functionName, request, isFullResponseRequested(parameters));
   }
 
   /**
-   * Performs a RESTful POST, PATCH, or PUT request using OkHttp Minimum requirements are URL,
-   * Payload, & MediaType Optional parameters are Headers & Full Response
+   * Performs a RESTful POST, PATCH, PUT or DELETE request using OkHttp Minimum requirements are
+   * URL, Payload, & MediaType Optional parameters are Headers & Full Response
    *
    * @param functionName
    * @param parameters include URL, payload, media type of payload, headers (optional) and if full
@@ -166,23 +172,32 @@ public class RESTfulFunctions extends AbstractFunction {
 
     if (headerMap.isEmpty()) {
       // Build without any headers...
-      if (functionName.equals("REST.post"))
+      if (functionName.equals("REST.post")) {
         request = new Request.Builder().url(baseURL).post(requestBody).build();
-      else if (functionName.equals("REST.put"))
+      } else if (functionName.equals("REST.put")) {
         request = new Request.Builder().url(baseURL).put(requestBody).build();
-      else if (functionName.equals("REST.patch"))
+      } else if (functionName.equals("REST.patch")) {
         request = new Request.Builder().url(baseURL).patch(requestBody).build();
-      else
+      } else if (functionName.equals("REST.delete")) {
+        request = new Request.Builder().url(baseURL).delete(requestBody).build();
+      } else {
         throw new ParserException(
             I18N.getText("macro.function.general.unknownFunction", functionName));
+      }
     } else {
       // Now build request with headers
-      if (functionName.equals("REST.post"))
+      if (functionName.equals("REST.post")) {
         request = new Request.Builder().url(baseURL).headers(headers).post(requestBody).build();
-      else if (functionName.equals("REST.put"))
+      } else if (functionName.equals("REST.put")) {
         request = new Request.Builder().url(baseURL).headers(headers).put(requestBody).build();
-      else if (functionName.equals("REST.patch"))
+      } else if (functionName.equals("REST.patch")) {
         request = new Request.Builder().url(baseURL).headers(headers).patch(requestBody).build();
+      } else if (functionName.equals("REST.delete")) {
+        request = new Request.Builder().url(baseURL).headers(headers).delete(requestBody).build();
+      } else {
+        throw new ParserException(
+            I18N.getText("macro.function.general.unknownFunction", functionName));
+      }
     }
 
     return executeClientCall(functionName, request, isFullResponseRequested(parameters));
@@ -202,12 +217,16 @@ public class RESTfulFunctions extends AbstractFunction {
 
     // Execute the call and check the response...
     try (Response response = client.newCall(request).execute()) {
-      if (!response.isSuccessful() && !fullResponse)
+      if (!response.isSuccessful() && !fullResponse) {
         throw new ParserException(
             I18N.getText("macro.function.rest.error.response", functionName, response.code()));
+      }
 
-      if (fullResponse) return gson.toJson(new RestResponseObj(response));
-      else return response.body().string();
+      if (fullResponse) {
+        return gson.toJson(new RestResponseObj(response));
+      } else {
+        return response.body().string();
+      }
 
     } catch (IllegalArgumentException | IOException e) {
       throw new ParserException(I18N.getText("macro.function.rest.error.unknown", functionName, e));
@@ -220,7 +239,9 @@ public class RESTfulFunctions extends AbstractFunction {
     for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
       String name = entry.getKey();
       List<String> values = entry.getValue();
-      for (String value : values) headerBuilder.add(name, value);
+      for (String value : values) {
+        headerBuilder.add(name, value);
+      }
     }
 
     return headerBuilder.build();
@@ -231,9 +252,11 @@ public class RESTfulFunctions extends AbstractFunction {
   }
 
   private boolean isFullResponseRequested(List<Object> parameters) {
-    if (isLastParamBoolean(parameters))
-      return AbstractTokenAccessorFunction.getBooleanValue(parameters.get(parameters.size() - 1));
-    else return false;
+    if (isLastParamBoolean(parameters)) {
+      return FunctionUtil.getBooleanValue(parameters.get(parameters.size() - 1));
+    } else {
+      return false;
+    }
   }
 
   private Map<String, List<String>> getHeaderMap(List<Object> parameters, int headerIndex) {
@@ -241,12 +264,13 @@ public class RESTfulFunctions extends AbstractFunction {
     // and the last parameter is a boolean then headers were not passed in.
     // of if parameter size is not large enough to hold either value...
     if (headerIndex >= parameters.size()
-        || (headerIndex == parameters.size() - 1 && isLastParamBoolean(parameters)))
+        || (headerIndex == parameters.size() - 1 && isLastParamBoolean(parameters))) {
       return new HashMap<String, List<String>>();
-    else
+    } else {
       return gson.fromJson(
           (String) parameters.get(headerIndex),
           new TypeToken<Map<String, List<String>>>() {}.getType());
+    }
   }
 
   /*
@@ -255,7 +279,9 @@ public class RESTfulFunctions extends AbstractFunction {
    * @throws ParserException
    */
   private BigDecimal launchSyrinscape(String baseURL) throws ParserException {
-    if (!AppPreferences.getSyrinscapeActive()) return BigDecimal.ZERO;
+    if (!AppPreferences.getSyrinscapeActive()) {
+      return BigDecimal.ZERO;
+    }
 
     URI uri;
 
@@ -282,21 +308,24 @@ public class RESTfulFunctions extends AbstractFunction {
       throws ParserException {
 
     if (min == max) {
-      if (parameters.size() != max)
+      if (parameters.size() != max) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.wrongNumParam", functionName, max, parameters.size()));
+      }
 
     } else {
-      if (parameters.size() < min)
+      if (parameters.size() < min) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, min, parameters.size()));
+      }
 
-      if (parameters.size() > max)
+      if (parameters.size() > max) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.tooManyParam", functionName, max, parameters.size()));
+      }
     }
   }
 
@@ -304,6 +333,7 @@ public class RESTfulFunctions extends AbstractFunction {
    * A POJO to hold an HTTP Response object to marshal as a JSON object
    */
   private final class RestResponseObj {
+
     private final int status;
     private final String message;
     private final Map<String, List<String>> headers;
@@ -313,12 +343,18 @@ public class RESTfulFunctions extends AbstractFunction {
       this.status = response.code();
       this.headers = response.headers().toMultimap();
 
-      if (!response.message().isEmpty()) this.message = response.message();
-      else this.message = null;
+      if (!response.message().isEmpty()) {
+        this.message = response.message();
+      } else {
+        this.message = null;
+      }
 
       String responseBody = response.body().string();
-      if (isValidJSON(responseBody)) body = gson.fromJson(responseBody, JsonElement.class);
-      else this.body = new Gson().toJsonTree(responseBody);
+      if (isValidJSON(responseBody)) {
+        body = gson.fromJson(responseBody, JsonElement.class);
+      } else {
+        this.body = new Gson().toJsonTree(responseBody);
+      }
     }
 
     private boolean isValidJSON(String jsonInString) {

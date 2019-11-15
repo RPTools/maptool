@@ -24,6 +24,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -156,7 +157,7 @@ public class TokenSelectionFunctions extends AbstractFunction {
     } else if (parameters.size() == 2) {
       String paramStr = parameters.get(0).toString();
       String addOrReplace = parameters.get(1).toString();
-      boolean add = AbstractTokenAccessorFunction.getBooleanValue(addOrReplace);
+      boolean add = FunctionUtil.getBooleanValue(addOrReplace);
 
       if (add) {
         allGUIDs = zr.getSelectedTokenSet();
@@ -176,7 +177,7 @@ public class TokenSelectionFunctions extends AbstractFunction {
       String paramStr = parameters.get(0).toString();
       String addOrReplace = parameters.get(1).toString();
       String delim = parameters.get(2).toString();
-      boolean add = AbstractTokenAccessorFunction.getBooleanValue(addOrReplace);
+      boolean add = FunctionUtil.getBooleanValue(addOrReplace);
 
       if (add) {
         allGUIDs = zr.getSelectedTokenSet();

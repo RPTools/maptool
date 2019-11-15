@@ -14,8 +14,10 @@
  */
 package net.rptools.maptool.client;
 
+import com.jayway.jsonpath.JsonPath;
 import java.io.*;
 import java.net.*;
+import java.util.List;
 import java.util.Properties;
 import java.util.jar.*;
 import javax.swing.*;
@@ -31,18 +33,27 @@ import org.apache.logging.log4j.Logger;
 public class AppUpdate {
   private static final Logger log = LogManager.getLogger(AppUpdate.class);
 
-  static final String GIT_HUB_API_URL = "github.api.url";
-  static final String GIT_HUB_OAUTH_TOKEN =
+  private static final String GIT_HUB_RELEASES = "github.api.releases";
+  private static final String GIT_HUB_OAUTH_TOKEN =
       "github.api.oauth.token"; // Grants read-only access to public information
 
+  /**
+   * Look for a newer version of MapTool. If a newer release is found and the AppPreferences tell us
+   * the update should not be ignored, give a prompt to update. If current version is a release,
+   * update to the most recent release. If the current version is a pre-release, update to the most
+   * recent version (pre-release or release).
+   *
+   * @return has an update been made
+   */
   public static boolean gitHubReleases() {
     // AppPreferences.setSkipAutoUpdate(false); // For testing only
     if (AppPreferences.getSkipAutoUpdate()) return false;
+    String strURL = getProperty(GIT_HUB_RELEASES);
+    String strRequest = strURL + getProperty(GIT_HUB_OAUTH_TOKEN);
 
-    String responseBody = null;
-    String jarCommit = null;
-    String latestGitHubReleaseCommit = "";
-    String latestGitHubReleaseTagName = "";
+    String jarCommit;
+    String latestGitHubReleaseCommit;
+    String latestGitHubReleaseTagName;
 
     // Default for Linux?
     String DOWNLOAD_EXTENSION = ".deb";
@@ -55,36 +66,32 @@ public class AppUpdate {
 
     // If we don't have a commit attribute from JAR, we're done!
     if (jarCommit == null) {
-      log.info(
-          "No commit SHA (running in DEVELOPMENT mode?): "
-              + getProperty(GIT_HUB_API_URL)
-              + getProperty(GIT_HUB_OAUTH_TOKEN));
+      log.info("No commit SHA (running in DEVELOPMENT mode?): " + strRequest);
       return false;
     }
 
+    String strReleases = getReleases();
+    // If can't access the list of releases, we're done
+    if (strReleases == null) return false;
+
+    JSONObject release;
     try {
-      Request request =
-          new Request.Builder()
-              .url(getProperty(GIT_HUB_API_URL) + getProperty(GIT_HUB_OAUTH_TOKEN))
-              .build();
+      // Get pre-release information regarding MapTool version from github list
+      String path = "$.[?(@.target_commitish == '" + jarCommit + "')].prerelease";
+      List<Boolean> listMatches = JsonPath.parse(strReleases).read(path);
+      boolean prerelease = listMatches.isEmpty() || listMatches.get(0);
 
-      Response response = new OkHttpClient().newCall(request).execute();
-      if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-      responseBody = response.body().string();
-
-      log.debug("GitHub API Response: " + responseBody);
-    } catch (IOException e) {
-      log.error("Unable to reach " + getProperty(GIT_HUB_API_URL), e.getLocalizedMessage());
-      return false;
-    }
-
-    JSONObject releases = new JSONObject();
-    try {
-      releases = JSONObject.fromObject(responseBody);
-      latestGitHubReleaseCommit = releases.get("target_commitish").toString();
+      if (prerelease) {
+        JSONArray releasesList = JSONArray.fromObject(strReleases);
+        release = JSONObject.fromObject(releasesList.get(0)); // the latest is at top of list
+      } else {
+        path = "$.[?(@.prerelease == false)]";
+        listMatches = JsonPath.parse(strReleases).read(path); // get sublist of releases
+        release = JSONObject.fromObject(listMatches.get(0)); // the latest is at top of list
+      }
+      latestGitHubReleaseCommit = release.get("target_commitish").toString();
       log.info("target_commitish from GitHub: " + latestGitHubReleaseCommit);
-      latestGitHubReleaseTagName = releases.get("tag_name").toString();
+      latestGitHubReleaseTagName = release.get("tag_name").toString();
       log.info("tag_name from GitHub: " + latestGitHubReleaseTagName);
     } catch (Exception e) {
       log.error("Unable to parse JSON payload from GitHub...", e);
@@ -95,7 +102,7 @@ public class AppUpdate {
     if (jarCommit.equals(latestGitHubReleaseCommit)
         || AppPreferences.getSkipAutoUpdateCommit().equals(latestGitHubReleaseCommit)) return false;
 
-    JSONArray releaseAssets = releases.getJSONArray("assets");
+    JSONArray releaseAssets = release.getJSONArray("assets");
     String assetDownloadURL = null;
     JSONObject asset;
 
@@ -132,6 +139,33 @@ public class AppUpdate {
     return false;
   }
 
+  /**
+   * Get the String containing the list of the releases and pre-releases from github.
+   *
+   * @return the String with the list of releases, or null if IOException
+   */
+  private static String getReleases() {
+    String strURL = getProperty(GIT_HUB_RELEASES);
+    String strRequest = strURL + getProperty(GIT_HUB_OAUTH_TOKEN);
+    try {
+      Request request = new Request.Builder().url(strRequest).build();
+      Response response = new OkHttpClient().newCall(request).execute();
+      if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+      String responseBody = response.body().string();
+      log.debug("GitHub API Response: " + responseBody);
+      return responseBody;
+    } catch (IOException e) {
+      log.error("Unable to reach " + strURL, e.getLocalizedMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Get the latest commit SHA from MANIFEST.MF
+   *
+   * @return the String of the commit SHA, or null if IOException
+   */
   public static String getCommitSHA() {
     String jarCommit = "";
 

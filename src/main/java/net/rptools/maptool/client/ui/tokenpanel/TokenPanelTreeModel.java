@@ -37,8 +37,13 @@ import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.ServerPolicy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
+
+  private static final Logger log = LogManager.getLogger(TokenPanelTreeModel.class);
+
   private static final String _TOKENS = "panel.MapExplorer.View.TOKENS";
   private static final String _PLAYERS = "panel.MapExplorer.View.PLAYERS";
   private static final String _GROUPS = "panel.MapExplorer.View.GROUPS";
@@ -209,7 +214,14 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
 
     // Plan to show all of the views in order to keep the order
     for (TokenFilter filter : filterList) {
-      if (filter.view.isAdmin && !MapTool.getPlayer().isGM()) {
+      try {
+        if (filter.view.isAdmin && !MapTool.getPlayer().isGM()) {
+          continue;
+        }
+      } catch (NullPointerException e) {
+        // This seems to happen when there was a problem creating the initial window. Lets just
+        // ignore this filter for now.
+        log.warn("NullPointerException encountered while trying to update TokenPanelTreeModel", e);
         continue;
       }
       currentViewList.add(filter.view);

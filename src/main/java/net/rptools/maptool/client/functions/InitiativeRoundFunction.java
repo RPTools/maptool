@@ -43,10 +43,6 @@ public class InitiativeRoundFunction extends AbstractFunction {
     return instance;
   }
 
-  /**
-   * @see net.rptools.parser.function.AbstractFunction#childEvaluate(net.rptools.parser.Parser,
-   *     java.lang.String, java.util.List)
-   */
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
@@ -70,7 +66,7 @@ public class InitiativeRoundFunction extends AbstractFunction {
    *
    * @return The initiative round
    */
-  public Object getInitiativeRound() {
+  public static Object getInitiativeRound() {
     InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
     return new BigDecimal(list.getRound());
   }
@@ -80,7 +76,7 @@ public class InitiativeRoundFunction extends AbstractFunction {
    *
    * @param value New value for the round.
    */
-  public void setInitiativeRound(Object value) {
+  public static void setInitiativeRound(Object value) {
     InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
     list.setRound(getInt(value));
   }

@@ -72,7 +72,7 @@ public class CurrentInitiativeFunction extends AbstractFunction {
    *
    * @return The current initiative
    */
-  public Object getInitiativeToken() {
+  public static Object getInitiativeToken() {
     InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
     int index = list.getCurrent();
     return index != -1 ? list.getToken(index).getId().toString() : "";
@@ -83,7 +83,7 @@ public class CurrentInitiativeFunction extends AbstractFunction {
    *
    * @return The current initiative
    */
-  public Object getCurrentInitiative() {
+  public static Object getCurrentInitiative() {
     InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
     return new BigDecimal(list.getCurrent());
   }
@@ -93,7 +93,7 @@ public class CurrentInitiativeFunction extends AbstractFunction {
    *
    * @param value New value for the round.
    */
-  public void setCurrentInitiative(Object value) {
+  public static void setCurrentInitiative(Object value) {
     InitiativeList list = MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
     list.setCurrent(InitiativeRoundFunction.getInt(value));
   }

@@ -62,7 +62,8 @@ public class StringFunctions extends AbstractFunction {
         "encode",
         "decode",
         "startsWith",
-        "endsWith");
+        "endsWith",
+        "capitalize");
   }
 
   public static StringFunctions getInstance() {
@@ -387,8 +388,38 @@ public class StringFunctions extends AbstractFunction {
           ? BigDecimal.ONE
           : BigDecimal.ZERO;
     }
+    if (functionName.equals("capitalize")) {
+      if (parameters.size() < 1) {
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
+      }
+      return capitalize(parameters.get(0).toString());
+    }
     // should never happen
     throw new ParserException(functionName + "(): Unknown function.");
+  }
+
+  /**
+   * This method returns a version of the passed in string where all the first letters of words are
+   * title case.
+   *
+   * @param str The string converted to title case.
+   * @return The string converted to title case.
+   */
+  private String capitalize(String str) {
+    Pattern pattern = Pattern.compile("(\\p{IsAlphabetic}+)");
+    Matcher matcher = pattern.matcher(str);
+
+    StringBuffer result = new StringBuffer();
+    while (matcher.find()) {
+      String word = matcher.group();
+      matcher.appendReplacement(result, Character.toTitleCase(word.charAt(0)) + word.substring(1));
+    }
+
+    matcher.appendTail(result);
+
+    return result.toString();
   }
 
   /**

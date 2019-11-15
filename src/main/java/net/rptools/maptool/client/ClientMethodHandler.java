@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import net.rptools.clientserver.hessian.AbstractMethodHandler;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.functions.ExecFunction;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
@@ -204,6 +205,11 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 MapTool.getFrame().hideGlassPane();
                 return;
 
+              case setCampaignName:
+                MapTool.getCampaign().setName((String) parameters[0]);
+                MapTool.getFrame().setTitle();
+                return;
+
               case putZone:
                 zone = (Zone) parameters[0];
                 MapTool.getCampaign().putZone(zone);
@@ -378,8 +384,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 MapTool.addServerMessage(message);
                 return;
 
+              case execFunction:
+                ExecFunction.receiveExecFunction(
+                    (String) parameters[0], (String) parameters[1], (String) parameters[2]);
+                return;
+
               case execLink:
-                MacroLinkFunction.receiveExecLink((String) parameters[0], (String) parameters[1]);
+                MacroLinkFunction.receiveExecLink(
+                    (String) parameters[0], (String) parameters[1], (String) parameters[2]);
                 return;
 
               case showPointer:
@@ -592,8 +604,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                             (ArrayList<MacroButtonProperties>) parameters[0]));
                 MapTool.getFrame().getCampaignPanel().reset();
                 return;
-                // moved this down into the event queue section so that the threading works as
-                // expected
+
+              case updateGmMacros:
+                MapTool.getCampaign()
+                    .setGmMacroButtonPropertiesArray(
+                        new ArrayList<MacroButtonProperties>(
+                            (ArrayList<MacroButtonProperties>) parameters[0]));
+                MapTool.getFrame().getGmPanel().reset();
+                return;
 
               case setLiveTypingLabel:
                 if ((Boolean) parameters[1]) {

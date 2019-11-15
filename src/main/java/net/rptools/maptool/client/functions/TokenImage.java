@@ -85,25 +85,23 @@ public class TokenImage extends AbstractFunction {
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
     Token token;
-    Zone zone;
     MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
 
     if (functionName.equals("setTokenOpacity")) {
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
-      String opacityValue = args.get(0).toString();
+      String strOpacity = args.get(0).toString();
+      FunctionUtil.paramAsFloat(functionName, args, 0, true);
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
-      zone = token.getZoneRenderer().getZone();
 
-      float newOpacity = token.setTokenOpacity(Float.parseFloat(opacityValue));
-      MapTool.serverCommand().putToken(zone.getId(), token);
-      return newOpacity;
+      MapTool.serverCommand().updateTokenProperty(token, "setTokenOpacity", strOpacity);
+      return token.getTokenOpacity();
     }
 
     if (functionName.equals("getTokenOpacity")) {
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
@@ -117,7 +115,6 @@ public class TokenImage extends AbstractFunction {
 
       String assetName = args.get(0).toString();
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
-      zone = token.getZoneRenderer().getZone();
 
       setImage(token, assetName);
       return "";
@@ -128,7 +125,6 @@ public class TokenImage extends AbstractFunction {
 
       String assetName = args.get(0).toString();
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
-      zone = token.getZoneRenderer().getZone();
 
       setPortrait(token, assetName);
       return "";
@@ -139,7 +135,6 @@ public class TokenImage extends AbstractFunction {
 
       String assetName = args.get(0).toString();
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
-      zone = token.getZoneRenderer().getZone();
 
       setHandout(token, assetName);
       return "";
@@ -218,48 +213,50 @@ public class TokenImage extends AbstractFunction {
     return null;
   }
 
-  private static void assignImage(Token token, String assetName, imageType type, String func)
-      throws ParserException {
+  /**
+   * Get the MD5Key corresponding to an asset.
+   *
+   * @param assetName either an assetId or the name of an image token.
+   * @param functionName the name of the function, to display the exception message.
+   * @return the MD5Key associated with the asset.
+   * @throws ParserException if assetName not found or assetName doesn't
+   */
+  public static MD5Key getMD5Key(String assetName, String functionName) throws ParserException {
     Matcher m = assetRE.matcher(assetName);
 
     String assetId;
     if (m.matches()) {
       assetId = m.group(1);
     } else if (assetName.toLowerCase().startsWith("image:")) {
-      assetId = findImageToken(assetName, func).getImageAssetId().toString();
+      Token imageToken = findImageToken(assetName, functionName);
+      if (imageToken == null) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.unknownToken", functionName, assetName));
+      }
+      assetId = imageToken.getImageAssetId().toString();
     } else {
       throw new ParserException(
-          I18N.getText("macro.function.general.argumentTypeInvalid", func, 1, assetName));
+          I18N.getText("macro.function.general.argumentTypeInvalid", functionName, 1, assetName));
     }
-    switch (type) {
-      case TOKEN_IMAGE:
-        token.setImageAsset(null, new MD5Key(assetId));
-        break;
-      case TOKEN_PORTRAIT:
-        token.setPortraitImage(new MD5Key(assetId));
-        break;
-      case TOKEN_HANDOUT:
-        token.setCharsheetImage(new MD5Key(assetId));
-        break;
-      default:
-        throw new IllegalArgumentException("unknown image type " + type);
-    }
-    MapTool.serverCommand().putToken(token.getZoneRenderer().getZone().getId(), token);
+    return new MD5Key(assetId);
   }
 
-  public static void setImage(Token token, String assetName) throws ParserException {
-    assignImage(token, assetName, imageType.TOKEN_IMAGE, SET_IMAGE);
+  private static void setImage(Token token, String assetName) throws ParserException {
+    MD5Key md5key = getMD5Key(assetName, SET_IMAGE);
+    MapTool.serverCommand().updateTokenProperty(token, "setImageAsset", null, md5key);
   }
 
-  public static void setPortrait(Token token, String assetName) throws ParserException {
-    assignImage(token, assetName, imageType.TOKEN_PORTRAIT, SET_PORTRAIT);
+  private static void setPortrait(Token token, String assetName) throws ParserException {
+    MD5Key md5key = getMD5Key(assetName, SET_PORTRAIT);
+    MapTool.serverCommand().updateTokenProperty(token, "setPortraitImage", md5key);
   }
 
-  public static void setHandout(Token token, String assetName) throws ParserException {
-    assignImage(token, assetName, imageType.TOKEN_HANDOUT, SET_HANDOUT);
+  private static void setHandout(Token token, String assetName) throws ParserException {
+    MD5Key md5key = getMD5Key(assetName, SET_HANDOUT);
+    MapTool.serverCommand().updateTokenProperty(token, "setCharsheetImage", md5key);
   }
 
-  public static Token findImageToken(final String name, String functionName)
+  private static Token findImageToken(final String name, String functionName)
       throws ParserException {
     Token imageToken = null;
     if (name != null && name.length() > 0) {

@@ -30,6 +30,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.TexturePaint;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.dnd.DropTargetDragEvent;
@@ -129,6 +130,7 @@ import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
+import net.rptools.maptool.model.drawing.DrawableNoise;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -149,12 +151,14 @@ public class ZoneRenderer extends JComponent
   private static final Color TRANSLUCENT_YELLOW =
       new Color(Color.yellow.getRed(), Color.yellow.getGreen(), Color.yellow.getBlue(), 50);
 
-  /** The interval, in milliseconds, during which calls to repaint() will be debounced. */
-  private static final int REPAINT_DEBOUNCE_INTERVAL = 33;
-
   /** DebounceExecutor for throttling repaint() requests. */
-  private final DebounceExecutor repaintDebouncer =
-      new DebounceExecutor(REPAINT_DEBOUNCE_INTERVAL, this::repaint);
+  private final DebounceExecutor repaintDebouncer;
+
+  /** Noise for mask on repeating tiles. */
+  private final DrawableNoise noise = new DrawableNoise();
+
+  /** Is the noise filter on for disrupting pattens in background tiled textures. */
+  private boolean bgTextureNoiseFilterOn = false;
 
   public static final int MIN_GRID_SIZE = 10;
   private static LightSourceIconOverlay lightSourceIconOverlay = new LightSourceIconOverlay();
@@ -233,6 +237,10 @@ public class ZoneRenderer extends JComponent
     this.zone = zone;
     zone.addModelChangeListener(new ZoneModelChangeListener());
 
+    // The interval, in milliseconds, during which calls to repaint() will be debounced.
+    int repaintDebounceInterval = 1000 / AppPreferences.getFrameRateCap();
+    repaintDebouncer = new DebounceExecutor(repaintDebounceInterval, this::repaint);
+
     setFocusable(true);
     setZoneScale(new Scale());
     zoneView = new ZoneView(zone);
@@ -271,6 +279,7 @@ public class ZoneRenderer extends JComponent
           }
         });
     // fps.start();
+
   }
 
   public void setAutoResizeStamp(boolean value) {
@@ -1996,6 +2005,12 @@ public class ZoneRenderer extends JComponent
           zone.getBackgroundPaint().getPaint(getViewOffsetX(), getViewOffsetY(), getScale(), this);
       bbg.setPaint(paint);
       bbg.fillRect(0, 0, size.width, size.height);
+
+      // Only apply the noise if the feature is on and the background a textured paint
+      if (bgTextureNoiseFilterOn && paint instanceof TexturePaint) {
+        bbg.setPaint(noise.getPaint(getViewOffsetX(), getViewOffsetY(), getScale()));
+        bbg.fillRect(0, 0, size.width, size.height);
+      }
 
       // Map
       if (zone.getMapAssetId() != null) {
@@ -4707,5 +4722,58 @@ public class ZoneRenderer extends JComponent
     } catch (Exception e) {
     }
     return c;
+  }
+
+  /**
+   * Returns the alpha level used to apply the noise to back ground repeating textures.
+   *
+   * @return the alpha level used to apply the noise.
+   */
+  public float getNoiseAlpha() {
+    return noise.getNoiseAlpha();
+  }
+
+  /**
+   * Returns the seed value used to generate the noise that is applied to tback ground repeating
+   * images.
+   *
+   * @return the seed value used to generate the noise.
+   */
+  public long getNoiseSeed() {
+    return noise.getNoiseSeed();
+  }
+
+  /**
+   * Sets the seed value and alpha level used for the noise applied to repeating background
+   * textures.
+   *
+   * @param seed The seed value used to generate the noise to be applied.
+   * @param alpha The alpha level to apply the noise.
+   */
+  public void setNoiseValues(long seed, float alpha) {
+    noise.setNoiseValues(seed, alpha);
+    drawBackground = true;
+  }
+
+  /**
+   * Returns if the setting for applying background noise to textures is on or off.
+   *
+   * @return <code>true</code> if noise will be applied to repeating background textures, otherwise
+   *     <code>false</code>
+   */
+  public boolean isBgTextureNoiseFilterOn() {
+    return bgTextureNoiseFilterOn;
+  }
+
+  /**
+   * Turn on / off application of noise to repeated background textures.
+   *
+   * @param on <code>true</code> to turn on, <code>false</code> to turn off.
+   */
+  public void setBgTextureNoiseFilterOn(boolean on) {
+    if (on != bgTextureNoiseFilterOn) {
+      bgTextureNoiseFilterOn = on;
+      drawBackground = true;
+    }
   }
 }

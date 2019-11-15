@@ -41,6 +41,7 @@ public interface ServerCommand {
     // @formatter:off
     bootPlayer,
     setCampaign,
+    setCampaignName,
     getZone,
     putZone,
     removeZone,
@@ -56,6 +57,7 @@ public interface ServerCommand {
     setZoneGridSize,
     message,
     execLink,
+    execFunction,
     undoDraw,
     showPointer,
     movePointer,
@@ -85,6 +87,7 @@ public interface ServerCommand {
     updateTokenInitiative,
     setVisionType,
     updateCampaignMacros,
+    updateGmMacros,
     setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be
     // depended on for general purpose token movement
     setLiveTypingLabel, // Experimental
@@ -117,6 +120,8 @@ public interface ServerCommand {
   public void restoreZoneView(GUID zoneGUID);
 
   public void setCampaign(Campaign campaign);
+
+  public void setCampaignName(String name);
 
   public void getZone(GUID zoneGUID);
 
@@ -155,7 +160,9 @@ public interface ServerCommand {
 
   public void message(TextMessage message);
 
-  public void execLink(String link, String target);
+  public void execFunction(String functionText, String target, String source);
+
+  public void execLink(String link, String target, String source);
 
   public void showPointer(String player, Pointer pointer);
 
@@ -195,6 +202,8 @@ public interface ServerCommand {
   public void setVisionType(GUID zoneGUID, VisionType visionType);
 
   public void updateCampaignMacros(List<MacroButtonProperties> properties);
+
+  public void updateGmMacros(List<MacroButtonProperties> properties);
 
   public void setBoard(GUID zoneGUID, MD5Key mapAsset, int X, int Y);
 

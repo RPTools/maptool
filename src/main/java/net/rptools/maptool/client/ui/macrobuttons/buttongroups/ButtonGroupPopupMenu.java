@@ -30,6 +30,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.macrobuttons.panels.CampaignPanel;
 import net.rptools.maptool.client.ui.macrobuttons.panels.GlobalPanel;
+import net.rptools.maptool.client.ui.macrobuttons.panels.GmPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -64,7 +65,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
           addActions();
         }
       }
-    } else if (panelClass.equals("CampaignPanel")) {
+    } else if (panelClass.equals("CampaignPanel") || panelClass.equals("GmPanel")) {
       addCampaignActions();
     } else {
       addActions();
@@ -125,6 +126,9 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
       } else if (panelClass.equals("CampaignPanel")) {
         new MacroButtonProperties(
             panelClass, MapTool.getCampaign().getMacroButtonNextIndex(), macroGroup);
+      } else if (panelClass.equals("GmPanel")) {
+        new MacroButtonProperties(
+            panelClass, MapTool.getCampaign().getGmMacroButtonNextIndex(), macroGroup);
       } else if (panelClass.equals("SelectionPanel")) {
         if (areaGroup != null) {
           if (areaGroup
@@ -207,6 +211,26 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                     new MacroButtonProperties(
                         panelClass,
                         MapTool.getCampaign().getMacroButtonNextIndex(),
+                        newButtonProps);
+                  }
+                } else if (panelClass.equals("GmPanel")) {
+                  for (MacroButtonProperties nextMacro :
+                      MapTool.getCampaign().getGmMacroButtonPropertiesArray()) {
+                    if (newButtonProps.hashCodeForComparison()
+                        == nextMacro.hashCodeForComparison()) {
+                      alreadyExists = true;
+                    }
+                  }
+                  if (alreadyExists) {
+                    alreadyExists =
+                        confirmImport(
+                            newButtonProps,
+                            I18N.getText("confirm.macro.panelLocation", I18N.getText("panel.Gm")));
+                  }
+                  if (!alreadyExists) {
+                    new MacroButtonProperties(
+                        panelClass,
+                        MapTool.getCampaign().getGmMacroButtonNextIndex(),
                         newButtonProps);
                   }
                 } else if (panelClass.equals("SelectionPanel")) {
@@ -359,6 +383,24 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                       new MacroButtonProperties(
                           panelClass, MapTool.getCampaign().getMacroButtonNextIndex(), nextProps);
                     }
+                  } else if (panelClass.equals("GmPanel")) {
+                    for (MacroButtonProperties nextMacro :
+                        MapTool.getCampaign().getGmMacroButtonPropertiesArray()) {
+                      if (nextProps.hashCodeForComparison() == nextMacro.hashCodeForComparison()) {
+                        alreadyExists = true;
+                      }
+                    }
+                    if (alreadyExists) {
+                      alreadyExists =
+                          confirmImport(
+                              nextProps,
+                              I18N.getText(
+                                  "confirm.macro.panelLocation", I18N.getText("panel.Gm")));
+                    }
+                    if (!alreadyExists) {
+                      new MacroButtonProperties(
+                          panelClass, MapTool.getCampaign().getGmMacroButtonNextIndex(), nextProps);
+                    }
                   } else if (panelClass.equals("SelectionPanel")) {
                     if (areaGroup != null) {
                       if (areaGroup
@@ -485,6 +527,9 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                 } else if (panelClass.equals("CampaignPanel")) {
                   PersistenceUtil.saveMacroSet(
                       MapTool.getCampaign().getMacroButtonPropertiesArray(), selectedFile);
+                } else if (panelClass.equals("GmPanel")) {
+                  PersistenceUtil.saveMacroSet(
+                      MapTool.getCampaign().getGmMacroButtonPropertiesArray(), selectedFile);
                 } else if (panelClass.equals("SelectionPanel")) {
                   if (areaGroup != null) {
                     if (areaGroup
@@ -587,6 +632,8 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
           GlobalPanel.deleteButtonGroup(macroGroup);
         } else if (panelClass.equals("CampaignPanel")) {
           CampaignPanel.deleteButtonGroup(macroGroup);
+        } else if (panelClass.equals("GmPanel")) {
+          GmPanel.deleteButtonGroup(macroGroup);
         } else if (tokenId != null) {
           MapTool.getFrame()
               .getCurrentZoneRenderer()
@@ -613,6 +660,11 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
         if (MapTool.confirm(
             I18N.getText("confirm.macro.clearPanel", I18N.getText("panel.Campaign")))) {
           CampaignPanel.clearPanel();
+        }
+      } else if (panelClass.equals("GmPanel")) {
+        if (MapTool.confirm(
+            I18N.getText("confirm.macro.clearPanel", I18N.getText("panel.Campaign")))) {
+          GmPanel.clearPanel();
         }
       } else if (tokenId != null) {
         if (panelClass.equals("ImpersonatePanel")) {

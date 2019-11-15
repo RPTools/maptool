@@ -32,6 +32,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 
 /** Log functions to dynamically set log levels, log configurations, and log messages from macros */
 public class LogFunctions extends AbstractFunction {
+
   private static final Logger log = LogManager.getLogger(LogFunctions.class);
   private static final Logger logger = LogManager.getLogger("macro-logger");
 
@@ -48,7 +49,8 @@ public class LogFunctions extends AbstractFunction {
         "log.error",
         "log.warn",
         "log.info",
-        "log.debug");
+        "log.debug",
+        "log.trace");
   }
 
   public static LogFunctions getInstance() {
@@ -59,20 +61,22 @@ public class LogFunctions extends AbstractFunction {
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
 
-    if (!MapTool.getParser().isMacroPathTrusted())
+    if (!MapTool.getParser().isMacroPathTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+    }
 
-    if (functionName.equalsIgnoreCase("log.getLoggers"))
+    if (functionName.equalsIgnoreCase("log.getLoggers")) {
       return getLoggers(functionName, parameters);
-    else if (functionName.equalsIgnoreCase("log.setLevel"))
+    } else if (functionName.equalsIgnoreCase("log.setLevel")) {
       return setLogLevel(functionName, parameters);
-    else if (functionName.equalsIgnoreCase("log.setPattern"))
+    } else if (functionName.equalsIgnoreCase("log.setPattern")) {
       return setPattern(functionName, parameters);
-    else if (functionName.toLowerCase().startsWith("log."))
+    } else if (functionName.toLowerCase().startsWith("log.")) {
       return logMessage(functionName, parameters);
-    else
+    } else {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
+    }
   }
 
   /**
@@ -89,12 +93,13 @@ public class LogFunctions extends AbstractFunction {
     LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
     List<LoggerResponse> loggerLevels = new ArrayList<>();
 
-    for (Logger logger : logContext.getLoggers())
+    for (Logger logger : logContext.getLoggers()) {
       try {
         loggerLevels.add(new LoggerResponse(logger.getName(), logger.getLevel().name()));
       } catch (IOException ioe) {
         log.error("Unable to get loggers from LogManager!", ioe);
       }
+    }
 
     Gson gson = new Gson();
     String jsonResponse = gson.toJson(loggerLevels);
@@ -117,7 +122,9 @@ public class LogFunctions extends AbstractFunction {
 
     // Convert the parameter string to a logger Level and return false if no match is found
     Level newLevel = Level.getLevel(parameters.get(1).toString().toUpperCase());
-    if (newLevel == null) return BigDecimal.ZERO;
+    if (newLevel == null) {
+      return BigDecimal.ZERO;
+    }
 
     Configurator.setLevel(loggerName, newLevel);
 
@@ -129,14 +136,22 @@ public class LogFunctions extends AbstractFunction {
 
     String logMessage = parameters.get(0).toString();
 
-    if (functionName.equalsIgnoreCase("log.fatal")) logger.fatal(logMessage);
-    else if (functionName.equalsIgnoreCase("log.error")) logger.error(logMessage);
-    else if (functionName.equalsIgnoreCase("log.warn")) logger.warn(logMessage);
-    else if (functionName.equalsIgnoreCase("log.info")) logger.info(logMessage);
-    else if (functionName.equalsIgnoreCase("log.debug")) logger.debug(logMessage);
-    else
+    if (functionName.equalsIgnoreCase("log.fatal")) {
+      logger.fatal(logMessage);
+    } else if (functionName.equalsIgnoreCase("log.error")) {
+      logger.error(logMessage);
+    } else if (functionName.equalsIgnoreCase("log.warn")) {
+      logger.warn(logMessage);
+    } else if (functionName.equalsIgnoreCase("log.info")) {
+      logger.info(logMessage);
+    } else if (functionName.equalsIgnoreCase("log.debug")) {
+      logger.debug(logMessage);
+    } else if (functionName.equalsIgnoreCase("log.trace")) {
+      logger.trace(logMessage);
+    } else {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
+    }
 
     return "";
   }
@@ -201,21 +216,24 @@ public class LogFunctions extends AbstractFunction {
       throws ParserException {
 
     if (min == max) {
-      if (parameters.size() != max)
+      if (parameters.size() != max) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.wrongNumParam", functionName, max, parameters.size()));
+      }
 
     } else {
-      if (parameters.size() < min)
+      if (parameters.size() < min) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.notEnoughParam", functionName, min, parameters.size()));
+      }
 
-      if (parameters.size() > max)
+      if (parameters.size() > max) {
         throw new ParserException(
             I18N.getText(
                 "macro.function.general.tooManyParam", functionName, max, parameters.size()));
+      }
     }
   }
 
@@ -223,6 +241,7 @@ public class LogFunctions extends AbstractFunction {
    * A POJO to hold an Logger Config to marshal as a nice JSON object
    */
   private final class LoggerResponse {
+
     private final String name;
     private final String level;
 

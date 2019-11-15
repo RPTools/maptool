@@ -67,6 +67,7 @@ public class MapToolLineParser {
               CurrentInitiativeFunction.getInstance(),
               DefineMacroFunction.getInstance(),
               EvalMacroFunctions.getInstance(),
+              ExecFunction.getInstance(),
               FindTokenFunctions.getInstance(),
               HasImpersonated.getInstance(),
               InitiativeRoundFunction.getInstance(),
@@ -1625,6 +1626,19 @@ public class MapToolLineParser {
       }
       macroBody = mbp.getCommand();
       macroContext = new MapToolMacroContext(macroName, "campaign", !mbp.getAllowPlayerEdits());
+    } else if (macroLocation.equalsIgnoreCase("Gm")) {
+      MacroButtonProperties mbp = null;
+      for (MacroButtonProperties m : MapTool.getCampaign().getGmMacroButtonPropertiesArray()) {
+        if (m.getLabel().equals(macroName)) {
+          mbp = m;
+          break;
+        }
+      }
+      if (mbp == null) {
+        throw new ParserException(I18N.getText("lineParser.unknownCampaignMacro", macroName));
+      }
+      macroBody = mbp.getCommand();
+      macroContext = new MapToolMacroContext(macroName, "Gm", MapTool.getPlayer().isGM());
     } else if (macroLocation.equalsIgnoreCase("GLOBAL")) {
       macroContext = new MapToolMacroContext(macroName, "global", MapTool.getPlayer().isGM());
       MacroButtonProperties mbp = null;
@@ -1742,6 +1756,28 @@ public class MapToolLineParser {
       }
     }
     return true;
+  }
+
+  /**
+   * Run a block of text as a macro.
+   *
+   * @param tokenInContext the token in context.
+   * @param macroBody the macro text to run.
+   * @param contextName the name of the macro context to use.
+   * @param contextSource the source of the macro block.
+   * @param trusted is the context trusted or not.
+   * @return the macro output.
+   */
+  public String runMacroBlock(
+      Token tokenInContext,
+      String macroBody,
+      String contextName,
+      String contextSource,
+      boolean trusted)
+      throws ParserException {
+    MapToolVariableResolver resolver = new MapToolVariableResolver(tokenInContext);
+    MapToolMacroContext context = new MapToolMacroContext(contextName, contextSource, trusted);
+    return runMacroBlock(resolver, tokenInContext, macroBody, context);
   }
 
   /** Executes a string as a block of macro code. */

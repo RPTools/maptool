@@ -14,7 +14,9 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonElement;
 import com.jayway.jsonpath.*;
+import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import java.math.BigDecimal;
 import java.util.*;
 import net.rptools.common.expression.ExpressionParser;
@@ -37,6 +39,9 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   private static final JSONMacroFunctions instance = new JSONMacroFunctions();
+
+  private static final Configuration jaywayConfig =
+      Configuration.builder().jsonProvider(new GsonJsonProvider()).build();
 
   private JSONMacroFunctions() {
     super(
@@ -103,7 +108,22 @@ public class JSONMacroFunctions extends AbstractFunction {
       String path = parameters.get(1).toString();
 
       try {
-        return JsonPath.parse(jsonStr).read(path);
+        JsonElement obj = JsonPath.using(jaywayConfig).parse(jsonStr).read(path);
+        if (obj.isJsonPrimitive()) {
+          try {
+            // Maybe it's a number.
+            BigDecimal bd = obj.getAsBigDecimal();
+            return bd;
+          } catch (NumberFormatException e) {
+            // So, not a number.
+            // Doing a toString() was wrapping the returned string in quotes.
+            return obj.getAsString();
+          }
+        } else {
+          // Curiously using getAsString() on JsonObjects threw an exception but using
+          // toString() works fine for objects and arrays.
+          return obj.toString();
+        }
       } catch (Exception e) {
         throw new ParserException(
             I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));
@@ -182,23 +202,41 @@ public class JSONMacroFunctions extends AbstractFunction {
 
     if (functionName.equalsIgnoreCase("json.toVars")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
-      JSONObject jsonObject = FunctionUtil.paramAsJsonObject(functionName, parameters, 0);
-      String prefix = parameters.size() > 1 ? parameters.get(1).toString() : "";
-      String suffix = parameters.size() > 2 ? parameters.get(2).toString() : "";
-
+      Object json = FunctionUtil.paramAsJson(functionName, parameters, 0);
       JSONArray jsonNames = new JSONArray();
-      for (Object keyStr : jsonObject.keySet()) {
-        // add prefix and suffix
-        String varName = prefix + keyStr.toString().trim() + suffix;
+      if (json instanceof JSONObject) {
+        JSONObject jsonObject = (JSONObject) json;
+        String prefix = parameters.size() > 1 ? parameters.get(1).toString() : "";
+        String suffix = parameters.size() > 2 ? parameters.get(2).toString() : "";
+
+        for (Object keyStr : jsonObject.keySet()) {
+          // add prefix and suffix
+          String varName = prefix + keyStr.toString().trim() + suffix;
+          // replace spaces by underscores
+          varName = varName.replaceAll("\\s", "_");
+          // delete special characters other than "." & "_" in var name
+          varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
+
+          if (!varName.equals("")) {
+            parser.setVariable(varName, jsonObject.get(keyStr));
+            jsonNames.add(varName);
+          }
+        }
+      } else {
+        FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+        JSONArray jsonArray = (JSONArray) json;
+
+        String varName = parameters.get(1).toString();
         // replace spaces by underscores
         varName = varName.replaceAll("\\s", "_");
         // delete special characters other than "." & "_" in var name
         varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
 
         if (!varName.equals("")) {
-          Object value = jsonObject.get(keyStr);
-          parser.setVariable(varName, value);
-          jsonNames.add(varName);
+          for (int i = 0; i < jsonArray.size(); i++) {
+            parser.setVariable(varName + i, jsonArray.get(i));
+            jsonNames.add(varName + i);
+          }
         }
       }
       return jsonNames;

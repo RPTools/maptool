@@ -17,6 +17,7 @@ package net.rptools.maptool.client.functions;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.MapToolVariableResolver;
@@ -80,9 +81,13 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     return "Deleted token " + token.getId() + " (" + token.getName() + ")";
   }
 
-  /*
-   * Token copyToken(String tokenId, Number numCopies: 1, String fromMap: (""|currentMap()), JSONObject updates: null) JSONArray copyToken(String tokenId, Number numCopies, String fromMap:
+  /**
+   * Token copyToken(String tokenId, Number numCopies: 1, String fromMap: (""|currentMap()),
+   * JSONObject updates: null) JSONArray copyToken(String tokenId, Number numCopies, String fromMap:
    * (""|currentMap()), JSONObject updates: null)
+   *
+   * @param res the MapToolVariableResolver
+   * @param param the list of parameters
    */
   private Object copyTokens(MapToolVariableResolver res, List<Object> param)
       throws ParserException {
@@ -155,6 +160,15 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     }
   }
 
+  /**
+   * This change various properties of a token. It is intended to be run before the token is sent to
+   * the server via putToken and as such, should only make local changes.
+   *
+   * @param token the token to change
+   * @param vals a JSONObject containing the new values
+   * @param zone the zone where the token is
+   * @param res the MapToolVariableResolver
+   */
   private void setTokenValues(Token token, JSONObject vals, Zone zone, MapToolVariableResolver res)
       throws ParserException {
     JSONObject newVals = JSONObject.fromObject(vals);
@@ -195,7 +209,12 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
         BigDecimal val = new BigDecimal(value);
         forceShape = !BigDecimal.ZERO.equals(val);
       }
-      TokenPropertyFunctions.getInstance().setLayer(token, newVals.getString("layer"), forceShape);
+      Zone.Layer layer = TokenPropertyFunctions.getLayer(newVals.getString("layer"));
+      Token.TokenShape tokenShape = TokenPropertyFunctions.getTokenShape(token, layer, forceShape);
+      token.setLayer(layer);
+      if (tokenShape != null) {
+        token.setShape(tokenShape);
+      }
     }
 
     int x = token.getX();
@@ -240,7 +259,9 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 
     if (tokenMoved) {
       // System.err.println(newVals + " @ (" + x + ", " + y + ")");
-      TokenLocationFunctions.getInstance().moveToken(token, x, y, useDistance);
+      ZonePoint zp = TokenLocationFunctions.getZonePoint(x, y, useDistance);
+      token.setX(zp.x);
+      token.setY(zp.y);
     }
 
     // Facing
@@ -266,20 +287,30 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       }
     }
 
+    // legacy use, from pre 1.5.7.
+    if (!newVals.containsKey("tokenHandout") && newVals.containsKey("handoutImage")) {
+      // handoutImage -> tokenHandout
+      newVals.put("tokenHandout", newVals.get("handoutImage"));
+    }
+    if (!newVals.containsKey("tokenPortrait") && newVals.containsKey("portraitImage")) {
+      // portraitImage -> tokenPortrait
+      newVals.put("tokenPortrait", newVals.get("portraitImage"));
+    }
+
     // tokenImage
     if (newVals.containsKey("tokenImage")) {
-      String assetName = newVals.getString("tokenImage");
-      TokenImage.setImage(token, assetName);
+      MD5Key md5key = TokenImage.getMD5Key(newVals.getString("tokenImage"), COPY_FUNC);
+      token.setImageAsset(null, md5key);
     }
     // handoutImage
-    if (newVals.containsKey("handoutImage")) {
-      String assetName = newVals.getString("handoutImage");
-      TokenImage.setHandout(token, assetName);
+    if (newVals.containsKey("tokenHandout")) {
+      MD5Key md5key = TokenImage.getMD5Key(newVals.getString("tokenHandout"), COPY_FUNC);
+      token.setCharsheetImage(md5key);
     }
     // portraitImage
-    if (newVals.containsKey("portraitImage")) {
-      String assetName = newVals.getString("portraitImage");
-      TokenImage.setPortrait(token, assetName);
+    if (newVals.containsKey("tokenPortrait")) {
+      MD5Key md5key = TokenImage.getMD5Key(newVals.getString("tokenPortrait"), COPY_FUNC);
+      token.setPortraitImage(md5key);
     }
   }
 }
