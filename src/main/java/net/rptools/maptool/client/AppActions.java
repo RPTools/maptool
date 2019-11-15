@@ -26,6 +26,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -114,7 +115,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent ae) {
+        protected void executeAction(ActionEvent ae) {
           Token chosenOne = null;
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           List<Token> myPlayers = new ArrayList<Token>();
@@ -163,7 +164,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent ae) {
+        protected void executeAction(ActionEvent ae) {
           // Do nothing
         }
       };
@@ -175,7 +176,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           try {
             ExportDialog d = MapTool.getCampaign().getExportDialog();
             d.setVisible(true);
@@ -193,7 +194,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ExportDialog d = MapTool.getCampaign().getExportDialog();
           if (d == null || d.getExportLocation() == null || d.getExportSettings() == null) {
             // Can't do a save.. so try "save as"
@@ -215,7 +216,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           try {
             doCampaignExport();
           } catch (Exception ex) {
@@ -232,7 +233,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
 
@@ -364,7 +365,7 @@ public class AppActions {
          * good, but the library itself is 2.7MB.
          */
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           /*
            * 1. Ask the user to select repositories which should be considered. 2. Ask the user for FTP upload information.
            */
@@ -463,7 +464,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (renderer == null) {
             return;
@@ -481,7 +482,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           try {
             AppSetup.installDefaultTokens();
 
@@ -505,7 +506,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           try {
             // Load the defaults
             InputStream in =
@@ -540,7 +541,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
           String oldName = zone.getName();
           if (oldName == null) oldName = "";
@@ -562,7 +563,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           if (MapTool.getFrame().isFullScreen()) {
             MapTool.getFrame().showWindowed();
@@ -584,7 +585,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           if (MapTool.getServer() == null) {
             return;
@@ -602,7 +603,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           // Probably don't have to create a new one each time
           PreferencesDialog dialog = new PreferencesDialog();
@@ -617,7 +618,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
           chooser.setDialogTitle(I18N.getText("msg.title.saveMessageHistory"));
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -650,7 +651,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           Zone z = MapTool.getFrame().getCurrentZoneRenderer().getZone();
           z.undoDrawable();
           isAvailable();
@@ -683,7 +684,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           Zone z = MapTool.getFrame().getCurrentZoneRenderer().getZone();
           z.redoDrawable();
           isAvailable();
@@ -728,7 +729,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (renderer == null) {
             return;
@@ -760,7 +761,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           Set<GUID> selectedSet = renderer.getSelectedTokenSet();
           cutTokens(renderer.getZone(), selectedSet);
@@ -816,7 +817,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           copyTokens(renderer.getSelectedTokenSet());
         }
@@ -962,7 +963,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (renderer == null) {
             return;
@@ -1107,7 +1108,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           AssetPanel assetPanel = MapTool.getFrame().getAssetPanel();
           Directory dir = assetPanel.getSelectedAssetRoot();
 
@@ -1132,7 +1133,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           AssetPanel assetPanel = MapTool.getFrame().getAssetPanel();
           Directory dir = assetPanel.getSelectedAssetRoot();
 
@@ -1152,7 +1153,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ClientConnectionPanel panel = MapTool.getFrame().getConnectionPanel();
           Player selectedPlayer = (Player) panel.getSelectedValue();
 
@@ -1188,7 +1189,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ClientConnectionPanel panel = MapTool.getFrame().getConnectionPanel();
           Player selectedPlayer = (Player) panel.getSelectedValue();
 
@@ -1228,7 +1229,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           AppState.setNotificationEnforced(!AppState.isNotificationEnforced());
           MapTool.serverCommand().enforceNotification(AppState.isNotificationEnforced());
         }
@@ -1247,7 +1248,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           AppState.setPlayerViewLinked(!AppState.isPlayerViewLinked());
           MapTool.getFrame().getCurrentZoneRenderer().maybeForcePlayersView();
@@ -1266,7 +1267,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           AppState.setShowAsPlayer(!AppState.isShowAsPlayer());
           MapTool.getFrame().refresh();
@@ -1285,7 +1286,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           AppState.setShowLightSources(!AppState.isShowLightSources());
           MapTool.getFrame().refresh();
@@ -1304,7 +1305,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           AppState.setCollectProfilingData(!AppState.isCollectProfilingData());
           MapTool.getProfilingNoteFrame().setVisible(AppState.isCollectProfilingData());
         }
@@ -1322,7 +1323,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           AppState.setLoggingToConsole(!AppState.isLoggingToConsole());
           MapTool.getLogConsoleNoteFrame().setVisible(AppState.isLoggingToConsole());
         }
@@ -1340,7 +1341,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           AppState.setShowMovementMeasurements(!AppState.getShowMovementMeasurements());
           if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
@@ -1356,7 +1357,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
           // XXX Perhaps ask the user if the copied map should have its GEA and/or TEA cleared? An
           // imported map would ask...
@@ -1377,7 +1378,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           if (!MapTool.confirm("msg.confirm.removeZone")) {
             return;
           }
@@ -1393,7 +1394,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           MapTool.getFrame().showAboutDialog();
         }
       };
@@ -1406,7 +1407,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (renderer == null) {
             return;
@@ -1425,7 +1426,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           if (!MapTool.getFrame().isCommandPanelVisible()) {
             MapTool.getFrame().showCommandPanel();
             MapTool.getFrame().getCommandPanel().startChat();
@@ -1449,7 +1450,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           MapTool.getFrame().getCommandPanel().startMacro();
         }
       };
@@ -1464,7 +1465,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           MapTool.getFrame().getCommandPanel().commitCommand();
         }
       };
@@ -1479,7 +1480,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           MapTool.getFrame().getCommandPanel().cancelCommand();
         }
       };
@@ -1494,7 +1495,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           MapTool.getFrame().getCommandPanel().insertNewline();
         }
       };
@@ -1506,7 +1507,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           MapTool.getFrame().getToolbox().setSelectedTool(GridTool.class);
         }
@@ -1519,7 +1520,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           if (MapTool.getFrame().getCurrentZoneRenderer().getZone().getMapAssetId() != null) {
             MapTool.getFrame().getToolbox().setSelectedTool(BoardTool.class);
@@ -1537,7 +1538,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           if (transferProgressDialog == null) {
             transferProgressDialog = new TransferProgressDialog();
@@ -1570,7 +1571,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           AppState.setShowGrid(!AppState.isShowGrid());
           if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
             MapTool.getFrame().getCurrentZoneRenderer().repaint();
@@ -1597,7 +1598,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           AppState.setShowCoordinates(!AppState.isShowCoordinates());
 
@@ -1624,7 +1625,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           AppState.setZoomLocked(!AppState.isZoomLocked());
           MapTool.getFrame().getZoomStatusBar().update(); // So the textfield becomes grayed out
         }
@@ -1647,7 +1648,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (renderer == null) {
@@ -1686,7 +1687,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           MapTool.getFrame()
               .getCurrentZoneRenderer()
               .getZone()
@@ -1701,7 +1702,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           if (!MapTool.confirm("msg.confirm.restoreFoW")) {
             return;
           }
@@ -1729,7 +1730,7 @@ public class AppActions {
     }
 
     @Override
-    public void execute(ActionEvent e) {
+    protected void executeAction(ActionEvent e) {
 
       ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
       if (renderer == null) {
@@ -1765,7 +1766,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           AppState.setShowTokenNames(!AppState.isShowTokenNames());
           if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
@@ -1791,7 +1792,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (renderer == null) {
@@ -1843,7 +1844,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           if (!confirmNewCampaign()) return;
 
@@ -1878,7 +1879,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (renderer != null) {
             Dimension size = renderer.getSize();
@@ -1900,7 +1901,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (renderer != null) {
             Dimension size = renderer.getSize();
@@ -1924,7 +1925,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (renderer != null) {
             // Revert to last zoom if we have one, but don't if the user has manually
@@ -1957,7 +1958,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           JComponent panel = MapTool.getFrame().getZoneMiniMapPanel();
           panel.setVisible(!panel.isVisible());
         }
@@ -1975,7 +1976,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
 
           ServerPolicy policy = MapTool.getServerPolicy();
           policy.setIsMovementLocked(!policy.isMovementLocked());
@@ -1997,7 +1998,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           runBackground(
               new Runnable() {
                 public void run() {
@@ -2141,7 +2142,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           if (MapTool.isCampaignDirty() && !MapTool.confirm("msg.confirm.loseChanges")) return;
 
           final ConnectToServerDialog dialog = new ConnectToServerDialog();
@@ -2216,7 +2217,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           if (MapTool.isHostingServer() && !MapTool.confirm("msg.confirm.hostingDisconnect"))
             return;
           disconnectFromServer();
@@ -2249,7 +2250,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent ae) {
+        protected void executeAction(ActionEvent ae) {
           if (MapTool.isCampaignDirty() && !MapTool.confirm("msg.confirm.loseChanges")) return;
           JFileChooser chooser = new CampaignPreviewFileChooser();
           chooser.setDialogTitle(I18N.getText("msg.title.loadCampaign"));
@@ -2376,7 +2377,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent ae) {
+        protected void executeAction(ActionEvent ae) {
           LoadSaveImpl impl = new LoadSaveImpl();
           impl.saveApplication(); // All the work is done here
         }
@@ -2394,7 +2395,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(final ActionEvent ae) {
+        protected void executeAction(final ActionEvent ae) {
           Observer callback = null;
           if (ae.getSource() instanceof Observer) callback = (Observer) ae.getSource();
           if (AppState.getCampaignFile() == null) {
@@ -2417,7 +2418,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(final ActionEvent ae) {
+        protected void executeAction(final ActionEvent ae) {
           doSaveCampaignAs(null);
         }
       };
@@ -2550,7 +2551,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent ae) {
+        protected void executeAction(ActionEvent ae) {
           ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
           JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
           chooser.setFileFilter(MapTool.getFrame().getMapFileFilter());
@@ -2611,7 +2612,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent ae) {
+        protected void executeAction(ActionEvent ae) {
           boolean isConnected = !MapTool.isHostingServer() && !MapTool.isPersonalServer();
           JFileChooser chooser = new MapPreviewFileChooser();
           chooser.setDialogTitle(I18N.getText("msg.title.loadMap"));
@@ -2707,7 +2708,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent ae) {
+        protected void executeAction(ActionEvent ae) {
           Campaign campaign = MapTool.getCampaign();
 
           // TODO: There should probably be only one of these
@@ -2737,7 +2738,7 @@ public class AppActions {
     }
 
     @Override
-    public void execute(ActionEvent arg0) {
+    protected void executeAction(ActionEvent arg0) {
       AppState.setGridSize(size);
       MapTool.getFrame().refresh();
     }
@@ -2751,7 +2752,7 @@ public class AppActions {
     }
 
     @Override
-    public void execute(ActionEvent arg0) {
+    protected void executeAction(ActionEvent arg0) {
       if (!MapTool.confirm("confirm.downloadRemoteLibrary", url)) {
         return;
       }
@@ -2814,7 +2815,7 @@ public class AppActions {
     }
 
     @Override
-    public void execute(java.awt.event.ActionEvent e) {
+    protected void executeAction(java.awt.event.ActionEvent e) {
       runBackground(
           new Runnable() {
             public void run() {
@@ -2837,7 +2838,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(java.awt.event.ActionEvent e) {
+        protected void executeAction(java.awt.event.ActionEvent e) {
           runBackground(
               new Runnable() {
                 public void run() {
@@ -2862,7 +2863,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(java.awt.event.ActionEvent e) {
+        protected void executeAction(java.awt.event.ActionEvent e) {
           runBackground(
               new Runnable() {
                 public void run() {
@@ -2891,7 +2892,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(java.awt.event.ActionEvent e) {
+        protected void executeAction(java.awt.event.ActionEvent e) {
           SysInfo.createAndShowGUI((String) getValue(Action.NAME));
         }
       };
@@ -2903,7 +2904,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent e) {
+        protected void executeAction(ActionEvent e) {
           runBackground(
               new Runnable() {
                 public void run() {
@@ -2921,7 +2922,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent ae) {
+        protected void executeAction(ActionEvent ae) {
           if (!MapTool.getFrame().confirmClose()) {
             return;
           } else {
@@ -2943,7 +2944,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent ae) {
+        protected void executeAction(ActionEvent ae) {
           MapTool.getFrame()
               .setPaintDrawingMeasurement(!MapTool.getFrame().isPaintDrawingMeasurement());
         }
@@ -2962,7 +2963,7 @@ public class AppActions {
         }
 
         @Override
-        public void execute(ActionEvent ae) {
+        protected void executeAction(ActionEvent ae) {
           AppState.setUseDoubleWideLine(!AppState.useDoubleWideLine());
           if (MapTool.getFrame() != null && MapTool.getFrame().getCurrentZoneRenderer() != null)
             MapTool.getFrame().getCurrentZoneRenderer().repaint();
@@ -2988,7 +2989,7 @@ public class AppActions {
     }
 
     @Override
-    public void execute(ActionEvent event) {
+    protected void executeAction(ActionEvent event) {
       DockableFrame frame = MapTool.getFrame().getFrame(mtFrame);
       if (frame.isVisible()) {
         MapTool.getFrame().getDockingManager().hideFrame(mtFrame.name());
@@ -3015,6 +3016,39 @@ public class AppActions {
   }
 
   public abstract static class ClientAction extends AbstractAction {
+    /** Does the code need to guard against bug https://bugs.openjdk.java.net/browse/JDK-8208712. */
+    private static final boolean NEEDS_GUARD;
+
+    static {
+      String prop = System.getProperty("os.name");
+      if ("Mac OS X".equals(prop)) {
+        NEEDS_GUARD =
+            true; // MapTool doesnt run on version 8 or less of JDK so no need to check that
+      } else {
+        NEEDS_GUARD = false;
+      }
+    }
+
+    /**
+     * The last time this action was called via accelerator key. This will only ever be set if
+     * {@link #NEEDS_GUARD} is <code>true</code> and the menu item is a JMenuCheckBoxItem
+     */
+    private long lastAccelInvoke;
+
+    public final void execute(ActionEvent e) {
+      if (NEEDS_GUARD && e != null && e.getSource() instanceof JCheckBoxMenuItem) {
+        if (e.getModifiers() == 0) {
+          if (TimeUnit.MILLISECONDS.toSeconds(e.getWhen() - lastAccelInvoke) < 1) {
+            return; // Nothing to do as its due to the JDK bug
+            // https://bugs.openjdk.java.net/browse/JDK-8208712
+          }
+        } else if ((e.getModifiers() & menuShortcut) != 0) {
+          lastAccelInvoke = e.getWhen();
+        }
+      }
+      executeAction(e);
+    }
+
     public void init(String key) {
       init(key, true);
     }
@@ -3048,7 +3082,7 @@ public class AppActions {
       updateActions();
     }
 
-    public abstract void execute(ActionEvent e);
+    protected abstract void executeAction(ActionEvent e);
 
     public void runBackground(final Runnable r) {
       new Thread() {
@@ -3114,7 +3148,7 @@ public class AppActions {
     }
 
     @Override
-    public void execute(ActionEvent e) {
+    protected void executeAction(ActionEvent e) {
       if (getValue(Action.SHORT_DESCRIPTION) != null)
         MapTool.showDocument((String) getValue(Action.SHORT_DESCRIPTION));
     }
