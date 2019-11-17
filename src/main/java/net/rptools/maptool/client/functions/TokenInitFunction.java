@@ -14,10 +14,12 @@
  */
 package net.rptools.maptool.client.functions;
 
+import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -34,7 +36,7 @@ public class TokenInitFunction extends AbstractFunction {
 
   /** Getter has 0 to 2, setter has 1 to 3 */
   private TokenInitFunction() {
-    super(0, 3, "setInitiative", "getInitiative");
+    super(0, 4, "setInitiative", "getInitiative", "addToInitiative");
   }
 
   /** singleton instance of this function */
@@ -54,7 +56,14 @@ public class TokenInitFunction extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(res, functionName, args, 0, 1);
       return getInitiative(token);
-    } else {
+    } else if (functionName.equalsIgnoreCase("addToInitiative")) {
+      FunctionUtil.checkNumberParam(functionName, args, 0, 4);
+      boolean allowDuplicates =
+          args.size() > 0 ? FunctionUtil.paramAsBoolean(functionName, args, 0, true) : false;
+      String state = args.size() > 1 && !"".equals(args.get(1)) ? args.get(1).toString() : null;
+      Token token = FunctionUtil.getTokenFromParam(res, functionName, args, 2, 3);
+      return addToInitiative(allowDuplicates, state, token);
+    } else { // setInitiative
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       String value = args.get(0).toString();
       Token token = FunctionUtil.getTokenFromParam(res, functionName, args, 1, 2);
@@ -62,6 +71,12 @@ public class TokenInitFunction extends AbstractFunction {
     }
   }
 
+  /**
+   * Return a string containing the initiatives of the token
+   *
+   * @param token the token
+   * @return a String list of the initiatives
+   */
   public static String getInitiative(Token token) {
     String ret = "";
     List<TokenInitiative> tis = token.getInitiatives();
@@ -73,10 +88,53 @@ public class TokenInitFunction extends AbstractFunction {
     return ret;
   }
 
-  public static Object setInitiative(Token token, String value) {
-    if (token.getInitiatives().isEmpty())
+  /**
+   * Add a token to the initiative. Can also assign the token an initiative state.
+   *
+   * @param allowDuplicates are duplicates allowed
+   * @param state the initiative to assign to the token
+   * @param token the token to add to the initiative
+   * @return 1 if the token was added, 0 otherwise
+   */
+  public static BigDecimal addToInitiative(boolean allowDuplicates, String state, Token token)
+      throws ParserException {
+    boolean hasPermission = MapTool.getFrame().getInitiativePanel().hasOwnerPermission(token);
+    if (!MapTool.getParser().isMacroTrusted() && !hasPermission) {
+      String message;
+      if (MapTool.getFrame().getInitiativePanel().isOwnerPermissions()) {
+        message = I18N.getText("macro.function.initiative.gmOrOwner", "addToInitiative");
+      } else {
+        message = I18N.getText("macro.function.initiative.gmOnly", "addToInitiative");
+      }
+      throw new ParserException(message);
+    } // endif
+
+    InitiativeList list = token.getZoneRenderer().getZone().getInitiativeList();
+    // insert the token if needed
+    TokenInitiative ti = null;
+    if (allowDuplicates || list.indexOf(token).isEmpty()) {
+      ti = list.insertToken(-1, token);
+      if (state != null) ti.setState(state);
+    } else {
+      setInitiative(token, state);
+    } // endif
+    return ti != null ? BigDecimal.ONE : BigDecimal.ZERO;
+  }
+
+  /**
+   * Set an initiative value to all initiative entries of a token.
+   *
+   * @param token the token to set the initiative of
+   * @param state the initiative to assign to the token
+   * @return the value assigned to the initiative
+   */
+  public static Object setInitiative(Token token, String state) {
+    List<InitiativeList.TokenInitiative> tis = token.getInitiatives();
+    for (InitiativeList.TokenInitiative ti : tis) ti.setState(state);
+    if (tis.isEmpty()) {
       return I18N.getText("macro.function.TokenInit.notOnListSet");
-    MapTool.serverCommand().updateTokenProperty(token, "setInitiative", value);
-    return value;
+    } else {
+      return state;
+    }
   }
 }

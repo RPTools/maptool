@@ -342,8 +342,12 @@ public class Token extends BaseModel implements Cloneable {
       getPropertyMap().clear();
       getPropertyMap().putAll(token.propertyMapCI);
     }
-    if (token.macroPropertiesMap != null) {
-      macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap);
+    if (token.macroPropertiesMap != null) { // Deep copy of the macros
+      macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap.size());
+      token.macroPropertiesMap.forEach(
+          (key, value) ->
+              macroPropertiesMap.put(
+                  key, new MacroButtonProperties(this, key, (MacroButtonProperties) value, false)));
     }
     // convert old-style macros
     if (token.macroMap != null) {
@@ -1883,26 +1887,6 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   /**
-   * Set the initiatives of the token
-   *
-   * @param value the new value of the initiatives
-   */
-  public void setInitiative(String value) {
-    List<InitiativeList.TokenInitiative> tis = getInitiatives();
-    for (InitiativeList.TokenInitiative ti : tis) ti.setState(value);
-  }
-
-  /**
-   * Set the hold on token initiative
-   *
-   * @param set the boolean value for the hold
-   */
-  public void setInitiativeHold(boolean set) {
-    List<InitiativeList.TokenInitiative> tis = getInitiatives();
-    for (InitiativeList.TokenInitiative ti : tis) ti.setHolding(set);
-  }
-
-  /**
    * Get the list of initiatives for the token
    *
    * @return The List of initiative
@@ -1912,10 +1896,8 @@ public class Token extends BaseModel implements Cloneable {
     Zone zone = getZoneRenderer().getZone();
     List<Integer> list = zone.getInitiativeList().indexOf(this);
     if (list.isEmpty()) return Collections.EMPTY_LIST;
-    List<InitiativeList.TokenInitiative> ret =
-        new ArrayList<InitiativeList.TokenInitiative>(list.size());
-    for (Integer index : list)
-      ret.add(zone.getInitiativeList().getTokenInitiative(index.intValue()));
+    List<InitiativeList.TokenInitiative> ret = new ArrayList<>(list.size());
+    for (Integer index : list) ret.add(zone.getInitiativeList().getTokenInitiative(index));
     return ret;
   }
 
@@ -1928,7 +1910,7 @@ public class Token extends BaseModel implements Cloneable {
     Zone zone = getZoneRenderer().getZone();
     List<Integer> list = zone.getInitiativeList().indexOf(this);
     if (list.isEmpty()) return null;
-    return zone.getInitiativeList().getTokenInitiative(list.get(0).intValue());
+    return zone.getInitiativeList().getTokenInitiative(list.get(0));
   }
 
   public static boolean isTokenFile(String filename) {
@@ -2151,12 +2133,6 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case "setGMNotes":
         setGMNotes(parameters[0].toString());
-        break;
-      case "setInitiative":
-        setInitiative((String) parameters[0]);
-        break;
-      case "setInitiativeHold":
-        setInitiativeHold((boolean) parameters[0]);
         break;
       case "setX":
         setX((int) parameters[0]);

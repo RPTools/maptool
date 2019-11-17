@@ -221,8 +221,16 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     save();
   }
 
-  // constructor for creating a new copy of an existing token button, auto-saves
-  public MacroButtonProperties(Token token, int index, MacroButtonProperties properties) {
+  /**
+   * Constructor for creating a new copy of an existing token button, can auto-saves
+   *
+   * @param token the token for which to create the copy
+   * @param index the index of the next macro
+   * @param properties the MacroButtonProperties of the copied button
+   * @param autoSave should the macro be autosaved or not?
+   */
+  public MacroButtonProperties(
+      Token token, int index, MacroButtonProperties properties, boolean autoSave) {
     this(index);
     setSaveLocation("Token");
     setTokenId(token);
@@ -249,7 +257,20 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setCompareCommand(properties.getCompareCommand());
     String tt = properties.getToolTip();
     setToolTip(tt);
-    save();
+    if (autoSave) {
+      save();
+    }
+  }
+
+  /**
+   * Constructor for creating a new copy of an existing token button, auto-saves
+   *
+   * @param token the token for which to create the copy
+   * @param index the index of the next macro
+   * @param properties the MacroButtonProperties of the copied button
+   */
+  public MacroButtonProperties(Token token, int index, MacroButtonProperties properties) {
+    this(token, index, properties, true);
   }
 
   // constructor for creating common macro buttons on selection panel
