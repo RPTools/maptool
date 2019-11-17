@@ -342,8 +342,12 @@ public class Token extends BaseModel implements Cloneable {
       getPropertyMap().clear();
       getPropertyMap().putAll(token.propertyMapCI);
     }
-    if (token.macroPropertiesMap != null) {
-      macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap);
+    if (token.macroPropertiesMap != null) { // Deep copy of the macros
+      macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap.size());
+      token.macroPropertiesMap.forEach(
+          (key, value) ->
+              macroPropertiesMap.put(
+                  key, new MacroButtonProperties(this, key, (MacroButtonProperties) value, false)));
     }
     // convert old-style macros
     if (token.macroMap != null) {
