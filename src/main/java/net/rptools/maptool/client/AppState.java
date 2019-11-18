@@ -170,13 +170,16 @@ public class AppState {
   }
 
   public static synchronized void setIsSaving(boolean saving) {
-    if (log.isDebugEnabled())
+    if (log.isDebugEnabled()) {
       log.debug("AppState.isSaving was " + isSaving + "; setting to " + saving); // $NON-NLS-1$
+    }
     isSaving = saving;
   }
 
   public static synchronized boolean isSaving() {
-    if (log.isDebugEnabled()) log.debug("AppState.isSaving is " + isSaving); // $NON-NLS-1$
+    if (log.isDebugEnabled()) {
+      log.debug("AppState.isSaving is " + isSaving); // $NON-NLS-1$
+    }
     return isSaving;
   }
 
