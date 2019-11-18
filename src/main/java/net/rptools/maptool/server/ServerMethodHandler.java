@@ -125,8 +125,11 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
         case message:
           message((TextMessage) context.get(0));
           break;
+        case execFunction:
+          execFunction((String) context.get(0), (String) context.get(1), (String) context.get(2));
+          break;
         case execLink:
-          execLink((String) context.get(0), (String) context.get(1));
+          execLink((String) context.get(0), (String) context.get(1), (String) context.get(2));
           break;
         case putAsset:
           putAsset((Asset) context.get(0));
@@ -162,6 +165,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           break;
         case setCampaign:
           setCampaign((Campaign) context.get(0));
+          break;
+        case setCampaignName:
+          setCampaignName((String) context.get(0));
           break;
         case setZoneGridSize:
           setZoneGridSize(
@@ -546,8 +552,13 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   @Override
-  public void execLink(String link, String target) {
-    forwardToAllClients();
+  public void execFunction(String functionText, String target, String source) {
+    forwardToClients();
+  }
+
+  @Override
+  public void execLink(String link, String target, String source) {
+    forwardToClients();
   }
 
   public void putAsset(Asset asset) {
@@ -659,6 +670,11 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 
   public void setCampaign(Campaign campaign) {
     server.setCampaign(campaign);
+    forwardToClients();
+  }
+
+  public void setCampaignName(String name) {
+    server.getCampaign().setName(name);
     forwardToClients();
   }
 

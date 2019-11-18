@@ -98,7 +98,6 @@ import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.ClientAction;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -184,6 +183,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private final AboutDialog aboutDialog;
   private final ColorPicker colorPicker;
   private final Toolbox toolbox;
+  private final ToolbarPanel toolbarPanel;
   private final ZoneMiniMapPanel zoneMiniMapPanel;
   private final JPanel zoneRendererPanel;
   private JPanel visibleControlPanel;
@@ -511,10 +511,11 @@ public class MapToolFrame extends DefaultDockableHolder
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
     rendererBorderPanel.add(zoneRendererPanel);
+    toolbarPanel = new ToolbarPanel(toolbox);
 
     // Put it all together
     setJMenuBar(menuBar);
-    add(BorderLayout.NORTH, new ToolbarPanel(toolbox));
+    add(BorderLayout.NORTH, toolbarPanel);
     add(BorderLayout.SOUTH, statusPanel);
 
     JLayeredPane glassPaneComposite = new JLayeredPane();
@@ -678,10 +679,17 @@ public class MapToolFrame extends DefaultDockableHolder
           .loadInitialLayout(
               MapToolFrame.class.getClassLoader().getResourceAsStream(INITIAL_LAYOUT_XML));
     } catch (ParserConfigurationException | SAXException | IOException e) {
+      MapTool.showError("msg.error.layoutInitial", e);
+    }
+    try {
+      getDockingManager()
+          .loadLayoutDataFromFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
+    } catch (IllegalArgumentException e) {
+      // This error sometimes comes up when using three monitors due to a bug in the java jdk
+      // incorrectly
+      // reporting screen size as zero.
       MapTool.showError("msg.error.layoutParse", e);
     }
-    getDockingManager()
-        .loadLayoutDataFromFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");
   }
 
   public DockableFrame getFrame(MTFrame frame) {
@@ -1561,14 +1569,14 @@ public class MapToolFrame extends DefaultDockableHolder
     getZoomStatusBar().update();
   }
 
+  /**
+   * Set the MapTool title bar. The title includes the name of the app, the player name, the
+   * campaign name and the name of the specified zone.
+   *
+   * @param renderer the ZoneRenderer of the zone.
+   */
   public void setTitleViaRenderer(ZoneRenderer renderer) {
-    String campaignName = " - [Default]";
-    if (AppState.getCampaignFile() != null) {
-      String s = AppState.getCampaignFile().getName();
-      // remove the file extension of the campaign file name
-      s = s.substring(0, s.length() - AppConstants.CAMPAIGN_FILE_EXTENSION.length());
-      campaignName = " - [" + s + "]";
-    }
+    String campaignName = " - [" + MapTool.getCampaign().getName() + "]";
     setTitle(
         AppConstants.APP_NAME
             + " - "
@@ -1577,8 +1585,20 @@ public class MapToolFrame extends DefaultDockableHolder
             + (renderer != null ? " - " + renderer.getZone().getName() : ""));
   }
 
+  /**
+   * Set the MapTool title bar. The title includes the name of the app, the player name, the
+   * campaign name and the current zone name.
+   */
+  public void setTitle() {
+    setTitleViaRenderer(MapTool.getFrame().getCurrentZoneRenderer());
+  }
+
   public Toolbox getToolbox() {
     return toolbox;
+  }
+
+  public ToolbarPanel getToolbarPanel() {
+    return toolbarPanel;
   }
 
   public ZoneRenderer getZoneRenderer(Zone zone) {

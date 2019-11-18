@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.functions.ExecFunction;
+import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -75,6 +77,12 @@ public class ServerCommandClientImpl implements ServerCommand {
     } finally {
       campaign.setBeingSerialized(false);
     }
+  }
+
+  public void setCampaignName(String name) {
+    MapTool.getCampaign().setName(name);
+    MapTool.getFrame().setTitle();
+    makeServerCall(COMMAND.setCampaignName, name);
   }
 
   public void setVisionType(GUID zoneGUID, VisionType visionType) {
@@ -200,8 +208,21 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   @Override
-  public void execLink(String link, String target) {
-    makeServerCall(COMMAND.execLink, link, target);
+  public void execFunction(String functionText, String target, String source) {
+    ExecFunction.receiveExecFunction(functionText, target, source); // receive locally right away
+
+    if (ExecFunction.isMessageGlobal(target, source)) {
+      makeServerCall(COMMAND.execFunction, functionText, target, source);
+    }
+  }
+
+  @Override
+  public void execLink(String link, String target, String source) {
+    MacroLinkFunction.receiveExecLink(link, target, source); // receive locally right away
+
+    if (ExecFunction.isMessageGlobal(target, source)) {
+      makeServerCall(COMMAND.execLink, link, target, source);
+    }
   }
 
   public void showPointer(String player, Pointer pointer) {

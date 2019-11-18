@@ -185,7 +185,6 @@ public class MapTool {
   private static AssetTransferManager assetTransferManager;
   private static ServiceAnnouncer announcer;
   private static AutoSaveManager autoSaveManager;
-  private static SoundManager soundManager;
   private static TaskBarFlasher taskbarFlasher;
   private static EventDispatcher eventDispatcher;
   private static MapToolLineParser parser = new MapToolLineParser();
@@ -531,10 +530,6 @@ public class MapTool {
     }
   }
 
-  public static SoundManager getSoundManager() {
-    return soundManager;
-  }
-
   /**
    * Play the sound registered to an eventId.
    *
@@ -545,7 +540,7 @@ public class MapTool {
       if (AppPreferences.getPlaySystemSoundsOnlyWhenNotFocused() && isInFocus()) {
         return;
       }
-      soundManager.playSoundEvent(eventId);
+      SoundManager.playSoundEvent(eventId);
     }
   }
 
@@ -689,11 +684,10 @@ public class MapTool {
     eventDispatcher = new EventDispatcher();
     registerEvents();
 
-    soundManager = new SoundManager();
     try {
-      soundManager.configure(SOUND_PROPERTIES);
-      soundManager.registerSoundEvent(
-          SND_INVALID_OPERATION, soundManager.getRegisteredSound("Dink"));
+      SoundManager.configure(SOUND_PROPERTIES);
+      SoundManager.registerSoundEvent(
+          SND_INVALID_OPERATION, SoundManager.getRegisteredSound("Dink"));
     } catch (IOException ioe) {
       MapTool.showError("While initializing (configuring sound)", ioe);
     }
@@ -1002,8 +996,18 @@ public class MapTool {
     return assetTransferManager;
   }
 
+  /**
+   * Start the server from a campaign file and various settings.
+   *
+   * @param id the id of the server for announcement
+   * @param config the server configuration
+   * @param campaign the campaign
+   * @param copyCampaign should the campaign be a copy of the one provided
+   * @throws IOException if new MapToolServer fails
+   */
   public static void startServer(
-      String id, ServerConfig config, ServerPolicy policy, Campaign campaign) throws IOException {
+      String id, ServerConfig config, ServerPolicy policy, Campaign campaign, boolean copyCampaign)
+      throws IOException {
     if (server != null) {
       Thread.dumpStack();
       showError("msg.error.alreadyRunningServer");
@@ -1015,9 +1019,13 @@ public class MapTool {
     // TODO: the client and server campaign MUST be different objects.
     // Figure out a better init method
     server = new MapToolServer(config, policy);
-    server.setCampaign(campaign);
 
     serverPolicy = server.getPolicy();
+    if (copyCampaign) {
+      server.setCampaign(new Campaign(campaign)); // copy of FoW depends on server policies
+    } else {
+      server.setCampaign(campaign);
+    }
 
     if (announcer != null) {
       announcer.stop();
@@ -1123,7 +1131,7 @@ public class MapTool {
 
   public static void startPersonalServer(Campaign campaign) throws IOException {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
-    MapTool.startServer(null, config, new ServerPolicy(), campaign);
+    MapTool.startServer(null, config, new ServerPolicy(), campaign, false);
 
     String username = System.getProperty("user.name", "Player");
 
