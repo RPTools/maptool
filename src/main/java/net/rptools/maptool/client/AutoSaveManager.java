@@ -125,6 +125,7 @@ public class AutoSaveManager implements ActionListener {
                     MapTool.showError("AutoSaveManager.failed", t);
                   } finally {
                     AppState.setIsSaving(false);
+                    restart(); // restart the timer after pausing it
                   }
                 }
               },
