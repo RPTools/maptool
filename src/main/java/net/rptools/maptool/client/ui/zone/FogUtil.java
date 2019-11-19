@@ -234,9 +234,9 @@ public class FogUtil {
    * net.rptools.maptool.server.ServerMethodHandler.exposePCArea(GUID), and the macro
    * exposePCOnlyArea().
    *
-   * @author updated Jamz
-   * @since updated 1.4.0.1
-   * @param renderer
+   * @author updated Jamz, Merudo
+   * @since updated 1.5.8
+   * @param renderer the ZoneRenderer
    */
   public static void exposePCArea(ZoneRenderer renderer) {
     Set<GUID> tokenSet = new HashSet<GUID>();
@@ -256,6 +256,7 @@ public class FogUtil {
       tokenSet.add(token.getId());
     }
 
+    renderer.getZone().clearGlobalExposedArea();
     renderer.getZone().clearExposedArea(tokenSet);
     // this was .clearExposedArea(), changed to expose current area only vs last path
     exposeVisibleArea(renderer, tokenSet, true);
