@@ -49,6 +49,7 @@ import java.util.zip.ZipOutputStream;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -3108,7 +3109,7 @@ public class AppActions {
     private long lastAccelInvoke;
 
     public final void execute(ActionEvent e) {
-      if (NEEDS_GUARD && e != null && e.getSource() instanceof JCheckBoxMenuItem) {
+      if (NEEDS_GUARD && (e != null) && (e.getSource() instanceof JCheckBoxMenuItem)) {
         if (e.getModifiers() == 0) {
           if (TimeUnit.MILLISECONDS.toSeconds(e.getWhen() - lastAccelInvoke) < 1) {
             return; // Nothing to do as its due to the JDK bug
