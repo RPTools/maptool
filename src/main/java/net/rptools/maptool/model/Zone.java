@@ -713,7 +713,7 @@ public class Zone extends BaseModel {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, token));
   }
 
-  // Clears FoW for ALL tokens, including NPC's
+  /** Clears FoW for ALL tokens, including NPC's */
   public void clearExposedArea() {
     exposedArea = new Area();
     // There used to be a foreach loop here that iterated over getTokens() and called .clear() --
@@ -722,7 +722,16 @@ public class Zone extends BaseModel {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
   }
 
-  // clear only exposed area for tokenSet, eg only PC's
+  /** Clear the exposedArea common to all tokens */
+  public void clearGlobalExposedArea() {
+    exposedArea.reset();
+  }
+
+  /**
+   * Clear only exposed area for tokenSet, eg only PC's
+   *
+   * @param tokenSet the set of token GUID to reset
+   */
   public void clearExposedArea(Set<GUID> tokenSet) {
     // Jamz: Clear FoW for set tokens only, for use by
     // ExposeVisibleAreaOnlyAction Menu action and exposePCOnlyArea() macro
