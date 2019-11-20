@@ -863,6 +863,7 @@ public class Token extends BaseModel implements Cloneable {
     ownerList.add(playerId);
   }
 
+  /** @return true if the token is owned by all or has explicit owners. */
   public synchronized boolean hasOwners() {
     return ownerType == OWNER_TYPE_ALL || (ownerList != null && !ownerList.isEmpty());
   }
