@@ -216,5 +216,5 @@ public interface ServerCommand {
   public void updateExposedAreaMeta(
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta);
 
-  public void clearExposedArea(GUID zoneGUID);
+  public void clearExposedArea(GUID zoneGUID, boolean globalOnly);
 }
