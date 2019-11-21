@@ -270,7 +270,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
               context.getGUID(0), context.getGUID(1), (ExposedAreaMetaData) context.get(2));
           break;
         case clearExposedArea:
-          clearExposedArea(context.getGUID(0));
+          clearExposedArea(context.getGUID(0), context.getBool(1));
           break;
       }
     } finally {
@@ -804,25 +804,33 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     forwardToClients();
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * Update the server exposed area meta data, and forward the change to the clients
    *
-   * @see net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net. rptools.maptool.model.GUID, net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
+   * @param zoneGUID the zone GUID of the map
+   * @param tokenExposedAreaGUID the GUID of the token to update the exposed meta data
+   * @param meta the exposed area meta data
+   * @see
+   *     net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net.rptools.maptool.model.GUID,
+   *     net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
    */
   public void updateExposedAreaMeta(
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.setExposedAreaMetaData(tokenExposedAreaGUID, meta); // update the server
     forwardToClients();
   }
 
-  public void clearExposedArea(GUID zoneGUID) {
-    Zone zone = MapTool.getCampaign().getZone(zoneGUID);
-    zone.clearExposedArea();
-    forwardToAllClients();
-
-    // same as forwardToClients?
-    // server.getConnection().broadcastCallMethod(
-    // ClientCommand.COMMAND.clearExposedArea.name(),
-    // RPCContext.getCurrent().parameters);
+  /**
+   * Clear server global exposed area. Can clear all token exposed areas. Forward to clients.
+   *
+   * @param zoneGUID the GUID of the zone
+   * @param globalOnly should only the global area be cleared?
+   */
+  public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.clearExposedArea(globalOnly);
+    forwardToClients();
   }
 
   ////

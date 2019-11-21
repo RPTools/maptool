@@ -1294,8 +1294,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
             // Only let the GM's do this
             if (MapTool.getPlayer().isGM()) {
               FogUtil.exposePCArea(renderer);
-              // Jamz: This doesn't seem to be needed
-              // MapTool.serverCommand().exposePCArea(renderer.getZone().getId());
             }
           }
         });
