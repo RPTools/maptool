@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -351,9 +350,8 @@ public class Zone extends BaseModel {
       Collections.copy(gmDrawables, zone.gmDrawables);
     }
     if (zone.labels != null && !zone.labels.isEmpty()) {
-      Iterator<GUID> i = zone.labels.keySet().iterator();
-      while (i.hasNext()) {
-        this.putLabel(new Label(zone.labels.get(i.next())));
+      for (GUID guid : zone.labels.keySet()) {
+        this.putLabel(new Label(zone.labels.get(guid)));
       }
     }
     exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>(zone.exposedAreaMeta.size() * 4 / 3);
@@ -364,11 +362,9 @@ public class Zone extends BaseModel {
     initiativeList.setZone(null);
 
     if (zone.tokenMap != null && !zone.tokenMap.isEmpty()) {
-      Iterator<GUID> i = zone.tokenMap.keySet().iterator();
-      while (i.hasNext()) {
-        Token old = zone.tokenMap.get(i.next());
-        Token token = new Token(old);
-        if (keepIds) token.setId(old.getId()); // keep the old token ids
+      for (GUID oldGUID : zone.tokenMap.keySet()) {
+        Token old = zone.tokenMap.get(oldGUID);
+        Token token = new Token(old, keepIds); // keep old ids at server start
         if (old.getExposedAreaGUID() != null) {
           GUID guid = new GUID();
           token.setExposedAreaGUID(guid);
@@ -717,16 +713,24 @@ public class Zone extends BaseModel {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, token));
   }
 
-  // Clears FoW for ALL tokens, including NPC's
-  public void clearExposedArea() {
+  /**
+   * Clears the global exposed area. Can also clear the exposed area for ALL tokens, including NPC's
+   *
+   * @param globalOnly should the exposed area of all tokens be also cleared?
+   */
+  public void clearExposedArea(boolean globalOnly) {
     exposedArea = new Area();
-    // There used to be a foreach loop here that iterated over getTokens() and called .clear() --
-    // why?!
-    exposedAreaMeta.clear();
+    if (!globalOnly) {
+      exposedAreaMeta.clear();
+    }
     fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
   }
 
-  // clear only exposed area for tokenSet, eg only PC's
+  /**
+   * Clear only exposed area for tokenSet, eg only PC's. Updates the server and other clients.
+   *
+   * @param tokenSet the set of token GUID to reset
+   */
   public void clearExposedArea(Set<GUID> tokenSet) {
     // Jamz: Clear FoW for set tokens only, for use by
     // ExposeVisibleAreaOnlyAction Menu action and exposePCOnlyArea() macro
@@ -746,6 +750,13 @@ public class Zone extends BaseModel {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
   }
 
+  /**
+   * Expose a FoW area. Add the exposed area to the metadata of the token. If tok is set to null or
+   * the settings disable individual FoW, instead add it to the general exposedArea.
+   *
+   * @param area the area to expose
+   * @param tok the token to expose for, or null
+   */
   public void exposeArea(Area area, Token tok) {
     if (area == null || area.isEmpty()) {
       return;
@@ -831,8 +842,8 @@ public class Zone extends BaseModel {
    * Modifies the global exposed area (GEA) or token exposed by resetting it and then setting it to
    * the contents of the passed in Area and firing a ModelChangeEvent.
    *
-   * @param area
-   * @param selectedToks
+   * @param area the area to expose
+   * @param selectedToks the selected tokens
    */
   public void setFogArea(Area area, Set<GUID> selectedToks) {
     if (area == null) {
@@ -1505,7 +1516,7 @@ public class Zone extends BaseModel {
         });
   }
 
-  // Jamz: For FogUtil.exposePCArea to skip sight test.
+  /** Returns PCs tokens with sight. For FogUtil.exposePCArea to skip sight test. */
   public List<Token> getPlayerTokensWithSight() {
     return getTokensFiltered(
         new Filter() {
@@ -1515,9 +1526,10 @@ public class Zone extends BaseModel {
         });
   }
 
-  // Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by
-  // All",
-  // or "Owned" by the current player; in theory, NPC tokens the Player control.
+  /**
+   * Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by
+   * All", or "Owned" by the current player; in theory, NPC tokens the Player control.
+   */
   public List<Token> getTokensOwnedByAllWithSight() {
     return getTokensFiltered(
         new Filter() {
@@ -1830,6 +1842,12 @@ public class Zone extends BaseModel {
     return meta;
   }
 
+  /**
+   * Put the ExposedAreaMetaData in the exposedAreaMeta map for a token
+   *
+   * @param tokenExposedAreaGUID the GUID of the token
+   * @param meta the exposed metadata
+   */
   public void setExposedAreaMetaData(GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
     if (exposedAreaMeta == null) {
       exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>();

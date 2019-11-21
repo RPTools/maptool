@@ -321,9 +321,15 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.updateGmMacros, properties);
   }
 
-  public void clearExposedArea(GUID zoneGUID) {
+  /**
+   * Send the message to server to clear the exposed area of a map
+   *
+   * @param zoneGUID the GUID of the zone
+   * @param globalOnly should all token exposed areas be cleared?
+   */
+  public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
     // System.out.println("in ServerCommandClientImpl");
-    makeServerCall(COMMAND.clearExposedArea, zoneGUID);
+    makeServerCall(COMMAND.clearExposedArea, zoneGUID, globalOnly);
   }
 
   private static void makeServerCall(ServerCommand.COMMAND command, Object... params) {

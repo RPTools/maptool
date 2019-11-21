@@ -183,6 +183,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private final AboutDialog aboutDialog;
   private final ColorPicker colorPicker;
   private final Toolbox toolbox;
+  private final ToolbarPanel toolbarPanel;
   private final ZoneMiniMapPanel zoneMiniMapPanel;
   private final JPanel zoneRendererPanel;
   private JPanel visibleControlPanel;
@@ -510,10 +511,11 @@ public class MapToolFrame extends DefaultDockableHolder
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
     rendererBorderPanel.add(zoneRendererPanel);
+    toolbarPanel = new ToolbarPanel(toolbox);
 
     // Put it all together
     setJMenuBar(menuBar);
-    add(BorderLayout.NORTH, new ToolbarPanel(toolbox));
+    add(BorderLayout.NORTH, toolbarPanel);
     add(BorderLayout.SOUTH, statusPanel);
 
     JLayeredPane glassPaneComposite = new JLayeredPane();
@@ -1593,6 +1595,10 @@ public class MapToolFrame extends DefaultDockableHolder
 
   public Toolbox getToolbox() {
     return toolbox;
+  }
+
+  public ToolbarPanel getToolbarPanel() {
+    return toolbarPanel;
   }
 
   public ZoneRenderer getZoneRenderer(Zone zone) {

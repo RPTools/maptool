@@ -90,7 +90,6 @@ public class MapToolLineParser {
               StrListFunctions.getInstance(),
               StrPropFunctions.getInstance(),
               SwitchTokenFunction.getInstance(),
-              TokenAddToInitiativeFunction.getInstance(),
               TokenBarFunction.getInstance(),
               TokenCopyDeleteFunctions.getInstance(),
               TokenGMNameFunction.getInstance(),
