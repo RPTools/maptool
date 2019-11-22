@@ -114,6 +114,7 @@ import net.rptools.maptool.client.swing.ProgressStatusBar;
 import net.rptools.maptool.client.swing.SpacerStatusBar;
 import net.rptools.maptool.client.swing.StatusPanel;
 import net.rptools.maptool.client.swing.ZoomStatusBar;
+import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
@@ -1532,6 +1533,20 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneMiniMapPanel.repaint();
   }
 
+  /** Stop the drag of the token, if any is being dragged. */
+  private void stopTokenDrag() {
+    Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
+    if (tool instanceof PointerTool) {
+      PointerTool pointer = (PointerTool) tool;
+      if (pointer.isDraggingToken()) pointer.stopTokenDrag();
+    }
+  }
+
+  /**
+   * Set the current ZoneRenderer
+   *
+   * @param renderer the ZoneRenderer
+   */
   public void setCurrentZoneRenderer(ZoneRenderer renderer) {
     // Flush first so that the new zone renderer can inject the newly needed images
     if (renderer != null) {
@@ -1546,6 +1561,7 @@ public class MapToolFrame extends DefaultDockableHolder
       zoneRendererList.add(renderer);
     }
     if (currentRenderer != null) {
+      stopTokenDrag(); // if a token is being dragged, stop the drag
       currentRenderer.flush();
       zoneRendererPanel.remove(currentRenderer);
     }
