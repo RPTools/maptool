@@ -521,7 +521,8 @@ public class CommandPanel extends JPanel implements Observer {
   public void cancelCommand() {
     commandTextArea.setText("");
     validate();
-    MapTool.getFrame().hideCommandPanel();
+    // Why were we closing the chat window on Esc?
+    // MapTool.getFrame().hideCommandPanel();
   }
 
   /** Inserts a newline into the chat input box. */
