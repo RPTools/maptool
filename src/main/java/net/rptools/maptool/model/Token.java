@@ -820,15 +820,13 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
-  // My Addition
+  /** Clear the lightSourceList */
   public void clearLightSources() {
     if (lightSourceList == null) {
       return;
     }
     lightSourceList = null;
   }
-
-  // End My Addition
 
   public boolean hasLightSource(LightSource source) {
     if (lightSourceList == null) {
@@ -845,6 +843,7 @@ public class Token extends BaseModel implements Cloneable {
     return false;
   }
 
+  /** Return false if lightSourceList is null or empty, and true otherwise */
   public boolean hasLightSources() {
     return lightSourceList != null && !lightSourceList.isEmpty();
   }
@@ -1122,6 +1121,7 @@ public class Token extends BaseModel implements Cloneable {
     this.isVisible = visible;
   }
 
+  /** @return isVisible */
   public boolean isVisible() {
     return isVisible;
   }
@@ -1161,11 +1161,17 @@ public class Token extends BaseModel implements Cloneable {
     return vblAlphaSensitivity;
   }
 
+  /**
+   * Set the VBL of the token. If vbl null, set vblAplphaSensitivity to -1.
+   *
+   * @param vbl the VBL to set.
+   */
   public void setVBL(Area vbl) {
     this.vbl = vbl;
     if (vbl == null) vblAlphaSensitivity = -1;
   }
 
+  /** Return the vbl area of the token */
   public Area getVBL() {
     return vbl;
   }
@@ -1261,9 +1267,13 @@ public class Token extends BaseModel implements Cloneable {
     return new Area(atArea.createTransformedShape(areaToTransform));
   }
 
+  /**
+   * Return the existence of the token's VBL
+   *
+   * @return rue if the token's vbl is null, and false otherwise
+   */
   public boolean hasVBL() {
-    if (vbl != null) return true;
-    else return false;
+    return vbl != null;
   }
 
   public void setIsAlwaysVisible(boolean isAlwaysVisible) {
@@ -1322,6 +1332,7 @@ public class Token extends BaseModel implements Cloneable {
     return footprintBounds;
   }
 
+  /** @return the String of the sightType */
   public String getSightType() {
     return sightType;
   }
@@ -2053,6 +2064,7 @@ public class Token extends BaseModel implements Cloneable {
    * @param parameters An array of parameters
    */
   public void updateProperty(Zone zone, String methodName, Object[] parameters) {
+    boolean lightChanged = false;
     switch (methodName) {
       case "setState":
         setState(parameters[0].toString(), parameters[1]);
@@ -2075,23 +2087,19 @@ public class Token extends BaseModel implements Cloneable {
       case "setLayerShape":
         setLayer((Zone.Layer) parameters[0]);
         setShape((TokenShape) parameters[1]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setShape":
         setShape((TokenShape) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setSnapToScale":
         setSnapToScale((Boolean) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setSnapToGrid":
         setSnapToGrid((Boolean) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setFootprint":
+        setSnapToScale(true);
         setFootprint((Grid) parameters[0], (TokenFootprint) parameters[1]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setProperty":
         setProperty(parameters[0].toString(), parameters[1].toString());
@@ -2104,8 +2112,8 @@ public class Token extends BaseModel implements Cloneable {
         zone.sortZOrder(); // update new ZOrder
         break;
       case "setFacing":
+        if (hasLightSources()) lightChanged = true;
         setFacing((Integer) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "clearAllOwners":
         clearAllOwners();
@@ -2117,17 +2125,17 @@ public class Token extends BaseModel implements Cloneable {
         addOwner(parameters[0].toString());
         break;
       case "setScaleX":
+        setSnapToScale(false);
         setScaleX((double) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setScaleY":
+        setSnapToScale(false);
         setScaleY((double) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setScaleXY":
+        setSnapToScale(false);
         setScaleX((double) parameters[0]);
         setScaleY((double) parameters[1]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setNotes":
         setNotes(parameters[0].toString());
@@ -2136,17 +2144,17 @@ public class Token extends BaseModel implements Cloneable {
         setGMNotes(parameters[0].toString());
         break;
       case "setX":
+        if (hasLightSources()) lightChanged = true;
         setX((int) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setY":
+        if (hasLightSources()) lightChanged = true;
         setY((int) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setXY":
+        if (hasLightSources()) lightChanged = true;
         setX((int) parameters[0]);
         setY((int) parameters[1]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
       case "setHaloColor":
         setHaloColor((Color) parameters[0]);
@@ -2177,6 +2185,9 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case "setVBL":
         setVBL((Area) parameters[0]);
+        if (!hasVBL()) { // if VBL removed
+          zone.tokenTopologyChanged(); // if token lost VBL, TOKEN_CHANGED won't update topology
+        }
         break;
       case "setImageAsset":
         setImageAsset((String) parameters[0], (MD5Key) parameters[1]);
@@ -2188,21 +2199,27 @@ public class Token extends BaseModel implements Cloneable {
         setCharsheetImage((MD5Key) parameters[0]);
         break;
       case "clearLightSources":
+        if (hasLightSources()) lightChanged = true;
         clearLightSources();
         break;
       case "removeLightSource":
+        if (hasLightSources()) lightChanged = true;
         removeLightSource((LightSource) parameters[0]);
         break;
       case "addLightSource":
+        lightChanged = true;
         addLightSource((LightSource) parameters[0], (Direction) parameters[1]);
         break;
       case "setHasSight":
+        if (hasLightSources()) lightChanged = true;
         setHasSight((boolean) parameters[0]);
         break;
       case "setSightType":
+        if (hasLightSources()) lightChanged = true;
         setSightType((String) parameters[0]);
         break;
     }
-    zone.tokenChanged(this); // fireModelChangeEvent Event.TOKEN_CHANGED
+    if (lightChanged) getZoneRenderer().flushLight(); // flush lights if it changed
+    zone.tokenChanged(this); // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
   }
 }

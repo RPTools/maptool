@@ -178,7 +178,9 @@ public class MapToolFrame extends DefaultDockableHolder
   // Components
   private final AssetPanel assetPanel;
   private final ClientConnectionPanel connectionPanel;
+  /** The panel showing the initiative order. */
   private final InitiativePanel initiativePanel;
+
   private final PointerOverlay pointerOverlay;
   private final CommandPanel commandPanel;
   private final AboutDialog aboutDialog;
@@ -212,7 +214,9 @@ public class MapToolFrame extends DefaultDockableHolder
   private final ChatTyperObserver chatTyperObserver;
 
   private final GlassPane glassPane;
+  /** Model for the token tree panel of the map explorer. */
   private TokenPanelTreeModel tokenPanelTreeModel;
+
   private DrawPanelTreeModel drawPanelTreeModel;
   private DrawablesPanel drawablesPanel;
   private final TextureChooserPanel textureChooserPanel;
@@ -225,7 +229,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private JFileChooser savePropsFileChooser;
   private JFileChooser saveFileChooser;
 
-  // Remember the last layer selected
+  /** Remember the last layer selected */
   private Layer lastSelectedLayer = Zone.Layer.TOKEN;
 
   private final FileFilter campaignFilter =
@@ -788,6 +792,7 @@ public class MapToolFrame extends DefaultDockableHolder
     return tokenPropertiesDialog;
   }
 
+  /** Repaints the current ZoneRenderer, if it is not null. */
   public void refresh() {
     if (getCurrentZoneRenderer() != null) {
       getCurrentZoneRenderer().repaint();
@@ -1214,6 +1219,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
+  /** Create the token tree panel for the map explorer */
   private JComponent createTokenTreePanel() {
     final JTree tree = new JTree();
     tokenPanelTreeModel = new TokenPanelTreeModel(tree);
@@ -1311,6 +1317,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
+  /** Update tokenPanelTreeModel and the initiativePanel. */
   public void updateTokenTree() {
     if (tokenPanelTreeModel != null) {
       tokenPanelTreeModel.update();

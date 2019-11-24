@@ -202,8 +202,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, functionName);
-      token.getZoneRenderer().flushLight();
-      MapTool.getFrame().updateTokenTree();
       return "";
     }
 
@@ -214,8 +212,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, functionName);
-      token.getZoneRenderer().flushLight();
-      MapTool.getFrame().updateTokenTree();
       return "";
     }
 
@@ -239,8 +235,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
       }
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 3);
       String layer = setLayer(token, parameters.get(0).toString(), forceShape);
-      token.getZoneRenderer().flushLight();
-      MapTool.getFrame().updateTokenTree();
       return layer;
     }
 
@@ -605,10 +599,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
       BigDecimal facing = getBigDecimalFromParam(functionName, parameters, 0);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
       MapTool.serverCommand().updateTokenProperty(token, "setFacing", facing.intValue());
-      token
-          .getZoneRenderer()
-          .flushLight(); // FJE This isn't needed unless the token had a light source, right? Should
-      // we check for that?
       return "";
     }
 
@@ -619,7 +609,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, "setFacing", (Integer) null);
-      token.getZoneRenderer().flushLight();
       return "";
     }
 
@@ -776,10 +765,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
       double magnitude = getBigDecimalFromParam(functionName, parameters, 0).doubleValue();
       Rectangle tokenBounds = token.getBounds(zone);
+
       double oldWidth = tokenBounds.width;
       double oldHeight = tokenBounds.height;
-      MapTool.serverCommand().updateTokenProperty(token, "setSnapToScale", false);
-
       double newScaleX;
       double newScaleY;
       if (functionName.equals("setTokenWidth")) {
@@ -839,16 +827,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
       MapTool.serverCommand().updateTokenProperty(token, "setSnapToScale", false);
       return getSize(token);
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setSnapToScale", true);
-    ZoneRenderer renderer = token.getZoneRenderer();
-    Zone zone = renderer.getZone();
-    Grid grid = zone.getGrid();
+    Grid grid = token.getZoneRenderer().getZone().getGrid();
     for (TokenFootprint footprint : grid.getFootprints()) {
       if (footprint.getName().equalsIgnoreCase(size)) {
         MapTool.serverCommand().updateTokenProperty(token, "setFootprint", grid, footprint);
-        renderer.flush(token);
-        renderer.repaint();
-        MapTool.getFrame().updateTokenTree();
         return getSize(token);
       }
     }
@@ -862,12 +844,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
    * @param token The token to reset the size of.
    */
   private void resetSize(Token token) {
-    MapTool.serverCommand().updateTokenProperty(token, "setSnapToScale", true);
-    ZoneRenderer renderer = token.getZoneRenderer();
-    Zone zone = renderer.getZone();
-    Grid grid = zone.getGrid();
-    MapTool.serverCommand()
-        .updateTokenProperty(token, "setFootprint", grid, grid.getDefaultFootprint());
+    Grid grid = token.getZoneRenderer().getZone().getGrid();
+    TokenFootprint footprint = grid.getDefaultFootprint();
+    MapTool.serverCommand().updateTokenProperty(token, "setFootprint", grid, footprint);
   }
 
   /**
@@ -896,8 +875,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
   }
 
   /**
-   * Get the token shape corresponding to the token & layer. Returns null if can't find match, or if
-   * forceShape is set to false.
+   * Get the token shape corresponding to the token and layer. Returns null if can't find match, or
+   * if forceShape is set to false.
    *
    * @param token the token to get the new shape of.
    * @param layer the layer of the token.
