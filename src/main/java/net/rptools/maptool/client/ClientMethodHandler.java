@@ -644,7 +644,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               case clearExposedArea:
                 zoneGUID = (GUID) parameters[0];
                 zone = MapTool.getCampaign().getZone(zoneGUID);
-                zone.clearExposedArea();
+                zone.clearExposedArea((boolean) parameters[1]);
                 return;
 
               case updateExposedAreaMeta:

@@ -445,6 +445,11 @@ public class ZoneRenderer extends JComponent
     repaintDebouncer.dispatch();
   }
 
+  /**
+   * Commit the move of the token selected
+   *
+   * @param keyTokenId the token ID of the key token
+   */
   public void commitMoveSelectionSet(GUID keyTokenId) {
     // TODO: Quick hack to handle updating server state
     SelectionSet set = selectionSetMap.get(keyTokenId);

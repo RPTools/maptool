@@ -713,22 +713,21 @@ public class Zone extends BaseModel {
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, token));
   }
 
-  /** Clears FoW for ALL tokens, including NPC's */
-  public void clearExposedArea() {
+  /**
+   * Clears the global exposed area. Can also clear the exposed area for ALL tokens, including NPC's
+   *
+   * @param globalOnly should the exposed area of all tokens be also cleared?
+   */
+  public void clearExposedArea(boolean globalOnly) {
     exposedArea = new Area();
-    // There used to be a foreach loop here that iterated over getTokens() and called .clear() --
-    // why?!
-    exposedAreaMeta.clear();
+    if (!globalOnly) {
+      exposedAreaMeta.clear();
+    }
     fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
   }
 
-  /** Clear the exposedArea common to all tokens */
-  public void clearGlobalExposedArea() {
-    exposedArea.reset();
-  }
-
   /**
-   * Clear only exposed area for tokenSet, eg only PC's
+   * Clear only exposed area for tokenSet, eg only PC's. Updates the server and other clients.
    *
    * @param tokenSet the set of token GUID to reset
    */
@@ -843,8 +842,8 @@ public class Zone extends BaseModel {
    * Modifies the global exposed area (GEA) or token exposed by resetting it and then setting it to
    * the contents of the passed in Area and firing a ModelChangeEvent.
    *
-   * @param area
-   * @param selectedToks
+   * @param area the area to expose
+   * @param selectedToks the selected tokens
    */
   public void setFogArea(Area area, Set<GUID> selectedToks) {
     if (area == null) {
@@ -1517,7 +1516,7 @@ public class Zone extends BaseModel {
         });
   }
 
-  // Jamz: For FogUtil.exposePCArea to skip sight test.
+  /** Returns PCs tokens with sight. For FogUtil.exposePCArea to skip sight test. */
   public List<Token> getPlayerTokensWithSight() {
     return getTokensFiltered(
         new Filter() {
@@ -1527,9 +1526,10 @@ public class Zone extends BaseModel {
         });
   }
 
-  // Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by
-  // All",
-  // or "Owned" by the current player; in theory, NPC tokens the Player control.
+  /**
+   * Jamz: Get a list of all tokens with sight that are either PC tokens or NPC Tokens "Owned by
+   * All", or "Owned" by the current player; in theory, NPC tokens the Player control.
+   */
   public List<Token> getTokensOwnedByAllWithSight() {
     return getTokensFiltered(
         new Filter() {
@@ -1842,6 +1842,12 @@ public class Zone extends BaseModel {
     return meta;
   }
 
+  /**
+   * Put the ExposedAreaMetaData in the exposedAreaMeta map for a token
+   *
+   * @param tokenExposedAreaGUID the GUID of the token
+   * @param meta the exposed metadata
+   */
   public void setExposedAreaMetaData(GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
     if (exposedAreaMeta == null) {
       exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>();

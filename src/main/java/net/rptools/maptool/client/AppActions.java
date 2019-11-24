@@ -1610,7 +1610,6 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showGrid");
-          putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
           try {
             putValue(
                 Action.SMALL_ICON,
@@ -1638,7 +1637,6 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showCoordinates");
-          putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
         }
 
         @Override
@@ -1812,7 +1810,6 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showNames");
-          putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
           try {
             putValue(
                 Action.SMALL_ICON,
@@ -2736,7 +2733,7 @@ public class AppActions {
                         "<html>Map contains exposed areas of fog.<br>Do you want to reset all of the fog?");
                 if (ok == true) {
                   // This fires a ModelChangeEvent, but that shouldn't matter
-                  map.zone.clearExposedArea();
+                  map.zone.clearExposedArea(false);
                 }
               }
               MapTool.addZone(map.zone);
