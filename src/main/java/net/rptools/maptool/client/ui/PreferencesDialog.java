@@ -335,7 +335,8 @@ public class PreferencesDialog extends JDialog {
     dataDirTextField = panel.getTextField("dataDirTextField");
 
     jvmAssertionsCheckbox = panel.getCheckBox("jvmAssertionsCheckbox");
-    jvmAssertionsCheckbox.setToolTipText(I18N.getText("prefs.jvm.advanced.enableAssertions.tooltip"));
+    jvmAssertionsCheckbox.setToolTipText(
+        I18N.getText("prefs.jvm.advanced.enableAssertions.tooltip"));
     jvmDirect3dCheckbox = panel.getCheckBox("jvmDirect3dCheckbox");
     jvmDirect3dCheckbox.setToolTipText(I18N.getText("prefs.jvm.advanced.direct3d.tooltip"));
     jvmOpenGLCheckbox = panel.getCheckBox("jvmOpenGLCheckbox");
