@@ -1610,7 +1610,6 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showGrid");
-          putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
           try {
             putValue(
                 Action.SMALL_ICON,
@@ -1638,7 +1637,6 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showCoordinates");
-          putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
         }
 
         @Override
@@ -1812,7 +1810,6 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showNames");
-          putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
           try {
             putValue(
                 Action.SMALL_ICON,
