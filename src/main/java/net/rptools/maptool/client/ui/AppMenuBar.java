@@ -398,6 +398,7 @@ public class AppMenuBar extends JMenuBar {
         new AbstractAction() {
           {
             putValue(Action.NAME, I18N.getText("msg.info.restoreLayout"));
+            putValue(Action.SHORT_DESCRIPTION, I18N.getText("msg.info.restoreLayout.description"));
           }
 
           public void actionPerformed(ActionEvent e) {
