@@ -114,6 +114,7 @@ import net.rptools.maptool.client.swing.ProgressStatusBar;
 import net.rptools.maptool.client.swing.SpacerStatusBar;
 import net.rptools.maptool.client.swing.StatusPanel;
 import net.rptools.maptool.client.swing.ZoomStatusBar;
+import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
@@ -183,6 +184,7 @@ public class MapToolFrame extends DefaultDockableHolder
   private final AboutDialog aboutDialog;
   private final ColorPicker colorPicker;
   private final Toolbox toolbox;
+  private final ToolbarPanel toolbarPanel;
   private final ZoneMiniMapPanel zoneMiniMapPanel;
   private final JPanel zoneRendererPanel;
   private JPanel visibleControlPanel;
@@ -510,10 +512,11 @@ public class MapToolFrame extends DefaultDockableHolder
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
     rendererBorderPanel.add(zoneRendererPanel);
+    toolbarPanel = new ToolbarPanel(toolbox);
 
     // Put it all together
     setJMenuBar(menuBar);
-    add(BorderLayout.NORTH, new ToolbarPanel(toolbox));
+    add(BorderLayout.NORTH, toolbarPanel);
     add(BorderLayout.SOUTH, statusPanel);
 
     JLayeredPane glassPaneComposite = new JLayeredPane();
@@ -1530,6 +1533,20 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneMiniMapPanel.repaint();
   }
 
+  /** Stop the drag of the token, if any is being dragged. */
+  private void stopTokenDrag() {
+    Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
+    if (tool instanceof PointerTool) {
+      PointerTool pointer = (PointerTool) tool;
+      if (pointer.isDraggingToken()) pointer.stopTokenDrag();
+    }
+  }
+
+  /**
+   * Set the current ZoneRenderer
+   *
+   * @param renderer the ZoneRenderer
+   */
   public void setCurrentZoneRenderer(ZoneRenderer renderer) {
     // Flush first so that the new zone renderer can inject the newly needed images
     if (renderer != null) {
@@ -1544,6 +1561,7 @@ public class MapToolFrame extends DefaultDockableHolder
       zoneRendererList.add(renderer);
     }
     if (currentRenderer != null) {
+      stopTokenDrag(); // if a token is being dragged, stop the drag
       currentRenderer.flush();
       zoneRendererPanel.remove(currentRenderer);
     }
@@ -1593,6 +1611,10 @@ public class MapToolFrame extends DefaultDockableHolder
 
   public Toolbox getToolbox() {
     return toolbox;
+  }
+
+  public ToolbarPanel getToolbarPanel() {
+    return toolbarPanel;
   }
 
   public ZoneRenderer getZoneRenderer(Zone zone) {
