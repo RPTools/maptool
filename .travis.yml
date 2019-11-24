@@ -45,7 +45,8 @@ deploy:
   skip_cleanup: true
   target_commitish: $TRAVIS_COMMIT
   tag_name: $TRAVIS_TAG
-  draft: true
+  draft: false
+  prerelease: true
   on:
     repo: $REPO
     tags: true
