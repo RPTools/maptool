@@ -242,6 +242,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     isDraggingToken = true;
   }
 
+  /** Complete the drag of the token, and expose FOW */
   public void stopTokenDrag() {
     renderer.commitMoveSelectionSet(tokenBeingDragged.getId()); // TODO: figure out a better way
     isDraggingToken = false;
