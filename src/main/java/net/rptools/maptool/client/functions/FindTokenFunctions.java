@@ -818,7 +818,7 @@ public class FindTokenFunctions extends AbstractFunction {
    * Finds the specified token.
    *
    * @param identifier the name of the token.
-   * @param zoneName the name of the zone.
+   * @param zoneName the name of the zone. If null, check current zone.
    * @return the token, or null if none found.
    */
   public static Token findToken(String identifier, String zoneName) {

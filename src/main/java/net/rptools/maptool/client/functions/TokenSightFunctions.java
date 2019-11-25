@@ -60,7 +60,7 @@ public class TokenSightFunctions extends AbstractFunction {
     // For functions no parameters except option tokenID and mapname
     if (functionName.equals("hasSight") || functionName.equals("getSightType")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
-      token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 0, 1);
       if (functionName.equals("hasSight"))
         return token.getHasSight() ? BigDecimal.ONE : BigDecimal.ZERO;
 
@@ -69,17 +69,17 @@ public class TokenSightFunctions extends AbstractFunction {
 
     // For functions with only 1 parameter and optional second parameter of tokenID & mapname
     FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
-    token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+    token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
 
     if (functionName.equals("setHasSight")) {
       boolean hasSight = !parameters.get(0).equals(BigDecimal.ZERO);
-      MapTool.serverCommand().updateTokenProperty(token, "setHasSight", hasSight);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setHasSight, hasSight);
       return token.getHasSight() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
 
     if (functionName.equals("setSightType")) {
       String sightType = parameters.get(0).toString();
-      MapTool.serverCommand().updateTokenProperty(token, "setSightType", sightType);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSightType, sightType);
       return token.getSightType();
     }
 
@@ -92,7 +92,7 @@ public class TokenSightFunctions extends AbstractFunction {
       if (tokensVisibleArea == null) {
         return "[]";
       }
-      Token target = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 2);
+      Token target = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 0, 2);
       if (!target.isVisible() || (target.isVisibleOnlyToOwner() && !AppUtil.playerOwns(target))) {
         return "[]";
       }
