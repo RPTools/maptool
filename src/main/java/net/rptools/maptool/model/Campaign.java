@@ -240,7 +240,8 @@ public class Campaign {
    * Convenience method that calls {@link #getSightTypeMap()} and returns the value for the key
    * <code>type</code>.
    *
-   * @return
+   * @param type the String corresponding to the SightType.
+   * @return the SightType.
    */
   public SightType getSightType(String type) {
     return getSightTypeMap()
