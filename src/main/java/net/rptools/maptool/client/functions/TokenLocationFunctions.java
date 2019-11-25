@@ -106,10 +106,8 @@ public class TokenLocationFunctions extends AbstractFunction {
                 1,
                 parameters.get(0).toString()));
       }
-      MapTool.serverCommand()
-          .updateTokenProperty(token, "setZOrder", ((BigDecimal) parameters.get(0)).intValue());
-      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-      renderer.flushLight();
+      int newZOrder = ((BigDecimal) parameters.get(0)).intValue();
+      MapTool.serverCommand().updateTokenProperty(token, "setZOrder", newZOrder);
       return BigDecimal.valueOf(token.getZOrder());
     }
     if (functionName.equals("getDistance")) {
@@ -595,7 +593,6 @@ public class TokenLocationFunctions extends AbstractFunction {
 
     ZonePoint zp = getZonePoint(x, y, useDistance);
     MapTool.serverCommand().updateTokenProperty(token, "setXY", zp.x, zp.y);
-    token.getZoneRenderer().flushLight();
     return "";
   }
 

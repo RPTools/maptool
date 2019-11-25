@@ -125,6 +125,13 @@ public class SightType {
     return arc;
   }
 
+  /**
+   * Get the shapedArea of a token's vision in a zone
+   *
+   * @param token the token.
+   * @param zone the zone.
+   * @return the Area of the vision shape.
+   */
   public Area getVisionShape(Token token, Zone zone) {
     return zone.getGrid()
         .getShapedArea(getShape(), token, getDistance(), getArc(), getOffset(), scaleWithToken);
