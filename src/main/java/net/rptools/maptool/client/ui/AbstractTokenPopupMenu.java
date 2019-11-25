@@ -994,7 +994,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       if (dialog.isTokenSaved()) {
         getRenderer().repaint();
         MapTool.serverCommand().putToken(getRenderer().getZone().getId(), getTokenUnderMouse());
-        getRenderer().getZone().putToken(getTokenUnderMouse());
         MapTool.getFrame().resetTokenPanels();
       }
     }

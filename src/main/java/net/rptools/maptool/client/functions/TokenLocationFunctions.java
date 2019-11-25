@@ -232,7 +232,6 @@ public class TokenLocationFunctions extends AbstractFunction {
         token.setX(x);
         token.setY(y);
         token.setZOrder(z);
-        toZone.putToken(token);
         MapTool.serverCommand().putToken(toZone.getId(), token);
         MapTool.serverCommand().removeToken(fromZone.getId(), token.getId());
         sb.append(I18N.getText("macro.function.moveTokenMap.movedToken", token.getName(), map))

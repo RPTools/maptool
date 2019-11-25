@@ -30,7 +30,6 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -212,22 +211,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 
               case putZone:
                 zone = (Zone) parameters[0];
-                MapTool.getCampaign().putZone(zone);
-
-                // TODO: combine this with MapTool.addZone()
-                renderer = ZoneRendererFactory.newRenderer(zone);
-                MapTool.getFrame().addZoneRenderer(renderer);
-                if (MapTool.getFrame().getCurrentZoneRenderer() == null && zone.isVisible()) {
-                  MapTool.getFrame().setCurrentZoneRenderer(renderer);
-                }
-                MapTool.getEventDispatcher()
-                    .fireEvent(MapTool.ZoneEvent.Added, MapTool.getCampaign(), null, zone);
+                boolean nullZR = MapTool.getFrame().getCurrentZoneRenderer() == null;
+                boolean changeMap = nullZR && (zone.isVisible() || MapTool.getPlayer().isGM());
+                MapTool.addZone(zone, changeMap, false);
                 return;
 
               case removeZone:
                 zoneGUID = (GUID) parameters[0];
-                MapTool.getCampaign().removeZone(zoneGUID);
-                MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zoneGUID));
+                MapTool.removeZone(zoneGUID, false);
                 return;
 
               case putToken:

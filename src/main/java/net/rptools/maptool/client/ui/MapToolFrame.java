@@ -1514,6 +1514,12 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneRendererList.add(renderer);
   }
 
+  /**
+   * Remove the ZoneRenderer. If it's the current ZoneRenderer, set a new current ZoneRenderer.
+   * Flush zoneMiniMapPanel.
+   *
+   * @param renderer the ZoneRenderer to remove.
+   */
   public void removeZoneRenderer(ZoneRenderer renderer) {
     boolean isCurrent = renderer == getCurrentZoneRenderer();
     zoneRendererList.remove(renderer);
@@ -1624,6 +1630,13 @@ public class MapToolFrame extends DefaultDockableHolder
     return toolbarPanel;
   }
 
+  /**
+   * Return the first ZoneRender for which the zone is the same as the passed zone (should be only
+   * one).
+   *
+   * @param zone the zone.
+   * @return the ZoneRenderer.
+   */
   public ZoneRenderer getZoneRenderer(Zone zone) {
     for (ZoneRenderer renderer : zoneRendererList) {
       if (zone == renderer.getZone()) {
@@ -1633,6 +1646,12 @@ public class MapToolFrame extends DefaultDockableHolder
     return null;
   }
 
+  /**
+   * Return the first ZoneRender for which the zone has the zoneGUID (should be only one).
+   *
+   * @param zoneGUID the zoneGUID of the zone.
+   * @return the ZoneRenderer.
+   */
   public ZoneRenderer getZoneRenderer(GUID zoneGUID) {
     for (ZoneRenderer renderer : zoneRendererList) {
       if (zoneGUID.equals(renderer.getZone().getId())) {
@@ -1642,6 +1661,12 @@ public class MapToolFrame extends DefaultDockableHolder
     return null;
   }
 
+  /**
+   * Return the first ZoneRender for which the zone has the zoneName (could be multiples).
+   *
+   * @param zoneName the name of the zone.
+   * @return the ZoneRenderer.
+   */
   public ZoneRenderer getZoneRenderer(final String zoneName) {
     for (ZoneRenderer renderer : zoneRendererList) {
       if (zoneName.equals(renderer.getZone().getName())) {
@@ -1949,12 +1974,13 @@ public class MapToolFrame extends DefaultDockableHolder
     return selectionPanel;
   }
 
+  /** Reset the impersonatePanel and the selectionPanel. */
   public void resetTokenPanels() {
     impersonatePanel.reset();
     selectionPanel.reset();
   }
 
-  // currently only used after loading a campaign
+  /** Reset the macro panels. Currently only used after loading a campaign. */
   public void resetPanels() {
     MacroButtonHotKeyManager.clearKeyStrokes();
     campaignPanel.reset();

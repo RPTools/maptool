@@ -1143,7 +1143,6 @@ public class AppActions {
         String newName = MapToolUtil.nextTokenId(zone, token, true);
         token.setName(newName);
       }
-      zone.putToken(token);
       MapTool.serverCommand().putToken(zone.getId(), token);
     }
     if (!failedPaste.isEmpty()) {
@@ -1437,7 +1436,7 @@ public class AppActions {
             return;
           }
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-          MapTool.removeZone(renderer.getZone());
+          MapTool.removeZone(renderer.getZone().getId(), true);
         }
       };
 
