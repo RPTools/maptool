@@ -17,7 +17,6 @@ package net.rptools.maptool.client.functions;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -50,23 +49,21 @@ public class TokenInitFunction extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
-    MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-
     if (functionName.equalsIgnoreCase("getInitiative")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, args, 0, 1);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
       return getInitiative(token);
     } else if (functionName.equalsIgnoreCase("addToInitiative")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 4);
       boolean allowDuplicates =
           args.size() > 0 ? FunctionUtil.paramAsBoolean(functionName, args, 0, true) : false;
       String state = args.size() > 1 && !"".equals(args.get(1)) ? args.get(1).toString() : null;
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, args, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 2, 3);
       return addToInitiative(allowDuplicates, state, token);
     } else { // setInitiative
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       String value = args.get(0).toString();
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, args, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
       return setInitiative(token, value);
     }
   }

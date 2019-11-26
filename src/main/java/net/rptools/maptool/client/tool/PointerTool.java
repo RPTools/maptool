@@ -344,7 +344,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
         if (tokenPropertiesDialog.isTokenSaved()) {
           MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-          renderer.getZone().putToken(token);
           MapTool.getFrame().resetTokenPanels();
           renderer.repaint();
           renderer.flush(token);
@@ -490,10 +489,8 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           tokenPropertiesDialog.showDialog(token);
 
           if (tokenPropertiesDialog.isTokenSaved()) {
-            renderer.repaint();
             renderer.flush(token);
             MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-            renderer.getZone().putToken(token);
             MapTool.getFrame().resetTokenPanels();
           }
         }

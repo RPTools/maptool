@@ -1204,7 +1204,7 @@ public class Zone extends BaseModel {
     // LATER: optimize this
     tokenOrderedList.remove(token);
     tokenOrderedList.add(token);
-    Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
+    tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
 
     if (newToken) {
       fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, token));
@@ -1242,7 +1242,7 @@ public class Zone extends BaseModel {
     }
     tokenOrderedList.removeAll(tokens);
     tokenOrderedList.addAll(tokens);
-    Collections.sort(tokenOrderedList, TOKEN_Z_ORDER_COMPARATOR);
+    tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
 
     if (!addedTokens.isEmpty())
       fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, addedTokens));
@@ -1648,7 +1648,7 @@ public class Zone extends BaseModel {
     public boolean matchToken(Token t);
   }
 
-  /** Construct a new TokenZOrderComparator. */
+  /** The TokenZOrderComparator used to order token lists. */
   public static final Comparator<Token> TOKEN_Z_ORDER_COMPARATOR = new TokenZOrderComparator();
 
   /** The class used to compare the Zorder of two tokens. */
@@ -1676,7 +1676,7 @@ public class Zone extends BaseModel {
     return new Comparator<Token>() {
       @Override
       public int compare(Token o1, Token o2) {
-        /**
+        /*
          * It is an assumption of this comparator that all tokens are being sorted using isometric
          * logic.
          *
@@ -1716,7 +1716,7 @@ public class Zone extends BaseModel {
 
     Rectangle b1 =
         t.isSnapToScale() ? t.getFootprint(getGrid()).getBounds(getGrid()) : t.getBounds(getZone());
-    /**
+    /*
      * This is an awful approximation of centre of token footprint. The bounding box (b1 & b2) are
      * usually centred on token x & y So token y + bounding y give you the bottom of the box Then
      * subtract portion of height to get the centre point of the base.

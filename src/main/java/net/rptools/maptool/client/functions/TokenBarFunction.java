@@ -54,20 +54,20 @@ public class TokenBarFunction extends AbstractFunction {
 
     if (functionName.equals("getBar")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, parameters, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
       return getValue(token, bar);
     } else if (functionName.equals("setBar")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, parameters, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
       return setValue(token, bar, parameters.get(1));
     } else if (functionName.equals("isBarVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, parameters, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
       return isVisible(token, bar);
     } else { // setBarVisible
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);
       boolean visible = FunctionUtil.paramAsBoolean(functionName, parameters, 1, true);
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, parameters, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
       return setVisible(token, bar, visible);
     }
   }
@@ -92,7 +92,7 @@ public class TokenBarFunction extends AbstractFunction {
    */
   public static Object setValue(Token token, String bar, Object value) {
     BigDecimal val = getBigDecimalValue(value);
-    MapTool.serverCommand().updateTokenProperty(token, "setState", bar, value);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, value);
     return val;
   }
 
@@ -113,7 +113,7 @@ public class TokenBarFunction extends AbstractFunction {
    */
   public static BigDecimal setVisible(Token token, String bar, boolean show) {
     BigDecimal value = show ? BigDecimal.ONE : null;
-    MapTool.serverCommand().updateTokenProperty(token, "setState", bar, value);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, value);
     return show ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 

@@ -106,8 +106,7 @@ public class MapFunctions extends AbstractFunction {
       Zone oldMap = getNamedMap(functionName, oldName).getZone();
       Zone newMap = new Zone(oldMap);
       newMap.setName(newName);
-      MapTool.addZone(newMap, false);
-      MapTool.serverCommand().putZone(newMap);
+      MapTool.addZone(newMap, false, true);
       return newMap.getName();
 
     } else {

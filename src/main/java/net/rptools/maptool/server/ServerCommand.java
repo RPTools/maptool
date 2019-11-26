@@ -142,9 +142,9 @@ public interface ServerCommand {
   public void removeToken(GUID zoneGUID, GUID tokenGUID);
 
   public void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, String methodName, Object[] parameters);
+      GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters);
 
-  public void updateTokenProperty(Token token, String methodName, Object... parameters);
+  public void updateTokenProperty(Token token, Token.Update update, Object... parameters);
 
   public void putLabel(GUID zoneGUID, Label label);
 

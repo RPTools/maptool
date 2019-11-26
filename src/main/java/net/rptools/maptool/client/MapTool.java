@@ -1096,26 +1096,48 @@ public class MapTool {
     return false;
   }
 
-  public static void removeZone(Zone zone) {
-    MapTool.serverCommand().removeZone(zone.getId());
-    MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zone.getId()));
-    MapTool.getCampaign().removeZone(zone.getId());
+  /**
+   * Remove zone and zoneRenderer and possibly update server.
+   *
+   * @param zoneGUID the GUID of the zone to remove.
+   * @param updateServer should the server be updated?
+   */
+  public static void removeZone(GUID zoneGUID, boolean updateServer) {
+    if (updateServer) {
+      MapTool.serverCommand().removeZone(zoneGUID);
+    }
+    MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zoneGUID));
+    MapTool.getCampaign().removeZone(zoneGUID);
   }
 
+  /**
+   * Add zone to campaign and create a renderer for it, change current map to it, and update server.
+   *
+   * @param zone the zone to add.
+   */
   public static void addZone(Zone zone) {
-    addZone(zone, true);
+    addZone(zone, true, true);
   }
 
-  public static void addZone(Zone zone, boolean changeZone) {
+  /**
+   * Add zone to campaign and create a renderer for it.
+   *
+   * @param zone the zone to add.
+   * @param changeZone should we change to the ZoneRenderer of the zone?
+   * @param updateServer should the server be updated?
+   */
+  public static void addZone(Zone zone, boolean changeZone, boolean updateServer) {
     if (getCampaign().getZones().size() == 1) {
       // Remove the default map
       Zone singleZone = getCampaign().getZones().get(0);
       if (ZoneFactory.DEFAULT_MAP_NAME.equals(singleZone.getName()) && singleZone.isEmpty()) {
-        removeZone(singleZone);
+        removeZone(singleZone.getId(), updateServer);
       }
     }
     getCampaign().putZone(zone);
-    serverCommand().putZone(zone);
+    if (updateServer) {
+      serverCommand().putZone(zone);
+    }
     eventDispatcher.fireEvent(ZoneEvent.Added, getCampaign(), null, zone);
 
     // Show the new zone

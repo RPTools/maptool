@@ -138,10 +138,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           putLabel(context.getGUID(0), (Label) context.get(1));
           break;
         case updateTokenProperty:
+          Token.Update update = (Token.Update) context.parameters[2];
           updateTokenProperty(
-              context.getGUID(0), context.getGUID(1), context.getString(2), context.getObjArray(3));
+              context.getGUID(0), context.getGUID(1), update, context.getObjArray(3));
           break;
-
         case putToken:
           putToken(context.getGUID(0), (Token) context.get(1));
           break;
@@ -586,7 +586,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     }
     if (newToken) {
       // don't send whole token back to sender, instead just send new ZOrder
-      Object[] parameters = {zoneGUID, token.getId(), "setZOrder", new Object[] {zOrder}};
+      Object[] parameters = {
+        zoneGUID, token.getId(), Token.Update.setZOrder, new Object[] {zOrder}
+      };
       broadcastToClient(
           RPCContext.getCurrent().id, ClientCommand.COMMAND.updateTokenProperty.name(), parameters);
     }
@@ -621,19 +623,16 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   public void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, String methodName, Object[] parameters) {
+      GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     Token token = zone.getToken(tokenGUID);
-    token.updateProperty(zone, methodName, parameters); // update server version of token
+    token.updateProperty(zone, update, parameters); // update server version of token
 
     forwardToClients();
   }
 
-  public void updateTokenProperty(
-      Token token,
-      String methodName,
-      Object...
-          parameters) {} // never actually called, but necessary to satisfy interface requirements
+  /** never actually called, but necessary to satisfy interface requirements */
+  public void updateTokenProperty(Token token, Token.Update update, Object... parameters) {}
 
   public void removeZone(GUID zoneGUID) {
     server.getCampaign().removeZone(zoneGUID);
