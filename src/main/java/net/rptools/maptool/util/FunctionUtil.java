@@ -375,4 +375,16 @@ public class FunctionUtil {
     } // endif
     return set;
   }
+
+  /**
+   * Throw an exception if the macro isn't trusted.
+   *
+   * @param functionName the name of the function.
+   * @throws ParserException if the macro isn't trusted.
+   */
+  public static void blockUntrustedMacro(String functionName) throws ParserException {
+    if (!MapTool.getParser().isMacroTrusted()) {
+      throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+    }
+  }
 }
