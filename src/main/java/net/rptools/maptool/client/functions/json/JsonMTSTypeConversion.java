@@ -3,35 +3,37 @@ package net.rptools.maptool.client.functions.json;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.MalformedJsonException;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import net.rptools.maptool.language.I18N;
+import net.rptools.parser.ParserException;
 
 /**
- * Class used to convert between Json Types and MT Script primitive types
+ * Class used to convert between json and MT Script types.
  */
 class JsonMTSTypeConversion {
 
-  /** The object used to parse Json objects. */
+  /** parser used to parse strings into {@link JsonElement} */
   private final JsonParser parser;
 
-  /** Empty String as a JSON element. */
+  /** An empty <code>String</code> as a {@link JsonPrimitive}. */
   public  static final JsonPrimitive EMPTY_STRING_ELEMENT = new JsonPrimitive("");
 
 
   /**
    * Creates a new <code>JsonMTSTypeConversion</code> object.
-   *
-   * @param parser the Json parser to parse strings as Json objects.
+   * @param parser The json parser which will be used to convert a string into json.
    */
   JsonMTSTypeConversion(JsonParser parser) {
     this.parser = parser;
   }
 
   /**
-   * This method returns the passed in object to the most appropriate type to pass back to MT
-   * Script.
-   *
-   * @param val The object to convert.
-   * @return the value to return to the scripting engine.
+   * Returns a valid MTScript type for the given object.
+   * @param val the object to return a MTScript type for.
+   * @return the MTScript type for the passed in object.
    */
   Object asScriptType(Object val) {
     if (val == null) {
@@ -53,27 +55,31 @@ class JsonMTSTypeConversion {
   }
 
   /**
-   * This method returns the object passed in as the appropriate json type.
-   *
-   * @param o the object to convert.
-   * @return the json representation..
+   * Returns a {@link JsonElement} version of the passed in object.
+   * @param o the object tp convert to a {@link JsonElement}.
+   * @return a {@link JsonElement} version of the object.
    */
-  JsonElement asJsonElement(Object o) {
+  JsonElement asJsonElement(Object o) throws ParserException {
     if (o instanceof JsonElement) {
       return (JsonElement) o;
     }
 
-    return parser.parse(o.toString());
+    try {
+      return parser.parse(o.toString());
+    } catch (JsonSyntaxException jse) { // return String
+      return new JsonPrimitive(o.toString());
+    }
   }
 
   /**
-   * This method returns the object passed in as the appropriate json type. If the passed in object
-   * is already a json type then it will return a clone of it.
+   * Returns a {@link JsonElement} version of the passed in object. If the object is already a
+   * {@link JsonElement} then it will return a cloned copy. As {@link JsonPrimitive}s are immutable
+   * they may not be cloned.
    *
-   * @param json The json object to convert or clone.
-   * @return The new json.
+   * @param json the object tp convert to a {@link JsonElement}.
+   * @return a {@link JsonElement} version of the object.
    */
-  JsonElement asClonedJsonElement(Object json) {
+  JsonElement asClonedJsonElement(Object json) throws ParserException {
     if (json instanceof JsonElement) {
       JsonElement jsonElement = (JsonElement) json;
       return jsonElement.deepCopy();
@@ -82,11 +88,11 @@ class JsonMTSTypeConversion {
     }
   }
 
+
   /**
-   * Converts a string into a json primitive value.
-   *
-   * @param value The string to convert.
-   * @return a json primitive representation of this string.
+   * Converts a <code>String</code> to a {@link JsonPrimitive}.
+   * @param value the value to convert.
+   * @return the converted value.
    */
   JsonPrimitive convertPrimitiveFromString(String value) {
     // Empty list element generates an empty string in the JSON array

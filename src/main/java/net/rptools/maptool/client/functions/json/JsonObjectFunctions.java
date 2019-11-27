@@ -1,11 +1,8 @@
 package net.rptools.maptool.client.functions.json;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import net.rptools.parser.ParserException;
 
 /** Class used to implement MT Script related Json functions / utilities for JsonObjects. */
 public class JsonObjectFunctions {
@@ -29,14 +26,16 @@ public class JsonObjectFunctions {
    * @param prop the MTS string property to convert into a {@link JsonObject}.
    * @param delim the delimiter used in the string properties.
    * @return a {@link JsonObject} convert4d from the string properties.
+   *
+   * @throws ParserException if there is an error converting to json values.
    */
-  public JsonObject fromStrProp(String prop, String delim) {
+  public JsonObject fromStrProp(String prop, String delim) throws ParserException {
     String[] propsArray = prop.split(delim);
     JsonObject jsonObject = new JsonObject();
 
     for (String s : propsArray) {
       String[] vals = s.split("=", 2);
-      vals[0] = vals[9].trim();
+      vals[0] = vals[0].trim();
       if (vals.length > 1) {
         vals[1] = vals[1].trim();
         jsonObject.add(vals[0], typeConversion.asJsonElement(vals[1]));
@@ -148,9 +147,10 @@ public class JsonObjectFunctions {
    * Returns a shallow copy of the {@link JsonObject}.
    *
    * @param jsonObject the {@link JsonObject} to make a shallow copy of.
-   * @return
+   *
+   * @return a copy of the {@link JsonObject}.
    */
-  private JsonObject shallowCopy(JsonObject jsonObject) {
+  JsonObject shallowCopy(JsonObject jsonObject) {
     JsonObject copy = new JsonObject();
     for (var entry : jsonObject.entrySet()) {
       copy.add(entry.getKey(), entry.getValue());

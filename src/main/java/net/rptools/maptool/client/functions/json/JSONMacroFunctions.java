@@ -4,14 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.maptool.client.MapToolVariableResolver;
@@ -162,9 +159,15 @@ public class JSONMacroFunctions extends AbstractFunction {
           return jsonObjectFunctions.remove(jsonElement.getAsJsonObject(), args.get(1).toString());
         }
       }
-      case "json.indent":
+      case "json.indent": {
         FunctionUtil.checkNumberParam(functionName, args, 1, 2);
-        return jsonIndent(functionName, args.get(0), args.size() > 1 ? args.get(1) : null);
+        JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+        int indentSize = 2;
+        if (args.size() > 1) {
+          indentSize = FunctionUtil.paramAsInteger(functionName, args, 1, true);
+        }
+        return jsonIndent(jsonElement, indentSize);
+      }
       case "json.contains": {
         FunctionUtil.checkNumberParam(functionName, args, 2, 2);
         JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
@@ -535,54 +538,69 @@ public class JSONMacroFunctions extends AbstractFunction {
     }
   }
 
-  private String jsonIndent(String functionName, Object json, Object indent) throws ParserException {
-    int ind;
-    if (indent instanceof Number) {
-      ind = ((Number) indent).intValue();
-    } else {
-      try {
-        ind = Integer.parseInt(indent.toString());
-      } catch (NumberFormatException nfe) {
-        throw new ParserException(
-            I18N.getText("macro.function.json.indentMustBeNumeric", functionName));
-      }
-    }
+  /**
+   * Returns a {@link String} version of the json indented using the specified number of spaces.
+   *
+   * @param json The json to format.
+   * @param indent The number of spaces to use for indentation.
+   * @return The json as a formatted string.
+   *
+   */
+  private String jsonIndent(JsonElement json, int indent) {
 
     // This is a bit ugly but the GSON library offers no way to specify indentation.
-    JsonElement jsonElement = asJsonElement(json);
-    if (jsonElement instanceof JsonArray) {
-      return JSONArray.fromObject(jsonElement.getAsString()).toString(ind);
-    } else if (jsonElement instanceof JsonObject){
-      return JSONObject.fromObject(jsonElement.getAsString()).toString(ind);
+    if (json.isJsonArray() ) {
+      return JSONArray.fromObject(json.getAsString()).toString(indent);
+    } else if (json.isJsonObject()){
+      return JSONObject.fromObject(json.getAsString()).toString(indent);
     } else {
-      return jsonElement.getAsString();
+      return json.getAsString();
     }
   }
 
+  /**
+   * This method calls the required functions to perform the json.path.* MT Script functions.
+   *
+   * @param functionName The name of the MT Script.
+   * @param parameters The parameters passed to the MT Script function.
+   * @return The result of the execution of the function.
+   *
+   * @throws ParserException if an error occurs during the execution of the function.
+   */
   private Object handleJsonPathFunctions(String functionName, List<Object> parameters)
       throws ParserException {
 
     try {
       switch (functionName) {
-        case "json.path.read":
+        case "json.path.read": {
           FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
-          return jsonPathRead(parameters.get(0), parameters.get(1).toString());
-        case "json.path.add":
+          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, parameters, 0);
+          return jsonPathRead(jsonElement, parameters.get(1).toString());
+        }
+        case "json.path.add": {
           FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
-          return jsonPathAdd(parameters.get(0), parameters.get(1).toString(), parameters.get(2));
-        case "json.path.set":
+          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, parameters, 0);
+          return jsonPathAdd(jsonElement, parameters.get(1).toString(), parameters.get(2));
+        }
+        case "json.path.set": {
           FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
-          return jsonPathSet(parameters.get(0), parameters.get(1).toString(), parameters.get(2));
-        case "json.path.put":
+          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, parameters, 0);
+          return jsonPathSet(jsonElement, parameters.get(1).toString(), parameters.get(2));
+        }
+        case "json.path.put": {
           FunctionUtil.checkNumberParam(functionName, parameters, 4, 4);
+          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, parameters, 0);
           return jsonPathPut(
-              parameters.get(0),
+              jsonElement,
               parameters.get(1).toString(),
               parameters.get(2).toString(),
               parameters.get(3));
-        case "json.path.delete":
+        }
+        case "json.path.delete": {
           FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
-          return jsonPathDelete(parameters.get(0), parameters.get(1).toString());
+          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, parameters, 0);
+          return jsonPathDelete(jsonElement, parameters.get(1).toString());
+        }
         default:
           throw new ParserException(
               I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -593,24 +611,70 @@ public class JSONMacroFunctions extends AbstractFunction {
     }
   }
 
-  private Object jsonPathDelete(Object json, String path) {
-    JsonElement jsonElement = typeConversion.asClonedJsonElement(json);
-
-    return JsonPath.parse(jsonElement).delete(path).json();
+  /**
+   * Returns a shallow copy of the passed in {@link JsonElement}. If the value is immutable then this
+   * method may just return the value itself without making a copy.
+   *
+   * @param jsonElement The {@link JsonElement} to copy.
+   *
+   * @return The resulting json data.
+   */
+  private JsonElement shallowCopy(JsonElement jsonElement) {
+    if (jsonElement.isJsonObject()) {
+      return jsonObjectFunctions.shallowCopy(jsonElement.getAsJsonObject());
+    } else if (jsonElement.isJsonArray()) {
+      return jsonArrayFunctions.shallowCopy(jsonElement.getAsJsonArray());
+    } else {
+      return jsonElement; // Is immutable so no need to return copy,
+    }
   }
 
-  private JsonElement jsonPathPut(Object json, String path, String key, Object info) {
-    JsonElement jsonElement = typeConversion.asClonedJsonElement(json);
-    Object value = asJsonElement(info);
-
-    return JsonPath.parse(jsonElement).put(path, key, value).json();
+  /**
+   * Returns a copy of the passed in json with the specified path removed.
+   *
+   * @param json The base {@link JsonElement}.
+   * @param path The path to remove.
+   *
+   * @return The resulting json data.
+   */
+  private JsonElement jsonPathDelete(JsonElement json, String path) {
+    return JsonPath.parse(shallowCopy(json)).delete(path).json();
   }
 
-  private Object jsonPathSet(Object json, String path, Object info) {
-    JsonElement jsonElement = typeConversion.asClonedJsonElement(json);
+  /**
+   * Returns a copy of the passed in json with a new value added at the specified path.
+   *
+   * @param json The base {@link JsonElement}.
+   * @param path The path to add the new information at.
+   * @param key The new key to be added.
+   * @param info The new information to add.
+   *
+   * @return The resulting json data.
+   *
+   * @throws ParserException If there is an error adding the information.
+   */
+  private JsonElement jsonPathPut(JsonElement json, String path, String key, Object info)
+      throws ParserException {
     Object value = asJsonElement(info);
 
-    return JsonPath.parse(jsonElement).set(path, value).json();
+    return JsonPath.parse(shallowCopy(json)).put(path, key, value).json();
+  }
+
+  /**
+   * Returns a copy of the passed in json with a new value set at the specified path.
+   *
+   * @param json The base {@link JsonElement}.
+   * @param path The path to change the new information at.
+   * @param info The new information to change to.
+   *
+   * @return The resulting json data.
+   *
+   * @throws ParserException If there is an error changing the information.
+   */
+  private JsonElement jsonPathSet(JsonElement json, String path, Object info) throws ParserException {
+    Object value = asJsonElement(info);
+
+    return JsonPath.parse(shallowCopy(json)).set(path, value).json();
   }
 
   /**
@@ -621,7 +685,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param info The information to be added.
    * @return a copy of the json with the new information added.
    */
-  private JsonElement jsonPathAdd(Object json, String path, Object info) {
+  private JsonElement jsonPathAdd(JsonElement json, String path, Object info) throws ParserException {
     JsonElement jsonElement = typeConversion.asClonedJsonElement(json);
     Object value = asJsonElement(info);
 
@@ -635,8 +699,10 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param json the json object to read the information from.
    * @param path the path to read in the object.
    * @return the return value as a MT Script type.
+   *
+   * @throws ParserException when there is an error converting the json objects.
    */
-  private Object jsonPathRead(Object json, String path) {
+  private Object jsonPathRead(JsonElement json, String path) throws ParserException {
     JsonElement jsonElement = asJsonElement(json);
     return typeConversion.asScriptType(JsonPath.using(jaywayConfig).parse(jsonElement).read(path));
   }
@@ -656,7 +722,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param o the object to convert.
    * @return the json representation..
    */
-  public JsonElement asJsonElement(Object o) {
+  public JsonElement asJsonElement(Object o) throws ParserException {
     return typeConversion.asJsonElement(o);
   }
 }
