@@ -60,7 +60,6 @@ public class TokenLightFunctions extends AbstractFunction {
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       MapTool.serverCommand().updateTokenProperty(token, "clearLightSources");
-      MapTool.getFrame().updateTokenTree();
       return "";
     }
     if (functionName.equalsIgnoreCase("setLight")) {
@@ -158,9 +157,6 @@ public class TokenLightFunctions extends AbstractFunction {
       throw new ParserException(
           I18N.getText("macro.function.tokenLight.unknownLightType", "setLights", category));
     }
-    MapTool.getFrame().updateTokenTree();
-    token.getZoneRenderer().flushLight();
-
     return found ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 

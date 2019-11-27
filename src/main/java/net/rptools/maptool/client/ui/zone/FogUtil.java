@@ -61,6 +61,15 @@ import org.apache.logging.log4j.Logger;
 public class FogUtil {
   private static final Logger log = LogManager.getLogger(FogUtil.class);
 
+  /**
+   * Return the visible area for an origin, a lightSourceArea and a VBL.
+   *
+   * @param x the x vision origin.
+   * @param y the y vision origin.
+   * @param vision the lightSourceArea.
+   * @param topology the VBL topology.
+   * @return the visible area.
+   */
   public static Area calculateVisibility(int x, int y, Area vision, AreaTree topology) {
     CodeTimer timer = new CodeTimer("calculateVisibility");
 
@@ -128,6 +137,13 @@ public class FogUtil {
     return vision;
   }
 
+  /**
+   * Expose visible area and previous path of all tokens in the token set. Server and clients are
+   * updated.
+   *
+   * @param renderer the ZoneRenderer of the map
+   * @param tokenSet the set of GUID of the tokens
+   */
   public static void exposeVisibleArea(final ZoneRenderer renderer, Set<GUID> tokenSet) {
     exposeVisibleArea(renderer, tokenSet, false);
   }
@@ -289,7 +305,7 @@ public class FogUtil {
    *
    * @author Jamz
    * @since 1.4.0.1
-   * @param renderer
+   * @param renderer the ZoneRenderer
    */
   public static void exposeAllOwnedArea(ZoneRenderer renderer) {
     Set<GUID> tokenSet = new HashSet<GUID>();
@@ -319,7 +335,7 @@ public class FogUtil {
   /**
    * Restore the FoW on one map. Updates server and clients.
    *
-   * @param renderer the ZoneRenderer of the map
+   * @param renderer the ZoneRenderer of the map.
    */
   public static void restoreFoW(final ZoneRenderer renderer) {
     // System.out.println("Zone ID: " + renderer.getZone().getId());
@@ -414,7 +430,10 @@ public class FogUtil {
   /**
    * Find the center point of a vision TODO: This is a horrible horrible method. the API is just
    * plain disgusting. But it'll work to consolidate all the places this has to be done until we can
-   * encapsulate it into the vision itself
+   * encapsulate it into the vision itself.
+   *
+   * @param token the token to get the vision center of.
+   * @param zone the Zone where the token is.
    */
   public static Point calculateVisionCenter(Token token, Zone zone) {
     Grid grid = zone.getGrid();
