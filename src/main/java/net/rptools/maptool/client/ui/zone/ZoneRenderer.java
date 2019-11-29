@@ -162,8 +162,12 @@ public class ZoneRenderer extends JComponent
 
   public static final int MIN_GRID_SIZE = 10;
   private static LightSourceIconOverlay lightSourceIconOverlay = new LightSourceIconOverlay();
-  protected Zone zone;
+  /** The zone the ZoneRenderer was built from. */
+  protected final Zone zone;
+
+  /** The ZoneView constructed from the zone. */
   private final ZoneView zoneView;
+
   private Scale zoneScale;
   private final DrawableRenderer backgroundDrawableRenderer = new PartitionedDrawableRenderer();
   private final DrawableRenderer objectDrawableRenderer = new PartitionedDrawableRenderer();

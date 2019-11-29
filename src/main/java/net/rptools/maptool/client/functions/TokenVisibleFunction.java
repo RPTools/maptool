@@ -97,7 +97,7 @@ public class TokenVisibleFunction extends AbstractFunction {
         set = Boolean.parseBoolean(val.toString());
       }
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setVisible", set);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVisible, set);
   }
 
   public static void setOwnerOnlyVisible(Token token, Object val) throws ParserException {
@@ -117,7 +117,7 @@ public class TokenVisibleFunction extends AbstractFunction {
         set = Boolean.parseBoolean(val.toString());
       }
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setVisibleOnlyToOwner", set);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVisibleOnlyToOwner, set);
   }
 
   @Override
@@ -304,7 +304,7 @@ public class TokenVisibleFunction extends AbstractFunction {
         set = Boolean.parseBoolean(val.toString());
       }
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setIsAlwaysVisible", set);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setIsAlwaysVisible, set);
   }
 
   /**

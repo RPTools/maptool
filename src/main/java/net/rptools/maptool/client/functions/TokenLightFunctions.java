@@ -59,7 +59,7 @@ public class TokenLightFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
 
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand().updateTokenProperty(token, "clearLightSources");
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.clearLightSources);
       return "";
     }
     if (functionName.equalsIgnoreCase("setLight")) {
@@ -146,10 +146,10 @@ public class TokenLightFunctions extends AbstractFunction {
         if (ls.getName().equals(name)) {
           found = true;
           if (val.equals(BigDecimal.ZERO)) {
-            MapTool.serverCommand().updateTokenProperty(token, "removeLightSource", ls);
+            MapTool.serverCommand().updateTokenProperty(token, Token.Update.removeLightSource, ls);
           } else {
             MapTool.serverCommand()
-                .updateTokenProperty(token, "addLightSource", ls, Direction.CENTER);
+                .updateTokenProperty(token, Token.Update.addLightSource, ls, Direction.CENTER);
           }
         }
       }
