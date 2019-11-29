@@ -1008,8 +1008,18 @@ public class Token extends BaseModel implements Cloneable {
     return assetId;
   }
 
+  /**
+   * Store the token image, and set the native Width and Height.
+   *
+   * @param name the name of the image.
+   * @param assetId the asset MD5Key.
+   */
   public void setImageAsset(String name, MD5Key assetId) {
     imageAssetMap.put(name, assetId);
+
+    BufferedImage image = ImageManager.getImageAndWait(assetId);
+    setWidth(image.getWidth(null));
+    setHeight(image.getHeight(null));
   }
 
   public void setImageAsset(String name) {
