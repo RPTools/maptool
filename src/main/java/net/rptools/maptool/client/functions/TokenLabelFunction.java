@@ -112,10 +112,9 @@ public class TokenLabelFunction extends AbstractFunction {
    */
   private static Object setLabel(Parser parser, List<Object> args) throws ParserException {
     FunctionUtil.checkNumberParam("setLabel", args, 1, 3);
-    MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
 
     String label = args.get(0).toString();
-    Token token = FunctionUtil.getTokenFromParam(res, "setLabel", args, 1, 2);
+    Token token = FunctionUtil.getTokenFromParam(parser, "setLabel", args, 1, 2);
     setLabel(token, label);
     return label;
   }
