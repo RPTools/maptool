@@ -22,6 +22,8 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.FunctionUtil;
@@ -68,6 +70,7 @@ public class TokenImage extends AbstractFunction {
         "setTokenHandout",
         "getImage",
         "setTokenOpacity",
+        "getAssetProperties",
         "getTokenOpacity");
   }
 
@@ -138,7 +141,18 @@ public class TokenImage extends AbstractFunction {
       return "";
     }
 
-    /** getImage, getTokenImage, getTokenPortrait, or getTokenHandout */
+    if (functionName.equalsIgnoreCase("getAssetProperties")) {
+      FunctionUtil.checkNumberParam(functionName, args, 1, 1);
+      MD5Key key = getMD5Key(args.get(0).toString(), functionName);
+      Asset asset = AssetManager.getAsset(key);
+      if (asset == null) {
+        return "";
+      } else {
+        return asset.getProperties();
+      }
+    }
+
+    /* getImage, getTokenImage, getTokenPortrait, or getTokenHandout */
     int indexSize = -1; // by default, no size added to asset id
     if (functionName.equals("getImage")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 2);
