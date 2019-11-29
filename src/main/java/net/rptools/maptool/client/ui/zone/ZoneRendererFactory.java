@@ -18,6 +18,11 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Zone;
 
 public class ZoneRendererFactory {
+  /**
+   * Create a new ZoneRenderer from a zone.
+   *
+   * @param zone the Zone.
+   */
   public static ZoneRenderer newRenderer(Zone zone) {
     ZoneRenderer renderer = new ZoneRenderer(zone);
     if (MapTool.getFrame() != null) {

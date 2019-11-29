@@ -16,7 +16,6 @@ package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
 import java.util.List;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -49,16 +48,14 @@ public class TokenInitHoldFunction extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
-    MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-
     if (functionName.equalsIgnoreCase("getInitiativeHold")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, args, 0, 1);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
       return getInitiativeHold(token);
     } else {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       boolean set = FunctionUtil.paramAsBoolean(functionName, args, 0, true);
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, args, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
       return setInitiativeHold(token, set);
     }
   }

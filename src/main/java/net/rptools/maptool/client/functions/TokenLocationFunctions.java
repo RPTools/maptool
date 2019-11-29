@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -39,8 +38,10 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
 
+/** Functions to move tokens, get a token's location, or calculate the distance from a token. */
 public class TokenLocationFunctions extends AbstractFunction {
 
+  /** Holds a token's x, y and z coordinates. */
   private static class TokenLocation {
     int x;
     int y;
@@ -69,7 +70,7 @@ public class TokenLocationFunctions extends AbstractFunction {
         "moveTokenFromMap");
   }
 
-  /** Gets an instance of TokenLocationFunctions. */
+  /** @return instance of TokenLocationFunctions. */
   public static TokenLocationFunctions getInstance() {
     return instance;
   }
@@ -77,58 +78,52 @@ public class TokenLocationFunctions extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
-    if (!MapTool.getParser().isMacroTrusted()) {
-      throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
-    }
-    MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
+    FunctionUtil.blockUntrustedMacro(functionName);
 
-    if (functionName.equals("getTokenX")) {
-      return BigDecimal.valueOf(getTokenLocation(res, functionName, parameters).x);
-    }
-    if (functionName.equals("getTokenY")) {
-      return BigDecimal.valueOf(getTokenLocation(res, functionName, parameters).y);
+    if (functionName.equals("getTokenX") || functionName.equals("getTokenY")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
+      boolean useDistancePerCell =
+          parameters.size() > 0
+              ? FunctionUtil.paramAsBoolean(functionName, parameters, 0, false)
+              : true;
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      TokenLocation location = getTokenLocation(useDistancePerCell, token);
+      return BigDecimal.valueOf(functionName.equals("getTokenX") ? location.x : location.y);
     }
     if (functionName.equals("getTokenDrawOrder")) {
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, parameters, 0, -1);
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 0, 1);
       return BigDecimal.valueOf(token.getZOrder());
     }
     if (functionName.equals("setTokenDrawOrder")) {
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, parameters, 1, -1);
-      if (parameters.isEmpty()) {
-        throw new ParserException(
-            I18N.getText("macro.function.general.notEnoughParam", functionName, 1, 0));
-      }
-      if (!(parameters.get(0) instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeN",
-                functionName,
-                1,
-                parameters.get(0).toString()));
-      }
-      MapTool.serverCommand()
-          .updateTokenProperty(token, "setZOrder", ((BigDecimal) parameters.get(0)).intValue());
-      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-      renderer.flushLight();
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      int newZOrder = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setZOrder, newZOrder);
       return BigDecimal.valueOf(token.getZOrder());
     }
     if (functionName.equals("getDistance")) {
-      return getDistance(res, parameters);
+      FunctionUtil.checkNumberParam("getDistance", parameters, 1, 4);
+      return getDistance(parser, parameters);
     }
     if (functionName.equals("getDistanceToXY")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 6);
-      return getDistanceToXY(res, parameters);
+      return getDistanceToXY(parser, parameters);
     }
     if (functionName.equals("goto")) {
-      return gotoLoc(res, parameters);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      return gotoLoc(parser, parameters);
     }
     if (functionName.equals("moveToken")) {
-      return moveToken(res, parameters);
+      FunctionUtil.checkNumberParam("moveToken", parameters, 2, 4);
+      return moveToken(parser, parameters);
     }
     if (functionName.equals("moveTokenToMap")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 5);
       return tokenMoveMap(true, parameters);
     }
     if (functionName.equals("moveTokenFromMap")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 5);
       return tokenMoveMap(false, parameters);
     }
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -140,15 +135,11 @@ public class TokenLocationFunctions extends AbstractFunction {
    * @param fromCurrentMap true if it is begin moved from the named map to this one.
    * @param args The parameters for the function.
    * @return a message detailing the number of tokens moved.
-   * @throws ParserException
+   * @throws ParserException if the parameters are invalid, or the token is already on the map.
    */
   @SuppressWarnings("unchecked")
   private String tokenMoveMap(boolean fromCurrentMap, List<Object> args) throws ParserException {
     String functionName = fromCurrentMap ? "moveTokenToMap" : "moveTokenFromMap";
-    if (args.size() < 2) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.notEnoughParam", functionName, 2, args.size()));
-    }
     Object tokenString = args.get(0);
     String map = (String) args.get(1);
 
@@ -187,37 +178,13 @@ public class TokenLocationFunctions extends AbstractFunction {
       throw new ParserException(
           I18N.getText("macro.function.moveTokenMap.alreadyThere", functionName));
     }
-    int x = 0;
-    int y = 0;
-    int z = zone.getLargestZOrder() + 1;
+    int x = args.size() > 2 ? FunctionUtil.paramAsInteger(functionName, args, 2, false) : 0;
+    int y = args.size() > 3 ? FunctionUtil.paramAsInteger(functionName, args, 3, false) : 0;
+    int z =
+        args.size() > 4
+            ? FunctionUtil.paramAsInteger(functionName, args, 4, false)
+            : zone.getLargestZOrder() + 1;
 
-    if (args.size() > 2) {
-      if (!(args.get(2) instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeN", functionName, 2, args.get(2).toString()));
-      } else {
-        x = ((BigDecimal) args.get(2)).intValue();
-      }
-    }
-    if (args.size() > 3) {
-      if (!(args.get(3) instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeN", functionName, 3, args.get(3).toString()));
-      } else {
-        y = ((BigDecimal) args.get(3)).intValue();
-      }
-    }
-    if (args.size() > 4) {
-      if (!(args.get(4) instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeN", functionName, 4, args.get(4).toString()));
-      } else {
-        z = ((BigDecimal) args.get(4)).intValue();
-      }
-    }
     StringBuilder sb = new StringBuilder();
     for (String id : tokens) {
       Token token = fromZone.resolveToken(id);
@@ -234,7 +201,6 @@ public class TokenLocationFunctions extends AbstractFunction {
         token.setX(x);
         token.setY(y);
         token.setZOrder(z);
-        toZone.putToken(token);
         MapTool.serverCommand().putToken(toZone.getId(), token);
         MapTool.serverCommand().removeToken(fromZone.getId(), token.getId());
         sb.append(I18N.getText("macro.function.moveTokenMap.movedToken", token.getName(), map))
@@ -250,31 +216,14 @@ public class TokenLocationFunctions extends AbstractFunction {
   /**
    * Gets the location of the token on the map.
    *
-   * @param res The variable resolver.
-   * @param args The arguments.
+   * @param useDistancePerCell should the cell coordinates per returned?
+   * @param token the token to return the location of.
    * @return the location of the token.
-   * @throws ParserException if an error occurs.
    */
-  private TokenLocation getTokenLocation(
-      MapToolVariableResolver res, String functionName, List<Object> args) throws ParserException {
-    Token token = FunctionUtil.getTokenFromParam(res, functionName, args, 1, -1);
-    boolean useDistancePerCell = true;
-
-    if (args.size() > 0) {
-      if (!(args.get(0) instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeN", functionName, 1, args.get(0).toString()));
-      }
-      BigDecimal val = (BigDecimal) args.get(0);
-      useDistancePerCell = val.equals(BigDecimal.ZERO) ? false : true;
-    }
-
+  private TokenLocation getTokenLocation(boolean useDistancePerCell, Token token) {
     TokenLocation loc = new TokenLocation();
-
     if (useDistancePerCell) {
-      Rectangle tokenBounds =
-          token.getBounds(MapTool.getFrame().getCurrentZoneRenderer().getZone());
+      Rectangle tokenBounds = token.getBounds(token.getZoneRenderer().getZone());
       loc.x = tokenBounds.x;
       loc.y = tokenBounds.y;
       loc.z = token.getZOrder();
@@ -482,36 +431,18 @@ public class TokenLocationFunctions extends AbstractFunction {
   /**
    * Gets the distance to another token.
    *
-   * @param res The variable resolver.
+   * @param parser the parser.
    * @param args arguments to the function.
    * @return the distance between tokens.
    * @throws ParserException if an error occurs.
    */
-  private BigDecimal getDistance(MapToolVariableResolver res, List<Object> args)
-      throws ParserException {
-    if (args.size() < 1) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.notEnoughParam", "getDistance", 1, args.size()));
-    }
+  private BigDecimal getDistance(Parser parser, List<Object> args) throws ParserException {
+    Token target = FunctionUtil.getTokenFromParam(parser, "getDistance", args, 0, -1);
+    Token source = FunctionUtil.getTokenFromParam(parser, "getDistance", args, 2, -1);
 
-    Token target = FunctionUtil.getTokenFromParam(res, "getDistance", args, 0, -1);
-    Token source = FunctionUtil.getTokenFromParam(res, "getDistance", args, 2, -1);
-
-    boolean useDistancePerCell = true;
-    if (args.size() > 1) {
-      if (!(args.get(1) instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeN", "getDistance", 2, args.get(1).toString()));
-      }
-      BigDecimal val = (BigDecimal) args.get(1);
-      useDistancePerCell = val.equals(BigDecimal.ZERO) ? false : true;
-    }
-
-    String metric = null;
-    if (args.size() > 3) {
-      metric = (String) args.get(3);
-    }
+    boolean useDistancePerCell =
+        args.size() > 1 ? FunctionUtil.paramAsBoolean("getDistance", args, 1, false) : true;
+    String metric = args.size() > 3 ? args.get(3).toString() : null;
 
     double dist = getDistance(source, target, useDistancePerCell, metric);
 
@@ -525,13 +456,12 @@ public class TokenLocationFunctions extends AbstractFunction {
   /**
    * Gets the distance to an x,y location.
    *
-   * @param res The variable resolver.
+   * @param parser the parser.
    * @param args arguments to the function.
    * @return the distance between tokens.
    * @throws ParserException if an error occurs.
    */
-  private BigDecimal getDistanceToXY(MapToolVariableResolver res, List<Object> args)
-      throws ParserException {
+  private BigDecimal getDistanceToXY(Parser parser, List<Object> args) throws ParserException {
     final String fName = "getDistanceToXY";
 
     int x = FunctionUtil.paramAsInteger(fName, args, 0, false);
@@ -540,7 +470,7 @@ public class TokenLocationFunctions extends AbstractFunction {
     boolean useDistancePerCell = true;
     if (args.size() > 2) useDistancePerCell = FunctionUtil.paramAsBoolean(fName, args, 2, true);
 
-    Token source = FunctionUtil.getTokenFromParam(res, fName, args, 3, -1);
+    Token source = FunctionUtil.getTokenFromParam(parser, fName, args, 3, -1);
     String metric = args.size() > 4 ? args.get(4).toString() : null;
     boolean pixel = args.size() > 5 ? FunctionUtil.paramAsBoolean(fName, args, 5, true) : false;
 
@@ -554,16 +484,16 @@ public class TokenLocationFunctions extends AbstractFunction {
   }
 
   /**
-   * Get a ZonePoint of the specified x,y location. If <code>units</code> is true, the incoming
-   * (x,y) is treated as a <code>ZonePoint</code>. If <code>units</code> is false, the incoming
-   * (x,y) is treated as a <code>CellPoint</code> and is converted to a ZonePoint by calling {@link
-   * Grid#convert(CellPoint)}.
+   * Get a ZonePoint of the specified x,y location for the current map. If <code>units</code> is
+   * true, the incoming (x,y) is treated as a <code>ZonePoint</code>. If <code>units</code> is
+   * false, the incoming (x,y) is treated as a <code>CellPoint</code> and is converted to a
+   * ZonePoint by calling {@link Grid#convert(CellPoint)}.
    *
    * @param x the x co-ordinate of the destination.
    * @param y the y co-ordinate of the destination.
    * @param units whether the (x,y) coordinate is a <code>ZonePoint</code> (true) or <code>CellPoint
    *     </code> (false)
-   * @return the ZonePoint of the coordinates
+   * @return the ZonePoint of the coordinates.
    */
   public static ZonePoint getZonePoint(int x, int y, boolean units) {
     ZonePoint zp;
@@ -580,63 +510,41 @@ public class TokenLocationFunctions extends AbstractFunction {
   /**
    * Moves a token to the specified location.
    *
-   * @param res the variable resolver.
+   * @param parser the parser.
    * @param args the arguments to the function.
    */
-  private static String moveToken(MapToolVariableResolver res, List<Object> args)
-      throws ParserException {
-    FunctionUtil.checkNumberParam("moveToken", args, 2, 5);
-
+  private static String moveToken(Parser parser, List<Object> args) throws ParserException {
     int x = FunctionUtil.paramAsInteger("moveToken", args, 0, false);
     int y = FunctionUtil.paramAsInteger("moveToken", args, 1, false);
     boolean useDistance =
         args.size() > 2 ? FunctionUtil.paramAsBoolean("moveToken", args, 2, false) : true;
-    Token token = FunctionUtil.getTokenFromParam(res, "moveToken", args, 3, 4);
+    Token token = FunctionUtil.getTokenFromParam(parser, "moveToken", args, 3, -1);
 
     ZonePoint zp = getZonePoint(x, y, useDistance);
-    MapTool.serverCommand().updateTokenProperty(token, "setXY", zp.x, zp.y);
-    token.getZoneRenderer().flushLight();
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setXY, zp.x, zp.y);
     return "";
   }
 
   /**
    * Centers the map on a new location.
    *
-   * @param res The variable resolver.
+   * @param parser The parser.
    * @param args The arguments to the function.
    * @return an empty string.
    * @throws ParserException if an error occurs.
    */
-  private String gotoLoc(MapToolVariableResolver res, List<Object> args) throws ParserException {
-    Token token = null;
+  private String gotoLoc(Parser parser, List<Object> args) throws ParserException {
     int x;
     int y;
 
-    if (!MapTool.getParser().isMacroTrusted()) {
-      throw new ParserException(I18N.getText("macro.function.general.noPerm", "goto"));
-    }
-
     if (args.size() < 2) {
-      token = FunctionUtil.getTokenFromParam(res, "goto", args, 0, -1);
+      Token token = FunctionUtil.getTokenFromParam(parser, "goto", args, 0, -1);
       x = token.getX();
       y = token.getY();
       MapTool.getFrame().getCurrentZoneRenderer().centerOn(new ZonePoint(x, y));
     } else {
-
-      if (!(args.get(0) instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeN", "goto", 1, args.get(0).toString()));
-      }
-
-      if (!(args.get(1) instanceof BigDecimal)) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeN", "goto", 2, args.get(1).toString()));
-      }
-
-      x = ((BigDecimal) args.get(0)).intValue();
-      y = ((BigDecimal) args.get(1)).intValue();
+      x = FunctionUtil.paramAsInteger("goto", args, 0, false);
+      y = FunctionUtil.paramAsInteger("goto", args, 1, false);
       MapTool.getFrame().getCurrentZoneRenderer().centerOn(new CellPoint(x, y));
     }
 
@@ -644,7 +552,7 @@ public class TokenLocationFunctions extends AbstractFunction {
   }
 
   /**
-   * Gets the distance for each cell.
+   * Gets the distance for one cell on the current map.
    *
    * @return the distance for each cell.
    */
@@ -655,11 +563,11 @@ public class TokenLocationFunctions extends AbstractFunction {
   /**
    * Gets the cell point that the token is at.
    *
-   * @param token
-   * @return
+   * @param token the token.
+   * @return the CellPoint where the token is.
    */
   public CellPoint getTokenCell(Token token) {
-    Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    Zone zone = token.getZoneRenderer().getZone();
     return zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
   }
 }

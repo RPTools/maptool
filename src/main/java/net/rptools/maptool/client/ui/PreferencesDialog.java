@@ -54,6 +54,7 @@ import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
@@ -326,16 +327,25 @@ public class PreferencesDialog extends JDialog {
     fileSyncPathButton = (JButton) panel.getButton("fileSyncPathButton");
 
     jvmXmxTextField = panel.getTextField("jvmXmxTextField");
+    jvmXmxTextField.setToolTipText(I18N.getText("prefs.jvm.xmx.tooltip"));
     jvmXmsTextField = panel.getTextField("jvmXmsTextField");
+    jvmXmsTextField.setToolTipText(I18N.getText("prefs.jvm.xms.tooltip"));
     jvmXssTextField = panel.getTextField("jvmXssTextField");
+    jvmXssTextField.setToolTipText(I18N.getText("prefs.jvm.xss.tooltip"));
     dataDirTextField = panel.getTextField("dataDirTextField");
 
     jvmAssertionsCheckbox = panel.getCheckBox("jvmAssertionsCheckbox");
+    jvmAssertionsCheckbox.setToolTipText(
+        I18N.getText("prefs.jvm.advanced.enableAssertions.tooltip"));
     jvmDirect3dCheckbox = panel.getCheckBox("jvmDirect3dCheckbox");
+    jvmDirect3dCheckbox.setToolTipText(I18N.getText("prefs.jvm.advanced.direct3d.tooltip"));
     jvmOpenGLCheckbox = panel.getCheckBox("jvmOpenGLCheckbox");
+    jvmOpenGLCheckbox.setToolTipText(I18N.getText("prefs.jvm.advanced.opengl.tooltip"));
     jvmInitAwtCheckbox = panel.getCheckBox("jvmInitAwtCheckbox");
+    jvmInitAwtCheckbox.setToolTipText(I18N.getText("prefs.jvm.advanced.initAWTbeforeJFX.tooltip"));
 
     jvmLanguageOverideComboBox = panel.getComboBox("jvmLanguageOverideComboBox");
+    jvmLanguageOverideComboBox.setToolTipText(I18N.getText("prefs.language.override.tooltip"));
 
     DefaultComboBoxModel<String> languageModel = new DefaultComboBoxModel<String>();
     for (Entry<String, String> language : UserJvmPrefs.getLanguages())
