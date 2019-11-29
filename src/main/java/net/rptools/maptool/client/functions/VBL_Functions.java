@@ -276,7 +276,7 @@ public class VBL_Functions extends AbstractFunction {
         }
       }
       // Replace with new VBL
-      MapTool.serverCommand().updateTokenProperty(token, "setVBL", tokenVBL);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVBL, tokenVBL);
     }
 
     if (functionName.equals("transferVBL")) {
