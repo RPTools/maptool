@@ -139,7 +139,7 @@ public class Asset {
     }
     properties.put("status", status);
     properties.put("width", img.getWidth(null));
-    properties.put("height", img.getWidth(null));
+    properties.put("height", img.getHeight(null));
     return properties;
   }
 
