@@ -92,7 +92,7 @@ public class TokenBarFunction extends AbstractFunction {
    */
   public static Object setValue(Token token, String bar, Object value) {
     BigDecimal val = getBigDecimalValue(value);
-    MapTool.serverCommand().updateTokenProperty(token, "setState", bar, value);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, value);
     return val;
   }
 
@@ -113,7 +113,7 @@ public class TokenBarFunction extends AbstractFunction {
    */
   public static BigDecimal setVisible(Token token, String bar, boolean show) {
     BigDecimal value = show ? BigDecimal.ONE : null;
-    MapTool.serverCommand().updateTokenProperty(token, "setState", bar, value);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, value);
     return show ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 
