@@ -60,8 +60,9 @@ public class ImageChooserDialog extends JDialog {
 
     imageChooser.addImageSelectionListener(
         new SelectionListener() {
+          @Override
           public void selectionPerformed(List<Object> selected) {
-            if (selected.size() < 0 || (Integer) selected.get(0) < 0) {
+            if (selected.isEmpty() || (Integer) selected.get(0) < 0) {
               return;
             }
 
@@ -74,6 +75,11 @@ public class ImageChooserDialog extends JDialog {
         });
   }
 
+  /**
+   * Returns the asset ID of the last selected image.
+   *
+   * @return Asset ID
+   */
   public MD5Key getImageId() {
     return imageId;
   }
@@ -91,6 +97,7 @@ public class ImageChooserDialog extends JDialog {
     JButton button = new JButton("OK");
     button.addActionListener(
         new ActionListener() {
+          @Override
           public void actionPerformed(java.awt.event.ActionEvent e) {
             setVisible(false);
           }
@@ -103,6 +110,7 @@ public class ImageChooserDialog extends JDialog {
     JButton button = new JButton("Cancel");
     button.addActionListener(
         new ActionListener() {
+          @Override
           public void actionPerformed(java.awt.event.ActionEvent e) {
             imageId = null;
             setVisible(false);
