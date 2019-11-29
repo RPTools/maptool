@@ -316,11 +316,10 @@ public class TokenVisibleFunction extends AbstractFunction {
    * @throws ParserException if an error occurs.
    */
   private static Object setAlwaysVisible(Parser parser, List<Object> args) throws ParserException {
-    MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
     FunctionUtil.checkNumberParam("setAlwaysVisible", args, 1, 3);
 
     Object val = args.get(0);
-    Token token = FunctionUtil.getTokenFromParam(res, "setAlwaysVisible", args, 1, 2);
+    Token token = FunctionUtil.getTokenFromParam(parser, "setAlwaysVisible", args, 1, 2);
 
     setAlwaysVisible(token, val);
     return val;

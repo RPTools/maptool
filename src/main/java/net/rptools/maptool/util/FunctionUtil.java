@@ -23,6 +23,7 @@ import net.rptools.maptool.client.functions.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
 import net.sf.json.JSONArray;
@@ -81,7 +82,7 @@ public class FunctionUtil {
    * the list size before trying to retrieve the token so it is safe to use for functions that have
    * the token as a optional argument.
    *
-   * @param res the variable resolver
+   * @param parser the parser.
    * @param functionName the function name (used for generating exception messages).
    * @param param the parameters for the function
    * @param indexToken the index to find the token at. If -1, use current token instead.
@@ -91,11 +92,7 @@ public class FunctionUtil {
    *     token can not be found, or if no token is specified and no token is impersonated.
    */
   public static Token getTokenFromParam(
-      MapToolVariableResolver res,
-      String functionName,
-      List<Object> param,
-      int indexToken,
-      int indexMap)
+      Parser parser, String functionName, List<Object> param, int indexToken, int indexMap)
       throws ParserException {
 
     int size = param.size();
@@ -117,7 +114,7 @@ public class FunctionUtil {
         }
       }
     } else {
-      token = res.getTokenInContext();
+      token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
       if (token == null) {
         throw new ParserException(I18N.getText(KEY_NO_IMPERSONATED, functionName));
       }

@@ -122,10 +122,9 @@ public class TokenGMNameFunction extends AbstractFunction {
    * @throws ParserException when an error occurs.
    */
   private Object setGMName(Parser parser, List<Object> args) throws ParserException {
-    MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
     FunctionUtil.checkNumberParam("setGMName", args, 1, 3);
     String gmName = args.get(0).toString();
-    Token token = FunctionUtil.getTokenFromParam(resolver, "setGMName", args, 1, 2);
+    Token token = FunctionUtil.getTokenFromParam(parser, "setGMName", args, 1, 2);
 
     MapTool.serverCommand().updateTokenProperty(token, Token.Update.setGMName, gmName);
 

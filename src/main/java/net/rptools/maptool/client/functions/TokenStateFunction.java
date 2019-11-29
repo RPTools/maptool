@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -54,33 +53,29 @@ public class TokenStateFunction extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
-    MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
-
     if (functionName.equals("setAllStates")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       Boolean val = getBooleanFromValue(args.get(0));
-      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setAllStates, val);
       return val ? BigDecimal.valueOf(1) : BigDecimal.valueOf(0);
     } else if (functionName.equals("getState")) {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       String stateName = args.get(0).toString();
-      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
       return getState(token, stateName);
     } else if (functionName.equals("setState")) {
       FunctionUtil.checkNumberParam(functionName, args, 2, 4);
       String stateName = args.get(0).toString();
       Object value = args.get(1);
-      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 2, 3);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 2, 3);
       return setState(token, stateName, value);
     } else if (functionName.equals("getTokenStates")) {
       FunctionUtil.checkNumberParam(functionName, args, 0, 4);
       String delim = args.size() > 0 ? args.get(0).toString() : ",";
       String group = args.size() > 1 ? args.get(1).toString() : "*";
       Token token =
-          args.size() > 2
-              ? FunctionUtil.getTokenFromParam(resolver, functionName, args, 2, 3)
-              : null;
+          args.size() > 2 ? FunctionUtil.getTokenFromParam(parser, functionName, args, 2, 3) : null;
       return getTokenStates(delim, group, token);
     } else {
       throw new ParserException(
