@@ -20,7 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -85,7 +84,6 @@ public class TokenImage extends AbstractFunction {
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
     Token token;
-    MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
 
     if (functionName.equals("setTokenOpacity")) {
       if (!MapTool.getParser().isMacroTrusted())
@@ -94,7 +92,7 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
       String strOpacity = args.get(0).toString();
       FunctionUtil.paramAsFloat(functionName, args, 0, true);
-      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
+      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
 
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setTokenOpacity, strOpacity);
       return token.getTokenOpacity();
@@ -105,7 +103,7 @@ public class TokenImage extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       FunctionUtil.checkNumberParam(functionName, args, 0, 2);
-      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 0, 1);
+      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
 
       return token.getTokenOpacity();
     }
@@ -114,7 +112,7 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
-      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
+      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
 
       setImage(token, assetName);
       return "";
@@ -124,7 +122,7 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
-      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
+      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
 
       setPortrait(token, assetName);
       return "";
@@ -134,7 +132,7 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 1, 3);
 
       String assetName = args.get(0).toString();
-      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
+      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
 
       setHandout(token, assetName);
       return "";
@@ -161,7 +159,7 @@ public class TokenImage extends AbstractFunction {
         indexSize = 0;
       }
 
-      token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
+      token = FunctionUtil.getTokenFromParam(parser, functionName, args, 1, 2);
     }
 
     StringBuilder assetId = new StringBuilder("asset://");

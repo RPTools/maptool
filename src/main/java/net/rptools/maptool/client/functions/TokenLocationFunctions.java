@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -80,7 +79,6 @@ public class TokenLocationFunctions extends AbstractFunction {
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
     FunctionUtil.blockUntrustedMacro(functionName);
-    MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
 
     if (functionName.equals("getTokenX") || functionName.equals("getTokenY")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
@@ -88,37 +86,37 @@ public class TokenLocationFunctions extends AbstractFunction {
           parameters.size() > 0
               ? FunctionUtil.paramAsBoolean(functionName, parameters, 0, false)
               : true;
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, parameters, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
       TokenLocation location = getTokenLocation(useDistancePerCell, token);
       return BigDecimal.valueOf(functionName.equals("getTokenX") ? location.x : location.y);
     }
     if (functionName.equals("getTokenDrawOrder")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, parameters, 0, 1);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 0, 1);
       return BigDecimal.valueOf(token.getZOrder());
     }
     if (functionName.equals("setTokenDrawOrder")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       int newZOrder = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
-      Token token = FunctionUtil.getTokenFromParam(res, functionName, parameters, 1, 2);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setZOrder, newZOrder);
       return BigDecimal.valueOf(token.getZOrder());
     }
     if (functionName.equals("getDistance")) {
       FunctionUtil.checkNumberParam("getDistance", parameters, 1, 4);
-      return getDistance(res, parameters);
+      return getDistance(parser, parameters);
     }
     if (functionName.equals("getDistanceToXY")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 6);
-      return getDistanceToXY(res, parameters);
+      return getDistanceToXY(parser, parameters);
     }
     if (functionName.equals("goto")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
-      return gotoLoc(res, parameters);
+      return gotoLoc(parser, parameters);
     }
     if (functionName.equals("moveToken")) {
       FunctionUtil.checkNumberParam("moveToken", parameters, 2, 4);
-      return moveToken(res, parameters);
+      return moveToken(parser, parameters);
     }
     if (functionName.equals("moveTokenToMap")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 5);
@@ -433,15 +431,14 @@ public class TokenLocationFunctions extends AbstractFunction {
   /**
    * Gets the distance to another token.
    *
-   * @param res The variable resolver.
+   * @param parser the parser.
    * @param args arguments to the function.
    * @return the distance between tokens.
    * @throws ParserException if an error occurs.
    */
-  private BigDecimal getDistance(MapToolVariableResolver res, List<Object> args)
-      throws ParserException {
-    Token target = FunctionUtil.getTokenFromParam(res, "getDistance", args, 0, -1);
-    Token source = FunctionUtil.getTokenFromParam(res, "getDistance", args, 2, -1);
+  private BigDecimal getDistance(Parser parser, List<Object> args) throws ParserException {
+    Token target = FunctionUtil.getTokenFromParam(parser, "getDistance", args, 0, -1);
+    Token source = FunctionUtil.getTokenFromParam(parser, "getDistance", args, 2, -1);
 
     boolean useDistancePerCell =
         args.size() > 1 ? FunctionUtil.paramAsBoolean("getDistance", args, 1, false) : true;
@@ -459,13 +456,12 @@ public class TokenLocationFunctions extends AbstractFunction {
   /**
    * Gets the distance to an x,y location.
    *
-   * @param res The variable resolver.
+   * @param parser the parser.
    * @param args arguments to the function.
    * @return the distance between tokens.
    * @throws ParserException if an error occurs.
    */
-  private BigDecimal getDistanceToXY(MapToolVariableResolver res, List<Object> args)
-      throws ParserException {
+  private BigDecimal getDistanceToXY(Parser parser, List<Object> args) throws ParserException {
     final String fName = "getDistanceToXY";
 
     int x = FunctionUtil.paramAsInteger(fName, args, 0, false);
@@ -474,7 +470,7 @@ public class TokenLocationFunctions extends AbstractFunction {
     boolean useDistancePerCell = true;
     if (args.size() > 2) useDistancePerCell = FunctionUtil.paramAsBoolean(fName, args, 2, true);
 
-    Token source = FunctionUtil.getTokenFromParam(res, fName, args, 3, -1);
+    Token source = FunctionUtil.getTokenFromParam(parser, fName, args, 3, -1);
     String metric = args.size() > 4 ? args.get(4).toString() : null;
     boolean pixel = args.size() > 5 ? FunctionUtil.paramAsBoolean(fName, args, 5, true) : false;
 
@@ -514,16 +510,15 @@ public class TokenLocationFunctions extends AbstractFunction {
   /**
    * Moves a token to the specified location.
    *
-   * @param res the variable resolver.
+   * @param parser the parser.
    * @param args the arguments to the function.
    */
-  private static String moveToken(MapToolVariableResolver res, List<Object> args)
-      throws ParserException {
+  private static String moveToken(Parser parser, List<Object> args) throws ParserException {
     int x = FunctionUtil.paramAsInteger("moveToken", args, 0, false);
     int y = FunctionUtil.paramAsInteger("moveToken", args, 1, false);
     boolean useDistance =
         args.size() > 2 ? FunctionUtil.paramAsBoolean("moveToken", args, 2, false) : true;
-    Token token = FunctionUtil.getTokenFromParam(res, "moveToken", args, 3, -1);
+    Token token = FunctionUtil.getTokenFromParam(parser, "moveToken", args, 3, -1);
 
     ZonePoint zp = getZonePoint(x, y, useDistance);
     MapTool.serverCommand().updateTokenProperty(token, Token.Update.setXY, zp.x, zp.y);
@@ -533,17 +528,17 @@ public class TokenLocationFunctions extends AbstractFunction {
   /**
    * Centers the map on a new location.
    *
-   * @param res The variable resolver.
+   * @param parser The parser.
    * @param args The arguments to the function.
    * @return an empty string.
    * @throws ParserException if an error occurs.
    */
-  private String gotoLoc(MapToolVariableResolver res, List<Object> args) throws ParserException {
+  private String gotoLoc(Parser parser, List<Object> args) throws ParserException {
     int x;
     int y;
 
     if (args.size() < 2) {
-      Token token = FunctionUtil.getTokenFromParam(res, "goto", args, 0, -1);
+      Token token = FunctionUtil.getTokenFromParam(parser, "goto", args, 0, -1);
       x = token.getX();
       y = token.getY();
       MapTool.getFrame().getCurrentZoneRenderer().centerOn(new ZonePoint(x, y));
