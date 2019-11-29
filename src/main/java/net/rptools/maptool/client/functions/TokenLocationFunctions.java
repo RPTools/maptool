@@ -101,7 +101,7 @@ public class TokenLocationFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       int newZOrder = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
       Token token = FunctionUtil.getTokenFromParam(res, functionName, parameters, 1, 2);
-      MapTool.serverCommand().updateTokenProperty(token, "setZOrder", newZOrder);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setZOrder, newZOrder);
       return BigDecimal.valueOf(token.getZOrder());
     }
     if (functionName.equals("getDistance")) {
@@ -526,7 +526,7 @@ public class TokenLocationFunctions extends AbstractFunction {
     Token token = FunctionUtil.getTokenFromParam(res, "moveToken", args, 3, -1);
 
     ZonePoint zp = getZonePoint(x, y, useDistance);
-    MapTool.serverCommand().updateTokenProperty(token, "setXY", zp.x, zp.y);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setXY, zp.x, zp.y);
     return "";
   }
 
@@ -569,7 +569,7 @@ public class TokenLocationFunctions extends AbstractFunction {
    * Gets the cell point that the token is at.
    *
    * @param token the token.
-   * @return the CellPoint.
+   * @return the CellPoint where the token is.
    */
   public CellPoint getTokenCell(Token token) {
     Zone zone = token.getZoneRenderer().getZone();
