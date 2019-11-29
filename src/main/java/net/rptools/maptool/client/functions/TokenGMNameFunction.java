@@ -127,7 +127,7 @@ public class TokenGMNameFunction extends AbstractFunction {
     String gmName = args.get(0).toString();
     Token token = FunctionUtil.getTokenFromParam(resolver, "setGMName", args, 1, 2);
 
-    MapTool.serverCommand().updateTokenProperty(token, "setGMName", gmName);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setGMName, gmName);
 
     return gmName;
   }

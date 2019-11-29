@@ -102,9 +102,58 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
+  /** Type of character: PC or NPC. */
   public enum Type {
     PC,
     NPC
+  }
+
+  /** Type of update for the token. */
+  public enum Update {
+    setState,
+    setAllStates,
+    setPropertyType,
+    setPC,
+    setNPC,
+    setLayer,
+    setLayerShape,
+    setShape,
+    setSnapToScale,
+    setSnapToGrid,
+    setFootprint,
+    setProperty,
+    resetProperty,
+    setZOrder,
+    setFacing,
+    clearAllOwners,
+    setOwnedByAll,
+    addOwner,
+    setScaleX,
+    setScaleY,
+    setScaleXY,
+    setNotes,
+    setGMNotes,
+    setX,
+    setY,
+    setXY,
+    setHaloColor,
+    setLabel,
+    setName,
+    setGMName,
+    setVisible,
+    setVisibleOnlyToOwner,
+    setIsAlwaysVisible,
+    setTokenOpacity,
+    setTerrainModifier,
+    setVBL,
+    setImageAsset,
+    setPortraitImage,
+    setCharsheetImage,
+    clearLightSources,
+    removeLightSource,
+    addLightSource,
+    setHasSight,
+    setSightType
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -2059,162 +2108,162 @@ public class Token extends BaseModel implements Cloneable {
    * Call the relevant setter from methodName with an array of parameters Called by
    * ClientMethodHandler to deal with sent change to token
    *
-   * @param methodName The method to be used
+   * @param update The method to be used
    * @param zone The zone where the token is
    * @param parameters An array of parameters
    */
-  public void updateProperty(Zone zone, String methodName, Object[] parameters) {
+  public void updateProperty(Zone zone, Update update, Object[] parameters) {
     boolean lightChanged = false;
-    switch (methodName) {
-      case "setState":
+    switch (update) {
+      case setState:
         setState(parameters[0].toString(), parameters[1]);
         break;
-      case "setAllStates":
+      case setAllStates:
         setAllStates(parameters[0]);
         break;
-      case "setPropertyType":
+      case setPropertyType:
         setPropertyType(parameters[0].toString());
         break;
-      case "setPC":
+      case setPC:
         setType(Type.PC);
         break;
-      case "setNPC":
+      case setNPC:
         setType(Type.NPC);
         break;
-      case "setLayer":
+      case setLayer:
         setLayer((Zone.Layer) parameters[0]);
         break;
-      case "setLayerShape":
+      case setLayerShape:
         setLayer((Zone.Layer) parameters[0]);
         setShape((TokenShape) parameters[1]);
         break;
-      case "setShape":
+      case setShape:
         setShape((TokenShape) parameters[0]);
         break;
-      case "setSnapToScale":
+      case setSnapToScale:
         setSnapToScale((Boolean) parameters[0]);
         break;
-      case "setSnapToGrid":
+      case setSnapToGrid:
         setSnapToGrid((Boolean) parameters[0]);
         break;
-      case "setFootprint":
+      case setFootprint:
         setSnapToScale(true);
         setFootprint((Grid) parameters[0], (TokenFootprint) parameters[1]);
         break;
-      case "setProperty":
+      case setProperty:
         setProperty(parameters[0].toString(), parameters[1].toString());
         break;
-      case "resetProperty":
+      case resetProperty:
         resetProperty(parameters[0].toString());
         break;
-      case "setZOrder":
+      case setZOrder:
         setZOrder((int) parameters[0]);
         zone.sortZOrder(); // update new ZOrder
         break;
-      case "setFacing":
+      case setFacing:
         if (hasLightSources()) lightChanged = true;
         setFacing((Integer) parameters[0]);
         break;
-      case "clearAllOwners":
+      case clearAllOwners:
         clearAllOwners();
         break;
-      case "setOwnedByAll":
+      case setOwnedByAll:
         setOwnedByAll((Boolean) parameters[0]);
         break;
-      case "addOwner":
+      case addOwner:
         addOwner(parameters[0].toString());
         break;
-      case "setScaleX":
+      case setScaleX:
         setSnapToScale(false);
         setScaleX((double) parameters[0]);
         break;
-      case "setScaleY":
+      case setScaleY:
         setSnapToScale(false);
         setScaleY((double) parameters[0]);
         break;
-      case "setScaleXY":
+      case setScaleXY:
         setSnapToScale(false);
         setScaleX((double) parameters[0]);
         setScaleY((double) parameters[1]);
         break;
-      case "setNotes":
+      case setNotes:
         setNotes(parameters[0].toString());
         break;
-      case "setGMNotes":
+      case setGMNotes:
         setGMNotes(parameters[0].toString());
         break;
-      case "setX":
+      case setX:
         if (hasLightSources()) lightChanged = true;
         setX((int) parameters[0]);
         break;
-      case "setY":
+      case setY:
         if (hasLightSources()) lightChanged = true;
         setY((int) parameters[0]);
         break;
-      case "setXY":
+      case setXY:
         if (hasLightSources()) lightChanged = true;
         setX((int) parameters[0]);
         setY((int) parameters[1]);
         break;
-      case "setHaloColor":
+      case setHaloColor:
         setHaloColor((Color) parameters[0]);
         break;
-      case "setLabel":
+      case setLabel:
         setLabel((String) parameters[0]);
         break;
-      case "setName":
+      case setName:
         setName((String) parameters[0]);
         break;
-      case "setGMName":
+      case setGMName:
         setGMName((String) parameters[0]);
         break;
-      case "setVisible":
+      case setVisible:
         setVisible((boolean) parameters[0]);
         break;
-      case "setVisibleOnlyToOwner":
+      case setVisibleOnlyToOwner:
         setVisibleOnlyToOwner((boolean) parameters[0]);
         break;
-      case "setIsAlwaysVisible":
+      case setIsAlwaysVisible:
         setIsAlwaysVisible((boolean) parameters[0]);
         break;
-      case "setTokenOpacity":
+      case setTokenOpacity:
         setTokenOpacity((String) parameters[0]);
         break;
-      case "setTerrainModifier":
+      case setTerrainModifier:
         setTerrainModifier((double) parameters[0]);
         break;
-      case "setVBL":
+      case setVBL:
         setVBL((Area) parameters[0]);
         if (!hasVBL()) { // if VBL removed
           zone.tokenTopologyChanged(); // if token lost VBL, TOKEN_CHANGED won't update topology
         }
         break;
-      case "setImageAsset":
+      case setImageAsset:
         setImageAsset((String) parameters[0], (MD5Key) parameters[1]);
         break;
-      case "setPortraitImage":
+      case setPortraitImage:
         setPortraitImage((MD5Key) parameters[0]);
         break;
-      case "setCharsheetImage":
+      case setCharsheetImage:
         setCharsheetImage((MD5Key) parameters[0]);
         break;
-      case "clearLightSources":
+      case clearLightSources:
         if (hasLightSources()) lightChanged = true;
         clearLightSources();
         break;
-      case "removeLightSource":
+      case removeLightSource:
         if (hasLightSources()) lightChanged = true;
         removeLightSource((LightSource) parameters[0]);
         break;
-      case "addLightSource":
+      case addLightSource:
         lightChanged = true;
         addLightSource((LightSource) parameters[0], (Direction) parameters[1]);
         break;
-      case "setHasSight":
+      case setHasSight:
         if (hasLightSources()) lightChanged = true;
         setHasSight((boolean) parameters[0]);
         break;
-      case "setSightType":
+      case setSightType:
         if (hasLightSources()) lightChanged = true;
         setSightType((String) parameters[0]);
         break;
