@@ -37,7 +37,7 @@ public class Asset {
   private MD5Key id;
   private String name;
   private String extension;
-  private String type;
+  private String type = "image";
 
   @XStreamConverter(AssetImageConverter.class)
   private byte[] image;
@@ -125,12 +125,12 @@ public class Asset {
    */
   public JSONObject getProperties() {
     JSONObject properties = new JSONObject();
-    properties.put("type", "image");
+    properties.put("type", type);
     properties.put("subtype", extension);
     properties.put("id", id.toString());
     properties.put("name", name);
 
-    Image img = ImageManager.getImage(id);
+    Image img = ImageManager.getImageAndWait(id); // wait until loaded, so width/height are correct
     String status = "loaded";
     if (img == ImageManager.BROKEN_IMAGE) {
       status = "broken";
