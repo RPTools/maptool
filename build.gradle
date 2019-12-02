@@ -192,7 +192,7 @@ dependencies {
     implementation 'jide-properties:jide-properties:3.2.3'
     implementation 'jide-shortcut:jide-shortcut:3.2.3'
 
-    implementation 'org.eclipse.jetty:jetty-server:9.3.0.M0'
+    implementation 'org.eclipse.jetty:jetty-server:10.0.0.alpha1'
     implementation 'org.eclipse.jetty:jetty-servlet:9.3.0.M0'
     implementation 'org.eclipse.jetty:jetty-webapp:9.3.0.M0'
     implementation 'org.eclipse.jetty:jetty-continuation:9.3.0.M1'
