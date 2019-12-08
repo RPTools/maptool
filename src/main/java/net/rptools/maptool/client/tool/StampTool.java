@@ -51,6 +51,7 @@ import javax.swing.SwingUtilities;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -1205,18 +1206,19 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         Stroke stroke = g.getStroke();
         g.setStroke(new BasicStroke(2));
 
-        Composite composite = g.getComposite();
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .25f));
-        g.setPaint(AppStyle.selectionBoxFill);
-        g.fillRoundRect(
-            selectionBoundBox.x,
-            selectionBoundBox.y,
-            selectionBoundBox.width,
-            selectionBoundBox.height,
-            10,
-            10);
-        g.setComposite(composite);
-
+        if (AppPreferences.getFillSelectionBox()) {
+          Composite composite = g.getComposite();
+          g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .25f));
+          g.setPaint(AppStyle.selectionBoxFill);
+          g.fillRoundRect(
+              selectionBoundBox.x,
+              selectionBoundBox.y,
+              selectionBoundBox.width,
+              selectionBoundBox.height,
+              10,
+              10);
+          g.setComposite(composite);
+        }
         g.setColor(AppStyle.selectionBoxOutline);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.drawRoundRect(
