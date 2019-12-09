@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.sf.json.JSONObject;
 
@@ -214,12 +213,6 @@ public class ServerPolicy {
     sinfo.put("gm", MapTool.getGMs());
     sinfo.put("hosting server", MapTool.isHostingServer() ? BigDecimal.ONE : BigDecimal.ZERO);
 
-    InitiativePanel ip = MapTool.getFrame().getInitiativePanel();
-    if (ip != null) {
-      sinfo.put(
-          "initiative owner permissions",
-          ip.isOwnerPermissions() ? BigDecimal.ONE : BigDecimal.ZERO);
-    }
     return JSONObject.fromObject(sinfo);
   }
 }
