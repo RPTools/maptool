@@ -35,6 +35,7 @@ Bug Fixes
 - [#333][i333] Startup tab in Preferences was missing tooltips for several items.  Tooltips added.  Tooltips on that tab are now localized.
 - [#197][i197] Hitting the `esc` key while in the chat window would close chat window.  No longer does this.
 
+
 [i952]: https://github.com/RPTools/maptool/issues/952
 [i949]: https://github.com/RPTools/maptool/issues/949
 [i945]: https://github.com/RPTools/maptool/issues/945
