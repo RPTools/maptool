@@ -13,8 +13,8 @@ Maptool 1.5.8
 Enhancements
 -----
 - [#949][i949] New macro function `getAssetProperties()` returns the properties of assets including size and type.
-- [#938][i938] Map name parameter added to Token Location functions. All Token Location functions now report correctly when invalid number of parameters are given.
- - getTokenX, getTokenY, getTokenDrawOrder, setTokenDrawOrder
+- [#938][i938] Map name parameter added to Token Location functions. All Token Location functions now report correctly when invalid number of parameters are given.  
+  - Map name parameter added to: `getTokenX()`, `getTokenY()`, `getTokenDrawOrder()`, `setTokenDrawOrder()`
 - [#901][i901] Default stack size increased to 8MB.  See Preferences -> Startup
 - [#898][i898] Macro functions `getOwned()` and `getOwnedNames` now take optional map name parameter.
 - [#897][i897] Toolbar ribbon now has a hide/show gadget.
@@ -34,6 +34,7 @@ Bug Fixes
 - [#595][i595] Changing maps while a token move was in process could leave the move path stuck on map and token unable to move.  Fixed.
 - [#333][i333] Startup tab in Preferences was missing tooltips for several items.  Tooltips added.  Tooltips on that tab are now localized.
 - [#197][i197] Hitting the `esc` key while in the chat window would close chat window.  No longer does this.
+
 
 [i952]: https://github.com/RPTools/maptool/issues/952
 [i949]: https://github.com/RPTools/maptool/issues/949
