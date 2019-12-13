@@ -72,6 +72,25 @@ public class AppSetup {
     }
   }
 
+  public static void installDefaultUIThemes() {
+    Reflections reflections =
+        new Reflections(AppConstants.DEFAULT_UI_THEMES, new ResourcesScanner());
+    Set<String> resourcePathSet = reflections.getResources(Pattern.compile(".*\\.theme"));
+
+    for (String resourcePath : resourcePathSet) {
+      URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
+      String resourceName = resourcePath.substring(AppConstants.DEFAULT_UI_THEMES.length());
+      File resourceFile = new File(AppConstants.UI_THEMES_DIR, resourceName);
+
+      try {
+        log.info("Installing ui theme: " + resourceFile);
+        FileUtils.copyURLToFile(inputUrl, resourceFile);
+      } catch (IOException e) {
+        log.error("ERROR copying " + inputUrl + " to " + resourceFile, e);
+      }
+    }
+  }
+
   /**
    * Overwrites any existing README file in the ~/.maptool/resource directory with the one from the
    * current MapTool JAR file. This way any updates to the README will eventually be seen by the

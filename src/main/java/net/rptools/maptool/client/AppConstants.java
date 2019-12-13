@@ -31,6 +31,10 @@ public class AppConstants {
   public static final String DEFAULT_MACRO_THEMES = "net/rptools/maptool/client/ui/syntax/themes/";
   public static final File THEMES_DIR = AppUtil.getAppHome("themes/syntax/");
 
+  public static final String DEFAULT_UI_THEMES = "net/rptools/maptool/client/ui/themes";
+
+  public static final File UI_THEMES_DIR = AppUtil.getAppHome("themes/ui");
+
   public static final ImageBorder GRAY_BORDER =
       new ImageBorder("net/rptools/maptool/client/image/border/gray");
   public static final ImageBorder SHADOW_BORDER =

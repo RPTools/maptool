@@ -19,7 +19,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
+import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
@@ -41,6 +48,7 @@ public class AppUtil {
   public static final String DEFAULT_DATADIR_NAME = ".maptool";
   public static final String DATADIR_PROPERTY_NAME = "MAPTOOL_DATADIR";
 
+
   private static File dataDirPath;
 
   private static final String CLIENT_ID_FILE = "client-id";
@@ -52,6 +60,8 @@ public class AppUtil {
   /** Returns true if currently running on a Mac OS X based operating system. */
   public static boolean MAC_OS_X =
       (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
+
+  public static final String LOOK_AND_FEEL_NAME = MAC_OS_X ? "net.rptools.maptool.client.TinyLookAndFeelMac" : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
 
   /**
    * Returns a File object for USER_HOME if USER_HOME is non-null, otherwise null.
@@ -254,5 +264,43 @@ public class AppUtil {
       }
     }
     return clientId;
+  }
+
+  public static Map<String, File> getUIThemeNames() {
+    // Make sure themes are installed
+    AppSetup.installDefaultUIThemes();
+
+
+    Path themesDir = AppConstants.UI_THEMES_DIR.toPath();
+
+    Map<String, File> themes = new TreeMap<>();
+    try (Stream<Path> walk = Files.walk(themesDir)) {
+      Set<Path> result = walk
+          .filter(f -> f.getFileName().toString().endsWith(".theme"))
+          .collect(Collectors.toSet());
+
+      for (Path path : result) {
+        String name = path.getFileName().toString().replaceFirst("\\.theme$", "").replaceAll("_", " ");
+        themes.put(name, path.toFile());
+      }
+    } catch (IOException e) {
+      log.error("msg.error.unableToGetThemeList", e);
+    }
+
+    return themes;
+  }
+
+  public static void setThemeName(String themeName) {
+    Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
+    prefs.put("themeName", themeName);
+  }
+
+  public static  String getThemeName() {
+    Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
+    return prefs.get("themeName", "");
+  }
+
+  public static File getThemeFile(String themeName) {
+    return getUIThemeNames().get(themeName);
   }
 }

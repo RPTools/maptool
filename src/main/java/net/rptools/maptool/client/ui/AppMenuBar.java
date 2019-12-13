@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.image.ImageUtil;
@@ -37,6 +39,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
+import de.muntjak.tinylookandfeel.Theme;
 
 public class AppMenuBar extends JMenuBar {
   private static MRUCampaignManager mruManager;
@@ -48,6 +51,10 @@ public class AppMenuBar extends JMenuBar {
     add(createViewMenu());
     add(createToolsMenu());
     add(createWindowMenu());
+    Map<String, File> themes = AppUtil.getUIThemeNames();
+    if (themes.size() > 0) {
+      add(createThemesMenu(themes));
+    }
     add(createHelpMenu());
     // shift to the right
     add(Box.createGlue());
@@ -59,6 +66,7 @@ public class AppMenuBar extends JMenuBar {
             I18N.getText("tools.hidetoolbar.tooltip"),
             I18N.getText("tools.unhidetoolbar.tooltip")));
   }
+
 
   // This is a hack to allow the menubar shortcut keys to still work even
   // when it isn't showing (fullscreen mode)
@@ -414,6 +422,26 @@ public class AppMenuBar extends JMenuBar {
     menu.addSeparator();
     menu.add(new JMenuItem(AppActions.SHOW_TRANSFER_WINDOW));
 
+    return menu;
+  }
+
+  private JMenu createThemesMenu(Map<String, File> themes) {
+    JMenu menu = I18N.createMenu("menu.themes");
+
+    for (Entry<String, File> theme : themes.entrySet()) {
+      menu.add(
+          new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              AppUtil.setThemeName(theme.getKey());
+            }
+
+            {
+              putValue(Action.NAME, theme.getKey());
+            }
+          }
+      );
+  }
     return menu;
   }
 
