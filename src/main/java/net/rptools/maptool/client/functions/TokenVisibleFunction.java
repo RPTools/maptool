@@ -97,7 +97,7 @@ public class TokenVisibleFunction extends AbstractFunction {
         set = Boolean.parseBoolean(val.toString());
       }
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setVisible", set);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVisible, set);
   }
 
   public static void setOwnerOnlyVisible(Token token, Object val) throws ParserException {
@@ -117,7 +117,7 @@ public class TokenVisibleFunction extends AbstractFunction {
         set = Boolean.parseBoolean(val.toString());
       }
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setVisibleOnlyToOwner", set);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setVisibleOnlyToOwner, set);
   }
 
   @Override
@@ -304,7 +304,7 @@ public class TokenVisibleFunction extends AbstractFunction {
         set = Boolean.parseBoolean(val.toString());
       }
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setIsAlwaysVisible", set);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setIsAlwaysVisible, set);
   }
 
   /**
@@ -316,11 +316,10 @@ public class TokenVisibleFunction extends AbstractFunction {
    * @throws ParserException if an error occurs.
    */
   private static Object setAlwaysVisible(Parser parser, List<Object> args) throws ParserException {
-    MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
     FunctionUtil.checkNumberParam("setAlwaysVisible", args, 1, 3);
 
     Object val = args.get(0);
-    Token token = FunctionUtil.getTokenFromParam(res, "setAlwaysVisible", args, 1, 2);
+    Token token = FunctionUtil.getTokenFromParam(parser, "setAlwaysVisible", args, 1, 2);
 
     setAlwaysVisible(token, val);
     return val;

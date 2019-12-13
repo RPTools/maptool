@@ -298,7 +298,7 @@ public class InitiativePanel extends JPanel
     list.clearModel();
   }
 
-  /** Make sure that the token references match the zone */
+  /** Update list containing tokens in initiative. Make sure the token references match the zone. */
   public void update() {
     list.update();
   }

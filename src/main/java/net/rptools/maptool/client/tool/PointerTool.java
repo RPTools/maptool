@@ -242,6 +242,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     isDraggingToken = true;
   }
 
+  /** Complete the drag of the token, and expose FOW */
   public void stopTokenDrag() {
     renderer.commitMoveSelectionSet(tokenBeingDragged.getId()); // TODO: figure out a better way
     isDraggingToken = false;
@@ -253,6 +254,11 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     exposeFoW(null);
   }
 
+  /**
+   * Expose the FoW at a ZonePoint, or at the visible area, for the selected token
+   *
+   * @param p the ZonePoint to expose, or a null if exposing visible area and last path
+   */
   public void exposeFoW(ZonePoint p) {
     // if has fog(required)
     // and ((isGM with pref set) OR serverPolicy allows auto reveal by players)
@@ -1294,8 +1300,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
             // Only let the GM's do this
             if (MapTool.getPlayer().isGM()) {
               FogUtil.exposePCArea(renderer);
-              // Jamz: This doesn't seem to be needed
-              // MapTool.serverCommand().exposePCArea(renderer.getZone().getId());
             }
           }
         });

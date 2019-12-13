@@ -246,14 +246,14 @@ public class ClientMethodHandler extends AbstractMethodHandler {
                 MapTool.getFrame().refresh();
                 return;
 
-              case updateTokenProperty: // select token from sent zoneGUID & tokenGUID, then call
-                // Token.updateProperty()
+              case updateTokenProperty: // get token and update its property
                 zoneGUID = (GUID) parameters[0];
                 zone = MapTool.getCampaign().getZone(zoneGUID);
                 tokenGUID = (GUID) parameters[1];
                 token = zone.getToken(tokenGUID);
                 if (token != null) {
-                  token.updateProperty(zone, parameters[2].toString(), (Object[]) parameters[3]);
+                  Token.Update update = (Token.Update) parameters[2];
+                  token.updateProperty(zone, update, (Object[]) parameters[3]);
                 }
                 return;
 
@@ -644,7 +644,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               case clearExposedArea:
                 zoneGUID = (GUID) parameters[0];
                 zone = MapTool.getCampaign().getZone(zoneGUID);
-                zone.clearExposedArea();
+                zone.clearExposedArea((boolean) parameters[1]);
                 return;
 
               case updateExposedAreaMeta:

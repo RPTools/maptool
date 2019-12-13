@@ -102,9 +102,58 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
+  /** Type of character: PC or NPC. */
   public enum Type {
     PC,
     NPC
+  }
+
+  /** Type of update for the token. */
+  public enum Update {
+    setState,
+    setAllStates,
+    setPropertyType,
+    setPC,
+    setNPC,
+    setLayer,
+    setLayerShape,
+    setShape,
+    setSnapToScale,
+    setSnapToGrid,
+    setFootprint,
+    setProperty,
+    resetProperty,
+    setZOrder,
+    setFacing,
+    clearAllOwners,
+    setOwnedByAll,
+    addOwner,
+    setScaleX,
+    setScaleY,
+    setScaleXY,
+    setNotes,
+    setGMNotes,
+    setX,
+    setY,
+    setXY,
+    setHaloColor,
+    setLabel,
+    setName,
+    setGMName,
+    setVisible,
+    setVisibleOnlyToOwner,
+    setIsAlwaysVisible,
+    setTokenOpacity,
+    setTerrainModifier,
+    setVBL,
+    setImageAsset,
+    setPortraitImage,
+    setCharsheetImage,
+    clearLightSources,
+    removeLightSource,
+    addLightSource,
+    setHasSight,
+    setSightType
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -245,6 +294,24 @@ public class Token extends BaseModel implements Cloneable {
 
   private HeroLabData heroLabData;
 
+  /**
+   * Constructor from another token, with the option to keep the token id
+   *
+   * @param token the token to copy
+   * @param keepId should the Id be kept
+   */
+  public Token(Token token, boolean keepId) {
+    this(token);
+    if (keepId) {
+      this.setId(token.getId());
+    }
+  }
+
+  /**
+   * Constructor from another token. The token id is not kept.
+   *
+   * @param token the token to copy
+   */
   public Token(Token token) {
     this(token.name, token.getImageAssetId());
     currentImageAsset = token.currentImageAsset;
@@ -324,8 +391,12 @@ public class Token extends BaseModel implements Cloneable {
       getPropertyMap().clear();
       getPropertyMap().putAll(token.propertyMapCI);
     }
-    if (token.macroPropertiesMap != null) {
-      macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap);
+    if (token.macroPropertiesMap != null) { // Deep copy of the macros
+      macroPropertiesMap = new HashMap<Integer, Object>(token.macroPropertiesMap.size());
+      token.macroPropertiesMap.forEach(
+          (key, value) ->
+              macroPropertiesMap.put(
+                  key, new MacroButtonProperties(this, key, (MacroButtonProperties) value, false)));
     }
     // convert old-style macros
     if (token.macroMap != null) {
@@ -798,15 +869,13 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
-  // My Addition
+  /** Clear the lightSourceList */
   public void clearLightSources() {
     if (lightSourceList == null) {
       return;
     }
     lightSourceList = null;
   }
-
-  // End My Addition
 
   public boolean hasLightSource(LightSource source) {
     if (lightSourceList == null) {
@@ -823,6 +892,7 @@ public class Token extends BaseModel implements Cloneable {
     return false;
   }
 
+  /** Return false if lightSourceList is null or empty, and true otherwise */
   public boolean hasLightSources() {
     return lightSourceList != null && !lightSourceList.isEmpty();
   }
@@ -841,6 +911,7 @@ public class Token extends BaseModel implements Cloneable {
     ownerList.add(playerId);
   }
 
+  /** @return true if the token is owned by all or has explicit owners. */
   public synchronized boolean hasOwners() {
     return ownerType == OWNER_TYPE_ALL || (ownerList != null && !ownerList.isEmpty());
   }
@@ -937,8 +1008,18 @@ public class Token extends BaseModel implements Cloneable {
     return assetId;
   }
 
+  /**
+   * Store the token image, and set the native Width and Height.
+   *
+   * @param name the name of the image.
+   * @param assetId the asset MD5Key.
+   */
   public void setImageAsset(String name, MD5Key assetId) {
     imageAssetMap.put(name, assetId);
+
+    BufferedImage image = ImageManager.getImageAndWait(assetId);
+    setWidth(image.getWidth(null));
+    setHeight(image.getHeight(null));
   }
 
   public void setImageAsset(String name) {
@@ -1099,6 +1180,7 @@ public class Token extends BaseModel implements Cloneable {
     this.isVisible = visible;
   }
 
+  /** @return isVisible */
   public boolean isVisible() {
     return isVisible;
   }
@@ -1138,11 +1220,17 @@ public class Token extends BaseModel implements Cloneable {
     return vblAlphaSensitivity;
   }
 
+  /**
+   * Set the VBL of the token. If vbl null, set vblAplphaSensitivity to -1.
+   *
+   * @param vbl the VBL to set.
+   */
   public void setVBL(Area vbl) {
     this.vbl = vbl;
     if (vbl == null) vblAlphaSensitivity = -1;
   }
 
+  /** Return the vbl area of the token */
   public Area getVBL() {
     return vbl;
   }
@@ -1238,9 +1326,13 @@ public class Token extends BaseModel implements Cloneable {
     return new Area(atArea.createTransformedShape(areaToTransform));
   }
 
+  /**
+   * Return the existence of the token's VBL
+   *
+   * @return rue if the token's vbl is null, and false otherwise
+   */
   public boolean hasVBL() {
-    if (vbl != null) return true;
-    else return false;
+    return vbl != null;
   }
 
   public void setIsAlwaysVisible(boolean isAlwaysVisible) {
@@ -1299,6 +1391,7 @@ public class Token extends BaseModel implements Cloneable {
     return footprintBounds;
   }
 
+  /** @return the String of the sightType */
   public String getSightType() {
     return sightType;
   }
@@ -1865,26 +1958,6 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   /**
-   * Set the initiatives of the token
-   *
-   * @param value the new value of the initiatives
-   */
-  public void setInitiative(String value) {
-    List<InitiativeList.TokenInitiative> tis = getInitiatives();
-    for (InitiativeList.TokenInitiative ti : tis) ti.setState(value);
-  }
-
-  /**
-   * Set the hold on token initiative
-   *
-   * @param set the boolean value for the hold
-   */
-  public void setInitiativeHold(boolean set) {
-    List<InitiativeList.TokenInitiative> tis = getInitiatives();
-    for (InitiativeList.TokenInitiative ti : tis) ti.setHolding(set);
-  }
-
-  /**
    * Get the list of initiatives for the token
    *
    * @return The List of initiative
@@ -1894,10 +1967,8 @@ public class Token extends BaseModel implements Cloneable {
     Zone zone = getZoneRenderer().getZone();
     List<Integer> list = zone.getInitiativeList().indexOf(this);
     if (list.isEmpty()) return Collections.EMPTY_LIST;
-    List<InitiativeList.TokenInitiative> ret =
-        new ArrayList<InitiativeList.TokenInitiative>(list.size());
-    for (Integer index : list)
-      ret.add(zone.getInitiativeList().getTokenInitiative(index.intValue()));
+    List<InitiativeList.TokenInitiative> ret = new ArrayList<>(list.size());
+    for (Integer index : list) ret.add(zone.getInitiativeList().getTokenInitiative(index));
     return ret;
   }
 
@@ -1910,7 +1981,7 @@ public class Token extends BaseModel implements Cloneable {
     Zone zone = getZoneRenderer().getZone();
     List<Integer> list = zone.getInitiativeList().indexOf(this);
     if (list.isEmpty()) return null;
-    return zone.getInitiativeList().getTokenInitiative(list.get(0).intValue());
+    return zone.getInitiativeList().getTokenInitiative(list.get(0));
   }
 
   public static boolean isTokenFile(String filename) {
@@ -2047,167 +2118,167 @@ public class Token extends BaseModel implements Cloneable {
    * Call the relevant setter from methodName with an array of parameters Called by
    * ClientMethodHandler to deal with sent change to token
    *
-   * @param methodName The method to be used
+   * @param update The method to be used
    * @param zone The zone where the token is
    * @param parameters An array of parameters
    */
-  public void updateProperty(Zone zone, String methodName, Object[] parameters) {
-    switch (methodName) {
-      case "setState":
+  public void updateProperty(Zone zone, Update update, Object[] parameters) {
+    boolean lightChanged = false;
+    switch (update) {
+      case setState:
         setState(parameters[0].toString(), parameters[1]);
         break;
-      case "setAllStates":
+      case setAllStates:
         setAllStates(parameters[0]);
         break;
-      case "setPropertyType":
+      case setPropertyType:
         setPropertyType(parameters[0].toString());
         break;
-      case "setPC":
+      case setPC:
         setType(Type.PC);
         break;
-      case "setNPC":
+      case setNPC:
         setType(Type.NPC);
         break;
-      case "setLayer":
+      case setLayer:
         setLayer((Zone.Layer) parameters[0]);
         break;
-      case "setLayerShape":
+      case setLayerShape:
         setLayer((Zone.Layer) parameters[0]);
         setShape((TokenShape) parameters[1]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "setShape":
+      case setShape:
         setShape((TokenShape) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "setSnapToScale":
+      case setSnapToScale:
         setSnapToScale((Boolean) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "setSnapToGrid":
+      case setSnapToGrid:
         setSnapToGrid((Boolean) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "setFootprint":
+      case setFootprint:
+        setSnapToScale(true);
         setFootprint((Grid) parameters[0], (TokenFootprint) parameters[1]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "setProperty":
+      case setProperty:
         setProperty(parameters[0].toString(), parameters[1].toString());
         break;
-      case "resetProperty":
+      case resetProperty:
         resetProperty(parameters[0].toString());
         break;
-      case "setZOrder":
+      case setZOrder:
         setZOrder((int) parameters[0]);
         zone.sortZOrder(); // update new ZOrder
         break;
-      case "setFacing":
+      case setFacing:
+        if (hasLightSources()) lightChanged = true;
         setFacing((Integer) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "clearAllOwners":
+      case clearAllOwners:
         clearAllOwners();
         break;
-      case "setOwnedByAll":
+      case setOwnedByAll:
         setOwnedByAll((Boolean) parameters[0]);
         break;
-      case "addOwner":
+      case addOwner:
         addOwner(parameters[0].toString());
         break;
-      case "setScaleX":
+      case setScaleX:
+        setSnapToScale(false);
         setScaleX((double) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "setScaleY":
+      case setScaleY:
+        setSnapToScale(false);
         setScaleY((double) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "setScaleXY":
+      case setScaleXY:
+        setSnapToScale(false);
         setScaleX((double) parameters[0]);
         setScaleY((double) parameters[1]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "setNotes":
+      case setNotes:
         setNotes(parameters[0].toString());
         break;
-      case "setGMNotes":
+      case setGMNotes:
         setGMNotes(parameters[0].toString());
         break;
-      case "setInitiative":
-        setInitiative((String) parameters[0]);
-        break;
-      case "setInitiativeHold":
-        setInitiativeHold((boolean) parameters[0]);
-        break;
-      case "setX":
+      case setX:
+        if (hasLightSources()) lightChanged = true;
         setX((int) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "setY":
+      case setY:
+        if (hasLightSources()) lightChanged = true;
         setY((int) parameters[0]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "setXY":
+      case setXY:
+        if (hasLightSources()) lightChanged = true;
         setX((int) parameters[0]);
         setY((int) parameters[1]);
-        if (hasVBL()) zone.tokenTopologyChanged(); // update VBL if token has any
         break;
-      case "setHaloColor":
+      case setHaloColor:
         setHaloColor((Color) parameters[0]);
         break;
-      case "setLabel":
+      case setLabel:
         setLabel((String) parameters[0]);
         break;
-      case "setName":
+      case setName:
         setName((String) parameters[0]);
         break;
-      case "setGMName":
+      case setGMName:
         setGMName((String) parameters[0]);
         break;
-      case "setVisible":
+      case setVisible:
         setVisible((boolean) parameters[0]);
         break;
-      case "setVisibleOnlyToOwner":
+      case setVisibleOnlyToOwner:
         setVisibleOnlyToOwner((boolean) parameters[0]);
         break;
-      case "setIsAlwaysVisible":
+      case setIsAlwaysVisible:
         setIsAlwaysVisible((boolean) parameters[0]);
         break;
-      case "setTokenOpacity":
+      case setTokenOpacity:
         setTokenOpacity((String) parameters[0]);
         break;
-      case "setTerrainModifier":
+      case setTerrainModifier:
         setTerrainModifier((double) parameters[0]);
         break;
-      case "setVBL":
+      case setVBL:
         setVBL((Area) parameters[0]);
+        if (!hasVBL()) { // if VBL removed
+          zone.tokenTopologyChanged(); // if token lost VBL, TOKEN_CHANGED won't update topology
+        }
         break;
-      case "setImageAsset":
+      case setImageAsset:
         setImageAsset((String) parameters[0], (MD5Key) parameters[1]);
         break;
-      case "setPortraitImage":
+      case setPortraitImage:
         setPortraitImage((MD5Key) parameters[0]);
         break;
-      case "setCharsheetImage":
+      case setCharsheetImage:
         setCharsheetImage((MD5Key) parameters[0]);
         break;
-      case "clearLightSources":
+      case clearLightSources:
+        if (hasLightSources()) lightChanged = true;
         clearLightSources();
         break;
-      case "removeLightSource":
+      case removeLightSource:
+        if (hasLightSources()) lightChanged = true;
         removeLightSource((LightSource) parameters[0]);
         break;
-      case "addLightSource":
+      case addLightSource:
+        lightChanged = true;
         addLightSource((LightSource) parameters[0], (Direction) parameters[1]);
         break;
-      case "setHasSight":
+      case setHasSight:
+        if (hasLightSources()) lightChanged = true;
         setHasSight((boolean) parameters[0]);
         break;
-      case "setSightType":
+      case setSightType:
+        if (hasLightSources()) lightChanged = true;
         setSightType((String) parameters[0]);
         break;
     }
-    zone.tokenChanged(this); // fireModelChangeEvent Event.TOKEN_CHANGED
+    if (lightChanged) getZoneRenderer().flushLight(); // flush lights if it changed
+    zone.tokenChanged(this); // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
   }
 }
