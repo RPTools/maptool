@@ -162,8 +162,12 @@ public class ZoneRenderer extends JComponent
 
   public static final int MIN_GRID_SIZE = 10;
   private static LightSourceIconOverlay lightSourceIconOverlay = new LightSourceIconOverlay();
-  protected Zone zone;
+  /** The zone the ZoneRenderer was built from. */
+  protected final Zone zone;
+
+  /** The ZoneView constructed from the zone. */
   private final ZoneView zoneView;
+
   private Scale zoneScale;
   private final DrawableRenderer backgroundDrawableRenderer = new PartitionedDrawableRenderer();
   private final DrawableRenderer objectDrawableRenderer = new PartitionedDrawableRenderer();
@@ -199,10 +203,15 @@ public class ZoneRenderer extends JComponent
   private String loadingProgress;
   private boolean isLoaded;
   private BufferedImage fogBuffer;
-  // I don't like this, at all, but it'll work for now, basically keep track of when the fog cache
-  // needs to be flushed in the case of switching views
+  /**
+   * I don't like this, at all, but it'll work for now, basically keep track of when the fog cache
+   * needs to be flushed in the case of switching views
+   */
   private boolean flushFog = true;
-  private Area exposedFogArea; // In screen space
+
+  /** In screen space */
+  private Area exposedFogArea;
+
   private BufferedImage miniImage;
   private BufferedImage backbuffer;
   private boolean drawBackground = true;
@@ -217,19 +226,25 @@ public class ZoneRenderer extends JComponent
 
   private boolean autoResizeStamp = false;
 
-  // Show blocked grid lines during AStar moving, for debugging...
+  /** Show blocked grid lines during AStar moving, for debugging... */
   private boolean showAstarDebugging = false;
 
-  // Store previous view to restore to, eg after GM shows ctrl+shift+space pointer
+  /** Store previous view to restore to, eg after GM shows ctrl+shift+space pointer */
   private double previousScale;
+
   private ZonePoint previousZonePoint;
 
-  public static enum TokenMoveCompletion {
+  public enum TokenMoveCompletion {
     TRUE,
     FALSE,
     OTHER
   }
 
+  /**
+   * Constructor for the ZoneRenderer from a zone.
+   *
+   * @param zone the zone of the ZoneRenderer
+   */
   public ZoneRenderer(Zone zone) {
     if (zone == null) {
       throw new IllegalArgumentException("Zone cannot be null");
@@ -445,6 +460,11 @@ public class ZoneRenderer extends JComponent
     repaintDebouncer.dispatch();
   }
 
+  /**
+   * Commit the move of the token selected
+   *
+   * @param keyTokenId the token ID of the key token
+   */
   public void commitMoveSelectionSet(GUID keyTokenId) {
     // TODO: Quick hack to handle updating server state
     SelectionSet set = selectionSetMap.get(keyTokenId);
@@ -608,7 +628,11 @@ public class ZoneRenderer extends JComponent
     if (vblTokenMoved) zone.tokenTopologyChanged();
   }
 
-  /** @param token */
+  /**
+   * Undo the last movement.
+   *
+   * @param token the token for which we undo the movement
+   */
   private void denyMovement(final Token token) {
     Path<?> path = token.getLastPath();
     if (path != null) {
@@ -663,6 +687,13 @@ public class ZoneRenderer extends JComponent
     centerOn(zone.getGrid().convert(point));
   }
 
+  /**
+   * Remove the token from: tokenLocationCache, flipImageMap, opacityImageMap, replacementImageMap,
+   * labelRenderingCache. Set the visibleScreenArea, tokenStackMap, renderedLightMap, rendered Aura
+   * map to null. Flush the fog. Flush the token from the zoneView.
+   *
+   * @param token the token to flush
+   */
   public void flush(Token token) {
     // This method can be called from a non-EDT thread so if that happens, make sure
     // we synchronize with the EDT.
@@ -688,6 +719,7 @@ public class ZoneRenderer extends JComponent
     zoneView.flush(token);
   }
 
+  /** @return the ZoneView */
   public ZoneView getZoneView() {
     return zoneView;
   }
@@ -715,6 +747,7 @@ public class ZoneRenderer extends JComponent
     isLoaded = false;
   }
 
+  /** Set the rendererLightMap and renderedAuraMap to null, flush the zoneView, and repaint. */
   public void flushLight() {
     renderedLightMap = null;
     renderedAuraMap = null;
@@ -722,12 +755,14 @@ public class ZoneRenderer extends JComponent
     repaintDebouncer.dispatch();
   }
 
+  /** Set flushFog to true, visibleScreenArea to null, and repaints */
   public void flushFog() {
     flushFog = true;
     visibleScreenArea = null;
     repaintDebouncer.dispatch();
   }
 
+  /** @return the Zone */
   public Zone getZone() {
     return zone;
   }
@@ -864,8 +899,8 @@ public class ZoneRenderer extends JComponent
    * The returned {@link PlayerView} contains a list of tokens that includes all selected tokens
    * that this player owns and that have their <code>HasSight</code> checkbox enabled.
    *
-   * @param role
-   * @return
+   * @param role the player role
+   * @return the player view
    */
   public PlayerView getPlayerView(Player.Role role) {
     List<Token> selectedTokens = null;
@@ -899,6 +934,7 @@ public class ZoneRenderer extends JComponent
    * created by copying renderZone() and then replacing each bit of rendering with a routine to
    * simply aggregate the extents of the object that would have been rendered.
    *
+   * @param view the player view
    * @return a new Rectangle with the bounding box of all the elements in the Zone
    */
   public Rectangle zoneExtents(PlayerView view) {
@@ -1385,8 +1421,16 @@ public class ZoneRenderer extends JComponent
     return timer;
   }
 
+  /** Map of the lights from drawableLightCache that have been combined. */
   private Map<Paint, List<Area>> renderedLightMap;
 
+  /**
+   * Render the lights. Get the lights from drawableLightCache, combine them, put them in
+   * renderedLightMap, and draw them.
+   *
+   * @param g the graphic 2D object
+   * @param view the player view
+   */
   private void renderLights(Graphics2D g, PlayerView view) {
     // Setup
     timer.start("lights-1");
@@ -1430,7 +1474,7 @@ public class ZoneRenderer extends JComponent
           // I'm not a huge fan of this hard wiring, but I haven't thought of a better way yet, so
           // this'll
           // work fine for now
-          otherLightList.add(light);
+          otherLightList.add(light); // not used for anything?!
         }
       }
       timer.stop("lights-3");
@@ -1488,8 +1532,16 @@ public class ZoneRenderer extends JComponent
     newG.dispose();
   }
 
+  /** Holds the auras from lightSourceMap after they have been combined. */
   private Map<Paint, Area> renderedAuraMap;
 
+  /**
+   * Get the list of auras from lightSourceMap, combine them, store them in renderedAuraMap, and
+   * draw them.
+   *
+   * @param g the Graphics2D object.
+   * @param view the player view.
+   */
   private void renderAuras(Graphics2D g, PlayerView view) {
     // Setup
     timer.start("auras-1");
@@ -2738,7 +2790,7 @@ public class ZoneRenderer extends JComponent
    * Get a list of tokens currently visible on the screen. The list is ordered by location starting
    * in the top left and going to the bottom right.
    *
-   * @return
+   * @return the token list
    */
   public List<Token> getTokensOnScreen() {
     List<Token> list = new ArrayList<Token>();
@@ -3725,7 +3777,11 @@ public class ZoneRenderer extends JComponent
     HTMLFrameFactory.selectedListChanged();
   }
 
-  /** Screen space rectangle */
+  /**
+   * Screen space rectangle
+   *
+   * @param rect the selection rectangle
+   */
   public void selectTokens(Rectangle rect) {
     List<GUID> selectedList = new LinkedList<GUID>();
     for (TokenLocation location : getTokenLocations(getActiveLayer())) {
@@ -3878,9 +3934,9 @@ public class ZoneRenderer extends JComponent
    *
    * <p>TODO: Add a check so that tokens owned by the current player are given priority.
    *
-   * @param x
-   * @param y
-   * @return
+   * @param x screen location x
+   * @param y screen location y
+   * @return the token
    */
   public Token getTokenAt(int x, int y) {
     List<TokenLocation> locationList = new ArrayList<TokenLocation>();
@@ -3920,9 +3976,9 @@ public class ZoneRenderer extends JComponent
    * Returns the label at screen location x, y (not cell location). To get the token at a cell
    * location, use getGameMap() and use that.
    *
-   * @param x
-   * @param y
-   * @return
+   * @param x the screen location x
+   * @param y the screen location y
+   * @return the Label
    */
   public Label getLabelAt(int x, int y) {
     List<LabelLocation> labelList = new ArrayList<LabelLocation>();
@@ -4098,8 +4154,9 @@ public class ZoneRenderer extends JComponent
     private ZoneWalker walker;
     private final Token token;
     private Path<ZonePoint> gridlessPath;
-    // Pixel distance from keyToken's origin
+    /** Pixel distance (x) from keyToken's origin. */
     private int offsetX;
+    /** Pixel distance (y) from keyToken's origin. */
     private int offsetY;
     // private boolean restrictMovement = true;
     private RenderPathWorker renderPathTask;
@@ -4126,7 +4183,7 @@ public class ZoneRenderer extends JComponent
       }
     }
 
-    // Lee: adding getter for path computation
+    /** @return path computation. */
     public Path<ZonePoint> getGridlessPath() {
       return gridlessPath;
     }
@@ -4212,6 +4269,8 @@ public class ZoneRenderer extends JComponent
     /**
      * Retrieves the last waypoint, or if there isn't one then the start point of the first path
      * segment.
+     *
+     * @return the ZonePoint.
      */
     public ZonePoint getLastWaypoint() {
       ZonePoint zp;
@@ -4515,7 +4574,7 @@ public class ZoneRenderer extends JComponent
    * Checks to see if token has an image table and references that if the token has a facing
    * otherwise uses basic image
    *
-   * @param token
+   * @param token the token to get the image from.
    * @return BufferedImage
    */
   private BufferedImage getTokenImage(Token token) {
@@ -4577,9 +4636,14 @@ public class ZoneRenderer extends JComponent
    */
   public void dropActionChanged(DropTargetDragEvent dtde) {}
 
-  //
-  // ZONE MODEL CHANGE LISTENER
+  /** ZONE MODEL CHANGE LISTENER */
   private class ZoneModelChangeListener implements ModelChangeListener {
+    /**
+     * ALL events trigger updateTokenTree and a repaint. Reacts specifically to events
+     * TOPOLOGY_CHANGED, TOKEN_CHANGED, TOKEN_REMOVED, and TOKEN_ADDED.
+     *
+     * @param event the event
+     */
     public void modelChanged(ModelChangeEvent event) {
       Object evt = event.getEvent();
 
@@ -4603,7 +4667,7 @@ public class ZoneRenderer extends JComponent
       if (evt == Zone.Event.FOG_CHANGED) {
         flushFog = true;
       }
-      MapTool.getFrame().updateTokenTree();
+      MapTool.getFrame().updateTokenTree(); // for any event
       repaintDebouncer.dispatch();
     }
   }
@@ -4650,6 +4714,9 @@ public class ZoneRenderer extends JComponent
    * applied as the mouse pointer so there is no visual effect. Hence it's currently commented out
    * by using an "if (false)" around the code block.
    *
+   * <p>Merudo: applied correctly now? TODO: replace false by proper condition.
+   *
+   * @param cursor the cursor to set.
    * @see java.awt.Component#setCursor(java.awt.Cursor)
    */
   @SuppressWarnings("unused")
@@ -4664,6 +4731,13 @@ public class ZoneRenderer extends JComponent
 
   private Cursor custom = null;
 
+  /**
+   * Create a custom cursor.
+   *
+   * @param resource the String corresponding to the buffered image.
+   * @param tokenName the name of the token, to be displayed by the cursor.
+   * @return the created cursor.
+   */
   public Cursor createCustomCursor(String resource, String tokenName) {
     Cursor c = null;
     try {

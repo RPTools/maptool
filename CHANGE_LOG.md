@@ -1,3 +1,61 @@
+Maptool 1.5.8
+=====
+
+**Highlights**
+- Macros on copied tokens having duplicate UUIDs problem fixed.
+- Toolbar/ribbon in MapTool can now be hidden to give you more screenspace.
+- Additional parameters and improvements to various macro functions.
+- New translation team members, Deniz Köse and Vitaly Karpenko have bumped our Russian translation up to 74%.
+- Fog of War exposure fixes.
+- Tooltips added to all menu items.
+- Bug fixes!
+
+Enhancements
+-----
+- [#949][i949] New macro function `getAssetProperties()` returns the properties of assets including size and type.
+- [#938][i938] Map name parameter added to Token Location functions. All Token Location functions now report correctly when invalid number of parameters are given.  
+  - Map name parameter added to: `getTokenX()`, `getTokenY()`, `getTokenDrawOrder()`, `setTokenDrawOrder()`
+- [#901][i901] Default stack size increased to 8MB.  See Preferences -> Startup
+- [#898][i898] Macro functions `getOwned()` and `getOwnedNames` now take optional map name parameter.
+- [#897][i897] Toolbar ribbon now has a hide/show gadget.
+- [#742][i742] Macro functions `getTokens()` and `getTokensNames()` have new `owned` `conditions` tag for getting tokens based on ownership.
+- [#154][i154] Tooltip for Shown Token Names menu option now includes description of what the colors mean.  Localized Tooltips added for all menu items.
+
+Bug Fixes
+-----
+- [#952][i952] Macro function `setTokenImage()` was not setting the token native height/width fields. Fixed.
+- [#945][i945] Image Chooser for selecting table images would throw an exception when clicked between images.  Fixed.
+- [#932][i932] Clients were not being updated if setTokenVBL was used to clear the VBL of a token.  Fixed.
+- [#912][i912] Initiative functions `addToInitiative()`, `setInitiative()`, and `setInitiativeHold()` were not reliable.  Fixed.
+- [#907][i907] Macros on copied tokens had same UUIDs as the parent token.  This is bad.  Fixed.
+- [#887][i887] When using Individual Views and Individual Fog of War, the server was not showing previously exposed areas after the server start.  Fixed.
+- [#792][i792] The various methods of exposing only the currently visible areas were not working correctly leaving previously exposed areas still exposed. Fixed.
+- [#762][i762] Autosave for campaign was not working correctly.  Fixed.
+- [#595][i595] Changing maps while a token move was in process could leave the move path stuck on map and token unable to move.  Fixed.
+- [#333][i333] Startup tab in Preferences was missing tooltips for several items.  Tooltips added.  Tooltips on that tab are now localized.
+- [#197][i197] Hitting the `esc` key while in the chat window would close chat window.  No longer does this.
+
+
+[i952]: https://github.com/RPTools/maptool/issues/952
+[i949]: https://github.com/RPTools/maptool/issues/949
+[i945]: https://github.com/RPTools/maptool/issues/945
+[i938]: https://github.com/RPTools/maptool/issues/938
+[i932]: https://github.com/RPTools/maptool/issues/932
+[i912]: https://github.com/RPTools/maptool/issues/912
+[i907]: https://github.com/RPTools/maptool/issues/907
+[i901]: https://github.com/RPTools/maptool/issues/901
+[i898]: https://github.com/RPTools/maptool/issues/898
+[i897]: https://github.com/RPTools/maptool/issues/897
+[i887]: https://github.com/RPTools/maptool/issues/887
+[i792]: https://github.com/RPTools/maptool/issues/792
+[i762]: https://github.com/RPTools/maptool/issues/762
+[i742]: https://github.com/RPTools/maptool/issues/742
+[i595]: https://github.com/RPTools/maptool/issues/595
+[i333]: https://github.com/RPTools/maptool/issues/333
+[i197]: https://github.com/RPTools/maptool/issues/197
+[i154]: https://github.com/RPTools/maptool/issues/154
+
+
 Maptool 1.5.7
 =====
 

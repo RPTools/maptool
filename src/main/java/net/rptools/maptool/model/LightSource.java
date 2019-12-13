@@ -93,6 +93,7 @@ public class LightSource implements Comparable<LightSource> {
     getLightList().remove(source);
   }
 
+  /** @return the lightList of the LightSource */
   public List<Light> getLightList() {
     if (lightList == null) {
       lightList = new LinkedList<Light>();

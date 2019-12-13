@@ -23,14 +23,28 @@ public class BaseModel {
   private transient List<ModelChangeListener> listenerList =
       new CopyOnWriteArrayList<ModelChangeListener>();
 
+  /**
+   * Add the listener to the listenerList.
+   *
+   * @param listener the ModelChangeListener to add.
+   */
   public void addModelChangeListener(ModelChangeListener listener) {
     listenerList.add(listener);
   }
-
+  /**
+   * Remove the listener from the listenerList.
+   *
+   * @param listener the ModelChangeListener to remove.
+   */
   public void removeModelChangeListener(ModelChangeListener listener) {
     listenerList.remove(listener);
   }
 
+  /**
+   * Send the event to each listener in listenerList
+   *
+   * @param event the event
+   */
   protected void fireModelChangeEvent(ModelChangeEvent event) {
 
     for (ModelChangeListener listener : listenerList) {
@@ -38,6 +52,11 @@ public class BaseModel {
     }
   }
 
+  /**
+   * Create a new listenerList, and returns this.
+   *
+   * @return this.
+   */
   protected Object readResolve() {
     listenerList = new CopyOnWriteArrayList<ModelChangeListener>();
     return this;

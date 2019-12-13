@@ -240,7 +240,8 @@ public class Campaign {
    * Convenience method that calls {@link #getSightTypeMap()} and returns the value for the key
    * <code>type</code>.
    *
-   * @return
+   * @param type the String corresponding to the SightType.
+   * @return the SightType.
    */
   public SightType getSightType(String type) {
     return getSightTypeMap()
@@ -364,7 +365,7 @@ public class Campaign {
    * Create an entry for the given <code>Zone</code> in the map, using <code>zone</code>'s {@link
    * Zone#getId()} method.
    *
-   * @param zone
+   * @param zone the zone to put into zones.
    */
   public void putZone(Zone zone) {
     zones.put(zone.getId(), zone);
@@ -374,6 +375,11 @@ public class Campaign {
     zones.clear();
   }
 
+  /**
+   * Remove a zone from zones.
+   *
+   * @param id the GUID of the zone.
+   */
   public void removeZone(GUID id) {
     zones.remove(id);
   }
