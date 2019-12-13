@@ -106,6 +106,20 @@ public class FacingTool extends DefaultTool {
     }
     Area visibleArea = null;
     Set<GUID> remoteSelected = new HashSet<GUID>();
+
+    String name = MapTool.getPlayer().getName();
+    boolean isGM = MapTool.getPlayer().isGM();
+    boolean ownerReveal; // if true, reveal FoW if current player owns the token.
+    boolean hasOwnerReveal; // if true, reveal FoW if token has an owner.
+    boolean noOwnerReveal; // if true, reveal FoW if token has no owners.
+    if (MapTool.isPersonalServer()) {
+      ownerReveal =
+          hasOwnerReveal = noOwnerReveal = AppPreferences.getAutoRevealVisionOnGMMovement();
+    } else {
+      ownerReveal = MapTool.getServerPolicy().isAutoRevealOnMovement();
+      hasOwnerReveal = isGM && MapTool.getServerPolicy().isAutoRevealOnMovement();
+      noOwnerReveal = isGM && MapTool.getServerPolicy().getGmRevealsVisionForUnownedTokens();
+    }
     for (GUID tokenGUID : selectedTokenSet) {
       Token token = renderer.getZone().getToken(tokenGUID);
       if (token == null) {
@@ -122,16 +136,11 @@ public class FacingTool extends DefaultTool {
       //  remoteSelected.add(token.getId());
       //  renderer.getZone().exposeArea(visibleArea, token);
       // }
-
       boolean revealFog = false;
       if (renderer.getZone().hasFog()) {
-        if ((AppPreferences.getAutoRevealVisionOnGMMovement() && MapTool.getPlayer().isGM())
-            || MapTool.getServerPolicy().isAutoRevealOnMovement()) {
-          if (token.isOwner(MapTool.getPlayer().getName())) revealFog = true;
-          else if (MapTool.getPlayer().isGM())
-            if (token.hasOwners() || MapTool.getServerPolicy().getGmRevealsVisionForUnownedTokens())
-              revealFog = true;
-        }
+        if (ownerReveal && token.isOwner(name)) revealFog = true;
+        else if (hasOwnerReveal && token.hasOwners()) revealFog = true;
+        else if (noOwnerReveal && !token.hasOwners()) revealFog = true;
       }
 
       if (revealFog) {
