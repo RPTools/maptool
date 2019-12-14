@@ -18,10 +18,7 @@ import com.jidesoft.docking.DockContext;
 import com.jidesoft.docking.DockableFrame;
 import com.jidesoft.docking.event.DockableFrameAdapter;
 import com.jidesoft.docking.event.DockableFrameEvent;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Frame;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -33,15 +30,37 @@ import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Token;
 import net.sf.json.JSONObject;
 
+/**
+ * Represents a dockable frame holding an HTML panel. Can hold either an HTML3.2 (Swing) or a HTML5
+ * (JavaFX) panel.
+ */
 @SuppressWarnings("serial")
 public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
+  /** The static map of the HTMLFrames. */
   private static final Map<String, HTMLFrame> frames = new HashMap<String, HTMLFrame>();
+
+  /** The map of the macro callbacks. */
   private final Map<String, String> macroCallbacks = new HashMap<String, String>();
 
+  /** The temporary status of the frame. A temporary frame isn't stored after being closed. */
   private boolean temporary;
+
+  /** The value stored in the frame. */
   private Object value;
-  private final HTMLPanel panel;
+
+  /** Panel for HTML. */
+  private HTMLPanelInterface panel;
+
+  /** The name of the frame. */
   private final String name;
+
+  /** Is the panel HTML5 or HTML3.2. */
+  private boolean isHTML5;
+
+  @Override
+  public Map<String, String> macroCallbacks() {
+    return macroCallbacks;
+  }
 
   /**
    * Returns if the frame is visible or not.
@@ -72,14 +91,15 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * ignored for existing frames so that they will not override the size that the player may have
    * resized them to.
    *
-   * @param name The name of the frame.
-   * @param title The title of the frame.
-   * @param width The width of the frame in pixels.
-   * @param height The height of the frame in pixels.
-   * @param temp Is the frame temporary.
-   * @param val A value that can be returned by getFrameProperties().
-   * @param html The html to display in the frame.
-   * @return The HTMLFrame that is displayed.
+   * @param name the name of the frame.
+   * @param title the title of the frame.
+   * @param width the width of the frame in pixels.
+   * @param height the height of the frame in pixels.
+   * @param temp whether the frame should be temporary.
+   * @param isHTML5 whether it should use HTML5 (JavaFX) or HTML 3.2 (Swing).
+   * @param val a value that can be returned by getFrameProperties().
+   * @param html the html to display in the frame.
+   * @return the HTMLFrame that is displayed.
    */
   public static HTMLFrame showFrame(
       String name,
@@ -88,69 +108,83 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       int width,
       int height,
       boolean temp,
+      boolean isHTML5,
       Object val,
       String html) {
     HTMLFrame frame;
 
     if (frames.containsKey(name)) {
       frame = frames.get(name);
-      frame.setTitle(title);
-      frame.setTabTitle(tabTitle);
-      frame.updateContents(html, temp, val);
       if (!frame.isVisible()) {
         frame.setVisible(true);
         frame.getDockingManager().showFrame(name);
       }
     } else {
       // Only set size on creation so we don't override players resizing.
-      width = width < 100 ? 400 : width;
-      height = height < 50 ? 200 : height;
-
-      frame = new HTMLFrame(MapTool.getFrame(), name, title, width, height);
+      frame = new HTMLFrame(name, width, height, isHTML5);
       frames.put(name, frame);
-      frame.updateContents(html, temp, val);
+
       frame.getDockingManager().showFrame(name);
-      frame.setTabTitle(tabTitle);
       // Jamz: why undock frames to center them?
       if (!frame.isDocked()) center(name);
     }
-    frame.setTemporary(temp);
+    frame.updateContents(html, title, tabTitle, temp, isHTML5, val);
     return frame;
   }
 
+  @Override
   public void setValue(Object val) {
     this.value = val;
   }
 
+  @Override
   public Object getValue() {
     return value;
   }
 
+  @Override
   public void setTemporary(boolean temp) {
     this.temporary = temp;
   }
 
+  @Override
   public boolean getTemporary() {
     return this.temporary;
   }
 
   /**
-   * Creates a new HTMLFrame.
+   * Add an HTML panel to the frame.
    *
-   * @param parent The parent of this frame.
-   * @param name The name of the frame.
-   * @param title The title of the frame.
-   * @param width The width of the frame.
-   * @param height The height of the frame.
+   * @param isHTML5 whether the panel supports HTML5
    */
-  private HTMLFrame(Frame parent, String name, String title, int width, int height) {
-    super(name, new ImageIcon(AppStyle.chatPanelImage));
+  public void addHTMLPanel(boolean isHTML5) {
+    if (isHTML5) {
+      panel = new HTMLJFXPanel(this);
+    } else {
+      panel = new HTMLPanel(this, true);
+    }
+    panel.addToContainer(this);
+    panel.addActionListener(this);
+  }
 
+  /**
+   * Create a new HTMLFrame.
+   *
+   * @param name the name of the frame
+   * @param width the width of the frame
+   * @param height the height of the frame
+   * @param isHTML5 whether the frame is HTML5 (JavaFx)
+   */
+  private HTMLFrame(String name, int width, int height, boolean isHTML5) {
+    super(name, new ImageIcon(AppStyle.chatPanelImage));
     this.name = name;
-    setTitle(title);
+    this.isHTML5 = isHTML5;
+    width = width < 100 ? 400 : width;
+    height = height < 50 ? 200 : height;
     setPreferredSize(new Dimension(width, height));
-    panel = new HTMLPanel(this, true, true); // closeOnSubmit is true so we don't get close button
-    add(panel);
+
+    addHTMLPanel(isHTML5);
+
     this.getContext().setInitMode(DockContext.STATE_FLOATING);
     MapTool.getFrame().getDockingManager().addFrame(this);
     this.setVisible(true);
@@ -163,6 +197,11 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
         });
   }
 
+  /**
+   * Center a frame.
+   *
+   * @param name the name of the frame to center.
+   */
   public static void center(String name) {
     if (!frames.containsKey(name)) {
       return;
@@ -174,86 +213,64 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     int y = MapTool.getFrame().getLocation().y + (outerSize.height - frame.getHeight()) / 2;
 
     Rectangle rect =
-        new Rectangle(x < 0 ? 0 : x, y < 0 ? 0 : y, frame.getWidth(), frame.getHeight());
+        new Rectangle(Math.max(x, 0), Math.max(y, 0), frame.getWidth(), frame.getHeight());
     MapTool.getFrame().getDockingManager().floatFrame(frame.getKey(), rect, true);
   }
 
   /**
-   * Updates the html contents of the frame.
+   * Update the html content of the frame.
    *
-   * @param html the html contents.
-   * @param temp Is the frame temporary or not.
-   * @param val the value of the frame.
+   * @param html the html content
+   * @param title the title of the frame
+   * @param tabTitle the tabTitle of the frame
+   * @param temp whether the frame is temporary
+   * @param isHTML5 whether the frame should support HTML5 (JavaFX)
+   * @param val the value to put in the frame
    */
-  public void updateContents(String html, boolean temp, Object val) {
+  public void updateContents(
+      String html, String title, String tabTitle, boolean temp, boolean isHTML5, Object val) {
+    if (this.isHTML5 != isHTML5) {
+      this.isHTML5 = isHTML5;
+      panel.removeFromContainer(this); // remove previous panel
+      addHTMLPanel(isHTML5); // add new panel of the other HTML type
+      this.revalidate();
+    }
     macroCallbacks.clear();
-    panel.updateContents(html, false);
+    setTitle(title);
+    setTabTitle(tabTitle);
     setTemporary(temp);
     setValue(val);
+    panel.updateContents(html);
   }
 
-  /** The selected token list has changed. */
-  private void selectedChanged() {
-    if (macroCallbacks.get("onChangeSelection") != null) {
-      EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              MacroLinkFunction.getInstance().runMacroLink(macroCallbacks.get("onChangeSelection"));
-            }
-          });
-    }
-  }
-
-  /** A new token has been impersonated or the impersonated token is cleared. */
-  private void impersonatedChanged() {
-    if (macroCallbacks.get("onChangeImpersonated") != null) {
-      EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              MacroLinkFunction.getInstance()
-                  .runMacroLink(macroCallbacks.get("onChangeImpersonated"));
-            }
-          });
-    }
-  }
-
-  /** One of the tokens has changed. */
-  private void tokenChanged(final Token token) {
-    if (macroCallbacks.get("onChangeToken") != null) {
-      EventQueue.invokeLater(
-          new Runnable() {
-            public void run() {
-              MacroLinkFunction.getInstance()
-                  .runMacroLink(macroCallbacks.get("onChangeToken") + token.getId().toString());
-            }
-          });
-    }
-  }
-
-  /** The selected token list has changed. */
+  /** Run all callback macros for "onChangeSelection". */
   public static void doSelectedChanged() {
     for (HTMLFrame frame : frames.values()) {
       if (frame.isVisible()) {
-        frame.selectedChanged();
+        HTMLPanelContainer.selectedChanged(frame.macroCallbacks);
       }
     }
   }
 
-  /** A new token has been impersonated or the impersonated token is cleared. */
+  /** Run all callback macros for "onChangeImpersonated". */
   public static void doImpersonatedChanged() {
     for (HTMLFrame frame : frames.values()) {
       if (frame.isVisible()) {
-        frame.impersonatedChanged();
+        HTMLPanelContainer.impersonatedChanged(frame.macroCallbacks);
       }
     }
   }
 
-  /** One of the tokens has changed. */
+  /**
+   * Run all callback macros for "onChangeToken".
+   *
+   * @param token the token that changed.
+   */
   public static void doTokenChanged(Token token) {
     if (token != null) {
       for (HTMLFrame frame : frames.values()) {
         if (frame.isVisible()) {
-          frame.tokenChanged(token);
+          HTMLPanelContainer.tokenChanged(token, frame.macroCallbacks);
         }
       }
     }
@@ -262,8 +279,8 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   /**
    * Return a json with the width, height, title, temporary, and value of the frame
    *
-   * @param name The name of the frame.
-   * @return A json with the width, height, title, temporary, and value of the frame
+   * @param name the name of the frame.
+   * @return a json with the width, height, title, temporary, and value of the frame
    */
   public static Object getFrameProperties(String name) {
     if (frames.containsKey(name)) {
@@ -295,10 +312,12 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     }
   }
 
+  @Override
   public void closeRequest() {
     MapTool.getFrame().getDockingManager().hideFrame(getKey());
     setVisible(false);
     panel.flush();
+
     if (getTemporary()) {
       MapTool.getFrame().getDockingManager().removeFrame(this.name, false);
       frames.remove(this.name);
@@ -306,22 +325,23 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     }
   }
 
+  @Override
   public void actionPerformed(ActionEvent e) {
-    if (e instanceof HTMLPane.FormActionEvent) {
-      HTMLPane.FormActionEvent fae = (HTMLPane.FormActionEvent) e;
-      MacroLinkFunction.getInstance().runMacroLink(fae.getAction() + fae.getData());
+    if (e instanceof HTMLActionEvent.FormActionEvent) {
+      HTMLActionEvent.FormActionEvent fae = (HTMLActionEvent.FormActionEvent) e;
+      MacroLinkFunction.runMacroLink(fae.getAction() + fae.getData());
     }
-    if (e instanceof HTMLPane.RegisterMacroActionEvent) {
-      HTMLPane.RegisterMacroActionEvent rmae = (HTMLPane.RegisterMacroActionEvent) e;
+    if (e instanceof HTMLActionEvent.RegisterMacroActionEvent) {
+      HTMLActionEvent.RegisterMacroActionEvent rmae = (HTMLActionEvent.RegisterMacroActionEvent) e;
       macroCallbacks.put(rmae.getType(), rmae.getMacro());
     }
-    if (e instanceof HTMLPane.ChangeTitleActionEvent) {
-      String newTitle = ((HTMLPane.ChangeTitleActionEvent) e).getNewTitle();
+    if (e instanceof HTMLActionEvent.ChangeTitleActionEvent) {
+      String newTitle = ((HTMLActionEvent.ChangeTitleActionEvent) e).getNewTitle();
       this.setTitle(newTitle);
       this.setTabTitle(newTitle);
     }
-    if (e instanceof HTMLPane.MetaTagActionEvent) {
-      HTMLPane.MetaTagActionEvent mtae = (HTMLPane.MetaTagActionEvent) e;
+    if (e instanceof HTMLActionEvent.MetaTagActionEvent) {
+      HTMLActionEvent.MetaTagActionEvent mtae = (HTMLActionEvent.MetaTagActionEvent) e;
       if (mtae.getName().equalsIgnoreCase("onChangeToken")
           || mtae.getName().equalsIgnoreCase("onChangeSelection")
           || mtae.getName().equalsIgnoreCase("onChangeImpersonated")) {
