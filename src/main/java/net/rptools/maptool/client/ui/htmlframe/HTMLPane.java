@@ -190,21 +190,7 @@ public class HTMLPane extends JEditorPane {
     if (log.isDebugEnabled()) {
       log.debug("setting text in HTMLPane: " + text);
     }
-    // We use ASCII control characters to mark off the rolls so that there's no limitation on what
-    // (printable) characters the output can include
-    text =
-        text.replaceAll(
-            "\036([^\036\037]*)\037([^\036]*)\036",
-            "<span class='roll' title='&#171; $1 &#187;'>$2</span>");
-    text = text.replaceAll("\036\01u\02([^\036]*)\036", "&#171; $1 &#187;");
-    text =
-        text.replaceAll(
-            "\036([^\036]*)\036",
-            "&#171;<span class='roll' style='color:blue'>&nbsp;$1&nbsp;</span>&#187;");
-
-    // Auto inline expansion
-    text = text.replaceAll("(^|\\s)(https?://[\\w.%-/~?&+#=]+)", "$1<a href='$2'>$2</a>");
-    super.setText(text);
+    super.setText(HTMLPanelInterface.fixHTML(text));
   }
 
   /** Class that deals with html parser callbacks. */

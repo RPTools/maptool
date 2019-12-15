@@ -49,4 +49,31 @@ interface HTMLPanelInterface {
    * @param container the container.
    */
   void addActionListener(final ActionListener container);
+
+  /**
+   * Modify the rolls and hyperlinks in the HTML.
+   *
+   * @param html the HTML to modify
+   * @return the modified HTML
+   */
+  static String fixHTML(String html) {
+    // We use ASCII control characters to mark off the rolls so that there's no limitation on what
+    // (printable) characters the output can include
+    // Note: options gm, self, and whisper are currently ignored
+    // Tooltip rolls
+    html =
+        html.replaceAll(
+            "\036(\001\002)?([^\036\037]*)\037([^\036]*)\036",
+            "<span class='roll' title='&#171; $2 &#187;'>$3</span>");
+    // Unformatted rolls
+    html = html.replaceAll("\036\01u\02([^\036]*)\036", "&#171; $1 &#187;");
+    // Inline rolls
+    html =
+        html.replaceAll(
+            "\036(\001\002)?([^\036]*)\036",
+            "&#171;<span class='roll' style='color:blue'>&nbsp;$2&nbsp;</span>&#187;");
+    // Auto inline expansion
+    html = html.replaceAll("(^|\\s)(https?://[\\w.%-/~?&+#=]+)", "$1<a href='$2'>$2</a>");
+    return html;
+  }
 }

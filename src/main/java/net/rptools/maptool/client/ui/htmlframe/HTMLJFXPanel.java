@@ -30,6 +30,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javax.swing.*;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.parser.ParserException;
@@ -103,6 +104,15 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
           + "}}}";
 
   /**
+   * The default CSS to apply before all others. %d is to be replaced by
+   * AppPreferences.getFontSize().
+   */
+  private static final String DEFAULT_CSS =
+      "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8}"
+          + "div {margin-bottom: 5px}"
+          + "span.roll {background:#efefef}";
+
+  /**
    * Creates a new HTMLJFXPanel.
    *
    * @param container The container that will hold the HTML panel.
@@ -162,9 +172,12 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
 
   @Override
   public void updateContents(final String html) {
+    if (log.isDebugEnabled()) {
+      log.debug("setting text in WebView: " + html);
+    }
     Platform.runLater(
         () -> {
-          webEngine.loadContent(BLOCK_EXT_JS_SCRIPT + html);
+          webEngine.loadContent(BLOCK_EXT_JS_SCRIPT + HTMLPanelInterface.fixHTML(html));
         });
   }
 
@@ -237,6 +250,13 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
 
       Document doc = webEngine.getDocument();
       NodeList nodeList;
+
+      // Add default CSS
+      Element styleNode = doc.createElement("style");
+      Text styleContent =
+          doc.createTextNode(String.format(DEFAULT_CSS, AppPreferences.getFontSize()));
+      styleNode.appendChild(styleContent);
+      doc.getDocumentElement().getElementsByTagName("head").item(0).appendChild(styleNode);
 
       // Set the title if using <title>.
       nodeList = doc.getElementsByTagName("title");
@@ -359,7 +379,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     String name = element.getAttribute("name");
     String content = element.getAttribute("content");
 
-    if (actionListeners != null && !name.isEmpty() && !content.isEmpty()) {
+    if (actionListeners != null && name != null && content != null) {
       if (log.isDebugEnabled()) {
         log.debug("metaTag found: name='" + name + "' content='" + content + "'");
       }
