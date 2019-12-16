@@ -57,7 +57,7 @@ public class TokenNameFunction extends AbstractFunction {
         throw new ParserException(
             I18N.getText("macro.function.tokenName.emptyTokenNameForbidden", "setName"));
       }
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setName, name);
+      setName(token, name);
     }
     return token.getName();
   }
@@ -73,12 +73,13 @@ public class TokenNameFunction extends AbstractFunction {
   }
 
   /**
-   * Sets the name of the token.
+   * Validates the name, sets the name of the token, and updates the server.
    *
    * @param token The token to set the name of.
    * @param name the name of the token.
    */
   public static void setName(Token token, String name) {
-    token.setName(name);
+    token.validateName(name);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setName, name);
   }
 }
