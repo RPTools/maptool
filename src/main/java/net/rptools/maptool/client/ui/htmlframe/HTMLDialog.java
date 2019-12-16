@@ -138,11 +138,11 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     closePanel.add(jcloseButton);
     closePanel.add(Box.createHorizontalGlue());
 
-    // Center dialog.
-    SwingUtil.centerOver(this, parent);
-
-    // Show dialog at preferred size.
+    // Size the dialog, make it displayable, and validate it
     pack();
+
+    // Center dialog
+    SwingUtil.centerOver(this, parent);
   }
 
   /**
