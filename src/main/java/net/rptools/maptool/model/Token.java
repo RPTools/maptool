@@ -989,9 +989,9 @@ public class Token extends BaseModel implements Cloneable {
    * showError() call makes this extremely unlikely due to the interactive nature of a failure.
    *
    * @param name the new name of the token
-   * @throws IllegalArgumentException thrown if a token has the same name
+   * @throws ParserException thrown if a token has the same name
    */
-  public void validateName(String name) {
+  public void validateName(String name) throws ParserException {
     if (!MapTool.getPlayer().isGM() && !MapTool.getParser().isMacroTrusted()) {
       Zone curZone = getZoneRenderer().getZone();
       List<Token> tokensList = curZone.getTokens();
@@ -1000,7 +1000,7 @@ public class Token extends BaseModel implements Cloneable {
         String curTokenName = token.getName();
         if (curTokenName.equalsIgnoreCase(name) && !(token.equals(this))) {
           MapTool.showError(I18N.getText("Token.error.unableToRename", name));
-          throw new IllegalArgumentException("Player dropped token with duplicate name");
+          throw new ParserException(I18N.getText("Token.error.unableToRename", name));
         }
       }
     }
