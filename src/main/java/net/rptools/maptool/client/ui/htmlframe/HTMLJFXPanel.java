@@ -37,10 +37,7 @@ import net.rptools.parser.ParserException;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
+import org.w3c.dom.*;
 import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.html.*;
@@ -251,12 +248,19 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       Document doc = webEngine.getDocument();
       NodeList nodeList;
 
-      // Add default CSS
+      // Add default CSS as first element of the head tag
+      String strCSS = String.format(DEFAULT_CSS, AppPreferences.getFontSize());
       Element styleNode = doc.createElement("style");
-      Text styleContent =
-          doc.createTextNode(String.format(DEFAULT_CSS, AppPreferences.getFontSize()));
+      Text styleContent = doc.createTextNode(strCSS);
       styleNode.appendChild(styleContent);
-      doc.getDocumentElement().getElementsByTagName("head").item(0).appendChild(styleNode);
+      Node head = doc.getDocumentElement().getElementsByTagName("head").item(0);
+      Node nodeCSS = head.insertBefore(styleNode, head.getFirstChild());
+
+      // Deal with CSS and events of <link>.
+      nodeList = doc.getElementsByTagName("link");
+      for (int i = 0; i < nodeList.getLength(); i++) {
+        fixLink(nodeList.item(i).getAttributes(), nodeCSS, doc);
+      }
 
       // Set the title if using <title>.
       nodeList = doc.getElementsByTagName("title");
@@ -289,12 +293,6 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
 
       // Replace href attributes that aren't macros or hyperlinks, as per #972
       webEngine.executeScript(BLOCK_EXT_HREF_SCRIPT);
-
-      // Deal with CSS and events of <link>.
-      nodeList = doc.getElementsByTagName("link");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        fixLink(nodeList.item(i), doc);
-      }
     }
   }
 
@@ -315,17 +313,18 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   }
 
   /**
-   * Handles the CSS and the events of a link.
+   * Handles the CSS and the events of a link. For a stylesheet link with a macro location as a
+   * href, the CSS sheet is attached at the end of the refNode. If the href instead starts with
+   * "macro", register the href as a callback macro.
    *
-   * @param node the node of the link tag.
-   * @param doc the document to update with the modified link.
+   * @param attr the attributes of the link tag
+   * @param refNode the node to append the new CSS rules to
+   * @param doc the document to update with the modified link
    */
-  private void fixLink(org.w3c.dom.Node node, org.w3c.dom.Document doc) {
-    org.w3c.dom.NamedNodeMap attr = node.getAttributes();
-
-    org.w3c.dom.Node rel = attr.getNamedItem("rel");
-    org.w3c.dom.Node type = attr.getNamedItem("type");
-    org.w3c.dom.Node href = attr.getNamedItem("href");
+  private void fixLink(NamedNodeMap attr, Node refNode, Document doc) {
+    Node rel = attr.getNamedItem("rel");
+    Node type = attr.getNamedItem("type");
+    Node href = attr.getNamedItem("href");
 
     if (rel != null && type != null && href != null) {
       String content = href.getTextContent();
@@ -339,8 +338,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
           Element styleNode = doc.createElement("style");
           Text styleContent = doc.createTextNode(cssText);
           styleNode.appendChild(styleContent);
-          // Add the style sheet node to the head.
-          doc.getDocumentElement().getElementsByTagName("head").item(0).appendChild(styleNode);
+          // Append the style sheet node to the refNode
+          refNode.appendChild(styleNode);
         } catch (ParserException e) {
           // Do nothing
         }
