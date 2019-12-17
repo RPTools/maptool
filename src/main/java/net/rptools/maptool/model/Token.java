@@ -974,30 +974,36 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   /**
-   * Set the name of this token to the provided string. There is a potential exposure of information
+   * Set the name of this token to the provided string.
+   *
+   * @param name the new name of the token
+   */
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  /**
+   * Validate a token name by testing for duplicates. There is a potential exposure of information
    * to the player in this method: through repeated attempts to name a token they own to another
    * name, they could determine which token names the GM is already using. Fortunately, the
    * showError() call makes this extremely unlikely due to the interactive nature of a failure.
    *
    * @param name the new name of the token
-   * @throws IllegalArgumentException thrown if a token has the same name
+   * @throws ParserException thrown if a token has the same name
    */
-  public void setName(String name) throws IllegalArgumentException {
-    // Let's see if there is another Token with that name (only if Player is not GM)
+  public void validateName(String name) throws ParserException {
     if (!MapTool.getPlayer().isGM() && !MapTool.getParser().isMacroTrusted()) {
-      Zone curZone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+      Zone curZone = getZoneRenderer().getZone();
       List<Token> tokensList = curZone.getTokens();
 
-      for (int i = 0; i < tokensList.size(); i++) {
-        String curTokenName = tokensList.get(i).getName();
-        if (curTokenName.equalsIgnoreCase(name)) {
+      for (Token token : tokensList) {
+        String curTokenName = token.getName();
+        if (curTokenName.equalsIgnoreCase(name) && !(token.equals(this))) {
           MapTool.showError(I18N.getText("Token.error.unableToRename", name));
-          throw new IllegalArgumentException("Player dropped token with duplicate name");
+          throw new ParserException(I18N.getText("Token.error.unableToRename", name));
         }
       }
     }
-    this.name = name;
-    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.name, name));
   }
 
   public MD5Key getImageAssetId() {

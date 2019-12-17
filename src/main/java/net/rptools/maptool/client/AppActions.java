@@ -1147,11 +1147,9 @@ public class AppActions {
       MapTool.serverCommand().putToken(zone.getId(), token);
     }
     if (!failedPaste.isEmpty()) {
-      String mesg = "Failed to paste token(s) with duplicate name(s): " + failedPaste;
-      TextMessage msg = TextMessage.gm(null, mesg);
+      String mesg = I18N.getText("Token.error.unableToPaste", failedPaste);
+      TextMessage msg = TextMessage.gmMe(null, mesg);
       MapTool.addMessage(msg);
-      // msg.setChannel(Channel.ME);
-      // MapTool.addMessage(msg);
     }
   }
 
