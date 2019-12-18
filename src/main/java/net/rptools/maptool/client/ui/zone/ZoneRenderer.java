@@ -4664,7 +4664,7 @@ public class ZoneRenderer extends JComponent
           }
         } else {
           flush((Token) event.getArg());
-          
+
           if (evt == Zone.Event.TOKEN_REMOVED) {
             deselectToken(((Token) event.getArg()).getId());
           }
