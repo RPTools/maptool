@@ -4659,9 +4659,17 @@ public class ZoneRenderer extends JComponent
           List<Token> list = (List<Token>) (event.getArg());
           for (Token token : list) {
             flush(token);
+
+            if (evt == Zone.Event.TOKEN_REMOVED) {
+              deselectToken(token.getId());
+            }
           }
         } else {
           flush((Token) event.getArg());
+          
+          if (evt == Zone.Event.TOKEN_REMOVED) {
+            deselectToken(((Token) event.getArg()).getId());
+          }
         }
       }
       if (evt == Zone.Event.FOG_CHANGED) {
