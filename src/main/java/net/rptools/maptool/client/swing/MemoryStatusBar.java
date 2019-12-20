@@ -31,7 +31,7 @@ public class MemoryStatusBar extends JProgressBar {
   private static MemoryStatusBar msb = null;
 
   private static FontMetrics fm = null;
-  
+
   public static MemoryStatusBar getInstance() {
     if (msb == null) msb = new MemoryStatusBar();
     return msb;
@@ -40,14 +40,14 @@ public class MemoryStatusBar extends JProgressBar {
   private MemoryStatusBar() {
     setMinimum(0);
     setStringPainted(true);
-    
+
     // Adjust the minimum size to be big enought for the font used
     // plus a bit extra padding.
     fm = getFontMetrics(getFont());
     int w = 26 + fm.stringWidth("9.99 MB/9.99 MB");
     int h = 4 + fm.getHeight();
-    minSize = new Dimension(w,h);
-    
+    minSize = new Dimension(w, h);
+
     new Thread() {
       @Override
       public void run() {
