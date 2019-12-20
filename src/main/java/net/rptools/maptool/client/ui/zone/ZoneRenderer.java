@@ -106,6 +106,7 @@ import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarCellPoint;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AbstractPoint;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -4551,17 +4552,14 @@ public class ZoneRenderer extends JComponent
     clearSelectedTokens();
     selectTokens(selectThese);
 
-    if (!isGM)
-      MapTool.addMessage(
-          TextMessage.gm(
-              null,
-              "Tokens dropped onto map '" + zone.getName() + "' by player " + MapTool.getPlayer()));
+    if (!isGM) {
+      String msg = I18N.getText("Token.dropped.byPlayer", zone.getName(), MapTool.getPlayer());
+      MapTool.addMessage(TextMessage.gm(null, msg));
+    }
     if (!failedPaste.isEmpty()) {
-      String mesg = "Failed to paste token(s) with duplicate name(s): " + failedPaste;
-      TextMessage msg = TextMessage.gm(null, mesg);
+      String mesg = I18N.getText("Token.error.unableToPaste", failedPaste);
+      TextMessage msg = TextMessage.gmMe(null, mesg);
       MapTool.addMessage(msg);
-      // msg.setChannel(Channel.ME);
-      // MapTool.addMessage(msg);
     }
     // Copy them to the clipboard so that we can quickly copy them onto the map
     AppActions.copyTokens(tokens);
