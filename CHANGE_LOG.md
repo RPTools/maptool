@@ -1,3 +1,35 @@
+Maptool 1.5.9
+=====
+
+**Highlights**
+- More translations.
+- Bug fixes.
+
+Enhancements
+-----
+- [#753][i753] Reserved variables names `init.current` and `init.round` were not highlighted in macro editor. Fixed.
+
+Bug Fixes
+-----
+- [#998][i998] Player clients dropping tokens with duplicate names weren't getting a notice of why nothing happened. Fixed.
+- [#993][i993] All clients were getting notified when a GM changed a token name to a duplicate. Fixed.
+- [#989][i989] Unprintable character symbol (□) showed in output for rolls and tooltips in frames/dialogs. Fixed.
+- [#962][i962] The GM-mode autoexpose (Preferences -> Application -> Auto-expose fog...) wasn't working.  Fixed.
+- [#920][i920] The RPTools logo was being loaded across the net each time for use in the MacOS dock.  Fixed.
+- [#796][i796] Drawing a selection box on layers other than the Token layer ignored the "Fill selection box" preference. Fixed.
+- [#739][i739] Initiative info was being returned by `getInfo("client")` and `getInfo("server")`. Removed from `server` option.
+- [#205][i205] Layer list in Drawing Tools allowed multi-select of layers. Fixed.
+
+[i998]: https://github.com/RPTools/maptool/issues/998
+[i993]: https://github.com/RPTools/maptool/issues/993
+[i989]: https://github.com/RPTools/maptool/issues/989
+[i962]: https://github.com/RPTools/maptool/issues/962
+[i920]: https://github.com/RPTools/maptool/issues/920
+[i796]: https://github.com/RPTools/maptool/issues/796
+[i753]: https://github.com/RPTools/maptool/issues/753
+[i739]: https://github.com/RPTools/maptool/issues/739
+[i205]: https://github.com/RPTools/maptool/issues/205
+
 Maptool 1.5.8
 =====
 
