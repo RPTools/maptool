@@ -65,6 +65,10 @@ public class TextureNoise implements Macro {
         return;
       }
 
+      // Changing noise values so make sure it is on.
+      if (!zr.isBgTextureNoiseFilterOn()) {
+        zr.setBgTextureNoiseFilterOn(true);
+      }
       long seed;
       if (args.length == 1) {
         seed = zr.getNoiseSeed();
