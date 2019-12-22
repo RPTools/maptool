@@ -156,7 +156,7 @@ public class ZoneRenderer extends JComponent
   private final DebounceExecutor repaintDebouncer;
 
   /** Noise for mask on repeating tiles. */
-  private final DrawableNoise noise = new DrawableNoise();
+  private DrawableNoise noise = null;
 
   /** Is the noise filter on for disrupting pattens in background tiled textures. */
   private boolean bgTextureNoiseFilterOn = false;
@@ -4657,9 +4657,17 @@ public class ZoneRenderer extends JComponent
           List<Token> list = (List<Token>) (event.getArg());
           for (Token token : list) {
             flush(token);
+
+            if (evt == Zone.Event.TOKEN_REMOVED) {
+              deselectToken(token.getId());
+            }
           }
         } else {
           flush((Token) event.getArg());
+
+          if (evt == Zone.Event.TOKEN_REMOVED) {
+            deselectToken(((Token) event.getArg()).getId());
+          }
         }
       }
       if (evt == Zone.Event.FOG_CHANGED) {
@@ -4843,9 +4851,12 @@ public class ZoneRenderer extends JComponent
    * @param on <code>true</code> to turn on, <code>false</code> to turn off.
    */
   public void setBgTextureNoiseFilterOn(boolean on) {
-    if (on != bgTextureNoiseFilterOn) {
-      bgTextureNoiseFilterOn = on;
-      drawBackground = true;
+    bgTextureNoiseFilterOn = on;
+    drawBackground = true;
+    if (on) {
+      noise = new DrawableNoise();
+    } else {
+      noise = null;
     }
   }
 }
