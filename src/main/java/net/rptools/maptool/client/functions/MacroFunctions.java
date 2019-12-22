@@ -16,10 +16,11 @@ package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -30,8 +31,12 @@ import net.rptools.parser.function.AbstractFunction;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class MacroFunctions extends AbstractFunction {
+  private static final Logger log = LogManager.getLogger(MacroFunctions.class);
+
   private static final MacroFunctions instance = new MacroFunctions();
 
   private MacroFunctions() {
@@ -109,7 +114,7 @@ public class MacroFunctions extends AbstractFunction {
     }
 
     if ("json".equals(delim)) {
-      Map<String, Object> props = new HashMap<String, Object>();
+      Map<String, Object> props = new LinkedHashMap<String, Object>();
       props.put("autoExecute", mbp.getAutoExecute());
       props.put("color", mbp.getColorKey());
       props.put("fontColor", mbp.getFontColorKey());
@@ -152,6 +157,13 @@ public class MacroFunctions extends AbstractFunction {
       }
 
       props.put("compare", compare);
+
+      Map<String, Object> propsMetadata = new LinkedHashMap<String, Object>();
+      propsMetadata.put("uuid", mbp.getMacroUUID());
+      propsMetadata.put("commandChecksum", new MD5Key(mbp.getCommand().getBytes()).toString());
+      propsMetadata.put("propsChecksum", new MD5Key(props.toString().getBytes()).toString());
+
+      props.put("metadata", propsMetadata);
 
       return JSONObject.fromObject(props);
     } else {

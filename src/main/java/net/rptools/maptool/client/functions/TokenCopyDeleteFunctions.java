@@ -142,7 +142,6 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
             }
           }
           setTokenValues(t, newVals, zone, res);
-          zone.putToken(t);
 
           MapTool.serverCommand().putToken(zone.getId(), t);
           newTokens.add(t.getId().toString());

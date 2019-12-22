@@ -1,6 +1,95 @@
+Maptool 1.5.9
+=====
+
+**Highlights**
+- More translations.
+- Bug fixes.
+
+Enhancements
+-----
+- [#753][i753] Reserved variables names `init.current` and `init.round` were not highlighted in macro editor. Fixed.
+
+Bug Fixes
+-----
+- [#998][i998] Player clients dropping tokens with duplicate names weren't getting a notice of why nothing happened. Fixed.
+- [#993][i993] All clients were getting notified when a GM changed a token name to a duplicate. Fixed.
+- [#989][i989] Unprintable character symbol (□) showed in output for rolls and tooltips in frames/dialogs. Fixed.
+- [#962][i962] The GM-mode autoexpose (Preferences -> Application -> Auto-expose fog...) wasn't working.  Fixed.
+- [#920][i920] The RPTools logo was being loaded across the net each time for use in the MacOS dock.  Fixed.
+- [#796][i796] Drawing a selection box on layers other than the Token layer ignored the "Fill selection box" preference. Fixed.
+- [#739][i739] Initiative info was being returned by `getInfo("client")` and `getInfo("server")`. Removed from `server` option.
+- [#205][i205] Layer list in Drawing Tools allowed multi-select of layers. Fixed.
+
+[i998]: https://github.com/RPTools/maptool/issues/998
+[i993]: https://github.com/RPTools/maptool/issues/993
+[i989]: https://github.com/RPTools/maptool/issues/989
+[i962]: https://github.com/RPTools/maptool/issues/962
+[i920]: https://github.com/RPTools/maptool/issues/920
+[i796]: https://github.com/RPTools/maptool/issues/796
+[i753]: https://github.com/RPTools/maptool/issues/753
+[i739]: https://github.com/RPTools/maptool/issues/739
+[i205]: https://github.com/RPTools/maptool/issues/205
+
+Maptool 1.5.8
+=====
+
+**Highlights**
+- Macros on copied tokens having duplicate UUIDs problem fixed.
+- Toolbar/ribbon in MapTool can now be hidden to give you more screenspace.
+- Additional parameters and improvements to various macro functions.
+- New translation team members, Deniz Köse and Vitaly Karpenko have bumped our Russian translation up to 74%.
+- Fog of War exposure fixes.
+- Tooltips added to all menu items.
+- Bug fixes!
+
+Enhancements
+-----
+- [#949][i949] New macro function `getAssetProperties()` returns the properties of assets including size and type.
+- [#938][i938] Map name parameter added to Token Location functions. All Token Location functions now report correctly when invalid number of parameters are given.  
+  - Map name parameter added to: `getTokenX()`, `getTokenY()`, `getTokenDrawOrder()`, `setTokenDrawOrder()`
+- [#901][i901] Default stack size increased to 8MB.  See Preferences -> Startup
+- [#898][i898] Macro functions `getOwned()` and `getOwnedNames` now take optional map name parameter.
+- [#897][i897] Toolbar ribbon now has a hide/show gadget.
+- [#742][i742] Macro functions `getTokens()` and `getTokensNames()` have new `owned` `conditions` tag for getting tokens based on ownership.
+- [#154][i154] Tooltip for Shown Token Names menu option now includes description of what the colors mean.  Localized Tooltips added for all menu items.
+
+Bug Fixes
+-----
+- [#952][i952] Macro function `setTokenImage()` was not setting the token native height/width fields. Fixed.
+- [#945][i945] Image Chooser for selecting table images would throw an exception when clicked between images.  Fixed.
+- [#932][i932] Clients were not being updated if setTokenVBL was used to clear the VBL of a token.  Fixed.
+- [#912][i912] Initiative functions `addToInitiative()`, `setInitiative()`, and `setInitiativeHold()` were not reliable.  Fixed.
+- [#907][i907] Macros on copied tokens had same UUIDs as the parent token.  This is bad.  Fixed.
+- [#887][i887] When using Individual Views and Individual Fog of War, the server was not showing previously exposed areas after the server start.  Fixed.
+- [#792][i792] The various methods of exposing only the currently visible areas were not working correctly leaving previously exposed areas still exposed. Fixed.
+- [#762][i762] Autosave for campaign was not working correctly.  Fixed.
+- [#595][i595] Changing maps while a token move was in process could leave the move path stuck on map and token unable to move.  Fixed.
+- [#333][i333] Startup tab in Preferences was missing tooltips for several items.  Tooltips added.  Tooltips on that tab are now localized.
+- [#197][i197] Hitting the `esc` key while in the chat window would close chat window.  No longer does this.
+
+
+[i952]: https://github.com/RPTools/maptool/issues/952
+[i949]: https://github.com/RPTools/maptool/issues/949
+[i945]: https://github.com/RPTools/maptool/issues/945
+[i938]: https://github.com/RPTools/maptool/issues/938
+[i932]: https://github.com/RPTools/maptool/issues/932
+[i912]: https://github.com/RPTools/maptool/issues/912
+[i907]: https://github.com/RPTools/maptool/issues/907
+[i901]: https://github.com/RPTools/maptool/issues/901
+[i898]: https://github.com/RPTools/maptool/issues/898
+[i897]: https://github.com/RPTools/maptool/issues/897
+[i887]: https://github.com/RPTools/maptool/issues/887
+[i792]: https://github.com/RPTools/maptool/issues/792
+[i762]: https://github.com/RPTools/maptool/issues/762
+[i742]: https://github.com/RPTools/maptool/issues/742
+[i595]: https://github.com/RPTools/maptool/issues/595
+[i333]: https://github.com/RPTools/maptool/issues/333
+[i197]: https://github.com/RPTools/maptool/issues/197
+[i154]: https://github.com/RPTools/maptool/issues/154
+
+
 Maptool 1.5.7
 =====
-** Draft Notes ** This release includes a variety of bug fixes, improvements and new features.
 
 **Highlights**
 - New accessibility features allows the user to apply [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise) to tiled textures to reduce obvious patterning.
@@ -11,10 +100,15 @@ Maptool 1.5.7
 
 Enhancements
 -----
+- [#878][i878] ISO 8601 time date field added to result of `getInfo("client")`.
+- [#872][i872] Metadata added to JSON returned from `getMacroProps` function to add in external managment of macros.
+- [#850][i850] New macro function `log.trace` added for log messages at `TRACE` level.
+- [#848][i848] File Sync Directory preference setting adding to `getInfo("client")` result.
+- [#829][i829] New macro function `capitalize` will change the first character at each word break to upper case.  e.g. "jolly green giant" -> "Jolly Green Giant".
 - [#810][i810] New macro function `playClip` more suited for short sound FX clips. New convenience function `defineAudioSource` to allow you to assign a nickname to audio sources and refer to the nickname in the audio functions.  Two existing audio functions were renamed as part of the other changes:  `stopStream` -> `stopSound`, `getStreamProperties` -> `getSoundProperties`.
 - [#804][i804] Chat notification flash now picks flash color based on task bar color.
 - [#801][i801] Macro function `getTokenStates` now accepts Token ID and Map Name parameters.
-- [#790][i790] New `execFunction` macro that works like `execLink` but is used for built-in macro functions and UDFs. 
+- [#790][i790] New `execFunction` macro that works like `execLink` but is used for built-in macro functions and UDFs.
 - [#784][i784] Macro function `json.toVars` now accepts JSON arrays as well as objects.
 - [#782][i782] Macro function `broadcast` no accepts "not-gm", "not-self" and "not-gm-self" as targets.
 - [#766][i766] New perlin noise overlay on tiled textures to reduce visible repetition.
@@ -26,9 +120,13 @@ Enhancements
 
 Bug Fixes
 -----
-- [#822][i822] `playStream was ignoring stream parameters set with `editStream`. Fixed.
+- [#883][i883] Command key shortcuts on MacOS not working.  Fixed.
+- [#874][i874] `REST.delete` did not support a header and payload.  Fixed.
+- [#846][i846] `getInfo("server")` was returning true/false instead of 1/0 for "hosting server". Fixed.
+- [#831][i831] Macro function `json.path.read` was returning numbers as strings.  Fixed.
+- [#822][i822] `playStream` was ignoring stream parameters set with `editStream`. Fixed.
 - [#820][i820] Functions `execLink` and `execFunction` were not running immediately on local client. Fixed.
-- [#814][i814] Some `update` keywords for `copyToken` were producing exceptions. Fixed. Alternate keywords *tokenPortrait* and *tokenHandout* added 
+- [#814][i814] Some `update` keywords for `copyToken` were producing exceptions. Fixed. Alternate keywords *tokenPortrait* and *tokenHandout* added
 - [#803][i803] `getStreamProps` was returning malformed JSON. Fixed.
 - [#800][i800] Incorrect tooltip on Chat Notification Background preference. Fixed.
 - [#788][i788] Player clients were showing the last campaign file they had loaded in the title bar when connected to servers. Fixed.
@@ -38,9 +136,19 @@ Bug Fixes
 - [#767][i767] A recent change to improve program responsiveness had capped frame rate at 30 fps making for jerky map panning. Default is now 60 fps and can be adjusted in preferences under Application -> Performance -> Max Frame Rate.  Note either reloading the current campaign or restarting MapTool is required after making a change.
 - [#740][i740] Selecting New Map in the Library image pane with no image underneath would thrown an exception. Fixed.
 - [#687][i687] The table functions `addTableEntry`, `createTable`, `setTableImage` and `setTableEntry` if passed an empty `AssetID` string would incorrectly put an empty "Asset://" into the entries asset id field. Fixed.  `getTableImage` would thrown an exeption if no table image was set. Fixed.
+- [#640][i640] Workaround for errors which occured when three monitors are in use.  Related exceptions caught and information is logged.
 - [#627][i627] Version check on MapTool startup should no longer prompt for updates when using release candidates.
 - [#529][i529] Smileys are now working again.
 
+[i883]: https://github.com/RPTools/maptool/issues/883
+[i878]: https://github.com/RPTools/maptool/issues/878
+[i874]: https://github.com/RPTools/maptool/issues/874
+[i872]: https://github.com/RPTools/maptool/issues/872
+[i850]: https://github.com/RPTools/maptool/issues/850
+[i848]: https://github.com/RPTools/maptool/issues/848
+[i846]: https://github.com/RPTools/maptool/issues/846
+[i831]: https://github.com/RPTools/maptool/issues/831
+[i829]: https://github.com/RPTools/maptool/issues/829
 [i822]: https://github.com/RPTools/maptool/issues/822
 [i820]: https://github.com/RPTools/maptool/issues/820
 [i814]: https://github.com/RPTools/maptool/issues/814
@@ -63,6 +171,7 @@ Bug Fixes
 [i740]: https://github.com/RPTools/maptool/issues/740
 [i687]: https://github.com/RPTools/maptool/issues/687
 [i642]: https://github.com/RPTools/maptool/issues/642
+[i640]: https://github.com/RPTools/maptool/issues/640
 [i627]: https://github.com/RPTools/maptool/issues/627
 [i529]: https://github.com/RPTools/maptool/issues/529
 
@@ -386,7 +495,7 @@ Enhancements
   * [getRolled][igrd]()
   * [getNewRolls][ignr]()
   * [clearRolls][icrl]()
-* [#406][i406] - New [dice expression](http://www.lmwcs.com/rptools/wiki/Dice_Expressions) **XdYdhZ** (drop highest) and 7 others. 
+* [#406][i406] - New [dice expression](http://www.lmwcs.com/rptools/wiki/Dice_Expressions) **XdYdhZ** (drop highest) and 7 others.
 * [#355][i355] - Macro Editor details tab reorganized to give some fields more room. Macro button tooltip entry field made into a larger text area with HTML highlighting.  Checkbox to enable/disable hotkey display on button.  UDFs now show in auto-complete of macro editor with their tooltip as help text.
 * [#426][i426] - New Line & Radius templates that start at cells. New icons for all template types.
 * [#424][i424] - Auto-completion in macro editor now works even if complete function name has already been entered.
@@ -398,7 +507,7 @@ Enhancements
 * [#106][i106] - Reset Size added to right-click menu for tokens/stamps.
 * [#299][i299] - Mouse pointer now visible when dragging tokens.
 * [#389][i389] - File -> Export -> Campaign File As... now supports converting back to non-decimal map units-per-cell values.
-* [#332][i332] - Added support for multiple personal lights and setting color for personal lights. 
+* [#332][i332] - Added support for multiple personal lights and setting color for personal lights.
 
 [igrd]: http://www.lmwcs.com/rptools/wiki/getRolled
 [ignr]: http://www.lmwcs.com/rptools/wiki/getNewRolls
@@ -457,8 +566,8 @@ Enhancements
 
 
 
-[i50]: https://github.com/RPTools/maptool/issues/50 
-[i107]: https://github.com/RPTools/maptool/issues/107 
+[i50]: https://github.com/RPTools/maptool/issues/50
+[i107]: https://github.com/RPTools/maptool/issues/107
 [i189]: https://github.com/RPTools/maptool/issues/189
 [i255]: https://github.com/RPTools/maptool/issues/255
 [i278]: https://github.com/RPTools/maptool/issues/278
@@ -529,7 +638,7 @@ A new shift+ctrl+spacebar command along with a new pointer image is now availabl
 * New RESTful functions getRequest & postRequest to send GET & POST requests to a URI. *Note: You must first turn access on in Preferences for these macro functions to work.
 * New function exportData exportData(FilePath file, String data, boolean appendToFile) which saves string data to external file.
 * New function getEnvironmentVariable(String name), Returns the value stored in the Environment Variable.
-* New menu option added to the "Connections" window. Right clicking a player will offer a "Whisper" command that prepopulates the chat window with a whisper macro.  
+* New menu option added to the "Connections" window. Right clicking a player will offer a "Whisper" command that prepopulates the chat window with a whisper macro.
 * [#237][i237] - Added support to use shift-enter to insert newlines into the command entry box (also known as the chat entry box)
 * [#239][i239] - MapToolScriptTokenMaker now handles function names with . notation and dynamically pulls in all functions names. TokenMakerMaker no longer needs to be ran upon changes to MTScript.
 * [#240][i240] - Macro Editor now has Auto-Completion for macro functions! A brief description and summary can be displayed (these will be added as time permits)

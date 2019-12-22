@@ -26,6 +26,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.basic.BasicToolBarUI;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -434,6 +435,29 @@ public class ToolbarPanel extends JToolBar {
     }
     tokenSelectionbuttonGroup.add(button);
     return button;
+  }
+
+  /**
+   * Return the current floating status of the ToolbarPanel.
+   *
+   * @return true if floating, false otherwise
+   */
+  private boolean isFloating() {
+    return getUI() instanceof BasicToolBarUI && ((BasicToolBarUI) ui).isFloating();
+  }
+
+  /**
+   * Show or hide the ToolbarPanel, even if it is floating.
+   *
+   * @param visible should the ToolbarPanel be visible or not
+   */
+  @Override
+  public void setVisible(boolean visible) {
+    if (isFloating()) {
+      SwingUtilities.getRoot(this).setVisible(visible);
+    } else {
+      super.setVisible(visible);
+    }
   }
 
   private class OptionPanel extends JToolBar {

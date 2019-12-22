@@ -237,7 +237,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         }
       case "json.evaluate":
         {
-          FunctionUtil.enforceTrusted(functionName);
+          FunctionUtil.blockUntrustedMacro(functionName);
           FunctionUtil.checkNumberParam(functionName, args, 1, 1);
           MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
           return jsonEvaluateArg(resolver, args.get(0));

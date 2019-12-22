@@ -23,8 +23,10 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
 
@@ -81,7 +83,6 @@ public class FunctionUtil {
    * the list size before trying to retrieve the token so it is safe to use for functions that have
    * the token as a optional argument.
    *
-   * @param res the variable resolver
    * @param functionName the function name (used for generating exception messages).
    * @param param the parameters for the function
    * @param indexToken the index to find the token at. If -1, use current token instead.
@@ -91,11 +92,7 @@ public class FunctionUtil {
    *     token can not be found, or if no token is specified and no token is impersonated.
    */
   public static Token getTokenFromParam(
-      MapToolVariableResolver res,
-      String functionName,
-      List<Object> param,
-      int indexToken,
-      int indexMap)
+      Parser parser, String functionName, List<Object> param, int indexToken, int indexMap)
       throws ParserException {
 
     int size = param.size();
@@ -117,12 +114,40 @@ public class FunctionUtil {
         }
       }
     } else {
-      token = res.getTokenInContext();
+      token = ((MapToolVariableResolver) parser.getVariableResolver()).getTokenInContext();
       if (token == null) {
         throw new ParserException(I18N.getText(KEY_NO_IMPERSONATED, functionName));
       }
     }
     return token;
+  }
+
+  /**
+   * Gets the ZoneRender from the specified index or returns the current ZoneRender. This method
+   * will check the list size before trying to retrieve the token so it is safe to use for functions
+   * that have the map as a optional argument.
+   *
+   * @param functionName the function name (used for generating exception messages).
+   * @param param the parameters for the function
+   * @param indexMap the index to find the map name at. If -1, use current map instead.
+   * @return the ZoneRenderer.
+   * @throws ParserException if the map cannot be found
+   */
+  public static ZoneRenderer getZoneRendererFromParam(
+      String functionName, List<Object> param, int indexMap) throws ParserException {
+
+    String map = indexMap >= 0 && param.size() > indexMap ? param.get(indexMap).toString() : null;
+
+    ZoneRenderer zoneRenderer;
+    if (map == null) {
+      zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    } else {
+      zoneRenderer = MapTool.getFrame().getZoneRenderer(map);
+      if (zoneRenderer == null) {
+        throw new ParserException(I18N.getText(KEY_UNKNOWN_MAP, functionName, map));
+      }
+    }
+    return zoneRenderer;
   }
 
   /**
@@ -353,13 +378,12 @@ public class FunctionUtil {
   }
 
   /**
-   * Checks to see if the the macro is executing an a trusted context and if not will throw an
-   * exception.
+   * Throw an exception if the macro isn't trusted.
    *
-   * @param functionName The name of the function being executed.
-   * @throws ParserException If the macro execution context does not have enough permission.
+   * @param functionName the name of the function.
+   * @throws ParserException if the macro isn't trusted.
    */
-  public static void enforceTrusted(String functionName) throws ParserException {
+  public static void blockUntrustedMacro(String functionName) throws ParserException {
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }

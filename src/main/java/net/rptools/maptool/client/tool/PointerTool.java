@@ -242,6 +242,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     isDraggingToken = true;
   }
 
+  /** Complete the drag of the token, and expose FOW */
   public void stopTokenDrag() {
     renderer.commitMoveSelectionSet(tokenBeingDragged.getId()); // TODO: figure out a better way
     isDraggingToken = false;
@@ -253,12 +254,30 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     exposeFoW(null);
   }
 
+  /**
+   * Expose the FoW at a ZonePoint, or at the visible area, for the selected token
+   *
+   * @param p the ZonePoint to expose, or a null if exposing visible area and last path
+   */
   public void exposeFoW(ZonePoint p) {
     // if has fog(required)
     // and ((isGM with pref set) OR serverPolicy allows auto reveal by players)
-    if (renderer.getZone().hasFog()
-        && ((AppPreferences.getAutoRevealVisionOnGMMovement() && MapTool.getPlayer().isGM())
-            || MapTool.getServerPolicy().isAutoRevealOnMovement())) {
+
+    String name = MapTool.getPlayer().getName();
+    boolean isGM = MapTool.getPlayer().isGM();
+    boolean ownerReveal; // if true, reveal FoW if current player owns the token.
+    boolean hasOwnerReveal; // if true, reveal FoW if token has an owner.
+    boolean noOwnerReveal; // if true, reveal FoW if token has no owners.
+
+    if (MapTool.isPersonalServer()) {
+      ownerReveal =
+          hasOwnerReveal = noOwnerReveal = AppPreferences.getAutoRevealVisionOnGMMovement();
+    } else {
+      ownerReveal = MapTool.getServerPolicy().isAutoRevealOnMovement();
+      hasOwnerReveal = isGM && MapTool.getServerPolicy().isAutoRevealOnMovement();
+      noOwnerReveal = isGM && MapTool.getServerPolicy().getGmRevealsVisionForUnownedTokens();
+    }
+    if (renderer.getZone().hasFog() && (ownerReveal || hasOwnerReveal || noOwnerReveal)) {
       Set<GUID> exposeSet = new HashSet<GUID>();
       Zone zone = renderer.getZone();
       for (GUID tokenGUID : renderer.getOwnedTokens(renderer.getSelectedTokenSet())) {
@@ -266,18 +285,9 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         if (token == null) {
           continue;
         }
-
-        // Old logic
-        // if (MapTool.getPlayer().isGM() || token.isOwner(MapTool.getPlayer().getName())) {
-        //  exposeSet.add(tokenGUID);
-        // }
-
-        // Jamz: New logic so GM only reveals FoW for unowned tokens if server option is enabled
-        if (token.isOwner(MapTool.getPlayer().getName())) exposeSet.add(tokenGUID);
-        else if (MapTool.getPlayer().isGM() && token.hasOwners()) exposeSet.add(tokenGUID);
-        else if (MapTool.getPlayer().isGM()
-            && MapTool.getServerPolicy().getGmRevealsVisionForUnownedTokens())
-          exposeSet.add(tokenGUID);
+        if (ownerReveal && token.isOwner(name)) exposeSet.add(tokenGUID);
+        else if (hasOwnerReveal && token.hasOwners()) exposeSet.add(tokenGUID);
+        else if (noOwnerReveal && !token.hasOwners()) exposeSet.add(tokenGUID);
       }
 
       if (p != null) {
@@ -1294,8 +1304,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
             // Only let the GM's do this
             if (MapTool.getPlayer().isGM()) {
               FogUtil.exposePCArea(renderer);
-              // Jamz: This doesn't seem to be needed
-              // MapTool.serverCommand().exposePCArea(renderer.getZone().getId());
             }
           }
         });

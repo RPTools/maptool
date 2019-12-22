@@ -61,6 +61,15 @@ import org.apache.logging.log4j.Logger;
 public class FogUtil {
   private static final Logger log = LogManager.getLogger(FogUtil.class);
 
+  /**
+   * Return the visible area for an origin, a lightSourceArea and a VBL.
+   *
+   * @param x the x vision origin.
+   * @param y the y vision origin.
+   * @param vision the lightSourceArea.
+   * @param topology the VBL topology.
+   * @return the visible area.
+   */
   public static Area calculateVisibility(int x, int y, Area vision, AreaTree topology) {
     CodeTimer timer = new CodeTimer("calculateVisibility");
 
@@ -128,12 +137,24 @@ public class FogUtil {
     return vision;
   }
 
+  /**
+   * Expose visible area and previous path of all tokens in the token set. Server and clients are
+   * updated.
+   *
+   * @param renderer the ZoneRenderer of the map
+   * @param tokenSet the set of GUID of the tokens
+   */
   public static void exposeVisibleArea(final ZoneRenderer renderer, Set<GUID> tokenSet) {
     exposeVisibleArea(renderer, tokenSet, false);
   }
 
-  // Jamz: Added boolean exposeCurrentOnly
-  // @SuppressWarnings("unchecked")
+  /**
+   * Expose the visible area of all tokens in the token set. Server and clients are updated.
+   *
+   * @param renderer the ZoneRenderer of the map
+   * @param tokenSet the set of GUID of the tokens
+   * @param exposeCurrentOnly show only the current vision be exposed, or the last path too?
+   */
   @SuppressWarnings("unchecked")
   public static void exposeVisibleArea(
       final ZoneRenderer renderer, Set<GUID> tokenSet, boolean exposeCurrentOnly) {
@@ -232,11 +253,13 @@ public class FogUtil {
    * This function is called by Meta-Shift-O, the token right-click, Expose {@code ->} only
    * Currently visible menu, from the Client/Server methods calls from
    * net.rptools.maptool.server.ServerMethodHandler.exposePCArea(GUID), and the macro
-   * exposePCOnlyArea().
+   * exposePCOnlyArea(). It takes the list of all PC tokens with sight and clear their exposed area,
+   * clear the general exposed area, and expose the currently visible area. The server and other
+   * clients are also updated.
    *
-   * @author updated Jamz
-   * @since updated 1.4.0.1
-   * @param renderer
+   * @author updated Jamz, Merudo
+   * @since updated 1.5.8
+   * @param renderer the ZoneRenderer
    */
   public static void exposePCArea(ZoneRenderer renderer) {
     Set<GUID> tokenSet = new HashSet<GUID>();
@@ -246,6 +269,7 @@ public class FogUtil {
     boolean isGM = MapTool.getPlayer().getRole() == Role.GM;
 
     for (Token token : tokList) {
+      // why check ownership? Only GM can run this.
       boolean owner = token.isOwner(playerName) || isGM;
 
       if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews())
@@ -256,9 +280,20 @@ public class FogUtil {
       tokenSet.add(token.getId());
     }
 
+    clearExposedArea(renderer.getZone(), true);
     renderer.getZone().clearExposedArea(tokenSet);
-    // this was .clearExposedArea(), changed to expose current area only vs last path
     exposeVisibleArea(renderer, tokenSet, true);
+  }
+
+  /**
+   * Clear the FoW on one map. Updates server and clients.
+   *
+   * @param zone the Zone of the map.
+   * @param globalOnly should only common area be cleared, or all token exposed areas?
+   */
+  private static void clearExposedArea(Zone zone, boolean globalOnly) {
+    zone.clearExposedArea(globalOnly);
+    MapTool.serverCommand().clearExposedArea(zone.getId(), globalOnly);
   }
 
   // Jamz: Expose not just PC tokens but also any NPC tokens the player owns
@@ -270,7 +305,7 @@ public class FogUtil {
    *
    * @author Jamz
    * @since 1.4.0.1
-   * @param renderer
+   * @param renderer the ZoneRenderer
    */
   public static void exposeAllOwnedArea(ZoneRenderer renderer) {
     Set<GUID> tokenSet = new HashSet<GUID>();
@@ -297,12 +332,14 @@ public class FogUtil {
     exposeVisibleArea(renderer, tokenSet, true);
   }
 
+  /**
+   * Restore the FoW on one map. Updates server and clients.
+   *
+   * @param renderer the ZoneRenderer of the map.
+   */
   public static void restoreFoW(final ZoneRenderer renderer) {
     // System.out.println("Zone ID: " + renderer.getZone().getId());
-
-    renderer.getZone().clearExposedArea();
-    renderer.flush();
-    MapTool.serverCommand().clearExposedArea(renderer.getZone().getId());
+    clearExposedArea(renderer.getZone(), false);
   }
 
   public static void exposeLastPath(final ZoneRenderer renderer, final Set<GUID> tokenSet) {
@@ -393,7 +430,10 @@ public class FogUtil {
   /**
    * Find the center point of a vision TODO: This is a horrible horrible method. the API is just
    * plain disgusting. But it'll work to consolidate all the places this has to be done until we can
-   * encapsulate it into the vision itself
+   * encapsulate it into the vision itself.
+   *
+   * @param token the token to get the vision center of.
+   * @param zone the Zone where the token is.
    */
   public static Point calculateVisionCenter(Token token, Zone zone) {
     Grid grid = zone.getGrid();

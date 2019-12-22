@@ -41,7 +41,7 @@ deploy:
     artifact: MapTool-Jar, MapTool-Windows, MapTool-Linux
     draft: false
     prerelease: true
-    force_update: false
+    force_update: true
     on:
       APPVEYOR_REPO_TAG: true
 on_success:

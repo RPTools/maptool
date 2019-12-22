@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonElement;
 import com.jayway.jsonpath.*;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import java.math.BigDecimal;
@@ -107,7 +108,22 @@ public class JSONMacroFunctionsOld extends AbstractFunction {
       String path = parameters.get(1).toString();
 
       try {
-        return JsonPath.using(jaywayConfig).parse(jsonStr).read(path).toString();
+        JsonElement obj = JsonPath.using(jaywayConfig).parse(jsonStr).read(path);
+        if (obj.isJsonPrimitive()) {
+          try {
+            // Maybe it's a number.
+            BigDecimal bd = obj.getAsBigDecimal();
+            return bd;
+          } catch (NumberFormatException e) {
+            // So, not a number.
+            // Doing a toString() was wrapping the returned string in quotes.
+            return obj.getAsString();
+          }
+        } else {
+          // Curiously using getAsString() on JsonObjects threw an exception but using
+          // toString() works fine for objects and arrays.
+          return obj.toString();
+        }
       } catch (Exception e) {
         throw new ParserException(
             I18N.getText("macro.function.json.path", functionName, e.getLocalizedMessage()));

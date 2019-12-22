@@ -16,6 +16,8 @@ package net.rptools.maptool.client.functions;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -160,10 +162,12 @@ public class getInfoFunction extends AbstractFunction {
     cinfo.put("portrait size", AppPreferences.getPortraitSize());
     cinfo.put("show portrait", AppPreferences.getShowPortrait());
     cinfo.put("show stat sheet", AppPreferences.getShowStatSheet());
+    cinfo.put("file sync directory", AppPreferences.getFileSyncPath());
     cinfo.put("version", MapTool.getVersion());
     cinfo.put("isFullScreen", MapTool.getFrame().isFullScreen() ? BigDecimal.ONE : BigDecimal.ZERO);
     cinfo.put("timeInMs", System.currentTimeMillis());
     cinfo.put("timeDate", getTimeDate());
+    cinfo.put("isoTimeDate", getIsoTimeDate());
     if (MapTool.getParser().isMacroTrusted()) {
       Map<String, Object> libInfo = new HashMap<String, Object>();
       for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
@@ -193,6 +197,10 @@ public class getInfoFunction extends AbstractFunction {
     Calendar cal = Calendar.getInstance();
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     return sdf.format(cal.getTime());
+  }
+
+  private String getIsoTimeDate() {
+    return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now());
   }
 
   /**

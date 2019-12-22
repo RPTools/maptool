@@ -19,8 +19,10 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
 
 public class PlayerView {
+  /** The role of the player (GM or PLAYER). */
   private final Player.Role role;
-  private final List<Token> tokens; // Optional
+  /** Restrict the view to these tokens. Optional. */
+  private final List<Token> tokens;
 
   // Optimization
   private final String hash;
@@ -47,6 +49,7 @@ public class PlayerView {
     return tokens;
   }
 
+  /** @return true if the view is for some tokens only, false if the view is global */
   public boolean isUsingTokenView() {
     return tokens != null;
   }
