@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.functions.json;
 
 import com.google.gson.JsonArray;
@@ -14,14 +28,10 @@ import java.util.stream.Collectors;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
 
-/**
- * Class used to implement MT Script related Json functions / utilities for JsonArrays.
- */
+/** Class used to implement MT Script related Json functions / utilities for JsonArrays. */
 public class JsonArrayFunctions {
 
-  /**
-   * Class used to compare numeric {@link JsonElement}s.
-   */
+  /** Class used to compare numeric {@link JsonElement}s. */
   private static class JsonNumberComparator implements Comparator<JsonElement> {
     @Override
     public int compare(JsonElement o1, JsonElement o2) {
@@ -29,9 +39,7 @@ public class JsonArrayFunctions {
     }
   }
 
-  /**
-   * Class used to compare non numeric {@link JsonElement}s.
-   */
+  /** Class used to compare non numeric {@link JsonElement}s. */
   private static class JsonStringComparator implements Comparator<JsonElement> {
     @Override
     public int compare(JsonElement o1, JsonElement o2) {
@@ -48,6 +56,7 @@ public class JsonArrayFunctions {
 
     /**
      * Creates a new instance of <code>JsonObjectComparator</code>.
+     *
      * @param fields The fields used to compare {@link JsonObject}s.
      * @param comparators The {@link Comparator}s used to compare {@link JsonObject}s.
      */
@@ -75,10 +84,11 @@ public class JsonArrayFunctions {
   /** An empty {@link JsonArray}. */
   public static final JsonArray EMPTY_JSON_ARRAY = new JsonArray();
 
-
   /**
    * Creates a new <code>JsonArrayFunctions</code> instance.
-   * @param converter the {@link JsonMTSTypeConversion} used to convert primitive types between json and MTS.
+   *
+   * @param converter the {@link JsonMTSTypeConversion} used to convert primitive types between json
+   *     and MTS.
    */
   JsonArrayFunctions(JsonMTSTypeConversion converter) {
     typeConversion = converter;
@@ -111,6 +121,7 @@ public class JsonArrayFunctions {
 
   /**
    * Converts a {@link JsonArray} into a MT Script string property.
+   *
    * @param jsonArray The JsonArray to convert.
    * @param delim The delimiter to user in converted string property.
    * @return the resultant string property.
@@ -127,12 +138,12 @@ public class JsonArrayFunctions {
   }
 
   /**
-   * Converts the argument into a Json Array. If the argument is a primitive type then a {@link JsonArray}
-   * containing only that primitive will be returned.
+   * Converts the argument into a Json Array. If the argument is a primitive type then a {@link
+   * JsonArray} containing only that primitive will be returned.
    *
    * @param o The {@link Object} to coerce into a {@link JsonArray}.
-   * @return either the argument converted to a {@link JsonArray} or a {@link JsonArray} containing the object.
-   *
+   * @return either the argument converted to a {@link JsonArray} or a {@link JsonArray} containing
+   *     the object.
    * @throws ParserException if there is an error while coercing the value to an array.
    */
   public JsonArray coerceToJsonArray(Object o) throws ParserException {
@@ -150,8 +161,8 @@ public class JsonArrayFunctions {
 
   /**
    * Concatenates multiple {@link JsonArray}s returning a new array.
-   * @param arrays the {@link JsonArray}s to concatenate.
    *
+   * @param arrays the {@link JsonArray}s to concatenate.
    * @return a new {@link JsonArray} which is a concatenation of the passed in arrays.
    */
   public JsonArray concatenate(List<JsonArray> arrays) {
@@ -165,11 +176,10 @@ public class JsonArrayFunctions {
 
   /**
    * Concatenates a {@link JsonArray} and other values returning a new {@link JsonArray}.
+   *
    * @param array The {@link JsonArray} top copy into the new array.
    * @param values the values to concatenate onto the end of the new array.
-   *
    * @return a new {@link JsonArray} containing the concatenated arguments.
-   *
    * @throws ParserException If an error occurs while converting the values to json.
    */
   public JsonArray concatenate(JsonArray array, List<Object> values) throws ParserException {
@@ -183,9 +193,9 @@ public class JsonArrayFunctions {
 
   /**
    * Returns a new {@link JsonArray} with the specified index removed.
+   *
    * @param jsonArray the array to to operate on.
    * @param index the index of the item to be excluded in the result.
-   *
    * @return a new {@link JsonArray} without the specified index.
    */
   public JsonArray remove(JsonArray jsonArray, int index) {
@@ -196,29 +206,29 @@ public class JsonArrayFunctions {
   }
 
   /**
-   * Returns a copy of a {@link JsonArray} sorted in ascending order.
-   * If all of the elements in the array can be converted to numeric then the will be sorted as numbers,
-   * otherwise they will be sorted as string.
-   * @param jsonArray the array to sort.
+   * Returns a copy of a {@link JsonArray} sorted in ascending order. If all of the elements in the
+   * array can be converted to numeric then the will be sorted as numbers, otherwise they will be
+   * sorted as string.
    *
+   * @param jsonArray the array to sort.
    * @return sorted copy of the array.
    */
   public JsonArray sortAscending(JsonArray jsonArray) {
     List<JsonElement> list = jsonArrayToList(jsonArray);
     if (allNumbers(list)) {
       list.sort(new JsonNumberComparator());
-      } else {
+    } else {
       list.sort(new JsonStringComparator());
     }
 
     return listToJsonArray(list);
   }
   /**
-   * Returns a copy of a {@link JsonArray} sorted in descending order.
-   * If all of the elements in the array can be converted to numeric then the will be sorted as numbers,
-   * otherwise they will be sorted as string.
-   * @param jsonArray the array to sort.
+   * Returns a copy of a {@link JsonArray} sorted in descending order. If all of the elements in the
+   * array can be converted to numeric then the will be sorted as numbers, otherwise they will be
+   * sorted as string.
    *
+   * @param jsonArray the array to sort.
    * @return sorted copy of the array.
    */
   public JsonElement sortDescending(JsonArray jsonArray) {
@@ -232,10 +242,9 @@ public class JsonArrayFunctions {
     return listToJsonArray(list);
   }
 
-
   /**
-   * This method sorts a list of {@link JsonObject}s using the specified fields.
-   * If the fields can be converted to a number it will be sorted numerically otherwise as a string.
+   * This method sorts a list of {@link JsonObject}s using the specified fields. If the fields can
+   * be converted to a number it will be sorted numerically otherwise as a string.
    *
    * @param list the list of {@link JsonObject}s to sort.
    * @param fields the fields to sort by.
@@ -258,9 +267,7 @@ public class JsonArrayFunctions {
    *
    * @param jsonArray the array to return a sorted copy of.
    * @param fields the fields to sort by.
-   *
    * @return sorted copy of the passed in list.
-   *
    * @throws ParserException if all of the objects do not have the required fields.
    */
   public JsonElement sortObjectsAscending(JsonArray jsonArray, List<String> fields)
@@ -275,9 +282,7 @@ public class JsonArrayFunctions {
    *
    * @param jsonArray the array to return a sorted copy of.
    * @param fields the fields to sort by.
-   *
    * @return sorted copy of the passed in list.
-   *
    * @throws ParserException if all of the objects do not have the required fields.
    */
   public JsonElement sorObjectsDescending(JsonArray jsonArray, List<String> fields)
@@ -288,12 +293,10 @@ public class JsonArrayFunctions {
     return listToJsonArray(list);
   }
 
-
   /**
    * Converts a {@link JsonArray} into a list of {@link JsonElement}s.
    *
    * @param jsonArray the <code>JsonArray</code> to convert.
-   *
    * @return list of {@link JsonElement}s.
    */
   private List<JsonElement> jsonArrayToList(JsonArray jsonArray) {
@@ -310,8 +313,8 @@ public class JsonArrayFunctions {
    *
    * @param jsonArray the <code>JsonArray</code> to convert.
    * @return List containing the {@link JsonObject}s that are in the {@link JsonArray}.
-   *
-   * @throws ParserException if the {@link JsonArray} contains anything other than {@link JsonObject}.
+   * @throws ParserException if the {@link JsonArray} contains anything other than {@link
+   *     JsonObject}.
    */
   private List<JsonObject> jsonArrayToListOfObjects(JsonArray jsonArray) throws ParserException {
     List<JsonObject> list = new ArrayList<>(jsonArray.size());
@@ -330,7 +333,6 @@ public class JsonArrayFunctions {
    * Converts a list of {@link JsonElement}s to a {@link JsonArray}.
    *
    * @param list the list of {@link JsonElement}s to convert.
-   *
    * @return a {@link JsonArray} containing all the {@link JsonElement}s.
    */
   private JsonArray listToJsonArray(List<? extends JsonElement> list) {
@@ -346,7 +348,6 @@ public class JsonArrayFunctions {
    * Checks to see if all of the {@link JsonElement}s in the list can be converted to a number.
    *
    * @param list the list to check.
-   *
    * @return <code>true</code> if all {@link JsonElement}s can be converted to a number.
    */
   private boolean allNumbers(List<JsonElement> list) {
@@ -368,11 +369,10 @@ public class JsonArrayFunctions {
 
   /**
    * Checks if the {@link JsonArray} contains the specified value.
+   *
    * @param jsonArray the {@link JsonArray} to check.
    * @param value the value to check for.
-   *
    * @return <code>true</code> if the {@link}
-   *
    * @throws ParserException if there is an error converting the value to json.
    */
   public boolean contains(JsonArray jsonArray, Object value) throws ParserException {
@@ -386,14 +386,14 @@ public class JsonArrayFunctions {
     return false;
   }
 
-
   /**
-   * Checks to see if the specified key in all of the {@link JsonObject}s in the list can be converted to a number.
+   * Checks to see if the specified key in all of the {@link JsonObject}s in the list can be
+   * converted to a number.
    *
    * @param list the list of {@link JsonObject}s to checks to check
    * @param key the key to check in each of the {@link JsonObject}s.
-   * @return <code>true</code> if they key for all the {@link JsonObject}s can be converted to a number.
-   *
+   * @return <code>true</code> if they key for all the {@link JsonObject}s can be converted to a
+   *     number.
    * @throws ParserException if any of the {@link JsonObject}s do not contain the key.
    */
   private boolean allNumbers(List<JsonObject> list, String key) throws ParserException {
@@ -401,8 +401,7 @@ public class JsonArrayFunctions {
       JsonObject jsonObject = list.get(i);
 
       if (!jsonObject.has(key)) {
-        throw new ParserException(
-            I18N.getText("macro.function.json.notAllContainKey", key));
+        throw new ParserException(I18N.getText("macro.function.json.notAllContainKey", key));
       }
 
       JsonElement jsonVal = jsonObject.get(key);
@@ -432,13 +431,12 @@ public class JsonArrayFunctions {
     return listToJsonArray(list);
   }
 
-
- /**
-  * Returns a new {@link JsonArray} with the contents of the passed in {@link JsonArray} reversed.
-  *
-  * @param jsonArray the {@link JsonArray} to copy and reversed.
-  * @return the new {@link JsonArray} with reversed contents of the passed in array.
-  */
+  /**
+   * Returns a new {@link JsonArray} with the contents of the passed in {@link JsonArray} reversed.
+   *
+   * @param jsonArray the {@link JsonArray} to copy and reversed.
+   * @return the new {@link JsonArray} with reversed contents of the passed in array.
+   */
   public JsonArray reverse(JsonArray jsonArray) {
     List<JsonElement> list = jsonArrayToList(jsonArray);
     Collections.reverse(list);
@@ -447,6 +445,7 @@ public class JsonArrayFunctions {
 
   /**
    * Checks if the {@link JsonArray} is empty.
+   *
    * @param jsonArray the <code>JsonArray</code> to check.
    * @return <code>true</code> if there is nothing in the array otherwise <code>false</code>/
    */
@@ -455,7 +454,8 @@ public class JsonArrayFunctions {
   }
 
   /**
-   * Returns the number of occurrences of a value in a {@link JsonArray} starting at a specific index.
+   * Returns the number of occurrences of a value in a {@link JsonArray} starting at a specific
+   * index.
    *
    * @param jsonArray The {@link JsonArray} to search through.
    * @param value The value to search for.
@@ -481,7 +481,6 @@ public class JsonArrayFunctions {
    * @param jsonArray The {@link JsonArray} to check.
    * @param value The value to check for.
    * @param start The index in the array to start at.
-   *
    * @return the index of the value or -1 if it is not found.
    */
   public long indexOf(JsonArray jsonArray, JsonElement value, int start) {
@@ -499,7 +498,6 @@ public class JsonArrayFunctions {
    * Returns a new {@link JsonArray} which contains the contents of all passed in arrays merged.
    *
    * @param arrays The arrays to merge.
-   *
    * @return The merged array.
    */
   public JsonArray merge(List<JsonArray> arrays) {
@@ -554,13 +552,12 @@ public class JsonArrayFunctions {
     return mergeLists(lists);
   }
 
-
   /**
-   * Returns a new {@link JsonArray} with the contents of the other passed in arrays removed from it.
+   * Returns a new {@link JsonArray} with the contents of the other passed in arrays removed from
+   * it.
    *
    * @param jsonArray The array with initial values.
    * @param removed The list of arrays of values to remove.
-   *
    * @return The new resulting array.
    */
   public JsonArray removeAll(JsonArray jsonArray, List<JsonArray> removed) {
@@ -572,12 +569,11 @@ public class JsonArrayFunctions {
     return listToJsonArray(result);
   }
 
-
   /**
-   * Converts the keys of a {@link JsonObject} to a list of {@link JsonElement}s (actually {@link JsonPrimitive}).
+   * Converts the keys of a {@link JsonObject} to a list of {@link JsonElement}s (actually {@link
+   * JsonPrimitive}).
    *
    * @param jsonObject the {@link JsonElement} to extract the keys from.
-   *
    * @return a list of the keys.
    */
   private List<JsonElement> objectKeysAsElements(JsonObject jsonObject) {
@@ -589,14 +585,12 @@ public class JsonArrayFunctions {
     return jsonElements;
   }
 
-
   /**
-   * Performs a union on multiple {@link JsonArray}/{@link JsonObject}s returning a new {@link JsonArray} with the result.
-   * Note: this is not a merge, if the same value appears more than once in the input {@link JsonArray}/{@link JsonObject}
-   * it will only appear once in the output.
+   * Performs a union on multiple {@link JsonArray}/{@link JsonObject}s returning a new {@link
+   * JsonArray} with the result. Note: this is not a merge, if the same value appears more than once
+   * in the input {@link JsonArray}/{@link JsonObject} it will only appear once in the output.
    *
    * @param elements The {@link JsonArray}s to perform the merge on.
-   *
    * @return the result of the union.
    */
   public JsonArray union(List<JsonElement> elements) {
@@ -614,11 +608,12 @@ public class JsonArrayFunctions {
   }
 
   /**
-   * Returns a new {@link JsonArray} with an intersection of all passed in {@link JsonArray}/{@link JsonObject}s.
+   * Returns a new {@link JsonArray} with an intersection of all passed in {@link JsonArray}/{@link
+   * JsonObject}s.
    *
    * @param elements The {@link JsonArray}s to take the intersection of.
-   *
-   * @return a {@link JsonArray} containing an intersection of the passed in {@link JsonArray}/{@link JsonObject}s.
+   * @return a {@link JsonArray} containing an intersection of the passed in {@link
+   *     JsonArray}/{@link JsonObject}s.
    */
   public JsonArray intersection(List<JsonElement> elements) {
     List<JsonElement> intersection = new ArrayList<>();
@@ -643,11 +638,10 @@ public class JsonArrayFunctions {
   }
 
   /**
-   * Returns a new {@link JsonArray} containing the elements in the first {@link JsonArray}/{@link JsonObject} which
-   * are not in the other {@link JsonArray}/{@link JsonObject}.
+   * Returns a new {@link JsonArray} containing the elements in the first {@link JsonArray}/{@link
+   * JsonObject} which are not in the other {@link JsonArray}/{@link JsonObject}.
    *
    * @param elements the {@link JsonArray}/{@link JsonObject} to get the difference of.
-   *
    * @return the resultant {@link JsonArray}.
    */
   public JsonArray difference(List<JsonElement> elements) {
@@ -677,7 +671,6 @@ public class JsonArrayFunctions {
    * first {@link JsonObject}/{@link JsonArray} passed in.
    *
    * @param elements the {@link JsonObject}/{@link JsonArray}s to check.
-   *
    * @return <code>true</code> if the first value is a superset of all subsequent values.
    */
   public boolean isSubset(List<JsonElement> elements) {
@@ -692,7 +685,7 @@ public class JsonArrayFunctions {
     for (int i = 1; i < elements.size(); i++) {
       JsonElement jsonElement = elements.get(i);
       if (jsonElement.isJsonObject()) {
-         remaining.addAll(objectKeysAsElements(jsonElement.getAsJsonObject()));
+        remaining.addAll(objectKeysAsElements(jsonElement.getAsJsonObject()));
       } else {
         remaining.addAll(jsonArrayToList(jsonElement.getAsJsonArray()));
       }
@@ -701,18 +694,18 @@ public class JsonArrayFunctions {
     return first.containsAll(remaining);
   }
 
-
   /**
    * Returns a new {@link JsonArray} that contains the values in <code>removeFrom</code> with the
    * first occurrence of each values in <code>toRemove</code> removed.
-   * @param removeFrom the {@link JsonArray} that contains the values to start with.
-   * @param toRemove the {@link JsonArray} that contains the values to remove the first occurrence of.
    *
+   * @param removeFrom the {@link JsonArray} that contains the values to start with.
+   * @param toRemove the {@link JsonArray} that contains the values to remove the first occurrence
+   *     of.
    * @return the resulting {@link JsonArray}.
    */
   public JsonArray removeFirst(JsonArray removeFrom, JsonArray toRemove) {
     List<JsonElement> removeFromList = jsonArrayToList(removeFrom);
-    List<JsonElement> toRemoveList = jsonArrayToList( toRemove);
+    List<JsonElement> toRemoveList = jsonArrayToList(toRemove);
 
     for (JsonElement jsonElement : toRemoveList) {
       removeFromList.remove(jsonElement);
@@ -721,11 +714,10 @@ public class JsonArrayFunctions {
     return listToJsonArray(removeFromList);
   }
 
-
   /**
    * Converts a {@link JsonArray} into a list of MT Script objects.
-   * @param jsonArray The {@link JsonArray} to convert.
    *
+   * @param jsonArray The {@link JsonArray} to convert.
    * @return the list of {@link JsonArray} objects.
    */
   public List<Object> jsonArrayAsMTScriptList(JsonArray jsonArray) {
@@ -737,24 +729,21 @@ public class JsonArrayFunctions {
     return list;
   }
 
-
   /**
    * Parses a <code>String</code> and returns it as a {@link JsonArray}.
    *
    * @param json the <code>String</code> to parse.
-   *
    * @return the parsed {@link JsonArray}.
-   *
    * @throws ParserException if there is an error parsing the <code>String</code>.
    */
   public JsonArray parseJsonArray(String json) throws ParserException {
-    JsonElement jsonElement =  typeConversion.asJsonElement(json);
+    JsonElement jsonElement = typeConversion.asJsonElement(json);
     return jsonElement.getAsJsonArray();
   }
 
-
   /**
    * Converts the elements in a {@link JsonArray} into a list of <code>String</code>s.
+   *
    * @param jsonArray The {@link JsonArray} to convert to a list of <code>String</code>s.
    * @return The list of <code>String</code>s.
    */
@@ -769,8 +758,8 @@ public class JsonArrayFunctions {
 
   /**
    * Returns a shallow copy of the passed in {@link JsonArray}.
-   * @param jsonArray The {@link JsonArray} to return a shallow copy of.
    *
+   * @param jsonArray The {@link JsonArray} to return a shallow copy of.
    * @return the copy of the array.
    */
   JsonArray shallowCopy(JsonArray jsonArray) {

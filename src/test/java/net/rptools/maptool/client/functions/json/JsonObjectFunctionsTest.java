@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.functions.json;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -234,6 +248,56 @@ class JsonObjectFunctionsTest {
 
     assertTrue(result.keySet().containsAll(jsonObject1.keySet()));
     assertTrue(result.keySet().containsAll(jsonObject3.keySet()));
+  }
 
+  @Test
+  void removeAll() {
+    JsonObject jobj = new JsonObject();
+    jobj.addProperty("test1", "This is a test");
+    jobj.addProperty("test2", "This is another test");
+    jobj.addProperty("test3", "Yet another test");
+    jobj.addProperty("test4", "Another test?");
+    jobj.addProperty("test5", "This is getting monotonous");
+
+    JsonObject remove1 = new JsonObject();
+    remove1.addProperty("test3", "doesn't matter");
+    JsonObject remove2 = new JsonObject();
+    remove2.addProperty("test2", "doesn't matter");
+    remove2.addProperty("test4", "doesn't matter");
+
+    JsonObject result = jsonObjectFunctions.removeAll(jobj, List.of(remove1));
+
+    assertEquals(4, result.size());
+    assertFalse(result.has("test3"));
+
+    result = jsonObjectFunctions.removeAll(jobj, List.of(remove1, remove2));
+
+    assertEquals(2, result.size());
+    assertFalse(result.has("test2"));
+    assertFalse(result.has("test3"));
+    assertFalse(result.has("test4"));
+  }
+
+  @Test
+  void shallowCopy() {
+    JsonObject jobj = new JsonObject();
+    jobj.addProperty("test1", "This is a test");
+    jobj.addProperty("test2", "This is another test");
+    jobj.addProperty("test3", "Yet another test");
+    jobj.addProperty("test4", "Another test?");
+    jobj.addProperty("test5", "This is getting monotonous");
+
+    JsonObject job2 = new JsonObject();
+    job2.addProperty("hello", "world");
+
+    jobj.add("hello", job2);
+
+    JsonObject copy = jsonObjectFunctions.shallowCopy(jobj);
+
+    assertEquals(jobj.size(), copy.size());
+
+    for (String key : jobj.keySet()) {
+      assertSame(jobj.get(key), copy.get(key));
+    }
   }
 }

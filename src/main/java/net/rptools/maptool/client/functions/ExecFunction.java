@@ -34,10 +34,9 @@ public class ExecFunction extends AbstractFunction {
   /** Singleton instance of the ExecFunction class. */
   private static final ExecFunction instance = new ExecFunction();
 
-
   /** Object used for various operations on {@link JsonArray}s. */
-  private JsonArrayFunctions jsonArrayFunctions = JSONMacroFunctions.getInstance().getJsonArrayFunctions();
-
+  private JsonArrayFunctions jsonArrayFunctions =
+      JSONMacroFunctions.getInstance().getJsonArrayFunctions();
 
   /**
    * Gets and instance of the ExecFunction class.
@@ -102,7 +101,7 @@ public class ExecFunction extends AbstractFunction {
    * @param targets the list of targets
    */
   private static void sendExecFunction(
-    final String execName, List<Object> execArgs, boolean defer, Collection<String> targets) {
+      final String execName, List<Object> execArgs, boolean defer, Collection<String> targets) {
     if (defer) {
       EventQueue.invokeLater(
           new Runnable() {

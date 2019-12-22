@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.functions.json;
 
 import com.google.gson.JsonObject;
@@ -26,7 +40,6 @@ public class JsonObjectFunctions {
    * @param prop the MTS string property to convert into a {@link JsonObject}.
    * @param delim the delimiter used in the string properties.
    * @return a {@link JsonObject} convert4d from the string properties.
-   *
    * @throws ParserException if there is an error converting to json values.
    */
   public JsonObject fromStrProp(String prop, String delim) throws ParserException {
@@ -142,12 +155,10 @@ public class JsonObjectFunctions {
     return result;
   }
 
-
   /**
    * Returns a shallow copy of the {@link JsonObject}.
    *
    * @param jsonObject the {@link JsonObject} to make a shallow copy of.
-   *
    * @return a copy of the {@link JsonObject}.
    */
   JsonObject shallowCopy(JsonObject jsonObject) {
@@ -158,5 +169,4 @@ public class JsonObjectFunctions {
 
     return copy;
   }
-
 }

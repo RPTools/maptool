@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.functions.json;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,12 +39,18 @@ class JsonMTSTypeConversionTest {
     random = new Random(System.currentTimeMillis());
   }
 
-
   @Test
   void asScriptType() {
-    assertEquals("null", typeConversion.asScriptType(null), "Null type should convert to string \"null\"");
-    assertEquals("true", typeConversion.asScriptType(new JsonPrimitive(true)), "true should convert to string \"true\"");
-    assertEquals("false", typeConversion.asScriptType(new JsonPrimitive(false)), "true should convert to string \"true\"");
+    assertEquals(
+        "null", typeConversion.asScriptType(null), "Null type should convert to string \"null\"");
+    assertEquals(
+        "true",
+        typeConversion.asScriptType(new JsonPrimitive(true)),
+        "true should convert to string \"true\"");
+    assertEquals(
+        "false",
+        typeConversion.asScriptType(new JsonPrimitive(false)),
+        "true should convert to string \"true\"");
     for (int i = 0; i < 100; i++) {
       int ir = random.nextInt();
       assertEquals(BigDecimal.valueOf(ir), typeConversion.asScriptType(new JsonPrimitive(ir)));
@@ -104,7 +124,7 @@ class JsonMTSTypeConversionTest {
     assertNotSame(jsonObject, jsonElement);
 
     jsonObject.add("test", new JsonPrimitive("test1"));
-    jsonElement =  typeConversion.asClonedJsonElement(jsonObject.toString());
+    jsonElement = typeConversion.asClonedJsonElement(jsonObject.toString());
     assertEquals(jsonObject, jsonElement);
     assertNotSame(jsonObject, jsonElement);
 
@@ -119,12 +139,12 @@ class JsonMTSTypeConversionTest {
     assertNotSame(jsonArray, jsonElement);
 
     jsonArray.add("something");
-    jsonElement =  typeConversion.asClonedJsonElement(jsonArray.toString());
+    jsonElement = typeConversion.asClonedJsonElement(jsonArray.toString());
     assertEquals(jsonArray, jsonElement);
     assertNotSame(jsonArray, jsonElement);
 
     jsonArray.add(new JsonArray());
-    jsonElement =  typeConversion.asClonedJsonElement(jsonArray.toString());
+    jsonElement = typeConversion.asClonedJsonElement(jsonArray.toString());
     assertEquals(jsonArray, jsonElement);
     assertNotSame(jsonArray, jsonElement);
 
@@ -152,7 +172,6 @@ class JsonMTSTypeConversionTest {
       jsonPrimitive = new JsonPrimitive(Double.toString(id));
       jsonElement = typeConversion.asClonedJsonElement(jsonPrimitive);
       assertEquals(jsonPrimitive, jsonElement);
-
     }
   }
 
@@ -181,6 +200,5 @@ class JsonMTSTypeConversionTest {
     jsonPrimitive = typeConversion.convertPrimitiveFromString("{a:1, b:2}");
     assertTrue(jsonPrimitive.isString());
     assertFalse(jsonPrimitive.isNumber());
-
   }
 }

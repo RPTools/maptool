@@ -280,7 +280,7 @@ public class FunctionUtil {
    */
   public static JsonElement paramAsJson(String functionName, List<Object> parameters, int index)
       throws ParserException {
-    JsonElement jsonElement =  JSONMacroFunctions.getInstance().asJsonElement(parameters.get(index));
+    JsonElement jsonElement = JSONMacroFunctions.getInstance().asJsonElement(parameters.get(index));
     if (!jsonElement.isJsonObject() && !jsonElement.isJsonArray()) {
       throw new ParserException(I18N.getText(KEY_NOT_JSON, functionName, index + 1));
     }
@@ -353,11 +353,10 @@ public class FunctionUtil {
   }
 
   /**
-   * Checks to see if the the macro is executing an a trusted context and if not will throw
-   * an exception.
+   * Checks to see if the the macro is executing an a trusted context and if not will throw an
+   * exception.
    *
    * @param functionName The name of the function being executed.
-   *
    * @throws ParserException If the macro execution context does not have enough permission.
    */
   public static void enforceTrusted(String functionName) throws ParserException {
