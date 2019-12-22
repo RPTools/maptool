@@ -92,6 +92,10 @@ public class MapPropertiesDialog extends JDialog {
   private Zone zone;
   private PaintChooser paintChooser;
 
+  // As a new grid is created from scratch, need to hold on to these values.
+  private int gridOffsetX = 0;
+  private int gridOffsetY = 0;
+
   public MapPropertiesDialog(JFrame owner) {
     super(owner, "Map Properties", true);
     initialize();
@@ -225,6 +229,9 @@ public class MapPropertiesDialog extends JDialog {
     getHexHorizontalRadio().setSelected(zone.getGrid() instanceof HexGridHorizontal);
     getSquareRadio().setSelected(zone.getGrid() instanceof SquareGrid);
     getNoGridRadio().setSelected(zone.getGrid() instanceof GridlessGrid);
+
+    gridOffsetX = zone.getGrid().getOffsetX();
+    gridOffsetY = zone.getGrid().getOffsetY();
 
     fogPaint = zone.getFogPaint();
     backgroundPaint = zone.getBackgroundPaint();
@@ -473,6 +480,9 @@ public class MapPropertiesDialog extends JDialog {
       grid = GridFactory.createGrid(GridFactory.NONE);
     }
     grid.setSize(StringUtil.parseInteger(getPixelsPerCellTextField().getText(), grid.getSize()));
+
+    grid.setOffset(gridOffsetX, gridOffsetY);
+
     return grid;
   }
 
