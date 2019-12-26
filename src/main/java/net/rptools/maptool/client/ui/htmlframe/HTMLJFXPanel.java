@@ -25,14 +25,17 @@ import javafx.concurrent.Worker;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
+import javafx.scene.web.PromptData;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -122,9 +125,10 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
           webEngine = webView.getEngine();
           webEngine.getLoadWorker().stateProperty().addListener(this::changed);
 
-          // For alert / confirm JS events.
+          // For alert / confirm / prompt JS events.
           webEngine.setOnAlert(event -> showAlert(event.getData()));
           webEngine.setConfirmHandler(HTMLJFXPanel::showConfirm);
+          webEngine.setPromptHandler(HTMLJFXPanel::showPrompt);
 
           StackPane root = new StackPane(); // VBox would create empty space at bottom on resize
           root.getChildren().add(webView);
@@ -203,6 +207,19 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
 
     Optional<ButtonType> result = confirm.showAndWait();
     return (result.isPresent() && result.get() == ButtonType.OK);
+  }
+
+  /**
+   * Shows a prompt for a value.
+   *
+   * @param promptData the promptData object holding the default value and text
+   * @return string holding the value entered by the user, or a null
+   */
+  private static String showPrompt(PromptData promptData) {
+    TextInputDialog dialog = new TextInputDialog(promptData.getDefaultValue());
+    dialog.setTitle(I18N.getText("lineParser.dialogTitleNoToken"));
+    dialog.setContentText(promptData.getMessage());
+    return dialog.showAndWait().orElse(null);
   }
 
   /**
