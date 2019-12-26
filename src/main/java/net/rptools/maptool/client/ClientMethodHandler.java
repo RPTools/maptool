@@ -386,7 +386,10 @@ public class ClientMethodHandler extends AbstractMethodHandler {
 
               case execFunction:
                 ExecFunction.receiveExecFunction(
-                    (String) parameters[0], (String) parameters[1], (String) parameters[2]);
+                    (String) parameters[0],
+                    (String) parameters[1],
+                    (String) parameters[2],
+                    (List<Object>) parameters[3]);
                 return;
 
               case execLink:
