@@ -175,8 +175,7 @@ public class MapToolUtil {
         }
         do {
           newNum = randomSuffixFactory.nextSuffixForToken(newName);
-        } while (zone.getTokenByName(newName + " " + newNum) != null
-            && zone.getTokenByGMName(Integer.toString(newNum)) != null);
+        } while (nameIsDuplicate(zone, newName, newNum, addNumToName, addNumToGM));
 
       } else {
         newNum = zone.findFreeNumber(addNumToName ? newName : null, addNumToGM);
@@ -186,9 +185,26 @@ public class MapToolUtil {
         newName += " ";
         newName += newNum;
       }
-      if (addNumToGM) token.setGMName(Integer.toString(newNum));
+
+      // GM names just get a number
+      if (addNumToGM) {
+        token.setGMName(Integer.toString(newNum));
+      }
     }
     return newName;
+  }
+
+  private static boolean nameIsDuplicate(
+      Zone zone, String newName, Integer newNum, boolean playerName, boolean gmName) {
+    boolean result = false;
+
+    if (playerName) {
+      result = zone.getTokenByName(newName + " " + newNum) != null;
+    }
+    if (gmName) {
+      result = zone.getTokenByGMName(Integer.toString(newNum)) != null;
+    }
+    return result;
   }
 
   public static boolean isDebugEnabled() {
