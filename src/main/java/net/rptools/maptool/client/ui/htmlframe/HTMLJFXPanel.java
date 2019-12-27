@@ -28,16 +28,18 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
-import javafx.scene.web.PromptData;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
+import javafx.scene.web.*;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.TextMessage;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONObject;
+import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.*;
@@ -55,6 +57,23 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
 
   /** The WebEngine of the WebView. */
   private WebEngine webEngine;
+
+  /** The bridge from Javascript to Java. */
+  private static final JavaBridge bridge = new JavaBridge();
+
+  /** Represents a bridge from Javascript to Java. */
+  public static class JavaBridge {
+    /** Name of the Bridge. */
+    private static final String NAME = "MapTool";
+    /**
+     * Display a self-only message in the chat window.
+     *
+     * @param text the message to display
+     */
+    public void log(String text) {
+      MapTool.addMessage(TextMessage.me(null, text));
+    }
+  }
 
   /** JS that disables all following external script downloads. */
   private static final String BLOCK_EXT_JS_SCRIPT =
@@ -112,6 +131,10 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
           + "div {margin-bottom: 5px}"
           + "span.roll {background:#efefef}";
 
+  /** JS that directs the console.log function to the Java bridge function "log". */
+  private static final String REPLACE_LOG_SCRIPT =
+      "console.log = function(message){" + JavaBridge.NAME + ".log(message);};";
+
   /**
    * Creates a new HTMLJFXPanel.
    *
@@ -126,9 +149,11 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
           webEngine.getLoadWorker().stateProperty().addListener(this::changed);
 
           // For alert / confirm / prompt JS events.
-          webEngine.setOnAlert(event -> showAlert(event.getData()));
+          webEngine.setOnAlert(HTMLJFXPanel::showAlert);
           webEngine.setConfirmHandler(HTMLJFXPanel::showConfirm);
           webEngine.setPromptHandler(HTMLJFXPanel::showPrompt);
+          webEngine.setCreatePopupHandler(HTMLJFXPanel::showPopup);
+          webEngine.setOnError(HTMLJFXPanel::showError);
 
           StackPane root = new StackPane(); // VBox would create empty space at bottom on resize
           root.getChildren().add(webView);
@@ -185,11 +210,11 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   /**
    * Show an alert message.
    *
-   * @param message the message to display.
+   * @param event the event of the alert
    */
-  private static void showAlert(String message) {
+  private static void showAlert(WebEvent<String> event) {
     javafx.scene.control.Dialog<ButtonType> alert = new javafx.scene.control.Dialog<>();
-    alert.getDialogPane().setContentText(message);
+    alert.getDialogPane().setContentText(event.getData());
     alert.getDialogPane().getButtonTypes().add(ButtonType.OK);
     alert.showAndWait();
   }
@@ -223,6 +248,29 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   }
 
   /**
+   * Shows a popup window.
+   *
+   * @param popupFeatures the popup features
+   * @return the webEngine of the popup
+   */
+  private static WebEngine showPopup(PopupFeatures popupFeatures) {
+    Stage stage = new Stage((StageStyle.UTILITY));
+    WebView webViewPopup = new WebView();
+    stage.setScene(new Scene(webViewPopup, 300, 300));
+    stage.show();
+    return webViewPopup.getEngine();
+  }
+
+  /**
+   * Shows an error message in the chat window.
+   *
+   * @param event the error event
+   */
+  private static void showError(WebErrorEvent event) {
+    MapTool.addMessage(TextMessage.me(null, event.getMessage()));
+  }
+
+  /**
    * Check if the worker succeeded, then deal with the MapTool macro references and add event
    * listeners for the buttons and hyperlinks.
    *
@@ -234,7 +282,13 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       ObservableValue<? extends Worker.State> observable,
       Worker.State oldState,
       Worker.State newState) {
-    if (newState == Worker.State.SUCCEEDED) {
+
+    if (newState == Worker.State.SCHEDULED) {
+      // Redirect console.log to the JavaBridge
+      JSObject window = (JSObject) webEngine.executeScript("window");
+      window.setMember(JavaBridge.NAME, bridge);
+      webEngine.executeScript(REPLACE_LOG_SCRIPT);
+    } else if (newState == Worker.State.SUCCEEDED) {
       // Event listener for the href macro link clicks.
       EventListener listenerA =
           event -> {
