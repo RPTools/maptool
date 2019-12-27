@@ -3048,7 +3048,7 @@ public class AppActions {
 
     @Override
     public boolean isSelected() {
-      return MapTool.getFrame().getFrame(mtFrame).isVisible();
+      return MapTool.getFrame().getFrame(mtFrame).isShowing();
     }
 
     @Override
@@ -3059,7 +3059,7 @@ public class AppActions {
     @Override
     protected void executeAction(ActionEvent event) {
       DockableFrame frame = MapTool.getFrame().getFrame(mtFrame);
-      if (frame.isVisible()) {
+      if (frame.isShowing()) {
         MapTool.getFrame().getDockingManager().hideFrame(mtFrame.name());
       } else {
         MapTool.getFrame().getDockingManager().showFrame(mtFrame.name());
