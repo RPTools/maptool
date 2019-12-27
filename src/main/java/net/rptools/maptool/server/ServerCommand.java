@@ -160,7 +160,7 @@ public interface ServerCommand {
 
   public void message(TextMessage message);
 
-  public void execFunction(String functionText, String target, String source);
+  public void execFunction(String target, String source, String functionName, List<Object> args);
 
   public void execLink(String link, String target, String source);
 
