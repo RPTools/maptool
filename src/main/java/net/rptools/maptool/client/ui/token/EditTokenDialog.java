@@ -1813,7 +1813,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     public void setSelectedObject(Object paramObject) {
       if (paramObject != null) {
         j.setText(paramObject.toString());
-        if (PopupPanel.i == 0) {}
       } else {
         j.setText("");
       }
