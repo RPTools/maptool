@@ -97,23 +97,23 @@ public class JsonArrayFunctions {
   /**
    * Converts a string list to json array.
    *
-   * @param list The string list to convert.
+   * @param strList The string list to convert.
    * @param delim The delimiter to use to split the string list.
    * @return the string list as a json array.
    */
-  public JsonArray fromStringList(String list, String delim) {
-    String[] stringList = list.split(delim);
+  public JsonArray fromStringList(String strList, String delim) {
+    String[] list = strList.split(delim);
 
     // An Empty list should generate an empty JSON array.
-    if (stringList.length == 1 && stringList[0].length() == 0) {
+    if (list.length == 1 && list[0].length() == 0) {
       return EMPTY_JSON_ARRAY;
     }
 
     JsonArray jsonArray = new JsonArray();
 
-    // Try to convert the value to a number and if that works we store it that way
-    for (int i = 0; i < stringList.length; i++) {
-      jsonArray.add(typeConversion.convertPrimitiveFromString(stringList[i].trim()));
+    for (String s : list) {
+      // Try to convert the value to a number and if that works we store it that way
+      jsonArray.add(typeConversion.convertPrimitiveFromString(s.trim()));
     }
 
     return jsonArray;
@@ -131,8 +131,8 @@ public class JsonArrayFunctions {
     for (int i = 0; i < jsonArray.size(); i++) {
       if (sb.length() > 0) {
         sb.append(delim);
-        sb.append(i).append("=").append(typeConversion.asScriptType(jsonArray.get(i)));
       }
+      sb.append(i).append("=").append(typeConversion.asScriptType(jsonArray.get(i)));
     }
     return sb.toString();
   }
@@ -167,8 +167,10 @@ public class JsonArrayFunctions {
    */
   public JsonArray concatenate(List<JsonArray> arrays) {
     JsonArray result = new JsonArray();
-    for (int i = 0; i < arrays.size(); i++) {
-      result.add(arrays.get(i));
+    for (JsonArray array : arrays) {
+      for (int i = 0; i < array.size(); i++) {
+        result.add(array.get(i));
+      }
     }
 
     return result;
@@ -182,10 +184,10 @@ public class JsonArrayFunctions {
    * @return a new {@link JsonArray} containing the concatenated arguments.
    * @throws ParserException If an error occurs while converting the values to json.
    */
-  public JsonArray concatenate(JsonArray array, List<Object> values) throws ParserException {
+  public JsonArray concatenate(JsonArray array, List<?> values) throws ParserException {
     JsonArray array2 = new JsonArray();
-    for (int i = 0; i < values.size(); i++) {
-      array2.add(typeConversion.asJsonElement(values.get(i)));
+    for (Object value : values) {
+      array2.add(typeConversion.asJsonElement(value));
     }
 
     return concatenate(List.of(array, array2));
@@ -231,7 +233,7 @@ public class JsonArrayFunctions {
    * @param jsonArray the array to sort.
    * @return sorted copy of the array.
    */
-  public JsonElement sortDescending(JsonArray jsonArray) {
+  public JsonArray sortDescending(JsonArray jsonArray) {
     List<JsonElement> list = jsonArrayToList(jsonArray);
     if (allNumbers(list)) {
       list.sort(new JsonNumberComparator().reversed());
@@ -251,15 +253,17 @@ public class JsonArrayFunctions {
    * @throws ParserException if not all objects contain the keys to sort by.
    */
   private void sortObjects(List<JsonObject> list, List<String> fields) throws ParserException {
-    var comparators = new ArrayList<Comparator>(fields.size());
+    var comparators = new ArrayList<Comparator<JsonElement>>(fields.size());
 
-    for (int i = 0; i < fields.size(); i++) {
-      if (allNumbers(list, fields.get(i))) {
+    for (String field : fields) {
+      if (allNumbers(list, field)) {
         comparators.add(new JsonNumberComparator());
       } else {
         comparators.add(new JsonStringComparator());
       }
     }
+
+    list.sort(new JsonObjectComparator(fields, comparators));
   }
 
   /**
@@ -270,7 +274,7 @@ public class JsonArrayFunctions {
    * @return sorted copy of the passed in list.
    * @throws ParserException if all of the objects do not have the required fields.
    */
-  public JsonElement sortObjectsAscending(JsonArray jsonArray, List<String> fields)
+  public JsonArray sortObjectsAscending(JsonArray jsonArray, List<String> fields)
       throws ParserException {
     List<JsonObject> list = jsonArrayToListOfObjects(jsonArray);
     sortObjects(list, fields);
@@ -285,7 +289,7 @@ public class JsonArrayFunctions {
    * @return sorted copy of the passed in list.
    * @throws ParserException if all of the objects do not have the required fields.
    */
-  public JsonElement sorObjectsDescending(JsonArray jsonArray, List<String> fields)
+  public JsonArray sortObjectsDescending(JsonArray jsonArray, List<String> fields)
       throws ParserException {
     List<JsonObject> list = jsonArrayToListOfObjects(jsonArray);
     sortObjects(list, fields);
@@ -351,8 +355,7 @@ public class JsonArrayFunctions {
    * @return <code>true</code> if all {@link JsonElement}s can be converted to a number.
    */
   private boolean allNumbers(List<JsonElement> list) {
-    for (int i = 0; i < list.size(); i++) {
-      JsonElement jsonElement = list.get(i);
+    for (JsonElement jsonElement : list) {
       if (!jsonElement.isJsonPrimitive()) {
         return false;
       }
@@ -397,9 +400,7 @@ public class JsonArrayFunctions {
    * @throws ParserException if any of the {@link JsonObject}s do not contain the key.
    */
   private boolean allNumbers(List<JsonObject> list, String key) throws ParserException {
-    for (int i = 0; i < list.size(); i++) {
-      JsonObject jsonObject = list.get(i);
-
+    for (JsonObject jsonObject : list) {
       if (!jsonObject.has(key)) {
         throw new ParserException(I18N.getText("macro.function.json.notAllContainKey", key));
       }

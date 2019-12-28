@@ -219,7 +219,7 @@ public class JSONMacroFunctions extends AbstractFunction {
             if (sortAscending) {
               return jsonArrayFunctions.sortObjectsAscending(jsonArray, fields);
             } else {
-              return jsonArrayFunctions.sorObjectsDescending(jsonArray, fields);
+              return jsonArrayFunctions.sortObjectsDescending(jsonArray, fields);
             }
           }
         }
