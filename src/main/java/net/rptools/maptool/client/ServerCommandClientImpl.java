@@ -208,11 +208,12 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   @Override
-  public void execFunction(String functionText, String target, String source) {
-    ExecFunction.receiveExecFunction(functionText, target, source); // receive locally right away
+  public void execFunction(String target, String source, String functionName, List<Object> args) {
+    // Execute locally right away
+    ExecFunction.receiveExecFunction(target, source, functionName, args);
 
     if (ExecFunction.isMessageGlobal(target, source)) {
-      makeServerCall(COMMAND.execFunction, functionText, target, source);
+      makeServerCall(COMMAND.execFunction, target, source, functionName, args);
     }
   }
 
