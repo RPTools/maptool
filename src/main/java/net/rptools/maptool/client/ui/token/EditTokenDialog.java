@@ -22,6 +22,7 @@ import com.jidesoft.combobox.MultilineStringExComboBox;
 import com.jidesoft.combobox.PopupPanel;
 import com.jidesoft.grid.AbstractPropertyTableModel;
 import com.jidesoft.grid.MultilineStringCellEditor;
+import com.jidesoft.grid.NavigableModel;
 import com.jidesoft.grid.Property;
 import com.jidesoft.grid.PropertyPane;
 import com.jidesoft.grid.PropertyTable;
@@ -1482,7 +1483,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private class TokenPropertyTableModel
       extends AbstractPropertyTableModel<
           net.rptools.maptool.client.ui.token.EditTokenDialog.TokenPropertyTableModel
-              .EditTokenProperty> {
+              .EditTokenProperty>
+      implements NavigableModel {
     private static final long serialVersionUID = 2822797264738675580L;
 
     private Map<String, String> propertyMap;
@@ -1524,6 +1526,18 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         }
         token.setProperty(property.getName(), value);
       }
+    }
+
+    @Override
+    public boolean isNavigableAt(int rowIndex, int columnIndex) {
+      // make the property name column non-navigable so that tab takes you
+      // directly to the next property value cell.
+      return (columnIndex != 0);
+    }
+
+    @Override
+    public boolean isNavigationOn() {
+      return true;
     }
 
     @Override
