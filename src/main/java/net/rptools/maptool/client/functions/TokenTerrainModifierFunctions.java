@@ -14,10 +14,8 @@
  */
 package net.rptools.maptool.client.functions;
 
-import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -44,11 +42,11 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
   }
 
   /**
-   * @param parser
-   * @param functionName
-   * @param param
-   * @return BigDecimal terrain modifier value
-   * @throws ParserException
+   * @param parser the MapTool parser.
+   * @param functionName the name of the function.
+   * @param param the list of parameters.
+   * @return BigDecimal terrain modifier value.
+   * @throws ParserException if unknown function name or incorrect function arguments.
    */
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> param)
@@ -81,15 +79,15 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
    * Sets Terrain Modifier.
    *
    * @param token the token to set.
-   * @param val the value to set the terrain modifier to.
+   * @param val the double value to set the terrain modifier to.
    * @throws ParserException if no permission
    */
-  public void setTerrainModifier(Token token, BigDecimal val) throws ParserException {
+  public void setTerrainModifier(Token token, double val) throws ParserException {
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(
           I18N.getText("macro.function.general.noPerm", "setTerrainModifier"));
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setTerrainModifier", val.doubleValue());
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setTerrainModifier, val);
   }
 
   /**
@@ -101,11 +99,10 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
    * @throws ParserException if an error occurs.
    */
   private Object setTerrainModifier(Parser parser, List<Object> args) throws ParserException {
-    MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
     FunctionUtil.checkNumberParam("setTerrainModifier", args, 1, 3);
 
-    BigDecimal val = FunctionUtil.paramAsBigDecimal("setTerrainModifier", args, 0, false);
-    Token token = FunctionUtil.getTokenFromParam(res, "setTerrainModifier", args, 1, 2);
+    Double val = FunctionUtil.paramAsDouble("setTerrainModifier", args, 0, false);
+    Token token = FunctionUtil.getTokenFromParam(parser, "setTerrainModifier", args, 1, 2);
 
     setTerrainModifier(token, val);
     return val;
@@ -120,35 +117,8 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
    * @throws ParserException if an error occurs.
    */
   private Object getTerrainModifier(Parser parser, List<Object> args) throws ParserException {
-    Object val;
-    Token token;
-
-    switch (args.size()) {
-      case 1:
-        token = FindTokenFunctions.findToken(args.get(0).toString(), null);
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.general.unknownToken",
-                  "getTerrainModifier",
-                  args.get(0).toString()));
-        }
-        break;
-      case 0:
-        MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-        token = res.getTokenInContext();
-        if (token == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.noImpersonated", "getTerrainModifier"));
-        }
-        break;
-      default:
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.general.tooManyParam", "getTerrainModifier", 1, args.size()));
-    }
-
-    val = getTerrainModifier(token);
-    return val;
+    FunctionUtil.checkNumberParam("getTerrainModifier", args, 0, 2);
+    Token token = FunctionUtil.getTokenFromParam(parser, "getTerrainModifier", args, 0, 1);
+    return getTerrainModifier(token);
   }
 }

@@ -45,7 +45,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
-import java.awt.image.BufferedImage;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -673,11 +672,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     // IMAGE
     if (!token.getImageAssetId().equals(getTokenIconPanel().getImageId())) {
-      BufferedImage image = ImageManager.getImageAndWait(getTokenIconPanel().getImageId());
       MapToolUtil.uploadAsset(AssetManager.getAsset(getTokenIconPanel().getImageId()));
       token.setImageAsset(null, getTokenIconPanel().getImageId()); // Default image for now
-      token.setWidth(image.getWidth(null));
-      token.setHeight(image.getHeight(null));
     }
     // PORTRAIT
     if (getPortraitPanel().getImageId() != null) {

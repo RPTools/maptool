@@ -14,22 +14,18 @@
  */
 package net.rptools.maptool.client.ui;
 
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JSeparator;
+import javax.swing.*;
 import net.rptools.lib.FileUtil;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.OpenUrlAction;
 import net.rptools.maptool.client.AppConstants;
@@ -53,15 +49,22 @@ public class AppMenuBar extends JMenuBar {
     add(createToolsMenu());
     add(createWindowMenu());
     add(createHelpMenu());
+    // shift to the right
+    add(Box.createGlue());
+
+    add(
+        createMinimizeButton(
+            "net/rptools/maptool/client/image/tool/downArrow.png",
+            "net/rptools/maptool/client/image/tool/upArrow.png",
+            I18N.getText("tools.hidetoolbar.tooltip"),
+            I18N.getText("tools.unhidetoolbar.tooltip")));
   }
 
   // This is a hack to allow the menubar shortcut keys to still work even
   // when it isn't showing (fullscreen mode)
   @Override
   public boolean isShowing() {
-    return MapTool.getFrame() != null && MapTool.getFrame().isFullScreen()
-        ? true
-        : super.isShowing();
+    return MapTool.getFrame() != null && MapTool.getFrame().isFullScreen() || super.isShowing();
   }
 
   protected JMenu createFileMenu() {
@@ -294,6 +297,44 @@ public class AppMenuBar extends JMenuBar {
   }
 
   /**
+   * Creates a minimize button that can hide the toolbar
+   *
+   * @param icon the icon when the toolbar is hidden
+   * @param offIcon the icon when the toolbar is showing
+   * @param hidetooltip the tooltip when the toolbar is showing
+   * @param unhidetooltip the tooltip when the toolbar is hidden
+   * @return the JToggleButton
+   */
+  protected JToggleButton createMinimizeButton(
+      final String icon, final String offIcon, String hidetooltip, String unhidetooltip) {
+    final JToggleButton button = new JToggleButton();
+    try {
+      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage((icon))));
+      button.setIcon(new ImageIcon(ImageUtil.getImage((offIcon))));
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
+    }
+    button.setOpaque(false);
+    button.setContentAreaFilled(false);
+    button.setBorderPainted(false);
+    button.setToolTipText(hidetooltip);
+    button.addActionListener(
+        new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            ToolbarPanel toolbarPanel = MapTool.getFrame().getToolbarPanel();
+            if (button.isSelected()) {
+              button.setToolTipText(unhidetooltip);
+              toolbarPanel.setVisible(false);
+            } else {
+              button.setToolTipText(hidetooltip);
+              toolbarPanel.setVisible(true);
+            }
+          }
+        });
+    return button;
+  }
+
+  /**
    * Builds the help menu. This menu contains a block of special url items. These items are
    * populated from {@link I18N#getMatchingKeys}.
    *
@@ -357,6 +398,7 @@ public class AppMenuBar extends JMenuBar {
         new AbstractAction() {
           {
             putValue(Action.NAME, I18N.getText("msg.info.restoreLayout"));
+            putValue(Action.SHORT_DESCRIPTION, I18N.getText("msg.info.restoreLayout.description"));
           }
 
           public void actionPerformed(ActionEvent e) {

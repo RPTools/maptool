@@ -41,8 +41,8 @@ public class TokenVBL {
    *
    * @author Jamz
    * @since 1.4.1.6
-   * @param token
-   * @param alphaSensitivity
+   * @param token the token
+   * @param alphaSensitivity the alpha sensitivity of the VBL area
    * @return Area
    */
   public static Area createVblArea(Token token, int alphaSensitivity) {
@@ -62,6 +62,7 @@ public class TokenVBL {
    * @param renderer Reference to the ZoneRenderer
    * @param area A valid Area containing VBL polygons
    * @param erase Set to true to erase the VBL, otherwise draw it
+   * @return the untouched area if the renderer is null, and null otherwise
    */
   public static Area renderVBL(ZoneRenderer renderer, Area area, boolean erase) {
     if (renderer == null) return area;
@@ -197,6 +198,14 @@ public class TokenVBL {
     return newTokenVBL;
   }
 
+  /**
+   * Create a VBL area from a bufferedImage and alphaSensitity. The area is created by combining
+   * vblRectangle where the alpha of the image is greater or equal to the sensitivity.
+   *
+   * @param image the buffered image.
+   * @param alphaSensitivity the alphaSensitivity.
+   * @return the area.
+   */
   private static Area createVblArea(BufferedImage image, int alphaSensitivity) {
     // Assumes all colors form the VBL Area, eg everything except transparent pixels with alpha
     // >=

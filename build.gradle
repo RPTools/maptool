@@ -35,7 +35,7 @@ targetCompatibility = 10
 
 // Used by gradle assemble & run tasks
 mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
-applicationDefaultJvmArgs = ["-Xss4M"]
+applicationDefaultJvmArgs = ["-Xss8M"]
 
 // Custom properties
 ext {
@@ -72,7 +72,7 @@ ext {
 
 run {
     args = [ '-v='+version ]
-    applicationDefaultJvmArgs = [ "-Xss4M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ]
+    applicationDefaultJvmArgs = [ "-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ]
 
     if(System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
@@ -152,7 +152,7 @@ repositories {
 dependencies {
     // For Sentry bug reporting
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.12.0'	// Bridges v1 to v2 for other code in other libs
 
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
@@ -387,7 +387,7 @@ task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepa
                 "-Bemail=maptool@rptools.net",
                 "-BuserJvmOptions=-DMAPTOOL_DATADIR\\==.maptool-" + vendor,
                 "-BuserJvmOptions=-Dfile.encoding\\==UTF-8",
-                "-BuserJvmOptions=-Xss=4M"
+                "-BuserJvmOptions=-Xss=8M"
 
                 println commandLine
         }

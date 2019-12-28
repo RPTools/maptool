@@ -126,7 +126,11 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           message((TextMessage) context.get(0));
           break;
         case execFunction:
-          execFunction((String) context.get(0), (String) context.get(1), (String) context.get(2));
+          execFunction(
+              (String) context.get(0),
+              (String) context.get(1),
+              (String) context.get(2),
+              (List<Object>) context.get(3));
           break;
         case execLink:
           execLink((String) context.get(0), (String) context.get(1), (String) context.get(2));
@@ -138,10 +142,10 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           putLabel(context.getGUID(0), (Label) context.get(1));
           break;
         case updateTokenProperty:
+          Token.Update update = (Token.Update) context.parameters[2];
           updateTokenProperty(
-              context.getGUID(0), context.getGUID(1), context.getString(2), context.getObjArray(3));
+              context.getGUID(0), context.getGUID(1), update, context.getObjArray(3));
           break;
-
         case putToken:
           putToken(context.getGUID(0), (Token) context.get(1));
           break;
@@ -270,7 +274,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
               context.getGUID(0), context.getGUID(1), (ExposedAreaMetaData) context.get(2));
           break;
         case clearExposedArea:
-          clearExposedArea(context.getGUID(0));
+          clearExposedArea(context.getGUID(0), context.getBool(1));
           break;
       }
     } finally {
@@ -552,7 +556,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   @Override
-  public void execFunction(String functionText, String target, String source) {
+  public void execFunction(String target, String source, String functionName, List<Object> args) {
     forwardToClients();
   }
 
@@ -586,7 +590,9 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     }
     if (newToken) {
       // don't send whole token back to sender, instead just send new ZOrder
-      Object[] parameters = {zoneGUID, token.getId(), "setZOrder", new Object[] {zOrder}};
+      Object[] parameters = {
+        zoneGUID, token.getId(), Token.Update.setZOrder, new Object[] {zOrder}
+      };
       broadcastToClient(
           RPCContext.getCurrent().id, ClientCommand.COMMAND.updateTokenProperty.name(), parameters);
     }
@@ -621,19 +627,16 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   public void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, String methodName, Object[] parameters) {
+      GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters) {
     Zone zone = server.getCampaign().getZone(zoneGUID);
     Token token = zone.getToken(tokenGUID);
-    token.updateProperty(zone, methodName, parameters); // update server version of token
+    token.updateProperty(zone, update, parameters); // update server version of token
 
     forwardToClients();
   }
 
-  public void updateTokenProperty(
-      Token token,
-      String methodName,
-      Object...
-          parameters) {} // never actually called, but necessary to satisfy interface requirements
+  /** never actually called, but necessary to satisfy interface requirements */
+  public void updateTokenProperty(Token token, Token.Update update, Object... parameters) {}
 
   public void removeZone(GUID zoneGUID) {
     server.getCampaign().removeZone(zoneGUID);
@@ -804,25 +807,33 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
     forwardToClients();
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * Update the server exposed area meta data, and forward the change to the clients
    *
-   * @see net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net. rptools.maptool.model.GUID, net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
+   * @param zoneGUID the zone GUID of the map
+   * @param tokenExposedAreaGUID the GUID of the token to update the exposed meta data
+   * @param meta the exposed area meta data
+   * @see
+   *     net.rptools.maptool.server.ServerCommand#updateExposedAreaMeta(net.rptools.maptool.model.GUID,
+   *     net.rptools.maptool.model.GUID, net.rptools.maptool.model.ExposedAreaMetaData)
    */
   public void updateExposedAreaMeta(
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.setExposedAreaMetaData(tokenExposedAreaGUID, meta); // update the server
     forwardToClients();
   }
 
-  public void clearExposedArea(GUID zoneGUID) {
-    Zone zone = MapTool.getCampaign().getZone(zoneGUID);
-    zone.clearExposedArea();
-    forwardToAllClients();
-
-    // same as forwardToClients?
-    // server.getConnection().broadcastCallMethod(
-    // ClientCommand.COMMAND.clearExposedArea.name(),
-    // RPCContext.getCurrent().parameters);
+  /**
+   * Clear server global exposed area. Can clear all token exposed areas. Forward to clients.
+   *
+   * @param zoneGUID the GUID of the zone
+   * @param globalOnly should only the global area be cleared?
+   */
+  public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
+    Zone zone = server.getCampaign().getZone(zoneGUID);
+    zone.clearExposedArea(globalOnly);
+    forwardToClients();
   }
 
   ////

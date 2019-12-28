@@ -90,7 +90,6 @@ public class MapToolLineParser {
               StrListFunctions.getInstance(),
               StrPropFunctions.getInstance(),
               SwitchTokenFunction.getInstance(),
-              TokenAddToInitiativeFunction.getInstance(),
               TokenBarFunction.getInstance(),
               TokenCopyDeleteFunctions.getInstance(),
               TokenGMNameFunction.getInstance(),
@@ -1488,8 +1487,7 @@ public class MapToolLineParser {
         b.append(expression);
         log.debug(b.toString());
       }
-      Result res =
-          createParser(resolver, tokenInContext == null ? false : true).evaluate(expression);
+      Result res = createParser(resolver, tokenInContext != null).evaluate(expression);
       rolled.addAll(res.getRolled());
       newRolls.addAll(res.getRolled());
 
@@ -1944,7 +1942,8 @@ public class MapToolLineParser {
     return retval;
   }
 
-  private ExpressionParser createParser(VariableResolver resolver, boolean hasTokenInContext) {
+  public static ExpressionParser createParser(
+      VariableResolver resolver, boolean hasTokenInContext) {
     ExpressionParser parser = new ExpressionParser(resolver);
     parser.getParser().addFunctions(mapToolParserFunctions);
     return parser;

@@ -142,9 +142,9 @@ public interface ServerCommand {
   public void removeToken(GUID zoneGUID, GUID tokenGUID);
 
   public void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, String methodName, Object[] parameters);
+      GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters);
 
-  public void updateTokenProperty(Token token, String methodName, Object... parameters);
+  public void updateTokenProperty(Token token, Token.Update update, Object... parameters);
 
   public void putLabel(GUID zoneGUID, Label label);
 
@@ -160,7 +160,7 @@ public interface ServerCommand {
 
   public void message(TextMessage message);
 
-  public void execFunction(String functionText, String target, String source);
+  public void execFunction(String target, String source, String functionName, List<Object> args);
 
   public void execLink(String link, String target, String source);
 
@@ -216,5 +216,5 @@ public interface ServerCommand {
   public void updateExposedAreaMeta(
       GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta);
 
-  public void clearExposedArea(GUID zoneGUID);
+  public void clearExposedArea(GUID zoneGUID, boolean globalOnly);
 }

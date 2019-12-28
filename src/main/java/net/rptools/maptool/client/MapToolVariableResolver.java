@@ -286,7 +286,8 @@ public class MapToolVariableResolver extends MapVariableResolver {
     if (tokenInContext != null) {
       if (validTokenProperty(varname, tokenInContext)) {
         MapTool.serverCommand()
-            .updateTokenProperty(tokenInContext, "setProperty", varname, value.toString());
+            .updateTokenProperty(
+                tokenInContext, Token.Update.setProperty, varname, value.toString());
       }
     }
 

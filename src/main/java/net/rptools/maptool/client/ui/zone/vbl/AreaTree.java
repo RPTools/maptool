@@ -23,11 +23,19 @@ import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/** Class digesting a VBL area into an AreaOcean. */
 public class AreaTree {
   private static final Logger log = LogManager.getLogger(AreaTree.class);
+  /** The original area digested. */
   private AreaOcean theOcean;
-  private Area theArea; // in case we want to return the original area undigested
+  /** The original area, in case we want to return the original area undigested */
+  private Area theArea;
 
+  /**
+   * Digest the area and store it in theOcean.
+   *
+   * @param area the area to digest.
+   */
   public AreaTree(Area area) {
     digest(area);
   }
