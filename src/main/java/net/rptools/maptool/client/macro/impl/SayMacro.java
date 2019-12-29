@@ -26,10 +26,9 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 
 @MacroDefinition(
-  name = "say",
-  aliases = {"s"},
-  description = "say.description"
-)
+    name = "say",
+    aliases = {"s"},
+    description = "say.description")
 public class SayMacro extends AbstractMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     macro = processText(macro);

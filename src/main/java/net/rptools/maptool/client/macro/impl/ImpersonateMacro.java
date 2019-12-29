@@ -27,11 +27,10 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 
 @MacroDefinition(
-  name = "impersonate",
-  aliases = {"im"},
-  description = "impersonate.description",
-  expandRolls = false
-)
+    name = "impersonate",
+    aliases = {"im"},
+    description = "impersonate.description",
+    expandRolls = false)
 public class ImpersonateMacro implements Macro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     final MapToolFrame frame = MapTool.getFrame(); // cached for quicker access
