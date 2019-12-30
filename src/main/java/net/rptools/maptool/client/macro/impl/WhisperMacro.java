@@ -27,10 +27,9 @@ import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.util.StringUtil;
 
 @MacroDefinition(
-  name = "whisper",
-  aliases = {"w"},
-  description = "whisper.description"
-)
+    name = "whisper",
+    aliases = {"w"},
+    description = "whisper.description")
 public class WhisperMacro extends AbstractMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     String playerName = StringUtil.getFirstWord(macro);

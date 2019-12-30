@@ -21,10 +21,9 @@ import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.model.TextMessage;
 
 @MacroDefinition(
-  name = "self",
-  aliases = {"self"},
-  description = "self.description"
-)
+    name = "self",
+    aliases = {"self"},
+    description = "self.description")
 public class SelfMacro extends AbstractMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     macro = processText(macro);
