@@ -283,12 +283,12 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       Worker.State oldState,
       Worker.State newState) {
 
-    if (newState == Worker.State.SCHEDULED) {
+    if (newState == Worker.State.SUCCEEDED) {
       // Redirect console.log to the JavaBridge
       JSObject window = (JSObject) webEngine.executeScript("window");
       window.setMember(JavaBridge.NAME, bridge);
       webEngine.executeScript(REPLACE_LOG_SCRIPT);
-    } else if (newState == Worker.State.SUCCEEDED) {
+
       // Event listener for the href macro link clicks.
       EventListener listenerA =
           event -> {
