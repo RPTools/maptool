@@ -34,10 +34,9 @@ import net.rptools.maptool.language.I18N;
 import org.apache.commons.io.FileUtils;
 
 @MacroDefinition(
-  name = "savealiases",
-  aliases = {},
-  description = "savealiases.description"
-)
+    name = "savealiases",
+    aliases = {},
+    description = "savealiases.description")
 public class SaveAliasesMacro implements Macro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     File aliasFile = null;

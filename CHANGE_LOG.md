@@ -1,3 +1,46 @@
+Maptool 1.5.9
+=====
+This release focused on clearing out bugs both old and new.
+
+**Highlights**
+- More translations.
+- More bug fixes.
+
+Enhancements
+-----
+- [#753][i753] Reserved variable names `init.current` and `init.round` are now highlighted in macro editor and documented on wiki.
+
+Bug Fixes
+-----
+- [#1006][i1006] The Perlin noise option for maps was causing significant memory usage whether enabled or not. The additional overhead (~28MB per map) is now only incurred when it is enabled on a map.  If using this feature, be mindful of how many maps you have in your campaign and your max memory allocation.
+- [#998][i998] Player clients dropping tokens with duplicate names weren't getting a notice of why nothing happened. Fixed.
+- [#993][i993] All clients were getting notified when a GM changed a token name to a duplicate. Fixed.
+- [#989][i989] Unprintable character symbol (□) showed in output for rolls and tooltips in frames/dialogs. Fixed.
+- [#962][i962] The GM-mode autoexpose (Preferences -> Application -> Auto-expose fog...) wasn't working.  Fixed.
+- [#943][i943] When using random token numbering and after a restart of MT, it was possible to get duplicate token names.  Fixed.
+- [#923][i923] Using Edit Map on a map with an adjusted grid would lose offset adjustment.  Fixed.
+- [#920][i920] The RPTools logo was being loaded across the net each time for use in the MacOS dock.  Fixed.
+- [#796][i796] Drawing a selection box on layers other than the Token layer ignored the "Fill selection box" preference. Fixed.
+- [#739][i739] Initiative info was being returned by `getInfo("client")` and `getInfo("server")`. Removed from `server` option.
+- [#272][i272] Display area for memory usage didn't adapt to larger font sizes and string length. Fixed.
+- [#251][i251] NPE when restoring FoW after deleting a token. Fixed.
+- [#205][i205] Layer list in Drawing Tools allowed multi-select of layers. Fixed.
+
+[i1006]: https://github.com/RPTools/maptool/issues/1006
+[i998]: https://github.com/RPTools/maptool/issues/998
+[i993]: https://github.com/RPTools/maptool/issues/993
+[i989]: https://github.com/RPTools/maptool/issues/989
+[i962]: https://github.com/RPTools/maptool/issues/962
+[i943]: https://github.com/RPTools/maptool/issues/943
+[i923]: https://github.com/RPTools/maptool/issues/923
+[i920]: https://github.com/RPTools/maptool/issues/920
+[i796]: https://github.com/RPTools/maptool/issues/796
+[i753]: https://github.com/RPTools/maptool/issues/753
+[i739]: https://github.com/RPTools/maptool/issues/739
+[i272]: https://github.com/RPTools/maptool/issues/272
+[i251]: https://github.com/RPTools/maptool/issues/251
+[i205]: https://github.com/RPTools/maptool/issues/205
+
 Maptool 1.5.8
 =====
 

@@ -1147,11 +1147,9 @@ public class AppActions {
       MapTool.serverCommand().putToken(zone.getId(), token);
     }
     if (!failedPaste.isEmpty()) {
-      String mesg = "Failed to paste token(s) with duplicate name(s): " + failedPaste;
-      TextMessage msg = TextMessage.gm(null, mesg);
+      String mesg = I18N.getText("Token.error.unableToPaste", failedPaste);
+      TextMessage msg = TextMessage.gmMe(null, mesg);
       MapTool.addMessage(msg);
-      // msg.setChannel(Channel.ME);
-      // MapTool.addMessage(msg);
     }
   }
 
@@ -3050,7 +3048,7 @@ public class AppActions {
 
     @Override
     public boolean isSelected() {
-      return MapTool.getFrame().getFrame(mtFrame).isVisible();
+      return MapTool.getFrame().getFrame(mtFrame).isShowing();
     }
 
     @Override
@@ -3061,7 +3059,7 @@ public class AppActions {
     @Override
     protected void executeAction(ActionEvent event) {
       DockableFrame frame = MapTool.getFrame().getFrame(mtFrame);
-      if (frame.isVisible()) {
+      if (frame.isShowing()) {
         MapTool.getFrame().getDockingManager().hideFrame(mtFrame.name());
       } else {
         MapTool.getFrame().getDockingManager().showFrame(mtFrame.name());

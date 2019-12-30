@@ -65,6 +65,13 @@ public class TextMessage {
         Channel.ME, null, MapTool.getPlayer().getName(), message, transformHistory);
   }
 
+  /**
+   * Creates a TextMessage address to the GMs and the current player.
+   *
+   * @param transformHistory the transform history of the message
+   * @param message the text of the message
+   * @return the message
+   */
   public static TextMessage gmMe(List<String> transformHistory, String message) {
     return new TextMessage(
         Channel.GMME, null, MapTool.getPlayer().getName(), message, transformHistory);

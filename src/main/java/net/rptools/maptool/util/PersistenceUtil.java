@@ -15,7 +15,6 @@
 package net.rptools.maptool.util;
 
 import com.caucho.hessian.io.HessianInput;
-import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.ConversionException;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -769,7 +768,9 @@ public class PersistenceUtil {
   public static CampaignProperties loadCampaignProperties(InputStream in) throws IOException {
     CampaignProperties props = null;
     try {
-      props = (CampaignProperties) new XStream().fromXML(new InputStreamReader(in, "UTF-8"));
+      props =
+          (CampaignProperties)
+              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.campaignPropertiesVersion", ce);
     }
@@ -867,7 +868,9 @@ public class PersistenceUtil {
   public static MacroButtonProperties loadMacro(InputStream in) throws IOException {
     MacroButtonProperties mbProps = null;
     try {
-      mbProps = (MacroButtonProperties) new XStream().fromXML(new InputStreamReader(in, "UTF-8"));
+      mbProps =
+          (MacroButtonProperties)
+              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macroVersion", ce);
     } catch (IOException ioe) {
@@ -929,7 +932,8 @@ public class PersistenceUtil {
     List<MacroButtonProperties> macroButtonSet = null;
     try {
       macroButtonSet =
-          (List<MacroButtonProperties>) new XStream().fromXML(new InputStreamReader(in, "UTF-8"));
+          (List<MacroButtonProperties>)
+              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
     }
@@ -992,7 +996,8 @@ public class PersistenceUtil {
   public static LookupTable loadTable(InputStream in) {
     LookupTable table = null;
     try {
-      table = (LookupTable) new XStream().fromXML(new InputStreamReader(in, "UTF-8"));
+      table =
+          (LookupTable) FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.tableVersion", ce);
     } catch (IOException ioe) {

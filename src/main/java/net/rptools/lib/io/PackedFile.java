@@ -100,7 +100,7 @@ public class PackedFile {
   private static File tmpDir =
       new File(System.getProperty("java.io.tmpdir")); // Shared temporary directory
 
-  private final XStream xstream = new XStream();
+  private final XStream xstream = FileUtil.getConfiguredXStream();
 
   private final File file; // Original zip file
   private final File tmpFile; // Temporary directory where changes are kept

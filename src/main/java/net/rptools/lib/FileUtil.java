@@ -83,7 +83,7 @@ public class FileUtil {
   }
 
   public static Object objFromResource(String res) throws IOException {
-    XStream xs = new XStream();
+    XStream xs = getConfiguredXStream();
     InputStream is = null;
     try {
       is = FileUtil.class.getClassLoader().getResourceAsStream(res);
@@ -522,5 +522,18 @@ public class FileUtil {
    */
   public static String stripInvalidCharacters(String fileName) {
     return fileName = fileName.replaceAll("[^\\w\\s.,-]", "_");
+  }
+
+  /**
+   * Return an XStream which allows net.rptools.**, java.awt.**, sun.awt.** May be too permissive,
+   * but it Works For Me(tm)
+   *
+   * @return a configured XStream
+   */
+  public static XStream getConfiguredXStream() {
+    XStream xStream = new XStream();
+    XStream.setupDefaultSecurity(xStream);
+    xStream.allowTypesByWildcard(new String[] {"net.rptools.**", "java.awt.**", "sun.awt.**"});
+    return xStream;
   }
 }

@@ -22,10 +22,9 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 
 @MacroDefinition(
-  name = "reply",
-  aliases = {"rep"},
-  description = "whisperreply.description"
-)
+    name = "reply",
+    aliases = {"rep"},
+    description = "whisperreply.description")
 public class WhisperReplyMacro extends AbstractMacro {
   public void execute(MacroContext context, String message, MapToolMacroContext executionContext) {
     String playerName = MapTool.getLastWhisperer();

@@ -29,10 +29,9 @@ import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.language.I18N;
 
 @MacroDefinition(
-  name = "loadaliases",
-  aliases = {},
-  description = "loadaliases.description"
-)
+    name = "loadaliases",
+    aliases = {},
+    description = "loadaliases.description")
 public class LoadAliasesMacro implements Macro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     File aliasFile = null;
