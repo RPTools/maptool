@@ -18,6 +18,7 @@ import com.thoughtworks.xstream.XStream;
 import java.awt.Point;
 import java.util.Arrays;
 import java.util.List;
+import net.rptools.lib.FileUtil;
 import net.rptools.maptool.model.TokenFootprint;
 
 public class TokenFootprintCreator {
@@ -26,7 +27,7 @@ public class TokenFootprintCreator {
     List<TokenFootprint> footprintList = makeVertHex();
     // List<TokenFootprint> footprintList = makeSquare();
     // List<TokenFootprint> footprintList = makeGridless();
-    XStream xstream = new XStream();
+    XStream xstream = FileUtil.getConfiguredXStream();
     System.out.println(xstream.toXML(footprintList));
   }
 

@@ -126,7 +126,11 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
           message((TextMessage) context.get(0));
           break;
         case execFunction:
-          execFunction((String) context.get(0), (String) context.get(1), (String) context.get(2));
+          execFunction(
+              (String) context.get(0),
+              (String) context.get(1),
+              (String) context.get(2),
+              (List<Object>) context.get(3));
           break;
         case execLink:
           execLink((String) context.get(0), (String) context.get(1), (String) context.get(2));
@@ -552,7 +556,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   @Override
-  public void execFunction(String functionText, String target, String source) {
+  public void execFunction(String target, String source, String functionName, List<Object> args) {
     forwardToClients();
   }
 
