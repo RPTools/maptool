@@ -10,9 +10,11 @@ This release is focused on clearing out bugs both old and new.
 Enhancements
 -----
 - [#753][i753] Reserved variable names `init.current` and `init.round` are now highlighted in macro editor and documented on wiki.
+- [#359][i359] Added infomation from `getInfo("server")` and `getInfo("campaign")` to the Sentry error logging.
 
 Bug Fixes
 -----
+- [#1037][i1037] Updated dependencies with reported vulnerabilites. 
 - [#1024][i1024] Macro function `execFunction()` would choke on apostrophes. Fixed.
 - [#1021][i1021] Confirmation dialog for clearing GM panel said "Campaign". Fixed.
 - [#1006][i1006] The Perlin noise option for maps was causing significant memory usage whether enabled or not. The additional overhead (~28MB per map) is now only incurred when it is enabled on a map.  If using this feature, be mindful of how many maps you have in your campaign and your max memory allocation.
@@ -30,6 +32,7 @@ Bug Fixes
 - [#251][i251] NPE when restoring FoW after deleting a token. Fixed.
 - [#205][i205] Layer list in Drawing Tools allowed multi-select of layers. Fixed.
 
+[i1037]: https://github.com/RPTools/maptool/issues/1037
 [i1024]: https://github.com/RPTools/maptool/issues/1024
 [i1021]: https://github.com/RPTools/maptool/issues/1021
 [i1006]: https://github.com/RPTools/maptool/issues/1006
@@ -44,6 +47,7 @@ Bug Fixes
 [i796]: https://github.com/RPTools/maptool/issues/796
 [i753]: https://github.com/RPTools/maptool/issues/753
 [i739]: https://github.com/RPTools/maptool/issues/739
+[i359]: https://github.com/RPTools/maptool/issues/359
 [i272]: https://github.com/RPTools/maptool/issues/272
 [i251]: https://github.com/RPTools/maptool/issues/251
 [i205]: https://github.com/RPTools/maptool/issues/205
