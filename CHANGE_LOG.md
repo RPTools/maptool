@@ -54,6 +54,7 @@ Other
 [i796]: https://github.com/RPTools/maptool/issues/796
 [i753]: https://github.com/RPTools/maptool/issues/753
 [i739]: https://github.com/RPTools/maptool/issues/739
+[i722]: https://github.com/RPTools/maptool/issues/739
 [i359]: https://github.com/RPTools/maptool/issues/359
 [i272]: https://github.com/RPTools/maptool/issues/272
 [i251]: https://github.com/RPTools/maptool/issues/251
