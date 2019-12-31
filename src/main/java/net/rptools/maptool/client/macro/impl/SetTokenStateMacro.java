@@ -33,10 +33,9 @@ import net.rptools.maptool.model.Zone;
  * @version $Revision$ $Date$ $Author$
  */
 @MacroDefinition(
-  name = "settokenstate",
-  aliases = {"sts"},
-  description = "settokenstate.description"
-)
+    name = "settokenstate",
+    aliases = {"sts"},
+    description = "settokenstate.description")
 public class SetTokenStateMacro implements Macro {
   /** The element that contains the token name */
   public static final int TOKEN = 0;
@@ -151,7 +150,7 @@ public class SetTokenStateMacro implements Macro {
     } else {
       newValue = Boolean.valueOf(value);
     }
-    MapTool.serverCommand().updateTokenProperty(token, "setState", state, newValue);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, state, newValue);
 
     if (newValue) {
       MapTool.addLocalMessage(I18N.getText("settokenstate.marked", token.getName(), state));

@@ -32,11 +32,10 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
 
 @MacroDefinition(
-  name = "settokenproperty",
-  aliases = {"stp"},
-  description = "settokenproperty.description",
-  expandRolls = false
-)
+    name = "settokenproperty",
+    aliases = {"stp"},
+    description = "settokenproperty.description",
+    expandRolls = false)
 /** Class that implements the settokenproperty command. */
 public class SetTokenPropertyMacro implements Macro {
   /** The pattern used to match the token name and commands. */

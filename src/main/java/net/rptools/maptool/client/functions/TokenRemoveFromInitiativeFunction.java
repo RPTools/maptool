@@ -17,7 +17,6 @@ package net.rptools.maptool.client.functions;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.Token;
@@ -54,8 +53,7 @@ public class TokenRemoveFromInitiativeFunction extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> args)
       throws ParserException {
-    MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
-    Token token = FunctionUtil.getTokenFromParam(res, functionName, args, 0, 1);
+    Token token = FunctionUtil.getTokenFromParam(parser, functionName, args, 0, 1);
 
     InitiativeList list = token.getZoneRenderer().getZone().getInitiativeList();
 

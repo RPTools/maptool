@@ -21,10 +21,9 @@ import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 
 @MacroDefinition(
-  name = "color",
-  aliases = {"cc"},
-  description = "changecolor.description"
-)
+    name = "color",
+    aliases = {"cc"},
+    description = "changecolor.description")
 public class ChangeColorMacro extends AbstractMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     Color newColor = Color.decode(macro);

@@ -1,7 +1,7 @@
-| Branch  | Travis | AppVeyor |
-| :---    |  :--:  |  :--:    |
+| Branch  | Travis | AppVeyor | Localization |
+| :---    |  :--:  |  :--:    |   :--:       |
 | master  | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=master)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/master?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/master)
-| develop | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=develop)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/develop?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/develop)
+| develop | [![Build Status](https://travis-ci.org/RPTools/maptool.svg?branch=develop)](https://travis-ci.org/RPTools/maptool)  | [![Build status](https://ci.appveyor.com/api/projects/status/1fccyq1tqp8py6c5/branch/develop?svg=true)](https://ci.appveyor.com/project/rptools-automation/maptool/branch/develop) | [![Crowdin](https://badges.crowdin.net/maptool/localized.svg)](https://crowdin.com/project/maptool)|
 
 
 
@@ -95,6 +95,25 @@ Building the Distributable Zip
 ```
 
 This will create a `.zip` file for use on all systems (as well as a zipped `.app` for macOS) in the `maptool/build/` subdirectory. The build number will be based on the latest tag and latest commit.
+
+Building an installer on Windows
+--------------------------------
+Install [Inno Setup](https://www.jrsoftware.org/isinfo.php) and [Wix](https://wixtoolset.org/)
+Make sure your JAVA_HOME is set to point to JDK 10.
+Then run
+```
+ ./gradlew deploy
+```
+installers (both .iss and .exe) will be created in the releases subdirectory.
+If you installed a more recent version of Inno Setup than is currently used for MapTool you may have to update the MapTool.iss file to set the proper MinVersion. (Inno Setup will complain if you don't.)
+
+Building an installer on Mac
+--------------------------------
+TODO
+
+Building an installer on Linux
+--------------------------------
+TODO
 
 Contributors
 ------------

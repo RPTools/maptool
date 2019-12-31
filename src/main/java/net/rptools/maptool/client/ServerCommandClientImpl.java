@@ -147,28 +147,28 @@ public class ServerCommandClientImpl implements ServerCommand {
    *
    * @param zoneGUID the GUID of the zone the token is on
    * @param tokenGUID the GUID of the token
-   * @param methodName the string with the setter for the token
+   * @param update the type of token update
    * @param parameters an array of parameters
    */
   public void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, String methodName, Object[] parameters) {
-    makeServerCall(COMMAND.updateTokenProperty, zoneGUID, tokenGUID, methodName, parameters);
+      GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters) {
+    makeServerCall(COMMAND.updateTokenProperty, zoneGUID, tokenGUID, update, parameters);
   }
 
   /**
    * Simplifies the arguments for the method above.
    *
    * @param token the token to be updated
-   * @param methodName the method to be used
+   * @param update the type of token update
    * @param parameters an array of parameters
    */
-  public void updateTokenProperty(Token token, String methodName, Object... parameters) {
+  public void updateTokenProperty(Token token, Token.Update update, Object... parameters) {
     Zone zone = token.getZoneRenderer().getZone();
     GUID tokenGUID = token.getId();
     GUID zoneGUID = zone.getId();
 
-    token.updateProperty(zone, methodName, parameters); // update locally right away
-    updateTokenProperty(zoneGUID, tokenGUID, methodName, parameters);
+    token.updateProperty(zone, update, parameters); // update locally right away
+    updateTokenProperty(zoneGUID, tokenGUID, update, parameters);
   }
 
   public void putLabel(GUID zoneGUID, Label label) {
@@ -208,11 +208,12 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   @Override
-  public void execFunction(String functionText, String target, String source) {
-    ExecFunction.receiveExecFunction(functionText, target, source); // receive locally right away
+  public void execFunction(String target, String source, String functionName, List<Object> args) {
+    // Execute locally right away
+    ExecFunction.receiveExecFunction(target, source, functionName, args);
 
     if (ExecFunction.isMessageGlobal(target, source)) {
-      makeServerCall(COMMAND.execFunction, functionText, target, source);
+      makeServerCall(COMMAND.execFunction, target, source, functionName, args);
     }
   }
 
@@ -321,9 +322,15 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.updateGmMacros, properties);
   }
 
-  public void clearExposedArea(GUID zoneGUID) {
+  /**
+   * Send the message to server to clear the exposed area of a map
+   *
+   * @param zoneGUID the GUID of the zone
+   * @param globalOnly should all token exposed areas be cleared?
+   */
+  public void clearExposedArea(GUID zoneGUID, boolean globalOnly) {
     // System.out.println("in ServerCommandClientImpl");
-    makeServerCall(COMMAND.clearExposedArea, zoneGUID);
+    makeServerCall(COMMAND.clearExposedArea, zoneGUID, globalOnly);
   }
 
   private static void makeServerCall(ServerCommand.COMMAND command, Object... params) {
