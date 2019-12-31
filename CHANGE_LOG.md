@@ -1,10 +1,11 @@
 Maptool 1.5.9
 =====
-This release is focused on clearing out bugs both old and new.
+This release focused on clearing out bugs both old and new.
 
 **Highlights**
 - Bug fixes. Some serious and some just quality of life.
 - More translation updates.
+- Brought the various libraries used by MapTool up to current releases.
 - Shout out to Melek and other volunteers for their work on 20+ new and improved wiki pages .
 
 Enhancements
@@ -14,7 +15,6 @@ Enhancements
 
 Bug Fixes
 -----
-- [#1037][i1037] Updated dependencies with reported vulnerabilites. 
 - [#1024][i1024] Macro function `execFunction()` would choke on apostrophes. Fixed.
 - [#1021][i1021] Confirmation dialog for clearing GM panel said "Campaign". Fixed.
 - [#1006][i1006] The Perlin noise option for maps was causing significant memory usage whether enabled or not. The additional overhead (~28MB per map) is now only incurred when it is enabled on a map.  If using this feature, be mindful of how many maps you have in your campaign and your max memory allocation.
@@ -32,6 +32,12 @@ Bug Fixes
 - [#251][i251] NPE when restoring FoW after deleting a token. Fixed.
 - [#205][i205] Layer list in Drawing Tools allowed multi-select of layers. Fixed.
 
+Other
+-----
+- [#1045][i1045] Update remaining dependencies.
+- [#1037][i1037] Updated dependencies with reported vulnerabilites. 
+
+[i1045]: https://github.com/RPTools/maptool/issues/1045
 [i1037]: https://github.com/RPTools/maptool/issues/1037
 [i1024]: https://github.com/RPTools/maptool/issues/1024
 [i1021]: https://github.com/RPTools/maptool/issues/1021
