@@ -33,10 +33,9 @@ import net.rptools.maptool.model.Zone;
  * @version $Revision$ $Date$ $Author$
  */
 @MacroDefinition(
-  name = "settokenstate",
-  aliases = {"sts"},
-  description = "settokenstate.description"
-)
+    name = "settokenstate",
+    aliases = {"sts"},
+    description = "settokenstate.description")
 public class SetTokenStateMacro implements Macro {
   /** The element that contains the token name */
   public static final int TOKEN = 0;
