@@ -23,10 +23,9 @@ import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.language.I18N;
 
 @MacroDefinition(
-  name = "clearaliases",
-  aliases = {},
-  description = "clearaliases.description"
-)
+    name = "clearaliases",
+    aliases = {},
+    description = "clearaliases.description")
 public class ClearAliasesMacro implements Macro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     if (MapTool.confirm(I18N.getText("clearaliases.prompt"))) {

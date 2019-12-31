@@ -27,10 +27,9 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 
 @MacroDefinition(
-  name = "goto",
-  aliases = {"g"},
-  description = "goto.description"
-)
+    name = "goto",
+    aliases = {"g"},
+    description = "goto.description")
 public class GotoMacro implements Macro {
   private static Pattern COORD_PATTERN = Pattern.compile("(-?\\d+)\\s*,?\\s*(-?\\d+)");
 

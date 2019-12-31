@@ -28,10 +28,9 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 
 @MacroDefinition(
-  name = "table",
-  aliases = {"tbl"},
-  description = "lookuptable.description"
-)
+    name = "table",
+    aliases = {"tbl"},
+    description = "lookuptable.description")
 public class LookupTableMacro extends AbstractMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     StringBuilder sb = new StringBuilder();
