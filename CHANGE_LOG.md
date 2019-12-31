@@ -28,6 +28,7 @@ Bug Fixes
 - [#892][i892] Panels could be permanently checked in Window menu but not visible. Fixed.
 - [#796][i796] Drawing a selection box on layers other than the Token layer ignored the "Fill selection box" preference. Fixed.
 - [#739][i739] Initiative info was being returned by `getInfo("client")` and `getInfo("server")`. Removed from `server` option.
+- [#722][i722] Find/replace action in Macro editor didn't give a Replace option.  Fixed.
 - [#272][i272] Display area for memory usage didn't adapt to larger font sizes and string length. Fixed.
 - [#251][i251] NPE when restoring FoW after deleting a token. Fixed.
 - [#205][i205] Layer list in Drawing Tools allowed multi-select of layers. Fixed.
