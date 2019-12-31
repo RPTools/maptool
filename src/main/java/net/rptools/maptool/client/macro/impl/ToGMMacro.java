@@ -22,10 +22,9 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 
 @MacroDefinition(
-  name = "gm",
-  aliases = {"togm"},
-  description = "togm.description"
-)
+    name = "gm",
+    aliases = {"togm"},
+    description = "togm.description")
 public class ToGMMacro extends AbstractRollMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     StringBuilder sb = new StringBuilder();
