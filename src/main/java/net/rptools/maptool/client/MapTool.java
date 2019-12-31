@@ -1720,20 +1720,20 @@ public class MapTool {
       // the Mac version should use the default and then install the keystroke differences
       // but what we have works and I'm loathe to go playing with it at 1.3b87 -- yes, 87!)
       File f2 = AppUtil.getThemeFile(AppUtil.getThemeName());
-      //File f = AppUtil.getAppHome("config");
-      //if (f.exists()) {
-        //File f2 = new File(f, "Default.theme");
-        if (f2.exists()) {
-          if (Theme.loadTheme(f2)) {
-            // re-install the Tiny Look and Feel
-            UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+      // File f = AppUtil.getAppHome("config");
+      // if (f.exists()) {
+      // File f2 = new File(f, "Default.theme");
+      if (f2.exists()) {
+        if (Theme.loadTheme(f2)) {
+          // re-install the Tiny Look and Feel
+          UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
 
-            // Update the ComponentUIs for all Components. This
-            // needs to be invoked for all windows.
-            // SwingUtilities.updateComponentTreeUI(rootComponent);
-          }
+          // Update the ComponentUIs for all Components. This
+          // needs to be invoked for all windows.
+          // SwingUtilities.updateComponentTreeUI(rootComponent);
         }
-      //}
+      }
+      // }
 
       com.jidesoft.utils.Lm.verifyLicense(
           "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");

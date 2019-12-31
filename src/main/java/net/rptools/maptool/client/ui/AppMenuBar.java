@@ -39,7 +39,6 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
-import de.muntjak.tinylookandfeel.Theme;
 
 public class AppMenuBar extends JMenuBar {
   private static MRUCampaignManager mruManager;
@@ -66,7 +65,6 @@ public class AppMenuBar extends JMenuBar {
             I18N.getText("tools.hidetoolbar.tooltip"),
             I18N.getText("tools.unhidetoolbar.tooltip")));
   }
-
 
   // This is a hack to allow the menubar shortcut keys to still work even
   // when it isn't showing (fullscreen mode)
@@ -440,9 +438,8 @@ public class AppMenuBar extends JMenuBar {
             {
               putValue(Action.NAME, theme.getKey());
             }
-          }
-      );
-  }
+          });
+    }
     return menu;
   }
 

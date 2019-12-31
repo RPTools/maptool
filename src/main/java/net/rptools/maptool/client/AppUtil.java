@@ -22,7 +22,6 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -48,7 +47,6 @@ public class AppUtil {
   public static final String DEFAULT_DATADIR_NAME = ".maptool";
   public static final String DATADIR_PROPERTY_NAME = "MAPTOOL_DATADIR";
 
-
   private static File dataDirPath;
 
   private static final String CLIENT_ID_FILE = "client-id";
@@ -61,7 +59,10 @@ public class AppUtil {
   public static boolean MAC_OS_X =
       (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
 
-  public static final String LOOK_AND_FEEL_NAME = MAC_OS_X ? "net.rptools.maptool.client.TinyLookAndFeelMac" : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
+  public static final String LOOK_AND_FEEL_NAME =
+      MAC_OS_X
+          ? "net.rptools.maptool.client.TinyLookAndFeelMac"
+          : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
 
   /**
    * Returns a File object for USER_HOME if USER_HOME is non-null, otherwise null.
@@ -270,17 +271,17 @@ public class AppUtil {
     // Make sure themes are installed
     AppSetup.installDefaultUIThemes();
 
-
     Path themesDir = AppConstants.UI_THEMES_DIR.toPath();
 
     Map<String, File> themes = new TreeMap<>();
     try (Stream<Path> walk = Files.walk(themesDir)) {
-      Set<Path> result = walk
-          .filter(f -> f.getFileName().toString().endsWith(".theme"))
-          .collect(Collectors.toSet());
+      Set<Path> result =
+          walk.filter(f -> f.getFileName().toString().endsWith(".theme"))
+              .collect(Collectors.toSet());
 
       for (Path path : result) {
-        String name = path.getFileName().toString().replaceFirst("\\.theme$", "").replaceAll("_", " ");
+        String name =
+            path.getFileName().toString().replaceFirst("\\.theme$", "").replaceAll("_", " ");
         themes.put(name, path.toFile());
       }
     } catch (IOException e) {
@@ -295,7 +296,7 @@ public class AppUtil {
     prefs.put("themeName", themeName);
   }
 
-  public static  String getThemeName() {
+  public static String getThemeName() {
     Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
     return prefs.get("themeName", "");
   }
