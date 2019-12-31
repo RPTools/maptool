@@ -270,8 +270,6 @@ dependencies {
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0-rc3'
 
-    // CommonMark/Markdown Java parser
-    implementation 'com.vladsch.flexmark:flexmark-all:0.50.40'
 }
 
 
