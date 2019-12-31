@@ -161,7 +161,7 @@ dependencies {
     implementation group: 'io.sentry', name: 'sentry', version: '1.7.29'
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
 
-    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.1' // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
+    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4' // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
 
     implementation 'net.java.abeille:abeille-formsrt:2.0'
 
@@ -234,7 +234,7 @@ dependencies {
 
     // For syntax highlighting in macro editor
     implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.6'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
-    implementation group: 'com.fifesoft', name: 'rstaui', version: '3.0.2'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
+    implementation group: 'com.fifesoft', name: 'rstaui', version: '3.0.3'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
     implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.0.4'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 
     // For simple xml work in Hero Lab integration
