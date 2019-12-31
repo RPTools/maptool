@@ -21,10 +21,9 @@ import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.model.TextMessage;
 
 @MacroDefinition(
-  name = "emotes",
-  aliases = {"mes"},
-  description = "emoteplural.description"
-)
+    name = "emotes",
+    aliases = {"mes"},
+    description = "emoteplural.description")
 public class EmotePluralMacro extends AbstractMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     macro = processText(macro);

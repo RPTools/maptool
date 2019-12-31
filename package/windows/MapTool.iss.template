@@ -23,7 +23,7 @@ DefaultGroupName=${Vendor}
 ;Optional License
 LicenseFile=COPYING.AFFERO
 ;WinXP or above
-MinVersion=0,5.1 
+MinVersion=0,5.1
 OutputBaseFilename=${AppName}-${AppVersion}
 Compression=lzma
 SolidCompression=yes
