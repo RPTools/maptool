@@ -22,10 +22,9 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 
 @MacroDefinition(
-  name = "rollsecret",
-  aliases = {"rsec"},
-  description = "rollsecret.description"
-)
+    name = "rollsecret",
+    aliases = {"rsec"},
+    description = "rollsecret.description")
 public class RollSecretMacro extends AbstractRollMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     String result = roll(macro);
