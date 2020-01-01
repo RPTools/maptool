@@ -42,10 +42,9 @@ import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
  * @version $Revision$ $Date$ $Author$
  */
 @MacroDefinition(
-  name = "addtokenstate",
-  aliases = {"tsa"},
-  description = "addtokenstate.description"
-)
+    name = "addtokenstate",
+    aliases = {"tsa"},
+    description = "addtokenstate.description")
 public class AddTokenStateMacro implements Macro {
 
   /** The element that contains the token state name */

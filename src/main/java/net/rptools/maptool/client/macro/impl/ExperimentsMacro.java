@@ -22,10 +22,9 @@ import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.language.I18N;
 
 @MacroDefinition(
-  name = "experiments",
-  aliases = {"exp", "exper"},
-  description = "experiments.description"
-)
+    name = "experiments",
+    aliases = {"exp", "exper"},
+    description = "experiments.description")
 public class ExperimentsMacro implements Macro {
   @Override
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {

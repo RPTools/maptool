@@ -36,10 +36,9 @@ import net.rptools.maptool.language.I18N;
  * @version $Revision$ $Date$ $Author$
  */
 @MacroDefinition(
-  name = "loadtokenstates",
-  aliases = {"tsl"},
-  description = "loadtokenstates.description"
-)
+    name = "loadtokenstates",
+    aliases = {"tsl"},
+    description = "loadtokenstates.description")
 public class LoadTokenStatesMacro implements Macro {
   /**
    * @see net.rptools.maptool.client.macro.Macro#execute(MacroContext, String, MapToolMacroContext)

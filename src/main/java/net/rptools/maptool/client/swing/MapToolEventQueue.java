@@ -21,11 +21,16 @@ import java.awt.AWTEvent;
 import java.awt.EventQueue;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Collections;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.functions.getInfoFunction;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Player;
 import net.rptools.maptool.util.SysInfo;
+import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -105,24 +110,51 @@ public class MapToolEventQueue extends EventQueue {
     // action").build());
 
     UserBuilder user = new UserBuilder();
-    user.setUsername(MapTool.getPlayer().getName());
-    user.setId(MapTool.getClientId());
-    user.setEmail(
-        MapTool.getPlayer().getName().replaceAll(" ", "_")
-            + "@rptools.net"); // Lets prompt for this?
+    Player player = MapTool.getPlayer();
+    if (player != null) {
+      user.setUsername(player.getName());
+      user.setId(MapTool.getClientId());
+      user.setEmail(
+          player.getName().replaceAll(" ", "_") + "@rptools.net"); // Lets prompt for this?
+    } else {
+      user.setUsername("Unknown");
+      user.setId("Unknown");
+      user.setEmail("Unknown");
+    }
 
     // Set the user in the current context.
     Sentry.getContext().setUser(user.build());
 
-    Sentry.getContext().addTag("role", MapTool.getPlayer().getRole().toString());
+    Sentry.getContext().addTag("role", player != null ? player.getRole().toString() : null);
+    boolean hostingServer = MapTool.isHostingServer();
     Sentry.getContext().addTag("hosting", String.valueOf(MapTool.isHostingServer()));
 
     Sentry.getContext().addExtra("System Info", new SysInfo().getSysInfoJSON());
 
-    if (MapTool.isHostingServer())
+    addGetInfoToSentry("campaign");
+
+    if (hostingServer) {
+      addGetInfoToSentry("server");
       Sentry.getContext().addExtra("Server Policy", MapTool.getServerPolicy().toJSON());
+    }
 
     // Send the event!
     Sentry.capture(thrown);
+  }
+
+  private static void addGetInfoToSentry(String command) {
+    Object campaign;
+    try {
+      MapToolMacroContext sentryContext = new MapToolMacroContext(command, "sentryIOLogging", true);
+      MapTool.getParser().enterContext(sentryContext);
+      campaign =
+          getInfoFunction
+              .getInstance()
+              .childEvaluate(null, null, Collections.singletonList(command));
+      MapTool.getParser().exitContext();
+    } catch (ParserException e) {
+      campaign = "Can't call getInfo(\"" + command + "\"), it threw " + e.getMessage();
+    }
+    Sentry.getContext().addExtra("getinfo(\"" + command + "\")", campaign);
   }
 }
