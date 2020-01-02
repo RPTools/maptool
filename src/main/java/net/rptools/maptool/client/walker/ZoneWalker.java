@@ -15,10 +15,12 @@
 package net.rptools.maptool.client.walker;
 
 import java.util.Collection;
+import java.util.Set;
 import net.rptools.maptool.client.ui.zone.RenderPathWorker;
 import net.rptools.maptool.client.walker.astar.AStarCellPoint;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Path;
+import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.TokenFootprint;
 
 public interface ZoneWalker {
@@ -28,7 +30,10 @@ public interface ZoneWalker {
 
   public CellPoint replaceLastWaypoint(CellPoint point);
 
-  public CellPoint replaceLastWaypoint(CellPoint point, boolean restrictMovement);
+  public CellPoint replaceLastWaypoint(
+      CellPoint point,
+      boolean restrictMovement,
+      Set<TerrainModifierOperation> terrainModifiersIgnored);
 
   public boolean isWaypoint(CellPoint point);
 

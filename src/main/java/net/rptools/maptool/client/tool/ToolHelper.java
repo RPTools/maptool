@@ -23,7 +23,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.text.NumberFormat;
 import java.util.Set;
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
@@ -63,7 +64,8 @@ public class ToolHelper {
                   .hideFrame(MapToolFrame.MTFrame.SELECTION.name());
             }
           }
-          Set<GUID> selectedTokenSet = renderer.getSelectedTokenSet();
+
+          Set<GUID> selectedTokenSet = Set.copyOf(renderer.getSelectedTokenSet());
 
           for (GUID tokenGUID : selectedTokenSet) {
             Token token = renderer.getZone().getToken(tokenGUID);
@@ -94,12 +96,24 @@ public class ToolHelper {
       double[] coords = new double[2];
       int segType = path.currentSegment(coords);
       if (segType != PathIterator.SEG_CLOSE) {
-        if (north == null) north = coords;
-        if (west == null) west = coords;
-        if (east == null) east = coords;
-        if (coords[1] < north[1]) north = coords;
-        if (coords[0] < west[0]) west = coords;
-        if (coords[0] > east[0]) east = coords;
+        if (north == null) {
+          north = coords;
+        }
+        if (west == null) {
+          west = coords;
+        }
+        if (east == null) {
+          east = coords;
+        }
+        if (coords[1] < north[1]) {
+          north = coords;
+        }
+        if (coords[0] < west[0]) {
+          west = coords;
+        }
+        if (coords[0] > east[0]) {
+          east = coords;
+        }
       }
       path.next();
     }
@@ -141,7 +155,9 @@ public class ToolHelper {
 
   public static void drawBoxedMeasurement(
       ZoneRenderer renderer, Graphics2D g, ScreenPoint startPoint, ScreenPoint endPoint) {
-    if (!MapTool.getFrame().isPaintDrawingMeasurement()) return;
+    if (!MapTool.getFrame().isPaintDrawingMeasurement()) {
+      return;
+    }
 
     // Calculations
     int left = (int) Math.min(startPoint.x, endPoint.x);
@@ -191,7 +207,9 @@ public class ToolHelper {
 
   public static void drawMeasurement(
       ZoneRenderer renderer, Graphics2D g, ScreenPoint startPoint, ScreenPoint endPoint) {
-    if (!MapTool.getFrame().isPaintDrawingMeasurement()) return;
+    if (!MapTool.getFrame().isPaintDrawingMeasurement()) {
+      return;
+    }
 
     boolean dirLeft = startPoint.x > endPoint.x;
     boolean dirUp = startPoint.y < endPoint.y;
@@ -216,7 +234,9 @@ public class ToolHelper {
    * @param y The y location of the measurement
    */
   public static void drawMeasurement(Graphics2D g, double distance, int x, int y) {
-    if (!MapTool.getFrame().isPaintDrawingMeasurement()) return;
+    if (!MapTool.getFrame().isPaintDrawingMeasurement()) {
+      return;
+    }
     String radius = NumberFormat.getInstance().format(distance);
     GraphicsUtil.drawBoxedString(g, radius, x, y);
   }
