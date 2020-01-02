@@ -66,11 +66,17 @@ public class ImageChooserDialog extends JDialog {
               return;
             }
 
+            // Sometimes asset is coming back null causing an NPE. Could not reproduce but am
+            // putting in a check for it.  On Sentry:  MAPTOOL-11H
             Asset asset = imageChooser.getAsset((Integer) selected.get(0));
-            imageId = asset.getId();
+            if (asset != null) {
+              imageId = asset.getId();
 
-            // Put the asset into the asset manager since we have the asset handy here
-            AssetManager.putAsset(asset);
+              // Put the asset into the asset manager since we have the asset handy here
+              AssetManager.putAsset(asset);
+            } else {
+              MapTool.showError("msg.asset.error.invalidAsset");
+            }
           }
         });
   }
