@@ -286,59 +286,518 @@ class JsonArrayFunctionsTest {
   }
 
   @Test
-  void sorObjectsDescending() {}
+  void sortObjectsDescending() throws ParserException {
+    JsonArray arr1 = new JsonArray();
+    for (int i = 0; i < 100; i++) {
+      JsonObject obj = new JsonObject();
+      obj.add("key", new JsonPrimitive(random.nextInt()));
+      obj.add("key1", new JsonPrimitive(1));
+      arr1.add(obj);
+    }
+
+    assertThrows(
+        ParserException.class,
+        () -> jsonArrayFunctions.sortObjectsDescending(arr1, List.of("not a key")));
+    JsonArray arr2 = jsonArrayFunctions.sortObjectsDescending(arr1, List.of("key"));
+
+    for (int i = 1; i < arr2.size(); i++) {
+      int val1 = arr2.get(i - 1).getAsJsonObject().get("key").getAsInt();
+      int val2 = arr2.get(i).getAsJsonObject().get("key").getAsInt();
+
+      assertTrue(val1 >= val2, val1 + " should be less than / equal to " + val2);
+    }
+
+    arr2 = jsonArrayFunctions.sortObjectsDescending(arr1, List.of("key1", "key"));
+    for (int i = 1; i < arr2.size(); i++) {
+      int val1 = arr2.get(i - 1).getAsJsonObject().get("key").getAsInt();
+      int val2 = arr2.get(i).getAsJsonObject().get("key").getAsInt();
+
+      assertTrue(val1 >= val2, val1 + " should be less than / equal to " + val2);
+    }
+  }
 
   @Test
-  void contains() {}
+  void contains() throws ParserException {
+    var intList = new ArrayList<Integer>();
+    JsonArray jarr = new JsonArray();
+    for (int i = 0; i < 100; i++) {
+      int rnd = new Random().nextInt();
+      intList.add(rnd);
+      jarr.add(rnd);
+    }
+    for (Integer i : intList) {
+      assertTrue(jsonArrayFunctions.contains(jarr, i));
+    }
+
+    for (int i = 0; i < 1000; i++) {
+      int rnd = random.nextInt();
+      assertEquals(intList.contains(rnd), jsonArrayFunctions.contains(jarr, rnd));
+    }
+  }
 
   @Test
-  void shuffle() {}
+  void shuffle() {
+    JsonArray jarr = new JsonArray();
+    for (int i = 0; i < 1000; i++) {
+      jarr.add(random.nextInt());
+    }
+
+    // be prepared to run shuffle a few times as its possible (although unlikely that a shuffle
+    // could return everything in the same order.
+    JsonArray res = null;
+    for (int i = 0; i < 100; i++) {
+      res = jsonArrayFunctions.shuffle(jarr);
+      if (!res.equals(jarr)) {
+        break;
+      }
+    }
+    assertEquals(jarr.size(), res.size());
+
+    for (int i = 0; i < res.size(); i++) {
+      assertTrue(res.contains(jarr.get(i)));
+    }
+
+    assertNotEquals(jarr, res);
+  }
 
   @Test
-  void reverse() {}
+  void reverse() {
+     var intList =  new ArrayList<Integer>();
+    JsonArray jarr = new JsonArray();
+    for (int i = 0; i < 100; i++) {
+      int rnd = random.nextInt();
+      intList.add(rnd);
+      jarr.add(rnd);
+    }
+
+    Collections.reverse(intList);
+    JsonArray rev = jsonArrayFunctions.reverse(jarr);
+    assertEquals(jarr.size(), rev.size());
+
+    for (int i = 0; i < intList.size(); i++) {
+      assertEquals(intList.get(i).intValue(), rev.get(i).getAsJsonPrimitive().getAsInt());
+    }
+
+    rev = jsonArrayFunctions.reverse(rev);
+    assertNotSame(jarr, rev);
+    assertEquals(jarr, rev);
+  }
 
   @Test
-  void isEmpty() {}
+  void isEmpty() {
+    JsonArray jarr = new JsonArray();
+    assertTrue(jsonArrayFunctions.isEmpty(jarr));
+    jarr.add(1);
+    assertFalse(jsonArrayFunctions.isEmpty(jarr));
+    jarr.remove(0);
+    assertTrue(jsonArrayFunctions.isEmpty(jarr));
+    assertTrue(jsonArrayFunctions.isEmpty(JsonArrayFunctions.EMPTY_JSON_ARRAY));
+  }
 
   @Test
-  void count() {}
+  void count() {
+    JsonArray jarr = new JsonArray();
+    for (int i = 0; i < 10; i++) {
+      jarr.add("test1");
+    }
+    for (int i = 0; i < 15; i++) {
+      jarr.add("test2");
+    }
+    for (int i = 0; i < 17; i++) {
+      jarr.add("test1");
+    }
+
+    JsonPrimitive jeleTest1 = new JsonPrimitive("test1");
+    JsonPrimitive jeleTest2 = new JsonPrimitive("test2");
+    assertEquals(27, jsonArrayFunctions.count(jarr, jeleTest1, 0));
+    assertEquals(17, jsonArrayFunctions.count(jarr, jeleTest1, 10));
+    assertEquals(15, jsonArrayFunctions.count(jarr, jeleTest2, 0));
+    assertEquals(1, jsonArrayFunctions.count(jarr, jeleTest2, 24));
+    assertEquals(0, jsonArrayFunctions.count(jarr, jeleTest2, 25));
+  }
 
   @Test
-  void indexOf() {}
+  void indexOf() {
+    var intList = new ArrayList<Integer>();
+    JsonArray jarr = new JsonArray();
+    for (int i = 0; i < 100; i++) {
+      intList.add(i);
+      jarr.add(i);
+    }
+
+    for (int i = 0; i < 100; i++) {
+      JsonPrimitive value = new JsonPrimitive(intList.get(i));
+      assertEquals(i, jsonArrayFunctions.indexOf(jarr, value, 0));
+    }
+
+    for (int i = 1; i < 100; i++) {
+      JsonPrimitive value = new JsonPrimitive(intList.get(i));
+      assertEquals(i, jsonArrayFunctions.indexOf(jarr, value, i - 1));
+    }
+
+    for (int i = 0; i < 99; i++) {
+      JsonPrimitive value = new JsonPrimitive(intList.get(i));
+      assertEquals(-1, jsonArrayFunctions.indexOf(jarr, value, i + 1));
+    }
+
+    JsonArray jarr2 = new JsonArray();
+    jarr2.add("Test1");
+    jarr2.add("Test2");
+    jarr2.add("Test3");
+    jarr2.add("Test1");
+
+    JsonPrimitive jeleTest1 = new JsonPrimitive("Test1");
+    assertEquals(0, jsonArrayFunctions.indexOf(jarr2, jeleTest1, 0));
+    for (int i = 1; i < jarr2.size(); i++) {
+      assertEquals(3, jsonArrayFunctions.indexOf(jarr2, jeleTest1, i));
+    }
+  }
 
   @Test
-  void merge() {}
+  void merge() {
+    JsonArray expected = new JsonArray();
+    JsonArray jarr1 = new JsonArray();
+    for (int i = 0; i < 100; i++) {
+      expected.add(i);
+      jarr1.add(i);
+    }
+
+    JsonArray jarr2 = new JsonArray();
+    for (int i = 0; i < 100; i++) {
+      expected.add(i);
+      jarr2.add(i);
+    }
+
+    JsonArray jarr3 = new JsonArray();
+    for (int i = 0; i < 100; i++) {
+      expected.add(i);
+      jarr3.add(i);
+    }
+
+    List<JsonArray> list = List.of(jarr1, jarr2, jarr3);
+    JsonArray res = jsonArrayFunctions.merge(list);
+
+    assertEquals(expected, res);
+  }
 
   @Test
-  void unique() {}
+  void unique() {
+    JsonArray jarr1 = new JsonArray();
+    jarr1.add("Test1");
+    jarr1.add("Test2");
+    jarr1.add("Test3");
+    jarr1.add("Test1");
+
+    JsonArray res = jsonArrayFunctions.unique(jarr1);
+    assertEquals(3, res.size());
+
+    JsonArray jarr2 = new JsonArray();
+    jarr2.add("Test1");
+    jarr2.add("Test2");
+    jarr2.add("Test3");
+    jarr2.add("Test1");
+    jarr2.add("Test2");
+    jarr2.add("Test2");
+
+    res = jsonArrayFunctions.unique(jarr1);
+    assertEquals(3, res.size());
+  }
 
   @Test
-  void removeAll() {}
+  void removeAll() {
+    JsonArray jarr = new JsonArray();
+    List<String> list = new ArrayList<String>();
+    list.add("Test1");
+    list.add("Test2");
+    list.add("Test3");
+    list.add("Test1");
+    list.add("Test2");
+    list.add("Test2");
+
+    for (String s : list) {
+      jarr.add(s);
+    }
+
+    JsonArray jarr1 = new JsonArray();
+    jarr1.add("Test1");
+
+    JsonArray jarr2 = new JsonArray();
+    jarr2.add("Test2");
+
+    JsonArray jarr3 = new JsonArray();
+    jarr3.add("Test3");
+
+    JsonArray jarr4 = new JsonArray();
+    jarr4.add("Test4");
+
+    JsonArray jarr5 = new JsonArray();
+    jarr5.add("Test2");
+    jarr5.add("Test3");
+
+    JsonArray res = jsonArrayFunctions.removeAll(jarr, List.of(jarr1));
+    List<String> expected = new ArrayList<>(list);
+    expected.removeAll(List.of("Test1"));
+    assertEquals(expected.size(), res.size());
+    for (int i = 0; i < expected.size(); i++) {
+      assertEquals(expected.get(i), res.get(i).getAsString());
+    }
+
+    res = jsonArrayFunctions.removeAll(jarr, List.of(jarr2));
+    expected = new ArrayList<>(list);
+    expected.removeAll(List.of("Test2"));
+    assertEquals(expected.size(), res.size());
+    for (int i = 0; i < expected.size(); i++) {
+      assertEquals(expected.get(i), res.get(i).getAsString());
+    }
+
+    res = jsonArrayFunctions.removeAll(jarr, List.of(jarr3));
+    expected = new ArrayList<>(list);
+    expected.removeAll(List.of("Test3"));
+    assertEquals(expected.size(), res.size());
+    for (int i = 0; i < expected.size(); i++) {
+      assertEquals(expected.get(i), res.get(i).getAsString());
+    }
+
+    res = jsonArrayFunctions.removeAll(jarr, List.of(jarr4));
+    expected = new ArrayList<>(list);
+    expected.removeAll(List.of("Test4"));
+    assertEquals(expected.size(), res.size());
+    for (int i = 0; i < expected.size(); i++) {
+      assertEquals(expected.get(i), res.get(i).getAsString());
+    }
+
+    res = jsonArrayFunctions.removeAll(jarr, List.of(jarr5));
+    expected = new ArrayList<>(list);
+    expected.removeAll(List.of("Test2", "Test3"));
+    assertEquals(expected.size(), res.size());
+    for (int i = 0; i < expected.size(); i++) {
+      assertEquals(expected.get(i), res.get(i).getAsString());
+    }
+  }
 
   @Test
-  void union() {}
+  void union() {
+    JsonArray jarr1 = new JsonArray();
+    jarr1.add("Test1");
+    jarr1.add("Test2");
+    jarr1.add("Test2");
+
+    JsonArray jarr2 = new JsonArray();
+    jarr2.add("Test3");
+    jarr2.add("Test4");
+
+    JsonArray jarr3 = new JsonArray();
+    jarr3.add("Test1");
+    jarr3.add("Test4");
+
+    JsonObject jobj1 = new JsonObject();
+    jobj1.addProperty("Test5", "aaa");
+    jobj1.addProperty("Test3", "aaa");
+    jobj1.addProperty("Test1", "aaa");
+
+    JsonObject jobj2 = new JsonObject();
+    jobj2.addProperty("Test5", "aaa");
+    jobj2.addProperty("Test3", "aaa");
+    jobj2.addProperty("Test6", "aaa");
+
+    JsonArray res = jsonArrayFunctions.union(List.of(jarr1, jarr2));
+    assertEquals(4, res.size());
+    assertTrue(res.contains(new JsonPrimitive("Test1")));
+    assertTrue(res.contains(new JsonPrimitive("Test2")));
+    assertTrue(res.contains(new JsonPrimitive("Test3")));
+    assertTrue(res.contains(new JsonPrimitive("Test4")));
+
+    res = jsonArrayFunctions.union(List.of(jarr1, jarr2, jarr3));
+    assertEquals(4, res.size());
+    assertTrue(res.contains(new JsonPrimitive("Test1")));
+    assertTrue(res.contains(new JsonPrimitive("Test2")));
+    assertTrue(res.contains(new JsonPrimitive("Test3")));
+    assertTrue(res.contains(new JsonPrimitive("Test4")));
+
+    res = jsonArrayFunctions.union(List.of(jarr1, jobj1));
+    assertEquals(4, res.size());
+    assertTrue(res.contains(new JsonPrimitive("Test1")));
+    assertTrue(res.contains(new JsonPrimitive("Test2")));
+    assertTrue(res.contains(new JsonPrimitive("Test3")));
+    assertTrue(res.contains(new JsonPrimitive("Test5")));
+
+    res = jsonArrayFunctions.union(List.of(jarr1, jobj1, jobj2));
+    assertEquals(5, res.size());
+    assertTrue(res.contains(new JsonPrimitive("Test1")));
+    assertTrue(res.contains(new JsonPrimitive("Test2")));
+    assertTrue(res.contains(new JsonPrimitive("Test3")));
+    assertTrue(res.contains(new JsonPrimitive("Test5")));
+    assertTrue(res.contains(new JsonPrimitive("Test6")));
+  }
 
   @Test
-  void intersection() {}
+  void intersection() {
+    JsonArray jarr1 = new JsonArray();
+    jarr1.add("Test1");
+    jarr1.add("Test2");
+    jarr1.add("Test2");
+    jarr1.add("Test6");
+
+    JsonArray jarr2 = new JsonArray();
+    jarr2.add("Test3");
+    jarr2.add("Test4");
+
+    JsonArray jarr3 = new JsonArray();
+    jarr3.add("Test1");
+    jarr3.add("Test4");
+
+    JsonObject jobj1 = new JsonObject();
+    jobj1.addProperty("Test5", "aaa");
+    jobj1.addProperty("Test3", "aaa");
+    jobj1.addProperty("Test1", "aaa");
+
+    JsonObject jobj2 = new JsonObject();
+    jobj2.addProperty("Test5", "aaa");
+    jobj2.addProperty("Test3", "aaa");
+    jobj2.addProperty("Test6", "aaa");
+
+    JsonArray res = jsonArrayFunctions.intersection(List.of(jarr1, jarr2));
+    assertEquals(0, res.size());
+
+    res = jsonArrayFunctions.intersection(List.of(jarr1, jarr3));
+    assertEquals(1, res.size());
+    assertTrue(res.contains(new JsonPrimitive("Test1")));
+
+    res = jsonArrayFunctions.intersection(List.of(jarr1, jobj1));
+    assertEquals(1, res.size());
+    assertTrue(res.contains(new JsonPrimitive("Test1")));
+
+    res = jsonArrayFunctions.intersection(List.of(jarr1, jobj2));
+    assertEquals(1, res.size());
+    assertTrue(res.contains(new JsonPrimitive("Test6")));
+
+    res = jsonArrayFunctions.intersection(List.of(jarr3, jobj2));
+    assertEquals(0, res.size());
+  }
 
   @Test
-  void difference() {}
+  void difference() {
+    JsonArray jarr1 = new JsonArray();
+    jarr1.add("Test1");
+    jarr1.add("Test2");
+    jarr1.add("Test2");
+    jarr1.add("Test6");
+
+    JsonArray jarr2 = new JsonArray();
+    jarr2.add("Test3");
+    jarr2.add("Test4");
+
+    JsonArray jarr3 = new JsonArray();
+    jarr3.add("Test1");
+    jarr3.add("Test4");
+
+    JsonObject jobj1 = new JsonObject();
+    jobj1.addProperty("Test5", "aaa");
+    jobj1.addProperty("Test3", "aaa");
+    jobj1.addProperty("Test1", "aaa");
+
+    JsonObject jobj2 = new JsonObject();
+    jobj2.addProperty("Test5", "aaa");
+    jobj2.addProperty("Test3", "aaa");
+    jobj2.addProperty("Test6", "aaa");
+
+    JsonArray res = jsonArrayFunctions.difference(List.of(jarr1, jarr2));
+    assertEquals(3, res.size());
+    assertTrue(res.contains(new JsonPrimitive("Test1")));
+    assertTrue(res.contains(new JsonPrimitive("Test2")));
+    assertTrue(res.contains(new JsonPrimitive("Test6")));
+
+    res = jsonArrayFunctions.difference(List.of(jarr1, jarr3));
+    assertEquals(2, res.size());
+    assertTrue(res.contains(new JsonPrimitive("Test2")));
+    assertTrue(res.contains(new JsonPrimitive("Test6")));
+
+    res = jsonArrayFunctions.difference(List.of(jarr1, jobj1));
+    assertEquals(2, res.size());
+    assertTrue(res.contains(new JsonPrimitive("Test2")));
+    assertTrue(res.contains(new JsonPrimitive("Test6")));
+
+    res = jsonArrayFunctions.difference(List.of(jarr1, jobj2));
+    assertEquals(2, res.size());
+    assertTrue(res.contains(new JsonPrimitive("Test1")));
+    assertTrue(res.contains(new JsonPrimitive("Test2")));
+
+  }
 
   @Test
-  void isSubset() {}
+  void isSubset() {
+    JsonArray jarr1 = new JsonArray();
+    jarr1.add("Test1");
+    jarr1.add("Test2");
+    jarr1.add("Test2");
+    jarr1.add("Test6");
+
+    JsonArray jarr2 = new JsonArray();
+    jarr2.add("Test3");
+    jarr2.add("Test4");
+
+    JsonArray jarr3 = new JsonArray();
+    jarr3.add("Test1");
+    jarr3.add("Test6");
+
+    JsonArray jarr4 = new JsonArray();
+    jarr4.add("Test1");
+    jarr4.add("Test1");
+    jarr4.add("Test2");
+    jarr4.add("Test6");
+
+    JsonObject jobj1 = new JsonObject();
+    jobj1.add("Test2", new JsonPrimitive("aaa"));
+    jobj1.add("Test2", new JsonPrimitive("aaa"));
+
+    JsonObject jobj2 = new JsonObject();
+    jobj2.add("Test1", new JsonPrimitive("aaa"));
+    jobj2.add("Test2", new JsonPrimitive("aaa"));
+
+
+    assertFalse(jsonArrayFunctions.isSubset(List.of(jarr1, jarr2)));
+    assertTrue(jsonArrayFunctions.isSubset(List.of(jarr1, jarr4)));
+    assertTrue(jsonArrayFunctions.isSubset(List.of(jarr4, jarr1)));
+    assertTrue(jsonArrayFunctions.isSubset(List.of(jarr4, jarr3)));
+    assertFalse(jsonArrayFunctions.isSubset(List.of(jarr3, jarr4)));
+    assertTrue(jsonArrayFunctions.isSubset(List.of(jarr1, jarr3, jarr4)));
+    assertTrue(jsonArrayFunctions.isSubset(List.of(jarr1, jobj1)));
+    assertTrue(jsonArrayFunctions.isSubset(List.of(jarr1, jobj1, jobj2)));
+    assertTrue(jsonArrayFunctions.isSubset(List.of(jobj2, jobj1)));
+  }
 
   @Test
-  void removeFirst() {}
+  void removeFirst() {
+    JsonArray jarr1 = new JsonArray();
+    jarr1.add("Test1");
+    jarr1.add("Test2");
+    jarr1.add("Test2");
+    jarr1.add("Test6");
 
-  @Test
-  void jsonArrayAsMTScriptList() {}
+    JsonArray jarr2 = new JsonArray();
+    jarr2.add("Test3");
+    jarr2.add("Test4");
 
-  @Test
-  void parseJsonArray() {}
+    JsonArray jarr3 = new JsonArray();
+    jarr3.add("Test2");
+    jarr3.add("Test6");
 
-  @Test
-  void jsonArrayToListOfStrings() {}
+    JsonArray jarr4 = new JsonArray();
+    jarr4.add("Test2");
+    jarr4.add("Test1");
+    jarr4.add("Test2");
+    jarr4.add("Test6");
 
-  @Test
-  void shallowCopy() {}
+    JsonArray res = jsonArrayFunctions.removeFirst(jarr1, jarr3);
+    assertEquals(2, res.size());
+    assertEquals("Test1", res.get(0).getAsString());
+    assertEquals("Test2", res.get(1).getAsString());
+
+    res = jsonArrayFunctions.removeFirst(jarr1, jarr2);
+    assertEquals(jarr1, res);
+
+
+    res = jsonArrayFunctions.removeFirst(jarr1, jarr4);
+    assertEquals(0, res.size());
+  }
 }

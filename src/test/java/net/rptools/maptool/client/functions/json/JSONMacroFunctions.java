@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.functions;
+package net.rptools.maptool.client.functions.json;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.rptools.maptool.client.functions.JSONMacroFunctionsOld;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONArray;

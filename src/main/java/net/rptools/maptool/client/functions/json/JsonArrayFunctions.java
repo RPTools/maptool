@@ -664,7 +664,7 @@ public class JsonArrayFunctions {
       }
     }
 
-    return listToJsonArray(difference);
+    return listToJsonArray(difference.stream().distinct().collect(Collectors.toList()));
   }
 
   /**
