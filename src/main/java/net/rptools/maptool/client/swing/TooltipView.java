@@ -19,6 +19,7 @@ import javax.swing.text.*;
 import javax.swing.text.html.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.language.I18N;
 
 public class TooltipView extends InlineView {
 
@@ -36,11 +37,19 @@ public class TooltipView extends InlineView {
 
   @Override
   public String getToolTipText(float x, float y, Shape allocation) {
-    AttributeSet att;
+    AttributeSet attSet;
 
-    att = (AttributeSet) getElement().getAttributes().getAttribute(HTML.Tag.A);
-    if (att != null) {
-      String href = att.getAttribute(HTML.Attribute.HREF).toString();
+    attSet = (AttributeSet) getElement().getAttributes().getAttribute(HTML.Tag.A);
+    if (attSet != null) {
+      Object attribute = attSet.getAttribute(HTML.Attribute.HREF);
+      String href;
+
+      if (attribute != null) {
+        href = attribute.toString();
+      } else {
+        href = I18N.getString("macroLink.error.tooltip.bad.href");
+      }
+
       if (href.startsWith("macro:")) {
         boolean isInsideChat = mlToolTips;
         boolean allowToolTipToShow = !AppPreferences.getSuppressToolTipsForMacroLinks();
@@ -54,8 +63,8 @@ public class TooltipView extends InlineView {
       }
     }
 
-    att = (AttributeSet) getElement().getAttributes().getAttribute(HTML.Tag.SPAN);
-    if (att != null) return (String) att.getAttribute(HTML.Attribute.TITLE);
+    attSet = (AttributeSet) getElement().getAttributes().getAttribute(HTML.Tag.SPAN);
+    if (attSet != null) return (String) attSet.getAttribute(HTML.Attribute.TITLE);
 
     return null;
   }
