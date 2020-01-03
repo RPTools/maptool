@@ -27,10 +27,9 @@ import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.language.I18N;
 
 @MacroDefinition(
-  name = "help",
-  aliases = {"h"},
-  description = "help.description"
-)
+    name = "help",
+    aliases = {"h"},
+    description = "help.description")
 public class HelpMacro implements Macro {
   private static Comparator<Macro> MACRO_NAME_COMPARATOR =
       new Comparator<Macro>() {

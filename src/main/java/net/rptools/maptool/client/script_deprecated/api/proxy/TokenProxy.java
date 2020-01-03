@@ -64,8 +64,8 @@ public class TokenProxy {
     return TokenNameFunction.getInstance().getName(token);
   }
 
-  public void setName(Object value) {
-    TokenNameFunction.getInstance().setName(token, value.toString());
+  public void setName(Object value) throws ParserException {
+    TokenNameFunction.setName(token, value.toString());
   }
 
   // GM Name

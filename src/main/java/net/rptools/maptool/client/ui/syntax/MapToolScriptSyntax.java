@@ -44,7 +44,9 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     "token.name",
     "token.visible",
     "tokens.denyMove",
-    "tokens.moveCount"
+    "tokens.moveCount",
+    "init.current",
+    "init.round"
   };
 
   static String[] RESERVED_WORDS = {
