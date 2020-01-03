@@ -75,7 +75,7 @@ public class AssetExtractor {
           pakfile = new PackedFile(file);
 
           Set<String> files = pakfile.getPaths();
-          XStream xstream = new XStream();
+          XStream xstream = FileUtil.getConfiguredXStream();
           int count = 0;
           for (String filename : files) {
             count++;

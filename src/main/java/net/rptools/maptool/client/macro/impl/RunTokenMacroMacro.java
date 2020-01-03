@@ -27,10 +27,9 @@ import net.rptools.maptool.model.Token;
 
 /** Macro to run the macro on the selected tokens */
 @MacroDefinition(
-  name = "tmacro",
-  aliases = {"tm"},
-  description = "tmacro.description"
-)
+    name = "tmacro",
+    aliases = {"tm"},
+    description = "tmacro.description")
 public class RunTokenMacroMacro implements Macro {
   /**
    * @see net.rptools.maptool.client.macro.Macro#execute(MacroContext, String, MapToolMacroContext)
