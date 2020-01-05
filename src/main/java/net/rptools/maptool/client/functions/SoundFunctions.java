@@ -322,9 +322,7 @@ public class SoundFunctions extends AbstractFunction {
    * @return a list with the nicknames corresponding to the resource
    */
   public static List<String> getNicks(String strUri) {
-    return mapSounds
-        .entrySet()
-        .stream()
+    return mapSounds.entrySet().stream()
         .filter(entry -> strUri.equals(entry.getValue()))
         .map(Map.Entry::getKey)
         .collect(Collectors.toList());

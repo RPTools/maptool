@@ -23,10 +23,9 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 
 @MacroDefinition(
-  name = "texturenoise",
-  aliases = {"tn"},
-  description = "texturenoise.description"
-)
+    name = "texturenoise",
+    aliases = {"tn"},
+    description = "texturenoise.description")
 /**
  * This class implements the slash command for adjusting the values for noise to be applied to
  * repeating background textures.
@@ -65,6 +64,10 @@ public class TextureNoise implements Macro {
         return;
       }
 
+      // Changing noise values so make sure it is on.
+      if (!zr.isBgTextureNoiseFilterOn()) {
+        zr.setBgTextureNoiseFilterOn(true);
+      }
       long seed;
       if (args.length == 1) {
         seed = zr.getNoiseSeed();

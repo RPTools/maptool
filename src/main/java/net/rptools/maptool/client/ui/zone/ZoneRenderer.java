@@ -106,6 +106,7 @@ import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarCellPoint;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AbstractPoint;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -155,7 +156,7 @@ public class ZoneRenderer extends JComponent
   private final DebounceExecutor repaintDebouncer;
 
   /** Noise for mask on repeating tiles. */
-  private final DrawableNoise noise = new DrawableNoise();
+  private DrawableNoise noise = null;
 
   /** Is the noise filter on for disrupting pattens in background tiled textures. */
   private boolean bgTextureNoiseFilterOn = false;
@@ -4551,17 +4552,14 @@ public class ZoneRenderer extends JComponent
     clearSelectedTokens();
     selectTokens(selectThese);
 
-    if (!isGM)
-      MapTool.addMessage(
-          TextMessage.gm(
-              null,
-              "Tokens dropped onto map '" + zone.getName() + "' by player " + MapTool.getPlayer()));
+    if (!isGM) {
+      String msg = I18N.getText("Token.dropped.byPlayer", zone.getName(), MapTool.getPlayer());
+      MapTool.addMessage(TextMessage.gm(null, msg));
+    }
     if (!failedPaste.isEmpty()) {
-      String mesg = "Failed to paste token(s) with duplicate name(s): " + failedPaste;
-      TextMessage msg = TextMessage.gm(null, mesg);
+      String mesg = I18N.getText("Token.error.unableToPaste", failedPaste);
+      TextMessage msg = TextMessage.gmMe(null, mesg);
       MapTool.addMessage(msg);
-      // msg.setChannel(Channel.ME);
-      // MapTool.addMessage(msg);
     }
     // Copy them to the clipboard so that we can quickly copy them onto the map
     AppActions.copyTokens(tokens);
@@ -4659,9 +4657,17 @@ public class ZoneRenderer extends JComponent
           List<Token> list = (List<Token>) (event.getArg());
           for (Token token : list) {
             flush(token);
+
+            if (evt == Zone.Event.TOKEN_REMOVED) {
+              deselectToken(token.getId());
+            }
           }
         } else {
           flush((Token) event.getArg());
+
+          if (evt == Zone.Event.TOKEN_REMOVED) {
+            deselectToken(((Token) event.getArg()).getId());
+          }
         }
       }
       if (evt == Zone.Event.FOG_CHANGED) {
@@ -4845,9 +4851,12 @@ public class ZoneRenderer extends JComponent
    * @param on <code>true</code> to turn on, <code>false</code> to turn off.
    */
   public void setBgTextureNoiseFilterOn(boolean on) {
-    if (on != bgTextureNoiseFilterOn) {
-      bgTextureNoiseFilterOn = on;
-      drawBackground = true;
+    bgTextureNoiseFilterOn = on;
+    drawBackground = true;
+    if (on) {
+      noise = new DrawableNoise();
+    } else {
+      noise = null;
     }
   }
 }

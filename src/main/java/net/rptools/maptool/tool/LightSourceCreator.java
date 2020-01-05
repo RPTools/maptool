@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.rptools.lib.FileUtil;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.ShapeType;
@@ -51,7 +52,7 @@ public class LightSourceCreator {
 
     lightSourcesMap.put("Generic", lightSourceList);
 
-    XStream xstream = new XStream();
+    XStream xstream = FileUtil.getConfiguredXStream();
     System.out.println(xstream.toXML(lightSourcesMap));
   }
 
