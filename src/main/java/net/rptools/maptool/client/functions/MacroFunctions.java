@@ -709,7 +709,6 @@ public class MacroFunctions extends AbstractFunction {
     mbp.setLabel(label);
     mbp.setSaveLocation("Token");
     mbp.setTokenId(token);
-    mbp.setApplyToTokens(false);
     mbp.save();
 
     updateToken(token);
