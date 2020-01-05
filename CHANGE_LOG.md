@@ -9,15 +9,9 @@ Bug Fixes
 -----
 - [#1079][i1079] Selecting and then deleting multiple tokens caused ConcurrentModification Exception.  Fixed.
 - [#1078][i1078] Translations for German language broke a number of shortcuts and macro editor. Fixed.
-- [#1069][i1069] Autosave Failure message had bad formatting. Fixed.
-- [#1066][i1066] NPE when selecting image for token. Null asset is caught and error msage presented.
-- [#1015][i1015] NPE produced when incorrectly constructed anchor link output. Fixed.
 
 [i1079]: https://github.com/RPTools/maptool/issues/1079
 [i1078]: https://github.com/RPTools/maptool/issues/1078
-[i1069]: https://github.com/RPTools/maptool/issues/1069
-[i1066]: https://github.com/RPTools/maptool/issues/1066
-[i1015]: https://github.com/RPTools/maptool/issues/1015
 
 Maptool 1.5.9
 =====
