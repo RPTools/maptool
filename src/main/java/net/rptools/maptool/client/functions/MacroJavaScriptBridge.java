@@ -14,20 +14,21 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.*;
 import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.JSObject;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public class MacroJavaScriptBridge extends AbstractFunction {
 
@@ -75,7 +76,7 @@ public class MacroJavaScriptBridge extends AbstractFunction {
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
-  public Object JavaScriptToMTScriptType(Object val) {
+  public Object JavaScriptToMTScriptType(Object val) throws ParserException {
     if (val == null) {
       // MTScript doesnt have a null, only empty string
       return "";
@@ -88,15 +89,17 @@ public class MacroJavaScriptBridge extends AbstractFunction {
     } else if (val instanceof JSObject) {
       JSObject jsObject = (JSObject) val;
       if (jsObject.isArray()) {
-        List<Object> arr = new ArrayList<>();
-        arr.addAll(jsObject.values());
-        return JSONArray.fromObject(arr.toArray());
-      } else {
-        Map<String, Object> obj = new HashMap<>();
-        for (String key : jsObject.keySet()) {
-          obj.put(key, jsObject.getMember(key));
+        JsonArray arr = new JsonArray();
+        for (Object o : jsObject.values()) {
+          arr.add(0);
         }
-        return JSONObject.fromObject(obj);
+        return arr;
+      } else {
+        JsonObject obj = new JsonObject();
+        for (String key : jsObject.keySet()) {
+          obj.add(key, JSONMacroFunctions.getInstance().asJsonElement(jsObject.getMember(key)));
+        }
+        return obj;
       }
     } else {
       return val;

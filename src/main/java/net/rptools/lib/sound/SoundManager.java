@@ -14,6 +14,8 @@
  */
 package net.rptools.lib.sound;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -24,8 +26,6 @@ import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.functions.SoundFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 /**
  * This class stores AudioClip for system sounds and sound events. Event sounds are played through
@@ -267,12 +267,12 @@ public class SoundManager {
    * Return the properties of a clip from its uri
    *
    * @param strUri the String uri of the clip
-   * @return JSONObject for one clip, JSONArray of JSONObjects if all clips
+   * @return JsonObject for one clip, JsonArray of JsonObjects if all clips
    */
   public static Object getClipProperties(String strUri) {
-    JSONObject info;
+    JsonObject info;
     if (strUri.equals("*")) {
-      JSONArray infoArray = new JSONArray();
+      JsonArray infoArray = new JsonArray();
       for (HashMap.Entry mapElement : userSounds.entrySet()) {
         info = ((SoundManager) mapElement.getValue()).getInfo();
         if (info != null) infoArray.add(info);
@@ -290,22 +290,22 @@ public class SoundManager {
   /**
    * Return the properties of a clip
    *
-   * @return JSONObject of the properties
+   * @return JsonObject of the properties
    */
-  private JSONObject getInfo() {
+  private JsonObject getInfo() {
     try {
-      JSONObject info = new JSONObject();
+      JsonObject info = new JsonObject();
 
       List<String> listNicks = SoundFunctions.getNicks(this.strUri);
       if (listNicks.size() > 0) {
-        info.put("nicknames", String.join(",", listNicks));
+        info.addProperty("nicknames", String.join(",", listNicks));
       }
-      info.put("uri", this.strUri);
-      info.put("cycleCount", this.cycleCount);
-      info.put("volume", this.volume);
+      info.addProperty("uri", this.strUri);
+      info.addProperty("cycleCount", this.cycleCount);
+      info.addProperty("volume", this.volume);
       String status = this.clip.isPlaying() ? "PLAYING" : "STOPPED";
-      info.put("status", status);
-      info.put("type", "clip");
+      info.addProperty("status", status);
+      info.addProperty("type", "clip");
       return info;
     } catch (Exception e) {
       return null;

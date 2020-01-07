@@ -14,11 +14,15 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import net.rptools.maptool.client.functions.*;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
@@ -27,8 +31,6 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.MapVariableResolver;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableModifiers;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -243,9 +245,9 @@ public class MapToolVariableResolver extends MapVariableResolver {
 
     Object value;
 
-    if (result instanceof JSONArray) {
+    if (result instanceof JsonArray) {
       value = result;
-    } else if (result instanceof JSONObject) {
+    } else if (result instanceof JsonObject) {
       value = result;
     } else if (result instanceof BigDecimal) {
       value = result;
@@ -253,9 +255,9 @@ public class MapToolVariableResolver extends MapVariableResolver {
 
       // First we try convert it to a JSON object.
       if (result.toString().trim().startsWith("[") || result.toString().trim().startsWith("{")) {
-        Object obj = JSONMacroFunctionsOld.convertToJSON(result.toString());
-        if (obj != null) {
-          return obj;
+        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(result.toString());
+        if (json.isJsonArray() || json.isJsonObject()) {
+          return json;
         }
       }
 

@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -31,6 +34,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -48,9 +52,6 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.ezmorph.bean.MorphDynaBean;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -120,7 +121,7 @@ public class TokenMoveFunctions extends AbstractFunction {
           pathPoints = getLastPathList(path, true);
           returnPoints = crossedPoints(zone, tokenInContext, points, pathPoints);
         }
-        JSONArray retVal = pathPointsToJSONArray(returnPoints);
+        JsonArray retVal = pathPointsToJSONArray(returnPoints);
         returnPoints = null;
         return retVal;
       } else {
@@ -181,7 +182,7 @@ public class TokenMoveFunctions extends AbstractFunction {
           pathPoints = getLastPathList(path, true);
           returnPoints = crossedToken(zone, tokenInContext, target, pathPoints);
         }
-        JSONArray retVal = pathPointsToJSONArray(returnPoints);
+        JsonArray retVal = pathPointsToJSONArray(returnPoints);
         returnPoints = null;
         return retVal;
       } else {
@@ -195,18 +196,21 @@ public class TokenMoveFunctions extends AbstractFunction {
 
   private List<Map<String, Integer>> crossedToken(
       final Zone zone, final Token tokenInContext, final Token target, final String pathString) {
-    Object jsonObject = JSONMacroFunctionsOld.asJSON(pathString);
+
+    JsonElement json = null;
+    try {
+      json = JSONMacroFunctions.getInstance().asJsonElement(pathString);
+    } catch (ParserException e) {
+      // Ignore parsing error to maintain macro compatibility
+    }
 
     ArrayList<Map<String, Integer>> pathPoints = new ArrayList<Map<String, Integer>>();
-    if (jsonObject instanceof JSONArray) {
-      ArrayList<?> tempPoints = (ArrayList<?>) JSONArray.toCollection((JSONArray) jsonObject);
-
-      for (Object o : tempPoints) {
-        MorphDynaBean bean = (MorphDynaBean) o;
-        // System.out.println(bean.get("x"));
+    if (json != null && json.isJsonArray()) {
+      for (JsonElement ele : json.getAsJsonArray()) {
+        JsonObject jobj = ele.getAsJsonObject();
         Map<String, Integer> point = new HashMap<String, Integer>();
-        point.put("x", (Integer) bean.get("x"));
-        point.put("y", (Integer) bean.get("y"));
+        point.put("x", jobj.get("x").getAsInt());
+        point.put("y", jobj.get("y").getAsInt());
         pathPoints.add(point);
       }
       return getInstance().crossedToken(zone, tokenInContext, target, pathPoints);
@@ -342,27 +346,27 @@ public class TokenMoveFunctions extends AbstractFunction {
     return returnPoints;
   }
 
-  private JSONArray pathPointsToJSONArray(final List<Map<String, Integer>> pathPoints) {
+  private JsonArray pathPointsToJSONArray(final List<Map<String, Integer>> pathPoints) {
     log.debug("...in pathPointsToJSONArrayt.  Converting list to JSONArray");
 
-    JSONArray jsonArr = new JSONArray();
+    JsonArray jsonArr = new JsonArray();
     if (pathPoints == null || pathPoints.isEmpty()) {
       return jsonArr;
     }
-    JSONObject pointObj = new JSONObject();
+    JsonObject pointObj = new JsonObject();
     // Lee: had to add handling for the line segment made by unsnapped movedOverToken()
     if (pathPoints.get(0).containsKey("x"))
       for (Map<String, Integer> entry : pathPoints) {
-        pointObj.element("x", entry.get("x"));
-        pointObj.element("y", entry.get("y"));
+        pointObj.addProperty("x", entry.get("x"));
+        pointObj.addProperty("y", entry.get("y"));
         jsonArr.add(pointObj);
       }
     else
       for (Map<String, Integer> entry : pathPoints) {
-        pointObj.element("x1", entry.get("x1"));
-        pointObj.element("y1", entry.get("y1"));
-        pointObj.element("x2", entry.get("x2"));
-        pointObj.element("y2", entry.get("y2"));
+        pointObj.addProperty("x1", entry.get("x1"));
+        pointObj.addProperty("y1", entry.get("y1"));
+        pointObj.addProperty("x2", entry.get("x2"));
+        pointObj.addProperty("y2", entry.get("y2"));
         jsonArr.add(pointObj);
       }
 
@@ -412,7 +416,7 @@ public class TokenMoveFunctions extends AbstractFunction {
     Token token = getMoveMacroToken(ON_TOKEN_MOVE_COMPLETE_CALLBACK);
 
     List<Map<String, Integer>> pathPoints = getInstance().getLastPathList(path, true);
-    JSONArray pathArr = getInstance().pathPointsToJSONArray(pathPoints);
+    JsonArray pathArr = getInstance().pathPointsToJSONArray(pathPoints);
     String pathCoordinates = pathArr.toString();
     // If we get here it is trusted so try to execute it.
     if (token != null) {
@@ -586,7 +590,7 @@ public class TokenMoveFunctions extends AbstractFunction {
     Token token = getMoveMacroToken(ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK);
     if (token != null) {
       try {
-        JSONArray json = new JSONArray();
+        JsonArray json = new JsonArray();
         for (GUID tokenGuid : filteredTokens) {
           json.add(tokenGuid.toString());
         }
@@ -628,16 +632,20 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   private List<Map<String, Integer>> convertJSONStringToList(final String pointsString) {
-    Object jsonObject = JSONMacroFunctionsOld.asJSON(pointsString);
+    JsonElement json = null;
+    try {
+      json = JSONMacroFunctions.getInstance().asJsonElement(pointsString);
+    } catch (ParserException e) {
+      // Do nothing on parse error to maintain compatibility with existing macro code.
+    }
 
     ArrayList<Map<String, Integer>> pathPoints = new ArrayList<Map<String, Integer>>();
-    if (jsonObject instanceof JSONArray) {
-      ArrayList<?> tempPoints = (ArrayList<?>) JSONArray.toCollection((JSONArray) jsonObject);
-      for (Object o : tempPoints) {
-        MorphDynaBean bean = (MorphDynaBean) o;
-        Map<String, Integer> point = new HashMap<String, Integer>();
-        point.put("x", (Integer) bean.get("x"));
-        point.put("y", (Integer) bean.get("y"));
+    if (json != null && json.isJsonArray()) {
+      for (JsonElement ele : json.getAsJsonArray()) {
+        JsonObject jobj = ele.getAsJsonObject();
+        Map<String, Integer> point = new HashMap<>();
+        point.put("x", jobj.get("x").getAsInt());
+        point.put("y", jobj.get("y").getAsInt());
         pathPoints.add(point);
       }
     }

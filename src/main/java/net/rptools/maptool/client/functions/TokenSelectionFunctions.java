@@ -14,11 +14,13 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -28,7 +30,6 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 public class TokenSelectionFunctions extends AbstractFunction {
 
@@ -90,11 +91,11 @@ public class TokenSelectionFunctions extends AbstractFunction {
       String delim = parameters.get(1).toString();
 
       if (delim.equalsIgnoreCase("json")) {
+        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(paramStr);
         // A JSON Array was supplied
-        Object json = JSONMacroFunctionsOld.convertToJSON(paramStr);
-        if (json instanceof JSONArray) {
-          for (Object o : (JSONArray) json) {
-            String identifier = (String) o;
+        if (json.isJsonArray()) {
+          for (JsonElement ele : json.getAsJsonArray()) {
+            String identifier = ele.getAsString();
             Token t = zone.resolveToken(identifier.trim());
             if (t != null) {
               deselectGUIDs.add(t.getId());
@@ -186,10 +187,10 @@ public class TokenSelectionFunctions extends AbstractFunction {
       }
       if (delim.equalsIgnoreCase("json")) {
         // A JSON Array was supplied
-        Object json = JSONMacroFunctionsOld.convertToJSON(paramStr);
-        if (json instanceof JSONArray) {
-          for (Object o : (JSONArray) json) {
-            String identifier = (String) o;
+        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(paramStr);
+        if (json.isJsonArray()) {
+          for (JsonElement ele : json.getAsJsonArray()) {
+            String identifier = ele.getAsString();
             Token t = zone.resolveToken(identifier);
             if (t != null) {
               allGUIDs.add(t.getId());

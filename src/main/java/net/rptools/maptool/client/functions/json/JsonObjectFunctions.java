@@ -169,4 +169,39 @@ public class JsonObjectFunctions {
 
     return copy;
   }
+
+  /**
+   * Creates a new JsonObject based on the one passed in and the values to be set.
+   *
+   * @param jsonObject The object to add to.
+   * @param list the list of arguments from the script command.
+   * @return The new json object.
+   * @throws ParserException if an error occurs.
+   */
+  public JsonObject set(JsonObject jsonObject, List<Object> list) throws ParserException {
+    JsonObject newJsonObject = jsonObject.deepCopy();
+
+    for (int i = 0; i < list.size(); i += 2) {
+      newJsonObject.add(list.get(i).toString(), typeConversion.asJsonElement(list.get(i + 1)));
+    }
+
+    return newJsonObject;
+  }
+
+  /**
+   * Returns a new JsonObject containing the specified keys from.
+   *
+   * @param jsonObject The JsonObject to get the values from.
+   * @param keys The keys to extract.
+   * @return The new JsonObject.
+   */
+  public JsonObject get(JsonObject jsonObject, List<Object> keys) {
+    JsonObject newJsonObject = new JsonObject();
+    for (Object key : keys) {
+      String k = key.toString();
+      newJsonObject.add(k, jsonObject.get(k));
+    }
+
+    return newJsonObject;
+  }
 }

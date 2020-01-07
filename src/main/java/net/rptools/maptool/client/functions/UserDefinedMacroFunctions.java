@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import java.util.Stack;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.syntax.MapToolScriptSyntax;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -126,9 +128,9 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       output = resolver.getVariable("macro.return").toString();
       stripOutput = output;
     }
-    Object out = JSONMacroFunctionsOld.convertToJSON(stripOutput);
-    if (out != null) {
-      return out;
+    JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(stripOutput);
+    if (json != null) {
+      return json;
     }
 
     try {

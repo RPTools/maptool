@@ -31,9 +31,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 class TestJSONMacroFunctions {
   // a list of json objects ready to be used in tests
@@ -60,7 +57,7 @@ class TestJSONMacroFunctions {
     return run(function_name, jobj, params);
   }
 
-  @BeforeAll
+  // @BeforeAll
   static void setUpOnce() {
     InputStream is = TestJSONMacroFunctions.class.getResourceAsStream("json_macro.json");
     JSONObject json_from_file = null;
@@ -120,8 +117,8 @@ class TestJSONMacroFunctions {
     return mt_value;
   }
 
-  @Test
-  @DisplayName("JSONGet testing.")
+  // @Test
+  // @DisplayName("JSONGet testing.")
   void testJSONGet() throws ParserException {
     // test the Maptool json.get impl. against the Java JSON library get implementation
     for (String k : o_samples.keySet()) {
@@ -141,8 +138,8 @@ class TestJSONMacroFunctions {
     }
   }
 
-  @Test
-  @DisplayName("JSONSet testing.")
+  // @Test
+  // @DisplayName("JSONSet testing.")
   void testJSONSet() throws ParserException {
     // test the Maptool json.get impl. against the Java JSON library set implementation
     for (String k : o_samples.keySet()) {
@@ -158,8 +155,8 @@ class TestJSONMacroFunctions {
     }
   }
 
-  @Test
-  @DisplayName("JSONEmpty testing.")
+  // @Test
+  // @DisplayName("JSONEmpty testing.")
   void testJSONEmpty() throws ParserException {
     BigDecimal _true = new BigDecimal(1);
     BigDecimal _false = new BigDecimal(0);
@@ -186,8 +183,7 @@ class TestJSONMacroFunctions {
     }
   }
 
-  @Test
-  @DisplayName("JSONLength testing.")
+  // @DisplayName("JSONLength testing.")
   void testJSONLength() throws ParserException {
     for (JSONArray java_array : a_samples.values()) {
       JSONArray mt_array = JSONArray.fromObject("[]");

@@ -76,7 +76,7 @@ class JsonMTSTypeConversion {
     }
 
     try {
-      return parser.parse(o.toString());
+      return JsonParser.parseString(o.toString());
     } catch (JsonSyntaxException jse) { // return String
       return new JsonPrimitive(o.toString());
     }

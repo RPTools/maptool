@@ -362,7 +362,7 @@ class JsonArrayFunctionsTest {
 
   @Test
   void reverse() {
-     var intList =  new ArrayList<Integer>();
+    var intList = new ArrayList<Integer>();
     JsonArray jarr = new JsonArray();
     for (int i = 0; i < 100; i++) {
       int rnd = random.nextInt();
@@ -721,7 +721,6 @@ class JsonArrayFunctionsTest {
     assertEquals(2, res.size());
     assertTrue(res.contains(new JsonPrimitive("Test1")));
     assertTrue(res.contains(new JsonPrimitive("Test2")));
-
   }
 
   @Test
@@ -753,7 +752,6 @@ class JsonArrayFunctionsTest {
     JsonObject jobj2 = new JsonObject();
     jobj2.add("Test1", new JsonPrimitive("aaa"));
     jobj2.add("Test2", new JsonPrimitive("aaa"));
-
 
     assertFalse(jsonArrayFunctions.isSubset(List.of(jarr1, jarr2)));
     assertTrue(jsonArrayFunctions.isSubset(List.of(jarr1, jarr4)));
@@ -795,7 +793,6 @@ class JsonArrayFunctionsTest {
 
     res = jsonArrayFunctions.removeFirst(jarr1, jarr2);
     assertEquals(jarr1, res);
-
 
     res = jsonArrayFunctions.removeFirst(jarr1, jarr4);
     assertEquals(0, res.size());

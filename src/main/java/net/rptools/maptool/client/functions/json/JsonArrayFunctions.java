@@ -18,6 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -758,6 +759,26 @@ public class JsonArrayFunctions {
   }
 
   /**
+   * Sets the values of the specified indexes in a Json Array.
+   *
+   * @param jsonArray the Json array to copy and set values of.
+   * @param list The list of indexes and values passed from the script.
+   * @return the new JsonArray.
+   * @throws ParserException when an error occurs.
+   */
+  public JsonArray set(JsonArray jsonArray, List<Object> list) throws ParserException {
+    JsonArray newArray = shallowCopy(jsonArray);
+    for (int i = 0; i < list.size(); i += 2) {
+      BigDecimal index = (BigDecimal) list.get(i);
+      Object value = list.get(i + 1);
+
+      newArray.set(index.intValue(), typeConversion.asJsonElement(value));
+    }
+
+    return newArray;
+  }
+
+  /**
    * Returns a shallow copy of the passed in {@link JsonArray}.
    *
    * @param jsonArray The {@link JsonArray} to return a shallow copy of.
@@ -767,5 +788,33 @@ public class JsonArrayFunctions {
     JsonArray result = new JsonArray();
     result.addAll(jsonArray);
     return result;
+  }
+
+  /**
+   * Returns the specified index of a JsonArray as a script type.
+   *
+   * @param jsonArray the JsonArray to get the index of
+   * @param index The index to retrieve.
+   * @return the value at the specified index as a script type.
+   */
+  public Object get(JsonArray jsonArray, int index) {
+    return typeConversion.asScriptType(jsonArray.get(index));
+  }
+
+  /**
+   * Returns a subset of the JsonArray between two indicies.
+   *
+   * @param jsonArray The JsonArray to get the sub array from.
+   * @param startInd The starting index of the sub array.
+   * @param endInd The ending index of the sub array.
+   * @return
+   */
+  public JsonArray get(JsonArray jsonArray, int startInd, int endInd) {
+    JsonArray newArray = new JsonArray();
+    for (int i = startInd; i < endInd; i++) {
+      newArray.add(jsonArray.get(i));
+    }
+
+    return newArray;
   }
 }

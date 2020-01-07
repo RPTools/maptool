@@ -154,10 +154,48 @@ public class JSONMacroFunctions extends AbstractFunction {
             return jsonObjectFunctions.toStringProp(jsonElement.getAsJsonObject(), delim);
           }
         }
+      case "json.set":
+        {
+          FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
+          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          if (jsonElement.isJsonArray()) {
+            return jsonArrayFunctions.set(
+                jsonElement.getAsJsonArray(), args.subList(1, args.size()));
+          } else {
+            return jsonObjectFunctions.set(
+                jsonElement.getAsJsonObject(), args.subList(1, args.size()));
+          }
+        }
+      case "json.get":
+        {
+          FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
+          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          if (jsonElement.isJsonArray()) {
+            if (args.size() == 2) {
+              return jsonArrayFunctions.get(
+                  jsonElement.getAsJsonArray(),
+                  FunctionUtil.paramAsInteger(functionName, args, 1, true));
+            } else {
+              return jsonArrayFunctions.get(
+                  jsonElement.getAsJsonArray(),
+                  FunctionUtil.paramAsInteger(functionName, args, 1, true),
+                  FunctionUtil.paramAsInteger(functionName, args, 2, true));
+            }
+          } else {
+            return jsonObjectFunctions.get(
+                jsonElement.getAsJsonObject(), args.subList(1, args.size()));
+          }
+        }
       case "json.append":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          JsonArray jsonArray = jsonArrayFunctions.coerceToJsonArray(args.get(0));
+          // Special case if first argument is empty string it represents an empty array
+          JsonArray jsonArray;
+          if (args.get(0).toString().length() == 0) {
+            jsonArray = new JsonArray();
+          } else {
+            jsonArray = jsonArrayFunctions.coerceToJsonArray(args.get(0));
+          }
           return jsonArrayFunctions.concatenate(jsonArray, args.subList(1, args.size()));
         }
       case "json.remove":
@@ -510,7 +548,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @return a {@link JsonElement} with the values replaced by those evaluated by the parser.
    * @throws ParserException if any errors occur while parsing.
    */
-  private JsonElement jsonEvaluateArg(MapToolVariableResolver resolver, Object json)
+  public JsonElement jsonEvaluateArg(MapToolVariableResolver resolver, Object json)
       throws ParserException {
     JsonElement jsonElement = asJsonElement(json);
 
@@ -526,7 +564,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @return a {@link JsonElement} with the values replaced by those evaluated by the parser.
    * @throws ParserException if any errors occur while parsing.
    */
-  private JsonElement jsonEvaluate(JsonElement jsonElement, MapToolVariableResolver resolver)
+  public JsonElement jsonEvaluate(JsonElement jsonElement, MapToolVariableResolver resolver)
       throws ParserException {
     if (jsonElement.isJsonObject()) {
       JsonObject source = jsonElement.getAsJsonObject();
@@ -569,7 +607,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param indent The number of spaces to use for indentation.
    * @return The json as a formatted string.
    */
-  private String jsonIndent(JsonElement json, int indent) {
+  public String jsonIndent(JsonElement json, int indent) {
 
     // This is a bit ugly but the GSON library offers no way to specify indentation.
     if (json.isJsonArray()) {
@@ -729,14 +767,22 @@ public class JSONMacroFunctions extends AbstractFunction {
   }
 
   /**
-   * Returns the object used to perform functions on {@link JsonArray}s.
+   * Returns the object used to perform manipulations on {@link JsonArray}s.
    *
-   * @return the object used to perform functions on {@link JsonArray}s.
+   * @return the object used to perform manipulations on {@link JsonArray}s.
    */
   public JsonArrayFunctions getJsonArrayFunctions() {
     return jsonArrayFunctions;
   }
 
+  /**
+   * Returns the object used to perform manipulations on {@link JsonObject}s.
+   *
+   * @return the object used to perform manipulations on {@link JsonObject}s.
+   */
+  public JsonObjectFunctions getJsonObjectFunctions() {
+    return jsonObjectFunctions;
+  }
   /**
    * This method returns the object passed in as the appropriate json type.
    *
