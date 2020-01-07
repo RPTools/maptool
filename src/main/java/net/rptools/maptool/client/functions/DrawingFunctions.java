@@ -14,15 +14,13 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.awt.Point;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -45,7 +43,6 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONObject;
 
 public class DrawingFunctions extends AbstractFunction {
 
@@ -286,33 +283,33 @@ public class DrawingFunctions extends AbstractFunction {
    * @return JSON in String form.
    * @throws ParserException
    */
-  protected JSONObject getDrawingJSONInfo(String functionName, Zone map, GUID guid)
+  protected JsonObject getDrawingJSONInfo(String functionName, Zone map, GUID guid)
       throws ParserException {
     DrawnElement el = getDrawnElement(functionName, map, guid);
     AbstractDrawing d = (AbstractDrawing) el.getDrawable();
-    Map<String, Object> dinfo = new HashMap<String, Object>();
-    dinfo.put("id", el.getDrawable().getId().toString());
-    dinfo.put("name", d.getName());
-    dinfo.put("layer", el.getDrawable().getLayer());
-    dinfo.put("type", getDrawbleType(d));
-    dinfo.put("bounds", boundsToJSON(d));
-    dinfo.put("penColor", paintToString(el.getPen().getPaint()));
-    dinfo.put("fillColor", paintToString(el.getPen().getBackgroundPaint()));
-    dinfo.put("opacity", el.getPen().getOpacity());
-    dinfo.put("isEraser", el.getPen().isEraser() ? BigDecimal.ONE : BigDecimal.ZERO);
-    dinfo.put("penWidth", el.getPen().getThickness());
-    dinfo.put("path", pathToJSON(d));
+    JsonObject dinfo = new JsonObject();
+    dinfo.addProperty("id", el.getDrawable().getId().toString());
+    dinfo.addProperty("name", d.getName());
+    dinfo.addProperty("layer", el.getDrawable().getLayer().toString());
+    dinfo.addProperty("type", getDrawbleType(d));
+    dinfo.add("bounds", boundsToJSON(d));
+    dinfo.addProperty("penColor", paintToString(el.getPen().getPaint()));
+    dinfo.addProperty("fillColor", paintToString(el.getPen().getBackgroundPaint()));
+    dinfo.addProperty("opacity", el.getPen().getOpacity());
+    dinfo.addProperty("isEraser", el.getPen().isEraser() ? BigDecimal.ONE : BigDecimal.ZERO);
+    dinfo.addProperty("penWidth", el.getPen().getThickness());
+    dinfo.add("path", pathToJSON(d));
 
-    return JSONObject.fromObject(dinfo);
+    return dinfo;
   }
 
-  private JSONObject boundsToJSON(AbstractDrawing d) {
-    Map<String, Object> binfo = new HashMap<String, Object>();
-    binfo.put("x", d.getBounds().x);
-    binfo.put("y", d.getBounds().y);
-    binfo.put("width", d.getBounds().width);
-    binfo.put("height", d.getBounds().height);
-    return JSONObject.fromObject(binfo);
+  private JsonObject boundsToJSON(AbstractDrawing d) {
+    JsonObject binfo = new JsonObject();
+    binfo.addProperty("x", d.getBounds().x);
+    binfo.addProperty("y", d.getBounds().y);
+    binfo.addProperty("width", d.getBounds().width);
+    binfo.addProperty("height", d.getBounds().height);
+    return binfo;
   }
 
   private String getDrawbleType(AbstractDrawing d) {
@@ -332,40 +329,42 @@ public class DrawingFunctions extends AbstractFunction {
     }
   }
 
-  private List<JSONObject> pathToJSON(AbstractDrawing d) {
+  private JsonArray pathToJSON(AbstractDrawing d) {
     if (d instanceof LineSegment) {
-      List<JSONObject> pinfo = new ArrayList<JSONObject>();
+      JsonArray pinfo = new JsonArray();
       LineSegment line = (LineSegment) d;
       for (Point point : line.getPoints()) {
-        Map<String, Object> info = new HashMap<String, Object>();
-        info.put("x", point.x);
-        info.put("y", point.y);
-        pinfo.add(JSONObject.fromObject(info));
+        JsonObject info = new JsonObject();
+        info.addProperty("x", point.x);
+        info.addProperty("y", point.y);
+        pinfo.add(info);
       }
       return pinfo;
     } else if (d instanceof ShapeDrawable) {
       String shape = ((ShapeDrawable) d).getShape().getClass().getSimpleName();
       if ("Float".equalsIgnoreCase(shape)) {
-        return Collections.emptyList();
+        return new JsonArray();
       } else {
         // Convert shape into path
-        List<JSONObject> pinfo = new ArrayList<JSONObject>();
+        JsonArray pinfo = new JsonArray();
         final PathIterator pathIter = ((ShapeDrawable) d).getShape().getPathIterator(null);
         float[] coords = new float[6];
-        Map<String, Object> lastinfo = new HashMap<String, Object>();
+        JsonObject lastinfo = new JsonObject();
         while (!pathIter.isDone()) {
           pathIter.currentSegment(coords);
-          Map<String, Object> info = new HashMap<String, Object>();
-          info.put("x", coords[0]);
-          info.put("y", coords[1]);
-          if (!info.equals(lastinfo)) pinfo.add(JSONObject.fromObject(info));
+          JsonObject info = new JsonObject();
+          info.addProperty("x", coords[0]);
+          info.addProperty("y", coords[1]);
+          if (!info.equals(lastinfo)) {
+            pinfo.add(info);
+          }
           lastinfo = info;
           pathIter.next();
         }
         return pinfo;
       }
     }
-    return Collections.emptyList();
+    return new JsonArray();
   }
 
   /**
