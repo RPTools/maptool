@@ -611,11 +611,11 @@ public class JSONMacroFunctions extends AbstractFunction {
 
     // This is a bit ugly but the GSON library offers no way to specify indentation.
     if (json.isJsonArray()) {
-      return JSONArray.fromObject(json.getAsString()).toString(indent);
+      return JSONArray.fromObject(json.toString()).toString(indent);
     } else if (json.isJsonObject()) {
-      return JSONObject.fromObject(json.getAsString()).toString(indent);
+      return JSONObject.fromObject(json.toString()).toString(indent);
     } else {
-      return json.getAsString();
+      return json.toString();
     }
   }
 
@@ -701,7 +701,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @return The resulting json data.
    */
   private JsonElement jsonPathDelete(JsonElement json, String path) {
-    return JsonPath.parse(shallowCopy(json)).delete(path).json();
+    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).delete(path).json();
   }
 
   /**
@@ -718,7 +718,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       throws ParserException {
     Object value = asJsonElement(info);
 
-    return JsonPath.parse(shallowCopy(json)).put(path, key, value).json();
+    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).put(path, key, value).json();
   }
 
   /**
@@ -734,7 +734,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       throws ParserException {
     Object value = asJsonElement(info);
 
-    return JsonPath.parse(shallowCopy(json)).set(path, value).json();
+    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).set(path, value).json();
   }
 
   /**
@@ -750,7 +750,7 @@ public class JSONMacroFunctions extends AbstractFunction {
     JsonElement jsonElement = typeConversion.asClonedJsonElement(json);
     Object value = asJsonElement(info);
 
-    return JsonPath.parse(jsonElement).add(path, value).json();
+    return JsonPath.using(jaywayConfig).parse(jsonElement).add(path, value).json();
   }
 
   /**

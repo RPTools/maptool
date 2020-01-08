@@ -195,7 +195,10 @@ public class JsonObjectFunctions {
    * @param keys The keys to extract.
    * @return The new JsonObject.
    */
-  public JsonObject get(JsonObject jsonObject, List<Object> keys) {
+  public Object get(JsonObject jsonObject, List<Object> keys) {
+    if (keys.size() == 1) {
+      return typeConversion.asScriptType(jsonObject.get(keys.get(0).toString()));
+    }
     JsonObject newJsonObject = new JsonObject();
     for (Object key : keys) {
       String k = key.toString();
