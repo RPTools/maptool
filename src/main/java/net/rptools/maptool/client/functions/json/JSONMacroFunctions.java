@@ -53,6 +53,13 @@ public class JSONMacroFunctions extends AbstractFunction {
   /** The default delimiter to use for MT String Properties. */
   private static final String DEFAULT_STRING_PROP_DELIM = ";";
 
+  /** Json Data Types */
+  public enum JSONObjectType {
+    OBJECT,
+    ARRAY,
+    UNKNOWN
+  }
+
   /**
    * Return the singleton instance for this class.
    *
@@ -129,6 +136,76 @@ public class JSONMacroFunctions extends AbstractFunction {
     }
 
     switch (functionName) {
+      case "json.type":
+        FunctionUtil.checkNumberParam(functionName, args, 1, 1);
+        Object potJson = args.get(0);
+        if (potJson instanceof JsonArray) {
+          return JSONObjectType.ARRAY;
+        } else if (potJson instanceof JsonObject) {
+          return JSONObjectType.OBJECT;
+        } else {
+          String str = potJson.toString().trim();
+          if (str.startsWith("{") || str.startsWith("[")) {
+            JsonElement json = typeConversion.asJsonElement(str);
+            if (json.isJsonArray()) {
+              return JSONObjectType.ARRAY;
+            } else if (json.isJsonObject()) {
+              return JSONObjectType.OBJECT;
+            }
+          }
+        }
+        return JSONObjectType.UNKNOWN;
+      case "json.length":
+        {
+          FunctionUtil.checkNumberParam(functionName, args, 1, 1);
+          JsonElement json = FunctionUtil.paramAsJson(functionName, args, 0);
+          if (json.isJsonObject()) {
+            return jsonObjectFunctions.length(json.getAsJsonObject());
+          } else {
+            return jsonArrayFunctions.length(json.getAsJsonArray());
+          }
+        }
+      case "json.fields":
+        {
+          FunctionUtil.checkNumberParam(functionName, args, 1, 2);
+          JsonElement json = FunctionUtil.paramAsJson(functionName, args, 0);
+          String delim = args.size() > 1 ? args.get(1).toString() : ",";
+
+          if (json.isJsonObject()) {
+            return jsonObjectFunctions.fields(json.getAsJsonObject(), delim);
+          } else {
+            return jsonArrayFunctions.fields(json.getAsJsonArray(), delim);
+          }
+        }
+      case "json.toVars":
+        {
+          FunctionUtil.checkNumberParam(functionName, args, 1, 3);
+          JsonElement json = FunctionUtil.paramAsJson(functionName, args, 0);
+
+          if (json.isJsonObject()) {
+            String prefix = args.size() > 1 ? args.get(1).toString() : "";
+            String suffix = args.size() > 2 ? args.get(2).toString() : "";
+
+            return jsonObjectFunctions.toVars(parser, json.getAsJsonObject(), prefix, suffix);
+          } else {
+            FunctionUtil.checkNumberParam(functionName, args, 2, 2);
+            String varName = args.get(1).toString();
+
+            return jsonArrayFunctions.toVars(parser, json.getAsJsonArray(), varName);
+          }
+        }
+      case "json.toList":
+        {
+          FunctionUtil.checkNumberParam(functionName, args, 1, 2);
+          JsonElement json = FunctionUtil.paramAsJson(functionName, args, 0);
+          String delim = args.size() > 1 ? args.get(1).toString() : ",";
+
+          if (json.isJsonArray()) {
+            return jsonArrayFunctions.toStringList(json.getAsJsonArray(), delim);
+          } else {
+            return jsonObjectFunctions.toStringList(json.getAsJsonObject(), delim);
+          }
+        }
       case "json.fromList":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 2);

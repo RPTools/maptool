@@ -14,8 +14,11 @@
  */
 package net.rptools.maptool.client.functions.json;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.math.BigDecimal;
 import java.util.List;
+import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 
 /** Class used to implement MT Script related Json functions / utilities for JsonObjects. */
@@ -206,5 +209,73 @@ public class JsonObjectFunctions {
     }
 
     return newJsonObject;
+  }
+
+  /**
+   * Sets variable values based on the keys and values in a JsonObject.
+   *
+   * @param parser The parser that this function is being run by.
+   * @param jsonObject The JsonObject to get the names and values from.
+   * @param prefix The prefix for all the variable names.
+   * @param suffix The suffix for all the variable names.
+   * @return A JsonArray that contains the names of all variables set.
+   * @throws ParserException if an error occurs while trying to set the variables.
+   */
+  public JsonArray toVars(Parser parser, JsonObject jsonObject, String prefix, String suffix)
+      throws ParserException {
+    JsonArray setVars = new JsonArray();
+    for (String key : jsonObject.keySet()) {
+      // add prefix and suffix
+      String varName = prefix + key.toString().trim() + suffix;
+      // replace spaces by underscores
+      varName = varName.replaceAll("\\s", "_");
+      // delete special characters other than "." & "_" in var name
+      varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
+
+      if (!varName.equals("")) {
+        parser.setVariable(varName, jsonObject.get(key));
+        setVars.add(varName);
+      }
+    }
+    return setVars;
+  }
+
+  /**
+   * Creates a MTS string list from the keys of JsonObject.
+   *
+   * @param json The JsonObject to create a string list of.
+   * @param delim The delimiter to use between elements in the list.
+   * @return the MTS string list.
+   */
+  public String toStringList(JsonObject json, String delim) {
+    return String.join(delim, json.keySet());
+  }
+
+  /**
+   * Returns a list of the fields in the JsonObject.
+   *
+   * @param json The JsonObject to get the fields from.
+   * @param delim if "json" returns a JsonArray of the fields otherwise a string delimited by this
+   *     value.
+   * @return the list of fields.
+   */
+  public Object fields(JsonObject json, String delim) {
+    if ("json".equals(delim)) {
+      JsonArray array = new JsonArray();
+      json.keySet().forEach(array::add);
+      return array;
+    } else {
+      return String.join(delim, json.keySet());
+    }
+  }
+
+  /**
+   * Returns the number of keys in this JsonObject.
+   *
+   * @param json the JsonObject to get the number of fields for.
+   * @return the number of keys in the JsonObject.
+   */
+  public BigDecimal length(JsonObject json) {
+    return BigDecimal.valueOf(json.keySet().size());
   }
 }

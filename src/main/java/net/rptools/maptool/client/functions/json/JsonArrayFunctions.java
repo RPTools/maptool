@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.rptools.maptool.language.I18N;
+import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 
 /** Class used to implement MT Script related Json functions / utilities for JsonArrays. */
@@ -816,5 +817,90 @@ public class JsonArrayFunctions {
     }
 
     return newArray;
+  }
+
+  /**
+   * Creates variables from a JsonArray.
+   *
+   * @param parser The parser used to set the variables.
+   * @param jsonArray The array containing the values to set.
+   * @param varName The name of the variable to append the index to and set.
+   * @return A JsonArray of variables that have been set.
+   * @throws ParserException if an error occurs setting the variables.
+   */
+  public JsonArray toVars(Parser parser, JsonArray jsonArray, String varName)
+      throws ParserException {
+
+    JsonArray setVars = new JsonArray();
+    // replace spaces by underscores
+    String name = varName.replaceAll("\\s", "_");
+    // delete special characters other than "." & "_" in var name
+    name = name.replaceAll("[^a-zA-Z0-9._]", "");
+
+    if (!varName.equals("")) {
+      for (int i = 0; i < jsonArray.size(); i++) {
+        parser.setVariable(name + i, jsonArray.get(i));
+        setVars.add(varName + i);
+      }
+    }
+
+    return setVars;
+  }
+
+  /**
+   * Creates a MTS string list from a JsonArray.
+   *
+   * @param json The JsonArray to create a string list of.
+   * @param delim The delimiter to use between elements in the list.
+   * @return the MTS string list.
+   */
+  public String toStringList(JsonArray json, String delim) {
+    StringBuilder sb = new StringBuilder();
+    for (JsonElement ele : json) {
+      if (sb.length() > 0) {
+        sb.append(delim);
+      }
+
+      sb.append(ele.toString());
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Returns the fields (indexes) of the passed in JsonArray.
+   *
+   * @param json The JsonArray to get the fields (indexes) of.
+   * @param delim if "json" the list will be returned as a JsonArray, otherwise used as delimiter in
+   *     a string list.
+   * @return the list of fields.
+   */
+  public Object fields(JsonArray json, String delim) {
+    if (delim.equals("json")) {
+      JsonArray array = new JsonArray();
+      for (int i = 0; i < json.size(); i++) {
+        array.add(i);
+      }
+      return array;
+    } else {
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < json.size(); i++) {
+        if (sb.length() > 0) {
+          sb.append(delim);
+        }
+        sb.append(i);
+      }
+      return sb.toString();
+    }
+  }
+
+  /**
+   * Returns the length of the JsonArray.
+   *
+   * @param json the JsonArray to get the length of.
+   * @return the length of the JsonArray
+   */
+  public BigDecimal length(JsonArray json) {
+    return BigDecimal.valueOf(json.size());
   }
 }
