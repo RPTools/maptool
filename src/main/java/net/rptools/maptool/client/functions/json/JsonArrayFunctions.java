@@ -812,8 +812,17 @@ public class JsonArrayFunctions {
    */
   public JsonArray get(JsonArray jsonArray, int startInd, int endInd) {
     JsonArray newArray = new JsonArray();
-    for (int i = startInd; i < endInd; i++) {
-      newArray.add(jsonArray.get(i));
+    int start = startInd >= 0 ? startInd : jsonArray.size() + startInd;
+    int end = endInd >= 0 ? endInd : jsonArray.size() + endInd;
+
+    if (end >= start) {
+      for (int i = start; i <= end; i++) {
+        newArray.add(jsonArray.get(i));
+      }
+    } else {
+      for (int i = start; i >= end; i--) {
+        newArray.add(jsonArray.get(i));
+      }
     }
 
     return newArray;

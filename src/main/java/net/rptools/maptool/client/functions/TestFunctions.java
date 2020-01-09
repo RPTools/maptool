@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.ui.macrobuttons.panels.SelectionPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -70,7 +71,7 @@ public class TestFunctions extends AbstractFunction {
           formattedMsg =
               "<div style='background-color:green; color:white'><b>" + msg + "</b></div>";
         } else {
-          msg = name + "Failed, expected" + expected + " got " + actual;
+          msg = name + "Failed, expected " + expected + " got " + actual;
           formattedMsg = "<div style='background-color:red'><b>" + msg + "</b></div>";
           if (testDepth > 0) {
             failures++;
@@ -138,9 +139,14 @@ public class TestFunctions extends AbstractFunction {
         MapToolMacroContext context =
             new MapToolMacroContext(
                 TEST_CONTEXT_NAME, MapTool.getParser().getContext().getSource(), true);
-        String ret =
-            MapTool.getParser()
-                .parseLine(resolver, resolver.getTokenInContext(), mbp.getCommand(), context);
+        try {
+          String ret =
+              MapTool.getParser()
+                  .parseLine(resolver, resolver.getTokenInContext(), mbp.getCommand(), context);
+        } catch (Exception e) {
+          failures++;
+          messages.add(e.getMessage());
+        }
 
         JsonObject jsonObj = new JsonObject();
         if (failures > 0) {
@@ -159,6 +165,10 @@ public class TestFunctions extends AbstractFunction {
         jsonObj.add("messages", jsonArray);
         token.setProperty(mbp.getLabel(), jsonObj.toString());
       }
+    }
+    SelectionPanel selectionPanel = MapTool.getFrame().getSelectionPanel();
+    if (selectionPanel != null && selectionPanel.isVisible()) {
+      selectionPanel.reset();
     }
   }
 }

@@ -125,11 +125,11 @@ class JsonObjectFunctionsTest {
   @Test
   void toStrProp() throws ParserException {
     String strProp = jsonObjectFunctions.toStringProp(jsonObject1, ",");
-    assertEquals("A=1,b=2,c=null,d=true,e=false,f=hello", strProp);
+    assertEquals("A=1,b=2,c=,d=true,e=false,f=hello", strProp);
     strProp = jsonObjectFunctions.toStringProp(jsonObject1, ";");
-    assertEquals("A=1;b=2;c=null;d=true;e=false;f=hello", strProp);
+    assertEquals("A=1;b=2;c=;d=true;e=false;f=hello", strProp);
     strProp = jsonObjectFunctions.toStringProp(jsonObject1, ":");
-    assertEquals("A=1:b=2:c=null:d=true:e=false:f=hello", strProp);
+    assertEquals("A=1:b=2:c=:d=true:e=false:f=hello", strProp);
   }
 
   @Test
