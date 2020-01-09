@@ -3014,7 +3014,7 @@ public class ZoneRenderer extends JComponent
       Area tokenBounds = new Area(origBounds);
       if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
         double sx = scaledWidth / 2 + x - (token.getAnchor().x * scale);
-        double sy = scaledHeight / 2 + y - (token.getAnchor().x * scale);
+        double sy = scaledHeight / 2 + y - (token.getAnchor().y * scale);
         tokenBounds.transform(
             AffineTransform.getRotateInstance(
                 Math.toRadians(-token.getFacing() - 90), sx, sy)); // facing
