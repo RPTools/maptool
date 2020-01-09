@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import net.rptools.common.expression.ExpressionParser;
+import net.rptools.common.expression.Result;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.EvalMacroFunctions;
 import net.rptools.maptool.language.I18N;
@@ -234,7 +235,12 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.set":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement jsonElement;
+          if (args.get(0).toString().trim().length() == 0) {
+            jsonElement = new JsonObject();
+          } else {
+            jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          }
           if (jsonElement.isJsonArray()) {
             return jsonArrayFunctions.set(
                 jsonElement.getAsJsonArray(), args.subList(1, args.size()));
@@ -360,7 +366,12 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.isEmpty":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 1);
-          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement jsonElement;
+          if (args.get(0).toString().trim().length() == 0) {
+            jsonElement = new JsonArray();
+          } else {
+            jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          }
           boolean empty;
           if (jsonElement.isJsonArray()) {
             empty = jsonArrayFunctions.isEmpty(jsonElement.getAsJsonArray());
@@ -451,7 +462,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
           List<JsonElement> elements = paramsAsJsonElements(functionName, args);
-          return jsonArrayFunctions.isSubset(elements);
+          return jsonArrayFunctions.isSubset(elements) ? BigDecimal.ONE : BigDecimal.ZERO;
         }
       case "json.removeFirst":
         {
@@ -479,8 +490,25 @@ public class JSONMacroFunctions extends AbstractFunction {
           FunctionUtil.checkNumberParam(functionName, args, 3, 3);
           JsonArray names = FunctionUtil.paramAsJsonArray(functionName, args, 0);
           JsonArray stats = FunctionUtil.paramAsJsonArray(functionName, args, 1);
-          String rollString = args.get(2).toString();
-          return jsonObjRolls(names, stats, rollString);
+          JsonArray rollArray;
+          String rollString; // = args.get(2).toString();
+          boolean isArrayOfRolls;
+
+          try {
+            rollArray = FunctionUtil.paramAsJsonArray(functionName, args, 2);
+            rollString = "";
+            isArrayOfRolls = true;
+          } catch (ParserException e) {
+            rollString = args.get(2).toString();
+            rollArray = new JsonArray();
+            isArrayOfRolls = false;
+          }
+
+          if (isArrayOfRolls) {
+            return jsonObjRolls(names, stats, rollArray);
+          } else {
+            return jsonObjRolls(names, stats, rollString);
+          }
         }
     }
 
@@ -499,14 +527,30 @@ public class JSONMacroFunctions extends AbstractFunction {
    */
   private JsonObject jsonObjRolls(JsonArray names, JsonArray stats, String rollString)
       throws ParserException {
+    JsonArray rollarr = new JsonArray();
+    for (int i = 0; i < stats.size(); i++) {
+      rollarr.add(rollString);
+    }
+
+    return jsonObjRolls(names, stats, rollarr);
+  }
+
+  private JsonObject jsonObjRolls(JsonArray names, JsonArray stats, JsonArray rolls)
+      throws ParserException {
     ExpressionParser parser = new ExpressionParser(new MapToolVariableResolver(null));
+
+    if (stats.size() != rolls.size()) {
+      throw new ParserException(I18N.getText("macro.function.json.matchingArrayOrRoll"));
+    }
 
     JsonObject outerObj = new JsonObject();
 
     for (JsonElement name : names) {
       JsonObject innerObj = new JsonObject();
-      for (JsonElement stat : stats) {
-        JsonElement val = asJsonElement(parser.evaluate(rollString).getValue());
+      for (int i = 0; i < stats.size(); i++) {
+        JsonElement stat = stats.get(i);
+        Result rollRes = parser.evaluate(rolls.get(i).getAsString());
+        JsonElement val = asJsonElement(rollRes.getValue());
         innerObj.add(stat.getAsString(), val);
       }
       outerObj.add(name.getAsString(), innerObj);

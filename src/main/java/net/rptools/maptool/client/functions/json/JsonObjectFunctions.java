@@ -18,6 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.List;
+import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 
@@ -182,6 +183,9 @@ public class JsonObjectFunctions {
    * @throws ParserException if an error occurs.
    */
   public JsonObject set(JsonObject jsonObject, List<Object> list) throws ParserException {
+    if (list.size() % 2 != 0) {
+      throw new ParserException(I18N.getText("macro.function.json.setNoMatchingValue", "json.set"));
+    }
     JsonObject newJsonObject = jsonObject.deepCopy();
 
     for (int i = 0; i < list.size(); i += 2) {

@@ -206,7 +206,7 @@ public class JsonArrayFunctions {
     JsonArray result = new JsonArray();
     result.addAll(jsonArray);
     result.remove(index);
-    return jsonArray;
+    return result;
   }
 
   /**
