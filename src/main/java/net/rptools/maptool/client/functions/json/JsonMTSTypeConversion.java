@@ -47,7 +47,7 @@ class JsonMTSTypeConversion {
    */
   Object asScriptType(Object val) {
     if (val == null) {
-      return "null";
+      return "";
     } else if (val instanceof JsonPrimitive) {
       JsonPrimitive jsonPrimitive = (JsonPrimitive) val;
       if (jsonPrimitive.isNumber()) {
@@ -58,7 +58,11 @@ class JsonMTSTypeConversion {
         return jsonPrimitive.getAsString();
       }
     } else if (val instanceof JsonElement) {
-      return val;
+      if (((JsonElement) val).isJsonNull()) {
+        return "";
+      } else {
+        return val;
+      }
     } else {
       return val.toString();
     }
