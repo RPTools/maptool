@@ -1606,7 +1606,8 @@ public class MapToolFrame extends DefaultDockableHolder
    */
   public void setTitleViaRenderer(ZoneRenderer renderer) {
     String campaignName = " - [" + MapTool.getCampaign().getName() + "]";
-    String versionString = MapTool.getVersion().equals("unspecified") ? "Development" : "v" + MapTool.getVersion();
+    String versionString =
+        MapTool.getVersion().equals("unspecified") ? "Development" : "v" + MapTool.getVersion();
     setTitle(
         AppConstants.APP_NAME
             + " "
