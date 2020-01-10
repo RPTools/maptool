@@ -42,7 +42,7 @@ class JsonMTSTypeConversionTest {
   @Test
   void asScriptType() {
     assertEquals(
-        "", typeConversion.asScriptType(null), "Null type should convert to and empty string");
+        "null", typeConversion.asScriptType(null), "Null type should convert to and empty string");
     assertEquals(
         "true",
         typeConversion.asScriptType(new JsonPrimitive(true)),
