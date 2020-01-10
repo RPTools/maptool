@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonElement;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.math.BigDecimal;
@@ -26,6 +27,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
@@ -640,10 +642,11 @@ public class TokenPropertyFunctions extends AbstractFunction {
         // Do nothing when trusted, since all ownership should be turned off for an empty string
         // used in such a macro.
       } else {
-        Object json = JSONMacroFunctions.asJSON(parameters.get(0));
-        if (json != null && json instanceof JSONArray) {
-          for (Object o : (JSONArray) json) {
-            MapTool.serverCommand().updateTokenProperty(token, Token.Update.addOwner, o.toString());
+        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0));
+        if (json != null && json.isJsonArray()) {
+          for (JsonElement ele : json.getAsJsonArray()) {
+            MapTool.serverCommand()
+                .updateTokenProperty(token, Token.Update.addOwner, ele.getAsString());
           }
         } else {
           MapTool.serverCommand().updateTokenProperty(token, Token.Update.addOwner, s);

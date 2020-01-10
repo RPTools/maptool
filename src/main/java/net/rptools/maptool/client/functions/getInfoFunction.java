@@ -14,16 +14,15 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
@@ -34,6 +33,7 @@ import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
+import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.SightType;
@@ -44,8 +44,6 @@ import net.rptools.maptool.util.SysInfo;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public class getInfoFunction extends AbstractFunction {
 
@@ -92,8 +90,8 @@ public class getInfoFunction extends AbstractFunction {
    * @return The information about the map.
    * @throws ParserException when there is an error.
    */
-  private JSONObject getMapInfo() throws ParserException {
-    Map<String, Object> minfo = new HashMap<String, Object>();
+  private JsonObject getMapInfo() throws ParserException {
+    JsonObject minfo = new JsonObject();
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 
     if (!MapTool.getParser().isMacroTrusted()) {
@@ -102,17 +100,17 @@ public class getInfoFunction extends AbstractFunction {
       }
     }
 
-    minfo.put("name", zone.getName());
-    minfo.put("image x scale", zone.getImageScaleX());
-    minfo.put("image y scale", zone.getImageScaleY());
-    minfo.put("player visible", zone.isVisible() ? 1 : 0);
+    minfo.addProperty("name", zone.getName());
+    minfo.addProperty("image x scale", zone.getImageScaleX());
+    minfo.addProperty("image y scale", zone.getImageScaleY());
+    minfo.addProperty("player visible", zone.isVisible() ? 1 : 0);
 
     if (MapTool.getParser().isMacroTrusted()) {
-      minfo.put("id", zone.getId().toString());
-      minfo.put("creation time", zone.getCreationTime());
-      minfo.put("width", zone.getWidth());
-      minfo.put("height", zone.getHeight());
-      minfo.put("largest Z order", zone.getLargestZOrder());
+      minfo.addProperty("id", zone.getId().toString());
+      minfo.addProperty("creation time", zone.getCreationTime());
+      minfo.addProperty("width", zone.getWidth());
+      minfo.addProperty("height", zone.getHeight());
+      minfo.addProperty("largest Z order", zone.getLargestZOrder());
     }
 
     String visionType = "off";
@@ -127,26 +125,26 @@ public class getInfoFunction extends AbstractFunction {
         visionType = "off";
         break;
     }
-    minfo.put("vision type", visionType);
+    minfo.addProperty("vision type", visionType);
 
-    Map<String, Object> ginfo = new HashMap<String, Object>();
-    minfo.put("grid", ginfo);
+    JsonObject ginfo = new JsonObject();
 
     Grid grid = zone.getGrid();
 
-    ginfo.put("type", GridFactory.getGridType(grid));
-    ginfo.put("color", String.format("%h", zone.getGridColor()));
-    ginfo.put("units per cell", zone.getUnitsPerCell());
-    ginfo.put("cell height", zone.getGrid().getCellHeight());
-    ginfo.put("cell width", zone.getGrid().getCellWidth());
-    ginfo.put("cell offset width", zone.getGrid().getCellOffset().getWidth());
-    ginfo.put("cell offset height", zone.getGrid().getCellOffset().getHeight());
-    ginfo.put("size", zone.getGrid().getSize());
-    ginfo.put("x offset", zone.getGrid().getOffsetX());
-    ginfo.put("y offset", zone.getGrid().getOffsetY());
-    ginfo.put("second dimension", grid.getSecondDimension());
+    ginfo.addProperty("type", GridFactory.getGridType(grid));
+    ginfo.addProperty("color", String.format("%h", zone.getGridColor()));
+    ginfo.addProperty("units per cell", zone.getUnitsPerCell());
+    ginfo.addProperty("cell height", zone.getGrid().getCellHeight());
+    ginfo.addProperty("cell width", zone.getGrid().getCellWidth());
+    ginfo.addProperty("cell offset width", zone.getGrid().getCellOffset().getWidth());
+    ginfo.addProperty("cell offset height", zone.getGrid().getCellOffset().getHeight());
+    ginfo.addProperty("size", zone.getGrid().getSize());
+    ginfo.addProperty("x offset", zone.getGrid().getOffsetX());
+    ginfo.addProperty("y offset", zone.getGrid().getOffsetY());
+    ginfo.addProperty("second dimension", grid.getSecondDimension());
 
-    return JSONObject.fromObject(minfo);
+    minfo.add("grid", ginfo);
+    return minfo;
   }
 
   /**
@@ -154,43 +152,47 @@ public class getInfoFunction extends AbstractFunction {
    *
    * @return the client side preferences
    */
-  private JSONObject getClientInfo() {
-    Map<String, Object> cinfo = new HashMap<String, Object>();
+  private JsonObject getClientInfo() {
+    JsonObject cinfo = new JsonObject();
 
-    cinfo.put("face edge", AppPreferences.getFaceEdge() ? BigDecimal.ONE : BigDecimal.ZERO);
-    cinfo.put("face vertex", AppPreferences.getFaceVertex() ? BigDecimal.ONE : BigDecimal.ZERO);
-    cinfo.put("portrait size", AppPreferences.getPortraitSize());
-    cinfo.put("show portrait", AppPreferences.getShowPortrait());
-    cinfo.put("show stat sheet", AppPreferences.getShowStatSheet());
-    cinfo.put("file sync directory", AppPreferences.getFileSyncPath());
-    cinfo.put("version", MapTool.getVersion());
-    cinfo.put("isFullScreen", MapTool.getFrame().isFullScreen() ? BigDecimal.ONE : BigDecimal.ZERO);
-    cinfo.put("timeInMs", System.currentTimeMillis());
-    cinfo.put("timeDate", getTimeDate());
-    cinfo.put("isoTimeDate", getIsoTimeDate());
+    cinfo.addProperty("face edge", AppPreferences.getFaceEdge() ? BigDecimal.ONE : BigDecimal.ZERO);
+    cinfo.addProperty(
+        "face vertex", AppPreferences.getFaceVertex() ? BigDecimal.ONE : BigDecimal.ZERO);
+    cinfo.addProperty("portrait size", AppPreferences.getPortraitSize());
+    cinfo.addProperty("show portrait", AppPreferences.getShowPortrait());
+    cinfo.addProperty("show stat sheet", AppPreferences.getShowStatSheet());
+    cinfo.addProperty("file sync directory", AppPreferences.getFileSyncPath());
+    cinfo.addProperty("version", MapTool.getVersion());
+    cinfo.addProperty(
+        "isFullScreen", MapTool.getFrame().isFullScreen() ? BigDecimal.ONE : BigDecimal.ZERO);
+    cinfo.addProperty("timeInMs", System.currentTimeMillis());
+    cinfo.addProperty("timeDate", getTimeDate());
+    cinfo.addProperty("isoTimeDate", getIsoTimeDate());
     if (MapTool.getParser().isMacroTrusted()) {
-      Map<String, Object> libInfo = new HashMap<String, Object>();
+      JsonObject libInfo = new JsonObject();
       for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
         Zone zone = zr.getZone();
         for (Token token : zone.getTokens()) {
           if (token.getName().toLowerCase().startsWith("lib:")) {
             if (token.getProperty("libversion") != null) {
-              libInfo.put(token.getName(), token.getProperty("libversion"));
+              libInfo.addProperty(token.getName(), token.getProperty("libversion").toString());
             } else {
-              libInfo.put(token.getName(), "unknown");
+              libInfo.addProperty(token.getName(), "unknown");
             }
           }
         }
       }
       if (libInfo.size() > 0) {
-        cinfo.put("library tokens", libInfo);
+        cinfo.add("library tokens", libInfo);
       }
-      cinfo.put(
-          "user defined functions",
-          JSONArray.fromObject(UserDefinedMacroFunctions.getInstance().getAliases()));
-      cinfo.put("client id", MapTool.getClientId());
+      JsonArray udf = new JsonArray();
+      for (String name : UserDefinedMacroFunctions.getInstance().getAliases()) {
+        udf.add(name);
+      }
+      cinfo.add("user defined functions", udf);
+      cinfo.addProperty("client id", MapTool.getClientId());
     }
-    return JSONObject.fromObject(cinfo);
+    return cinfo;
   }
 
   private String getTimeDate() {
@@ -208,9 +210,9 @@ public class getInfoFunction extends AbstractFunction {
    *
    * @return the server side preferences
    */
-  private JSONObject getServerInfo() {
+  private JsonObject getServerInfo() {
     ServerPolicy sp = MapTool.getServerPolicy();
-    JSONObject sinfo = sp.toJSON();
+    JsonObject sinfo = sp.toJSON();
 
     return (sinfo);
   }
@@ -221,105 +223,116 @@ public class getInfoFunction extends AbstractFunction {
    * @return the campaign information.
    * @throws ParserException if an error occurs.
    */
-  private JSONObject getCampaignInfo() throws ParserException {
+  private JsonObject getCampaignInfo() throws ParserException {
+
+    Gson gson = new Gson();
+
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(
           I18N.getText("macro.function.general.noPerm", "getInfo('campaign')"));
     }
-    Map<String, Object> cinfo = new HashMap<String, Object>();
+    JsonObject cinfo = new JsonObject();
     Campaign c = MapTool.getCampaign();
     CampaignProperties cp = c.getCampaignProperties();
 
-    cinfo.put("id", c.getId().toString());
-    cinfo.put(
+    cinfo.addProperty("id", c.getId().toString());
+    cinfo.addProperty(
         "initiative movement locked",
         cp.isInitiativeMovementLock() ? BigDecimal.ONE : BigDecimal.ZERO);
-    cinfo.put(
+    cinfo.addProperty(
         "initiative owner permissions",
         cp.isInitiativeOwnerPermissions() ? BigDecimal.ONE : BigDecimal.ZERO);
 
-    Map<String, String> zinfo = new HashMap<String, String>();
+    JsonObject zinfo = new JsonObject();
     for (Zone z : c.getZones()) {
-      zinfo.put(z.getName(), z.getId().toString());
+      zinfo.addProperty(z.getName(), z.getId().toString());
     }
-    cinfo.put("zones", zinfo);
+    cinfo.add("zones", zinfo);
 
-    Set<String> tinfo = new HashSet<String>();
+    JsonArray tinfo = new JsonArray();
     for (LookupTable table : c.getLookupTableMap().values()) {
       tinfo.add(table.getName());
     }
-    cinfo.put("tables", tinfo);
+    cinfo.add("tables", tinfo);
 
-    Map<String, Object> llinfo = new HashMap<String, Object>();
+    JsonObject llinfo = new JsonObject();
     for (String ltype : c.getLightSourcesMap().keySet()) {
-      Set<Object> ltinfo = new HashSet<Object>();
+      JsonArray ltinfo = new JsonArray();
       for (LightSource ls : c.getLightSourceMap(ltype).values()) {
-        HashMap<String, Object> linfo = new HashMap<String, Object>();
-        linfo.put("name", ls.getName());
-        linfo.put("max range", ls.getMaxRange());
-        linfo.put("type", ls.getType());
+        JsonObject linfo = new JsonObject();
+        linfo.addProperty("name", ls.getName());
+        linfo.addProperty("max range", ls.getMaxRange());
+        linfo.addProperty("type", ls.getType().toString());
         // List<Light> lights = new ArrayList<Light>();
         // for (Light light : ls.getLightList()) {
         // lights.add(light);
         // }
-        linfo.put("light segments", ls.getLightList());
+        JsonArray lightList = new JsonArray();
+        for (Light light : ls.getLightList()) {
+          lightList.add(gson.toJson(light));
+        }
+        linfo.add("light segments", lightList);
         ltinfo.add(linfo);
       }
-      llinfo.put(ltype, ltinfo);
+      llinfo.add(ltype, ltinfo);
     }
-    cinfo.put("light sources", llinfo);
+    cinfo.add("light sources", llinfo);
 
-    Map<String, Set<String>> sinfo = new HashMap<String, Set<String>>();
+    JsonObject sinfo = new JsonObject();
     for (BooleanTokenOverlay states : c.getTokenStatesMap().values()) {
       String group = states.getGroup();
       if (group == null) {
         group = "no group";
       }
-      Set<String> sgroup = sinfo.get(group);
-      if (sgroup != null) {
-        sgroup.add(states.getName());
+      if (sinfo.has(group)) {
+        JsonArray sgroup = sinfo.get(group).getAsJsonArray();
       } else {
-        sgroup = new HashSet<String>();
+        JsonArray sgroup = new JsonArray();
         sgroup.add(states.getName());
-        sinfo.put(group, sgroup);
+        sinfo.add(group, sgroup);
       }
     }
-    cinfo.put("states", sinfo);
+    cinfo.add("states", sinfo);
 
-    cinfo.put("remote repository", c.getRemoteRepositoryList());
-
-    Map<String, Object> sightInfo = new HashMap<String, Object>();
-    for (SightType sightType : c.getSightTypeMap().values()) {
-      Map<String, Object> si = new HashMap<String, Object>();
-      si.put("arc", sightType.getArc());
-      si.put("distance", sightType.getArc());
-      si.put("multiplier", sightType.getMultiplier());
-      si.put("shape", sightType.getShape().toString());
-      si.put("type", sightType.getOffset());
-      sightInfo.put(sightType.getName(), si);
+    JsonArray remoteRepos = new JsonArray();
+    for (String repo : c.getRemoteRepositoryList()) {
+      remoteRepos.add(repo);
     }
-    cinfo.put("sight", sightInfo);
+    cinfo.add("remote repository", remoteRepos);
 
-    Map<String, Set<Object>> barinfo = new HashMap<String, Set<Object>>();
+    JsonObject sightInfo = new JsonObject();
+    for (SightType sightType : c.getSightTypeMap().values()) {
+      JsonObject si = new JsonObject();
+      si.addProperty("arc", sightType.getArc());
+      si.addProperty("distance", sightType.getArc());
+      si.addProperty("multiplier", sightType.getMultiplier());
+      si.addProperty("shape", sightType.getShape().toString());
+      si.addProperty("type", sightType.getOffset());
+      sightInfo.add(sightType.getName(), si);
+    }
+    cinfo.add("sight", sightInfo);
+
+    JsonObject barinfo = new JsonObject();
     for (BarTokenOverlay tbo : c.getTokenBarsMap().values()) {
       String group = tbo.getGroup();
       if (group == null) {
         group = "no group";
       }
-      Set<Object> bgroup = barinfo.get(group);
-      if (bgroup == null) {
-        bgroup = new HashSet<Object>();
-        barinfo.put(group, bgroup);
+      JsonArray bgroup;
+      if (barinfo.has(group)) {
+        bgroup = barinfo.get(group).getAsJsonArray();
+      } else {
+        bgroup = new JsonArray();
       }
-      Map<String, Object> b = new HashMap<String, Object>();
-      b.put("name", tbo.getName());
-      b.put("side", tbo.getSide());
-      b.put("increment", tbo.getIncrements());
-      bgroup.add(b);
+      JsonObject bar = new JsonObject();
+      bar.addProperty("name", tbo.getName());
+      bar.addProperty("side", tbo.getSide().toString());
+      bar.addProperty("increment", tbo.getIncrements());
+      bgroup.add(bar);
     }
-    cinfo.put("bars", barinfo);
+    cinfo.add("bars", barinfo);
 
-    return JSONObject.fromObject(cinfo);
+    return cinfo;
   }
 
   /**
@@ -328,7 +341,7 @@ public class getInfoFunction extends AbstractFunction {
    * @return the debug information.
    * @throws ParserException if an error occurs.
    */
-  private JSONObject getDebugInfo() throws ParserException {
+  private JsonObject getDebugInfo() throws ParserException {
     SysInfo info = new SysInfo();
     return info.getSysInfoJSON();
   }

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonObject;
 import java.awt.Rectangle;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
@@ -25,7 +26,6 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONObject;
 
 public class ZoomFunctions extends AbstractFunction {
   /** Singleton for class * */
@@ -142,12 +142,12 @@ public class ZoomFunctions extends AbstractFunction {
         + EQUALS + endX + delim + "endY" + EQUALS + endY;
   }
 
-  private static JSONObject createBoundsAsJSON(int offsetX, int offsetY, int endX, int endY) {
-    JSONObject bounds = new JSONObject();
-    bounds.put("startX", offsetX);
-    bounds.put("startY", offsetY);
-    bounds.put("endX", endX);
-    bounds.put("endY", endY);
+  private static JsonObject createBoundsAsJSON(int offsetX, int offsetY, int endX, int endY) {
+    JsonObject bounds = new JsonObject();
+    bounds.addProperty("startX", offsetX);
+    bounds.addProperty("startY", offsetY);
+    bounds.addProperty("endX", endX);
+    bounds.addProperty("endY", endY);
     return bounds;
   }
 
@@ -220,9 +220,9 @@ public class ZoomFunctions extends AbstractFunction {
     }
 
     if ("json".equalsIgnoreCase(delim)) {
-      JSONObject center = new JSONObject();
-      center.put("centerX", centerX);
-      center.put("centerY", centerY);
+      JsonObject center = new JsonObject();
+      center.addProperty("centerX", centerX);
+      center.addProperty("centerY", centerY);
       return center;
     } else {
       return "centerX" + EQUALS + centerX + delim + "centerY" + EQUALS + centerY;
