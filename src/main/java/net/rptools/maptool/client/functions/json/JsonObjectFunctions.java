@@ -15,7 +15,9 @@
 package net.rptools.maptool.client.functions.json;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.language.I18N;
@@ -209,7 +211,12 @@ public class JsonObjectFunctions {
     JsonObject newJsonObject = new JsonObject();
     for (Object key : keys) {
       String k = key.toString();
-      newJsonObject.add(k, jsonObject.get(k));
+      JsonElement jsonElement = jsonObject.get(k);
+      if (jsonElement == null || jsonElement.isJsonNull()) { // compatibility with previous MTScript code
+        newJsonObject.add(k, new JsonPrimitive(""));
+      } else {
+        newJsonObject.add(k, jsonElement);
+      }
     }
 
     return newJsonObject;
