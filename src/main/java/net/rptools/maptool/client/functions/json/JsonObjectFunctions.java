@@ -212,7 +212,8 @@ public class JsonObjectFunctions {
     for (Object key : keys) {
       String k = key.toString();
       JsonElement jsonElement = jsonObject.get(k);
-      if (jsonElement == null || jsonElement.isJsonNull()) { // compatibility with previous MTScript code
+      if (jsonElement == null
+          || jsonElement.isJsonNull()) { // compatibility with previous MTScript code
         newJsonObject.add(k, new JsonPrimitive(""));
       } else {
         newJsonObject.add(k, jsonElement);
