@@ -86,7 +86,7 @@ public class VBL_Functions extends AbstractFunction {
                 "macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
       }
 
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (functionName.equals("eraseVBL")) erase = true;
@@ -146,7 +146,7 @@ public class VBL_Functions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
 
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (parameters.size() == 2 && !parameters.get(1).equals(BigDecimal.ZERO)) simpleJSON = true;
@@ -931,13 +931,10 @@ public class VBL_Functions extends AbstractFunction {
       }
     }
     if (simpleJSON) {
-      int count = 0;
       for (int i = 0; i < linePoints.size(); i++) {
         JsonObject points = linePoints.get(i).getAsJsonObject();
-        allPolygons.set(count, points.get("x"));
-        count++;
-        allPolygons.set(count, points.get("y"));
-        count++;
+        allPolygons.add(points.get("x"));
+        allPolygons.add(points.get("y"));
       }
     } else {
       polygon.addProperty("fill", 1);
