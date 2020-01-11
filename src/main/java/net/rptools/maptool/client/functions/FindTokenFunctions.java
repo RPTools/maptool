@@ -239,20 +239,22 @@ public class FindTokenFunctions extends AbstractFunction {
    * layers).
    */
   private static class LayerFilter implements Zone.Filter {
-    private final JsonArray layers;
+    private final JsonArray filterLayers;
 
     public LayerFilter(JsonArray layers) {
-      this.layers = new JsonArray();
+      filterLayers = new JsonArray();
       for (Object s : layers) {
-        String name = s.toString().toUpperCase();
-        this.layers.add(Zone.Layer.valueOf("HIDDEN".equals(name) ? "GM" : name).toString());
+        // Can't use .toString() as it wraps in extra quotes - bug in the JSON lib?
+        String name = ((JsonPrimitive) s).getAsString().toUpperCase();
+        name = "HIDDEN".equals(name) ? "GM" : name;
+        name = Zone.Layer.valueOf(name).toString();
+        filterLayers.add(name);
       }
     }
 
     public boolean matchToken(Token t) {
       // Filter out the utility lib: and image: tokens
-      return layers.contains(new JsonPrimitive(t.getLayer().toString().toUpperCase()))
-          && !t.isImgOrLib();
+      return filterLayers.contains(new JsonPrimitive(t.getLayer().toString())) && !t.isImgOrLib();
     }
   }
 
@@ -663,21 +665,24 @@ public class FindTokenFunctions extends AbstractFunction {
   }
 
   private static boolean booleanCheck(JsonObject jobj, String searchType) {
-    JsonPrimitive val = jobj.get(searchType).getAsJsonPrimitive();
-    if (val == null) {
-      return false;
-    }
-    if (val.isBoolean()) {
-      return val.getAsBoolean();
-    } else if (val.isNumber()) {
-      if (val.getAsInt() == 0) {
-        return false;
+    JsonElement jel = jobj.get(searchType);
+    if (jel.isJsonPrimitive()) {
+      JsonPrimitive jprim = jel.getAsJsonPrimitive();
+      if (jprim.isBoolean()) {
+        return jprim.getAsBoolean();
+      } else if (jprim.isNumber()) {
+        if (jprim.getAsInt() == 0) {
+          return false;
+        } else {
+          return true;
+        }
       } else {
+        // What's the rationale for returning true for other types?
+        // Should we be looking at strings for true/false?
         return true;
       }
-    } else {
-      return true;
     }
+    return false;
   }
 
   /**
