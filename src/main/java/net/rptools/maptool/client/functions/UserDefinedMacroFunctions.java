@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -37,7 +38,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
 import net.rptools.parser.function.ParameterException;
-import net.sf.json.JSONArray;
 
 public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDescription {
 
@@ -90,9 +90,11 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       throws ParserException {
     MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
     MapToolVariableResolver newResolver;
-    JSONArray jarr = new JSONArray();
+    JsonArray jarr = new JsonArray();
 
-    jarr.addAll(parameters);
+    for (Object obj : parameters) {
+      jarr.add(JSONMacroFunctions.getInstance().asJsonElement(obj));
+    }
     String macroArgs = jarr.size() > 0 ? jarr.toString() : "";
     String output;
     FunctionDefinition funcDef = userDefinedFunctions.get(functionName);
