@@ -91,7 +91,8 @@ public class ChatFunction extends AbstractFunction {
         // FALLTHRU
       case 2:
         String temp = param.get(1).toString().trim();
-        if ("json".equals(delim) || temp.charAt(0) == '[') jarray = JsonParser.parseString(temp).getAsJsonArray();
+        if ("json".equals(delim) || temp.charAt(0) == '[')
+          jarray = JsonParser.parseString(temp).getAsJsonArray();
         else {
           jarray = new JsonArray();
           for (String t : temp.split(delim)) jarray.add(t.trim());
@@ -109,7 +110,9 @@ public class ChatFunction extends AbstractFunction {
           } else {
             @SuppressWarnings("unchecked")
             Collection<String> targets =
-                JSONMacroFunctions.getInstance().getJsonArrayFunctions().jsonArrayToListOfStrings(jarray);
+                JSONMacroFunctions.getInstance()
+                    .getJsonArrayFunctions()
+                    .jsonArrayToListOfStrings(jarray);
             MapTool.addGlobalMessage(message, (List<String>) targets);
           }
         }

@@ -55,7 +55,7 @@ public class PlayerFunctions extends AbstractFunction {
       String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
       if ("json".equals(delim)) {
         JsonArray jarr = new JsonArray();
-        Arrays.stream(playerArray).forEach(p ->  jarr.add(new JsonPrimitive(p)));
+        Arrays.stream(playerArray).forEach(p -> jarr.add(new JsonPrimitive(p)));
         return jarr;
       } else {
         return StringFunctions.getInstance().join(playerArray, delim);
