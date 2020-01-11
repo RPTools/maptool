@@ -14,7 +14,9 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.math.BigDecimal;
@@ -42,7 +44,6 @@ import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 public class TokenPropertyFunctions extends AbstractFunction {
   private static final TokenPropertyFunctions instance = new TokenPropertyFunctions();
@@ -969,7 +970,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
         }
       }
       if ("json".equals(delim)) {
-        return JSONArray.fromObject(namesList).toString();
+        JsonArray jarr = new JsonArray();
+        namesList.forEach(n -> jarr.add(n));
+        return jarr.toString();
       } else {
         return StringFunctions.getInstance().join(namesList, delim);
       }
@@ -986,7 +989,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
         namesList.add(tp.getName());
       }
       if ("json".equals(delim)) {
-        return JSONArray.fromObject(namesList).toString();
+        JsonArray jarr = new JsonArray();
+        namesList.forEach(n -> jarr.add(new JsonPrimitive(n)));
+        return jarr.toString();
       } else {
         return StringFunctions.getInstance().join(namesList);
       }
@@ -1020,7 +1025,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
     String[] names = new String[namesList.size()];
     namesList.toArray(names);
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(names).toString();
+      JsonArray jarr = new JsonArray();
+      Arrays.stream(names).forEach(n -> jarr.add(new JsonPrimitive(n)));
+      return jarr.toString();
     } else {
       return StringFunctions.getInstance().join(names, delim);
     }
@@ -1037,7 +1044,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
     String[] owners = new String[token.getOwners().size()];
     token.getOwners().toArray(owners);
     if ("json".endsWith(delim)) {
-      return JSONArray.fromObject(owners).toString();
+      JsonArray jarr = new JsonArray();
+      Arrays.stream(owners).forEach(o -> jarr.add(new JsonPrimitive(o)));
+      return jarr.toString();
     } else {
       return StringFunctions.getInstance().join(owners, delim);
     }
