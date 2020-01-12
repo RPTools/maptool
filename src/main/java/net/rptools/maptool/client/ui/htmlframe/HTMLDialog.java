@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.google.gson.JsonObject;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
@@ -27,8 +28,9 @@ import javax.swing.JDialog;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.model.Token;
-import net.sf.json.JSONObject;
+import net.rptools.parser.ParserException;
 
 @SuppressWarnings("serial")
 public class HTMLDialog extends JDialog implements HTMLPanelContainer {
@@ -172,15 +174,16 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param name The name of the frame.
    * @return A json with the width, height, temporary, title, and value of dialog
    */
-  public static Object getDialogProperties(String name) {
+  public static Object getDialogProperties(String name) throws ParserException {
     if (dialogs.containsKey(name)) {
       HTMLDialog dialog = dialogs.get(name);
-      JSONObject dialogProperties = new JSONObject();
+      JsonObject dialogProperties = new JsonObject();
 
-      dialogProperties.put("width", dialog.getWidth());
-      dialogProperties.put("height", dialog.getHeight());
-      dialogProperties.put("temporary", dialog.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
-      dialogProperties.put("title", dialog.getTitle());
+      dialogProperties.addProperty("width", dialog.getWidth());
+      dialogProperties.addProperty("height", dialog.getHeight());
+      dialogProperties.addProperty(
+          "temporary", dialog.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
+      dialogProperties.addProperty("title", dialog.getTitle());
 
       Object dialogValue = dialog.getValue();
       if (dialogValue == null) {
@@ -189,12 +192,12 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
         if (dialogValue instanceof String) {
           // try to convert to a number
           try {
-            dialogValue = new BigDecimal(dialogValue.toString());
+            BigDecimal dialogValueBD = new BigDecimal(dialogValue.toString());
           } catch (Exception e) {
           }
         }
       }
-      dialogProperties.put("value", dialogValue);
+      dialogProperties.add("value", JSONMacroFunctions.getInstance().asJsonElement(dialogValue));
 
       return dialogProperties;
     } else {
