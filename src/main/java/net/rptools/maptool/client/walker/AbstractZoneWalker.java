@@ -18,9 +18,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 import net.rptools.maptool.client.ui.zone.RenderPathWorker;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Path;
+import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Zone;
 
 public abstract class AbstractZoneWalker implements ZoneWalker {
@@ -28,6 +30,7 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
       Collections.synchronizedList(new ArrayList<PartialPath>());
   protected final Zone zone;
   protected boolean restrictMovement = false;
+  protected Set<TerrainModifierOperation> terrainModifiersIgnored;
   protected RenderPathWorker renderPathWorker;
 
   public AbstractZoneWalker(Zone zone) {
@@ -46,13 +49,11 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   }
 
   public void setWaypoints(CellPoint... points) {
-    // System.out.println("AbstractZoneWalker setWaypoints called");
     partialPaths.clear();
     addWaypoints(points);
   }
 
   public void addWaypoints(CellPoint... points) {
-    // System.out.println("AbstractZoneWalker addWaypoints called");
     CellPoint previous =
         partialPaths.size() > 0 ? partialPaths.get(partialPaths.size() - 1).end : null;
     for (CellPoint current : points) {
@@ -64,13 +65,17 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   }
 
   public CellPoint replaceLastWaypoint(CellPoint point) {
-    return replaceLastWaypoint(point, false);
+    return replaceLastWaypoint(point, false, Collections.singleton(TerrainModifierOperation.NONE));
   }
 
   @Override
-  public CellPoint replaceLastWaypoint(CellPoint point, boolean restrictMovement) {
-    // System.out.println("AbstractZoneWalker replaceLastWaypoint2 called");
+  public CellPoint replaceLastWaypoint(
+      CellPoint point,
+      boolean restrictMovement,
+      Set<TerrainModifierOperation> terrainModifiersIgnored) {
+
     this.restrictMovement = restrictMovement;
+    this.terrainModifiersIgnored = terrainModifiersIgnored;
 
     if (partialPaths.isEmpty()) return null;
     PartialPath oldPartial = partialPaths.remove(partialPaths.size() - 1);
@@ -86,14 +91,10 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
 
   public Path<CellPoint> getPath(RenderPathWorker renderPathWorker) {
     this.renderPathWorker = renderPathWorker;
-    // System.out.println("########## AbstractZoneWalker.getPath(RenderPathWorker renderPathWorker)
-    // renderPathWorker null? " + (renderPathWorker == null));
     return getPath();
   }
 
   public Path<CellPoint> getPath() {
-    // System.out.println("########## AbstractZoneWalker.getPath() renderPathWorker null? " +
-    // (renderPathWorker == null));
     Path<CellPoint> path = new Path<CellPoint>();
 
     PartialPath last = null;

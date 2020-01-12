@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.AbortFunction;
+import net.rptools.maptool.client.functions.AboutMacro;
 import net.rptools.maptool.client.functions.AssertFunction;
 import net.rptools.maptool.client.macro.impl.*;
 import net.rptools.maptool.client.ui.MapToolFrame;
@@ -78,7 +79,8 @@ public class MacroManager {
     registerMacro(new EmotePluralMacro());
     registerMacro(new ExperimentsMacro());
     registerMacro(new TextureNoise());
-
+    registerMacro(new VersionMacro());
+    registerMacro(new AboutMacro());
     registerMacro(UNDEFINED_MACRO);
   }
 

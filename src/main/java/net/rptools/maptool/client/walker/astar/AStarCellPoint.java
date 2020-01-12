@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Zone;
 
 public class AStarCellPoint extends CellPoint implements Comparable<AStarCellPoint> {
@@ -30,6 +31,7 @@ public class AStarCellPoint extends CellPoint implements Comparable<AStarCellPoi
   double h;
   double f;
   double terrainModifier;
+  TerrainModifierOperation terrainModifierOperation;
 
   // Store if it's valid to move from Point2D to this cell.
   HashMap<Point2D, Boolean> validMoves = new HashMap<Point2D, Boolean>();
@@ -46,9 +48,10 @@ public class AStarCellPoint extends CellPoint implements Comparable<AStarCellPoi
     super(p.x, p.y, p.distanceTraveled);
   }
 
-  public AStarCellPoint(CellPoint p, double mod) {
+  public AStarCellPoint(CellPoint p, double mod, TerrainModifierOperation operation) {
     super(p.x, p.y);
     terrainModifier = mod;
+    terrainModifierOperation = operation;
   }
 
   public double fCost() {
