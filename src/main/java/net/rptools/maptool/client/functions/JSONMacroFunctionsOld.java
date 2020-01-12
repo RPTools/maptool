@@ -31,19 +31,19 @@ import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
 @SuppressWarnings("unchecked")
-public class JSONMacroFunctions extends AbstractFunction {
+public class JSONMacroFunctionsOld extends AbstractFunction {
   public enum JSONObjectType {
     OBJECT,
     ARRAY,
     UNKNOWN
   }
 
-  private static final JSONMacroFunctions instance = new JSONMacroFunctions();
+  private static final JSONMacroFunctionsOld instance = new JSONMacroFunctionsOld();
 
   private static final Configuration jaywayConfig =
       Configuration.builder().jsonProvider(new GsonJsonProvider()).build();
 
-  private JSONMacroFunctions() {
+  private JSONMacroFunctionsOld() {
     super(
         1,
         UNLIMITED_PARAMETERS,
@@ -86,7 +86,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         "json.objrolls");
   }
 
-  public static JSONMacroFunctions getInstance() {
+  public static JSONMacroFunctionsOld getInstance() {
     return instance;
   }
 
