@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.jidesoft.docking.DockContext;
 import com.jidesoft.docking.DockableFrame;
 import com.jidesoft.docking.event.DockableFrameAdapter;
@@ -31,7 +33,6 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Token;
-import net.sf.json.JSONObject;
 
 @SuppressWarnings("serial")
 public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
@@ -268,12 +269,13 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   public static Object getFrameProperties(String name) {
     if (frames.containsKey(name)) {
       HTMLFrame frame = frames.get(name);
-      JSONObject frameProperties = new JSONObject();
+      JsonObject frameProperties = new JsonObject();
 
-      frameProperties.put("width", frame.getWidth());
-      frameProperties.put("height", frame.getHeight());
-      frameProperties.put("temporary", frame.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
-      frameProperties.put("title", frame.getTitle());
+      frameProperties.addProperty("width", frame.getWidth());
+      frameProperties.addProperty("height", frame.getHeight());
+      frameProperties.addProperty(
+          "temporary", frame.getTemporary() ? BigDecimal.ONE : BigDecimal.ZERO);
+      frameProperties.addProperty("title", frame.getTitle());
 
       Object frameValue = frame.getValue();
       if (frameValue == null) {
@@ -287,7 +289,10 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
           }
         }
       }
-      frameProperties.put("value", frameValue);
+      if (frameValue instanceof JsonElement) {
+        frameProperties.add("value", (JsonElement) frameValue);
+      }
+      frameProperties.addProperty("value", frameValue.toString());
 
       return frameProperties;
     } else {

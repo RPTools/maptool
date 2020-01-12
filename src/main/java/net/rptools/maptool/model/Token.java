@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.gson.JsonElement;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -47,7 +48,7 @@ import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.JSONMacroFunctions;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
@@ -1639,9 +1640,13 @@ public class Token extends BaseModel implements Cloneable {
     }
     // First we try convert it to a JSON object.
     if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
-      Object obj = JSONMacroFunctions.convertToJSON(val.toString());
-      if (obj != null) {
-        return obj;
+      try {
+        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
+        if (json.isJsonObject() || json.isJsonArray()) {
+          return json;
+        }
+      } catch (ParserException e) {
+        // Ignore exception to maintain compatibility with existing macros.
       }
     }
     try {

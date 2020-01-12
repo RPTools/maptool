@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +29,6 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 public class TokenStateFunction extends AbstractFunction {
 
@@ -189,7 +190,9 @@ public class TokenStateFunction extends AbstractFunction {
 
     StringBuilder sb = new StringBuilder();
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(stateNames).toString();
+      JsonArray jarr = new JsonArray();
+      stateNames.forEach(s -> jarr.add(new JsonPrimitive(s)));
+      return jarr.toString();
     } else {
       for (String s : stateNames) {
         if (sb.length() > 0) {

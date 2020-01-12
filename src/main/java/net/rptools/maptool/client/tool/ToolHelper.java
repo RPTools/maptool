@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.text.NumberFormat;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
@@ -64,14 +65,14 @@ public class ToolHelper {
                   .hideFrame(MapToolFrame.MTFrame.SELECTION.name());
             }
           }
-
-          Set<GUID> selectedTokenSet = Set.copyOf(renderer.getSelectedTokenSet());
+          Set<GUID> selectedTokenSet = new LinkedHashSet(renderer.getSelectedTokenSet());
 
           for (GUID tokenGUID : selectedTokenSet) {
             Token token = renderer.getZone().getToken(tokenGUID);
 
             if (AppUtil.playerOwns(token)) {
               renderer.getZone().removeToken(tokenGUID);
+              renderer.deselectToken(tokenGUID);
               MapTool.serverCommand().removeToken(renderer.getZone().getId(), tokenGUID);
             }
           }
