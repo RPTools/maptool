@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.util;
 
+import com.google.gson.JsonObject;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.DisplayMode;
@@ -52,7 +53,6 @@ import net.rptools.maptool.client.swing.MemoryStatusBar;
 import net.sbbi.upnp.devices.UPNPRootDevice;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.UPNPResponseException;
-import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,46 +75,48 @@ public class SysInfo {
   private static String hostIP = new String();
   private static String routerIP = new String();
 
-  public JSONObject getSysInfoJSON() {
-    JSONObject info = new JSONObject();
+  public JsonObject getSysInfoJSON() {
+    JsonObject info = new JsonObject();
 
-    JSONObject mt = new JSONObject();
+    JsonObject mt = new JsonObject();
 
-    JSONObject java = new JSONObject();
-    JSONObject locale = new JSONObject();
-    JSONObject os = new JSONObject();
+    JsonObject java = new JsonObject();
+    JsonObject locale = new JsonObject();
+    JsonObject os = new JsonObject();
 
     Properties p = System.getProperties();
     Map<String, String> env = System.getenv();
 
     // maptool info
-    mt.put("version", MapTool.getVersion());
-    // mt.put("home", AppUtil.getAppHome()); // this line crashes, I didnt figured out why
-    mt.put("max mem avail", format.format(Runtime.getRuntime().maxMemory() / (1024 * 1024)));
-    mt.put("max mem used", format.format(MemoryStatusBar.getInstance().getLargestMemoryUsed()));
-    info.put("maptool", mt);
+    mt.addProperty("version", MapTool.getVersion());
+    // mt.addProperty("home", AppUtil.getAppHome()); // this line crashes, I didnt figured out why
+    mt.addProperty(
+        "max mem avail", format.format(Runtime.getRuntime().maxMemory() / (1024 * 1024)));
+    mt.addProperty(
+        "max mem used", format.format(MemoryStatusBar.getInstance().getLargestMemoryUsed()));
+    info.add("maptool", mt);
 
     // java
-    java.put("vendor", p.getProperty("java.vendor"));
-    java.put("home", p.getProperty("java.home"));
-    java.put("version", p.getProperty("java.version"));
-    info.put("java", java);
+    java.addProperty("vendor", p.getProperty("java.vendor"));
+    java.addProperty("home", p.getProperty("java.home"));
+    java.addProperty("version", p.getProperty("java.version"));
+    info.add("java", java);
 
     // locale
     Locale loc = Locale.getDefault();
-    locale.put("country", loc.getDisplayCountry());
-    locale.put("language", loc.getDisplayLanguage());
-    locale.put("locale", loc.getDisplayName());
-    locale.put("variant", loc.getDisplayVariant());
-    info.put("locale", locale);
+    locale.addProperty("country", loc.getDisplayCountry());
+    locale.addProperty("language", loc.getDisplayLanguage());
+    locale.addProperty("locale", loc.getDisplayName());
+    locale.addProperty("variant", loc.getDisplayVariant());
+    info.add("locale", locale);
 
     // os
-    os.put("name", p.getProperty("os.name"));
-    os.put("version", p.getProperty("os.version"));
-    os.put("arch", p.getProperty("os.arch"));
-    // os.put("path", (env.get("PATH") != null ? env.get("PATH") :
+    os.addProperty("name", p.getProperty("os.name"));
+    os.addProperty("version", p.getProperty("os.version"));
+    os.addProperty("arch", p.getProperty("os.arch"));
+    // os.addProperty("path", (env.get("PATH") != null ? env.get("PATH") :
     // p.getProperty("java.library.path")));
-    info.put("os", os);
+    info.add("os", os);
 
     return info;
   }

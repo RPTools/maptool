@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.net.*;
 import java.util.HashMap;
 import java.util.List;
@@ -26,10 +28,9 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import net.rptools.lib.sound.SoundManager;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 /**
  * This class handles audio streaming through MediaPlayer. MediaPlayer methods must be run on the
@@ -292,12 +293,12 @@ public class MediaPlayerAdapter {
    * Return the properties of a stream from its uri
    *
    * @param strUri the String uri of the stream
-   * @return JSONObject for one stream, JSONArray of JSONObjects if all streams
+   * @return JsonObject for one stream, JsonArray of JsonObjects if all streams
    */
   public static Object getStreamProperties(String strUri) {
-    JSONObject info;
+    JsonObject info;
     if (strUri.equals("*")) {
-      JSONArray infoArray = new JSONArray();
+      JsonArray infoArray = new JsonArray();
       for (HashMap.Entry mapElement : mapStreams.entrySet()) {
         info = ((MediaPlayerAdapter) mapElement.getValue()).getInfo();
         if (info != null) infoArray.add(info);
@@ -305,51 +306,65 @@ public class MediaPlayerAdapter {
       return infoArray;
     } else {
       MediaPlayerAdapter adapter = mapStreams.get(strUri);
-      if (adapter == null) return "";
-      else info = adapter.getInfo();
-      if (info == null) return "";
-      else return info;
+      if (adapter == null) {
+        return "";
+      } else {
+        info = adapter.getInfo();
+      }
+      if (info == null) {
+        return "";
+      } else {
+        return info;
+      }
     }
   }
 
   /**
    * Return the properties of a stream
    *
-   * @return JSONObject of the properties
+   * @return JsonObject of the properties
    */
-  private JSONObject getInfo() {
-    if (player.getStatus() == MediaPlayer.Status.UNKNOWN) return null;
+  private JsonObject getInfo() {
+    if (player.getStatus() == MediaPlayer.Status.UNKNOWN) {
+      return null;
+    }
     try {
       Duration durTotal = media.getDuration();
       Object objTotal;
-      if (durTotal.equals(Duration.INDEFINITE)) objTotal = -1;
-      else if (durTotal.equals(Duration.UNKNOWN)) objTotal = "UNKNOWN";
-      else objTotal = durTotal.toSeconds();
+      if (durTotal.equals(Duration.INDEFINITE)) {
+        objTotal = -1;
+      } else if (durTotal.equals(Duration.UNKNOWN)) {
+        objTotal = "UNKNOWN";
+      } else {
+        objTotal = durTotal.toSeconds();
+      }
 
       Duration durStop = player.getStopTime();
       Object objStop;
-      if (durStop.equals(Duration.INDEFINITE) || durStop.equals(Duration.UNKNOWN))
+      if (durStop.equals(Duration.INDEFINITE) || durStop.equals(Duration.UNKNOWN)) {
         objStop = objTotal;
-      else objStop = durStop.toSeconds();
+      } else {
+        objStop = durStop.toSeconds();
+      }
 
-      JSONObject info = new JSONObject();
+      JsonObject info = new JsonObject();
 
       List<String> listNicks = SoundFunctions.getNicks(strUri);
       if (listNicks.size() > 0) {
-        info.put("nicknames", String.join(",", listNicks));
+        info.addProperty("nicknames", String.join(",", listNicks));
       }
-      info.put("uri", strUri);
-      info.put("volume", volume);
-      info.put("cycleCount", cycleCount);
-      info.put("startTime", start.toSeconds());
-      info.put("stopTime", objStop);
-      info.put("currentTime", player.getCurrentTime().toSeconds());
-      info.put("totalTime", objTotal);
-      info.put("bufferTime", player.getBufferProgressTime().toSeconds());
-      info.put("currentCount", player.getCurrentCount());
-      info.put("endCount", player.getCycleCount());
-      info.put("status", player.getStatus().toString());
-      info.put("type", "stream");
+      info.addProperty("uri", strUri);
+      info.addProperty("volume", volume);
+      info.addProperty("cycleCount", cycleCount);
+      info.addProperty("startTime", start.toSeconds());
+      info.add("stopTime", JSONMacroFunctions.getInstance().asJsonElement(objStop));
+      info.addProperty("currentTime", player.getCurrentTime().toSeconds());
+      info.add("totalTime", JSONMacroFunctions.getInstance().asJsonElement(objTotal));
+      info.addProperty("bufferTime", player.getBufferProgressTime().toSeconds());
+      info.addProperty("currentCount", player.getCurrentCount());
+      info.addProperty("endCount", player.getCycleCount());
+      info.addProperty("status", player.getStatus().toString());
+      info.addProperty("type", "stream");
       return info;
     } catch (Exception e) {
       return null;
