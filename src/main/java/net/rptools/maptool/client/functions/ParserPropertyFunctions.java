@@ -14,10 +14,9 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolLineParser;
 import net.rptools.maptool.client.MapToolMacroContext;
@@ -25,7 +24,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONObject;
 
 /*
  * This software copyright by various authors including the RPTools.net development team, and licensed under the LGPL Version 3 or, at your option, any later version.
@@ -83,16 +81,16 @@ public class ParserPropertyFunctions extends AbstractFunction {
     } else if (functionName.equals("getRecursionDepth")) {
       returnVal = mtlParser.getRecursionDepth();
     } else if (functionName.equals("getMacroContext")) {
-      Map<String, Object> mco = new HashMap<String, Object>();
+      JsonObject mco = new JsonObject();
       MapToolMacroContext mc = mtlParser.getContext();
-      mco.put("stackSize", mtlParser.getContextStackSize());
-      mco.put("name", mc.getName());
-      mco.put("source", mc.getSource());
-      mco.put("trusted", mc.isTrusted());
+      mco.addProperty("stackSize", mtlParser.getContextStackSize());
+      mco.addProperty("name", mc.getName());
+      mco.addProperty("source", mc.getSource());
+      mco.addProperty("trusted", mc.isTrusted());
       if (mc.getMacroButtonIndex() >= 0) {
-        mco.put("buttonIndex", mc.getMacroButtonIndex());
+        mco.addProperty("buttonIndex", mc.getMacroButtonIndex());
       }
-      return JSONObject.fromObject(mco);
+      return mco;
     } else if (functionName.equals("setMaxRecursionDepth")) {
       mtlParser.setMaxRecursionDepth(argVal);
       returnVal = mtlParser.getMaxRecursionDepth();

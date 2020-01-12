@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.gson.JsonObject;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -28,7 +29,6 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.ImageManager;
-import net.sf.json.JSONObject;
 
 /** The binary representation of an image. */
 public class Asset {
@@ -119,16 +119,16 @@ public class Asset {
   }
 
   /**
-   * Get the properties of the asset and put them in a JSONObject.
+   * Get the properties of the asset and put them in a JsonObject.
    *
-   * @return the JSONObject with the properties.
+   * @return the JsonObject with the properties.
    */
-  public JSONObject getProperties() {
-    JSONObject properties = new JSONObject();
-    properties.put("type", type);
-    properties.put("subtype", extension);
-    properties.put("id", id.toString());
-    properties.put("name", name);
+  public JsonObject getProperties() {
+    JsonObject properties = new JsonObject();
+    properties.addProperty("type", type);
+    properties.addProperty("subtype", extension);
+    properties.addProperty("id", id.toString());
+    properties.addProperty("name", name);
 
     Image img = ImageManager.getImageAndWait(id); // wait until loaded, so width/height are correct
     String status = "loaded";
@@ -137,9 +137,9 @@ public class Asset {
     } else if (img == ImageManager.TRANSFERING_IMAGE) {
       status = "transferring";
     }
-    properties.put("status", status);
-    properties.put("width", img.getWidth(null));
-    properties.put("height", img.getHeight(null));
+    properties.addProperty("status", status);
+    properties.addProperty("width", img.getWidth(null));
+    properties.addProperty("height", img.getHeight(null));
     return properties;
   }
 
