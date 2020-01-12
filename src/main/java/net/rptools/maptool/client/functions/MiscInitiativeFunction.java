@@ -14,8 +14,9 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
@@ -26,7 +27,6 @@ import net.rptools.maptool.model.InitiativeListModel;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONObject;
 
 /**
  * Advance the initiative
@@ -73,12 +73,12 @@ public class MiscInitiativeFunction extends AbstractFunction {
     } else if (functionName.equals("getInitiativeList")) {
 
       // Save round and zone name
-      JSONObject out = new JSONObject();
-      out.element("round", list.getRound());
-      out.element("map", list.getZone().getName());
+      JsonObject out = new JsonObject();
+      out.addProperty("round", list.getRound());
+      out.addProperty("map", list.getZone().getName());
 
       // Get the visible tokens only
-      List<JSONObject> tokens = new ArrayList<JSONObject>(list.getTokens().size());
+      JsonArray tokens = new JsonArray(list.getTokens().size());
       int current = -1; // Assume that the current isn't visible
       boolean hideNPCs = list.isHideNPC();
       for (TokenInitiative ti : list.getTokens()) {
@@ -86,14 +86,14 @@ public class MiscInitiativeFunction extends AbstractFunction {
             && !InitiativeListModel.isTokenVisible(ti.getToken(), hideNPCs)) continue;
         if (ti == list.getTokenInitiative(list.getCurrent()))
           current = tokens.size(); // Make sure the current number matches what the user can see
-        JSONObject tiJSON = new JSONObject();
-        tiJSON.element("holding", ti.isHolding());
-        tiJSON.element("initiative", ti.getState());
-        tiJSON.element("tokenId", ti.getId().toString());
+        JsonObject tiJSON = new JsonObject();
+        tiJSON.addProperty("holding", ti.isHolding());
+        tiJSON.addProperty("initiative", ti.getState());
+        tiJSON.addProperty("tokenId", ti.getId().toString());
         tokens.add(tiJSON);
       } // endfor
-      out.element("current", current);
-      out.element("tokens", tokens);
+      out.addProperty("current", current);
+      out.add("tokens", tokens);
       return out.toString();
     }
     if (!MapTool.getParser().isMacroTrusted() && !ip.hasGMPermission())

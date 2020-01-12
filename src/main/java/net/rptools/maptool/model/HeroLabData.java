@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.jcabi.xml.XML;
 import com.jcabi.xml.XMLDocument;
 import java.awt.image.BufferedImage;
@@ -33,7 +35,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
-import net.sf.json.JSONObject;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 
 /**
  * @author Jamz
@@ -467,26 +469,31 @@ public class HeroLabData {
 
   @Override
   public String toString() {
-    return getInfo().toString(4);
+    return JSONMacroFunctions.getInstance().jsonIndent(getInfo(), 4);
   }
 
-  public JSONObject getInfo() {
-    Map<String, Object> heroLabInfo = new HashMap<String, Object>();
-    heroLabInfo.put("name", name);
-    heroLabInfo.put("summary", summary);
-    heroLabInfo.put("playerName", playerName);
-    heroLabInfo.put("gameSystem", gameSystem);
-    heroLabInfo.put("heroLabIndex", heroLabIndex);
-    heroLabInfo.put("masterIndex", minionMasterIndex);
-    heroLabInfo.put("masterName", minionMasterName);
-    heroLabInfo.put("isDirty", isDirty());
-    heroLabInfo.put("isAlly", isAlly);
-    heroLabInfo.put("isMinion", isMinion);
-    heroLabInfo.put("portfolioFile", getPortfolioFile().getAbsolutePath());
-    heroLabInfo.put("portfolioPath", portfolioPath);
-    heroLabInfo.put("lastModified", getLastModifiedDateString());
-    heroLabInfo.put("images", getAllImageAssetsURLs().toArray());
+  public JsonObject getInfo() {
+    JsonObject heroLabInfo = new JsonObject();
+    heroLabInfo.addProperty("name", name);
+    heroLabInfo.addProperty("summary", summary);
+    heroLabInfo.addProperty("playerName", playerName);
+    heroLabInfo.addProperty("gameSystem", gameSystem);
+    heroLabInfo.addProperty("heroLabIndex", heroLabIndex);
+    heroLabInfo.addProperty("masterIndex", minionMasterIndex);
+    heroLabInfo.addProperty("masterName", minionMasterName);
+    heroLabInfo.addProperty("isDirty", isDirty());
+    heroLabInfo.addProperty("isAlly", isAlly);
+    heroLabInfo.addProperty("isMinion", isMinion);
+    heroLabInfo.addProperty("portfolioFile", getPortfolioFile().getAbsolutePath());
+    heroLabInfo.addProperty("portfolioPath", portfolioPath);
+    heroLabInfo.addProperty("lastModified", getLastModifiedDateString());
 
-    return JSONObject.fromObject(heroLabInfo);
+    JsonArray urls = new JsonArray();
+    for (String url : getAllImageAssetsURLs()) {
+      urls.add(url);
+    }
+    heroLabInfo.add("images", urls);
+
+    return heroLabInfo;
   }
 }

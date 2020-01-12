@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
@@ -22,7 +25,6 @@ import net.rptools.maptool.model.Player;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 public class PlayerFunctions extends AbstractFunction {
   private static final PlayerFunctions instance = new PlayerFunctions();
@@ -52,7 +54,9 @@ public class PlayerFunctions extends AbstractFunction {
       }
       String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
       if ("json".equals(delim)) {
-        return JSONArray.fromObject(playerArray).toString();
+        JsonArray jarr = new JsonArray();
+        Arrays.stream(playerArray).forEach(p -> jarr.add(new JsonPrimitive(p)));
+        return jarr;
       } else {
         return StringFunctions.getInstance().join(playerArray, delim);
       }
