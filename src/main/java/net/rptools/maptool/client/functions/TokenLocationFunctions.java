@@ -138,7 +138,6 @@ public class TokenLocationFunctions extends AbstractFunction {
    * @return a message detailing the number of tokens moved.
    * @throws ParserException if the parameters are invalid, or the token is already on the map.
    */
-  @SuppressWarnings("unchecked")
   private String tokenMoveMap(boolean fromCurrentMap, List<Object> args) throws ParserException {
     String functionName = fromCurrentMap ? "moveTokenToMap" : "moveTokenFromMap";
     Object tokenString = args.get(0);
@@ -149,7 +148,7 @@ public class TokenLocationFunctions extends AbstractFunction {
     JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(tokenString);
     if (json.isJsonArray()) {
       for (JsonElement ele : json.getAsJsonArray()) {
-        tokens.add(ele.getAsString());
+        tokens.add(JSONMacroFunctions.getInstance().jsonToScriptString(ele));
       }
     } else {
       tokens.add((String) tokenString);

@@ -191,7 +191,11 @@ public class JsonObjectFunctions {
     JsonObject newJsonObject = jsonObject.deepCopy();
 
     for (int i = 0; i < list.size(); i += 2) {
-      newJsonObject.add(list.get(i).toString(), typeConversion.asJsonElement(list.get(i + 1)));
+      Object value = list.get(i + 1);
+      if (value instanceof String && value.toString().length() == 0) {
+        value = "''";
+      }
+      newJsonObject.add(list.get(i).toString(), typeConversion.asJsonElement(value));
     }
 
     return newJsonObject;
