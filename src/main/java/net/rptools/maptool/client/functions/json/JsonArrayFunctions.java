@@ -776,7 +776,7 @@ public class JsonArrayFunctions {
         value = "''";
       }
 
-        newArray.set(index.intValue(), typeConversion.asJsonElement(value));
+      newArray.set(index.intValue(), typeConversion.asJsonElement(value));
     }
 
     return newArray;

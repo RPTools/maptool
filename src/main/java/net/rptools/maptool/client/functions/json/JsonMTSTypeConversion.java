@@ -70,6 +70,7 @@ class JsonMTSTypeConversion {
 
   /**
    * Converts a JsonElement to a String that is safe to be returned to MTScript
+   *
    * @param element the JsonElement to convert.
    * @return The converted String.
    */

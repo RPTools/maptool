@@ -74,7 +74,6 @@ public class MapToolVariableResolver extends MapVariableResolver {
   /** The variable name for querying and setting token visible state */
   private static final String TOKEN_VISIBLE = "token.visible";
 
-
   private static final String JSON_NULL = "json.null";
   private static final String JSON_TRUE = "json.true";
   private static final String JSON_FALSE = "json.false";

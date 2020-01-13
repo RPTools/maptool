@@ -638,7 +638,6 @@ public class MacroFunctions extends AbstractFunction {
       }
       label = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("label"));
 
-
       if (!jobj.has("command")) {
         throw new ParserException("createMacro(): Missing command.");
       }
