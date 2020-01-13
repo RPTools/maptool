@@ -226,7 +226,7 @@ public class MacroFunctions extends AbstractFunction {
     }
     for (Object o : jobj.keySet()) {
       String key = o.toString();
-      String value = jobj.get(key).getAsString();
+      String value = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get(key));
 
       if ("autoexecute".equalsIgnoreCase(key)) {
         mbp.setAutoExecute(boolVal(value));
@@ -636,12 +636,13 @@ public class MacroFunctions extends AbstractFunction {
       if (!jobj.has("label")) {
         throw new ParserException("createMacro(): Missing label.");
       }
-      label = jobj.get("label").getAsString();
+      label = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("label"));
+
 
       if (!jobj.has("command")) {
         throw new ParserException("createMacro(): Missing command.");
       }
-      command = jobj.get("command").getAsString();
+      command = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("command"));
       prop = param.get(0).toString();
       delim = "json";
     } else if (param.size() == 2) { // either (json, token) or (label, command)
@@ -651,12 +652,12 @@ public class MacroFunctions extends AbstractFunction {
       if (!jobj.has("label")) {
         throw new ParserException("createMacro(): Missing label.");
       }
-      label = jobj.get("label").getAsString();
+      label = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("label"));
 
       if (!jobj.has("command")) {
         throw new ParserException("createMacro(): Missing command.");
       }
-      command = jobj.get("command").getAsString();
+      command = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("command"));
 
       if (!MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(

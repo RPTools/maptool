@@ -95,7 +95,7 @@ public class TokenSelectionFunctions extends AbstractFunction {
         // A JSON Array was supplied
         if (json.isJsonArray()) {
           for (JsonElement ele : json.getAsJsonArray()) {
-            String identifier = ele.getAsString();
+            String identifier = JSONMacroFunctions.getInstance().jsonToScriptString(ele);
             Token t = zone.resolveToken(identifier.trim());
             if (t != null) {
               deselectGUIDs.add(t.getId());
@@ -190,7 +190,7 @@ public class TokenSelectionFunctions extends AbstractFunction {
         JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(paramStr);
         if (json.isJsonArray()) {
           for (JsonElement ele : json.getAsJsonArray()) {
-            String identifier = ele.getAsString();
+            String identifier = JSONMacroFunctions.getInstance().jsonToScriptString(ele);
             Token t = zone.resolveToken(identifier);
             if (t != null) {
               allGUIDs.add(t.getId());

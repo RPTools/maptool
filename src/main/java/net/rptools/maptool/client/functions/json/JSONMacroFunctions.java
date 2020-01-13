@@ -33,6 +33,7 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
+import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -912,5 +913,14 @@ public class JSONMacroFunctions extends AbstractFunction {
    */
   public JsonElement asJsonElement(Object o) throws ParserException {
     return typeConversion.asJsonElement(o);
+  }
+
+  /**
+   * Converts a JsonElement to a String that is safe to be returned to MTScript
+   * @param element the JsonElement to convert.
+   * @return The converted String.
+   */
+  public String jsonToScriptString(JsonElement element) {
+    return typeConversion.jsonToScriptString(element);
   }
 }

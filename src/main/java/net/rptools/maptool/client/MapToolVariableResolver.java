@@ -16,7 +16,9 @@ package net.rptools.maptool.client;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +73,11 @@ public class MapToolVariableResolver extends MapVariableResolver {
 
   /** The variable name for querying and setting token visible state */
   private static final String TOKEN_VISIBLE = "token.visible";
+
+
+  private static final String JSON_NULL = "json.null";
+  private static final String JSON_TRUE = "json.true";
+  private static final String JSON_FALSE = "json.false";
 
   private List<Runnable> delayedActionList;
 
@@ -149,6 +156,15 @@ public class MapToolVariableResolver extends MapVariableResolver {
   public Object getVariable(String name, VariableModifiers mods) throws ParserException {
 
     boolean evaluate = false; // Should we try to evaluate the value.
+
+    switch (name) {
+      case JSON_NULL:
+        return JsonNull.INSTANCE;
+      case JSON_TRUE:
+        return new JsonPrimitive(true);
+      case JSON_FALSE:
+        return new JsonPrimitive(false);
+    }
 
     Object result = null;
     if (tokenInContext != null) {
