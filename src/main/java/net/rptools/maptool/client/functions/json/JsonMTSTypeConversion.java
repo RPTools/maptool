@@ -69,6 +69,22 @@ class JsonMTSTypeConversion {
   }
 
   /**
+   * Converts a JsonElement to a String that is safe to be returned to MTScript
+   *
+   * @param element the JsonElement to convert.
+   * @return The converted String.
+   */
+  public String jsonToScriptString(JsonElement element) {
+    if (element == null || element.isJsonNull()) {
+      return "";
+    } else if (element.isJsonPrimitive()) {
+      return element.getAsString();
+    } else {
+      return element.toString();
+    }
+  }
+
+  /**
    * Returns a {@link JsonElement} version of the passed in object.
    *
    * @param o the object tp convert to a {@link JsonElement}.
