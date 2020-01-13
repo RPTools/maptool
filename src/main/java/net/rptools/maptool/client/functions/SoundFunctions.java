@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -29,7 +30,6 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 /** This class handles functions to play, stop, and edit audio clips and streams. */
 public class SoundFunctions extends AbstractFunction {
@@ -193,8 +193,8 @@ public class SoundFunctions extends AbstractFunction {
       case "clips":
         return SoundManager.getClipProperties("*");
       case "*":
-        JSONArray all = (JSONArray) MediaPlayerAdapter.getStreamProperties("*");
-        all.addAll((JSONArray) SoundManager.getClipProperties("*"));
+        JsonArray all = (JsonArray) MediaPlayerAdapter.getStreamProperties("*");
+        all.addAll((JsonArray) SoundManager.getClipProperties("*"));
         return all;
       default:
         Object streams = MediaPlayerAdapter.getStreamProperties(strUri);
@@ -322,9 +322,7 @@ public class SoundFunctions extends AbstractFunction {
    * @return a list with the nicknames corresponding to the resource
    */
   public static List<String> getNicks(String strUri) {
-    return mapSounds
-        .entrySet()
-        .stream()
+    return mapSounds.entrySet().stream()
         .filter(entry -> strUri.equals(entry.getValue()))
         .map(Map.Entry::getKey)
         .collect(Collectors.toList());

@@ -34,11 +34,10 @@ import net.rptools.maptool.language.I18N;
  *     azhrei_fje $
  */
 @MacroDefinition(
-  name = "alias",
-  aliases = {"alias"},
-  description = "alias.description",
-  expandRolls = false
-)
+    name = "alias",
+    aliases = {"alias"},
+    description = "alias.description",
+    expandRolls = false)
 public class AliasMacro implements Macro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     macro = macro.trim();

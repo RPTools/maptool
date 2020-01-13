@@ -50,6 +50,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -58,11 +59,13 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import javax.swing.AbstractButton;
 import javax.swing.AbstractListModel;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -89,6 +92,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.Position.Bias;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import net.rptools.lib.MD5Key;
@@ -107,6 +111,7 @@ import net.rptools.maptool.model.HeroLabData;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.TokenProperty;
@@ -122,6 +127,7 @@ import org.fife.ui.rtextarea.SearchEngine;
 
 /** This dialog is used to display all of the token states and notes to the user. */
 public class EditTokenDialog extends AbeillePanel<Token> {
+
   private static final long serialVersionUID = 1295729281890170792L;
 
   private boolean tokenSaved;
@@ -160,9 +166,21 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   }
 
   public void initGMNotesTextArea() {
-    if (MapTool.getPlayer().isGM())
+    if (MapTool.getPlayer().isGM()) {
       getGMNotesTextArea().addMouseListener(new MouseHandler(getGMNotesTextArea()));
+    }
     getComponent("@GMNotes").setEnabled(MapTool.getPlayer().isGM());
+  }
+
+  public void initTerrainModifierOperationComboBox() {
+    getTerrainModifierOperationComboBox()
+        .setModel(new DefaultComboBoxModel<>(TerrainModifierOperation.values()));
+  }
+
+  public void initTerrainModifiersIgnoredList() {
+    DefaultListModel<TerrainModifierOperation> operationModel = new DefaultListModel<>();
+    getTerrainModifiersIgnoredList().setModel(operationModel);
+    EnumSet.allOf(TerrainModifierOperation.class).forEach(operationModel::addElement);
   }
 
   public void showDialog(Token token) {
@@ -277,6 +295,20 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     getTokenOpacitySlider()
         .setValue(new BigDecimal(token.getTokenOpacity()).multiply(new BigDecimal(100)).intValue());
     getTerrainModifier().setText(Double.toString(token.getTerrainModifier()));
+    getTerrainModifierOperationComboBox().setSelectedItem(token.getTerrainModifierOperation());
+
+    // Get tokens ignored list, match to the index in the JList then select them.
+    getTerrainModifiersIgnoredList()
+        .setSelectedIndices(
+            token.getTerrainModifiersIgnored().stream()
+                .map(
+                    operation ->
+                        getTerrainModifiersIgnoredList()
+                            .getNextMatch(operation.toString(), 0, Bias.Forward))
+                .collect(Collectors.toCollection(ArrayList::new))
+                .stream()
+                .mapToInt(Integer::valueOf)
+                .toArray());
 
     // Jamz: Init the VBL tab...
     JTabbedPane tabbedPane = getTabbedPane();
@@ -288,8 +320,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       getVisibilityToleranceSpinner().setValue(token.getAlwaysVisibleTolerance());
     } else {
       tabbedPane.setEnabledAt(tabbedPane.indexOfTab("VBL"), false);
-      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("VBL"))
+      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("VBL")) {
         tabbedPane.setSelectedIndex(0);
+      }
     }
     getAlwaysVisibleButton().setSelected(token.isAlwaysVisible());
 
@@ -323,9 +356,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       ((JCheckBox) getComponent("isAllyCheckBox")).setSelected(heroLabData.isAlly());
       ((JLabel) getComponent("summaryText")).setText(heroLabData.getSummary());
 
-      if (heroLabData.getPortfolioFile().exists())
+      if (heroLabData.getPortfolioFile().exists()) {
         ((JLabel) getComponent("portfolioLocation")).setForeground(Color.BLACK);
-      else ((JLabel) getComponent("portfolioLocation")).setForeground(Color.RED);
+      } else {
+        ((JLabel) getComponent("portfolioLocation")).setForeground(Color.RED);
+      }
 
       ((JLabel) getComponent("portfolioLocation"))
           .setText(heroLabData.getPortfolioFile().getAbsolutePath());
@@ -343,8 +378,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       // loadHeroLabImageList();
     } else {
       tabbedPane.setEnabledAt(tabbedPane.indexOfTab("Hero Lab"), false);
-      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("Hero Lab"))
+      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("Hero Lab")) {
         tabbedPane.setSelectedIndex(6);
+      }
     }
 
     // we will disable the Owner only visible check box if the token is not
@@ -516,6 +552,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   }
 
   class SliderListener implements ChangeListener {
+
     public void stateChanged(ChangeEvent e) {
       JSlider source = (JSlider) e.getSource();
       if (!source.getValueIsAdjusting()) {
@@ -538,6 +575,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public JTextField getTerrainModifier() {
     return (JTextField) getComponent("terrainModifier");
+  }
+
+  public JComboBox<TerrainModifierOperation> getTerrainModifierOperationComboBox() {
+    return (JComboBox<TerrainModifierOperation>) getComponent("terrainModifierOperation");
+  }
+
+  public JList<TerrainModifierOperation> getTerrainModifiersIgnoredList() {
+    return (JList<TerrainModifierOperation>) getComponent("terrainModifiersIgnored");
   }
 
   public void initOKButton() {
@@ -592,6 +637,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       // User didn't enter a valid float...
       token.setTerrainModifier(1);
     }
+
+    token.setTerrainModifierOperation(
+        (TerrainModifierOperation) getTerrainModifierOperationComboBox().getSelectedItem());
+
+    token.setTerrainModifiersIgnored(
+        getTerrainModifiersIgnoredList().getSelectedValuesList().stream()
+            .collect(Collectors.toSet()));
 
     // Get the states
     Component[] stateComponents = getStatesPanel().getComponents();
@@ -693,9 +745,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     token.setVBL(getTokenVblPanel().getTokenVBL());
     token.setIsAlwaysVisible(getAlwaysVisibleButton().isSelected());
     token.setAlwaysVisibleTolerance((int) getVisibilityToleranceSpinner().getValue());
-    if (getTokenVblPanel().getAutoGenerated())
+    if (getTokenVblPanel().getAutoGenerated()) {
       token.setAlphaSensitivity(getTokenVblPanel().getAlphaSensitivity());
-    else token.setAlphaSensitivity(-1);
+    } else {
+      token.setAlphaSensitivity(-1);
+    }
 
     token.setHeroLabData(heroLabData);
 
@@ -777,12 +831,16 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     for (BooleanTokenOverlay state : overlays) {
       String group = state.getGroup();
       panel = groups.get("");
-      if (group != null && (group = group.trim()).length() != 0) panel = groups.get(group);
+      if (group != null && (group = group.trim()).length() != 0) {
+        panel = groups.get(group);
+      }
       int x = panel.getComponentCount() % 4;
       int y = panel.getComponentCount() / 4;
       if (x == 0) {
         layout = (FormLayout) panel.getLayout();
-        if (y != 0) layout.appendRow(new RowSpec("2px"));
+        if (y != 0) {
+          layout.appendRow(new RowSpec("2px"));
+        }
         layout.appendRow(new RowSpec("pref"));
       }
       panel.add(new JCheckBox(state.getName()), new CellConstraints(x * 2 + 1, y * 2 + 1));
@@ -1084,8 +1142,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             new ActionListener() {
               public void actionPerformed(ActionEvent e) {
                 if (vblPanel.getTokenVBL() != null) {
-                  if (getCopyOrMoveCheckbox().isSelected())
-                    if (!MapTool.confirm("EditTokenDialog.confirm.vbl.clearVBL")) return;
+                  if (getCopyOrMoveCheckbox().isSelected()) {
+                    if (!MapTool.confirm("EditTokenDialog.confirm.vbl.clearVBL")) {
+                      return;
+                    }
+                  }
 
                   TokenVBL.renderVBL(
                       MapTool.getFrame().getCurrentZoneRenderer(),
@@ -1216,8 +1277,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
           public void actionPerformed(ActionEvent e) {
             int index = getHeroLabImagesList().getSelectedIndex();
 
-            if (heroLabData != null)
+            if (heroLabData != null) {
               getCharSheetPanel().setImageId(heroLabData.getImageAssetID(index));
+            }
           }
         });
   }
@@ -1237,6 +1299,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   }
 
   public class HeroLabImageListRenderer extends DefaultListCellRenderer {
+
     private static final long serialVersionUID = 7113815213979044509L;
     Font font = new Font("helvitica", Font.BOLD, 24);
 
@@ -1339,10 +1402,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 }
 
                 MD5Key portraitAssetKeY = heroLabData.getPortraitImage();
-                if (portraitAssetKeY != null) getPortraitPanel().setImageId(portraitAssetKeY);
+                if (portraitAssetKeY != null) {
+                  getPortraitPanel().setImageId(portraitAssetKeY);
+                }
 
                 MD5Key handoutAssetKey = heroLabData.getHandoutImage();
-                if (handoutAssetKey != null) getCharSheetPanel().setImageId(handoutAssetKey);
+                if (handoutAssetKey != null) {
+                  getCharSheetPanel().setImageId(handoutAssetKey);
+                }
 
                 // If NPC, lets not overwrite the Name, it may be "Creature 229" or such, GM
                 // name is enough
@@ -1382,7 +1449,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
           public void actionPerformed(ActionEvent e) {
             String searchText = xmlStatblockSearchTextField.getText();
 
-            if (searchText.isEmpty()) return;
+            if (searchText.isEmpty()) {
+              return;
+            }
 
             xmlStatblockRSyntaxTextArea.setText(heroLabData.parseXML(searchText));
             xmlStatblockRSyntaxTextArea.setCaretPosition(0);
@@ -1410,7 +1479,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
           public void actionPerformed(ActionEvent e) {
             String searchText = textStatblockSearchTextField.getText();
 
-            if (searchText.isEmpty()) return;
+            if (searchText.isEmpty()) {
+              return;
+            }
 
             SearchContext context = new SearchContext();
             context.setSearchFor(searchText);
@@ -1427,6 +1498,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   // //
   // HANDLER
   public class MouseHandler extends MouseAdapter {
+
     JTextArea source;
 
     public MouseHandler(JTextArea source) {
@@ -1580,6 +1652,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   }
 
   private class OwnerListModel extends AbstractListModel {
+
     private static final long serialVersionUID = 2375600545516097234L;
 
     List<Selectable> ownerList = new ArrayList<Selectable>();
@@ -1616,6 +1689,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   }
 
   private static class SpeechTableModel extends KeyValueTableModel {
+
     private static final long serialVersionUID = 1601750325218502846L;
 
     public SpeechTableModel(Token token) {
@@ -1650,6 +1724,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   }
 
   private static class KeyValueTableModel extends AbstractTableModel {
+
     private static final long serialVersionUID = -1006405977882120853L;
 
     private Association<String, String> newRow = new Association<String, String>("", "");
@@ -1742,6 +1817,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   // needed to change the popup for properties
   private static class MTMultilineStringExComboBox extends MultilineStringExComboBox {
+
     final ResourceBundle a = ResourceBundle.getBundle("com.jidesoft.combobox.combobox");
 
     public ResourceBundle getResourceBundle(Locale paramLocale) {
@@ -1758,6 +1834,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   // the cell editor for property popups
   private static class MTMultilineStringCellEditor extends MultilineStringCellEditor {
+
     protected MTMultilineStringExComboBox createMultilineStringComboBox() {
       MTMultilineStringExComboBox localMultilineStringExComboBox =
           new MTMultilineStringExComboBox();
@@ -1768,6 +1845,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   // the property popup table
   private static class MTMultilineStringPopupPanel extends PopupPanel {
+
     private RSyntaxTextArea j = createTextArea();
 
     public MTMultilineStringPopupPanel() {
@@ -1840,6 +1918,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   // cell renderer for properties table
   private static class WordWrapCellRenderer extends RSyntaxTextArea implements TableCellRenderer {
+
     WordWrapCellRenderer() {
       setLineWrap(false);
       setWrapStyleWord(true);

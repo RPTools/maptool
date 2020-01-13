@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +37,7 @@ import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
 import net.rptools.maptool.client.functions.AssertFunction.AssertFunctionException;
 import net.rptools.maptool.client.functions.ReturnFunction.ReturnFunctionException;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -46,8 +49,6 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -127,7 +128,8 @@ public class MapToolLineParser {
               LogFunctions.getInstance(),
               LastRolledFunction.getInstance(),
               Base64Functions.getInstance(),
-              TokenTerrainModifierFunctions.getInstance())
+              TokenTerrainModifierFunctions.getInstance(),
+              TestFunctions.getInstance())
           .collect(Collectors.toList());
 
   /** Name and Source or macros that come from chat. */
@@ -841,13 +843,15 @@ public class MapToolLineParser {
                             .getValue()
                             .toString();
                     if (arg.trim().startsWith("[")) {
-                      Object json = JSONMacroFunctions.convertToJSON(arg);
-                      if (json instanceof JSONArray) {
-                        for (Object name : (JSONArray) json) {
-                          outputOpts.add("w:" + name.toString().toLowerCase());
+                      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(arg);
+                      if (json.isJsonArray()) {
+                        for (JsonElement name : json.getAsJsonArray()) {
+                          outputOpts.add("w:" + name.getAsString().toLowerCase());
                         }
                       }
-                    } else outputOpts.add("w:" + arg.toLowerCase());
+                    } else {
+                      outputOpts.add("w:" + arg.toLowerCase());
+                    }
                   }
                   break;
 
@@ -941,18 +945,14 @@ public class MapToolLineParser {
                     foreachList = null;
                     if (listString.trim().startsWith("{") || listString.trim().startsWith("[")) {
                       // if String starts with [ or { it is JSON -- try to treat it as a JSON String
-                      Object obj = JSONMacroFunctions.convertToJSON(listString);
-                      if (obj != null) {
-                        foreachList = new ArrayList<String>();
-                        if (obj instanceof JSONArray) {
-                          for (Object o : ((JSONArray) obj).toArray()) {
-                            foreachList.add(o.toString());
-                          }
-                        } else {
-                          @SuppressWarnings("unchecked")
-                          Set<String> keySet = ((JSONObject) obj).keySet();
-                          foreachList.addAll(keySet);
+                      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(listString);
+                      if (json.isJsonArray()) {
+                        foreachList = new ArrayList<>(json.getAsJsonArray().size());
+                        for (JsonElement ele : json.getAsJsonArray()) {
+                          foreachList.add(JSONMacroFunctions.getInstance().jsonToScriptString(ele));
                         }
+                      } else if (json.isJsonArray()) {
+                        foreachList = new ArrayList<>(json.getAsJsonObject().keySet());
                       }
                     }
 
@@ -1674,9 +1674,9 @@ public class MapToolLineParser {
       macroResolver = resolver;
     }
     macroResolver.setVariable("macro.args", args);
-    Object obj = JSONMacroFunctions.convertToJSON(args);
-    if (obj instanceof JSONArray) {
-      JSONArray jarr = (JSONArray) obj;
+    JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(args);
+    if (json.isJsonArray()) {
+      JsonArray jarr = json.getAsJsonArray();
       macroResolver.setVariable("macro.args.num", BigDecimal.valueOf(jarr.size()));
       for (int i = 0; i < jarr.size(); i++) {
         macroResolver.setVariable("macro.args." + i, jarr.get(i));

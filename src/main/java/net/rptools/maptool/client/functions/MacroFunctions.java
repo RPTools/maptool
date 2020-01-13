@@ -14,23 +14,22 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -114,28 +113,28 @@ public class MacroFunctions extends AbstractFunction {
     }
 
     if ("json".equals(delim)) {
-      Map<String, Object> props = new LinkedHashMap<String, Object>();
-      props.put("autoExecute", mbp.getAutoExecute());
-      props.put("color", mbp.getColorKey());
-      props.put("fontColor", mbp.getFontColorKey());
-      props.put("group", mbp.getGroup());
-      props.put("includeLabel", mbp.getIncludeLabel());
-      props.put("sortBy", mbp.getSortby());
-      props.put("index", mbp.getIndex());
-      props.put("label", mbp.getLabel());
-      props.put("fontSize", mbp.getFontSize());
-      props.put("minWidth", mbp.getMinWidth());
-      props.put("playerEditable", mbp.getAllowPlayerEdits());
-      props.put("command", mbp.getCommand());
-      props.put("maxWith", mbp.getMaxWidth());
+      JsonObject props = new JsonObject();
+      props.addProperty("autoExecute", mbp.getAutoExecute());
+      props.addProperty("color", mbp.getColorKey());
+      props.addProperty("fontColor", mbp.getFontColorKey());
+      props.addProperty("group", mbp.getGroup());
+      props.addProperty("includeLabel", mbp.getIncludeLabel());
+      props.addProperty("sortBy", mbp.getSortby());
+      props.addProperty("index", mbp.getIndex());
+      props.addProperty("label", mbp.getLabel());
+      props.addProperty("fontSize", mbp.getFontSize());
+      props.addProperty("minWidth", mbp.getMinWidth());
+      props.addProperty("playerEditable", mbp.getAllowPlayerEdits());
+      props.addProperty("command", mbp.getCommand());
+      props.addProperty("maxWith", mbp.getMaxWidth());
       if (mbp.getToolTip() != null) {
-        props.put("tooltip", mbp.getToolTip());
+        props.addProperty("tooltip", mbp.getToolTip());
       } else {
-        props.put("tooltip", "");
+        props.addProperty("tooltooltip", "");
       }
-      props.put("applyToSelected", mbp.getApplyToTokens());
+      props.addProperty("toolapplyToSelected", mbp.getApplyToTokens());
 
-      JSONArray compare = new JSONArray();
+      JsonArray compare = new JsonArray();
 
       if (mbp.getCompareGroup()) {
         compare.add("group");
@@ -156,16 +155,18 @@ public class MacroFunctions extends AbstractFunction {
         compare.add("applyToSelected");
       }
 
-      props.put("compare", compare);
+      props.add("compare", compare);
 
-      Map<String, Object> propsMetadata = new LinkedHashMap<String, Object>();
-      propsMetadata.put("uuid", mbp.getMacroUUID());
-      propsMetadata.put("commandChecksum", new MD5Key(mbp.getCommand().getBytes()).toString());
-      propsMetadata.put("propsChecksum", new MD5Key(props.toString().getBytes()).toString());
+      JsonObject propsMetadata = new JsonObject();
+      propsMetadata.addProperty("uuid", mbp.getMacroUUID());
+      propsMetadata.addProperty(
+          "commandChecksum", new MD5Key(mbp.getCommand().getBytes()).toString());
+      propsMetadata.addProperty(
+          "propsChecksum", new MD5Key(props.toString().getBytes()).toString());
 
-      props.put("metadata", propsMetadata);
+      props.add("metadata", propsMetadata);
 
-      return JSONObject.fromObject(props);
+      return props;
     } else {
       StringBuilder sb = new StringBuilder();
       sb.append("autoExecute=").append(mbp.getAutoExecute()).append(delim);
@@ -200,20 +201,24 @@ public class MacroFunctions extends AbstractFunction {
    */
   public void setMacroProps(MacroButtonProperties mbp, String propString, String delim)
       throws ParserException {
-    JSONObject jobj;
+    JsonElement json;
 
     // This should default to false for token buttons.
     mbp.setApplyToTokens(false);
 
     if (propString.trim().startsWith("{")) {
       // We are either a JSON string or an illegal string.
-      jobj = JSONObject.fromObject(propString);
+      json = JSONMacroFunctions.getInstance().asJsonElement(propString);
     } else {
-      jobj = JSONMacroFunctions.getInstance().fromStrProp(propString, delim);
+      json =
+          JSONMacroFunctions.getInstance().getJsonObjectFunctions().fromStrProp(propString, delim);
     }
-    if (jobj.containsKey("command") && !MapTool.getParser().isMacroTrusted()) {
+
+    JsonObject jobj = json.getAsJsonObject();
+
+    if (jobj.has("command") && !MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(
-          "setMacroProps(): You do not have permision to change the macro command.");
+          "setMacroProps(): You do not have permission to change the macro command.");
     }
     if (!mbp.getAllowPlayerEdits() && !MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(
@@ -221,7 +226,7 @@ public class MacroFunctions extends AbstractFunction {
     }
     for (Object o : jobj.keySet()) {
       String key = o.toString();
-      String value = jobj.getString(key);
+      String value = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get(key));
 
       if ("autoexecute".equalsIgnoreCase(key)) {
         mbp.setAutoExecute(boolVal(value));
@@ -264,7 +269,7 @@ public class MacroFunctions extends AbstractFunction {
       } else if ("applyToSelected".equalsIgnoreCase(key)) {
         mbp.setApplyToTokens(boolVal(value));
       } else if ("compare".equalsIgnoreCase(key)) {
-        JSONArray compareArray = jobj.getJSONArray("compare");
+        JsonArray compareArray = jobj.get("compare").getAsJsonArray();
         // First set everything to false as script will specify what is compared
         mbp.setCompareGroup(false);
         mbp.setCompareSortPrefix(false);
@@ -364,10 +369,10 @@ public class MacroFunctions extends AbstractFunction {
    *
    * @param resolver The variable resolver.
    * @param param The parameters.
-   * @return The string containing the macro names.
+   * @return The macro names
    * @throws ParserException If an error occurs.
    */
-  private String getMacros(MapToolVariableResolver resolver, List<Object> param)
+  private Object getMacros(MapToolVariableResolver resolver, List<Object> param)
       throws ParserException {
     Token token;
     String delim;
@@ -402,7 +407,11 @@ public class MacroFunctions extends AbstractFunction {
     String[] names = new String[token.getMacroNames(false).size()];
 
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(token.getMacroNames(false).toArray(names)).toString();
+      JsonArray jsonArray = new JsonArray();
+      for (String name : token.getMacroNames(false)) {
+        jsonArray.add(name);
+      }
+      return jsonArray;
     } else {
       return StringFunctions.getInstance().join(token.getMacroNames(false).toArray(names), delim);
     }
@@ -475,7 +484,7 @@ public class MacroFunctions extends AbstractFunction {
    * @return the indexes for the macro buttons.
    * @throws ParserException if an error occurs.
    */
-  private String getMacroIndexes(MapToolVariableResolver resolver, List<Object> param)
+  private Object getMacroIndexes(MapToolVariableResolver resolver, List<Object> param)
       throws ParserException {
     Token token;
     String delim;
@@ -513,16 +522,22 @@ public class MacroFunctions extends AbstractFunction {
       throw new ParserException("getMacroIndexes(): Incorrect number of parameters.");
     }
 
-    List<String> indexes = new ArrayList<String>();
+    List<String> strIndexes = new ArrayList<>();
+    List<Integer> indexes = new ArrayList<>();
     for (MacroButtonProperties mbp : token.getMacroList(false)) {
       if (mbp.getLabel().equals(label)) {
-        indexes.add(Integer.toString(mbp.getIndex()));
+        strIndexes.add(Integer.toString(mbp.getIndex()));
+        indexes.add(mbp.getIndex());
       }
     }
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(indexes).toString();
+      JsonArray indArray = new JsonArray();
+      for (int ind : indexes) {
+        indArray.add(ind);
+      }
+      return indArray;
     } else {
-      return StringFunctions.getInstance().join(indexes, delim);
+      return StringFunctions.getInstance().join(strIndexes, delim);
     }
   }
 
@@ -610,60 +625,51 @@ public class MacroFunctions extends AbstractFunction {
     String delim;
 
     if (param.size() == 1) { // Only valid if its a json object
-      JSONObject jobj;
-      jobj = JSONObject.fromObject(param.get(0).toString());
+      JsonObject jobj;
+      jobj =
+          JSONMacroFunctions.getInstance().asJsonElement(param.get(0).toString()).getAsJsonObject();
       token = resolver.getTokenInContext();
       if (token == null) {
         throw new ParserException("createMacro(): No impersonated token.");
       }
 
-      if (!jobj.containsKey("label")) {
+      if (!jobj.has("label")) {
         throw new ParserException("createMacro(): Missing label.");
       }
-      label = jobj.getString("label");
+      label = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("label"));
 
-      if (!jobj.containsKey("command")) {
+      if (!jobj.has("command")) {
         throw new ParserException("createMacro(): Missing command.");
       }
-      command = jobj.getString("command");
+      command = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("command"));
       prop = param.get(0).toString();
       delim = "json";
     } else if (param.size() == 2) { // either (json, token) or (label, command)
-      JSONObject jobj;
-      try {
-        jobj = JSONObject.fromObject(param.get(0).toString());
-        if (!jobj.containsKey("label")) {
-          throw new ParserException("createMacro(): Missing label.");
-        }
-        label = jobj.getString("label");
-
-        if (!jobj.containsKey("command")) {
-          throw new ParserException("createMacro(): Missing command.");
-        }
-        command = jobj.getString("command");
-
-        if (!MapTool.getParser().isMacroTrusted()) {
-          throw new ParserException(
-              "createMacro(): You do not have the permission to specify the token.");
-        }
-
-        token = FindTokenFunctions.findToken(param.get(1).toString(), null);
-        if (token == null) {
-          throw new ParserException(
-              "createMacro(): Unknown Token or Token ID, " + param.get(1).toString());
-        }
-        prop = param.get(0).toString();
-        delim = "json";
-      } catch (JSONException e) {
-        label = param.get(0).toString();
-        command = param.get(1).toString();
-        prop = null;
-        delim = null;
-        token = resolver.getTokenInContext();
-        if (token == null) {
-          throw new ParserException("createMacro(): No impersonated token.");
-        }
+      JsonObject jobj;
+      jobj =
+          JSONMacroFunctions.getInstance().asJsonElement(param.get(0).toString()).getAsJsonObject();
+      if (!jobj.has("label")) {
+        throw new ParserException("createMacro(): Missing label.");
       }
+      label = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("label"));
+
+      if (!jobj.has("command")) {
+        throw new ParserException("createMacro(): Missing command.");
+      }
+      command = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("command"));
+
+      if (!MapTool.getParser().isMacroTrusted()) {
+        throw new ParserException(
+            "createMacro(): You do not have the permission to specify the token.");
+      }
+
+      token = FindTokenFunctions.findToken(param.get(1).toString(), null);
+      if (token == null) {
+        throw new ParserException(
+            "createMacro(): Unknown Token or Token ID, " + param.get(1).toString());
+      }
+      prop = param.get(0).toString();
+      delim = "json";
     } else if (param.size() == 3) { // label, command, props
       label = param.get(0).toString();
       command = param.get(1).toString();
@@ -709,7 +715,6 @@ public class MacroFunctions extends AbstractFunction {
     mbp.setLabel(label);
     mbp.setSaveLocation("Token");
     mbp.setTokenId(token);
-    mbp.setApplyToTokens(false);
     mbp.save();
 
     updateToken(token);
@@ -916,7 +921,7 @@ public class MacroFunctions extends AbstractFunction {
    * @return The string containing the macro names.
    * @throws ParserException If an error occurs.
    */
-  private String getMacroGroup(MapToolVariableResolver resolver, List<Object> param)
+  private Object getMacroGroup(MapToolVariableResolver resolver, List<Object> param)
       throws ParserException {
     Token token;
     String delim;
@@ -954,20 +959,26 @@ public class MacroFunctions extends AbstractFunction {
       throw new ParserException("getMacroGroup(): Incorrect number of parameters.");
     }
 
-    List<String> indexes =
-        new LinkedList<String>(); // Has to be a string or the list functions wont like it :\
+    List<String> strIndexes =
+        new LinkedList<>(); // Has to be a string or the list functions wont like it :\
+    List<Integer> indexes = new LinkedList<>();
     for (MacroButtonProperties props : token.getMacroList(false)) {
       if (props.getGroup().equals(group)) {
-        indexes.add(String.valueOf(props.getIndex()));
+        strIndexes.add(String.valueOf(props.getIndex()));
+        indexes.add(props.getIndex());
       }
     }
 
-    String[] vals = new String[indexes.size()];
+    String[] vals = new String[strIndexes.size()];
 
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(indexes.toArray(vals)).toString();
+      JsonArray jarray = new JsonArray();
+      for (Integer i : indexes) {
+        jarray.add(i);
+      }
+      return jarray;
     } else {
-      return StringFunctions.getInstance().join(indexes.toArray(vals), delim);
+      return StringFunctions.getInstance().join(strIndexes.toArray(vals), delim);
     }
   }
 

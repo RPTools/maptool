@@ -170,7 +170,7 @@ public class AutoSaveManager implements ActionListener {
       // we shouldn't be able to get here in that case...
       log.debug("Throwable during thread setup?! " + t);
       if (AppState.isSaving()) {
-        MapTool.showError(I18N.getString("AutoSaveManager.failed_badState"), t);
+        MapTool.showError("AutoSaveManager.failed_badState", t);
         restart();
         AppState.setIsSaving(false);
       } else {

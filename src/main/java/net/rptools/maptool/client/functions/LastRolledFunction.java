@@ -14,12 +14,13 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 public class LastRolledFunction extends AbstractFunction {
   private static final LastRolledFunction instance = new LastRolledFunction();
@@ -35,15 +36,15 @@ public class LastRolledFunction extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
-    JSONArray jarr = new JSONArray();
+    JsonArray jarr = new JsonArray();
     if (functionName.equalsIgnoreCase("lastRolled")) {
-      jarr.addAll(MapTool.getParser().getLastRolled());
+      MapTool.getParser().getLastRolled().forEach(r -> jarr.add(new JsonPrimitive(r)));
     } else if (functionName.equalsIgnoreCase("getRolled")) {
-      jarr.addAll(MapTool.getParser().getRolled());
+      MapTool.getParser().getRolled().forEach(r -> jarr.add(new JsonPrimitive(r)));
     } else if (functionName.equalsIgnoreCase("clearRolls")) {
       MapTool.getParser().clearRolls();
     } else {
-      jarr.addAll(MapTool.getParser().getNewRolls());
+      MapTool.getParser().getNewRolls().forEach(r -> jarr.add(new JsonPrimitive(r)));
     }
 
     return jarr;
