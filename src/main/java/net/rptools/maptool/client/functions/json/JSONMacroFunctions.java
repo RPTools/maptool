@@ -913,4 +913,14 @@ public class JSONMacroFunctions extends AbstractFunction {
   public JsonElement asJsonElement(Object o) throws ParserException {
     return typeConversion.asJsonElement(o);
   }
+
+  /**
+   * Converts a JsonElement to a String that is safe to be returned to MTScript
+   *
+   * @param element the JsonElement to convert.
+   * @return The converted String.
+   */
+  public String jsonToScriptString(JsonElement element) {
+    return typeConversion.jsonToScriptString(element);
+  }
 }
