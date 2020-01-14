@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonElement;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.math.BigDecimal;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -36,7 +38,6 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 /** Functions to move tokens, get a token's location, or calculate the distance from a token. */
 public class TokenLocationFunctions extends AbstractFunction {
@@ -137,7 +138,6 @@ public class TokenLocationFunctions extends AbstractFunction {
    * @return a message detailing the number of tokens moved.
    * @throws ParserException if the parameters are invalid, or the token is already on the map.
    */
-  @SuppressWarnings("unchecked")
   private String tokenMoveMap(boolean fromCurrentMap, List<Object> args) throws ParserException {
     String functionName = fromCurrentMap ? "moveTokenToMap" : "moveTokenFromMap";
     Object tokenString = args.get(0);
@@ -145,9 +145,11 @@ public class TokenLocationFunctions extends AbstractFunction {
 
     List<String> tokens = new ArrayList<String>();
 
-    Object json = JSONMacroFunctions.asJSON(tokenString);
-    if (json instanceof JSONArray) {
-      tokens.addAll((JSONArray) json);
+    JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(tokenString);
+    if (json.isJsonArray()) {
+      for (JsonElement ele : json.getAsJsonArray()) {
+        tokens.add(JSONMacroFunctions.getInstance().jsonToScriptString(ele));
+      }
     } else {
       tokens.add((String) tokenString);
     }

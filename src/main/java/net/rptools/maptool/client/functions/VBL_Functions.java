@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.awt.BasicStroke;
 import java.awt.Polygon;
 import java.awt.geom.AffineTransform;
@@ -21,21 +24,18 @@ import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 /**
  * New class extending AbstractFunction to create new "Macro Functions" drawVBL, eraseVBL, getVBL
@@ -86,26 +86,32 @@ public class VBL_Functions extends AbstractFunction {
                 "macro.function.general.wrongNumParam", functionName, 1, parameters.size()));
       }
 
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (functionName.equals("eraseVBL")) erase = true;
 
-      Object j = JSONMacroFunctions.asJSON(parameters.get(0).toString().toLowerCase());
-      if (!(j instanceof JSONObject || j instanceof JSONArray)) {
+      JsonElement json =
+          JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
+
+      JsonArray vblArray;
+      if (json.isJsonArray()) {
+        vblArray = json.getAsJsonArray();
+      } else if (json.isJsonObject()) {
+        vblArray = new JsonArray();
+        vblArray.add(json.getAsJsonObject());
+      } else {
         throw new ParserException(
             I18N.getText(
                 "macro.function.json.unknownType",
-                j == null ? parameters.get(0).toString() : j.toString(),
+                json == null ? parameters.get(0).toString() : json.toString(),
                 functionName));
       }
 
-      JSONArray vblArray = JSONArray.fromObject(j);
-
       for (int i = 0; i < vblArray.size(); i++) {
-        JSONObject vblObject = vblArray.getJSONObject(i);
+        JsonObject vblObject = vblArray.get(i).getAsJsonObject();
 
-        Shape vblShape = Shape.valueOf(vblObject.getString("shape").toUpperCase());
+        Shape vblShape = Shape.valueOf(vblObject.get("shape").getAsString().toUpperCase());
         switch (vblShape) {
           case RECTANGLE:
             drawRectangleVBL(renderer, vblObject, erase);
@@ -140,24 +146,30 @@ public class VBL_Functions extends AbstractFunction {
             I18N.getText(
                 "macro.function.general.notenoughparms", functionName, 1, parameters.size()));
 
-      if (!MapTool.getParser().isMacroPathTrusted())
+      if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
       if (parameters.size() == 2 && !parameters.get(1).equals(BigDecimal.ZERO)) simpleJSON = true;
 
-      Object j = JSONMacroFunctions.asJSON(parameters.get(0).toString().toLowerCase());
-      if (!(j instanceof JSONObject || j instanceof JSONArray)) {
+      JsonElement json =
+          JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
+      JsonArray vblArray;
+      if (json.isJsonArray()) {
+        vblArray = json.getAsJsonArray();
+      } else if (json.isJsonObject()) {
+        vblArray = new JsonArray();
+        vblArray.add(json.getAsJsonObject());
+      } else {
         throw new ParserException(
             I18N.getText(
                 "macro.function.json.unknownType",
-                j == null ? parameters.get(0).toString() : j.toString(),
+                json == null ? parameters.get(0).toString() : json.toString(),
                 functionName));
       }
 
-      JSONArray vblArray = JSONArray.fromObject(j);
       Area vblArea = null;
       for (int i = 0; i < vblArray.size(); i++) {
-        JSONObject vblObject = vblArray.getJSONObject(i);
+        JsonObject vblObject = vblArray.get(i).getAsJsonObject();
         if (vblArea == null) {
           vblArea = getVBL(renderer, vblObject);
         } else {
@@ -213,29 +225,27 @@ public class VBL_Functions extends AbstractFunction {
       if (!MapTool.getParser().isMacroTrusted())
         throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
-      Object jsonArea = JSONMacroFunctions.asJSON(parameters.get(0).toString().toLowerCase());
+      JsonElement jsonArea =
+          JSONMacroFunctions.getInstance().asJsonElement(parameters.get(0).toString());
+      JsonArray vblArray;
+      if (jsonArea.isJsonArray()) {
+        vblArray = jsonArea.getAsJsonArray();
+      } else if (jsonArea.isJsonObject()) {
+        vblArray = new JsonArray();
+        vblArray.add(jsonArea.getAsJsonObject());
+      } else {
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.json.unknownType",
+                jsonArea == null ? parameters.get(0).toString() : jsonArea.toString(),
+                functionName));
+      }
 
       if (parameters.size() == 2) {
         token = FindTokenFunctions.findToken(parameters.get(1).toString(), null);
-
-        if (!(jsonArea instanceof JSONObject || jsonArea instanceof JSONArray)) {
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.json.unknownType",
-                  jsonArea == null ? parameters.get(0).toString() : jsonArea.toString(),
-                  functionName));
-        }
       } else if (parameters.size() == 1) {
         MapToolVariableResolver res = (MapToolVariableResolver) parser.getVariableResolver();
         token = res.getTokenInContext();
-
-        if (!(jsonArea instanceof JSONObject || jsonArea instanceof JSONArray)) {
-          throw new ParserException(
-              I18N.getText(
-                  "macro.function.json.unknownType",
-                  jsonArea == null ? parameters.get(0).toString() : jsonArea.toString(),
-                  functionName));
-        }
       }
       if (token == null) {
         throw new ParserException(
@@ -243,11 +253,10 @@ public class VBL_Functions extends AbstractFunction {
       }
 
       Area tokenVBL = new Area();
-      JSONArray vblArray = JSONArray.fromObject(jsonArea);
       for (int i = 0; i < vblArray.size(); i++) {
-        JSONObject vblObject = vblArray.getJSONObject(i);
+        JsonObject vblObject = vblArray.get(i).getAsJsonObject();
 
-        Shape vblShape = Shape.valueOf(vblObject.getString("shape").toUpperCase());
+        Shape vblShape = Shape.valueOf(vblObject.get("shape").getAsString().toUpperCase());
         switch (vblShape) {
           case RECTANGLE:
             tokenVBL.add(drawRectangleVBL(null, vblObject, false));
@@ -358,13 +367,13 @@ public class VBL_Functions extends AbstractFunction {
    * Get the required parameters needed from the JSON to draw a rectangle and render as VBL.
    *
    * @param renderer Reference to the ZoneRenderer. Can be null.
-   * @param vblObject The JSONObject containing all the coordinates and values to needed to draw a
+   * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
    * @param erase Set to true to erase the rectangle in VBL, otherwise draw it.
    * @return the VBL area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawRectangleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase)
+  private Area drawRectangleVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase)
       throws ParserException {
     String funcname = "drawVBL[Rectangle]";
     // Required Parameters
@@ -384,7 +393,7 @@ public class VBL_Functions extends AbstractFunction {
     double r = getJSONdouble(vblObject, "r", funcname);
     double facing = getJSONdouble(vblObject, "facing", funcname);
     float t = (float) getJSONdouble(vblObject, "thickness", funcname);
-    boolean useFacing = vblObject.containsKey("facing");
+    boolean useFacing = vblObject.has("facing");
 
     if (t < 2) {
       t = 2;
@@ -458,7 +467,7 @@ public class VBL_Functions extends AbstractFunction {
   }
 
   private void applyTranslate(
-      String funcname, AffineTransform at, JSONObject vblObject, String[] params)
+      String funcname, AffineTransform at, JsonObject vblObject, String[] params)
       throws ParserException {
     if (jsonKeysExist(vblObject, params, funcname)) {
       double tx = getJSONdouble(vblObject, "tx", funcname);
@@ -468,7 +477,7 @@ public class VBL_Functions extends AbstractFunction {
   }
 
   private void applyScale(
-      String funcname, AffineTransform at, JSONObject vblObject, String[] params)
+      String funcname, AffineTransform at, JsonObject vblObject, String[] params)
       throws ParserException {
     if (jsonKeysExist(vblObject, params, funcname)) {
       double sx = getJSONdouble(vblObject, "sx", funcname);
@@ -481,13 +490,13 @@ public class VBL_Functions extends AbstractFunction {
    * Get the required parameters needed from the JSON to draw a Polygon and render as VBL.
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param vblObject The JSONObject containing all the coordinates and values to needed to draw a
+   * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
    * @param erase Set to true to erase the rectangle in VBL, otherwise draw it
    * @return the VBL area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawPolygonVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase)
+  private Area drawPolygonVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase)
       throws ParserException {
     String funcname = "drawVBL[Polygon]";
     String requiredParms[] = {"points"};
@@ -496,7 +505,7 @@ public class VBL_Functions extends AbstractFunction {
           I18N.getText("macro.function.general.argumentKeyTypeA", "points", funcname));
 
     // Get all the x,y coords for the Polygon, must have at least 2
-    JSONArray points = vblObject.getJSONArray("points");
+    JsonArray points = vblObject.get("points").getAsJsonArray();
     if (points.size() < 2) {
       throw new ParserException(
           I18N.getText("macro.function.json.getInvalidEndIndex", funcname, 2, points.size()));
@@ -507,9 +516,9 @@ public class VBL_Functions extends AbstractFunction {
     double r = getJSONdouble(vblObject, "r", funcname);
     double facing = getJSONdouble(vblObject, "facing", funcname);
     float t = (float) getJSONdouble(vblObject, "thickness", funcname);
-    boolean useFacing = vblObject.containsKey("facing");
+    boolean useFacing = vblObject.has("facing");
 
-    if (!vblObject.containsKey("thickness")) t = 2; // Set default thickness if no value is passed.
+    if (!vblObject.has("thickness")) t = 2; // Set default thickness if no value is passed.
 
     Area area = null;
 
@@ -520,7 +529,7 @@ public class VBL_Functions extends AbstractFunction {
       double lastY = 0;
 
       for (int i = 0; i < points.size(); i++) {
-        JSONObject point = points.getJSONObject(i);
+        JsonObject point = points.get(i).getAsJsonObject();
 
         String requiredPointParms[] = {"x", "y"};
         if (!jsonKeysExist(point, requiredPointParms, funcname))
@@ -547,7 +556,7 @@ public class VBL_Functions extends AbstractFunction {
       Polygon poly = new Polygon();
 
       for (int i = 0; i < points.size(); i++) {
-        JSONObject point = points.getJSONObject(i);
+        JsonObject point = points.get(i).getAsJsonObject();
 
         String requiredPointParms[] = {"x", "y"};
         if (!jsonKeysExist(point, requiredPointParms, funcname))
@@ -600,13 +609,13 @@ public class VBL_Functions extends AbstractFunction {
    * commonly used to block LOS for objects like Trees but still show most of the image.
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param vblObject The JSONObject containing all the coordinates and values to needed to draw a
+   * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
    * @param erase Set to true to erase the rectangle in VBL, otherwise draw it
    * @return the VBL area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawCrossVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase)
+  private Area drawCrossVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase)
       throws ParserException {
     String funcname = "drawVBL[Cross]";
     // Required Parameters
@@ -625,7 +634,7 @@ public class VBL_Functions extends AbstractFunction {
     double r = getJSONdouble(vblObject, "r", funcname);
     double facing = getJSONdouble(vblObject, "facing", funcname);
     float t = (float) getJSONdouble(vblObject, "thickness", funcname);
-    boolean useFacing = vblObject.containsKey("facing");
+    boolean useFacing = vblObject.has("facing");
 
     // Apply Scaling if requested
     if (s != 0) {
@@ -682,13 +691,13 @@ public class VBL_Functions extends AbstractFunction {
    * VBL.
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param vblObject The JSONObject containing all the coordinates and values to needed to draw a
+   * @param vblObject The JsonObject containing all the coordinates and values to needed to draw a
    *     rectangle.
    * @param erase Set to true to erase the rectangle in VBL, otherwise draw it
    * @return the VBL area if the renderer is null, and null otherwise.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area drawCircleVBL(ZoneRenderer renderer, JSONObject vblObject, boolean erase)
+  private Area drawCircleVBL(ZoneRenderer renderer, JsonObject vblObject, boolean erase)
       throws ParserException {
     String funcname = "drawVBL[Circle]";
     // Required Parameters
@@ -708,7 +717,7 @@ public class VBL_Functions extends AbstractFunction {
     double facing = getJSONdouble(vblObject, "facing", funcname);
     double scale = getJSONdouble(vblObject, "scale", funcname);
     float t = (float) getJSONdouble(vblObject, "thickness", funcname);
-    boolean useFacing = vblObject.containsKey("facing");
+    boolean useFacing = vblObject.has("facing");
 
     // Lets set some sanity limits
     if (sides < 3) sides = 3;
@@ -771,12 +780,12 @@ public class VBL_Functions extends AbstractFunction {
    * Get the required parameters needed from the JSON to get/set VBL within a defined rectangle.
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param vblObject JSONObject containing all the coordinates and values needed to draw a
+   * @param vblObject JsonObject containing all the coordinates and values needed to draw a
    *     rectangle.
    * @return the VBL area.
    * @throws ParserException If the minimum required parameters are not present in the JSON.
    */
-  private Area getVBL(ZoneRenderer renderer, JSONObject vblObject) throws ParserException {
+  private Area getVBL(ZoneRenderer renderer, JsonObject vblObject) throws ParserException {
     String funcname = "getVBL[Rectangle]";
     // Required Parameters
     String requiredParms[] = {"x", "y", "w", "h"};
@@ -795,7 +804,7 @@ public class VBL_Functions extends AbstractFunction {
     double r = getJSONdouble(vblObject, "r", funcname);
     double facing = getJSONdouble(vblObject, "facing", funcname);
     float t = (float) getJSONdouble(vblObject, "thickness", funcname);
-    boolean useFacing = vblObject.containsKey("facing");
+    boolean useFacing = vblObject.has("facing");
 
     // Allow thickness of 0 and default to 0 to allow complete capture of VBL under a token.
     if (t < 0) t = 0; // Set default thickness to 0 if null or negative
@@ -838,7 +847,7 @@ public class VBL_Functions extends AbstractFunction {
       int ry = y + (h / 2);
 
       // Override rx,ry coords if supplied
-      String rParms[] = {"rx", "ry"};
+      String[] rParms = {"rx", "ry"};
       if (jsonKeysExist(vblObject, rParms, funcname)) {
         rx = getJSONint(vblObject, "rx", funcname);
         ry = getJSONint(vblObject, "ry", funcname);
@@ -860,7 +869,7 @@ public class VBL_Functions extends AbstractFunction {
    * @param simpleJSON Boolean to set output to array of points or key/value pairs
    */
   private String getAreaPoints(Area area, boolean simpleJSON) {
-    ArrayList<double[]> areaPoints = new ArrayList<double[]>();
+    ArrayList<double[]> areaPoints = new ArrayList<>();
     double[] coords = new double[6];
 
     for (PathIterator pi = area.getPathIterator(null); !pi.isDone(); pi.next()) {
@@ -876,19 +885,19 @@ public class VBL_Functions extends AbstractFunction {
     // into a json array of json objects.
     // Each shape will be it's own json object which each object contains an
     // array of x,y coords
-    JSONObject polygon = new JSONObject();
-    JSONArray linePoints = new JSONArray();
-    JSONArray allPolygons = new JSONArray();
+    JsonObject polygon = new JsonObject();
+    JsonArray linePoints = new JsonArray();
+    JsonArray allPolygons = new JsonArray();
 
-    polygon.put("generated", 1);
-    polygon.put("shape", "polygon");
+    polygon.addProperty("generated", 1);
+    polygon.addProperty("shape", "polygon");
 
     double[] defaultPos = null;
     double[] moveTo = null;
 
     for (double[] currentElement : areaPoints) {
       // Create a json object to hold the x,y key/value pairs
-      JSONObject line = new JSONObject();
+      JsonObject line = new JsonObject();
 
       // 2 decimals is precise enough, we will deal in .5 pixels mostly.
       currentElement[1] = Math.floor(currentElement[1] * 100) / 100;
@@ -899,42 +908,39 @@ public class VBL_Functions extends AbstractFunction {
         if (defaultPos == null) {
           defaultPos = currentElement;
         } else {
-          line.put("x", defaultPos[1]);
-          line.put("y", defaultPos[2]);
+          line.addProperty("x", defaultPos[1]);
+          line.addProperty("y", defaultPos[2]);
           linePoints.add(line);
-          line = new JSONObject();
+          line = new JsonObject();
         }
         moveTo = currentElement;
 
-        line.put("x", currentElement[1]);
-        line.put("y", currentElement[2]);
+        line.addProperty("x", currentElement[1]);
+        line.addProperty("y", currentElement[2]);
         linePoints.add(line);
       } else if (currentElement[0] == PathIterator.SEG_LINETO) {
-        line.put("x", currentElement[1]);
-        line.put("y", currentElement[2]);
+        line.addProperty("x", currentElement[1]);
+        line.addProperty("y", currentElement[2]);
         linePoints.add(line);
       } else if (currentElement[0] == PathIterator.SEG_CLOSE) {
-        line.put("x", moveTo[1]);
-        line.put("y", moveTo[2]);
+        line.addProperty("x", moveTo[1]);
+        line.addProperty("y", moveTo[2]);
         linePoints.add(line);
       } else {
         // System.out.println("in getAreaPoints(): found a curve, ignoring");
       }
     }
     if (simpleJSON) {
-      int count = 0;
       for (int i = 0; i < linePoints.size(); i++) {
-        JSONObject points = (JSONObject) linePoints.get(i);
-        allPolygons.add(count, points.get("x"));
-        count++;
-        allPolygons.add(count, points.get("y"));
-        count++;
+        JsonObject points = linePoints.get(i).getAsJsonObject();
+        allPolygons.add(points.get("x"));
+        allPolygons.add(points.get("y"));
       }
     } else {
-      polygon.put("fill", 1);
-      polygon.put("close", 1);
-      polygon.put("thickness", 0);
-      polygon.put("points", linePoints);
+      polygon.addProperty("fill", 1);
+      polygon.addProperty("close", 1);
+      polygon.addProperty("thickness", 0);
+      polygon.add("points", linePoints);
       allPolygons.add(polygon);
     }
 
@@ -944,14 +950,14 @@ public class VBL_Functions extends AbstractFunction {
   /**
    * Check to see if all needed parameters/keys in the JSON exist.
    *
-   * @param jsonObject The JSONObject to validate.
+   * @param jsonObject The JsonObject to validate.
    * @param parmList A String array of keys to look up.
    * @return boolean Return true only if all keys exist, otherwise return false if any key is
    *     missing.
    */
-  private boolean jsonKeysExist(JSONObject jsonObject, String[] parmList, String funcname) {
+  private boolean jsonKeysExist(JsonObject jsonObject, String[] parmList, String funcname) {
     for (String parm : parmList) {
-      if (!jsonObject.containsKey(parm)) return false;
+      if (!jsonObject.has(parm)) return false;
     }
     return true;
   }
@@ -960,31 +966,23 @@ public class VBL_Functions extends AbstractFunction {
    * This is a convenience method to fetch and return an int value from the JSON if key exists,
    * otherwise return 0.
    *
-   * @param jsonObject The JSONObject to get key from.
+   * @param jsonObject The JsonObject to get key from.
    * @param key The string value to look for in the JSON.
    * @return An int
    */
-  private int getJSONint(JSONObject jsonObject, String key, String funcname)
+  private int getJSONint(JsonObject jsonObject, String key, String funcname)
       throws ParserException {
     int value = 0;
 
-    try {
-      if (jsonObject.containsKey(key)) {
-        Object v = jsonObject.get(key);
-        if (v instanceof String) value = StringUtil.parseInteger((String) v);
-        else if (v instanceof Number) value = ((Number) v).intValue();
-        else {
-          // Is this even possible?
-          throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeD", funcname, key));
-        }
+    if (jsonObject.has(key)) {
+      JsonElement v = jsonObject.get(key);
+      if (v.getAsJsonPrimitive().isNumber()) {
+        return v.getAsJsonPrimitive().getAsInt();
+      } else {
+        // Is this even possible?
+        throw new ParserException(
+            I18N.getText("macro.function.general.argumentKeyTypeD", funcname, key));
       }
-    } catch (net.sf.json.JSONException e) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.argumentKeyTypeI", funcname, key));
-    } catch (ParseException e) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.argumentKeyTypeI", funcname, key));
     }
     return value;
   }
@@ -993,28 +991,19 @@ public class VBL_Functions extends AbstractFunction {
    * This is a convenience method to fetch and return a double value from the JSON if key exists,
    * otherwise return 0.
    *
-   * @param jsonObject The JSON object to get key from.
+   * @param jsonObject The JsonObject to get key from.
    * @param key The string value to look for in the JSON.
    * @return A double
    */
-  private double getJSONdouble(JSONObject jsonObject, String key, String funcname)
+  private double getJSONdouble(JsonObject jsonObject, String key, String funcname)
       throws ParserException {
     double value = key.equals("facing") ? -90 : 0;
-    try {
-      if (jsonObject.containsKey(key)) {
-        Object v = jsonObject.get(key);
-        if (v instanceof String) value = StringUtil.parseDecimal((String) v);
-        else if (v instanceof Number) value = ((Number) v).doubleValue();
-        else {
-          // Is this even possible?
-          throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeD", funcname, key));
-        }
+    if (jsonObject.has(key)) {
+      JsonElement v = jsonObject.get(key);
+      if (v.getAsJsonPrimitive().isNumber()) {
+        return v.getAsJsonPrimitive().getAsDouble();
       }
-    } catch (net.sf.json.JSONException e) {
-      throw new ParserException(
-          I18N.getText("macro.function.general.argumentKeyTypeD", funcname, key));
-    } catch (ParseException e) {
+      // Is this even possible?
       throw new ParserException(
           I18N.getText("macro.function.general.argumentKeyTypeD", funcname, key));
     }
