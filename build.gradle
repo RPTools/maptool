@@ -207,7 +207,7 @@ dependencies {
     implementation 'org.reflections:reflections:0.9.11'
     implementation 'com.caucho.hessian:hessian:3.1.6'
     implementation 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
-    implementation 'org.mozilla:rhino:1.7.11'
+    implementation 'org.mozilla:rhino:1.7.12'
     implementation 'ca.odell.renderpack:renderpack:1.2004'
     implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
     implementation 'org.swinglabs:swing-worker:1.2'
