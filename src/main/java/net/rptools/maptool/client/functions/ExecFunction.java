@@ -14,10 +14,15 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolLineParser;
+import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.functions.json.JsonArrayFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
@@ -25,12 +30,15 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.Function;
 import net.rptools.parser.function.ParameterException;
-import net.sf.json.JSONArray;
 
 public class ExecFunction extends AbstractFunction {
 
   /** Singleton instance of the ExecFunction class. */
   private static final ExecFunction instance = new ExecFunction();
+
+  /** Object used for various operations on {@link JsonArray}s. */
+  private JsonArrayFunctions jsonArrayFunctions =
+      JSONMacroFunctions.getInstance().getJsonArrayFunctions();
 
   /**
    * Gets and instance of the ExecFunction class.
@@ -60,9 +68,8 @@ public class ExecFunction extends AbstractFunction {
           I18N.getText("macro.function.execFunction.incorrectName", functionName, execName));
     }
 
-    JSONArray jsonArgs = FunctionUtil.paramAsJsonArray(functionName, args, 1);
-    @SuppressWarnings("unchecked")
-    ArrayList execArgs = new ArrayList(jsonArgs);
+    JsonArray jsonArgs = FunctionUtil.paramAsJsonArray(functionName, args, 1);
+    List<Object> execArgs = jsonArrayFunctions.jsonArrayAsMTScriptList(jsonArgs);
 
     boolean defer =
         args.size() > 2 ? FunctionUtil.paramAsBoolean(functionName, args, 2, true) : false;
@@ -70,21 +77,20 @@ public class ExecFunction extends AbstractFunction {
     String strTargets = args.size() > 3 ? args.get(3).toString() : "self";
     String delim = args.size() > 4 ? args.get(4).toString() : ",";
 
-    JSONArray jsonTargets;
+    JsonArray jsonTargets;
     if ("json".equals(delim) || strTargets.charAt(0) == '[') {
-      jsonTargets = JSONArray.fromObject(strTargets);
+      jsonTargets = jsonArrayFunctions.parseJsonArray(strTargets);
     } else {
-      jsonTargets = new JSONArray();
-      for (String t : strTargets.split(delim)) jsonTargets.add(t.trim());
+      jsonTargets = new JsonArray();
+      for (String t : strTargets.split(delim)) {
+        jsonTargets.add(t.trim());
+      }
     }
-    if (jsonTargets.isEmpty()) {
+    if (jsonTargets.size() == 0) {
       return ""; // dont send to empty lists
     }
 
-    @SuppressWarnings("unchecked")
-    // Returns an ArrayList<String>
-    Collection<String> targets = JSONArray.toCollection(jsonTargets, List.class);
-
+    Collection<String> targets = jsonArrayFunctions.jsonArrayToListOfStrings(jsonTargets);
     sendExecFunction(execName, execArgs, defer, targets);
     return "";
   }
@@ -113,30 +119,31 @@ public class ExecFunction extends AbstractFunction {
   /**
    * Send the execFunction. If target is local, run locally instead.
    *
-   * @param execName the name of the function.
+   * @param functionName the name of the function.
    * @param execArgs the list of arguments to the function.
    * @param targets the list of targets.
    */
   private static void sendExecFunction(
-      final String execName, List<Object> execArgs, Collection<String> targets) {
-    String functionText = getExecFunctionText(execName, execArgs);
+      String functionName, List<Object> execArgs, Collection<String> targets) {
     String source = MapTool.getPlayer().getName();
 
     for (String target : targets) {
-      MapTool.serverCommand().execFunction(functionText, target, source);
+      MapTool.serverCommand().execFunction(target, source, functionName, execArgs);
     }
   }
 
   /**
    * Receive the execFunction, and execute it if need be.
    *
-   * @param functionText the text of the function call.
    * @param target the target player.
    * @param source the name of the player who sent the link.
+   * @param functionName the name of the function.
+   * @param execArgs the arguments of the function.
    */
-  public static void receiveExecFunction(final String functionText, String target, String source) {
+  public static void receiveExecFunction(
+      String target, String source, String functionName, List<Object> execArgs) {
     if (isMessageForMe(target, source)) {
-      runExecFunction(functionText);
+      runExecFunction(functionName, execArgs);
     }
   }
 
@@ -174,6 +181,13 @@ public class ExecFunction extends AbstractFunction {
     }
   }
 
+  /**
+   * Return true if the message is for other clients, false otherwise.
+   *
+   * @param target the target of the message
+   * @param source the source of the message
+   * @return true if the message if for other clients, false otherwise
+   */
   public static boolean isMessageGlobal(String target, String source) {
     if (target.equals(source)) return false;
     if (target.equalsIgnoreCase("none")) return false;
@@ -182,37 +196,17 @@ public class ExecFunction extends AbstractFunction {
   }
 
   /**
-   * Get a String corresponding to the function call from the function name and list of arguments.
-   * The text is then intended to be run through runMacroBlock. This is a workaround as it is not
-   * currently possible to run a macro directly as doing so would require a reference to the parser,
-   * which is not available to us.
+   * Run the execFunction locally.
    *
-   * @param execName the name of the function.
-   * @param execArgs a list of arguments to the function.
-   * @return the string of the function call.
+   * @param functionName the name of the function
+   * @param execArgs the arguments to the function
    */
-  private static String getExecFunctionText(final String execName, List<Object> execArgs) {
-    StringBuilder functionText = new StringBuilder("[h:" + execName + "(");
-
-    for (int i = 0; i < execArgs.size(); i++) {
-      if (execArgs.get(i) instanceof String) {
-        functionText.append('"').append(execArgs.get(i)).append('"');
-      } else {
-        functionText.append(execArgs.get(i).toString());
-      }
-
-      if (i < (execArgs.size() - 1)) {
-        functionText.append(",");
-      } else {
-        functionText.append(")]");
-      }
-    }
-    return functionText.toString();
-  }
-
-  private static void runExecFunction(final String functionText) {
+  private static void runExecFunction(String functionName, List<Object> execArgs) {
     try {
-      MapTool.getParser().runMacroBlock(null, functionText, "execFunction", "remote", true);
+      MapToolVariableResolver resolver = new MapToolVariableResolver(null);
+      Parser parser = MapToolLineParser.createParser(resolver, false).getParser();
+      Function function = parser.getFunction(functionName);
+      function.evaluate(parser, functionName, execArgs);
     } catch (ParserException ignored) {
     }
   }

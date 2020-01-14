@@ -28,7 +28,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import org.apache.commons.collections.map.LinkedMap;
+import org.apache.commons.collections4.map.LinkedMap;
 
 @SuppressWarnings("serial")
 public class ChatTypingNotification extends JPanel {

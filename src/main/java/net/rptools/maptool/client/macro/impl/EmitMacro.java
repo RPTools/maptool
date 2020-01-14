@@ -22,10 +22,9 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 
 @MacroDefinition(
-  name = "emit",
-  aliases = {"e"},
-  description = "emit.description"
-)
+    name = "emit",
+    aliases = {"e"},
+    description = "emit.description")
 public class EmitMacro extends AbstractMacro {
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
     macro = processText(macro);

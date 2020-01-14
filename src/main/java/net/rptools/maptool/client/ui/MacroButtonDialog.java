@@ -201,8 +201,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
   @Override
   public String getSelectedText() {
-    // TODO Auto-generated method stub
-    return null;
+    return macroEditorRSyntaxTextArea.getSelectedText();
   }
 
   private void installHotKeyCombo() {

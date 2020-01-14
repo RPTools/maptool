@@ -1,3 +1,111 @@
+Maptool 1.5.11
+=====
+**Highlights**
+- Terrain Modifier enhancements:
+  - Token terrain modifier can be flagged as NONE, MULTIPLY, ADD, BLOCK and FREE
+  - Tokens can be set to ignore Terrain Modifiers.
+- Major refactoring of use of JSON in code. Replaced all uses of net.sf.json-lib library with the Google GSON library.
+
+**Enhancements**
+- [#1101][i1101] New chat commands `/version` and `/about`. MapTool version added to title bar.
+- [#728][i728] Tokens can now be set to ignore terrain modifiers.
+- [#459][i459] Terrain Modifiers have multiple types now.
+
+**Bug Fixes**
+- [#1075][i1075] Setting `applyToSelected=1` when using `createMacro()` was not being applied. Fixed.
+- [#1069][i1069] AutoSave failure message changed.
+- [#1066][i1066] SENTRY: When selecting images for tokens a null asset could be returned. Caught and error message displayed.
+- [#1047][i1047] `json.contains` and `json.indexOf` were not handling values outside the range of a signed integer. Fixed.
+- [#1015][i1015] A bad HREF in a anchor link could produce an NPE.  Fixed.
+
+**Note** The Windows install for this release requires Windows 7 or greater to install.  The `.jar` file release can still be used on older 64-bit Windows platform.
+
+[i1101]: https://github.com/RPTools/maptool/issues/1101
+[i1075]: https://github.com/RPTools/maptool/issues/1075
+[i1069]: https://github.com/RPTools/maptool/issues/1069
+[i1066]: https://github.com/RPTools/maptool/issues/1066
+[i1047]: https://github.com/RPTools/maptool/issues/1047
+[i1015]: https://github.com/RPTools/maptool/issues/1015
+[i728]: https://github.com/RPTools/maptool/issues/728
+[i459]: https://github.com/RPTools/maptool/issues/459
+
+Maptool 1.5.10
+=====
+Emergency bug fixes
+
+- Fix for exception when deleting multiple tokens.
+- Fixed German translations so macro editor and menu shortcuts work.
+
+Bug Fixes
+-----
+- [#1079][i1079] Selecting and then deleting multiple tokens caused ConcurrentModification Exception.  Fixed.
+- [#1078][i1078] Translations for German language broke a number of shortcuts and macro editor. Fixed.
+
+[i1079]: https://github.com/RPTools/maptool/issues/1079
+[i1078]: https://github.com/RPTools/maptool/issues/1078
+
+Maptool 1.5.9
+=====
+This release focused on clearing out bugs both old and new.
+
+**Highlights**
+- Bug fixes. Some serious and some just quality of life.
+- More translation updates.
+- Brought the various libraries used by MapTool up to current releases.
+- Shout out to Melek and other volunteers for their work on 20+ new and improved wiki pages .
+
+Enhancements
+-----
+- [#753][i753] Reserved variable names `init.current` and `init.round` are now highlighted in macro editor and documented on wiki.
+- [#359][i359] Added infomation from `getInfo("server")` and `getInfo("campaign")` to the Sentry error logging.
+
+Bug Fixes
+-----
+- [#1024][i1024] Macro function `execFunction()` would choke on apostrophes. Fixed.
+- [#1021][i1021] Confirmation dialog for clearing GM panel said "Campaign". Fixed.
+- [#1006][i1006] The Perlin noise option for maps was causing significant memory usage whether enabled or not. The additional overhead (~28MB per map) is now only incurred when it is enabled on a map.  If using this feature, be mindful of how many maps you have in your campaign and your max memory allocation.
+- [#998][i998] Player clients dropping tokens with duplicate names weren't getting a notice of why nothing happened. Fixed.
+- [#993][i993] All clients were getting notified when a GM changed a token name to a duplicate. Fixed.
+- [#989][i989] Unprintable character symbol (□) showed in output for rolls and tooltips in frames/dialogs. Fixed.
+- [#962][i962] The GM-mode autoexpose (Preferences -> Application -> Auto-expose fog...) wasn't working. Fixed.
+- [#943][i943] When using random token numbering and after a restart of MT, it was possible to get duplicate token names. Fixed.
+- [#923][i923] Using Edit Map on a map with an adjusted grid would lose offset adjustment. Fixed.
+- [#920][i920] The RPTools logo was being loaded across the net each time for use in the MacOS dock. Fixed.
+- [#892][i892] Panels could be permanently checked in Window menu but not visible. Fixed.
+- [#796][i796] Drawing a selection box on layers other than the Token layer ignored the "Fill selection box" preference. Fixed.
+- [#739][i739] Initiative info was being returned by `getInfo("client")` and `getInfo("server")`. Removed from `server` option.
+- [#722][i722] Find/replace action in Macro editor didn't give a Replace option.  Fixed.
+- [#272][i272] Display area for memory usage didn't adapt to larger font sizes and string length. Fixed.
+- [#251][i251] NPE when restoring FoW after deleting a token. Fixed.
+- [#205][i205] Layer list in Drawing Tools allowed multi-select of layers. Fixed.
+
+Other
+-----
+- [#1045][i1045] Update remaining dependencies.
+- [#1037][i1037] Updated dependencies with reported vulnerabilites. 
+
+[i1045]: https://github.com/RPTools/maptool/issues/1045
+[i1037]: https://github.com/RPTools/maptool/issues/1037
+[i1024]: https://github.com/RPTools/maptool/issues/1024
+[i1021]: https://github.com/RPTools/maptool/issues/1021
+[i1006]: https://github.com/RPTools/maptool/issues/1006
+[i998]: https://github.com/RPTools/maptool/issues/998
+[i993]: https://github.com/RPTools/maptool/issues/993
+[i989]: https://github.com/RPTools/maptool/issues/989
+[i962]: https://github.com/RPTools/maptool/issues/962
+[i943]: https://github.com/RPTools/maptool/issues/943
+[i923]: https://github.com/RPTools/maptool/issues/923
+[i920]: https://github.com/RPTools/maptool/issues/920
+[i892]: https://github.com/RPTools/maptool/issues/892
+[i796]: https://github.com/RPTools/maptool/issues/796
+[i753]: https://github.com/RPTools/maptool/issues/753
+[i739]: https://github.com/RPTools/maptool/issues/739
+[i722]: https://github.com/RPTools/maptool/issues/739
+[i359]: https://github.com/RPTools/maptool/issues/359
+[i272]: https://github.com/RPTools/maptool/issues/272
+[i251]: https://github.com/RPTools/maptool/issues/251
+[i205]: https://github.com/RPTools/maptool/issues/205
+
 Maptool 1.5.8
 =====
 

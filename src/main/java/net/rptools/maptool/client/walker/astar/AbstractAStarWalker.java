@@ -32,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.walker.AbstractZoneWalker;
 import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
@@ -46,13 +45,14 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 
 public abstract class AbstractAStarWalker extends AbstractZoneWalker {
+
   private static final Logger log = LogManager.getLogger(AbstractAStarWalker.class);
 
   private boolean debugCosts = false; // Manually set this to view H, G & F costs as rendered labels
-  private List<GUID> debugLabels;
+  // private List<GUID> debugLabels;
 
   private Area vbl = new Area();
-  private double normal_cost = 1; // zone.getUnitsPerCell();
+  private double cell_cost = zone.getUnitsPerCell();
   private double distance = -1;
 
   private final GeometryFactory geometryFactory = new GeometryFactory();
@@ -60,17 +60,16 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   private Geometry vblGeometry = null;
   private TokenFootprint footprint = new TokenFootprint();
 
-  private Map<AStarCellPoint, AStarCellPoint> checkedList =
-      new ConcurrentHashMap<AStarCellPoint, AStarCellPoint>();
-  private long avgRetrieveTime;
-  private long avgTestTime;
-  private long retrievalCount;
-  private long testCount;
+  private Map<AStarCellPoint, AStarCellPoint> checkedList = new ConcurrentHashMap<>();
+  // private long avgRetrieveTime;
+  // private long avgTestTime;
+  // private long retrievalCount;
+  // private long testCount;
 
   protected int crossX = 0;
   protected int crossY = 0;
 
-  private List<AStarCellPoint> terrainCells = new ArrayList<AStarCellPoint>();
+  private List<AStarCellPoint> terrainCells = new ArrayList<>();
 
   public AbstractAStarWalker(Zone zone) {
     super(zone);
@@ -79,8 +78,11 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     for (Token token : zone.getTokensWithTerrainModifiers()) {
       // log.info("Token: " + token.getName() + ", " + token.getTerrainModifier());
       Set<CellPoint> cells = token.getOccupiedCells(zone.getGrid());
-      for (CellPoint cell : cells)
-        terrainCells.add(new AStarCellPoint(cell, token.getTerrainModifier()));
+      for (CellPoint cell : cells) {
+        terrainCells.add(
+            new AStarCellPoint(
+                cell, token.getTerrainModifier(), token.getTerrainModifierOperation()));
+      }
     }
   }
 
@@ -105,8 +107,11 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   protected abstract double getDiagonalMultiplier(int[] neighborArray);
 
   public double getDistance() {
-    if (distance < 0) return 0;
-    else return distance;
+    if (distance < 0) {
+      return 0;
+    } else {
+      return distance;
+    }
   }
 
   public Collection<AStarCellPoint> getCheckedPoints() {
@@ -123,10 +128,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     crossX = start.x - goal.x;
     crossY = start.y - goal.y;
 
-    List<AStarCellPoint> openList = new ArrayList<AStarCellPoint>();
-    Map<AStarCellPoint, AStarCellPoint> openSet =
-        new HashMap<AStarCellPoint, AStarCellPoint>(); // For faster lookups
-    Set<AStarCellPoint> closedSet = new HashSet<AStarCellPoint>();
+    List<AStarCellPoint> openList = new ArrayList<>();
+    Map<AStarCellPoint, AStarCellPoint> openSet = new HashMap<>(); // For faster lookups
+    Set<AStarCellPoint> closedSet = new HashSet<>();
 
     // Current fail safe... bail out after 10 seconds of searching just in case, shouldn't hang UI
     // as this is off the AWT thread
@@ -145,8 +149,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     // Using JTS because AWT Area can only intersect with Area and we want to use simple lines here.
     // Render VBL to Geometry class once and store.
     // Note: zoneRenderer will be null if map is not visible to players.
-    if (MapTool.getFrame().getCurrentZoneRenderer() != null)
+    if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
       vbl = MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
+    }
 
     if (!vbl.isEmpty()) {
       try {
@@ -155,9 +160,10 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
                 .read(vbl.getPathIterator(null))
                 .buffer(1); // .buffer helps creating valid geometry and prevent self-intersecting
         // polygons
-        if (!vblGeometry.isValid())
+        if (!vblGeometry.isValid()) {
           log.info(
               "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
+        }
       } catch (Exception e) {
         log.info("vblGeometry oh oh: ", e);
       }
@@ -173,7 +179,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     }
 
     // Timeout quicker for GM cause reasons
-    if (MapTool.getPlayer().isGM()) estimatedTimeoutNeeded = estimatedTimeoutNeeded / 2;
+    if (MapTool.getPlayer().isGM()) {
+      estimatedTimeoutNeeded = estimatedTimeoutNeeded / 2;
+    }
 
     // log.info("A* Path timeout estimate: " + estimatedTimeoutNeeded);
 
@@ -222,7 +230,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       }
     }
 
-    List<CellPoint> ret = new LinkedList<CellPoint>();
+    List<CellPoint> ret = new LinkedList<>();
     while (currentNode != null) {
       ret.add(currentNode);
       currentNode = currentNode.parent;
@@ -245,7 +253,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
     Collections.reverse(ret);
     timeOut = (System.currentTimeMillis() - timeOut);
-    if (timeOut > 500) log.debug("Time to calculate A* path warning: " + timeOut + "ms");
+    if (timeOut > 500) {
+      log.debug("Time to calculate A* path warning: " + timeOut + "ms");
+    }
 
     // if (retrievalCount > 0)
     // log.info("avgRetrieveTime: " + Math.floor(avgRetrieveTime / retrievalCount)/1000 + " micro");
@@ -279,19 +289,23 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   }
 
   protected List<AStarCellPoint> getNeighbors(AStarCellPoint node, Set<AStarCellPoint> closedSet) {
-    List<AStarCellPoint> neighbors = new ArrayList<AStarCellPoint>();
+    List<AStarCellPoint> neighbors = new ArrayList<>();
     int[][] neighborMap = getNeighborMap(node.x, node.y);
 
     // Find all the neighbors.
     for (int[] neighborArray : neighborMap) {
-      double terrainModifier = 0;
+      double terrainMultiplier = 0;
+      double terrainAdder = 0;
+      boolean terrainIsFree = false;
       boolean blockNode = false;
 
       AStarCellPoint neighbor =
           new AStarCellPoint(node.x + neighborArray[0], node.y + neighborArray[1]);
       Set<CellPoint> occupiedCells = footprint.getOccupiedCells(node);
 
-      if (closedSet.contains(neighbor)) continue;
+      if (closedSet.contains(neighbor)) {
+        continue;
+      }
 
       // Add the cell we're coming from
       neighbor.parent = node;
@@ -309,35 +323,72 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
           }
         }
 
-        if (blockNode) continue;
+        if (blockNode) {
+          continue;
+        }
 
         // Check for terrain modifiers
         for (AStarCellPoint cell : terrainCells) {
-          if (cell.equals(neighbor)) {
-            terrainModifier += cell.terrainModifier;
-            // log.info("terrainModifier for " + cell + " = " + cell.terrainModifier);
+          if (cell.equals(neighbor)
+              && !terrainModifiersIgnored.contains(cell.terrainModifierOperation)) {
+            switch (cell.terrainModifierOperation) {
+              case MULTIPLY:
+                terrainMultiplier += cell.terrainModifier;
+                break;
+              case ADD:
+                terrainAdder += cell.terrainModifier;
+                break;
+              case BLOCK:
+                closedSet.add(cell);
+                blockNode = true;
+                continue;
+              case FREE:
+                terrainIsFree = true;
+                break;
+              case NONE:
+                break;
+            }
           }
         }
       }
 
-      // Tokens with no terrainModifier set would be a zero so multiplier is set to 1 in that case
-      if (terrainModifier == 0) terrainModifier = 1;
+      if (blockNode) {
+        continue;
+      }
+
+      // If the total terrainMultiplier equals out to zero, or there were no multipliers,
+      // set to 1 so we do math right...
+      if (terrainMultiplier == 0) {
+        terrainMultiplier = 1;
+      }
+
+      terrainMultiplier = Math.abs(terrainMultiplier); // net negative multipliers screw with the AI
 
       // Get diagonal cost multiplier, if any...
       double diagonalMultiplier = getDiagonalMultiplier(neighborArray);
-      neighbor.distanceTraveled =
-          node.distanceTraveled + (normal_cost * terrainModifier * diagonalMultiplier);
-      neighbor.g = node.g + (normal_cost * terrainModifier * diagonalMultiplier);
+
+      if (terrainIsFree) {
+        neighbor.distanceTraveled = node.distanceTraveled;
+        neighbor.g = node.g;
+      } else {
+        neighbor.distanceTraveled =
+            node.distanceTraveled
+                + (terrainMultiplier * diagonalMultiplier)
+                + (terrainAdder / cell_cost);
+
+        neighbor.g = node.g + (cell_cost * terrainMultiplier * diagonalMultiplier) + terrainAdder;
+      }
 
       neighbors.add(neighbor);
-      // log.info("neighbor.g: " + neighbor.getG());
     }
 
     return neighbors;
   }
 
   private boolean vblBlocksMovement(AStarCellPoint start, AStarCellPoint goal) {
-    if (vblGeometry == null) return false;
+    if (vblGeometry == null) {
+      return false;
+    }
 
     // Stopwatch stopwatch = Stopwatch.createStarted();
     AStarCellPoint checkNode = checkedList.get(goal);
@@ -360,16 +411,22 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     Rectangle startBounds = zone.getGrid().getBounds(start);
     Rectangle goalBounds = zone.getGrid().getBounds(goal);
 
-    if (goalBounds.isEmpty() || startBounds.isEmpty()) return false;
+    if (goalBounds.isEmpty() || startBounds.isEmpty()) {
+      return false;
+    }
 
     // If there is no vbl within the footprints, we're good!
-    if (!vbl.intersects(startBounds) && !vbl.intersects(goalBounds)) return false;
+    if (!vbl.intersects(startBounds) && !vbl.intersects(goalBounds)) {
+      return false;
+    }
 
     // If the goal center point is in vbl, allow to maintain path through vbl (should be GM only?)
+    /*
     if (vbl.contains(goal.toPoint())) {
       // Allow GM to move through VBL
-      // return !MapTool.getPlayer().isGM();
+       return !MapTool.getPlayer().isGM();
     }
+    */
 
     // NEW WAY - use polygon test
     double x1 = startBounds.getCenterX();
@@ -398,9 +455,11 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   }
 
   protected void showDebugInfo(AStarCellPoint node) {
-    if (!log.isDebugEnabled() && !debugCosts) return;
+    if (!log.isDebugEnabled() && !debugCosts) {
+      return;
+    }
 
-    if (debugLabels == null) debugLabels = new ArrayList<GUID>();
+    // if (debugLabels == null) { debugLabels = new ArrayList<>(); }
 
     Rectangle cellBounds = zone.getGrid().getBounds(node);
     DecimalFormat f = new DecimalFormat("##.00");
@@ -427,8 +486,8 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     zone.putLabel(fScore);
 
     // Track labels to delete later
-    debugLabels.add(gScore.getId());
-    debugLabels.add(hScore.getId());
-    debugLabels.add(fScore.getId());
+    // debugLabels.add(gScore.getId());
+    // debugLabels.add(hScore.getId());
+    // debugLabels.add(fScore.getId());
   }
 }

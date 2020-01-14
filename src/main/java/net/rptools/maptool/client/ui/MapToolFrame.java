@@ -146,7 +146,7 @@ import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.ImageManager;
-import org.apache.commons.collections.map.LinkedMap;
+import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
@@ -1606,8 +1606,12 @@ public class MapToolFrame extends DefaultDockableHolder
    */
   public void setTitleViaRenderer(ZoneRenderer renderer) {
     String campaignName = " - [" + MapTool.getCampaign().getName() + "]";
+    String versionString =
+        MapTool.getVersion().equals("unspecified") ? "Development" : "v" + MapTool.getVersion();
     setTitle(
         AppConstants.APP_NAME
+            + " "
+            + versionString
             + " - "
             + MapTool.getPlayer()
             + campaignName
