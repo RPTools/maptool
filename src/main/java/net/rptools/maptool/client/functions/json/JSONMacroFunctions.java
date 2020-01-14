@@ -20,6 +20,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -755,9 +756,12 @@ public class JSONMacroFunctions extends AbstractFunction {
       switch (functionName) {
         case "json.path.read":
           {
-            FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+            FunctionUtil.checkNumberParam(functionName, parameters, 2, 3);
             JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, parameters, 0);
-            return jsonPathRead(jsonElement, parameters.get(1).toString());
+            String strPath = parameters.get(1).toString();
+            String strConf = parameters.size() > 2 ? parameters.get(2).toString() : null;
+            Configuration config = getConfig(strConf);
+            return jsonPathRead(jsonElement, strPath, config);
           }
         case "json.path.add":
           {
@@ -882,9 +886,10 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @return the return value as a MT Script type.
    * @throws ParserException when there is an error converting the json objects.
    */
-  private Object jsonPathRead(JsonElement json, String path) throws ParserException {
+  private Object jsonPathRead(JsonElement json, String path, Configuration config)
+      throws ParserException {
     JsonElement jsonElement = asJsonElement(json);
-    return typeConversion.asScriptType(JsonPath.using(jaywayConfig).parse(jsonElement).read(path));
+    return typeConversion.asScriptType(JsonPath.using(config).parse(jsonElement).read(path));
   }
 
   /**
@@ -922,5 +927,35 @@ public class JSONMacroFunctions extends AbstractFunction {
    */
   public String jsonToScriptString(JsonElement element) {
     return typeConversion.jsonToScriptString(element);
+  }
+
+  /**
+   * Create the Jayway configuration from a String
+   *
+   * @param strConf The String containing the configuration options
+   * @return the Jayway Configuration
+   */
+  private static Configuration getConfig(String strConf) {
+    Configuration config = jaywayConfig;
+    if (strConf == null) {
+      return config;
+    }
+    strConf = strConf.toUpperCase();
+    if (strConf.contains("AS_PATH_LIST")) {
+      config = config.addOptions(Option.AS_PATH_LIST);
+    }
+    if (strConf.contains("DEFAULT_PATH_LEAF_TO_NULL")) {
+      config = config.addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
+    }
+    if (strConf.contains("SUPPRESS_EXCEPTIONS")) {
+      config = config.addOptions(Option.SUPPRESS_EXCEPTIONS);
+    }
+    if (strConf.contains("ALWAYS_RETURN_LIST")) {
+      config = config.addOptions(Option.ALWAYS_RETURN_LIST);
+    }
+    if (strConf.contains("REQUIRE_PROPERTIES")) {
+      config = config.addOptions(Option.REQUIRE_PROPERTIES);
+    }
+    return config;
   }
 }
