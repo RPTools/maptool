@@ -249,7 +249,7 @@ public class JsonObjectFunctions {
       varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
 
       if (!varName.equals("")) {
-        parser.setVariable(varName, jsonObject.get(key));
+        parser.setVariable(varName, typeConversion.asScriptType(jsonObject.get(key)));
         setVars.add(varName);
       }
     }
