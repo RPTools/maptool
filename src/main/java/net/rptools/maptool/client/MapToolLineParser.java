@@ -1679,7 +1679,8 @@ public class MapToolLineParser {
       JsonArray jarr = json.getAsJsonArray();
       macroResolver.setVariable("macro.args.num", BigDecimal.valueOf(jarr.size()));
       for (int i = 0; i < jarr.size(); i++) {
-        macroResolver.setVariable("macro.args." + i, JSONMacroFunctions.getInstance().asScriptType(jarr.get(i)));
+        macroResolver.setVariable(
+            "macro.args." + i, JSONMacroFunctions.getInstance().asScriptType(jarr.get(i)));
       }
     } else {
       macroResolver.setVariable("macro.args.num", BigDecimal.ZERO);

@@ -963,11 +963,9 @@ public class JSONMacroFunctions extends AbstractFunction {
    * Converts a JsonElement into a MT Script type.
    *
    * @param jsonElement The json element to convert;
-   *
    * @return The MT Script value
    */
   public Object asScriptType(JsonElement jsonElement) {
     return typeConversion.asScriptType(jsonElement);
   }
-
 }
