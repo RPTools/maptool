@@ -851,7 +851,7 @@ public class JsonArrayFunctions {
 
     if (!varName.equals("")) {
       for (int i = 0; i < jsonArray.size(); i++) {
-        parser.setVariable(name + i, jsonArray.get(i));
+        parser.setVariable(name + i, typeConversion.asScriptType(jsonArray.get(i)));
         setVars.add(varName + i);
       }
     }
