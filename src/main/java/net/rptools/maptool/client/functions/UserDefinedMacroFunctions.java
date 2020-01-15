@@ -130,9 +130,13 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       output = resolver.getVariable("macro.return").toString();
       stripOutput = output;
     }
-    JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(stripOutput);
-    if (json != null) {
-      return json;
+
+    String trim = stripOutput.trim();
+    if (trim.startsWith("[") || trim.startsWith("{")) {
+      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(trim);
+      if (json != null) {
+        return json;
+      }
     }
 
     try {
