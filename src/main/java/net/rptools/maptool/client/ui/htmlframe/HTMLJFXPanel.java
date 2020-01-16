@@ -75,52 +75,9 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     }
   }
 
-  /** JS that disables all following external script downloads. */
-  private static final String BLOCK_EXT_JS_SCRIPT =
-      "<script>"
-          + "const config = { attributes: true, childList: true, subtree: true };"
-          + "const observer = new MutationObserver(mutations => {"
-          + "    mutations.forEach(({ addedNodes }) => {"
-          + "        addedNodes.forEach(node => {"
-          + "            if(node.nodeType === 1 && node.tagName === 'SCRIPT' && node.src !== '') {"
-          + "                    node.src = '...';"
-          + "                    node.type = 'javascript/blocked';"
-          + "                    node.parentElement.removeChild(node);"
-          + "            }"
-          + "        });"
-          + "    });"
-          + "});"
-          + "observer.observe(document.documentElement, config);"
-          + "</script>";
-
-  /** JS that replaces all non-asset sources by "EXTERNAL_LINK_PROHIBITED". */
-  private static final String BLOCK_EXT_SRC_SCRIPT =
-      "      var nodeList = document.querySelectorAll('[src]');"
-          + "for(var i = 0; i < nodeList.length; i++) {  "
-          + "    var element = nodeList[i];"
-          + "    var src = element.getAttribute('src').trim().toLowerCase();"
-          + "    if(!src.startsWith('asset')){"
-          + "        element.setAttribute('src', 'EXTERNAL_LINK_PROHIBITED');"
-          + "        element.alt = 'EXTERNAL_LINK_PROHIBITED';"
-          + "        element.innerHTML = 'EXTERNAL_LINK_PROHIBITED';"
-          + "}}";
-
-  /**
-   * JS that replaces non-macro, non-hyperlink, non-internal css hrefs by
-   * "EXTERNAL_LINK_PROHIBITED".
-   */
-  private static final String BLOCK_EXT_HREF_SCRIPT =
-      "      var nodeList = document.querySelectorAll('[href]');"
-          + "for(var i = 0; i < nodeList.length; i++) {  "
-          + "    var element = nodeList[i];"
-          + "    var href = element.getAttribute('href').trim().toLowerCase();"
-          + "    var tag = element.tagName;"
-          + "    if(!href.startsWith('macro') && (tag != 'A') && typeof href === 'string'){"
-          + "        var matches = href.match(/@/gi);"
-          + "        if(matches == null || matches.length != 1) {"
-          + "            element.setAttribute('href', 'EXTERNAL_LINK_PROHIBITED');"
-          + "            element.innerHTML = 'EXTERNAL_LINK_PROHIBITED';"
-          + "}}}";
+  /** Meta-tag that blocks external file access. */
+  private static final String BLOCK_EXT_FILES =
+      "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src asset:; style-src 'unsafe-inline'; script-src 'unsafe-inline' 'unsafe-eval'\">\n";
 
   /**
    * The default CSS to apply before all others. %d is to be replaced by
@@ -203,7 +160,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     }
     Platform.runLater(
         () -> {
-          webEngine.loadContent(BLOCK_EXT_JS_SCRIPT + HTMLPanelInterface.fixHTML(html));
+          webEngine.loadContent(BLOCK_EXT_FILES + HTMLPanelInterface.fixHTML(html));
         });
   }
 
@@ -358,12 +315,6 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
         Element node = (Element) nodeList.item(i);
         ((EventTarget) node).addEventListener("submit", listenerSubmit, false);
       }
-
-      // Replace src attributes that aren't assetIds, as per #972
-      webEngine.executeScript(BLOCK_EXT_SRC_SCRIPT);
-
-      // Replace href attributes that aren't macros or hyperlinks, as per #972
-      webEngine.executeScript(BLOCK_EXT_HREF_SCRIPT);
     }
   }
 
