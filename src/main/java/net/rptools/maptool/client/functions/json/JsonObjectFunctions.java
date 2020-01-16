@@ -210,6 +210,9 @@ public class JsonObjectFunctions {
    */
   public Object get(JsonObject jsonObject, List<Object> keys) {
     if (keys.size() == 1) {
+      if (!jsonObject.has(keys.get(0).toString())) {
+        return "";
+      }
       return typeConversion.asScriptType(jsonObject.get(keys.get(0).toString()));
     }
     JsonObject newJsonObject = new JsonObject();
