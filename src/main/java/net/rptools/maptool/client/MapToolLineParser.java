@@ -951,7 +951,7 @@ public class MapToolLineParser {
                         for (JsonElement ele : json.getAsJsonArray()) {
                           foreachList.add(JSONMacroFunctions.getInstance().jsonToScriptString(ele));
                         }
-                      } else if (json.isJsonArray()) {
+                      } else if (json.isJsonObject()) {
                         foreachList = new ArrayList<>(json.getAsJsonObject().keySet());
                       }
                     }
