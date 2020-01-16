@@ -1814,8 +1814,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public void deleteMacroButtonProperty(MacroButtonProperties prop) {
     getMacroPropertiesMap(false).remove(prop.getIndex());
-    MapTool.serverCommand()
-        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+    MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
     MapTool.getFrame().resetTokenPanels(); // switched with above line to resolve panel render
     // timing problem.
 

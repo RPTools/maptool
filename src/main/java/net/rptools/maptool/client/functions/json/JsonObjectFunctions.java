@@ -191,7 +191,11 @@ public class JsonObjectFunctions {
     JsonObject newJsonObject = jsonObject.deepCopy();
 
     for (int i = 0; i < list.size(); i += 2) {
-      newJsonObject.add(list.get(i).toString(), typeConversion.asJsonElement(list.get(i + 1)));
+      Object value = list.get(i + 1);
+      if (value instanceof String && value.toString().length() == 0) {
+        value = "''";
+      }
+      newJsonObject.add(list.get(i).toString(), typeConversion.asJsonElement(value));
     }
 
     return newJsonObject;
@@ -206,6 +210,9 @@ public class JsonObjectFunctions {
    */
   public Object get(JsonObject jsonObject, List<Object> keys) {
     if (keys.size() == 1) {
+      if (!jsonObject.has(keys.get(0).toString())) {
+        return "";
+      }
       return typeConversion.asScriptType(jsonObject.get(keys.get(0).toString()));
     }
     JsonObject newJsonObject = new JsonObject();
@@ -245,7 +252,7 @@ public class JsonObjectFunctions {
       varName = varName.replaceAll("[^a-zA-Z0-9._]", "");
 
       if (!varName.equals("")) {
-        parser.setVariable(varName, jsonObject.get(key));
+        parser.setVariable(varName, typeConversion.asScriptType(jsonObject.get(key)));
         setVars.add(varName);
       }
     }

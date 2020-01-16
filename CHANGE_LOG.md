@@ -1,3 +1,34 @@
+Maptool 1.5.11
+=====
+**Highlights**
+- Terrain Modifier enhancements:
+  - Token terrain modifier can be flagged as NONE, MULTIPLY, ADD, BLOCK and FREE
+  - Tokens can be set to ignore Terrain Modifiers.
+- Major refactoring of use of JSON in code. Replaced all uses of net.sf.json-lib library with the Google GSON library.
+
+**Enhancements**
+- [#1101][i1101] New chat commands `/version` and `/about`. MapTool version added to title bar.
+- [#728][i728] Tokens can now be set to ignore terrain modifiers.
+- [#459][i459] Terrain Modifiers have multiple types now.
+
+**Bug Fixes**
+- [#1075][i1075] Setting `applyToSelected=1` when using `createMacro()` was not being applied. Fixed.
+- [#1069][i1069] AutoSave failure message changed.
+- [#1066][i1066] SENTRY: When selecting images for tokens a null asset could be returned. Caught and error message displayed.
+- [#1047][i1047] `json.contains` and `json.indexOf` were not handling values outside the range of a signed integer. Fixed.
+- [#1015][i1015] A bad HREF in a anchor link could produce an NPE.  Fixed.
+
+**Note** The Windows install for this release requires Windows 7 or greater to install.  The `.jar` file release can still be used on older 64-bit Windows platform.
+
+[i1101]: https://github.com/RPTools/maptool/issues/1101
+[i1075]: https://github.com/RPTools/maptool/issues/1075
+[i1069]: https://github.com/RPTools/maptool/issues/1069
+[i1066]: https://github.com/RPTools/maptool/issues/1066
+[i1047]: https://github.com/RPTools/maptool/issues/1047
+[i1015]: https://github.com/RPTools/maptool/issues/1015
+[i728]: https://github.com/RPTools/maptool/issues/728
+[i459]: https://github.com/RPTools/maptool/issues/459
+
 Maptool 1.5.10
 =====
 Emergency bug fixes

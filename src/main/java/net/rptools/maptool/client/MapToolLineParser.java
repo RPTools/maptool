@@ -949,7 +949,7 @@ public class MapToolLineParser {
                       if (json.isJsonArray()) {
                         foreachList = new ArrayList<>(json.getAsJsonArray().size());
                         for (JsonElement ele : json.getAsJsonArray()) {
-                          foreachList.add(ele.getAsString());
+                          foreachList.add(JSONMacroFunctions.getInstance().jsonToScriptString(ele));
                         }
                       } else if (json.isJsonArray()) {
                         foreachList = new ArrayList<>(json.getAsJsonObject().keySet());
@@ -1679,7 +1679,8 @@ public class MapToolLineParser {
       JsonArray jarr = json.getAsJsonArray();
       macroResolver.setVariable("macro.args.num", BigDecimal.valueOf(jarr.size()));
       for (int i = 0; i < jarr.size(); i++) {
-        macroResolver.setVariable("macro.args." + i, jarr.get(i));
+        macroResolver.setVariable(
+            "macro.args." + i, JSONMacroFunctions.getInstance().asScriptType(jarr.get(i)));
       }
     } else {
       macroResolver.setVariable("macro.args.num", BigDecimal.ZERO);
