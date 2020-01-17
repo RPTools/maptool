@@ -142,21 +142,21 @@ public class JSONMacroFunctions extends AbstractFunction {
         FunctionUtil.checkNumberParam(functionName, args, 1, 1);
         Object potJson = args.get(0);
         if (potJson instanceof JsonArray) {
-          return JSONObjectType.ARRAY;
+          return JSONObjectType.ARRAY.name();
         } else if (potJson instanceof JsonObject) {
-          return JSONObjectType.OBJECT;
+          return JSONObjectType.OBJECT.name();
         } else {
           String str = potJson.toString().trim();
           if (str.startsWith("{") || str.startsWith("[")) {
             JsonElement json = typeConversion.asJsonElement(str);
             if (json.isJsonArray()) {
-              return JSONObjectType.ARRAY;
+              return JSONObjectType.ARRAY.name();
             } else if (json.isJsonObject()) {
-              return JSONObjectType.OBJECT;
+              return JSONObjectType.OBJECT.name();
             }
           }
         }
-        return JSONObjectType.UNKNOWN;
+        return JSONObjectType.UNKNOWN.name();
       case "json.length":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 1);
@@ -957,5 +957,15 @@ public class JSONMacroFunctions extends AbstractFunction {
       config = config.addOptions(Option.REQUIRE_PROPERTIES);
     }
     return config;
+  }
+
+  /**
+   * Converts a JsonElement into a MT Script type.
+   *
+   * @param jsonElement The json element to convert;
+   * @return The MT Script value
+   */
+  public Object asScriptType(JsonElement jsonElement) {
+    return typeConversion.asScriptType(jsonElement);
   }
 }
