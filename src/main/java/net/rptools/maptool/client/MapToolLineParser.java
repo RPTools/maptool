@@ -956,7 +956,7 @@ public class MapToolLineParser {
                         for (JsonElement ele : json.getAsJsonArray()) {
                           foreachList.add(JSONMacroFunctions.getInstance().jsonToScriptString(ele));
                         }
-                      } else if (json.isJsonArray()) {
+                      } else if (json.isJsonObject()) {
                         foreachList = new ArrayList<>(json.getAsJsonObject().keySet());
                       }
                     }
@@ -1705,7 +1705,7 @@ public class MapToolLineParser {
       JsonArray jarr = json.getAsJsonArray();
       macroResolver.setVariable("macro.args.num", BigDecimal.valueOf(jarr.size()));
       for (int i = 0; i < jarr.size(); i++) {
-        macroResolver.setVariable("macro.args." + i, jarr.get(i));
+        macroResolver.setVariable("macro.args." + i, asMacroArg(jarr.get(i)));
       }
     } else {
       macroResolver.setVariable("macro.args.num", BigDecimal.ZERO);
@@ -1744,6 +1744,22 @@ public class MapToolLineParser {
     } finally {
       // exitContext();
       macroRecurseDepth--;
+    }
+  }
+
+  /**
+   * Returns the JsonElement as a valid macro argument.
+   *
+   * @param jsonElement The JsonElement to convert.
+   * @return The converted JsonElement.
+   */
+  private Object asMacroArg(JsonElement jsonElement) {
+    if (jsonElement == null) {
+      return "";
+    } else if (jsonElement.isJsonNull()) {
+      return "";
+    } else {
+      return JSONMacroFunctions.getInstance().asScriptType(jsonElement);
     }
   }
 
