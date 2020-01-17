@@ -16,6 +16,7 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,7 +94,18 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     JsonArray jarr = new JsonArray();
 
     for (Object obj : parameters) {
-      jarr.add(JSONMacroFunctions.getInstance().asJsonElement(obj));
+      if (obj
+          instanceof
+          String) { // Want to make sure we dont translate string arguments where not wanted
+        String s = obj.toString();
+        if (!s.startsWith("[") && !s.startsWith("{")) {
+          jarr.add(new JsonPrimitive(s));
+        } else {
+          jarr.add(JSONMacroFunctions.getInstance().asJsonElement(obj));
+        }
+      } else {
+        jarr.add(JSONMacroFunctions.getInstance().asJsonElement(obj));
+      }
     }
     String macroArgs = jarr.size() > 0 ? jarr.toString() : "";
     String output;
