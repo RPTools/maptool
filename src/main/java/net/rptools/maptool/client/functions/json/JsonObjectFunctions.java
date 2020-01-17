@@ -57,7 +57,7 @@ public class JsonObjectFunctions {
       vals[0] = vals[0].trim();
       if (vals.length > 1) {
         vals[1] = vals[1].trim();
-        jsonObject.add(vals[0], typeConversion.asJsonElement(vals[1]));
+        jsonObject.add(vals[0], typeConversion.convertPrimitiveFromString(vals[1]));
       } else {
         jsonObject.add(vals[0], null);
       }
