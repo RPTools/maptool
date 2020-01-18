@@ -41,6 +41,8 @@ src/main/resources/sentry.properties
 .classpath
 .history
 workbench.xmi
+.theia
+.nb-*
 
 # Keystore
 build-resources/rptools-keystore

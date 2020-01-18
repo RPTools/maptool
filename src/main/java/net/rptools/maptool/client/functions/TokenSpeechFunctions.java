@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
 import java.util.List;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
@@ -21,7 +23,6 @@ import net.rptools.maptool.model.Token;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 public class TokenSpeechFunctions extends AbstractFunction {
 
@@ -69,7 +70,9 @@ public class TokenSpeechFunctions extends AbstractFunction {
       String[] speech = new String[token.getSpeechNames().size()];
       String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
       if ("json".equals(delim)) {
-        return JSONArray.fromObject(token.getSpeechNames()).toString();
+        JsonArray jarr = new JsonArray();
+        token.getSpeechNames().forEach(s -> jarr.add(new JsonPrimitive(s)));
+        return jarr.toString();
       } else {
         return StringFunctions.getInstance().join(token.getSpeechNames().toArray(speech), delim);
       }

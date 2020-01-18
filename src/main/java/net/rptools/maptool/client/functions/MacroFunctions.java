@@ -14,23 +14,23 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,10 +39,19 @@ public class MacroFunctions extends AbstractFunction {
 
   private static final MacroFunctions instance = new MacroFunctions();
 
+  private static final String KEY_MISSING_COMMAND = "macro.function.MacroFunctions.missingCommand";
+  private static final String KEY_MISSING_LABEL = "macro.function.MacroFunctions.missingLabel";
+  private static final String KEY_NO_PERM = "macro.function.MacroFunctions.noPerm";
+  private static final String KEY_NO_PERM_COMMAND = "macro.function.MacroFunctions.noPermCommand";
+  private static final String KEY_NO_PERM_EDITABLE = "macro.function.MacroFunctions.noPermEditable";
+  private static final String KEY_NO_PERM_OTHER = "macro.function.MacroFunctions.noPermOther";
+  private static final String KEY_OUT_OF_RANGE = "macro.function.MacroFunctions.outOfRange";
+  private static final String KEY_UNKNOWN_MACRO = "macro.function.general.unknownFunction";
+
   private MacroFunctions() {
     super(
         0,
-        5,
+        6,
         "hasMacro",
         "createMacro",
         "setMacroProps",
@@ -65,36 +74,68 @@ public class MacroFunctions extends AbstractFunction {
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
       throws ParserException {
-    MapToolVariableResolver resolver = ((MapToolVariableResolver) parser.getVariableResolver());
-
-    if (functionName.equals("hasMacro")) {
-      return hasMacro(resolver, parameters);
-    } else if (functionName.equals("createMacro")) {
-      return createMacro(resolver, parameters);
-    } else if (functionName.equals("getMacros")) {
-      return getMacros(resolver, parameters);
-    } else if (functionName.equals("getMacroProps")) {
-      return getMacroProps(resolver, parameters);
-    } else if (functionName.equals("setMacroProps")) {
-      return setMacroProps(resolver, parameters);
-    } else if (functionName.equals("getMacroIndexes")) {
-      return getMacroIndexes(resolver, parameters);
-    } else if (functionName.equals("getMacroName")) {
+    if (functionName.equalsIgnoreCase("hasMacro")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      String label = parameters.get(0).toString();
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      return token.getMacroNames(false).contains(label) ? BigDecimal.ONE : BigDecimal.ZERO;
+    } else if (functionName.equalsIgnoreCase("createMacro")) {
+      return createMacro(parser, parameters);
+    } else if (functionName.equalsIgnoreCase("getMacros")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
+      String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      return getMacros(delim, token);
+    } else if (functionName.equalsIgnoreCase("getMacroProps")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
+      int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
+      String delim = parameters.size() > 1 ? parameters.get(1).toString() : ";";
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      return getMacroButtonProps(token, index, delim);
+    } else if (functionName.equalsIgnoreCase("setMacroProps")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 5);
+      Object value = parameters.get(0);
+      String props = parameters.get(1).toString();
+      String delim = parameters.size() > 2 ? parameters.get(2).toString() : ";";
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 3, 4);
+      return setMacroProps(value, props, delim, token);
+    } else if (functionName.equalsIgnoreCase("getMacroIndexes")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
+      String label = parameters.get(0).toString();
+      String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      return getMacroIndexes(label, delim, token);
+    } else if (functionName.equalsIgnoreCase("getMacroName")) {
       return MapTool.getParser().getMacroName();
-    } else if (functionName.equals("getMacroLocation")) {
+    } else if (functionName.equalsIgnoreCase("getMacroLocation")) {
       return MapTool.getParser().getMacroSource();
-    } else if (functionName.equals("setMacroCommand")) {
-      return setMacroCommand(resolver, parameters);
-    } else if (functionName.equals("getMacroCommand")) {
-      return getMacroCommand(resolver, parameters);
-    } else if (functionName.equals("getMacroButtonIndex")) {
+    } else if (functionName.equalsIgnoreCase("setMacroCommand")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);
+      FunctionUtil.blockUntrustedMacro(functionName);
+      int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
+      String command = FunctionUtil.paramAsString(functionName, parameters, 1, true);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      return setMacroCommand(index, command, token);
+    } else if (functionName.equalsIgnoreCase("getMacroCommand")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      return getMacroCommand(index, token);
+    } else if (functionName.equalsIgnoreCase("getMacroButtonIndex")) {
       return BigDecimal.valueOf(MapTool.getParser().getMacroButtonIndex());
-    } else if (functionName.equals("removeMacro")) {
-      return removeMacro(resolver, parameters);
-    } else if (functionName.equals("getMacroGroup")) {
-      return getMacroGroup(resolver, parameters);
+    } else if (functionName.equalsIgnoreCase("removeMacro")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+      int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+      return removeMacro(index, token);
+    } else if (functionName.equalsIgnoreCase("getMacroGroup")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
+      String group = parameters.get(0).toString();
+      String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 2, 3);
+      return getMacroGroup(group, delim, token);
     } else { // should never happen, hopefully ;)
-      throw new ParserException("Unkown function: " + functionName);
+      throw new ParserException(I18N.getText(KEY_UNKNOWN_MACRO, functionName));
     }
   }
 
@@ -110,32 +151,33 @@ public class MacroFunctions extends AbstractFunction {
   public Object getMacroButtonProps(Token token, int index, String delim) throws ParserException {
     MacroButtonProperties mbp = token.getMacro(index, !MapTool.getParser().isMacroTrusted());
     if (mbp == null) {
-      throw new ParserException("No macro at index " + index);
+      throw new ParserException(
+          I18N.getText(KEY_OUT_OF_RANGE, "getMacroProps", index, token.getName()));
     }
 
     if ("json".equals(delim)) {
-      Map<String, Object> props = new LinkedHashMap<String, Object>();
-      props.put("autoExecute", mbp.getAutoExecute());
-      props.put("color", mbp.getColorKey());
-      props.put("fontColor", mbp.getFontColorKey());
-      props.put("group", mbp.getGroup());
-      props.put("includeLabel", mbp.getIncludeLabel());
-      props.put("sortBy", mbp.getSortby());
-      props.put("index", mbp.getIndex());
-      props.put("label", mbp.getLabel());
-      props.put("fontSize", mbp.getFontSize());
-      props.put("minWidth", mbp.getMinWidth());
-      props.put("playerEditable", mbp.getAllowPlayerEdits());
-      props.put("command", mbp.getCommand());
-      props.put("maxWith", mbp.getMaxWidth());
+      JsonObject props = new JsonObject();
+      props.addProperty("autoExecute", mbp.getAutoExecute());
+      props.addProperty("color", mbp.getColorKey());
+      props.addProperty("fontColor", mbp.getFontColorKey());
+      props.addProperty("group", mbp.getGroup());
+      props.addProperty("includeLabel", mbp.getIncludeLabel());
+      props.addProperty("sortBy", mbp.getSortby());
+      props.addProperty("index", mbp.getIndex());
+      props.addProperty("label", mbp.getLabel());
+      props.addProperty("fontSize", mbp.getFontSize());
+      props.addProperty("minWidth", mbp.getMinWidth());
+      props.addProperty("playerEditable", mbp.getAllowPlayerEdits());
+      props.addProperty("command", mbp.getCommand());
+      props.addProperty("maxWith", mbp.getMaxWidth());
       if (mbp.getToolTip() != null) {
-        props.put("tooltip", mbp.getToolTip());
+        props.addProperty("tooltip", mbp.getToolTip());
       } else {
-        props.put("tooltip", "");
+        props.addProperty("tooltooltip", "");
       }
-      props.put("applyToSelected", mbp.getApplyToTokens());
+      props.addProperty("toolapplyToSelected", mbp.getApplyToTokens());
 
-      JSONArray compare = new JSONArray();
+      JsonArray compare = new JsonArray();
 
       if (mbp.getCompareGroup()) {
         compare.add("group");
@@ -156,16 +198,18 @@ public class MacroFunctions extends AbstractFunction {
         compare.add("applyToSelected");
       }
 
-      props.put("compare", compare);
+      props.add("compare", compare);
 
-      Map<String, Object> propsMetadata = new LinkedHashMap<String, Object>();
-      propsMetadata.put("uuid", mbp.getMacroUUID());
-      propsMetadata.put("commandChecksum", new MD5Key(mbp.getCommand().getBytes()).toString());
-      propsMetadata.put("propsChecksum", new MD5Key(props.toString().getBytes()).toString());
+      JsonObject propsMetadata = new JsonObject();
+      propsMetadata.addProperty("uuid", mbp.getMacroUUID());
+      propsMetadata.addProperty(
+          "commandChecksum", new MD5Key(mbp.getCommand().getBytes()).toString());
+      propsMetadata.addProperty(
+          "propsChecksum", new MD5Key(props.toString().getBytes()).toString());
 
-      props.put("metadata", propsMetadata);
+      props.add("metadata", propsMetadata);
 
-      return JSONObject.fromObject(props);
+      return props;
     } else {
       StringBuilder sb = new StringBuilder();
       sb.append("autoExecute=").append(mbp.getAutoExecute()).append(delim);
@@ -200,28 +244,29 @@ public class MacroFunctions extends AbstractFunction {
    */
   public void setMacroProps(MacroButtonProperties mbp, String propString, String delim)
       throws ParserException {
-    JSONObject jobj;
+    JsonElement json;
 
     // This should default to false for token buttons.
     mbp.setApplyToTokens(false);
 
     if (propString.trim().startsWith("{")) {
       // We are either a JSON string or an illegal string.
-      jobj = JSONObject.fromObject(propString);
+      json = JSONMacroFunctions.getInstance().asJsonElement(propString);
     } else {
-      jobj = JSONMacroFunctions.getInstance().fromStrProp(propString, delim);
+      json =
+          JSONMacroFunctions.getInstance().getJsonObjectFunctions().fromStrProp(propString, delim);
     }
-    if (jobj.containsKey("command") && !MapTool.getParser().isMacroTrusted()) {
+
+    JsonObject jobj = json.getAsJsonObject();
+
+    if (jobj.has("command") && !MapTool.getParser().isMacroTrusted()) {
+      int index = mbp.getIndex();
       throw new ParserException(
-          "setMacroProps(): You do not have permision to change the macro command.");
-    }
-    if (!mbp.getAllowPlayerEdits() && !MapTool.getParser().isMacroTrusted()) {
-      throw new ParserException(
-          "setMacroProps(): You do not have permision to change macros which are not player editable.");
+          I18N.getText(KEY_NO_PERM_COMMAND, "setMacroProps", index, mbp.getToken().getName()));
     }
     for (Object o : jobj.keySet()) {
       String key = o.toString();
-      String value = jobj.getString(key);
+      String value = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get(key));
 
       if ("autoexecute".equalsIgnoreCase(key)) {
         mbp.setAutoExecute(boolVal(value));
@@ -241,16 +286,15 @@ public class MacroFunctions extends AbstractFunction {
         mbp.setIndex(Integer.parseInt(value));
       } else if ("label".equalsIgnoreCase(key)) {
         mbp.setLabel(value);
-      } else if ("fontSize".equalsIgnoreCase(key)) {
-        mbp.setFontSize(value);
       } else if ("minWidth".equalsIgnoreCase(key)) {
         mbp.setMinWidth(value);
       } else if ("maxWidth".equalsIgnoreCase(key)) {
         mbp.setMaxWidth(value);
       } else if ("playerEditable".equalsIgnoreCase(key)) {
         if (!MapTool.getParser().isMacroTrusted()) {
+          int index = mbp.getIndex();
           throw new ParserException(
-              "setMacroProps(): You do not have permission to change player editable status");
+              I18N.getText(KEY_NO_PERM_EDITABLE, "setMacroProps", index, mbp.getToken().getName()));
         }
         mbp.setAllowPlayerEdits(boolVal(value));
       } else if ("command".equals(key)) {
@@ -264,7 +308,7 @@ public class MacroFunctions extends AbstractFunction {
       } else if ("applyToSelected".equalsIgnoreCase(key)) {
         mbp.setApplyToTokens(boolVal(value));
       } else if ("compare".equalsIgnoreCase(key)) {
-        JSONArray compareArray = jobj.getJSONArray("compare");
+        JsonArray compareArray = jobj.get("compare").getAsJsonArray();
         // First set everything to false as script will specify what is compared
         mbp.setCompareGroup(false);
         mbp.setCompareSortPrefix(false);
@@ -309,274 +353,76 @@ public class MacroFunctions extends AbstractFunction {
     }
 
     try {
-      if (Integer.parseInt(val) == 0) {
-        return false;
-      } else {
-        return true;
-      }
+      return Integer.parseInt(val) != 0;
     } catch (NumberFormatException e) {
       return true;
     }
   }
 
   /**
-   * Checks to see if the token has the specified macro. The first value in param is the name of the
-   * macro to check, if there is a second argument then it is the token to check, otherwise the
-   * token in context is checked.
+   * Gets the name of the macros for a token.
    *
-   * @param resolver The variable resolver.
-   * @param param The parameters.
-   * @return BigDecimal.ONE if the token has the macro, BigDecimal.ZERO if it does not.
-   * @throws ParserException If an error occurs.
-   */
-  private BigDecimal hasMacro(MapToolVariableResolver resolver, List<Object> param)
-      throws ParserException {
-    Token token;
-    String macro;
-    if (param.size() == 2) { // Second parameter should be token name/id.
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(
-            "hasMacro(): You do not have the permission to specify the token.");
-      }
-      token = FindTokenFunctions.findToken(param.get(1).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            "hasMacro(): Unknown Token or Token ID, " + param.get(1).toString());
-      }
-      macro = param.get(0).toString();
-    } else if (param.size() == 1) {
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("hasMacro(): No impersonated token");
-      }
-      macro = param.get(0).toString();
-    } else {
-      throw new ParserException("hasMacro(): Incorrect number of parameters.");
-    }
-
-    return token.getMacroNames(false).contains(macro) ? BigDecimal.ONE : BigDecimal.ZERO;
-  }
-
-  /**
-   * Gets the name of the macros for a token. If param has 2 arguments then the first is resolved as
-   * the token name the second is the macro, if it only has one then the token in context is used
-   * and the argument is the macro name.
-   *
-   * @param resolver The variable resolver.
-   * @param param The parameters.
+   * @param delim delimiter used to separate the values in the returned String List
+   * @param token token that the function is executed on
    * @return The string containing the macro names.
-   * @throws ParserException If an error occurs.
    */
-  private String getMacros(MapToolVariableResolver resolver, List<Object> param)
-      throws ParserException {
-    Token token;
-    String delim;
-
-    if (param.size() == 0) {
-      delim = ",";
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("getMacros(): No impersonated token.");
-      }
-    } else if (param.size() == 1) {
-      delim = param.get(0).toString();
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("getMacros(): No impersonated token.");
-      }
-    } else if (param.size() == 2) { // Token is second parameter
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(
-            "getMacros(): You do not have the permission to specify the token.");
-      }
-      delim = param.get(0).toString();
-      token = FindTokenFunctions.findToken(param.get(1).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            "getMacros(): Unknown Token or Token ID, " + param.get(1).toString());
-      }
-    } else {
-      throw new ParserException("getMacros(): Incorrect number of parameters.");
-    }
+  private Object getMacros(String delim, Token token) {
 
     String[] names = new String[token.getMacroNames(false).size()];
 
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(token.getMacroNames(false).toArray(names)).toString();
+      JsonArray jsonArray = new JsonArray();
+      for (String name : token.getMacroNames(false)) {
+        jsonArray.add(name);
+      }
+      return jsonArray;
     } else {
       return StringFunctions.getInstance().join(token.getMacroNames(false).toArray(names), delim);
     }
   }
 
   /**
-   * Gets the macro properties for a macro button on a token. If param has 1 value it used as the
-   * index of the button, if there are 2 values then the second is used as the delimiter. If there
-   * is a third value then it is the token to get the button property from. If no token is specified
-   * then the token in context is used.
-   *
-   * @param resolver The variable resolver.
-   * @param param The parameters to the function.
-   * @return The properties for the button.
-   * @throws ParserException if an error occurs.
-   */
-  private Object getMacroProps(MapToolVariableResolver resolver, List<Object> param)
-      throws ParserException {
-    Token token;
-    String delim;
-
-    if (param.size() < 1) {
-      throw new ParserException("getMacroProps(): Not enough parameters.");
-    }
-
-    if (!(param.get(0) instanceof BigDecimal)) {
-      throw new ParserException("getMacroProps(): first argument must be a number.");
-    }
-    int index = ((BigDecimal) param.get(0)).intValue();
-
-    if (param.size() == 1) {
-      delim = ";";
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("getMacroProps(): No impersonated token.");
-      }
-    } else if (param.size() == 2) {
-      delim = param.get(1).toString();
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("getMacroProps(): No impersonated token.");
-      }
-    } else if (param.size() == 3) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(
-            "hasMacroProps(): You do not have the permission to specify the token.");
-      }
-      delim = param.get(1).toString();
-      token = FindTokenFunctions.findToken(param.get(2).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            "getMacroProps(): Unknown Token or Token ID, " + param.get(2).toString());
-      }
-
-    } else {
-      throw new ParserException("getMacroProps(): Incorrect number of parameters.");
-    }
-
-    return getMacroButtonProps(token, index, delim);
-  }
-
-  /**
    * Gets the indexes for all the macros on a token with the specified label.
    *
-   * @param resolver The variable resolver.
-   * @param param The list of parameters. The first parameter is the label to get the indexes for,
-   *     the second parameter if it exists is the delimiter to use (',' if not specified) and the
-   *     third is the token to get the indexes from. If no token is specified then the token in
-   *     context is used.
+   * @param label the label for the macro buttons to return
+   * @param delim the delimiter separating the indexes. If "json", returns a JSON Array.
+   * @param token the token that the function is executed on
    * @return the indexes for the macro buttons.
-   * @throws ParserException if an error occurs.
    */
-  private String getMacroIndexes(MapToolVariableResolver resolver, List<Object> param)
-      throws ParserException {
-    Token token;
-    String delim;
-    String label;
-
-    if (param.size() < 1) {
-      throw new ParserException("getMacroIndexes(): Not enough parameters.");
-    }
-    label = param.get(0).toString();
-
-    if (param.size() == 1) {
-      delim = ",";
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("getMacroIndexes(): No impersonated token.");
-      }
-    } else if (param.size() == 2) {
-      delim = param.get(1).toString();
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("getMacroIndexes(): No impersonated token.");
-      }
-    } else if (param.size() == 3) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(
-            "getMacroIndexes(): You do not have the permission to specify the token.");
-      }
-      delim = param.get(1).toString();
-      token = FindTokenFunctions.findToken(param.get(2).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            "getMacroIndexes(): Unknown Token or Token ID, " + param.get(2).toString());
-      }
-    } else {
-      throw new ParserException("getMacroIndexes(): Incorrect number of parameters.");
-    }
-
-    List<String> indexes = new ArrayList<String>();
+  private Object getMacroIndexes(String label, String delim, Token token) {
+    List<String> strIndexes = new ArrayList<>();
+    List<Integer> indexes = new ArrayList<>();
     for (MacroButtonProperties mbp : token.getMacroList(false)) {
       if (mbp.getLabel().equals(label)) {
-        indexes.add(Integer.toString(mbp.getIndex()));
+        strIndexes.add(Integer.toString(mbp.getIndex()));
+        indexes.add(mbp.getIndex());
       }
     }
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(indexes).toString();
+      JsonArray indArray = new JsonArray();
+      for (int ind : indexes) {
+        indArray.add(ind);
+      }
+      return indArray;
     } else {
-      return StringFunctions.getInstance().join(indexes, delim);
+      return StringFunctions.getInstance().join(strIndexes, delim);
     }
   }
 
   /**
-   * Gets the command for a macro button on a token. The fist value in param is the index of the
-   * macro button to get the command from. If there is a second value in param then this is the
-   * token to get the command from. If no token is specified then the token in context is used.
+   * Gets the command for a macro button on a token.
    *
-   * @param resolver The variable resolver.
-   * @param param The parameters.
+   * @param index the index of the macro.
+   * @param token the token to take the macro from.
    * @return the macro command or "" if it has no command.
-   * @throws ParserException if there is an error.
+   * @throws ParserException if there is no macro at the index.
    */
-  private String getMacroCommand(MapToolVariableResolver resolver, List<Object> param)
-      throws ParserException {
-    if (param.size() < 1) {
-      throw new ParserException("getMacroCommand(): Not enough parameters.");
-    }
-
-    if (!(param.get(0) instanceof BigDecimal)) {
-      throw new ParserException("getMacroCommand(): First argument must be a number.");
-    }
-
-    int index = ((BigDecimal) param.get(0)).intValue();
-
-    Token token;
-
-    if (param.size() == 1) {
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("getMacroCommand(): No impersonated token.");
-      }
-    } else if (param.size() == 2) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(
-            "getMacroCommand(): You do not have the permission to specify the token.");
-      }
-
-      token = FindTokenFunctions.findToken(param.get(1).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            "getMacroCommand(): Unknown Token or Token ID, " + param.get(1).toString());
-      }
-    } else {
-      throw new ParserException("getMacroCommand(): Incorrect number of parameters.");
-    }
+  private String getMacroCommand(int index, Token token) throws ParserException {
 
     MacroButtonProperties mbp = token.getMacro(index, false);
     if (mbp == null) {
       throw new ParserException(
-          "getMacroCommand(): Macro at index "
-              + index
-              + " does not exist for token "
-              + token.getName());
+          I18N.getText(KEY_OUT_OF_RANGE, "getMacroCommand", index, token.getName()));
     }
     String cmd = mbp.getCommand();
     return cmd != null ? cmd : "";
@@ -592,16 +438,13 @@ public class MacroFunctions extends AbstractFunction {
    * ';' if not specified). The fifth argument is the token to create the macro button on, if no
    * token is specified it is created on the token in context.
    *
-   * @param resolver The variable resolver.
+   * @param parser The parser.
    * @param param The arguments passed to the function.
    * @return the index of the newly created button.
    * @throws ParserException if an error occurs.
    */
-  private BigDecimal createMacro(MapToolVariableResolver resolver, List<Object> param)
-      throws ParserException {
-    if (param.size() < 1) {
-      throw new ParserException("createMacro(): Not enough parameters.");
-    }
+  private BigDecimal createMacro(Parser parser, List<Object> param) throws ParserException {
+    FunctionUtil.checkNumberParam("createMacro", param, 1, 6);
 
     String label;
     String command;
@@ -609,95 +452,35 @@ public class MacroFunctions extends AbstractFunction {
     String prop;
     String delim;
 
-    if (param.size() == 1) { // Only valid if its a json object
-      JSONObject jobj;
-      jobj = JSONObject.fromObject(param.get(0).toString());
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("createMacro(): No impersonated token.");
-      }
+    JsonObject jobj;
 
-      if (!jobj.containsKey("label")) {
-        throw new ParserException("createMacro(): Missing label.");
-      }
-      label = jobj.getString("label");
+    try {
+      jobj =
+          JSONMacroFunctions.getInstance().asJsonElement(param.get(0).toString()).getAsJsonObject();
+    } catch (ParserException | IllegalStateException e) {
+      jobj = null;
+    }
 
-      if (!jobj.containsKey("command")) {
-        throw new ParserException("createMacro(): Missing command.");
+    if (jobj != null) {
+      FunctionUtil.checkNumberParam("createMacro", param, 1, 3);
+      if (!jobj.has("label")) {
+        throw new ParserException(I18N.getText(KEY_MISSING_LABEL, "createMacro"));
       }
-      command = jobj.getString("command");
+      label = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("label"));
+      if (!jobj.has("command")) {
+        throw new ParserException(I18N.getText(KEY_MISSING_COMMAND, "createMacro"));
+      }
+      command = JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("command"));
       prop = param.get(0).toString();
       delim = "json";
-    } else if (param.size() == 2) { // either (json, token) or (label, command)
-      JSONObject jobj;
-      try {
-        jobj = JSONObject.fromObject(param.get(0).toString());
-        if (!jobj.containsKey("label")) {
-          throw new ParserException("createMacro(): Missing label.");
-        }
-        label = jobj.getString("label");
-
-        if (!jobj.containsKey("command")) {
-          throw new ParserException("createMacro(): Missing command.");
-        }
-        command = jobj.getString("command");
-
-        if (!MapTool.getParser().isMacroTrusted()) {
-          throw new ParserException(
-              "createMacro(): You do not have the permission to specify the token.");
-        }
-
-        token = FindTokenFunctions.findToken(param.get(1).toString(), null);
-        if (token == null) {
-          throw new ParserException(
-              "createMacro(): Unknown Token or Token ID, " + param.get(1).toString());
-        }
-        prop = param.get(0).toString();
-        delim = "json";
-      } catch (JSONException e) {
-        label = param.get(0).toString();
-        command = param.get(1).toString();
-        prop = null;
-        delim = null;
-        token = resolver.getTokenInContext();
-        if (token == null) {
-          throw new ParserException("createMacro(): No impersonated token.");
-        }
-      }
-    } else if (param.size() == 3) { // label, command, props
-      label = param.get(0).toString();
-      command = param.get(1).toString();
-      prop = param.get(2).toString();
-      delim = ";";
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("createMacro(): No impersonated token.");
-      }
-    } else if (param.size() == 4) { // label, command, props, delim
-      label = param.get(0).toString();
-      command = param.get(1).toString();
-      prop = param.get(2).toString();
-      delim = param.get(3).toString();
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("createMacro(): No impersonated token.");
-      }
-    } else if (param.size() == 5) { // label, command, props, delim, token
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(
-            "createMacro(): You do not have the permission to specify the token.");
-      }
-      label = param.get(0).toString();
-      command = param.get(1).toString();
-      prop = param.get(2).toString();
-      delim = param.get(3).toString();
-      token = FindTokenFunctions.findToken(param.get(4).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            "createMacro(): Unknown Token or Token ID, " + param.get(4).toString());
-      }
+      token = FunctionUtil.getTokenFromParam(parser, "createMacro", param, 1, 2);
     } else {
-      throw new ParserException("createMacro(): Incorrect number of parameters.");
+      FunctionUtil.checkNumberParam("createMacro", param, 2, 6);
+      label = param.get(0).toString();
+      command = param.get(1).toString();
+      prop = param.size() > 2 ? param.get(2).toString() : null;
+      delim = param.size() > 3 ? param.get(3).toString() : ";";
+      token = FunctionUtil.getTokenFromParam(parser, "createMacro", param, 4, 5);
     }
 
     MacroButtonProperties mbp = new MacroButtonProperties(token.getMacroNextIndex());
@@ -709,275 +492,130 @@ public class MacroFunctions extends AbstractFunction {
     mbp.setLabel(label);
     mbp.setSaveLocation("Token");
     mbp.setTokenId(token);
-    mbp.setApplyToTokens(false);
     mbp.save();
 
-    updateToken(token);
+    MapTool.serverCommand().putToken(token.getZoneRenderer().getZone().getId(), token);
     return BigDecimal.valueOf(mbp.getIndex());
   }
 
   /**
-   * Sets the properties for macro buttons on a token. The first argument in params is the button
-   * index or label of the buttons to set the properties for, if it is an index then only that
-   * button is changed, if it is a label then all buttons with that label are changed. The second
-   * argument is the properties to change, the third if specified is the delimiter for the
-   * properties (defaults to ';') if there is a fourth argument then it is the token that contains
-   * the buttons. If no token is specified then the token in context is used.
+   * Sets the properties for macro buttons on a token. If supplied an index then only that button is
+   * changed, if it is a label then all buttons with that label are changed.
    *
-   * @param resolver The variable resolver.
-   * @param param The arguments passed to the function.
+   * @param value the button index or the label of the buttons to set the properties for
+   * @param props a String Property List or JSON Object containing the properties for the button
+   * @param delim delim the delimiter used in the String Property List
+   * @param token the token that the macro button is located on
    * @return an empty string.
    * @throws ParserException if an error occurs.
    */
-  private String setMacroProps(MapToolVariableResolver resolver, List<Object> param)
+  private String setMacroProps(Object value, String props, String delim, Token token)
       throws ParserException {
-    if (param.size() < 2) {
-      throw new ParserException("setMacroProps(): Not enough parameters.");
-    }
-    Token token;
-
-    if (param.size() == 2 || param.size() == 3) {
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("setMacroProps(): No impersonated token.");
-      }
-    } else if (param.size() == 4) {
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(
-            "setMacroProps(): You do not have the permission to specify the token.");
-      }
-      token = FindTokenFunctions.findToken(param.get(3).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            "setMacroProps(): Unknown Token or Token ID, " + param.get(3).toString());
-      }
-    } else {
-      throw new ParserException("setMacroProps(): Incorrect number of parameters.");
-    }
-
-    if ((param.get(0) instanceof BigDecimal)) {
-      int index = ((BigDecimal) param.get(0)).intValue();
+    if ((value instanceof BigDecimal)) {
+      int index = ((BigDecimal) value).intValue();
       MacroButtonProperties mbp = token.getMacro(index, false);
 
       if (mbp == null) {
         throw new ParserException(
-            "setMacroProps(): No macro at index " + index + " for " + token.getName());
+            I18N.getText(KEY_OUT_OF_RANGE, "setMacroProps", index, token.getName()));
       }
       if (!mbp.getAllowPlayerEdits() && !MapTool.getParser().isMacroTrusted()) {
         throw new ParserException(
-            "setMacroProps: You do not have permissions to edit macro button at index "
-                + index
-                + " on "
-                + token.getName());
+            I18N.getText(KEY_NO_PERM, "setMacroProps", index, token.getName()));
       }
-      String delim = param.size() > 2 ? param.get(2).toString() : ";";
-      setMacroProps(mbp, param.get(1).toString(), delim);
+      setMacroProps(mbp, props, delim);
       mbp.save();
     } else {
       for (MacroButtonProperties mbp : token.getMacroList(false)) {
-        String delim = param.size() > 2 ? param.get(2).toString() : ";";
-        if (mbp.getLabel().equals(param.get(0).toString())) {
+        if (mbp.getLabel().equals(value.toString())) {
           if (!mbp.getAllowPlayerEdits() && !MapTool.getParser().isMacroTrusted()) {
+            String label = mbp.getLabel();
+            int index = mbp.getIndex();
             MapTool.addLocalMessage(
-                "Warning: You can not edit macro button "
-                    + mbp.getLabel()
-                    + " index = "
-                    + mbp.getIndex()
-                    + " on "
-                    + token.getName());
+                I18N.getText(KEY_NO_PERM_OTHER, "setMacroProps", label, index, token.getName()));
           } else {
-            setMacroProps(mbp, param.get(1).toString(), delim);
+            setMacroProps(mbp, props, delim);
             mbp.save();
           }
         }
       }
     }
-    updateToken(token);
+    MapTool.serverCommand().putToken(token.getZoneRenderer().getZone().getId(), token);
     return "";
   }
 
   /**
-   * Sets the command for a macro button on a token. The first value param is the index of the macro
-   * button to change. The second value param is the command to set for the button. The third value
-   * if present is the token that the button is for. If no token is specified then the token in
-   * context is used.
+   * Sets the command for a macro button on a token.
    *
-   * @param res The variable resolver.
-   * @param param The arguments.
+   * @param index the index of the macro button
+   * @param command a string containing the command to set on the macro button
+   * @param token the token that the command is set on
    * @return An empty string.
    * @throws ParserException If an error occurs.
    */
-  private String setMacroCommand(MapToolVariableResolver res, List<Object> param)
-      throws ParserException {
-    if (param.size() < 2) {
-      throw new ParserException("setMacroCommand(): Not enough parameters.");
-    }
-
-    if (!MapTool.getParser().isMacroTrusted()) {
-      throw new ParserException(
-          "setMacroCommand(): You do not have permission to call this function.");
-    }
-
-    if (!(param.get(0) instanceof BigDecimal)) {
-      throw new ParserException("setMacroCommand(): First Argument must be a number.");
-    }
-    int index = ((BigDecimal) param.get(0)).intValue();
-
-    Token token;
-
-    if (param.size() == 2) {
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("setMacroCommand(): No impersonated token.");
-      }
-    } else if (param.size() == 3) {
-      token = FindTokenFunctions.findToken(param.get(2).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            "setMacroCommand(): Unknown Token or Token ID, " + param.get(3).toString());
-      }
-    } else {
-      throw new ParserException("setMacroCommand(): Incorrect number of parameters.");
-    }
+  private String setMacroCommand(int index, String command, Token token) throws ParserException {
 
     MacroButtonProperties mbp = token.getMacro(index, false);
     if (mbp == null) {
       throw new ParserException(
-          "setMacroCommand(): No button at index " + index + " for " + token.getName());
+          I18N.getText(KEY_OUT_OF_RANGE, "setMacroCommand", index, token.getName()));
     }
-
-    mbp.setCommand(param.get(1).toString());
+    mbp.setCommand(command);
     mbp.save();
-    updateToken(token);
+    MapTool.serverCommand().putToken(token.getZoneRenderer().getZone().getId(), token);
     return "";
   }
 
   /**
-   * Removes a macro button from a token. The first argument in param is the index of the button to
-   * remove. The second argument in param is the token to remove the button from, if the token is
-   * not specified then the token in context is used.
+   * Removes a macro button from a token.
    *
-   * @param res The variable resolver.
-   * @param param The arguments.
+   * @param index the index of the macro button.
+   * @param token the token the macro is located on.
    * @return the details of the button that was removed.
-   * @throws ParserException if an error occurs.
+   * @throws ParserException if the index is invalid.
    */
-  private String removeMacro(MapToolVariableResolver res, List<Object> param)
-      throws ParserException {
-    if (param.size() < 1) {
-      throw new ParserException("removeMacro(): Not enough parameters.");
-    }
-
-    if (!MapTool.getParser().isMacroTrusted()) {
-      throw new ParserException("removeMacro(): You do not have permission to call this function.");
-    }
-
-    if (!(param.get(0) instanceof BigDecimal)) {
-      throw new ParserException("removeMacro(): First Argument must be a number.");
-    }
-    int index = ((BigDecimal) param.get(0)).intValue();
-
-    Token token;
-
-    if (param.size() == 1) {
-      token = res.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("removeMacro(): No impersonated token.");
-      }
-    } else if (param.size() == 2) {
-      token = FindTokenFunctions.findToken(param.get(1).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            "removeMacro(): Unknown Token or Token ID, " + param.get(1).toString());
-      }
-    } else {
-      throw new ParserException("removeMacro(): Incorrect number of parameters.");
-    }
+  private String removeMacro(int index, Token token) throws ParserException {
 
     MacroButtonProperties mbp = token.getMacro(index, false);
     if (mbp == null) {
       throw new ParserException(
-          "removeMacro(): No button at index " + index + " for " + token.getName());
+          I18N.getText(KEY_OUT_OF_RANGE, "removeMacro", index, token.getName()));
     }
 
     String label = mbp.getLabel();
     token.deleteMacroButtonProperty(mbp);
-    StringBuilder sb = new StringBuilder();
-    sb.append("Removed macro button ").append(label).append("(index = ").append(index);
-    sb.append(") from ").append(token.getName());
-    return sb.toString();
+    return "Removed macro button " + label + "(index = " + index + ") from " + token.getName();
   }
 
   /**
    * Gets the index of the macros for a token in the specified group.
    *
-   * @param resolver The variable resolver.
-   * @param param The parameters.
+   * @param group the name of the macro group to get the macro button indexes from.
+   * @param delim the delimiter used in the string list returned, defaults to ",".
+   * @param token the token that the macro group is located on.
    * @return The string containing the macro names.
-   * @throws ParserException If an error occurs.
    */
-  private String getMacroGroup(MapToolVariableResolver resolver, List<Object> param)
-      throws ParserException {
-    Token token;
-    String delim;
-    String group;
-
-    if (param.size() == 0) {
-      throw new ParserException("getMacroGroup(): Not enough parameters");
-    } else if (param.size() == 1) {
-      delim = ",";
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("getMacroGroup(): No impersonated token.");
-      }
-      group = param.get(0).toString();
-    } else if (param.size() == 2) {
-      group = param.get(0).toString();
-      delim = param.get(1).toString();
-      token = resolver.getTokenInContext();
-      if (token == null) {
-        throw new ParserException("getMacroGroup(): No impersonated token.");
-      }
-    } else if (param.size() == 3) { // Token is third parameter
-      if (!MapTool.getParser().isMacroTrusted()) {
-        throw new ParserException(
-            "getMacroGroup(): You do not have the permission to specify the token.");
-      }
-      group = param.get(0).toString();
-      delim = param.get(1).toString();
-      token = FindTokenFunctions.findToken(param.get(2).toString(), null);
-      if (token == null) {
-        throw new ParserException(
-            "getMacroGroup(): Unknown Token or Token ID, " + param.get(2).toString());
-      }
-    } else {
-      throw new ParserException("getMacroGroup(): Incorrect number of parameters.");
-    }
-
-    List<String> indexes =
-        new LinkedList<String>(); // Has to be a string or the list functions wont like it :\
+  private Object getMacroGroup(String group, String delim, Token token) {
+    // Has to be a string or the list functions wont like it :\
+    List<String> strIndexes = new LinkedList<>();
+    List<Integer> indexes = new LinkedList<>();
     for (MacroButtonProperties props : token.getMacroList(false)) {
       if (props.getGroup().equals(group)) {
-        indexes.add(String.valueOf(props.getIndex()));
+        strIndexes.add(String.valueOf(props.getIndex()));
+        indexes.add(props.getIndex());
       }
     }
 
-    String[] vals = new String[indexes.size()];
+    String[] vals = new String[strIndexes.size()];
 
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(indexes.toArray(vals)).toString();
+      JsonArray jarray = new JsonArray();
+      for (Integer i : indexes) {
+        jarray.add(i);
+      }
+      return jarray;
     } else {
-      return StringFunctions.getInstance().join(indexes.toArray(vals), delim);
+      return StringFunctions.getInstance().join(strIndexes.toArray(vals), delim);
     }
-  }
-
-  /**
-   * Updates the token locally and remotely.
-   *
-   * @param token The token to update.
-   */
-  private void updateToken(Token token) {
-    MapTool.serverCommand()
-        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token);
   }
 }

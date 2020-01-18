@@ -14,18 +14,20 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 /**
  * Chat related functions like broadcast()
@@ -76,7 +78,7 @@ public class ChatFunction extends AbstractFunction {
 
     String message = null;
     String delim = ",";
-    JSONArray jarray = null;
+    JsonArray jarray = null;
     switch (param.size()) {
       default:
         throw new ParserException(
@@ -89,23 +91,28 @@ public class ChatFunction extends AbstractFunction {
         // FALLTHRU
       case 2:
         String temp = param.get(1).toString().trim();
-        if ("json".equals(delim) || temp.charAt(0) == '[') jarray = JSONArray.fromObject(temp);
+        if ("json".equals(delim) || temp.charAt(0) == '[')
+          jarray = JsonParser.parseString(temp).getAsJsonArray();
         else {
-          jarray = new JSONArray();
+          jarray = new JsonArray();
           for (String t : temp.split(delim)) jarray.add(t.trim());
         }
-        if (jarray.isEmpty()) return ""; // dont send to empty lists
+        if (jarray.size() == 0) {
+          return ""; // dont send to empty lists
+        }
 
         // FALLTHRU
       case 1:
         message = checkForCheating(param.get(0).toString());
         if (message != null) {
-          if (jarray == null || jarray.isEmpty()) {
+          if (jarray == null || jarray.size() == 0) {
             MapTool.addGlobalMessage(message);
           } else {
             @SuppressWarnings("unchecked")
             Collection<String> targets =
-                JSONArray.toCollection(jarray, List.class); // Returns an ArrayList<String>
+                JSONMacroFunctions.getInstance()
+                    .getJsonArrayFunctions()
+                    .jsonArrayToListOfStrings(jarray);
             MapTool.addGlobalMessage(message, (List<String>) targets);
           }
         }
