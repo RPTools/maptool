@@ -489,19 +489,23 @@ public class MapTool {
       Exception exception = null;
       String[] envvars = {"MAPTOOL_BROWSER", "BROWSER"};
       String param = envvars[0];
+      boolean apparentlyItWorked = false;
       for (String var : envvars) {
         String browser = System.getenv(var);
         if (browser != null) {
           try {
             param = var + "=\"" + browser + "\"";
             Runtime.getRuntime().exec(new String[] {browser, url});
+            apparentlyItWorked = true;
           } catch (Exception e) {
-            errorMessage = "msg.error.browser.cannotStart";
-            MapTool.showError(I18N.getText(errorMessage, param), e);
+            exception = e;
           }
         }
       }
-
+      if (!apparentlyItWorked) {
+        errorMessage = "msg.error.browser.cannotStart";
+        MapTool.showError(I18N.getText(errorMessage, param), exception);
+      }
     }
   }
 
