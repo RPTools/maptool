@@ -143,14 +143,14 @@ public class MapTool {
 
   private static String clientId = AppUtil.readClientId();
 
-  public static enum ZoneEvent {
+  public enum ZoneEvent {
     Added,
     Removed,
     Activated,
     Deactivated
   }
 
-  public static enum PreferencesEvent {
+  public enum PreferencesEvent {
     Changed
   }
 
@@ -161,7 +161,7 @@ public class MapTool {
       new Dimension(AppPreferences.getThumbnailSize(), AppPreferences.getThumbnailSize());
 
   private static ThumbnailManager thumbnailManager;
-  private static String version = "DEVELOPMENT";;
+  private static String version = "DEVELOPMENT";
   private static String vendor = "RPTools!"; // Default, will get from JAR Manifest during normal
   // runtime
 
@@ -404,35 +404,15 @@ public class MapTool {
     }
 
     String msg = I18N.getText("msg.confirm.deleteToken");
-    log.debug(msg);
-    Object[] options = {
-      I18N.getText("msg.title.messageDialog.yes"),
-      I18N.getText("msg.title.messageDialog.no"),
-      I18N.getText("msg.title.messageDialog.dontAskAgain")
-    };
-    String title = I18N.getText("msg.title.messageDialogConfirm");
-    int val =
-        JOptionPane.showOptionDialog(
-            clientFrame,
-            msg,
-            title,
-            JOptionPane.NO_OPTION,
-            JOptionPane.WARNING_MESSAGE,
-            null,
-            options,
-            options[0]);
+    int val = confirmDelete(msg);
 
     // "Yes, don't show again" Button
     if (val == 2) {
       showInformation("msg.confirm.deleteToken.removed");
       AppPreferences.setTokensWarnWhenDeleted(false);
     }
-    // Any version of 'Yes'...
-    if (val == JOptionPane.YES_OPTION || val == 2) {
-      return true;
-    }
-    // Assume 'No' response
-    return false;
+    // Any version of 'Yes' returns true, false otherwise
+    return val == JOptionPane.YES_OPTION || val == 2;
   }
 
   public static boolean confirmDrawDelete() {
@@ -441,15 +421,26 @@ public class MapTool {
     }
 
     String msg = I18N.getText("msg.confirm.deleteDraw");
+    int val = confirmDelete(msg);
+
+    // "Yes, don't show again" Button
+    if (val == 2) {
+      showInformation("msg.confirm.deleteDraw.removed");
+      AppPreferences.setDrawWarnWhenDeleted(false);
+    }
+    // Any version of 'Yes' returns true, otherwise false
+    return val == JOptionPane.YES_OPTION || val == 2;
+  }
+
+  private static int confirmDelete(String msg) {
     log.debug(msg);
     Object[] options = {
-      I18N.getText("msg.title.messageDialog.yes"),
-      I18N.getText("msg.title.messageDialog.no"),
-      I18N.getText("msg.title.messageDialog.dontAskAgain")
+            I18N.getText("msg.title.messageDialog.yes"),
+            I18N.getText("msg.title.messageDialog.no"),
+            I18N.getText("msg.title.messageDialog.dontAskAgain")
     };
     String title = I18N.getText("msg.title.messageDialogConfirm");
-    int val =
-        JOptionPane.showOptionDialog(
+    return JOptionPane.showOptionDialog(
             clientFrame,
             msg,
             title,
@@ -458,18 +449,6 @@ public class MapTool {
             null,
             options,
             options[0]);
-
-    // "Yes, don't show again" Button
-    if (val == 2) {
-      showInformation("msg.confirm.deleteDraw.removed");
-      AppPreferences.setDrawWarnWhenDeleted(false);
-    }
-    // Any version of 'Yes'...
-    if (val == JOptionPane.YES_OPTION || val == 2) {
-      return true;
-    }
-    // Assume 'No' response
-    return false;
   }
 
   private MapTool() {
@@ -510,23 +489,19 @@ public class MapTool {
       Exception exception = null;
       String[] envvars = {"MAPTOOL_BROWSER", "BROWSER"};
       String param = envvars[0];
-      boolean apparentlyItWorked = false;
       for (String var : envvars) {
         String browser = System.getenv(var);
         if (browser != null) {
           try {
             param = var + "=\"" + browser + "\"";
             Runtime.getRuntime().exec(new String[] {browser, url});
-            apparentlyItWorked = true;
           } catch (Exception e) {
             errorMessage = "msg.error.browser.cannotStart";
-            exception = e;
+            MapTool.showError(I18N.getText(errorMessage, param), e);
           }
         }
       }
-      if (apparentlyItWorked == false) {
-        MapTool.showError(I18N.getText(errorMessage, param), exception);
-      }
+
     }
   }
 
@@ -587,10 +562,8 @@ public class MapTool {
                 renderer.renderZone(g, view);
               }
             });
-      } catch (InterruptedException ie) {
+      } catch (InterruptedException | InvocationTargetException ie) {
         MapTool.showError("While creating snapshot", ie);
-      } catch (InvocationTargetException ite) {
-        MapTool.showError("While creating snapshot", ite);
       }
     } else {
       renderer.renderZone(g, view);
@@ -1623,12 +1596,12 @@ public class MapTool {
     sentry.addTag("version", MapTool.getVersion());
 
     if (listMacros) {
-      String logOutput = "";
+      StringBuilder logOutput = new StringBuilder();
       List<String> macroList = new ArrayList<>(parser.listAllMacroFunctions().keySet());
       Collections.sort(macroList);
 
       for (String macro : macroList) {
-        logOutput += "\n" + macro;
+        logOutput.append("\n").append(macro);
       }
 
       log.info("Current list of Macro Functions: " + logOutput);
