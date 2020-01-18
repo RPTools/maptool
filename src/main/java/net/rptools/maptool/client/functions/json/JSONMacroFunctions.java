@@ -253,7 +253,16 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.get":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement jsonElement;
+          try {
+            jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          } catch (
+              ParserException
+                  pe) { // If we cant convert it to a JsonArray/JsonObject then treat like array
+            // with single value
+            jsonElement = new JsonArray();
+            jsonElement.getAsJsonArray().add(typeConversion.asJsonElement(args.get(0)));
+          }
           if (jsonElement.isJsonArray()) {
             if (args.size() == 2) {
               return jsonArrayFunctions.get(
