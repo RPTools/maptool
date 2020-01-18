@@ -873,7 +873,11 @@ public class JsonArrayFunctions {
         sb.append(delim);
       }
 
-      sb.append(ele.toString());
+      if (ele.isJsonPrimitive()) {
+        sb.append(ele.getAsString());
+      } else {
+        sb.append(ele.toString());
+      }
     }
 
     return sb.toString();
