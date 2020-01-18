@@ -435,20 +435,20 @@ public class MapTool {
   private static int confirmDelete(String msg) {
     log.debug(msg);
     Object[] options = {
-            I18N.getText("msg.title.messageDialog.yes"),
-            I18N.getText("msg.title.messageDialog.no"),
-            I18N.getText("msg.title.messageDialog.dontAskAgain")
+      I18N.getText("msg.title.messageDialog.yes"),
+      I18N.getText("msg.title.messageDialog.no"),
+      I18N.getText("msg.title.messageDialog.dontAskAgain")
     };
     String title = I18N.getText("msg.title.messageDialogConfirm");
     return JOptionPane.showOptionDialog(
-            clientFrame,
-            msg,
-            title,
-            JOptionPane.NO_OPTION,
-            JOptionPane.WARNING_MESSAGE,
-            null,
-            options,
-            options[0]);
+        clientFrame,
+        msg,
+        title,
+        JOptionPane.NO_OPTION,
+        JOptionPane.WARNING_MESSAGE,
+        null,
+        options,
+        options[0]);
   }
 
   private MapTool() {
