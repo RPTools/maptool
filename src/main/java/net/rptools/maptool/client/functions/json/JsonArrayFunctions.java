@@ -773,7 +773,7 @@ public class JsonArrayFunctions {
       BigDecimal index = (BigDecimal) list.get(i);
       Object value = list.get(i + 1);
       if (value instanceof String && value.toString().length() == 0) {
-        value = "''";
+        value = "";
       }
 
       newArray.set(index.intValue(), typeConversion.asJsonElement(value));
