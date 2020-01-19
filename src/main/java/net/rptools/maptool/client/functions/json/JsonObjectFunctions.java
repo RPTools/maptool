@@ -193,7 +193,7 @@ public class JsonObjectFunctions {
     for (int i = 0; i < list.size(); i += 2) {
       Object value = list.get(i + 1);
       if (value instanceof String && value.toString().length() == 0) {
-        value = "''";
+        value = "";
       }
       newJsonObject.add(list.get(i).toString(), typeConversion.asJsonElement(value));
     }
