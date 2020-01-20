@@ -237,7 +237,7 @@ dependencies {
     // For syntax highlighting in macro editor
     implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.8'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
     implementation group: 'com.fifesoft', name: 'rstaui', version: '3.0.3'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
-    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.0.4'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
+    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.0.5'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 
     // For simple xml work in Hero Lab integration
     implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.22.1'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
