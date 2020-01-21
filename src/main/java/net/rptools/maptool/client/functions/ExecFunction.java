@@ -202,12 +202,14 @@ public class ExecFunction extends AbstractFunction {
    * @param execArgs the arguments to the function
    */
   private static void runExecFunction(String functionName, List<Object> execArgs) {
+    MapToolVariableResolver resolver = new MapToolVariableResolver(null);
+    Parser parser = MapToolLineParser.createParser(resolver, false).getParser();
+    Function function = parser.getFunction(functionName);
+    MapTool.getParser().enterTrustedContext(functionName, "execFunction");
     try {
-      MapToolVariableResolver resolver = new MapToolVariableResolver(null);
-      Parser parser = MapToolLineParser.createParser(resolver, false).getParser();
-      Function function = parser.getFunction(functionName);
       function.evaluate(parser, functionName, execArgs);
     } catch (ParserException ignored) {
     }
+    MapTool.getParser().exitContext();
   }
 }
