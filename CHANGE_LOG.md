@@ -10,12 +10,18 @@ Maptool 1.5.11
 - [#1101][i1101] New chat commands `/version` and `/about`. MapTool version added to title bar.
 - [#1072][i1072] Meta macro functions now accept a map name parameter.
   - `createMacro`, `getMacroCommand`, `getMacroIndexes`, `getMacroProps`, `getMacros`, `removeMacro`, `setMacroCommand`, `setMacroProps`
+- [#1062][i1062] New preference setting for Maps. Can now be set to default to None, Day or Night. Same option on Map Properties dialog.
+- [#941][i941] Hitting the tab key in the property fields of the Edit Token Dialog will now advance to the next property value instead of property name.
 - [#870][i870] New configuration options for `json.path.read` function.
   - ALWAYS_RETURN_LIST, AS_PATH_LIST, DEFAULT_PATH_LEAF_TO_NULL, REQUIRE_PROPERTIES, SUPPRESS_EXCEPTIONS
-- [#728][i728] Tokens can now be set to ignore terrain modifiers.
-- [#459][i459] Terrain Modifiers have multiple types now.
+- [#728][i728] Tokens can now be set to ignore one or more types of terrain modifiers.
+- [#459][i459] Terrain Modifiers have multiple types now: None, Add, Multiply, Block and Free.
 
 **Bug Fixes**
+- [#1151][i1151] `json.set` was adding extra quotes when setting value to empty string. Not in released code. Fixed.
+- [#1149][i1149] `execFunction` failed when defer = 1 and a trusted function was used. Fixed.
+- [#1144][i1144] `json.get` was not promoting strings/numbers to arrays. Not in released code. Fixed.
+- [#1143][i1143] `json.toList` was not removing quotes around strings. Not in released code. Fixed.
 - [#1139][i1139] Whitespace trimmed off strings containing numbers and converted to numbers. Not in released code. Fixed.
 - [#1127][i1127] Logging was broken by recent lib change for 1.5.9/10.  Also log files were not being zipped or pruned. Fixed.
 - [#1125][i1125] Using `json.type` in an `if()` would produce an invalid condition error.  Fixed.
@@ -28,9 +34,14 @@ Maptool 1.5.11
 - [#1066][i1066] SENTRY: When selecting images for tokens a null asset could be returned. Caught and error message displayed.
 - [#1047][i1047] `json.contains` and `json.indexOf` were not handling values outside the range of a signed integer. Fixed.
 - [#1015][i1015] A bad HREF in a anchor link could produce an NPE.  Fixed.
+- [#353][i353] Macro Editor wasn't persisting window size.  Fixed.
 
 **Note** The Windows install for this release requires Windows 7 or greater to install.  The `.jar` file release can still be used on older 64-bit Windows platform. [#1039][i1039]
 
+[i1151]: https://github.com/RPTools/maptool/issues/1151
+[i1149]: https://github.com/RPTools/maptool/issues/1149
+[i1144]: https://github.com/RPTools/maptool/issues/1144
+[i1143]: https://github.com/RPTools/maptool/issues/1143
 [i1139]: https://github.com/RPTools/maptool/issues/1139
 [i1127]: https://github.com/RPTools/maptool/issues/1127
 [i1125]: https://github.com/RPTools/maptool/issues/1125
@@ -38,17 +49,20 @@ Maptool 1.5.11
 [i1121]: https://github.com/RPTools/maptool/issues/1121
 [i1120]: https://github.com/RPTools/maptool/issues/1120
 [i1117]: https://github.com/RPTools/maptool/issues/1117
-[i1072]: https://github.com/RPTools/maptool/issues/1072
 [i1101]: https://github.com/RPTools/maptool/issues/1101
 [i1075]: https://github.com/RPTools/maptool/issues/1075
+[i1072]: https://github.com/RPTools/maptool/issues/1072
 [i1069]: https://github.com/RPTools/maptool/issues/1069
 [i1066]: https://github.com/RPTools/maptool/issues/1066
+[i1062]: https://github.com/RPTools/maptool/issues/1062
 [i1047]: https://github.com/RPTools/maptool/issues/1047
 [i1039]: https://github.com/RPTools/maptool/issues/1039
 [i1015]: https://github.com/RPTools/maptool/issues/1015
+[i941]: https://github.com/RPTools/maptool/issues/941
 [i870]: https://github.com/RPTools/maptool/issues/870
 [i728]: https://github.com/RPTools/maptool/issues/728
 [i459]: https://github.com/RPTools/maptool/issues/459
+[i353]: https://github.com/RPTools/maptool/issues/353
 
 Maptool 1.5.10
 =====
