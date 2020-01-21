@@ -19,7 +19,7 @@
             </Policies>
             <DefaultRolloverStrategy max="10">
                 <Delete basePath="${sys:appHome}/archive">
-                    <IfFileName glob="maptool_*.log.zip"/>
+                    <IfFileName glob="maptool_*.log*"/>
                     <IfLastModified age="14d"/>
                 </Delete>
             </DefaultRolloverStrategy>

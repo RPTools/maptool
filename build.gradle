@@ -72,7 +72,7 @@ ext {
 
 run {
     args = [ '-v='+version ]
-    applicationDefaultJvmArgs = [ "-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ]
+    applicationDefaultJvmArgs = [ "-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ] // Add -Dlog4j2.debug to see log4j2 details
 
     if(System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
@@ -150,14 +150,16 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    // For Sentry bug reporting
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.13.0'	// Bridges v1 to v2 for other code in other libs
+    // Jamz: Do NOT update log4j libs without testing with uberjar build, 2.13.0 currently does not work
+    // See open issue: https://issues.apache.org/jira/browse/LOG4J2-673
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.12.1'	// Bridges v1 to v2 for other code in other libs
 
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
 
+    // For Sentry bug reporting
     implementation group: 'io.sentry', name: 'sentry', version: '1.7.29'
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
 

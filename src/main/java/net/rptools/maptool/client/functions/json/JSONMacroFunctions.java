@@ -142,21 +142,21 @@ public class JSONMacroFunctions extends AbstractFunction {
         FunctionUtil.checkNumberParam(functionName, args, 1, 1);
         Object potJson = args.get(0);
         if (potJson instanceof JsonArray) {
-          return JSONObjectType.ARRAY;
+          return JSONObjectType.ARRAY.name();
         } else if (potJson instanceof JsonObject) {
-          return JSONObjectType.OBJECT;
+          return JSONObjectType.OBJECT.name();
         } else {
           String str = potJson.toString().trim();
           if (str.startsWith("{") || str.startsWith("[")) {
             JsonElement json = typeConversion.asJsonElement(str);
             if (json.isJsonArray()) {
-              return JSONObjectType.ARRAY;
+              return JSONObjectType.ARRAY.name();
             } else if (json.isJsonObject()) {
-              return JSONObjectType.OBJECT;
+              return JSONObjectType.OBJECT.name();
             }
           }
         }
-        return JSONObjectType.UNKNOWN;
+        return JSONObjectType.UNKNOWN.name();
       case "json.length":
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 1);
@@ -253,7 +253,16 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.get":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          JsonElement jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          JsonElement jsonElement;
+          try {
+            jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
+          } catch (
+              ParserException
+                  pe) { // If we cant convert it to a JsonArray/JsonObject then treat like array
+            // with single value
+            jsonElement = new JsonArray();
+            jsonElement.getAsJsonArray().add(typeConversion.asJsonElement(args.get(0)));
+          }
           if (jsonElement.isJsonArray()) {
             if (args.size() == 2) {
               return jsonArrayFunctions.get(
