@@ -121,9 +121,7 @@ import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.apache.logging.log4j.core.config.Configurator;
 
-/**
- *
- */
+/** */
 public class MapTool {
 
   private static final Logger log = LogManager.getLogger(MapTool.class);
@@ -214,7 +212,7 @@ public class MapTool {
    * the detail message from the <code>Throwable</code> appended to the end.
    *
    * @param msgKey the string to use when calling {@link I18N#getText(String)}
-   * @param t      the exception to be processed
+   * @param t the exception to be processed
    * @return the <code>String</code> result
    */
   public static String generateMessage(String msgKey, Throwable t) {
@@ -234,14 +232,12 @@ public class MapTool {
    * error, a warning, or just an information message. Do not use this method if the desired result
    * is a simple confirmation box (use {@link #confirm(String, Object...)} instead).
    *
-   * @param message     the key in the properties file to put in the body of the dialog (formatted
-   *                    using
-   *                    <code>params</code>)
-   * @param titleKey    the key in the properties file to use when creating the title of the dialog
-   *                    window (formatted using <code>params</code>)
+   * @param message the key in the properties file to put in the body of the dialog (formatted using
+   *     <code>params</code>)
+   * @param titleKey the key in the properties file to use when creating the title of the dialog
+   *     window (formatted using <code>params</code>)
    * @param messageType JOptionPane.{ERROR|WARNING|INFORMATION}_MESSAGE
-   * @param params      optional parameters to use when formatting the data from the properties
-   *                    file
+   * @param params optional parameters to use when formatting the data from the properties file
    */
   public static void showMessage(
       String message, String titleKey, int messageType, Object... params) {
@@ -255,14 +251,15 @@ public class MapTool {
    * is stored into a JList and that component is then used as the content of the dialog box. This
    * allows multiple strings to be displayed in a manner consistent with other message dialogs.
    *
-   * @param messages    the Objects (normally strings) to put in the body of the dialog; no
-   *                    properties file lookup is performed!
-   * @param titleKey    the key in the properties file to use when creating the title of the dialog
-   *                    window (formatted using <code>params</code>)
+   * @param messages the Objects (normally strings) to put in the body of the dialog; no properties
+   *     file lookup is performed!
+   * @param titleKey the key in the properties file to use when creating the title of the dialog
+   *     window (formatted using <code>params</code>)
    * @param messageType one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>
-   *                    JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE</code>
-   * @param params      optional parameters to use when formatting the title text from the
-   *                    properties file
+   *                    JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE
+   *     </code>
+   * @param params optional parameters to use when formatting the title text from the properties
+   *     file
    */
   public static void showMessage(
       Object[] messages, String titleKey, int messageType, Object... params) {
@@ -278,7 +275,7 @@ public class MapTool {
    * parameters.
    *
    * @param messages the Objects (normally strings) to put in the body of the dialog; no properties
-   *                 file lookup is performed!
+   *     file lookup is performed!
    */
   public static void showFeedback(Object[] messages) {
     showMessage(messages, "msg.title.messageDialogFeedback", JOptionPane.ERROR_MESSAGE);
@@ -303,7 +300,7 @@ public class MapTool {
    * type is <code>JOptionPane.ERROR_MESSAGE</code>.
    *
    * @param msgKey the key to use when calling {@link I18N#getText(String)}
-   * @param t      the exception to be processed
+   * @param t the exception to be processed
    */
   public static void showError(String msgKey, Throwable t) {
     String msg = generateMessage(msgKey, t);
@@ -312,8 +309,7 @@ public class MapTool {
   }
 
   /**
-   * Displays a dialog box by calling {@link #showWarning(String, Throwable)} and passing
-   * <code>null
+   * Displays a dialog box by calling {@link #showWarning(String, Throwable)} and passing <code>null
    * </code> for the second parameter.
    *
    * @param msgKey the key to use when calling {@link I18N#getText(String)}
@@ -331,7 +327,7 @@ public class MapTool {
    * type is <code>JOptionPane.WARNING_MESSAGE</code>.
    *
    * @param msgKey the key to use when calling {@link I18N#getText(String)}
-   * @param t      the exception to be processed
+   * @param t the exception to be processed
    */
   public static void showWarning(String msgKey, Throwable t) {
     String msg = generateMessage(msgKey, t);
@@ -358,7 +354,7 @@ public class MapTool {
    * type is <code>JOptionPane.INFORMATION_MESSAGE</code>.
    *
    * @param msgKey the key to use when calling {@link I18N#getText(String)}
-   * @param t      the exception to be processed
+   * @param t the exception to be processed
    */
   public static void showInformation(String msgKey, Throwable t) {
     String msg = generateMessage(msgKey, t);
@@ -371,7 +367,7 @@ public class MapTool {
    * additional values as parameters to the formatting of the key lookup.
    *
    * @param message key from the properties file (preferred) or hard-coded string to display
-   * @param params  optional arguments for the formatting of the property value
+   * @param params optional arguments for the formatting of the property value
    * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
    */
   public static boolean confirm(String message, Object... params) {
@@ -390,7 +386,7 @@ public class MapTool {
    * @param title
    * @param buttons
    * @param message key from the properties file (preferred) or hard-coded string to display
-   * @param params  optional arguments for the formatting of the property value
+   * @param params optional arguments for the formatting of the property value
    * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
    */
   public static int confirmImpl(String title, int buttons, String message, Object... params) {
@@ -442,9 +438,9 @@ public class MapTool {
   private static int confirmDelete(String msg) {
     log.debug(msg);
     Object[] options = {
-        I18N.getText("msg.title.messageDialog.yes"),
-        I18N.getText("msg.title.messageDialog.no"),
-        I18N.getText("msg.title.messageDialog.dontAskAgain")
+      I18N.getText("msg.title.messageDialog.yes"),
+      I18N.getText("msg.title.messageDialog.no"),
+      I18N.getText("msg.title.messageDialog.dontAskAgain")
     };
     String title = I18N.getText("msg.title.messageDialogConfirm");
     return JOptionPane.showOptionDialog(
@@ -502,7 +498,7 @@ public class MapTool {
         if (browser != null) {
           try {
             param = var + "=\"" + browser + "\"";
-            Runtime.getRuntime().exec(new String[]{browser, url});
+            Runtime.getRuntime().exec(new String[] {browser, url});
             apparentlyItWorked = true;
           } catch (Exception e) {
             exception = e;
@@ -602,8 +598,7 @@ public class MapTool {
   }
 
   /**
-   * This was added to make it easier to set a breakpoint and locate when the frame was
-   * initialized.
+   * This was added to make it easier to set a breakpoint and locate when the frame was initialized.
    *
    * @param frame
    */
@@ -621,8 +616,8 @@ public class MapTool {
    * For Multi-monitor support, allows you to move the frame to a specific monitor. It will also set
    * the height, width and x, y position of the frame.
    *
-   * @param frame    The JFrame to move
-   * @param monitor  The monitor number as an int. Note the first monitor start at 0, not 1.
+   * @param frame The JFrame to move
+   * @param monitor The monitor number as an int. Note the first monitor start at 0, not 1.
    * @param maximize set to true if you want to maximize the frame to that monitor.
    * @author Jamz
    * @since 1.4.1.0
@@ -650,7 +645,9 @@ public class MapTool {
       throw new RuntimeException("No Screens Found");
     }
 
-    if (maximize) { frame.setExtendedState(JFrame.MAXIMIZED_BOTH); }
+    if (maximize) {
+      frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+    }
   }
 
   private static void initialize() {
@@ -723,7 +720,9 @@ public class MapTool {
       // It's possible that the SelectionPanel may cause text to be added to the NoteFrame, so
       // it
       // can happen before MapTool.initialize() has had a chance to init the clientFrame.
-      if (clientFrame != null) { SwingUtil.centerOver(profilingNoteFrame, clientFrame); }
+      if (clientFrame != null) {
+        SwingUtil.centerOver(profilingNoteFrame, clientFrame);
+      }
     }
     return profilingNoteFrame;
   }
@@ -733,7 +732,9 @@ public class MapTool {
       logConsoleFrame = new LogConsoleFrame();
       logConsoleFrame.setVisible(true);
 
-      if (clientFrame != null) { SwingUtil.centerOver(logConsoleFrame, clientFrame); }
+      if (clientFrame != null) {
+        SwingUtil.centerOver(logConsoleFrame, clientFrame);
+      }
     }
 
     return logConsoleFrame;
@@ -872,17 +873,18 @@ public class MapTool {
 
   /**
    * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...)
-   * and addMessage(GM, ...). The <code>targets</code> is expected do be in a string list built
-   * with
+   * and addMessage(GM, ...). The <code>targets</code> is expected do be in a string list built with
    * <code>separator</code>.
    *
-   * @param message   message to be sent
-   * @param targets   string specifying clients to send the message to (spaces are trimmed)
+   * @param message message to be sent
+   * @param targets string specifying clients to send the message to (spaces are trimmed)
    * @param separator the separator between entries in <code>targets</code>
    */
   public static void addGlobalMessage(String message, String targets, String separator) {
     List<String> list = new LinkedList<String>();
-    for (String target : targets.split(separator)) { list.add(target.trim()); }
+    for (String target : targets.split(separator)) {
+      list.add(target.trim());
+    }
     addGlobalMessage(message, list);
   }
 
@@ -985,9 +987,9 @@ public class MapTool {
   /**
    * Start the server from a campaign file and various settings.
    *
-   * @param id           the id of the server for announcement
-   * @param config       the server configuration
-   * @param campaign     the campaign
+   * @param id the id of the server for announcement
+   * @param config the server configuration
+   * @param campaign the campaign
    * @param copyCampaign should the campaign be a copy of the one provided
    * @throws IOException if new MapToolServer fails
    */
@@ -1299,7 +1301,9 @@ public class MapTool {
         keepgoing = confirm("msg.error.wrongJavaVersion", version);
       }
     }
-    if (!keepgoing) { System.exit(1); }
+    if (!keepgoing) {
+      System.exit(1);
+    }
   }
 
   private static void postInitialize() {
@@ -1410,10 +1414,10 @@ public class MapTool {
    *
    * <p>Examples: -version=1.4.0.1 -user=Jamz
    *
-   * @param options      {@link org.apache.commons.cli.Options}
-   * @param searchValue  Option string to search for, ie -version
+   * @param options {@link org.apache.commons.cli.Options}
+   * @param searchValue Option string to search for, ie -version
    * @param defaultValue A default value to return if option is not found
-   * @param args         String array of passed in args
+   * @param args String array of passed in args
    * @return Option value found as a String, or defaultValue if not found
    * @author Jamz
    * @since 1.4.0.1
@@ -1440,9 +1444,9 @@ public class MapTool {
    *
    * <p>Examples: -x or -fullscreen
    *
-   * @param options     {@link org.apache.commons.cli.Options}
+   * @param options {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
-   * @param args        String array of passed in args
+   * @param args String array of passed in args
    * @return A boolean value of true if option parameter found
    * @author Jamz
    * @since 1.4.0.1
@@ -1468,10 +1472,10 @@ public class MapTool {
    *
    * <p>Examples: -monitor=1 -x=0 -y=0 -w=1200 -h=960
    *
-   * @param options      {@link org.apache.commons.cli.Options}
-   * @param searchValue  Option string to search for, ie -version
+   * @param options {@link org.apache.commons.cli.Options}
+   * @param searchValue Option string to search for, ie -version
    * @param defaultValue A default value to return if option is not found
-   * @param args         String array of passed in args
+   * @param args String array of passed in args
    * @return Int value of the matching option parameter if found
    * @author Jamz
    * @since 1.4.0.1
@@ -1595,7 +1599,9 @@ public class MapTool {
 
     loadCampaignOnStartPath = getCommandLineOption(cmdOptions, "load", "", args);
 
-    if (getCommandLineOption(cmdOptions, "reset", args)) { UserJvmPrefs.resetJvmOptions(); }
+    if (getCommandLineOption(cmdOptions, "reset", args)) {
+      UserJvmPrefs.resetJvmOptions();
+    }
 
     boolean listMacros = getCommandLineOption(cmdOptions, "macros", args);
 
@@ -1614,7 +1620,9 @@ public class MapTool {
 
     if (cmdOptions.hasOption("version")) {
       log.info("overriding MapTool version from command line to: " + version);
-    } else { log.info("MapTool version: " + version); }
+    } else {
+      log.info("MapTool version: " + version);
+    }
 
     log.info("MapTool vendor: " + vendor);
 
@@ -1782,7 +1790,9 @@ public class MapTool {
       for (Enumeration<Object> keys = UIManager.getDefaults().keys(); keys.hasMoreElements(); ) {
         Object key = keys.nextElement();
         Object value = UIManager.get(key);
-        if (value instanceof FontUIResource) { UIManager.put(key, fontRes); }
+        if (value instanceof FontUIResource) {
+          UIManager.put(key, fontRes);
+        }
       }
     }
 
