@@ -28,9 +28,11 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
+
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.ui.Scale;
 
@@ -79,7 +81,8 @@ public class AdvancedAdjustGridPanel extends JComponent
         .put(
             "zoomOut",
             new AbstractAction() {
-              public void actionPerformed(ActionEvent e) {
+              @Override
+			public void actionPerformed(ActionEvent e) {
                 zoomOut();
               }
             });
@@ -89,7 +92,8 @@ public class AdvancedAdjustGridPanel extends JComponent
         .put(
             "zoomIn",
             new AbstractAction() {
-              public void actionPerformed(ActionEvent e) {
+              @Override
+			public void actionPerformed(ActionEvent e) {
                 zoomIn();
               }
             });
@@ -100,7 +104,8 @@ public class AdvancedAdjustGridPanel extends JComponent
         .put(
             "zoomReset",
             new AbstractAction() {
-              public void actionPerformed(ActionEvent e) {
+              @Override
+			public void actionPerformed(ActionEvent e) {
                 zoomReset();
               }
             });
@@ -354,13 +359,17 @@ public class AdvancedAdjustGridPanel extends JComponent
 
   ////
   // MOUSE LISTENER
-  public void mouseClicked(MouseEvent e) {}
+  @Override
+public void mouseClicked(MouseEvent e) {}
 
-  public void mouseEntered(MouseEvent e) {}
+  @Override
+public void mouseEntered(MouseEvent e) {}
 
-  public void mouseExited(MouseEvent e) {}
+  @Override
+public void mouseExited(MouseEvent e) {}
 
-  public void mousePressed(MouseEvent e) {
+  @Override
+public void mousePressed(MouseEvent e) {
 
     if (SwingUtilities.isLeftMouseButton(e)) {
       float imgRatio = getScaledImageRatio();
@@ -399,7 +408,8 @@ public class AdvancedAdjustGridPanel extends JComponent
     }
   }
 
-  public void mouseReleased(MouseEvent e) {
+  @Override
+public void mouseReleased(MouseEvent e) {
     draggingHandle = null;
 
     repaint();
@@ -407,7 +417,8 @@ public class AdvancedAdjustGridPanel extends JComponent
 
   ////
   // MOUSE MOTION LISTENER
-  public void mouseDragged(MouseEvent e) {
+  @Override
+public void mouseDragged(MouseEvent e) {
 
     if (SwingUtilities.isLeftMouseButton(e)) {
       updateHandles(e);
@@ -424,7 +435,8 @@ public class AdvancedAdjustGridPanel extends JComponent
     repaint();
   }
 
-  public void mouseMoved(MouseEvent e) {
+  @Override
+public void mouseMoved(MouseEvent e) {
 
     Dimension imgSize = getScaledImageSize();
     Point imgPos = getScaledImagePosition();
@@ -445,14 +457,13 @@ public class AdvancedAdjustGridPanel extends JComponent
 
   ////
   // MOUSE WHEEL LISTENER
-  public void mouseWheelMoved(MouseWheelEvent e) {
-
-    if (e.getWheelRotation() > 0) {
-      scale.zoomOut(e.getX(), e.getY());
-    } else {
+  @Override
+public void mouseWheelMoved(MouseWheelEvent e) {
+    if (e.getWheelRotation() < 0) {
       scale.zoomIn(e.getX(), e.getY());
+    } else {
+      scale.zoomOut(e.getX(), e.getY());
     }
-
     repaint();
   }
 }

@@ -14,21 +14,35 @@
  */
 package net.rptools.maptool.client;
 
-import com.jayway.jsonpath.JsonPath;
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Properties;
-import java.util.jar.*;
-import javax.swing.*;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.ProgressMonitor;
+import javax.swing.ProgressMonitorInputStream;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.jayway.jsonpath.JsonPath;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class AppUpdate {
   private static final Logger log = LogManager.getLogger(AppUpdate.class);
@@ -197,7 +211,7 @@ public class AppUpdate {
     Object[] msgContent = {msg1, msg2, blankLine, dontAskCheckbox};
     Object[] options = {"Yes", "No", "Skip this Version"};
     int result =
-        JOptionPane.showOptionDialog(
+        JOptionPane.showOptionDialog(		// XXX Use MapTool.confirm() or similar?
             MapTool.getFrame(),
             msgContent,
             title,
@@ -233,7 +247,8 @@ public class AppUpdate {
 
     Runnable updatethread =
         new Runnable() {
-          public void run() {
+          @Override
+		public void run() {
             try (InputStream stream = assetDownloadURL.openStream()) {
               ProgressMonitorInputStream pmis =
                   new ProgressMonitorInputStream(MapTool.getFrame(), "Downloading...\n", stream);

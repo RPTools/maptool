@@ -28,8 +28,10 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
@@ -56,12 +58,13 @@ public class TokenLayoutPanel extends JPanel {
   public TokenLayoutPanel() {
     addMouseWheelListener(
         new MouseWheelListener() {
-          public void mouseWheelMoved(MouseWheelEvent e) {
+          @Override
+		public void mouseWheelMoved(MouseWheelEvent e) {
             // Not for snap-to-scale
             if (!token.isSnapToScale()) {
               return;
             }
-            double delta = e.getWheelRotation() > 0 ? -.1 : .1;
+            double delta = e.getWheelRotation() < 0 ? .1 : +.1;
             if (SwingUtil.isShiftDown(e)) {
               // Nothing yet, as changing the facing isn't the right way to handle it --
               // the image itself really should be rotated. And it's probably better to
@@ -74,7 +77,7 @@ public class TokenLayoutPanel extends JPanel {
             double scale = token.getSizeScale() + delta;
 
             // Range
-            scale = Math.max(.1, scale);
+            scale = Math.max(.1, scale);	// XXX Why these arbitrary limits?  Document them?
             scale = Math.min(3, scale);
             token.setSizeScale(scale);
             repaint();

@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.client.ui;
 
-import com.jeta.forms.components.panel.FormPanel;
-import com.jeta.forms.gui.form.GridView;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -26,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashSet;
+
 import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -45,19 +44,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
-import net.rptools.lib.swing.SwingUtil;
-import net.rptools.lib.swing.preference.WindowPreferences;
-import net.rptools.maptool.client.AppActions;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
-import net.rptools.maptool.client.ui.syntax.MapToolScriptAutoComplete;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Token;
+
 import org.fife.rsta.ui.CollapsibleSectionPanel;
 import org.fife.rsta.ui.GoToDialog;
 import org.fife.rsta.ui.search.FindDialog;
@@ -80,6 +67,23 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
+
+import com.jeta.forms.components.panel.FormPanel;
+import com.jeta.forms.gui.form.GridView;
+
+import net.rptools.lib.swing.SwingUtil;
+import net.rptools.lib.swing.preference.WindowPreferences;
+import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolUtil;
+import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
+import net.rptools.maptool.client.ui.syntax.MapToolScriptAutoComplete;
+import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.MacroButtonProperties;
+import net.rptools.maptool.model.Token;
 
 public class MacroButtonDialog extends JDialog implements SearchListener {
 
@@ -179,7 +183,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         break;
       case REPLACE_ALL:
         result = SearchEngine.replaceAll(macroEditorRSyntaxTextArea, context);
-        JOptionPane.showMessageDialog(null, result.getCount() + " occurrences replaced.");
+        JOptionPane.showMessageDialog(MapTool.getFrame(), result.getCount() + " occurrences replaced."); // XXX Use MapTool.showMessage()?
         break;
     }
 
@@ -244,7 +248,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("runButton");
     button.addActionListener(
         new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+		public void actionPerformed(ActionEvent e) {
             save(false);
 
             if (properties.getApplyToTokens() || properties.getCommonMacro()) {
@@ -263,7 +268,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("applyButton");
     button.addActionListener(
         new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+		public void actionPerformed(ActionEvent e) {
             save(false);
           }
         });
@@ -273,7 +279,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("okButton");
     button.addActionListener(
         new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+		public void actionPerformed(ActionEvent e) {
             save(true);
           }
         });
@@ -285,7 +292,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("cancelButton");
     button.addActionListener(
         new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
+          @Override
+		public void actionPerformed(ActionEvent e) {
             cancel();
           }
         });
@@ -439,15 +447,18 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         .getDocument()
         .addDocumentListener(
             new DocumentListener() {
-              public void changedUpdate(DocumentEvent e) {
+              @Override
+			public void changedUpdate(DocumentEvent e) {
                 status.setText("Ready");
               }
 
-              public void removeUpdate(DocumentEvent e) {
+              @Override
+			public void removeUpdate(DocumentEvent e) {
                 status.setText("Ready");
               }
 
-              public void insertUpdate(DocumentEvent e) {
+              @Override
+			public void insertUpdate(DocumentEvent e) {
                 status.setText("Ready");
               }
             });

@@ -15,10 +15,16 @@
 package net.rptools.maptool.client.tool;
 
 import java.awt.dnd.DragSource;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.util.Set;
-import javax.swing.*;
+
+import javax.swing.SwingUtilities;
+
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
@@ -81,7 +87,8 @@ public abstract class DefaultTool extends Tool
 
   ////
   // Mouse
-  public void mousePressed(MouseEvent e) {
+  @Override
+public void mousePressed(MouseEvent e) {
     // Potential map dragging
     if (SwingUtilities.isRightMouseButton(e)) {
       dragStartX = e.getX();
@@ -89,7 +96,8 @@ public abstract class DefaultTool extends Tool
     }
   }
 
-  public void mouseReleased(MouseEvent e) {
+  @Override
+public void mouseReleased(MouseEvent e) {
     if (isDraggingMap && isRightMouseButton(e)) {
       renderer.maybeForcePlayersView();
     }
@@ -102,21 +110,24 @@ public abstract class DefaultTool extends Tool
    *
    * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
    */
-  public void mouseClicked(MouseEvent e) {}
+  @Override
+public void mouseClicked(MouseEvent e) {}
 
   /*
    * (non-Javadoc)
    *
    * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
    */
-  public void mouseEntered(MouseEvent e) {}
+  @Override
+public void mouseEntered(MouseEvent e) {}
 
   /*
    * (non-Javadoc)
    *
    * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
    */
-  public void mouseExited(MouseEvent e) {}
+  @Override
+public void mouseExited(MouseEvent e) {}
 
   ////
   // MouseMotion
@@ -125,7 +136,8 @@ public abstract class DefaultTool extends Tool
    *
    * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
    */
-  public void mouseMoved(MouseEvent e) {
+  @Override
+public void mouseMoved(MouseEvent e) {
     if (renderer == null) {
       return;
     }
@@ -141,7 +153,8 @@ public abstract class DefaultTool extends Tool
     }
   }
 
-  public void mouseDragged(MouseEvent e) {
+  @Override
+public void mouseDragged(MouseEvent e) {
     int mX = e.getX();
     int mY = e.getY();
     CellPoint cellUnderMouse = renderer.getCellAt(new ScreenPoint(mX, mY));
@@ -178,7 +191,11 @@ public abstract class DefaultTool extends Tool
 
   ////
   // Mouse Wheel
-  public void mouseWheelMoved(MouseWheelEvent e) {
+  /**
+   * 
+   */
+@Override
+public void mouseWheelMoved(MouseWheelEvent e) {
     // Fix for High Resolution Mouse Wheels
     if (e.getWheelRotation() == 0) {
       return;
@@ -203,7 +220,9 @@ public abstract class DefaultTool extends Tool
           facing = -90; // natural alignment
         }
         if (SwingUtil.isControlDown(e)) {
+          facing += e.getWheelRotation() < 0 ? -5 : 5;
           // Modify on the fly the rotation point
+          // (Code to store the computed values is commented out, so... unimplemented?)
           if (e.isAltDown()) {
             int x = token.getX();
             int y = token.getY();
@@ -213,7 +232,6 @@ public abstract class DefaultTool extends Tool
             double xc = x + w / 2;
             double yc = y + h / 2;
 
-            facing += e.getWheelRotation() > 0 ? 5 : -5;
             token.setFacing(facing);
             int a = token.getFacingInDegrees();
             double r = Math.toRadians(a);
@@ -221,17 +239,6 @@ public abstract class DefaultTool extends Tool
             System.out.println("Angle: " + a);
             System.out.println("Origin x,y: " + x + ", " + y);
             System.out.println("Origin bounds: " + token.getBounds(renderer.getZone()));
-            // System.out.println("Anchor x,y: " + token.getAnchor().x + ", " +
-            // token.getAnchor().y);
-
-            // x = (int) ((x + w) - w * Math.cos(r));
-            // y = (int) (y - w * Math.sin(r));
-
-            // double x1 = (x - xc) * Math.cos(r) - (y - yc) * Math.sin(r) + xc;
-            // double y1 = (y - yc) * Math.cos(r) + (x - xc) * Math.sin(r) + yc;
-
-            // x = (int) (x * Math.cos(r) - y * Math.sin(r));
-            // y = (int) (y * Math.cos(r) + x * Math.sin(r));
 
             AffineTransform at = new AffineTransform();
             at.translate(x, y);
@@ -250,15 +257,15 @@ public abstract class DefaultTool extends Tool
 
             System.out.println("New x,y: " + x + ", " + y);
             System.out.println("New bounds: " + token.getBounds(renderer.getZone()).toString());
-
-          } else {
-            facing += e.getWheelRotation() > 0 ? 5 : -5;
           }
         } else {
+          // XXX Why isn't this delegated to the Grid object?  Shouldn't we be
+          // giving it a token and tell it to move to the next/prev facing position?
+          // That way it could even factor in larger token footprints, if it wished.
           int[] facingArray = getZone().getGrid().getFacingAngles();
           int facingIndex = TokenUtil.getIndexNearestTo(facingArray, facing);
 
-          facingIndex += e.getWheelRotation() > 0 ? 1 : -1;
+          facingIndex += e.getWheelRotation() < 0 ? -1 : 1;
           if (facingIndex < 0) {
             facingIndex = facingArray.length - 1;
           }
@@ -267,7 +274,6 @@ public abstract class DefaultTool extends Tool
           }
           facing = facingArray[facingIndex];
         }
-
         token.setFacing(facing);
 
         renderer.flush(token);
@@ -279,8 +285,8 @@ public abstract class DefaultTool extends Tool
     }
     // ZOOM
     if (!AppState.isZoomLocked()) {
-      boolean direction = e.getWheelRotation() > 0;
-      direction = isKeyDown('z') ? !direction : direction;
+      boolean direction = e.getWheelRotation() < 0;
+      direction = isKeyDown('z') ? direction : !direction;	// XXX Why check for this?
       if (direction) {
         renderer.zoomOut(e.getX(), e.getY());
       } else {

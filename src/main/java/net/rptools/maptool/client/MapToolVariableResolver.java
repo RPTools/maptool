@@ -14,16 +14,32 @@
  */
 package net.rptools.maptool.client;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JOptionPane;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import javax.swing.JOptionPane;
-import net.rptools.maptool.client.functions.*;
+
+import net.rptools.maptool.client.functions.CurrentInitiativeFunction;
+import net.rptools.maptool.client.functions.InitiativeRoundFunction;
+import net.rptools.maptool.client.functions.TokenBarFunction;
+import net.rptools.maptool.client.functions.TokenGMNameFunction;
+import net.rptools.maptool.client.functions.TokenHaloFunction;
+import net.rptools.maptool.client.functions.TokenInitFunction;
+import net.rptools.maptool.client.functions.TokenInitHoldFunction;
+import net.rptools.maptool.client.functions.TokenLabelFunction;
+import net.rptools.maptool.client.functions.TokenNameFunction;
+import net.rptools.maptool.client.functions.TokenStateFunction;
+import net.rptools.maptool.client.functions.TokenVisibleFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -33,8 +49,6 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.MapVariableResolver;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableModifiers;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class MapToolVariableResolver extends MapVariableResolver {
 
@@ -244,9 +258,9 @@ public class MapToolVariableResolver extends MapVariableResolver {
         DialogTitle = I18N.getText("lineParser.dialogTitle", tokenInContext.getName());
       }
       result =
-          JOptionPane.showInputDialog(
+          JOptionPane.showInputDialog(	// XXX Why not use method from client.MapTool?
               MapTool.getFrame(),
-              I18N.getText("lineParser.dialogValueFor") + " " + name,
+              I18N.getText("lineParser.dialogValueFor") + " " + name, // XXX Why not a parameterized msg?
               DialogTitle,
               JOptionPane.QUESTION_MESSAGE,
               null,
@@ -449,7 +463,8 @@ public class MapToolVariableResolver extends MapVariableResolver {
       this.token = token;
     }
 
-    public void run() {
+    @Override
+	public void run() {
       MapTool.serverCommand().putToken(zoneId, token);
     }
 
