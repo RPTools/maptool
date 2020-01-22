@@ -380,7 +380,8 @@ public class JSONMacroFunctions extends AbstractFunction {
           try {
             jsonElement = FunctionUtil.paramAsJson(functionName, args, 0);
           } catch (ParserException pe) {
-            // If we cant convert it to a JsonArray/JsonObject then treat like array with single value
+            // If we cant convert it to a JsonArray/JsonObject then treat like array with single
+            // value
             jsonElement = new JsonArray();
             if (args.get(0).toString().length() != 0) { // empty string == empty array
               jsonElement.getAsJsonArray().add(typeConversion.asJsonElement(args.get(0)));
