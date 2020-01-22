@@ -1585,7 +1585,7 @@ public class MapTool {
     cmdOptions.addOption("y", "ypos", true, "override MapTool window starting y coordinate");
     cmdOptions.addOption("m", "macros", false, "display defined list of macro functions");
     cmdOptions.addOption("r", "reset", false, "reset startup options to defaults");
-    cmdOptions.addOption("l", "load", true, "load campaign on startup");
+    cmdOptions.addOption("F", "file", true, "load campaign on startup");
 
     debug = getCommandLineOption(cmdOptions, "debug", args);
     version = getCommandLineOption(cmdOptions, "version", version, args);
@@ -1597,7 +1597,7 @@ public class MapTool {
     windowX = getCommandLineOption(cmdOptions, "xpos", windowX, args);
     windowY = getCommandLineOption(cmdOptions, "ypos", windowY, args);
 
-    loadCampaignOnStartPath = getCommandLineOption(cmdOptions, "load", "", args);
+    loadCampaignOnStartPath = getCommandLineOption(cmdOptions, "file", "", args);
 
     if (getCommandLineOption(cmdOptions, "reset", args)) {
       UserJvmPrefs.resetJvmOptions();
