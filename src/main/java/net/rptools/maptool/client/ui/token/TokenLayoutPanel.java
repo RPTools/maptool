@@ -28,10 +28,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
@@ -59,7 +57,7 @@ public class TokenLayoutPanel extends JPanel {
     addMouseWheelListener(
         new MouseWheelListener() {
           @Override
-		public void mouseWheelMoved(MouseWheelEvent e) {
+          public void mouseWheelMoved(MouseWheelEvent e) {
             // Not for snap-to-scale
             if (!token.isSnapToScale()) {
               return;
@@ -77,7 +75,7 @@ public class TokenLayoutPanel extends JPanel {
             double scale = token.getSizeScale() + delta;
 
             // Range
-            scale = Math.max(.1, scale);	// XXX Why these arbitrary limits?  Document them?
+            scale = Math.max(.1, scale); // XXX Why these arbitrary limits?  Document them?
             scale = Math.min(3, scale);
             token.setSizeScale(scale);
             repaint();

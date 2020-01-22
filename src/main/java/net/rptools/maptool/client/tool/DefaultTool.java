@@ -22,9 +22,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.util.Set;
-
 import javax.swing.SwingUtilities;
-
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
@@ -88,7 +86,7 @@ public abstract class DefaultTool extends Tool
   ////
   // Mouse
   @Override
-public void mousePressed(MouseEvent e) {
+  public void mousePressed(MouseEvent e) {
     // Potential map dragging
     if (SwingUtilities.isRightMouseButton(e)) {
       dragStartX = e.getX();
@@ -97,7 +95,7 @@ public void mousePressed(MouseEvent e) {
   }
 
   @Override
-public void mouseReleased(MouseEvent e) {
+  public void mouseReleased(MouseEvent e) {
     if (isDraggingMap && isRightMouseButton(e)) {
       renderer.maybeForcePlayersView();
     }
@@ -111,7 +109,7 @@ public void mouseReleased(MouseEvent e) {
    * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
    */
   @Override
-public void mouseClicked(MouseEvent e) {}
+  public void mouseClicked(MouseEvent e) {}
 
   /*
    * (non-Javadoc)
@@ -119,7 +117,7 @@ public void mouseClicked(MouseEvent e) {}
    * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
    */
   @Override
-public void mouseEntered(MouseEvent e) {}
+  public void mouseEntered(MouseEvent e) {}
 
   /*
    * (non-Javadoc)
@@ -127,7 +125,7 @@ public void mouseEntered(MouseEvent e) {}
    * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
    */
   @Override
-public void mouseExited(MouseEvent e) {}
+  public void mouseExited(MouseEvent e) {}
 
   ////
   // MouseMotion
@@ -137,7 +135,7 @@ public void mouseExited(MouseEvent e) {}
    * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
    */
   @Override
-public void mouseMoved(MouseEvent e) {
+  public void mouseMoved(MouseEvent e) {
     if (renderer == null) {
       return;
     }
@@ -154,7 +152,7 @@ public void mouseMoved(MouseEvent e) {
   }
 
   @Override
-public void mouseDragged(MouseEvent e) {
+  public void mouseDragged(MouseEvent e) {
     int mX = e.getX();
     int mY = e.getY();
     CellPoint cellUnderMouse = renderer.getCellAt(new ScreenPoint(mX, mY));
@@ -191,11 +189,9 @@ public void mouseDragged(MouseEvent e) {
 
   ////
   // Mouse Wheel
-  /**
-   * 
-   */
-@Override
-public void mouseWheelMoved(MouseWheelEvent e) {
+  /** */
+  @Override
+  public void mouseWheelMoved(MouseWheelEvent e) {
     // Fix for High Resolution Mouse Wheels
     if (e.getWheelRotation() == 0) {
       return;
@@ -286,7 +282,7 @@ public void mouseWheelMoved(MouseWheelEvent e) {
     // ZOOM
     if (!AppState.isZoomLocked()) {
       boolean direction = e.getWheelRotation() < 0;
-      direction = isKeyDown('z') ? direction : !direction;	// XXX Why check for this?
+      direction = isKeyDown('z') ? direction : !direction; // XXX Why check for this?
       if (direction) {
         renderer.zoomOut(e.getX(), e.getY());
       } else {

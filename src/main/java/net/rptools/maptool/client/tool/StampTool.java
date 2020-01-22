@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
@@ -49,7 +48,6 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppActions;
@@ -127,7 +125,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
             },
             new LayerSelectionListener() {
               @Override
-			public void layerSelected(Layer layer) {
+              public void layerSelected(Layer layer) {
                 if (renderer != null) {
                   renderer.setActiveLayer(layer);
                   MapTool.getFrame().setLastSelectedLayer(layer);
@@ -867,7 +865,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_R, AppActions.menuShortcut),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             if (renderer.getSelectedTokenSet().isEmpty()) {
               return;
             }
@@ -885,7 +883,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_D, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             if (!isDraggingToken) {
               return;
             }
@@ -897,7 +895,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             if (!isDraggingToken) {
               return;
             }
@@ -911,7 +909,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 0, false);
           }
         });
@@ -919,7 +917,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 0, false);
           }
         });
@@ -927,7 +925,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, -1, false);
           }
         });
@@ -935,7 +933,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, 1, false);
           }
         });
@@ -943,7 +941,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD7, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, -1, false);
           }
         });
@@ -951,7 +949,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, -1, false);
           }
         });
@@ -959,7 +957,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 1, false);
           }
         });
@@ -967,7 +965,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD3, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 1, false);
           }
         });
@@ -976,7 +974,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 0, true);
           }
         });
@@ -984,7 +982,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 0, true);
           }
         });
@@ -992,7 +990,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, -1, true);
           }
         });
@@ -1000,7 +998,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, 1, true);
           }
         });
@@ -1008,7 +1006,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD7, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, -1, true);
           }
         });
@@ -1016,7 +1014,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, -1, true);
           }
         });
@@ -1024,7 +1022,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 1, true);
           }
         });
@@ -1032,7 +1030,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD3, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 1, true);
           }
         });
@@ -1040,7 +1038,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_T, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             cycleSelectedToken(1);
           }
         });
@@ -1048,7 +1046,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.SHIFT_DOWN_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             cycleSelectedToken(-1);
           }
         });
@@ -1056,7 +1054,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, 1, false);
           }
         });
@@ -1064,7 +1062,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 0, false);
           }
         });
@@ -1072,7 +1070,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 0, false);
           }
         });
@@ -1080,7 +1078,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, -1, false);
           }
         });
@@ -1088,7 +1086,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, 1, true);
           }
         });
@@ -1096,7 +1094,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(1, 0, true);
           }
         });
@@ -1104,7 +1102,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(-1, 0, true);
           }
         });
@@ -1112,7 +1110,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.SHIFT_MASK),
         new AbstractAction() {
           @Override
-		public void actionPerformed(ActionEvent e) {
+          public void actionPerformed(ActionEvent e) {
             handleKeyMove(0, -1, true);
           }
         });
@@ -1207,7 +1205,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
    * @see net.rptools.maptool.client.ZoneOverlay#paintOverlay(net.rptools.maptool .client.ZoneRenderer, java.awt.Graphics2D)
    */
   @Override
-public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
+  public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     if (selectionBoundBox != null) {
       if (renderer.isAutoResizeStamp()) {
         Stroke stroke = g.getStroke();
@@ -1357,8 +1355,8 @@ public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
   public void resizeStamp() {
     if (tokenUnderMouse == null) {
       // Cancel action, didn't start/end the selection over the stamp
-      JOptionPane.showMessageDialog(	// XXX Why isn't client.MapTool.showError() being used?
-    	  MapTool.getFrame(),
+      JOptionPane.showMessageDialog( // XXX Why isn't client.MapTool.showError() being used?
+          MapTool.getFrame(),
           I18N.getText("dialog.stampTool.error.noSelection"),
           I18N.getText("msg.title.messageDialogError"),
           JOptionPane.ERROR_MESSAGE);
@@ -1366,8 +1364,8 @@ public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     }
     if (selectionBoundBox.width <= 1 || selectionBoundBox.height <= 1) {
       // Cancel action, didn't select enough pixels
-      JOptionPane.showMessageDialog(	// XXX Why isn't client.MapTool.showError() being used?
-    	  MapTool.getFrame(),
+      JOptionPane.showMessageDialog( // XXX Why isn't client.MapTool.showError() being used?
+          MapTool.getFrame(),
           I18N.getText("dialog.stampTool.error.badSelection"),
           I18N.getText("msg.title.messageDialogError"),
           JOptionPane.ERROR_MESSAGE);

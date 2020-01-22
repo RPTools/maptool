@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client;
 
+import com.jidesoft.docking.DockableFrame;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.Graphics2D;
@@ -45,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
@@ -56,14 +56,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jdesktop.swingworker.SwingWorker;
-
-import com.jidesoft.docking.DockableFrame;
-
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -126,6 +118,10 @@ import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
 import net.rptools.maptool.util.PersistenceUtil.PersistedMap;
 import net.rptools.maptool.util.SysInfo;
 import net.rptools.maptool.util.UPnPUtil;
+import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jdesktop.swingworker.SwingWorker;
 
 /**
  * This class acts as a container for a wide variety of {@link Action}s that are used throughout the
@@ -1418,7 +1414,8 @@ public class AppActions {
           // XXX Perhaps ask the user if the copied map should have its GEA and/or TEA cleared? An
           // imported map would ask...
           String zoneName =
-              JOptionPane.showInputDialog(MapTool.getFrame(), "New map name:", "Copy of " + zone.getName());
+              JOptionPane.showInputDialog(
+                  MapTool.getFrame(), "New map name:", "Copy of " + zone.getName());
           if (zoneName != null) {
             Zone zoneCopy = new Zone(zone);
             zoneCopy.setName(zoneName);
@@ -1886,7 +1883,7 @@ public class AppActions {
           };
           String title = I18N.getText("msg.title.messageDialogConfirm");
           int val =
-              JOptionPane.showOptionDialog(		// XXX Use MapTool.confirm()?
+              JOptionPane.showOptionDialog( // XXX Use MapTool.confirm()?
                   MapTool.getFrame(),
                   msg,
                   title,

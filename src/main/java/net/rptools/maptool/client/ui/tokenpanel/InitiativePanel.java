@@ -14,6 +14,12 @@
  */
 package net.rptools.maptool.client.ui.tokenpanel;
 
+import com.jeta.forms.components.line.HorizontalLineComponent;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jidesoft.plaf.LookAndFeelFactory;
+import com.jidesoft.swing.JideButton;
+import com.jidesoft.swing.JideSplitButton;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -27,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -46,14 +51,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import com.jeta.forms.components.line.HorizontalLineComponent;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jidesoft.plaf.LookAndFeelFactory;
-import com.jidesoft.swing.JideButton;
-import com.jidesoft.swing.JideSplitButton;
-
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -326,7 +323,7 @@ public class InitiativePanel extends JPanel
     EventQueue.invokeLater(
         new Runnable() {
           @Override
-		public void run() {
+          public void run() {
             model.setList(list);
             if (menuButton != null && menuButton.getAction() == NEXT_ACTION)
               menuButton.setButtonEnabled(
@@ -464,7 +461,7 @@ public class InitiativePanel extends JPanel
    * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
    */
   @Override
-public void valueChanged(ListSelectionEvent e) {
+  public void valueChanged(ListSelectionEvent e) {
     if (e != null && e.getValueIsAdjusting()) return;
     TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
     boolean enabled = (ti != null && hasOwnerPermission(ti.getToken())) ? true : false;
@@ -492,7 +489,7 @@ public void valueChanged(ListSelectionEvent e) {
 
   /** @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent) */
   @Override
-public void propertyChange(PropertyChangeEvent evt) {
+  public void propertyChange(PropertyChangeEvent evt) {
     if (evt.getPropertyName().equals(InitiativeList.ROUND_PROP)) {
       String text = list.getRound() < 0 ? "" : Integer.toString(list.getRound());
       round.setText(text);
@@ -528,7 +525,7 @@ public void propertyChange(PropertyChangeEvent evt) {
    *     net.rptools.maptool.model.ModelChangeListener#modelChanged(net.rptools.maptool.model.ModelChangeEvent)
    */
   @Override
-public void modelChanged(ModelChangeEvent event) {
+  public void modelChanged(ModelChangeEvent event) {
     if (event.getEvent().equals(Event.INITIATIVE_LIST_CHANGED)) {
       if ((Zone) event.getModel() == zone) {
         int oldSize = model.getSize();
@@ -550,7 +547,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action NEXT_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           list.nextInitiative();
         };
       };
@@ -559,7 +556,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action PREV_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           list.prevInitiative();
         };
       };
@@ -568,7 +565,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action REMOVE_TOKEN_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
           if (ti == null) return;
           int index = list.indexOf(ti);
@@ -580,7 +577,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action TOGGLE_HOLD_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
           if (ti == null) return;
           ti.setHolding(!ti.isHolding());
@@ -591,7 +588,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action MAKE_CURRENT_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
           if (ti == null) return;
           list.setCurrent(list.indexOf(ti));
@@ -602,7 +599,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action SHOW_TOKENS_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           showTokens = ((JCheckBoxMenuItem) e.getSource()).isSelected();
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
@@ -615,7 +612,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action SHOW_TOKEN_STATES_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           showTokenStates = ((JCheckBoxMenuItem) e.getSource()).isSelected();
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
@@ -628,7 +625,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action SHOW_INIT_STATE =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           showInitState = ((JCheckBoxMenuItem) e.getSource()).isSelected();
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
@@ -641,7 +638,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action INIT_STATE_SECOND_LINE =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           initStateSecondLine = ((JCheckBoxMenuItem) e.getSource()).isSelected();
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
@@ -654,7 +651,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action SORT_LIST_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           list.sort();
         };
       };
@@ -663,7 +660,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action SET_INIT_STATE_VALUE =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
           if (ti == null) return;
           Token token = ti.getToken();
@@ -684,7 +681,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action CLEAR_INIT_STATE_VALUE =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           TokenInitiative ti = (TokenInitiative) displayList.getSelectedValue();
           if (ti == null) return;
           ti.setState(null);
@@ -695,7 +692,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action REMOVE_ALL_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           clearTokens();
         };
       };
@@ -704,7 +701,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action ADD_ALL_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           list.insertTokens(list.getZone().getTokens());
         };
       };
@@ -713,7 +710,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action ADD_PCS_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           List<Token> tokens = new ArrayList<Token>();
           for (Token token : list.getZone().getTokens()) {
             if (token.getType() == Type.PC) tokens.add(token);
@@ -726,7 +723,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action TOGGLE_HIDE_NPC_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           list.setHideNPC(!list.isHideNPC());
           if (list.isHideNPC() != hideNPCMenuItem.isSelected())
             hideNPCMenuItem.setSelected(list.isHideNPC());
@@ -739,7 +736,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action TOGGLE_OWNER_PERMISSIONS_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           boolean op = !MapTool.getCampaign().isInitiativeOwnerPermissions();
           if (ownerPermissionsMenuItem != null) ownerPermissionsMenuItem.setSelected(op);
           MapTool.getCampaign().setInitiativeOwnerPermissions(op);
@@ -753,7 +750,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action TOGGLE_MOVEMENT_LOCK_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           boolean op = !MapTool.getCampaign().isInitiativeMovementLock();
           if (ownerPermissionsMenuItem != null) ownerPermissionsMenuItem.setSelected(op);
           MapTool.getCampaign().setInitiativeMovementLock(op);
@@ -765,7 +762,7 @@ public void modelChanged(ModelChangeEvent event) {
   public final Action RESET_COUNTER_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           if (!MapTool.getPlayer().isGM()) {
             return;
           }
@@ -801,7 +798,7 @@ public void modelChanged(ModelChangeEvent event) {
         SwingUtilities.invokeLater(
             new Runnable() {
               @Override
-			public void run() {
+              public void run() {
                 if (displayList.getSelectedValue() != null) {
                   // Show the selected token on the map.
                   Token token = ((TokenInitiative) displayList.getSelectedValue()).getToken();

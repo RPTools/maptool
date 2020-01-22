@@ -24,7 +24,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
@@ -44,7 +43,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.metal.MetalSliderUI;
-
 import net.rptools.lib.swing.ImagePanel;
 import net.rptools.lib.swing.ImagePanel.SelectionMode;
 import net.rptools.lib.swing.SelectionListener;
@@ -128,8 +126,8 @@ public class AssetPanel extends JComponent {
     imagePanel.addMouseWheelListener(
         new MouseWheelListener() {
           @Override
-		public void mouseWheelMoved(MouseWheelEvent e) {
-            if (SwingUtil.isControlDown(e) || e.isMetaDown()) {		// XXX Why either one?
+          public void mouseWheelMoved(MouseWheelEvent e) {
+            if (SwingUtil.isControlDown(e) || e.isMetaDown()) { // XXX Why either one?
               e.consume();
               int steps = e.getWheelRotation();
               imagePanel.setGridSize(imagePanel.getGridSize() + steps);
@@ -218,17 +216,17 @@ public class AssetPanel extends JComponent {
           .addDocumentListener(
               new DocumentListener() {
                 @Override
-				public void changedUpdate(DocumentEvent e) {
+                public void changedUpdate(DocumentEvent e) {
                   // no op
                 }
 
                 @Override
-				public void insertUpdate(DocumentEvent e) {
+                public void insertUpdate(DocumentEvent e) {
                   updateFilter();
                 }
 
                 @Override
-				public void removeUpdate(DocumentEvent e) {
+                public void removeUpdate(DocumentEvent e) {
                   updateFilter();
                 }
               });
@@ -249,7 +247,7 @@ public class AssetPanel extends JComponent {
       globalSearchField.addActionListener(
           new ActionListener() {
             @Override
-			public void actionPerformed(ActionEvent ev) {
+            public void actionPerformed(ActionEvent ev) {
               updateFilter();
             }
           });
@@ -295,7 +293,7 @@ public class AssetPanel extends JComponent {
       thumbnailPreviewSlider.setUI(
           new MetalSliderUI() {
             @Override
-			protected void scrollDueToClickInTrack(int direction) {
+            protected void scrollDueToClickInTrack(int direction) {
               int value = thumbnailPreviewSlider.getValue();
 
               if (thumbnailPreviewSlider.getOrientation() == JSlider.HORIZONTAL) {
@@ -336,7 +334,7 @@ public class AssetPanel extends JComponent {
               500,
               new ActionListener() {
                 @Override
-				public void actionPerformed(ActionEvent e) {
+                public void actionPerformed(ActionEvent e) {
                   ImageFileImagePanelModel model = (ImageFileImagePanelModel) imagePanel.getModel();
                   if (model == null) {
                     return;

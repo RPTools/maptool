@@ -16,12 +16,10 @@ package net.rptools.maptool.client.ui.tokenpanel;
 
 import java.awt.event.ActionEvent;
 import java.util.Set;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -109,7 +107,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
   public final Action TOGGLE_HOLD_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           for (TokenInitiative ti : selectedTokenInitiatives) ti.setHolding(!ti.isHolding());
         };
       };
@@ -118,7 +116,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
   public final Action MAKE_CURRENT_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           InitiativeList list = getRenderer().getZone().getInitiativeList();
           list.setCurrent(list.indexOf(tokenInitiativeUnderMouse));
         };
@@ -128,7 +126,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
   public final Action SET_INIT_STATE_VALUE =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           String message = I18N.getText("initPanel.enterState");
           String defaultValue = "";
           if (selectedTokenInitiatives.size() == 1) {
@@ -152,7 +150,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
   public final Action CLEAR_INIT_STATE_VALUE =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           for (TokenInitiative ti : selectedTokenInitiatives) ti.setState(null);
         };
       };
@@ -161,7 +159,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
   public final Action REMOVE_TOKEN_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           InitiativeList list = getRenderer().getZone().getInitiativeList();
           InitiativePanel ip = MapTool.getFrame().getInitiativePanel();
           for (TokenInitiative ti : selectedTokenInitiatives) {
@@ -177,7 +175,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
   public final Action MOVE_UP_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           InitiativeList list = getRenderer().getZone().getInitiativeList();
           int index = list.indexOf(tokenInitiativeUnderMouse);
           list.moveToken(index, index - 1);
@@ -188,7 +186,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
   public final Action MOVE_DOWN_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           InitiativeList list = getRenderer().getZone().getInitiativeList();
           int index = list.indexOf(tokenInitiativeUnderMouse);
           list.moveToken(index, index + 2);
@@ -199,7 +197,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
   public final Action CENTER_ACTION =
       new AbstractAction() {
         @Override
-		public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {
           Token token = tokenInitiativeUnderMouse.getToken();
           getRenderer().centerOn(new ZonePoint(token.getX(), token.getY()));
           getRenderer().clearSelectedTokens();

@@ -27,9 +27,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-
 import javax.swing.JPanel;
-
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
@@ -47,9 +45,9 @@ public class TokenVblPanel extends JPanel {
 
   public TokenVblPanel() {
     addMouseWheelListener(
-        new MouseWheelListener() {		// XXX Why is this here?
+        new MouseWheelListener() { // XXX Why is this here?
           @Override
-		public void mouseWheelMoved(MouseWheelEvent e) {
+          public void mouseWheelMoved(MouseWheelEvent e) {
             // Not for snap-to-scale
             if (!token.isSnapToScale()) {
               return;
@@ -65,14 +63,14 @@ public class TokenVblPanel extends JPanel {
           }
         });
     addMouseListener(
-        new MouseAdapter() {		// XXX Why is this here?
+        new MouseAdapter() { // XXX Why is this here?
           String old;
 
           @Override
           public void mousePressed(MouseEvent e) {}
 
           @Override
-		public void mouseReleased(MouseEvent e) {}
+          public void mouseReleased(MouseEvent e) {}
 
           @Override
           public void mouseEntered(MouseEvent e) {

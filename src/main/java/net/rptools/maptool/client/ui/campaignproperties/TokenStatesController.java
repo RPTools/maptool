@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
+import com.jeta.forms.components.colors.JETAColorWell;
+import com.jeta.forms.components.panel.FormPanel;
+import com.jeta.forms.store.properties.ListItemProperty;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
@@ -33,7 +36,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
@@ -54,11 +56,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
-
-import com.jeta.forms.components.colors.JETAColorWell;
-import com.jeta.forms.components.panel.FormPanel;
-import com.jeta.forms.store.properties.ListItemProperty;
-
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
@@ -267,7 +264,7 @@ public class TokenStatesController
 
   /** @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent) */
   @Override
-public void itemStateChanged(ItemEvent e) {
+  public void itemStateChanged(ItemEvent e) {
     changedUpdate(null);
   }
 
@@ -277,7 +274,7 @@ public void itemStateChanged(ItemEvent e) {
    * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
    */
   @Override
-public void actionPerformed(ActionEvent e) {
+  public void actionPerformed(ActionEvent e) {
     String name = ((JComponent) e.getSource()).getName();
     JList<Object> list = formPanel.getList(STATES);
     DefaultListModel<Object> model = (DefaultListModel<Object>) list.getModel();
@@ -363,7 +360,7 @@ public void actionPerformed(ActionEvent e) {
   }
 
   @Override
-public void stateChanged(ChangeEvent e) {
+  public void stateChanged(ChangeEvent e) {
     String name = ((JComponent) e.getSource()).getName();
     JList<Object> list = formPanel.getList(STATES);
     DefaultListModel<Object> model = (DefaultListModel<Object>) list.getModel();
@@ -429,7 +426,7 @@ public void stateChanged(ChangeEvent e) {
    * @see javax.swing.event.DocumentListener#changedUpdate(javax.swing.event.DocumentEvent)
    */
   @Override
-public void changedUpdate(DocumentEvent e) {
+  public void changedUpdate(DocumentEvent e) {
     String text = formPanel.getText(IMAGE);
     boolean hasImage =
         !((ListItemProperty) formPanel.getSelectedItem(TYPE)).getLabel().contains("Image")
@@ -450,13 +447,13 @@ public void changedUpdate(DocumentEvent e) {
 
   /** @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent) */
   @Override
-public void insertUpdate(DocumentEvent e) {
+  public void insertUpdate(DocumentEvent e) {
     changedUpdate(e);
   }
 
   /** @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent) */
   @Override
-public void removeUpdate(DocumentEvent e) {
+  public void removeUpdate(DocumentEvent e) {
     changedUpdate(e);
   }
 
@@ -466,7 +463,7 @@ public void removeUpdate(DocumentEvent e) {
    * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
    */
   @Override
-public void valueChanged(ListSelectionEvent e) {
+  public void valueChanged(ListSelectionEvent e) {
     if (e.getValueIsAdjusting()) return;
     int selected = formPanel.getList(STATES).getSelectedIndex();
     formPanel.getButton(DELETE).setEnabled(selected >= 0);
@@ -578,17 +575,17 @@ public void valueChanged(ListSelectionEvent e) {
     Icon icon =
         new Icon() {
           @Override
-		public int getIconHeight() {
+          public int getIconHeight() {
             return ICON_SIZE + 2;
           }
 
           @Override
-		public int getIconWidth() {
+          public int getIconWidth() {
             return ICON_SIZE + 2;
           }
 
           @Override
-		public void paintIcon(Component c, java.awt.Graphics g, int x, int y) {
+          public void paintIcon(Component c, java.awt.Graphics g, int x, int y) {
             g.setColor(Color.BLACK);
             g.drawRect(x, y, ICON_SIZE + 2, ICON_SIZE + 2);
             g.translate(x + 1, y + 1);
@@ -776,7 +773,7 @@ public void valueChanged(ListSelectionEvent e) {
       spinner.commitEdit();
       width = ((Integer) spinner.getValue()).intValue();
     } catch (ParseException e) {
-      JOptionPane.showMessageDialog(		// XXX Use MapTool.showMessage()?
+      JOptionPane.showMessageDialog( // XXX Use MapTool.showMessage()?
           spinner,
           "There is an invalid "
               + displayName
@@ -819,7 +816,7 @@ public void valueChanged(ListSelectionEvent e) {
       message = "The file specified is a directory: ";
     }
     if (message != null) {
-      JOptionPane.showMessageDialog(	// XXX Use MapTool.showError()?
+      JOptionPane.showMessageDialog( // XXX Use MapTool.showError()?
           formPanel, message + file.getAbsolutePath(), "Error", JOptionPane.ERROR_MESSAGE);
       return null;
     }
@@ -827,7 +824,7 @@ public void valueChanged(ListSelectionEvent e) {
     try {
       asset = AssetManager.createAsset(file);
     } catch (IOException e) {
-      JOptionPane.showMessageDialog(	// XXX Use MapTool.showError()?
+      JOptionPane.showMessageDialog( // XXX Use MapTool.showError()?
           formPanel,
           "Error reading image file: " + file.getAbsolutePath(),
           "Error",

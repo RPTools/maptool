@@ -28,11 +28,9 @@ import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
-
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.ui.Scale;
@@ -86,7 +84,7 @@ public class AdjustGridPanel extends JComponent
             "zoomOut",
             new AbstractAction() {
               @Override
-			public void actionPerformed(ActionEvent e) {
+              public void actionPerformed(ActionEvent e) {
                 zoomOut();
               }
             });
@@ -97,7 +95,7 @@ public class AdjustGridPanel extends JComponent
             "zoomIn",
             new AbstractAction() {
               @Override
-			public void actionPerformed(ActionEvent e) {
+              public void actionPerformed(ActionEvent e) {
                 zoomIn();
               }
             });
@@ -109,7 +107,7 @@ public class AdjustGridPanel extends JComponent
             "zoomReset",
             new AbstractAction() {
               @Override
-			public void actionPerformed(ActionEvent e) {
+              public void actionPerformed(ActionEvent e) {
                 zoomReset();
               }
             });
@@ -305,16 +303,16 @@ public class AdjustGridPanel extends JComponent
   ////
   // MOUSE LISTENER
   @Override
-public void mouseClicked(MouseEvent e) {}
+  public void mouseClicked(MouseEvent e) {}
 
   @Override
-public void mouseEntered(MouseEvent e) {}
+  public void mouseEntered(MouseEvent e) {}
 
   @Override
-public void mouseExited(MouseEvent e) {}
+  public void mouseExited(MouseEvent e) {}
 
   @Override
-public void mousePressed(MouseEvent e) {
+  public void mousePressed(MouseEvent e) {
 
     mouseX = e.getX();
     mouseY = e.getY();
@@ -332,12 +330,12 @@ public void mousePressed(MouseEvent e) {
   }
 
   @Override
-public void mouseReleased(MouseEvent e) {}
+  public void mouseReleased(MouseEvent e) {}
 
   ////
   // MOUSE MOTION LISTENER
   @Override
-public void mouseDragged(MouseEvent e) {
+  public void mouseDragged(MouseEvent e) {
 
     if (SwingUtilities.isLeftMouseButton(e)) {
 
@@ -377,7 +375,7 @@ public void mouseDragged(MouseEvent e) {
   }
 
   @Override
-public void mouseMoved(MouseEvent e) {
+  public void mouseMoved(MouseEvent e) {
 
     Dimension imgSize = getScaledImageSize();
     Point imgPos = getScaledImagePosition();
@@ -399,7 +397,7 @@ public void mouseMoved(MouseEvent e) {
   ////
   // MOUSE WHEEL LISTENER
   @Override
-public void mouseWheelMoved(MouseWheelEvent e) {
+  public void mouseWheelMoved(MouseWheelEvent e) {
     if (SwingUtil.isControlDown(e)) {
       double oldScale = scale.getScale();
       if (e.getWheelRotation() < 0) {
