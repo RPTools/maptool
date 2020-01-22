@@ -14,16 +14,6 @@
  */
 package net.rptools.maptool.client;
 
-import com.jidesoft.plaf.LookAndFeelFactory;
-import com.jidesoft.plaf.UIDefaultsLookup;
-import com.jidesoft.plaf.basic.ThemePainter;
-import de.muntjak.tinylookandfeel.Theme;
-import de.muntjak.tinylookandfeel.util.SBReference;
-import io.sentry.Sentry;
-import io.sentry.SentryClient;
-import io.sentry.SentryClientFactory;
-import io.sentry.event.BreadcrumbBuilder;
-import io.sentry.event.UserBuilder;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -52,6 +42,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.BorderFactory;
@@ -65,6 +56,31 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.config.Configurator;
+
+import com.jidesoft.plaf.LookAndFeelFactory;
+import com.jidesoft.plaf.UIDefaultsLookup;
+import com.jidesoft.plaf.basic.ThemePainter;
+
+import de.muntjak.tinylookandfeel.Theme;
+import de.muntjak.tinylookandfeel.util.SBReference;
+import io.sentry.Sentry;
+import io.sentry.SentryClient;
+import io.sentry.SentryClientFactory;
+import io.sentry.event.BreadcrumbBuilder;
+import io.sentry.event.UserBuilder;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
@@ -104,22 +120,11 @@ import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
+import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmPrefs;
 import net.rptools.maptool.webapi.MTWebAppServer;
 import net.tsc.servicediscovery.ServiceAnnouncer;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.logging.log4j.core.appender.RollingFileAppender;
-import org.apache.logging.log4j.core.config.Configurator;
 
 /** */
 public class MapTool {
@@ -565,7 +570,8 @@ public class MapTool {
       try {
         EventQueue.invokeAndWait(
             new Runnable() {
-              public void run() {
+              @Override
+			public void run() {
                 renderer.renderZone(g, view);
               }
             });
@@ -747,7 +753,7 @@ public class MapTool {
   public static boolean isDevelopment() {
     return "DEVELOPMENT".equals(version)
         || "@buildNumber@".equals(version)
-        || "SNAPSHOT".startsWith(version);
+        || (version != null && version.startsWith("SNAPSHOT"));
   }
 
   public static ServerPolicy getServerPolicy() {
@@ -769,7 +775,8 @@ public class MapTool {
       // LATER: Make this non-anonymous
       playerList.sort(
           new Comparator<Player>() {
-            public int compare(Player arg0, Player arg1) {
+            @Override
+			public int compare(Player arg0, Player arg1) {
               return arg0.getName().compareToIgnoreCase(arg1.getName());
             }
           });
@@ -1221,7 +1228,8 @@ public class MapTool {
   private static final void configureJide() {
     LookAndFeelFactory.UIDefaultsCustomizer uiDefaultsCustomizer =
         new LookAndFeelFactory.UIDefaultsCustomizer() {
-          public void customize(UIDefaults defaults) {
+          @Override
+		public void customize(UIDefaults defaults) {
             ThemePainter painter = (ThemePainter) UIDefaultsLookup.get("Theme.painter");
             defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
 
@@ -1309,14 +1317,17 @@ public class MapTool {
   private static void postInitialize() {
     // Check to see if there is an autosave file from MT crashing
     getAutoSaveManager().check();
-    getAutoSaveManager().restart();
 
-    if (loadCampaignOnStartPath != "") {
+    if (!loadCampaignOnStartPath.isEmpty()) {
       File campaignFile = new File(loadCampaignOnStartPath);
       if (campaignFile.exists()) {
         AppActions.loadCampaign(campaignFile);
       }
     }
+    // loadCampaign() is guaranteed to restart the ASM so we don't need this, but
+    // we can't be sure which path of the IF statement is taken, so this is easy
+    // and relatively inexpensive.
+    getAutoSaveManager().restart();
 
     taskbarFlasher = new TaskBarFlasher(clientFrame);
 
@@ -1327,9 +1338,9 @@ public class MapTool {
 
   /**
    * Return whether the campaign file has changed. Only checks to see if there is a single empty map
-   * with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". We really
-   * should check against things like campaign property changes as well, including campaign
-   * macros...
+   * with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". The right
+   * way to do this is to check the length of the UndoQueue -- if the length is zero, we know
+   * the data isn't dirty.  But that would require a working UndoQueue... :(
    */
   public static boolean isCampaignDirty() {
     // TODO: This is a very naive check, but it's better than nothing
@@ -1423,20 +1434,8 @@ public class MapTool {
    * @since 1.4.0.1
    */
   private static String getCommandLineOption(
-      Options options, String searchValue, String defaultValue, String[] args) {
-    CommandLineParser parser = new DefaultParser();
-
-    try {
-      CommandLine cmd = parser.parse(options, args);
-
-      if (cmd.hasOption(searchValue)) {
-        return cmd.getOptionValue(searchValue);
-      }
-    } catch (ParseException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    return defaultValue;
+		  CommandLine cmd, String searchValue, String defaultValue) {
+	  return cmd.hasOption(searchValue) ? cmd.getOptionValue(searchValue) : defaultValue;
   }
 
   /**
@@ -1451,19 +1450,8 @@ public class MapTool {
    * @author Jamz
    * @since 1.4.0.1
    */
-  private static boolean getCommandLineOption(Options options, String searchValue, String[] args) {
-    CommandLineParser parser = new DefaultParser();
-
-    try {
-      CommandLine cmd = parser.parse(options, args);
-      if (cmd.hasOption(searchValue)) {
-        return true;
-      }
-    } catch (ParseException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    return false;
+  private static boolean getCommandLineOption(CommandLine cmd, String searchValue) {
+      return cmd.hasOption(searchValue);
   }
 
   /**
@@ -1481,19 +1469,8 @@ public class MapTool {
    * @since 1.4.0.1
    */
   private static int getCommandLineOption(
-      Options options, String searchValue, int defaultValue, String[] args) {
-    CommandLineParser parser = new DefaultParser();
-
-    try {
-      CommandLine cmd = parser.parse(options, args);
-      if (cmd.hasOption(searchValue)) {
-        return Integer.parseInt(cmd.getOptionValue(searchValue));
-      }
-    } catch (ParseException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    return -1;
+		  CommandLine cmd, String searchValue, int defaultValue) {
+	  return StringUtil.parseInteger(cmd.getOptionValue(searchValue), defaultValue);
   }
 
   /** An example method that throws an exception. */
@@ -1557,9 +1534,12 @@ public class MapTool {
     log.info("AppHome System Property: " + System.getProperty("appHome"));
     log.info("Logging to: " + getLoggerFileName());
 
+    String versionImplementation = version;
+    String versionOverride = version;
+    
     if (MapTool.class.getPackage().getImplementationVersion() != null) {
-      version = MapTool.class.getPackage().getImplementationVersion().trim();
-      log.info("setting MapTool version from manifest: " + version);
+      versionImplementation = MapTool.class.getPackage().getImplementationVersion().trim();
+      log.info("setting MapTool version from manifest: " + versionImplementation);
     }
 
     if (MapTool.class.getPackage().getImplementationVendor() != null) {
@@ -1587,23 +1567,33 @@ public class MapTool {
     cmdOptions.addOption("r", "reset", false, "reset startup options to defaults");
     cmdOptions.addOption("F", "file", true, "load campaign on startup");
 
-    debug = getCommandLineOption(cmdOptions, "debug", args);
-    version = getCommandLineOption(cmdOptions, "version", version, args);
-    graphicsMonitor = getCommandLineOption(cmdOptions, "monitor", graphicsMonitor, args);
-    useFullScreen = getCommandLineOption(cmdOptions, "fullscreen", args);
+    CommandLineParser cmdParser = new DefaultParser();
+    CommandLine cmd = null;
+    boolean listMacros = false;
 
-    windowWidth = getCommandLineOption(cmdOptions, "width", windowWidth, args);
-    windowHeight = getCommandLineOption(cmdOptions, "height", windowHeight, args);
-    windowX = getCommandLineOption(cmdOptions, "xpos", windowX, args);
-    windowY = getCommandLineOption(cmdOptions, "ypos", windowY, args);
+    try {
+      cmd = cmdParser.parse(cmdOptions, args);
 
-    loadCampaignOnStartPath = getCommandLineOption(cmdOptions, "file", "", args);
+      debug = getCommandLineOption(cmd, "debug");
+      versionOverride = getCommandLineOption(cmd, "version", version);
+      graphicsMonitor = getCommandLineOption(cmd, "monitor", graphicsMonitor);
+      useFullScreen = getCommandLineOption(cmd, "fullscreen");
 
-    if (getCommandLineOption(cmdOptions, "reset", args)) {
-      UserJvmPrefs.resetJvmOptions();
+      windowWidth = getCommandLineOption(cmd, "width", windowWidth);
+      windowHeight = getCommandLineOption(cmd, "height", windowHeight);
+      windowX = getCommandLineOption(cmd, "xpos", windowX);
+      windowY = getCommandLineOption(cmd, "ypos", windowY);
+
+      loadCampaignOnStartPath = getCommandLineOption(cmd, "file", "");
+      listMacros = getCommandLineOption(cmd, "macros");
+
+      if (getCommandLineOption(cmd, "reset")) {
+          UserJvmPrefs.resetJvmOptions();
+      }
+    } catch (ParseException e1) {
+      // XXX Can we call showWarning() here?  Test it.
+      e1.printStackTrace();
     }
-
-    boolean listMacros = getCommandLineOption(cmdOptions, "macros", args);
 
     // Jamz: Just a little console log formatter for system.out to hyperlink messages to source.
     if (debug) {
@@ -1619,17 +1609,29 @@ public class MapTool {
     }
 
     if (cmdOptions.hasOption("version")) {
-      log.info("overriding MapTool version from command line to: " + version);
+      log.info("overriding MapTool version from command line to: " + versionOverride);
+      version = versionOverride;
     } else {
+      version = versionImplementation;
       log.info("MapTool version: " + version);
     }
 
     log.info("MapTool vendor: " + vendor);
+    
+    if (cmd.getArgs().length != 0) {
+    	log.info("Overriding -F option with extra argument");
+    	loadCampaignOnStartPath = cmd.getArgs()[0];
+    }
+    if (!loadCampaignOnStartPath.isEmpty()) {
+    	log.info("Loading initial campaign: " + loadCampaignOnStartPath);
+    }
 
     // Set MapTool version
     sentry.setRelease(getVersion());
     sentry.addTag("os", System.getProperty("os.name"));
     sentry.addTag("version", MapTool.getVersion());
+    sentry.addTag("versionImplementation", versionImplementation);
+    sentry.addTag("versionOverride", versionOverride);
 
     if (listMacros) {
       StringBuilder logOutput = new StringBuilder();
@@ -1750,7 +1752,8 @@ public class MapTool {
           "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
       LookAndFeelFactory.addUIDefaultsCustomizer(
           new LookAndFeelFactory.UIDefaultsCustomizer() {
-            public void customize(UIDefaults defaults) {
+            @Override
+			public void customize(UIDefaults defaults) {
               // Remove red border around menus
               defaults.put("PopupMenu.foreground", Color.lightGray);
             }
@@ -1801,16 +1804,19 @@ public class MapTool {
 
     EventQueue.invokeLater(
         new Runnable() {
-          public void run() {
+          @Override
+		public void run() {
             initialize();
             EventQueue.invokeLater(
                 new Runnable() {
-                  public void run() {
+                  @Override
+				public void run() {
                     clientFrame.setVisible(true);
                     splash.hideSplashScreen();
                     EventQueue.invokeLater(
                         new Runnable() {
-                          public void run() {
+                          @Override
+						public void run() {
                             postInitialize();
                           }
                         });
