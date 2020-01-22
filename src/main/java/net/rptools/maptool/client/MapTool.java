@@ -14,6 +14,16 @@
  */
 package net.rptools.maptool.client;
 
+import com.jidesoft.plaf.LookAndFeelFactory;
+import com.jidesoft.plaf.UIDefaultsLookup;
+import com.jidesoft.plaf.basic.ThemePainter;
+import de.muntjak.tinylookandfeel.Theme;
+import de.muntjak.tinylookandfeel.util.SBReference;
+import io.sentry.Sentry;
+import io.sentry.SentryClient;
+import io.sentry.SentryClientFactory;
+import io.sentry.event.BreadcrumbBuilder;
+import io.sentry.event.UserBuilder;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -42,7 +52,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.BorderFactory;
@@ -56,31 +65,6 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.logging.log4j.core.appender.RollingFileAppender;
-import org.apache.logging.log4j.core.config.Configurator;
-
-import com.jidesoft.plaf.LookAndFeelFactory;
-import com.jidesoft.plaf.UIDefaultsLookup;
-import com.jidesoft.plaf.basic.ThemePainter;
-
-import de.muntjak.tinylookandfeel.Theme;
-import de.muntjak.tinylookandfeel.util.SBReference;
-import io.sentry.Sentry;
-import io.sentry.SentryClient;
-import io.sentry.SentryClientFactory;
-import io.sentry.event.BreadcrumbBuilder;
-import io.sentry.event.UserBuilder;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
@@ -125,6 +109,18 @@ import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmPrefs;
 import net.rptools.maptool.webapi.MTWebAppServer;
 import net.tsc.servicediscovery.ServiceAnnouncer;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.config.Configurator;
 
 /** */
 public class MapTool {
@@ -571,7 +567,7 @@ public class MapTool {
         EventQueue.invokeAndWait(
             new Runnable() {
               @Override
-			public void run() {
+              public void run() {
                 renderer.renderZone(g, view);
               }
             });
@@ -776,7 +772,7 @@ public class MapTool {
       playerList.sort(
           new Comparator<Player>() {
             @Override
-			public int compare(Player arg0, Player arg1) {
+            public int compare(Player arg0, Player arg1) {
               return arg0.getName().compareToIgnoreCase(arg1.getName());
             }
           });
@@ -1229,7 +1225,7 @@ public class MapTool {
     LookAndFeelFactory.UIDefaultsCustomizer uiDefaultsCustomizer =
         new LookAndFeelFactory.UIDefaultsCustomizer() {
           @Override
-		public void customize(UIDefaults defaults) {
+          public void customize(UIDefaults defaults) {
             ThemePainter painter = (ThemePainter) UIDefaultsLookup.get("Theme.painter");
             defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
 
@@ -1339,8 +1335,8 @@ public class MapTool {
   /**
    * Return whether the campaign file has changed. Only checks to see if there is a single empty map
    * with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". The right
-   * way to do this is to check the length of the UndoQueue -- if the length is zero, we know
-   * the data isn't dirty.  But that would require a working UndoQueue... :(
+   * way to do this is to check the length of the UndoQueue -- if the length is zero, we know the
+   * data isn't dirty. But that would require a working UndoQueue... :(
    */
   public static boolean isCampaignDirty() {
     // TODO: This is a very naive check, but it's better than nothing
@@ -1434,8 +1430,8 @@ public class MapTool {
    * @since 1.4.0.1
    */
   private static String getCommandLineOption(
-		  CommandLine cmd, String searchValue, String defaultValue) {
-	  return cmd.hasOption(searchValue) ? cmd.getOptionValue(searchValue) : defaultValue;
+      CommandLine cmd, String searchValue, String defaultValue) {
+    return cmd.hasOption(searchValue) ? cmd.getOptionValue(searchValue) : defaultValue;
   }
 
   /**
@@ -1451,7 +1447,7 @@ public class MapTool {
    * @since 1.4.0.1
    */
   private static boolean getCommandLineOption(CommandLine cmd, String searchValue) {
-      return cmd.hasOption(searchValue);
+    return cmd.hasOption(searchValue);
   }
 
   /**
@@ -1468,9 +1464,8 @@ public class MapTool {
    * @author Jamz
    * @since 1.4.0.1
    */
-  private static int getCommandLineOption(
-		  CommandLine cmd, String searchValue, int defaultValue) {
-	  return StringUtil.parseInteger(cmd.getOptionValue(searchValue), defaultValue);
+  private static int getCommandLineOption(CommandLine cmd, String searchValue, int defaultValue) {
+    return StringUtil.parseInteger(cmd.getOptionValue(searchValue), defaultValue);
   }
 
   /** An example method that throws an exception. */
@@ -1536,7 +1531,7 @@ public class MapTool {
 
     String versionImplementation = version;
     String versionOverride = version;
-    
+
     if (MapTool.class.getPackage().getImplementationVersion() != null) {
       versionImplementation = MapTool.class.getPackage().getImplementationVersion().trim();
       log.info("setting MapTool version from manifest: " + versionImplementation);
@@ -1588,11 +1583,12 @@ public class MapTool {
       listMacros = getCommandLineOption(cmd, "macros");
 
       if (getCommandLineOption(cmd, "reset")) {
-          UserJvmPrefs.resetJvmOptions();
+        UserJvmPrefs.resetJvmOptions();
       }
-    } catch (ParseException e1) {
-      // XXX Can we call showWarning() here?  Test it.
-      e1.printStackTrace();
+    } catch (ParseException e) {
+      // MapTool.showWarning() can be invoked here.  It will log the stacktrace,
+      // so there's no need for us to do it.
+      MapTool.showWarning("Error parsing the command line", e);
     }
 
     // Jamz: Just a little console log formatter for system.out to hyperlink messages to source.
@@ -1617,13 +1613,13 @@ public class MapTool {
     }
 
     log.info("MapTool vendor: " + vendor);
-    
+
     if (cmd.getArgs().length != 0) {
-    	log.info("Overriding -F option with extra argument");
-    	loadCampaignOnStartPath = cmd.getArgs()[0];
+      log.info("Overriding -F option with extra argument");
+      loadCampaignOnStartPath = cmd.getArgs()[0];
     }
     if (!loadCampaignOnStartPath.isEmpty()) {
-    	log.info("Loading initial campaign: " + loadCampaignOnStartPath);
+      log.info("Loading initial campaign: " + loadCampaignOnStartPath);
     }
 
     // Set MapTool version
@@ -1657,21 +1653,11 @@ public class MapTool {
     try {
       AppUtil.getAppHome();
     } catch (Throwable t) {
-      t.printStackTrace();
-
-      // Create an empty frame so there's something to click on if the dialog goes in the
-      // background
-      JFrame frame = new JFrame();
-      SwingUtil.centerOnScreen(frame);
-      frame.setVisible(true);
-
-      String errorCreatingDir = "Error creating data directory";
-      log.error(errorCreatingDir, t);
-      JOptionPane.showMessageDialog(
-          frame, t.getMessage(), errorCreatingDir, JOptionPane.ERROR_MESSAGE);
+      MapTool.showError("Error creating data directory", t);
       System.exit(1);
     }
 
+    // XXX Should we even be doing this now that we ship with our own JRE?
     verifyJavaVersion();
 
     // System properties
@@ -1753,7 +1739,7 @@ public class MapTool {
       LookAndFeelFactory.addUIDefaultsCustomizer(
           new LookAndFeelFactory.UIDefaultsCustomizer() {
             @Override
-			public void customize(UIDefaults defaults) {
+            public void customize(UIDefaults defaults) {
               // Remove red border around menus
               defaults.put("PopupMenu.foreground", Color.lightGray);
             }
@@ -1805,18 +1791,18 @@ public class MapTool {
     EventQueue.invokeLater(
         new Runnable() {
           @Override
-		public void run() {
+          public void run() {
             initialize();
             EventQueue.invokeLater(
                 new Runnable() {
                   @Override
-				public void run() {
+                  public void run() {
                     clientFrame.setVisible(true);
                     splash.hideSplashScreen();
                     EventQueue.invokeLater(
                         new Runnable() {
                           @Override
-						public void run() {
+                          public void run() {
                             postInitialize();
                           }
                         });
