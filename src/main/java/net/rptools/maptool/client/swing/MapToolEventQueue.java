@@ -14,16 +14,24 @@
  */
 package net.rptools.maptool.client.swing;
 
-import com.jidesoft.dialog.JideOptionPane;
-import io.sentry.Sentry;
-import io.sentry.event.UserBuilder;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
+import java.awt.event.MouseWheelEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
+
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.jidesoft.dialog.JideOptionPane;
+
+import io.sentry.Sentry;
+import io.sentry.event.UserBuilder;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.getInfoFunction;
@@ -31,8 +39,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.util.SysInfo;
 import net.rptools.parser.ParserException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class MapToolEventQueue extends EventQueue {
   private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
@@ -45,7 +51,14 @@ public class MapToolEventQueue extends EventQueue {
   @Override
   protected void dispatchEvent(AWTEvent event) {
     try {
-      super.dispatchEvent(event);
+      if (event instanceof MouseWheelEvent
+          && AppUtil.MAC_OS_X
+          && ((MouseWheelEvent) event).isShiftDown()) {
+        // System.out.println("Ignoring: " + event.paramString());
+        // ignore this event
+      } else {
+        super.dispatchEvent(event);
+      }
     } catch (StackOverflowError soe) {
       log.error(soe, soe);
       optionPane.setTitle(I18N.getString("MapToolEventQueue.stackOverflow.title")); // $NON-NLS-1$
