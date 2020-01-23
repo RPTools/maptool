@@ -462,7 +462,7 @@ public class JSONMacroFunctions extends AbstractFunction {
       case "json.difference":
         {
           FunctionUtil.checkNumberParam(functionName, args, 2, UNLIMITED_PARAMETERS);
-          List<JsonElement> elements = paramsAsJsonElements(functionName, args);
+          List<JsonElement> elements = paramsConvertedToJsonElements(functionName, args);
           return jsonArrayFunctions.difference(elements);
         }
       case "json.isSubset":
