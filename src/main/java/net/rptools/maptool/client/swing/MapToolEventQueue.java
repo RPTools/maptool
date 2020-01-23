@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.client.swing;
 
+import com.jidesoft.dialog.JideOptionPane;
+import io.sentry.Sentry;
+import io.sentry.event.UserBuilder;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
 import java.awt.event.FocusEvent;
@@ -23,17 +26,8 @@ import java.awt.event.MouseWheelEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
-
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.jidesoft.dialog.JideOptionPane;
-
-import io.sentry.Sentry;
-import io.sentry.event.UserBuilder;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.getInfoFunction;
@@ -41,6 +35,8 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.util.SysInfo;
 import net.rptools.parser.ParserException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class MapToolEventQueue extends EventQueue {
   private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
@@ -50,45 +46,68 @@ public class MapToolEventQueue extends EventQueue {
           JOptionPane.ERROR_MESSAGE,
           JideOptionPane.CLOSE_OPTION);
   /**
-   * This field must only ever be accessed from the EDT.  Otherwise, a separate thread
-   * could access it to determine the state of the `Shift` key only to have the EDT
-   * progress to a different event such that the state is outdated.
-   * 
-   * An `int` is used to allow for future implementations to include the location
-   * of the key, i.e., Left-Shift or Right-Shift via event.getKeyLocation().
+   * This field must only ever be accessed from the EDT. Otherwise, a separate thread could access
+   * it to determine the state of the `Shift` key only to have the EDT progress to a different event
+   * such that the state is outdated.
+   *
+   * <p>An `int` is used to allow for future implementations to include the location of the key,
+   * i.e., Left-Shift or Right-Shift via event.getKeyLocation().
    */
   public static int shiftState = 0;
-  public static final int ALL_MODIFIERS_EXC_SHIFT = InputEvent.CTRL_DOWN_MASK |
-			InputEvent.ALT_DOWN_MASK | InputEvent.META_DOWN_MASK | InputEvent.ALT_GRAPH_DOWN_MASK;
+
+  public static final int ALL_MODIFIERS_EXC_SHIFT =
+      InputEvent.CTRL_DOWN_MASK
+          | InputEvent.ALT_DOWN_MASK
+          | InputEvent.META_DOWN_MASK
+          | InputEvent.ALT_GRAPH_DOWN_MASK;
 
   @Override
   protected void dispatchEvent(AWTEvent event) {
     try {
-		if (event instanceof KeyEvent) {
-			KeyEvent ke = (KeyEvent) event;
-			if (ke.getKeyCode() == KeyEvent.VK_SHIFT) {
-				switch (ke.getID()) {
-				case KeyEvent.KEY_PRESSED:	MapToolEventQueue.shiftState = 1; break;
-				case KeyEvent.KEY_RELEASED:	MapToolEventQueue.shiftState = 0; break;
-				}
-				// log.info("shiftState set to " + MapToolEventQueue.shiftState);
-			}
-		} else if (event instanceof FocusEvent) {
-			FocusEvent fe = (FocusEvent) event;
-			if (fe.getID() == FocusEvent.FOCUS_LOST) {
-				// When we lose focus, assume the Shift key is released.
-				MapToolEventQueue.shiftState = 0;
-				// log.info("shiftState forced off (focus lost)");
-			}
-		} else if (event instanceof MouseWheelEvent) {
-			MouseWheelEvent mwe = (MouseWheelEvent) event;
-			if (mwe.isShiftDown() && MapToolEventQueue.shiftState == 0) {
-				int all_mods = mwe.getModifiersEx() & MapToolEventQueue.ALL_MODIFIERS_EXC_SHIFT;
-				event = new MouseWheelEvent(mwe.getComponent(), mwe.getID(), mwe.getWhen(), all_mods, mwe.getX(), mwe.getY(), mwe.getXOnScreen(), mwe.getYOnScreen(), 1, mwe.isPopupTrigger(), mwe.getScrollType(), mwe.getScrollAmount(), mwe.getWheelRotation(), mwe.getPreciseWheelRotation());
-				// log.info("shiftModifier forced off");
-			}
+      if (event instanceof KeyEvent) {
+        KeyEvent ke = (KeyEvent) event;
+        if (ke.getKeyCode() == KeyEvent.VK_SHIFT) {
+          switch (ke.getID()) {
+            case KeyEvent.KEY_PRESSED:
+              MapToolEventQueue.shiftState = 1;
+              break;
+            case KeyEvent.KEY_RELEASED:
+              MapToolEventQueue.shiftState = 0;
+              break;
+          }
+          // log.info("shiftState set to " + MapToolEventQueue.shiftState);
         }
-        super.dispatchEvent(event);
+      } else if (event instanceof FocusEvent) {
+        FocusEvent fe = (FocusEvent) event;
+        if (fe.getID() == FocusEvent.FOCUS_LOST) {
+          // When we lose focus, assume the Shift key is released.
+          MapToolEventQueue.shiftState = 0;
+          // log.info("shiftState forced off (focus lost)");
+        }
+      } else if (event instanceof MouseWheelEvent) {
+        MouseWheelEvent mwe = (MouseWheelEvent) event;
+        if (mwe.isShiftDown() && MapToolEventQueue.shiftState == 0) {
+          int all_mods = mwe.getModifiersEx() & MapToolEventQueue.ALL_MODIFIERS_EXC_SHIFT;
+          event =
+              new MouseWheelEvent(
+                  mwe.getComponent(),
+                  mwe.getID(),
+                  mwe.getWhen(),
+                  all_mods,
+                  mwe.getX(),
+                  mwe.getY(),
+                  mwe.getXOnScreen(),
+                  mwe.getYOnScreen(),
+                  1,
+                  mwe.isPopupTrigger(),
+                  mwe.getScrollType(),
+                  mwe.getScrollAmount(),
+                  mwe.getWheelRotation(),
+                  mwe.getPreciseWheelRotation());
+          // log.info("shiftModifier forced off");
+        }
+      }
+      super.dispatchEvent(event);
     } catch (StackOverflowError soe) {
       log.error(soe, soe);
       optionPane.setTitle(I18N.getString("MapToolEventQueue.stackOverflow.title")); // $NON-NLS-1$
