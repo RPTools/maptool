@@ -244,6 +244,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("runButton");
     button.addActionListener(
         new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             save(false);
 
@@ -263,6 +264,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("applyButton");
     button.addActionListener(
         new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             save(false);
           }
@@ -273,6 +275,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("okButton");
     button.addActionListener(
         new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             save(true);
           }
@@ -285,6 +288,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     JButton button = (JButton) panel.getButton("cancelButton");
     button.addActionListener(
         new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             cancel();
           }
@@ -439,14 +443,17 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         .getDocument()
         .addDocumentListener(
             new DocumentListener() {
+              @Override
               public void changedUpdate(DocumentEvent e) {
                 status.setText("Ready");
               }
 
+              @Override
               public void removeUpdate(DocumentEvent e) {
                 status.setText("Ready");
               }
 
+              @Override
               public void insertUpdate(DocumentEvent e) {
                 status.setText("Ready");
               }

@@ -57,7 +57,7 @@ public class JsonObjectFunctions {
       vals[0] = vals[0].trim();
       if (vals.length > 1) {
         vals[1] = vals[1].trim();
-        jsonObject.add(vals[0], typeConversion.asJsonElement(vals[1]));
+        jsonObject.add(vals[0], typeConversion.convertPrimitiveFromString(vals[1]));
       } else {
         jsonObject.add(vals[0], null);
       }
@@ -193,7 +193,7 @@ public class JsonObjectFunctions {
     for (int i = 0; i < list.size(); i += 2) {
       Object value = list.get(i + 1);
       if (value instanceof String && value.toString().length() == 0) {
-        value = "''";
+        value = "";
       }
       newJsonObject.add(list.get(i).toString(), typeConversion.asJsonElement(value));
     }

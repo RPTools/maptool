@@ -104,6 +104,7 @@ import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
+import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmPrefs;
 import net.rptools.maptool.webapi.MTWebAppServer;
@@ -123,6 +124,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 
 /** */
 public class MapTool {
+
   private static final Logger log = LogManager.getLogger(MapTool.class);
 
   private static SentryClient sentry;
@@ -143,14 +145,14 @@ public class MapTool {
 
   private static String clientId = AppUtil.readClientId();
 
-  public static enum ZoneEvent {
+  public enum ZoneEvent {
     Added,
     Removed,
     Activated,
     Deactivated
   }
 
-  public static enum PreferencesEvent {
+  public enum PreferencesEvent {
     Changed
   }
 
@@ -161,7 +163,7 @@ public class MapTool {
       new Dimension(AppPreferences.getThumbnailSize(), AppPreferences.getThumbnailSize());
 
   private static ThumbnailManager thumbnailManager;
-  private static String version = "DEVELOPMENT";;
+  private static String version = "DEVELOPMENT";
   private static String vendor = "RPTools!"; // Default, will get from JAR Manifest during normal
   // runtime
 
@@ -200,6 +202,7 @@ public class MapTool {
   private static int windowHeight = -1;
   private static int windowX = -1;
   private static int windowY = -1;
+  private static String loadCampaignOnStartPath = "";
 
   public static Dimension getThumbnailSize() {
     return THUMBNAIL_SIZE;
@@ -254,7 +257,8 @@ public class MapTool {
    * @param titleKey the key in the properties file to use when creating the title of the dialog
    *     window (formatted using <code>params</code>)
    * @param messageType one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>
-   *     JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE</code>
+   *                    JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE
+   *     </code>
    * @param params optional parameters to use when formatting the title text from the properties
    *     file
    */
@@ -404,35 +408,15 @@ public class MapTool {
     }
 
     String msg = I18N.getText("msg.confirm.deleteToken");
-    log.debug(msg);
-    Object[] options = {
-      I18N.getText("msg.title.messageDialog.yes"),
-      I18N.getText("msg.title.messageDialog.no"),
-      I18N.getText("msg.title.messageDialog.dontAskAgain")
-    };
-    String title = I18N.getText("msg.title.messageDialogConfirm");
-    int val =
-        JOptionPane.showOptionDialog(
-            clientFrame,
-            msg,
-            title,
-            JOptionPane.NO_OPTION,
-            JOptionPane.WARNING_MESSAGE,
-            null,
-            options,
-            options[0]);
+    int val = confirmDelete(msg);
 
     // "Yes, don't show again" Button
     if (val == 2) {
       showInformation("msg.confirm.deleteToken.removed");
       AppPreferences.setTokensWarnWhenDeleted(false);
     }
-    // Any version of 'Yes'...
-    if (val == JOptionPane.YES_OPTION || val == 2) {
-      return true;
-    }
-    // Assume 'No' response
-    return false;
+    // Any version of 'Yes' returns true, false otherwise
+    return val == JOptionPane.YES_OPTION || val == 2;
   }
 
   public static boolean confirmDrawDelete() {
@@ -441,6 +425,18 @@ public class MapTool {
     }
 
     String msg = I18N.getText("msg.confirm.deleteDraw");
+    int val = confirmDelete(msg);
+
+    // "Yes, don't show again" Button
+    if (val == 2) {
+      showInformation("msg.confirm.deleteDraw.removed");
+      AppPreferences.setDrawWarnWhenDeleted(false);
+    }
+    // Any version of 'Yes' returns true, otherwise false
+    return val == JOptionPane.YES_OPTION || val == 2;
+  }
+
+  private static int confirmDelete(String msg) {
     log.debug(msg);
     Object[] options = {
       I18N.getText("msg.title.messageDialog.yes"),
@@ -448,28 +444,15 @@ public class MapTool {
       I18N.getText("msg.title.messageDialog.dontAskAgain")
     };
     String title = I18N.getText("msg.title.messageDialogConfirm");
-    int val =
-        JOptionPane.showOptionDialog(
-            clientFrame,
-            msg,
-            title,
-            JOptionPane.NO_OPTION,
-            JOptionPane.WARNING_MESSAGE,
-            null,
-            options,
-            options[0]);
-
-    // "Yes, don't show again" Button
-    if (val == 2) {
-      showInformation("msg.confirm.deleteDraw.removed");
-      AppPreferences.setDrawWarnWhenDeleted(false);
-    }
-    // Any version of 'Yes'...
-    if (val == JOptionPane.YES_OPTION || val == 2) {
-      return true;
-    }
-    // Assume 'No' response
-    return false;
+    return JOptionPane.showOptionDialog(
+        clientFrame,
+        msg,
+        title,
+        JOptionPane.NO_OPTION,
+        JOptionPane.WARNING_MESSAGE,
+        null,
+        options,
+        options[0]);
   }
 
   private MapTool() {
@@ -519,12 +502,12 @@ public class MapTool {
             Runtime.getRuntime().exec(new String[] {browser, url});
             apparentlyItWorked = true;
           } catch (Exception e) {
-            errorMessage = "msg.error.browser.cannotStart";
             exception = e;
           }
         }
       }
-      if (apparentlyItWorked == false) {
+      if (!apparentlyItWorked) {
+        errorMessage = "msg.error.browser.cannotStart";
         MapTool.showError(I18N.getText(errorMessage, param), exception);
       }
     }
@@ -583,14 +566,13 @@ public class MapTool {
       try {
         EventQueue.invokeAndWait(
             new Runnable() {
+              @Override
               public void run() {
                 renderer.renderZone(g, view);
               }
             });
-      } catch (InterruptedException ie) {
+      } catch (InterruptedException | InvocationTargetException ie) {
         MapTool.showError("While creating snapshot", ie);
-      } catch (InvocationTargetException ite) {
-        MapTool.showError("While creating snapshot", ite);
       }
     } else {
       renderer.renderZone(g, view);
@@ -636,11 +618,11 @@ public class MapTool {
    * For Multi-monitor support, allows you to move the frame to a specific monitor. It will also set
    * the height, width and x, y position of the frame.
    *
-   * @author Jamz
-   * @since 1.4.1.0
    * @param frame The JFrame to move
    * @param monitor The monitor number as an int. Note the first monitor start at 0, not 1.
    * @param maximize set to true if you want to maximize the frame to that monitor.
+   * @author Jamz
+   * @since 1.4.1.0
    */
   private static void moveToMonitor(JFrame frame, int monitor, boolean maximize) {
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -665,7 +647,9 @@ public class MapTool {
       throw new RuntimeException("No Screens Found");
     }
 
-    if (maximize) frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+    if (maximize) {
+      frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+    }
   }
 
   private static void initialize() {
@@ -738,7 +722,9 @@ public class MapTool {
       // It's possible that the SelectionPanel may cause text to be added to the NoteFrame, so
       // it
       // can happen before MapTool.initialize() has had a chance to init the clientFrame.
-      if (clientFrame != null) SwingUtil.centerOver(profilingNoteFrame, clientFrame);
+      if (clientFrame != null) {
+        SwingUtil.centerOver(profilingNoteFrame, clientFrame);
+      }
     }
     return profilingNoteFrame;
   }
@@ -748,7 +734,9 @@ public class MapTool {
       logConsoleFrame = new LogConsoleFrame();
       logConsoleFrame.setVisible(true);
 
-      if (clientFrame != null) SwingUtil.centerOver(logConsoleFrame, clientFrame);
+      if (clientFrame != null) {
+        SwingUtil.centerOver(logConsoleFrame, clientFrame);
+      }
     }
 
     return logConsoleFrame;
@@ -761,7 +749,7 @@ public class MapTool {
   public static boolean isDevelopment() {
     return "DEVELOPMENT".equals(version)
         || "@buildNumber@".equals(version)
-        || "SNAPSHOT".startsWith(version);
+        || (version != null && version.startsWith("SNAPSHOT"));
   }
 
   public static ServerPolicy getServerPolicy() {
@@ -783,6 +771,7 @@ public class MapTool {
       // LATER: Make this non-anonymous
       playerList.sort(
           new Comparator<Player>() {
+            @Override
             public int compare(Player arg0, Player arg1) {
               return arg0.getName().compareToIgnoreCase(arg1.getName());
             }
@@ -896,7 +885,9 @@ public class MapTool {
    */
   public static void addGlobalMessage(String message, String targets, String separator) {
     List<String> list = new LinkedList<String>();
-    for (String target : targets.split(separator)) list.add(target.trim());
+    for (String target : targets.split(separator)) {
+      list.add(target.trim());
+    }
     addGlobalMessage(message, list);
   }
 
@@ -1119,8 +1110,9 @@ public class MapTool {
     eventDispatcher.fireEvent(ZoneEvent.Added, getCampaign(), null, zone);
 
     // Show the new zone
-    if (changeZone) clientFrame.setCurrentZoneRenderer(ZoneRendererFactory.newRenderer(zone));
-    else {
+    if (changeZone) {
+      clientFrame.setCurrentZoneRenderer(ZoneRendererFactory.newRenderer(zone));
+    } else {
       getFrame().getZoneRenderers().add(ZoneRendererFactory.newRenderer(zone));
     }
   }
@@ -1232,6 +1224,7 @@ public class MapTool {
   private static final void configureJide() {
     LookAndFeelFactory.UIDefaultsCustomizer uiDefaultsCustomizer =
         new LookAndFeelFactory.UIDefaultsCustomizer() {
+          @Override
           public void customize(UIDefaults defaults) {
             ThemePainter painter = (ThemePainter) UIDefaultsLookup.get("Theme.painter");
             defaults.put("OptionPaneUI", "com.jidesoft.plaf.basic.BasicJideOptionPaneUI");
@@ -1312,12 +1305,24 @@ public class MapTool {
         keepgoing = confirm("msg.error.wrongJavaVersion", version);
       }
     }
-    if (!keepgoing) System.exit(1);
+    if (!keepgoing) {
+      System.exit(1);
+    }
   }
 
   private static void postInitialize() {
     // Check to see if there is an autosave file from MT crashing
     getAutoSaveManager().check();
+
+    if (!loadCampaignOnStartPath.isEmpty()) {
+      File campaignFile = new File(loadCampaignOnStartPath);
+      if (campaignFile.exists()) {
+        AppActions.loadCampaign(campaignFile);
+      }
+    }
+    // loadCampaign() is guaranteed to restart the ASM so we don't need this, but
+    // we can't be sure which path of the IF statement is taken, so this is easy
+    // and relatively inexpensive.
     getAutoSaveManager().restart();
 
     taskbarFlasher = new TaskBarFlasher(clientFrame);
@@ -1329,9 +1334,9 @@ public class MapTool {
 
   /**
    * Return whether the campaign file has changed. Only checks to see if there is a single empty map
-   * with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". We really
-   * should check against things like campaign property changes as well, including campaign
-   * macros...
+   * with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". The right
+   * way to do this is to check the length of the UndoQueue -- if the length is zero, we know the
+   * data isn't dirty. But that would require a working UndoQueue... :(
    */
   public static boolean isCampaignDirty() {
     // TODO: This is a very naive check, but it's better than nothing
@@ -1389,6 +1394,7 @@ public class MapTool {
   }
 
   private static class ServerHeartBeatThread extends Thread {
+
     @Override
     public void run() {
 
@@ -1415,29 +1421,17 @@ public class MapTool {
    *
    * <p>Examples: -version=1.4.0.1 -user=Jamz
    *
-   * @author Jamz
-   * @since 1.4.0.1
    * @param options {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
    * @param defaultValue A default value to return if option is not found
    * @param args String array of passed in args
    * @return Option value found as a String, or defaultValue if not found
+   * @author Jamz
+   * @since 1.4.0.1
    */
   private static String getCommandLineOption(
-      Options options, String searchValue, String defaultValue, String[] args) {
-    CommandLineParser parser = new DefaultParser();
-
-    try {
-      CommandLine cmd = parser.parse(options, args);
-
-      if (cmd.hasOption(searchValue)) {
-        return cmd.getOptionValue(searchValue);
-      }
-    } catch (ParseException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    return defaultValue;
+      CommandLine cmd, String searchValue, String defaultValue) {
+    return cmd.hasOption(searchValue) ? cmd.getOptionValue(searchValue) : defaultValue;
   }
 
   /**
@@ -1445,26 +1439,15 @@ public class MapTool {
    *
    * <p>Examples: -x or -fullscreen
    *
-   * @author Jamz
-   * @since 1.4.0.1
    * @param options {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
    * @param args String array of passed in args
    * @return A boolean value of true if option parameter found
+   * @author Jamz
+   * @since 1.4.0.1
    */
-  private static boolean getCommandLineOption(Options options, String searchValue, String[] args) {
-    CommandLineParser parser = new DefaultParser();
-
-    try {
-      CommandLine cmd = parser.parse(options, args);
-      if (cmd.hasOption(searchValue)) {
-        return true;
-      }
-    } catch (ParseException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    return false;
+  private static boolean getCommandLineOption(CommandLine cmd, String searchValue) {
+    return cmd.hasOption(searchValue);
   }
 
   /**
@@ -1473,28 +1456,16 @@ public class MapTool {
    *
    * <p>Examples: -monitor=1 -x=0 -y=0 -w=1200 -h=960
    *
-   * @author Jamz
-   * @since 1.4.0.1
    * @param options {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
    * @param defaultValue A default value to return if option is not found
    * @param args String array of passed in args
    * @return Int value of the matching option parameter if found
+   * @author Jamz
+   * @since 1.4.0.1
    */
-  private static int getCommandLineOption(
-      Options options, String searchValue, int defaultValue, String[] args) {
-    CommandLineParser parser = new DefaultParser();
-
-    try {
-      CommandLine cmd = parser.parse(options, args);
-      if (cmd.hasOption(searchValue)) {
-        return Integer.parseInt(cmd.getOptionValue(searchValue));
-      }
-    } catch (ParseException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-    return -1;
+  private static int getCommandLineOption(CommandLine cmd, String searchValue, int defaultValue) {
+    return StringUtil.parseInteger(cmd.getOptionValue(searchValue), defaultValue);
   }
 
   /** An example method that throws an exception. */
@@ -1538,10 +1509,13 @@ public class MapTool {
     org.apache.logging.log4j.core.Logger loggerImpl = (org.apache.logging.log4j.core.Logger) log;
     Appender appender = loggerImpl.getAppenders().get("LogFile");
 
-    if (appender != null)
-      if (appender instanceof FileAppender) return ((FileAppender) appender).getFileName();
-      else if (appender instanceof RollingFileAppender)
+    if (appender != null) {
+      if (appender instanceof FileAppender) {
+        return ((FileAppender) appender).getFileName();
+      } else if (appender instanceof RollingFileAppender) {
         return ((RollingFileAppender) appender).getFileName();
+      }
+    }
 
     return "NOT_CONFIGURED";
   }
@@ -1555,9 +1529,12 @@ public class MapTool {
     log.info("AppHome System Property: " + System.getProperty("appHome"));
     log.info("Logging to: " + getLoggerFileName());
 
+    String versionImplementation = version;
+    String versionOverride = version;
+
     if (MapTool.class.getPackage().getImplementationVersion() != null) {
-      version = MapTool.class.getPackage().getImplementationVersion().trim();
-      log.info("setting MapTool version from manifest: " + version);
+      versionImplementation = MapTool.class.getPackage().getImplementationVersion().trim();
+      log.info("setting MapTool version from manifest: " + versionImplementation);
     }
 
     if (MapTool.class.getPackage().getImplementationVendor() != null) {
@@ -1583,20 +1560,36 @@ public class MapTool {
     cmdOptions.addOption("y", "ypos", true, "override MapTool window starting y coordinate");
     cmdOptions.addOption("m", "macros", false, "display defined list of macro functions");
     cmdOptions.addOption("r", "reset", false, "reset startup options to defaults");
+    cmdOptions.addOption("F", "file", true, "load campaign on startup");
 
-    debug = getCommandLineOption(cmdOptions, "debug", args);
-    version = getCommandLineOption(cmdOptions, "version", version, args);
-    graphicsMonitor = getCommandLineOption(cmdOptions, "monitor", graphicsMonitor, args);
-    useFullScreen = getCommandLineOption(cmdOptions, "fullscreen", args);
+    CommandLineParser cmdParser = new DefaultParser();
+    CommandLine cmd = null;
+    boolean listMacros = false;
 
-    windowWidth = getCommandLineOption(cmdOptions, "width", windowWidth, args);
-    windowHeight = getCommandLineOption(cmdOptions, "height", windowHeight, args);
-    windowX = getCommandLineOption(cmdOptions, "xpos", windowX, args);
-    windowY = getCommandLineOption(cmdOptions, "ypos", windowY, args);
+    try {
+      cmd = cmdParser.parse(cmdOptions, args);
 
-    if (getCommandLineOption(cmdOptions, "reset", args)) UserJvmPrefs.resetJvmOptions();
+      debug = getCommandLineOption(cmd, "debug");
+      versionOverride = getCommandLineOption(cmd, "version", version);
+      graphicsMonitor = getCommandLineOption(cmd, "monitor", graphicsMonitor);
+      useFullScreen = getCommandLineOption(cmd, "fullscreen");
 
-    boolean listMacros = getCommandLineOption(cmdOptions, "macros", args);
+      windowWidth = getCommandLineOption(cmd, "width", windowWidth);
+      windowHeight = getCommandLineOption(cmd, "height", windowHeight);
+      windowX = getCommandLineOption(cmd, "xpos", windowX);
+      windowY = getCommandLineOption(cmd, "ypos", windowY);
+
+      loadCampaignOnStartPath = getCommandLineOption(cmd, "file", "");
+      listMacros = getCommandLineOption(cmd, "macros");
+
+      if (getCommandLineOption(cmd, "reset")) {
+        UserJvmPrefs.resetJvmOptions();
+      }
+    } catch (ParseException e) {
+      // MapTool.showWarning() can be invoked here.  It will log the stacktrace,
+      // so there's no need for us to do it.
+      MapTool.showWarning("Error parsing the command line", e);
+    }
 
     // Jamz: Just a little console log formatter for system.out to hyperlink messages to source.
     if (debug) {
@@ -1611,24 +1604,38 @@ public class MapTool {
       log.info("argument passed via command line: " + arg);
     }
 
-    if (cmdOptions.hasOption("version"))
-      log.info("overriding MapTool version from command line to: " + version);
-    else log.info("MapTool version: " + version);
+    if (cmdOptions.hasOption("version")) {
+      log.info("overriding MapTool version from command line to: " + versionOverride);
+      version = versionOverride;
+    } else {
+      version = versionImplementation;
+      log.info("MapTool version: " + version);
+    }
 
     log.info("MapTool vendor: " + vendor);
+
+    if (cmd.getArgs().length != 0) {
+      log.info("Overriding -F option with extra argument");
+      loadCampaignOnStartPath = cmd.getArgs()[0];
+    }
+    if (!loadCampaignOnStartPath.isEmpty()) {
+      log.info("Loading initial campaign: " + loadCampaignOnStartPath);
+    }
 
     // Set MapTool version
     sentry.setRelease(getVersion());
     sentry.addTag("os", System.getProperty("os.name"));
     sentry.addTag("version", MapTool.getVersion());
+    sentry.addTag("versionImplementation", versionImplementation);
+    sentry.addTag("versionOverride", versionOverride);
 
     if (listMacros) {
-      String logOutput = "";
+      StringBuilder logOutput = new StringBuilder();
       List<String> macroList = new ArrayList<>(parser.listAllMacroFunctions().keySet());
       Collections.sort(macroList);
 
       for (String macro : macroList) {
-        logOutput += "\n" + macro;
+        logOutput.append("\n").append(macro);
       }
 
       log.info("Current list of Macro Functions: " + logOutput);
@@ -1646,21 +1653,11 @@ public class MapTool {
     try {
       AppUtil.getAppHome();
     } catch (Throwable t) {
-      t.printStackTrace();
-
-      // Create an empty frame so there's something to click on if the dialog goes in the
-      // background
-      JFrame frame = new JFrame();
-      SwingUtil.centerOnScreen(frame);
-      frame.setVisible(true);
-
-      String errorCreatingDir = "Error creating data directory";
-      log.error(errorCreatingDir, t);
-      JOptionPane.showMessageDialog(
-          frame, t.getMessage(), errorCreatingDir, JOptionPane.ERROR_MESSAGE);
+      MapTool.showError("Error creating data directory", t);
       System.exit(1);
     }
 
+    // XXX Should we even be doing this now that we ship with our own JRE?
     verifyJavaVersion();
 
     // System properties
@@ -1741,6 +1738,7 @@ public class MapTool {
           "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
       LookAndFeelFactory.addUIDefaultsCustomizer(
           new LookAndFeelFactory.UIDefaultsCustomizer() {
+            @Override
             public void customize(UIDefaults defaults) {
               // Remove red border around menus
               defaults.put("PopupMenu.foreground", Color.lightGray);
@@ -1781,7 +1779,9 @@ public class MapTool {
       for (Enumeration<Object> keys = UIManager.getDefaults().keys(); keys.hasMoreElements(); ) {
         Object key = keys.nextElement();
         Object value = UIManager.get(key);
-        if (value instanceof FontUIResource) UIManager.put(key, fontRes);
+        if (value instanceof FontUIResource) {
+          UIManager.put(key, fontRes);
+        }
       }
     }
 
@@ -1790,15 +1790,18 @@ public class MapTool {
 
     EventQueue.invokeLater(
         new Runnable() {
+          @Override
           public void run() {
             initialize();
             EventQueue.invokeLater(
                 new Runnable() {
+                  @Override
                   public void run() {
                     clientFrame.setVisible(true);
                     splash.hideSplashScreen();
                     EventQueue.invokeLater(
                         new Runnable() {
+                          @Override
                           public void run() {
                             postInitialize();
                           }

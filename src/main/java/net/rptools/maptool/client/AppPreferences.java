@@ -345,6 +345,9 @@ public class AppPreferences {
   private static final String KEY_DEFAULT_VISION_DISTANCE = "defaultVisionDistance";
   private static final int DEFAULT_DEFAULT_VISION_DISTANCE = 1000;
 
+  private static final String KEY_DEFAULT_VISION_TYPE = "defaultVisionType";
+  private static final Zone.VisionType DEFAULT_VISION_TYPE = Zone.VisionType.OFF;
+
   private static final String KEY_FONT_SIZE = "fontSize";
   private static final int DEFAULT_FONT_SIZE = 12;
 
@@ -674,6 +677,19 @@ public class AppPreferences {
 
   public static int getDefaultVisionDistance() {
     return prefs.getInt(KEY_DEFAULT_VISION_DISTANCE, DEFAULT_DEFAULT_VISION_DISTANCE);
+  }
+
+  public static void setDefaultVisionType(Zone.VisionType visionType) {
+    prefs.put(KEY_DEFAULT_VISION_TYPE, visionType.toString());
+  }
+
+  public static Zone.VisionType getDefaultVisionType() {
+    try {
+      return Zone.VisionType.valueOf(
+          prefs.get(KEY_DEFAULT_VISION_TYPE, DEFAULT_VISION_TYPE.toString()));
+    } catch (Exception e) {
+      return DEFAULT_VISION_TYPE;
+    }
   }
 
   public static void setUseSoftFogEdges(boolean flag) {
