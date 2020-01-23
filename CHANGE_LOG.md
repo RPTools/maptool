@@ -4,9 +4,18 @@ Maptool 1.5.11
 - Terrain Modifier enhancements:
   - Token terrain modifier can be flagged as NONE, MULTIPLY, ADD, BLOCK and FREE
   - Tokens can be set to ignore Terrain Modifiers.
+  - Per map setting for rounding of fractional movement costs: NONE, CELL_UNIT, INTEGER
+- Can now specify a campaign file on startup:
+  - With command line options `-F` or `-file`, e.g. `-file=path/to/file/mycampaign.cmpgn`
+  - Passing the path and file without command line switches, e.g. `maptool path/to/mycampaign.cmpgn`
+  - File assocation - will need to manually configure this through the appropriate OS settings
+  - Drag-n-drop of campaign file on executable.
 - Major refactoring of use of JSON in code. Replaced all uses of net.sf.json-lib library with the Google GSON library.
 
 **Enhancements**
+- [#1178][i1178] New, per map, rounding options for AI movement costs: NONE, CELL_UNIT, INTEGER
+- [#1165][i1165] New command line option for loading campaign on startup.
+- [#1142][i1142] New macro function `getTokenMap(id,delim)`gets a maps with the provided token ID/name.
 - [#1101][i1101] New chat commands `/version` and `/about`. MapTool version added to title bar.
 - [#1072][i1072] Meta macro functions now accept a map name parameter.
   - `createMacro`, `getMacroCommand`, `getMacroIndexes`, `getMacroProps`, `getMacros`, `removeMacro`, `setMacroCommand`, `setMacroProps`
@@ -18,6 +27,11 @@ Maptool 1.5.11
 - [#459][i459] Terrain Modifiers have multiple types now: None, Add, Multiply, Block and Free.
 
 **Bug Fixes**
+- [#1178][i1178] Some AI distance calculations were off when using terrain mods. Fixed.
+- [#1177][i1177] `json.difference()` wasn't promoting strings to JSON. Not in released code. Fixed.
+- [#1175][i1175] `getTokenNames()` and `getTokens()` was failing when _mapname_ condition was used. Not in released code. Fixed.
+- [#1173][i1173] Macrolink argument encoding/decoding failing. Not in released code. Fixed.
+- [#1167][i1167] `json.isEmpty` was not promoting passed strings to JSON array. Not in released code. Fixed.
 - [#1151][i1151] `json.set` was adding extra quotes when setting value to empty string. Not in released code. Fixed.
 - [#1149][i1149] `execFunction` failed when defer = 1 and a trusted function was used. Fixed.
 - [#1144][i1144] `json.get` was not promoting strings/numbers to arrays. Not in released code. Fixed.
@@ -34,14 +48,22 @@ Maptool 1.5.11
 - [#1066][i1066] SENTRY: When selecting images for tokens a null asset could be returned. Caught and error message displayed.
 - [#1047][i1047] `json.contains` and `json.indexOf` were not handling values outside the range of a signed integer. Fixed.
 - [#1015][i1015] A bad HREF in a anchor link could produce an NPE.  Fixed.
+- [#413][i413] Facing could be changed when zooming in/out on Mac.  Fixed.
 - [#353][i353] Macro Editor wasn't persisting window size.  Fixed.
 
 **Note** The Windows install for this release requires Windows 7 or greater to install.  The `.jar` file release can still be used on older 64-bit Windows platform. [#1039][i1039]
 
+[i1178]: https://github.com/RPTools/maptool/issues/1178
+[i1177]: https://github.com/RPTools/maptool/issues/1177
+[i1175]: https://github.com/RPTools/maptool/issues/1175
+[i1173]: https://github.com/RPTools/maptool/issues/1173
+[i1167]: https://github.com/RPTools/maptool/issues/1167
+[i1165]: https://github.com/RPTools/maptool/issues/1165
 [i1151]: https://github.com/RPTools/maptool/issues/1151
 [i1149]: https://github.com/RPTools/maptool/issues/1149
 [i1144]: https://github.com/RPTools/maptool/issues/1144
 [i1143]: https://github.com/RPTools/maptool/issues/1143
+[i1142]: https://github.com/RPTools/maptool/issues/1142
 [i1139]: https://github.com/RPTools/maptool/issues/1139
 [i1127]: https://github.com/RPTools/maptool/issues/1127
 [i1125]: https://github.com/RPTools/maptool/issues/1125
@@ -62,6 +84,7 @@ Maptool 1.5.11
 [i870]: https://github.com/RPTools/maptool/issues/870
 [i728]: https://github.com/RPTools/maptool/issues/728
 [i459]: https://github.com/RPTools/maptool/issues/459
+[i413]: https://github.com/RPTools/maptool/issues/413
 [i353]: https://github.com/RPTools/maptool/issues/353
 
 Maptool 1.5.10
