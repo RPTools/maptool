@@ -28,9 +28,11 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
+
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.ui.Scale;
 
@@ -461,8 +463,6 @@ public class AdvancedAdjustGridPanel extends JComponent
       scale.zoomIn(e.getX(), e.getY());
     } else {
       scale.zoomOut(e.getX(), e.getY());
-    } else {
-      scale.zoomIn(e.getX(), e.getY());
     }
 
     repaint();
