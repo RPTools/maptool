@@ -5,7 +5,10 @@ Maptool 1.5.11
   - Token terrain modifier can be flagged as NONE, MULTIPLY, ADD, BLOCK and FREE
   - Tokens can be set to ignore Terrain Modifiers.
   - Per map setting for rounding of fractional movement costs: NONE, CELL_UNIT, INTEGER
-- Can now specify a campaign file on startup either the File Assocation on Windows or via command line option `-F/-file=...`.
+- Can now specify a campaign file on startup:
+  - With command line options `-F` or `-file`, e.g. `-file=path/to/file/mycampaign.cmpgn`
+  - File assocation - will need to manually configure this through the appropriate OS settings
+  - Drag-n-drop of campaign file on executable.
 - Major refactoring of use of JSON in code. Replaced all uses of net.sf.json-lib library with the Google GSON library.
 
 **Enhancements**
