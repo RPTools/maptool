@@ -421,7 +421,7 @@ public class FindTokenFunctions extends AbstractFunction {
       mapName = null; // set to null so findToken searches the current map
       zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
     } else {
-      mapName = jobj.get("mapName").toString();
+      mapName = jobj.get("mapName").getAsString();
       zoneRenderer = MapTool.getFrame().getZoneRenderer(mapName);
       if (zoneRenderer == null) {
         throw new ParserException(

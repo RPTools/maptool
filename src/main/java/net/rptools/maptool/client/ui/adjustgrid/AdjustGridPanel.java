@@ -83,6 +83,7 @@ public class AdjustGridPanel extends JComponent
         .put(
             "zoomOut",
             new AbstractAction() {
+              @Override
               public void actionPerformed(ActionEvent e) {
                 zoomOut();
               }
@@ -93,6 +94,7 @@ public class AdjustGridPanel extends JComponent
         .put(
             "zoomIn",
             new AbstractAction() {
+              @Override
               public void actionPerformed(ActionEvent e) {
                 zoomIn();
               }
@@ -104,6 +106,7 @@ public class AdjustGridPanel extends JComponent
         .put(
             "zoomReset",
             new AbstractAction() {
+              @Override
               public void actionPerformed(ActionEvent e) {
                 zoomReset();
               }
@@ -299,12 +302,16 @@ public class AdjustGridPanel extends JComponent
 
   ////
   // MOUSE LISTENER
+  @Override
   public void mouseClicked(MouseEvent e) {}
 
+  @Override
   public void mouseEntered(MouseEvent e) {}
 
+  @Override
   public void mouseExited(MouseEvent e) {}
 
+  @Override
   public void mousePressed(MouseEvent e) {
 
     mouseX = e.getX();
@@ -322,10 +329,12 @@ public class AdjustGridPanel extends JComponent
     dragOffsetY = y % gridSize;
   }
 
+  @Override
   public void mouseReleased(MouseEvent e) {}
 
   ////
   // MOUSE MOTION LISTENER
+  @Override
   public void mouseDragged(MouseEvent e) {
 
     if (SwingUtilities.isLeftMouseButton(e)) {
@@ -365,6 +374,7 @@ public class AdjustGridPanel extends JComponent
     }
   }
 
+  @Override
   public void mouseMoved(MouseEvent e) {
 
     Dimension imgSize = getScaledImageSize();
@@ -386,8 +396,8 @@ public class AdjustGridPanel extends JComponent
 
   ////
   // MOUSE WHEEL LISTENER
+  @Override
   public void mouseWheelMoved(MouseWheelEvent e) {
-
     if (SwingUtil.isControlDown(e)) {
 
       double oldScale = scale.getScale();
