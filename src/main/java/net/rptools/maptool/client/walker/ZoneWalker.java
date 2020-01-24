@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.walker;
 
+import java.awt.geom.Area;
 import java.util.Collection;
 import java.util.Set;
 import net.rptools.maptool.client.ui.zone.RenderPathWorker;
@@ -24,6 +25,7 @@ import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.TokenFootprint;
 
 public interface ZoneWalker {
+
   public void setWaypoints(CellPoint... points);
 
   public void addWaypoints(CellPoint... point);
@@ -33,7 +35,8 @@ public interface ZoneWalker {
   public CellPoint replaceLastWaypoint(
       CellPoint point,
       boolean restrictMovement,
-      Set<TerrainModifierOperation> terrainModifiersIgnored);
+      Set<TerrainModifierOperation> terrainModifiersIgnored,
+      Area tokenVBL);
 
   public boolean isWaypoint(CellPoint point);
 
