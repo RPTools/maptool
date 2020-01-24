@@ -4349,7 +4349,12 @@ public class ZoneRenderer extends JComponent
 
         renderPathTask =
             new RenderPathWorker(
-                walker, point, restictMovement, terrainModifiersIgnored, ZoneRenderer.this);
+                walker,
+                point,
+                restictMovement,
+                terrainModifiersIgnored,
+                token.getTransformedVBL(),
+                ZoneRenderer.this);
         renderPathThreadPool.execute(renderPathTask);
       } else {
         if (gridlessPath.getCellPath().size() > 1) {
