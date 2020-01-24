@@ -353,6 +353,54 @@ public class FunctionUtil {
   }
 
   /**
+   * Return the jsonElement value of a parameter. Throws a <code>ParserException</code> if the
+   * parameter can't be converted to a jsonArray.
+   *
+   * @param functionName this is used in the exception message
+   * @param parameters the list of parameters
+   * @param index the index of the parameter to return as jsonArray
+   * @return the parameter as a jsonArray
+   */
+  public static JsonElement paramConvertedToJson(
+      String functionName, List<Object> parameters, int index) {
+    try {
+      return paramAsJson(functionName, parameters, index);
+    } catch (ParserException e) {
+      JsonArray json = new JsonArray();
+      Object val = parameters.get(index);
+      if (val.toString().length() > 0) {
+        if (val instanceof Number) {
+          json.add((Number) val);
+        } else {
+          json.add(val.toString());
+        }
+      }
+
+      return json;
+    }
+  }
+
+  /**
+   * Return the jsonObject or jsonArray value of a parameter. if the parameter can't be converted to
+   * a json. Then an empty json array will be returned if its an empty string, otherwise a a
+   * JsonArray containing the argument will be returned.
+   *
+   * @param functionName this is used in the exception message
+   * @param parameters the list of parameters
+   * @param index the index of the parameter to return as Json
+   * @return the parameter as a jsonObject or jsonArray
+   * @throws ParserException if the parameter can't be converted to jsonObject or jsonArray
+   */
+  public static JsonArray paramConvertedToJsonArray(
+      String functionName, List<Object> parameters, int index) throws ParserException {
+    JsonElement json = paramConvertedToJson(functionName, parameters, index);
+    if (!json.isJsonArray()) {
+      throw new ParserException(I18N.getText(KEY_NOT_JSON_ARRAY, functionName, index + 1));
+    } else {
+      return json.getAsJsonArray();
+    }
+  }
+  /**
    * Convert an object into a boolean value. Never returns an error.
    *
    * @param value Convert this object. Must be {@link Boolean}, {@link BigDecimal}, or will have its

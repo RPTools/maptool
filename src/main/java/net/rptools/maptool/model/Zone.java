@@ -126,6 +126,13 @@ public class Zone extends BaseModel {
     GM
   }
 
+  /** Control how A* Pathfinding distances is rounded off due to terrain costs */
+  public enum AStarRoundingOptions {
+    NONE,
+    CELL_UNIT,
+    INTEGER
+  }
+
   public static final int DEFAULT_TOKEN_VISION_DISTANCE = 250; // In units
   public static final int DEFAULT_PIXELS_CELL = 50;
   public static final int DEFAULT_UNITS_PER_CELL = 5;
@@ -150,6 +157,7 @@ public class Zone extends BaseModel {
   private int tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE;
 
   private double unitsPerCell = DEFAULT_UNITS_PER_CELL;
+  private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
 
   private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
   private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
@@ -1017,6 +1025,18 @@ public class Zone extends BaseModel {
 
   public void setUnitsPerCell(double unitsPerCell) {
     this.unitsPerCell = unitsPerCell;
+  }
+
+  public AStarRoundingOptions getAStarRounding() {
+    if (aStarRounding == null) {
+      aStarRounding = AStarRoundingOptions.NONE;
+    }
+
+    return aStarRounding;
+  }
+
+  public void setAStarRounding(AStarRoundingOptions aStarRounding) {
+    this.aStarRounding = aStarRounding;
   }
 
   public int getLargestZOrder() {
