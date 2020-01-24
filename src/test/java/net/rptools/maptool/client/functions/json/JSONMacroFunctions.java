@@ -16,6 +16,7 @@ package net.rptools.maptool.client.functions.json;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.jayway.jsonpath.JsonPath;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,11 +27,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.rptools.maptool.client.MapToolLineParser;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.JSONMacroFunctionsOld;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.junit.jupiter.api.Test;
+import org.locationtech.jts.util.Assert;
 
 class TestJSONMacroFunctions {
   // a list of json objects ready to be used in tests
@@ -191,6 +196,84 @@ class TestJSONMacroFunctions {
         mt_array = (JSONArray) run("json.append", mt_array, elem);
       }
       assertEquals(sanitize(java_array.size()), run("json.length", mt_array));
+    }
+  }
+
+  /** JSON example from https://github.com/json-path/JsonPath/ */
+  private static final String JSON =
+      "{ \"store\": {\n"
+          + "    \"book\": [ \n"
+          + "      { \"category\": \"reference\",\n"
+          + "        \"author\": \"Nigel Rees\",\n"
+          + "        \"title\": \"Sayings of the Century\",\n"
+          + "        \"price\": 8.95\n"
+          + "      },\n"
+          + "      { \"category\": \"fiction\",\n"
+          + "        \"author\": \"Evelyn Waugh\",\n"
+          + "        \"title\": \"Sword of Honour\",\n"
+          + "        \"price\": 12.99\n"
+          + "      },\n"
+          + "      { \"category\": \"fiction\",\n"
+          + "        \"author\": \"Herman Melville\",\n"
+          + "        \"title\": \"Moby Dick\",\n"
+          + "        \"isbn\": \"0-553-21311-3\",\n"
+          + "        \"price\": 8.99\n"
+          + "      },\n"
+          + "      { \"category\": \"fiction\",\n"
+          + "        \"author\": \"J. R. R. Tolkien\",\n"
+          + "        \"title\": \"The Lord of the Rings\",\n"
+          + "        \"isbn\": \"0-395-19395-8\",\n"
+          + "        \"price\": 22.99\n"
+          + "      }\n"
+          + "    ],\n"
+          + "    \"bicycle\": {\n"
+          + "      \"color\": \"red\",\n"
+          + "      \"price\": 19.95\n"
+          + "    }\n"
+          + "  }, \"expensive\": 10"
+          + "}";
+
+  /** Path examples from https://github.com/json-path/JsonPath. */
+  private static final String[] PATHS = {
+    "$.store.book[*].author",
+    "$..author",
+    "$.store.*",
+    "$.store..price",
+    "$..book[2]",
+    "$..book[-2]",
+    "$..book[0,1]",
+    "$..book[:2]",
+    "$..book[1:2]",
+    "$..book[-2:]",
+    "$..book[2:]",
+    "$..book[?(@.isbn)]",
+    "$.store.book[?(@.price < 10)]",
+    "$..book[?(@.price <= $['expensive'])]",
+    "$..book[?(@.author =~ /.*REES/i)]",
+    "$..*",
+    "$..book.length()"
+  };
+
+  /**
+   * Tests the JSON and paths from https://github.com/json-path/JsonPath.
+   *
+   * @throws ParserException if json.path.read throws a parser exception
+   */
+  @Test
+  void jsonPathRead() throws ParserException {
+    MapToolVariableResolver resolver = new MapToolVariableResolver(null);
+    Parser parser = MapToolLineParser.createParser(resolver, false).getParser();
+    String fName = "json.path.read";
+    String msg = "incorrect output for path %s";
+
+    String mtOutput;
+    String jwOutput;
+
+    for (String path : PATHS) {
+      List<Object> param = List.of(JSON, path);
+      mtOutput = JSONMacroFunctions.getInstance().childEvaluate(parser, fName, param).toString();
+      jwOutput = JsonPath.read(JSON, path).toString();
+      Assert.equals(mtOutput, jwOutput, String.format(msg, path));
     }
   }
 }

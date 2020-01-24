@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
+import java.awt.geom.Area;
 import java.util.Set;
 import javax.swing.SwingWorker;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -28,23 +29,26 @@ public class RenderPathWorker extends SwingWorker<Void, Void> {
   CellPoint startPoint, endPoint;
   private final boolean restrictMovement;
   private final Set<TerrainModifierOperation> terrainModifiersIgnored;
+  private final Area tokenVBL;
 
   public RenderPathWorker(
       ZoneWalker walker,
       CellPoint endPoint,
       boolean restrictMovement,
       Set<TerrainModifierOperation> terrainModifiersIgnored,
+      Area tokenVBL,
       ZoneRenderer zoneRenderer) {
     this.walker = walker;
     this.endPoint = endPoint;
     this.restrictMovement = restrictMovement;
     this.zoneRenderer = zoneRenderer;
     this.terrainModifiersIgnored = terrainModifiersIgnored;
+    this.tokenVBL = tokenVBL;
   }
 
   @Override
   protected Void doInBackground() throws Exception {
-    walker.replaceLastWaypoint(endPoint, restrictMovement, terrainModifiersIgnored);
+    walker.replaceLastWaypoint(endPoint, restrictMovement, terrainModifiersIgnored, tokenVBL);
     return null;
   }
 
