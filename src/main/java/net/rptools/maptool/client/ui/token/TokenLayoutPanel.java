@@ -56,6 +56,7 @@ public class TokenLayoutPanel extends JPanel {
   public TokenLayoutPanel() {
     addMouseWheelListener(
         new MouseWheelListener() {
+          @Override
           public void mouseWheelMoved(MouseWheelEvent e) {
             // Not for snap-to-scale
             if (!token.isSnapToScale()) {

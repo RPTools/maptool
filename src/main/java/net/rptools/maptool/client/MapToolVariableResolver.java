@@ -449,6 +449,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
       this.token = token;
     }
 
+    @Override
     public void run() {
       MapTool.serverCommand().putToken(zoneId, token);
     }

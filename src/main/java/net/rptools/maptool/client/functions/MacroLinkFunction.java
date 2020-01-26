@@ -298,7 +298,6 @@ public class MacroLinkFunction extends AbstractFunction {
     try {
       for (String s : vals) {
         String decoded = URLDecoder.decode(s, "utf-8");
-        decoded = decoded.replaceAll(";", "&#59");
         if (propList.length() == 0) {
           propList.append(decoded);
         } else {
