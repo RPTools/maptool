@@ -44,6 +44,8 @@ public class AppSetup {
     }
 
     installDefaultMacroEditorThemes();
+
+    installPredefinedProperties();
   }
 
   public static void installDefaultTokens() throws IOException {
@@ -71,6 +73,8 @@ public class AppSetup {
       }
     }
   }
+
+  private static void installPredefinedProperties() {}
 
   /**
    * Overwrites any existing README file in the ~/.maptool/resource directory with the one from the

@@ -29,6 +29,7 @@ import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,8 +37,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import javax.swing.AbstractAction;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
@@ -48,6 +51,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -120,6 +125,8 @@ public class CampaignPropertiesDialog extends JDialog {
 
     initImportButton();
     initExportButton();
+    initImportPredefinedButton();
+    initPredefinedPropertiesComboBox();
 
     add(formPanel);
 
@@ -809,6 +816,14 @@ public class CampaignPropertiesDialog extends JDialog {
     return (JButton) formPanel.getButton("exportButton");
   }
 
+  public JButton getImportPredefinedButton() {
+    return (JButton) formPanel.getButton("importPredefinedButton");
+  }
+
+  public JComboBox<String> getPredefinedPropertiesComboBox() {
+    return (JComboBox<String>) formPanel.getComboBox("predefinedPropertiesComboBox");
+  }
+
   private void initCancelButton() {
     getCancelButton()
         .addActionListener(
@@ -879,6 +894,56 @@ public class CampaignPropertiesDialog extends JDialog {
                 }
               }
             });
+  }
+
+  private void initImportPredefinedButton() {
+    getImportPredefinedButton()
+        .addActionListener(
+            new ActionListener() {
+
+              private File getSelectedPropertyFile() {
+                String propertyFilename =
+                    (String) getPredefinedPropertiesComboBox().getSelectedItem();
+                return new File(AppUtil.getAppHome("property") + "/" + propertyFilename);
+              }
+
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                File selectedFile = getSelectedPropertyFile();
+                EventQueue.invokeLater(
+                    new Runnable() {
+                      public void run() {
+                        CampaignProperties properties =
+                            PersistenceUtil.loadCampaignProperties(selectedFile);
+                        if (properties != null) {
+                          MapTool.getCampaign().mergeCampaignProperties(properties);
+                          copyCampaignToUI(properties);
+                        }
+                      }
+                    });
+              }
+            });
+  }
+
+  private void initPredefinedPropertiesComboBox() {
+    DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
+    for (File f : getPredefinedProperty()) {
+      model.addElement(f.getName());
+    }
+    getPredefinedPropertiesComboBox().setModel(model);
+  }
+
+  private List<File> getPredefinedProperty() {
+    File propertyDir = AppUtil.getAppHome("property");
+    File[] result = getPredefinedPropertyFiles(propertyDir);
+    if (result == null) {
+      return Collections.emptyList();
+    }
+    return Arrays.asList(result);
+  }
+
+  protected File[] getPredefinedPropertyFiles(File propertyDir) {
+    return propertyDir.listFiles(AppConstants.CAMPAIGN_PROPERTIES_FILE_FILTER);
   }
 
   public static void main(String[] args) {

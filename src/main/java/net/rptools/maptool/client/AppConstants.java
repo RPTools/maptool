@@ -72,4 +72,13 @@ public class AppConstants {
   public static final String MACRO_FILE_EXTENSION = ".mtmacro";
   public static final String MACROSET_FILE_EXTENSION = ".mtmacset";
   public static final String TABLE_FILE_EXTENSION = ".mttable";
+
+  public static final FilenameFilter CAMPAIGN_PROPERTIES_FILE_FILTER =
+      new FilenameFilter() {
+
+        @Override
+        public boolean accept(File dir, String name) {
+          return name.toLowerCase().endsWith(CAMPAIGN_PROPERTIES_FILE_EXTENSION);
+        }
+      };
 }
