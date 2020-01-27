@@ -14,16 +14,6 @@
  */
 package net.rptools.maptool.client;
 
-import com.jidesoft.plaf.LookAndFeelFactory;
-import com.jidesoft.plaf.UIDefaultsLookup;
-import com.jidesoft.plaf.basic.ThemePainter;
-import de.muntjak.tinylookandfeel.Theme;
-import de.muntjak.tinylookandfeel.util.SBReference;
-import io.sentry.Sentry;
-import io.sentry.SentryClient;
-import io.sentry.SentryClientFactory;
-import io.sentry.event.BreadcrumbBuilder;
-import io.sentry.event.UserBuilder;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -52,6 +42,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
 import javax.swing.BorderFactory;
@@ -65,6 +56,31 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.config.Configurator;
+
+import com.jidesoft.plaf.LookAndFeelFactory;
+import com.jidesoft.plaf.UIDefaultsLookup;
+import com.jidesoft.plaf.basic.ThemePainter;
+
+import de.muntjak.tinylookandfeel.Theme;
+import de.muntjak.tinylookandfeel.util.SBReference;
+import io.sentry.Sentry;
+import io.sentry.SentryClient;
+import io.sentry.SentryClientFactory;
+import io.sentry.event.BreadcrumbBuilder;
+import io.sentry.event.UserBuilder;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
@@ -109,18 +125,6 @@ import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmPrefs;
 import net.rptools.maptool.webapi.MTWebAppServer;
 import net.tsc.servicediscovery.ServiceAnnouncer;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.logging.log4j.core.appender.RollingFileAppender;
-import org.apache.logging.log4j.core.config.Configurator;
 
 /** */
 public class MapTool {
@@ -1534,12 +1538,12 @@ public class MapTool {
 
     if (MapTool.class.getPackage().getImplementationVersion() != null) {
       versionImplementation = MapTool.class.getPackage().getImplementationVersion().trim();
-      log.info("setting MapTool version from manifest: " + versionImplementation);
+      log.info("getting MapTool version from manifest: " + versionImplementation);
     }
 
     if (MapTool.class.getPackage().getImplementationVendor() != null) {
       vendor = MapTool.class.getPackage().getImplementationVendor().trim();
-      log.info("setting MapTool vendor from manifest:  " + vendor);
+      log.info("getting MapTool vendor from manifest:  " + vendor);
     }
 
     // Initialize Sentry.io logging
@@ -1604,7 +1608,7 @@ public class MapTool {
       log.info("argument passed via command line: " + arg);
     }
 
-    if (cmdOptions.hasOption("version")) {
+    if (cmd.hasOption("version")) {
       log.info("overriding MapTool version from command line to: " + versionOverride);
       version = versionOverride;
     } else {
