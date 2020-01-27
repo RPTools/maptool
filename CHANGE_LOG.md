@@ -1,4 +1,4 @@
-Maptool 1.5.11
+Maptool 1.5.11/12
 =====
 **Highlights**
 - Terrain Modifier enhancements:
