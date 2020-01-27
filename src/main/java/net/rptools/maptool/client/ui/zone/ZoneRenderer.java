@@ -4132,6 +4132,19 @@ public class ZoneRenderer extends JComponent
     return zone.getGrid().convert(zp);
   }
 
+  /**
+   * Converts a screen point to the center point of the corresponding grid cell.
+   *
+   * @param sp
+   * @return ZonePoint with the coordinates of the center of the grid cell.
+   */
+  public ZonePoint getCellCenterAt(ScreenPoint sp) {
+    Grid grid = getZone().getGrid();
+    CellPoint cp = getCellAt(sp);
+    Point2D.Double p2d = grid.getCellCenter(cp);
+    return new ZonePoint((int) p2d.getX(), (int) p2d.getY());
+  }
+
   public void setScale(double scale) {
     if (zoneScale.getScale() != scale) {
       /*
@@ -4349,7 +4362,12 @@ public class ZoneRenderer extends JComponent
 
         renderPathTask =
             new RenderPathWorker(
-                walker, point, restictMovement, terrainModifiersIgnored, ZoneRenderer.this);
+                walker,
+                point,
+                restictMovement,
+                terrainModifiersIgnored,
+                token.getTransformedVBL(),
+                ZoneRenderer.this);
         renderPathThreadPool.execute(renderPathTask);
       } else {
         if (gridlessPath.getCellPath().size() > 1) {

@@ -151,6 +151,10 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     // Note: zoneRenderer will be null if map is not visible to players.
     if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
       vbl = MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
+
+      if (tokenVBL != null) {
+        vbl.subtract(tokenVBL);
+      }
     }
 
     if (!vbl.isEmpty()) {

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.walker;
 
+import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +33,7 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   protected final Zone zone;
   protected boolean restrictMovement = false;
   protected Set<TerrainModifierOperation> terrainModifiersIgnored;
+  protected Area tokenVBL;
   protected RenderPathWorker renderPathWorker;
 
   public AbstractZoneWalker(Zone zone) {
@@ -69,17 +71,20 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   }
 
   public CellPoint replaceLastWaypoint(CellPoint point) {
-    return replaceLastWaypoint(point, false, Collections.singleton(TerrainModifierOperation.NONE));
+    return replaceLastWaypoint(
+        point, false, Collections.singleton(TerrainModifierOperation.NONE), null);
   }
 
   @Override
   public CellPoint replaceLastWaypoint(
       CellPoint point,
       boolean restrictMovement,
-      Set<TerrainModifierOperation> terrainModifiersIgnored) {
+      Set<TerrainModifierOperation> terrainModifiersIgnored,
+      Area tokenVBL) {
 
     this.restrictMovement = restrictMovement;
     this.terrainModifiersIgnored = terrainModifiersIgnored;
+    this.tokenVBL = tokenVBL;
 
     if (partialPaths.isEmpty()) {
       return null;

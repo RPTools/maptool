@@ -1,4 +1,4 @@
-Maptool 1.5.11
+Maptool 1.5.11/12
 =====
 **Highlights**
 - Terrain Modifier enhancements:
@@ -19,7 +19,7 @@ Maptool 1.5.11
 - [#1101][i1101] New chat commands `/version` and `/about`. MapTool version added to title bar.
 - [#1072][i1072] Meta macro functions now accept a map name parameter.
   - `createMacro`, `getMacroCommand`, `getMacroIndexes`, `getMacroProps`, `getMacros`, `removeMacro`, `setMacroCommand`, `setMacroProps`
-- [#1062][i1062] New preference setting for Maps. Can now be set to default to None, Day or Night. Same option on Map Properties dialog.
+- [#1062][i1062] New Light preference setting for Maps. Can now be set to default to None, Day or Night. Same option is available on Map Properties dialog.
 - [#941][i941] Hitting the tab key in the property fields of the Edit Token Dialog will now advance to the next property value instead of property name.
 - [#870][i870] New configuration options for `json.path.read` function.
   - ALWAYS_RETURN_LIST, AS_PATH_LIST, DEFAULT_PATH_LEAF_TO_NULL, REQUIRE_PROPERTIES, SUPPRESS_EXCEPTIONS
@@ -37,6 +37,7 @@ Maptool 1.5.11
 - [#1144][i1144] `json.get` was not promoting strings/numbers to arrays. Not in released code. Fixed.
 - [#1143][i1143] `json.toList` was not removing quotes around strings. Not in released code. Fixed.
 - [#1139][i1139] Whitespace trimmed off strings containing numbers and converted to numbers. Not in released code. Fixed.
+- [#1130][i1130] `foreach()` not working with JSON objects. Not in released code. Fixed.
 - [#1127][i1127] Logging was broken by recent lib change for 1.5.9/10.  Also log files were not being zipped or pruned. Fixed.
 - [#1125][i1125] Using `json.type` in an `if()` would produce an invalid condition error.  Fixed.
 - [#1124][i1124] UDFs were being passed `null` when an empty string was sent. Not in released code. Fixed.
@@ -46,8 +47,10 @@ Maptool 1.5.11
 - [#1075][i1075] Setting `applyToSelected=1` when using `createMacro()` was not being applied. Fixed.
 - [#1069][i1069] AutoSave failure message changed.
 - [#1066][i1066] SENTRY: When selecting images for tokens a null asset could be returned. Caught and error message displayed.
+- [#1060][i1060] Labels, halos and selection boxes were incorrectly rendered on tokens with off-center layout in config. Fixed.
 - [#1047][i1047] `json.contains` and `json.indexOf` were not handling values outside the range of a signed integer. Fixed.
 - [#1015][i1015] A bad HREF in a anchor link could produce an NPE.  Fixed.
+- [#456][i456] Tokens with VBL didn't show path and couldn't have movement reverted.  Fixed.
 - [#413][i413] Facing could be changed when zooming in/out on Mac.  Fixed.
 - [#353][i353] Macro Editor wasn't persisting window size.  Fixed.
 
@@ -65,6 +68,7 @@ Maptool 1.5.11
 [i1143]: https://github.com/RPTools/maptool/issues/1143
 [i1142]: https://github.com/RPTools/maptool/issues/1142
 [i1139]: https://github.com/RPTools/maptool/issues/1139
+[i1130]: https://github.com/RPTools/maptool/issues/1130
 [i1127]: https://github.com/RPTools/maptool/issues/1127
 [i1125]: https://github.com/RPTools/maptool/issues/1125
 [i1124]: https://github.com/RPTools/maptool/issues/1124
@@ -77,6 +81,7 @@ Maptool 1.5.11
 [i1069]: https://github.com/RPTools/maptool/issues/1069
 [i1066]: https://github.com/RPTools/maptool/issues/1066
 [i1062]: https://github.com/RPTools/maptool/issues/1062
+[i1060]: https://github.com/RPTools/maptool/issues/1060
 [i1047]: https://github.com/RPTools/maptool/issues/1047
 [i1039]: https://github.com/RPTools/maptool/issues/1039
 [i1015]: https://github.com/RPTools/maptool/issues/1015
@@ -84,6 +89,7 @@ Maptool 1.5.11
 [i870]: https://github.com/RPTools/maptool/issues/870
 [i728]: https://github.com/RPTools/maptool/issues/728
 [i459]: https://github.com/RPTools/maptool/issues/459
+[i456]: https://github.com/RPTools/maptool/issues/456
 [i413]: https://github.com/RPTools/maptool/issues/413
 [i353]: https://github.com/RPTools/maptool/issues/353
 
