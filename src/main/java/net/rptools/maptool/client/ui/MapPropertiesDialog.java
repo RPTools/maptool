@@ -34,8 +34,10 @@ import java.io.IOException;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -132,6 +134,8 @@ public class MapPropertiesDialog extends JDialog {
     initDistanceTextField();
     initPixelsPerCellTextField();
     initDefaultVisionTextField();
+    initVisionTypeCombo();
+    initAStarRoundingOptionsComboBox();
 
     initIsometricRadio();
     initHexHoriRadio();
@@ -214,6 +218,14 @@ public class MapPropertiesDialog extends JDialog {
     return formPanel.getRadioButton("isoHexRadio");
   }
 
+  public JComboBox getVisionTypeCombo() {
+    return formPanel.getComboBox("visionType");
+  }
+
+  public JComboBox getAStarRoundingOptionsComboBox() {
+    return formPanel.getComboBox("aStarRoundingOptionsComboBox");
+  }
+
   public void setZone(Zone zone) {
     this.zone = zone;
     copyZoneToUI();
@@ -229,6 +241,8 @@ public class MapPropertiesDialog extends JDialog {
     getHexHorizontalRadio().setSelected(zone.getGrid() instanceof HexGridHorizontal);
     getSquareRadio().setSelected(zone.getGrid() instanceof SquareGrid);
     getNoGridRadio().setSelected(zone.getGrid() instanceof GridlessGrid);
+    getVisionTypeCombo().setSelectedItem(zone.getVisionType());
+    getAStarRoundingOptionsComboBox().setSelectedItem(zone.getAStarRounding());
 
     gridOffsetX = zone.getGrid().getOffsetX();
     gridOffsetY = zone.getGrid().getOffsetY();
@@ -246,6 +260,10 @@ public class MapPropertiesDialog extends JDialog {
     zone.setTokenVisionDistance(
         StringUtil.parseInteger(
             getDefaultVisionTextField().getText(), zone.getTokenVisionDistance()));
+
+    zone.setVisionType((Zone.VisionType) getVisionTypeCombo().getSelectedItem());
+    zone.setAStarRounding(
+        (Zone.AStarRoundingOptions) getAStarRoundingOptionsComboBox().getSelectedItem());
 
     zone.setFogPaint(fogPaint);
     zone.setBackgroundPaint(backgroundPaint);
@@ -439,6 +457,20 @@ public class MapPropertiesDialog extends JDialog {
   private void initDefaultVisionTextField() {
     this.getDefaultVisionTextField()
         .setText(Integer.toString(AppPreferences.getDefaultVisionDistance()));
+  }
+
+  private void initVisionTypeCombo() {
+    DefaultComboBoxModel<Zone.VisionType> model = new DefaultComboBoxModel<>();
+    for (Zone.VisionType vt : Zone.VisionType.values()) {
+      model.addElement(vt);
+    }
+    model.setSelectedItem(AppPreferences.getDefaultVisionType());
+    getVisionTypeCombo().setModel(model);
+  }
+
+  private void initAStarRoundingOptionsComboBox() {
+    getAStarRoundingOptionsComboBox()
+        .setModel(new DefaultComboBoxModel<>(Zone.AStarRoundingOptions.values()));
   }
 
   public String getZoneName() {

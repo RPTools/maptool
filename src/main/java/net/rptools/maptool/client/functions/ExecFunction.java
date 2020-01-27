@@ -14,12 +14,15 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolLineParser;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.functions.json.JsonArrayFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
@@ -27,12 +30,15 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.Function;
 import net.rptools.parser.function.ParameterException;
-import net.sf.json.JSONArray;
 
 public class ExecFunction extends AbstractFunction {
 
   /** Singleton instance of the ExecFunction class. */
   private static final ExecFunction instance = new ExecFunction();
+
+  /** Object used for various operations on {@link JsonArray}s. */
+  private JsonArrayFunctions jsonArrayFunctions =
+      JSONMacroFunctions.getInstance().getJsonArrayFunctions();
 
   /**
    * Gets and instance of the ExecFunction class.
@@ -62,8 +68,8 @@ public class ExecFunction extends AbstractFunction {
           I18N.getText("macro.function.execFunction.incorrectName", functionName, execName));
     }
 
-    JSONArray jsonArgs = FunctionUtil.paramAsJsonArray(functionName, args, 1);
-    ArrayList<Object> execArgs = new ArrayList<Object>(jsonArgs);
+    JsonArray jsonArgs = FunctionUtil.paramAsJsonArray(functionName, args, 1);
+    List<Object> execArgs = jsonArrayFunctions.jsonArrayAsMTScriptList(jsonArgs);
 
     boolean defer =
         args.size() > 2 ? FunctionUtil.paramAsBoolean(functionName, args, 2, true) : false;
@@ -71,21 +77,20 @@ public class ExecFunction extends AbstractFunction {
     String strTargets = args.size() > 3 ? args.get(3).toString() : "self";
     String delim = args.size() > 4 ? args.get(4).toString() : ",";
 
-    JSONArray jsonTargets;
+    JsonArray jsonTargets;
     if ("json".equals(delim) || strTargets.charAt(0) == '[') {
-      jsonTargets = JSONArray.fromObject(strTargets);
+      jsonTargets = jsonArrayFunctions.parseJsonArray(strTargets);
     } else {
-      jsonTargets = new JSONArray();
-      for (String t : strTargets.split(delim)) jsonTargets.add(t.trim());
+      jsonTargets = new JsonArray();
+      for (String t : strTargets.split(delim)) {
+        jsonTargets.add(t.trim());
+      }
     }
-    if (jsonTargets.isEmpty()) {
+    if (jsonTargets.size() == 0) {
       return ""; // dont send to empty lists
     }
 
-    @SuppressWarnings("unchecked")
-    // Returns an ArrayList<String>
-    Collection<String> targets = JSONArray.toCollection(jsonTargets, List.class);
-
+    Collection<String> targets = jsonArrayFunctions.jsonArrayToListOfStrings(jsonTargets);
     sendExecFunction(execName, execArgs, defer, targets);
     return "";
   }
@@ -197,12 +202,14 @@ public class ExecFunction extends AbstractFunction {
    * @param execArgs the arguments to the function
    */
   private static void runExecFunction(String functionName, List<Object> execArgs) {
+    MapToolVariableResolver resolver = new MapToolVariableResolver(null);
+    Parser parser = MapToolLineParser.createParser(resolver, false).getParser();
+    Function function = parser.getFunction(functionName);
+    MapTool.getParser().enterTrustedContext(functionName, "execFunction");
     try {
-      MapToolVariableResolver resolver = new MapToolVariableResolver(null);
-      Parser parser = MapToolLineParser.createParser(resolver, false).getParser();
-      Function function = parser.getFunction(functionName);
       function.evaluate(parser, functionName, execArgs);
     } catch (ParserException ignored) {
     }
+    MapTool.getParser().exitContext();
   }
 }

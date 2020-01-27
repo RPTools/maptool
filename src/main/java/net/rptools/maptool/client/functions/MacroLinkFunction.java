@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.io.UnsupportedEncodingException;
@@ -27,6 +30,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -41,9 +45,6 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -151,19 +152,21 @@ public class MacroLinkFunction extends AbstractFunction {
       String strTargets = args.size() > 2 ? args.get(2).toString().trim() : "self";
       String delim = args.size() > 3 ? args.get(3).toString() : ",";
 
-      JSONArray jsonTargets;
+      JsonArray jsonTargets;
       if ("json".equals(delim) || strTargets.charAt(0) == '[')
-        jsonTargets = JSONArray.fromObject(strTargets);
+        jsonTargets = JSONMacroFunctions.getInstance().asJsonElement(strTargets).getAsJsonArray();
       else {
-        jsonTargets = new JSONArray();
+        jsonTargets = new JsonArray();
         for (String t : strTargets.split(delim)) jsonTargets.add(t.trim());
       }
-      if (jsonTargets.isEmpty()) return ""; // dont send to empty lists
+      if (jsonTargets.size() == 0) {
+        return ""; // dont send to empty lists
+      }
 
-      @SuppressWarnings("unchecked")
-      Collection<String> targets =
-          JSONArray.toCollection(jsonTargets, List.class); // Returns an ArrayList<String>
-
+      List<String> targets = new ArrayList<>();
+      for (JsonElement ele : jsonTargets) {
+        targets.add(ele.getAsString());
+      }
       sendExecLink(link, defer, targets);
       return "";
     }
@@ -258,23 +261,25 @@ public class MacroLinkFunction extends AbstractFunction {
 
   private String encode(String str) throws ParserException {
     try {
-      JSONObject.fromObject(str);
+      JSONMacroFunctions.getInstance().asJsonElement(str);
       try {
         return URLEncoder.encode(str, "utf-8");
       } catch (UnsupportedEncodingException e) {
         throw new ParserException(e);
       }
-    } catch (JSONException e) {
+    } catch (ParserException e) {
       return strPropListToArgs(str);
     }
   }
 
   private String decode(String str) throws ParserException {
     try {
-      return JSONObject.fromObject(URLDecoder.decode(str, "utf-8")).toString();
+      return JSONMacroFunctions.getInstance()
+          .asJsonElement(URLDecoder.decode(str, "utf-8"))
+          .getAsString();
     } catch (UnsupportedEncodingException e) {
       throw new ParserException(e);
-    } catch (JSONException e) {
+    } catch (ParserException e) {
       return argsToStrPropList(str);
     }
   }
@@ -293,7 +298,6 @@ public class MacroLinkFunction extends AbstractFunction {
     try {
       for (String s : vals) {
         String decoded = URLDecoder.decode(s, "utf-8");
-        decoded = decoded.replaceAll(";", "&#59");
         if (propList.length() == 0) {
           propList.append(decoded);
         } else {
@@ -475,9 +479,12 @@ public class MacroLinkFunction extends AbstractFunction {
           }
           args = val;
           try {
-            JSONObject jobj = JSONObject.fromObject(args);
-            if (jobj.containsKey("mlOutputList")) {
-              outputToPlayers.addAll(jobj.getJSONArray("mlOutputList"));
+            JsonObject jobj =
+                JSONMacroFunctions.getInstance().asJsonElement(args).getAsJsonObject();
+            if (jobj.has("mlOutputList")) {
+              for (JsonElement ele : jobj.get("mlOutputList").getAsJsonArray()) {
+                outputToPlayers.add(ele.getAsString());
+              }
             }
           } catch (Exception e) {
             // Do nothing as we just dont populate the list.

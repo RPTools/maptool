@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.math.BigDecimal;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -36,7 +39,6 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 /** Functions to move tokens, get a token's location, or calculate the distance from a token. */
 public class TokenLocationFunctions extends AbstractFunction {
@@ -61,6 +63,7 @@ public class TokenLocationFunctions extends AbstractFunction {
         "getTokenX",
         "getTokenY",
         "getTokenDrawOrder",
+        "getTokenMap",
         "getDistance",
         "moveToken",
         "goto",
@@ -102,6 +105,12 @@ public class TokenLocationFunctions extends AbstractFunction {
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setZOrder, newZOrder);
       return BigDecimal.valueOf(token.getZOrder());
     }
+    if (functionName.equalsIgnoreCase("getTokenMap")) {
+      FunctionUtil.checkNumberParam("getDistance", parameters, 1, 2);
+      String identifier = parameters.get(0).toString();
+      String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
+      return getTokenMap(identifier, delim);
+    }
     if (functionName.equals("getDistance")) {
       FunctionUtil.checkNumberParam("getDistance", parameters, 1, 4);
       return getDistance(parser, parameters);
@@ -137,7 +146,6 @@ public class TokenLocationFunctions extends AbstractFunction {
    * @return a message detailing the number of tokens moved.
    * @throws ParserException if the parameters are invalid, or the token is already on the map.
    */
-  @SuppressWarnings("unchecked")
   private String tokenMoveMap(boolean fromCurrentMap, List<Object> args) throws ParserException {
     String functionName = fromCurrentMap ? "moveTokenToMap" : "moveTokenFromMap";
     Object tokenString = args.get(0);
@@ -145,9 +153,11 @@ public class TokenLocationFunctions extends AbstractFunction {
 
     List<String> tokens = new ArrayList<String>();
 
-    Object json = JSONMacroFunctions.asJSON(tokenString);
-    if (json instanceof JSONArray) {
-      tokens.addAll((JSONArray) json);
+    JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(tokenString);
+    if (json.isJsonArray()) {
+      for (JsonElement ele : json.getAsJsonArray()) {
+        tokens.add(JSONMacroFunctions.getInstance().jsonToScriptString(ele));
+      }
     } else {
       tokens.add((String) tokenString);
     }
@@ -574,5 +584,35 @@ public class TokenLocationFunctions extends AbstractFunction {
   public CellPoint getTokenCell(Token token) {
     Zone zone = token.getZoneRenderer().getZone();
     return zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
+  }
+
+  /**
+   * Returns a list of maps containing the token.
+   *
+   * @param identifier the identifier of the token.
+   * @param delim the delimiter of the returned list.
+   * @return the list of maps containing the token.
+   */
+  private Object getTokenMap(String identifier, String delim) {
+    List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+    List<String> mapList = new ArrayList<>();
+
+    for (final ZoneRenderer zr : zrenderers) {
+      Zone zone = zr.getZone();
+      Token token = zone.resolveToken(identifier);
+      if (token != null) {
+        mapList.add(zr.getZone().getName());
+      }
+    }
+
+    if ("json".equalsIgnoreCase(delim)) {
+      JsonArray jsonArray = new JsonArray();
+      for (String map : mapList) {
+        jsonArray.add(map);
+      }
+      return jsonArray;
+    } else {
+      return String.join(delim, mapList);
+    }
   }
 }

@@ -14,14 +14,18 @@
  */
 package net.rptools.maptool.client.functions;
 
-import static net.rptools.maptool.client.functions.JSONMacroFunctions.convertToJSON;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -29,8 +33,6 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 /** Includes currentToken(), findToken(), and functions to get lists of tokens through filters. */
 public class FindTokenFunctions extends AbstractFunction {
@@ -237,32 +239,35 @@ public class FindTokenFunctions extends AbstractFunction {
    * layers).
    */
   private static class LayerFilter implements Zone.Filter {
-    private final JSONArray layers;
+    private final JsonArray filterLayers;
 
-    public LayerFilter(JSONArray layers) {
-      this.layers = new JSONArray();
+    public LayerFilter(JsonArray layers) {
+      filterLayers = new JsonArray();
       for (Object s : layers) {
-        String name = s.toString().toUpperCase();
-        this.layers.add(Zone.Layer.valueOf("HIDDEN".equals(name) ? "GM" : name));
+        // Can't use .toString() as it wraps in extra quotes - bug in the JSON lib?
+        String name = ((JsonPrimitive) s).getAsString().toUpperCase();
+        name = "HIDDEN".equals(name) ? "GM" : name;
+        name = Zone.Layer.valueOf(name).toString();
+        filterLayers.add(name);
       }
     }
 
     public boolean matchToken(Token t) {
       // Filter out the utility lib: and image: tokens
-      return layers.contains(t.getLayer()) && !t.isImgOrLib();
+      return filterLayers.contains(new JsonPrimitive(t.getLayer().toString())) && !t.isImgOrLib();
     }
   }
 
   private static class PropertyTypeFilter implements Zone.Filter {
-    private final JSONArray types;
+    private final JsonArray types;
 
-    public PropertyTypeFilter(JSONArray types) {
+    public PropertyTypeFilter(JsonArray types) {
       this.types = types;
     }
 
     public boolean matchToken(Token t) {
       // Don't filter out lib and image
-      boolean isType = types.contains(t.getPropertyType());
+      boolean isType = types.contains(new JsonPrimitive(t.getPropertyType()));
       return isType;
     }
   }
@@ -392,31 +397,31 @@ public class FindTokenFunctions extends AbstractFunction {
    */
   private static Object getTokenList(
       Parser parser, boolean nameOnly, String delim, String jsonString) throws ParserException {
-    JSONObject jobj = JSONObject.fromObject(jsonString);
+    JsonObject jobj = JsonParser.parseString(jsonString).getAsJsonObject();
 
     // First get a list of all our tokens. By default this is limited to the TOKEN and GM layers.
     List<Token> allTokens = null;
-    JSONArray layers = null;
-    if (!jobj.containsKey("layer")) {
-      layers = new JSONArray();
+    JsonArray layers = null;
+    if (!jobj.has("layer")) {
+      layers = new JsonArray();
       layers.add(Zone.Layer.TOKEN.toString());
       layers.add(Zone.Layer.GM.toString());
     } else {
       Object o = jobj.get("layer");
-      if (o instanceof JSONArray) {
-        layers = (JSONArray) o;
+      if (o instanceof JsonArray) {
+        layers = (JsonArray) o;
       } else {
-        layers = new JSONArray();
+        layers = new JsonArray();
         layers.add(o.toString());
       }
     }
     ZoneRenderer zoneRenderer;
     String mapName;
-    if (!jobj.containsKey("mapName")) {
+    if (!jobj.has("mapName")) {
       mapName = null; // set to null so findToken searches the current map
       zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
     } else {
-      mapName = jobj.get("mapName").toString();
+      mapName = jobj.get("mapName").getAsString();
       zoneRenderer = MapTool.getFrame().getZoneRenderer(mapName);
       if (zoneRenderer == null) {
         throw new ParserException(
@@ -430,19 +435,19 @@ public class FindTokenFunctions extends AbstractFunction {
     allTokens = zone.getTokensFiltered(new LayerFilter(layers));
     List<Token> tokenList = new ArrayList<Token>(allTokens.size());
     tokenList.addAll(allTokens);
-    JSONObject range = null;
-    JSONObject area = null;
+    JsonObject range = null;
+    JsonObject area = null;
 
-    Boolean match;
+    boolean match;
     // Now loop through conditions and filter out tokens that don't match conditions
     for (Object key : jobj.keySet()) {
       String searchType = key.toString();
       if ("setStates".equalsIgnoreCase(searchType) || "unsetStates".equalsIgnoreCase(searchType)) {
-        JSONArray states;
+        JsonArray states;
         Object o = jobj.get(searchType);
-        if (o instanceof JSONArray) states = (JSONArray) o;
+        if (o instanceof JsonArray) states = (JsonArray) o;
         else {
-          states = new JSONArray();
+          states = new JsonArray();
           states.add(o.toString());
         }
         match = "setStates".equalsIgnoreCase(searchType);
@@ -454,19 +459,19 @@ public class FindTokenFunctions extends AbstractFunction {
       } else if ("range".equalsIgnoreCase(searchType)) {
         // We will do this as one of the last steps as it's one of the most expensive so we want to
         // do it on as few tokens as possible
-        range = jobj.getJSONObject(searchType);
+        range = jobj.get(searchType).getAsJsonObject();
       } else if ("area".equalsIgnoreCase(searchType)) {
         // We will do this as one of the last steps as it's one of the most expensive so we want to
         // do it on as few tokens as possible
-        area = jobj.getJSONObject(searchType);
+        area = jobj.get(searchType).getAsJsonObject();
         // } else if ("unsetStates".equalsIgnoreCase(searchType)) {
         // // ignore
       } else if ("propertyType".equalsIgnoreCase(searchType)) {
-        JSONArray types;
+        JsonArray types;
         Object o = jobj.get(searchType);
-        if (o instanceof JSONArray) types = (JSONArray) o;
+        if (o instanceof JsonArray) types = (JsonArray) o;
         else {
-          types = new JSONArray();
+          types = new JsonArray();
           types.add(o.toString());
         }
         tokenList = getTokensFiltered(new PropertyTypeFilter(types), tokenList);
@@ -480,9 +485,9 @@ public class FindTokenFunctions extends AbstractFunction {
           match = false;
           type = name = "*";
         } else {
-          Object jsonLight = convertToJSON(value);
-          if (jsonLight instanceof JSONObject) {
-            JSONObject jobjLight = (JSONObject) jsonLight;
+          JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(value);
+          if (json.isJsonObject()) {
+            JsonObject jobjLight = json.getAsJsonObject();
             match = !jobjLight.has("value") || FunctionUtil.getBooleanValue(jobjLight.get("value"));
             type = jobjLight.has("category") ? jobjLight.get("category").toString() : "*";
             name = jobjLight.has("name") ? jobjLight.get("name").toString() : "*";
@@ -501,13 +506,13 @@ public class FindTokenFunctions extends AbstractFunction {
         }
         tokenList = getTokensFiltered(new LightFilter(type, name, match), tokenList);
       } else if ("owned".equalsIgnoreCase(searchType)) {
-        Object value = JSONMacroFunctions.convertToJSON(jobj.get(searchType).toString());
-        if (value instanceof JSONArray) {
+        JsonElement json =
+            JSONMacroFunctions.getInstance().asJsonElement(jobj.get(searchType).toString());
+        if (json.isJsonArray()) {
           Ownership ownership = Ownership.ARRAY;
-          JSONArray jsonOwners = (JSONArray) value;
-          Set<String> setOwners = new HashSet<String>(jsonOwners.size());
-          for (Object jsonOwner : jsonOwners) {
-            setOwners.add(jsonOwner.toString());
+          Set<String> setOwners = new HashSet<>();
+          for (JsonElement ele : json.getAsJsonArray()) {
+            setOwners.add(ele.getAsString());
           }
           tokenList = getTokensFiltered(new OwnedFilter(ownership, setOwners), tokenList);
         } else {
@@ -537,12 +542,14 @@ public class FindTokenFunctions extends AbstractFunction {
     if (range != null) {
       TokenLocationFunctions instance = TokenLocationFunctions.getInstance();
       Token token;
-      if (range.containsKey("token")) {
-        token = findToken(range.getString("token"), mapName);
+      if (range.has("token")) {
+        token = findToken(range.get("token").getAsString(), mapName);
         if (token == null) {
           throw new ParserException(
               I18N.getText(
-                  "macro.function.general.unknownToken", "getTokens", range.getString("token")));
+                  "macro.function.general.unknownToken",
+                  "getTokens",
+                  range.get("token").getAsString()));
         }
       } else {
         GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
@@ -556,20 +563,20 @@ public class FindTokenFunctions extends AbstractFunction {
       int from = Integer.MIN_VALUE;
       int upto = Integer.MAX_VALUE;
 
-      if (range.containsKey("from")) {
-        from = range.getInt("from");
+      if (range.has("from")) {
+        from = range.get("from").getAsInt();
       }
-      if (range.containsKey("upto")) {
-        upto = range.getInt("upto");
+      if (range.has("upto")) {
+        upto = range.get("upto").getAsInt();
       }
       boolean useDistancePerCell = true;
-      if (range.containsKey("distancePerCell")) {
+      if (range.has("distancePerCell")) {
         useDistancePerCell = booleanCheck(range, "distancePerCell");
       }
 
       String metric = null;
-      if (range.containsKey("metric")) {
-        metric = range.getString("metric");
+      if (range.has("metric")) {
+        metric = range.get("metric").getAsString();
       }
       List<Token> inrange = new LinkedList<Token>();
       for (Token targetToken : tokenList) {
@@ -585,12 +592,14 @@ public class FindTokenFunctions extends AbstractFunction {
     if (area != null) {
       TokenLocationFunctions instance = TokenLocationFunctions.getInstance();
       Token token;
-      if (area.containsKey("token")) {
-        token = findToken(area.getString("token"), mapName);
+      if (area.has("token")) {
+        token = findToken(area.get("token").getAsString(), mapName);
         if (token == null) {
           throw new ParserException(
               I18N.getText(
-                  "macro.function.general.unknownToken", "getTokens", area.getString("token")));
+                  "macro.function.general.unknownToken",
+                  "getTokens",
+                  area.get("token").getAsString()));
         }
       } else {
         GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
@@ -601,31 +610,31 @@ public class FindTokenFunctions extends AbstractFunction {
               I18N.getText("macro.function.general.noImpersonated", "getTokens"));
         }
       }
-      JSONArray offsets = area.getJSONArray("offsets");
+      JsonArray offsets = area.get("offsets").getAsJsonArray();
       if (offsets == null) {
         throw new ParserException(
             I18N.getText("macro.function.findTokenFunctions.offsetArray", "getTokens"));
       }
       String metric = null;
-      if (area.containsKey("metric")) {
-        metric = area.getString("metric");
+      if (area.has("metric")) {
+        metric = area.get("metric").getAsString();
       }
       CellPoint cp = instance.getTokenCell(token);
 
       Point[] points = new Point[offsets.size()];
       int ip = 0; // create an array of points for each cell
       for (Object o : offsets) {
-        if (!(o instanceof JSONObject)) {
+        if (!(o instanceof JsonObject)) {
           throw new ParserException(
               I18N.getText("macro.function.findTokenFunctions.offsetArray", "getTokens"));
         }
-        JSONObject joff = (JSONObject) o;
-        if (!joff.containsKey("x") || !joff.containsKey("y")) {
+        JsonObject joff = (JsonObject) o;
+        if (!joff.has("x") || !joff.has("y")) {
           throw new ParserException(
               I18N.getText("macro.function.findTokenFunctions.offsetArray", "getTokens"));
         }
         // note: cp.x and cp.y returns the top left cell (pixel for gridless
-        points[ip] = new Point(joff.getInt("x") + cp.x, joff.getInt("y") + cp.y);
+        points[ip] = new Point(joff.get("x").getAsInt() + cp.x, joff.get("y").getAsInt() + cp.y);
         ip += 1;
       }
       Set<Token> matching = new HashSet<Token>();
@@ -645,21 +654,35 @@ public class FindTokenFunctions extends AbstractFunction {
       }
     }
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(values);
+      JsonArray jsonArray = new JsonArray();
+      for (String val : values) {
+        jsonArray.add(val);
+      }
+      return jsonArray;
     } else {
       return StringFunctions.getInstance().join(values, delim);
     }
   }
 
-  private static boolean booleanCheck(JSONObject jobj, String searchType) {
-    Object val = jobj.get(searchType);
-    if (val instanceof Boolean) {
-      return Boolean.TRUE.equals(val);
-    } else if (val instanceof Integer) {
-      return !Integer.valueOf(0).equals(val);
-    } else {
-      return val == null;
+  private static boolean booleanCheck(JsonObject jobj, String searchType) {
+    JsonElement jel = jobj.get(searchType);
+    if (jel.isJsonPrimitive()) {
+      JsonPrimitive jprim = jel.getAsJsonPrimitive();
+      if (jprim.isBoolean()) {
+        return jprim.getAsBoolean();
+      } else if (jprim.isNumber()) {
+        if (jprim.getAsInt() == 0) {
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        // What's the rationale for returning true for other types?
+        // Should we be looking at strings for true/false?
+        return true;
+      }
     }
+    return false;
   }
 
   /**
@@ -796,7 +819,11 @@ public class FindTokenFunctions extends AbstractFunction {
       }
     }
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(values).toString();
+      JsonArray jsonArray = new JsonArray();
+      for (String val : values) {
+        jsonArray.add(val);
+      }
+      return jsonArray.toString();
     } else {
       return StringFunctions.getInstance().join(values, delim);
     }

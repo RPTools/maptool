@@ -14,20 +14,26 @@
  */
 package net.rptools.maptool.client.walker;
 
+import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 import net.rptools.maptool.client.ui.zone.RenderPathWorker;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Path;
+import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Zone;
 
 public abstract class AbstractZoneWalker implements ZoneWalker {
+
   protected List<PartialPath> partialPaths =
       Collections.synchronizedList(new ArrayList<PartialPath>());
   protected final Zone zone;
   protected boolean restrictMovement = false;
+  protected Set<TerrainModifierOperation> terrainModifiersIgnored;
+  protected Area tokenVBL;
   protected RenderPathWorker renderPathWorker;
 
   public AbstractZoneWalker(Zone zone) {
@@ -40,19 +46,20 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
 
   public CellPoint getLastPoint() {
     synchronized (partialPaths) {
-      if (partialPaths.isEmpty()) return null;
-      else return partialPaths.get(partialPaths.size() - 1).end;
+      if (partialPaths.isEmpty()) {
+        return null;
+      } else {
+        return partialPaths.get(partialPaths.size() - 1).end;
+      }
     }
   }
 
   public void setWaypoints(CellPoint... points) {
-    // System.out.println("AbstractZoneWalker setWaypoints called");
     partialPaths.clear();
     addWaypoints(points);
   }
 
   public void addWaypoints(CellPoint... points) {
-    // System.out.println("AbstractZoneWalker addWaypoints called");
     CellPoint previous =
         partialPaths.size() > 0 ? partialPaths.get(partialPaths.size() - 1).end : null;
     for (CellPoint current : points) {
@@ -64,15 +71,24 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   }
 
   public CellPoint replaceLastWaypoint(CellPoint point) {
-    return replaceLastWaypoint(point, false);
+    return replaceLastWaypoint(
+        point, false, Collections.singleton(TerrainModifierOperation.NONE), null);
   }
 
   @Override
-  public CellPoint replaceLastWaypoint(CellPoint point, boolean restrictMovement) {
-    // System.out.println("AbstractZoneWalker replaceLastWaypoint2 called");
-    this.restrictMovement = restrictMovement;
+  public CellPoint replaceLastWaypoint(
+      CellPoint point,
+      boolean restrictMovement,
+      Set<TerrainModifierOperation> terrainModifiersIgnored,
+      Area tokenVBL) {
 
-    if (partialPaths.isEmpty()) return null;
+    this.restrictMovement = restrictMovement;
+    this.terrainModifiersIgnored = terrainModifiersIgnored;
+    this.tokenVBL = tokenVBL;
+
+    if (partialPaths.isEmpty()) {
+      return null;
+    }
     PartialPath oldPartial = partialPaths.remove(partialPaths.size() - 1);
 
     // short circuit exit if the point hasn't changed.
@@ -86,14 +102,10 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
 
   public Path<CellPoint> getPath(RenderPathWorker renderPathWorker) {
     this.renderPathWorker = renderPathWorker;
-    // System.out.println("########## AbstractZoneWalker.getPath(RenderPathWorker renderPathWorker)
-    // renderPathWorker null? " + (renderPathWorker == null));
     return getPath();
   }
 
   public Path<CellPoint> getPath() {
-    // System.out.println("########## AbstractZoneWalker.getPath() renderPathWorker null? " +
-    // (renderPathWorker == null));
     Path<CellPoint> path = new Path<CellPoint>();
 
     PartialPath last = null;
@@ -121,15 +133,21 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   }
 
   public boolean isWaypoint(CellPoint point) {
-    if (point == null) return false;
+    if (point == null) {
+      return false;
+    }
 
     PartialPath last = null;
     for (PartialPath partial : partialPaths) {
-      if (partial.start.equals(point)) return true;
+      if (partial.start.equals(point)) {
+        return true;
+      }
 
       last = partial;
     }
-    if (last != null && last.end != null && last.end.equals(point)) return true;
+    if (last != null && last.end != null && last.end.equals(point)) {
+      return true;
+    }
 
     return false;
   }
@@ -139,7 +157,9 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
    *     net.rptools.maptool.client.walker.ZoneWalker#removeWaypoint(net.rptools.maptool.model.CellPoint)
    */
   public boolean removeWaypoint(CellPoint aPoint) {
-    if (aPoint == null || partialPaths == null || partialPaths.isEmpty()) return false;
+    if (aPoint == null || partialPaths == null || partialPaths.isEmpty()) {
+      return false;
+    }
 
     // Find the partial path with the given end point
     ListIterator<PartialPath> i = partialPaths.listIterator();
@@ -148,7 +168,9 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
       if (path.end.equals(aPoint)) {
         // If this is the last partial path then done, otherwise
         // combine this path and the next and replace them with a combined path
-        if (!i.hasNext()) return false;
+        if (!i.hasNext()) {
+          return false;
+        }
         i.remove();
         PartialPath path2 = i.next();
         i.set(new PartialPath(path.start, path2.end, calculatePath(path.start, path2.end)));
@@ -163,7 +185,9 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
    *     net.rptools.maptool.client.walker.ZoneWalker#toggleWaypoint(net.rptools.maptool.model.CellPoint)
    */
   public boolean toggleWaypoint(CellPoint aPoint) {
-    if (removeWaypoint(aPoint)) return true;
+    if (removeWaypoint(aPoint)) {
+      return true;
+    }
     addWaypoints(aPoint);
     return true;
   }
@@ -182,6 +206,7 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   protected abstract List<CellPoint> calculatePath(CellPoint start, CellPoint end);
 
   protected static class PartialPath {
+
     final CellPoint start;
     final CellPoint end;
     final List<CellPoint> path;
@@ -192,7 +217,11 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
       this.path = path;
 
       // Get the distance traveled from the last partial path, eg from last waypoint...
-      if (!path.isEmpty()) this.end.distanceTraveled = path.get(path.size() - 1).distanceTraveled;
+      if (!path.isEmpty()) {
+        this.end.distanceTraveled = path.get(path.size() - 1).distanceTraveled;
+        this.end.distanceTraveledWithoutTerrain =
+            path.get(path.size() - 1).distanceTraveledWithoutTerrain;
+      }
     }
 
     /** @see java.lang.Object#toString() */

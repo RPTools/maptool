@@ -233,6 +233,7 @@ public class AppUpdate {
 
     Runnable updatethread =
         new Runnable() {
+          @Override
           public void run() {
             try (InputStream stream = assetDownloadURL.openStream()) {
               ProgressMonitorInputStream pmis =

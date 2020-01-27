@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +28,7 @@ import java.util.Stack;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.AbortFunction.AbortFunctionException;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.syntax.MapToolScriptSyntax;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -35,7 +39,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
 import net.rptools.parser.function.ParameterException;
-import net.sf.json.JSONArray;
 
 public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDescription {
 
@@ -88,9 +91,22 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       throws ParserException {
     MapToolVariableResolver resolver = (MapToolVariableResolver) parser.getVariableResolver();
     MapToolVariableResolver newResolver;
-    JSONArray jarr = new JSONArray();
+    JsonArray jarr = new JsonArray();
 
-    jarr.addAll(parameters);
+    for (Object obj : parameters) {
+      if (obj
+          instanceof
+          String) { // Want to make sure we dont translate string arguments where not wanted
+        String s = obj.toString();
+        if (!s.startsWith("[") && !s.startsWith("{")) {
+          jarr.add(new JsonPrimitive(s));
+        } else {
+          jarr.add(JSONMacroFunctions.getInstance().asJsonElement(obj));
+        }
+      } else {
+        jarr.add(JSONMacroFunctions.getInstance().asJsonElement(obj));
+      }
+    }
     String macroArgs = jarr.size() > 0 ? jarr.toString() : "";
     String output;
     FunctionDefinition funcDef = userDefinedFunctions.get(functionName);
@@ -126,9 +142,13 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       output = resolver.getVariable("macro.return").toString();
       stripOutput = output;
     }
-    Object out = JSONMacroFunctions.convertToJSON(stripOutput);
-    if (out != null) {
-      return out;
+
+    String trim = stripOutput.trim();
+    if (trim.startsWith("[") || trim.startsWith("{")) {
+      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(trim);
+      if (json != null) {
+        return json;
+      }
     }
 
     try {

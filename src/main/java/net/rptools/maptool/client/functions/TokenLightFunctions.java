@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +30,6 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
 
 public class TokenLightFunctions extends AbstractFunction {
   private static final TokenLightFunctions instance = new TokenLightFunctions();
@@ -116,7 +117,9 @@ public class TokenLightFunctions extends AbstractFunction {
       }
     }
     if ("json".equals(delim)) {
-      return JSONArray.fromObject(lightList).toString();
+      JsonArray jarr = new JsonArray();
+      lightList.forEach(l -> jarr.add(new JsonPrimitive(l)));
+      return jarr.toString();
     } else {
       return StringFunctions.getInstance().join(lightList, delim);
     }
