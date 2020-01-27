@@ -412,7 +412,11 @@ public class FindTokenFunctions extends AbstractFunction {
         layers = (JsonArray) o;
       } else {
         layers = new JsonArray();
-        layers.add(o.toString());
+        if (o instanceof JsonPrimitive) {
+          layers.add(((JsonPrimitive) o).getAsString());
+        } else {
+          layers.add(o.toString());
+        }
       }
     }
     ZoneRenderer zoneRenderer;
