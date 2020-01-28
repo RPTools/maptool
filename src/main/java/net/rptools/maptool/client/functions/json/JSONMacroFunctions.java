@@ -171,7 +171,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 2);
           JsonElement json = FunctionUtil.paramConvertedToJson(functionName, args, 0);
-          String delim = args.size() > 1 ? args.get(1).toString() : ",";
+          String delim = args.size() > 1 ? args.get(1).toString() : DEFAULT_STRING_LIST_DELIM;
 
           if (json.isJsonObject()) {
             return jsonObjectFunctions.fields(json.getAsJsonObject(), delim);
@@ -200,7 +200,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         {
           FunctionUtil.checkNumberParam(functionName, args, 1, 2);
           JsonElement json = FunctionUtil.paramConvertedToJson(functionName, args, 0);
-          String delim = args.size() > 1 ? args.get(1).toString() : ",";
+          String delim = args.size() > 1 ? args.get(1).toString() : DEFAULT_STRING_LIST_DELIM;
 
           if (json.isJsonArray()) {
             return jsonArrayFunctions.toStringList(json.getAsJsonArray(), delim);
@@ -498,7 +498,7 @@ public class JSONMacroFunctions extends AbstractFunction {
           JsonArray names = FunctionUtil.paramConvertedToJsonArray(functionName, args, 0);
           JsonArray stats = FunctionUtil.paramConvertedToJsonArray(functionName, args, 1);
           JsonArray rollArray;
-          String rollString; // = args.get(2).toString();
+          String rollString;
           boolean isArrayOfRolls;
 
           try {
@@ -518,8 +518,7 @@ public class JSONMacroFunctions extends AbstractFunction {
           }
         }
     }
-
-    return null; // TODO CDW
+    throw new ParserException(functionName + "(): Unknown function");
   }
 
   /**
