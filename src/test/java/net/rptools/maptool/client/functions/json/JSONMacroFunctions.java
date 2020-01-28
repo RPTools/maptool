@@ -16,6 +16,7 @@ package net.rptools.maptool.client.functions.json;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.jayway.jsonpath.JsonPath;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,6 +32,8 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.junit.jupiter.api.Test;
+import org.locationtech.jts.util.Assert;
 
 class TestJSONMacroFunctions {
   // a list of json objects ready to be used in tests
@@ -41,7 +44,7 @@ class TestJSONMacroFunctions {
   public static final BigDecimal _false = new BigDecimal(0);
   private static final Parser parser = new Parser();
 
-  // an alias to childEvaluate
+  /** An alias to childEvaluate. */
   Object run(String function_name, Object json, List<Object> keys) throws ParserException {
     List<Object> fparams = new ArrayList<Object>();
     fparams.add(json);
@@ -49,12 +52,17 @@ class TestJSONMacroFunctions {
     return JSONMacroFunctionsOld.getInstance().childEvaluate(parser, function_name, fparams);
   }
 
-  Object run(String function_name, Object jobj, Object... objs) throws ParserException {
-    List<Object> params = new ArrayList<Object>();
-    for (Object o : objs) {
-      params.add(o);
-    }
-    return run(function_name, jobj, params);
+  /**
+   * An alias to childEvaluate.
+   *
+   * @param functionName the name of the function
+   * @param objs the arguments of the function
+   * @return the output of the function
+   * @throws ParserException if the macro function throws a parser exception
+   */
+  Object run(String functionName, Object... objs) throws ParserException {
+    List<Object> params = new ArrayList<>(Arrays.asList(objs));
+    return JSONMacroFunctionsOld.getInstance().childEvaluate(parser, functionName, params);
   }
 
   // @BeforeAll
@@ -192,5 +200,118 @@ class TestJSONMacroFunctions {
       }
       assertEquals(sanitize(java_array.size()), run("json.length", mt_array));
     }
+  }
+
+  /** JSON example from https://github.com/json-path/JsonPath/ */
+  private static final String JSON =
+      "{ \"store\": {"
+          + "    \"book\": [ "
+          + "      { \"category\": \"reference\","
+          + "        \"author\": \"Nigel Rees\","
+          + "        \"title\": \"Sayings of the Century\","
+          + "        \"price\": 8.95"
+          + "      },\n"
+          + "      { \"category\": \"fiction\","
+          + "        \"author\": \"Evelyn Waugh\","
+          + "        \"title\": \"Sword of Honour\","
+          + "        \"price\": 12.99"
+          + "      },"
+          + "      { \"category\": \"fiction\","
+          + "        \"author\": \"Herman Melville\","
+          + "        \"title\": \"Moby Dick\","
+          + "        \"isbn\": \"0-553-21311-3\","
+          + "        \"price\": 8.99"
+          + "      },\n"
+          + "      { \"category\": \"fiction\","
+          + "        \"author\": \"J. R. R. Tolkien\","
+          + "        \"title\": \"The Lord of the Rings\","
+          + "        \"isbn\": \"0-395-19395-8\","
+          + "        \"price\": 22.99"
+          + "      }\n"
+          + "    ],\n"
+          + "    \"bicycle\": {"
+          + "      \"color\": \"red\","
+          + "      \"price\": 19.95"
+          + "    }\n"
+          + "  }, \"expensive\": 10"
+          + "}";
+
+  /** Path examples from https://github.com/json-path/JsonPath. */
+  private static final String[] PATHS = {
+    "$.store.book[*].author",
+    "$..author",
+    "$.store.*",
+    "$.store..price",
+    "$..book[2]",
+    "$..book[-2]",
+    "$..book[0,1]",
+    "$..book[:2]",
+    "$..book[1:2]",
+    "$..book[-2:]",
+    "$..book[2:]",
+    "$..book[?(@.isbn)]",
+    "$.store.book[?(@.price < 10)]",
+    "$..book[?(@.price <= $['expensive'])]",
+    "$..book[?(@.author =~ /.*REES/i)]",
+    "$..*",
+    "$..book.length()"
+  };
+
+  /** Tests the JSON and paths from https://github.com/json-path/JsonPath. */
+  @Test
+  void testJsonPathRead() {
+    String fName = "json.path.read";
+    String msg = "Incorrect output for path %s";
+    String excMsg = "Parser exception '%s' for path %s.";
+    for (String path : PATHS) {
+      try {
+        String mtOutput = run(fName, JSON, path).toString();
+        String jwOutput = JsonPath.read(JSON, path).toString();
+        Assert.equals(jwOutput, mtOutput, String.format(msg, path));
+      } catch (ParserException e) {
+        fail(String.format(excMsg, e.getLocalizedMessage(), path));
+      }
+    }
+  }
+
+  /** Test json.difference() when Strings are used as arguments (fixed bug #1177). */
+  @Test
+  void testJsonDifferenceWithStrings() throws ParserException {
+    Assert.equals("[]", run("json.difference", "test", "test").toString());
+  }
+  /** Test json.isEmpty() when String is used as argument (fixed bug #1167). */
+  @Test
+  void testJsonIsEmptyWithString() throws ParserException {
+    Assert.equals(BigDecimal.ZERO, run("json.isEmpty", "a"));
+  }
+  /** Test json.set() when empty String is used as argument (fixed bug #1151). */
+  @Test
+  void testJsonSetWithEmptyString() throws ParserException {
+    Assert.equals("{\"field\":\"\"}", run("json.set", "{}", "field", "").toString());
+  }
+  /** Test json.get() returning empty string if field doesn't exist (fixed bug #1121). */
+  @Test
+  void testJsonGetMissingField() throws ParserException {
+    Assert.equals("", run("json.get", "{}", "field"));
+  }
+  /** Test json.get() when String is used as argument (fixed bug #1144). */
+  @Test
+  void testJsonGetWithString() throws ParserException {
+    Assert.equals("test", run("json.get", "test", 0));
+  }
+  /** Test json.append() when number is surrounded by white spaces (fixed bug #1139). */
+  @Test
+  void testJsonAppendWhiteSpaces() throws ParserException {
+    Assert.equals("[\" 0 \"]", run("json.append", "[]", " 0 ").toString());
+  }
+  /** Test json.toList() when quotes are in the json used as argument (fixed bug #1143). */
+  @Test
+  void testJsonToListWithQuotes() throws ParserException {
+    Assert.equals("\"", run("json.toList", "[\"\\\"\"]").toString());
+  }
+  /** Test json.type() with a json array (fixed bug #1125). */
+  @Test
+  void testJsonTypeArray() throws ParserException {
+    Assert.equals("ARRAY", run("json.type", "[]"));
   }
 }

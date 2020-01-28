@@ -1376,6 +1376,10 @@ public class Token extends BaseModel implements Cloneable {
    * @since 1.4.1.5
    */
   public Area getTransformedVBL(Area areaToTransform) {
+    if (areaToTransform == null) {
+      return null;
+    }
+
     Rectangle footprintBounds = getBounds(MapTool.getFrame().getCurrentZoneRenderer().getZone());
     Dimension imgSize = new Dimension(getWidth(), getHeight());
     SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);

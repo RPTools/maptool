@@ -1534,12 +1534,12 @@ public class MapTool {
 
     if (MapTool.class.getPackage().getImplementationVersion() != null) {
       versionImplementation = MapTool.class.getPackage().getImplementationVersion().trim();
-      log.info("setting MapTool version from manifest: " + versionImplementation);
+      log.info("getting MapTool version from manifest: " + versionImplementation);
     }
 
     if (MapTool.class.getPackage().getImplementationVendor() != null) {
       vendor = MapTool.class.getPackage().getImplementationVendor().trim();
-      log.info("setting MapTool vendor from manifest:  " + vendor);
+      log.info("getting MapTool vendor from manifest:  " + vendor);
     }
 
     // Initialize Sentry.io logging
@@ -1604,7 +1604,7 @@ public class MapTool {
       log.info("argument passed via command line: " + arg);
     }
 
-    if (cmdOptions.hasOption("version")) {
+    if (cmd.hasOption("version")) {
       log.info("overriding MapTool version from command line to: " + versionOverride);
       version = versionOverride;
     } else {
