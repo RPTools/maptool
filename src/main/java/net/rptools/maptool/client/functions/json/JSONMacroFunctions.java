@@ -518,7 +518,7 @@ public class JSONMacroFunctions extends AbstractFunction {
           }
         }
     }
-    throw new ParserException(functionName + "(): Unknown function");
+    throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
   /**
