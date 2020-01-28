@@ -54,7 +54,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
   private boolean isEraser;
   private boolean isSnapToGridSelected;
   private boolean isEraseSelected;
-  private static LayerSelectionDialog layerSelectionDialog;
+  private static final LayerSelectionDialog layerSelectionDialog;
 
   private static Zone.Layer selectedLayer = Zone.Layer.TOKEN;
 
@@ -67,6 +67,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
               Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
             },
             new LayerSelectionListener() {
+              @Override
               public void layerSelected(Layer layer) {
                 selectedLayer = layer;
               }
@@ -198,6 +199,14 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     return defaultValue;
   }
 
+  protected boolean isSnapToCenter(MouseEvent e) {
+    boolean defaultValue = false;
+    if (e.isAltDown()) {
+      defaultValue = true;
+    }
+    return defaultValue;
+  }
+
   protected Pen getPen() {
     Pen pen = new Pen(MapTool.getFrame().getPen());
     pen.setEraser(isEraser);
@@ -221,9 +230,12 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
   protected ZonePoint getPoint(MouseEvent e) {
     ScreenPoint sp = new ScreenPoint(e.getX(), e.getY());
     ZonePoint zp = sp.convertToZoneRnd(renderer);
-    if (isSnapToGrid(e)) {
+    if (isSnapToCenter(e) && this instanceof AbstractLineTool) {
+      // Only line tools will snap to center as the Alt key for rectangle, diamond and oval
+      // is used for expand from center.
+      zp = renderer.getCellCenterAt(sp);
+    } else if (isSnapToGrid(e)) {
       zp = renderer.getZone().getNearestVertex(zp);
-      sp = ScreenPoint.fromZonePoint(renderer, zp);
     }
     return zp;
   }
@@ -240,6 +252,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     return tokenTopolgy;
   }
 
+  @Override
   public abstract void paintOverlay(ZoneRenderer renderer, Graphics2D g);
 
   protected void paintTopologyOverlay(Graphics2D g, Drawable drawable) {
