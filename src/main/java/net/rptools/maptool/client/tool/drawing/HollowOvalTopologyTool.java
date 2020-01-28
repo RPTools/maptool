@@ -22,12 +22,9 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
-import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Oval;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.GraphicsUtil;
@@ -78,46 +75,7 @@ public class HollowOvalTopologyTool extends AbstractDrawingTool implements Mouse
   }
 
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
-
-    // Color oldColor = g.getColor();
-
-    if (MapTool.getPlayer().isGM()) {
-      Zone zone = renderer.getZone();
-      Area topology = zone.getTopology();
-
-      Graphics2D g2 = (Graphics2D) g.create();
-      g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
-      g2.scale(renderer.getScale(), renderer.getScale());
-
-      g2.setColor(AppStyle.tokenTopologyColor);
-      g2.fill(getTokenTopology());
-
-      g2.setColor(AppStyle.topologyColor);
-      g2.fill(topology);
-
-      g2.dispose();
-    }
-
-    if (oval != null) {
-
-      Pen pen = new Pen();
-      pen.setEraser(getPen().isEraser());
-      pen.setOpacity(AppStyle.topologyRemoveColor.getAlpha() / 255.0f);
-      pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
-      pen.setThickness(3.0f);
-
-      if (pen.isEraser()) {
-        pen.setEraser(false);
-      }
-
-      if (isEraser()) {
-        pen.setPaint(new DrawableColorPaint(AppStyle.topologyRemoveColor));
-      } else {
-        pen.setPaint(new DrawableColorPaint(AppStyle.topologyAddColor));
-      }
-
-      paintTransformed(g, renderer, oval, pen);
-    }
+    paintTopologyOverlay(g, oval, Pen.MODE_TRANSPARENT);
   }
 
   public void mousePressed(MouseEvent e) {

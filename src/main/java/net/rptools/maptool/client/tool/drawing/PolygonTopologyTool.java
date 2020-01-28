@@ -29,7 +29,6 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.LineSegment;
@@ -38,6 +37,7 @@ import net.rptools.maptool.model.drawing.ShapeDrawable;
 
 /** Tool for drawing freehand lines. */
 public class PolygonTopologyTool extends LineTool implements MouseMotionListener {
+
   private static final long serialVersionUID = 3258132466219627316L;
 
   public PolygonTopologyTool() {
@@ -148,22 +148,7 @@ public class PolygonTopologyTool extends LineTool implements MouseMotionListener
 
   @Override
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
-    if (MapTool.getPlayer().isGM()) {
-      Zone zone = renderer.getZone();
-      Area topology = zone.getTopology();
-
-      Graphics2D g2 = (Graphics2D) g.create();
-      g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
-      g2.scale(renderer.getScale(), renderer.getScale());
-
-      g2.setColor(AppStyle.tokenTopologyColor);
-      g2.fill(getTokenTopology());
-
-      g2.setColor(AppStyle.topologyColor);
-      g2.fill(topology);
-
-      g2.dispose();
-    }
+    paintTopologyOverlay(g);
     super.paintOverlay(renderer, g);
   }
 }

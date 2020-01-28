@@ -23,7 +23,17 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.Hashtable;
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicToolBarUI;
@@ -68,8 +78,14 @@ import net.rptools.maptool.client.tool.drawing.WallTemplateTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Zone.TokenSelection;
+import net.rptools.maptool.model.Zone.TopologyMode;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ToolbarPanel extends JToolBar {
+
+  private static final Logger log = LogManager.getLogger(ToolbarPanel.class);
+
   private final ButtonGroup buttonGroup = new ButtonGroup();
   private final ButtonGroup tokenSelectionbuttonGroup = new ButtonGroup();
   private final JPanel optionPanel;
@@ -327,6 +343,13 @@ public class ToolbarPanel extends JToolBar {
     panel.add(DiamondTopologyTool.class);
     panel.add(HollowDiamondTopologyTool.class);
 
+    panel.add(
+        createTopologyModeButton(
+            "net/rptools/maptool/client/image/tool/vbl-only.png",
+            "net/rptools/maptool/client/image/tool/mbl-only.png",
+            "net/rptools/maptool/client/image/tool/mbl-vbl-on.png",
+            I18N.getText("tools.vbl_mbl_selector.tooltip")));
+
     // panel.add(FillTopologyTool.class);
     return panel;
   }
@@ -355,17 +378,43 @@ public class ToolbarPanel extends JToolBar {
     return button;
   }
 
-  public void getTest() {}
+  private JToggleButton createTopologyModeButton(
+      final String vblIcon, final String mblIcon, final String combinedIcon, String tooltip) {
+
+    final JToggleButton button = new JToggleButton();
+    button.setToolTipText(tooltip);
+
+    button.addActionListener(
+        e -> {
+          if (button.isSelected()) {
+            AppPreferences.setTopologyDrawingMode(TopologyMode.MBL);
+          } else {
+            AppPreferences.setTopologyDrawingMode(TopologyMode.VBL);
+          }
+        });
+
+    try {
+      button.setIcon(new ImageIcon(ImageUtil.getImage(vblIcon)));
+      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage(mblIcon)));
+
+      // storing icons for third state usage
+      // button.setDisabledIcon(new ImageIcon(ImageUtil.getImage(mblIcon)));
+      // button.setDisabledSelectedIcon(new ImageIcon(ImageUtil.getImage(combinedIcon)));
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
+    }
+
+    if (AppPreferences.getTopologyDrawingMode().equals(TopologyMode.MBL)) {
+      button.doClick();
+    }
+
+    return button;
+  }
 
   private JToggleButton createAiButton(final String icon, final String offIcon, String tooltip) {
     final JToggleButton button = new JToggleButton();
     button.setToolTipText(tooltip);
-    button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setUseAstarPathfinding(button.isSelected());
-          }
-        });
+    button.addActionListener(e -> AppPreferences.setUseAstarPathfinding(button.isSelected()));
 
     try {
       button.setIcon(new ImageIcon(ImageUtil.getImage(offIcon)));
@@ -374,7 +423,9 @@ public class ToolbarPanel extends JToolBar {
       ioe.printStackTrace();
     }
 
-    if (AppPreferences.isUsingAstarPathfinding()) button.doClick();
+    if (AppPreferences.isUsingAstarPathfinding()) {
+      button.doClick();
+    }
 
     return button;
   }
@@ -387,8 +438,11 @@ public class ToolbarPanel extends JToolBar {
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             MediaPlayerAdapter.setGlobalMute(button.isSelected());
-            if (button.isSelected()) button.setToolTipText(unmutetooltip);
-            else button.setToolTipText(mutetooltip);
+            if (button.isSelected()) {
+              button.setToolTipText(unmutetooltip);
+            } else {
+              button.setToolTipText(mutetooltip);
+            }
           }
         });
 
@@ -399,7 +453,9 @@ public class ToolbarPanel extends JToolBar {
       ioe.printStackTrace();
     }
 
-    if (MediaPlayerAdapter.getGlobalMute()) button.doClick();
+    if (MediaPlayerAdapter.getGlobalMute()) {
+      button.doClick();
+    }
 
     return button;
   }
@@ -461,6 +517,7 @@ public class ToolbarPanel extends JToolBar {
   }
 
   private class OptionPanel extends JToolBar {
+
     private Class<? extends Tool> firstTool;
     private Class<? extends Tool> currentTool;
 

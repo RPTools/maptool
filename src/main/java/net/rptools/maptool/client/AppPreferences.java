@@ -27,10 +27,12 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.TopologyMode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class AppPreferences {
+
   private static final Logger log = LogManager.getLogger(AppPreferences.class);
   private static Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
 
@@ -177,6 +179,9 @@ public class AppPreferences {
 
   private static final String MACRO_EDITOR_THEME = "macroEditorTheme";
   private static final String DEFAULT_MACRO_EDITOR_THEME = "default";
+
+  private static final String KEY_TOPOLOGY_DRAWING_MODE = "topologyDrawingMode";
+  private static final String DEFAULT_TOPOLOGY_DRAWING_MODE = "VBL";
 
   public static void setFillSelectionBox(boolean fill) {
     prefs.putBoolean(KEY_FILL_SELECTION_BOX, fill);
@@ -1021,8 +1026,9 @@ public class AppPreferences {
         path = file.getCanonicalPath();
       } catch (IOException e) {
         // Probably pretty rare, but we want to know about it
-        if (log.isInfoEnabled())
+        if (log.isInfoEnabled()) {
           log.info("unexpected during file.getCanonicalPath()", e); // $NON-NLS-1$
+        }
         path = file.getPath();
       }
       // It's important that '%3A' is done last. Note that the pathSeparator may not be a colon on
@@ -1042,7 +1048,9 @@ public class AppPreferences {
       // It's important that '%3A' is done first
       combined = combined.replaceAll("%3A", File.pathSeparator).replaceAll("%25", "%");
       String[] all = combined.split(File.pathSeparator);
-      for (int i = 0; i < all.length; i++) mruCampaigns.add(new File(all[i]));
+      for (int i = 0; i < all.length; i++) {
+        mruCampaigns.add(new File(all[i]));
+      }
     }
     return mruCampaigns;
   }
@@ -1061,7 +1069,9 @@ public class AppPreferences {
     String combined = prefs.get(KEY_SAVED_PAINT_TEXTURES, null);
     if (combined != null) {
       String[] all = combined.split(File.pathSeparator);
-      for (int i = 0; i < all.length; i++) savedTextures.add(new File(all[i]));
+      for (int i = 0; i < all.length; i++) {
+        savedTextures.add(new File(all[i]));
+      }
     }
     return savedTextures;
   }
@@ -1194,5 +1204,14 @@ public class AppPreferences {
 
   public static void setDefaultMacroEditorTheme(String type) {
     prefs.put(MACRO_EDITOR_THEME, type);
+  }
+
+  public static TopologyMode getTopologyDrawingMode() {
+    return TopologyMode.valueOf(
+        prefs.get(KEY_TOPOLOGY_DRAWING_MODE, DEFAULT_TOPOLOGY_DRAWING_MODE));
+  }
+
+  public static void setTopologyDrawingMode(TopologyMode mode) {
+    prefs.put(KEY_TOPOLOGY_DRAWING_MODE, mode.toString());
   }
 }
