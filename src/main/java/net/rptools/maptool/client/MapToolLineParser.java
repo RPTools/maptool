@@ -208,7 +208,9 @@ public class MapToolLineParser {
   private enum OutputLoc { // Mutually exclusive output location
     CHAT,
     DIALOG,
-    FRAME
+    DIALOG5,
+    FRAME,
+    FRAME5
   }
 
   private enum ScanState {
@@ -351,6 +353,9 @@ public class MapToolLineParser {
     FRAME("frame", 1, 2, "\"\""),
     // HTML Dialog
     DIALOG("dialog", 1, 2, "\"\""),
+    DIALOG5("dialog5", 1, 2, "\"\""),
+    // HTML webView
+    FRAME5("frame5", 1, 2, "\"\""),
     // Run for another token
     TOKEN("token", 1, 1);
 
@@ -951,7 +956,7 @@ public class MapToolLineParser {
                         for (JsonElement ele : json.getAsJsonArray()) {
                           foreachList.add(JSONMacroFunctions.getInstance().jsonToScriptString(ele));
                         }
-                      } else if (json.isJsonArray()) {
+                      } else if (json.isJsonObject()) {
                         foreachList = new ArrayList<>(json.getAsJsonObject().keySet());
                       }
                     }
@@ -1009,6 +1014,18 @@ public class MapToolLineParser {
                   frameName = option.getParsedParam(0, resolver, tokenInContext).toString();
                   frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
                   outputTo = OutputLoc.DIALOG;
+                  break;
+                case DIALOG5:
+                  codeType = CodeType.CODEBLOCK;
+                  frameName = option.getParsedParam(0, resolver, tokenInContext).toString();
+                  frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
+                  outputTo = OutputLoc.DIALOG5;
+                  break;
+                case FRAME5:
+                  codeType = CodeType.CODEBLOCK;
+                  frameName = option.getParsedParam(0, resolver, tokenInContext).toString();
+                  frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
+                  outputTo = OutputLoc.FRAME5;
                   break;
                   ///////////////////////////////////////////////////
                   // CODE OPTIONS
@@ -1399,13 +1416,22 @@ public class MapToolLineParser {
           }
           switch (outputTo) {
             case FRAME:
-              HTMLFrameFactory.show(frameName, true, frameOpts, expressionBuilder.toString());
+              HTMLFrameFactory.show(
+                  frameName, true, false, frameOpts, expressionBuilder.toString());
               break;
             case DIALOG:
-              HTMLFrameFactory.show(frameName, false, frameOpts, expressionBuilder.toString());
+              HTMLFrameFactory.show(
+                  frameName, false, false, frameOpts, expressionBuilder.toString());
               break;
             case CHAT:
               builder.append(expressionBuilder);
+              break;
+            case FRAME5:
+              HTMLFrameFactory.show(frameName, true, true, frameOpts, expressionBuilder.toString());
+              break;
+            case DIALOG5:
+              HTMLFrameFactory.show(
+                  frameName, false, true, frameOpts, expressionBuilder.toString());
               break;
           }
 
@@ -1679,8 +1705,7 @@ public class MapToolLineParser {
       JsonArray jarr = json.getAsJsonArray();
       macroResolver.setVariable("macro.args.num", BigDecimal.valueOf(jarr.size()));
       for (int i = 0; i < jarr.size(); i++) {
-        macroResolver.setVariable(
-            "macro.args." + i, JSONMacroFunctions.getInstance().asScriptType(jarr.get(i)));
+        macroResolver.setVariable("macro.args." + i, asMacroArg(jarr.get(i)));
       }
     } else {
       macroResolver.setVariable("macro.args.num", BigDecimal.ZERO);
@@ -1719,6 +1744,22 @@ public class MapToolLineParser {
     } finally {
       // exitContext();
       macroRecurseDepth--;
+    }
+  }
+
+  /**
+   * Returns the JsonElement as a valid macro argument.
+   *
+   * @param jsonElement The JsonElement to convert.
+   * @return The converted JsonElement.
+   */
+  private Object asMacroArg(JsonElement jsonElement) {
+    if (jsonElement == null) {
+      return "";
+    } else if (jsonElement.isJsonNull()) {
+      return "";
+    } else {
+      return JSONMacroFunctions.getInstance().asScriptType(jsonElement);
     }
   }
 

@@ -104,13 +104,11 @@ class JsonMTSTypeConversionTest {
       int ir = random.nextInt();
       jsonPrimitive = new JsonPrimitive(ir);
       jsonStringPrimitive = new JsonPrimitive(Integer.toString(ir));
-      assertEquals(jsonPrimitive, typeConversion.asJsonElement(jsonPrimitive.getAsString()));
       assertEquals(jsonPrimitive, typeConversion.asJsonElement(jsonPrimitive));
       assertEquals(jsonStringPrimitive, typeConversion.asJsonElement(jsonStringPrimitive));
       double id = random.nextDouble();
       jsonPrimitive = new JsonPrimitive(id);
       jsonStringPrimitive = new JsonPrimitive(Double.toString(id));
-      assertEquals(jsonPrimitive, typeConversion.asJsonElement(jsonPrimitive.getAsString()));
       assertEquals(jsonPrimitive, typeConversion.asJsonElement(jsonPrimitive));
       assertEquals(jsonStringPrimitive, typeConversion.asJsonElement(jsonStringPrimitive));
     }
@@ -157,7 +155,6 @@ class JsonMTSTypeConversionTest {
     for (int i = 0; i < 100; i++) {
       int ir = random.nextInt();
       jsonPrimitive = new JsonPrimitive(ir);
-      assertEquals(jsonPrimitive, typeConversion.asClonedJsonElement(jsonPrimitive.getAsString()));
       jsonElement = typeConversion.asClonedJsonElement(jsonPrimitive);
       assertEquals(jsonPrimitive, jsonElement);
 
@@ -167,7 +164,6 @@ class JsonMTSTypeConversionTest {
 
       double id = random.nextDouble();
       jsonPrimitive = new JsonPrimitive(id);
-      assertEquals(jsonPrimitive, typeConversion.asClonedJsonElement(jsonPrimitive.getAsString()));
 
       jsonPrimitive = new JsonPrimitive(Double.toString(id));
       jsonElement = typeConversion.asClonedJsonElement(jsonPrimitive);

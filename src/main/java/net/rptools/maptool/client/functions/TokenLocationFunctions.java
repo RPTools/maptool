@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -62,6 +63,7 @@ public class TokenLocationFunctions extends AbstractFunction {
         "getTokenX",
         "getTokenY",
         "getTokenDrawOrder",
+        "getTokenMap",
         "getDistance",
         "moveToken",
         "goto",
@@ -102,6 +104,12 @@ public class TokenLocationFunctions extends AbstractFunction {
       Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setZOrder, newZOrder);
       return BigDecimal.valueOf(token.getZOrder());
+    }
+    if (functionName.equalsIgnoreCase("getTokenMap")) {
+      FunctionUtil.checkNumberParam("getDistance", parameters, 1, 2);
+      String identifier = parameters.get(0).toString();
+      String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
+      return getTokenMap(identifier, delim);
     }
     if (functionName.equals("getDistance")) {
       FunctionUtil.checkNumberParam("getDistance", parameters, 1, 4);
@@ -576,5 +584,35 @@ public class TokenLocationFunctions extends AbstractFunction {
   public CellPoint getTokenCell(Token token) {
     Zone zone = token.getZoneRenderer().getZone();
     return zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
+  }
+
+  /**
+   * Returns a list of maps containing the token.
+   *
+   * @param identifier the identifier of the token.
+   * @param delim the delimiter of the returned list.
+   * @return the list of maps containing the token.
+   */
+  private Object getTokenMap(String identifier, String delim) {
+    List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+    List<String> mapList = new ArrayList<>();
+
+    for (final ZoneRenderer zr : zrenderers) {
+      Zone zone = zr.getZone();
+      Token token = zone.resolveToken(identifier);
+      if (token != null) {
+        mapList.add(zr.getZone().getName());
+      }
+    }
+
+    if ("json".equalsIgnoreCase(delim)) {
+      JsonArray jsonArray = new JsonArray();
+      for (String map : mapList) {
+        jsonArray.add(map);
+      }
+      return jsonArray;
+    } else {
+      return String.join(delim, mapList);
+    }
   }
 }

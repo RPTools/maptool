@@ -95,9 +95,22 @@ class JsonMTSTypeConversion {
       return (JsonElement) o;
     }
 
-    try {
-      return JsonParser.parseString(o.toString());
-    } catch (JsonSyntaxException jse) { // return String
+    if (o instanceof String) {
+      String s = o.toString();
+      if (s.startsWith("[") || s.startsWith("{")) {
+        // if it could be a json object try parse it, if we want to try convert strings to numbers
+        // parsing it will do this
+        try {
+          return JsonParser.parseString(o.toString());
+        } catch (JsonSyntaxException e) {
+          // Do nothing as we will return a JsonPrimitive of the string
+        }
+      }
+      return new JsonPrimitive(s);
+    } else if (o instanceof Number) {
+      Number n = (Number) o;
+      return new JsonPrimitive(n);
+    } else {
       return new JsonPrimitive(o.toString());
     }
   }

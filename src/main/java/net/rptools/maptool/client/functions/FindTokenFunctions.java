@@ -412,7 +412,11 @@ public class FindTokenFunctions extends AbstractFunction {
         layers = (JsonArray) o;
       } else {
         layers = new JsonArray();
-        layers.add(o.toString());
+        if (o instanceof JsonPrimitive) {
+          layers.add(((JsonPrimitive) o).getAsString());
+        } else {
+          layers.add(o.toString());
+        }
       }
     }
     ZoneRenderer zoneRenderer;
@@ -421,7 +425,7 @@ public class FindTokenFunctions extends AbstractFunction {
       mapName = null; // set to null so findToken searches the current map
       zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
     } else {
-      mapName = jobj.get("mapName").toString();
+      mapName = jobj.get("mapName").getAsString();
       zoneRenderer = MapTool.getFrame().getZoneRenderer(mapName);
       if (zoneRenderer == null) {
         throw new ParserException(

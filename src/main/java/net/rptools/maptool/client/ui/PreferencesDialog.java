@@ -137,6 +137,7 @@ public class PreferencesDialog extends JDialog {
   private final JComboBox tokenNamingCombo;
   private final JComboBox showNumberingCombo;
   private final JComboBox movementMetricCombo;
+  private final JComboBox<Zone.VisionType> visionTypeCombo;
   private final JCheckBox showStatSheetCheckBox;
   private final JCheckBox showPortraitCheckBox;
   private final JCheckBox showStatSheetModifierCheckBox;
@@ -296,6 +297,7 @@ public class PreferencesDialog extends JDialog {
     syrinscapeActiveCheckBox = panel.getCheckBox("syrinscapeActive");
     showAvatarInChat = panel.getCheckBox("showChatAvatar");
     showDialogOnNewToken = panel.getCheckBox("showDialogOnNewToken");
+    visionTypeCombo = panel.getComboBox("defaultVisionType");
     movementMetricCombo = panel.getComboBox("movementMetric");
     allowPlayerMacroEditsDefault = panel.getCheckBox("allowPlayerMacroEditsDefault");
     toolTipInlineRolls = panel.getCheckBox("toolTipInlineRolls");
@@ -1107,6 +1109,22 @@ public class PreferencesDialog extends JDialog {
           @Override
           public void itemStateChanged(ItemEvent e) {
             AppPreferences.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
+          }
+        });
+
+    DefaultComboBoxModel<Zone.VisionType> visionTypeModel = new DefaultComboBoxModel<>();
+    for (Zone.VisionType vt : Zone.VisionType.values()) {
+      visionTypeModel.addElement(vt);
+    }
+    visionTypeModel.setSelectedItem(AppPreferences.getDefaultVisionType());
+
+    visionTypeCombo.setModel(visionTypeModel);
+    visionTypeCombo.addItemListener(
+        new ItemListener() {
+          @Override
+          public void itemStateChanged(ItemEvent e) {
+            AppPreferences.setDefaultVisionType(
+                (Zone.VisionType) visionTypeCombo.getSelectedItem());
           }
         });
 

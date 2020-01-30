@@ -45,7 +45,7 @@ public class AStarCellPoint extends CellPoint implements Comparable<AStarCellPoi
   }
 
   public AStarCellPoint(CellPoint p) {
-    super(p.x, p.y, p.distanceTraveled);
+    super(p.x, p.y, p.distanceTraveled, p.distanceTraveledWithoutTerrain);
   }
 
   public AStarCellPoint(CellPoint p, double mod, TerrainModifierOperation operation) {

@@ -79,6 +79,7 @@ public class AdvancedAdjustGridPanel extends JComponent
         .put(
             "zoomOut",
             new AbstractAction() {
+              @Override
               public void actionPerformed(ActionEvent e) {
                 zoomOut();
               }
@@ -89,6 +90,7 @@ public class AdvancedAdjustGridPanel extends JComponent
         .put(
             "zoomIn",
             new AbstractAction() {
+              @Override
               public void actionPerformed(ActionEvent e) {
                 zoomIn();
               }
@@ -100,6 +102,7 @@ public class AdvancedAdjustGridPanel extends JComponent
         .put(
             "zoomReset",
             new AbstractAction() {
+              @Override
               public void actionPerformed(ActionEvent e) {
                 zoomReset();
               }
@@ -354,12 +357,16 @@ public class AdvancedAdjustGridPanel extends JComponent
 
   ////
   // MOUSE LISTENER
+  @Override
   public void mouseClicked(MouseEvent e) {}
 
+  @Override
   public void mouseEntered(MouseEvent e) {}
 
+  @Override
   public void mouseExited(MouseEvent e) {}
 
+  @Override
   public void mousePressed(MouseEvent e) {
 
     if (SwingUtilities.isLeftMouseButton(e)) {
@@ -399,6 +406,7 @@ public class AdvancedAdjustGridPanel extends JComponent
     }
   }
 
+  @Override
   public void mouseReleased(MouseEvent e) {
     draggingHandle = null;
 
@@ -407,6 +415,7 @@ public class AdvancedAdjustGridPanel extends JComponent
 
   ////
   // MOUSE MOTION LISTENER
+  @Override
   public void mouseDragged(MouseEvent e) {
 
     if (SwingUtilities.isLeftMouseButton(e)) {
@@ -424,6 +433,7 @@ public class AdvancedAdjustGridPanel extends JComponent
     repaint();
   }
 
+  @Override
   public void mouseMoved(MouseEvent e) {
 
     Dimension imgSize = getScaledImageSize();
@@ -445,12 +455,12 @@ public class AdvancedAdjustGridPanel extends JComponent
 
   ////
   // MOUSE WHEEL LISTENER
+  @Override
   public void mouseWheelMoved(MouseWheelEvent e) {
-
-    if (e.getWheelRotation() > 0) {
-      scale.zoomOut(e.getX(), e.getY());
-    } else {
+    if (e.getWheelRotation() < 0) {
       scale.zoomIn(e.getX(), e.getY());
+    } else {
+      scale.zoomOut(e.getX(), e.getY());
     }
 
     repaint();

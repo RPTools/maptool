@@ -2265,7 +2265,7 @@ public class ZoneRenderer extends JComponent
         }
 
         // Show current Blocked Movement directions for A*
-        if (walker != null && showAstarDebugging) {
+        if (walker != null && (log.isDebugEnabled() || showAstarDebugging)) {
           Collection<AStarCellPoint> checkPoints = walker.getCheckedPoints();
           // Color currentColor = g.getColor();
           for (AStarCellPoint acp : checkPoints) {
@@ -2533,7 +2533,8 @@ public class ZoneRenderer extends JComponent
           ZonePoint zp = grid.convert(p);
           zp.x += grid.getCellWidth() / cellAdj + cellOffset.width;
           zp.y += grid.getCellHeight() / cellAdj + cellOffset.height;
-          addDistanceText(g, zp, 1.0f, p.getDistanceTraveled(zone));
+          addDistanceText(
+              g, zp, 1.0f, p.getDistanceTraveled(zone), p.getDistanceTraveledWithoutTerrain());
         }
       }
       int w = 0;
@@ -2809,7 +2810,8 @@ public class ZoneRenderer extends JComponent
         this);
   }
 
-  public void addDistanceText(Graphics2D g, ZonePoint point, float size, double distance) {
+  public void addDistanceText(
+      Graphics2D g, ZonePoint point, float size, double distance, double distanceWithoutTerrain) {
     if (distance == 0) {
       return;
     }
@@ -2821,7 +2823,6 @@ public class ZoneRenderer extends JComponent
     double iwidth = cwidth * size;
     double iheight = cheight * size;
 
-    String distanceText = NumberFormat.getInstance().format(distance);
     ScreenPoint sp = ScreenPoint.fromZonePoint(this, point);
 
     int cellX = (int) (sp.x - iwidth / 2);
@@ -2831,6 +2832,12 @@ public class ZoneRenderer extends JComponent
     double fontScale = (double) grid.getSize() / 50; // Font size of 12 at grid size 50 is default
     int fontSize = (int) (getScale() * 12 * fontScale);
     int textOffset = (int) (getScale() * 7 * fontScale); // 7 pixels at 100% zoom & grid size of 50
+
+    String distanceText = NumberFormat.getInstance().format(distance);
+    if (log.isDebugEnabled() || showAstarDebugging) {
+      distanceText += " (" + NumberFormat.getInstance().format(distanceWithoutTerrain) + ")";
+      fontSize = (int) (fontSize * 0.75);
+    }
 
     Font font = new Font(Font.DIALOG, Font.BOLD, fontSize);
     Font originalFont = g.getFont();
@@ -4125,6 +4132,19 @@ public class ZoneRenderer extends JComponent
     return zone.getGrid().convert(zp);
   }
 
+  /**
+   * Converts a screen point to the center point of the corresponding grid cell.
+   *
+   * @param sp
+   * @return ZonePoint with the coordinates of the center of the grid cell.
+   */
+  public ZonePoint getCellCenterAt(ScreenPoint sp) {
+    Grid grid = getZone().getGrid();
+    CellPoint cp = getCellAt(sp);
+    Point2D.Double p2d = grid.getCellCenter(cp);
+    return new ZonePoint((int) p2d.getX(), (int) p2d.getY());
+  }
+
   public void setScale(double scale) {
     if (zoneScale.getScale() != scale) {
       /*
@@ -4306,8 +4326,7 @@ public class ZoneRenderer extends JComponent
 
         if (renderPathTask != null) {
           while (!renderPathTask.isDone()) {
-            log.debug("Waiting on Path Rendering... ");
-
+            log.trace("Waiting on Path Rendering... ");
             try {
               Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -4343,7 +4362,12 @@ public class ZoneRenderer extends JComponent
 
         renderPathTask =
             new RenderPathWorker(
-                walker, point, restictMovement, terrainModifiersIgnored, ZoneRenderer.this);
+                walker,
+                point,
+                restictMovement,
+                terrainModifiersIgnored,
+                token.getTransformedVBL(),
+                ZoneRenderer.this);
         renderPathThreadPool.execute(renderPathTask);
       } else {
         if (gridlessPath.getCellPath().size() > 1) {

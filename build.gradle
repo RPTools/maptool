@@ -72,7 +72,7 @@ ext {
 
 run {
     args = [ '-v='+version ]
-    applicationDefaultJvmArgs = [ "-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ]
+    applicationDefaultJvmArgs = [ "-Xss8M", "-Djava.library.path=lib", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8", "-DMAPTOOL_DATADIR=.maptool-" + vendor ] // Add -Dlog4j2.debug to see log4j2 details
 
     if(System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
@@ -208,7 +208,6 @@ dependencies {
 
     implementation 'org.reflections:reflections:0.9.11'
     implementation 'com.caucho.hessian:hessian:3.1.6'
-    implementation 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
     implementation 'org.mozilla:rhino:1.7.12'
     implementation 'ca.odell.renderpack:renderpack:1.2004'
     implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
@@ -237,7 +236,7 @@ dependencies {
     // For syntax highlighting in macro editor
     implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.0.8'		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
     implementation group: 'com.fifesoft', name: 'rstaui', version: '3.0.3'				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
-    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.0.4'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
+    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.0.5'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 
     // For simple xml work in Hero Lab integration
     implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.22.1'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
