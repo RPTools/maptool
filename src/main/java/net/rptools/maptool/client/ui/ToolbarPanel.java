@@ -90,6 +90,9 @@ public class ToolbarPanel extends JToolBar {
   private final ButtonGroup tokenSelectionbuttonGroup = new ButtonGroup();
   private final JPanel optionPanel;
   private final Toolbox toolbox;
+  private ImageIcon vblImageIcon;
+  private ImageIcon combinedImageIcon;
+  private ImageIcon mblImageIcon;
 
   public ToolbarPanel(Toolbox tbox) {
     setRollover(true);
@@ -187,6 +190,11 @@ public class ToolbarPanel extends JToolBar {
             "net/rptools/maptool/client/image/tool/ai-blue-green.png",
             "net/rptools/maptool/client/image/tool/ai-blue-off.png",
             I18N.getText("tools.ai_selector.tooltip")));
+    add(
+        createUseVBLonMoveButton(
+            "net/rptools/maptool/client/image/tool/use-vbl-on-move.png",
+            "net/rptools/maptool/client/image/tool/ignore-vbl-on-move.png",
+            I18N.getText("tools.ignore_vbl_on_move.tooltip")));
 
     add(Box.createHorizontalStrut(10));
     add(new JSeparator(JSeparator.VERTICAL));
@@ -381,32 +389,70 @@ public class ToolbarPanel extends JToolBar {
   private JToggleButton createTopologyModeButton(
       final String vblIcon, final String mblIcon, final String combinedIcon, String tooltip) {
 
-    final JToggleButton button = new JToggleButton();
-    button.setToolTipText(tooltip);
-
-    button.addActionListener(
-        e -> {
-          if (button.isSelected()) {
-            AppPreferences.setTopologyDrawingMode(TopologyMode.MBL);
-          } else {
-            AppPreferences.setTopologyDrawingMode(TopologyMode.VBL);
-          }
-        });
-
     try {
-      button.setIcon(new ImageIcon(ImageUtil.getImage(vblIcon)));
-      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage(mblIcon)));
-
-      // storing icons for third state usage
-      // button.setDisabledIcon(new ImageIcon(ImageUtil.getImage(mblIcon)));
-      // button.setDisabledSelectedIcon(new ImageIcon(ImageUtil.getImage(combinedIcon)));
+      vblImageIcon = new ImageIcon(ImageUtil.getImage(vblIcon));
+      mblImageIcon = new ImageIcon(ImageUtil.getImage(mblIcon));
+      combinedImageIcon = new ImageIcon(ImageUtil.getImage(combinedIcon));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
 
-    if (AppPreferences.getTopologyDrawingMode().equals(TopologyMode.MBL)) {
-      button.doClick();
+    final JToggleButton button = new JToggleButton();
+    button.setToolTipText(tooltip);
+    button.setSelectedIcon(combinedImageIcon);
+
+    switch (AppPreferences.getTopologyDrawingMode()) {
+      case VBL:
+        button.setActionCommand(TopologyMode.VBL.toString());
+        button.setIcon(vblImageIcon);
+        break;
+      case MBL:
+        button.setActionCommand(TopologyMode.MBL.toString());
+        button.setIcon(mblImageIcon);
+        break;
+      case COMBINED:
+        button.setActionCommand(TopologyMode.VBL.toString());
+        button.setIcon(vblImageIcon);
+        button.setSelected(true);
+        break;
     }
+
+    button.addActionListener(
+        e -> {
+          TopologyMode currentTopologyMode;
+
+          // Not a huge fan of this code but needed a TriStateButton and TriStateCheckbox from JIDE
+          // doesn't handle custom images very well. Also, trying to avoid JIDE were possible
+          // in case we move to FX in the future.
+          if (button.isSelected()) {
+            if (button.getActionCommand().equals(TopologyMode.MBL.toString())) {
+              currentTopologyMode = TopologyMode.VBL;
+              button.setActionCommand(TopologyMode.VBL.toString());
+              button.setSelected(false);
+              button.setIcon(vblImageIcon);
+            } else {
+              currentTopologyMode = TopologyMode.COMBINED;
+            }
+          } else {
+            // Toggle unselected button between VBL/MBL
+            if (button.getActionCommand().equals(TopologyMode.VBL.toString())) {
+              currentTopologyMode = TopologyMode.MBL;
+              button.setActionCommand(TopologyMode.MBL.toString());
+              button.setIcon(mblImageIcon);
+            } else {
+              currentTopologyMode = TopologyMode.VBL;
+              button.setActionCommand(TopologyMode.VBL.toString());
+              button.setIcon(vblImageIcon);
+            }
+          }
+
+          AppPreferences.setTopologyDrawingMode(currentTopologyMode);
+
+          MapTool.getFrame()
+              .getCurrentZoneRenderer()
+              .getZone()
+              .setTopologyMode(currentTopologyMode);
+        });
 
     return button;
   }
@@ -425,6 +471,29 @@ public class ToolbarPanel extends JToolBar {
 
     if (AppPreferences.isUsingAstarPathfinding()) {
       button.doClick();
+    }
+
+    return button;
+  }
+
+  private JToggleButton createUseVBLonMoveButton(
+      final String icon, final String offIcon, String tooltip) {
+    final JToggleButton button = new JToggleButton();
+    button.setToolTipText(tooltip);
+    button.addActionListener(
+        e -> {
+          AppPreferences.setVblBlocksMove(button.isSelected());
+        });
+
+    try {
+      button.setIcon(new ImageIcon(ImageUtil.getImage(offIcon)));
+      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage(icon)));
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
+    }
+
+    if (AppPreferences.getVblBlocksMove()) {
+      button.setSelected(true);
     }
 
     return button;

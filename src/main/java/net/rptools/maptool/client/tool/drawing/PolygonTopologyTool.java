@@ -114,11 +114,11 @@ public class PolygonTopologyTool extends LineTool implements MouseMotionListener
       area = new Area(((ShapeDrawable) drawable).getShape());
     }
     if (pen.isEraser()) {
-      renderer.getZone().removeTopology(area);
-      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
+      getZone().removeTopology(area);
+      MapTool.serverCommand().removeTopology(getZone().getId(), area, getZone().getTopologyMode());
     } else {
-      renderer.getZone().addTopology(area);
-      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
+      getZone().addTopology(area);
+      MapTool.serverCommand().addTopology(getZone().getId(), area, getZone().getTopologyMode());
     }
     renderer.repaint();
   }

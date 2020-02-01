@@ -177,6 +177,9 @@ public class AppPreferences {
   private static final String KEY_USE_ASTAR_PATHFINDING = "useAstarPathfinding";
   private static final boolean DEFAULT_USE_ASTAR_PATHFINDING = true;
 
+  private static final String KEY_VBL_BLOCKS_MOVE = "vblBlocksMove";
+  private static final boolean DEFAULT_VBL_BLOCKS_MOVE = true;
+
   private static final String MACRO_EDITOR_THEME = "macroEditorTheme";
   private static final String DEFAULT_MACRO_EDITOR_THEME = "default";
 
@@ -1076,15 +1079,6 @@ public class AppPreferences {
     return savedTextures;
   }
 
-  // Jamz: Disabling Initiative Panel server sync prevents panel updates to other clients.
-  // Effectively, only the GM now has access to the initiative panel. This greatly increases
-  // performance and
-  // prevents the updates from getting out of sync as they can today.
-  // Note: This is a HACK to fix a broken system, but we're not going to invest anymore time into
-  // the current classes. REWRITE ME!
-  // private static final String INIT_ENABLE_SERVER_SYNC = "initEnableServerSync";
-  // private static final boolean DEFAULT_INIT_ENABLE_SERVER_SYNC = true;
-
   private static final String INIT_SHOW_TOKENS = "initShowTokens";
   private static final boolean DEFAULT_INIT_SHOW_TOKENS = true;
 
@@ -1105,14 +1099,6 @@ public class AppPreferences {
 
   private static final String INIT_LOCK_MOVEMENT = "initLockMovement";
   private static final boolean DEFAULT_INIT_LOCK_MOVEMENT = false;
-
-  // public static boolean getInitEnableServerSync() {
-  // return prefs.getBoolean(INIT_ENABLE_SERVER_SYNC, DEFAULT_INIT_ENABLE_SERVER_SYNC);
-  // }
-  //
-  // public static void setInitEnableServerSync(boolean enableSync) {
-  // prefs.putBoolean(INIT_ENABLE_SERVER_SYNC, enableSync);
-  // }
 
   public static boolean getInitShowTokens() {
     return prefs.getBoolean(INIT_SHOW_TOKENS, DEFAULT_INIT_SHOW_TOKENS);
@@ -1196,6 +1182,14 @@ public class AppPreferences {
 
   public static void setUseAstarPathfinding(boolean show) {
     prefs.putBoolean(KEY_USE_ASTAR_PATHFINDING, show);
+  }
+
+  public static boolean getVblBlocksMove() {
+    return prefs.getBoolean(KEY_VBL_BLOCKS_MOVE, DEFAULT_VBL_BLOCKS_MOVE);
+  }
+
+  public static void setVblBlocksMove(boolean use) {
+    prefs.putBoolean(KEY_VBL_BLOCKS_MOVE, use);
   }
 
   public static String getDefaultMacroEditorTheme() {

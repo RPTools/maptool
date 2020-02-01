@@ -166,6 +166,7 @@ public class Zone extends BaseModel {
 
   private double unitsPerCell = DEFAULT_UNITS_PER_CELL;
   private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
+  private TopologyMode topologyMode = TopologyMode.VBL;
 
   private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
   private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
@@ -440,6 +441,9 @@ public class Zone extends BaseModel {
     boardPosition = (Point) zone.boardPosition.clone();
     exposedArea = (Area) zone.exposedArea.clone();
     topology = (Area) zone.topology.clone();
+    topologyTerrain = (Area) zone.topologyTerrain.clone();
+    aStarRounding = zone.aStarRounding;
+    topologyMode = zone.topologyMode;
     isVisible = zone.isVisible;
     hasFog = zone.hasFog;
   }
@@ -740,21 +744,25 @@ public class Zone extends BaseModel {
    *
    * @param area the area
    */
-  public void addTopology(Area area) {
-    switch (AppPreferences.getTopologyDrawingMode()) {
+  public void addTopology(Area area, TopologyMode topologyMode) {
+    switch (topologyMode) {
       case VBL:
-        topology.add(area);
+        getTopology().add(area);
         break;
       case MBL:
-        topologyTerrain.add(area);
+        getTopologyTerrain().add(area);
         break;
       case COMBINED:
-        topology.add(area);
-        topologyTerrain.add(area);
+        getTopology().add(area);
+        getTopologyTerrain().add(area);
         break;
     }
 
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+  }
+
+  public void addTopology(Area area) {
+    addTopology(area, getTopologyMode());
   }
 
   /**
@@ -762,21 +770,25 @@ public class Zone extends BaseModel {
    *
    * @param area the area
    */
-  public void removeTopology(Area area) {
-    switch (AppPreferences.getTopologyDrawingMode()) {
+  public void removeTopology(Area area, TopologyMode topologyMode) {
+    switch (topologyMode) {
       case VBL:
-        topology.subtract(area);
+        getTopology().subtract(area);
         break;
       case MBL:
-        topologyTerrain.subtract(area);
+        getTopologyTerrain().subtract(area);
         break;
       case COMBINED:
-        topology.subtract(area);
-        topologyTerrain.subtract(area);
+        getTopology().subtract(area);
+        getTopologyTerrain().subtract(area);
         break;
     }
 
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+  }
+
+  public void removeTopology(Area area) {
+    removeTopology(area, getTopologyMode());
   }
 
   /** Fire the event TOPOLOGY_CHANGED. */
@@ -1080,6 +1092,18 @@ public class Zone extends BaseModel {
 
   public void setAStarRounding(AStarRoundingOptions aStarRounding) {
     this.aStarRounding = aStarRounding;
+  }
+
+  public TopologyMode getTopologyMode() {
+    if (topologyMode == null) {
+      topologyMode = AppPreferences.getTopologyDrawingMode();
+    }
+
+    return topologyMode;
+  }
+
+  public void setTopologyMode(TopologyMode topologyMode) {
+    this.topologyMode = topologyMode;
   }
 
   public int getLargestZOrder() {

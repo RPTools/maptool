@@ -29,6 +29,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.walker.AbstractZoneWalker;
 import net.rptools.maptool.model.CellPoint;
@@ -150,14 +151,18 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     // Render VBL to Geometry class once and store.
     // Note: zoneRenderer will be null if map is not visible to players.
     if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
-      vbl = MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
+      if (AppPreferences.getVblBlocksMove()) {
+        vbl = MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
 
-      if (tokenVBL != null) {
-        vbl.subtract(tokenVBL);
+        if (tokenVBL != null) {
+          vbl.subtract(tokenVBL);
+        }
+
+        // Finally, add the Move Blocking Layer!
+        vbl.add((zone.getTopologyTerrain()));
+      } else {
+        vbl = zone.getTopologyTerrain();
       }
-
-      // Finally, add the Move Blocking Layer!
-      vbl.add((zone.getTopologyTerrain()));
     }
 
     if (!vbl.isEmpty()) {
