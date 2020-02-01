@@ -236,10 +236,25 @@ public class ImageUtil {
     return foundTransparent ? Transparency.BITMASK : Transparency.OPAQUE;
   }
 
+  /**
+   * Convert a BufferedImage to byte[] in the jpg format.
+   *
+   * @param image the buffered image.
+   * @return the byte[] of the image
+   * @throws IOException if the image cannot be written to the output stream.
+   */
   public static byte[] imageToBytes(BufferedImage image) throws IOException {
     return imageToBytes(image, "jpg");
   }
 
+  /**
+   * Convert a BufferedImage to byte[] in an given format.
+   *
+   * @param image the buffered image.
+   * @param format a String containing the informal name of the format.
+   * @return the byte[] of the image.
+   * @throws IOException if the image cannot be written to the output stream.
+   */
   public static byte[] imageToBytes(BufferedImage image, String format) throws IOException {
     ByteArrayOutputStream outStream = new ByteArrayOutputStream(10000);
     ImageIO.write(image, format, outStream);
@@ -253,7 +268,7 @@ public class ImageUtil {
    * Converts a byte array into an {@link Image} instance.
    *
    * @param imageBytes bytes to convert
-   * @return
+   * @return the image
    * @throws IOException
    */
   public static Image bytesToImage(byte[] imageBytes) throws IOException {
