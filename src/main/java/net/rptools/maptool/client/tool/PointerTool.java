@@ -1038,11 +1038,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
   }
 
   /**
-   * @note These keystrokes are currently hard-coded and should be exported to a property file in a perfect universe. :)
-   *
-   * <p>
-   *
-   * <table>
+   * @note These keystrokes are currently hard-coded and should be exported to a property file in a
+   *     perfect universe. :)
+   *     <p>
+   *     <table>
    * <caption>Keystrokes</caption>
    * <tr>
    * <td>Meta R
