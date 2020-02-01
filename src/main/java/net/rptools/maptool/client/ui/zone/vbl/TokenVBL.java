@@ -41,7 +41,6 @@ import org.locationtech.jts.simplify.VWSimplifier;
  *
  * @author Jamz
  */
-
 public class TokenVBL {
 
   private static final Logger log = LogManager.getLogger();
@@ -56,7 +55,7 @@ public class TokenVBL {
    * A passed token will have it's image asset rendered into an Area based on pixels that have an
    * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
    *
-   * @param token            the token
+   * @param token the token
    * @param alphaSensitivity the alpha sensitivity of the VBL area
    * @return Area
    * @author Jamz
@@ -68,7 +67,10 @@ public class TokenVBL {
 
   public static Area createVblArea(Token token, int alphaSensitivity, double distanceTolerance) {
     if (distanceTolerance > 0) {
-      return createVblArea(token, alphaSensitivity, JTS_SimplifyMethod.DOUGLAS_PEUCKER_SIMPLIFIER,
+      return createVblArea(
+          token,
+          alphaSensitivity,
+          JTS_SimplifyMethod.DOUGLAS_PEUCKER_SIMPLIFIER,
           distanceTolerance);
     } else {
       return createVblArea(token, alphaSensitivity, null, distanceTolerance);
@@ -79,15 +81,18 @@ public class TokenVBL {
    * A passed token will have it's image asset rendered into an Area based on pixels that have an
    * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
    *
-   * @param token            the token
+   * @param token the token
    * @param alphaSensitivity the alpha sensitivity of the VBL area
-   * @param simplifyMethod   the JTS_SimplifyMethod algorithm used to reduce the polygon count
+   * @param simplifyMethod the JTS_SimplifyMethod algorithm used to reduce the polygon count
    * @return Area
    * @author Jamz
    * @since 1.6.0
    */
-  public static Area createVblArea(Token token, int alphaSensitivity,
-      JTS_SimplifyMethod simplifyMethod, double distanceTolerance) {
+  public static Area createVblArea(
+      Token token,
+      int alphaSensitivity,
+      JTS_SimplifyMethod simplifyMethod,
+      double distanceTolerance) {
     BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
 
     Area vblArea = createVblArea(image, alphaSensitivity);
@@ -99,8 +104,8 @@ public class TokenVBL {
     }
   }
 
-  public static Area simplifyArea(Area vblArea, double distanceTolerance,
-      JTS_SimplifyMethod simplifyMethod) {
+  public static Area simplifyArea(
+      Area vblArea, double distanceTolerance, JTS_SimplifyMethod simplifyMethod) {
     final GeometryFactory geometryFactory = new GeometryFactory();
     ShapeReader shapeReader = new ShapeReader(geometryFactory);
     Geometry vblGeometry = null;
@@ -157,8 +162,8 @@ public class TokenVBL {
    * This is a convenience method to send the VBL Area to be rendered to the server
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param area     A valid Area containing VBL polygons
-   * @param erase    Set to true to erase the VBL, otherwise draw it
+   * @param area A valid Area containing VBL polygons
+   * @param erase Set to true to erase the VBL, otherwise draw it
    * @return the untouched area if the renderer is null, and null otherwise
    */
   public static Area renderVBL(ZoneRenderer renderer, Area area, boolean erase) {
@@ -301,7 +306,7 @@ public class TokenVBL {
    * Create a VBL area from a bufferedImage and alphaSensitity. The area is created by combining
    * vblRectangle where the alpha of the image is greater or equal to the sensitivity.
    *
-   * @param image            the buffered image.
+   * @param image the buffered image.
    * @param alphaSensitivity the alphaSensitivity.
    * @return the area.
    */
