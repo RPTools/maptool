@@ -67,11 +67,16 @@ public class AppConstants {
       };
 
   public static final String CAMPAIGN_FILE_EXTENSION = ".cmpgn";
+  public static final String CAMPAIGN_FILE_EXTENSION_ND = "cmpgn";
   public static final String CAMPAIGN_PROPERTIES_FILE_EXTENSION = ".mtprops";
   public static final String MAP_FILE_EXTENSION = ".rpmap";
   public static final String MACRO_FILE_EXTENSION = ".mtmacro";
   public static final String MACROSET_FILE_EXTENSION = ".mtmacset";
   public static final String TABLE_FILE_EXTENSION = ".mttable";
+
+  public static final String DEFAULT_CAMPAIGN_PROPERTIES =
+      "net/rptools/maptool/model/campaignProps/";
+  public static final File CAMPAIGN_PROPERTIES_DIR = AppUtil.getAppHome("campaignProps");
 
   public static final FilenameFilter CAMPAIGN_PROPERTIES_FILE_FILTER =
       new FilenameFilter() {

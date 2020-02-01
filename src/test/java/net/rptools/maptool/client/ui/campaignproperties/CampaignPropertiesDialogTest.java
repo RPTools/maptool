@@ -14,13 +14,14 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.File;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
 import net.rptools.maptool.client.AppConstants;
 import org.junit.jupiter.api.Test;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import java.io.File;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CampaignPropertiesDialogTest {
 
@@ -58,6 +59,7 @@ public class CampaignPropertiesDialogTest {
         new CampaignPropertiesDialog(null) {
           @Override
           protected File[] getPredefinedPropertyFiles(File propertyDir) {
+
             return new File[] {new File(one), new File(two)};
           }
         };
@@ -65,7 +67,7 @@ public class CampaignPropertiesDialogTest {
     JComboBox<String> comboBox = cpd.getPredefinedPropertiesComboBox();
 
     assertEquals(comboBox.getModel().getSize(), 2);
-    assertEquals(comboBox.getModel().getElementAt(0), one);
-    assertEquals(comboBox.getModel().getElementAt(1), two);
+    assertEquals(comboBox.getModel().getElementAt(0), "a");
+    assertEquals(comboBox.getModel().getElementAt(1), "b");
   }
 }

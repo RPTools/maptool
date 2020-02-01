@@ -50,9 +50,9 @@ import javax.swing.JList;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import net.rptools.lib.FileUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -902,9 +902,10 @@ public class CampaignPropertiesDialog extends JDialog {
             new ActionListener() {
 
               private File getSelectedPropertyFile() {
-                String propertyFilename =
-                    (String) getPredefinedPropertiesComboBox().getSelectedItem();
-                return new File(AppUtil.getAppHome("property") + "/" + propertyFilename);
+                String property = (String) getPredefinedPropertiesComboBox().getSelectedItem();
+                return new File(
+                    AppConstants.CAMPAIGN_PROPERTIES_DIR,
+                    property + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
               }
 
               @Override
@@ -928,14 +929,14 @@ public class CampaignPropertiesDialog extends JDialog {
   private void initPredefinedPropertiesComboBox() {
     DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
     for (File f : getPredefinedProperty()) {
-      model.addElement(f.getName());
+
+      model.addElement(FileUtil.getNameWithoutExtension(f));
     }
     getPredefinedPropertiesComboBox().setModel(model);
   }
 
   private List<File> getPredefinedProperty() {
-    File propertyDir = AppUtil.getAppHome("property");
-    File[] result = getPredefinedPropertyFiles(propertyDir);
+    File[] result = getPredefinedPropertyFiles(AppConstants.CAMPAIGN_PROPERTIES_DIR);
     if (result == null) {
       return Collections.emptyList();
     }

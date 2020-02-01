@@ -44,7 +44,6 @@ public class AppSetup {
     }
 
     installDefaultMacroEditorThemes();
-
     installPredefinedProperties();
   }
 
@@ -53,20 +52,29 @@ public class AppSetup {
   }
 
   public static void installDefaultMacroEditorThemes() {
-    // Install only once
-    if (AppConstants.THEMES_DIR.listFiles().length > 0) return;
+    installUsingReflection(AppConstants.DEFAULT_MACRO_THEMES, AppConstants.THEMES_DIR, "theme");
+  }
 
-    Reflections reflections =
-        new Reflections(AppConstants.DEFAULT_MACRO_THEMES, new ResourcesScanner());
+  private static void installPredefinedProperties() {
+    installUsingReflection(
+        AppConstants.DEFAULT_CAMPAIGN_PROPERTIES,
+        AppConstants.CAMPAIGN_PROPERTIES_DIR,
+        "campaign property");
+  }
+
+  private static void installUsingReflection(String source, File dir, String name) {
+    if (isNotEmpty(dir)) return;
+
+    Reflections reflections = new Reflections(source, new ResourcesScanner());
     Set<String> resourcePathSet = reflections.getResources(Pattern.compile(".*"));
 
     for (String resourcePath : resourcePathSet) {
       URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
-      String resourceName = resourcePath.substring(AppConstants.DEFAULT_MACRO_THEMES.length());
-      File resourceFile = new File(AppConstants.THEMES_DIR, resourceName);
+      String resourceName = resourcePath.substring(source.length());
+      File resourceFile = new File(dir, resourceName);
 
       try {
-        log.info("Installing theme: " + resourceFile);
+        log.info("Installing " + name + " in:" + resourceFile);
         FileUtils.copyURLToFile(inputUrl, resourceFile);
       } catch (IOException e) {
         log.error("ERROR copying " + inputUrl + " to " + resourceFile, e);
@@ -74,7 +82,10 @@ public class AppSetup {
     }
   }
 
-  private static void installPredefinedProperties() {}
+  private static boolean isNotEmpty(File dir) {
+    File[] files = dir.listFiles();
+    return files != null && files.length > 0;
+  }
 
   /**
    * Overwrites any existing README file in the ~/.maptool/resource directory with the one from the
