@@ -1038,12 +1038,12 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
   }
 
   /**
-   * These keystrokes are currently hard-coded and should be exported to the i18n.properties file in
-   * a perfect universe. :)
+   * @note These keystrokes are currently hard-coded and should be exported to a property file in a perfect universe. :)
    *
    * <p>
    *
-   * <table summary="">
+   * <table>
+   * <caption>Keystrokes</caption>
    * <tr>
    * <td>Meta R
    * <td>Select the FacingTool (to allow rotating with the left/right arrows)
@@ -1080,7 +1080,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
    * <tr>
    * <td>NumPad digits
    * <td>Move token (specifics based on the grid type are not implemented yet):<br>
-   * <table summary="">
    * <tr>
    * <td>7 (up/left)
    * <td>8 (up)
@@ -1093,7 +1092,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
    * <td>1 (down/left)
    * <td>2 (down)
    * <td>3 (down/right)
-   * </table>
    * <tr>
    * <td>Down
    * <td>Move token down
