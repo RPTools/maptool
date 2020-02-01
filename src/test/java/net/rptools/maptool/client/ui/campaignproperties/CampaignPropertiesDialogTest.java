@@ -14,14 +14,13 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import net.rptools.maptool.client.AppConstants;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.File;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import java.io.File;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import net.rptools.maptool.client.AppConstants;
+import org.junit.jupiter.api.Test;
 
 public class CampaignPropertiesDialogTest {
 
