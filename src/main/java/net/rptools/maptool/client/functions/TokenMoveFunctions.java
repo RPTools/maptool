@@ -353,16 +353,18 @@ public class TokenMoveFunctions extends AbstractFunction {
     if (pathPoints == null || pathPoints.isEmpty()) {
       return jsonArr;
     }
-    JsonObject pointObj = new JsonObject();
+    JsonObject pointObj;
     // Lee: had to add handling for the line segment made by unsnapped movedOverToken()
     if (pathPoints.get(0).containsKey("x"))
       for (Map<String, Integer> entry : pathPoints) {
+        pointObj = new JsonObject();
         pointObj.addProperty("x", entry.get("x"));
         pointObj.addProperty("y", entry.get("y"));
         jsonArr.add(pointObj);
       }
     else
       for (Map<String, Integer> entry : pathPoints) {
+        pointObj = new JsonObject();
         pointObj.addProperty("x1", entry.get("x1"));
         pointObj.addProperty("y1", entry.get("y1"));
         pointObj.addProperty("x2", entry.get("x2"));
