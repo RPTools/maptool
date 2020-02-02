@@ -16,6 +16,7 @@ package net.rptools.maptool.client.ui.zone.vbl;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -25,15 +26,6 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.locationtech.jts.awt.ShapeReader;
-import org.locationtech.jts.awt.ShapeWriter;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
-import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
-import org.locationtech.jts.simplify.VWSimplifier;
 
 /**
  * A utility class that creates and returns an Area based on image pixels. A few convenience methods
@@ -43,119 +35,25 @@ import org.locationtech.jts.simplify.VWSimplifier;
  */
 public class TokenVBL {
 
-  private static final Logger log = LogManager.getLogger();
-
-  public enum JTS_SimplifyMethod {
-    DOUGLAS_PEUCKER_SIMPLIFIER,
-    TOPOLOGY_PRESERVING_SIMPLIFIER,
-    VW_SIMPLIFIER
-  }
-
   /**
    * A passed token will have it's image asset rendered into an Area based on pixels that have an
    * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
    *
+   * @author Jamz
+   * @since 1.4.1.6
    * @param token the token
    * @param alphaSensitivity the alpha sensitivity of the VBL area
    * @return Area
-   * @author Jamz
-   * @since 1.6.0
    */
   public static Area createVblArea(Token token, int alphaSensitivity) {
-    return createVblArea(token, alphaSensitivity, JTS_SimplifyMethod.DOUGLAS_PEUCKER_SIMPLIFIER, 2);
-  }
-
-  public static Area createVblArea(Token token, int alphaSensitivity, double distanceTolerance) {
-    if (distanceTolerance > 0) {
-      return createVblArea(
-          token,
-          alphaSensitivity,
-          JTS_SimplifyMethod.DOUGLAS_PEUCKER_SIMPLIFIER,
-          distanceTolerance);
-    } else {
-      return createVblArea(token, alphaSensitivity, null, distanceTolerance);
-    }
-  }
-
-  /**
-   * A passed token will have it's image asset rendered into an Area based on pixels that have an
-   * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
-   *
-   * @param token the token
-   * @param alphaSensitivity the alpha sensitivity of the VBL area
-   * @param simplifyMethod the JTS_SimplifyMethod algorithm used to reduce the polygon count
-   * @return Area
-   * @author Jamz
-   * @since 1.6.0
-   */
-  public static Area createVblArea(
-      Token token,
-      int alphaSensitivity,
-      JTS_SimplifyMethod simplifyMethod,
-      double distanceTolerance) {
     BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
 
-    Area vblArea = createVblArea(image, alphaSensitivity);
+    // Future enhancement to create solid token VBL vs VBL with holes, further UI options...
+    // int detail = 5;
+    // int angle = 5;
+    // return new Area(makePolyFromImage(image, detail, angle, alphaSensitivity));
 
-    if (simplifyMethod != null) {
-      return simplifyArea(vblArea, distanceTolerance, simplifyMethod);
-    } else {
-      return vblArea;
-    }
-  }
-
-  public static Area simplifyArea(
-      Area vblArea, double distanceTolerance, JTS_SimplifyMethod simplifyMethod) {
-    final GeometryFactory geometryFactory = new GeometryFactory();
-    ShapeReader shapeReader = new ShapeReader(geometryFactory);
-    Geometry vblGeometry = null;
-
-    if (!vblArea.isEmpty()) {
-      try {
-        vblGeometry =
-            shapeReader
-                .read(vblArea.getPathIterator(null))
-                .buffer(1); // .buffer helps creating valid geometry and prevent self-intersecting
-        // polygons
-        if (!vblGeometry.isValid()) {
-          log.info(
-              "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
-        }
-      } catch (Exception e) {
-        log.info("vblGeometry oh oh: ", e);
-      }
-    } else {
-      return vblArea;
-    }
-
-    ShapeWriter sw = new ShapeWriter();
-    Geometry simplifiedGeometry;
-
-    switch (simplifyMethod) {
-      case DOUGLAS_PEUCKER_SIMPLIFIER:
-        DouglasPeuckerSimplifier dps = new DouglasPeuckerSimplifier(vblGeometry);
-        dps.setDistanceTolerance(distanceTolerance);
-        simplifiedGeometry = dps.getResultGeometry();
-        break;
-      case VW_SIMPLIFIER:
-        VWSimplifier vws = new VWSimplifier(vblGeometry);
-        vws.setDistanceTolerance(distanceTolerance);
-        simplifiedGeometry = vws.getResultGeometry();
-        break;
-      case TOPOLOGY_PRESERVING_SIMPLIFIER:
-        TopologyPreservingSimplifier tss = new TopologyPreservingSimplifier(vblGeometry);
-        tss.setDistanceTolerance(distanceTolerance);
-        simplifiedGeometry = tss.getResultGeometry();
-        break;
-      default:
-        throw new IllegalStateException("Unexpected value: " + simplifyMethod);
-    }
-
-    if (simplifiedGeometry.isValid()) {
-      return new Area(sw.toShape(simplifiedGeometry));
-    } else {
-      return vblArea;
-    }
+    return createVblArea(image, alphaSensitivity);
   }
 
   /**
@@ -167,9 +65,7 @@ public class TokenVBL {
    * @return the untouched area if the renderer is null, and null otherwise
    */
   public static Area renderVBL(ZoneRenderer renderer, Area area, boolean erase) {
-    if (renderer == null) {
-      return area;
-    }
+    if (renderer == null) return area;
 
     if (erase) {
       renderer.getZone().removeTopology(area);
@@ -314,9 +210,7 @@ public class TokenVBL {
     // Assumes all colors form the VBL Area, eg everything except transparent pixels with alpha
     // >=
     // alphaSensitivity
-    if (image == null) {
-      return null;
-    }
+    if (image == null) return null;
 
     Area vblArea = new Area();
     Rectangle vblRectangle;
@@ -347,10 +241,132 @@ public class TokenVBL {
       }
     }
 
-    if (vblArea.isEmpty()) {
-      return null;
-    } else {
-      return vblArea;
+    if (vblArea.isEmpty()) return null;
+    else return vblArea;
+  }
+
+  private static Polygon makePolyFromImage(
+      BufferedImage image, int detail, int angle, int alphaSensitivity) {
+
+    // creates an outline of a transparent image, points are stored in an array
+    // arg0 - BufferedImage source image
+    // arg1 - Int detail (lower = better)
+    // arg2 - Int angle threshold in degrees (will remove points with angle differences below
+    // this
+    // level; 15 is a good value)
+    // making this larger will make the body faster but less accurate;
+
+    int w = image.getWidth(null);
+    int h = image.getHeight(null);
+
+    // increase array size from 255 if needed
+    int[] vertex_x = new int[2555], vertex_y = new int[2555], vertex_k = new int[2555];
+
+    int numPoints = 0, tx = 0, ty = 0, fy = -1, lx = 0, ly = 0;
+    vertex_x[0] = 0;
+    vertex_y[0] = 0;
+    vertex_k[0] = 1;
+
+    for (tx = 0; tx < w; tx += detail)
+      for (ty = 0; ty < h; ty += 1) {
+        // if ((image.getRGB(tx, ty) >> 24) != 0x00) {
+        Color pixelColor = new Color(image.getRGB(tx, ty), true);
+        if (pixelColor.getAlpha() >= alphaSensitivity) {
+          vertex_x[numPoints] = tx;
+          vertex_y[numPoints] = h - ty;
+          vertex_k[numPoints] = 1;
+          numPoints++;
+          if (fy < 0) fy = ty;
+          lx = tx;
+          ly = ty;
+          break;
+        }
+      }
+
+    for (ty = 0; ty < h; ty += detail)
+      for (tx = w - 1; tx >= 0; tx -= 1) {
+        Color pixelColor = new Color(image.getRGB(tx, ty), true);
+        // if ((image.getRGB(tx, ty) >> 24) != 0x00 && ty > ly) {
+        if (pixelColor.getAlpha() >= alphaSensitivity && ty > ly) {
+          vertex_x[numPoints] = tx;
+          vertex_y[numPoints] = h - ty;
+          vertex_k[numPoints] = 1;
+          numPoints++;
+          lx = tx;
+          ly = ty;
+          break;
+        }
+      }
+
+    for (tx = w - 1; tx >= 0; tx -= detail)
+      for (ty = h - 1; ty >= 0; ty -= 1) {
+        Color pixelColor = new Color(image.getRGB(tx, ty), true);
+        if (pixelColor.getAlpha() >= alphaSensitivity && tx < lx) {
+          vertex_x[numPoints] = tx;
+          vertex_y[numPoints] = h - ty;
+          vertex_k[numPoints] = 1;
+          numPoints++;
+          lx = tx;
+          ly = ty;
+          break;
+        }
+      }
+
+    for (ty = h - 1; ty >= 0; ty -= detail)
+      for (tx = 0; tx < w; tx += 1) {
+        Color pixelColor = new Color(image.getRGB(tx, ty), true);
+        // if ((image.getRGB(tx, ty) >> 24) != 0x00 && ty < ly && ty > fy) {
+        if (pixelColor.getAlpha() >= alphaSensitivity && ty < ly && ty > fy) {
+          vertex_x[numPoints] = tx;
+          vertex_y[numPoints] = h - ty;
+          vertex_k[numPoints] = 1;
+          numPoints++;
+          lx = tx;
+          ly = ty;
+          break;
+        }
+      }
+
+    double ang1, ang2;
+
+    for (int i = 0; i < numPoints - 2; i++) {
+      ang1 = PointDirection(vertex_x[i], vertex_y[i], vertex_x[i + 1], vertex_y[i + 1]);
+      ang2 = PointDirection(vertex_x[i + 1], vertex_y[i + 1], vertex_x[i + 2], vertex_y[i + 2]);
+      if (Math.abs(ang1 - ang2) <= angle) vertex_k[i + 1] = 0;
     }
+
+    ang1 =
+        PointDirection(
+            vertex_x[numPoints - 2],
+            vertex_y[numPoints - 2],
+            vertex_x[numPoints - 1],
+            vertex_y[numPoints - 1]);
+    ang2 =
+        PointDirection(vertex_x[numPoints - 1], vertex_y[numPoints - 1], vertex_x[0], vertex_y[0]);
+
+    if (Math.abs(ang1 - ang2) <= angle) vertex_k[numPoints - 1] = 0;
+
+    ang1 =
+        PointDirection(vertex_x[numPoints - 1], vertex_y[numPoints - 1], vertex_x[0], vertex_y[0]);
+    ang2 = PointDirection(vertex_x[0], vertex_y[0], vertex_x[1], vertex_y[1]);
+
+    if (Math.abs(ang1 - ang2) <= angle) vertex_k[0] = 0;
+
+    int n = 0;
+    for (int i = 0; i < numPoints; i++) if (vertex_k[i] == 1) n++;
+
+    Polygon poly = new Polygon();
+
+    for (int i = 0; i < numPoints; i++)
+      if (vertex_k[i] == 1) {
+        poly.addPoint(vertex_x[i], h - vertex_y[i]);
+        n++;
+      }
+
+    return poly;
+  }
+
+  private static double PointDirection(double xfrom, double yfrom, double xto, double yto) {
+    return Math.atan2(yto - yfrom, xto - xfrom) * 180 / Math.PI;
   }
 }
