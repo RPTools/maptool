@@ -30,6 +30,7 @@ public class AppConstants {
 
   public static final String DEFAULT_MACRO_THEMES = "net/rptools/maptool/client/ui/syntax/themes/";
   public static final File THEMES_DIR = AppUtil.getAppHome("themes/syntax/");
+  public static final String DEFAULT_THEME_NAME = "Default";
 
   public static final String DEFAULT_UI_THEMES = "net/rptools/maptool/client/ui/themes";
 
