@@ -23,10 +23,14 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
+import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.drawing.ShapeDrawable;
 
 public class HollowDiamondTopologyTool extends AbstractDrawingTool implements MouseMotionListener {
   private static final long serialVersionUID = 7227397975734203085L;
@@ -73,7 +77,41 @@ public class HollowDiamondTopologyTool extends AbstractDrawingTool implements Mo
 
   @Override
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
-    paintTopologyOverlay(g, diamond, Pen.MODE_TRANSPARENT);
+    // Color oldColor = g.getColor();
+
+    if (MapTool.getPlayer().isGM()) {
+      Zone zone = renderer.getZone();
+      Area topology = zone.getTopology();
+
+      Graphics2D g2 = (Graphics2D) g.create();
+      g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
+      g2.scale(renderer.getScale(), renderer.getScale());
+
+      g2.setColor(AppStyle.tokenTopologyColor);
+      g2.fill(getTokenTopology());
+
+      g2.setColor(AppStyle.topologyColor);
+      g2.fill(topology);
+
+      g2.dispose();
+    }
+    if (diamond != null) {
+      Pen pen = new Pen();
+      pen.setEraser(getPen().isEraser());
+      pen.setOpacity(AppStyle.topologyRemoveColor.getAlpha() / 255.0f);
+      pen.setBackgroundMode(Pen.MODE_TRANSPARENT);
+      pen.setThickness(3.0f);
+
+      if (pen.isEraser()) {
+        pen.setEraser(false);
+      }
+      if (isEraser()) {
+        pen.setPaint(new DrawableColorPaint(AppStyle.topologyRemoveColor));
+      } else {
+        pen.setPaint(new DrawableColorPaint(AppStyle.topologyAddColor));
+      }
+      paintTransformed(g, renderer, new ShapeDrawable(diamond, false), pen);
+    }
   }
 
   @Override
@@ -94,12 +132,11 @@ public class HollowDiamondTopologyTool extends AbstractDrawingTool implements Mo
         }
         Area area = new Area(diamond);
         if (isEraser(e)) {
-          getZone().removeTopology(area);
-          MapTool.serverCommand()
-              .removeTopology(getZone().getId(), area, getZone().getTopologyMode());
+          renderer.getZone().removeTopology(area);
+          MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
         } else {
-          getZone().addTopology(area);
-          MapTool.serverCommand().addTopology(getZone().getId(), area, getZone().getTopologyMode());
+          renderer.getZone().addTopology(area);
+          MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
         }
         renderer.repaint();
         // TODO: send this to the server

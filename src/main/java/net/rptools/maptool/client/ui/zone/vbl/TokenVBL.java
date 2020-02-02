@@ -173,12 +173,10 @@ public class TokenVBL {
 
     if (erase) {
       renderer.getZone().removeTopology(area);
-      MapTool.serverCommand()
-          .removeTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
+      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
     } else {
       renderer.getZone().addTopology(area);
-      MapTool.serverCommand()
-          .addTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
+      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
     }
 
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();

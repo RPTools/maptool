@@ -27,12 +27,10 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class AppPreferences {
-
   private static final Logger log = LogManager.getLogger(AppPreferences.class);
   private static Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
 
@@ -177,14 +175,8 @@ public class AppPreferences {
   private static final String KEY_USE_ASTAR_PATHFINDING = "useAstarPathfinding";
   private static final boolean DEFAULT_USE_ASTAR_PATHFINDING = true;
 
-  private static final String KEY_VBL_BLOCKS_MOVE = "vblBlocksMove";
-  private static final boolean DEFAULT_VBL_BLOCKS_MOVE = true;
-
   private static final String MACRO_EDITOR_THEME = "macroEditorTheme";
   private static final String DEFAULT_MACRO_EDITOR_THEME = "default";
-
-  private static final String KEY_TOPOLOGY_DRAWING_MODE = "topologyDrawingMode";
-  private static final String DEFAULT_TOPOLOGY_DRAWING_MODE = "VBL";
 
   public static void setFillSelectionBox(boolean fill) {
     prefs.putBoolean(KEY_FILL_SELECTION_BOX, fill);
@@ -1029,9 +1021,8 @@ public class AppPreferences {
         path = file.getCanonicalPath();
       } catch (IOException e) {
         // Probably pretty rare, but we want to know about it
-        if (log.isInfoEnabled()) {
+        if (log.isInfoEnabled())
           log.info("unexpected during file.getCanonicalPath()", e); // $NON-NLS-1$
-        }
         path = file.getPath();
       }
       // It's important that '%3A' is done last. Note that the pathSeparator may not be a colon on
@@ -1051,9 +1042,7 @@ public class AppPreferences {
       // It's important that '%3A' is done first
       combined = combined.replaceAll("%3A", File.pathSeparator).replaceAll("%25", "%");
       String[] all = combined.split(File.pathSeparator);
-      for (int i = 0; i < all.length; i++) {
-        mruCampaigns.add(new File(all[i]));
-      }
+      for (int i = 0; i < all.length; i++) mruCampaigns.add(new File(all[i]));
     }
     return mruCampaigns;
   }
@@ -1072,12 +1061,19 @@ public class AppPreferences {
     String combined = prefs.get(KEY_SAVED_PAINT_TEXTURES, null);
     if (combined != null) {
       String[] all = combined.split(File.pathSeparator);
-      for (int i = 0; i < all.length; i++) {
-        savedTextures.add(new File(all[i]));
-      }
+      for (int i = 0; i < all.length; i++) savedTextures.add(new File(all[i]));
     }
     return savedTextures;
   }
+
+  // Jamz: Disabling Initiative Panel server sync prevents panel updates to other clients.
+  // Effectively, only the GM now has access to the initiative panel. This greatly increases
+  // performance and
+  // prevents the updates from getting out of sync as they can today.
+  // Note: This is a HACK to fix a broken system, but we're not going to invest anymore time into
+  // the current classes. REWRITE ME!
+  // private static final String INIT_ENABLE_SERVER_SYNC = "initEnableServerSync";
+  // private static final boolean DEFAULT_INIT_ENABLE_SERVER_SYNC = true;
 
   private static final String INIT_SHOW_TOKENS = "initShowTokens";
   private static final boolean DEFAULT_INIT_SHOW_TOKENS = true;
@@ -1099,6 +1095,14 @@ public class AppPreferences {
 
   private static final String INIT_LOCK_MOVEMENT = "initLockMovement";
   private static final boolean DEFAULT_INIT_LOCK_MOVEMENT = false;
+
+  // public static boolean getInitEnableServerSync() {
+  // return prefs.getBoolean(INIT_ENABLE_SERVER_SYNC, DEFAULT_INIT_ENABLE_SERVER_SYNC);
+  // }
+  //
+  // public static void setInitEnableServerSync(boolean enableSync) {
+  // prefs.putBoolean(INIT_ENABLE_SERVER_SYNC, enableSync);
+  // }
 
   public static boolean getInitShowTokens() {
     return prefs.getBoolean(INIT_SHOW_TOKENS, DEFAULT_INIT_SHOW_TOKENS);
@@ -1184,28 +1188,11 @@ public class AppPreferences {
     prefs.putBoolean(KEY_USE_ASTAR_PATHFINDING, show);
   }
 
-  public static boolean getVblBlocksMove() {
-    return prefs.getBoolean(KEY_VBL_BLOCKS_MOVE, DEFAULT_VBL_BLOCKS_MOVE);
-  }
-
-  public static void setVblBlocksMove(boolean use) {
-    prefs.putBoolean(KEY_VBL_BLOCKS_MOVE, use);
-  }
-
   public static String getDefaultMacroEditorTheme() {
     return prefs.get(MACRO_EDITOR_THEME, DEFAULT_MACRO_EDITOR_THEME);
   }
 
   public static void setDefaultMacroEditorTheme(String type) {
     prefs.put(MACRO_EDITOR_THEME, type);
-  }
-
-  public static TopologyMode getTopologyDrawingMode() {
-    return TopologyMode.valueOf(
-        prefs.get(KEY_TOPOLOGY_DRAWING_MODE, DEFAULT_TOPOLOGY_DRAWING_MODE));
-  }
-
-  public static void setTopologyDrawingMode(TopologyMode mode) {
-    prefs.put(KEY_TOPOLOGY_DRAWING_MODE, mode.toString());
   }
 }

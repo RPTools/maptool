@@ -62,10 +62,6 @@ public class AppStyle {
   public static Color topologyAddColor = new Color(255, 0, 0, 128);
   public static Color topologyRemoveColor = new Color(255, 255, 255, 128);
 
-  public static Color topologyTerrainColor = new Color(255, 0, 255, 128);
-  public static Color topologyTerrainAddColor = new Color(255, 0, 0, 128);
-  public static Color topologyTerrainRemoveColor = new Color(255, 255, 255, 128);
-
   public static Color tokenTopologyColor = new Color(255, 255, 0, 128);
   public static Color tokenTopologyAddColor = new Color(255, 0, 0, 128);
   public static Color tokenTopologyRemoveColor = new Color(255, 255, 255, 128);
