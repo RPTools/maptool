@@ -286,7 +286,7 @@ public class TokenVisibleFunction extends AbstractFunction {
    *
    * @param token the token to set.
    * @param val the value to set the visible flag to.
-   * @throws ParserException
+   * @throws ParserException when an error occurs.
    */
   public static void setAlwaysVisible(Token token, Object val) throws ParserException {
     if (!MapTool.getParser().isMacroTrusted()) {

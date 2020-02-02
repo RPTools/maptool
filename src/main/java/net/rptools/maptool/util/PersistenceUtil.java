@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -837,7 +838,7 @@ public class PersistenceUtil {
 
   public static void saveCampaignProperties(Campaign campaign, File file) throws IOException {
     // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
+    if (!file.getName().contains(".")) {
       file = new File(file.getAbsolutePath() + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
     }
     PackedFile pakFile = null;
@@ -870,11 +871,10 @@ public class PersistenceUtil {
     try {
       mbProps =
           (MacroButtonProperties)
-              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macroVersion", ce);
-    } catch (IOException ioe) {
-      MapTool.showError("PersistenceUtil.error.macroRead", ioe);
     }
     return mbProps;
   }
@@ -888,20 +888,21 @@ public class PersistenceUtil {
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
 
-      MacroButtonProperties macroButton = (MacroButtonProperties) pakFile.getContent();
-      return macroButton;
+      return (MacroButtonProperties) pakFile.getContent();
     } catch (IOException e) {
-      if (pakFile != null) pakFile.close();
+      pakFile.close();
       pakFile = null;
       return loadLegacyMacro(file);
     } finally {
-      if (pakFile != null) pakFile.close();
+      if (pakFile != null) {
+        pakFile.close();
+      }
     }
   }
 
   public static void saveMacro(MacroButtonProperties macroButton, File file) throws IOException {
     // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
+    if (!file.getName().contains(".")) {
       file = new File(file.getAbsolutePath() + AppConstants.MACRO_FILE_EXTENSION);
     }
     PackedFile pakFile = null;
