@@ -125,9 +125,10 @@ public class StrPropFunctions extends AbstractFunction {
   }
 
   /**
-   * Prepares a string for use in regex operations.
+   * Prepares a {@code String} for use in regex operations.
    *
-   * @param s the String.
+   * @param s the {@code String} to prepare for regex.
+   * @return a {@code String} prepared for regex.
    */
   public static String fullyQuoteString(String s) {
     // We escape each non-alphanumeric character in the delimiter string
@@ -189,6 +190,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The matching value for <code>key</code>, or <code>""</code> if not found. The value is
    *     converted to a number if possible.
+   * @throws ParserException when an error occurs.
    */
   public Object getStrProp(
       List<Object> parameters,
@@ -236,6 +238,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The new property string.
+   * @throws ParserException when an error occurs.
    */
   public Object setStrProp(
       List<Object> parameters,
@@ -293,6 +296,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The new property string. (If <code>key</code> is not found, no changes are made.)
+   * @throws ParserException when an error occurs.
    */
   public Object deleteStrProp(
       List<Object> parameters,
@@ -369,6 +373,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param parser parser object to use as context
    * @return The number of assignments made (keys with spaces in their names are ignored and don't
    *     appear in the count)
+   * @throws ParserException when an error occurs.
    */
   public Object varsFromStrProp(
       List<Object> parameters,
@@ -459,6 +464,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @param parser the Maptool parser.
    * @return A property string containing the settings of all the variables.
+   * @throws ParserException when an error occurs.
    */
   public Object strPropFromVars(
       List<Object> parameters,
@@ -522,6 +528,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The number of property entries in the string.
+   * @throws ParserException when an error occurs.
    */
   public Object countStrProp(
       List<Object> parameters,
@@ -556,6 +563,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The key for the setting at position <code>index</code>
+   * @throws ParserException when an error occurs.
    */
   public Object indexKeyStrProp(
       List<Object> parameters,
@@ -600,6 +608,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The value (converted to a number if possible) for the setting at position <code>index
    *     </code>
+   * @throws ParserException when an error occurs.
    */
   public Object indexValueStrProp(
       List<Object> parameters,
@@ -654,6 +663,7 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return A string containing the formatted property string.
+   * @throws ParserException when an error occurs.
    */
   public Object formatStrProp(
       List<Object> parameters,
@@ -702,9 +712,11 @@ public class StrPropFunctions extends AbstractFunction {
   }
 
   /**
-   * Tries to convert a string to a number, returning <code>null</code> on failure.
+   * Tries to convert a {@code String} to an {@code Integer}, returning {@code null} on failure.
    *
-   * @param s the string to convert.
+   * @param s the {@code String} to convert.
+   * @return the {@code Integer} value of the {@code String} or {@code null} if it cannot be
+   *     converted.
    */
   public Integer strToInt(String s) {
     Integer intval = null;
@@ -733,7 +745,9 @@ public class StrPropFunctions extends AbstractFunction {
    * @param funcName the name of the function.
    * @param minParams the minimum number of parameters.
    * @param maxParams the maximum number of parameters.
+   * @param parameters the parameters to check.
    * @param expected an array of expected classes.
+   * @throws ParameterException when an error occurs.
    */
   public void checkVaryingParameters(
       String funcName, int minParams, int maxParams, List<Object> parameters, Class<?>[] expected)

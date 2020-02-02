@@ -128,7 +128,11 @@ public class CommandPanel extends JPanel implements Observer {
     chatProcessor.install(smileyRuleGroup);
   }
 
-  /** Whether the player is currently impersonating a token */
+  /**
+   * Whether the player is currently impersonating a token
+   *
+   * @return {@code true} if there is a token being impersonated.
+   */
   public boolean isImpersonating() {
     return identityName != null;
   }
@@ -136,6 +140,8 @@ public class CommandPanel extends JPanel implements Observer {
   /**
    * The name currently in use; if the user is not impersonating a token, this will return the
    * player's name.
+   *
+   * @return the identity to use.
    */
   public String getIdentity() {
     if (identityName == null) {
@@ -151,7 +157,7 @@ public class CommandPanel extends JPanel implements Observer {
    * (perhaps an arbitrary strings was used via {@link #setIdentityName(String)}?) then <code>null
    * </code> is returned.
    *
-   * @return
+   * @return ID of the token that is being impersonated if it was set via ID.
    */
   public GUID getIdentityGUID() {
     return identityGUID;
@@ -176,7 +182,7 @@ public class CommandPanel extends JPanel implements Observer {
    * #getIdentity()} to retrieve the token name and/or token GUID for reporting to the user. (Name
    * is preferred.)
    *
-   * @param guid
+   * @param guid sets the token being impersonated to the token with the id passed in.
    */
   public void setIdentityGUID(GUID guid) {
     Token token = null;
@@ -191,7 +197,7 @@ public class CommandPanel extends JPanel implements Observer {
    * impersonation of a token that doesn't exist; the name is stored with a <code>null</code> for
    * the GUID.
    *
-   * @param identity
+   * @param identity sets the impersonated token by name.
    */
   public void setIdentityName(String identity) {
     if (identity == null) {
@@ -365,7 +371,7 @@ public class CommandPanel extends JPanel implements Observer {
   /**
    * Creates the label for live typing.
    *
-   * @return
+   * @return a {@link JTextPane} to be displayed.
    */
   public JTextPane getCommandTextArea() {
     if (commandTextArea == null) {

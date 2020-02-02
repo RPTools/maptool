@@ -39,7 +39,11 @@ public class AssertFunction extends AbstractFunction implements DefinesSpecialVa
   /** The singleton instance. */
   private static final AssertFunction instance = new AssertFunction();
 
-  /** Gets the instance. */
+  /**
+   * Gets the instance.
+   *
+   * @return the singleton instance.
+   */
   public static AssertFunction getInstance() {
     return instance;
   }
