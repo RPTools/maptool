@@ -314,7 +314,7 @@ public class AppUtil {
    */
   public static String getThemeName() {
     Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
-    return prefs.get("themeName", "");
+    return prefs.get("themeName", AppConstants.DEFAULT_THEME_NAME);
   }
 
   /**
