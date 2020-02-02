@@ -166,14 +166,26 @@ public abstract class Grid implements Cloneable {
     // return newGrid;
   }
 
-  /** @return Coordinates in Cell-space of the ZonePoint */
+  /**
+   * Returns Coordinates in Cell-space of a {@link ZonePoint}.
+   *
+   * @param zp The {@link ZonePoint} to convert.
+   * @return Coordinates in Cell-space of the {@link ZonePoint}.
+   */
   public abstract CellPoint convert(ZonePoint zp);
 
   /**
-   * @return A ZonePoint whose position within the cell depends on the grid type:<br>
-   *     <i>SquareGrid</i> - top right of cell (x_min, y_min)<br>
-   *     <i>HexGrid</i> - center of cell<br>
-   *     For HexGrids Use getCellOffset() to move ZonePoint from center to top right
+   * Returns a {@link ZonePoint} whose position within the cell depends on the grid type:
+   *
+   * <ul>
+   *   <li><i>SquareGrid</i> - top right of cell (x_min, y_min)
+   *   <li><i>HexGrid</i> - center of cell<br>
+   * </ul>
+   *
+   * For HexGrids Use getCellOffset() to move ZonePoint from center to top right.
+   *
+   * @param cp the {@link CellPoint} to convert.
+   * @return a {@link ZonePoint} within the cell.
    */
   public abstract ZonePoint convert(CellPoint cp);
 
@@ -277,7 +289,8 @@ public abstract class Grid implements Cloneable {
   /**
    * Constrains size to {@code MIN_GRID_SIZE <= size <= MAX_GRID_SIZE}
    *
-   * @return The size after it has been constrained
+   * @param size the size value to constrain.
+   * @return The size after it has been constrained.
    */
   protected final int constrainSize(int size) {
     if (size < MIN_GRID_SIZE) {
@@ -559,7 +572,13 @@ public abstract class Grid implements Cloneable {
     }
   }
 
-  /** Draws the grid scaled to the renderer's scale and within the renderer's boundaries */
+  /**
+   * Draws the grid scaled to the renderer's scale and within the renderer's boundaries.
+   *
+   * @param renderer the {@link ZoneRenderer} that represents the screen view.
+   * @param g the {@link Graphics2D} class used for drawing.
+   * @param bounds the bounds of the drawing area.
+   */
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
     // Do nothing
   }
@@ -690,10 +709,10 @@ public abstract class Grid implements Cloneable {
   }
 
   /**
-   * Returns an area based upon the token's cell footprint
+   * Returns an area based upon the token's cell footprint.
    *
-   * @param bounds
-   * @return area
+   * @param bounds the bounds of the cell.
+   * @return the {@link Area} based on the footprint.
    */
   public Area getTokenCellArea(Rectangle bounds) {
     // Get the cell footprint
@@ -710,7 +729,7 @@ public abstract class Grid implements Cloneable {
    *
    * @param regionToCheck rectangular region to check for hard fog
    * @param fog defines areas where fog is currently covering the background
-   * @return
+   * @return {@code true} if at least 6 regions are open.
    */
   public boolean checkCenterRegion(Rectangle regionToCheck, Area fog) {
     Rectangle center = new Rectangle();
@@ -739,12 +758,13 @@ public abstract class Grid implements Cloneable {
   }
 
   /**
-   * Check the region by subdividing into 3x3 and checking to see if at least 6 are open.
+   * Check the region by subdividing into 3x3 and checking to see if at least {@code tolerance} are
+   * open.
    *
    * @param regionToCheck rectangular region to check for hard fog
    * @param fog defines areas where fog is currently covering the background
-   * @param tolerance
-   * @return
+   * @param tolerance the number of open regions to check for.
+   * @return {code true} if there are at least {@code tolerance} open regions.
    */
   public boolean checkRegion(Rectangle regionToCheck, Area fog, int tolerance) {
     Rectangle bounds = new Rectangle();

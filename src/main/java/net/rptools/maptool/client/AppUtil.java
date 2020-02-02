@@ -171,8 +171,8 @@ public class AppUtil {
    * always returns true. If strict token management is disabled then this function always returns
    * true.
    *
-   * @param token
-   * @return true if the player owns the token
+   * @param token the {@link Token} to check the ownership of.
+   * @return {@code true} if the player owns the token, otherwise {@code false}.
    */
   public static boolean playerOwns(Token token) {
     Player player = MapTool.getPlayer();
@@ -189,8 +189,8 @@ public class AppUtil {
    * Returns true if the token is visible in the zone. If the view is the GM view then this function
    * always returns true.
    *
-   * @param token
-   * @return true if the GM "owns" the token
+   * @param token the {@link Token} to check if the GM owns.
+   * @return {@code true} if the GM "owns" the {@link Token}, otherwise {@code false}.
    */
   public static boolean gmOwns(Token token) {
     Player player = MapTool.getPlayer();
@@ -221,9 +221,10 @@ public class AppUtil {
    * Returns the disk spaced used in a given directory in a human readable format automatically
    * adjusting to kb/mb/gb etc.
    *
+   * @param directory the directory to retrieve the space used for.
    * @author Jamz
    * @since 1.4.0.1
-   * @return String of disk usage info
+   * @return String of disk usage information.
    */
   public static String getDiskSpaceUsed(File directory) {
     try {
@@ -239,8 +240,8 @@ public class AppUtil {
    * adjusting to kb/mb/gb etc.
    *
    * @author Jamz
-   * @since 1.4.0.1
-   * @param directory
+   * @since 1.4.0.
+   * @param directory the directory to retrieve the free space for.
    * @return String of free disk space
    */
   public static String getFreeDiskSpace(File directory) {
