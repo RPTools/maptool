@@ -116,6 +116,9 @@ public class DrawingFunctions extends AbstractFunction {
    * @param functionName this is used in the exception message
    * @param map the zone that should contain the drawing
    * @param guid the id of the drawing.
+   *
+   * @return the {@link Drawable} requested.
+   *
    * @throws ParserException if the drawing is not found.
    */
   protected Drawable getDrawable(String functionName, Zone map, GUID guid) throws ParserException {
@@ -281,7 +284,8 @@ public class DrawingFunctions extends AbstractFunction {
    * @param map the zone that should contain the drawing
    * @param guid the id of the drawing.
    * @return JSON in String form.
-   * @throws ParserException
+   *
+   * @throws ParserException if the drawable is not found.
    */
   protected JsonObject getDrawingJSONInfo(String functionName, Zone map, GUID guid)
       throws ParserException {
@@ -374,6 +378,9 @@ public class DrawingFunctions extends AbstractFunction {
    * @param functionName this is used in the exception message.
    * @param args List of parameters passed to the function.
    * @param param int reference to the boolean parameter.
+   *
+   * @return the boolean equivalent to the passed in argument.
+   *
    * @throws ParserException if the parameter fails to parse.
    */
   protected boolean parseBoolean(String functionName, List<Object> args, int param)

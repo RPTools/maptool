@@ -174,6 +174,9 @@ public class TransferableHelper extends TransferHandler {
   /**
    * Takes a drop event and returns an asset from it. Returns null if an asset could not be
    * obtained.
+   *
+   * @param transferable the {@link Transferable} from the drop event.
+   * @return A list of assets transferred or {@code null} if it could not be obtained from transfer.
    */
   @SuppressWarnings("unchecked")
   public static List<Object> getAsset(Transferable transferable) {

@@ -23,7 +23,15 @@ public class ScreenPoint extends Point2D.Double {
     super(x, y);
   }
 
-  /** Translate the point from screen x,y to zone x,y */
+  /**
+   * Translate the point from screen x,y to zone x,y.
+   *
+   * @param renderer the {@link ZoneRenderer} for the "screen view" of the {@link net.rptools.maptool.model.Zone}.
+   * @param x the x screen co-ordinate.
+   * @param y the y screen co-ordinate.
+   *
+   * @return the {@link ZonePoint} representing the screen point.
+   */
   public static ZonePoint convertToZone(ZoneRenderer renderer, double x, double y) {
     double scale = renderer.getScale();
 
@@ -44,7 +52,13 @@ public class ScreenPoint extends Point2D.Double {
     return new ZonePoint((int) zX, (int) zY);
   }
 
-  /** Translate the point from screen x,y to zone x,y */
+  /**
+   * Translate the point from screen x,y to zone x,y.
+   *
+   * @param renderer the {@link ZoneRenderer} for the "screen view" of the {@link net.rptools.maptool.model.Zone}
+   *
+   * @return the {@link ZonePoint} representing the screen point.
+   */
   public ZonePoint convertToZone(ZoneRenderer renderer) {
     return convertToZone(renderer, this.x, this.y);
   }
@@ -53,6 +67,10 @@ public class ScreenPoint extends Point2D.Double {
    * Translate the point from screen x,y to the nearest top left corner of a zone x,y for when the
    * zone point required is on the "zone point grid" as opposed to the area of zone space designated
    * by the zone point.
+   *
+   * @param renderer the {@link ZoneRenderer} for the "screen view" of the {@link net.rptools.maptool.model.Zone}.
+   *
+   * @return the {@link ZonePoint} representing the screen point.
    */
   public ZonePoint convertToZoneRnd(ZoneRenderer renderer) {
     double scale = renderer.getScale();

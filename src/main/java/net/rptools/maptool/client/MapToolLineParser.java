@@ -1595,7 +1595,21 @@ public class MapToolLineParser {
     return runMacro(resolver, tokenInContext, qMacroName, args, true);
   }
 
-  /** Runs a macro from a specified location. */
+  /**
+   * Runs a macro from a specified location.
+   *
+   * @param resolver the {@link MapToolVariableResolver} used for resolving variables in the macro being run.
+   * @param tokenInContext the {@code Token} if any that is the "current" token for the macro.
+   * @param qMacroName the qualified macro name. (i.e. macro name and location of macro).
+   * @param args the arguments to pass to the macro when executing it.
+   * @param createNewVariableContext if {@code true} a new varaible scope is created for the macro, if {@code false} then
+   * the macro uses the calling scope and can read/modify/create variables visible to the caller.
+   *
+   * @return the result of the macro execution.
+   *
+   * @throws ParserException when an error occurs parsing or executing the macro.
+   *
+   */
   public String runMacro(
       MapToolVariableResolver resolver,
       Token tokenInContext,
@@ -1807,6 +1821,8 @@ public class MapToolLineParser {
    * @param contextSource the source of the macro block.
    * @param trusted is the context trusted or not.
    * @return the macro output.
+   *
+   * @throws ParserException when an error occurs parsing or executing the macro.
    */
   public String runMacroBlock(
       Token tokenInContext,
@@ -1865,6 +1881,7 @@ public class MapToolLineParser {
   /**
    * Searches all maps for a token and returns the the requested lib: macro.
    *
+   * @param location the location of the library macro.
    * @return The token which holds the library.
    * @throws ParserException if the token name is illegal, the token appears multiple times, or if
    *     the caller doesn't have access to the token.
@@ -1907,6 +1924,8 @@ public class MapToolLineParser {
 
   /**
    * Searches all maps for a token and returns the zone that the lib: macro is in.
+   *
+   * @param location the location of the library macro.
    *
    * @return The zone which holds the library.
    * @throws ParserException if the token name is illegal, the token appears multiple times, or if

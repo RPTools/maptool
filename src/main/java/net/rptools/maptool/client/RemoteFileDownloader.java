@@ -46,6 +46,8 @@ public class RemoteFileDownloader {
    * Read the data at the given URL. This method should not be called on the EDT.
    *
    * @return File pointer to the location of the data, file will be deleted at program end
+   *
+   * @throws IOException if an error occurs while processing/downloading the URL.
    */
   public File read() throws IOException {
     URLConnection conn = url.openConnection();

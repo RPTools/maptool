@@ -384,8 +384,8 @@ public class MapTool {
    * Displays a confirmation dialog that uses the message as a key to the properties file, and the
    * additional values as parameters to the formatting of the key lookup.
    *
-   * @param title
-   * @param buttons
+   * @param title the title of the dialog.
+   * @param buttons the buttons to display on the dialog, one of {@link JOptionPane#YES_NO_OPTION}, {@link JOptionPane#YES_NO_CANCEL_OPTION}, {@link  JOptionPane#OK_CANCEL_OPTION}.
    * @param message key from the properties file (preferred) or hard-coded string to display
    * @param params optional arguments for the formatting of the property value
    * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
@@ -476,7 +476,7 @@ public class MapTool {
    * be called from any uncontrolled macros as there are both security and denial-of-service attacks
    * possible.
    *
-   * @param url
+   * @param url the URL to pass to the browser.
    */
   public static void showDocument(String url) {
     if (Desktop.isDesktopSupported()) {
@@ -846,7 +846,10 @@ public class MapTool {
     messageList.add(message);
   }
 
-  /** These are the messages that are generated locally */
+  /**
+   * These are the messages that are generated locally.
+   * @param message The locally generated message to add.
+   */
   public static void addMessage(TextMessage message) {
     // Filter stuff
     addServerMessage(message);
@@ -990,11 +993,12 @@ public class MapTool {
   /**
    * Start the server from a campaign file and various settings.
    *
-   * @param id the id of the server for announcement
-   * @param config the server configuration
-   * @param campaign the campaign
-   * @param copyCampaign should the campaign be a copy of the one provided
-   * @throws IOException if new MapToolServer fails
+   * @param id the id of the server for announcement.
+   * @param config the server configuration.
+   * @param policy the server policy configuration to use.
+   * @param campaign the campaign.
+   * @param copyCampaign should the campaign be a copy of the one provided.
+   * @throws IOException if new MapToolServer fails.
    */
   public static void startServer(
       String id, ServerConfig config, ServerPolicy policy, Campaign campaign, boolean copyCampaign)
@@ -1076,7 +1080,13 @@ public class MapTool {
     return gms;
   }
 
-  /** Whether a specific player is connected to the game */
+  /**
+   * checks if a specific player is connected to the game.
+   *
+   * @param player The name of the player to check.
+   * @return {@code true} if the player is connected otherwise {@code false}.
+   *
+   */
   public static boolean isPlayerConnected(String player) {
     for (int i = 0; i < playerList.size(); i++) {
       Player p = playerList.get(i);
@@ -1337,6 +1347,8 @@ public class MapTool {
    * with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". The right
    * way to do this is to check the length of the UndoQueue -- if the length is zero, we know the
    * data isn't dirty. But that would require a working UndoQueue... :(
+   *
+   * @return {@code true} if the campaign file has changed, otherwise {@code false}.
    */
   public static boolean isCampaignDirty() {
     // TODO: This is a very naive check, but it's better than nothing
