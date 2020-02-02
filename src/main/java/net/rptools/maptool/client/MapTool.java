@@ -1708,11 +1708,9 @@ public class MapTool {
       // allows the system to set up system defaults before we go and modify things.
       // That is, please don't move these lines around unless you test the result on windows
       // and mac
-      String lafname;
       if (AppUtil.MAC_OS_X) {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        lafname = "net.rptools.maptool.client.TinyLookAndFeelMac";
-        UIManager.setLookAndFeel(lafname);
+        UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
         menuBar = new AppMenuBar();
         OSXAdapter.macOSXicon();
       }
@@ -1722,8 +1720,7 @@ public class MapTool {
       // menuBar = new AppMenuBar();
       // }
       else {
-        lafname = "de.muntjak.tinylookandfeel.TinyLookAndFeel";
-        UIManager.setLookAndFeel(lafname);
+        UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
         menuBar = new AppMenuBar();
       }
       // After the TinyLAF library is initialized, look to see if there is a Default.theme
@@ -1732,20 +1729,21 @@ public class MapTool {
       // we have both the original and a Mac version that gets cumbersome. (Really
       // the Mac version should use the default and then install the keystroke differences
       // but what we have works and I'm loathe to go playing with it at 1.3b87 -- yes, 87!)
-      File f = AppUtil.getAppHome("config");
-      if (f.exists()) {
-        File f2 = new File(f, "Default.theme");
-        if (f2.exists()) {
-          if (Theme.loadTheme(f2)) {
-            // re-install the Tiny Look and Feel
-            UIManager.setLookAndFeel(lafname);
+      File f2 = AppUtil.getThemeFile(AppUtil.getThemeName());
+      // File f = AppUtil.getAppHome("config");
+      // if (f.exists()) {
+      // File f2 = new File(f, "Default.theme");
+      if (f2.exists()) {
+        if (Theme.loadTheme(f2)) {
+          // re-install the Tiny Look and Feel
+          UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
 
-            // Update the ComponentUIs for all Components. This
-            // needs to be invoked for all windows.
-            // SwingUtilities.updateComponentTreeUI(rootComponent);
-          }
+          // Update the ComponentUIs for all Components. This
+          // needs to be invoked for all windows.
+          // SwingUtilities.updateComponentTreeUI(rootComponent);
         }
       }
+      // }
 
       com.jidesoft.utils.Lm.verifyLicense(
           "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
