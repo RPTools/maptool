@@ -48,7 +48,6 @@ public class MRUCampaignManager {
    * Adds a new Campaign to the MRU list, then resort the list and update the menu
    *
    * @param newCampaign the campaign to add to the most recently used list.
-   *
    */
   public void addMRUCampaign(File newCampaign) {
     // FIXME (this coupling is too tight; change the calling function to avoid this call entirely)

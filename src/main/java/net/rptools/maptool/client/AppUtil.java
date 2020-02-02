@@ -211,7 +211,6 @@ public class AppUtil {
    * adjusting to kb/mb/gb etc.
    *
    * @param directory the directory to retrieve the space used for.
-   *
    * @author Jamz
    * @since 1.4.0.1
    * @return String of disk usage information.
@@ -228,7 +227,6 @@ public class AppUtil {
   /**
    * Returns the free disk spaced for a given directory in a human readable format automatically
    * adjusting to kb/mb/gb etc.
-   *
    *
    * @author Jamz
    * @since 1.4.0.

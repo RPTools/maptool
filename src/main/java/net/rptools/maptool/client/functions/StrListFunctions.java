@@ -106,7 +106,7 @@ public class StrListFunctions extends AbstractFunction {
    * Prepares a string for use in regex operations.
    *
    * @param s the String that could have non-alphanumeric characters.
-   * @return  a new String, with the non-alphanumeric characters escaped.
+   * @return a new String, with the non-alphanumeric characters escaped.
    */
   public static String fullyQuoteString(String s) {
     // We escape each non-alphanumeric character in the delimiter string
@@ -161,7 +161,6 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the elements
    * @return The item at position <code>index</code>, or <code>""</code> if out of bounds.
-   *
    * @throws ParameterException if an error occurs.
    */
   public Object listGet(
@@ -203,7 +202,6 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return A new list with the item at position <code>index</code> deleted.
-   *
    * @throws ParameterException if an error occurs.
    */
   public Object listDelete(
@@ -251,7 +249,6 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return The number of entries in the list.
-   *
    * @throws ParameterException if an error occurs.
    */
   public Object listCount(
@@ -281,7 +278,6 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return The index of the first occurence of <code>target</code>, or -1 if not found.
-   *
    * @throws ParameterException when an error occurs.
    */
   public Object listFind(
@@ -319,7 +315,6 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return Number of occurrences of <code>target</code> in <code>list</code>.
-   *
    * @throws ParameterException when an error occurs.
    */
   public Object listContains(
@@ -356,7 +351,6 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return A new list with <code>target</code> appended.
-   *
    * @throws ParameterException when an error occurs.
    */
   public Object listAppend(
@@ -395,7 +389,6 @@ public class StrListFunctions extends AbstractFunction {
    * @param list the list that will contain the parsed element
    * @return A new list with <code>target</code> inserted before the item at position <code>index
    *     </code>
-   *
    * @throws ParameterException when an error occurs.
    */
   public Object listInsert(
@@ -451,7 +444,6 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return A new list with the entry at <code>index</code> repaced by <code>target</code>
-   *
    * @throws ParameterException when an error occurs.
    */
   public Object listReplace(
@@ -550,7 +542,6 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return A string containing the formatted list.
-   *
    * @throws ParameterException if an error occurs.
    */
   public Object listFormat(
@@ -676,7 +667,8 @@ public class StrListFunctions extends AbstractFunction {
    * Tries to convert a string to a number, returning {@code null} on failure.
    *
    * @param s the {@code String} to convert to an {@code Integer}.
-   * @return the {@code Integer} value of the {@code String}, return {@code null} if it can not be converted.
+   * @return the {@code Integer} value of the {@code String}, return {@code null} if it can not be
+   *     converted.
    */
   public Integer strToInt(String s) {
     Integer intval = null;
@@ -703,7 +695,6 @@ public class StrListFunctions extends AbstractFunction {
    * @param maxParams the maximum number of parameters expected for the script function.
    * @param parameters the parameters to check.
    * @param expected the expected classes of the parameters.
-   *
    * @throws ParameterException if there is an error.
    */
   public void checkVaryingParameters(

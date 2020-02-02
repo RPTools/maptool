@@ -385,7 +385,8 @@ public class MapTool {
    * additional values as parameters to the formatting of the key lookup.
    *
    * @param title the title of the dialog.
-   * @param buttons the buttons to display on the dialog, one of {@link JOptionPane#YES_NO_OPTION}, {@link JOptionPane#YES_NO_CANCEL_OPTION}, {@link  JOptionPane#OK_CANCEL_OPTION}.
+   * @param buttons the buttons to display on the dialog, one of {@link JOptionPane#YES_NO_OPTION},
+   *     {@link JOptionPane#YES_NO_CANCEL_OPTION}, {@link JOptionPane#OK_CANCEL_OPTION}.
    * @param message key from the properties file (preferred) or hard-coded string to display
    * @param params optional arguments for the formatting of the property value
    * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
@@ -848,6 +849,7 @@ public class MapTool {
 
   /**
    * These are the messages that are generated locally.
+   *
    * @param message The locally generated message to add.
    */
   public static void addMessage(TextMessage message) {
@@ -1085,7 +1087,6 @@ public class MapTool {
    *
    * @param player The name of the player to check.
    * @return {@code true} if the player is connected otherwise {@code false}.
-   *
    */
   public static boolean isPlayerConnected(String player) {
     for (int i = 0; i < playerList.size(); i++) {

@@ -124,9 +124,7 @@ public class MapToolVariableResolver extends MapVariableResolver {
     }
   }
 
-  /**
-   * Perform any delayed actions. This should called by the command framework only.
-   */
+  /** Perform any delayed actions. This should called by the command framework only. */
   public void flush() {
     for (Runnable r : delayedActionList) {
       r.run();

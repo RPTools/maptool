@@ -126,8 +126,8 @@ public class MapToolUtil {
    *
    * @param zone the map that the token is being placed onto
    * @param token the new token to be named
-   * @param force if {@code false} a new name will not be generated unless the token naming prefrence in {@link AppPreferences} is {@link Token#NAME_USE_CREATURE}.
-   *
+   * @param force if {@code false} a new name will not be generated unless the token naming
+   *     prefrence in {@link AppPreferences} is {@link Token#NAME_USE_CREATURE}.
    * @return the new token's algorithmically generated name
    */
   public static String nextTokenId(Zone zone, Token token, boolean force) {

@@ -190,7 +190,6 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The matching value for <code>key</code>, or <code>""</code> if not found. The value is
    *     converted to a number if possible.
-   *
    * @throws ParserException when an error occurs.
    */
   public Object getStrProp(
@@ -239,7 +238,6 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The new property string.
-   *
    * @throws ParserException when an error occurs.
    */
   public Object setStrProp(
@@ -298,7 +296,6 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The new property string. (If <code>key</code> is not found, no changes are made.)
-   *
    * @throws ParserException when an error occurs.
    */
   public Object deleteStrProp(
@@ -376,7 +373,6 @@ public class StrPropFunctions extends AbstractFunction {
    * @param parser parser object to use as context
    * @return The number of assignments made (keys with spaces in their names are ignored and don't
    *     appear in the count)
-   *
    * @throws ParserException when an error occurs.
    */
   public Object varsFromStrProp(
@@ -468,7 +464,6 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @param parser the Maptool parser.
    * @return A property string containing the settings of all the variables.
-   *
    * @throws ParserException when an error occurs.
    */
   public Object strPropFromVars(
@@ -533,7 +528,6 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The number of property entries in the string.
-   *
    * @throws ParserException when an error occurs.
    */
   public Object countStrProp(
@@ -569,7 +563,6 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The key for the setting at position <code>index</code>
-   *
    * @throws ParserException when an error occurs.
    */
   public Object indexKeyStrProp(
@@ -615,7 +608,6 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return The value (converted to a number if possible) for the setting at position <code>index
    *     </code>
-   *
    * @throws ParserException when an error occurs.
    */
   public Object indexValueStrProp(
@@ -671,7 +663,6 @@ public class StrPropFunctions extends AbstractFunction {
    * @param oldKeys holds the un-normalized keys, in their original order.
    * @param oldKeysNormalized an empty array that will contain the normalized keys.
    * @return A string containing the formatted property string.
-   *
    * @throws ParserException when an error occurs.
    */
   public Object formatStrProp(
@@ -724,7 +715,8 @@ public class StrPropFunctions extends AbstractFunction {
    * Tries to convert a {@code String} to an {@code Integer}, returning {@code null} on failure.
    *
    * @param s the {@code String} to convert.
-   * @return the {@code Integer} value of the {@code String} or {@code null} if it cannot be converted.
+   * @return the {@code Integer} value of the {@code String} or {@code null} if it cannot be
+   *     converted.
    */
   public Integer strToInt(String s) {
     Integer intval = null;
@@ -755,7 +747,6 @@ public class StrPropFunctions extends AbstractFunction {
    * @param maxParams the maximum number of parameters.
    * @param parameters the parameters to check.
    * @param expected an array of expected classes.
-   *
    * @throws ParameterException when an error occurs.
    */
   public void checkVaryingParameters(

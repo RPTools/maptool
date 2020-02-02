@@ -277,7 +277,7 @@ public class I18N {
   }
 
   /**
-   *  Returns all matching keys when given a string regular expression.
+   * Returns all matching keys when given a string regular expression.
    *
    * @param regex the regular expression used to find the i81n keys.
    * @return a list of the matching keys from the i18n property file
@@ -287,7 +287,7 @@ public class I18N {
   }
 
   /**
-   *  Returns all matching keys when given a compiled regular expression pattern.
+   * Returns all matching keys when given a compiled regular expression pattern.
    *
    * @param regex the compiled regular expression used to find the i81n keys.
    * @return a list of the matching keys from the i18n property file

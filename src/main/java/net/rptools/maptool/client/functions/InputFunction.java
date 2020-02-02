@@ -139,7 +139,7 @@ public class InputFunction extends AbstractFunction {
   }
 
   /**
-   *  Gets the singleton instance.
+   * Gets the singleton instance.
    *
    * @return the singleton instance for the class.
    */
@@ -184,8 +184,8 @@ public class InputFunction extends AbstractFunction {
      * Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them.
      *
      * @param strName the name of the enum values.
-     *
-     * @return the {@link InputType} matching the passed in name, or {@code null} if there is no match..
+     * @return the {@link InputType} matching the passed in name, or {@code null} if there is no
+     *     match..
      */
     public static InputType inputTypeFromName(String strName) {
       for (InputType it : InputType.values()) {
@@ -195,7 +195,7 @@ public class InputFunction extends AbstractFunction {
     }
 
     /**
-     *  Gets the default value for an option.
+     * Gets the default value for an option.
      *
      * @param option the name of the option to get the default value for.
      * @return the default value for the passed in option.
