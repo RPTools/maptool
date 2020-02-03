@@ -138,7 +138,11 @@ public class InputFunction extends AbstractFunction {
     super(1, -1, "input");
   }
 
-  /** Gets the singleton instance. */
+  /**
+   * Gets the singleton instance.
+   *
+   * @return the singleton instance for the class.
+   */
   public static InputFunction getInstance() {
     return instance;
   }
@@ -153,7 +157,7 @@ public class InputFunction extends AbstractFunction {
         false,
         "VALUE=NUMBER;TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     CHECK(false, false, "SPAN=FALSE;"),
-    RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;"),
+    RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     LABEL(false, false, "TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SPAN=FALSE;"),
     PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;"),
     TAB(false, true, "SELECT=FALSE;");
@@ -176,7 +180,13 @@ public class InputFunction extends AbstractFunction {
       }
     }
 
-    /** Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them. */
+    /**
+     * Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them.
+     *
+     * @param strName the name of the enum values.
+     * @return the {@link InputType} matching the passed in name, or {@code null} if there is no
+     *     match..
+     */
     public static InputType inputTypeFromName(String strName) {
       for (InputType it : InputType.values()) {
         if (strName.equalsIgnoreCase(it.name())) return it;
@@ -184,7 +194,12 @@ public class InputFunction extends AbstractFunction {
       return null;
     }
 
-    /** Gets the default value for an option. */
+    /**
+     * Gets the default value for an option.
+     *
+     * @param option the name of the option to get the default value for.
+     * @return the default value for the passed in option.
+     */
     public String getDefault(String option) {
       return defaultOptions.get(option.toUpperCase());
     }
@@ -192,6 +207,10 @@ public class InputFunction extends AbstractFunction {
     /**
      * Parses a string and returns a Map of options for the given type. Options not found are set to
      * the default value for the type.
+     *
+     * @param s the {@code String} to parse.
+     * @return the options parsed from the string.
+     * @throws OptionException if an error occurs.
      */
     public OptionMap parseOptionString(String s) throws OptionException {
       OptionMap ret = new OptionMap();

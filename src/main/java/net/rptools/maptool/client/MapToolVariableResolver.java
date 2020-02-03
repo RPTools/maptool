@@ -113,7 +113,11 @@ public class MapToolVariableResolver extends MapVariableResolver {
     return false;
   }
 
-  /** Add an action to be performed after the full expression has been evaluated. */
+  /**
+   * Add an action to be performed after the full expression has been evaluated.
+   *
+   * @param runnable the action to be performed.
+   */
   public void addDelayedAction(Runnable runnable) {
     if (!delayedActionList.contains(runnable)) {
       delayedActionList.add(runnable);
