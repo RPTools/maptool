@@ -1356,7 +1356,9 @@ public class ZoneRenderer extends JComponent
     // Perhaps we should draw the fog first and use hard fog to determine whether labels need to be
     // drawn?
     // (This method has it's own 'timer' calls)
-    renderLabels(g2d, view);
+    if (AppState.getShowTextLabels()) {
+      renderLabels(g2d, view);
+    }
 
     // (This method has it's own 'timer' calls)
     if (zone.hasFog()) {
