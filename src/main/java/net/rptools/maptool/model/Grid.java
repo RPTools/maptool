@@ -18,7 +18,12 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.geom.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashSet;
@@ -182,7 +187,7 @@ public abstract class Grid implements Cloneable {
    *   <li><i>HexGrid</i> - center of cell<br>
    * </ul>
    *
-   * For HexGrids Use getCellOffset() to move ZonePoint from center to top right.
+   * <p>For HexGrids Use getCellOffset() to move ZonePoint from center to top right.
    *
    * @param cp the {@link CellPoint} to convert.
    * @return a {@link ZonePoint} within the cell.
@@ -372,17 +377,18 @@ public abstract class Grid implements Cloneable {
 
           // Create the light
           int dist = (int) (range / zone.getUnitsPerCell());
-          Area radius = new Area();
+          Area gridArea = new Area();
 
           // Get it from cache if it exists, otherwise create and store it
           synchronized (gridShapeCache) {
             if (gridShapeCache.containsKey(Integer.valueOf(dist))) {
-              radius = gridShapeCache.get(Integer.valueOf(dist));
+              gridArea = gridShapeCache.get(Integer.valueOf(dist));
             } else {
               HashSet<Point> cells = generateRadius(dist);
 
               for (Point point : cells) {
-                radius.add(new Area(new Rectangle((point.x) * size, (point.y) * size, size, size)));
+                gridArea.add(
+                    new Area(new Rectangle((point.x) * size, (point.y) * size, size, size)));
 
                 // Use grid shape to handle Hex's? Still lots of work to do for Hex in any case
                 // AffineTransform at = new AffineTransform();
@@ -390,8 +396,11 @@ public abstract class Grid implements Cloneable {
                 // radius.add(cellShape.createTransformedArea(at));
               }
 
-              gridShapeCache.put(Integer.valueOf(dist), radius);
-              log.info("Adding to cache radius: " + Integer.valueOf(dist));
+              gridShapeCache.put(Integer.valueOf(dist), gridArea);
+
+              // Verify combined Area is a single union of polygons
+              log.debug("gridShape is singular? " + gridArea.isSingular());
+              log.debug("Adding to cache radius: " + Integer.valueOf(dist));
             }
           }
 
@@ -412,16 +421,25 @@ public abstract class Grid implements Cloneable {
           int cellX = token.getX() / size;
           int cellY = token.getY() / size;
 
+          // Cached Area may have been based on a different grid size
+          double rangeUnits = (range / zone.getUnitsPerCell() * 2) + 1;
+          double gridAreaUnits = (gridArea.getBounds().getWidth() / getSize());
+          double scaleFromCache = rangeUnits / gridAreaUnits;
+
           for (CellPoint cellPoint : tokenCells) {
             AffineTransform at = new AffineTransform();
             at.translate(
                 (cellPoint.x - cellX - tokenSizeAdjust) * size,
                 (cellPoint.y - cellY - tokenSizeAdjust) * size);
-            visibleArea.add(radius.createTransformedArea(at));
+            at.scale(scaleFromCache, scaleFromCache);
+
+            visibleArea.add(gridArea.createTransformedArea(at));
           }
 
           time = (System.currentTimeMillis() - time);
-          if (time > 50) log.info("Long time for grid light " + dist + ": " + time + "ms");
+          if (time > 50) {
+            log.info("Long time for grid light " + dist + ": " + time + "ms");
+          }
         } else {
           // Fall back to regular circle in daylight, etc.
           visibleArea =
@@ -549,12 +567,13 @@ public abstract class Grid implements Cloneable {
     GeneralPath hexPath = new GeneralPath();
 
     for (int i = 0; i < 6; i++) {
-      if (i == 0)
+      if (i == 0) {
         hexPath.moveTo(
             x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
-      else
+      } else {
         hexPath.lineTo(
             x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
+      }
     }
 
     if (rotation != 0) {
@@ -613,6 +632,7 @@ public abstract class Grid implements Cloneable {
   public abstract void uninstallMovementKeys(Map<KeyStroke, Action> actionMap);
 
   static class DirectionCalculator {
+
     private static final int NW = 1;
     private static final int N = 2;
     private static final int NE = 4;
@@ -634,14 +654,26 @@ public abstract class Grid implements Cloneable {
 
       int direction = TopRow | MidRow | BotRow;
 
-      if (dirx > 0) direction &= (LeftCol | MidCol); // two left columns
-      if (dirx < 0) direction &= (MidCol | RightCol); // two right columns
+      if (dirx > 0) {
+        direction &= (LeftCol | MidCol); // two left columns
+      }
+      if (dirx < 0) {
+        direction &= (MidCol | RightCol); // two right columns
+      }
 
-      if (diry > 0) direction &= (TopRow | MidRow); // two top rows
-      if (diry < 0) direction &= (MidRow | BotRow); // two bottom rows
+      if (diry > 0) {
+        direction &= (TopRow | MidRow); // two top rows
+      }
+      if (diry < 0) {
+        direction &= (MidRow | BotRow); // two bottom rows
+      }
 
-      if (dirx == 0) direction &= ~MidRow;
-      if (diry == 0) direction &= ~MidCol;
+      if (dirx == 0) {
+        direction &= ~MidRow;
+      }
+      if (diry == 0) {
+        direction &= ~MidCol;
+      }
 
       direction &= ~CENTER; // Always turn off the center since we don't check it using the outside
       // iterations...
@@ -689,16 +721,21 @@ public abstract class Grid implements Cloneable {
     Rectangle bounds = new Rectangle();
     int bit = 1;
 
-    if (areaToCheck.width < 9 || (dirx == 0 && diry == 0))
+    if (areaToCheck.width < 9 || (dirx == 0 && diry == 0)) {
       direction = (512 - 1) & ~DirectionCalculator.CENTER;
+    }
 
     for (int dy = 0; dy < 3; dy++) {
       for (int dx = 0; dx < 3; dx++, bit *= 2) {
-        if ((direction & bit) == 0) continue;
+        if ((direction & bit) == 0) {
+          continue;
+        }
         oneThird(areaToCheck, dx, dy, bounds);
 
         // The 'fog' variable defines areas where fog has been cleared away
-        if (!exposedFog.contains(bounds)) continue;
+        if (!exposedFog.contains(bounds)) {
+          continue;
+        }
         return checkCenterRegion(areaToCheck, exposedFog);
       }
     }
@@ -741,19 +778,26 @@ public abstract class Grid implements Cloneable {
     for (int dy = 0; dy < 3; dy++) {
       for (int dx = 0; dx < 3; dx++) {
         oneThird(center, dx, dy, bounds);
-        if (bounds.width < 1 || bounds.height < 1) continue;
+        if (bounds.width < 1 || bounds.height < 1) {
+          continue;
+        }
         if (!fog.intersects(bounds)) {
-          if (++closedSpace > 3) return false;
+          if (++closedSpace > 3) {
+            return false;
+          }
         } else {
-          if (++openSpace > 5) return true;
+          if (++openSpace > 5) {
+            return true;
+          }
         }
       }
     }
-    if (log.isInfoEnabled())
+    if (log.isInfoEnabled()) {
       log.info(
           "Center region of size "
               + regionToCheck.getSize()
               + " contains neither 4+ closed spaces nor 6+ open spaces?!");
+    }
     return openSpace >= closedSpace;
   }
 
@@ -774,16 +818,22 @@ public abstract class Grid implements Cloneable {
     for (int dy = 0; dy < 3; dy++) {
       for (int dx = 0; dx < 3; dx++) {
         oneThird(regionToCheck, dx, dy, bounds);
-        if (bounds.width < 1 || bounds.height < 1) continue;
+        if (bounds.width < 1 || bounds.height < 1) {
+          continue;
+        }
         if (!fog.intersects(bounds)) {
-          if (++closedSpace > (9 - tolerance)) return false;
+          if (++closedSpace > (9 - tolerance)) {
+            return false;
+          }
         } else {
-          if (++openSpace > tolerance) return true;
+          if (++openSpace > tolerance) {
+            return true;
+          }
         }
       }
     }
 
-    if (log.isInfoEnabled())
+    if (log.isInfoEnabled()) {
       log.info(
           "Center region of size "
               + regionToCheck.getSize()
@@ -792,6 +842,7 @@ public abstract class Grid implements Cloneable {
               + "+ closed spaces nor "
               + tolerance
               + "+ open spaces?!");
+    }
     return openSpace >= closedSpace;
   }
 
