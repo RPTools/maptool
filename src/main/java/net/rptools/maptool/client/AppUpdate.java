@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.jar.*;
 import javax.swing.*;
+import net.rptools.maptool.language.I18N;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import okhttp3.OkHttpClient;
@@ -228,6 +229,12 @@ public class AppUpdate {
 
     File saveLocation = chooser.getSelectedFile();
 
+    if (!saveLocation.canWrite()) {
+      String parent = saveLocation.getParent();
+      MapTool.showError(I18N.getText("msg.error.directoryNotWriteable", parent));
+      return;
+    }
+
     log.info("URL: " + assetDownloadURL.toString());
     log.info("assetDownloadSize: " + assetDownloadSize);
 
@@ -248,9 +255,8 @@ public class AppUpdate {
               pm.setMaximum((int) assetDownloadSize);
 
               FileUtils.copyInputStreamToFile(pmis, saveLocation);
-            } catch (IOException e1) {
-              // TODO Auto-generated catch block
-              e1.printStackTrace();
+            } catch (IOException ioe) {
+              MapTool.showError("msg.error.failedSavingNewVersion", ioe);
             }
           }
         };
