@@ -157,7 +157,7 @@ public class InputFunction extends AbstractFunction {
         false,
         "VALUE=NUMBER;TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     CHECK(false, false, "SPAN=FALSE;"),
-    RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;"),
+    RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     LABEL(false, false, "TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SPAN=FALSE;"),
     PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;"),
     TAB(false, true, "SELECT=FALSE;");

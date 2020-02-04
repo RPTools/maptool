@@ -456,9 +456,10 @@ public class FindTokenFunctions extends AbstractFunction {
         }
         match = "setStates".equalsIgnoreCase(searchType);
         // Looking for tokens that either match or don't match the states
-        for (Object item : states) {
+        for (JsonElement item : states) {
           tokenList =
-              getTokenList(parser, FindType.STATE, item.toString(), match, tokenList, zoneRenderer);
+              getTokenList(
+                  parser, FindType.STATE, item.getAsString(), match, tokenList, zoneRenderer);
         }
       } else if ("range".equalsIgnoreCase(searchType)) {
         // We will do this as one of the last steps as it's one of the most expensive so we want to
