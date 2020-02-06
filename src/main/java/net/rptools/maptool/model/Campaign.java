@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
+import net.rptools.maptool.model.bookmarks.MapBookmarkManager;
 
 /**
  * This object contains {@link Zone}s and {@link Asset}s that make up a campaign as well as links to
@@ -90,6 +92,13 @@ public class Campaign {
 
   private Map<String, Map<GUID, LightSource>> lightSourcesMap;
   private Map<String, LookupTable> lookupTableMap;
+
+  /**
+   * The {@link MapBookmarkManager} manages all the {@link
+   * net.rptools.maptool.model.bookmarks.MapBookmark}s for the campaign.
+   */
+  @XStreamOmitField // Do no persist as part of normal persistence, it will be handled sseparately
+  private final MapBookmarkManager mapBookmarkManager = new MapBookmarkManager();
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
@@ -151,6 +160,9 @@ public class Campaign {
   public Campaign(Campaign campaign) {
     name = campaign.getName();
     zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+    for (GUID zid : zones.keySet()) {
+      mapBookmarkManager.zoneAdded(zid);
+    }
 
     /*
      * JFJ 2010-10-27 Don't forget that since these are new zones AND new tokens created here from the old one, if you have any data that needs to transfer over you will need to manually copy it
@@ -369,10 +381,16 @@ public class Campaign {
    */
   public void putZone(Zone zone) {
     zones.put(zone.getId(), zone);
+    mapBookmarkManager.zoneAdded(zone.getId());
   }
 
   public void removeAllZones() {
+    Set<GUID> removedZoneIds = Set.copyOf(zones.keySet());
     zones.clear();
+
+    for (GUID zid : removedZoneIds) {
+      mapBookmarkManager.zoneRemoved(zid);
+    }
   }
 
   /**
@@ -382,6 +400,7 @@ public class Campaign {
    */
   public void removeZone(GUID id) {
     zones.remove(id);
+    mapBookmarkManager.zoneRemoved(id);
   }
 
   public boolean containsAsset(Asset asset) {
