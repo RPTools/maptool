@@ -14,12 +14,13 @@
  */
 package net.rptools.maptool.model.bookmarks;
 
+import java.util.Objects;
 import java.util.UUID;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.GUID;
 
 /** {@code MapBookmark} represents a bookmark on a game Map. */
-public final class MapBookmark {
+public final class MapBookmark implements Comparable<MapBookmark> {
 
   /** The id for the bookmark. */
   private final UUID id;
@@ -54,6 +55,9 @@ public final class MapBookmark {
   /** The scaling factor to use for the bookmark. */
   private final double scale;
 
+  /** The order of the {@code MapBookMark} with respect to other {@code MapBookMark}s. */
+  private final double order;
+
   /**
    * Returns a new id for a {@link MapBookmark}.
    *
@@ -80,6 +84,7 @@ public final class MapBookmark {
    * @param viewX The x coordinate of the {@code MapBookmark} view.
    * @param viewY The y coordinate of the {@code MapBookmark} view.
    * @param scale The scale factor of the {@code MapBookmark} view.
+   * @param order The order of the {@code MapBookmark} with respect to other {@code MapBookmark}s.
    */
   public MapBookmark(
       UUID id,
@@ -92,18 +97,25 @@ public final class MapBookmark {
       double iconY,
       double viewX,
       double viewY,
-      double scale) {
-    this.id = id;
+      double scale,
+      double order) {
+
+    assert name != null;
+    assert zoneId != null;
+    assert mapImage != null;
+
+    this.id = id != null ? id : MapBookmark.generateId();
     this.name = name;
     this.zoneId = zoneId;
     this.mapImage = mapImage;
-    this.shortDescription = shortDesc;
-    this.notes = notes;
+    this.shortDescription = shortDesc != null ? shortDesc : "";
+    this.notes = notes != null ? notes : "";
     this.iconCenterX = iconX;
     this.iconCenterY = iconY;
     this.viewCenterX = viewX;
     this.viewCenterY = viewY;
     this.scale = scale;
+    this.order = order;
   }
 
   /**
@@ -122,6 +134,7 @@ public final class MapBookmark {
    * @param viewX The x coordinate of the {@code MapBookmark} view.
    * @param viewY The y coordinate of the {@code MapBookmark} view.
    * @param scale The scale factor of the {@code MapBookmark} view.
+   * @param order The order of the {@code MapBookmark} with respect to other {@code MapBookmark}s.
    */
   public MapBookmark(
       String name,
@@ -133,9 +146,10 @@ public final class MapBookmark {
       double iconY,
       double viewX,
       double viewY,
-      double scale) {
+      double scale,
+      double order) {
     this(
-        UUID.randomUUID(),
+        MapBookmark.generateId(),
         name,
         zoneId,
         mapImage,
@@ -145,7 +159,8 @@ public final class MapBookmark {
         iconY,
         viewX,
         viewY,
-        scale);
+        scale,
+        order);
   }
 
   /**
@@ -247,5 +262,59 @@ public final class MapBookmark {
    */
   public double getScale() {
     return scale;
+  }
+
+  /**
+   * Returns the order of this {@code MapBookmark} with respect to order {@link MapBookmark}s.
+   *
+   * @return the order of this {@code MapBookmark} with respect to order {@link MapBookmark}s.
+   */
+  public double getOrder() {
+    return order;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    MapBookmark bookmark = (MapBookmark) o;
+    return Double.compare(bookmark.iconCenterX, iconCenterX) == 0
+        && Double.compare(bookmark.iconCenterY, iconCenterY) == 0
+        && Double.compare(bookmark.viewCenterX, viewCenterX) == 0
+        && Double.compare(bookmark.viewCenterY, viewCenterY) == 0
+        && Double.compare(bookmark.scale, scale) == 0
+        && Double.compare(bookmark.order, order) == 0
+        && id.equals(bookmark.id)
+        && name.equals(bookmark.name)
+        && zoneId.equals(bookmark.zoneId)
+        && mapImage.equals(bookmark.mapImage)
+        && shortDescription.equals(bookmark.shortDescription)
+        && notes.equals(bookmark.notes);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        id,
+        name,
+        zoneId,
+        mapImage,
+        shortDescription,
+        notes,
+        iconCenterX,
+        iconCenterY,
+        viewCenterX,
+        viewCenterY,
+        scale,
+        order);
+  }
+
+  @Override
+  public int compareTo(MapBookmark bookmark) {
+    return Double.compare(order, bookmark.order);
   }
 }
