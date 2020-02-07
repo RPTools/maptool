@@ -39,7 +39,7 @@ import java.security.NoSuchAlgorithmException;
 public final class MD5Key implements Serializable {
 
   /** The {@link MessageDigest} used for calculation of the md5 sum. */
-  private ThreadLocal<MessageDigest> md5Digest =
+  private transient ThreadLocal<MessageDigest> md5Digest =
       ThreadLocal.withInitial(
           () -> {
             try {
