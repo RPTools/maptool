@@ -19,39 +19,44 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import org.apache.commons.io.IOUtils;
 
 /**
  * Represents the MD5 key for a certain set of data. Can be used in maps as keys.
  *
- * This class is thread safe if a couple of simple rules are followed.
+ * <p>This class is thread safe if a couple of simple rules are followed.
+ *
  * <ul>
- *   <li>If creating the instance with {@link #MD5Key(byte[])} the passed in array must not be modified in a separate thread until the constructor returns</li>
- *   <li>If creating the instance with {@link #MD5Key(InputStream)} the input stream must not be used by another thread.
+ *   <li>If creating the instance with {@link #MD5Key(byte[])} the passed in array must not be
+ *       modified in a separate thread until the constructor returns
+ *   <li>If creating the instance with {@link #MD5Key(InputStream)} the input stream must not be
+ *       used by another thread.
  * </ul>
- * If either of the above two rules are violated then the state of {@link MD5Key} will be inconsistent for the same data.
+ *
+ * If either of the above two rules are violated then the state of {@link MD5Key} will be
+ * inconsistent for the same data.
  */
 @SuppressWarnings("serial")
 public final class MD5Key implements Serializable {
 
-  /**
-   * The {@link MessageDigest} used for calculation of the md5 sum.
-   */
-  private ThreadLocal<MessageDigest> md5Digest = ThreadLocal.withInitial(() -> {
-    try {
-      return MessageDigest.getInstance("md5");
-    } catch (NoSuchAlgorithmException e) {
-      // Shouldn't happen, but if it does let it bubble up as its really bad mojo if it does happen
-      throw new AssertionError(e);
-    }
-  });
+  /** The {@link MessageDigest} used for calculation of the md5 sum. */
+  private ThreadLocal<MessageDigest> md5Digest =
+      ThreadLocal.withInitial(
+          () -> {
+            try {
+              return MessageDigest.getInstance("md5");
+            } catch (NoSuchAlgorithmException e) {
+              // Shouldn't happen, but if it does let it bubble up as its really bad mojo if it does
+              // happen
+              throw new AssertionError(e);
+            }
+          });
 
   /** The {@code String} representation of the MD5key. */
   private final String id;
 
-
   /**
    * Creates a new {@code MD5Key} using the value in the {@code String} as the id.
+   *
    * @param id the id of the key.
    */
   public MD5Key(String id) {
@@ -60,10 +65,10 @@ public final class MD5Key implements Serializable {
 
   /**
    * Creates an {@code MD5Key} representing the supplied data.
-   * @param data The data to perform an md5 sum over.
    *
+   * @param data The data to perform an md5 sum over.
    * @note Do not modify the data in the passed in array in another thread before this constructor
-   * completes, doing so will result in an inconsistent state for the sale input data.
+   *     completes, doing so will result in an inconsistent state for the sale input data.
    */
   public MD5Key(byte[] data) {
     id = encodeToHex(digestData(data));
@@ -71,22 +76,20 @@ public final class MD5Key implements Serializable {
 
   /**
    * Creates an {@code MD5Key} representing the supplied data.
+   *
    * @param data The data to perform an md5 sum over.
    * @throws IOException if an error occurs reading the data.
-   *
    * @note Do not use the {@link InputStream} provided in another thread (why would you do that in
-   * any case?) before this constructor completes, doing so will result in an inconsistent state
-   * for the sale input data.
-   *
+   *     any case?) before this constructor completes, doing so will result in an inconsistent state
+   *     for the sale input data.
    */
-  public MD5Key(InputStream data)  throws IOException {
+  public MD5Key(InputStream data) throws IOException {
     id = encodeToHex(digestData(data));
   }
 
   /**
-   * Returns the {@code String} representation of this {@code MD5Key}.
-   * This method is guaranteed to return a format that can be understood by the
-   * {@link #MD5Key(String)} constructor.
+   * Returns the {@code String} representation of this {@code MD5Key}. This method is guaranteed to
+   * return a format that can be understood by the {@link #MD5Key(String)} constructor.
    *
    * @return the {@code String} representation of the {@code MD5Key}.
    */
@@ -108,9 +111,9 @@ public final class MD5Key implements Serializable {
     return id.hashCode();
   }
 
-
   /**
    * Returns the md5 sum of the provided data.
+   *
    * @param data The data to calculate the md5 sum of.
    * @return the md5 sum of the data.
    */
@@ -123,6 +126,7 @@ public final class MD5Key implements Serializable {
 
   /**
    * Returns the md5 sum of the data provided by the {@link InputStream}.
+   *
    * @param is The {@code InputStream} providing the data to calculate the md5 sum of.
    * @return the md5 sum of the data from the {@link InputStream}.
    */
@@ -139,6 +143,7 @@ public final class MD5Key implements Serializable {
 
   /**
    * Encode a byte array into a hexadecimal string.
+   *
    * @param data the byte array to encode.
    * @return a {@code String} containing the encoded hexadecimal value of the passed in data.
    */
