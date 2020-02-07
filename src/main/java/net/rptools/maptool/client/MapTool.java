@@ -258,7 +258,7 @@ public class MapTool {
    *     window (formatted using <code>params</code>)
    * @param messageType one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>
    *                    JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE
-   *     </code>
+   *                    </code>
    * @param params optional parameters to use when formatting the title text from the properties
    *     file
    */
@@ -1341,6 +1341,18 @@ public class MapTool {
     // Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
     // so after frame is all done loading we sync them back up.
     MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
+
+    // Set the Topology drawing mode to the last mode used for convenience
+    MapTool.getFrame()
+        .getCurrentZoneRenderer()
+        .getZone()
+        .setTopologyMode(AppPreferences.getTopologyDrawingMode());
+
+    // Set the Topology drawing mode to the last mode used for convenience
+    MapTool.getFrame()
+        .getCurrentZoneRenderer()
+        .getZone()
+        .setTopologyMode(AppPreferences.getTopologyDrawingMode());
   }
 
   /**
@@ -1434,13 +1446,12 @@ public class MapTool {
    *
    * <p>Examples: -version=1.4.0.1 -user=Jamz
    *
-   * @param options {@link org.apache.commons.cli.Options}
+   * @param cmd {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
    * @param defaultValue A default value to return if option is not found
-   * @param args String array of passed in args
    * @return Option value found as a String, or defaultValue if not found
    * @author Jamz
-   * @since 1.4.0.1
+   * @since 1.5.12
    */
   private static String getCommandLineOption(
       CommandLine cmd, String searchValue, String defaultValue) {
@@ -1452,12 +1463,11 @@ public class MapTool {
    *
    * <p>Examples: -x or -fullscreen
    *
-   * @param options {@link org.apache.commons.cli.Options}
+   * @param cmd {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
-   * @param args String array of passed in args
    * @return A boolean value of true if option parameter found
    * @author Jamz
-   * @since 1.4.0.1
+   * @since 1.5.12
    */
   private static boolean getCommandLineOption(CommandLine cmd, String searchValue) {
     return cmd.hasOption(searchValue);
@@ -1469,13 +1479,12 @@ public class MapTool {
    *
    * <p>Examples: -monitor=1 -x=0 -y=0 -w=1200 -h=960
    *
-   * @param options {@link org.apache.commons.cli.Options}
+   * @param cmd {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
    * @param defaultValue A default value to return if option is not found
-   * @param args String array of passed in args
    * @return Int value of the matching option parameter if found
    * @author Jamz
-   * @since 1.4.0.1
+   * @since 1.5.12
    */
   private static int getCommandLineOption(CommandLine cmd, String searchValue, int defaultValue) {
     return StringUtil.parseInteger(cmd.getOptionValue(searchValue), defaultValue);
