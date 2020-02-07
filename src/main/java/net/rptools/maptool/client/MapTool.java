@@ -694,7 +694,7 @@ public class MapTool {
 
     try {
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
-      // This was previously being done in the server thread and didn't always get done 
+      // This was previously being done in the server thread and didn't always get done
       // before the campaign was accessed by the postInitialize() method below.
       setCampaign(cmpgn);
       startPersonalServer(cmpgn);
