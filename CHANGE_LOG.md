@@ -38,6 +38,7 @@ Maptool 1.6.0
 [i1228]: https://github.com/RPTools/maptool/issues/1228
 [i1225]: https://github.com/RPTools/maptool/issues/1225
 [i1219]: https://github.com/RPTools/maptool/issues/1219
+[i1216]: https://github.com/RPTools/maptool/issues/1216
 [i1210]: https://github.com/RPTools/maptool/issues/1210
 [i1206]: https://github.com/RPTools/maptool/issues/1206
 [i1204]: https://github.com/RPTools/maptool/issues/1204
