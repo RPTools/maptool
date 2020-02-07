@@ -30,6 +30,7 @@ public class AppState {
   private static boolean linkPlayerViews = false;
   private static boolean useDoubleWideLine = true;
   private static boolean showMovementMeasurements = true;
+  private static boolean showTextLabels = true;
   private static boolean enforceNotification = false;
   private static File campaignFile;
   private static int gridSize = 1;
@@ -159,6 +160,14 @@ public class AppState {
 
   public static boolean getShowMovementMeasurements() {
     return showMovementMeasurements;
+  }
+
+  public static void setShowTextLabels(boolean show) {
+    showTextLabels = show;
+  }
+
+  public static boolean getShowTextLabels() {
+    return showTextLabels;
   }
 
   public static boolean isShowAsPlayer() {

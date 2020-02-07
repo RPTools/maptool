@@ -1380,6 +1380,26 @@ public class AppActions {
           MapTool.getLogConsoleNoteFrame().setVisible(AppState.isLoggingToConsole());
         }
       };
+  public static final Action TOGGLE_SHOW_TEXT_LABELS =
+      new DefaultClientAction() {
+        {
+          init("action.showTextLabels");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.getShowTextLabels();
+        }
+
+        @Override
+        protected void executeAction(ActionEvent e) {
+
+          AppState.setShowTextLabels(!AppState.getShowTextLabels());
+          if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
+            MapTool.getFrame().getCurrentZoneRenderer().repaint();
+          }
+        }
+      };
 
   public static final Action TOGGLE_SHOW_MOVEMENT_MEASUREMENTS =
       new DefaultClientAction() {
