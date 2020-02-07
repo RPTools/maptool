@@ -69,10 +69,12 @@ public class TokenVBL {
 
     if (erase) {
       renderer.getZone().removeTopology(area);
-      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
+      MapTool.serverCommand()
+          .removeTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
     } else {
       renderer.getZone().addTopology(area);
-      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
+      MapTool.serverCommand()
+          .addTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
     }
 
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();
