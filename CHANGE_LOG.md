@@ -2,10 +2,12 @@ Maptool 1.6.0
 =====
 **Highlights**
 - New dialog and frame functions support HTML5, JavaScript and CSS.
+- Movement Blocking Layer - Now you can make those Force Fields that would block movement but not sight.
 - Look & Feel themes can now be selected from the Themes menu.  More enhancements to come.
 - Pre-defined Campaign Property sets can now be selected and loaded in the Campaign Properties dialog.
 
 **Enhancements**
+- [#1216][i1216] Movement Blocking Layer - similar VBL, but specifically for blocking movement and not sight or light.
 - [#1210][i1210] RADIO and LIST fields for `input()` function now support a DELIMITER option.
 - [#1107][i1107] Using the line drawing tools while holding Alt will snap to grid centers.
 - [#972][i972] New macro functions for HTML5 compatible dialogs and frames.
