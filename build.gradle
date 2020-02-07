@@ -396,6 +396,12 @@ task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepa
     }
 }
 
+javadoc {
+    options.addStringOption('Xmaxwarns', '2000')
+    options.addBooleanOption('html5', true)
+    options.tags("note:a:<strong><u>Note:</u></strong>")
+}
+
 test {
     useJUnitPlatform()
 }

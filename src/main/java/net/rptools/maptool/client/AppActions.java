@@ -835,8 +835,8 @@ public class AppActions {
    *
    * <p>If any tokens<i>are</i> deleted, then the selection set for the zone is cleared.
    *
-   * @param zone
-   * @param tokenSet
+   * @param zone the {@link Zone} the tokens belong to.
+   * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
    */
   public static final void cutTokens(Zone zone, Set<GUID> tokenSet) {
     // Only cut if some tokens are selected. Don't want to accidentally
@@ -1378,6 +1378,26 @@ public class AppActions {
         protected void executeAction(ActionEvent e) {
           AppState.setLoggingToConsole(!AppState.isLoggingToConsole());
           MapTool.getLogConsoleNoteFrame().setVisible(AppState.isLoggingToConsole());
+        }
+      };
+  public static final Action TOGGLE_SHOW_TEXT_LABELS =
+      new DefaultClientAction() {
+        {
+          init("action.showTextLabels");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.getShowTextLabels();
+        }
+
+        @Override
+        protected void executeAction(ActionEvent e) {
+
+          AppState.setShowTextLabels(!AppState.getShowTextLabels());
+          if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
+            MapTool.getFrame().getCurrentZoneRenderer().repaint();
+          }
         }
       };
 

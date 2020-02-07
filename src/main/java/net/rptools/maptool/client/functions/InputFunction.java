@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonElement;
 import de.muntjak.tinylookandfeel.TinyComboBoxButton;
 import java.awt.Color;
 import java.awt.Component;
@@ -70,6 +71,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.InputFunction.InputType.OptionException;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.htmlframe.HTMLPane;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -136,7 +138,11 @@ public class InputFunction extends AbstractFunction {
     super(1, -1, "input");
   }
 
-  /** Gets the singleton instance. */
+  /**
+   * Gets the singleton instance.
+   *
+   * @return the singleton instance for the class.
+   */
   public static InputFunction getInstance() {
     return instance;
   }
@@ -146,9 +152,12 @@ public class InputFunction extends AbstractFunction {
     // The regexp for the option strings is strict: no spaces, and trailing semicolon required.
     // @formatter: off
     TEXT(false, false, "WIDTH=16;SPAN=FALSE;"),
-    LIST(true, false, "VALUE=NUMBER;TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SELECT=0;SPAN=FALSE;"),
+    LIST(
+        true,
+        false,
+        "VALUE=NUMBER;TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     CHECK(false, false, "SPAN=FALSE;"),
-    RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;"),
+    RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     LABEL(false, false, "TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SPAN=FALSE;"),
     PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;"),
     TAB(false, true, "SELECT=FALSE;");
@@ -164,14 +173,20 @@ public class InputFunction extends AbstractFunction {
 
       defaultOptions = new OptionMap();
       Pattern pattern =
-          Pattern.compile("(\\w+)=([\\w-]+)\\;"); // no spaces allowed, semicolon required
+          Pattern.compile("(\\w+)=([\\w-,]+)\\;"); // no spaces allowed, semicolon required
       Matcher matcher = pattern.matcher(nameval);
       while (matcher.find()) {
         defaultOptions.put(matcher.group(1).toUpperCase(), matcher.group(2).toUpperCase());
       }
     }
 
-    /** Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them. */
+    /**
+     * Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them.
+     *
+     * @param strName the name of the enum values.
+     * @return the {@link InputType} matching the passed in name, or {@code null} if there is no
+     *     match..
+     */
     public static InputType inputTypeFromName(String strName) {
       for (InputType it : InputType.values()) {
         if (strName.equalsIgnoreCase(it.name())) return it;
@@ -179,7 +194,12 @@ public class InputFunction extends AbstractFunction {
       return null;
     }
 
-    /** Gets the default value for an option. */
+    /**
+     * Gets the default value for an option.
+     *
+     * @param option the name of the option to get the default value for.
+     * @return the default value for the passed in option.
+     */
     public String getDefault(String option) {
       return defaultOptions.get(option.toUpperCase());
     }
@@ -187,11 +207,15 @@ public class InputFunction extends AbstractFunction {
     /**
      * Parses a string and returns a Map of options for the given type. Options not found are set to
      * the default value for the type.
+     *
+     * @param s the {@code String} to parse.
+     * @return the options parsed from the string.
+     * @throws OptionException if an error occurs.
      */
     public OptionMap parseOptionString(String s) throws OptionException {
       OptionMap ret = new OptionMap();
       ret.putAll(defaultOptions); // copy the default values first
-      Pattern pattern = Pattern.compile("\\s*(\\w+)\\s*\\=\\s*([\\w-]+)\\s*");
+      Pattern pattern = Pattern.compile("\\s*(\\w+)\\s*=\\s*([^ ]+)\\s*");
       Matcher matcher = pattern.matcher(s);
       while (matcher.find()) {
         String key = matcher.group(1);
@@ -350,22 +374,37 @@ public class InputFunction extends AbstractFunction {
       this.optionValues = inputType.parseOptionString(options);
 
       if (inputType != null && inputType.isValueComposite)
-        this.valueList = parseStringList(this.value);
+        this.valueList = parseStringList(this.value, this.optionValues.get("DELIMITER"));
     }
 
     /**
      * Parses a string into a list of values, for composite types. <br>
      * Before calling, the <code>inputType</code> and <code>value</code> must be set. <br>
      * After calling, the <code>listIndex</code> member is adjusted if necessary.
+     *
+     * @param valueString the string list
+     * @param delim the delimiter
      */
-    public List<String> parseStringList(String valueString) {
+    public List<String> parseStringList(String valueString, String delim) {
       List<String> ret = new ArrayList<String>();
       if (valueString != null) {
-        String[] values = valueString.split(",");
-        int i = 0;
-        for (String s : values) {
-          ret.add(s.trim());
-          i++;
+        if ("json".equalsIgnoreCase(delim)) {
+          JsonElement json = null;
+          try {
+            json = JSONMacroFunctions.getInstance().asJsonElement(valueString);
+          } catch (ParserException ignored) {
+            // if can't parse, keep json a null
+          }
+          if (json != null && json.isJsonArray()) {
+            for (JsonElement ele : json.getAsJsonArray()) {
+              ret.add(ele.getAsString().trim());
+            }
+          }
+        } else {
+          String[] values = valueString.split(delim);
+          for (String s : values) {
+            ret.add(s.trim());
+          }
         }
       }
       return ret;
