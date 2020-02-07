@@ -27,9 +27,11 @@ Maptool 1.6.0
 - [#1204][i1204] `getToken*` was throwing an exception if a string was passed to the `layer` option. Fixed.
 
 **Other**
+- [#1253][i1253] MD5 key generation wasn't thread-safe. Fixed.
 - [#1219][i1219] Javadocs generated via `gradlew javadoc` switched to HTML5.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
+[i1253]: https://github.com/RPTools/maptool/issues/1253
 [i1243]: https://github.com/RPTools/maptool/issues/1243
 [i1236]: https://github.com/RPTools/maptool/issues/1236
 [i1231]: https://github.com/RPTools/maptool/issues/1231
