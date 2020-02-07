@@ -27,6 +27,7 @@ import java.awt.geom.Path2D;
 import java.util.List;
 import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ScreenPoint;
@@ -41,10 +42,13 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.drawing.ShapeDrawable;
 
 /** Tool for drawing freehand lines. */
 public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOverlay {
+
   private static final long serialVersionUID = 9121558405484986225L;
 
   private boolean isEraser;
@@ -251,6 +255,78 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
   @Override
   public abstract void paintOverlay(ZoneRenderer renderer, Graphics2D g);
 
+  protected void paintTopologyOverlay(Graphics2D g, Drawable drawable) {
+    paintTopologyOverlay(g, drawable, Pen.MODE_SOLID);
+  }
+
+  protected void paintTopologyOverlay(Graphics2D g, Shape shape) {
+    ShapeDrawable drawable = null;
+
+    if (shape != null) {
+      drawable = new ShapeDrawable(shape, false);
+    }
+
+    paintTopologyOverlay(g, drawable, Pen.MODE_SOLID);
+  }
+
+  protected void paintTopologyOverlay(Graphics2D g, Shape shape, int penMode) {
+    ShapeDrawable drawable = null;
+
+    if (shape != null) {
+      drawable = new ShapeDrawable(shape, false);
+    }
+
+    paintTopologyOverlay(g, drawable, penMode);
+  }
+
+  protected void paintTopologyOverlay(Graphics2D g) {
+    Rectangle rectangle = null;
+    paintTopologyOverlay(g, rectangle, Pen.MODE_SOLID);
+  }
+
+  protected void paintTopologyOverlay(Graphics2D g, Drawable drawable, int penMode) {
+    if (MapTool.getPlayer().isGM()) {
+      Zone zone = renderer.getZone();
+      Area topology = zone.getTopology();
+
+      Graphics2D g2 = (Graphics2D) g.create();
+      g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
+      g2.scale(renderer.getScale(), renderer.getScale());
+
+      g2.setColor(AppStyle.tokenTopologyColor);
+      g2.fill(getTokenTopology());
+
+      g2.setColor(AppStyle.topologyTerrainColor);
+      g2.fill(zone.getTopologyTerrain());
+
+      g2.setColor(AppStyle.topologyColor);
+      g2.fill(topology);
+
+      g2.dispose();
+    }
+
+    if (drawable != null) {
+      Pen pen = new Pen();
+      pen.setEraser(getPen().isEraser());
+      pen.setOpacity(AppStyle.topologyRemoveColor.getAlpha() / 255.0f);
+      pen.setBackgroundMode(penMode);
+
+      if (penMode == Pen.MODE_TRANSPARENT) {
+        pen.setThickness(3.0f);
+      }
+
+      if (pen.isEraser()) {
+        pen.setEraser(false);
+      }
+      if (isEraser()) {
+        pen.setBackgroundPaint(new DrawableColorPaint(AppStyle.topologyRemoveColor));
+      } else {
+        pen.setBackgroundPaint(new DrawableColorPaint(AppStyle.topologyAddColor));
+      }
+      paintTransformed(g, renderer, drawable, pen);
+    }
+  }
+
   /**
    * Render a drawable on a zone. This method consolidates all of the calls to the server in one
    * place so that it is easier to keep them in sync.
@@ -263,10 +339,15 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     if (!hasPaint(pen)) {
       return;
     }
-    if (drawable.getBounds() == null) return;
+    if (drawable.getBounds() == null) {
+      return;
+    }
     drawable.setLayer(selectedLayer);
-    if (MapTool.getPlayer().isGM()) drawable.setLayer(selectedLayer);
-    else drawable.setLayer(Layer.TOKEN);
+    if (MapTool.getPlayer().isGM()) {
+      drawable.setLayer(selectedLayer);
+    } else {
+      drawable.setLayer(Layer.TOKEN);
+    }
 
     // Send new textures
     MapToolUtil.uploadTexture(pen.getPaint());
