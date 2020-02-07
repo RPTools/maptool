@@ -693,7 +693,11 @@ public class MapTool {
     player = new Player("", Player.Role.GM, "");
 
     try {
-      startPersonalServer(CampaignFactory.createBasicCampaign());
+      Campaign cmpgn = CampaignFactory.createBasicCampaign();
+      // This was previously being done in the server thread and didn't always get done
+      // before the campaign was accessed by the postInitialize() method below.
+      setCampaign(cmpgn);
+      startPersonalServer(cmpgn);
     } catch (Exception e) {
       MapTool.showError("While starting personal server", e);
     }
