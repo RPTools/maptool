@@ -222,18 +222,26 @@ public class AppUpdate {
 
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-    // Last chance to "cancel" but canceling out of JFileChooser
-    if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-      return;
-    }
+    File chosenLocation = null;
+    while (chosenLocation == null) {
+      // Last chance to "cancel" but canceling out of JFileChooser
+      if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+        return;
+      }
 
-    File saveLocation = chooser.getSelectedFile();
-
-    if (!saveLocation.canWrite()) {
-      String parent = saveLocation.getParent();
-      MapTool.showError(I18N.getText("msg.error.directoryNotWriteable", parent));
-      return;
+      chosenLocation = chooser.getSelectedFile();
+      try {
+        boolean newFile = chosenLocation.createNewFile();
+        if (!newFile) {
+          MapTool.showError(I18N.getText("msg.error.fileAlreadyExists", chosenLocation));
+          chosenLocation = null;
+        }
+      } catch (IOException ioe) {
+        MapTool.showError(I18N.getText("msg.error.directoryNotWriteable", chosenLocation));
+        chosenLocation = null;
+      }
     }
+    final File saveLocation = chooser.getSelectedFile();
 
     log.info("URL: " + assetDownloadURL.toString());
     log.info("assetDownloadSize: " + assetDownloadSize);
