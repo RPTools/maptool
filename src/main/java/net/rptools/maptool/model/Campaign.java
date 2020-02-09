@@ -97,8 +97,8 @@ public class Campaign {
    * The {@link MapBookmarkManager} manages all the {@link
    * net.rptools.maptool.model.bookmarks.MapBookmark}s for the campaign.
    */
-  @XStreamOmitField // Do no persist as part of normal persistence, it will be handled sseparately
-  private final MapBookmarkManager mapBookmarkManager = new MapBookmarkManager();
+  @XStreamOmitField // Do no persist as part of normal persistence, it will be handled s separately
+  transient private final MapBookmarkManager mapBookmarkManager = new MapBookmarkManager();
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
