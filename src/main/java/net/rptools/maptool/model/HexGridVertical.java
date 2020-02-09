@@ -18,11 +18,14 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.AppPreferences;
@@ -49,11 +52,7 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 public class HexGridVertical extends HexGrid {
 
   private static final int[] ALL_ANGLES =
-      new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
-  private static int[]
-      FACING_ANGLES; // = new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
-  private static List<TokenFootprint> footprintList;
-
+      new int[]{-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static final OffsetTranslator OFFSET_TRANSLATOR =
       new OffsetTranslator() {
         public void translate(CellPoint originPoint, CellPoint offsetPoint) {
@@ -62,6 +61,10 @@ public class HexGridVertical extends HexGrid {
           }
         }
       };
+  private static int[]
+      FACING_ANGLES; // = new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
+  private static List<TokenFootprint> footprintList;
+  private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   public HexGridVertical() {
     super();
@@ -78,6 +81,16 @@ public class HexGridVertical extends HexGrid {
   }
 
   @Override
+  public boolean isHexVertical() {
+    return true;
+  }
+
+  @Override
+  protected synchronized Map<Integer, Area> getGridShapeCache() {
+    return gridShapeCache;
+  }
+
+  @Override
   public double cellDistance(CellPoint cellA, CellPoint cellB, WalkerMetric wmetric) {
     int x1 = cellA.x;
     int x2 = cellB.x;
@@ -87,8 +100,9 @@ public class HexGridVertical extends HexGrid {
     int dx = x2 - x1;
     int dy = y2 - y1;
 
-    if (Integer.signum(dx) == Integer.signum(dy)) return Math.abs(dx + dy);
-    else return Math.max(Math.abs(dx), Math.abs(dy));
+    if (Integer.signum(dx) == Integer.signum(dy)) { return Math.abs(dx + dy); } else {
+      return Math.max(Math.abs(dx), Math.abs(dy));
+    }
   }
 
   @Override
@@ -96,11 +110,11 @@ public class HexGridVertical extends HexGrid {
     if (faceEdges && faceVertices) {
       FACING_ANGLES = ALL_ANGLES;
     } else if (!faceEdges && faceVertices) {
-      FACING_ANGLES = new int[] {-120, -60, 0, 60, 120, 180};
+      FACING_ANGLES = new int[]{-120, -60, 0, 60, 120, 180};
     } else if (faceEdges && !faceVertices) {
-      FACING_ANGLES = new int[] {-150, -90, -30, 30, 90, 150};
+      FACING_ANGLES = new int[]{-150, -90, -30, 30, 90, 150};
     } else {
-      FACING_ANGLES = new int[] {90};
+      FACING_ANGLES = new int[]{90};
     }
   }
 
@@ -117,7 +131,7 @@ public class HexGridVertical extends HexGrid {
    *	-		5		-
    *		1	2	3
    *
-   * @formatter:off
+   * @formatter:on
    * (non-Javadoc)
    * @see net.rptools.maptool.model.Grid#installMovementKeys(net.rptools.maptool.client.tool.PointerTool, java.util.Map)
    */
@@ -270,5 +284,30 @@ public class HexGridVertical extends HexGrid {
     double mapY = (newY - newX) * getVRadius();
     double mapX = ((newX + newY) * heightHalf) + heightHalf;
     return new ZonePoint((int) (mapX) + getOffsetX(), (int) (mapY) + getOffsetY());
+  }
+
+  @Override
+  protected AffineTransform getGridOffset(Token token) {
+    // Adjust to grid if token is an even number of grid cells
+    double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
+    double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
+    double shortFootprintSide =
+        (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
+
+    final AffineTransform at = new AffineTransform();
+    final double coordinateOffsetX;
+    final double coordinateOffsetY;
+
+    if ((shortFootprintSide / getSize()) % 2 == 0) {
+      coordinateOffsetX = getCellWidth() * -1.375;
+      coordinateOffsetY = getCellHeight() * -1.5;
+    } else {
+      coordinateOffsetX = -getCellWidth();
+      coordinateOffsetY = getCellOffsetV() * 2;
+    }
+
+    at.translate(coordinateOffsetX, coordinateOffsetY);
+
+    return at;
   }
 }
