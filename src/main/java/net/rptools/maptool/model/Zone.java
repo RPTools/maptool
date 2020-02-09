@@ -17,6 +17,7 @@ package net.rptools.maptool.model;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -803,9 +804,6 @@ public class Zone extends BaseModel {
 
   /** @return the terrain topology of the zone */
   public Area getTopologyTerrain() {
-    if (topologyTerrain == null) {
-      topologyTerrain = new Area();
-    }
     return topologyTerrain;
   }
 
@@ -2004,6 +2002,12 @@ public class Zone extends BaseModel {
     // This will be true; it's just in case we decide to make it persistent in the future
     if (undo == null) {
       undo = new UndoPerZone(this);
+    }
+
+    // Movement Blocking Layer
+    if (topologyTerrain == null) {
+      Shape s;
+      topologyTerrain = new Area();
     }
     return this;
   }
