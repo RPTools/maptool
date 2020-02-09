@@ -2,10 +2,12 @@ Maptool 1.6.0
 =====
 **Highlights**
 - New dialog and frame functions support HTML5, JavaScript and CSS.
+- Movement Blocking Layer - Now you can make those Force Fields that would block movement but not sight.
 - Look & Feel themes can now be selected from the Themes menu.  More enhancements to come.
 - Pre-defined Campaign Property sets can now be selected and loaded in the Campaign Properties dialog.
 
 **Enhancements**
+- [#1216][i1216] Movement Blocking Layer - similar VBL, but specifically for blocking movement and not sight or light.
 - [#1210][i1210] RADIO and LIST fields for `input()` function now support a DELIMITER option.
 - [#1107][i1107] Using the line drawing tools while holding Alt will snap to grid centers.
 - [#972][i972] New macro functions for HTML5 compatible dialogs and frames.
@@ -25,15 +27,18 @@ Maptool 1.6.0
 - [#1204][i1204] `getToken*` was throwing an exception if a string was passed to the `layer` option. Fixed.
 
 **Other**
+- [#1253][i1253] MD5 key generation wasn't thread-safe. Fixed.
 - [#1219][i1219] Javadocs generated via `gradlew javadoc` switched to HTML5.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
+[i1253]: https://github.com/RPTools/maptool/issues/1253
 [i1243]: https://github.com/RPTools/maptool/issues/1243
 [i1236]: https://github.com/RPTools/maptool/issues/1236
 [i1231]: https://github.com/RPTools/maptool/issues/1231
 [i1228]: https://github.com/RPTools/maptool/issues/1228
 [i1225]: https://github.com/RPTools/maptool/issues/1225
 [i1219]: https://github.com/RPTools/maptool/issues/1219
+[i1216]: https://github.com/RPTools/maptool/issues/1216
 [i1210]: https://github.com/RPTools/maptool/issues/1210
 [i1206]: https://github.com/RPTools/maptool/issues/1206
 [i1204]: https://github.com/RPTools/maptool/issues/1204

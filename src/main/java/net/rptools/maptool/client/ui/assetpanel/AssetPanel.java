@@ -69,6 +69,16 @@ public class AssetPanel extends JComponent {
   private Timer updateFilterTimer;
   private JProgressBar imagePanelProgressBar;
 
+  public boolean isLimitReached() {
+    return limitReached;
+  }
+
+  public void setLimitReached(boolean limitReached) {
+    this.limitReached = limitReached;
+  }
+
+  private boolean limitReached = false;
+
   public AssetPanel(String controlName) {
     this(controlName, new AssetPanelModel());
   }
@@ -390,7 +400,7 @@ public class AssetPanel extends JComponent {
 
   public void setDirectory(Directory dir) {
     imagePanel.setModel(
-        new ImageFileImagePanelModel(dir) {
+        new ImageFileImagePanelModel(dir, this) {
           @Override
           public Transferable getTransferable(int index) {
             // TransferableAsset t = (TransferableAsset) super.getTransferable(index);
