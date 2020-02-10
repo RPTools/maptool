@@ -420,6 +420,13 @@ public class MapTool {
     return val == JOptionPane.YES_OPTION || val == 2;
   }
 
+  /**
+   * Displays a dialog to confirm the delete of drawings through the Drawing Explorer window.
+   * Presents Yes/No/Yes and don't ask again options. Default action is No. Button text is localized
+   * as is the message.
+   *
+   * @return <code>true</code> if the user clicks either Yes button, <code>falsee</code> otherwise.
+   */
   public static boolean confirmDrawDelete() {
     if (!AppPreferences.getDrawWarnWhenDeleted()) {
       return true;
@@ -429,17 +436,19 @@ public class MapTool {
     int val = confirmDelete(msg);
 
     // "Yes, don't show again" Button
-    if (val == 2) {
+    if (val == JOptionPane.CANCEL_OPTION) {
       showInformation("msg.confirm.deleteDraw.removed");
       AppPreferences.setDrawWarnWhenDeleted(false);
     }
     // Any version of 'Yes' returns true, otherwise false
-    return val == JOptionPane.YES_OPTION || val == 2;
+    return val == JOptionPane.YES_OPTION || val == JOptionPane.CANCEL_OPTION;
   }
 
   private static int confirmDelete(String msg) {
     log.debug(msg);
     Object[] options = {
+      // getText() strips out the & as when the button text is specified this way the mnemonics
+      // don't work.
       I18N.getText("msg.title.messageDialog.yes"),
       I18N.getText("msg.title.messageDialog.no"),
       I18N.getText("msg.title.messageDialog.dontAskAgain")
@@ -449,11 +458,11 @@ public class MapTool {
         clientFrame,
         msg,
         title,
-        JOptionPane.NO_OPTION,
+        JOptionPane.YES_NO_CANCEL_OPTION,
         JOptionPane.WARNING_MESSAGE,
         null,
         options,
-        options[0]);
+        options[1]);
   }
 
   private MapTool() {
@@ -461,12 +470,17 @@ public class MapTool {
     throw new Error("cannot construct MapTool object!");
   }
 
+  /**
+   * Get the BackupManager instance.
+   *
+   * @return the BackupManager.
+   */
   public static BackupManager getBackupManager() {
     if (backupManager == null) {
       try {
         backupManager = new BackupManager(AppUtil.getAppHome("backup"));
       } catch (IOException ioe) {
-        ioe.printStackTrace();
+        showError(I18N.getText("msg.error.creatingBackupManager"), ioe);
       }
     }
     return backupManager;
