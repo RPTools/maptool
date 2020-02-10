@@ -32,6 +32,7 @@ import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -55,7 +56,9 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
+import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
+import net.rptools.maptool.client.ui.assetpanel.AssetPanelModel;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Grid;
@@ -159,11 +162,14 @@ public class MapPropertiesDialog extends JDialog {
             });
     // Color picker
     paintChooser = new PaintChooser();
+    AssetPanelModel model = new AssetPanelModel();
+    Set<File> assetRootList = AppPreferences.getAssetRoots();
+    for (File file : assetRootList) {
+      model.addRootGroup(new AssetDirectory(file, AppConstants.IMAGE_FILE_FILTER));
+    }
+
     TextureChooserPanel textureChooserPanel =
-        new TextureChooserPanel(
-            paintChooser,
-            MapTool.getFrame().getAssetPanel().getModel(),
-            "mapPropertiesTextureChooser");
+        new TextureChooserPanel(paintChooser, model, "mapPropertiesTextureChooser");
     paintChooser.addPaintChooser(textureChooserPanel);
     paintChooser.setPreferredSize(new Dimension(450, 400));
     mapSelectorDialog = new MapSelectorDialog();
@@ -623,11 +629,14 @@ public class MapPropertiesDialog extends JDialog {
     }
 
     private JComponent createImageExplorerPanel() {
+      AssetPanelModel model = new AssetPanelModel();
+      Set<File> assetRootList = AppPreferences.getAssetRoots();
+      for (File file : assetRootList) {
+        model.addRootGroup(new AssetDirectory(file, AppConstants.IMAGE_FILE_FILTER));
+      }
       final AssetPanel assetPanel =
-          new AssetPanel(
-              "mapPropertiesImageExplorer",
-              MapTool.getFrame().getAssetPanel().getModel(),
-              JSplitPane.HORIZONTAL_SPLIT);
+          new AssetPanel("mapPropertiesImageExplorer", model, JSplitPane.HORIZONTAL_SPLIT);
+
       assetPanel.addImageSelectionListener(
           new SelectionListener() {
             public void selectionPerformed(List<Object> selectedList) {
