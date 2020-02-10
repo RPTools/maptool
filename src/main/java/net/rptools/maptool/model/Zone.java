@@ -17,7 +17,6 @@ package net.rptools.maptool.model;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -2006,7 +2005,6 @@ public class Zone extends BaseModel {
 
     // Movement Blocking Layer
     if (topologyTerrain == null) {
-      Shape s;
       topologyTerrain = new Area();
     }
     return this;
