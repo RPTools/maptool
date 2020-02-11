@@ -90,7 +90,7 @@ import org.apache.logging.log4j.Logger;
  * the automatic character set encoding. (Otherwise, strings can be converted to UTF-8 using the
  * {@link String#getBytes(String)} method.
  */
-public class PackedFile {
+public class PackedFile implements AutoCloseable {
 
   private static final String PROPERTY_FILE = "properties.xml";
   private static final String CONTENT_FILE = "content.xml";

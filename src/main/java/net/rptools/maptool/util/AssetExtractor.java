@@ -67,13 +67,10 @@ public class AssetExtractor {
         frame.setVisible(true);
         Reader r = null;
         OutputStream out = null;
-        PackedFile pakfile = null;
-        try {
-          newDir.mkdirs();
 
-          label.setText("Loading campaign ...");
-          pakfile = new PackedFile(file);
-
+        newDir.mkdirs();
+        label.setText("Loading campaign ...");
+        try (PackedFile pakfile = new PackedFile(file)) {
           Set<String> files = pakfile.getPaths();
           XStream xstream = FileUtil.getConfiguredXStream();
           int count = 0;
@@ -99,7 +96,6 @@ public class AssetExtractor {
         } catch (Exception ioe) {
           MapTool.showInformation("AssetExtractor failure", ioe);
         } finally {
-          if (pakfile != null) pakfile.close();
           IOUtils.closeQuietly(r);
           IOUtils.closeQuietly(out);
         }
