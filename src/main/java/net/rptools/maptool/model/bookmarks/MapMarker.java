@@ -19,4 +19,8 @@ import net.rptools.lib.MD5Key;
 public interface MapMarker {
 
   MD5Key getAsset();
+
+  double getIconCenterX();
+
+  double getIconCenterY();
 }

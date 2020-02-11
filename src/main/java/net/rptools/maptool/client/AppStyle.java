@@ -94,6 +94,7 @@ public class AppStyle {
   public static BufferedImage arrowIn;
   public static BufferedImage arrowRight;
   public static BufferedImage arrowLeft;
+  public static BufferedImage bookmarksPanelImage;
 
   public static BufferedImage lightSourceIcon;
 
@@ -163,6 +164,8 @@ public class AppStyle {
       arrowIn = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_in_red.png");
       arrowRight = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_right.png");
       arrowLeft = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_left.png");
+      bookmarksPanelImage =
+          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/book_open.png");
 
       lightSourceIcon =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/lightbulb.png");

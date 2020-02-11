@@ -15,7 +15,6 @@
 package net.rptools.maptool.model.bookmarks;
 
 import java.util.UUID;
-import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.GUID;
 
 /** Builder class to create {@link MapBookmark} objects. */
@@ -23,38 +22,50 @@ public class MapBookmarkBuilder {
   /** The id for the bookmark. */
   private UUID id;
 
+  /** Has the id value been set. */
+  private boolean idSet;
+
   /** The name of the bookmark. */
   private String name;
+
+  /** Has the name value been set. */
+  private boolean nameSet;
+
+  /** The reference value of the bookmark. */
+  private String reference;
+
+  /** Has the reference id value been set. */
+  private boolean referenceSet;
 
   /** The id of the zone that the bookmark is on. */
   private GUID zoneId;
 
-  /** The image on the map for the bookmark. */
-  private MD5Key mapImage;
+  /** Has the zone id been set. */
+  private boolean zoneIdSet;
 
-  /** The short description of the bookmark. */
-  private String shortDescription;
+  /** The short notes of the bookmark. */
+  private String shortNotes;
+
+  /** Has the short notes been set. */
+  private boolean shortNotesSet;
 
   /** The notes for the bookmark. */
   private String notes;
 
-  /** The x co-ordinate of the bookmark image. */
-  private double iconCenterX;
+  /** Has the notes value been set. */
+  private boolean notesSet;
 
-  /** The y co-ordinate of the bookmark. */
-  private double iconCenterY;
+  /** The {@link MapMarker} to display for the map bookmark. */
+  private MapMarker mapMarker;
 
-  /** The x co-ordinate of the bookmark image. */
-  private double viewCenterX;
-
-  /** The y co-ordinate of the bookmark. */
-  private double viewCenterY;
-
-  /** The scaling factor to use for the bookmark. */
-  private double scale;
+  /** Has the {@link MapMarker} to display been set. */
+  private boolean mapMarkerSet;
 
   /** The ordering when comparing two bookmarks. */
   private double order;
+
+  /** Has the order value been set. */
+  private boolean orderSet;
 
   /**
    * Creates a {@code MapBookmarkBuilder} prepopulated with the details of an existing {@link
@@ -66,17 +77,13 @@ public class MapBookmarkBuilder {
    */
   private static MapBookmarkBuilder copy(MapBookmark mapBookmark, UUID id) {
     MapBookmarkBuilder builder = new MapBookmarkBuilder();
-    builder.id = id;
-    builder.name = mapBookmark.getName();
-    builder.zoneId = mapBookmark.getZoneId();
-    builder.mapImage = mapBookmark.getMapImage();
-    builder.shortDescription = mapBookmark.getShortDescription();
-    builder.notes = mapBookmark.getNotes();
-    builder.iconCenterX = mapBookmark.getIconCenterX();
-    builder.iconCenterY = mapBookmark.getIconCenterY();
-    builder.viewCenterX = mapBookmark.getViewCenterX();
-    builder.viewCenterY = mapBookmark.getViewCenterY();
-    builder.scale = mapBookmark.getScale();
+    builder.setId(id);
+    builder.setName(mapBookmark.getName());
+    builder.setZoneId(mapBookmark.getZoneId());
+    builder.setShortNotes(mapBookmark.getShortDescription());
+    builder.setNotes(mapBookmark.getNotes());
+    builder.setMapMarker(mapBookmark.getMapMarker());
+    builder.setOrder(mapBookmark.getOrder());
 
     return builder;
   }
@@ -100,7 +107,7 @@ public class MapBookmarkBuilder {
    * @return the new builder.
    */
   public static MapBookmarkBuilder copyWithNewId(MapBookmark mapBookmark) {
-    return copy(mapBookmark, MapBookmark.generateId());
+    return copy(mapBookmark, Bookmark.generateId());
   }
 
   /**
@@ -122,6 +129,15 @@ public class MapBookmarkBuilder {
   }
 
   /**
+   * Returns the reference id of the {@link MapBookmark} that will be created.
+   *
+   * @return the reference id of the {@link MapBookmark} that will be created.
+   */
+  public String getReference() {
+    return reference;
+  }
+
+  /**
    * Returns the id of the {@link net.rptools.maptool.model.Zone} that this {@link MapBookmark} is
    * on that will be created.
    *
@@ -133,23 +149,12 @@ public class MapBookmarkBuilder {
   }
 
   /**
-   * Returns the {@link MD5Key} of the {@link net.rptools.maptool.model.Asset} used to display this
-   * {@link MapBookmark} on the map that will be created.
+   * Returns the short notes of the {@link MapBookmark} that will be created.
    *
-   * @return the {@link MD5Key} of the {@link net.rptools.maptool.model.Asset} used to display this
-   *     {@link MapBookmark} on the map that will be created.
+   * @return the short notes of the {@link MapBookmark} that will be created.
    */
-  public MD5Key getMapImage() {
-    return mapImage;
-  }
-
-  /**
-   * Returns the short description of the {@link MapBookmark} that will be created.
-   *
-   * @return the short description of the {@link MapBookmark} that will be created.
-   */
-  public String getShortDescription() {
-    return shortDescription;
+  public String getShortNotes() {
+    return shortNotes;
   }
 
   /**
@@ -162,47 +167,12 @@ public class MapBookmarkBuilder {
   }
 
   /**
-   * Returns the x coordinate of the center of the map icon for the {@link MapBookmark} that will be
-   * created.
+   * Returns the {@link MapMarker} for the map bookmark.
    *
-   * @return the x coordinate of the center of the map icon for the {@link MapBookmark} that will be
-   *     created.
+   * @returns the {@link MapMarker} for the map bookmark.
    */
-  public double getIconCenterX() {
-    return iconCenterX;
-  }
-
-  /**
-   * Returns the y coordinate of the center of the map icon for the {@link MapBookmark} that will be
-   * created.
-   *
-   * @return the y coordinate of the center of the map icon for the {@link MapBookmark} that will be
-   *     created.
-   */
-  public double getIconCenterY() {
-    return iconCenterY;
-  }
-
-  /**
-   * Returns the x coordinate of the center of the map view for the {@link MapBookmark} that will be
-   * created.
-   *
-   * @return the x coordinate of the center of the map view for the {@link MapBookmark} that will be
-   *     created.
-   */
-  public double getViewCenterX() {
-    return viewCenterX;
-  }
-
-  /**
-   * Returns the y coordinate of the center of the map view for the {@link MapBookmark} that will be
-   * created.
-   *
-   * @return the y coordinate of the center of the map view for the {@link MapBookmark} that will be
-   *     created.
-   */
-  public double getViewCenterY() {
-    return viewCenterY;
+  public MapMarker getMapMarker() {
+    return mapMarker;
   }
 
   /**
@@ -215,15 +185,6 @@ public class MapBookmarkBuilder {
   }
 
   /**
-   * Returns the scaling factor for the map view for the {@link MapBookmark} that will be created.
-   *
-   * @return the scaling factor for the map view for the {@link MapBookmark} that will be created.
-   */
-  public double getScale() {
-    return scale;
-  }
-
-  /**
    * Sets the id of the {@link MapBookmark} that will be created.
    *
    * @param id the id of the {@link MapBookmark} that will be created.
@@ -231,6 +192,7 @@ public class MapBookmarkBuilder {
    */
   public MapBookmarkBuilder setId(UUID id) {
     this.id = id;
+    idSet = id != null;
     return this;
   }
 
@@ -242,6 +204,19 @@ public class MapBookmarkBuilder {
    */
   public MapBookmarkBuilder setName(String name) {
     this.name = name;
+    nameSet = name != null;
+    return this;
+  }
+
+  /**
+   * Sets the reference id of the {@link MapBookmark} that will be created.
+   *
+   * @param ref the reference id of the {@link MapBookmark} that will be created.
+   * @return {@code this} so methods can be chained.
+   */
+  public MapBookmarkBuilder setReference(String ref) {
+    reference = ref;
+    referenceSet = ref != null;
     return this;
   }
 
@@ -254,29 +229,19 @@ public class MapBookmarkBuilder {
    */
   public MapBookmarkBuilder setZoneId(GUID zoneId) {
     this.zoneId = zoneId;
+    zoneIdSet = zoneId != null;
     return this;
   }
 
   /**
-   * Sets the name of the {@link MapBookmark} that will be created.
+   * Sets the short notes of the {@link MapBookmark} that will be created.
    *
-   * @param mapImage the id of the {@link MD5Key} for {@link net.rptools.maptool.model.Asset} of the
-   *     image for the {@link MapBookmark} that will be created.
+   * @param shortNotes the short notes of the {@link MapBookmark} that will be created.
    * @return {@code this} so methods can be chained.
    */
-  public MapBookmarkBuilder setMapImage(MD5Key mapImage) {
-    this.mapImage = mapImage;
-    return this;
-  }
-
-  /**
-   * Sets the short description of the {@link MapBookmark} that will be created.
-   *
-   * @param shortDescription the short description of the {@link MapBookmark} that will be created.
-   * @return {@code this} so methods can be chained.
-   */
-  public MapBookmarkBuilder setShortDescription(String shortDescription) {
-    this.shortDescription = shortDescription;
+  public MapBookmarkBuilder setShortNotes(String shortNotes) {
+    this.shortNotes = shortNotes;
+    shortNotesSet = shortNotes != null;
     return this;
   }
 
@@ -288,69 +253,19 @@ public class MapBookmarkBuilder {
    */
   public MapBookmarkBuilder setNotes(String notes) {
     this.notes = notes;
+    notesSet = notes != null;
     return this;
   }
 
   /**
-   * Sets the x coordinate of the center of the icon for the {@link MapBookmark} that will be
-   * created.
+   * Sets the {@link MapMarker} for the map bookmark.
    *
-   * @param iconCenterX the x coordinate of the center the icon for the {@link MapBookmark} that
-   *     will be created.
+   * @param marker the {@link MapMarker} to set.
    * @return {@code this} so methods can be chained.
    */
-  public MapBookmarkBuilder setIconCenterX(double iconCenterX) {
-    this.iconCenterX = iconCenterX;
-    return this;
-  }
-
-  /**
-   * Sets the y coordinate of the center of the icon for the {@link MapBookmark} that will be
-   * created.
-   *
-   * @param iconCenterY the y coordinate of the center the icon for the {@link MapBookmark} that
-   *     will be created.
-   * @return {@code this} so methods can be chained.
-   */
-  public MapBookmarkBuilder setIconCenterY(double iconCenterY) {
-    this.iconCenterY = iconCenterY;
-    return this;
-  }
-
-  /**
-   * Sets the x coordinate of the center of the view for the {@link MapBookmark} that will be
-   * created.
-   *
-   * @param viewCenterX the x coordinate of the center the view for the {@link MapBookmark} that
-   *     will be created.
-   * @return {@code this} so methods can be chained.
-   */
-  public MapBookmarkBuilder setViewCenterX(double viewCenterX) {
-    this.viewCenterX = viewCenterX;
-    return this;
-  }
-
-  /**
-   * Sets the y coordinate of the center of the view for the {@link MapBookmark} that will be
-   * created.
-   *
-   * @param viewCenterY the y coordinate of the center the view for the {@link MapBookmark} that
-   *     will be created.
-   * @return {@code this} so methods can be chained.
-   */
-  public MapBookmarkBuilder setViewCenterY(double viewCenterY) {
-    this.viewCenterY = viewCenterY;
-    return this;
-  }
-
-  /**
-   * Sets the scaling factor of the view for the {@link MapBookmark} that will be created.
-   *
-   * @param scale the scaling factor view for the {@link MapBookmark} that will be created.
-   * @return {@code this} so methods can be chained.
-   */
-  public MapBookmarkBuilder setScale(double scale) {
-    this.scale = scale;
+  public MapBookmarkBuilder setMapMarker(MapMarker marker) {
+    mapMarker = marker;
+    mapMarkerSet = marker != null;
     return this;
   }
 
@@ -362,6 +277,7 @@ public class MapBookmarkBuilder {
    */
   public MapBookmarkBuilder setOrder(double order) {
     this.order = order;
+    orderSet = order != 0;
     return this;
   }
 
@@ -371,18 +287,76 @@ public class MapBookmarkBuilder {
    * @return a {@link MapBookmark} created by the builder.
    */
   public MapBookmark build() {
-    return new MapBookmark(
-        id != null ? id : MapBookmark.generateId(),
-        name,
-        zoneId,
-        mapImage,
-        shortDescription,
-        notes,
-        iconCenterX,
-        iconCenterY,
-        viewCenterX,
-        viewCenterY,
-        scale,
-        order);
+    return new MapBookmark(this);
+  }
+
+  /**
+   * Has the order value been set.
+   *
+   * @return {@code true} if the order value has been set.
+   */
+  public boolean isIdSet() {
+    return idSet;
+  }
+
+  /**
+   * Has the name value been set.
+   *
+   * @return {@code true} if the name value has been set.
+   */
+  public boolean isNameSet() {
+    return nameSet;
+  }
+
+  /**
+   * Has the order value been set.
+   *
+   * @return {@code true} if the order value has been set.
+   */
+  public boolean isReferenceSet() {
+    return referenceSet;
+  }
+  /**
+   * Has the zone id value been set.
+   *
+   * @return {@code true} if the zone id value has been set.
+   */
+  public boolean isZoneIdSet() {
+    return zoneIdSet;
+  }
+
+  /**
+   * Has the short notes value been set.
+   *
+   * @return {@code true} if the short notes value has been set.
+   */
+  public boolean isShortNotesSet() {
+    return shortNotesSet;
+  }
+
+  /**
+   * Has the notes value been set.
+   *
+   * @return {@code true} if the notes value has been set.
+   */
+  public boolean isNotesSet() {
+    return notesSet;
+  }
+
+  /**
+   * Has the map marker value been set.
+   *
+   * @return {@code true} if the map marker value has been set.
+   */
+  public boolean isMapMarkerSet() {
+    return mapMarkerSet;
+  }
+  /**
+   * Has the order value been set.
+   *
+   * @return {@code true} if the order value has been set.
+   */
+  public boolean isOrderSet() {
+    return orderSet;
   }
 }

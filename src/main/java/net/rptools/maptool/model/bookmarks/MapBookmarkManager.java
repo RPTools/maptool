@@ -31,7 +31,8 @@ import net.rptools.maptool.model.Zone;
  * {@code MapBookmarkManager} class is used to manage all the {@link MapBookmark}s in a campaign.
  * This class is thread safe so may be used from multiple threads.
  *
- * @implNote The thread safety of this class depends on the following
+ * @implNote Maintaining the thread safety of this class depends on keeping to the following
+ *     conventions when changing this class.
  *     <ul>
  *       <li>Whenever the {@link #removedZones} {@code Set} is updated a write lock {@link
  *           #removedZonesWriteLock} must be obtained.

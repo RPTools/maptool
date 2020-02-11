@@ -15,12 +15,12 @@
 package net.rptools.maptool.model.bookmarks;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
-import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.GUID;
 
-/** {@code MapBookmark} represents a bookmark on a game Map. */
-public final class MapBookmark implements Comparable<MapBookmark> {
+/** {@code MapBookmark} represents a map bookmark on a game Map. */
+public final class MapBookmark implements Bookmark, Comparable<MapBookmark> {
 
   /** The id for the bookmark. */
   private final UUID id;
@@ -28,157 +28,57 @@ public final class MapBookmark implements Comparable<MapBookmark> {
   /** The name of the bookmark. */
   private final String name;
 
+  /** The reference id of the bookmark. */
+  private final String reference;
+
   /** The id of the zone that the bookmark is on. */
   private final GUID zoneId;
 
-  /** The image on the map for the bookmark. */
-  private final MD5Key mapImage;
-
   /** The short description of the bookmark. */
-  private final String shortDescription;
+  private final String shortNotes;
 
   /** The notes for the bookmark. */
   private final String notes;
 
-  /** The x co-ordinate of the bookmark image. */
-  private final double iconCenterX;
-
-  /** The y co-ordinate of the bookmark. */
-  private final double iconCenterY;
-
-  /** The x co-ordinate of the bookmark image. */
-  private final double viewCenterX;
-
-  /** The y co-ordinate of the bookmark. */
-  private final double viewCenterY;
-
-  /** The scaling factor to use for the bookmark. */
-  private final double scale;
+  /** The {@link MapMarker} for this Map BookMark. */
+  private final MapMarker mapMarker;
 
   /** The order of the {@code MapBookMark} with respect to other {@code MapBookMark}s. */
   private final double order;
 
   /**
-   * Returns a new id for a {@link MapBookmark}.
-   *
-   * @return a new id for a {@link MapBookmark}.
-   */
-  public static UUID generateId() {
-    return UUID.randomUUID();
-  }
-
-  /**
    * Creates a new {@code MapBookmark}.
    *
-   * @param id The id of the {@code MapBookmark}.
-   * @param name The name of the {@code MapBookmark}.
-   * @param zoneId The id of the {@link net.rptools.maptool.model.Zone} of the {@code MapBookmark}
-   *     is on.
-   * @param mapImage The image displayed on the map for the {@code MapBookmark}.
-   * @param shortDesc The short description of the {@code MapBookmark}.
-   * @param notes The notes for the {@code MapBookmark}.
-   * @param iconX The x coordinate center of the {@code MapBookmark} in the {@link
-   *     net.rptools.maptool.model.Zone}.
-   * @param iconY The y coordinate name of the {@code MapBookmark} in the {@link
-   *     net.rptools.maptool.model.Zone}.
-   * @param viewX The x coordinate of the {@code MapBookmark} view.
-   * @param viewY The y coordinate of the {@code MapBookmark} view.
-   * @param scale The scale factor of the {@code MapBookmark} view.
-   * @param order The order of the {@code MapBookmark} with respect to other {@code MapBookmark}s.
+   * @param builder {@link MapBookmarkBuilder} used to build this {@code MapBookmark}.
    */
-  public MapBookmark(
-      UUID id,
-      String name,
-      GUID zoneId,
-      MD5Key mapImage,
-      String shortDesc,
-      String notes,
-      double iconX,
-      double iconY,
-      double viewX,
-      double viewY,
-      double scale,
-      double order) {
+  MapBookmark(MapBookmarkBuilder builder) {
+    assert builder.isZoneIdSet() : "The zone id must be set for a MapBookmark";
+    assert builder.isNameSet() : "The name must be set for a MapBookmark";
+    assert builder.isMapMarkerSet() : "The map marker must be set for a MapBookmark";
 
-    assert name != null;
-    assert zoneId != null;
-    assert mapImage != null;
-
-    this.id = id != null ? id : MapBookmark.generateId();
-    this.name = name;
-    this.zoneId = zoneId;
-    this.mapImage = mapImage;
-    this.shortDescription = shortDesc != null ? shortDesc : "";
-    this.notes = notes != null ? notes : "";
-    this.iconCenterX = iconX;
-    this.iconCenterY = iconY;
-    this.viewCenterX = viewX;
-    this.viewCenterY = viewY;
-    this.scale = scale;
-    this.order = order;
+    id = builder.isIdSet() ? builder.getId() : Bookmark.generateId();
+    name = builder.getName();
+    reference = builder.getReference();
+    zoneId = builder.getZoneId();
+    shortNotes = builder.isShortNotesSet() ? builder.getShortNotes() : "";
+    notes = builder.isNotesSet() ? builder.getNotes() : "";
+    mapMarker = builder.getMapMarker();
+    order = builder.getOrder();
   }
 
-  /**
-   * Creates a new {@code MapBookmark}.
-   *
-   * @param name The name of the {@code MapBookmark}.
-   * @param zoneId The id of the {@link net.rptools.maptool.model.Zone} of the {@code MapBookmark}
-   *     is on.
-   * @param mapImage The image displayed on the map for the {@code MapBookmark}.
-   * @param shortDesc The short description of the {@code MapBookmark}.
-   * @param notes The notes for the {@code MapBookmark}.
-   * @param iconX The x coordinate center of the {@code MapBookmark} in the {@link
-   *     net.rptools.maptool.model.Zone}.
-   * @param iconY The y coordinate name of the {@code MapBookmark} in the {@link
-   *     net.rptools.maptool.model.Zone}.
-   * @param viewX The x coordinate of the {@code MapBookmark} view.
-   * @param viewY The y coordinate of the {@code MapBookmark} view.
-   * @param scale The scale factor of the {@code MapBookmark} view.
-   * @param order The order of the {@code MapBookmark} with respect to other {@code MapBookmark}s.
-   */
-  public MapBookmark(
-      String name,
-      GUID zoneId,
-      MD5Key mapImage,
-      String shortDesc,
-      String notes,
-      double iconX,
-      double iconY,
-      double viewX,
-      double viewY,
-      double scale,
-      double order) {
-    this(
-        MapBookmark.generateId(),
-        name,
-        zoneId,
-        mapImage,
-        shortDesc,
-        notes,
-        iconX,
-        iconY,
-        viewX,
-        viewY,
-        scale,
-        order);
-  }
-
-  /**
-   * Returns the id of the {@code Bookmark}.
-   *
-   * @return the id of the {@code Bookmark}.
-   */
+  @Override
   public UUID getId() {
     return id;
   }
 
-  /**
-   * Returns the name of the {@code Bookmark}.
-   *
-   * @return the name pf tje {@code Bookmark}.
-   */
+  @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public Optional<String> getReference() {
+    return Optional.ofNullable(reference);
   }
 
   /**
@@ -191,23 +91,21 @@ public final class MapBookmark implements Comparable<MapBookmark> {
   }
 
   /**
-   * Returns the {@link MD5Key} of the {@link net.rptools.maptool.model.Asset} used to display this
-   * {@code Bookmark} on the map.
+   * Returns the {@link MapMarker} for the {@code Bookmark}.
    *
-   * @return the {@link MD5Key} of the {@link net.rptools.maptool.model.Asset} used to display this
-   *     {@code Bookmark} on the map.
+   * @returns the {@link MapMarker} for the {@code Bookmark}.
    */
-  public MD5Key getMapImage() {
-    return mapImage;
+  public MapMarker getMapMarker() {
+    return mapMarker;
   }
 
   /**
-   * Returns the short description of the {@code Bookmark}.
+   * Returns the short notes of the {@code Bookmark}.
    *
-   * @return the short description of the {@code Bookmark}.
+   * @return the short notes of the {@code Bookmark}.
    */
-  public String getShortDescription() {
-    return shortDescription;
+  public String getShortNotes() {
+    return shortNotes;
   }
 
   /**
@@ -217,51 +115,6 @@ public final class MapBookmark implements Comparable<MapBookmark> {
    */
   public String getNotes() {
     return notes;
-  }
-
-  /**
-   * Returns the x coordinate of the center of the map icon for the {@code Bookmark}.
-   *
-   * @return the x coordinate of the center of the map icon for the {@code Bookmark}.
-   */
-  public double getIconCenterX() {
-    return iconCenterX;
-  }
-
-  /**
-   * Returns the y coordinate of the center of the map icon for the {@code Bookmark}.
-   *
-   * @return the y coordinate of the center of the map icon for the {@code Bookmark}.
-   */
-  public double getIconCenterY() {
-    return iconCenterY;
-  }
-
-  /**
-   * Returns the x coordinate of the center of the map view for the {@code Bookmark}.
-   *
-   * @return the x coordinate of the center of the map view for the {@code Bookmark}.
-   */
-  public double getViewCenterX() {
-    return viewCenterX;
-  }
-
-  /**
-   * Returns the y coordinate of the center of the map view for the {@code Bookmark}.
-   *
-   * @return the y coordinate of the center of the map view for the {@code Bookmark}.
-   */
-  public double getViewCenterY() {
-    return viewCenterY;
-  }
-
-  /**
-   * Returns the scaling factor for the map view for the {@code Bookmark}.
-   *
-   * @return the scaling factor for the map view for the {@code Bookmark}.
-   */
-  public double getScale() {
-    return scale;
   }
 
   /**
@@ -282,35 +135,19 @@ public final class MapBookmark implements Comparable<MapBookmark> {
       return false;
     }
     MapBookmark bookmark = (MapBookmark) o;
-    return Double.compare(bookmark.iconCenterX, iconCenterX) == 0
-        && Double.compare(bookmark.iconCenterY, iconCenterY) == 0
-        && Double.compare(bookmark.viewCenterX, viewCenterX) == 0
-        && Double.compare(bookmark.viewCenterY, viewCenterY) == 0
-        && Double.compare(bookmark.scale, scale) == 0
-        && Double.compare(bookmark.order, order) == 0
+    return Double.compare(bookmark.order, order) == 0
         && id.equals(bookmark.id)
         && name.equals(bookmark.name)
+        && Objects.equals(reference, bookmark.reference)
         && zoneId.equals(bookmark.zoneId)
-        && mapImage.equals(bookmark.mapImage)
-        && shortDescription.equals(bookmark.shortDescription)
-        && notes.equals(bookmark.notes);
+        && shortNotes.equals(bookmark.shortNotes)
+        && notes.equals(bookmark.notes)
+        && mapMarker.equals(bookmark.mapMarker);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        id,
-        name,
-        zoneId,
-        mapImage,
-        shortDescription,
-        notes,
-        iconCenterX,
-        iconCenterY,
-        viewCenterX,
-        viewCenterY,
-        scale,
-        order);
+    return Objects.hash(id, name, reference, zoneId, shortNotes, notes, mapMarker, order);
   }
 
   @Override

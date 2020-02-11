@@ -102,6 +102,7 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerDisconnectHandler;
+import net.rptools.maptool.client.bookmarks.MapBookmarkPanel;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
 import net.rptools.maptool.client.swing.CoordinateStatusBar;
@@ -634,7 +635,8 @@ public class MapToolFrame extends DefaultDockableHolder
     CAMPAIGN("Campaign"),
     GM("Gm"),
     SELECTION("Selected"),
-    IMPERSONATED("Impersonate");
+    IMPERSONATED("Impersonate"),
+    BOOKMARKS("Map Bookmarks");
     // @formatter:on
 
     private String displayName;
@@ -678,6 +680,7 @@ public class MapToolFrame extends DefaultDockableHolder
     getDockingManager().addFrame(getFrame(MTFrame.GM));
     getDockingManager().addFrame(getFrame(MTFrame.SELECTION));
     getDockingManager().addFrame(getFrame(MTFrame.IMPERSONATED));
+    getDockingManager().addFrame(getFrame(MTFrame.BOOKMARKS));
 
     try {
       getDockingManager()
@@ -737,6 +740,12 @@ public class MapToolFrame extends DefaultDockableHolder
         MTFrame.INITIATIVE,
         createDockingFrame(
             MTFrame.INITIATIVE, initiativePanel, new ImageIcon(AppStyle.initiativePanelImage)));
+    frameMap.put(
+        MTFrame.BOOKMARKS,
+        createDockingFrame(
+            MTFrame.BOOKMARKS,
+            MapBookmarkPanel.createMapBookmarkPanel(),
+            new ImageIcon(AppStyle.bookmarksPanelImage)));
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);
