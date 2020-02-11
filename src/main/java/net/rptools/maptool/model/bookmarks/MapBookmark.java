@@ -93,7 +93,7 @@ public final class MapBookmark implements Bookmark, Comparable<MapBookmark> {
   /**
    * Returns the {@link MapMarker} for the {@code Bookmark}.
    *
-   * @returns the {@link MapMarker} for the {@code Bookmark}.
+   * @return the {@link MapMarker} for the {@code Bookmark}.
    */
   public MapMarker getMapMarker() {
     return mapMarker;

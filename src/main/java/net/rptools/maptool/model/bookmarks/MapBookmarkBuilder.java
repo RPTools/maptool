@@ -80,7 +80,7 @@ public class MapBookmarkBuilder {
     builder.setId(id);
     builder.setName(mapBookmark.getName());
     builder.setZoneId(mapBookmark.getZoneId());
-    builder.setShortNotes(mapBookmark.getShortDescription());
+    builder.setShortNotes(mapBookmark.getShortNotes());
     builder.setNotes(mapBookmark.getNotes());
     builder.setMapMarker(mapBookmark.getMapMarker());
     builder.setOrder(mapBookmark.getOrder());
