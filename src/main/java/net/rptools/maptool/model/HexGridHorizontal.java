@@ -51,7 +51,7 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 public class HexGridHorizontal extends HexGrid {
 
   private static final int[] ALL_ANGLES =
-      new int[]{-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
+      new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static final OffsetTranslator OFFSET_TRANSLATOR =
       new OffsetTranslator() {
         public void translate(CellPoint originPoint, CellPoint offsetPoint) {
@@ -97,7 +97,7 @@ public class HexGridHorizontal extends HexGrid {
   /**
    * Set available facings based on the passed parameters.
    *
-   * @param faceEdges    - Tokens can face cell faces if true.
+   * @param faceEdges - Tokens can face cell faces if true.
    * @param faceVertices - Tokens can face cell vertices if true.
    */
   @Override
@@ -105,11 +105,11 @@ public class HexGridHorizontal extends HexGrid {
     if (faceEdges && faceVertices) {
       FACING_ANGLES = ALL_ANGLES;
     } else if (!faceEdges && faceVertices) {
-      FACING_ANGLES = new int[]{-150, -90, -30, 30, 90, 150};
+      FACING_ANGLES = new int[] {-150, -90, -30, 30, 90, 150};
     } else if (faceEdges && !faceVertices) {
-      FACING_ANGLES = new int[]{-120, -60, 0, 60, 120, 180};
+      FACING_ANGLES = new int[] {-120, -60, 0, 60, 120, 180};
     } else {
-      FACING_ANGLES = new int[]{90};
+      FACING_ANGLES = new int[] {90};
     }
   }
 
@@ -123,7 +123,9 @@ public class HexGridHorizontal extends HexGrid {
     int dx = x2 - x1;
     int dy = y2 - y1;
 
-    if (Integer.signum(dx) == Integer.signum(dy)) { return Math.abs(dx + dy); } else {
+    if (Integer.signum(dx) == Integer.signum(dy)) {
+      return Math.abs(dx + dy);
+    } else {
       return Math.max(Math.abs(dx), Math.abs(dy));
     }
   }

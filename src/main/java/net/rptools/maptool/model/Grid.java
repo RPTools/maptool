@@ -60,6 +60,7 @@ public abstract class Grid implements Cloneable {
    * least 9 pixels horizontally and vertically are required.
    */
   public static final int MIN_GRID_SIZE = 9;
+
   public static final int MAX_GRID_SIZE = 350;
   protected static final Logger log = LogManager.getLogger();
   protected static final int CIRCLE_SEGMENTS = 60;
@@ -113,7 +114,7 @@ public abstract class Grid implements Cloneable {
    * <p>If both are false, tokens on that grid will not be able to rotate with the mouse and
    * keyboard controls for setting facing.
    *
-   * @param faceEdges    - Tokens can face edges.
+   * @param faceEdges - Tokens can face edges.
    * @param faceVertices - Tokens can face vertices.
    */
   public void setFacings(boolean faceEdges, boolean faceVertices) {
@@ -236,13 +237,13 @@ public abstract class Grid implements Cloneable {
 
   /**
    * @return The offset required to translate from the center of a cell to the top right (x_min,
-   * y_min) of the cell's bounding rectangle. Used for non-square grids only.<br>
-   * <br>
-   * Why? Because mySquareGrid.convert(CellPoint cp) returns a ZonePoint in the top right
-   * corner(x_min, y_min) of the square-cell, whereas myHexGrid.convert(CellPoint cp) returns a
-   * ZonePoint in the center of the hex-cell. Thus adding the CellOffset allows us to position the
-   * ZonePoint returned by myHexGrid.convert(CellPoint cp) in an equivalent position to that
-   * returned by mySquareGrid.convert(CellPoint cp)....I think ;)
+   *     y_min) of the cell's bounding rectangle. Used for non-square grids only.<br>
+   *     <br>
+   *     Why? Because mySquareGrid.convert(CellPoint cp) returns a ZonePoint in the top right
+   *     corner(x_min, y_min) of the square-cell, whereas myHexGrid.convert(CellPoint cp) returns a
+   *     ZonePoint in the center of the hex-cell. Thus adding the CellOffset allows us to position
+   *     the ZonePoint returned by myHexGrid.convert(CellPoint cp) in an equivalent position to that
+   *     returned by mySquareGrid.convert(CellPoint cp)....I think ;)
    */
   public Dimension getCellOffset() {
     return NO_DIM;
@@ -312,8 +313,9 @@ public abstract class Grid implements Cloneable {
 
   /**
    * @return The size of the grid<br>
-   * <br>
-   * *<i>SquareGrid</i> - edge length<br> *<i>HexGrid</i> - edge to edge diameter
+   *     <br>
+   *     *<i>SquareGrid</i> - edge length<br>
+   *     *<i>HexGrid</i> - edge to edge diameter
    */
   public int getSize() {
     return size;
@@ -323,8 +325,8 @@ public abstract class Grid implements Cloneable {
    * Sets the grid size and creates the grid cell shape
    *
    * @param size The size of the grid<br>
-   *             <i>SquareGrid</i> - edge length<br>
-   *             <i>HexGrid</i> - edge to edge diameter
+   *     <i>SquareGrid</i> - edge length<br>
+   *     <i>HexGrid</i> - edge to edge diameter
    */
   public void setSize(int size) {
     this.size = constrainSize(size);
@@ -335,11 +337,11 @@ public abstract class Grid implements Cloneable {
   /**
    * Called by SightType and Light class to return a vision area based upon a specified distance
    *
-   * @param shape          CIRCLE, GRID, SQUARE or CONE
-   * @param token          Used to position the shape and to provide footprint
-   * @param range          As specified in the vision or light definition
-   * @param arcAngle       Only used by cone
-   * @param offsetAngle    Arc distance from facing, only used by cone
+   * @param shape CIRCLE, GRID, SQUARE or CONE
+   * @param token Used to position the shape and to provide footprint
+   * @param range As specified in the vision or light definition
+   * @param arcAngle Only used by cone
+   * @param offsetAngle Arc distance from facing, only used by cone
    * @param scaleWithToken used to increase the area based on token footprint
    * @return Area
    */
@@ -446,8 +448,8 @@ public abstract class Grid implements Cloneable {
    * Return the cell distance between two cells. Does not take into account terrain or VBL.
    * Overridden by Hex &amp; Gridless grids.
    *
-   * @param cellA   the first cell
-   * @param cellB   the second cell
+   * @param cellA the first cell
+   * @param cellB the second cell
    * @param wmetric the walker metric
    * @return the distance (in cells) between the two cells
    */
@@ -474,12 +476,10 @@ public abstract class Grid implements Cloneable {
     for (int i = 0; i < 6; i++) {
       if (i == 0) {
         hexPath.moveTo(
-            x + radius * Math.cos(i * 2 * Math.PI / 6),
-            y + radius * Math.sin(i * 2 * Math.PI / 6));
+            x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
       } else {
         hexPath.lineTo(
-            x + radius * Math.cos(i * 2 * Math.PI / 6),
-            y + radius * Math.sin(i * 2 * Math.PI / 6));
+            x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
       }
     }
 
@@ -502,8 +502,8 @@ public abstract class Grid implements Cloneable {
    * Draws the grid scaled to the renderer's scale and within the renderer's boundaries.
    *
    * @param renderer the {@link ZoneRenderer} that represents the screen view.
-   * @param g        the {@link Graphics2D} class used for drawing.
-   * @param bounds   the bounds of the drawing area.
+   * @param g the {@link Graphics2D} class used for drawing.
+   * @param bounds the bounds of the drawing area.
    */
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
     // Do nothing
@@ -525,18 +525,16 @@ public abstract class Grid implements Cloneable {
    *
    * @param length the second settable dimension
    */
-  public void setSecondDimension(double length) {
-  }
+  public void setSecondDimension(double length) {}
 
   /**
    * Installs a list of which which actions go with which keystrokes for the purpose of moving the
    * token.
    *
-   * @param callback  The object whose methods are invoked when the event occurs
+   * @param callback The object whose methods are invoked when the event occurs
    * @param actionMap the map of existing keystrokes we want to add ourselves to
    */
-  public abstract void installMovementKeys(PointerTool
-      callback, Map<KeyStroke, Action> actionMap);
+  public abstract void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap);
 
   public abstract void uninstallMovementKeys(Map<KeyStroke, Action> actionMap);
 
@@ -563,12 +561,11 @@ public abstract class Grid implements Cloneable {
    *       </code>.
    * </ol>
    *
-   * @param token       token whose movement is being validated; passed in case token state is
-   *                    needed
+   * @param token token whose movement is being validated; passed in case token state is needed
    * @param areaToCheck destination area to check, measured in ZonePoint units
-   * @param dirx        direction token is traveling along the X axis
-   * @param diry        direction token is traveling along the Y axis
-   * @param exposedFog  area in which fog has been cleared away
+   * @param dirx direction token is traveling along the X axis
+   * @param diry direction token is traveling along the Y axis
+   * @param exposedFog area in which fog has been cleared away
    * @return true or false whether the token may move into the area
    */
   public boolean validateMove(
@@ -621,7 +618,7 @@ public abstract class Grid implements Cloneable {
    * Check the middle region by subdividing into 3x3 and checking to see if at least 6 are open.
    *
    * @param regionToCheck rectangular region to check for hard fog
-   * @param fog           defines areas where fog is currently covering the background
+   * @param fog defines areas where fog is currently covering the background
    * @return {@code true} if at least 6 regions are open.
    */
   public boolean checkCenterRegion(Rectangle regionToCheck, Area fog) {
@@ -662,8 +659,8 @@ public abstract class Grid implements Cloneable {
    * open.
    *
    * @param regionToCheck rectangular region to check for hard fog
-   * @param fog           defines areas where fog is currently covering the background
-   * @param tolerance     the number of open regions to check for.
+   * @param fog defines areas where fog is currently covering the background
+   * @param tolerance the number of open regions to check for.
    * @return {code true} if there are at least {@code tolerance} open regions.
    */
   public boolean checkRegion(Rectangle regionToCheck, Area fog, int tolerance) {
@@ -708,9 +705,9 @@ public abstract class Grid implements Cloneable {
    * reference to the same object as the region to divide (also not checked).
    *
    * @param regionToDivide region to subdivide
-   * @param column         column in the 3x3 grid
-   * @param row            row in the 3x3 grid
-   * @param destination    one of nine possible pieces represented as a Rectangle
+   * @param column column in the 3x3 grid
+   * @param row row in the 3x3 grid
+   * @param destination one of nine possible pieces represented as a Rectangle
    */
   private void oneThird(Rectangle regionToDivide, int column, int row, Rectangle destination) {
     int width = regionToDivide.width * column / 3;
@@ -730,14 +727,14 @@ public abstract class Grid implements Cloneable {
   /**
    * Returns an Area with a given radius that is shaped and aligned to the current grid
    *
-   * @param token          token which to center the grid area on
-   * @param range          range in units grid area extends out to
+   * @param token token which to center the grid area on
+   * @param range range in units grid area extends out to
    * @param scaleWithToken whether grid area should expand by the size of the token
-   * @param visionRange    token's vision in pixels
+   * @param visionRange token's vision in pixels
    * @return the {@link Area} conforming to the current grid layout
    */
-  protected Area getGridArea(Token token, double range, boolean scaleWithToken,
-      double visionRange) {
+  protected Area getGridArea(
+      Token token, double range, boolean scaleWithToken, double visionRange) {
 
     final Area visibleArea;
 
@@ -752,7 +749,8 @@ public abstract class Grid implements Cloneable {
       }
 
       if (stopwatch.elapsed(TimeUnit.MILLISECONDS) > 50) {
-        log.debug("Excessive time to generate {}r grid light, took {}ms",
+        log.debug(
+            "Excessive time to generate {}r grid light, took {}ms",
             gridRadius,
             stopwatch.elapsed(TimeUnit.MILLISECONDS));
       }
@@ -770,10 +768,10 @@ public abstract class Grid implements Cloneable {
    * Returns a combined Area where radius included the tokens footprint. e.g. a 15ft light on a Huge
    * token radiates 15ft from all sides of the token.
    *
-   * @param token      token to generate area from
+   * @param token token to generate area from
    * @param gridRadius distance from token edge to generate area
    * @return the {@link Area} conforming to the current grid layout scaled to include the tokens
-   * size
+   *     size
    */
   protected Area getScaledGridArea(Token token, int gridRadius) {
     final double offsetX = token.getX() + token.getFootprint(this).getBounds(this).getWidth() / 2;
@@ -840,7 +838,7 @@ public abstract class Grid implements Cloneable {
    *
    * @param radius The maximum radius to generate the ring of cell points for this range
    * @return a {@link HashSet<Point>} that includes all cells that only equal in distance to the
-   * given radius
+   *     given radius
    */
   protected HashSet<Point> generateRing(int radius) {
     return generateRadius(radius, radius);

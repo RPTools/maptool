@@ -49,6 +49,7 @@ public abstract class HexGrid extends Grid {
 
   /** One DirectionCalculator object is shared by all instances of this hex grid class. */
   private static final DirectionCalculator calculator = new DirectionCalculator();
+
   private static final GridCapabilities GRID_CAPABILITIES =
       new GridCapabilities() {
         public boolean isPathingSupported() {
@@ -309,7 +310,9 @@ public abstract class HexGrid extends Grid {
     }
 
     ZonePoint snappedZP = convertCP(cp.x, cp.y);
-    if (!exposedFog.contains(snappedZP.x, snappedZP.y)) { return false; }
+    if (!exposedFog.contains(snappedZP.x, snappedZP.y)) {
+      return false;
+    }
 
     // The next step is to check the triangle that covers the hex face we are leaving from and teh
     // one we
@@ -326,7 +329,9 @@ public abstract class HexGrid extends Grid {
     result = checkOneSlice(snappedZP, direction, exposedFog);
 
     // If this one is false, don't bother checking the other one...
-    if (!result) { return false; }
+    if (!result) {
+      return false;
+    }
 
     snappedZP.translate(-dirx, -diry);
     cp = convert(snappedZP); // takes grid orientation and cellOffset into account
@@ -459,11 +464,15 @@ public abstract class HexGrid extends Grid {
     if (offsetZpV < 0) {
       if (Math.abs(xSect) % 2 == 1) {
         ySect = (int) ((offsetZpV - minorRadius) / (2 * minorRadius)) - 1;
-      } else { ySect = (int) (offsetZpV / (2 * minorRadius)) - 1; }
+      } else {
+        ySect = (int) (offsetZpV / (2 * minorRadius)) - 1;
+      }
     } else {
       if (Math.abs(xSect) % 2 == 1) {
         ySect = (int) ((offsetZpV - minorRadius) / (2 * minorRadius));
-      } else { ySect = (int) (offsetZpV / (2 * minorRadius)); }
+      } else {
+        ySect = (int) (offsetZpV / (2 * minorRadius));
+      }
     }
     int xPxl = Math.abs((int) (offsetZpU - xSect * (edgeProjection + edgeLength)));
     int yPxl = Math.abs((int) (offsetZpV - ySect * (2 * minorRadius)));
@@ -557,8 +566,10 @@ public abstract class HexGrid extends Grid {
     final HashSet<Point> points = generateRing(gridRadius);
     Area gridArea = new Area();
 
-    // HACK! Hex cellShape is ever so off from grid so adding them to a single Area can produce gap artifacts in the rendering
-    // TODO: Look at cellShape and see if it needs adjusting, and if so what does that affect downstream if anything?
+    // HACK! Hex cellShape is ever so off from grid so adding them to a single Area can produce gap
+    // artifacts in the rendering
+    // TODO: Look at cellShape and see if it needs adjusting, and if so what does that affect
+    // downstream if anything?
     final double hexScale = 1.025;
 
     for (Point point : points) {
@@ -660,12 +671,12 @@ public abstract class HexGrid extends Grid {
       // pieSlices = null; // debugging -- forces the following IF statement to always be true
       if (pieSlices == null) {
         double[][] coords = {
-            {0, 0, -114, 0, -57, -100}, // NW
-            {0, 0, -57, -100, 57, -100}, // N
-            {0, 0, 57, -100, 114, 0}, // NE
-            {0, 0, 114, 0, 57, 100}, // SE
-            {0, 0, 57, 100, -57, 100}, // S
-            {0, 0, -57, 100, -114, 0}, // SW
+          {0, 0, -114, 0, -57, -100}, // NW
+          {0, 0, -57, -100, 57, -100}, // N
+          {0, 0, 57, -100, 114, 0}, // NE
+          {0, 0, 114, 0, 57, 100}, // SE
+          {0, 0, 57, 100, -57, 100}, // S
+          {0, 0, -57, 100, -114, 0}, // SW
         };
         pieSlices = new Shape[6];
         for (int i = 0; i < 6; i++) {
