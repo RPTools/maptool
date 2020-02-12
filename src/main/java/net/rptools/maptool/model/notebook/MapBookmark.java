@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.bookmarks;
+package net.rptools.maptool.model.notebook;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -20,7 +20,7 @@ import java.util.UUID;
 import net.rptools.maptool.model.GUID;
 
 /** {@code MapBookmark} represents a map bookmark on a game Map. */
-public final class MapBookmark implements Bookmark, Comparable<MapBookmark> {
+public final class MapBookmark implements NoteBookEntry, Comparable<MapBookmark> {
 
   /** The id for the bookmark. */
   private final UUID id;
@@ -56,7 +56,7 @@ public final class MapBookmark implements Bookmark, Comparable<MapBookmark> {
     assert builder.isNameSet() : "The name must be set for a MapBookmark";
     assert builder.isMapMarkerSet() : "The map marker must be set for a MapBookmark";
 
-    id = builder.isIdSet() ? builder.getId() : Bookmark.generateId();
+    id = builder.isIdSet() ? builder.getId() : NoteBookEntry.generateId();
     name = builder.getName();
     reference = builder.getReference();
     zoneId = builder.getZoneId();

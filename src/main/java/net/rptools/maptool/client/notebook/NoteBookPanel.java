@@ -12,9 +12,8 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.bookmarks;
+package net.rptools.maptool.client.notebook;
 
-import java.awt.print.Book;
 import java.util.Optional;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -26,21 +25,21 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import net.rptools.maptool.model.bookmarks.Bookmark;
+import net.rptools.maptool.model.notebook.NoteBookEntry;
 
-public class MapBookmarkPanel extends JFXPanel {
+public class NoteBookPanel extends JFXPanel {
 
   private TableView bookmarkTable = new TableView();
 
-  public static MapBookmarkPanel createMapBookmarkPanel() {
-    MapBookmarkPanel panel = new MapBookmarkPanel();
+  public static NoteBookPanel createMapBookmarkPanel() {
+    NoteBookPanel panel = new NoteBookPanel();
     panel.setVisible(true);
     Platform.runLater(panel::initFX);
 
     return panel;
   }
 
-  private MapBookmarkPanel() {}
+  private NoteBookPanel() {}
 
   private void initFX() {
     bookmarkTable.setEditable(false);
@@ -53,12 +52,13 @@ public class MapBookmarkPanel extends JFXPanel {
     Button addNote = new Button("Add Note");
     Button addView = new Button("Add View");
     Button addMarker = new Button("Add Marker");
-    addNote.setOnAction(a -> {
-      Dialog<Bookmark> dialog = new Dialog<>();
-      dialog.setTitle("Add Bookmark");
-      dialog.setHeaderText("New Bookmark Details");
-      Optional<Bookmark> result = dialog.showAndWait();
-    });
+    addNote.setOnAction(
+        a -> {
+          Dialog<NoteBookEntry> dialog = new Dialog<>();
+          dialog.setTitle("Add Bookmark");
+          dialog.setHeaderText("New Bookmark Details");
+          Optional<NoteBookEntry> result = dialog.showAndWait();
+        });
     vBox.setSpacing(5);
     vBox.setPadding(new Insets(10, 0, 0, 10));
     HBox buttonsHBox = new HBox();

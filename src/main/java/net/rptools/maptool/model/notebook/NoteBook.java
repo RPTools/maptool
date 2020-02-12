@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.bookmarks;
+package net.rptools.maptool.model.notebook;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +45,7 @@ import net.rptools.maptool.model.Zone;
  *     concurrent hash map will take care of this, we are just interested in making sure that adding
  *     and removal of {@link Zone}s is consistent across both collections.
  */
-public final class MapBookmarkManager {
+public final class NoteBook {
 
   /**
    * Value used for "no zone".

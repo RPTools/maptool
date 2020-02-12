@@ -12,13 +12,13 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.bookmarks;
+package net.rptools.maptool.model.notebook;
 
 import java.util.Optional;
 import java.util.UUID;
 import net.rptools.maptool.model.GUID;
 
-public interface Bookmark {
+public interface NoteBookEntry {
   /**
    * Returns a new id for a {@link MapBookmark}.
    *
@@ -62,5 +62,4 @@ public interface Bookmark {
    * @return the notes for the {@code Bookmark}.
    */
   String getNotes();
-
 }

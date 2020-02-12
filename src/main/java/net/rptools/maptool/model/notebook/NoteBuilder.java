@@ -1,11 +1,23 @@
-package net.rptools.maptool.model.bookmarks;
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
+package net.rptools.maptool.model.notebook;
 
-import java.awt.print.Book;
 import java.util.UUID;
-import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.GUID;
 
-public class NoteBookmarkBuilder {
+public class NoteBuilder {
 
   private UUID id;
 
@@ -27,11 +39,10 @@ public class NoteBookmarkBuilder {
 
   private boolean notesSet;
 
-
-  public static NoteBookmarkBuilder copy(NoteBookmark noteBookmark, UUID id) {
+  public static NoteBuilder copy(Note noteBookmark, UUID id) {
     assert id != null : "ID can not be null for copied NoteBookmarkBuilder.";
 
-    NoteBookmarkBuilder builder = new NoteBookmarkBuilder();
+    NoteBuilder builder = new NoteBuilder();
 
     builder.setId(id);
     builder.setName(noteBookmark.getName());
@@ -46,25 +57,21 @@ public class NoteBookmarkBuilder {
     return builder;
   }
 
-  public static NoteBookmarkBuilder copy(NoteBookmark noteBookmark) {
+  public static NoteBuilder copy(Note noteBookmark) {
     return copy(noteBookmark, noteBookmark.getId());
   }
 
-
-  public static NoteBookmarkBuilder copyWithNewId(NoteBookmark noteBookmark) {
-    return copy(noteBookmark, Bookmark.generateId());
+  public static NoteBuilder copyWithNewId(Note noteBookmark) {
+    return copy(noteBookmark, NoteBookEntry.generateId());
   }
 
-
-  public NoteBookmarkBuilder() {
-  }
-
+  public NoteBuilder() {}
 
   public UUID getId() {
     return id;
   }
 
-  public NoteBookmarkBuilder setId(UUID id) {
+  public NoteBuilder setId(UUID id) {
     this.id = id;
     idSet = id != null;
     return this;
@@ -78,7 +85,7 @@ public class NoteBookmarkBuilder {
     return name;
   }
 
-  public NoteBookmarkBuilder setName(String name) {
+  public NoteBuilder setName(String name) {
     this.name = name;
     nameSet = name != null;
     return this;
@@ -92,7 +99,7 @@ public class NoteBookmarkBuilder {
     return reference;
   }
 
-  public NoteBookmarkBuilder setReference(String reference) {
+  public NoteBuilder setReference(String reference) {
     this.reference = reference;
     referenceSet = reference != null;
     return this;
@@ -106,7 +113,7 @@ public class NoteBookmarkBuilder {
     return zoneId;
   }
 
-  public NoteBookmarkBuilder setZoneId(GUID zoneId) {
+  public NoteBuilder setZoneId(GUID zoneId) {
     this.zoneId = zoneId;
     zoneIdSet = zoneId != null;
     return this;
@@ -120,7 +127,7 @@ public class NoteBookmarkBuilder {
     return notes;
   }
 
-  public NoteBookmarkBuilder setNotes(String notes) {
+  public NoteBuilder setNotes(String notes) {
     this.notes = notes;
     notesSet = notes != null;
     return this;

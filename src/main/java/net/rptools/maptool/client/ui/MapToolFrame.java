@@ -102,7 +102,7 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerDisconnectHandler;
-import net.rptools.maptool.client.bookmarks.MapBookmarkPanel;
+import net.rptools.maptool.client.notebook.NoteBookPanel;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
 import net.rptools.maptool.client.swing.CoordinateStatusBar;
@@ -636,7 +636,7 @@ public class MapToolFrame extends DefaultDockableHolder
     GM("Gm"),
     SELECTION("Selected"),
     IMPERSONATED("Impersonate"),
-    BOOKMARKS("Map Bookmarks");
+    NOTEBOOK("Map Note Book");
     // @formatter:on
 
     private String displayName;
@@ -680,7 +680,7 @@ public class MapToolFrame extends DefaultDockableHolder
     getDockingManager().addFrame(getFrame(MTFrame.GM));
     getDockingManager().addFrame(getFrame(MTFrame.SELECTION));
     getDockingManager().addFrame(getFrame(MTFrame.IMPERSONATED));
-    getDockingManager().addFrame(getFrame(MTFrame.BOOKMARKS));
+    getDockingManager().addFrame(getFrame(MTFrame.NOTEBOOK));
 
     try {
       getDockingManager()
@@ -741,10 +741,10 @@ public class MapToolFrame extends DefaultDockableHolder
         createDockingFrame(
             MTFrame.INITIATIVE, initiativePanel, new ImageIcon(AppStyle.initiativePanelImage)));
     frameMap.put(
-        MTFrame.BOOKMARKS,
+        MTFrame.NOTEBOOK,
         createDockingFrame(
-            MTFrame.BOOKMARKS,
-            MapBookmarkPanel.createMapBookmarkPanel(),
+            MTFrame.NOTEBOOK,
+            NoteBookPanel.createMapBookmarkPanel(),
             new ImageIcon(AppStyle.bookmarksPanelImage)));
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);

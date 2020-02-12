@@ -37,7 +37,7 @@ import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
-import net.rptools.maptool.model.bookmarks.MapBookmarkManager;
+import net.rptools.maptool.model.notebook.NoteBook;
 
 /**
  * This object contains {@link Zone}s and {@link Asset}s that make up a campaign as well as links to
@@ -94,11 +94,11 @@ public class Campaign {
   private Map<String, LookupTable> lookupTableMap;
 
   /**
-   * The {@link MapBookmarkManager} manages all the {@link
-   * net.rptools.maptool.model.bookmarks.MapBookmark}s for the campaign.
+   * The {@link NoteBook} manages all the {@link net.rptools.maptool.model.notebook.MapBookmark}s
+   * for the campaign.
    */
   @XStreamOmitField // Do no persist as part of normal persistence, it will be handled s separately
-  private final transient MapBookmarkManager mapBookmarkManager = new MapBookmarkManager();
+  private final transient NoteBook mapBookmarkManager = new NoteBook();
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
