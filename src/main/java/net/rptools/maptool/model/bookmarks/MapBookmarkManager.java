@@ -47,6 +47,13 @@ import net.rptools.maptool.model.Zone;
  */
 public final class MapBookmarkManager {
 
+  /**
+   * Value used for "no zone".
+   *
+   * @implNote This does not need to be the same every run as we never persist it.
+   */
+  private static final GUID NO_ZONE_ID = new GUID();
+
   /** The {@link MapBookmark}s for each {@link Zone} */
   private final Map<GUID, Map<UUID, MapBookmark>> zoneMapBookmarks = new ConcurrentHashMap<>();
 
@@ -88,9 +95,10 @@ public final class MapBookmarkManager {
        * If the zone is in the list of zone that have been removed then drop the bookmark silently.
        * This is to avoid storing bookmarks for zones that have already been removed.
        */
-      if (!removedZones.contains(bookmark.getZoneId())) {
-        zoneMapBookmarks.putIfAbsent(bookmark.getZoneId(), new ConcurrentHashMap<>());
-        zoneMapBookmarks.get(bookmark.getZoneId()).put(bookmark.getId(), bookmark);
+      GUID zoneId = bookmark.getZoneId().orElse(NO_ZONE_ID);
+      if (!removedZones.contains(zoneId)) {
+        zoneMapBookmarks.putIfAbsent(zoneId, new ConcurrentHashMap<>());
+        zoneMapBookmarks.get(zoneId).put(bookmark.getId(), bookmark);
       }
     } finally {
       removedZonesReadLock.unlock();
@@ -111,9 +119,10 @@ public final class MapBookmarkManager {
          * If the zone is in the list of zone that have been removed then drop the bookmark silently.
          * This is to avoid storing bookmarks for zones that have already been removed.
          */
-        if (!removedZones.contains(bookmark.getZoneId())) {
-          zoneMapBookmarks.putIfAbsent(bookmark.getZoneId(), new ConcurrentHashMap<>());
-          zoneMapBookmarks.get(bookmark.getZoneId()).put(bookmark.getId(), bookmark);
+        GUID zoneId = bookmark.getZoneId().orElse(NO_ZONE_ID);
+        if (!removedZones.contains(zoneId)) {
+          zoneMapBookmarks.putIfAbsent(zoneId, new ConcurrentHashMap<>());
+          zoneMapBookmarks.get(zoneId).put(bookmark.getId(), bookmark);
         }
       }
     } finally {

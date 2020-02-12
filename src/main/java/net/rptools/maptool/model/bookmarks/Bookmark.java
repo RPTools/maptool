@@ -16,6 +16,7 @@ package net.rptools.maptool.model.bookmarks;
 
 import java.util.Optional;
 import java.util.UUID;
+import net.rptools.maptool.model.GUID;
 
 public interface Bookmark {
   /**
@@ -47,4 +48,19 @@ public interface Bookmark {
    * @return the reference id for the {@code Bookmark}.
    */
   Optional<String> getReference();
+
+  /**
+   * Returns the id of the {@link net.rptools.maptool.model.Zone} that this {@code Bookmark} is on.
+   *
+   * @return the id of the {@link net.rptools.maptool.model.Zone} that this {@code Bookmark} is on.
+   */
+  Optional<GUID> getZoneId();
+
+  /**
+   * Returns the notes for the {@code Bookmark}.
+   *
+   * @return the notes for the {@code Bookmark}.
+   */
+  String getNotes();
+
 }

@@ -81,13 +81,9 @@ public final class MapBookmark implements Bookmark, Comparable<MapBookmark> {
     return Optional.ofNullable(reference);
   }
 
-  /**
-   * Returns the id of the {@link net.rptools.maptool.model.Zone} that this {@code Bookmark} is on.
-   *
-   * @return the id of the {@link net.rptools.maptool.model.Zone} that this {@code Bookmark} is on.
-   */
-  public GUID getZoneId() {
-    return zoneId;
+  @Override
+  public Optional<GUID> getZoneId() {
+    return Optional.of(zoneId);
   }
 
   /**
@@ -108,11 +104,7 @@ public final class MapBookmark implements Bookmark, Comparable<MapBookmark> {
     return shortNotes;
   }
 
-  /**
-   * Returns the notes for the {@code Bookmark}.
-   *
-   * @return the notes for the {@code Bookmark}.
-   */
+  @Override
   public String getNotes() {
     return notes;
   }

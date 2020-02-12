@@ -69,17 +69,19 @@ public class MapBookmarkBuilder {
 
   /**
    * Creates a {@code MapBookmarkBuilder} prepopulated with the details of an existing {@link
-   * MapBookmark}.
+   * MapBookmark} and a specified id.
    *
    * @param mapBookmark The {@link MapBookmark} to copy the values from.
    * @param id The id to used for the {@link MapBookmark}.
    * @return the new builder.
    */
   private static MapBookmarkBuilder copy(MapBookmark mapBookmark, UUID id) {
+    assert id != null : "ID can not be null for copied MapBookmarkBuilder.";
+
     MapBookmarkBuilder builder = new MapBookmarkBuilder();
     builder.setId(id);
     builder.setName(mapBookmark.getName());
-    builder.setZoneId(mapBookmark.getZoneId());
+    builder.setZoneId(mapBookmark.getZoneId().get());
     builder.setShortNotes(mapBookmark.getShortNotes());
     builder.setNotes(mapBookmark.getNotes());
     builder.setMapMarker(mapBookmark.getMapMarker());
@@ -90,25 +92,26 @@ public class MapBookmarkBuilder {
 
   /**
    * Creates a {@code MapBookmarkBuilder} prepopulated with the details of an existing {@link
-   * MapBookmark}.
+   * MapBookmark} retaining the id.
    *
    * @param mapBookmark The {@link MapBookmark} to copy the values from.
    * @return the new builder.
    */
-  public static MapBookmarkBuilder copyWithSameId(MapBookmark mapBookmark) {
+  private static MapBookmarkBuilder copy(MapBookmark mapBookmark) {
     return copy(mapBookmark, mapBookmark.getId());
   }
 
   /**
-   * Creates a {@code MapBookmarkBuilder} preopulated with the details of an existing {@link
-   * MapBookmark}, but having a new id.
+   * Creates a {@code MapBookmarkBuilder} prepopulated with the details of an existing {@link
+   * MapBookmark} assigning a new id.
    *
    * @param mapBookmark The {@link MapBookmark} to copy the values from.
    * @return the new builder.
    */
-  public static MapBookmarkBuilder copyWithNewId(MapBookmark mapBookmark) {
+  private static MapBookmarkBuilder copyWithNewId(MapBookmark mapBookmark) {
     return copy(mapBookmark, Bookmark.generateId());
   }
+
 
   /**
    * Returns the id of the {@link MapBookmark} that will be created.
