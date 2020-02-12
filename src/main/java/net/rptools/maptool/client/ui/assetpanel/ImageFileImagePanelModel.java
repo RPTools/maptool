@@ -25,12 +25,10 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -79,10 +77,12 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     }
   }
 
+  private final AssetPanel assetPanel;
+
   private Directory dir;
   private static String filter;
   private boolean global;
-  private static List<File> fileList = new ArrayList<File>();
+  private List<File> fileList = new ArrayList<File>();
   private List<Directory> subDirList;
 
   private static int pagesProcessed = 0;
@@ -90,8 +90,9 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   private static boolean pdfExtractIsRunning = false;
   private static ScheduledExecutorService extractThreadPool;
 
-  public ImageFileImagePanelModel(Directory dir) {
+  public ImageFileImagePanelModel(Directory dir, AssetPanel assetPanel) {
     this.dir = dir;
+    this.assetPanel = assetPanel;
   }
 
   public void rescan(Directory dir) {
@@ -395,7 +396,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
       pageCount = extractor.getPageCount();
       extractThreadPool = Executors.newScheduledThreadPool(numThreads);
-      MapTool.getFrame().getAssetPanel().setImagePanelProgressMax(pageCount);
+      assetPanel.setImagePanelProgressMax(pageCount);
     }
 
     @Override
@@ -403,7 +404,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       try {
         // 0 page count means it's already been processed (or PDF if empty)
         if (pageCount > 0 || forceRescan) {
-          MapTool.getFrame().getAssetPanel().showImagePanelProgress(true);
+          assetPanel.showImagePanelProgress(true);
 
           for (int pageNumber = 1; pageNumber < pageCount + 1; pageNumber++) {
             ExtractImagesTask task = new ExtractImagesTask(pageNumber, pageCount, dir, forceRescan);
@@ -470,13 +471,13 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     if (progress == 0) {
       pagesProcessed = 0;
       fileListCleanup(new PdfAsDirectory(tempFile, AppConstants.IMAGE_FILE_FILTER));
-      MapTool.getFrame().getAssetPanel().showImagePanelProgress(false);
+      assetPanel.showImagePanelProgress(false);
     } else {
       fileListCleanup();
     }
 
-    MapTool.getFrame().getAssetPanel().setImagePanelProgress(pagesProcessed++);
-    MapTool.getFrame().getAssetPanel().updateImagePanel();
+    assetPanel.setImagePanelProgress(pagesProcessed++);
+    assetPanel.updateImagePanel();
   }
 
   private void fileListCleanup(Directory dir) {
@@ -491,11 +492,10 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   }
 
   private void fileListCleanup() {
-    Set<File> tempSet = new HashSet<File>();
-    tempSet.addAll(fileList);
+    Set<File> tempSet = new HashSet<File>(fileList);
     fileList.clear();
     fileList.addAll(tempSet);
-    Collections.sort(fileList, filenameComparator);
+    fileList.sort(filenameComparator);
   }
 
   private void refreshHeroLab() {
@@ -513,16 +513,11 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     fileList.addAll(heroLabFile.extractAllCharacters(portfolioChanged));
 
     if (filter != null && filter.length() > 0) {
-      for (ListIterator<File> iter = fileList.listIterator(); iter.hasNext(); ) {
-        File file = iter.next();
-        if (!file.getName().toUpperCase().contains(filter)) {
-          iter.remove();
-        }
-      }
+      fileList.removeIf(file -> !file.getName().toUpperCase().contains(filter));
     }
 
-    Collections.sort(fileList, filenameComparator);
-    MapTool.getFrame().getAssetPanel().updateGlobalSearchLabel(fileList.size());
+    fileList.sort(filenameComparator);
+    assetPanel.updateGlobalSearchLabel(fileList.size());
   }
 
   /**
@@ -537,7 +532,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     fileList = new ArrayList<File>();
     subDirList = new ArrayList<Directory>();
 
-    if (global == true && filter != null && filter.length() > 0) {
+    if (global && filter != null && filter.length() > 0) {
       // FIXME populate fileList from all filenames in the library
       // Use the AssetManager class, something akin to searchForImageReferences()
       // but I don't want to do a search; I want to use the existing cached results.
@@ -553,20 +548,16 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
         fileList.addAll(dir.getFiles());
 
         // Filter current directory of files
-        for (ListIterator<File> iter = fileList.listIterator(); iter.hasNext(); ) {
-          File file = iter.next();
-          if (!file.getName().toUpperCase().contains(filter)) {
-            iter.remove();
-          }
-        }
+        fileList.removeIf(file -> !file.getName().toUpperCase().contains(filter));
 
         // Now search remaining subdirectories and filter as it goes.
         // Stop at any time if it reaches SEARCH_LIMIT
         subDirList.addAll(dir.getSubDirs());
-        ListFilesSwingWorker.reset();
+        assetPanel.setLimitReached(false);
 
         for (Directory folder : subDirList) {
-          ListFilesSwingWorker workerThread = new ListFilesSwingWorker(folder.getPath());
+          ListFilesSwingWorker workerThread =
+              new ListFilesSwingWorker(folder.getPath(), assetPanel);
           workerThread.execute();
         }
 
@@ -581,18 +572,13 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       }
 
       if (filter != null && filter.length() > 0) {
-        for (ListIterator<File> iter = fileList.listIterator(); iter.hasNext(); ) {
-          File file = iter.next();
-          if (!file.getName().toUpperCase().contains(filter)) {
-            iter.remove();
-          }
-        }
+        fileList.removeIf(file -> !file.getName().toUpperCase().contains(filter));
       }
     }
 
-    Collections.sort(fileList, filenameComparator);
+    fileList.sort(filenameComparator);
     try {
-      MapTool.getFrame().getAssetPanel().updateGlobalSearchLabel(fileList.size());
+      assetPanel.updateGlobalSearchLabel(fileList.size());
     } catch (NullPointerException e) {
       // This currently throws a NPE if the frame was not finished initializing when runs. For now,
       // lets log a message and continue.
@@ -602,21 +588,18 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     }
   }
 
-  private static class ListFilesSwingWorker extends SwingWorker<Void, Integer> {
+  private class ListFilesSwingWorker extends SwingWorker<Void, Integer> {
     private final File folderPath;
-    private static boolean limitReached = false;
+    private AssetPanel assetPanel;
 
-    private ListFilesSwingWorker(File path) {
-      folderPath = path;
-    }
-
-    private static void reset() {
-      limitReached = false;
+    private ListFilesSwingWorker(File path, AssetPanel assetPanel) {
+      this.folderPath = path;
+      this.assetPanel = assetPanel;
     }
 
     @Override
     protected Void doInBackground() throws Exception {
-      MapTool.getFrame().getAssetPanel().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+      assetPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       listFilesInSubDirectories();
       publish(fileList.size());
       return null;
@@ -624,7 +607,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
     @Override
     protected void process(List<Integer> integers) {
-      MapTool.getFrame().getAssetPanel().updateGlobalSearchLabel(fileList.size());
+      assetPanel.updateGlobalSearchLabel(fileList.size());
     }
 
     @Override
@@ -640,9 +623,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       // Jamz: Causes cursor to flicker due to multiple threads running. Needs a supervisior thread
       // to
       // watch over all threads. Pain to code, leave for later? Remove cursor changes?
-      MapTool.getFrame()
-          .getAssetPanel()
-          .setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+      assetPanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     }
 
     /*
@@ -669,21 +650,21 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
               });
 
       for (final File fileEntry : files) {
-        if (fileEntry.getName().toUpperCase().contains(filter) && !limitReached)
+        if (fileEntry.getName().toUpperCase().contains(filter) && !assetPanel.isLimitReached())
           fileList.add(fileEntry);
         if (limitReached()) break;
       }
 
       for (final File fileEntry : folders) {
         if (limitReached()) break;
-        ListFilesSwingWorker workerThread = new ListFilesSwingWorker(fileEntry);
+        ListFilesSwingWorker workerThread = new ListFilesSwingWorker(fileEntry, assetPanel);
         workerThread.execute();
       }
     }
 
     private boolean limitReached() {
-      if (fileList.size() > AppConstants.ASSET_SEARCH_LIMIT) limitReached = true;
-      return limitReached;
+      if (fileList.size() > AppConstants.ASSET_SEARCH_LIMIT) assetPanel.setLimitReached(true);
+      return assetPanel.isLimitReached();
     }
   }
 
