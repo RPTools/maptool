@@ -36,6 +36,7 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
@@ -865,9 +866,11 @@ public abstract class Grid implements Cloneable {
     HashSet<Point> points = new HashSet<>();
     CellPoint start = new CellPoint(0, 0);
 
+    WalkerMetric metric = getCurrentMetric();
+
     for (int y = -maxRadius; y <= maxRadius; y++) {
       for (int x = -maxRadius; x <= maxRadius; x++) {
-        double distance = cellDistance(start, new CellPoint(x, y), WalkerMetric.ONE_TWO_ONE);
+        double distance = cellDistance(start, new CellPoint(x, y), metric);
         if (distance >= minRadius && distance <= maxRadius) {
           points.add(new Point(x, y));
         }
@@ -875,6 +878,17 @@ public abstract class Grid implements Cloneable {
     }
 
     return points;
+  }
+
+  /**
+   * Future change may include getting a metric from a different property/source
+   *
+   * @return the current {@link WalkerMetric} depending on if a server is running or not
+   */
+  protected WalkerMetric getCurrentMetric() {
+    return MapTool.isPersonalServer()
+        ? AppPreferences.getMovementMetric()
+        : MapTool.getServerPolicy().getMovementMetric();
   }
 
   /**
