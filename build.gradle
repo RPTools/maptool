@@ -208,7 +208,6 @@ dependencies {
 
     implementation 'org.reflections:reflections:0.9.11'
     implementation 'com.caucho.hessian:hessian:3.1.6'
-    implementation 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
     implementation 'org.mozilla:rhino:1.7.12'
     implementation 'ca.odell.renderpack:renderpack:1.2004'
     implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
@@ -395,6 +394,12 @@ task deploy(dependsOn: [clean, displayGitInfo, uberJar, copyPackageExtras, prepa
                 println commandLine
         }
     }
+}
+
+javadoc {
+    options.addStringOption('Xmaxwarns', '2000')
+    options.addBooleanOption('html5', true)
+    options.tags("note:a:<strong><u>Note:</u></strong>")
 }
 
 test {

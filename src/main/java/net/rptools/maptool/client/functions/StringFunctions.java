@@ -430,7 +430,7 @@ public class StringFunctions extends AbstractFunction {
    * @param resolver The variable resolver used to resolve variables within %{}.
    * @param args The arguments for formating options.
    * @return the formated string.
-   * @throws ParserException
+   * @throws ParserException when an error occurs.
    */
   public String format(String string, VariableResolver resolver, List<Object> args)
       throws ParserException {

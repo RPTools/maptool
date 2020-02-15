@@ -244,7 +244,7 @@ public class MacroLinkFunction extends AbstractFunction {
    * @param target the string <code>impersonated</code>, <code>all</code>
    * @param args the arguments to append to the end of the macro invocation
    * @return the String of the macro invocation
-   * @throws ParserException
+   * @throws ParserException when an error occurs.
    */
   public String createMacroText(String macroName, String who, String target, String args)
       throws ParserException {

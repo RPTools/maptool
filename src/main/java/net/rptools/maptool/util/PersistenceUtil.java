@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -170,25 +171,21 @@ public class PersistenceUtil {
       // Put in a placeholder
       pMap.assetMap.put(key, null);
     }
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(mapFile);
+
+    try (PackedFile pakFile = new PackedFile(mapFile)) {
       saveAssets(z.getAllAssetIds(), pakFile);
       pakFile.setContent(pMap);
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
   public static PersistedMap loadMap(File mapFile) throws IOException {
-    PackedFile pakFile = null;
     PersistedMap persistedMap = null;
 
-    try {
-      pakFile = new PackedFile(mapFile);
+    // TODO: split in a try with resources and a try/catch
+    try (PackedFile pakFile = new PackedFile(mapFile)) {
 
       // Sanity check
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
@@ -226,8 +223,6 @@ public class PersistenceUtil {
       MapTool.showError("PersistenceUtil.error.mapVersion", ce);
     } catch (IOException ioe) {
       MapTool.showError("PersistenceUtil.error.mapRead", ioe);
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
     return persistedMap;
   }
@@ -519,16 +514,18 @@ public class PersistenceUtil {
     return persistedCampaign;
   }
 
-  public static BufferedImage getTokenThumbnail(File file) throws Exception {
-    PackedFile pakFile = new PackedFile(file);
-    BufferedImage thumb;
-    String thumbFileName = Token.FILE_THUMBNAIL;
-
-    // Jamz: Lets use the Large thumbnail if needed
+  private static String getThumbFilename(PackedFile pakFile) throws IOException {
     if ((MapTool.getThumbnailSize().width > 50 || MapTool.getThumbnailSize().height > 50)
-        && pakFile.hasFile(Token.FILE_THUMBNAIL_LARGE)) thumbFileName = Token.FILE_THUMBNAIL_LARGE;
+        && pakFile.hasFile(Token.FILE_THUMBNAIL_LARGE)) return Token.FILE_THUMBNAIL_LARGE;
+    return Token.FILE_THUMBNAIL;
+  }
 
-    try {
+  public static BufferedImage getTokenThumbnail(File file) throws Exception {
+    BufferedImage thumb;
+    try (PackedFile pakFile = new PackedFile(file); ) {
+      // Jamz: Lets use the Large thumbnail if needed
+      String thumbFileName = getThumbFilename(pakFile);
+
       thumb = null;
       if (pakFile.hasFile(thumbFileName)) {
         InputStream is = null;
@@ -539,8 +536,6 @@ public class PersistenceUtil {
           IOUtils.closeQuietly(is);
         }
       }
-    } finally {
-      pakFile.close();
     }
     return thumb;
   }
@@ -580,9 +575,7 @@ public class PersistenceUtil {
     g.drawImage(image, 0, 0, sz.width, sz.height, null);
     g.dispose();
 
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+    try (PackedFile pakFile = new PackedFile(file)) {
       saveAssets(token.getAllImageAssets(), pakFile);
       pakFile.putFile(Token.FILE_THUMBNAIL, ImageUtil.imageToBytes(thumb, "png"));
       pakFile.putFile(Token.FILE_THUMBNAIL_LARGE, ImageUtil.imageToBytes(thumbLarge, "png"));
@@ -590,16 +583,12 @@ public class PersistenceUtil {
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.setProperty(HERO_LAB, (token.getHeroLabData() != null));
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
   public static Token loadToken(File file) throws IOException {
-    PackedFile pakFile = null;
     Token token = null;
-    try {
-      pakFile = new PackedFile(file);
+    try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setModelVersionManager(tokenVersionManager);
 
       // Sanity check
@@ -613,7 +602,6 @@ public class PersistenceUtil {
     } catch (IOException ioe) {
       MapTool.showError("PersistenceUtil.error.tokenRead", ioe);
     }
-    if (pakFile != null) pakFile.close();
     return token;
   }
 
@@ -837,19 +825,15 @@ public class PersistenceUtil {
 
   public static void saveCampaignProperties(Campaign campaign, File file) throws IOException {
     // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
+    if (!file.getName().contains(".")) {
       file = new File(file.getAbsolutePath() + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
     }
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+    try (PackedFile pakFile = new PackedFile(file)) {
       clearAssets(pakFile);
       saveAssets(campaign.getCampaignProperties().getAllImageAssets(), pakFile);
       pakFile.setContent(campaign.getCampaignProperties());
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
@@ -870,48 +854,36 @@ public class PersistenceUtil {
     try {
       mbProps =
           (MacroButtonProperties)
-              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macroVersion", ce);
-    } catch (IOException ioe) {
-      MapTool.showError("PersistenceUtil.error.macroRead", ioe);
     }
     return mbProps;
   }
 
   public static MacroButtonProperties loadMacro(File file) throws IOException {
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
-
+    try (PackedFile pakFile = new PackedFile(file)) {
       // Sanity check
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
 
-      MacroButtonProperties macroButton = (MacroButtonProperties) pakFile.getContent();
-      return macroButton;
+      return (MacroButtonProperties) pakFile.getContent();
     } catch (IOException e) {
-      if (pakFile != null) pakFile.close();
-      pakFile = null;
       return loadLegacyMacro(file);
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
   public static void saveMacro(MacroButtonProperties macroButton, File file) throws IOException {
     // Put this in FileUtil
-    if (file.getName().indexOf(".") < 0) {
+    if (!file.getName().contains(".")) {
       file = new File(file.getAbsolutePath() + AppConstants.MACRO_FILE_EXTENSION);
     }
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+
+    try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setContent(macroButton);
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
@@ -942,22 +914,19 @@ public class PersistenceUtil {
 
   @SuppressWarnings("unchecked")
   public static List<MacroButtonProperties> loadMacroSet(File file) throws IOException {
-    PackedFile pakFile = null;
     List<MacroButtonProperties> macroButtonSet = null;
     try {
-      pakFile = new PackedFile(file);
+      try (PackedFile pakFile = new PackedFile(file)) {
+        // Sanity check
+        String progVersion = (String) pakFile.getProperty(PROP_VERSION);
+        if (!versionCheck(progVersion)) return null;
 
-      // Sanity check
-      String progVersion = (String) pakFile.getProperty(PROP_VERSION);
-      if (!versionCheck(progVersion)) return null;
-
-      macroButtonSet = (List<MacroButtonProperties>) pakFile.getContent();
-    } catch (ConversionException ce) {
-      MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
+        macroButtonSet = (List<MacroButtonProperties>) pakFile.getContent();
+      } catch (ConversionException ce) {
+        MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
+      }
     } catch (IOException e) {
       return loadLegacyMacroSet(file);
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
     return macroButtonSet;
   }
@@ -968,14 +937,11 @@ public class PersistenceUtil {
     if (file.getName().indexOf(".") < 0) {
       file = new File(file.getAbsolutePath() + AppConstants.MACROSET_FILE_EXTENSION);
     }
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+
+    try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setContent(macroButtonSet);
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
@@ -1007,29 +973,25 @@ public class PersistenceUtil {
   }
 
   public static LookupTable loadTable(File file) throws IOException {
-    PackedFile pakFile = null;
+
     try {
-      pakFile = new PackedFile(file);
+      try (PackedFile pakFile = new PackedFile(file)) {
+        // Sanity check
+        String progVersion = (String) pakFile.getProperty(PROP_VERSION);
+        if (!versionCheck(progVersion)) return null;
 
-      // Sanity check
-      String progVersion = (String) pakFile.getProperty(PROP_VERSION);
-      if (!versionCheck(progVersion)) return null;
-
-      LookupTable lookupTable = (LookupTable) pakFile.getContent();
-      loadAssets(lookupTable.getAllAssetIds(), pakFile);
-      return lookupTable;
-    } catch (ConversionException ce) {
-      MapTool.showError("PersistenceUtil.error.tableVersion", ce);
+        LookupTable lookupTable = (LookupTable) pakFile.getContent();
+        loadAssets(lookupTable.getAllAssetIds(), pakFile);
+        return lookupTable;
+      } catch (ConversionException ce) {
+        MapTool.showError("PersistenceUtil.error.tableVersion", ce);
+      }
     } catch (IOException e) {
       try {
-        if (pakFile != null) pakFile.close();
-        pakFile = null;
         return loadLegacyTable(file);
       } catch (IOException ioe) {
         MapTool.showError("PersistenceUtil.error.tableRead", ioe);
       }
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
     return null;
   }
@@ -1039,15 +1001,12 @@ public class PersistenceUtil {
     if (file.getName().indexOf(".") < 0) {
       file = new File(file.getAbsolutePath() + AppConstants.TABLE_FILE_EXTENSION);
     }
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+
+    try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setContent(lookupTable);
       saveAssets(lookupTable.getAllAssetIds(), pakFile);
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
       pakFile.save();
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
   }
 
