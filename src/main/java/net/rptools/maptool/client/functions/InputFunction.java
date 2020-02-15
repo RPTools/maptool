@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import de.muntjak.tinylookandfeel.TinyComboBoxButton;
 import java.awt.Color;
 import java.awt.Component;
@@ -389,12 +390,7 @@ public class InputFunction extends AbstractFunction {
       List<String> ret = new ArrayList<String>();
       if (valueString != null) {
         if ("json".equalsIgnoreCase(delim)) {
-          JsonElement json = null;
-          try {
-            json = JSONMacroFunctions.getInstance().asJsonElement(valueString);
-          } catch (ParserException ignored) {
-            // if can't parse, keep json a null
-          }
+          JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(valueString);
           if (json != null && json.isJsonArray()) {
             for (JsonElement ele : json.getAsJsonArray()) {
               ret.add(ele.getAsString().trim());
@@ -786,11 +782,22 @@ public class InputFunction extends AbstractFunction {
 
     /** Creates a subpanel with controls for each property. */
     public JComponent createPropsControl(VarSpec vs) {
-      // Get the key/value pairs from the property string
       Map<String, String> map = new HashMap<String, String>();
+      JsonElement jsonElement = JSONMacroFunctions.getInstance().asJsonElement(vs.value);
       List<String> oldKeys = new ArrayList<String>();
-      List<String> oldKeysNormalized = new ArrayList<String>();
-      StrPropFunctions.parse(vs.value, map, oldKeys, oldKeysNormalized, ";");
+
+      if (jsonElement instanceof JsonObject) {
+        // Get the key/value pairs from the JsonObject
+        JsonObject jsonObject = (JsonObject) jsonElement;
+        for (String key : jsonObject.keySet()) {
+          map.put(key.toUpperCase(), jsonObject.get(key).getAsString());
+          oldKeys.add(key);
+        }
+      } else {
+        // Get the key/value pairs from the property string
+        List<String> oldKeysNormalized = new ArrayList<String>();
+        StrPropFunctions.parse(vs.value, map, oldKeys, oldKeysNormalized, ";");
+      }
 
       // Create list of VarSpecs for the subpanel
       List<VarSpec> varSpecs = new ArrayList<VarSpec>();
