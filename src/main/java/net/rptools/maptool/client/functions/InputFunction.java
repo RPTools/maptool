@@ -159,7 +159,7 @@ public class InputFunction extends AbstractFunction {
     CHECK(false, false, "SPAN=FALSE;"),
     RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     LABEL(false, false, "TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SPAN=FALSE;"),
-    PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;"),
+    PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;WIDTH=14;"),
     TAB(false, true, "SELECT=FALSE;");
     // @formatter: on
 
@@ -794,12 +794,13 @@ public class InputFunction extends AbstractFunction {
 
       // Create list of VarSpecs for the subpanel
       List<VarSpec> varSpecs = new ArrayList<VarSpec>();
+      InputType it = InputType.TEXT;
+      int width = vs.optionValues.getNumeric("WIDTH");
+      String options = "WIDTH=" + width;
       for (String key : oldKeys) {
         String name = key;
         String value = map.get(key.toUpperCase());
         String prompt = key;
-        InputType it = InputType.TEXT;
-        String options = "WIDTH=14;";
         VarSpec subvs;
         try {
           subvs = new VarSpec(name, value, prompt, it, options);
