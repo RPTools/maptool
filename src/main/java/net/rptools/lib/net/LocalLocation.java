@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
-import net.rptools.lib.FileUtil;
 import org.apache.commons.io.IOUtils;
 
 public class LocalLocation implements Location {
