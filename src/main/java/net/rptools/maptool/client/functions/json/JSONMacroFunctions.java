@@ -958,7 +958,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param o the object to convert.
    * @return the json representation..
    */
-  public JsonElement asJsonElement(Object o) throws ParserException {
+  public JsonElement asJsonElement(Object o) {
     return typeConversion.asJsonElement(o);
   }
 
