@@ -16,6 +16,7 @@ package net.rptools.maptool.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,7 +51,11 @@ public class Campaign {
   public static final String DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
 
   private GUID id = new GUID();
-  private Map<GUID, Zone> zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+
+  /** The {@link Zone}s that make up this {@code Campaign}. */
+  private final Map<GUID, Zone> zones =
+      Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+
   private String name; // the name of the campaign, to be displayed in the MapToolFrame title bar
 
   @SuppressWarnings("unused")
@@ -150,13 +155,18 @@ public class Campaign {
    */
   public Campaign(Campaign campaign) {
     name = campaign.getName();
-    zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
 
     /*
-     * JFJ 2010-10-27 Don't forget that since these are new zones AND new tokens created here from the old one, if you have any data that needs to transfer over you will need to manually copy it
-     * as is done below for the campaign properties and macro buttons.
+     * Don't forget that since these are new zones AND new tokens created here from the old one,
+     * if you have any data that needs to transfer over you will need to manually copy it
+     * as is done below for the campaign properties and macro buttons. Iteration over a synchronized
+     *  map must lock the map.
      */
-    for (Entry<GUID, Zone> entry : campaign.zones.entrySet()) {
+    Map<GUID, Zone> zonesToCopy;
+    synchronized (zones) {
+      zonesToCopy = new LinkedHashMap<>(campaign.zones);
+    }
+    for (Entry<GUID, Zone> entry : zonesToCopy.entrySet()) {
       Zone copy = new Zone(entry.getValue(), true);
       zones.put(copy.getId(), copy);
     }
@@ -348,7 +358,9 @@ public class Campaign {
    * @return
    */
   public List<Zone> getZones() {
-    return new ArrayList<Zone>(zones.values());
+    synchronized (zones) { // Must lock synchronized map while iterating over contents.
+      return new ArrayList<Zone>(zones.values());
+    }
   }
 
   /**
@@ -389,7 +401,12 @@ public class Campaign {
   }
 
   public boolean containsAsset(MD5Key key) {
-    for (Zone zone : zones.values()) {
+    Collection<Zone> zonesToCheck;
+    synchronized (zones) { // iteration over synchronized map must lock the map
+      zonesToCheck = zones.values();
+    }
+
+    for (Zone zone : zonesToCheck) {
       Set<MD5Key> assetSet = zone.getAllAssetIds();
       if (assetSet.contains(key)) {
         return true;
