@@ -528,12 +528,8 @@ public class PersistenceUtil {
 
       thumb = null;
       if (pakFile.hasFile(thumbFileName)) {
-        InputStream is = null;
-        try {
-          is = pakFile.getFileAsInputStream(thumbFileName);
+        try (InputStream is = pakFile.getFileAsInputStream(thumbFileName)) {
           thumb = ImageIO.read(is);
-        } finally {
-          IOUtils.closeQuietly(is);
         }
       }
     }
@@ -634,16 +630,12 @@ public class PersistenceUtil {
         String pathname = ASSET_DIR + key;
         Asset asset = null;
         if (fixRequired) {
-          InputStream is = null;
-          try {
-            is = pakFile.getFileAsInputStream(pathname);
+          try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
             asset = new Asset(key.toString(), IOUtils.toByteArray(is)); // Ugly bug fix :(
           } catch (FileNotFoundException fnf) {
             // Doesn't need to be reported, since that's handled below.
           } catch (Exception e) {
             log.error("Could not load asset from 1.3.b64 file in compatibility mode", e);
-          } finally {
-            IOUtils.closeQuietly(is);
           }
         } else {
           try {
@@ -670,9 +662,7 @@ public class PersistenceUtil {
           String ext = asset.getImageExtension();
           pathname = pathname + "." + (StringUtil.isEmpty(ext) ? "dat" : ext);
           pathname = assetnameVersionManager.transform(pathname, campaignVersion);
-          InputStream is = null;
-          try {
-            is = pakFile.getFileAsInputStream(pathname);
+          try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
             asset.setImage(IOUtils.toByteArray(is));
           } catch (FileNotFoundException fnf) {
             log.error("Image data for '" + pathname + "' not found?!", fnf);
@@ -680,8 +670,6 @@ public class PersistenceUtil {
           } catch (Exception e) {
             log.error("While reading image data for '" + pathname + "'", e);
             continue;
-          } finally {
-            IOUtils.closeQuietly(is);
           }
         }
         AssetManager.putAsset(asset);
@@ -745,11 +733,8 @@ public class PersistenceUtil {
   public static CampaignProperties loadLegacyCampaignProperties(File file) throws IOException {
     if (!file.exists()) throw new FileNotFoundException();
 
-    FileInputStream in = new FileInputStream(file);
-    try {
+    try (FileInputStream in = new FileInputStream(file)) {
       return loadCampaignProperties(in);
-    } finally {
-      IOUtils.closeQuietly(in);
     }
   }
 
@@ -841,11 +826,8 @@ public class PersistenceUtil {
   public static MacroButtonProperties loadLegacyMacro(File file) throws IOException {
     if (!file.exists()) throw new FileNotFoundException();
 
-    FileInputStream in = new FileInputStream(file);
-    try {
+    try (FileInputStream in = new FileInputStream(file)) {
       return loadMacro(in);
-    } finally {
-      IOUtils.closeQuietly(in);
     }
   }
 
@@ -891,11 +873,8 @@ public class PersistenceUtil {
     if (!file.exists()) {
       throw new FileNotFoundException();
     }
-    FileInputStream in = new FileInputStream(file);
-    try {
+    try (FileInputStream in = new FileInputStream(file)) {
       return loadMacroSet(in);
-    } finally {
-      IOUtils.closeQuietly(in);
     }
   }
 
@@ -951,11 +930,8 @@ public class PersistenceUtil {
   public static LookupTable loadLegacyTable(File file) throws IOException {
     if (!file.exists()) throw new FileNotFoundException();
 
-    FileInputStream in = new FileInputStream(file);
-    try {
+    try (FileInputStream in = new FileInputStream(file)) {
       return loadTable(in);
-    } finally {
-      IOUtils.closeQuietly(in);
     }
   }
 
