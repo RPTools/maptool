@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 import net.rptools.lib.FileUtil;
+import org.apache.commons.io.IOUtils;
 
 public class LocalLocation implements Location {
 
@@ -48,30 +49,15 @@ public class LocalLocation implements Location {
   }
 
   public void putContent(InputStream content) throws IOException {
-
-    OutputStream out = null;
-    try {
-      out = new BufferedOutputStream(new FileOutputStream(getFile()));
-
-      FileUtil.copyWithClose(content, out);
-    } finally {
-      if (out != null) {
-        out.close();
-      }
+    try (OutputStream out = new BufferedOutputStream(new FileOutputStream(getFile()))) {
+      IOUtils.copy(content, out);
     }
   }
 
   public void putContent(ImageWriter writer, BufferedImage content) throws IOException {
-    FileImageOutputStream out = null;
-    try {
-      out = new FileImageOutputStream(getFile());
-
+    try (FileImageOutputStream out = new FileImageOutputStream(getFile())) {
       writer.setOutput(out);
       writer.write(content);
-    } finally {
-      if (out != null) {
-        out.close();
-      }
     }
   }
 
