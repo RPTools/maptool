@@ -499,8 +499,7 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   private String getMovement(
-      final Token source, boolean returnFractionOnly, boolean useTerrainModifiers)
-      throws ParserException {
+      final Token source, boolean returnFractionOnly, boolean useTerrainModifiers) {
     ZoneWalker walker = null;
 
     WalkerMetric metric =

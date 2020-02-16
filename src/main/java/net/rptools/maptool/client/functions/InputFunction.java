@@ -81,7 +81,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import net.rptools.parser.function.EvaluationException;
 import net.rptools.parser.function.ParameterException;
 import org.apache.commons.lang.StringUtils;
 
@@ -1022,7 +1021,7 @@ public class InputFunction extends AbstractFunction {
   // The function that does all the work
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
-      throws EvaluationException, ParserException {
+      throws ParserException {
     // Extract the list of specifier strings from the parameters
     // "name | value | prompt | inputType | options"
     List<String> varStrings = new ArrayList<String>();
