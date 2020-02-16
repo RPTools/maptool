@@ -36,6 +36,7 @@ public class Toolbox {
   public void updateTools() {
     for (Tool tool : toolMap.values()) {
       tool.setEnabled(tool.isAvailable());
+      tool.updateButtonState();
     }
   }
 
@@ -54,7 +55,10 @@ public class Toolbox {
       tool = constructor.newInstance(new Object[] {});
       // tool = constructor.newInstance((Object) null);
 
-      buttonGroup.add(tool);
+      if (tool.hasGroup()) {
+        buttonGroup.add(tool);
+      }
+
       toolMap.put(toolClass, tool);
       tool.setToolbox(this);
       return tool;
