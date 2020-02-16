@@ -155,8 +155,8 @@ public final class NoteBook {
        * Check to see if we are replacing an entry and if so remove it from the other maps, as
        * the reference or the zone may have changed.
        */
-      if (idEntryMap.containsKey(entry.getId())) {
-        removeEntry(entry, false);
+      if (oldEntry != null) {
+        removeEntry(oldEntry, false);
       }
 
       idEntryMap.put(entry.getId(), entry);
@@ -210,10 +210,11 @@ public final class NoteBook {
    *
    * @return the {@link NoteBookEntry}s being managed.
    */
-  public Collection<NoteBookEntry> getEntries() {
+  public Set<NoteBookEntry> getEntries() {
     readLock.lock();
     try {
-      return Collections.unmodifiableCollection(idEntryMap.values());
+      Set<NoteBookEntry> entries = new HashSet<>(idEntryMap.values());
+      return Collections.unmodifiableSet(entries);
     } finally {
       readLock.unlock();
     }
@@ -297,10 +298,13 @@ public final class NoteBook {
 
       // Make sure that entries are removed from the non zone collection when zone is removed
       if (zoneEntries.containsKey(zoneId)) {
-        Set<NoteBookEntry> entries = new HashSet<>();
-        entries.addAll(zoneEntries.get(zoneId).values());
-        for (NoteBookEntry entry : entries) {
-          removeEntry(entry, false);
+        Set<NoteBookEntry> newEntries = new HashSet<>();
+        newEntries.addAll(zoneEntries.get(zoneId).values());
+        for (NoteBookEntry entry : newEntries) {
+          NoteBookEntry oldEntry = idEntryMap.get(entry.getId());
+          if (oldEntry != null) {
+            removeEntry(oldEntry, false);
+          }
         }
       }
 

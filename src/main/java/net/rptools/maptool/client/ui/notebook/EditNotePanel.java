@@ -14,12 +14,7 @@
  */
 package net.rptools.maptool.client.ui.notebook;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.atomic.AtomicReference;
 import javafx.embed.swing.JFXPanel;
-import javafx.embed.swing.SwingNode;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -32,9 +27,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javafx.scene.web.HTMLEditor;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -43,18 +36,15 @@ import net.rptools.maptool.model.notebook.Note;
 import net.rptools.maptool.model.notebook.NoteBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rtextarea.RTextScrollPane;
 
 /**
  * The dialog used for editing or creating notes to be stored in the {@link
  * net.rptools.maptool.model.notebook.NoteBook}.
  */
-public class EditNoteDialog {
+public class EditNotePanel {
 
   /** Logger for this class. */
-  private static final Logger log = LogManager.getLogger(EditNoteDialog.class);
+  private static final Logger log = LogManager.getLogger(EditNotePanel.class);
 
   /** The current {@link Note} being edited, or {@code null} if the dialog is for a new note. */
   private Note editingNotes;
@@ -72,14 +62,8 @@ public class EditNoteDialog {
   private final CheckBox zoneCheckBox =
       new CheckBox(I18N.getText("noteBook.editNote.belongsToMap"));
 
-  /** The {@link Stage} used to display the dialog . */
-  // TODO: CDW: private final Stage stage = new Stage();
-
-  /** The {@link RSyntaxTextArea} used to edit the note contents. */
-  private final RSyntaxTextArea notesTextArea = new RSyntaxTextArea();
-
-  /** The text value of the note. */
-  private AtomicReference<String> editorText = new AtomicReference<>();
+  /** HTMLEditor used for editing the note. */
+  private final HTMLEditor htmlEditor = new HTMLEditor();
 
   /** Has the dialog been initialized. */
   private boolean hasBeenInitialized = false;
@@ -88,36 +72,15 @@ public class EditNoteDialog {
    * Initializes the structure of the dialog. This must be called once after creation of the {@code
    * EditNoteDialog} object.
    */
-  synchronized void init(JFXPanel stage) { // TODO: CDW:
+  synchronized void init(JFXPanel stage, Runnable closeCallback) {
     if (hasBeenInitialized) {
       return;
     }
 
     hasBeenInitialized = true;
     BorderPane root = new BorderPane();
-    // TODO: CDW: stage.setTitle(I18N.getText("noteBook.editNote.title"));
 
-    // Create the SwingNode for the text editor, after creation this must be set up on the EDT.
-    final SwingNode swingNode = new SwingNode();
-    SwingUtilities.invokeLater(
-        () -> {
-          notesTextArea.setEditable(true);
-          notesTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_HTML);
-          notesTextArea.setCodeFoldingEnabled(false); // RSyntaxTextArea throws NPE on badly formatted HTML.
-          notesTextArea.setLineWrap(true);
-          notesTextArea.setWrapStyleWord(true);
-          notesTextArea.setTabSize(4);
-          RTextScrollPane rsp = new RTextScrollPane(notesTextArea);
-
-          JPanel panel = new JPanel();
-          panel.setLayout(new BorderLayout());
-          panel.setPreferredSize(new Dimension(600, 800));
-          panel.add(rsp, BorderLayout.CENTER);
-
-          swingNode.setContent(panel);
-        });
-
-    root.setCenter(swingNode);
+    root.setCenter(htmlEditor);
 
     // Set up the details block on the dialog for the not details
     GridPane detailsGrid = new GridPane();
@@ -147,11 +110,13 @@ public class EditNoteDialog {
 
     Button okButton = new Button(I18N.getText("noteBook.editNote.ok"));
     okButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-    okButton.setOnAction(a -> handleOk());
+    okButton.setOnAction(a -> handleOk(closeCallback));
 
     Button cancelButton = new Button(I18N.getText("noteBook.editNote.cancel"));
     cancelButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-    // TODO: CDW: cancelButton.setOnAction(a -> stage.close());
+    if (closeCallback != null) {
+      cancelButton.setOnAction(a -> closeCallback.run());
+    }
 
     buttons.getChildren().addAll(cancelButton, okButton);
 
@@ -188,14 +153,41 @@ public class EditNoteDialog {
    * successfully it will be added to the campaign note book.
    */
   synchronized void editNew() {
-    SwingUtilities.invokeLater(() -> notesTextArea.setText(""));
+    htmlEditor.setHtmlText("");
     editingNotes = null;
     nameTextField.clear();
     referenceTextField.clear();
     zoneCheckBox.setSelected(true);
     Zone currentZone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
     populateZoneComboBox(currentZone);
-    // TODO: CDW: stage.show();
+  }
+
+  /**
+   * Shows the dialog with blank values to create a new {@link Note}. If the note is created
+   * successfully it will be added to the campaign note book.
+   */
+  synchronized void edit(Note note) {
+    editingNotes = note;
+    htmlEditor.setHtmlText(editingNotes.getNotes());
+    nameTextField.setText(editingNotes.getName());
+    if (editingNotes.getReference().isPresent()) {
+      referenceTextField.setText(editingNotes.getReference().get());
+    } else {
+      referenceTextField.clear();
+    }
+
+    Zone currentZone;
+
+    if (editingNotes.getZoneId().isPresent()) {
+      GUID zoneId = editingNotes.getZoneId().get();
+      currentZone = MapTool.getCampaign().getZone(zoneId);
+      zoneCheckBox.setSelected(true);
+    } else {
+      currentZone = null;
+      zoneCheckBox.setSelected(false);
+    }
+
+    populateZoneComboBox(currentZone);
   }
 
   /**
@@ -216,22 +208,8 @@ public class EditNoteDialog {
    * Checks that the edits are valid and if the are it adds the {@link Note} to the campaign note
    * book.
    */
-  private synchronized void handleOk() {
+  private synchronized void handleOk(Runnable closeCallback) {
     boolean valid = true;
-    boolean done = false;
-
-    while (!done) {
-      try {
-        SwingUtilities.invokeAndWait(() -> editorText.set(notesTextArea.getText()));
-        done = true;
-      } catch (InterruptedException e) {
-        // Do nothing as we will just retry
-      } catch (InvocationTargetException e) {
-        MapTool.showError("noteBook.editNode.errorRetrievingText", e);
-        valid = false;
-        done = true;
-      }
-    }
 
     if (nameTextField.getText().trim().isEmpty()) {
       MapTool.showInformation("noteBook.editNode.noteNameRequired");
@@ -251,10 +229,12 @@ public class EditNoteDialog {
         noteBuilder.setZoneId(zoneID);
       }
 
-      noteBuilder.setNotes(editorText.get());
+      noteBuilder.setNotes(htmlEditor.getHtmlText());
 
       MapTool.getCampaign().getNotebook().putEntry(noteBuilder.build());
-      // TODO: CDW: stage.close();
+      if (closeCallback != null) {
+        closeCallback.run();
+      }
     }
   }
 }

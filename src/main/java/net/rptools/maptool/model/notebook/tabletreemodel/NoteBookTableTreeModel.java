@@ -27,14 +27,16 @@ import net.rptools.maptool.model.notebook.NoteBookEntry;
 
 public final class NoteBookTableTreeModel {
 
-  private final TreeItem<TableTreeItemHolder> root = new TreeItem<>();
-  private final TreeItem<TableTreeItemHolder> zoneRoot =
-      new TreeItem<>(new NoteBookGroupTreeItem("Maps"));
+  private final TreeItem<TableTreeItemHolder> root =
+      new TreeItem<>(new NoteBookGroupTreeItem("Top Level"));
   private final TreeItem<TableTreeItemHolder> noZoneRoot =
       new TreeItem<>(new NoteBookGroupTreeItem("No Map"));
   private final Map<GUID, TreeItem<TableTreeItemHolder>> zoneNodeMap = new HashMap<>();
   private final NoteBook noteBook;
   private final PropertyChangeListener propertyChangeListener = this::synchronizeModelOnJFXThread;
+
+  private final TreeItem<TableTreeItemHolder> EMPTY_NOTE_BOOK =
+      new TreeItem<>(new NoteBookGroupTreeItem("No Note Book Entries"));
 
   public static NoteBookTableTreeModel getTreeModelFor(NoteBook noteBook) {
     var model = new NoteBookTableTreeModel(noteBook);
@@ -43,14 +45,16 @@ public final class NoteBookTableTreeModel {
     return model;
   }
 
-  private NoteBookTableTreeModel(NoteBook nbook) {
-    root.getChildren().add(zoneRoot);
-    root.getChildren().add(noZoneRoot);
-    noteBook = nbook;
+  private NoteBookTableTreeModel(NoteBook nBook) {
+    noteBook = nBook;
     root.setExpanded(true);
   }
 
   private void init() {
+    initializeModel();
+    if (root.getChildren().size() == 0) {
+      root.getChildren().add(EMPTY_NOTE_BOOK);
+    }
     noteBook.addPropertyChangeListener(propertyChangeListener);
   }
 
@@ -66,7 +70,19 @@ public final class NoteBookTableTreeModel {
     Platform.runLater(() -> synchronizeModel(event));
   }
 
+  private void initializeModel() {
+    // remove and add all the entries
+    removeEntries(noteBook.getEntries());
+    addedEntries(noteBook.getEntries());
+  }
+
   private void synchronizeModel(PropertyChangeEvent event) {
+    /*
+     * Always remove the EMPTY_NOTE_BOOK node upfront, we will re add later if it exists as it is
+     * always added at the end if we have no nodes.
+     */
+    root.getChildren().remove(EMPTY_NOTE_BOOK);
+
     switch (event.getPropertyName()) {
       case NoteBook.ZONE_REMOVED_EVENT:
         {
@@ -97,6 +113,18 @@ public final class NoteBookTableTreeModel {
         }
         break;
     }
+
+    if (noZoneRoot.getChildren().size() == 0) {
+      root.getChildren().remove(noZoneRoot);
+    } else {
+      if (!root.getChildren().contains(noZoneRoot)) {
+        root.getChildren().add(noZoneRoot);
+      }
+    }
+
+    if (root.getChildren().size() == 0) {
+      root.getChildren().add(EMPTY_NOTE_BOOK);
+    }
   }
 
   private void addedEntries(Set<NoteBookEntry> added) {
@@ -107,7 +135,7 @@ public final class NoteBookTableTreeModel {
         if (!zoneNodeMap.containsKey(zoneId)) {
           TreeItem<TableTreeItemHolder> node = new TreeItem<>(new NoteBookZoneTreeItem(zoneId));
           zoneNodeMap.put(zoneId, node);
-          zoneRoot.getChildren().add(node);
+          root.getChildren().add(node);
         }
         parentNode = zoneNodeMap.get(zoneId);
       } else {
@@ -120,6 +148,7 @@ public final class NoteBookTableTreeModel {
   }
 
   private void removeEntries(Set<NoteBookEntry> entries) {
+    var toRemove = new HashMap<TreeItem<TableTreeItemHolder>, TreeItem<TableTreeItemHolder>>();
     for (NoteBookEntry entry : entries) {
       TreeItem<TableTreeItemHolder> parentNode;
       if (entry.getZoneId().isPresent()) {
@@ -133,11 +162,15 @@ public final class NoteBookTableTreeModel {
           if (node.getValue() instanceof NoteBookEntryTreeItem) {
             var item = (NoteBookEntryTreeItem) node.getValue();
             if (item.getEntry().getId().equals(entry.getId())) {
-              parentNode.getChildren().remove(node);
+              toRemove.put(parentNode, node);
             }
           }
         }
       }
+    }
+
+    for (var remove : toRemove.entrySet()) {
+      remove.getKey().getChildren().remove(remove.getValue());
     }
   }
 }

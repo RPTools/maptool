@@ -639,7 +639,7 @@ public class MapToolFrame extends DefaultDockableHolder
     GM("Gm"),
     SELECTION("Selected"),
     IMPERSONATED("Impersonate"),
-    NOTEBOOK("Map Note Book");
+    NOTEBOOK("NoteBook");
     // @formatter:on
 
     private String displayName;

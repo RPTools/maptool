@@ -24,13 +24,16 @@ import javafx.embed.swing.JFXPanel;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import net.rptools.lib.swing.SwingUtil;
 
 /**
- * Implements a Swing dialog with JavaFX contents. This is currently preferable to creating a
- * top level JavaFX dialog as it wont get pushed being MapTool if a modal dialog opens.
+ * Implements a Swing dialog with JavaFX contents. This is currently preferable to creating a top
+ * level JavaFX dialog as it wont get pushed being MapTool if a modal dialog opens.
+ *
+ * <p>Objects of this class must be created on the Swing EDT. All the other methods will ensure that
+ * they perform their tasks on the Swing EDT.
  */
 public class SwingJavaFXDialog extends JDialog {
 
@@ -38,26 +41,35 @@ public class SwingJavaFXDialog extends JDialog {
   private boolean hasPositionedItself;
 
   /**
-   *  Creates a new modal {@code SwingJavaFXDialog}.
+   * Creates a new modal {@code SwingJavaFXDialog}.
    *
    * @param title The title of the dialog.
    * @param parent The swing {@link Frame} that is the parent.
    * @param panel The JavaFX content to display.
+   * @throws IllegalStateException if not run on the Swing EDT thread.
+   * @note This constructor must only be used on the Swing EDT thread.
    */
   public SwingJavaFXDialog(String title, Frame parent, JFXPanel panel) {
     this(title, parent, panel, true);
   }
 
   /**
-   *  Creates a new {@code SwingJavaFXDialog}.
+   * Creates a new {@code SwingJavaFXDialog}.
    *
    * @param title The title of the dialog.
    * @param parent The swing {@link Frame} that is the parent.
    * @param panel The JavaFX content to display.
    * @param modal if {@code true} to create a modal dialog.
+   * @throws IllegalStateException if not run on the Swing EDT thread.
+   * @note This constructor must only be used on the Swing EDT thread.
    */
   public SwingJavaFXDialog(String title, Frame parent, JFXPanel panel, boolean modal) {
     super(parent, title, modal);
+
+    if (!SwingUtilities.isEventDispatchThread()) {
+      throw new IllegalStateException("SwingJavaFXDialog must be created on the Swing EDT thread.");
+    }
+
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
     setLayout(new GridLayout());
@@ -71,10 +83,13 @@ public class SwingJavaFXDialog extends JDialog {
           }
         });
     // ESCAPE cancels the window without committing
-    panel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-         .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
-    panel.getActionMap()
-         .put("cancel",
+    panel
+        .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+        .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
+    panel
+        .getActionMap()
+        .put(
+            "cancel",
             new AbstractAction() {
               public void actionPerformed(ActionEvent e) {
                 closeDialog();
@@ -84,22 +99,53 @@ public class SwingJavaFXDialog extends JDialog {
 
   /**
    * Closes the dialog and disposes of resources.
+   *
+   * @note It is safe to run this method from any thread.
    */
   public void closeDialog() {
+    if (SwingUtilities.isEventDispatchThread()) {
+      closeDialogEDT();
+    } else {
+      SwingUtilities.invokeLater(this::closeDialogEDT);
+    }
+  }
+
+  /**
+   * Closes the dialog and disposes of resources.
+   *
+   * @note This method must be run from the Swing EDT thread.
+   */
+  private void closeDialogEDT() {
     dispose();
   }
 
   /**
    * Centers the dialog over the parent.
+   *
+   * @note It is safe to run this method from any thread.
    */
   protected void positionInitialView() {
+    if (SwingUtilities.isEventDispatchThread()) {
+      positionInitialViewEDT();
+    } else {
+      SwingUtilities.invokeLater(this::positionInitialViewEDT);
+    }
+  }
+  /**
+   * Centers the dialog over the parent.
+   *
+   * @note This method must be run from the Swing EDT thread.
+   */
+  private void positionInitialViewEDT() {
     SwingUtil.centerOver(this, getOwner());
   }
 
   /**
    * Displays the dialog.
+   *
+   * @note It is safe to run this method from any thread.
    */
-  public void showDialog() {
+  public void showDialogEDT() {
     // We want to center over our parent, but only the first time.
     // If this dialog is reused, we want it to show up where it was last.
     if (!hasPositionedItself) {
@@ -108,5 +154,17 @@ public class SwingJavaFXDialog extends JDialog {
       hasPositionedItself = true;
     }
     setVisible(true);
+  }
+  /**
+   * Displays the dialog.
+   *
+   * @note This method must be run from the Swing EDT thread.
+   */
+  public void showDialog() {
+    if (SwingUtilities.isEventDispatchThread()) {
+      showDialogEDT();
+    } else {
+      SwingUtilities.invokeLater(this::showDialogEDT);
+    }
   }
 }
