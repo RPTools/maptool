@@ -159,7 +159,7 @@ public class InputFunction extends AbstractFunction {
     CHECK(false, false, "SPAN=FALSE;"),
     RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     LABEL(false, false, "TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SPAN=FALSE;"),
-    PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;WIDTH=14;"),
+    PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;WIDTH=14;TYPE=STRPROP;"),
     TAB(false, true, "SELECT=FALSE;");
     // @formatter: on
 
@@ -1120,6 +1120,7 @@ public class InputFunction extends AbstractFunction {
         VarSpec vs = panelVars.get(varCount);
         JComponent comp = panelControls.get(varCount);
         String newValue = null;
+        JsonObject jsonObject = null;
         switch (vs.inputType) {
           case TEXT:
             {
@@ -1176,6 +1177,7 @@ public class InputFunction extends AbstractFunction {
               // all the new settings.
               Component[] comps = ((JPanel) comp).getComponents();
               StringBuilder sb = new StringBuilder();
+              jsonObject = new JsonObject();
               int setVars = 0; // "NONE", no assignments made
               if (vs.optionValues.optionEquals("SETVARS", "SUFFIXED")) setVars = 1;
               if (vs.optionValues.optionEquals("SETVARS", "UNSUFFIXED")) setVars = 2;
@@ -1189,6 +1191,10 @@ public class InputFunction extends AbstractFunction {
                 sb.append("=");
                 sb.append(value);
                 sb.append(" ; ");
+                if (vs.optionValues.optionEquals("TYPE", "JSON")) {
+                  jsonObject.add(
+                      key, JSONMacroFunctions.getInstance().convertPrimitiveFromString(value));
+                }
                 switch (setVars) {
                   case 0:
                     // Do nothing
@@ -1211,7 +1217,11 @@ public class InputFunction extends AbstractFunction {
         }
         // Set the variable to the value we got from the dialog box.
         if (newValue != null) {
-          parser.setVariable(vs.name, newValue.trim());
+          if (vs.optionValues.optionEquals("TYPE", "JSON")) {
+            parser.setVariable(vs.name, jsonObject);
+          } else {
+            parser.setVariable(vs.name, newValue.trim());
+          }
           allAssignments.append(vs.name + "=" + newValue.trim() + " ## ");
         }
       }
