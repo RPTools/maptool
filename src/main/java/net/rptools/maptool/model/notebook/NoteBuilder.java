@@ -16,91 +16,168 @@ package net.rptools.maptool.model.notebook;
 
 import java.util.UUID;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 
+/** Builder class used for building {@link Note} objects. */
 public class NoteBuilder {
 
+  /** The id of the {@code Note}. */
   private UUID id;
 
+  /** Has the id valie been set. */
   private boolean idSet;
 
+  /** The name of the {@code Note}. */
   private String name;
 
+  /** Has the name value been set. */
   private boolean nameSet;
 
+  /** The Reference value of the {@code Note}. */
   private String reference;
 
+  /** Has the reference value been set. */
   private boolean referenceSet;
 
+  /** The id of the {@link Zone} of the {@code Note}. */
   private GUID zoneId;
 
+  /** Has the {@link Zone} id value been set. */
   private boolean zoneIdSet;
 
+  /** The notes for the {@code Note). */
   private String notes;
 
+  /** Has the nores value been set. */
   private boolean notesSet;
 
-  public static NoteBuilder copy(Note noteBookmark, UUID id) {
+  /**
+   * Creates a new {@code NoteBuilder} populated with the values from the passed in {@link Note} and
+   * sets the id to the specified value.
+   *
+   * @param note The {@link Note} to copy the values from.
+   * @param id The id value to use.
+   * @return a new {@code NoteBuilder}.}
+   */
+  public static NoteBuilder copy(Note note, UUID id) {
     assert id != null : "ID can not be null for copied NoteBookmarkBuilder.";
 
     NoteBuilder builder = new NoteBuilder();
 
     builder.setId(id);
-    builder.setName(noteBookmark.getName());
-    if (noteBookmark.getReference().isPresent()) {
-      builder.setReference(noteBookmark.getReference().get());
+    builder.setName(note.getName());
+    if (note.getReference().isPresent()) {
+      builder.setReference(note.getReference().get());
     }
-    if (noteBookmark.getZoneId().isPresent()) {
-      builder.setZoneId(noteBookmark.getZoneId().get());
+    if (note.getZoneId().isPresent()) {
+      builder.setZoneId(note.getZoneId().get());
     }
-    builder.setNotes(noteBookmark.getNotes());
+    builder.setNotes(note.getNotes());
 
     return builder;
   }
 
-  public static NoteBuilder copy(Note noteBookmark) {
-    return copy(noteBookmark, noteBookmark.getId());
+  /**
+   * Creates a new {@code NoteBuilder} populated with the values from the passed in {@link Note}.
+   *
+   * @param note The {@link Note} to copy the values from.
+   * @return a new {@code NoteBuilder}.
+   */
+  public static NoteBuilder copy(Note note) {
+    return copy(note, note.getId());
   }
 
-  public static NoteBuilder copyWithNewId(Note noteBookmark) {
-    return copy(noteBookmark, NoteBookEntry.generateId());
+  /**
+   * Creates a new {@code NoteBuilder} populated with the values from the passed in {@link Note} and
+   * assigns a newly generated id.
+   *
+   * @param note The {@link Note} to copy the values from.
+   * @return a new {@code NoteBuilder}.
+   */
+  public static NoteBuilder copyWithNewId(Note note) {
+    return copy(note, NoteBookEntry.generateId());
   }
 
+  /** Creates a new {@code NoteBuilder} with none of the values set. */
   public NoteBuilder() {
     id = NoteBookEntry.generateId();
   }
 
+  /**
+   * Returns the id that has been set.
+   *
+   * @eturn the id that has been set.
+   */
   public UUID getId() {
     return id;
   }
 
+  /**
+   * Sets the id that will be used for the {@link Note} to be built.
+   *
+   * @param id the id that will be used.
+   * @return {@code this} so that methods can be chained.
+   */
   public NoteBuilder setId(UUID id) {
     this.id = id;
     idSet = id != null;
     return this;
   }
 
+  /**
+   * Returns if the id has been set.
+   *
+   * @return {@code true} if the id has been set.
+   */
   public boolean isIdSet() {
     return idSet;
   }
 
+  /**
+   * Returns the name that will be used to build the {@link Note}.
+   *
+   * @return the name that will be used to build the {@link Note}.
+   */
   public String getName() {
     return name;
   }
 
+  /**
+   * Sets the name tht will be used to build the {@link Note}.
+   *
+   * @param name The name that wil be used.
+   * @return {@code this} so that methods can be chained.
+   */
   public NoteBuilder setName(String name) {
     this.name = name;
     nameSet = name != null;
     return this;
   }
 
+  /**
+   * Returns if the name has been set.
+   *
+   * @return {@code true} if the name has been set.
+   */
   public boolean isNameSet() {
     return nameSet;
   }
 
+  /**
+   * Returns the reference that will be used for the {@link Note} to be built.
+   *
+   * @return the reference that has been set.
+   */
   public String getReference() {
     return reference;
   }
 
+  /**
+   * Sets the reference value that will be used when building the {@link Note}.
+   *
+   * @param reference The reference value that will be set.
+   * @return {@code this} so that methods can be chained.
+   */
   public NoteBuilder setReference(String reference) {
     if (reference == null || reference.isEmpty()) {
       this.reference = null;

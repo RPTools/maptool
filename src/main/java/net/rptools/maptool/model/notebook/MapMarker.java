@@ -15,12 +15,29 @@
 package net.rptools.maptool.model.notebook;
 
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.model.Asset;
 
+/** Interface that describes a general marker on the map. */
 public interface MapMarker {
 
+  /**
+   * Returns the MD5Key of the {@link Asset} used to display the marker on the map.
+   *
+   * @return the MD5Key of the {@link Asset} used to display the marker on the map.
+   */
   MD5Key getAsset();
 
+  /**
+   * Returns the x co-ordinate of the center of the marker on the map.
+   *
+   * @return the x co-ordinate of the center of the marker on the map.
+   */
   double getIconCenterX();
 
+  /**
+   * Returns the y co-ordinate of the center of the marker on the map.
+   *
+   * @return the y co-ordinate of the center of the marker on the map.
+   */
   double getIconCenterY();
 }
