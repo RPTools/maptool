@@ -24,8 +24,12 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapTool.CampaignEvent;
+import net.rptools.maptool.client.swing.GenericDialog;
+import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookEntryTreeItem;
@@ -41,6 +45,8 @@ public class NoteBookPanel extends JFXPanel {
 
   private final TreeTableView<TableTreeItemHolder> bookmarkTable = new TreeTableView<>();
   private NoteBookTableTreeModel noteBookTableTreeModel;
+
+  private SwingJavaFXDialog editDialog;
 
   public static NoteBookPanel createMapBookmarkPanel() {
     NoteBookPanel panel = new NoteBookPanel();
@@ -110,7 +116,10 @@ public class NoteBookPanel extends JFXPanel {
     Button addNote = new Button("Add Note");
     Button addView = new Button("Add View");
     Button addMarker = new Button("Add Marker");
-    addNote.setOnAction(a -> editNoteDialog.editNew());
+    addNote.setOnAction(a -> {
+      editNoteDialog.editNew();
+      SwingUtilities.invokeLater(() -> editDialog.showDialog());
+    });
     vBox.setSpacing(5);
     vBox.setPadding(new Insets(10, 0, 0, 10));
     HBox buttonsHBox = new HBox();
@@ -118,7 +127,12 @@ public class NoteBookPanel extends JFXPanel {
     vBox.getChildren().addAll(bookmarkTable, buttonsHBox);
     setScene(scene);
 
-    editNoteDialog.init();
+    JFXPanel jfxPanel = new JFXPanel();
+    editNoteDialog.init(jfxPanel);
+
+    SwingUtilities.invokeLater(() -> {
+      editDialog = new SwingJavaFXDialog("Test", MapTool.getFrame(), jfxPanel, false);
+    });
   }
 
   private void campaignChanged(Campaign oldCampaign, Campaign newCampaign) {

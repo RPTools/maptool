@@ -18,6 +18,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.atomic.AtomicReference;
+import javafx.embed.swing.JFXPanel;
 import javafx.embed.swing.SwingNode;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -72,7 +73,7 @@ public class EditNoteDialog {
       new CheckBox(I18N.getText("noteBook.editNote.belongsToMap"));
 
   /** The {@link Stage} used to display the dialog . */
-  private final Stage stage = new Stage();
+  // TODO: CDW: private final Stage stage = new Stage();
 
   /** The {@link RSyntaxTextArea} used to edit the note contents. */
   private final RSyntaxTextArea notesTextArea = new RSyntaxTextArea();
@@ -87,14 +88,14 @@ public class EditNoteDialog {
    * Initializes the structure of the dialog. This must be called once after creation of the {@code
    * EditNoteDialog} object.
    */
-  synchronized void init() {
+  synchronized void init(JFXPanel stage) { // TODO: CDW:
     if (hasBeenInitialized) {
       return;
     }
 
     hasBeenInitialized = true;
     BorderPane root = new BorderPane();
-    stage.setTitle(I18N.getText("noteBook.editNote.title"));
+    // TODO: CDW: stage.setTitle(I18N.getText("noteBook.editNote.title"));
 
     // Create the SwingNode for the text editor, after creation this must be set up on the EDT.
     final SwingNode swingNode = new SwingNode();
@@ -102,8 +103,7 @@ public class EditNoteDialog {
         () -> {
           notesTextArea.setEditable(true);
           notesTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_HTML);
-          notesTextArea.setCodeFoldingEnabled(
-              false); // RSyntaxTextArea throws NPE on badly formatted HTML.
+          notesTextArea.setCodeFoldingEnabled(false); // RSyntaxTextArea throws NPE on badly formatted HTML.
           notesTextArea.setLineWrap(true);
           notesTextArea.setWrapStyleWord(true);
           notesTextArea.setTabSize(4);
@@ -151,7 +151,7 @@ public class EditNoteDialog {
 
     Button cancelButton = new Button(I18N.getText("noteBook.editNote.cancel"));
     cancelButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-    cancelButton.setOnAction(a -> stage.close());
+    // TODO: CDW: cancelButton.setOnAction(a -> stage.close());
 
     buttons.getChildren().addAll(cancelButton, okButton);
 
@@ -195,7 +195,7 @@ public class EditNoteDialog {
     zoneCheckBox.setSelected(true);
     Zone currentZone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
     populateZoneComboBox(currentZone);
-    stage.show();
+    // TODO: CDW: stage.show();
   }
 
   /**
@@ -254,7 +254,7 @@ public class EditNoteDialog {
       noteBuilder.setNotes(editorText.get());
 
       MapTool.getCampaign().getNotebook().putEntry(noteBuilder.build());
-      stage.close();
+      // TODO: CDW: stage.close();
     }
   }
 }
