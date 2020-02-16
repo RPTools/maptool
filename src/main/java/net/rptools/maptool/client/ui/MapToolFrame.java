@@ -102,7 +102,6 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerDisconnectHandler;
-import net.rptools.maptool.client.notebook.NoteBookPanel;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
 import net.rptools.maptool.client.swing.CoordinateStatusBar;
@@ -126,6 +125,7 @@ import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.*;
+import net.rptools.maptool.client.ui.notebook.NoteBookPanel;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeCellRenderer;
@@ -222,6 +222,9 @@ public class MapToolFrame extends DefaultDockableHolder
   private DrawablesPanel drawablesPanel;
   private final TextureChooserPanel textureChooserPanel;
   private LookupTablePanel lookupTablePanel;
+
+  /** The UI element for displaying note books. */
+  private final NoteBookPanel noteBookPanel = NoteBookPanel.createMapBookmarkPanel();
 
   // External filename support
   private JFileChooser loadPropsFileChooser;
@@ -743,9 +746,7 @@ public class MapToolFrame extends DefaultDockableHolder
     frameMap.put(
         MTFrame.NOTEBOOK,
         createDockingFrame(
-            MTFrame.NOTEBOOK,
-            NoteBookPanel.createMapBookmarkPanel(),
-            new ImageIcon(AppStyle.bookmarksPanelImage)));
+            MTFrame.NOTEBOOK, noteBookPanel, new ImageIcon(AppStyle.bookmarksPanelImage)));
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);
@@ -792,6 +793,10 @@ public class MapToolFrame extends DefaultDockableHolder
       lookupTablePanel = new LookupTablePanel();
     }
     return lookupTablePanel;
+  }
+
+  public NoteBookPanel getNoteBookPanel() {
+    return noteBookPanel;
   }
 
   public EditTokenDialog getTokenPropertiesDialog() {

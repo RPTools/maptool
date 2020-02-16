@@ -61,6 +61,7 @@ import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -156,6 +157,10 @@ public class MapTool {
     Changed
   }
 
+  public enum CampaignEvent {
+    Changed
+  }
+
   // Jamz: This sets the thumbnail size that is cached for imageThumbs
   // Set it to 500 (from 100) for now to support larger asset window previews
   // TODO: Add preferences option as well as add auto-purge after x days preferences
@@ -239,12 +244,22 @@ public class MapTool {
    *     window (formatted using <code>params</code>)
    * @param messageType JOptionPane.{ERROR|WARNING|INFORMATION}_MESSAGE
    * @param params optional parameters to use when formatting the data from the properties file
+   * @note It is safe to call this from any thread.
    */
   public static void showMessage(
       String message, String titleKey, int messageType, Object... params) {
-    String title = I18N.getText(titleKey, params);
-    JOptionPane.showMessageDialog(
-        clientFrame, "<html>" + I18N.getText(message, params), title, messageType);
+    Runnable runnable =
+        () -> {
+          String title = I18N.getText(titleKey, params);
+          JOptionPane.showMessageDialog(
+              clientFrame, "<html>" + I18N.getText(message, params), title, messageType);
+        };
+
+    if (SwingUtilities.isEventDispatchThread()) {
+      runnable.run();
+    } else {
+      SwingUtilities.invokeLater(runnable);
+    }
   }
 
   /**
@@ -261,12 +276,23 @@ public class MapTool {
    *                    </code>
    * @param params optional parameters to use when formatting the title text from the properties
    *     file
+   * @note It is safe to call this from any thread.
    */
   public static void showMessage(
       Object[] messages, String titleKey, int messageType, Object... params) {
-    String title = I18N.getText(titleKey, params);
-    JList list = new JList(messages);
-    JOptionPane.showMessageDialog(clientFrame, list, title, messageType);
+
+    Runnable runnable =
+        () -> {
+          String title = I18N.getText(titleKey, params);
+          JList<Object> list = new JList<>(messages);
+          JOptionPane.showMessageDialog(clientFrame, list, title, messageType);
+        };
+
+    if (SwingUtilities.isEventDispatchThread()) {
+      runnable.run();
+    } else {
+      SwingUtilities.invokeLater(runnable);
+    }
   }
 
   /**
@@ -277,6 +303,7 @@ public class MapTool {
    *
    * @param messages the Objects (normally strings) to put in the body of the dialog; no properties
    *     file lookup is performed!
+   * @note It is safe to call this from any thread.
    */
   public static void showFeedback(Object[] messages) {
     showMessage(messages, "msg.title.messageDialogFeedback", JOptionPane.ERROR_MESSAGE);
@@ -302,6 +329,7 @@ public class MapTool {
    *
    * @param msgKey the key to use when calling {@link I18N#getText(String)}
    * @param t the exception to be processed
+   * @note It is safe to call this from any thread.
    */
   public static void showError(String msgKey, Throwable t) {
     String msg = generateMessage(msgKey, t);
@@ -314,6 +342,7 @@ public class MapTool {
    * </code> for the second parameter.
    *
    * @param msgKey the key to use when calling {@link I18N#getText(String)}
+   * @note It is safe to call this from any thread.
    */
   public static void showWarning(String msgKey) {
     showWarning(msgKey, null);
@@ -329,6 +358,7 @@ public class MapTool {
    *
    * @param msgKey the key to use when calling {@link I18N#getText(String)}
    * @param t the exception to be processed
+   * @note It is safe to call this from any thread.
    */
   public static void showWarning(String msgKey, Throwable t) {
     String msg = generateMessage(msgKey, t);
@@ -341,6 +371,7 @@ public class MapTool {
    * null</code> for the second parameter.
    *
    * @param msgKey the key to use when calling {@link I18N#getText(String)}
+   * @note It is safe to call this from any thread.
    */
   public static void showInformation(String msgKey) {
     showInformation(msgKey, null);
@@ -356,6 +387,7 @@ public class MapTool {
    *
    * @param msgKey the key to use when calling {@link I18N#getText(String)}
    * @param t the exception to be processed
+   * @note It is safe to call this from any thread.
    */
   public static void showInformation(String msgKey, Throwable t) {
     String msg = generateMessage(msgKey, t);
@@ -370,6 +402,7 @@ public class MapTool {
    * @param message key from the properties file (preferred) or hard-coded string to display
    * @param params optional arguments for the formatting of the property value
    * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
+   * @note This method must be called from the swing event thread.
    */
   public static boolean confirm(String message, Object... params) {
     // String msg = I18N.getText(message, params);
@@ -390,6 +423,7 @@ public class MapTool {
    * @param message key from the properties file (preferred) or hard-coded string to display
    * @param params optional arguments for the formatting of the property value
    * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
+   * @note This method must be called from the swing event thread.
    */
   public static int confirmImpl(String title, int buttons, String message, Object... params) {
     String msg = I18N.getText(message, params);
@@ -598,6 +632,7 @@ public class MapTool {
   private static void registerEvents() {
     getEventDispatcher().registerEvents(ZoneEvent.values());
     getEventDispatcher().registerEvents(PreferencesEvent.values());
+    getEventDispatcher().registerEvents(CampaignEvent.values());
   }
 
   /**
@@ -957,6 +992,7 @@ public class MapTool {
 
   public static void setCampaign(Campaign campaign, GUID defaultRendererId) {
     // Load up the new
+    Campaign oldCampaign = MapTool.campaign;
     MapTool.campaign = campaign;
     ZoneRenderer currRenderer = null;
 
@@ -986,6 +1022,10 @@ public class MapTool {
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
     UserDefinedMacroFunctions.getInstance().loadCampaignLibFunctions();
+
+    if (oldCampaign != null) { // Dont fire during initialization
+      getEventDispatcher().fireEvent(CampaignEvent.Changed, oldCampaign, campaign);
+    }
   }
 
   public static void setServerPolicy(ServerPolicy policy) {

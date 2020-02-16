@@ -65,7 +65,9 @@ public class NoteBuilder {
     return copy(noteBookmark, NoteBookEntry.generateId());
   }
 
-  public NoteBuilder() {}
+  public NoteBuilder() {
+    id = NoteBookEntry.generateId();
+  }
 
   public UUID getId() {
     return id;
@@ -100,8 +102,12 @@ public class NoteBuilder {
   }
 
   public NoteBuilder setReference(String reference) {
-    this.reference = reference;
-    referenceSet = reference != null;
+    if (reference == null || reference.isEmpty()) {
+      this.reference = null;
+    } else {
+      this.reference = reference;
+    }
+    referenceSet = this.reference != null;
     return this;
   }
 
@@ -135,5 +141,9 @@ public class NoteBuilder {
 
   public boolean isNotesSet() {
     return notesSet;
+  }
+
+  public Note build() {
+    return new Note(this);
   }
 }

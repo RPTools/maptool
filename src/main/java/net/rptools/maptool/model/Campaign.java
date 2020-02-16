@@ -98,7 +98,7 @@ public class Campaign {
    * for the campaign.
    */
   @XStreamOmitField // Do no persist as part of normal persistence, it will be handled s separately
-  private final transient NoteBook mapBookmarkManager = new NoteBook();
+  private final transient NoteBook notebook = new NoteBook();
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
@@ -161,7 +161,7 @@ public class Campaign {
     name = campaign.getName();
     zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
     for (GUID zid : zones.keySet()) {
-      mapBookmarkManager.zoneAdded(zid);
+      notebook.zoneAdded(zid);
     }
 
     /*
@@ -381,7 +381,7 @@ public class Campaign {
    */
   public void putZone(Zone zone) {
     zones.put(zone.getId(), zone);
-    mapBookmarkManager.zoneAdded(zone.getId());
+    notebook.zoneAdded(zone.getId());
   }
 
   public void removeAllZones() {
@@ -389,7 +389,7 @@ public class Campaign {
     zones.clear();
 
     for (GUID zid : removedZoneIds) {
-      mapBookmarkManager.zoneRemoved(zid);
+      notebook.zoneRemoved(zid);
     }
   }
 
@@ -400,7 +400,7 @@ public class Campaign {
    */
   public void removeZone(GUID id) {
     zones.remove(id);
-    mapBookmarkManager.zoneRemoved(id);
+    notebook.zoneRemoved(id);
   }
 
   public boolean containsAsset(Asset asset) {
@@ -682,5 +682,14 @@ public class Campaign {
 
   public void setExportCampaignDialog(CampaignExportDialog d) {
     campaignExportDialog = d;
+  }
+
+  /**
+   * Returns the {@link NoteBook} for the {@code Campaign}.
+   *
+   * @return the {@link NoteBook} for the {@code Campaign}.
+   */
+  public NoteBook getNotebook() {
+    return notebook;
   }
 }

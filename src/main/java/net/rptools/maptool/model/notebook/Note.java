@@ -24,7 +24,7 @@ public class Note implements NoteBookEntry {
   /** The id of the {@code NoteBookmark}. */
   private final UUID id;
 
-  /** Th ename of the {@code NoteBookmark}. */
+  /** The name of the {@code NoteBookmark}. */
   private final String name;
 
   /** The Reference id of the {@code NoteBookmark}. */
