@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import de.muntjak.tinylookandfeel.TinyComboBoxButton;
 import java.awt.Color;
 import java.awt.Component;
@@ -80,7 +81,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import net.rptools.parser.function.EvaluationException;
 import net.rptools.parser.function.ParameterException;
 import org.apache.commons.lang.StringUtils;
 
@@ -159,7 +159,7 @@ public class InputFunction extends AbstractFunction {
     CHECK(false, false, "SPAN=FALSE;"),
     RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     LABEL(false, false, "TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SPAN=FALSE;"),
-    PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;"),
+    PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;WIDTH=14;TYPE=STRPROP;"),
     TAB(false, true, "SELECT=FALSE;");
     // @formatter: on
 
@@ -389,12 +389,7 @@ public class InputFunction extends AbstractFunction {
       List<String> ret = new ArrayList<String>();
       if (valueString != null) {
         if ("json".equalsIgnoreCase(delim)) {
-          JsonElement json = null;
-          try {
-            json = JSONMacroFunctions.getInstance().asJsonElement(valueString);
-          } catch (ParserException ignored) {
-            // if can't parse, keep json a null
-          }
+          JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(valueString);
           if (json != null && json.isJsonArray()) {
             for (JsonElement ele : json.getAsJsonArray()) {
               ret.add(ele.getAsString().trim());
@@ -786,20 +781,32 @@ public class InputFunction extends AbstractFunction {
 
     /** Creates a subpanel with controls for each property. */
     public JComponent createPropsControl(VarSpec vs) {
-      // Get the key/value pairs from the property string
       Map<String, String> map = new HashMap<String, String>();
+      JsonElement jsonElement = JSONMacroFunctions.getInstance().asJsonElement(vs.value);
       List<String> oldKeys = new ArrayList<String>();
-      List<String> oldKeysNormalized = new ArrayList<String>();
-      StrPropFunctions.parse(vs.value, map, oldKeys, oldKeysNormalized, ";");
+
+      if (jsonElement instanceof JsonObject) {
+        // Get the key/value pairs from the JsonObject
+        JsonObject jsonObject = (JsonObject) jsonElement;
+        for (String key : jsonObject.keySet()) {
+          map.put(key.toUpperCase(), jsonObject.get(key).getAsString());
+          oldKeys.add(key);
+        }
+      } else {
+        // Get the key/value pairs from the property string
+        List<String> oldKeysNormalized = new ArrayList<String>();
+        StrPropFunctions.parse(vs.value, map, oldKeys, oldKeysNormalized, ";");
+      }
 
       // Create list of VarSpecs for the subpanel
       List<VarSpec> varSpecs = new ArrayList<VarSpec>();
+      InputType it = InputType.TEXT;
+      int width = vs.optionValues.getNumeric("WIDTH");
+      String options = "WIDTH=" + width;
       for (String key : oldKeys) {
         String name = key;
         String value = map.get(key.toUpperCase());
         String prompt = key;
-        InputType it = InputType.TEXT;
-        String options = "WIDTH=14;";
         VarSpec subvs;
         try {
           subvs = new VarSpec(name, value, prompt, it, options);
@@ -1014,7 +1021,7 @@ public class InputFunction extends AbstractFunction {
   // The function that does all the work
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
-      throws EvaluationException, ParserException {
+      throws ParserException {
     // Extract the list of specifier strings from the parameters
     // "name | value | prompt | inputType | options"
     List<String> varStrings = new ArrayList<String>();
@@ -1113,6 +1120,7 @@ public class InputFunction extends AbstractFunction {
         VarSpec vs = panelVars.get(varCount);
         JComponent comp = panelControls.get(varCount);
         String newValue = null;
+        JsonObject jsonObject = null;
         switch (vs.inputType) {
           case TEXT:
             {
@@ -1169,6 +1177,7 @@ public class InputFunction extends AbstractFunction {
               // all the new settings.
               Component[] comps = ((JPanel) comp).getComponents();
               StringBuilder sb = new StringBuilder();
+              jsonObject = new JsonObject();
               int setVars = 0; // "NONE", no assignments made
               if (vs.optionValues.optionEquals("SETVARS", "SUFFIXED")) setVars = 1;
               if (vs.optionValues.optionEquals("SETVARS", "UNSUFFIXED")) setVars = 2;
@@ -1182,6 +1191,10 @@ public class InputFunction extends AbstractFunction {
                 sb.append("=");
                 sb.append(value);
                 sb.append(" ; ");
+                if (vs.optionValues.optionEquals("TYPE", "JSON")) {
+                  jsonObject.add(
+                      key, JSONMacroFunctions.getInstance().convertPrimitiveFromString(value));
+                }
                 switch (setVars) {
                   case 0:
                     // Do nothing
@@ -1204,7 +1217,11 @@ public class InputFunction extends AbstractFunction {
         }
         // Set the variable to the value we got from the dialog box.
         if (newValue != null) {
-          parser.setVariable(vs.name, newValue.trim());
+          if (vs.optionValues.optionEquals("TYPE", "JSON")) {
+            parser.setVariable(vs.name, jsonObject);
+          } else {
+            parser.setVariable(vs.name, newValue.trim());
+          }
           allAssignments.append(vs.name + "=" + newValue.trim() + " ## ");
         }
       }

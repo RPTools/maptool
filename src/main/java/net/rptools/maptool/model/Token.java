@@ -1644,13 +1644,9 @@ public class Token extends BaseModel implements Cloneable {
     }
     // First we try convert it to a JSON object.
     if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
-      try {
-        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
-        if (json.isJsonObject() || json.isJsonArray()) {
-          return json;
-        }
-      } catch (ParserException e) {
-        // Ignore exception to maintain compatibility with existing macros.
+      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
+      if (json.isJsonObject() || json.isJsonArray()) {
+        return json;
       }
     }
     try {
