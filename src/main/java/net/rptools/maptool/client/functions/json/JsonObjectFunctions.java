@@ -46,9 +46,8 @@ public class JsonObjectFunctions {
    * @param prop the MTS string property to convert into a {@link JsonObject}.
    * @param delim the delimiter used in the string properties.
    * @return a {@link JsonObject} convert4d from the string properties.
-   * @throws ParserException if there is an error converting to json values.
    */
-  public JsonObject fromStrProp(String prop, String delim) throws ParserException {
+  public JsonObject fromStrProp(String prop, String delim) {
     String[] propsArray = prop.split(delim);
     JsonObject jsonObject = new JsonObject();
 
