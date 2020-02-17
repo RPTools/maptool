@@ -15,14 +15,27 @@
 package net.rptools.maptool.model.notebook.tabletreemodel;
 
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 
+/** Holder class that holds the id of the {@link Zone} in the model for the ui representation. */
 public final class NoteBookZoneTreeItem implements TableTreeItemHolder {
+  /** The id of the {@link Zone}. */
   private final GUID id;
 
+  /**
+   * Creates a new {@code NoteBookZoneTreeItem}.
+   *
+   * @param zoneId the id of the {@link Zone}.
+   */
   NoteBookZoneTreeItem(GUID zoneId) {
     id = zoneId;
   }
 
+  /**
+   * Returns the id of the {@link Zone}.
+   *
+   * @return the id of the {@link Zone}.
+   */
   public GUID getId() {
     return id;
   }

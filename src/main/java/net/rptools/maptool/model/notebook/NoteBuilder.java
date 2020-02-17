@@ -190,6 +190,7 @@ public class NoteBuilder {
 
   /**
    * Has the reference value been set.
+   *
    * @return {@code true} if the reference value has been set.
    */
   public boolean isReferenceSet() {
@@ -207,8 +208,8 @@ public class NoteBuilder {
 
   /**
    * Sets the id of the {@link Zone} for the {@link Note} that will be built.
-   * @param zoneId the id of the {@link Zone} for the {@link Note} that will be built.
    *
+   * @param zoneId the id of the {@link Zone} for the {@link Note} that will be built.
    * @return {@code this} so that methods can be chained.
    */
   public NoteBuilder setZoneId(GUID zoneId) {
@@ -237,8 +238,8 @@ public class NoteBuilder {
 
   /**
    * Sets the notes for the {@link Note} that will be built.
-   * @param notes the notes for the {@link Note} that will be built.
    *
+   * @param notes the notes for the {@link Note} that will be built.
    * @return {@code this} so that methods can be chained.
    */
   public NoteBuilder setNotes(String notes) {
@@ -260,7 +261,6 @@ public class NoteBuilder {
    * Builds a new {@link Note} with the details from this {@code NoteBuilder}.
    *
    * @return a {@link Note}.
-   *
    * @throws IllegalStateException if all the required values are not set.
    */
   public Note build() {

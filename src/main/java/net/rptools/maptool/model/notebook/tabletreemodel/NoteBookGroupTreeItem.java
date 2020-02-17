@@ -14,13 +14,25 @@
  */
 package net.rptools.maptool.model.notebook.tabletreemodel;
 
+/** Holder class that holds the name of the group in the model for the ui representation. */
 public final class NoteBookGroupTreeItem implements TableTreeItemHolder {
+  /** The name of the group. */
   private final String name;
 
+  /**
+   * Creates a new {@code NoteBookGroupTreeItem};
+   *
+   * @param groupName tne name of the group.
+   */
   NoteBookGroupTreeItem(String groupName) {
     name = groupName;
   }
 
+  /**
+   * Returns the name of the group.
+   *
+   * @return the name of the group.
+   */
   public String getName() {
     return name;
   }

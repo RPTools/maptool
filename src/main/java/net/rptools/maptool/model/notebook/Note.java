@@ -41,13 +41,11 @@ public class Note implements NoteBookEntry {
    * object.
    *
    * @param builder the {@link NoteBuilder} used to create this object.
-   *
    * @throws IllegalStateException if all the required values are not set.
    */
   Note(NoteBuilder builder) {
     String error = "";
     boolean invalid = false;
-
 
     if (builder.isIdSet()) {
       error = "ID can not be null for Note";

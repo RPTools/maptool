@@ -50,13 +50,11 @@ public final class MapBookmark implements NoteBookEntry, Comparable<MapBookmark>
    * Creates a new {@code MapBookmark}.
    *
    * @param builder {@link MapBookmarkBuilder} used to build this {@code MapBookmark}.
-   *
    * @throws IllegalStateException if all the required values are not set.
    */
   MapBookmark(MapBookmarkBuilder builder) {
     String error = "";
     boolean invalid = false;
-
 
     if (builder.isZoneIdSet()) {
       error = "The zone id must be set for a MapBookmark";
@@ -75,7 +73,7 @@ public final class MapBookmark implements NoteBookEntry, Comparable<MapBookmark>
       if (!error.isEmpty()) {
         error += ",";
       }
-      error +=  "The map marker must be set for a MapBookmark";
+      error += "The map marker must be set for a MapBookmark";
       invalid = true;
     }
 

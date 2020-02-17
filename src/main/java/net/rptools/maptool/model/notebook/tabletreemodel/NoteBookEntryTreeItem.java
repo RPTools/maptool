@@ -16,13 +16,26 @@ package net.rptools.maptool.model.notebook.tabletreemodel;
 
 import net.rptools.maptool.model.notebook.NoteBookEntry;
 
+/** Holder class that holds {@link NoteBookEntry}s in the model for the ui representation. */
 public final class NoteBookEntryTreeItem implements TableTreeItemHolder {
+  /** The {@link NoteBookEntry} to be displayed. */
   private final NoteBookEntry entry;
 
+  /**
+   * Creates a new {@code NoteBookEntryTreeItem} to be held in the {@link
+   * javafx.scene.control.TreeItem} node for the UI.
+   *
+   * @param entry the {@link NoteBookEntry} to hold.
+   */
   NoteBookEntryTreeItem(NoteBookEntry entry) {
     this.entry = entry;
   }
 
+  /**
+   * Returns the {@link NoteBookEntry} being held.
+   *
+   * @return the {@link NoteBookEntry} being held.
+   */
   public NoteBookEntry getEntry() {
     return entry;
   }

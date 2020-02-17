@@ -14,4 +14,8 @@
  */
 package net.rptools.maptool.model.notebook.tabletreemodel;
 
+/**
+ * Interface implemented by Holder classes that hold can be placed in {@link
+ * javafx.scene.control.TreeItem} nodes used for the the tree model for displaying the note book.
+ */
 public interface TableTreeItemHolder {}

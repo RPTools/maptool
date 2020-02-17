@@ -166,7 +166,6 @@ public class Campaign {
     name = campaign.getName();
     zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
 
-
     /*
      * Don't forget that since these are new zones AND new tokens created here from the old one,
      * if you have any data that needs to transfer over you will need to manually copy it
