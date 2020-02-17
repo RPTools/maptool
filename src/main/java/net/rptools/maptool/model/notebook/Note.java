@@ -41,11 +41,38 @@ public class Note implements NoteBookEntry {
    * object.
    *
    * @param builder the {@link NoteBuilder} used to create this object.
+   *
+   * @throws IllegalStateException if all the required values are not set.
    */
   Note(NoteBuilder builder) {
-    assert builder.isIdSet() : "ID can not be null for NoteBookmark";
-    assert builder.isNameSet() : "Name can not be null for NoteBookmark";
-    assert builder.isNotesSet() : "Notes can not be null for NoteBookmark";
+    String error = "";
+    boolean invalid = false;
+
+
+    if (builder.isIdSet()) {
+      error = "ID can not be null for Note";
+      invalid = true;
+    }
+
+    if (builder.isNameSet()) {
+      if (!error.isEmpty()) {
+        error += ", ";
+      }
+      error += "Name can not be null for Note";
+      invalid = true;
+    }
+
+    if (builder.isNotesSet()) {
+      if (!error.isEmpty()) {
+        error += ",";
+      }
+      error += "Notes can not be null for Note";
+      invalid = true;
+    }
+
+    if (invalid) {
+      throw new IllegalStateException(error);
+    }
 
     id = builder.getId();
     name = builder.getName();
@@ -76,6 +103,6 @@ public class Note implements NoteBookEntry {
 
   @Override
   public String getNotes() {
-    return null;
+    return notes;
   }
 }

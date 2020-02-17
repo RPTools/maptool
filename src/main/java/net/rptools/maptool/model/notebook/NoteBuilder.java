@@ -188,38 +188,81 @@ public class NoteBuilder {
     return this;
   }
 
+  /**
+   * Has the reference value been set.
+   * @return {@code true} if the reference value has been set.
+   */
   public boolean isReferenceSet() {
     return referenceSet;
   }
 
+  /**
+   * Returns the id of the {@link Zone} for the {@link Note} will be built.
+   *
+   * @return the id of the {@link Zone} for the {@link Note} that will be built.
+   */
   public GUID getZoneId() {
     return zoneId;
   }
 
+  /**
+   * Sets the id of the {@link Zone} for the {@link Note} that will be built.
+   * @param zoneId the id of the {@link Zone} for the {@link Note} that will be built.
+   *
+   * @return {@code this} so that methods can be chained.
+   */
   public NoteBuilder setZoneId(GUID zoneId) {
     this.zoneId = zoneId;
     zoneIdSet = zoneId != null;
     return this;
   }
 
+  /**
+   * Has the zone id been set.
+   *
+   * @return {@code true} if the zone id has been set.
+   */
   public boolean isZoneIdSet() {
     return zoneIdSet;
   }
 
+  /**
+   * Returns the notes for the {@link Note} that will be built.
+   *
+   * @return the notes for the {@link Note} that will be built.
+   */
   public String getNotes() {
     return notes;
   }
 
+  /**
+   * Sets the notes for the {@link Note} that will be built.
+   * @param notes the notes for the {@link Note} that will be built.
+   *
+   * @return {@code this} so that methods can be chained.
+   */
   public NoteBuilder setNotes(String notes) {
     this.notes = notes;
     notesSet = notes != null;
     return this;
   }
 
+  /**
+   * Returns if the notes have been set.
+   *
+   * @return {@code true} if the notes have been set.
+   */
   public boolean isNotesSet() {
     return notesSet;
   }
 
+  /**
+   * Builds a new {@link Note} with the details from this {@code NoteBuilder}.
+   *
+   * @return a {@link Note}.
+   *
+   * @throws IllegalStateException if all the required values are not set.
+   */
   public Note build() {
     return new Note(this);
   }

@@ -55,8 +55,7 @@ public class Campaign {
   private GUID id = new GUID();
 
   /** The {@link Zone}s that make up this {@code Campaign}. */
-  private final Map<GUID, Zone> zones =
-      Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+  private final Map<GUID, Zone> zones;
 
   private String name; // the name of the campaign, to be displayed in the MapToolFrame title bar
 
@@ -128,6 +127,7 @@ public class Campaign {
     gmMacroButtonLastIndex = 0;
     macroButtonProperties = new ArrayList<MacroButtonProperties>();
     gmMacroButtonProperties = new ArrayList<MacroButtonProperties>();
+    zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
   }
 
   private void checkCampaignPropertyConversion() {
