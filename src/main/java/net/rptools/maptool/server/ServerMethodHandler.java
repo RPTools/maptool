@@ -776,6 +776,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
 
   public void setServerPolicy(ServerPolicy policy) {
     forwardToClients();
+    MapTool.getFrame().getToolbox().updateTools();
   }
 
   public void addTopology(GUID zoneGUID, Area area, TopologyMode topologyMode) {
