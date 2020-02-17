@@ -480,6 +480,7 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               case setServerPolicy:
                 ServerPolicy policy = (ServerPolicy) parameters[0];
                 MapTool.setServerPolicy(policy);
+                MapTool.getFrame().getToolbox().updateTools();
                 return;
 
               case addTopology:

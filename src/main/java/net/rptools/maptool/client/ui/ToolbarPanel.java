@@ -38,10 +38,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicToolBarUI;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
+import net.rptools.maptool.client.tool.AI_Tool;
+import net.rptools.maptool.client.tool.AI_UseVblTool;
 import net.rptools.maptool.client.tool.BoardTool;
+import net.rptools.maptool.client.tool.DrawTopologySelectionTool;
 import net.rptools.maptool.client.tool.FacingTool;
 import net.rptools.maptool.client.tool.GridTool;
 import net.rptools.maptool.client.tool.MeasureTool;
@@ -78,7 +80,6 @@ import net.rptools.maptool.client.tool.drawing.WallTemplateTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Zone.TokenSelection;
-import net.rptools.maptool.model.Zone.TopologyMode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -90,9 +91,6 @@ public class ToolbarPanel extends JToolBar {
   private final ButtonGroup tokenSelectionbuttonGroup = new ButtonGroup();
   private final JPanel optionPanel;
   private final Toolbox toolbox;
-  private ImageIcon vblImageIcon;
-  private ImageIcon combinedImageIcon;
-  private ImageIcon mblImageIcon;
 
   public ToolbarPanel(Toolbox tbox) {
     setRollover(true);
@@ -107,6 +105,13 @@ public class ToolbarPanel extends JToolBar {
             "net/rptools/maptool/client/image/tool/pointer-blue-off.png",
             pointerGroupOptionPanel,
             I18N.getText("tools.interaction.tooltip"));
+
+    final SidePanel aiPanel = new SidePanel();
+    aiPanel.add(AI_Tool.class);
+    aiPanel.add(AI_UseVblTool.class);
+
+    pointerGroupOptionPanel.add(Box.createHorizontalStrut(5));
+    pointerGroupOptionPanel.add(aiPanel);
 
     pointerGroupButton.setSelected(true);
     pointerGroupOptionPanel.activate();
@@ -179,22 +184,6 @@ public class ToolbarPanel extends JToolBar {
 
     add(jslider);
     // End slider
-
-    add(Box.createHorizontalStrut(10));
-    add(new JSeparator(JSeparator.VERTICAL));
-    add(Box.createHorizontalStrut(10));
-
-    // New button to toggle AI on/off
-    add(
-        createAiButton(
-            "net/rptools/maptool/client/image/tool/ai-blue-green.png",
-            "net/rptools/maptool/client/image/tool/ai-blue-off.png",
-            I18N.getText("tools.ai_selector.tooltip")));
-    add(
-        createUseVBLonMoveButton(
-            "net/rptools/maptool/client/image/tool/use-vbl-on-move.png",
-            "net/rptools/maptool/client/image/tool/ignore-vbl-on-move.png",
-            I18N.getText("tools.ignore_vbl_on_move.tooltip")));
 
     add(Box.createHorizontalStrut(10));
     add(new JSeparator(JSeparator.VERTICAL));
@@ -351,12 +340,12 @@ public class ToolbarPanel extends JToolBar {
     panel.add(DiamondTopologyTool.class);
     panel.add(HollowDiamondTopologyTool.class);
 
-    panel.add(
-        createTopologyModeButton(
-            "net/rptools/maptool/client/image/tool/vbl-only.png",
-            "net/rptools/maptool/client/image/tool/mbl-only.png",
-            "net/rptools/maptool/client/image/tool/mbl-vbl-on.png",
-            I18N.getText("tools.vbl_mbl_selector.tooltip")));
+    // Add with space to denote button is not part of the Topology Panel button group
+    final SidePanel topologySelectionPanel = new SidePanel();
+    topologySelectionPanel.add(DrawTopologySelectionTool.class);
+
+    panel.add(Box.createHorizontalStrut(5));
+    panel.add(topologySelectionPanel);
 
     // panel.add(FillTopologyTool.class);
     return panel;
@@ -383,119 +372,6 @@ public class ToolbarPanel extends JToolBar {
     }
     optionPanel.add(panel, icon);
     buttonGroup.add(button);
-    return button;
-  }
-
-  private JToggleButton createTopologyModeButton(
-      final String vblIcon, final String mblIcon, final String combinedIcon, String tooltip) {
-
-    try {
-      vblImageIcon = new ImageIcon(ImageUtil.getImage(vblIcon));
-      mblImageIcon = new ImageIcon(ImageUtil.getImage(mblIcon));
-      combinedImageIcon = new ImageIcon(ImageUtil.getImage(combinedIcon));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-
-    final JToggleButton button = new JToggleButton();
-    button.setToolTipText(tooltip);
-    button.setSelectedIcon(combinedImageIcon);
-
-    switch (AppPreferences.getTopologyDrawingMode()) {
-      case VBL:
-        button.setActionCommand(TopologyMode.VBL.toString());
-        button.setIcon(vblImageIcon);
-        break;
-      case MBL:
-        button.setActionCommand(TopologyMode.MBL.toString());
-        button.setIcon(mblImageIcon);
-        break;
-      case COMBINED:
-        button.setActionCommand(TopologyMode.VBL.toString());
-        button.setIcon(vblImageIcon);
-        button.setSelected(true);
-        break;
-    }
-
-    button.addActionListener(
-        e -> {
-          TopologyMode currentTopologyMode;
-
-          // Not a huge fan of this code but needed a TriStateButton and TriStateCheckbox from JIDE
-          // doesn't handle custom images very well. Also, trying to avoid JIDE were possible
-          // in case we move to FX in the future.
-          if (button.isSelected()) {
-            if (button.getActionCommand().equals(TopologyMode.MBL.toString())) {
-              currentTopologyMode = TopologyMode.VBL;
-              button.setActionCommand(TopologyMode.VBL.toString());
-              button.setSelected(false);
-              button.setIcon(vblImageIcon);
-            } else {
-              currentTopologyMode = TopologyMode.COMBINED;
-            }
-          } else {
-            // Toggle unselected button between VBL/MBL
-            if (button.getActionCommand().equals(TopologyMode.VBL.toString())) {
-              currentTopologyMode = TopologyMode.MBL;
-              button.setActionCommand(TopologyMode.MBL.toString());
-              button.setIcon(mblImageIcon);
-            } else {
-              currentTopologyMode = TopologyMode.VBL;
-              button.setActionCommand(TopologyMode.VBL.toString());
-              button.setIcon(vblImageIcon);
-            }
-          }
-
-          AppPreferences.setTopologyDrawingMode(currentTopologyMode);
-
-          MapTool.getFrame()
-              .getCurrentZoneRenderer()
-              .getZone()
-              .setTopologyMode(currentTopologyMode);
-        });
-
-    return button;
-  }
-
-  private JToggleButton createAiButton(final String icon, final String offIcon, String tooltip) {
-    final JToggleButton button = new JToggleButton();
-    button.setToolTipText(tooltip);
-    button.addActionListener(e -> AppPreferences.setUseAstarPathfinding(button.isSelected()));
-
-    try {
-      button.setIcon(new ImageIcon(ImageUtil.getImage(offIcon)));
-      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage(icon)));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-
-    if (AppPreferences.isUsingAstarPathfinding()) {
-      button.doClick();
-    }
-
-    return button;
-  }
-
-  private JToggleButton createUseVBLonMoveButton(
-      final String icon, final String offIcon, String tooltip) {
-    final JToggleButton button = new JToggleButton();
-    button.setToolTipText(tooltip);
-    button.addActionListener(
-        e -> {
-          AppPreferences.setVblBlocksMove(button.isSelected());
-        });
-
-    try {
-      button.setIcon(new ImageIcon(ImageUtil.getImage(offIcon)));
-      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage(icon)));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-
-    if (AppPreferences.getVblBlocksMove()) {
-      button.setSelected(true);
-    }
-
     return button;
   }
 
@@ -626,6 +502,32 @@ public class ToolbarPanel extends JToolBar {
         currentTool = firstTool;
       }
       toolbox.setSelectedTool(currentTool);
+    }
+  }
+
+  /*
+   * Stand-alone toolbar with meant to not interact with standard toolbar
+   */
+  private class SidePanel extends JToolBar {
+
+    public SidePanel() {
+      setFloatable(false);
+      setRollover(true);
+      setBorder(null);
+      setBorderPainted(false);
+
+      ToolbarPanel.this.addPropertyChangeListener(
+          "orientation",
+          new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent evt) {
+              setOrientation((Integer) evt.getNewValue());
+            }
+          });
+    }
+
+    public void add(Class<? extends Tool> toolClass) {
+      final Tool tool = toolbox.createTool(toolClass);
+      add(tool);
     }
   }
 }
