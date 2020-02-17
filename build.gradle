@@ -239,7 +239,7 @@ dependencies {
     implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.0.5'		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
 
     // For simple xml work in Hero Lab integration
-    implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.22.1'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
+    implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.22.2'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
 
     // For some math functions used in the A* Pathfinding
     // https://locationtech.github.io/jts/jts-features.html
