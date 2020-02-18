@@ -122,6 +122,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jdesktop.swingworker.SwingWorker;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This class acts as a container for a wide variety of {@link Action}s that are used throughout the
@@ -2575,26 +2576,7 @@ public class AppActions {
 
     int saveStatus = chooser.showSaveDialog(MapTool.getFrame());
     if (saveStatus == JFileChooser.APPROVE_OPTION) {
-      File campaignFile = chooser.getSelectedFile();
-
-      if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
-        return;
-      }
-
-      String _extension = AppConstants.CAMPAIGN_FILE_EXTENSION;
-
-      if (!campaignFile.getName().toLowerCase().endsWith(_extension)) {
-        campaignFile = new File(campaignFile.getAbsolutePath() + _extension);
-      }
-
-      doSaveCampaign(campaign, campaignFile, callback);
-
-      AppState.setCampaignFile(campaignFile);
-      AppPreferences.setSaveDir(campaignFile.getParentFile());
-      AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
-      if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
-        MapTool.serverCommand().setCampaignName(AppState.getCampaignName());
-      }
+      saveAndUpdateCampaignName(callback, campaign, null, chooser.getSelectedFile());
     }
   }
 
@@ -2604,22 +2586,32 @@ public class AppActions {
     MapTool.getCampaign().setExportCampaignDialog(dialog);
 
     if (dialog.getSaveStatus() == JFileChooser.APPROVE_OPTION) {
-      Campaign campaign = MapTool.getCampaign();
-      File campaignFile = dialog.getCampaignFile();
-
-      if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
-        return;
-      }
-
-      doSaveCampaign(campaign, campaignFile, null, dialog.getVersionText());
-
-      AppState.setCampaignFile(campaignFile);
-      AppPreferences.setSaveDir(campaignFile.getParentFile());
-      AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
-      if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
-        MapTool.serverCommand().setCampaignName(AppState.getCampaignName());
-      }
+      saveAndUpdateCampaignName(
+          null, MapTool.getCampaign(), dialog.getVersionText(), dialog.getCampaignFile());
     }
+  }
+
+  private static void saveAndUpdateCampaignName(
+      Observer callback, Campaign campaign, String campaignVersion, File selectedFile) {
+    File campaignFile = getFileWithExtension(selectedFile, AppConstants.CAMPAIGN_FILE_EXTENSION);
+    if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
+      return;
+    }
+    doSaveCampaign(campaign, campaignFile, callback, campaignVersion);
+    AppState.setCampaignFile(campaignFile);
+    AppPreferences.setSaveDir(campaignFile.getParentFile());
+    AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
+    if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
+      MapTool.serverCommand().setCampaignName(AppState.getCampaignName());
+    }
+  }
+
+  @NotNull
+  private static File getFileWithExtension(File file, String extension) {
+    if (!file.getName().toLowerCase().endsWith(extension)) {
+      file = new File(file.getAbsolutePath() + extension);
+    }
+    return file;
   }
 
   public static final DeveloperClientAction SAVE_MAP_AS =
@@ -2646,9 +2638,7 @@ public class AppActions {
               File mapFile = chooser.getSelectedFile();
               // Jamz: Bug fix, would not add extension if map name had a . in it...
               // Lets do a better job and actually check the end of the file name for the extension
-              if (!mapFile.getName().toLowerCase().endsWith(AppConstants.MAP_FILE_EXTENSION)) {
-                mapFile = new File(mapFile.getAbsolutePath() + AppConstants.MAP_FILE_EXTENSION);
-              }
+              mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
               PersistenceUtil.saveMap(zr.getZone(), mapFile);
               AppPreferences.setSaveDir(mapFile.getParentFile());
               MapTool.showInformation("msg.info.mapSaved");
