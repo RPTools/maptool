@@ -122,7 +122,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jdesktop.swingworker.SwingWorker;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * This class acts as a container for a wide variety of {@link Action}s that are used throughout the
@@ -2606,7 +2605,6 @@ public class AppActions {
     }
   }
 
-  @NotNull
   private static File getFileWithExtension(File file, String extension) {
     if (!file.getName().toLowerCase().endsWith(extension)) {
       file = new File(file.getAbsolutePath() + extension);
