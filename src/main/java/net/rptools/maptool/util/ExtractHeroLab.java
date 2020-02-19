@@ -68,7 +68,7 @@ public final class ExtractHeroLab {
 
   private static final File tmpDir = AppUtil.getTmpDir();
   private static final String MISSING_XML_ERROR_MESSAGE =
-      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<document>\n    XML Data is missing from Hero Lab portfolio.\n    Contact LWD Technology support at https://www.wolflair.com\n</document>";
+      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<error>\n    XML Data is missing from Hero Lab portfolio.\n    Contact LWD Technology support at https://www.wolflair.com\n</error>";
   private final File finalTempDir;
   private final File extractComplete;
   private final File portfolioFile;
