@@ -25,7 +25,6 @@ import java.util.*;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -448,11 +447,11 @@ public class FindTokenFunctions extends AbstractFunction {
       String searchType = key.toString();
       if ("setStates".equalsIgnoreCase(searchType) || "unsetStates".equalsIgnoreCase(searchType)) {
         JsonArray states;
-        Object o = jobj.get(searchType);
-        if (o instanceof JsonArray) states = (JsonArray) o;
+        JsonElement json = jobj.get(searchType);
+        if (json.isJsonArray()) states = json.getAsJsonArray();
         else {
           states = new JsonArray();
-          states.add(o.toString());
+          states.add(json.getAsString());
         }
         match = "setStates".equalsIgnoreCase(searchType);
         // Looking for tokens that either match or don't match the states
@@ -473,37 +472,42 @@ public class FindTokenFunctions extends AbstractFunction {
         // // ignore
       } else if ("propertyType".equalsIgnoreCase(searchType)) {
         JsonArray types;
-        Object o = jobj.get(searchType);
-        if (o instanceof JsonArray) types = (JsonArray) o;
+        JsonElement json = jobj.get(searchType);
+        if (json.isJsonArray()) types = json.getAsJsonArray();
         else {
           types = new JsonArray();
-          types.add(o.toString());
+          types.add(json.getAsString());
         }
         tokenList = getTokensFiltered(new PropertyTypeFilter(types), tokenList);
       } else if ("light".equalsIgnoreCase(searchType)) {
-        String value = jobj.get(searchType).toString();
         String type, name;
-        if ("true".equalsIgnoreCase(value) || "1".equals(value)) {
-          match = true;
-          type = name = "*";
-        } else if ("false".equalsIgnoreCase(value) || "0".equals(value)) {
-          match = false;
-          type = name = "*";
+        JsonElement json = jobj.get(searchType);
+        if (json.isJsonObject()) {
+          JsonObject jobjLight = json.getAsJsonObject();
+          match =
+              !jobjLight.has("value")
+                  || FunctionUtil.getBooleanValue(jobjLight.get("value").getAsString());
+          type = jobjLight.has("category") ? jobjLight.get("category").getAsString() : "*";
+          name = jobjLight.has("name") ? jobjLight.get("name").getAsString() : "*";
+
+          Map<String, Map<GUID, LightSource>> lightSourcesMap =
+              MapTool.getCampaign().getLightSourcesMap();
+
+          if (!"*".equals(type) && !lightSourcesMap.containsKey(type)) {
+            throw new ParserException(
+                I18N.getText("macro.function.tokenLight.unknownLightType", "light", type));
+          }
+        } else if (json.isJsonArray()) {
+          throw new ParserException(
+              I18N.getText("macro.function.json.onlyObject", json.toString(), "light"));
         } else {
-          JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(value);
-          if (json.isJsonObject()) {
-            JsonObject jobjLight = json.getAsJsonObject();
-            match = !jobjLight.has("value") || FunctionUtil.getBooleanValue(jobjLight.get("value"));
-            type = jobjLight.has("category") ? jobjLight.get("category").toString() : "*";
-            name = jobjLight.has("name") ? jobjLight.get("name").toString() : "*";
-
-            Map<String, Map<GUID, LightSource>> lightSourcesMap =
-                MapTool.getCampaign().getLightSourcesMap();
-
-            if (!"*".equals(type) && !lightSourcesMap.containsKey(type))
-              throw new ParserException(
-                  I18N.getText("macro.function.tokenLight.unknownLightType", "light", type));
-
+          String value = json.getAsString();
+          if ("true".equalsIgnoreCase(value) || "1".equals(value)) {
+            match = true;
+            type = name = "*";
+          } else if ("false".equalsIgnoreCase(value) || "0".equals(value)) {
+            match = false;
+            type = name = "*";
           } else {
             throw new ParserException(
                 I18N.getText("macro.function.json.onlyObject", value, "light"));
@@ -511,8 +515,7 @@ public class FindTokenFunctions extends AbstractFunction {
         }
         tokenList = getTokensFiltered(new LightFilter(type, name, match), tokenList);
       } else if ("owned".equalsIgnoreCase(searchType)) {
-        JsonElement json =
-            JSONMacroFunctions.getInstance().asJsonElement(jobj.get(searchType).toString());
+        JsonElement json = jobj.get(searchType);
         if (json.isJsonArray()) {
           Ownership ownership = Ownership.ARRAY;
           Set<String> setOwners = new HashSet<>();
@@ -520,8 +523,11 @@ public class FindTokenFunctions extends AbstractFunction {
             setOwners.add(ele.getAsString());
           }
           tokenList = getTokensFiltered(new OwnedFilter(ownership, setOwners), tokenList);
+        } else if (json.isJsonObject()) {
+          throw new ParserException(
+              I18N.getText("macro.function.json.onlyArray", json.toString(), "owned"));
         } else {
-          Ownership ownership = getOwnership(jobj.get(searchType).toString());
+          Ownership ownership = getOwnership(json.getAsString());
           tokenList = getTokensFiltered(new OwnedFilter(ownership), tokenList);
         }
       } else {
