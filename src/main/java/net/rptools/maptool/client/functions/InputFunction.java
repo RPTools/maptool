@@ -1093,6 +1093,8 @@ public class InputFunction extends AbstractFunction {
 
     // UI step 3 - show the dialog
     JOptionPane jop = new JOptionPane(ip, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+    fixLayoutForTabPanes(jop);
+
     JDialog dlg = jop.createDialog(MapTool.getFrame(), dialogTitle);
 
     // Set up callbacks needed for desired runtime behavior
@@ -1234,6 +1236,23 @@ public class InputFunction extends AbstractFunction {
 
     // for debugging:
     // return debugOutput(varSpecs);
+  }
+
+  /**
+   * This is a workaround to fix the excessive space introduced when using multiple tabs (see issue
+   * #198)
+   */
+  private void fixLayoutForTabPanes(JOptionPane jop) {
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    GridBagLayout gbl = new GridBagLayout();
+    for (Component c : jop.getComponents()) {
+      gbl.setConstraints(c, gbc);
+      gbc.gridy += 1;
+    }
+    jop.setLayout(gbl);
   }
 
   @Override
