@@ -24,7 +24,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.script_deprecated.api.TokenApi;
-import net.rptools.parser.ParserException;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Script;
@@ -97,7 +96,7 @@ public class ScriptManager {
   private static Pattern registerPattern =
       Pattern.compile("^\\/\\/\\s*@register\\s+(.*)", Pattern.CASE_INSENSITIVE);
 
-  public static void registerFunctions(Reader reader) throws IOException, ParserException {
+  public static void registerFunctions(Reader reader) throws IOException {
     BufferedReader r = new BufferedReader(reader);
     String line;
     while ((line = r.readLine()) != null) {

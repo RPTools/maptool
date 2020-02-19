@@ -40,12 +40,11 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
 
 public abstract class Tool extends JToggleButton implements ActionListener, KeyListener {
+
   private static final long serialVersionUID = -6365594431759083634L;
-
-  private Toolbox toolbox;
-
-  protected Map<KeyStroke, Action> keyActionMap = new HashMap<KeyStroke, Action>();
   private final Set<Character> keyDownSet = new HashSet<Character>();
+  protected Map<KeyStroke, Action> keyActionMap = new HashMap<KeyStroke, Action>();
+  private Toolbox toolbox;
 
   public Tool() {
     // Map the escape key to reset this tool.
@@ -150,25 +149,11 @@ public abstract class Tool extends JToggleButton implements ActionListener, KeyL
    */
   protected abstract void resetTool();
 
-  /**
-   * Perform the escape action on a tool.
-   *
-   * @author jgorrell
+  /*
+   * Defines if the Tool belongs to a button group or not
    */
-  private class EscapeAction extends AbstractAction {
-    private static final long serialVersionUID = -514197544905143826L;
-
-    /** @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent) */
-    public void actionPerformed(ActionEvent e) {
-      // This should probably go somewhere else like MapToolFrame...
-      // but it was just too easy to plop down here to resist =)
-      // although having it here will be a quick reminder about competing
-      // Escape actions.
-      if (MapTool.getFrame().isFullScreen()) {
-        MapTool.getFrame().showWindowed();
-      }
-      resetTool();
-    }
+  protected boolean hasGroup() {
+    return true;
   }
 
   ////
@@ -190,4 +175,28 @@ public abstract class Tool extends JToggleButton implements ActionListener, KeyL
   }
 
   public void keyTyped(KeyEvent e) {}
+
+  public void updateButtonState() {};
+
+  /**
+   * Perform the escape action on a tool.
+   *
+   * @author jgorrell
+   */
+  private class EscapeAction extends AbstractAction {
+
+    private static final long serialVersionUID = -514197544905143826L;
+
+    /** @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent) */
+    public void actionPerformed(ActionEvent e) {
+      // This should probably go somewhere else like MapToolFrame...
+      // but it was just too easy to plop down here to resist =)
+      // although having it here will be a quick reminder about competing
+      // Escape actions.
+      if (MapTool.getFrame().isFullScreen()) {
+        MapTool.getFrame().showWindowed();
+      }
+      resetTool();
+    }
+  }
 }

@@ -93,7 +93,7 @@ public class TestFunctions extends AbstractFunction {
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
-  private String runTests() throws ParserException {
+  private String runTests() {
     Set<Token> tokens = new HashSet<>();
     Set<GUID> tokenIds = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
     if (!tokenIds.isEmpty()) {
@@ -113,7 +113,7 @@ public class TestFunctions extends AbstractFunction {
     return runTests(tokens);
   }
 
-  private String runTests(Set<Token> tokens) throws ParserException {
+  private String runTests(Set<Token> tokens) {
     int i = 0;
     for (Token token : tokens) {
       i++;
@@ -124,7 +124,7 @@ public class TestFunctions extends AbstractFunction {
     return "";
   }
 
-  private void runTests(Token token) throws ParserException {
+  private void runTests(Token token) {
     Map<Integer, Object> macroPropertiesMap =
         token.getMacroPropertiesMap(MapTool.getParser().isMacroTrusted());
 

@@ -279,8 +279,6 @@ public class MacroLinkFunction extends AbstractFunction {
           .getAsString();
     } catch (UnsupportedEncodingException e) {
       throw new ParserException(e);
-    } catch (ParserException e) {
-      return argsToStrPropList(str);
     }
   }
 

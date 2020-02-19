@@ -146,9 +146,8 @@ public class JsonArrayFunctions {
    * @param o The {@link Object} to coerce into a {@link JsonArray}.
    * @return either the argument converted to a {@link JsonArray} or a {@link JsonArray} containing
    *     the object.
-   * @throws ParserException if there is an error while coercing the value to an array.
    */
-  public JsonArray coerceToJsonArray(Object o) throws ParserException {
+  public JsonArray coerceToJsonArray(Object o) {
     JsonElement jsonElement = typeConversion.asJsonElement(o);
 
     if (jsonElement.isJsonArray()) {
@@ -184,9 +183,8 @@ public class JsonArrayFunctions {
    * @param array The {@link JsonArray} top copy into the new array.
    * @param values the values to concatenate onto the end of the new array.
    * @return a new {@link JsonArray} containing the concatenated arguments.
-   * @throws ParserException If an error occurs while converting the values to json.
    */
-  public JsonArray concatenate(JsonArray array, List<?> values) throws ParserException {
+  public JsonArray concatenate(JsonArray array, List<?> values) {
     JsonArray array2 = new JsonArray();
     for (Object value : values) {
       array2.add(typeConversion.asJsonElement(value));
@@ -378,9 +376,8 @@ public class JsonArrayFunctions {
    * @param jsonArray the {@link JsonArray} to check.
    * @param value the value to check for.
    * @return <code>true</code> if the {@link}
-   * @throws ParserException if there is an error converting the value to json.
    */
-  public boolean contains(JsonArray jsonArray, Object value) throws ParserException {
+  public boolean contains(JsonArray jsonArray, Object value) {
     JsonElement jsonValue = typeConversion.asJsonElement(value);
     for (int i = 0; i < jsonArray.size(); i++) {
       if (jsonArray.get(i).equals(jsonValue)) {
@@ -737,9 +734,8 @@ public class JsonArrayFunctions {
    *
    * @param json the <code>String</code> to parse.
    * @return the parsed {@link JsonArray}.
-   * @throws ParserException if there is an error parsing the <code>String</code>.
    */
-  public JsonArray parseJsonArray(String json) throws ParserException {
+  public JsonArray parseJsonArray(String json) {
     JsonElement jsonElement = typeConversion.asJsonElement(json);
     return jsonElement.getAsJsonArray();
   }
@@ -765,9 +761,8 @@ public class JsonArrayFunctions {
    * @param jsonArray the Json array to copy and set values of.
    * @param list The list of indexes and values passed from the script.
    * @return the new JsonArray.
-   * @throws ParserException when an error occurs.
    */
-  public JsonArray set(JsonArray jsonArray, List<Object> list) throws ParserException {
+  public JsonArray set(JsonArray jsonArray, List<Object> list) {
     JsonArray newArray = shallowCopy(jsonArray);
     for (int i = 0; i < list.size(); i += 2) {
       BigDecimal index = (BigDecimal) list.get(i);
