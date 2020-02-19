@@ -1,4 +1,22 @@
-Maptool 1.5.11
+Maptool 1.5.13
+=====
+**Highlights**
+- Bug fix release to correct several JSON related issues.
+
+**Bug Fixes**
+- [#1296][i1296] Exception thrown when trying to read Hero Lab .por files that are missing the XML statblock. Exception caught and error reported.
+- [#1236][i1236] `getTokens/getTokenNames()` was failing if `setState` or `unsetState` options were used. Fixed.
+- [#1228][i1228] `getLastPath()` and other token move functions that made use of pathPointsToJsonArray were broken. Fixed.
+- [#1206][i1206] Unknown json functions would return null instead of an error. Fixed.
+- [#1204][i1204] Layer condition of `getTokens/getTokenNames()` weren't accepting accepting a string for a single layer. Fixed.
+
+[i1296]: https://github.com/RPTools/maptool/issues/1296
+[i1236]: https://github.com/RPTools/maptool/issues/1236
+[i1228]: https://github.com/RPTools/maptool/issues/1228
+[i1206]: https://github.com/RPTools/maptool/issues/1206
+[i1204]: https://github.com/RPTools/maptool/issues/1204
+
+Maptool 1.5.11/12
 =====
 **Highlights**
 - Terrain Modifier enhancements:
