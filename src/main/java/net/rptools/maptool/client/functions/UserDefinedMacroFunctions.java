@@ -183,8 +183,7 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
   }
 
   public void defineFunction(
-      Parser parser, String name, String macro, boolean ignoreOutput, boolean newVariableContext)
-      throws ParserException {
+      Parser parser, String name, String macro, boolean ignoreOutput, boolean newVariableContext) {
     if (parser.getFunction(name) != null) {
       FunctionRedefinition fr = new FunctionRedefinition();
       fr.function = parser.getFunction(name);

@@ -84,37 +84,24 @@ public class FileUtil {
 
   public static Object objFromResource(String res) throws IOException {
     XStream xs = getConfiguredXStream();
-    InputStream is = null;
-    try {
-      is = FileUtil.class.getClassLoader().getResourceAsStream(res);
+    try (InputStream is = FileUtil.class.getClassLoader().getResourceAsStream(res)) {
       return xs.fromXML(new InputStreamReader(is, "UTF-8"));
-    } finally {
-      IOUtils.closeQuietly(is);
     }
   }
 
   public static byte[] loadResource(String resource) throws IOException {
-    InputStream is = null;
-    try {
-      is = FileUtil.class.getClassLoader().getResourceAsStream(resource);
+    try (InputStream is = FileUtil.class.getClassLoader().getResourceAsStream(resource)) {
       if (is == null) {
         throw new IOException("Resource \"" + resource + "\" cannot be opened as stream.");
       }
       return IOUtils.toByteArray(new InputStreamReader(is, "UTF-8"), "UTF-8");
-    } finally {
-      IOUtils.closeQuietly(is);
     }
   }
 
   public static List<String> getLines(File file) throws IOException {
-    List<String> list;
-    FileReader fr = new FileReader(file);
-    try {
-      list = IOUtils.readLines(fr);
-    } finally {
-      fr.close();
+    try (FileReader fr = new FileReader(file)) {
+      return IOUtils.readLines(fr);
     }
-    return list;
   }
 
   public static void saveResource(String resource, File destDir) throws IOException {
@@ -126,15 +113,9 @@ public class FileUtil {
   public static void saveResource(String resource, File destDir, String filename)
       throws IOException {
     File outFilename = new File(destDir, filename);
-    InputStream inStream = null;
-    OutputStream outStream = null;
-    try {
-      inStream = FileUtil.class.getResourceAsStream(resource);
-      outStream = new BufferedOutputStream(new FileOutputStream(outFilename));
+    try (InputStream inStream = FileUtil.class.getResourceAsStream(resource);
+        OutputStream outStream = new BufferedOutputStream(new FileOutputStream(outFilename))) {
       IOUtils.copy(inStream, outStream);
-    } finally {
-      IOUtils.closeQuietly(inStream);
-      IOUtils.closeQuietly(outStream);
     }
   }
 
@@ -170,12 +151,8 @@ public class FileUtil {
   }
 
   public static byte[] getBytes(URL url) throws IOException {
-    InputStream is = null;
-    try {
-      is = url.openStream();
+    try (InputStream is = url.openStream()) {
       return IOUtils.toByteArray(is);
-    } finally {
-      IOUtils.closeQuietly(is);
     }
   }
 
@@ -374,12 +351,8 @@ public class FileUtil {
     if (url == null) throw new IOException("URL cannot be null");
 
     InputStream is = url.openStream();
-    ZipInputStream zis = null;
-    try {
-      zis = new ZipInputStream(new BufferedInputStream(is));
+    try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is))) {
       unzip(zis, destDir);
-    } finally {
-      IOUtils.closeQuietly(zis);
     }
   }
 
@@ -391,34 +364,25 @@ public class FileUtil {
     File absDestDir = destDir.getAbsoluteFile();
 
     // Pull out the files
-    OutputStream out = null;
     ZipEntry entry = null;
-    try {
-      while ((entry = in.getNextEntry()) != null) {
-        if (entry.isDirectory()) continue;
+    while ((entry = in.getNextEntry()) != null) {
+      if (entry.isDirectory()) continue;
 
-        // Prepare file destination
-        File entryFile = new File(absDestDir, entry.getName());
-        entryFile.getParentFile().mkdirs();
+      // Prepare file destination
+      File entryFile = new File(absDestDir, entry.getName());
+      entryFile.getParentFile().mkdirs();
 
-        out = new FileOutputStream(entryFile);
+      try (OutputStream out = new FileOutputStream(entryFile)) {
         IOUtils.copy(in, out);
-        IOUtils.closeQuietly(out);
-        in.closeEntry();
       }
-    } finally {
-      IOUtils.closeQuietly(out);
+      in.closeEntry();
     }
   }
 
   public static void unzipFile(File sourceFile, File destDir) throws IOException {
     if (!sourceFile.exists()) throw new IOException("source file does not exist: " + sourceFile);
 
-    ZipFile zipFile = null;
-    InputStream is = null;
-    OutputStream os = null;
-    try {
-      zipFile = new ZipFile(sourceFile);
+    try (ZipFile zipFile = new ZipFile(sourceFile)) {
       Enumeration<? extends ZipEntry> entries = zipFile.entries();
 
       while (entries.hasMoreElements()) {
@@ -430,18 +394,10 @@ public class FileUtil {
         file.getParentFile().mkdirs();
 
         // System.out.println("Writing file: " + path);
-        is = zipFile.getInputStream(entry);
-        os = new BufferedOutputStream(new FileOutputStream(path));
-        copyWithClose(is, os);
-        IOUtils.closeQuietly(is);
-        IOUtils.closeQuietly(os);
-      }
-    } finally {
-      IOUtils.closeQuietly(is);
-      IOUtils.closeQuietly(os);
-      try {
-        if (zipFile != null) zipFile.close();
-      } catch (Exception e) {
+        try (InputStream is = zipFile.getInputStream(entry);
+            OutputStream os = new BufferedOutputStream(new FileOutputStream(path))) {
+          IOUtils.copy(is, os);
+        }
       }
     }
   }
@@ -462,10 +418,13 @@ public class FileUtil {
   /**
    * Copies all bytes from InputStream to OutputStream, and close both streams before returning.
    *
+   * @deprecated not in use. Use {@link IOUtils#copy(InputStream, OutputStream)} instead and
+   *     try-with-resources
    * @param is input stream to read data from.
    * @param os output stream to write data to.
    * @throws IOException
    */
+  @Deprecated
   public static void copyWithClose(InputStream is, OutputStream os) throws IOException {
     try {
       IOUtils.copy(is, os);
