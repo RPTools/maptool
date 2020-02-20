@@ -65,18 +65,18 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     }
 
     if (functionName.equals(REMOVE_FUNC)) {
-      return deleteToken(res, parameters);
+      return deleteToken(parameters);
     }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
-  private String deleteToken(MapToolVariableResolver res, List<Object> parameters)
-      throws ParserException {
+  private String deleteToken(List<Object> parameters) throws ParserException {
     Token token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
 
     if (token == null) {
-      throw new ParserException("Can not find token " + parameters.get(0));
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownToken", REMOVE_FUNC, parameters.get(0)));
     }
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
     MapTool.serverCommand().removeToken(zone.getId(), token.getId());
@@ -93,10 +93,10 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
    */
   private Object copyTokens(MapToolVariableResolver res, List<Object> param)
       throws ParserException {
-    Token token = null;
+    Token token;
     int numberCopies = 1;
     String zoneName = null;
-    JsonObject newVals = null;
+    JsonObject newVals = new JsonObject();
 
     int size = param.size();
     switch (size) {
@@ -143,6 +143,8 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
               }
             }
           }
+          // setTokenValues() handles the naming of the new token and must be called even if
+          // nothing was passed for the updates parameter (newVals).
           setTokenValues(t, newVals, zone, res);
 
           MapTool.serverCommand().putToken(zone.getId(), t);
@@ -156,11 +158,11 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
           for (String val : newTokens) {
             jsonArray.add(val);
           }
+          return jsonArray;
         }
       case 0:
         throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeT", COPY_FUNC, 1)); // should be notEnoughParams
+            I18N.getText("macro.function.general.notEnoughParam", COPY_FUNC, 1, 0));
     }
   }
 
