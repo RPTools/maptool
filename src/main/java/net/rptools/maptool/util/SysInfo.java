@@ -85,7 +85,6 @@ public class SysInfo {
     JsonObject os = new JsonObject();
 
     Properties p = System.getProperties();
-    Map<String, String> env = System.getenv();
 
     // maptool info
     mt.addProperty("version", MapTool.getVersion());
@@ -213,8 +212,7 @@ public class SysInfo {
     final byte[] bytes = {'D'};
     final InputStream inputStream = new ByteArrayInputStream(bytes);
     final InputStreamReader reader = new InputStreamReader(inputStream);
-    final String encoding = reader.getEncoding();
-    return encoding;
+    return reader.getEncoding();
   }
 
   private void getNetworkInterfaces() {
@@ -347,7 +345,8 @@ public class SysInfo {
 
     contentPane.add(this.scrollPane, "Center");
 
-    getInfo();
+    new Thread(this::getInfo).start();
+
     return contentPane;
   }
 
