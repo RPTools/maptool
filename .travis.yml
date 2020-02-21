@@ -10,7 +10,7 @@ install:
   - cd ..
   - mkdir java
   - cd java
-  - wget http://www.nerps.net/jdk10/jdk-10.0.2_osx-x64_bin.dmg
+  - wget http://maptool.craigs-stuff.net/java/jdk-10.0.2_osx-x64_bin.dmg
   - MOUNTDEV=$(hdiutil mount jdk-10.0.2_osx-x64_bin.dmg | awk '/dev.disk/{print$1}')
   - echo $MOUNTDEV
   - MOUNTDIR="$(mount | grep JDK | awk '{$1=$2="";sub(" [(].*","");sub("^  ","");print}')"

@@ -119,15 +119,9 @@ public class AppSetup {
    */
   private static void createREADME() throws IOException {
     File outFilename = new File(AppConstants.UNZIP_DIR, "README");
-    InputStream inStream = null;
-    OutputStream outStream = null;
-    try {
-      inStream = AppSetup.class.getResourceAsStream("README");
-      outStream = new BufferedOutputStream(new FileOutputStream(outFilename));
+    try (InputStream inStream = AppSetup.class.getResourceAsStream("README");
+        OutputStream outStream = new BufferedOutputStream(new FileOutputStream(outFilename))) {
       IOUtils.copy(inStream, outStream);
-    } finally {
-      IOUtils.closeQuietly(inStream);
-      IOUtils.closeQuietly(outStream);
     }
   }
 

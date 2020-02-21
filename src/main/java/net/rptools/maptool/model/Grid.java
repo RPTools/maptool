@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.common.base.Stopwatch;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -29,12 +30,13 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
@@ -51,7 +53,7 @@ import org.apache.logging.log4j.Logger;
  * @author trevor
  */
 public abstract class Grid implements Cloneable {
-  private static final Logger log = LogManager.getLogger(Grid.class);
+
   /**
    * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm
    * for determining whether a given square cell can be entered due to fog blocking the cell is
@@ -61,20 +63,18 @@ public abstract class Grid implements Cloneable {
   public static final int MIN_GRID_SIZE = 9;
 
   public static final int MAX_GRID_SIZE = 350;
+  protected static final Logger log = LogManager.getLogger();
   protected static final int CIRCLE_SEGMENTS = 60;
 
   private static final Dimension NO_DIM = new Dimension();
-
-  private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<Integer, Area>();
-
+  private static final DirectionCalculator calculator = new DirectionCalculator();
+  private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
+  protected Map<KeyStroke, Action> movementKeys = null;
   private int offsetX = 0;
   private int offsetY = 0;
   private int size;
-
   private Zone zone;
   private Area cellShape;
-
-  protected Map<KeyStroke, Action> movementKeys = null;
 
   public Grid() {
     setSize(AppPreferences.getDefaultGridSize());
@@ -83,6 +83,25 @@ public abstract class Grid implements Cloneable {
   public Grid(Grid grid) {
     setSize(grid.getSize());
     setOffset(grid.offsetX, grid.offsetY);
+  }
+
+  protected synchronized Map<Integer, Area> getGridShapeCache() {
+    return gridShapeCache;
+  }
+
+  protected synchronized void setGridShapeCache(int gridRadius, Area newGridArea) {
+    final AffineTransform at = new AffineTransform();
+    final double gridScale = (double) MAX_GRID_SIZE / getSize();
+    at.scale(gridScale, gridScale);
+
+    getGridShapeCache().put(Integer.valueOf(gridRadius), newGridArea.createTransformedArea(at));
+
+    // Verify combined Area is a single union of polygons
+    if (!newGridArea.isSingular()) {
+      log.warn(
+          "gridShape {} is not singular, this is unexpected and could affect performance.",
+          gridRadius);
+    }
   }
 
   public void drawCoordinatesOverlay(Graphics2D g, ZoneRenderer renderer) {
@@ -243,15 +262,15 @@ public abstract class Grid implements Cloneable {
     return cellShape;
   }
 
+  protected void setCellShape(Area cellShape) {
+    this.cellShape = cellShape;
+  }
+
   public BufferedImage getCellHighlight() {
     return null;
   }
 
   protected abstract Area createCellShape(int size);
-
-  protected void setCellShape(Area cellShape) {
-    this.cellShape = cellShape;
-  }
 
   /**
    * @param offsetX The grid's x offset component
@@ -276,19 +295,6 @@ public abstract class Grid implements Cloneable {
 
   public ZoneWalker createZoneWalker() {
     return null;
-  }
-
-  /**
-   * Sets the grid size and creates the grid cell shape
-   *
-   * @param size The size of the grid<br>
-   *     <i>SquareGrid</i> - edge length<br>
-   *     <i>HexGrid</i> - edge to edge diameter
-   */
-  public void setSize(int size) {
-    this.size = constrainSize(size);
-    cellShape = createCellShape(size);
-    fireGridChanged();
   }
 
   /**
@@ -317,9 +323,22 @@ public abstract class Grid implements Cloneable {
   }
 
   /**
+   * Sets the grid size and creates the grid cell shape
+   *
+   * @param size The size of the grid<br>
+   *     <i>SquareGrid</i> - edge length<br>
+   *     <i>HexGrid</i> - edge to edge diameter
+   */
+  public void setSize(int size) {
+    this.size = constrainSize(size);
+    cellShape = createCellShape(size);
+    fireGridChanged();
+  }
+
+  /**
    * Called by SightType and Light class to return a vision area based upon a specified distance
    *
-   * @param shape CIRCLE, SQUARE or CONE
+   * @param shape CIRCLE, GRID, SQUARE or CONE
    * @param token Used to position the shape and to provide footprint
    * @param range As specified in the vision or light definition
    * @param arcAngle Only used by cone
@@ -340,7 +359,6 @@ public abstract class Grid implements Cloneable {
     int visionDistance = zone.getTokenVisionInPixels();
     double visionRange = (range == 0) ? visionDistance : range * getSize() / zone.getUnitsPerCell();
 
-    // System.out.println("1 visionRange " + visionRange);
     if (scaleWithToken) {
       double footprintWidth = token.getFootprint(this).getBounds(this).getWidth() / 2;
 
@@ -350,102 +368,21 @@ public abstract class Grid implements Cloneable {
         visionRange += (footprintWidth > tokenBoundsWidth) ? tokenBoundsWidth : tokenBoundsWidth;
       } else {
         // For grids, this will be the same, but for Hex's we'll use the smaller side depending on
-        // which Hex
-        // type you choose
+        // which Hex type you choose
         double footprintHeight = token.getFootprint(this).getBounds(this).getHeight() / 2;
         visionRange += (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
       }
     }
-    // System.out.println("this.cellShape " + this.cellShape);
-    // System.out.println("token.getWidth() " + token.getWidth());
-    // System.out.println("token.getBounds(getZone()) " + token.getBounds(getZone()));
 
     Area visibleArea = new Area();
     switch (shape) {
       case CIRCLE:
-        // visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2,
-        // visionRange * 2));
-        // Use fake circles for better performance, remove those curves! We are talking over 10-100x
-        // performance gains! awt.geom.Area.add does NOT do curves fast...
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
                 -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
         break;
       case GRID:
-        if (range > 0) {
-          long time = System.currentTimeMillis();
-
-          // Create the light
-          int dist = (int) (range / zone.getUnitsPerCell());
-          Area gridArea = new Area();
-
-          // Get it from cache if it exists, otherwise create and store it
-          synchronized (gridShapeCache) {
-            if (gridShapeCache.containsKey(Integer.valueOf(dist))) {
-              gridArea = gridShapeCache.get(Integer.valueOf(dist));
-            } else {
-              HashSet<Point> cells = generateRadius(dist);
-
-              for (Point point : cells) {
-                gridArea.add(
-                    new Area(new Rectangle((point.x) * size, (point.y) * size, size, size)));
-
-                // Use grid shape to handle Hex's? Still lots of work to do for Hex in any case
-                // AffineTransform at = new AffineTransform();
-                // at.translate(point.x*size, point.y*size);
-                // radius.add(cellShape.createTransformedArea(at));
-              }
-
-              gridShapeCache.put(Integer.valueOf(dist), gridArea);
-
-              // Verify combined Area is a single union of polygons
-              log.debug("gridShape is singular? " + gridArea.isSingular());
-              log.debug("Adding to cache radius: " + Integer.valueOf(dist));
-            }
-          }
-
-          // place the light, this is very fast, < 1ms
-          Set<CellPoint> tokenCells = new HashSet<CellPoint>();
-          double tokenSizeAdjust = 0;
-
-          // FIXME: default properties with scale are not loading properly!
-
-          if (scaleWithToken) {
-            tokenCells = token.getOccupiedCells(this);
-            tokenSizeAdjust = (token.getFootprint(this).getBounds(this).getWidth() / size) / 2;
-          } else {
-            tokenCells.add(new CellPoint((int) ((token.getX() / size)), (token.getY() / size)));
-            tokenSizeAdjust = .5;
-          }
-
-          int cellX = token.getX() / size;
-          int cellY = token.getY() / size;
-
-          // Cached Area may have been based on a different grid size
-          double rangeUnits = (range / zone.getUnitsPerCell() * 2) + 1;
-          double gridAreaUnits = (gridArea.getBounds().getWidth() / getSize());
-          double scaleFromCache = rangeUnits / gridAreaUnits;
-
-          for (CellPoint cellPoint : tokenCells) {
-            AffineTransform at = new AffineTransform();
-            at.translate(
-                (cellPoint.x - cellX - tokenSizeAdjust) * size,
-                (cellPoint.y - cellY - tokenSizeAdjust) * size);
-            at.scale(scaleFromCache, scaleFromCache);
-
-            visibleArea.add(gridArea.createTransformedArea(at));
-          }
-
-          time = (System.currentTimeMillis() - time);
-          if (time > 50) {
-            log.info("Long time for grid light " + dist + ": " + time + "ms");
-          }
-        } else {
-          // Fall back to regular circle in daylight, etc.
-          visibleArea =
-              GraphicsUtil.createLineSegmentEllipse(
-                  -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
-        }
+        visibleArea = getGridArea(token, range, scaleWithToken, visionRange);
         break;
       case SQUARE:
         visibleArea =
@@ -457,9 +394,6 @@ public abstract class Grid implements Cloneable {
         if (token.getFacing() == null) {
           token.setFacing(0);
         }
-        // Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange, -visionRange, visionRange
-        // * 2, visionRange * 2, 360.0 - (arcAngle / 2.0) + (offsetAngle * 1.0), arcAngle,
-        // Arc2D.PIE));
 
         Arc2D cone =
             new Arc2D.Double(
@@ -470,8 +404,10 @@ public abstract class Grid implements Cloneable {
                 360.0 - (arcAngle / 2.0) + (offsetAngle * 1.0),
                 arcAngle,
                 Arc2D.PIE);
+
+        // Flatten the cone to remove 'curves'
         GeneralPath path = new GeneralPath();
-        path.append(cone.getPathIterator(null, 1), false); // Flatten the cone to remove 'curves'
+        path.append(cone.getPathIterator(null, 1), false);
         Area tempvisibleArea = new Area(path);
 
         // Rotate
@@ -482,9 +418,7 @@ public abstract class Grid implements Cloneable {
         Rectangle footprint = token.getFootprint(this).getBounds(this);
         footprint.x = -footprint.width / 2;
         footprint.y = -footprint.height / 2;
-        // footprint =
-        // footprint.createTransformedArea(AffineTransform.getTranslateInstance(-footprint.getBounds().getWidth() /
-        // 2, -footprint.getBounds().getHeight() / 2));
+
         visibleArea.add(new Area(footprint));
         visibleArea.add(tempvisibleArea);
         break;
@@ -492,14 +426,13 @@ public abstract class Grid implements Cloneable {
         footprint = token.getFootprint(this).getBounds(this);
         double x = footprint.getCenterX();
         double y = footprint.getCenterY();
-        // double rotation = Math.toRadians(30);
 
         double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
         double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
         double adjustment = (footprintWidth < footprintHeight) ? footprintWidth : footprintHeight;
         x -= adjustment / 2;
         y -= adjustment / 2;
-        // System.out.println("adjustment " + adjustment);
+
         visibleArea = createHex(x, y, visionRange, 0);
         break;
       default:
@@ -509,32 +442,7 @@ public abstract class Grid implements Cloneable {
         break;
     }
 
-    // log.info("visibleArea bounds: " + visibleArea.getBounds());
     return visibleArea;
-  }
-
-  private HashSet<Point> generateRadius(int radius) {
-    HashSet<Point> points = new HashSet<>();
-    int x, y;
-
-    for (y = -radius; y <= radius; y++) {
-      for (x = -radius; x <= radius; x++) {
-        if (metricDistance(x, y, radius) < radius + 1) points.add(new Point(x, y));
-      }
-    }
-
-    return points;
-  }
-
-  private static double metricDistance(int x, int y, int radius) {
-    double distance;
-
-    int xDist = Math.abs(x);
-    int yDist = Math.abs(y);
-    if (xDist > yDist) distance = 1.5 * yDist + (xDist - yDist);
-    else distance = 1.5 * xDist + (yDist - xDist);
-
-    return distance;
   }
 
   /**
@@ -563,7 +471,7 @@ public abstract class Grid implements Cloneable {
     return distance;
   }
 
-  private Area createHex(double x, double y, double radius, double rotation) {
+  protected Area createHex(double x, double y, double radius, double rotation) {
     GeneralPath hexPath = new GeneralPath();
 
     for (int i = 0; i < 6; i++) {
@@ -607,18 +515,18 @@ public abstract class Grid implements Cloneable {
   /**
    * Override if getCapabilities.isSecondDimensionAdjustmentSupported() returns true
    *
-   * @param length the second settable dimension
-   */
-  public void setSecondDimension(double length) {}
-
-  /**
-   * Override if getCapabilities.isSecondDimensionAdjustmentSupported() returns true
-   *
    * @return length the curent value of the second settable dimension
    */
   public double getSecondDimension() {
     return 0;
   }
+
+  /**
+   * Override if getCapabilities.isSecondDimensionAdjustmentSupported() returns true
+   *
+   * @param length the second settable dimension
+   */
+  public void setSecondDimension(double length) {}
 
   /**
    * Installs a list of which which actions go with which keystrokes for the purpose of moving the
@@ -630,59 +538,6 @@ public abstract class Grid implements Cloneable {
   public abstract void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap);
 
   public abstract void uninstallMovementKeys(Map<KeyStroke, Action> actionMap);
-
-  static class DirectionCalculator {
-
-    private static final int NW = 1;
-    private static final int N = 2;
-    private static final int NE = 4;
-    private static final int W = 8;
-    private static final int CENTER = 16;
-    private static final int E = 32;
-    private static final int SW = 64;
-    private static final int S = 128;
-    private static final int SE = 256;
-
-    public int getDirection(int dirx, int diry) {
-      int TopRow = (NW | N | NE);
-      int MidRow = (W | CENTER | E);
-      int BotRow = (SW | S | SE);
-
-      int LeftCol = (NW | W | SW);
-      int MidCol = (N | CENTER | S);
-      int RightCol = (NE | E | SE);
-
-      int direction = TopRow | MidRow | BotRow;
-
-      if (dirx > 0) {
-        direction &= (LeftCol | MidCol); // two left columns
-      }
-      if (dirx < 0) {
-        direction &= (MidCol | RightCol); // two right columns
-      }
-
-      if (diry > 0) {
-        direction &= (TopRow | MidRow); // two top rows
-      }
-      if (diry < 0) {
-        direction &= (MidRow | BotRow); // two bottom rows
-      }
-
-      if (dirx == 0) {
-        direction &= ~MidRow;
-      }
-      if (diry == 0) {
-        direction &= ~MidCol;
-      }
-
-      direction &= ~CENTER; // Always turn off the center since we don't check it using the outside
-      // iterations...
-
-      return direction;
-    }
-  }
-
-  private static final DirectionCalculator calculator = new DirectionCalculator();
 
   /**
    * Tests the grid cell location to determine whether a token is allowed to move into it when such
@@ -740,8 +595,7 @@ public abstract class Grid implements Cloneable {
       }
     }
     // Everything is covered with fog. Or at least, the three regions that we wanted to use to enter
-    // the destination
-    // area.
+    // the destination area.
     return false;
   }
 
@@ -869,5 +723,243 @@ public abstract class Grid implements Cloneable {
     // will be
     // introduced
     destination.height = regionToDivide.height * (row + 1) / 3 - regionToDivide.height * row / 3;
+  }
+
+  /**
+   * Returns an Area with a given radius that is shaped and aligned to the current grid
+   *
+   * @param token token which to center the grid area on
+   * @param range range in units grid area extends out to
+   * @param scaleWithToken whether grid area should expand by the size of the token
+   * @param visionRange token's vision in pixels
+   * @return the {@link Area} conforming to the current grid layout
+   */
+  protected Area getGridArea(
+      Token token, double range, boolean scaleWithToken, double visionRange) {
+
+    final Area visibleArea;
+
+    if (range > 0) {
+      final Stopwatch stopwatch = Stopwatch.createStarted();
+      final int gridRadius = (int) (range / getZone().getUnitsPerCell());
+
+      if (scaleWithToken) {
+        visibleArea = getScaledGridArea(token, gridRadius);
+      } else {
+        visibleArea = getGridAreaFromCache(gridRadius).createTransformedArea(getGridOffset(token));
+      }
+
+      if (stopwatch.elapsed(TimeUnit.MILLISECONDS) > 50) {
+        log.debug(
+            "Excessive time to generate {}r grid light, took {}ms",
+            gridRadius,
+            stopwatch.elapsed(TimeUnit.MILLISECONDS));
+      }
+    } else {
+      // Fall back to regular circle in daylight, etc.
+      visibleArea =
+          GraphicsUtil.createLineSegmentEllipse(
+              -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
+    }
+
+    return visibleArea;
+  }
+
+  /**
+   * Returns a combined Area where radius included the tokens footprint. e.g. a 15ft light on a Huge
+   * token radiates 15ft from all sides of the token.
+   *
+   * @param token token to generate area from
+   * @param gridRadius distance from token edge to generate area
+   * @return the {@link Area} conforming to the current grid layout scaled to include the tokens
+   *     size
+   */
+  protected Area getScaledGridArea(Token token, int gridRadius) {
+    final double offsetX = token.getX() + token.getFootprint(this).getBounds(this).getWidth() / 2;
+    final double offsetY = token.getY() + token.getFootprint(this).getBounds(this).getHeight() / 2;
+    final Area gridArea = getGridAreaFromCache(gridRadius);
+    Area occupiedArea = new Area();
+
+    for (CellPoint occupiedCell : token.getOccupiedCells(this)) {
+      final double x = (occupiedCell.x * getSize()) - offsetX;
+      final double y = (occupiedCell.y * getSize()) - offsetY;
+      final AffineTransform at = new AffineTransform();
+      at.translate(x, y);
+
+      occupiedArea.add(gridArea.createTransformedArea(at));
+    }
+
+    return occupiedArea;
+  }
+
+  /**
+   * Returns translated coordinates to adjust the grid area for token footprints that are an odd
+   * number of cells and SCALE keyword is not used to adjust the Area proportionally.
+   *
+   * @param token source token to check footprint against
+   * @return the {@link AffineTransform} to align an {@link Area} to the current grid
+   */
+  protected AffineTransform getGridOffset(Token token) {
+    double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
+
+    final AffineTransform at = new AffineTransform();
+    if ((footprintWidth / getSize()) % 2 != 0) {
+      double coordinateOffset = getSize() / -2;
+      at.translate(coordinateOffset, coordinateOffset);
+    }
+    return at;
+  }
+
+  /**
+   * Generates an Area that conforms to the current grid cells to the specified radius and caches
+   * the results
+   *
+   * @param gridRadius radius of the Area measured using ONE_TWO_ONE metric
+   * @return the {@link Area} conforming to the current grid layout for the given radius
+   */
+  protected Area createGridArea(int gridRadius) {
+    final Area cellArea = new Area(createCellShape(getSize()));
+    final HashSet<Point> points = generateRadius(gridRadius);
+    Area gridArea = new Area();
+
+    for (Point point : points) {
+      final AffineTransform at = new AffineTransform();
+      at.translate((point.x) * getSize(), (point.y) * getSize());
+      gridArea.add(cellArea.createTransformedArea(at));
+    }
+
+    setGridShapeCache(gridRadius, gridArea);
+
+    return gridArea;
+  }
+
+  /**
+   * Generates a set of {@link Point} used to create a grid area that only includes the outer most
+   * edge of cells
+   *
+   * @param radius The maximum radius to generate the ring of cell points for this range
+   * @return a {@link HashSet<Point>} that includes all cells that only equal in distance to the
+   *     given radius
+   */
+  protected HashSet<Point> generateRing(int radius) {
+    return generateRadius(radius, radius);
+  }
+
+  /**
+   * Generates a set of {@link Point} used to create a grid area
+   *
+   * @param radius The maximum radius to generate all cell points within this range
+   * @return a {@link HashSet<Point>} that includes all cells up to the radius
+   */
+  protected HashSet<Point> generateRadius(int radius) {
+    return generateRadius(0, radius);
+  }
+
+  /**
+   * Generates a set of {@link Point} used to create a grid area
+   *
+   * @param minRadius The minimum radius to generate the ring of cell points for this range
+   * @param maxRadius The maximum radius to generate the ring of cell points for this range
+   * @return a {@link HashSet<Point>} that includes all cells between the minRadius to the maxRadius
+   */
+  protected HashSet<Point> generateRadius(int minRadius, int maxRadius) {
+    HashSet<Point> points = new HashSet<>();
+    CellPoint start = new CellPoint(0, 0);
+
+    WalkerMetric metric = getCurrentMetric();
+
+    for (int y = -maxRadius; y <= maxRadius; y++) {
+      for (int x = -maxRadius; x <= maxRadius; x++) {
+        double distance = cellDistance(start, new CellPoint(x, y), metric);
+        if (distance >= minRadius && distance <= maxRadius) {
+          points.add(new Point(x, y));
+        }
+      }
+    }
+
+    return points;
+  }
+
+  /**
+   * Future change may include getting a metric from a different property/source
+   *
+   * @return the current {@link WalkerMetric} depending on if a server is running or not
+   */
+  protected WalkerMetric getCurrentMetric() {
+    return MapTool.isPersonalServer()
+        ? AppPreferences.getMovementMetric()
+        : MapTool.getServerPolicy().getMovementMetric();
+  }
+
+  /**
+   * Retrieve the generated grid conformed {@link Area} from cache if it exists, otherwise generate,
+   * store, and return it.
+   *
+   * @param gridRadius The radius of the {@link Area} to retrieve from cache.
+   * @return the {@link Area} from cache for the given gridRadius
+   */
+  protected Area getGridAreaFromCache(int gridRadius) {
+    // If not already in cache, create and cache it
+    // Or if debug is enabled recreate cache
+    if (log.isDebugEnabled() || !getGridShapeCache().containsKey(Integer.valueOf(gridRadius))) {
+      createGridArea(gridRadius);
+    }
+
+    double rescale = getSize() / (double) MAX_GRID_SIZE;
+    final AffineTransform at = new AffineTransform();
+    at.scale(rescale, rescale);
+
+    return getGridShapeCache().get(Integer.valueOf(gridRadius)).createTransformedArea(at);
+  }
+
+  static class DirectionCalculator {
+
+    private static final int NW = 1;
+    private static final int N = 2;
+    private static final int NE = 4;
+    private static final int W = 8;
+    private static final int CENTER = 16;
+    private static final int E = 32;
+    private static final int SW = 64;
+    private static final int S = 128;
+    private static final int SE = 256;
+
+    public int getDirection(int dirx, int diry) {
+      int TopRow = (NW | N | NE);
+      int MidRow = (W | CENTER | E);
+      int BotRow = (SW | S | SE);
+
+      int LeftCol = (NW | W | SW);
+      int MidCol = (N | CENTER | S);
+      int RightCol = (NE | E | SE);
+
+      int direction = TopRow | MidRow | BotRow;
+
+      if (dirx > 0) {
+        direction &= (LeftCol | MidCol); // two left columns
+      }
+      if (dirx < 0) {
+        direction &= (MidCol | RightCol); // two right columns
+      }
+
+      if (diry > 0) {
+        direction &= (TopRow | MidRow); // two top rows
+      }
+      if (diry < 0) {
+        direction &= (MidRow | BotRow); // two bottom rows
+      }
+
+      if (dirx == 0) {
+        direction &= ~MidRow;
+      }
+      if (diry == 0) {
+        direction &= ~MidCol;
+      }
+
+      direction &= ~CENTER; // Always turn off the center since we don't check it using the outside
+      // iterations...
+
+      return direction;
+    }
   }
 }
