@@ -77,6 +77,7 @@ public class TokenNameFunction extends AbstractFunction {
    *
    * @param token The token to set the name of.
    * @param name the name of the token.
+   * @throws ParserException if an error occurs.
    */
   public static void setName(Token token, String name) throws ParserException {
     token.validateName(name);

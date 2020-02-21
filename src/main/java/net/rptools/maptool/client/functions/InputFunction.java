@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import de.muntjak.tinylookandfeel.TinyComboBoxButton;
 import java.awt.Color;
 import java.awt.Component;
@@ -70,6 +72,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.InputFunction.InputType.OptionException;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.htmlframe.HTMLPane;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -78,7 +81,6 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import net.rptools.parser.function.EvaluationException;
 import net.rptools.parser.function.ParameterException;
 import org.apache.commons.lang.StringUtils;
 
@@ -136,7 +138,11 @@ public class InputFunction extends AbstractFunction {
     super(1, -1, "input");
   }
 
-  /** Gets the singleton instance. */
+  /**
+   * Gets the singleton instance.
+   *
+   * @return the singleton instance for the class.
+   */
   public static InputFunction getInstance() {
     return instance;
   }
@@ -146,11 +152,14 @@ public class InputFunction extends AbstractFunction {
     // The regexp for the option strings is strict: no spaces, and trailing semicolon required.
     // @formatter: off
     TEXT(false, false, "WIDTH=16;SPAN=FALSE;"),
-    LIST(true, false, "VALUE=NUMBER;TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SELECT=0;SPAN=FALSE;"),
+    LIST(
+        true,
+        false,
+        "VALUE=NUMBER;TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     CHECK(false, false, "SPAN=FALSE;"),
-    RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;"),
+    RADIO(true, false, "ORIENT=V;VALUE=NUMBER;SELECT=0;SPAN=FALSE;DELIMITER=,;"),
     LABEL(false, false, "TEXT=TRUE;ICON=FALSE;ICONSIZE=50;SPAN=FALSE;"),
-    PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;"),
+    PROPS(false, true, "SETVARS=NONE;SPAN=FALSE;WIDTH=14;TYPE=STRPROP;"),
     TAB(false, true, "SELECT=FALSE;");
     // @formatter: on
 
@@ -164,14 +173,20 @@ public class InputFunction extends AbstractFunction {
 
       defaultOptions = new OptionMap();
       Pattern pattern =
-          Pattern.compile("(\\w+)=([\\w-]+)\\;"); // no spaces allowed, semicolon required
+          Pattern.compile("(\\w+)=([\\w-,]+)\\;"); // no spaces allowed, semicolon required
       Matcher matcher = pattern.matcher(nameval);
       while (matcher.find()) {
         defaultOptions.put(matcher.group(1).toUpperCase(), matcher.group(2).toUpperCase());
       }
     }
 
-    /** Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them. */
+    /**
+     * Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them.
+     *
+     * @param strName the name of the enum values.
+     * @return the {@link InputType} matching the passed in name, or {@code null} if there is no
+     *     match..
+     */
     public static InputType inputTypeFromName(String strName) {
       for (InputType it : InputType.values()) {
         if (strName.equalsIgnoreCase(it.name())) return it;
@@ -179,7 +194,12 @@ public class InputFunction extends AbstractFunction {
       return null;
     }
 
-    /** Gets the default value for an option. */
+    /**
+     * Gets the default value for an option.
+     *
+     * @param option the name of the option to get the default value for.
+     * @return the default value for the passed in option.
+     */
     public String getDefault(String option) {
       return defaultOptions.get(option.toUpperCase());
     }
@@ -187,11 +207,15 @@ public class InputFunction extends AbstractFunction {
     /**
      * Parses a string and returns a Map of options for the given type. Options not found are set to
      * the default value for the type.
+     *
+     * @param s the {@code String} to parse.
+     * @return the options parsed from the string.
+     * @throws OptionException if an error occurs.
      */
     public OptionMap parseOptionString(String s) throws OptionException {
       OptionMap ret = new OptionMap();
       ret.putAll(defaultOptions); // copy the default values first
-      Pattern pattern = Pattern.compile("\\s*(\\w+)\\s*\\=\\s*([\\w-]+)\\s*");
+      Pattern pattern = Pattern.compile("\\s*(\\w+)\\s*=\\s*([^ ]+)\\s*");
       Matcher matcher = pattern.matcher(s);
       while (matcher.find()) {
         String key = matcher.group(1);
@@ -350,22 +374,32 @@ public class InputFunction extends AbstractFunction {
       this.optionValues = inputType.parseOptionString(options);
 
       if (inputType != null && inputType.isValueComposite)
-        this.valueList = parseStringList(this.value);
+        this.valueList = parseStringList(this.value, this.optionValues.get("DELIMITER"));
     }
 
     /**
      * Parses a string into a list of values, for composite types. <br>
      * Before calling, the <code>inputType</code> and <code>value</code> must be set. <br>
      * After calling, the <code>listIndex</code> member is adjusted if necessary.
+     *
+     * @param valueString the string list
+     * @param delim the delimiter
      */
-    public List<String> parseStringList(String valueString) {
+    public List<String> parseStringList(String valueString, String delim) {
       List<String> ret = new ArrayList<String>();
       if (valueString != null) {
-        String[] values = valueString.split(",");
-        int i = 0;
-        for (String s : values) {
-          ret.add(s.trim());
-          i++;
+        if ("json".equalsIgnoreCase(delim)) {
+          JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(valueString);
+          if (json != null && json.isJsonArray()) {
+            for (JsonElement ele : json.getAsJsonArray()) {
+              ret.add(ele.getAsString().trim());
+            }
+          }
+        } else {
+          String[] values = valueString.split(delim);
+          for (String s : values) {
+            ret.add(s.trim());
+          }
         }
       }
       return ret;
@@ -747,20 +781,32 @@ public class InputFunction extends AbstractFunction {
 
     /** Creates a subpanel with controls for each property. */
     public JComponent createPropsControl(VarSpec vs) {
-      // Get the key/value pairs from the property string
       Map<String, String> map = new HashMap<String, String>();
+      JsonElement jsonElement = JSONMacroFunctions.getInstance().asJsonElement(vs.value);
       List<String> oldKeys = new ArrayList<String>();
-      List<String> oldKeysNormalized = new ArrayList<String>();
-      StrPropFunctions.parse(vs.value, map, oldKeys, oldKeysNormalized, ";");
+
+      if (jsonElement instanceof JsonObject) {
+        // Get the key/value pairs from the JsonObject
+        JsonObject jsonObject = (JsonObject) jsonElement;
+        for (String key : jsonObject.keySet()) {
+          map.put(key.toUpperCase(), jsonObject.get(key).getAsString());
+          oldKeys.add(key);
+        }
+      } else {
+        // Get the key/value pairs from the property string
+        List<String> oldKeysNormalized = new ArrayList<String>();
+        StrPropFunctions.parse(vs.value, map, oldKeys, oldKeysNormalized, ";");
+      }
 
       // Create list of VarSpecs for the subpanel
       List<VarSpec> varSpecs = new ArrayList<VarSpec>();
+      InputType it = InputType.TEXT;
+      int width = vs.optionValues.getNumeric("WIDTH");
+      String options = "WIDTH=" + width;
       for (String key : oldKeys) {
         String name = key;
         String value = map.get(key.toUpperCase());
         String prompt = key;
-        InputType it = InputType.TEXT;
-        String options = "WIDTH=14;";
         VarSpec subvs;
         try {
           subvs = new VarSpec(name, value, prompt, it, options);
@@ -975,7 +1021,7 @@ public class InputFunction extends AbstractFunction {
   // The function that does all the work
   @Override
   public Object childEvaluate(Parser parser, String functionName, List<Object> parameters)
-      throws EvaluationException, ParserException {
+      throws ParserException {
     // Extract the list of specifier strings from the parameters
     // "name | value | prompt | inputType | options"
     List<String> varStrings = new ArrayList<String>();
@@ -1047,6 +1093,8 @@ public class InputFunction extends AbstractFunction {
 
     // UI step 3 - show the dialog
     JOptionPane jop = new JOptionPane(ip, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+    fixLayoutForTabPanes(jop);
+
     JDialog dlg = jop.createDialog(MapTool.getFrame(), dialogTitle);
 
     // Set up callbacks needed for desired runtime behavior
@@ -1074,6 +1122,7 @@ public class InputFunction extends AbstractFunction {
         VarSpec vs = panelVars.get(varCount);
         JComponent comp = panelControls.get(varCount);
         String newValue = null;
+        JsonObject jsonObject = null;
         switch (vs.inputType) {
           case TEXT:
             {
@@ -1130,6 +1179,7 @@ public class InputFunction extends AbstractFunction {
               // all the new settings.
               Component[] comps = ((JPanel) comp).getComponents();
               StringBuilder sb = new StringBuilder();
+              jsonObject = new JsonObject();
               int setVars = 0; // "NONE", no assignments made
               if (vs.optionValues.optionEquals("SETVARS", "SUFFIXED")) setVars = 1;
               if (vs.optionValues.optionEquals("SETVARS", "UNSUFFIXED")) setVars = 2;
@@ -1143,6 +1193,10 @@ public class InputFunction extends AbstractFunction {
                 sb.append("=");
                 sb.append(value);
                 sb.append(" ; ");
+                if (vs.optionValues.optionEquals("TYPE", "JSON")) {
+                  jsonObject.add(
+                      key, JSONMacroFunctions.getInstance().convertPrimitiveFromString(value));
+                }
                 switch (setVars) {
                   case 0:
                     // Do nothing
@@ -1165,7 +1219,11 @@ public class InputFunction extends AbstractFunction {
         }
         // Set the variable to the value we got from the dialog box.
         if (newValue != null) {
-          parser.setVariable(vs.name, newValue.trim());
+          if (vs.optionValues.optionEquals("TYPE", "JSON")) {
+            parser.setVariable(vs.name, jsonObject);
+          } else {
+            parser.setVariable(vs.name, newValue.trim());
+          }
           allAssignments.append(vs.name + "=" + newValue.trim() + " ## ");
         }
       }
@@ -1178,6 +1236,23 @@ public class InputFunction extends AbstractFunction {
 
     // for debugging:
     // return debugOutput(varSpecs);
+  }
+
+  /**
+   * This is a workaround to fix the excessive space introduced when using multiple tabs (see issue
+   * #198)
+   */
+  private void fixLayoutForTabPanes(JOptionPane jop) {
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    GridBagLayout gbl = new GridBagLayout();
+    for (Component c : jop.getComponents()) {
+      gbl.setConstraints(c, gbc);
+      gbc.gridy += 1;
+    }
+    jop.setLayout(gbl);
   }
 
   @Override

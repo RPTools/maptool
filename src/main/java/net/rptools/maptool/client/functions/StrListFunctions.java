@@ -105,8 +105,8 @@ public class StrListFunctions extends AbstractFunction {
   /**
    * Prepares a string for use in regex operations.
    *
-   * @param s the String that could have non-alphanumeric characters
-   * @return a new String, with the non-alphanumeric characters escaped
+   * @param s the String that could have non-alphanumeric characters.
+   * @return a new String, with the non-alphanumeric characters escaped.
    */
   public static String fullyQuoteString(String s) {
     // We escape each non-alphanumeric character in the delimiter string
@@ -161,6 +161,7 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the elements
    * @return The item at position <code>index</code>, or <code>""</code> if out of bounds.
+   * @throws ParameterException if an error occurs.
    */
   public Object listGet(
       List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -201,6 +202,7 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return A new list with the item at position <code>index</code> deleted.
+   * @throws ParameterException if an error occurs.
    */
   public Object listDelete(
       List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -247,6 +249,7 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return The number of entries in the list.
+   * @throws ParameterException if an error occurs.
    */
   public Object listCount(
       List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -275,6 +278,7 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return The index of the first occurence of <code>target</code>, or -1 if not found.
+   * @throws ParameterException when an error occurs.
    */
   public Object listFind(
       List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -311,6 +315,7 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return Number of occurrences of <code>target</code> in <code>list</code>.
+   * @throws ParameterException when an error occurs.
    */
   public Object listContains(
       List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -346,6 +351,7 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return A new list with <code>target</code> appended.
+   * @throws ParameterException when an error occurs.
    */
   public Object listAppend(
       List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -383,6 +389,7 @@ public class StrListFunctions extends AbstractFunction {
    * @param list the list that will contain the parsed element
    * @return A new list with <code>target</code> inserted before the item at position <code>index
    *     </code>
+   * @throws ParameterException when an error occurs.
    */
   public Object listInsert(
       List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -437,6 +444,7 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return A new list with the entry at <code>index</code> repaced by <code>target</code>
+   * @throws ParameterException when an error occurs.
    */
   public Object listReplace(
       List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -534,7 +542,7 @@ public class StrListFunctions extends AbstractFunction {
    * @param lastParam the last parameter
    * @param list the list that will contain the parsed element
    * @return A string containing the formatted list.
-   * @throws ParameterException
+   * @throws ParameterException if an error occurs.
    */
   public Object listFormat(
       List<Object> parameters, String listStr, String lastParam, List<String> list)
@@ -632,7 +640,12 @@ public class StrListFunctions extends AbstractFunction {
       return order;
     }
 
-    /** Pads a string with leading zeros out to 4 digits */
+    /**
+     * Pads a {@code String} with leading zeros out to 4 digits.
+     *
+     * @param s the {@code String} to pad.
+     * @return the {@code String} padded with 0's out to 4 digits..
+     */
     public String pad(String s) {
       int l = 4 - s.length();
       switch (l) {
@@ -650,7 +663,13 @@ public class StrListFunctions extends AbstractFunction {
     }
   }
 
-  /** Tries to convert a string to a number, returning <code>null</code> on failure. */
+  /**
+   * Tries to convert a string to a number, returning {@code null} on failure.
+   *
+   * @param s the {@code String} to convert to an {@code Integer}.
+   * @return the {@code Integer} value of the {@code String}, return {@code null} if it can not be
+   *     converted.
+   */
   public Integer strToInt(String s) {
     Integer intval = null;
     try { // convert to numeric value if possible
@@ -670,6 +689,13 @@ public class StrListFunctions extends AbstractFunction {
 
   /**
    * Checks number and types of parameters (pass null type to suppress typechecking for that slot).
+   *
+   * @param funcName the name of the Script functions.
+   * @param minParams the minimum number of parameters expected for the script function.
+   * @param maxParams the maximum number of parameters expected for the script function.
+   * @param parameters the parameters to check.
+   * @param expected the expected classes of the parameters.
+   * @throws ParameterException if there is an error.
    */
   public void checkVaryingParameters(
       String funcName, int minParams, int maxParams, List<Object> parameters, Class<?>[] expected)

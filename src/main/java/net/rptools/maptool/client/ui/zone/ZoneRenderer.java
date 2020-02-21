@@ -1356,7 +1356,9 @@ public class ZoneRenderer extends JComponent
     // Perhaps we should draw the fog first and use hard fog to determine whether labels need to be
     // drawn?
     // (This method has it's own 'timer' calls)
-    renderLabels(g2d, view);
+    if (AppState.getShowTextLabels()) {
+      renderLabels(g2d, view);
+    }
 
     // (This method has it's own 'timer' calls)
     if (zone.hasFog()) {
@@ -4132,6 +4134,19 @@ public class ZoneRenderer extends JComponent
     return zone.getGrid().convert(zp);
   }
 
+  /**
+   * Converts a screen point to the center point of the corresponding grid cell.
+   *
+   * @param sp
+   * @return ZonePoint with the coordinates of the center of the grid cell.
+   */
+  public ZonePoint getCellCenterAt(ScreenPoint sp) {
+    Grid grid = getZone().getGrid();
+    CellPoint cp = getCellAt(sp);
+    Point2D.Double p2d = grid.getCellCenter(cp);
+    return new ZonePoint((int) p2d.getX(), (int) p2d.getY());
+  }
+
   public void setScale(double scale) {
     if (zoneScale.getScale() != scale) {
       /*
@@ -4339,7 +4354,8 @@ public class ZoneRenderer extends JComponent
           renderPathTask.cancel(true);
         }
 
-        boolean restictMovement = AppPreferences.isUsingAstarPathfinding();
+        boolean restictMovement = MapTool.getServerPolicy().isUsingAstarPathfinding();
+
         Set<TerrainModifierOperation> terrainModifiersIgnored = token.getTerrainModifiersIgnored();
 
         // Skip AI Pathfinding if not on the token layer...

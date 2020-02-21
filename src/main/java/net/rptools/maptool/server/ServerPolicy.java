@@ -37,6 +37,9 @@ public class ServerPolicy {
   private boolean includeOwnedNPCs = true; // Include Owned NPC Tokens in FoW views
   private WalkerMetric movementMetric;
 
+  private boolean useAstarPathfinding = AppPreferences.isUsingAstarPathfinding();
+  private boolean vblBlocksMove = AppPreferences.getVblBlocksMove();
+
   public ServerPolicy() {
     // Default tool tip usage for inline rolls to user preferences.
     useToolTipsForDefaultRollFormat = AppPreferences.getUseToolTipForInlineRoll();
@@ -174,6 +177,22 @@ public class ServerPolicy {
     this.includeOwnedNPCs = includeOwnedNPCs;
   }
 
+  public boolean isUsingAstarPathfinding() {
+    return useAstarPathfinding;
+  }
+
+  public void setUseAstarPathfinding(boolean useAstarPathfinding) {
+    this.useAstarPathfinding = useAstarPathfinding;
+  }
+
+  public boolean getVblBlocksMove() {
+    return vblBlocksMove;
+  }
+
+  public void setVblBlocksMove(boolean vblBlocksMove) {
+    this.vblBlocksMove = vblBlocksMove;
+  }
+
   /**
    * Retrieves the server side preferences as a json object.
    *
@@ -207,6 +226,9 @@ public class ServerPolicy {
     WalkerMetric metric =
         MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : getMovementMetric();
     sinfo.addProperty("movement metric", metric.toString());
+
+    sinfo.addProperty("using ai", isUsingAstarPathfinding() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty("vbl blocks movement", getVblBlocksMove() ? BigDecimal.ONE : BigDecimal.ZERO);
 
     sinfo.addProperty("timeInMs", getSystemTime());
     sinfo.addProperty("timeDate", getTimeDate());

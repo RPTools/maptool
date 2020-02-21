@@ -78,6 +78,7 @@ public class EvalMacroFunctions extends AbstractFunction {
   /**
    * Executes the macro with the specified variable scope.
    *
+   * @param res the {@link MapToolVariableResolver} used to resolve variable values.
    * @param tokenInContext The token in context.
    * @param line the macro to execute.
    * @return the result of the execution.
