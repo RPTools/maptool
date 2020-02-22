@@ -33,7 +33,7 @@ import javax.swing.JPanel;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethod;
+import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone;
@@ -54,7 +54,7 @@ public class TokenVblPanel extends JPanel {
   private Color vblIgnoredColor = new Color(0, 0, 0, 0);
   private int alphaSensitivity = 1;
   private int jtsDistanceTolerance = 10;
-  private JTS_SimplifyMethod jtsMethod = JTS_SimplifyMethod.getDefault();
+  private JTS_SimplifyMethodType jtsMethod = JTS_SimplifyMethodType.getDefault();
   private int tokenVblOriginalPointCount = 0;
   private int tokenVblOptimizedPointCount = 0;
 
@@ -228,12 +228,12 @@ public class TokenVblPanel extends JPanel {
     jtsDistanceTolerance = value;
   }
 
-  public JTS_SimplifyMethod getJtsMethod() {
+  public JTS_SimplifyMethodType getJtsMethod() {
     return jtsMethod;
   }
 
   public void setJtsMethod(String method) {
-    jtsMethod = JTS_SimplifyMethod.fromString(method);
+    jtsMethod = JTS_SimplifyMethodType.fromString(method);
   }
 
   @Override
@@ -299,8 +299,6 @@ public class TokenVblPanel extends JPanel {
 
     // Draw the VBL
     if (tokenVBL_optimized != null) {
-      //      double tx = centerPoint.x - deltaX - translateX - (imgSize.width / 2) * scale;
-      //      double ty = centerPoint.y - deltaY - translateY - (imgSize.height / 2) * scale;
       double sx = (imgSize.getWidth() / originalImgSize.getWidth()) * scale;
       double sy = (imgSize.getHeight() / originalImgSize.getHeight()) * scale;
 
