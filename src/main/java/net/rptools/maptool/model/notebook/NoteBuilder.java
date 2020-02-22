@@ -14,42 +14,42 @@
  */
 package net.rptools.maptool.model.notebook;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.annotations.Since;
 import java.util.UUID;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 
 /** Builder class used for building {@link Note} objects. */
-public class NoteBuilder {
+public class NoteBuilder implements NoteBookEntryBuilder {
+
+  /** The current version of the {@link NoteBuilder} class */
+  public static final double CURRENT_VERSION = 1.0;
+
+  /** The version of the {@code NoteBuilder}. */
+  private double version = 1.0;
 
   /** The id of the {@code Note}. */
+  @Since(1.0)
   private UUID id;
 
-  /** Has the id valie been set. */
-  private boolean idSet;
-
   /** The name of the {@code Note}. */
+  @Since(1.0)
   private String name;
 
-  /** Has the name value been set. */
-  private boolean nameSet;
-
   /** The Reference value of the {@code Note}. */
+  @Since(1.0)
   private String reference;
 
-  /** Has the reference value been set. */
-  private boolean referenceSet;
-
   /** The id of the {@link Zone} of the {@code Note}. */
+  @Since(1.0)
   private GUID zoneId;
 
-  /** Has the {@link Zone} id value been set. */
-  private boolean zoneIdSet;
-
   /** The notes for the {@code Note). */
+  @Since(1.0)
   private String notes;
-
-  /** Has the nores value been set. */
-  private boolean notesSet;
 
   /**
    * Creates a new {@code NoteBuilder} populated with the values from the passed in {@link Note} and
@@ -57,10 +57,13 @@ public class NoteBuilder {
    *
    * @param note The {@link Note} to copy the values from.
    * @param id The id value to use.
-   * @return a new {@code NoteBuilder}.}
+   * @return a new {@code NoteBuilder}.
+   * @throws IllegalStateException if {@code id} is {@code null}.
    */
   public static NoteBuilder copy(Note note, UUID id) {
-    assert id != null : "ID can not be null for copied NoteBookmarkBuilder.";
+    if (id == null) {
+      throw new IllegalStateException("ID can not be null for copied NoteBookmarkBuilder.");
+    }
 
     NoteBuilder builder = new NoteBuilder();
 
@@ -120,17 +123,7 @@ public class NoteBuilder {
    */
   public NoteBuilder setId(UUID id) {
     this.id = id;
-    idSet = id != null;
     return this;
-  }
-
-  /**
-   * Returns if the id has been set.
-   *
-   * @return {@code true} if the id has been set.
-   */
-  public boolean isIdSet() {
-    return idSet;
   }
 
   /**
@@ -150,17 +143,7 @@ public class NoteBuilder {
    */
   public NoteBuilder setName(String name) {
     this.name = name;
-    nameSet = name != null;
     return this;
-  }
-
-  /**
-   * Returns if the name has been set.
-   *
-   * @return {@code true} if the name has been set.
-   */
-  public boolean isNameSet() {
-    return nameSet;
   }
 
   /**
@@ -184,17 +167,7 @@ public class NoteBuilder {
     } else {
       this.reference = reference;
     }
-    referenceSet = this.reference != null;
     return this;
-  }
-
-  /**
-   * Has the reference value been set.
-   *
-   * @return {@code true} if the reference value has been set.
-   */
-  public boolean isReferenceSet() {
-    return referenceSet;
   }
 
   /**
@@ -214,17 +187,7 @@ public class NoteBuilder {
    */
   public NoteBuilder setZoneId(GUID zoneId) {
     this.zoneId = zoneId;
-    zoneIdSet = zoneId != null;
     return this;
-  }
-
-  /**
-   * Has the zone id been set.
-   *
-   * @return {@code true} if the zone id has been set.
-   */
-  public boolean isZoneIdSet() {
-    return zoneIdSet;
   }
 
   /**
@@ -244,17 +207,7 @@ public class NoteBuilder {
    */
   public NoteBuilder setNotes(String notes) {
     this.notes = notes;
-    notesSet = notes != null;
     return this;
-  }
-
-  /**
-   * Returns if the notes have been set.
-   *
-   * @return {@code true} if the notes have been set.
-   */
-  public boolean isNotesSet() {
-    return notesSet;
   }
 
   /**
@@ -265,5 +218,34 @@ public class NoteBuilder {
    */
   public Note build() {
     return new Note(this);
+  }
+
+  /**
+   * Returns a {@link JsonObject} representing the {@link NoteBuilder}. The {@link String} returned
+   * by this function can be passed to {@link #buildFromJson(JsonObject)}.
+   *
+   * @return The {@link JsonObject} that later can be passed to {@link #buildFromJson(JsonObject)}
+   *     to rebuild the {@link Note}.
+   */
+  public static JsonObject toJson(Note note) {
+    Gson gson = new GsonBuilder().setVersion(CURRENT_VERSION).create();
+    return gson.toJsonTree(note).getAsJsonObject();
+  }
+
+  /**
+   * Builds a {@link Note} from the passed in {@code String} value. This method is a complement to
+   * {@link #toJson(Note)}.
+   *
+   * @param json The {@link JsonObject} to build the {@link Note} for.
+   * @return a {@link Note} built from the {@link JsonObject}}.
+   * @throws IllegalStateException if the {@link JsonObject} can not be parsed correctly.
+   */
+  public static Note buildFromJson(JsonObject json) {
+    Gson gson = new GsonBuilder().create();
+    NoteBuilder builder = gson.fromJson(json, NoteBuilder.class);
+
+    // In the future version conversion would happen here...
+
+    return builder.build();
   }
 }

@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
@@ -62,6 +63,8 @@ import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.notebook.NoteBook;
+import net.rptools.maptool.model.notebook.NoteBookEntryPersistenceUtil;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
@@ -80,7 +83,7 @@ public class PersistenceUtil {
   private static final String ASSET_DIR = "assets/"; // $NON-NLS-1$
   public static final String HERO_LAB = "herolab"; // $NON-NLS-1$
 
-  private static final String CAMPAIGN_VERSION = "1.4.1";
+  private static final String CAMPAIGN_VERSION = "1.6.0";
 
   // Please add a single note regarding why the campaign version number has been updated:
   // 1.3.70 ownerOnly added to model.Light (not backward compatible)
@@ -306,6 +309,12 @@ public class PersistenceUtil {
           pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
         }
 
+        if (campaignVersion == null || campaignVersion.startsWith("1.6")) {
+          saveTimer.start("Save NoteBook");
+          saveNoteBook(pakFile, persistedCampaign.campaign.getNotebook());
+          saveTimer.stop("Save NoteBook");
+        }
+
         saveTimer.stop("Set content");
         saveTimer.start("Save");
         pakFile.save();
@@ -368,6 +377,21 @@ public class PersistenceUtil {
 
     if (log.isDebugEnabled()) {
       log.debug(saveTimer);
+    }
+  }
+
+  /**
+   * Persists the contents of a {@link NoteBook}.
+   *
+   * @param packedFile The {@link PackedFile} to write the information to.
+   * @param notebook The {@link NoteBook} to save the information.
+   * @throws IOException if an error occurs writing a file.
+   */
+  private static void saveNoteBook(PackedFile packedFile, NoteBook notebook) throws IOException {
+    var nbePersistenceUtil = new NoteBookEntryPersistenceUtil();
+    for (var entry : notebook.getEntries()) {
+      packedFile.putFile(
+          "notebook/" + entry.getId(), nbePersistenceUtil.toString(entry).getBytes());
     }
   }
 
@@ -439,6 +463,10 @@ public class PersistenceUtil {
           zone.optimize();
         }
 
+        NoteBook noteBook = persistedCampaign.campaign.getNotebook();
+
+        loadNoteBook(pakFile, noteBook);
+
         // for (Entry<String, Map<GUID, LightSource>> entry :
         // persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
         // for (Entry<GUID, LightSource> entryLs : entry.getValue().entrySet()) {
@@ -471,6 +499,19 @@ public class PersistenceUtil {
     persistedCampaign = loadLegacyCampaign(campaignFile);
     if (persistedCampaign == null) MapTool.showWarning("PersistenceUtil.warn.campaignNotLoaded");
     return persistedCampaign;
+  }
+
+  private static void loadNoteBook(PackedFile packedFile, NoteBook noteBook) throws IOException {
+    var nbePersistenceUtil = new NoteBookEntryPersistenceUtil();
+
+    List<String> noteFiles =
+        packedFile.getPaths().stream()
+            .filter(p -> p.startsWith("notebook/"))
+            .collect(Collectors.toList());
+    for (var noteFile : noteFiles) {
+      String asString = IOUtils.toString(packedFile.getFileAsReader(noteFile));
+      noteBook.putEntry(nbePersistenceUtil.fromString(asString));
+    }
   }
 
   public static PersistedCampaign loadLegacyCampaign(File campaignFile) {

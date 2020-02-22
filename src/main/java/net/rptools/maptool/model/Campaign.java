@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.model;
 
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -101,8 +100,7 @@ public class Campaign {
    * The {@link NoteBook} manages all the {@link net.rptools.maptool.model.notebook.MapBookmark}s
    * for the campaign.
    */
-  @XStreamOmitField // Do no persist as part of normal persistence, it will be handled s separately
-  private final transient NoteBook notebook = new NoteBook();
+  private final transient NoteBook notebook;
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
@@ -128,6 +126,7 @@ public class Campaign {
     macroButtonProperties = new ArrayList<MacroButtonProperties>();
     gmMacroButtonProperties = new ArrayList<MacroButtonProperties>();
     zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+    notebook = new NoteBook();
   }
 
   private void checkCampaignPropertyConversion() {
@@ -165,6 +164,8 @@ public class Campaign {
   public Campaign(Campaign campaign) {
     name = campaign.getName();
     zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+
+    notebook = new NoteBook();
 
     /*
      * Don't forget that since these are new zones AND new tokens created here from the old one,
@@ -699,6 +700,17 @@ public class Campaign {
 
   public void setExportCampaignDialog(CampaignExportDialog d) {
     campaignExportDialog = d;
+  }
+
+  /**
+   * Read resolve to teo replace Object from deserialization.
+   *
+   * @return a {@code Campaign} from deserialization.
+   * @implNote A {@code readResolve()} method is required to ensure that final transient fields are
+   *     correctly initialized.
+   */
+  private Object readResolve() {
+    return new Campaign(this);
   }
 
   /**

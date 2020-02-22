@@ -218,19 +218,21 @@ public class NoteBookPanel extends JFXPanel {
    * @note This method can safely be called from any thread.
    */
   private void campaignChanged(Campaign oldCampaign, Campaign newCampaign) {
-    NoteBookTableTreeModel oldNoteBookTableTreeModel = noteBookTableTreeModel;
 
     if (newCampaign != null) {
       Platform.runLater(
           () -> {
+            NoteBookTableTreeModel oldNoteBookTableTreeModel = noteBookTableTreeModel;
+
             noteBookTableTreeModel =
                 NoteBookTableTreeModel.getTreeModelFor(newCampaign.getNotebook());
             notebookTable.setRoot(noteBookTableTreeModel.getRoot());
-          });
-    }
+            notebookTable.refresh();
 
-    if (oldNoteBookTableTreeModel != null) {
-      oldNoteBookTableTreeModel.dispose();
+            /*if (oldNoteBookTableTreeModel != null) {
+              oldNoteBookTableTreeModel.dispose();
+            }*/
+          });
     }
   }
 }

@@ -47,24 +47,16 @@ public class Note implements NoteBookEntry {
     String error = "";
     boolean invalid = false;
 
-    if (builder.isIdSet()) {
+    if (builder.getId() == null) {
       error = "ID can not be null for Note";
       invalid = true;
     }
 
-    if (builder.isNameSet()) {
+    if (builder.getName() == null || builder.getName().isEmpty()) {
       if (!error.isEmpty()) {
         error += ", ";
       }
       error += "Name can not be null for Note";
-      invalid = true;
-    }
-
-    if (builder.isNotesSet()) {
-      if (!error.isEmpty()) {
-        error += ",";
-      }
-      error += "Notes can not be null for Note";
       invalid = true;
     }
 
