@@ -275,7 +275,7 @@ public class VBL_Functions extends AbstractFunction {
             if (alpha < 0 || alpha > 255)
               throw new ParserException(
                   I18N.getText("macro.function.input.illegalArgumentType", alpha, "0-255"));
-            tokenVBL = TokenVBL.createVblArea(token, alpha);
+            tokenVBL = TokenVBL.createOptimizedVblArea(token, alpha);
             break;
           case NONE:
             // Setting to null causes various Token VBL updating to be skipped
