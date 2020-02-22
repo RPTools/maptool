@@ -603,13 +603,12 @@ public class PackedFile implements AutoCloseable {
     ZipEntry entry = new ZipEntry(path);
     ZipFile zipFile = getZipFile();
 
-    try (InputStream in = zipFile.getInputStream(entry)) {
-      if (in == null) throw new FileNotFoundException(path);
-      String type = FileUtil.getContentType(in);
-      if (log.isDebugEnabled() && type != null)
-        log.debug("FileUtil.getContentType() returned " + type);
-      return in;
-    }
+    InputStream in = zipFile.getInputStream(entry);
+    if (in == null) throw new FileNotFoundException(path);
+    String type = FileUtil.getContentType(in);
+    if (log.isDebugEnabled() && type != null)
+      log.debug("FileUtil.getContentType() returned " + type);
+    return in;
   }
 
   public void close() {
