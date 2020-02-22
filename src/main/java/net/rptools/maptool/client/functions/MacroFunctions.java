@@ -457,7 +457,7 @@ public class MacroFunctions extends AbstractFunction {
     try {
       jobj =
           JSONMacroFunctions.getInstance().asJsonElement(param.get(0).toString()).getAsJsonObject();
-    } catch (ParserException | IllegalStateException e) {
+    } catch (IllegalStateException e) {
       jobj = null;
     }
 

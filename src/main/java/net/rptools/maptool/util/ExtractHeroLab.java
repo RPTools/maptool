@@ -65,10 +65,13 @@ import org.xml.sax.SAXException;
  * @author Jamz
  */
 public final class ExtractHeroLab {
+
   private static final File tmpDir = AppUtil.getTmpDir();
-  private File finalTempDir;
-  private File extractComplete;
-  private File portfolioFile;
+  private static final String MISSING_XML_ERROR_MESSAGE =
+      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<error>\n    XML Data is missing from Hero Lab portfolio.\n    Contact LWD Technology support at https://www.wolflair.com\n</error>";
+  private final File finalTempDir;
+  private final File extractComplete;
+  private final File portfolioFile;
 
   private DocumentBuilderFactory factory;
   private DocumentBuilder builder;
@@ -122,8 +125,11 @@ public final class ExtractHeroLab {
   }
 
   private boolean isExtracted() {
-    if (extractComplete.exists()) return true;
-    else return false;
+    if (extractComplete.exists()) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   private void markComplete() {
@@ -280,7 +286,9 @@ public final class ExtractHeroLab {
 
       // Ugg, @herolableadindex is always 0 for all minions :(
       String minionCriteria = "";
-      if (heroLabData.isMinion()) minionCriteria = "' and @name='" + heroLabData.getName();
+      if (heroLabData.isMinion()) {
+        minionCriteria = "' and @name='" + heroLabData.getName();
+      }
 
       XPathFactory xPathfactory = XPathFactory.newInstance();
       XPath xpath = xPathfactory.newXPath();
@@ -428,6 +436,13 @@ public final class ExtractHeroLab {
     try {
       xmlStatBlock = getXmlFromZip(zipPath);
 
+      // This shouldn't happen but unsupported running of Hero Lab on Linux via Wine can cause this
+      if (xmlStatBlock == null) {
+        xmlStatBlockMap.put("data", MISSING_XML_ERROR_MESSAGE);
+        statBlocks.put(HeroLabData.StatBlockType.XML, xmlStatBlockMap);
+        return statBlocks;
+      }
+
       if (master == null) {
         // We don't need the minion data in the main character so we will remove that
         // node to save space
@@ -500,11 +515,12 @@ public final class ExtractHeroLab {
       XPathExpression xPath_statBlock =
           xpath.compile("statblocks/statblock[@format='" + type + "']");
       Node statBlockNode = (Node) xPath_statBlock.evaluate(hero, XPathConstants.NODE);
-      if (statBlockNode != null)
+      if (statBlockNode != null) {
         path =
             ((Element) statBlockNode).getAttribute("folder")
                 + "/"
                 + ((Element) statBlockNode).getAttribute("filename");
+      }
     } catch (XPathExpressionException e) {
       e.printStackTrace();
     }

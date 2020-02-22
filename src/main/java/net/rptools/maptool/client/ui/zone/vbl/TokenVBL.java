@@ -20,6 +20,7 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import java.util.stream.Stream;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -45,14 +46,14 @@ public class TokenVBL {
 
   private static final Logger log = LogManager.getLogger();
 
-  public enum JTS_SimplifyMethod {
-    DOUGLAS_PEUCKER_SIMPLIFIER,
-    TOPOLOGY_PRESERVING_SIMPLIFIER,
-    VW_SIMPLIFIER
-  }
-
   /**
-   * A passed token will have it's image asset rendered into an Area based on pixels that have an
+   * TODO: Used by macro function only, update it.
+   *
+   * <p>FIXME: replaceBean failed. Unable to find compName: textStatblockRTextScrollPane
+   *
+   * <p>FIXME: replaceBean failed. Unable to find compName: xmlStatblockRTextScrollPane
+   *
+   * <p>A passed token will have it's image asset rendered into an Area based on pixels that have an
    * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
    *
    * @param token the token
@@ -61,51 +62,23 @@ public class TokenVBL {
    * @author Jamz
    * @since 1.6.0
    */
-  public static Area createVblArea(Token token, int alphaSensitivity) {
-    return createVblArea(token, alphaSensitivity, JTS_SimplifyMethod.DOUGLAS_PEUCKER_SIMPLIFIER, 2);
+  public static Area createOptimizedVblArea(Token token, int alphaSensitivity) {
+    final Area vblArea = createVblAreaFromToken(token, alphaSensitivity, false);
+    return simplifyArea(vblArea, JTS_SimplifyMethodType.getDefault(), 10);
   }
 
-  public static Area createVblArea(Token token, int alphaSensitivity, double distanceTolerance) {
-    if (distanceTolerance > 0) {
-      return createVblArea(
-          token,
-          alphaSensitivity,
-          JTS_SimplifyMethod.DOUGLAS_PEUCKER_SIMPLIFIER,
-          distanceTolerance);
-    } else {
-      return createVblArea(token, alphaSensitivity, null, distanceTolerance);
-    }
-  }
-
-  /**
-   * A passed token will have it's image asset rendered into an Area based on pixels that have an
-   * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
-   *
-   * @param token the token
-   * @param alphaSensitivity the alpha sensitivity of the VBL area
-   * @param simplifyMethod the JTS_SimplifyMethod algorithm used to reduce the polygon count
-   * @return Area
-   * @author Jamz
-   * @since 1.6.0
-   */
-  public static Area createVblArea(
-      Token token,
-      int alphaSensitivity,
-      JTS_SimplifyMethod simplifyMethod,
-      double distanceTolerance) {
+  public static Area createVblAreaFromToken(Token token, int alphaSensitivity, boolean inverseVbl) {
     BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
-
-    Area vblArea = createVblArea(image, alphaSensitivity);
-
-    if (simplifyMethod != null) {
-      return simplifyArea(vblArea, distanceTolerance, simplifyMethod);
-    } else {
-      return vblArea;
-    }
+    return createVblArea(image, alphaSensitivity, inverseVbl);
   }
 
   public static Area simplifyArea(
-      Area vblArea, double distanceTolerance, JTS_SimplifyMethod simplifyMethod) {
+      Area vblArea, JTS_SimplifyMethodType simplifyMethod, double distanceTolerance) {
+
+    if (simplifyMethod.equals(JTS_SimplifyMethodType.NONE)) {
+      return vblArea;
+    }
+
     final GeometryFactory geometryFactory = new GeometryFactory();
     ShapeReader shapeReader = new ShapeReader(geometryFactory);
     Geometry vblGeometry = null;
@@ -173,10 +146,12 @@ public class TokenVBL {
 
     if (erase) {
       renderer.getZone().removeTopology(area);
-      MapTool.serverCommand().removeTopology(renderer.getZone().getId(), area);
+      MapTool.serverCommand()
+          .removeTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
     } else {
       renderer.getZone().addTopology(area);
-      MapTool.serverCommand().addTopology(renderer.getZone().getId(), area);
+      MapTool.serverCommand()
+          .addTopology(renderer.getZone().getId(), area, renderer.getZone().getTopologyMode());
     }
 
     MapTool.getFrame().getCurrentZoneRenderer().getZone().tokenTopologyChanged();
@@ -308,9 +283,10 @@ public class TokenVBL {
    *
    * @param image the buffered image.
    * @param alphaSensitivity the alphaSensitivity.
+   * @param inverseVbl
    * @return the area.
    */
-  private static Area createVblArea(BufferedImage image, int alphaSensitivity) {
+  private static Area createVblArea(BufferedImage image, int alphaSensitivity, boolean inverseVbl) {
     // Assumes all colors form the VBL Area, eg everything except transparent pixels with alpha
     // >=
     // alphaSensitivity
@@ -321,13 +297,24 @@ public class TokenVBL {
     Area vblArea = new Area();
     Rectangle vblRectangle;
     int y1, y2;
+    boolean addArea = false;
 
     for (int x = 0; x < image.getWidth(); x++) {
       y1 = 99;
       y2 = -1;
       for (int y = 0; y < image.getHeight(); y++) {
         Color pixelColor = new Color(image.getRGB(x, y), true);
-        if (pixelColor.getAlpha() >= alphaSensitivity) {
+        addArea = false;
+
+        if (!inverseVbl && pixelColor.getAlpha() >= alphaSensitivity) {
+          addArea = true;
+        }
+
+        if (inverseVbl && pixelColor.getAlpha() <= alphaSensitivity) {
+          addArea = true;
+        }
+
+        if (addArea) {
           if (y1 == 99) {
             y1 = y;
             y2 = y;
@@ -351,6 +338,33 @@ public class TokenVBL {
       return null;
     } else {
       return vblArea;
+    }
+  }
+
+  public enum JTS_SimplifyMethodType {
+    DOUGLAS_PEUCKER_SIMPLIFIER("Douglas Peucker"),
+    TOPOLOGY_PRESERVING_SIMPLIFIER("Topology Preserving"),
+    VW_SIMPLIFIER("VW Simplifier"),
+    NONE("No Optimization");
+
+    private final String label;
+
+    JTS_SimplifyMethodType(String label) {
+      this.label = label;
+    }
+
+    public static JTS_SimplifyMethodType getDefault() {
+      return DOUGLAS_PEUCKER_SIMPLIFIER;
+    }
+
+    public static JTS_SimplifyMethodType fromString(String label) {
+      final JTS_SimplifyMethodType jts_simplifyMethod =
+          Stream.of(JTS_SimplifyMethodType.values())
+              .filter(e -> e.label.equalsIgnoreCase(label))
+              .findAny()
+              .orElse(DOUGLAS_PEUCKER_SIMPLIFIER);
+
+      return jts_simplifyMethod;
     }
   }
 }

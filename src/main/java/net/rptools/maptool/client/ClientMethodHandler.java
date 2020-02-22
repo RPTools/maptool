@@ -18,7 +18,6 @@ import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.geom.Area;
 import java.io.IOException;
-import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +47,7 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.Zone.TopologyMode;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -480,14 +480,16 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               case setServerPolicy:
                 ServerPolicy policy = (ServerPolicy) parameters[0];
                 MapTool.setServerPolicy(policy);
+                MapTool.getFrame().getToolbox().updateTools();
                 return;
 
               case addTopology:
                 zoneGUID = (GUID) parameters[0];
                 area = (Area) parameters[1];
+                TopologyMode topologyMode = (TopologyMode) parameters[2];
 
                 zone = MapTool.getCampaign().getZone(zoneGUID);
-                zone.addTopology(area);
+                zone.addTopology(area, topologyMode);
 
                 MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
                 return;
@@ -495,9 +497,10 @@ public class ClientMethodHandler extends AbstractMethodHandler {
               case removeTopology:
                 zoneGUID = (GUID) parameters[0];
                 area = (Area) parameters[1];
+                topologyMode = (TopologyMode) parameters[2];
 
                 zone = MapTool.getCampaign().getZone(zoneGUID);
-                zone.removeTopology(area);
+                zone.removeTopology(area, topologyMode);
 
                 MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
                 return;

@@ -258,7 +258,7 @@ public class MapTool {
    *     window (formatted using <code>params</code>)
    * @param messageType one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>
    *                    JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE
-   *     </code>
+   *                    </code>
    * @param params optional parameters to use when formatting the title text from the properties
    *     file
    */
@@ -420,6 +420,13 @@ public class MapTool {
     return val == JOptionPane.YES_OPTION || val == 2;
   }
 
+  /**
+   * Displays a dialog to confirm the delete of drawings through the Drawing Explorer window.
+   * Presents Yes/No/Yes and don't ask again options. Default action is No. Button text is localized
+   * as is the message.
+   *
+   * @return <code>true</code> if the user clicks either Yes button, <code>falsee</code> otherwise.
+   */
   public static boolean confirmDrawDelete() {
     if (!AppPreferences.getDrawWarnWhenDeleted()) {
       return true;
@@ -429,17 +436,19 @@ public class MapTool {
     int val = confirmDelete(msg);
 
     // "Yes, don't show again" Button
-    if (val == 2) {
+    if (val == JOptionPane.CANCEL_OPTION) {
       showInformation("msg.confirm.deleteDraw.removed");
       AppPreferences.setDrawWarnWhenDeleted(false);
     }
     // Any version of 'Yes' returns true, otherwise false
-    return val == JOptionPane.YES_OPTION || val == 2;
+    return val == JOptionPane.YES_OPTION || val == JOptionPane.CANCEL_OPTION;
   }
 
   private static int confirmDelete(String msg) {
     log.debug(msg);
     Object[] options = {
+      // getText() strips out the & as when the button text is specified this way the mnemonics
+      // don't work.
       I18N.getText("msg.title.messageDialog.yes"),
       I18N.getText("msg.title.messageDialog.no"),
       I18N.getText("msg.title.messageDialog.dontAskAgain")
@@ -449,11 +458,11 @@ public class MapTool {
         clientFrame,
         msg,
         title,
-        JOptionPane.NO_OPTION,
+        JOptionPane.YES_NO_CANCEL_OPTION,
         JOptionPane.WARNING_MESSAGE,
         null,
         options,
-        options[0]);
+        options[1]);
   }
 
   private MapTool() {
@@ -461,12 +470,17 @@ public class MapTool {
     throw new Error("cannot construct MapTool object!");
   }
 
+  /**
+   * Get the BackupManager instance.
+   *
+   * @return the BackupManager.
+   */
   public static BackupManager getBackupManager() {
     if (backupManager == null) {
       try {
         backupManager = new BackupManager(AppUtil.getAppHome("backup"));
       } catch (IOException ioe) {
-        ioe.printStackTrace();
+        showError(I18N.getText("msg.error.creatingBackupManager"), ioe);
       }
     }
     return backupManager;
@@ -526,6 +540,10 @@ public class MapTool {
       }
       SoundManager.playSoundEvent(eventId);
     }
+  }
+
+  public static void updateServerPolicy() {
+    updateServerPolicy(serverPolicy);
   }
 
   public static void updateServerPolicy(ServerPolicy policy) {
@@ -693,7 +711,11 @@ public class MapTool {
     player = new Player("", Player.Role.GM, "");
 
     try {
-      startPersonalServer(CampaignFactory.createBasicCampaign());
+      Campaign cmpgn = CampaignFactory.createBasicCampaign();
+      // This was previously being done in the server thread and didn't always get done
+      // before the campaign was accessed by the postInitialize() method below.
+      setCampaign(cmpgn);
+      startPersonalServer(cmpgn);
     } catch (Exception e) {
       MapTool.showError("While starting personal server", e);
     }
@@ -1341,6 +1363,12 @@ public class MapTool {
     // Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
     // so after frame is all done loading we sync them back up.
     MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
+
+    // Set the Topology drawing mode to the last mode used for convenience
+    MapTool.getFrame()
+        .getCurrentZoneRenderer()
+        .getZone()
+        .setTopologyMode(AppPreferences.getTopologyDrawingMode());
   }
 
   /**
@@ -1434,13 +1462,12 @@ public class MapTool {
    *
    * <p>Examples: -version=1.4.0.1 -user=Jamz
    *
-   * @param options {@link org.apache.commons.cli.Options}
+   * @param cmd {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
    * @param defaultValue A default value to return if option is not found
-   * @param args String array of passed in args
    * @return Option value found as a String, or defaultValue if not found
    * @author Jamz
-   * @since 1.4.0.1
+   * @since 1.5.12
    */
   private static String getCommandLineOption(
       CommandLine cmd, String searchValue, String defaultValue) {
@@ -1452,12 +1479,11 @@ public class MapTool {
    *
    * <p>Examples: -x or -fullscreen
    *
-   * @param options {@link org.apache.commons.cli.Options}
+   * @param cmd {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
-   * @param args String array of passed in args
    * @return A boolean value of true if option parameter found
    * @author Jamz
-   * @since 1.4.0.1
+   * @since 1.5.12
    */
   private static boolean getCommandLineOption(CommandLine cmd, String searchValue) {
     return cmd.hasOption(searchValue);
@@ -1469,13 +1495,12 @@ public class MapTool {
    *
    * <p>Examples: -monitor=1 -x=0 -y=0 -w=1200 -h=960
    *
-   * @param options {@link org.apache.commons.cli.Options}
+   * @param cmd {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
    * @param defaultValue A default value to return if option is not found
-   * @param args String array of passed in args
    * @return Int value of the matching option parameter if found
    * @author Jamz
-   * @since 1.4.0.1
+   * @since 1.5.12
    */
   private static int getCommandLineOption(CommandLine cmd, String searchValue, int defaultValue) {
     return StringUtil.parseInteger(cmd.getOptionValue(searchValue), defaultValue);
