@@ -64,7 +64,7 @@ public class TokenVBL {
    */
   public static Area createOptimizedVblArea(Token token, int alphaSensitivity) {
     final Area vblArea = createVblAreaFromToken(token, alphaSensitivity, false);
-    return simplifyArea(vblArea, JTS_SimplifyMethod.getDefault(), 10);
+    return simplifyArea(vblArea, JTS_SimplifyMethodType.getDefault(), 10);
   }
 
   public static Area createVblAreaFromToken(Token token, int alphaSensitivity, boolean inverseVbl) {
@@ -73,9 +73,9 @@ public class TokenVBL {
   }
 
   public static Area simplifyArea(
-      Area vblArea, JTS_SimplifyMethod simplifyMethod, double distanceTolerance) {
+      Area vblArea, JTS_SimplifyMethodType simplifyMethod, double distanceTolerance) {
 
-    if (simplifyMethod.equals(JTS_SimplifyMethod.NONE)) {
+    if (simplifyMethod.equals(JTS_SimplifyMethodType.NONE)) {
       return vblArea;
     }
 
@@ -341,7 +341,7 @@ public class TokenVBL {
     }
   }
 
-  public enum JTS_SimplifyMethod {
+  public enum JTS_SimplifyMethodType {
     DOUGLAS_PEUCKER_SIMPLIFIER("Douglas Peucker"),
     TOPOLOGY_PRESERVING_SIMPLIFIER("Topology Preserving"),
     VW_SIMPLIFIER("VW Simplifier"),
@@ -349,27 +349,22 @@ public class TokenVBL {
 
     private final String label;
 
-    JTS_SimplifyMethod(String label) {
+    JTS_SimplifyMethodType(String label) {
       this.label = label;
     }
 
-    public static JTS_SimplifyMethod getDefault() {
+    public static JTS_SimplifyMethodType getDefault() {
       return DOUGLAS_PEUCKER_SIMPLIFIER;
     }
 
-    public static JTS_SimplifyMethod fromString(String label) {
-      final JTS_SimplifyMethod jts_simplifyMethod =
-          Stream.of(JTS_SimplifyMethod.values())
+    public static JTS_SimplifyMethodType fromString(String label) {
+      final JTS_SimplifyMethodType jts_simplifyMethod =
+          Stream.of(JTS_SimplifyMethodType.values())
               .filter(e -> e.label.equalsIgnoreCase(label))
               .findAny()
               .orElse(DOUGLAS_PEUCKER_SIMPLIFIER);
 
       return jts_simplifyMethod;
     }
-  }
-
-  public enum TokenVblKeyTypes {
-    ORIGINAL,
-    OPTIMIZED
   }
 }
