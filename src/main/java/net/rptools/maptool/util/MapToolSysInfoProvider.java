@@ -201,7 +201,7 @@ public class MapToolSysInfoProvider implements SysInfoProvider {
       String routerIP = getRouterIP();
       appendInfo("Default Gateway: " + routerIP);
     } catch (SocketException se) {
-      appendInfo("*** Could net get list of network interfaces ***");
+      appendInfo("*** Could not get list of network interfaces ***");
       log.error(se);
     }
   }
