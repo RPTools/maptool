@@ -14,12 +14,14 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
+import com.google.common.base.Stopwatch;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
@@ -45,6 +47,7 @@ import org.locationtech.jts.simplify.VWSimplifier;
 public class TokenVBL {
 
   private static final Logger log = LogManager.getLogger();
+  private static int sliceSize = 100;
 
   /**
    * TODO: Used by macro function only, update it.
@@ -65,7 +68,62 @@ public class TokenVBL {
 
   public static Area createVblAreaFromToken(Token token, int alphaSensitivity, boolean inverseVbl) {
     BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
-    return createVblArea(image, alphaSensitivity, inverseVbl);
+
+    final int w = image.getWidth();
+    final int h = image.getHeight();
+
+    //    log.info("Image w,h {},{}", w, h);
+
+    // By slicing an image up, the Area math is greatly simplified downstream
+    // Performance increase is up to 50x faster...
+    if (w > sliceSize || h > sliceSize) {
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      Area combinedArea = new Area();
+
+      for (int i = 0; i < w; i += sliceSize) {
+        int width = sliceSize;
+        if (i + sliceSize > w) {
+          width = w - i;
+        }
+
+        for (int j = 0; j < h; j += sliceSize) {
+          int height = sliceSize;
+          if (j + sliceSize > h) {
+            height = h - j;
+          }
+
+          Area slice = createVblAreaSlice(i, j, width, height, image, alphaSensitivity, inverseVbl);
+          combinedArea.add(slice);
+        }
+      }
+
+      log.info(
+          "Total time to render image to Area: {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
+      return combinedArea;
+    } else {
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      final Area vblArea = createVblArea(image, alphaSensitivity, inverseVbl);
+      log.info("Time to complete full image: {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+      return vblArea;
+    }
+  }
+
+  private static Area createVblAreaSlice(
+      int x, int y, int w, int h, BufferedImage image, int alphaSensitivity, boolean inverseVbl) {
+
+    //    log.info("x,y,w,h: {},{},{},{}", x, y, w, h);
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    AffineTransform at = new AffineTransform();
+
+    at.translate(x, y);
+    Area slice =
+        createVblArea(image.getSubimage(x, y, w, h), alphaSensitivity, inverseVbl)
+            .createTransformedArea(at);
+
+    //    log.info("Time to complete quadrant: {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
+    return slice;
   }
 
   public static Area simplifyArea(
@@ -289,7 +347,7 @@ public class TokenVBL {
     // >=
     // alphaSensitivity
     if (image == null) {
-      return null;
+      return new Area();
     }
 
     Area vblArea = new Area();
@@ -333,7 +391,7 @@ public class TokenVBL {
     }
 
     if (vblArea.isEmpty()) {
-      return null;
+      return new Area();
     } else {
       return vblArea;
     }

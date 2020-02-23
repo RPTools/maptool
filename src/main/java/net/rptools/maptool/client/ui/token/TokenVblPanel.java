@@ -80,6 +80,13 @@ public class TokenVblPanel extends JPanel {
 
           @Override
           public void mousePressed(MouseEvent e) {
+            if (e.getClickCount() == 2) {
+              scale = 1;
+              translateX = 0;
+              translateY = 0;
+              repaint();
+            }
+
             startX = e.getX();
             startY = e.getY();
           }
