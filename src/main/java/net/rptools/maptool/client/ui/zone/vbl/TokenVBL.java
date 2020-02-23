@@ -49,10 +49,6 @@ public class TokenVBL {
   /**
    * TODO: Used by macro function only, update it.
    *
-   * <p>FIXME: replaceBean failed. Unable to find compName: textStatblockRTextScrollPane
-   *
-   * <p>FIXME: replaceBean failed. Unable to find compName: xmlStatblockRTextScrollPane
-   *
    * <p>A passed token will have it's image asset rendered into an Area based on pixels that have an
    * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
    *
