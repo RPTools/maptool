@@ -85,17 +85,14 @@ public class TokenVBL {
 
     if (!vblArea.isEmpty()) {
       try {
-        vblGeometry =
-            shapeReader
-                .read(vblArea.getPathIterator(null))
-                .buffer(1); // .buffer helps creating valid geometry and prevent self-intersecting
-        // polygons
+        vblGeometry = shapeReader.read(vblArea.getPathIterator(null));
+        // .buffer(1); // helps creating valid geometry and prevent self-intersecting polygons
         if (!vblGeometry.isValid()) {
-          log.info(
+          log.debug(
               "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
         }
       } catch (Exception e) {
-        log.info("vblGeometry oh oh: ", e);
+        log.error("There is a problem reading vblGeometry: ", e);
       }
     } else {
       return vblArea;
@@ -108,27 +105,32 @@ public class TokenVBL {
       case DOUGLAS_PEUCKER_SIMPLIFIER:
         DouglasPeuckerSimplifier dps = new DouglasPeuckerSimplifier(vblGeometry);
         dps.setDistanceTolerance(distanceTolerance);
+        dps.setEnsureValid(false);
         simplifiedGeometry = dps.getResultGeometry();
-        break;
-      case VW_SIMPLIFIER:
-        VWSimplifier vws = new VWSimplifier(vblGeometry);
-        vws.setDistanceTolerance(distanceTolerance);
-        simplifiedGeometry = vws.getResultGeometry();
         break;
       case TOPOLOGY_PRESERVING_SIMPLIFIER:
         TopologyPreservingSimplifier tss = new TopologyPreservingSimplifier(vblGeometry);
         tss.setDistanceTolerance(distanceTolerance);
         simplifiedGeometry = tss.getResultGeometry();
         break;
+      case VW_SIMPLIFIER:
+        VWSimplifier vws = new VWSimplifier(vblGeometry);
+        vws.setDistanceTolerance(distanceTolerance);
+        vws.setEnsureValid(false);
+        simplifiedGeometry = vws.getResultGeometry();
+        break;
       default:
         throw new IllegalStateException("Unexpected value: " + simplifyMethod);
     }
 
-    if (simplifiedGeometry.isValid()) {
-      return new Area(sw.toShape(simplifiedGeometry));
-    } else {
-      return vblArea;
+    final Area simplifiedArea = new Area(sw.toShape(simplifiedGeometry));
+
+    if (!simplifiedGeometry.isValid()) {
+      log.debug(
+          "simplifiedGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
     }
+
+    return simplifiedArea;
   }
 
   /**
