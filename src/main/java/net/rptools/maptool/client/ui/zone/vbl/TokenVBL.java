@@ -14,12 +14,14 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
+import com.google.common.base.Stopwatch;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
@@ -45,13 +47,10 @@ import org.locationtech.jts.simplify.VWSimplifier;
 public class TokenVBL {
 
   private static final Logger log = LogManager.getLogger();
+  private static int sliceSize = 100;
 
   /**
    * TODO: Used by macro function only, update it.
-   *
-   * <p>FIXME: replaceBean failed. Unable to find compName: textStatblockRTextScrollPane
-   *
-   * <p>FIXME: replaceBean failed. Unable to find compName: xmlStatblockRTextScrollPane
    *
    * <p>A passed token will have it's image asset rendered into an Area based on pixels that have an
    * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
@@ -69,7 +68,62 @@ public class TokenVBL {
 
   public static Area createVblAreaFromToken(Token token, int alphaSensitivity, boolean inverseVbl) {
     BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
-    return createVblArea(image, alphaSensitivity, inverseVbl);
+
+    final int w = image.getWidth();
+    final int h = image.getHeight();
+
+    //    log.info("Image w,h {},{}", w, h);
+
+    // By slicing an image up, the Area math is greatly simplified downstream
+    // Performance increase is up to 50x faster...
+    if (w > sliceSize || h > sliceSize) {
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      Area combinedArea = new Area();
+
+      for (int i = 0; i < w; i += sliceSize) {
+        int width = sliceSize;
+        if (i + sliceSize > w) {
+          width = w - i;
+        }
+
+        for (int j = 0; j < h; j += sliceSize) {
+          int height = sliceSize;
+          if (j + sliceSize > h) {
+            height = h - j;
+          }
+
+          Area slice = createVblAreaSlice(i, j, width, height, image, alphaSensitivity, inverseVbl);
+          combinedArea.add(slice);
+        }
+      }
+
+      log.info(
+          "Total time to render image to Area: {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
+      return combinedArea;
+    } else {
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      final Area vblArea = createVblArea(image, alphaSensitivity, inverseVbl);
+      log.info("Time to complete full image: {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+      return vblArea;
+    }
+  }
+
+  private static Area createVblAreaSlice(
+      int x, int y, int w, int h, BufferedImage image, int alphaSensitivity, boolean inverseVbl) {
+
+    //    log.info("x,y,w,h: {},{},{},{}", x, y, w, h);
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    AffineTransform at = new AffineTransform();
+
+    at.translate(x, y);
+    Area slice =
+        createVblArea(image.getSubimage(x, y, w, h), alphaSensitivity, inverseVbl)
+            .createTransformedArea(at);
+
+    //    log.info("Time to complete quadrant: {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
+    return slice;
   }
 
   public static Area simplifyArea(
@@ -85,17 +139,14 @@ public class TokenVBL {
 
     if (!vblArea.isEmpty()) {
       try {
-        vblGeometry =
-            shapeReader
-                .read(vblArea.getPathIterator(null))
-                .buffer(1); // .buffer helps creating valid geometry and prevent self-intersecting
-        // polygons
+        vblGeometry = shapeReader.read(vblArea.getPathIterator(null));
+        // .buffer(1); // helps creating valid geometry and prevent self-intersecting polygons
         if (!vblGeometry.isValid()) {
-          log.info(
+          log.debug(
               "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
         }
       } catch (Exception e) {
-        log.info("vblGeometry oh oh: ", e);
+        log.error("There is a problem reading vblGeometry: ", e);
       }
     } else {
       return vblArea;
@@ -108,27 +159,32 @@ public class TokenVBL {
       case DOUGLAS_PEUCKER_SIMPLIFIER:
         DouglasPeuckerSimplifier dps = new DouglasPeuckerSimplifier(vblGeometry);
         dps.setDistanceTolerance(distanceTolerance);
+        dps.setEnsureValid(false);
         simplifiedGeometry = dps.getResultGeometry();
-        break;
-      case VW_SIMPLIFIER:
-        VWSimplifier vws = new VWSimplifier(vblGeometry);
-        vws.setDistanceTolerance(distanceTolerance);
-        simplifiedGeometry = vws.getResultGeometry();
         break;
       case TOPOLOGY_PRESERVING_SIMPLIFIER:
         TopologyPreservingSimplifier tss = new TopologyPreservingSimplifier(vblGeometry);
         tss.setDistanceTolerance(distanceTolerance);
         simplifiedGeometry = tss.getResultGeometry();
         break;
+      case VW_SIMPLIFIER:
+        VWSimplifier vws = new VWSimplifier(vblGeometry);
+        vws.setDistanceTolerance(distanceTolerance);
+        vws.setEnsureValid(false);
+        simplifiedGeometry = vws.getResultGeometry();
+        break;
       default:
         throw new IllegalStateException("Unexpected value: " + simplifyMethod);
     }
 
-    if (simplifiedGeometry.isValid()) {
-      return new Area(sw.toShape(simplifiedGeometry));
-    } else {
-      return vblArea;
+    final Area simplifiedArea = new Area(sw.toShape(simplifiedGeometry));
+
+    if (!simplifiedGeometry.isValid()) {
+      log.debug(
+          "simplifiedGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
     }
+
+    return simplifiedArea;
   }
 
   /**
@@ -291,7 +347,7 @@ public class TokenVBL {
     // >=
     // alphaSensitivity
     if (image == null) {
-      return null;
+      return new Area();
     }
 
     Area vblArea = new Area();
@@ -335,7 +391,7 @@ public class TokenVBL {
     }
 
     if (vblArea.isEmpty()) {
-      return null;
+      return new Area();
     } else {
       return vblArea;
     }
