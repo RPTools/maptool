@@ -542,6 +542,10 @@ public class MapTool {
     }
   }
 
+  public static void updateServerPolicy() {
+    updateServerPolicy(serverPolicy);
+  }
+
   public static void updateServerPolicy(ServerPolicy policy) {
     setServerPolicy(policy);
 

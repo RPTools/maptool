@@ -226,10 +226,8 @@ public class PackedFile implements AutoCloseable {
    */
   public Object getContent(ModelVersionManager versionManager, String fileVersion)
       throws IOException {
-    Reader r = null;
-    try {
+    try (Reader r = getFileAsReader(CONTENT_FILE)) {
       if (versionManager != null && versionManager.isTransformationRequired(fileVersion)) {
-        r = getFileAsReader(CONTENT_FILE);
         String xml = IOUtils.toString(r);
         xml = versionManager.transform(xml, fileVersion);
         xstream.ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new
@@ -241,8 +239,6 @@ public class PackedFile implements AutoCloseable {
     } catch (NullPointerException npe) {
       log.error("Problem finding/converting content file", npe);
       return null;
-    } finally {
-      IOUtils.closeQuietly(r);
     }
   }
 
@@ -277,8 +273,6 @@ public class PackedFile implements AutoCloseable {
     saveTimer = new CodeTimer("PackedFile.save");
     saveTimer.setEnabled(log.isDebugEnabled());
 
-    InputStream is = null;
-
     // Create the new file
     File newFile = new File(tmpDir, new GUID() + ".pak");
     ZipOutputStream zout =
@@ -287,11 +281,7 @@ public class PackedFile implements AutoCloseable {
     try {
       saveTimer.start(CONTENT_FILE);
       if (hasFile(CONTENT_FILE)) {
-        zout.putNextEntry(new ZipEntry(CONTENT_FILE));
-        is = getFileAsInputStream(CONTENT_FILE); // When copying, always use an InputStream
-        IOUtils.copy(is, zout);
-        IOUtils.closeQuietly(is);
-        zout.closeEntry();
+        saveEntry(zout, CONTENT_FILE);
       }
       saveTimer.stop(CONTENT_FILE);
 
@@ -309,11 +299,7 @@ public class PackedFile implements AutoCloseable {
       saveTimer.start("addFiles");
       addedFileSet.remove(CONTENT_FILE);
       for (String path : addedFileSet) {
-        zout.putNextEntry(new ZipEntry(path));
-        is = getFileAsInputStream(path); // When copying, always use an InputStream
-        IOUtils.copy(is, zout);
-        IOUtils.closeQuietly(is);
-        zout.closeEntry();
+        saveEntry(zout, path);
       }
       saveTimer.stop("addFiles");
 
@@ -336,9 +322,10 @@ public class PackedFile implements AutoCloseable {
             // else
             // zout.setLevel(Deflater.BEST_COMPRESSION); // fast compression
             zout.putNextEntry(entry);
-            is = getFileAsInputStream(entry.getName()); // When copying, always use an InputStream
-            IOUtils.copy(is, zout);
-            IOUtils.closeQuietly(is);
+            try (InputStream is = getFileAsInputStream(entry.getName())) {
+              // When copying, always use an InputStream
+              IOUtils.copy(is, zout);
+            }
             zout.closeEntry();
           } else if (entry.isDirectory()) {
             zout.putNextEntry(entry);
@@ -393,13 +380,21 @@ public class PackedFile implements AutoCloseable {
         // ignore close exception
       }
       if (newFile.exists()) newFile.delete();
-      IOUtils.closeQuietly(is);
       IOUtils.closeQuietly(zout);
       saveTimer.stop("cleanup");
 
       if (log.isDebugEnabled()) log.debug(saveTimer);
       saveTimer = null;
     }
+  }
+
+  private void saveEntry(ZipOutputStream zout, String path) throws IOException {
+    zout.putNextEntry(new ZipEntry(path));
+    try (InputStream is = getFileAsInputStream(path)) {
+      // When copying, always use an InputStream
+      IOUtils.copy(is, zout);
+    }
+    zout.closeEntry();
   }
 
   /**
@@ -448,9 +443,9 @@ public class PackedFile implements AutoCloseable {
    * @throws IOException
    */
   public void putFile(String path, byte[] data) throws IOException {
-    InputStream is = new ByteArrayInputStream(data);
-    putFile(path, is);
-    IOUtils.closeQuietly(is);
+    try (InputStream is = new ByteArrayInputStream(data)) {
+      putFile(path, is);
+    }
   }
 
   /**
@@ -463,9 +458,9 @@ public class PackedFile implements AutoCloseable {
    */
   public void putFile(String path, InputStream is) throws IOException {
     File explodedFile = putFileImpl(path);
-    FileOutputStream fos = new FileOutputStream(explodedFile);
-    IOUtils.copy(is, fos);
-    IOUtils.closeQuietly(fos);
+    try (FileOutputStream fos = new FileOutputStream(explodedFile)) {
+      IOUtils.copy(is, fos);
+    }
   }
 
   /**
@@ -481,12 +476,11 @@ public class PackedFile implements AutoCloseable {
     File explodedFile = putFileImpl(path);
     FileOutputStream fos = new FileOutputStream(explodedFile);
     OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
-    BufferedWriter bw = new BufferedWriter(osw);
+    try (BufferedWriter bw = new BufferedWriter(osw)) {
+      xstream.toXML(obj, bw);
 
-    xstream.toXML(obj, bw);
-
-    bw.newLine(); // Not necessary but editing the file looks nicer. ;-)
-    IOUtils.closeQuietly(bw);
+      bw.newLine(); // Not necessary but editing the file looks nicer. ;-)
+    }
   }
 
   /**
@@ -500,9 +494,9 @@ public class PackedFile implements AutoCloseable {
    * @throws IOException
    */
   public void putFile(String path, URL url) throws IOException {
-    InputStream is = url.openStream();
-    putFile(path, is);
-    IOUtils.closeQuietly(is);
+    try (InputStream is = url.openStream()) {
+      putFile(path, is);
+    }
   }
 
   public boolean hasFile(String path) throws IOException {
@@ -545,20 +539,16 @@ public class PackedFile implements AutoCloseable {
     // older pre-1.3.b64 campaigns to be loaded but only the newer format
     // (with a separate image file) works on output.
     LineNumberReader r = getFileAsReader(path);
-    Object o = null;
-    try {
+    try (r) {
       xstream
           .ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new classes/fields
       // added.
-      o = xstream.fromXML(r);
+      return xstream.fromXML(r);
     } catch (InstantiationError ie) {
       log.error("Found at line number " + r.getLineNumber());
       log.error("Cannot convert XML to Object", ie);
       throw ie;
-    } finally {
-      IOUtils.closeQuietly(r);
     }
-    return o;
   }
 
   /**
@@ -612,19 +602,13 @@ public class PackedFile implements AutoCloseable {
 
     ZipEntry entry = new ZipEntry(path);
     ZipFile zipFile = getZipFile();
-    InputStream in = null;
-    try {
-      in = zipFile.getInputStream(entry);
-      if (in == null) throw new FileNotFoundException(path);
-      String type = FileUtil.getContentType(in);
-      if (log.isDebugEnabled() && type != null)
-        log.debug("FileUtil.getContentType() returned " + type);
-      return in;
-    } catch (IOException ex) {
-      // Don't need to close 'in' since zipFile.close() will do so
-      IOUtils.closeQuietly(in);
-      throw ex;
-    }
+
+    InputStream in = zipFile.getInputStream(entry);
+    if (in == null) throw new FileNotFoundException(path);
+    String type = FileUtil.getContentType(in);
+    if (log.isDebugEnabled() && type != null)
+      log.debug("FileUtil.getContentType() returned " + type);
+    return in;
   }
 
   public void close() {

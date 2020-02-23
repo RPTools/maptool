@@ -4354,7 +4354,8 @@ public class ZoneRenderer extends JComponent
           renderPathTask.cancel(true);
         }
 
-        boolean restictMovement = AppPreferences.isUsingAstarPathfinding();
+        boolean restictMovement = MapTool.getServerPolicy().isUsingAstarPathfinding();
+
         Set<TerrainModifierOperation> terrainModifiersIgnored = token.getTerrainModifiersIgnored();
 
         // Skip AI Pathfinding if not on the token layer...
