@@ -33,7 +33,7 @@ import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.getInfoFunction;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
-import net.rptools.maptool.util.SysInfo;
+import net.rptools.maptool.util.MapToolSysInfoProvider;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -191,7 +191,7 @@ public class MapToolEventQueue extends EventQueue {
     boolean hostingServer = MapTool.isHostingServer();
     Sentry.getContext().addTag("hosting", String.valueOf(MapTool.isHostingServer()));
 
-    Sentry.getContext().addExtra("System Info", new SysInfo().getSysInfoJSON());
+    Sentry.getContext().addExtra("System Info", new MapToolSysInfoProvider().getSysInfoJSON());
 
     addGetInfoToSentry("campaign");
 
