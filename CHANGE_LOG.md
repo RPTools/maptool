@@ -25,6 +25,7 @@ Maptool 1.6.0
 - [#1309][i1309] Three of the default maps have been missing from the Resource Library for ages. They are back now.
 - [#1300][i1300] `copyToken()` macro function bugs when only a token name provided and though succeeding was reporting an error when making multiple copies. Fixed.
 - [#1292][i1292] The _setState_ and _unsetStates_ conditions for `getTokens` and `getTokenNames` were returning the wrong information. Similar issues with _propertyType_, _owned_, and _light_ also fixed.
+- [#1288][i1288] Token Properties grid in the Edit Token dialog didn't fill the available area. Fixed.
 - [#1278][i1278] PROPS option for `input()` broken. Fixed.
 - [#1269][i1269] Exporting a campaign with too short a name was throwing an exception. Fixed.
 - [#1267][i1267] Null Pointer Exceptions for Zone fields during Auto Save and Campaign Lod. Fixed.
@@ -41,12 +42,14 @@ Maptool 1.6.0
 - [#1268][i1268] Refactored PackeFile class to use *try with resource* instead of try/catch/finally blocks.
 - [#1253][i1253] MD5 key generation wasn't thread-safe. Fixed.
 - [#1219][i1219] Javadocs generated via `gradlew javadoc` switched to HTML5.
+- [#1215][i1215] Replaced calls to deprecated IOUtils.closeQuietly() with try-with-resource.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
 [i1313]: https://github.com/RPTools/maptool/issues/1313
 [i1309]: https://github.com/RPTools/maptool/issues/1309
 [i1300]: https://github.com/RPTools/maptool/issues/1300
 [i1292]: https://github.com/RPTools/maptool/issues/1292
+[i1288]: https://github.com/RPTools/maptool/issues/1288
 [i1278]: https://github.com/RPTools/maptool/issues/1278
 [i1271]: https://github.com/RPTools/maptool/issues/1271
 [i1269]: https://github.com/RPTools/maptool/issues/1269
@@ -60,6 +63,7 @@ Maptool 1.6.0
 [i1225]: https://github.com/RPTools/maptool/issues/1225
 [i1219]: https://github.com/RPTools/maptool/issues/1219
 [i1216]: https://github.com/RPTools/maptool/issues/1216
+[i1215]: https://github.com/RPTools/maptool/issues/1215
 [i1210]: https://github.com/RPTools/maptool/issues/1210
 [i1206]: https://github.com/RPTools/maptool/issues/1206
 [i1204]: https://github.com/RPTools/maptool/issues/1204
