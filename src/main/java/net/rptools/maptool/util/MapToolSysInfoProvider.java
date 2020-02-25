@@ -15,13 +15,9 @@
 package net.rptools.maptool.util;
 
 import com.google.gson.JsonObject;
-import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.DisplayMode;
-import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -33,20 +29,10 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.MemoryStatusBar;
@@ -57,24 +43,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Retrieves certain characteristics of the execution environment for the purposes of problem
- * determination and diagnostics. This class is invoked via the Help menu, Gather Debug Info... menu
- * option.
- *
- * @author frank
- */
-public class SysInfo {
-  private static final Logger log = LogManager.getLogger(SysInfo.class);
+public class MapToolSysInfoProvider implements SysInfoProvider {
+  private static final Logger log = LogManager.getLogger(MapToolSysInfoProvider.class);
+
   private static final DecimalFormat format = new DecimalFormat("#,##0.#");
+  private static String os = "";
+  private List<String> rows = new ArrayList<>();
 
-  private static JDialog frame;
-  private JTextArea infoTextArea;
-  private JScrollPane scrollPane;
-  private static String os = new String();
-  private static String hostIP = new String();
-  private static String routerIP = new String();
-
+  @Override
   public JsonObject getSysInfoJSON() {
     JsonObject info = new JsonObject();
 
@@ -85,7 +61,6 @@ public class SysInfo {
     JsonObject os = new JsonObject();
 
     Properties p = System.getProperties();
-    Map<String, String> env = System.getenv();
 
     // maptool info
     mt.addProperty("version", MapTool.getVersion());
@@ -122,7 +97,7 @@ public class SysInfo {
   }
 
   private void appendInfo(String s) {
-    infoTextArea.append(s + "\n");
+    rows.add(s + "\n");
   }
 
   private void getMapToolInfo(Properties p) {
@@ -177,6 +152,7 @@ public class SysInfo {
     appendInfo("OS Name........: " + p.getProperty("os.name"));
     appendInfo("OS Version.....: " + p.getProperty("os.version"));
     appendInfo("OS Architecture: " + p.getProperty("os.arch"));
+    os = p.getProperty("os.name");
     if (os.contains("Windows")) {
       appendInfo("Processor......: " + env.get("PROCESSOR_IDENTIFIER"));
     }
@@ -191,30 +167,11 @@ public class SysInfo {
     appendInfo("User Dir.: " + p.getProperty("user.dir"));
   }
 
-  private void getInfo() {
-    clearInfo();
-    Properties p = System.getProperties();
-
-    getMapToolInfo(p);
-    getJavaInfo(p);
-    getOsInfo(p);
-    getNetworkInterfaces();
-    getLocaleInfo();
-    getEncodingInfo();
-    getDisplayInfo();
-    getIGDs();
-  }
-
-  private void clearInfo() {
-    this.infoTextArea.setText("");
-  }
-
   private static String getEncoding() {
     final byte[] bytes = {'D'};
     final InputStream inputStream = new ByteArrayInputStream(bytes);
     final InputStreamReader reader = new InputStreamReader(inputStream);
-    final String encoding = reader.getEncoding();
-    return encoding;
+    return reader.getEncoding();
   }
 
   private void getNetworkInterfaces() {
@@ -234,16 +191,18 @@ public class SysInfo {
       }
 
       try {
-        hostIP = InetAddress.getLocalHost().getHostAddress();
+        String hostIP = InetAddress.getLocalHost().getHostAddress();
         appendInfo("Host Address...: " + hostIP);
       } catch (UnknownHostException ex) {
         appendInfo("Host Address...: failed");
+        log.error(ex);
       }
 
-      routerIP = getRouterIP();
+      String routerIP = getRouterIP();
       appendInfo("Default Gateway: " + routerIP);
     } catch (SocketException se) {
-      appendInfo("*** Could net get list of network interfaces ***");
+      appendInfo("*** Could not get list of network interfaces ***");
+      log.error(se);
     }
   }
 
@@ -293,6 +252,7 @@ public class SysInfo {
         }
       }
     } catch (IOException ex) {
+      log.error(ex);
       return "Failed";
     }
     return "Unknown";
@@ -307,6 +267,7 @@ public class SysInfo {
       IGDs = InternetGatewayDevice.getDevices(discoveryTimeout);
     } catch (IOException ex) {
       appendInfo("\tError scanning for IGDs.");
+      log.error(ex);
     }
 
     if (IGDs != null)
@@ -321,64 +282,27 @@ public class SysInfo {
         try {
           appendInfo("External IP.: " + igd.getExternalIPAddress());
         } catch (UPNPResponseException ex) {
-          MapTool.showError("UPNPResponseException", ex);
+          appendInfo("UPNPResponseException" + ex);
+          log.error(ex);
         } catch (IOException ex) {
-          MapTool.showError("IOException", ex);
+          appendInfo("IOException" + ex);
+          log.error(ex);
         }
         appendInfo("");
       }
     else appendInfo("\tNo IGDs Found!");
   }
 
-  private Container createContentPane() {
-    JPanel contentPane = new JPanel(new BorderLayout());
-    contentPane.setOpaque(true);
-
-    this.infoTextArea = new JTextArea(5, 30);
-    this.infoTextArea.setEditable(false);
-    this.infoTextArea.setLineWrap(true);
-    this.infoTextArea.setWrapStyleWord(true);
-    this.infoTextArea.setFont(new Font("Monospaced", 0, 13));
-
-    this.scrollPane = new JScrollPane(this.infoTextArea);
-    this.scrollPane.setHorizontalScrollBarPolicy(31);
-    this.scrollPane.setVerticalScrollBarPolicy(22);
-    this.scrollPane.setViewportView(this.infoTextArea);
-
-    contentPane.add(this.scrollPane, "Center");
-
-    getInfo();
-    return contentPane;
-  }
-
-  public static void createAndShowGUI(String title) {
-    if (frame != null) {
-      frame
-          .dispose(); // This is so that the memory characteristics are queried each time this frame
-      // is displayed.
-      frame = null;
-    }
-    frame = new JDialog(MapTool.getFrame(), title);
-    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-    SysInfo demo = new SysInfo();
-    // frame.setJMenuBar(demo.createMenuBar());
-    frame.setContentPane(demo.createContentPane());
-    try {
-      Image img = ImageUtil.getImage("net/rptools/maptool/client/image/maptool_icon.png");
-      frame.setIconImage(img);
-      // URL url =
-      // MapTool.class.getClassLoader().getResource("net/rptools/maptool/client/image/maptool_icon.png");
-      // Toolkit tk = Toolkit.getDefaultToolkit();
-      // if (url != null) {
-      // Image img = tk.createImage(url);
-      // frame.setIconImage(img);
-      // }
-    } catch (Exception ex) {
-      MapTool.showError("While retrieving MapTool logo image?!", ex);
-    }
-    frame.setSize(550, 640);
-    frame.setLocationByPlatform(true);
-    frame.setVisible(true);
+  public List<String> getInfo() {
+    Properties p = System.getProperties();
+    getMapToolInfo(p);
+    getJavaInfo(p);
+    getOsInfo(p);
+    getNetworkInterfaces();
+    getLocaleInfo();
+    getEncodingInfo();
+    getDisplayInfo();
+    getIGDs();
+    return rows;
   }
 }
