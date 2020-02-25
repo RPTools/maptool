@@ -5,9 +5,13 @@ Maptool 1.6.0
 - Movement Blocking Layer - Now you can make those Force Fields that would block movement but not sight.
 - Look & Feel themes can now be selected from the Themes menu.  More enhancements to come.
 - Pre-defined Campaign Property sets can now be selected and loaded in the Campaign Properties dialog.
+- The annoying behavior where browsing for a drawing texture would cause the Resource Library to also change folders has been fixed!
 
 **Enhancements**
-- [#1216][i1216] Movement Blocking Layer - similar VBL, but specifically for blocking movement and not sight or light.
+- [#1313][i1313] Gather Debug Information window (Help MenU) refactored. Window opens immediately with note that data collection is in progress and then updates once data has been collected.
+- [#1278][i1278] JSON option added to PROPS type for `input()` function.  WIDTH option added to PROPS.  Defaults to 14.
+- [#1216][i1216] Movement Blocking Layer - similar to VBL, but specifically for blocking movement and not sight or light.
+  - AI button and new VBL Blocks Movement button moved over by Measuring tool and are now under GM control
 - [#1210][i1210] RADIO and LIST fields for `input()` function now support a DELIMITER option.
 - [#1107][i1107] Using the line drawing tools while holding Alt will snap to grid centers.
 - [#972][i972] New macro functions for HTML5 compatible dialogs and frames.
@@ -18,6 +22,13 @@ Maptool 1.6.0
 - [#221][i221] Campaign Properties dialog now has a drop-down to select from pre-defined Campaign Property sets (.mtprops).
 
 **Bug Fixes**
+- [#1309][i1309] Three of the default maps have been missing from the Resource Library for ages. They are back now.
+- [#1300][i1300] `copyToken()` macro function bugs when only a token name provided and though succeeding was reporting an error when making multiple copies. Fixed.
+- [#1292][i1292] The _setState_ and _unsetStates_ conditions for `getTokens` and `getTokenNames` were returning the wrong information. Similar issues with _propertyType_, _owned_, and _light_ also fixed.
+- [#1288][i1288] Token Properties grid in the Edit Token dialog didn't fill the available area. Fixed.
+- [#1278][i1278] PROPS option for `input()` broken. Fixed.
+- [#1269][i1269] Exporting a campaign with too short a name was throwing an exception. Fixed.
+- [#1267][i1267] Null Pointer Exceptions for Zone fields during Auto Save and Campaign Lod. Fixed.
 - [#1243][i1243] Once a GRID light source was used on a map, further use on maps with a different grid size would be the wrong size. Fixed.
 - [#1236][i1236] `getToken*` functions failing when setState/unsetState condition used. Fixed.
 - [#1231][i1231] Choosing a non-writable directory for downloading updates was failing silently. Fixed.
@@ -27,10 +38,23 @@ Maptool 1.6.0
 - [#1204][i1204] `getToken*` was throwing an exception if a string was passed to the `layer` option. Fixed.
 
 **Other**
+- [#1271][i1271] Clean up of Drawing Delete confirmation dialog code with comments and javadocs plus comments on the I18N strings.
+- [#1268][i1268] Refactored PackeFile class to use *try with resource* instead of try/catch/finally blocks.
 - [#1253][i1253] MD5 key generation wasn't thread-safe. Fixed.
 - [#1219][i1219] Javadocs generated via `gradlew javadoc` switched to HTML5.
+- [#1215][i1215] Replaced calls to deprecated IOUtils.closeQuietly() with try-with-resource.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
+[i1313]: https://github.com/RPTools/maptool/issues/1313
+[i1309]: https://github.com/RPTools/maptool/issues/1309
+[i1300]: https://github.com/RPTools/maptool/issues/1300
+[i1292]: https://github.com/RPTools/maptool/issues/1292
+[i1288]: https://github.com/RPTools/maptool/issues/1288
+[i1278]: https://github.com/RPTools/maptool/issues/1278
+[i1271]: https://github.com/RPTools/maptool/issues/1271
+[i1269]: https://github.com/RPTools/maptool/issues/1269
+[i1268]: https://github.com/RPTools/maptool/issues/1268
+[i1267]: https://github.com/RPTools/maptool/issues/1267
 [i1253]: https://github.com/RPTools/maptool/issues/1253
 [i1243]: https://github.com/RPTools/maptool/issues/1243
 [i1236]: https://github.com/RPTools/maptool/issues/1236
@@ -39,6 +63,7 @@ Maptool 1.6.0
 [i1225]: https://github.com/RPTools/maptool/issues/1225
 [i1219]: https://github.com/RPTools/maptool/issues/1219
 [i1216]: https://github.com/RPTools/maptool/issues/1216
+[i1215]: https://github.com/RPTools/maptool/issues/1215
 [i1210]: https://github.com/RPTools/maptool/issues/1210
 [i1206]: https://github.com/RPTools/maptool/issues/1206
 [i1204]: https://github.com/RPTools/maptool/issues/1204
