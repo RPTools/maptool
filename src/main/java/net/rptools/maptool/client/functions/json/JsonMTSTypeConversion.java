@@ -64,9 +64,9 @@ class JsonMTSTypeConversion {
         return val;
       }
     } else if (val instanceof Double) {
-      return BigDecimal.valueOf((Double)val);
+      return BigDecimal.valueOf((Double) val);
     } else if (val instanceof Integer) {
-      return BigDecimal.valueOf((Integer)val);
+      return BigDecimal.valueOf((Integer) val);
     } else {
       return val.toString();
     }
