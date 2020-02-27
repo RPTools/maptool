@@ -368,12 +368,11 @@ public class MapPropertiesDialog extends JDialog {
         .addActionListener(
             new ActionListener() {
               public void actionPerformed(ActionEvent e) {
-                Asset asset = mapSelectorDialog.chooseAsset();
-                if (asset == null) {
-                  return;
-                }
+                Asset asset = mapSelectorDialog.chooseAsset(mapAsset);
                 mapAsset = asset;
-                getNameTextField().setText(asset.getName());
+                if (asset != null) {
+                  getNameTextField().setText(asset.getName());
+                }
                 updatePreview();
               }
             });
@@ -528,6 +527,7 @@ public class MapPropertiesDialog extends JDialog {
     private static final long serialVersionUID = -854043369053089633L;
 
     private Asset selectedAsset;
+    private Asset originalAsset;
 
     public MapSelectorDialog() {
       super(MapTool.getFrame(), true);
@@ -552,7 +552,7 @@ public class MapPropertiesDialog extends JDialog {
 
       JPanel leftPanel = new JPanel();
       leftPanel.add(createFilesystemButton());
-      // leftPanel.add(createClearButton());
+      leftPanel.add(createClearButton());
 
       JPanel rightPanel = new JPanel();
       rightPanel.add(createOKButton());
@@ -594,37 +594,42 @@ public class MapPropertiesDialog extends JDialog {
       return button;
     }
 
-    // private JButton createClearButton() {
-    // JButton button = new JButton("Clear");
-    //
-    // return button;
-    // }
+    private JButton createClearButton() {
+      JButton button = new JButton("Clear");
+      button.addActionListener(
+          e -> {
+            selectedAsset = null;
+            setVisible(false);
+          });
+      return button;
+    }
 
     private JButton createOKButton() {
       JButton button = new JButton("OK");
-      button.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              setVisible(false);
-            }
-          });
+      button.addActionListener(e -> setVisible(false));
       return button;
     }
 
     private JButton createCancelButton() {
       JButton button = new JButton("Cancel");
       button.addActionListener(
-          new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              selectedAsset = null;
-              setVisible(false);
-            }
+          e -> {
+            selectedAsset = originalAsset;
+            setVisible(false);
           });
       return button;
     }
 
-    public Asset chooseAsset() {
+    /**
+     * Open the dialog and allow the user to select an asset for the map.
+     *
+     * @param asset - The currently selected asset.
+     * @return The selected asset. If "Clear" was clicked, returns null.
+     */
+    public Asset chooseAsset(Asset asset) {
+      originalAsset = asset;
       setVisible(true);
+      originalAsset = null;
       return selectedAsset;
     }
 
