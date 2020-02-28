@@ -14,11 +14,20 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
+import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookTableTreeModel;
 
 public class NoteBookUI {
 
   private SwingJavaFXDialog noteBookDialog;
   private JFXPanel jfxPanel;
+  private NoteBookController controller;
+
+
+  /**
+   * The {@link NoteBookTableTreeModel} with all the {@link
+   * net.rptools.maptool.model.notebook.NoteBookEntry}s for the campaign.
+   */
+  private NoteBookTableTreeModel noteBookTableTreeModel;
 
 
   public void init(MapToolFrame parentFrame) {
@@ -41,18 +50,23 @@ public class NoteBookUI {
     );
 
     Parent parent = loader.load();
-    NoteBookController controller = loader.getController();
+    controller = loader.getController();
 
     Scene scene = new Scene(loader.getRoot());
     jfxPanel = new JFXPanel();
     jfxPanel.setScene(scene);
 
+
+
+    campaignChanged(null, MapTool.getCampaign());
+
+
     SwingUtilities.invokeLater(() -> {
-      noteBookDialog = new SwingJavaFXDialog(I18N.getText( "noteBook.title"), parentFrame, jfxPanel);
+      noteBookDialog = new SwingJavaFXDialog(I18N.getText( "noteBook.title"), parentFrame, jfxPanel, false);
 
       MapTool.getEventDispatcher()
           .addListener(
-              e -> panel.campaignChanged((Campaign) e.getOldValue(), (Campaign) e.getNewValue()),
+              e -> campaignChanged((Campaign) e.getOldValue(), (Campaign) e.getNewValue()),
               CampaignEvent.Changed);
     });
 
@@ -62,5 +76,31 @@ public class NoteBookUI {
 
   public void show() {
     SwingUtilities.invokeLater(() -> noteBookDialog.showDialog());
+  }
+
+
+  /**
+   * Method called when the {@link Campaign} is changed.
+   *
+   * @param oldCampaign The previous {@link Campaign}.
+   * @param newCampaign The new {@link Campaign}.
+   * @note This method can safely be called from any thread.
+   */
+  private void campaignChanged(Campaign oldCampaign, Campaign newCampaign) {
+
+    if (newCampaign != null) {
+      Platform.runLater(
+          () -> {
+            NoteBookTableTreeModel oldNoteBookTableTreeModel = noteBookTableTreeModel;
+
+            noteBookTableTreeModel =
+                NoteBookTableTreeModel.getTreeModelFor(newCampaign.getNotebook());
+            controller.setTreeRoot(noteBookTableTreeModel.getRoot());
+
+            /*if (oldNoteBookTableTreeModel != null) {
+              oldNoteBookTableTreeModel.dispose();
+            }*/
+          });
+    }
   }
 }
