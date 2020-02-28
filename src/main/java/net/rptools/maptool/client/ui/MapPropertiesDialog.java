@@ -16,14 +16,7 @@ package net.rptools.maptool.client.ui;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Paint;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -33,29 +26,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import net.rptools.lib.swing.PaintChooser;
 import net.rptools.lib.swing.SelectionListener;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolUtil;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanelModel;
@@ -363,18 +339,23 @@ public class MapPropertiesDialog extends JDialog {
             });
   }
 
+  private void setMapAsset(Asset asset) {
+    mapAsset = asset;
+    if (asset != null) {
+      getNameTextField().setText(asset.getName());
+    }
+    updatePreview();
+  }
+
   private void initMapButton() {
     getMapButton()
         .addActionListener(
-            new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-                Asset asset = mapSelectorDialog.chooseAsset(mapAsset);
-                mapAsset = asset;
-                if (asset != null) {
-                  getNameTextField().setText(asset.getName());
-                }
-                updatePreview();
+            e -> {
+              Asset asset = mapSelectorDialog.chooseAsset();
+              if (asset == null) {
+                return;
               }
+              setMapAsset(asset);
             });
   }
 
@@ -527,7 +508,6 @@ public class MapPropertiesDialog extends JDialog {
     private static final long serialVersionUID = -854043369053089633L;
 
     private Asset selectedAsset;
-    private Asset originalAsset;
 
     public MapSelectorDialog() {
       super(MapTool.getFrame(), true);
@@ -552,7 +532,6 @@ public class MapPropertiesDialog extends JDialog {
 
       JPanel leftPanel = new JPanel();
       leftPanel.add(createFilesystemButton());
-      leftPanel.add(createClearButton());
 
       JPanel rightPanel = new JPanel();
       rightPanel.add(createOKButton());
@@ -594,16 +573,6 @@ public class MapPropertiesDialog extends JDialog {
       return button;
     }
 
-    private JButton createClearButton() {
-      JButton button = new JButton("Clear");
-      button.addActionListener(
-          e -> {
-            selectedAsset = null;
-            setVisible(false);
-          });
-      return button;
-    }
-
     private JButton createOKButton() {
       JButton button = new JButton("OK");
       button.addActionListener(e -> setVisible(false));
@@ -614,22 +583,14 @@ public class MapPropertiesDialog extends JDialog {
       JButton button = new JButton("Cancel");
       button.addActionListener(
           e -> {
-            selectedAsset = originalAsset;
+            selectedAsset = null;
             setVisible(false);
           });
       return button;
     }
 
-    /**
-     * Open the dialog and allow the user to select an asset for the map.
-     *
-     * @param asset - The currently selected asset.
-     * @return The selected asset. If "Clear" was clicked, returns null.
-     */
-    public Asset chooseAsset(Asset asset) {
-      originalAsset = asset;
+    public Asset chooseAsset() {
       setVisible(true);
-      originalAsset = null;
       return selectedAsset;
     }
 
@@ -670,6 +631,29 @@ public class MapPropertiesDialog extends JDialog {
   private class MapPreviewPanel extends JComponent {
     private static final long serialVersionUID = 3761329103161077644L;
 
+    private JButton cancelButton;
+
+    private MapPreviewPanel() {
+      setLayout(new BorderLayout());
+      JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+      northPanel.setOpaque(false);
+      northPanel.add(getCancelButton());
+      add(BorderLayout.NORTH, northPanel);
+    }
+
+    private JButton getCancelButton() {
+      if (cancelButton == null) {
+        cancelButton = new JButton(new ImageIcon(AppStyle.cancelButton));
+        cancelButton.setContentAreaFilled(false);
+        cancelButton.setBorderPainted(false);
+        cancelButton.setFocusable(false);
+        cancelButton.setMargin(new Insets(0, 0, 0, 0));
+
+        cancelButton.addActionListener(e -> setMapAsset(null));
+      }
+      return cancelButton;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
       Dimension size = getSize();
@@ -702,6 +686,8 @@ public class MapPropertiesDialog extends JDialog {
 
         g.drawImage(image, x, y, imgSize.width, imgSize.height, this);
       }
+
+      getCancelButton().setVisible(mapAsset != null);
     }
   }
 
