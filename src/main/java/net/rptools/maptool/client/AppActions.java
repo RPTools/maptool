@@ -78,6 +78,7 @@ import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
 import net.rptools.maptool.client.ui.StartServerDialog;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.StaticMessageDialog;
+import net.rptools.maptool.client.ui.SysInfoDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
@@ -116,7 +117,6 @@ import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
 import net.rptools.maptool.util.PersistenceUtil.PersistedMap;
-import net.rptools.maptool.util.SysInfo;
 import net.rptools.maptool.util.UPnPUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -2980,7 +2980,7 @@ public class AppActions {
 
         @Override
         protected void executeAction(java.awt.event.ActionEvent e) {
-          SysInfo.createAndShowGUI((String) getValue(Action.NAME));
+          SysInfoDialog.createAndShowGUI((String) getValue(Action.NAME));
         }
       };
 
