@@ -86,6 +86,7 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
+import net.rptools.maptool.client.ui.notebook.NoteBookUI;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
@@ -99,6 +100,7 @@ import net.rptools.maptool.model.Player;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.notebook.NoteBook;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -739,7 +741,9 @@ public class MapTool {
 
     handler = new ClientMethodHandler();
 
-    setClientFrame(new MapToolFrame(menuBar));
+    NoteBookUI noteBookUI = new NoteBookUI();
+    setClientFrame(new MapToolFrame(menuBar, noteBookUI));
+    noteBookUI.init(MapTool.getFrame());
 
     serverCommand = new ServerCommandClientImpl();
 

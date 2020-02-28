@@ -231,6 +231,14 @@ public final class NoteBookTableTreeModel {
       TreeItem<TableTreeItemHolder> node = new TreeItem<>(new NoteBookEntryTreeItem(entry));
       parentNode.getChildren().add(node);
     }
+
+    if (noZoneParent.getChildren().size() == 0 && root.getChildren().contains(noZoneParent)) {
+      root.getChildren().remove(noZoneParent);
+    } else {
+      if (!root.getChildren().contains(noZoneParent)) {
+        root.getChildren().add(noZoneParent);
+      }
+    }
   }
 
   /**

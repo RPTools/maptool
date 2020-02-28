@@ -126,6 +126,7 @@ import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.*;
 import net.rptools.maptool.client.ui.notebook.NoteBookPanel;
+import net.rptools.maptool.client.ui.notebook.NoteBookUI;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeCellRenderer;
@@ -146,6 +147,7 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.notebook.NoteBook;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.logging.log4j.LogManager;
@@ -226,6 +228,8 @@ public class MapToolFrame extends DefaultDockableHolder
   /** The UI element for displaying note books. */
   private final NoteBookPanel noteBookPanel = NoteBookPanel.createMapBookmarkPanel();
 
+  private final NoteBookUI noteBookUI;
+
   // External filename support
   private JFileChooser loadPropsFileChooser;
   private JFileChooser loadFileChooser;
@@ -257,6 +261,10 @@ public class MapToolFrame extends DefaultDockableHolder
   private final ImpersonatePanel impersonatePanel = new ImpersonatePanel();
 
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
+
+  public void showNoteBook() {
+    noteBookUI.show();
+  }
 
   private final class KeyListenerDeleteDraw implements KeyListener {
     private final JTree tree;
@@ -437,7 +445,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  public MapToolFrame(JMenuBar menuBar) {
+  public MapToolFrame(JMenuBar menuBar, NoteBookUI nbUI) {
     // Set up the frame
     super(AppConstants.APP_NAME);
 
@@ -456,7 +464,9 @@ public class MapToolFrame extends DefaultDockableHolder
       log.error(msg, ioe);
       System.err.println(msg);
     }
-    // Notify duration
+
+    noteBookUI = nbUI;
+
     initializeNotifyDuration();
 
     // Components

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.web.WebView?>
+
+<BorderPane fx:id="noteBookPanel" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.notebook.NoteBookController">
+   <left>
+      <TreeTableView fx:id="noteBookTreeTableView" prefHeight="600.0" prefWidth="260.0" BorderPane.alignment="CENTER">
+        <columns>
+          <TreeTableColumn fx:id="groupColumn" prefWidth="75.0" />
+          <TreeTableColumn fx:id="nameColumn" prefWidth="100.0" text="%noteBook.editNote.nameLabel" />
+            <TreeTableColumn fx:id="referenceColumn" prefWidth="78.0" text="%noteBook.editNote.referenceLabel" />
+        </columns>
+      </TreeTableView>
+   </left>
+   <center>
+      <BorderPane prefHeight="400.0" prefWidth="693.0" BorderPane.alignment="CENTER">
+         <center>
+            <StackPane fx:id="mainViewStackPane" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <AnchorPane fx:id="notePane" prefHeight="200.0" prefWidth="200.0">
+                     <children>
+                        <WebView fx:id="noteWebView" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane fx:id="editorPane" prefHeight="149.0" prefWidth="400.0" />
+               </children>
+            </StackPane>
+         </center>
+         <top>
+            <AnchorPane fx:id="detailsAnchorPane" prefHeight="117.0" prefWidth="546.0" BorderPane.alignment="CENTER" />
+         </top>
+         <bottom>
+            <HBox fx:id="buttonHBox" prefHeight="50.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
+         </bottom>
+      </BorderPane>
+   </center>
+</BorderPane>
