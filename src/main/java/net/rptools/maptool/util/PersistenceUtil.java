@@ -672,7 +672,7 @@ public class PersistenceUtil {
         Asset asset = null;
         if (fixRequired) {
           try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
-            asset = new Asset(key.toString(), IOUtils.toByteArray(is)); // Ugly bug fix :(
+            asset = Asset.createAsset(key.toString(), IOUtils.toByteArray(is)); // Ugly bug fix :(
           } catch (FileNotFoundException fnf) {
             // Doesn't need to be reported, since that's handled below.
           } catch (Exception e) {
@@ -699,12 +699,12 @@ public class PersistenceUtil {
         }
         // pre 1.3b52 campaign files stored the image data directly in the asset serialization.
         // New XStreamConverter creates empty byte[] for image.
-        if (asset.getImage() == null || asset.getImage().length < 4) {
-          String ext = asset.getImageExtension();
+        if (asset.getData() == null || asset.getData().length < 4) {
+          String ext = asset.getExtension();
           pathname = pathname + "." + (StringUtil.isEmpty(ext) ? "dat" : ext);
           pathname = assetnameVersionManager.transform(pathname, campaignVersion);
           try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
-            asset.setImage(IOUtils.toByteArray(is));
+            asset = asset.setData(IOUtils.toByteArray(is));
           } catch (FileNotFoundException fnf) {
             log.error("Image data for '" + pathname + "' not found?!", fnf);
             continue;
@@ -755,8 +755,8 @@ public class PersistenceUtil {
         continue;
       }
 
-      String extension = asset.getImageExtension();
-      byte[] assetData = asset.getImage();
+      String extension = asset.getExtension();
+      byte[] assetData = asset.getData();
       // System.out.println("Saving AssetId " + assetId + "." + extension + " with size of " +
       // assetData.length);
 
@@ -1038,7 +1038,7 @@ public class PersistenceUtil {
     try {
       tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + ".png");
       BufferedImage image =
-          ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()));
+          ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getData()));
       ImageIO.write(image, "png", tokenSaveFile);
       image.flush();
     } catch (IOException e) {

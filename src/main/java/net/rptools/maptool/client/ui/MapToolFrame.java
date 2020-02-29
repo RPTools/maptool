@@ -147,7 +147,6 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.notebook.NoteBook;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.logging.log4j.LogManager;
@@ -1425,14 +1424,14 @@ public class MapToolFrame extends DefaultDockableHolder
           private void createZone(Asset asset) {
             Zone zone = ZoneFactory.createZone();
             zone.setName(asset.getName());
-            BufferedImage image = ImageManager.getImageAndWait(asset.getId());
+            BufferedImage image = ImageManager.getImageAndWait(asset.getMD5Key());
             if (image.getWidth() < 200 || image.getHeight() < 200) {
               zone.setBackgroundPaint(new DrawableTexturePaint(asset));
-              zone.setBackgroundAsset(asset.getId());
+              zone.setBackgroundAsset(asset.getMD5Key());
             } else {
-              zone.setMapAsset(asset.getId());
+              zone.setMapAsset(asset.getMD5Key());
               zone.setBackgroundPaint(new DrawableColorPaint(Color.black));
-              zone.setBackgroundAsset(asset.getId());
+              zone.setBackgroundAsset(asset.getMD5Key());
             }
             MapPropertiesDialog newMapDialog = new MapPropertiesDialog(MapTool.getFrame());
             newMapDialog.setZone(zone);

@@ -2052,7 +2052,7 @@ public class ZoneRenderer extends JComponent
       downloadCount++;
 
       // Have we loaded the image into memory yet ?
-      Image image = ImageManager.getImage(asset.getId(), this);
+      Image image = ImageManager.getImage(asset.getMD5Key(), this);
       if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
         loaded = false;
         continue;

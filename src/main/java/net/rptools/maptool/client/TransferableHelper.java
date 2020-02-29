@@ -250,7 +250,7 @@ public class TransferableHelper extends TransferHandler {
         if (log.isInfoEnabled()) log.info("Selected: " + X_JAVA_IMAGE);
         BufferedImage image =
             (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
-        o = new Asset("unnamed", ImageUtil.imageToBytes(image));
+        o = Asset.createImageAsset("unnamed", ImageUtil.imageToBytes(image));
       }
 
       // DIRECT/BROWSER
@@ -338,7 +338,7 @@ public class TransferableHelper extends TransferHandler {
     }
     if (image != null) {
       String name = findName(url);
-      asset = new Asset(name != null ? name : "unnamed", ImageUtil.imageToBytes(image));
+      asset = Asset.createImageAsset(name != null ? name : "unnamed", ImageUtil.imageToBytes(image));
     } else {
       throw new IllegalArgumentException("cannot convert drop object to image: " + url.toString());
     }
@@ -579,7 +579,7 @@ public class TransferableHelper extends TransferHandler {
       for (Object working : assets) {
         if (working instanceof Asset) {
           Asset asset = (Asset) working;
-          Token token = new Token(asset.getName(), asset.getId());
+          Token token = new Token(asset.getName(), asset.getMD5Key());
           // token.setName(MapToolUtil.nextTokenId(zone, token));
           tokens.add(token);
           // A token from an image asset needs additional configuration.

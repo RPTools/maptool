@@ -2029,11 +2029,11 @@ public class Token extends BaseModel implements Cloneable {
     // Get the image and portrait for the token
     Asset asset = createAssetFromIcon(td.getToken());
     if (asset != null) {
-      imageAssetMap.put(null, asset.getId());
+      imageAssetMap.put(null, asset.getMD5Key());
     }
     asset = createAssetFromIcon((ImageIcon) td.get(TokenTransferData.PORTRAIT));
     if (asset != null) {
-      portraitImage = asset.getId();
+      portraitImage = asset.getMD5Key();
     }
 
     // Get the macros
@@ -2077,7 +2077,7 @@ public class Token extends BaseModel implements Cloneable {
     // Create the asset
     Asset asset = null;
     try {
-      asset = new Asset(name, ImageUtil.imageToBytes((BufferedImage) image));
+      asset = Asset.createImageAsset(name, ImageUtil.imageToBytes((BufferedImage) image));
       if (!AssetManager.hasAsset(asset)) {
         AssetManager.putAsset(asset);
       }

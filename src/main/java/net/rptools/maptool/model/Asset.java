@@ -15,12 +15,12 @@
 package net.rptools.maptool.model;
 
 import com.google.gson.JsonObject;
-import com.thoughtworks.xstream.annotations.XStreamConverter;
-import java.awt.*;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Iterator;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -31,86 +31,110 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.util.ImageManager;
 
 /** The binary representation of an image. */
-public class Asset {
+public final class Asset {
   public static final String DATA_EXTENSION = "data";
 
-  private MD5Key id;
-  private String name;
-  private String extension;
-  private String type = "image";
+  public static final String BROKEN_IMAGE_NAME = "broken";
 
-  @XStreamConverter(AssetImageConverter.class)
-  private byte[] image;
+  private final MD5Key md5Key;
+  private final String name;
+  private final String extension;
+  private final String type = "image";
 
-  protected Asset() {}
+  private final byte[] data;
 
-  public Asset(String name, byte[] image) {
-    this.image = image;
+
+  public static Asset createImageAsset(String name, byte[] image) {
+    return new Asset(null, name, image != null ? image : new byte[] {}, true);
+  }
+
+  public static Asset createImageAsset(String name, BufferedImage image) {
+    return new Asset(name, image);
+  }
+
+  public static Asset createBrokenImageAsset(MD5Key md5Key) {
+    return new Asset(md5Key, BROKEN_IMAGE_NAME, new byte[] {}, true);
+  }
+
+  public static Asset createUnknownAssetType(String name, byte[] data) {
+    return createImageAsset(name, data);
+  }
+
+
+  public static Asset createAsset(String name, byte[] data) {
+    return new Asset(null, name, data != null ? data : new byte[] {}, false);
+  }
+
+  private Asset(MD5Key key, String name, byte[] image, boolean isImage) {
+    assert image != null;
+    this.data = image;
     this.name = name;
-    if (image != null) {
-      this.id = new MD5Key(image);
-      extension = null;
-      getImageExtension();
+    if (key != null) {
+      md5Key = key;
+    } else {
+      this.md5Key = new MD5Key(image);
+    }
+
+    if (isImage) {
+      extension = determineImageExtension();
+    } else {
+      extension = DATA_EXTENSION;
     }
   }
 
-  public Asset(String name, BufferedImage image) {
+  private Asset(String name, BufferedImage image) {
+    this.name = name;
     try {
-      this.image = ImageUtil.imageToBytes(image);
+      this.data = ImageUtil.imageToBytes(image);
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new AssertionError(e); // Shouldn't happen
     }
-    this.name = name;
-    if (this.image != null) {
-      this.id = new MD5Key(this.image);
-      extension = null;
-      getImageExtension();
-    }
+    this.md5Key = new MD5Key(this.data);
+    extension = determineImageExtension();
   }
 
-  public Asset(MD5Key id) {
-    this.id = id;
+
+
+
+  public MD5Key getMD5Key() {
+    return md5Key;
   }
 
-  public MD5Key getId() {
-    return id;
+  public byte[] getData() {
+    return data;
+    //return Arrays.copyOf(data, data.length);
   }
 
-  public void setId(MD5Key id) {
-    this.id = id;
+  public Asset setData(byte[] data) {
+    return new Asset(this.md5Key, this.name, data, true);
   }
 
-  public byte[] getImage() {
-    return image;
-  }
 
-  public void setImage(byte[] image) {
-    this.image = image;
-    extension = null;
-    getImageExtension();
-  }
-
-  public String getImageExtension() {
-    if (extension == null) {
-      extension = "";
-      try {
-        if (image != null && image.length >= 4) {
-          InputStream is = new ByteArrayInputStream(image);
-          ImageInputStream iis = ImageIO.createImageInputStream(is);
-          Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
-          if (readers.hasNext()) {
-            ImageReader reader = readers.next();
-            reader.setInput(iis);
-            extension = reader.getFormatName().toLowerCase();
-          }
-          // We can store more than images, eg HeroLabData in the form of a HashMap, assume this if
-          // an image type can not be established
-          if (extension.isEmpty()) extension = DATA_EXTENSION;
+  private String determineImageExtension() {
+    String ext = "";
+    try {
+      if (data != null && data.length >= 4) {
+        InputStream is = new ByteArrayInputStream(data);
+        ImageInputStream iis = ImageIO.createImageInputStream(is);
+        Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+        if (readers.hasNext()) {
+          ImageReader reader = readers.next();
+          reader.setInput(iis);
+          ext = reader.getFormatName().toLowerCase();
         }
-      } catch (IOException e) {
-        MapTool.showError("IOException?!", e); // Can this happen??
+        // We can store more than images, eg HeroLabData in the form of a HashMap, assume this if
+        // an image type can not be established
+        if (ext.isEmpty()) {
+          ext = DATA_EXTENSION;
+        }
       }
+    } catch (IOException e) {
+      MapTool.showError("IOException?!", e); // Can this happen??
     }
+    return ext;
+  }
+
+  public String getExtension() {
     return extension;
   }
 
@@ -127,10 +151,10 @@ public class Asset {
     JsonObject properties = new JsonObject();
     properties.addProperty("type", type);
     properties.addProperty("subtype", extension);
-    properties.addProperty("id", id.toString());
+    properties.addProperty("id", md5Key.toString());
     properties.addProperty("name", name);
 
-    Image img = ImageManager.getImageAndWait(id); // wait until loaded, so width/height are correct
+    Image img = ImageManager.getImageAndWait(md5Key); // wait until loaded, so width/height are correct
     String status = "loaded";
     if (img == ImageManager.BROKEN_IMAGE) {
       status = "broken";
@@ -144,7 +168,7 @@ public class Asset {
   }
 
   public boolean isTransfering() {
-    return AssetManager.isAssetRequested(id);
+    return AssetManager.isAssetRequested(md5Key);
   }
 
   public String getType() {
@@ -153,12 +177,12 @@ public class Asset {
 
   @Override
   public String toString() {
-    return id + "/" + name + "(" + (image != null ? image.length : "-") + ")";
+    return md5Key + "/" + name + "(" + (data != null ? data.length : "-") + ")";
   }
 
   @Override
   public int hashCode() {
-    return getId().hashCode();
+    return getMD5Key().hashCode();
   }
 
   @Override
@@ -167,6 +191,6 @@ public class Asset {
       return false;
     }
     Asset asset = (Asset) obj;
-    return asset.getId().equals(getId());
+    return asset.getMD5Key().equals(getMD5Key());
   }
 }

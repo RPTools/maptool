@@ -222,7 +222,7 @@ public class ImageManager {
    * @param asset Asset associated with this image
    */
   public static void flushImage(Asset asset) {
-    flushImage(asset.getId());
+    flushImage(asset.getMD5Key());
   }
 
   /**
@@ -279,38 +279,38 @@ public class ImageManager {
 
     /** Load the asset raw image data and notify observers that the image is loaded. */
     public void run() {
-      log.debug("Loading asset: " + asset.getId());
-      BufferedImage image = imageMap.get(asset.getId());
+      log.debug("Loading asset: " + asset.getMD5Key());
+      BufferedImage image = imageMap.get(asset.getMD5Key());
 
       if (image != null && image != TRANSFERING_IMAGE) {
         // We've somehow already loaded this image
-        log.debug("Image wasn't in transit: " + asset.getId());
+        log.debug("Image wasn't in transit: " + asset.getMD5Key());
         return;
       }
 
-      if (asset.getImageExtension().equals(Asset.DATA_EXTENSION)) {
+      if (asset.getExtension().equals(Asset.DATA_EXTENSION)) {
         log.debug(
             "BackgroundImageLoader.run("
                 + asset.getName()
                 + ","
-                + asset.getImageExtension()
+                + asset.getExtension()
                 + ", "
-                + asset.getId()
+                + asset.getMD5Key()
                 + "): looks like data and skipped");
         image = BROKEN_IMAGE; // we should never see this
       } else {
         try {
-          assert asset.getImage() != null
+          assert asset.getData() != null
               : "asset.getImage() for " + asset.toString() + "returns null?!";
-          image = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()), hints);
+          image = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getData()), hints);
         } catch (Throwable t) {
           log.error(
               "BackgroundImageLoader.run("
                   + asset.getName()
                   + ","
-                  + asset.getImageExtension()
+                  + asset.getExtension()
                   + ", "
-                  + asset.getId()
+                  + asset.getMD5Key()
                   + "): image not resolved",
               t);
           image = BROKEN_IMAGE;
@@ -319,7 +319,7 @@ public class ImageManager {
 
       synchronized (imageLoaderMutex) {
         // Replace placeholder with actual image
-        imageMap.put(asset.getId(), image);
+        imageMap.put(asset.getMD5Key(), image);
         notifyObservers(asset, image);
       }
     }
@@ -333,8 +333,8 @@ public class ImageManager {
    */
   private static void notifyObservers(Asset asset, BufferedImage image) {
     // Notify observers
-    log.debug("Notifying observers of image availability: " + asset.getId());
-    Set<ImageObserver> observerSet = imageObserverMap.remove(asset.getId());
+    log.debug("Notifying observers of image availability: " + asset.getMD5Key());
+    Set<ImageObserver> observerSet = imageObserverMap.remove(asset.getMD5Key());
     if (observerSet != null) {
       for (ImageObserver observer : observerSet) {
         observer.imageUpdate(
@@ -351,7 +351,7 @@ public class ImageManager {
    */
   private static void backgroundLoadImage(Asset asset, Map<String, Object> hints) {
     // Use large image loader if the image is larger than 128kb.
-    if (asset.getImage().length > 128 * 1024) {
+    if (asset.getData().length > 128 * 1024) {
       largeImageLoader.execute(new BackgroundImageLoader(asset, hints));
     } else {
       smallImageLoader.execute(new BackgroundImageLoader(asset, hints));

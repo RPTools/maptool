@@ -69,8 +69,8 @@ public class TokenImageHandler extends AbstractHandler {
       response.setStatus(HttpServletResponse.SC_OK);
     } else {
       Asset asset = AssetManager.getAsset(token.getImageAssetId());
-      byte[] image = asset.getImage();
-      response.setContentType("image/" + asset.getImageExtension());
+      byte[] image = asset.getData();
+      response.setContentType("image/" + asset.getExtension());
       response.setStatus(HttpServletResponse.SC_OK);
 
       response.setContentLength(image.length);
@@ -95,8 +95,8 @@ public class TokenImageHandler extends AbstractHandler {
       response.setStatus(HttpServletResponse.SC_OK);
     } else {
       Asset asset = AssetManager.getAsset(token.getPortraitImage());
-      byte[] image = asset.getImage();
-      response.setContentType("image/" + asset.getImageExtension());
+      byte[] image = asset.getData();
+      response.setContentType("image/" + asset.getExtension());
       response.setStatus(HttpServletResponse.SC_OK);
 
       response.setContentLength(image.length);
@@ -124,8 +124,8 @@ public class TokenImageHandler extends AbstractHandler {
     }
 
     if (asset != null) {
-      byte[] image = asset.getImage();
-      response.setContentType("image/" + asset.getImageExtension());
+      byte[] image = asset.getData();
+      response.setContentType("image/" + asset.getExtension());
       response.setStatus(HttpServletResponse.SC_OK);
 
       response.setContentLength(image.length);

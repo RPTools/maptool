@@ -173,7 +173,7 @@ public class AssetManager {
    * @return True if the asset exists, false otherwise
    */
   public static boolean hasAsset(Asset asset) {
-    return hasAsset(asset.getId());
+    return hasAsset(asset.getMD5Key());
   }
 
   /**
@@ -210,25 +210,25 @@ public class AssetManager {
       return;
     }
 
-    assetMap.put(asset.getId(), asset);
+    assetMap.put(asset.getMD5Key(), asset);
 
     // Invalid images are represented by empty assets.
     // Don't persist those
-    if (asset.getImage().length > 0) {
+    if (asset.getData().length > 0) {
       putInPersistentCache(asset);
     }
 
     // Clear the waiting status
-    assetLoader.completeRequest(asset.getId());
+    assetLoader.completeRequest(asset.getMD5Key());
 
     // Listeners
-    List<AssetAvailableListener> listenerList = assetListenerListMap.get(asset.getId());
+    List<AssetAvailableListener> listenerList = assetListenerListMap.get(asset.getMD5Key());
     if (listenerList != null) {
       for (AssetAvailableListener listener : listenerList) {
-        listener.assetAvailable(asset.getId());
+        listener.assetAvailable(asset.getMD5Key());
       }
 
-      assetListenerListMap.remove(asset.getId());
+      assetListenerListMap.remove(asset.getMD5Key());
     }
   }
 
@@ -292,10 +292,10 @@ public class AssetManager {
           String name = FileUtil.getNameWithoutExtension(imageFile);
           byte[] data = FileUtils.readFileToByteArray(imageFile);
 
-          asset = new Asset(name, data);
+          asset = Asset.createUnknownAssetType(name, data);
 
           // Just to be sure the image didn't change
-          if (!asset.getId().equals(id)) {
+          if (!asset.getMD5Key().equals(id)) {
             throw new IOException("Image reference did not match the requested image");
           }
 
@@ -386,9 +386,9 @@ public class AssetManager {
       byte[] data = FileUtils.readFileToByteArray(assetFile);
       Properties props = getAssetInfo(id);
 
-      Asset asset = new Asset(props.getProperty(NAME), data);
+      Asset asset = Asset.createUnknownAssetType(props.getProperty(NAME), data);
 
-      if (!asset.getId().equals(id)) {
+      if (!asset.getMD5Key().equals(id)) {
         log.error("MD5 for asset " + asset.getName() + " corrupted");
       }
 
@@ -409,7 +409,7 @@ public class AssetManager {
    * @throws IOException
    */
   public static Asset createAsset(File file) throws IOException {
-    return new Asset(FileUtil.getNameWithoutExtension(file), FileUtils.readFileToByteArray(file));
+    return Asset.createUnknownAssetType(FileUtil.getNameWithoutExtension(file), FileUtils.readFileToByteArray(file));
   }
 
   /**
@@ -426,7 +426,7 @@ public class AssetManager {
       FileUtils.copyURLToFile(url, newFile);
       if (!newFile.exists() || newFile.length() < 20) return null;
       Asset temp =
-          new Asset(FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
+          Asset.createUnknownAssetType(FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
       return temp;
     } finally {
       newFile.delete();
@@ -478,7 +478,7 @@ public class AssetManager {
             assetFile.getParentFile().mkdirs();
             // Image
             OutputStream out = new FileOutputStream(assetFile);
-            out.write(asset.getImage());
+            out.write(asset.getData());
             out.close();
           } catch (IOException ioe) {
             log.error("Could not persist asset while writing image data", ioe);
@@ -593,7 +593,7 @@ public class AssetManager {
    * @return True if asset is in the persistent cache, false otherwise
    */
   private static boolean assetIsInPersistentCache(Asset asset) {
-    return assetIsInPersistentCache(asset.getId());
+    return assetIsInPersistentCache(asset.getMD5Key());
   }
 
   /**
@@ -603,7 +603,7 @@ public class AssetManager {
    * @return True if the assets information exists in the persistent cache
    */
   private static boolean assetInfoIsInPersistentCache(Asset asset) {
-    return getAssetInfoFile(asset.getId()).exists();
+    return getAssetInfoFile(asset.getMD5Key()).exists();
   }
 
   /**
@@ -625,7 +625,7 @@ public class AssetManager {
    * @return The assets cache file, or null if it doesn't have one
    */
   public static File getAssetCacheFile(Asset asset) {
-    return getAssetCacheFile(asset.getId());
+    return getAssetCacheFile(asset.getMD5Key());
   }
 
   /**
@@ -646,7 +646,7 @@ public class AssetManager {
    * @return The assets info file, or null if it doesn't have one
    */
   private static File getAssetInfoFile(Asset asset) {
-    return getAssetInfoFile(asset.getId());
+    return getAssetInfoFile(asset.getMD5Key());
   }
 
   /**
