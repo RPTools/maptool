@@ -76,6 +76,7 @@ import org.apache.logging.log4j.Logger;
 
 /** @author trevor */
 public class PersistenceUtil {
+  /** Extension to use for generic binary data. */
   private static final Logger log = LogManager.getLogger(PersistenceUtil.class);
 
   public static final String PROP_VERSION = "version"; // $NON-NLS-1$
@@ -704,7 +705,7 @@ public class PersistenceUtil {
           pathname = pathname + "." + (StringUtil.isEmpty(ext) ? "dat" : ext);
           pathname = assetnameVersionManager.transform(pathname, campaignVersion);
           try (InputStream is = pakFile.getFileAsInputStream(pathname)) {
-            asset = asset.setData(IOUtils.toByteArray(is));
+            asset = asset.setData(IOUtils.toByteArray(is), false);
           } catch (FileNotFoundException fnf) {
             log.error("Image data for '" + pathname + "' not found?!", fnf);
             continue;
