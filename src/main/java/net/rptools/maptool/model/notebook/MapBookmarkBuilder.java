@@ -15,6 +15,9 @@
 package net.rptools.maptool.model.notebook;
 
 import java.util.UUID;
+import net.rptools.lib.MD5Key;
+import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
 
 /** Builder class to create {@link MapBookmark} objects. */
@@ -49,7 +52,10 @@ public class MapBookmarkBuilder {
   /** Has the short notes been set. */
   private boolean shortNotesSet;
 
-  /** The notes for the bookmark. */
+  /** The notes for the bookmark, either this or {@link #notes} will be set not both. */
+  private MD5Key notesKey;
+
+  /** The notes for the bookmark, either this or  {@link #notesKey} will be set not both. */
   private String notes;
 
   /** Has the notes value been set. */
@@ -83,7 +89,11 @@ public class MapBookmarkBuilder {
     builder.setName(mapBookmark.getName());
     builder.setZoneId(mapBookmark.getZoneId().get());
     builder.setShortNotes(mapBookmark.getShortNotes());
-    builder.setNotes(mapBookmark.getNotes());
+    if (mapBookmark.getNotesKey().isPresent()) {
+      builder.setNotesKey(mapBookmark.getNotesKey().get());
+    } else {
+      builder.setNotesKey(null);
+    }
     builder.setMapMarker(mapBookmark.getMapMarker());
     builder.setOrder(mapBookmark.getOrder());
 
@@ -164,8 +174,8 @@ public class MapBookmarkBuilder {
    *
    * @return the notes for the {@link MapBookmark} that will be created.
    */
-  public String getNotes() {
-    return notes;
+  public MD5Key getNotesKey() {
+    return notesKey;
   }
 
   /**
@@ -250,12 +260,27 @@ public class MapBookmarkBuilder {
   /**
    * Sets the notes of the {@link MapBookmark} that will be created.
    *
+   * @param notesKey the notes of the {@link MapBookmark} that will be created.
+   * @return {@code this} so methods can be chained.
+   */
+  public MapBookmarkBuilder setNotesKey(MD5Key notesKey) {
+    this.notesKey = notesKey;
+    this.notes = null;
+    notesSet = notesKey != null;
+    return this;
+  }
+
+  /**
+   * Sets the notes of the {@link MapBookmark} that will be created.
+   *
    * @param notes the notes of the {@link MapBookmark} that will be created.
    * @return {@code this} so methods can be chained.
    */
   public MapBookmarkBuilder setNotes(String notes) {
     this.notes = notes;
-    notesSet = notes != null;
+    this.notesKey = null;
+    notesSet = notes != null && notes.length() > 0;
+
     return this;
   }
 
@@ -289,6 +314,12 @@ public class MapBookmarkBuilder {
    * @return a {@link MapBookmark} created by the builder.
    */
   public MapBookmark build() {
+    if (notesKey == null && notes != null && !notes.isEmpty()) {
+      Asset asset = Asset.createHTMLAsset(name + "-notes", notes.getBytes());
+      AssetManager.putAsset(asset);
+
+    }
+
     return new MapBookmark(this);
   }
 

@@ -95,7 +95,7 @@ public class HeroLabData {
                       .getClassLoader()
                       .getResource("net/rptools/maptool/client/image/hero-lab-token.png")));
       DEFAULT_HERO_LAB_PORTRAIT_ASSET =
-           Asset.createImageAsset(
+          Asset.createImageAsset(
               "DEFAULT_HERO_LAB_PORTRAIT",
               ImageIO.read(
                   HeroLabData.class
@@ -396,7 +396,8 @@ public class HeroLabData {
 
   public MD5Key getPortraitImage() {
     if (!heroImageAssets.containsKey(DefaultAssetKey.PORTRAIT_KEY))
-      heroImageAssets.put(DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getMD5Key());
+      heroImageAssets.put(
+          DefaultAssetKey.PORTRAIT_KEY, DEFAULT_HERO_LAB_PORTRAIT_ASSET.getMD5Key());
 
     return heroImageAssets.get(DefaultAssetKey.PORTRAIT_KEY);
   }

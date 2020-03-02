@@ -14,9 +14,13 @@
  */
 package net.rptools.maptool.model.notebook;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.GUID;
 
 /** {@code MapBookmark} represents a map bookmark on a game Map. */
@@ -38,7 +42,7 @@ public final class MapBookmark implements NoteBookEntry, Comparable<MapBookmark>
   private final String shortNotes;
 
   /** The notes for the bookmark. */
-  private final String notes;
+  private final MD5Key notesKey;
 
   /** The {@link MapMarker} for this Map BookMark. */
   private final MapMarker mapMarker;
@@ -86,7 +90,7 @@ public final class MapBookmark implements NoteBookEntry, Comparable<MapBookmark>
     reference = builder.getReference();
     zoneId = builder.getZoneId();
     shortNotes = builder.isShortNotesSet() ? builder.getShortNotes() : "";
-    notes = builder.isNotesSet() ? builder.getNotes() : "";
+    notesKey = builder.isNotesSet() ? builder.getNotesKey() : null;
     mapMarker = builder.getMapMarker();
     order = builder.getOrder();
   }
@@ -130,8 +134,8 @@ public final class MapBookmark implements NoteBookEntry, Comparable<MapBookmark>
   }
 
   @Override
-  public String getNotes() {
-    return notes;
+  public Optional<MD5Key> getNotesKey() {
+    return Optional.ofNullable(notesKey);
   }
 
   /**
@@ -158,13 +162,22 @@ public final class MapBookmark implements NoteBookEntry, Comparable<MapBookmark>
         && Objects.equals(reference, bookmark.reference)
         && zoneId.equals(bookmark.zoneId)
         && shortNotes.equals(bookmark.shortNotes)
-        && notes.equals(bookmark.notes)
+        && notesKey.equals(bookmark.notesKey)
         && mapMarker.equals(bookmark.mapMarker);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, reference, zoneId, shortNotes, notes, mapMarker, order);
+    return Objects.hash(id, name, reference, zoneId, shortNotes, notesKey, mapMarker, order);
+  }
+
+  @Override
+  public Collection<MD5Key> getAssetKeys() {
+    if (notesKey == null) {
+      return Collections.emptySet();
+    } else {
+      return Set.of(notesKey);
+    }
   }
 
   @Override

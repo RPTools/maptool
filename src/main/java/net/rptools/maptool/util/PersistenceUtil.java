@@ -64,6 +64,7 @@ import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.notebook.NoteBook;
+import net.rptools.maptool.model.notebook.NoteBookEntry;
 import net.rptools.maptool.model.notebook.NoteBookEntryPersistenceUtil;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
@@ -393,6 +394,16 @@ public class PersistenceUtil {
     for (var entry : notebook.getEntries()) {
       packedFile.putFile(
           "notebook/" + entry.getId(), nbePersistenceUtil.toString(entry).getBytes());
+
+      for (MD5Key md5Key : entry.getAssetKeys()) {
+        Asset asset = AssetManager.getAsset(md5Key);
+        if (asset == null) {
+          log.error("NoteBook: AssetId " + md5Key + " not found while saving?!");
+          continue;
+        }
+        packedFile.putFile(ASSET_DIR + md5Key + "." + asset.getExtension(), asset.getData());
+        packedFile.putFile(ASSET_DIR + md5Key + "", asset);
+      }
     }
   }
 
@@ -509,10 +520,15 @@ public class PersistenceUtil {
         packedFile.getPaths().stream()
             .filter(p -> p.startsWith("notebook/"))
             .collect(Collectors.toList());
+    Set<MD5Key> allAssetIds = new HashSet<>();
     for (var noteFile : noteFiles) {
       String asString = IOUtils.toString(packedFile.getFileAsReader(noteFile));
-      noteBook.putEntry(nbePersistenceUtil.fromString(asString));
+      NoteBookEntry entry = nbePersistenceUtil.fromString(asString);
+      noteBook.putEntry(entry);
+      allAssetIds.addAll(entry.getAssetKeys());
     }
+
+    loadAssets(allAssetIds, packedFile);
   }
 
   public static PersistedCampaign loadLegacyCampaign(File campaignFile) {

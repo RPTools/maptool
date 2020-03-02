@@ -1,7 +1,22 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.ui.notebook;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,8 +34,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.AssetAvailableListener;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.notebook.NoteBookEntry;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookEntryTreeItem;
@@ -30,72 +45,68 @@ import net.rptools.maptool.model.notebook.tabletreemodel.TableTreeItemHolder;
 
 public class NoteBookController {
 
-  @FXML
-  private ResourceBundle resources;
+  @FXML private ResourceBundle resources;
 
-  @FXML
-  private URL location;
+  @FXML private URL location;
 
-  @FXML
-  private BorderPane noteBookPanel;
+  @FXML private BorderPane noteBookPanel;
 
-  @FXML
-  private TreeTableView<TableTreeItemHolder> noteBookTreeTableView;
+  @FXML private TreeTableView<TableTreeItemHolder> noteBookTreeTableView;
 
-  @FXML
-  private TreeTableColumn<TableTreeItemHolder, String> groupColumn;
+  @FXML private TreeTableColumn<TableTreeItemHolder, String> groupColumn;
 
+  @FXML private Button addNoteButton;
 
-  @FXML
-  private Button addNoteButton;
+  @FXML private StackPane mainViewStackPane;
 
-  @FXML
-  private StackPane mainViewStackPane;
+  @FXML private AnchorPane notePane;
 
-  @FXML
-  private AnchorPane notePane;
+  @FXML private WebView noteWebView;
 
-  @FXML
-  private WebView noteWebView;
+  @FXML private AnchorPane editorPane;
 
-  @FXML
-  private AnchorPane editorPane;
+  @FXML private AnchorPane detailsAnchorPane;
 
-  @FXML
-  private AnchorPane detailsAnchorPane;
+  @FXML private HBox buttonHBox;
 
-  @FXML
-  private HBox buttonHBox;
+  @FXML private TextField nameTextField;
 
-  @FXML
-  private TextField nameTextField;
+  @FXML private ComboBox<Zone> mapComboBox;
 
-  @FXML
-  private ComboBox<Zone> mapComboBox;
+  @FXML private CheckBox mapCheckBox;
 
-  @FXML
-  private CheckBox mapCheckBox;
-
-  @FXML
-  private TextField referenceTextField;
+  @FXML private TextField referenceTextField;
 
   @FXML
   void initialize() {
-    assert noteBookPanel != null : "fx:id=\"noteBookPanel\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert noteBookTreeTableView != null : "fx:id=\"noteBookTreeTableView\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert groupColumn != null : "fx:id=\"groupColumn\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert addNoteButton != null : "fx:id=\"addNoteButton\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert mainViewStackPane != null : "fx:id=\"mainViewStackPane\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert notePane != null : "fx:id=\"notePane\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert noteWebView != null : "fx:id=\"noteWebView\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert editorPane != null : "fx:id=\"editorPane\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert detailsAnchorPane != null : "fx:id=\"detailsAnchorPane\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert nameTextField != null : "fx:id=\"nameTextField\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert mapComboBox != null : "fx:id=\"mapComboBox\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert mapCheckBox != null : "fx:id=\"mapCheckBox\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert referenceTextField != null : "fx:id=\"referenceTextField\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert buttonHBox != null : "fx:id=\"buttonHBox\" was not injected: check your FXML file 'NoteBook.fxml'.";
-
+    assert noteBookPanel != null
+        : "fx:id=\"noteBookPanel\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert noteBookTreeTableView != null
+        : "fx:id=\"noteBookTreeTableView\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert groupColumn != null
+        : "fx:id=\"groupColumn\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert addNoteButton != null
+        : "fx:id=\"addNoteButton\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert mainViewStackPane != null
+        : "fx:id=\"mainViewStackPane\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert notePane != null
+        : "fx:id=\"notePane\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert noteWebView != null
+        : "fx:id=\"noteWebView\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert editorPane != null
+        : "fx:id=\"editorPane\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert detailsAnchorPane != null
+        : "fx:id=\"detailsAnchorPane\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert nameTextField != null
+        : "fx:id=\"nameTextField\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert mapComboBox != null
+        : "fx:id=\"mapComboBox\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert mapCheckBox != null
+        : "fx:id=\"mapCheckBox\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert referenceTextField != null
+        : "fx:id=\"referenceTextField\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert buttonHBox != null
+        : "fx:id=\"buttonHBox\" was not injected: check your FXML file 'NoteBook.fxml'.";
 
     groupColumn.setCellValueFactory(
         cellDataFeatures -> {
@@ -114,7 +125,6 @@ public class NoteBookController {
           return new SimpleStringProperty("");
         });
 
-
     noteBookTreeTableView.setEditable(false);
     noteBookTreeTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
@@ -131,6 +141,7 @@ public class NoteBookController {
             });
   }
 
+
   private void showEntry(NoteBookEntry entry) {
     if (entry == null) {
       noteWebView.getEngine().loadContent("");
@@ -138,7 +149,23 @@ public class NoteBookController {
       mapCheckBox.setSelected(false);
       referenceTextField.clear();
     } else {
-      noteWebView.getEngine().loadContent(entry.getNotes());
+      final AssetAvailableListener aal = k -> {
+        Platform.runLater(() -> {
+          noteWebView.getEngine().loadContent(AssetManager.getAsset(k).toString());
+        });
+      };
+
+      if (entry.getNotesKey().isPresent()) {
+        AssetManager.getAssetAsynchronously(
+            entry.getNotesKey().get(),
+            (key) -> {
+              String note = AssetManager.getAsset(key).getDataAsString();
+              Platform.runLater(() -> noteWebView.getEngine().loadContent(note));
+            });
+      } else {
+        noteWebView.getEngine().loadContent("");
+      }
+
       nameTextField.setText(entry.getName());
       Zone currentZone;
       if (entry.getZoneId().isPresent()) {
@@ -170,14 +197,11 @@ public class NoteBookController {
     mapComboBox.setValue(defaultZone);
   }
 
-
   void setTreeRoot(TreeItem<TableTreeItemHolder> root) {
     noteBookTreeTableView.setRoot(root);
     noteBookTreeTableView.refresh();
   }
 
   @FXML
-  void addNoteAction(ActionEvent event) {
-
-  }
+  void addNoteAction(ActionEvent event) {}
 }

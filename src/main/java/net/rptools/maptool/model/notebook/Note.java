@@ -14,8 +14,12 @@
  */
 package net.rptools.maptool.model.notebook;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.GUID;
 
 /** A {@link NoteBookEntry} that contains nothing but notes. */
@@ -34,7 +38,7 @@ public class Note implements NoteBookEntry {
   private final GUID zoneId;
 
   /** The Notes of the {@code NoteBookmark}. */
-  private final String notes;
+  private final MD5Key notesKey;
 
   /**
    * Creates a {@code NoteBookmark} object from the details contained in a {@link NoteBuilder}
@@ -68,7 +72,7 @@ public class Note implements NoteBookEntry {
     name = builder.getName();
     reference = builder.getReference();
     zoneId = builder.getZoneId();
-    notes = builder.getNotes();
+    notesKey = builder.getNotesKey();
   }
 
   @Override
@@ -92,7 +96,16 @@ public class Note implements NoteBookEntry {
   }
 
   @Override
-  public String getNotes() {
-    return notes;
+  public Optional<MD5Key> getNotesKey() {
+    return Optional.ofNullable(notesKey);
+  }
+
+  @Override
+  public Collection<MD5Key> getAssetKeys() {
+    if (notesKey == null) {
+      return Collections.emptySet();
+    } else {
+      return Set.of(notesKey);
+    }
   }
 }

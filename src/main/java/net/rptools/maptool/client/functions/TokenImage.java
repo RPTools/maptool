@@ -157,7 +157,9 @@ public class TokenImage extends AbstractFunction {
         properties.addProperty("id", asset.getMD5Key().toString());
         properties.addProperty("name", asset.getName());
 
-        Image img = ImageManager.getImageAndWait(asset.getMD5Key()); // wait until loaded, so width/height are correct
+        Image img =
+            ImageManager.getImageAndWait(
+                asset.getMD5Key()); // wait until loaded, so width/height are correct
         String status = "loaded";
         if (img == ImageManager.BROKEN_IMAGE) {
           status = "broken";

@@ -19,6 +19,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Since;
 import java.util.UUID;
+import net.rptools.lib.MD5Key;
+import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 
@@ -49,7 +52,13 @@ public class NoteBuilder implements NoteBookEntryBuilder {
 
   /** The notes for the {@code Note). */
   @Since(1.0)
-  private String notes;
+  private MD5Key notesKey;
+
+  /**
+   * The notes value before it has been converted to an {@code Asset}, once it has been
+   * converted to an {@code Asset} then {@link #notesKey} will be set and this unset.
+   */
+  transient private String notes;
 
   /**
    * Creates a new {@code NoteBuilder} populated with the values from the passed in {@link Note} and
@@ -75,7 +84,9 @@ public class NoteBuilder implements NoteBookEntryBuilder {
     if (note.getZoneId().isPresent()) {
       builder.setZoneId(note.getZoneId().get());
     }
-    builder.setNotes(note.getNotes());
+    if (note.getNotesKey().isPresent()) {
+      builder.setNotesKey(note.getNotesKey().get());
+    }
 
     return builder;
   }
@@ -195,8 +206,11 @@ public class NoteBuilder implements NoteBookEntryBuilder {
    *
    * @return the notes for the {@link Note} that will be built.
    */
-  public String getNotes() {
-    return notes;
+  public MD5Key getNotesKey() {
+    if (notesKey == null && notes != null) {
+      createNoteAsset();
+    }
+    return notesKey;
   }
 
   /**
@@ -205,8 +219,36 @@ public class NoteBuilder implements NoteBookEntryBuilder {
    * @param notes the notes for the {@link Note} that will be built.
    * @return {@code this} so that methods can be chained.
    */
-  public NoteBuilder setNotes(String notes) {
-    this.notes = notes;
+  public NoteBuilder setNotesKey(MD5Key notes) {
+    this.notesKey = notes;
+    return this;
+  }
+
+  /**
+   * Sets the notes for the {@link Note} that will be built.
+   *
+   * @param key the notes for the {@link Note} that will be built.
+   * @return {@code this} so that methods can be chained.
+   */
+  public NoteBuilder setNotesKey(String key) {
+    this.notesKey = notesKey;
+    this.notes = null;
+    return this;
+  }
+
+  /**
+   * Sets the notes value from a {@link String}.
+   *
+   * @param n The value of the note.
+   *
+   * @return {@code this} so that methods can be chained.
+   *
+   * @implNote The creation of the {@link Asset} is delayed until its fetched as this could
+   *           be set before the name.
+   */
+  public NoteBuilder setNotes(String n) {
+    this.notes = n;
+    this.notesKey = null;
     return this;
   }
 
@@ -248,4 +290,18 @@ public class NoteBuilder implements NoteBookEntryBuilder {
 
     return builder.build();
   }
+
+  /**
+   * Creates an {@link Asset} for the {@link #notes} and updates the {@link #notesKey}.
+   * This will also result in the {@link #notes} being set to {@code null}.
+   */
+  private void createNoteAsset() {
+    if (notes != null) {
+      Asset asset = Asset.createHTMLAsset(name + "-notes", notes.getBytes());
+      AssetManager.putAsset(asset);
+      notesKey = asset.getMD5Key();
+      notes = null;
+    }
+  }
+
 }

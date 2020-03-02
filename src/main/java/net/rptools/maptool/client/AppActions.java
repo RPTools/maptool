@@ -337,7 +337,11 @@ public class AppActions {
             for (Asset asset : assetSet) {
 
               // Index it
-              builder.append(asset.getMD5Key()).append(" assets/").append(asset.getMD5Key()).append("\n");
+              builder
+                  .append(asset.getMD5Key())
+                  .append(" assets/")
+                  .append(asset.getMD5Key())
+                  .append("\n");
               // Save it
               ZipEntry entry = new ZipEntry("assets/" + asset.getMD5Key().toString());
               out.putNextEntry(entry);
@@ -1624,7 +1628,7 @@ public class AppActions {
         }
       };
 
-    public static final Action CAMPAIGN_NOTE_BOOK =
+  public static final Action CAMPAIGN_NOTE_BOOK =
       new DefaultClientAction() {
         {
           init("noteBook.menuItem");

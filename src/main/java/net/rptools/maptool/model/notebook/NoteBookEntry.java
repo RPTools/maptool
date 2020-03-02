@@ -14,8 +14,11 @@
  */
 package net.rptools.maptool.model.notebook;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
+import net.rptools.lib.MD5Key;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
 
 public interface NoteBookEntry {
@@ -61,5 +64,14 @@ public interface NoteBookEntry {
    *
    * @return the notes for the {@code Bookmark}.
    */
-  String getNotes();
+  Optional<MD5Key> getNotesKey();
+
+
+  /**
+   * Returns all of the {@link MD5Key}s associated with the {@link Asset}s that the
+   * {@code NoteBookEntry} contains.
+   *
+   * @return all of the {@link MD5Key}s associated with the {@link Asset}s.
+   */
+  Collection<MD5Key> getAssetKeys();
 }

@@ -37,6 +37,7 @@ import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.Asset.Type;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -66,8 +67,14 @@ public class AssetManager {
   private static Map<MD5Key, List<AssetAvailableListener>> assetListenerListMap =
       new ConcurrentHashMap<MD5Key, List<AssetAvailableListener>>();
 
-  /** Property string associated with asset name */
+  /** Property string associated with asset name. */
   public static final String NAME = "name";
+
+  /** Property string associated with asset type. */
+  public static final String TYPE = "type";
+
+  /** Property string associated with asset extension. */
+  public static final String EXTENSION = "extension";
 
   /** Used to load assets from storage */
   private static AssetLoader assetLoader = new AssetLoader();
@@ -386,7 +393,10 @@ public class AssetManager {
       byte[] data = FileUtils.readFileToByteArray(assetFile);
       Properties props = getAssetInfo(id);
 
-      Asset asset = Asset.createUnknownAssetType(props.getProperty(NAME), data);
+      String name = props.getProperty(NAME);
+      String type = props.getProperty(TYPE, Type.DATA.toString());
+      Asset.Type assetType = Asset.Type.valueOf(type);
+      Asset asset = Asset.createAsset(name, data, assetType);
 
       if (!asset.getMD5Key().equals(id)) {
         log.error("MD5 for asset " + asset.getName() + " corrupted");
@@ -409,7 +419,8 @@ public class AssetManager {
    * @throws IOException
    */
   public static Asset createAsset(File file) throws IOException {
-    return Asset.createUnknownAssetType(FileUtil.getNameWithoutExtension(file), FileUtils.readFileToByteArray(file));
+    return Asset.createUnknownAssetType(
+        FileUtil.getNameWithoutExtension(file), FileUtils.readFileToByteArray(file));
   }
 
   /**
@@ -426,7 +437,8 @@ public class AssetManager {
       FileUtils.copyURLToFile(url, newFile);
       if (!newFile.exists() || newFile.length() < 20) return null;
       Asset temp =
-          Asset.createUnknownAssetType(FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
+          Asset.createUnknownAssetType(
+              FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
       return temp;
     } finally {
       newFile.delete();
@@ -499,6 +511,7 @@ public class AssetManager {
         OutputStream out = new FileOutputStream(infoFile);
         Properties props = new Properties();
         props.put(NAME, asset.getName() != null ? asset.getName() : "");
+        props.put(TYPE, asset.getType().toString());
         props.store(out, "Asset Info");
         out.close();
 

@@ -338,7 +338,8 @@ public class TransferableHelper extends TransferHandler {
     }
     if (image != null) {
       String name = findName(url);
-      asset = Asset.createImageAsset(name != null ? name : "unnamed", ImageUtil.imageToBytes(image));
+      asset =
+          Asset.createImageAsset(name != null ? name : "unnamed", ImageUtil.imageToBytes(image));
     } else {
       throw new IllegalArgumentException("cannot convert drop object to image: " + url.toString());
     }

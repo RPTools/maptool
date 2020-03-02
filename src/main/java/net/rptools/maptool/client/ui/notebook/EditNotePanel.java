@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.notebook;
 
+import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -30,6 +31,7 @@ import javafx.scene.text.Text;
 import javafx.scene.web.HTMLEditor;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.notebook.Note;
@@ -168,7 +170,16 @@ public class EditNotePanel {
    */
   synchronized void edit(Note note) {
     editingNotes = note;
-    htmlEditor.setHtmlText(editingNotes.getNotes());
+
+    if (note.getNotesKey().isPresent()) {
+      AssetManager.getAssetAsynchronously(
+          note.getNotesKey().get(),
+          (key) -> {
+            String noteString = AssetManager.getAsset(key).getDataAsString();
+            Platform.runLater(() -> htmlEditor.setHtmlText(noteString));
+          });
+    }
+
     nameTextField.setText(editingNotes.getName());
     if (editingNotes.getReference().isPresent()) {
       referenceTextField.setText(editingNotes.getReference().get());
