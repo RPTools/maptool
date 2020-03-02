@@ -55,7 +55,7 @@ public class MapBookmarkBuilder {
   /** The notes for the bookmark, either this or {@link #notes} will be set not both. */
   private MD5Key notesKey;
 
-  /** The notes for the bookmark, either this or  {@link #notesKey} will be set not both. */
+  /** The notes for the bookmark, either this or {@link #notesKey} will be set not both. */
   private String notes;
 
   /** Has the notes value been set. */
@@ -317,7 +317,6 @@ public class MapBookmarkBuilder {
     if (notesKey == null && notes != null && !notes.isEmpty()) {
       Asset asset = Asset.createHTMLAsset(name + "-notes", notes.getBytes());
       AssetManager.putAsset(asset);
-
     }
 
     return new MapBookmark(this);

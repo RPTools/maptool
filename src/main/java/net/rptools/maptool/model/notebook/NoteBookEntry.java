@@ -66,10 +66,9 @@ public interface NoteBookEntry {
    */
   Optional<MD5Key> getNotesKey();
 
-
   /**
-   * Returns all of the {@link MD5Key}s associated with the {@link Asset}s that the
-   * {@code NoteBookEntry} contains.
+   * Returns all of the {@link MD5Key}s associated with the {@link Asset}s that the {@code
+   * NoteBookEntry} contains.
    *
    * @return all of the {@link MD5Key}s associated with the {@link Asset}s.
    */

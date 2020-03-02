@@ -52,9 +52,9 @@ public final class Asset {
     /** The default extension for this type. */
     private final String defaultExtension;
 
-
     /**
      * Creates a new {@code Asset.Type}.
+     *
      * @param isString is this {@code Asset} representable as a {@link String}
      * @param extension the default extension for this {@code Asset} type.
      * @param factoryFunction the method used to create {@code Asset}s of this type.
@@ -65,9 +65,9 @@ public final class Asset {
       factory = factoryFunction;
     };
 
-
     /**
      * Returns if this asset is representable as a {@link String}.
+     *
      * @return {@code true} if this asset is representable as a {@link String}.
      */
     public boolean isStringType() {
@@ -76,6 +76,7 @@ public final class Asset {
 
     /**
      * Returns the method that can be used to create an {@code Asset} of this type.
+     *
      * @return the method that can be used to create an {@code Asset} of this type.
      */
     public BiFunction<String, byte[], Asset> getFactory() {
@@ -109,7 +110,6 @@ public final class Asset {
   private final String extension;
   /** The type of the {@code Asset}. */
   private final Type type;
-
 
   /** The value of the data as a {@link String}. */
   private final transient String dataAsString;
@@ -162,9 +162,9 @@ public final class Asset {
     return createImageAsset(name, data);
   }
 
-
   /**
    * Creates a HTML {@code Asset}.
+   *
    * @param name The name of the {@code Asset}.
    * @param data The data for the {@code Asset}.
    * @return the HTML {@code Asset}.
@@ -175,6 +175,7 @@ public final class Asset {
 
   /**
    * Creates a new {@code Asset} of the specified type.
+   *
    * @param name The name of the {@code Asset}.
    * @param data The data for the {@code Asset}.
    * @param type The {@link Type} of the {@code Asset}.
@@ -271,9 +272,9 @@ public final class Asset {
     }
   }
 
-
   /**
    * Creates a new {@code Asset}.
+   *
    * @param key The md5 sum of the {@code Asset} if {@code null} this will be calculated.
    * @param name The name of the {@code Asset}.
    * @param data The data for the {@code Asset}.
@@ -384,12 +385,10 @@ public final class Asset {
   }
 
   /**
-   * Returns the data for the {@code Asset} as a {@link String}.
-   * If the {@code Asset} can't be represented as a {@link String} then {@link IllegalStateException}
-   * will be thrown.
+   * Returns the data for the {@code Asset} as a {@link String}. If the {@code Asset} can't be
+   * represented as a {@link String} then {@link IllegalStateException} will be thrown.
    *
    * @return the date for the {@code Asset} as {@link String}.
-   *
    * @throws IllegalStateException if this {@code Asset} cannot be represented as a {@link String}.
    */
   public String getDataAsString() {
@@ -402,6 +401,7 @@ public final class Asset {
 
   /**
    * Returns if the {@code Asset} be represented as a {@link String}.
+   *
    * @return {@code true} if the {@code Asset} can be represented as a {@link String}.
    */
   public boolean isStringAsset() {
@@ -429,6 +429,7 @@ public final class Asset {
 
   /**
    * Used to ensure that transient fields are correctly initialized on read.
+   *
    * @return replacement object on read.
    */
   Object readResolve() {

@@ -141,7 +141,6 @@ public class NoteBookController {
             });
   }
 
-
   private void showEntry(NoteBookEntry entry) {
     if (entry == null) {
       noteWebView.getEngine().loadContent("");
@@ -149,11 +148,13 @@ public class NoteBookController {
       mapCheckBox.setSelected(false);
       referenceTextField.clear();
     } else {
-      final AssetAvailableListener aal = k -> {
-        Platform.runLater(() -> {
-          noteWebView.getEngine().loadContent(AssetManager.getAsset(k).toString());
-        });
-      };
+      final AssetAvailableListener aal =
+          k -> {
+            Platform.runLater(
+                () -> {
+                  noteWebView.getEngine().loadContent(AssetManager.getAsset(k).toString());
+                });
+          };
 
       if (entry.getNotesKey().isPresent()) {
         AssetManager.getAssetAsynchronously(

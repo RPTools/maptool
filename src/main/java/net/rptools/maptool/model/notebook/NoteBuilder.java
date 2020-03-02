@@ -55,10 +55,10 @@ public class NoteBuilder implements NoteBookEntryBuilder {
   private MD5Key notesKey;
 
   /**
-   * The notes value before it has been converted to an {@code Asset}, once it has been
-   * converted to an {@code Asset} then {@link #notesKey} will be set and this unset.
+   * The notes value before it has been converted to an {@code Asset}, once it has been converted to
+   * an {@code Asset} then {@link #notesKey} will be set and this unset.
    */
-  transient private String notes;
+  private transient String notes;
 
   /**
    * Creates a new {@code NoteBuilder} populated with the values from the passed in {@link Note} and
@@ -240,11 +240,9 @@ public class NoteBuilder implements NoteBookEntryBuilder {
    * Sets the notes value from a {@link String}.
    *
    * @param n The value of the note.
-   *
    * @return {@code this} so that methods can be chained.
-   *
-   * @implNote The creation of the {@link Asset} is delayed until its fetched as this could
-   *           be set before the name.
+   * @implNote The creation of the {@link Asset} is delayed until its fetched as this could be set
+   *     before the name.
    */
   public NoteBuilder setNotes(String n) {
     this.notes = n;
@@ -292,8 +290,8 @@ public class NoteBuilder implements NoteBookEntryBuilder {
   }
 
   /**
-   * Creates an {@link Asset} for the {@link #notes} and updates the {@link #notesKey}.
-   * This will also result in the {@link #notes} being set to {@code null}.
+   * Creates an {@link Asset} for the {@link #notes} and updates the {@link #notesKey}. This will
+   * also result in the {@link #notes} being set to {@code null}.
    */
   private void createNoteAsset() {
     if (notes != null) {
@@ -303,5 +301,4 @@ public class NoteBuilder implements NoteBookEntryBuilder {
       notes = null;
     }
   }
-
 }
