@@ -49,3 +49,8 @@ build-resources/rptools-keystore
 /log.html
 /report.html
 /output.xml
+
+
+################################################################################
+# include icon resources
+!src/main/resources/net/rptools/maptool/client/image/icons

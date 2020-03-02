@@ -103,10 +103,6 @@ public class NoteBookUI {
             noteBookTableTreeModel =
                 NoteBookTableTreeModel.getTreeModelFor(newCampaign.getNotebook());
             controller.setTreeRoot(noteBookTableTreeModel.getRoot());
-
-            /*if (oldNoteBookTableTreeModel != null) {
-              oldNoteBookTableTreeModel.dispose();
-            }*/
           });
     }
   }
