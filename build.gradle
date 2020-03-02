@@ -199,7 +199,7 @@ dependencies {
     implementation 'org.eclipse.jetty:jetty-webapp:9.4.25.v20191220'
     implementation 'org.eclipse.jetty:jetty-continuation:9.4.25.v20191220'
     implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.25.v20191220'
+    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.27.v20200227'
     implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.25.v20191220'
     implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.25.v20191220'
 
