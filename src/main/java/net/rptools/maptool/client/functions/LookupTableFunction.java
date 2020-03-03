@@ -56,7 +56,11 @@ public class LookupTableFunction extends AbstractFunction {
         "setTableImage",
         "copyTable",
         "getTableEntry",
-        "setTableEntry");
+        "setTableEntry",
+        "resetTablePicks",
+        "getTablePickOnce",
+        "setTablePickOnce",
+        "getTablePicksLeft");
   }
 
   /** The singleton instance. */
@@ -301,14 +305,12 @@ public class LookupTableFunction extends AbstractFunction {
       String roll = params.get(1).toString();
       LookupEntry entry = lookupTable.getLookup(roll);
       if (entry == null) return ""; // no entry was found
-      int rollInt = Integer.parseInt(roll);
-      if (rollInt < entry.getMin() || rollInt > entry.getMax())
-        return ""; // entry was found but doesn't match
 
       JsonObject entryDetails = new JsonObject();
       entryDetails.addProperty("min", entry.getMin());
       entryDetails.addProperty("max", entry.getMax());
       entryDetails.addProperty("value", entry.getValue());
+      entryDetails.addProperty("picked", entry.getValue());
 
       MD5Key imageId = entry.getImageId();
       if (imageId != null) {
@@ -317,6 +319,43 @@ public class LookupTableFunction extends AbstractFunction {
         entryDetails.addProperty("assetid", "");
       }
       return entryDetails;
+
+    } else if ("resetTablePicks".equalsIgnoreCase(function)) {
+
+      checkTrusted(function);
+      FunctionUtil.checkNumberParam("setTableVisible", params, 1, 1);
+      String name = params.get(0).toString();
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      lookupTable.reset();
+      MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
+      return "";
+
+    } else if ("setTablePickOnce".equalsIgnoreCase(function)) {
+
+      checkTrusted(function);
+      FunctionUtil.checkNumberParam("setTableAccess", params, 2, 2);
+      String name = params.get(0).toString();
+      String pickonce = params.get(1).toString();
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      lookupTable.setPickOnce(FunctionUtil.getBooleanValue(pickonce));
+      MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
+      return lookupTable.getPickOnce();
+
+    } else if ("getTablePickOnce".equalsIgnoreCase(function)) {
+
+      checkTrusted(function);
+      FunctionUtil.checkNumberParam("setTableAccess", params, 1, 1);
+      String name = params.get(0).toString();
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      return lookupTable.getPickOnce();
+
+    } else if ("getTablePicksLeft".equalsIgnoreCase(function)) {
+
+      checkTrusted(function);
+      FunctionUtil.checkNumberParam("setTableAccess", params, 1, 1);
+      String name = params.get(0).toString();
+      LookupTable lookupTable = getMaptoolTable(name, function);
+      return lookupTable.getPicksLeft();
 
     } else { // if tbl, table, tblImage or tableImage
       FunctionUtil.checkNumberParam(function, params, 1, 3);
@@ -343,6 +382,13 @@ public class LookupTableFunction extends AbstractFunction {
       }
 
       LookupEntry result = lookupTable.getLookup(roll);
+      if (result == null) {
+        return null;
+      }
+      
+      if (result.getValue().equals(LookupTable.NO_PICKS_LEFT)) {
+        return result.getValue();
+      }
 
       if (function.equals("table") || function.equals("tbl")) {
         String val = result.getValue();
