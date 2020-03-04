@@ -31,7 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -49,12 +49,6 @@ import org.apache.logging.log4j.Logger;
 
 public class FileUtil {
   private static final Logger log = LogManager.getLogger(FileUtil.class);
-
-  /**
-   * Can't use this for String objects yet as it's Java 6+ and we're trying to be Java 5 compatible.
-   * But soon...
-   */
-  public static final Charset UTF_8 = Charset.forName("UTF-8");
 
   /**
    * Reads the entire content of the given file into a byte array.
@@ -85,7 +79,7 @@ public class FileUtil {
   public static Object objFromResource(String res) throws IOException {
     XStream xs = getConfiguredXStream();
     try (InputStream is = FileUtil.class.getClassLoader().getResourceAsStream(res)) {
-      return xs.fromXML(new InputStreamReader(is, "UTF-8"));
+      return xs.fromXML(new InputStreamReader(is, StandardCharsets.UTF_8));
     }
   }
 
@@ -94,7 +88,8 @@ public class FileUtil {
       if (is == null) {
         throw new IOException("Resource \"" + resource + "\" cannot be opened as stream.");
       }
-      return IOUtils.toByteArray(new InputStreamReader(is, "UTF-8"), "UTF-8");
+      return IOUtils.toByteArray(
+          new InputStreamReader(is, StandardCharsets.UTF_8), StandardCharsets.UTF_8);
     }
   }
 
@@ -167,7 +162,7 @@ public class FileUtil {
   @Deprecated
   public static String getString(InputStream is) throws IOException {
     if (is == null) throw new IllegalArgumentException("InputStream cannot be null");
-    return IOUtils.toString(is, "UTF-8");
+    return IOUtils.toString(is, StandardCharsets.UTF_8);
   }
 
   /**
@@ -184,7 +179,7 @@ public class FileUtil {
     if (file == null) {
       throw new IllegalArgumentException("file cannot be null");
     }
-    return FileUtils.readFileToString(file, "UTF-8");
+    return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
   }
 
   /**
@@ -242,7 +237,8 @@ public class FileUtil {
    * @throws IOException
    */
   public static BufferedReader getFileAsReader(File file) throws IOException {
-    return new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+    return new BufferedReader(
+        new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
   }
 
   /**
@@ -265,7 +261,7 @@ public class FileUtil {
       type = getContentType(conn.getInputStream());
       // Now make a guess and change 'encoding' to match the content type...
     }
-    isr = new InputStreamReader(conn.getInputStream(), "UTF-8");
+    isr = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
     return isr;
   }
 
@@ -442,9 +438,8 @@ public class FileUtil {
    * @param file the file or directory to recursively check and possibly delete
    * @param daysOld number of days old a file or directory can be before it is considered for
    *     deletion
-   * @throws IOException if something goes wrong
    */
-  public static void delete(File file, int daysOld) throws IOException {
+  public static void delete(File file, int daysOld) {
     Calendar olderThan = new GregorianCalendar();
     olderThan.add(Calendar.DATE, -daysOld);
 
