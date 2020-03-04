@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui.htmlframe;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.awt.Component;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -217,11 +216,6 @@ public class HTMLPaneFormView extends FormView {
   }
 
   private String encode(String str) {
-    try {
-      return URLEncoder.encode(str, "utf-8");
-    } catch (UnsupportedEncodingException e) {
-      log.error(e.getStackTrace());
-      return str;
-    }
+    return URLEncoder.encode(str, StandardCharsets.UTF_8);
   }
 }
