@@ -14,8 +14,11 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -35,10 +38,10 @@ import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.parser.ParserException;
-import net.sf.json.JSONObject;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -414,7 +417,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
    * @param form the form to submit.
    */
   private void getDataAndSubmit(HTMLFormElement form) {
-    JSONObject jobj = new JSONObject();
+    JsonObject jobj = new JsonObject();
     final HTMLCollection collection = form.getElements();
     for (int i = 0; i < collection.getLength(); i++) {
       String name = null, value = null;
@@ -439,7 +442,16 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
         name = element.getName();
         value = element.getValue();
       }
-      if (name != null) jobj.put(name, value == null ? "" : value);
+      if (name != null) {
+        value = value == null ? "" : value;
+        try {
+          BigDecimal number = new BigDecimal(value);
+          jobj.addProperty(name, number);
+        } catch (NumberFormatException nfe) {
+          JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(value);
+          jobj.add(name, json);
+        }
+      }
     }
 
     String action = form.getAction();
