@@ -8,8 +8,11 @@ Maptool 1.6.0
 - The annoying behavior where browsing for a drawing texture would cause the Resource Library to also change folders has been fixed!
 
 **Enhancements**
+- [#1323][i1323] New menu item, Frameworks, in Help menu opens default browser to [Frameworks](http://www.lmwcs.com/rptools/wiki/Frameworks) page on wiki.
+- [#1320][i1320] Downloadabe artpacks in the Add Resource dialog are now sorted by name.
 - [#1313][i1313] Gather Debug Information window (Help MenU) refactored. Window opens immediately with note that data collection is in progress and then updates once data has been collected.
 - [#1278][i1278] JSON option added to PROPS type for `input()` function.  WIDTH option added to PROPS.  Defaults to 14.
+- [#1270][i1270] Map Properties dialog now has a delete button to remove embedded maps.
 - [#1216][i1216] Movement Blocking Layer - similar to VBL, but specifically for blocking movement and not sight or light.
   - AI button and new VBL Blocks Movement button moved over by Measuring tool and are now under GM control
 - [#1210][i1210] RADIO and LIST fields for `input()` function now support a DELIMITER option.
@@ -52,6 +55,8 @@ Maptool 1.6.0
 
 [i1352]: https://github.com/RPTools/maptool/issues/1352
 [i1325]: https://github.com/RPTools/maptool/issues/1325
+[i1323]: https://github.com/RPTools/maptool/issues/1323
+[i1320]: https://github.com/RPTools/maptool/issues/1320
 [i1313]: https://github.com/RPTools/maptool/issues/1313
 [i1309]: https://github.com/RPTools/maptool/issues/1309
 [i1300]: https://github.com/RPTools/maptool/issues/1300
@@ -59,6 +64,7 @@ Maptool 1.6.0
 [i1288]: https://github.com/RPTools/maptool/issues/1288
 [i1278]: https://github.com/RPTools/maptool/issues/1278
 [i1271]: https://github.com/RPTools/maptool/issues/1271
+[i1270]: https://github.com/RPTools/maptool/issues/1270
 [i1269]: https://github.com/RPTools/maptool/issues/1269
 [i1268]: https://github.com/RPTools/maptool/issues/1268
 [i1267]: https://github.com/RPTools/maptool/issues/1267
