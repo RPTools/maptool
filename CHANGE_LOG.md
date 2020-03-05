@@ -22,6 +22,7 @@ Maptool 1.6.0
 - [#921][i921] Support added for selecting an available them via the Themes menu in MapTool.
 - [#891][i891] Menu option and macro functions to show/hide Text Labels and get display status.
   - `showTextLabels()`, `hideTextLabels()` and `getTextLabelStatus()`
+- [#643][i643] Grid types for Light and Sight now supports Hex grids.
 - [#221][i221] Campaign Properties dialog now has a drop-down to select from pre-defined Campaign Property sets (.mtprops).
 
 **Bug Fixes**
@@ -86,6 +87,7 @@ Maptool 1.6.0
 [i921]: https://github.com/RPTools/maptool/issues/921
 [i891]: https://github.com/RPTools/maptool/issues/891
 [i650]: https://github.com/RPTools/maptool/issues/650
+[i643]: https://github.com/RPTools/maptool/issues/643
 [i221]: https://github.com/RPTools/maptool/issues/221
 [i198]: https://github.com/RPTools/maptool/issues/198
 
