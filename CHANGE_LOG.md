@@ -9,7 +9,7 @@ Maptool 1.6.0
 
 **Enhancements**
 - [#1323][i1323] New menu item, Frameworks, in Help menu opens default browser to [Frameworks](http://www.lmwcs.com/rptools/wiki/Frameworks) page on wiki.
-- [#1320][i1320] Downloadabe artpacks in the Add Resource dialog are now sorted by name.
+- [#1320][i1320] Downloadable artpacks in the Add Resource to Library dialog are now sorted by name.
 - [#1313][i1313] Gather Debug Information window (Help MenU) refactored. Window opens immediately with note that data collection is in progress and then updates once data has been collected.
 - [#1278][i1278] JSON option added to PROPS type for `input()` function.  WIDTH option added to PROPS.  Defaults to 14.
 - [#1270][i1270] Map Properties dialog now has a delete button to remove embedded maps.
