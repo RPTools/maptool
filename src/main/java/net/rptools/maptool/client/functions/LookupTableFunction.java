@@ -385,7 +385,7 @@ public class LookupTableFunction extends AbstractFunction {
       if (result == null) {
         return null;
       }
-      
+
       if (result.getValue().equals(LookupTable.NO_PICKS_LEFT)) {
         return result.getValue();
       }
