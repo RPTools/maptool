@@ -36,8 +36,13 @@ Maptool 1.6.0
 - [#1225][i1225]  Exception during L&F setup. Not in released code. Fixed.
 - [#1206][i1206]  JSON function code was returning NULL if the function couldn't be found. Now reports unknown function.
 - [#1204][i1204] `getToken*` was throwing an exception if a string was passed to the `layer` option. Fixed.
+- [#650][i650] Can't pass JSON data from a form submit. Fixed.
+- [#198][i198] Using tab panels in `input()` could add large empty space at bottom of panel. Fixed.
 
 **Other**
+- [#1352][i1352] Replaced use of `"UTF-i"` by `StandardCharsets.UTF_8`
+- [#1325][i1325] Unit tests added for ImageUtils.
+- [#1284][i1284] Removed superfluous ParserException try/catch blocks.
 - [#1271][i1271] Clean up of Drawing Delete confirmation dialog code with comments and javadocs plus comments on the I18N strings.
 - [#1268][i1268] Refactored PackeFile class to use *try with resource* instead of try/catch/finally blocks.
 - [#1253][i1253] MD5 key generation wasn't thread-safe. Fixed.
@@ -45,6 +50,8 @@ Maptool 1.6.0
 - [#1215][i1215] Replaced calls to deprecated IOUtils.closeQuietly() with try-with-resource.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
+[i1352]: https://github.com/RPTools/maptool/issues/1352
+[i1325]: https://github.com/RPTools/maptool/issues/1325
 [i1313]: https://github.com/RPTools/maptool/issues/1313
 [i1309]: https://github.com/RPTools/maptool/issues/1309
 [i1300]: https://github.com/RPTools/maptool/issues/1300
@@ -72,7 +79,9 @@ Maptool 1.6.0
 [i972]: https://github.com/RPTools/maptool/issues/972
 [i921]: https://github.com/RPTools/maptool/issues/921
 [i891]: https://github.com/RPTools/maptool/issues/891
+[i650]: https://github.com/RPTools/maptool/issues/650
 [i221]: https://github.com/RPTools/maptool/issues/221
+[i198]: https://github.com/RPTools/maptool/issues/198
 
 Maptool 1.5.13
 =====
