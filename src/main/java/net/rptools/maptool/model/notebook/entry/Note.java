@@ -16,88 +16,72 @@ package net.rptools.maptool.model.notebook.entry;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 import net.rptools.maptool.model.notebook.entry.NoteBuilder;
 
 /** A {@link NoteBookEntry} that contains nothing but notes. */
-public class Note implements NoteBookEntry {
-
-  /** The id of the {@code NoteBookmark}. */
-  private final UUID id;
-
-  /** The name of the {@code NoteBookmark}. */
-  private final String name;
-
-  /** The Reference id of the {@code NoteBookmark}. */
-  private final String reference;
-
-  /** The Zone Id of the {@code NoteBookmark}. */
-  private final GUID zoneId;
+public class Note extends AbstractNoteBookEntry {
 
   /** The Notes of the {@code NoteBookmark}. */
-  private final MD5Key notesKey;
+  private MD5Key notesKey;
+
 
   /**
-   * Creates a {@code NoteBookmark} object from the details contained in a {@link NoteBuilder}
-   * object.
+   * creates a new {@code Note}.
    *
-   * @param builder the {@link NoteBuilder} used to create this object.
-   * @throws IllegalStateException if all the required values are not set.
+   * @param id The id of the {@code Note}.
+   * @param name The name of the {@code Note}.
+   * @param zoneId The id of the zone of the {@code Note}, can be {@code null}.
+   * @param notesKey The {@link MD5Key} for the {@link net.rptools.maptool.model.Asset} containing
+   *                 the note can be null.
    */
-  Note(NoteBuilder builder) {
-    String error = "";
-    boolean invalid = false;
+  public Note(UUID id, String name, GUID zoneId, MD5Key notesKey) {
+    super(id, name, zoneId, EntryZoneRequirements.ZONE_ALLOWED);
+    Objects.requireNonNull(id, "ID for Note cannot be null");
 
-    if (builder.getId() == null) {
-      error = "ID can not be null for Note";
-      invalid = true;
-    }
+    this.notesKey =  notesKey;
+  }
 
-    if (builder.getName() == null || builder.getName().isEmpty()) {
-      if (!error.isEmpty()) {
-        error += ", ";
-      }
-      error += "Name can not be null for Note";
-      invalid = true;
-    }
+  /**
+   * creates a new {@code Note}, with a newly generated id.
+   *
+   * @param name The name of the {@code Note}.
+   * @param zoneId The id of the zone of the {@code Note}, can be {@code null}.
+   * @param notesKey The {@link MD5Key} for the {@link Asset} containing
+   *                 the note can be null.
+   */
+  public Note(String name, GUID zoneId, MD5Key notesKey) {
+    super(null, name, zoneId, EntryZoneRequirements.ZONE_ALLOWED);
+    this.notesKey =  notesKey;
+  }
 
-    if (invalid) {
-      throw new IllegalStateException(error);
-    }
+  /**
+   * Set the {@link MD5Key} for the {@link Asset} containing the note.
+   *
+   * @param key The {@link MD5Key} for the {@link Asset} containing the note.
+   */
+  public synchronized void setNotesKey(MD5Key key) {
+    notesKey = key;
+  }
 
-    id = builder.getId();
-    name = builder.getName();
-    reference = builder.getReference();
-    zoneId = builder.getZoneId();
-    notesKey = builder.getNotesKey();
+
+  /**
+   * Returns the {@link MD5Key} for the {@link Asset} containing the note.
+   * @return the {@link MD5Key} for the {@link Asset} containing the note.
+   */
+  public synchronized Optional<MD5Key> getNotesKey() {
+    return  Optional.ofNullable(notesKey);
   }
 
   @Override
-  public UUID getId() {
-    return id;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public Optional<GUID> getZoneId() {
-    return Optional.ofNullable(zoneId);
-  }
-
-  public Optional<MD5Key> getNotesKey() {
-    return Optional.ofNullable(notesKey);
-  }
-
-  @Override
-  public Collection<MD5Key> getAssetKeys() {
+  public synchronized Collection<MD5Key> getAssetKeys() {
     if (notesKey == null) {
       return Collections.emptySet();
     } else {
