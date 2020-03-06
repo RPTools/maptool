@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.webapi;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
@@ -24,8 +26,6 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.model.*;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public class WebAppInitiative {
 
@@ -101,37 +101,39 @@ public class WebAppInitiative {
         });
   }
 
-  private JSONObject getInitiativeDetails() {
-    JSONObject json = new JSONObject();
+  private JsonObject getInitiativeDetails() {
+    JsonObject json = new JsonObject();
     InitiativeList initiativeList =
         MapTool.getFrame().getCurrentZoneRenderer().getZone().getInitiativeList();
 
     List<net.rptools.maptool.model.InitiativeList.TokenInitiative> tokenInitList =
         initiativeList.getTokens();
 
-    JSONArray tokArray = new JSONArray();
+    JsonArray tokArray = new JsonArray();
     int index = 0;
     for (InitiativeList.TokenInitiative token : tokenInitList) {
       if (InitiativeListModel.isTokenVisible(token.getToken(), initiativeList.isHideNPC())) {
-        JSONObject tokJSon = new JSONObject();
-        tokJSon.put("id", token.getToken().getId().toString());
-        tokJSon.put("name", token.getToken().getName());
-        tokJSon.put("holding", token.isHolding());
-        tokJSon.put("initiative", token.getState());
-        tokJSon.put("tokenIndex", index);
+        JsonObject tokJSon = new JsonObject();
+        tokJSon.addProperty("id", token.getToken().getId().toString());
+        tokJSon.addProperty("name", token.getToken().getName());
+        tokJSon.addProperty("holding", token.isHolding());
+        if (token.getState() != null) {
+          tokJSon.addProperty("initiative", token.getState());
+        }
+        tokJSon.addProperty("tokenIndex", index);
         /*
          * if (AppUtil.playerOwns(token.getToken())) { tokJSon.put("playerOwns", "true"); } else { tokJSon.put("playerOwns", "false"); }
          */
-        tokJSon.put("playerOwns", AppUtil.playerOwns(token.getToken()));
+        tokJSon.addProperty("playerOwns", AppUtil.playerOwns(token.getToken()));
         tokArray.add(tokJSon);
       }
       index++;
     }
 
-    json.put("initiative", tokArray);
-    json.put("current", initiativeList.getCurrent());
-    json.put("round", initiativeList.getRound());
-    json.put("canAdvance", canAdvanceInitiative());
+    json.add("initiative", tokArray);
+    json.addProperty("current", initiativeList.getCurrent());
+    json.addProperty("round", initiativeList.getRound());
+    json.addProperty("canAdvance", canAdvanceInitiative());
 
     return json;
   }
@@ -145,11 +147,11 @@ public class WebAppInitiative {
   }
 
   void sendInitiative() {
-    JSONObject init = getInitiativeDetails();
+    JsonObject init = getInitiativeDetails();
     MTWebClientManager.getInstance().sendToAllSessions("initiative", init);
   }
 
-  void processInitiativeMessage(JSONObject json) {
+  void processInitiativeMessage(JsonObject json) {
     InitiativeList ilist = initiativeListener.initiativeList;
     String currentInit = Integer.toString(ilist.getCurrent());
     String currentRound = Integer.toString(ilist.getRound());
@@ -159,12 +161,12 @@ public class WebAppInitiative {
     // people can be updating the initiative at the same time and its possible that two people might
     // update the
     // initiative at the same time.
-    if (!currentInit.equals(json.getString("currentInitiative"))
-        || !currentRound.equals(json.getString("currentRound"))) {
+    if (!currentInit.equals(json.get("currentInitiative").getAsString())
+        || !currentRound.equals(json.get("currentRound").getAsString())) {
       return; // FIXME: This needs to send a "can not do" message back to client.
     }
 
-    String command = json.getString("command");
+    String command = json.get("command").getAsString();
     if ("nextInitiative".equals(command)) {
       System.out.println("DEBUG: got next initiative call" + json.toString());
 
@@ -179,8 +181,8 @@ public class WebAppInitiative {
       ilist.sort();
     } else if ("toggleHoldInitiative".equals(command)) {
       InitiativeList.TokenInitiative tokenInit = null;
-      GUID id = new GUID(json.getString("token"));
-      int tokenIndex = json.getInt("tokenIndex");
+      GUID id = new GUID(json.get("token").getAsString());
+      int tokenIndex = json.get("tokenIndex").getAsInt();
       int index = 0;
       for (InitiativeList.TokenInitiative ti : ilist.getTokens()) {
         if (ti.getId().equals(id) && tokenIndex == index) {
