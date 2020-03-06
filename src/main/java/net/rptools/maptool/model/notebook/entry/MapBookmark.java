@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.notebook;
+package net.rptools.maptool.model.notebook.entry;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.notebook.MapMarker;
 
 /** {@code MapBookmark} represents a map bookmark on a game Map. */
 public final class MapBookmark implements NoteBookEntry, Comparable<MapBookmark> {

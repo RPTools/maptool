@@ -19,6 +19,9 @@ import com.google.gson.JsonParser;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import net.rptools.maptool.model.notebook.entry.Note;
+import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
+import net.rptools.maptool.model.notebook.entry.NoteBuilder;
 
 /** Utility Class to help with persistence of {@link NoteBookEntry}. */
 public class NoteBookEntryPersistenceUtil {

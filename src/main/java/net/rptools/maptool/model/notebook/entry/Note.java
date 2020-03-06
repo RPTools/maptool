@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.notebook;
+package net.rptools.maptool.model.notebook.entry;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.UUID;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
+import net.rptools.maptool.model.notebook.entry.NoteBuilder;
 
 /** A {@link NoteBookEntry} that contains nothing but notes. */
 public class Note implements NoteBookEntry {
@@ -86,16 +88,10 @@ public class Note implements NoteBookEntry {
   }
 
   @Override
-  public Optional<String> getReference() {
-    return Optional.ofNullable(reference);
-  }
-
-  @Override
   public Optional<GUID> getZoneId() {
     return Optional.ofNullable(zoneId);
   }
 
-  @Override
   public Optional<MD5Key> getNotesKey() {
     return Optional.ofNullable(notesKey);
   }

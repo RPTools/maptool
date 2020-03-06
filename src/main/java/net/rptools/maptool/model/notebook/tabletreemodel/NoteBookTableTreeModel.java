@@ -23,7 +23,7 @@ import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.notebook.NoteBook;
-import net.rptools.maptool.model.notebook.NoteBookEntry;
+import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 
 /**
  * A model class used for creating and maintaining a {@link TreeItem} for the campaign note book.

@@ -32,7 +32,8 @@ import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.notebook.Note;
+import net.rptools.maptool.model.notebook.entry.Note;
+import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookEntryTreeItem;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookGroupTreeItem;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookTableTreeModel;
@@ -52,20 +53,20 @@ public class NoteBookPanel extends JFXPanel {
 
   /**
    * The {@link TreeTableView} used to display all the {@link
-   * net.rptools.maptool.model.notebook.NoteBookEntry}s for the campaign.
+   * NoteBookEntry}s for the campaign.
    */
   private final TreeTableView<TableTreeItemHolder> notebookTable = new TreeTableView<>();
 
   /**
    * The {@link NoteBookTableTreeModel} with all the {@link
-   * net.rptools.maptool.model.notebook.NoteBookEntry}s for the campaign.
+   * NoteBookEntry}s for the campaign.
    */
   private NoteBookTableTreeModel noteBookTableTreeModel;
 
   /** The dialog used to show the {@link EditNotePanel} for editing / creating {@link Note}s. */
   private SwingJavaFXDialog editDialog;
 
-  /** The button used to edit {@link net.rptools.maptool.model.notebook.NoteBookEntry}s. */
+  /** The button used to edit {@link NoteBookEntry}s. */
   private final Button editButton = new Button(I18N.getText("panel.NoteBook.button.edit"));
 
   /**

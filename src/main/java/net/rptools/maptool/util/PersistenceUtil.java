@@ -64,7 +64,7 @@ import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.notebook.NoteBook;
-import net.rptools.maptool.model.notebook.NoteBookEntry;
+import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 import net.rptools.maptool.model.notebook.NoteBookEntryPersistenceUtil;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;

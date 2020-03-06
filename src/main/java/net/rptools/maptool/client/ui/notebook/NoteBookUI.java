@@ -28,6 +28,7 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
+import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookTableTreeModel;
 
 public class NoteBookUI {
@@ -38,7 +39,7 @@ public class NoteBookUI {
 
   /**
    * The {@link NoteBookTableTreeModel} with all the {@link
-   * net.rptools.maptool.model.notebook.NoteBookEntry}s for the campaign.
+   * NoteBookEntry}s for the campaign.
    */
   private NoteBookTableTreeModel noteBookTableTreeModel;
 

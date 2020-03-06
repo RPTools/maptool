@@ -14,7 +14,7 @@
  */
 package net.rptools.maptool.model.notebook.tabletreemodel;
 
-import net.rptools.maptool.model.notebook.NoteBookEntry;
+import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 
 /** Holder class that holds {@link NoteBookEntry}s in the model for the ui representation. */
 public final class NoteBookEntryTreeItem implements TableTreeItemHolder {

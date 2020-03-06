@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -170,7 +171,16 @@
                </children></AnchorPane>
          </top>
          <bottom>
-            <HBox fx:id="buttonHBox" prefHeight="28.0" prefWidth="540.0" BorderPane.alignment="CENTER" />
+            <StackPane prefHeight="28.0" prefWidth="597.0" BorderPane.alignment="CENTER">
+               <children>
+                  <FlowPane prefHeight="28.0" prefWidth="597.0" />
+                  <FlowPane alignment="CENTER" columnHalignment="CENTER" prefHeight="28.0" prefWidth="200.0">
+                     <children>
+                        <Button fx:id="editButton" mnemonicParsing="false" text="%noteBook.editNote.edit" />
+                     </children>
+                  </FlowPane>
+               </children>
+            </StackPane>
          </bottom>
       </BorderPane>
    </center>

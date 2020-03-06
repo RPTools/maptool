@@ -38,6 +38,7 @@ import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.model.notebook.NoteBook;
+import net.rptools.maptool.model.notebook.entry.MapBookmark;
 
 /**
  * This object contains {@link Zone}s and {@link Asset}s that make up a campaign as well as links to
@@ -97,7 +98,7 @@ public class Campaign {
   private Map<String, LookupTable> lookupTableMap;
 
   /**
-   * The {@link NoteBook} manages all the {@link net.rptools.maptool.model.notebook.MapBookmark}s
+   * The {@link NoteBook} manages all the {@link MapBookmark}s
    * for the campaign.
    */
   private final transient NoteBook notebook;

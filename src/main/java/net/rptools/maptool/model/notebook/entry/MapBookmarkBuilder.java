@@ -12,13 +12,14 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.notebook;
+package net.rptools.maptool.model.notebook.entry;
 
 import java.util.UUID;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.notebook.MapMarker;
 
 /** Builder class to create {@link MapBookmark} objects. */
 public class MapBookmarkBuilder {

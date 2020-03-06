@@ -28,22 +28,36 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 
 /**
  * {@code MapBookmarkManager} class is used to manage all the {@link NoteBookEntry}s in a campaign.
  * This class is thread safe so may be used from multiple threads.
  *
+ * Taking out a lock on a {@code NoteBook} (e.g. {code syncronized(notebook) {}} will block changes
+ * via
+ * <ui>
+ *  <li>{@link #setDescription(String)}</li>
+ *  <li>{@link #setName(String)}></il>
+ *  <li>{@link #setVersion(String)}</li>
+ *  <li>{@link #setNamespace(String)} (String)}</li>
+ * </ui>
+ * while the lock is held and can be used when you require these to remain stable while performing
+ * an operation.
+ *
  * @implNote Maintaining the thread safety of this class depends on keeping to the following
  *     conventions when changing this class.
  *     <ul>
- *       <li>Whenever {@link #removedZones}, {@link #zoneEntries}, {@link #referenceEntries}, or
+ *       <li>Whenever {@link #removedZones}, {@link #zoneEntries}, or
  *           {@link #idEntryMap} are modified then a {@link #writeLock} must be obtained.
- *       <li>Whenever {@link #removedZones}, {@link #zoneEntries}, {@link #referenceEntries}, or
+ *       <li>Whenever {@link #removedZones}, {@link #zoneEntries}, or
  *           {@link #idEntryMap} are read then a {@link #readLock} must be obtained.
  *     </ul>
  *     Also do <strong>not</strong> fire the property change events while holding a lock.
+ *
+ *
  */
-public final class NoteBook {
+public class NoteBook implements Comparable<NoteBook> {
 
   /**
    * Value used for "no zone".
@@ -82,6 +96,17 @@ public final class NoteBook {
    */
   public static final String ENTRIES_REMOVED_EVENT = "Entries Removed";
 
+
+  public static final String NAME_CHANGED = "Name Changed";
+
+  public static final String VERSION_CHANGED = "Version Changed";
+
+  public static final String NAMESPACE_CHANGED = "Namespace Changed";
+
+  public static final String DESCRIPTION_CHANGED = "Description Changed";
+
+  public static final String VERSIONED_NAMESPACE_CHANGED = "Versioned Namespace Changed";
+
   /** The {@link NoteBookEntry}s for each {@link Zone} */
   private final Map<GUID, Map<UUID, NoteBookEntry>> zoneEntries = new HashMap<>();
 
@@ -90,9 +115,6 @@ public final class NoteBook {
    * NoteBookEntry}s for {@link Zone}s that have been removed.
    */
   private final Set<GUID> removedZones = new HashSet<>();
-
-  /** Mapping of {@link NoteBookEntry} references to {@link NoteBookEntry}s. */
-  private final Map<String, Set<NoteBookEntry>> referenceEntries = new HashMap<>();
 
   /** Mapping between id and {@link NoteBookEntry}. */
   private final Map<UUID, NoteBookEntry> idEntryMap = new HashMap<>();
@@ -117,6 +139,185 @@ public final class NoteBook {
    * @see #readLock
    */
   private final Lock writeLock = readWriteLock.writeLock();
+
+
+  /** The name of the {@code NoteBook}. */
+  private String name;
+
+  /** The description of the {@code NoteBook}. */
+  private String description;
+
+  /** The version of the {@code NoteBook}. */
+  private String version;
+
+  /** The namespace of the {@code NoteBook}. */
+  private String namespace;
+
+  /** Is this an internal  MapTool {@code NoteBook}. */
+  private final boolean internal;
+
+
+
+  /**
+   * Creates a new {@code NoteBook} object.
+   * @param name The name of the {@code NoteBook}.
+   * @param description The description of the {@code NoteBook}.
+   * @param version The version of the {@code NoteBook}.
+   * @param namespace The namespace of the {@code NoteBook}.
+   * @param internal {@code true} if this ia an internal uneditable MapTool {@code NoteBook}.
+   */
+  private NoteBook(String name, String description, String version, String namespace, boolean internal) {
+    this.name = name;
+    this.description = description;
+    this.version = version;
+    this.namespace = namespace;
+    this.internal = internal;
+  }
+
+
+  /**
+   * Creates a new {@code NoteBook} object.
+   * @param name The name of the {@code NoteBook}.
+   * @param description The description of the {@code NoteBook}.
+   * @param version The version of the {@code NoteBook}.
+   * @param namespace The namespace of the {@code NoteBook}.
+   *
+   * @return a new {@code NoteBook} object.
+   */
+  public static NoteBook createNoteBook(String name, String description, String version, String namespace) {
+    return new NoteBook(name, description, version, namespace, false);
+  }
+
+
+  /**
+   * Sets the name for the {@code NoteBook}.
+   * @param newName the name to set.
+   */
+  public void setName(String newName) {
+    String oldName;
+    synchronized (this) {
+      if (name.equals(newName)) {
+        return;
+      }
+      oldName = name;
+      name = newName;
+    }
+
+    fireChangeEvent(NAME_CHANGED, oldName, newName);
+  }
+
+  /**
+   * Sets the description for the {@code NoteBook}.
+   * @param desc the description to set.
+   */
+  public void setDescription(String desc) {
+    String oldDesc;
+    synchronized (this) {
+      if (description.equals(desc)) {
+        return;
+      }
+      oldDesc = description;
+      description = desc;
+    }
+
+    fireChangeEvent(DESCRIPTION_CHANGED, oldDesc, desc);
+  }
+
+  /**
+   * Sets the version for the {@code NoteBook}
+   * @param ver the version to set.
+   */
+  public void setVersion(String ver) {
+    String oldVer;
+    String oldvns;
+    String newvns;
+    synchronized (this) {
+      if (version.equals(ver)) {
+        return;
+      }
+      oldVer = version;
+      oldvns = getVersionedNameSpace();
+      version = ver;
+      newvns = getVersionedNameSpace();
+    }
+
+    fireChangeEvent(VERSION_CHANGED, oldVer, ver);
+    fireChangeEvent(VERSIONED_NAMESPACE_CHANGED, oldvns, newvns);
+  }
+
+
+  /**
+   * Returns the name of the {@code NoteBook}.
+   * @return the name of the {@code NoteBook}.
+   */
+  public synchronized String getName() {
+    return name;
+  }
+
+  /**
+   * Returns the description of the {@code NoteBook}.
+   * @return the description of the {@code NoteBook}.
+   */
+  public synchronized String getDescription() {
+    return description;
+  }
+
+  /**
+   * Returns the version of the {@code NoteBook}.
+   * @return the version of the {@code NoteBook}.
+   */
+  public synchronized String getVersion() {
+    return version;
+  }
+
+
+  /**
+   * Returns if this is an internal MapTool {@code NoteBook} or not.
+   * @return  {@code true }if this is an internal MapTool {@code NoteBook}.
+   */
+  public boolean isInternal() {
+    return internal;
+  }
+
+
+  /**
+   * Sets the namespace of the {@code NoteBook}.
+   * @param ns
+   */
+  public void setNamespace(String ns) {
+    String oldns;
+    String oldvns;
+    String newvns;
+    synchronized (this) {
+      if (namespace.equals(ns)) {
+        return;
+      }
+      oldns = namespace;
+      oldvns = getVersionedNameSpace();
+      namespace = ns;
+      newvns = getVersionedNameSpace();
+    }
+
+    fireChangeEvent(NAMESPACE_CHANGED, oldns, ns);
+    fireChangeEvent(VERSIONED_NAMESPACE_CHANGED, oldvns, newvns);
+  }
+
+
+  public synchronized String getNamespace() {
+    return namespace;
+  }
+
+
+  /**
+   * Returns the versioned name space, which is a combination of the namespace and version of the
+   * {@code NoteBook}.
+   * @return the versioned name space.
+   */
+  public synchronized String getVersionedNameSpace() {
+    return namespace + "/" + version;
+  }
+
+
   /**
    * Adds or replaces a {@link NoteBookEntry} to the note book being managed. This will replace
    * <strong>any</strong> {@link NoteBookEntry} with the same id.
@@ -160,11 +361,6 @@ public final class NoteBook {
       }
 
       idEntryMap.put(entry.getId(), entry);
-      if (entry.getReference().isPresent()) {
-        String ref = entry.getReference().get();
-        referenceEntries.putIfAbsent(ref, new HashSet<>());
-        referenceEntries.get(ref).add(entry);
-      }
       zoneEntries.putIfAbsent(zoneId, new HashMap<>());
       zoneEntries.get(zoneId).put(entry.getId(), entry);
     } finally {
@@ -333,14 +529,6 @@ public final class NoteBook {
   private void removeEntry(NoteBookEntry entry, boolean firePropertyChange) {
     writeLock.lock();
     try {
-      if (entry.getReference().isPresent()) {
-        String ref = entry.getReference().get();
-        Set<NoteBookEntry> entries = referenceEntries.get(ref);
-        entries.remove(entry);
-        if (entries.size() == 0) {
-          referenceEntries.remove(ref);
-        }
-      }
       if (entry.getZoneId().isPresent()) {
         GUID oldZoneId = entry.getZoneId().get();
         zoneEntries.get(oldZoneId).remove(entry.getId());
@@ -361,27 +549,6 @@ public final class NoteBook {
    */
   public void removeEntry(NoteBookEntry entry) {
     removeEntry(entry, true);
-  }
-
-  /**
-   * Returns all {@link NoteBookEntry}s contained in the {@code NoteBook} that have this reference
-   * id.
-   *
-   * @param ref the reference id to search for.
-   * @return all {@link NoteBookEntry}s contained in the {@code NoteBook} that have this reference
-   */
-  public Collection<NoteBookEntry> getByReference(String ref) {
-    Set<NoteBookEntry> entries = new HashSet<>();
-
-    readLock.lock();
-    try {
-      if (referenceEntries.containsKey(ref)) {
-        entries.addAll(referenceEntries.get(ref));
-      }
-    } finally {
-      readLock.unlock();
-    }
-    return entries;
   }
 
   /**
@@ -453,5 +620,20 @@ public final class NoteBook {
   public void removePropertyChangeListener(PropertyChangeListener propertyChangeListener) {
     // No need for locking a PropertyChangeSupport is thread safe.
     propertyChangeSupport.removePropertyChangeListener(propertyChangeListener);
+  }
+
+  @Override
+  public int compareTo(NoteBook o) {
+    int res = Boolean.compare(o.isInternal(), isInternal()); // reversed as false < true
+    if (res != 0) {
+      return res;
+    }
+
+    res = getName().compareTo(o.getName());
+    if (res != 0) {
+      return res;
+    }
+
+    return getVersion().compareTo(getVersion());
   }
 }

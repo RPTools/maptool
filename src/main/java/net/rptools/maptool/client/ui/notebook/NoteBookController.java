@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.client.ui.notebook;
 
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
@@ -30,14 +28,13 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.AssetAvailableListener;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.notebook.NoteBookEntry;
+import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookEntryTreeItem;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookGroupTreeItem;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookZoneTreeItem;
@@ -45,9 +42,6 @@ import net.rptools.maptool.model.notebook.tabletreemodel.TableTreeItemHolder;
 
 public class NoteBookController {
 
-  @FXML private ResourceBundle resources;
-
-  @FXML private URL location;
 
   @FXML private BorderPane noteBookPanel;
 
@@ -67,7 +61,6 @@ public class NoteBookController {
 
   @FXML private AnchorPane detailsAnchorPane;
 
-  @FXML private HBox buttonHBox;
 
   @FXML private TextField nameTextField;
 
@@ -76,6 +69,10 @@ public class NoteBookController {
   @FXML private CheckBox mapCheckBox;
 
   @FXML private TextField referenceTextField;
+
+  @FXML private Button editButton;
+
+  private NoteBookEntry entryShowing;
 
   @FXML
   void initialize() {
@@ -105,8 +102,8 @@ public class NoteBookController {
         : "fx:id=\"mapCheckBox\" was not injected: check your FXML file 'NoteBook.fxml'.";
     assert referenceTextField != null
         : "fx:id=\"referenceTextField\" was not injected: check your FXML file 'NoteBook.fxml'.";
-    assert buttonHBox != null
-        : "fx:id=\"buttonHBox\" was not injected: check your FXML file 'NoteBook.fxml'.";
+    assert editButton != null
+        : "fx:id=\"editButton\" was not injected: check your FXML file 'NoteBook.fxml'.";
 
     groupColumn.setCellValueFactory(
         cellDataFeatures -> {
@@ -142,6 +139,8 @@ public class NoteBookController {
   }
 
   private void showEntry(NoteBookEntry entry) {
+    entryShowing = entry;
+
     if (entry == null) {
       noteWebView.getEngine().loadContent("");
       nameTextField.clear();
@@ -183,11 +182,10 @@ public class NoteBookController {
         referenceTextField.clear();
       }
     }
-    noteWebView.setDisable(true);
-    nameTextField.setDisable(true);
+    nameTextField.setEditable(false);
     mapComboBox.setDisable(true);
     mapCheckBox.setDisable(true);
-    referenceTextField.setDisable(true);
+    referenceTextField.setEditable(false);
   }
 
   private void loadMapComboBox(Zone defaultZone) {
@@ -202,6 +200,8 @@ public class NoteBookController {
     noteBookTreeTableView.setRoot(root);
     noteBookTreeTableView.refresh();
   }
+
+
 
   @FXML
   void addNoteAction(ActionEvent event) {}

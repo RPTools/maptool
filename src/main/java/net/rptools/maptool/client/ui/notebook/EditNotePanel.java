@@ -34,14 +34,15 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.notebook.Note;
-import net.rptools.maptool.model.notebook.NoteBuilder;
+import net.rptools.maptool.model.notebook.entry.Note;
+import net.rptools.maptool.model.notebook.entry.NoteBuilder;
+import net.rptools.maptool.model.notebook.NoteBook;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
  * The dialog used for editing or creating notes to be stored in the {@link
- * net.rptools.maptool.model.notebook.NoteBook}.
+ * NoteBook}.
  */
 public class EditNotePanel {
 
