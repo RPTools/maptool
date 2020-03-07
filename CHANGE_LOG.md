@@ -44,6 +44,7 @@ Maptool 1.6.0
 - [#198][i198] Using tab panels in `input()` could add large empty space at bottom of panel. Fixed.
 
 **Other**
+- [#1355][i1355] Moving remaining classes off old JSON library to GSON.
 - [#1352][i1352] Replaced use of `"UTF-i"` by `StandardCharsets.UTF_8`
 - [#1325][i1325] Unit tests added for ImageUtils.
 - [#1284][i1284] Removed superfluous ParserException try/catch blocks.
@@ -54,6 +55,7 @@ Maptool 1.6.0
 - [#1215][i1215] Replaced calls to deprecated IOUtils.closeQuietly() with try-with-resource.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
+[i1355]: https://github.com/RPTools/maptool/issues/1355
 [i1352]: https://github.com/RPTools/maptool/issues/1352
 [i1325]: https://github.com/RPTools/maptool/issues/1325
 [i1323]: https://github.com/RPTools/maptool/issues/1323
