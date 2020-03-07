@@ -35,7 +35,6 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.notebook.entry.Note;
-import net.rptools.maptool.model.notebook.entry.NoteBuilder;
 import net.rptools.maptool.model.notebook.NoteBook;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -182,11 +181,7 @@ public class EditNotePanel {
     }
 
     nameTextField.setText(editingNotes.getName());
-    if (editingNotes.getReference().isPresent()) {
-      referenceTextField.setText(editingNotes.getReference().get());
-    } else {
-      referenceTextField.clear();
-    }
+    referenceTextField.clear(); // TODO: CDW:
 
     Zone currentZone;
 
@@ -223,6 +218,7 @@ public class EditNotePanel {
   private synchronized void handleOk(Runnable closeCallback) {
     boolean valid = true;
 
+    /* TODO: CDW
     if (nameTextField.getText().trim().isEmpty()) {
       MapTool.showInformation("noteBook.editNode.noteNameRequired");
       valid = false;
@@ -248,5 +244,6 @@ public class EditNotePanel {
         closeCallback.run();
       }
     }
+     */
   }
 }

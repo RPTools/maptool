@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.function.Function;
 import net.rptools.maptool.model.notebook.entry.Note;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
-import net.rptools.maptool.model.notebook.entry.NoteBuilder;
 
 /** Utility Class to help with persistence of {@link NoteBookEntry}. */
 public class NoteBookEntryPersistenceUtil {
@@ -40,11 +39,14 @@ public class NoteBookEntryPersistenceUtil {
 
   /** Creates a new {@code NoteBookEntryPersistenceUtil} class. */
   public NoteBookEntryPersistenceUtil() {
+    /*
+    TODO: CDW:
     fromString.put(NoteBuilder.class.getSimpleName(), NoteBuilder::buildFromJson);
 
     asString.put(NoteBuilder.class.getSimpleName(), (note) -> NoteBuilder.toJson((Note) note));
 
     builders.put(Note.class.getSimpleName(), NoteBuilder.class.getSimpleName());
+     */
   }
 
   /**

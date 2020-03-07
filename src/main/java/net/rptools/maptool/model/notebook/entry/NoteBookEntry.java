@@ -25,7 +25,7 @@ import net.rptools.maptool.model.notebook.NoteBook;
 /**
  * Interface implemented by entries stored in a {@link NoteBook}.
  *
- * All implementations of this interface are required to be thread safe.
+ * All implementations of this interface are required to be immutable.
  */
 public interface NoteBookEntry {
   /**
@@ -61,20 +61,22 @@ public interface NoteBookEntry {
 
 
   /**
-   * Sets the name of the {@code NoteBookEntry}.
-   * @param name the name of the {@code NoteBookEntry}.
+   * Returns a new {@code NoteBookEntry} that is a copy of this one with the new name.
+   * @return a new {@code NoteBookEntry} that is a copy of this one with the new name.
+   *
+   * If the name is the same as the current name then this method may return the original object
+   * as all implementors of this interface are immutable.
    */
-  void setName(String name);
+  NoteBookEntry setName(String name);
 
 
   /**
-   * Sets the Zone id for the {@code NoteBookEntry}.
+   * Returns a new {@code NoteBookEntry} that is a copy of this one with the new zone id.
    *
    * This method must be consistent with {@link #getZoneRequirements()}
    * <ul>
    *   <li>
-   *     when {@link EntryZoneRequirements#ZONE_IGNORED} this method will ignore any input and do
-   *     nothing
+   *     when {@link EntryZoneRequirements#ZONE_IGNORED} this method will ignore any input.
    *   </li>
    *   <li>
    *     when {@link EntryZoneRequirements#ZONE_ALLOWED} this method will allow {@code null}s
@@ -87,10 +89,13 @@ public interface NoteBookEntry {
    *
    * @param id the id of the zone.
    *
+   * If the zone id is the same as the current zone id then this method may return the original object
+   * as all implementors of this interface are immutable.
+   *
    * @throws IllegalArgumentException if the {@code NoteBookEntry} requires a zone a
    * {@code mull} is passed.
    */
-  void setZoneId(GUID id);
+  NoteBookEntry setZoneId(GUID id);
 
 
   /**

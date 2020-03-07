@@ -14,10 +14,10 @@ abstract class AbstractNoteBookEntry implements NoteBookEntry {
   private final UUID id;
 
   /** THe name of the {@link NoteBookEntry} */
-  private String name;
+  private final String name;
 
   /** THe zoneId of the {@link NoteBookEntry} */
-  private GUID zoneId;
+  private final GUID zoneId;
 
   /** The zone requirements for the entry. */
   private final EntryZoneRequirements zoneRequirements;
@@ -46,7 +46,38 @@ abstract class AbstractNoteBookEntry implements NoteBookEntry {
       case ZONE_REQUIRED:
         this.zoneId = Objects.requireNonNull(zoneId, "Required zone id can not be null for note book entry.");
         break;
+      default:
+        throw new AssertionError(); // Should never happen.
     }
+  }
+
+  /**
+   * Checks to see if the passed in zone id is different from the current zone id.
+   * If {@link #getZoneRequirements()} is {@link EntryZoneRequirements#ZONE_IGNORED}
+   * this will always return false.
+   *
+   * @param zId the zone id to check.
+   * @return {@code true} if zone is not being ignored and passed in zone id differs from current
+   *         zoneId.
+   */
+  protected boolean zoneWouldChange(GUID zId) {
+    // If the zone is always ignored then a change could never occur.
+    if (zoneRequirements == EntryZoneRequirements.ZONE_IGNORED) {
+      return false;
+    }
+
+    // If it is null and being set to null no change
+    if (zoneId == zId) {
+      return false;
+    }
+
+    // If zoneId is not null then check to see if its equal to zId
+    if (zoneId != null) {
+      return !zoneId.equals(zId);
+    }
+
+    // If we get here it means that zoneId == null and zId != null so will create a change
+    return true;
   }
 
   @Override
@@ -55,34 +86,13 @@ abstract class AbstractNoteBookEntry implements NoteBookEntry {
   }
 
   @Override
-  public synchronized String getName() {
+  public String getName() {
     return name;
   }
 
   @Override
-  public synchronized Optional<GUID> getZoneId() {
+  public Optional<GUID> getZoneId() {
     return Optional.ofNullable(zoneId);
-  }
-
-
-  @Override
-  public synchronized void setName(String name) {
-    this.name = name;
-  }
-
-  @Override
-  public synchronized void setZoneId(GUID zoneId) {
-    switch (zoneRequirements) {
-      case ZONE_IGNORED:
-        this.zoneId = null;
-        break;
-      case ZONE_ALLOWED:
-        this.zoneId = zoneId;
-        break;
-      case ZONE_REQUIRED:
-        this.zoneId = Objects.requireNonNull(zoneId, "Required zone id can not be null for note book entry.");
-        break;
-    }
   }
 
   @Override

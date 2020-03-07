@@ -155,6 +155,7 @@ public class NoteBookController {
                 });
           };
 
+      /* TODO: CDW
       if (entry.getNotesKey().isPresent()) {
         AssetManager.getAssetAsynchronously(
             entry.getNotesKey().get(),
@@ -162,9 +163,9 @@ public class NoteBookController {
               String note = AssetManager.getAsset(key).getDataAsString();
               Platform.runLater(() -> noteWebView.getEngine().loadContent(note));
             });
-      } else {
+      } else { */
         noteWebView.getEngine().loadContent("");
-      }
+      // TODO: CDW }
 
       nameTextField.setText(entry.getName());
       Zone currentZone;
@@ -176,11 +177,7 @@ public class NoteBookController {
         mapCheckBox.setSelected(false);
       }
       loadMapComboBox(currentZone);
-      if (entry.getReference().isPresent()) {
-        referenceTextField.setText(entry.getReference().get());
-      } else {
-        referenceTextField.clear();
-      }
+      referenceTextField.clear(); // TODO: CDW
     }
     nameTextField.setEditable(false);
     mapComboBox.setDisable(true);

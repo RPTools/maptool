@@ -17,18 +17,22 @@ package net.rptools.maptool.model.notebook;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.notebook.entry.DirectoryEntry;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
+import net.rptools.maptool.model.notebook.entry.tree.NoteBookEntryNode;
 
 /**
  * {@code MapBookmarkManager} class is used to manage all the {@link NoteBookEntry}s in a campaign.
@@ -48,10 +52,14 @@ import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
  * @implNote Maintaining the thread safety of this class depends on keeping to the following
  *     conventions when changing this class.
  *     <ul>
- *       <li>Whenever {@link #removedZones}, {@link #zoneEntries}, or
- *           {@link #idEntryMap} are modified then a {@link #writeLock} must be obtained.
- *       <li>Whenever {@link #removedZones}, {@link #zoneEntries}, or
- *           {@link #idEntryMap} are read then a {@link #readLock} must be obtained.
+ *       <li>
+ *         Whenever {@link #removedZones} or {@link #idEntryMap} are modified then a
+ *         {@link #writeLock} must be obtained.
+ *       </li>
+ *       <li>
+ *         Whenever {@link #removedZones} or {@link #idEntryMap} are read then a
+ *         {@link #readLock} must be obtained.
+ *       </li>
  *     </ul>
  *     Also do <strong>not</strong> fire the property change events while holding a lock.
  *
@@ -59,15 +67,10 @@ import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
  */
 public class NoteBook implements Comparable<NoteBook> {
 
-  /**
-   * Value used for "no zone".
-   *
-   * @implNote This does not need to be the same every run as we never persist it.
-   */
-  private static final GUID NO_ZONE_ID = new GUID();
 
   /**
-   * Name of event fired when a zone is removed. For this event
+   * Name of event fired when a zone is removed.
+   * For this event:
    *
    * <ul>
    *   <li>{@code oldValue} = the id of the zone that was removed.
@@ -77,7 +80,8 @@ public class NoteBook implements Comparable<NoteBook> {
   public static final String ZONE_REMOVED_EVENT = "Zone Removed";
 
   /**
-   * Name of event fired when a entries are added. For this event
+   * Name of event fired when a entries are added.
+   * For this event:
    *
    * <ul>
    *   <li>{@code oldValue} = {@code Set<NoteBookEntry>} containing values that were replaced}.
@@ -87,7 +91,8 @@ public class NoteBook implements Comparable<NoteBook> {
   public static final String ENTRIES_ADDED_EVENT = "Entries Added";
 
   /**
-   * Name of event fired when a entries are removed. For this event
+   * Name of event fired when entries are removed.
+   * For this event:
    *
    * <ul>
    *   <li>{@code oldValue} = {@code Set<NoteBookEntry>} containing the removed values.
@@ -96,19 +101,110 @@ public class NoteBook implements Comparable<NoteBook> {
    */
   public static final String ENTRIES_REMOVED_EVENT = "Entries Removed";
 
-
+  /**
+   * Name of event fired when the name of the {@code NoteBook} changes.
+   * For this event:
+   *
+   * <ul>
+   *   <li>{@code oldValue} = The old name of the {@code NoteBook}.
+   *   <li>{@code newValue} = The new name of the {@code NoteBook}.
+   * </ul>
+   */
   public static final String NAME_CHANGED = "Name Changed";
 
+  /**
+   * Name of event fired when the version of the {@code NoteBook} changes.
+   * For this event:
+   *
+   * <ul>
+   *   <li>{@code oldValue} = The old version of the {@code NoteBook}.
+   *   <li>{@code newValue} = The new version of the {@code NoteBook}.
+   * </ul>
+   */
   public static final String VERSION_CHANGED = "Version Changed";
 
+  /**
+   * Name of event fired when the namespace of the {@code NoteBook} changes.
+   * For this event:
+   *
+   * <ul>
+   *   <li>{@code oldValue} = The old namespace of the {@code NoteBook}.
+   *   <li>{@code newValue} = The new namespace of the {@code NoteBook}.
+   * </ul>
+   */
   public static final String NAMESPACE_CHANGED = "Namespace Changed";
 
+  /**
+   * Name of event fired when the description of the {@code NoteBook} changes.
+   * For this event:
+   *
+   * <ul>
+   *   <li>{@code oldValue} = The old description of the {@code NoteBook}.
+   *   <li>{@code newValue} = The new description of the {@code NoteBook}.
+   * </ul>
+   */
   public static final String DESCRIPTION_CHANGED = "Description Changed";
 
+  /**
+   * Name of event fired when the versioned name space of the {@code NoteBook} changes.
+   * This event will be fired when either the name space or teh version change
+   * For this event:
+   *
+   * <ul>
+   *   <li>{@code oldValue} = The old versioned name space of the {@code NoteBook}.
+   *   <li>{@code newValue} = The new versioned name space of the {@code NoteBook}.
+   * </ul>
+   */
   public static final String VERSIONED_NAMESPACE_CHANGED = "Versioned Namespace Changed";
 
-  /** The {@link NoteBookEntry}s for each {@link Zone} */
-  private final Map<GUID, Map<UUID, NoteBookEntry>> zoneEntries = new HashMap<>();
+
+  /**
+   * Class used to hold a {@code MapBookEntry} and the path it is in the tree.
+   */
+  private static final class EntryDetails {
+    /** The path that the {@code MapBookEntry} can be found in the tree. */
+    private final String path;
+
+    /** The {@code MapBookEntry}. */
+    private final NoteBookEntry entry;
+
+    /** The {@link GUID} zoneId for the {@link Zone} this entry is for. */
+    private final GUID zoneId;
+    /**
+     * Creates a new {@code EntryPath} object.
+     * @param path the path in the tree.
+     * @param entry the {@code NoteBookEntry}.
+     */
+    public EntryDetails(String path, NoteBookEntry entry, GUID zoneId) {
+      this.path = Objects.requireNonNull(path, "The path for EntryDetails cannot be null");
+      this.entry = Objects.requireNonNull(entry, "The entry for EntryDetails cannot be null");
+      this.zoneId = zoneId;
+    }
+
+    /**
+     * Returns the path in the tree.
+     * @return the path in the tree.
+     */
+    public String getPath() {
+      return path;
+    }
+
+    /**
+     * Returns the {@code NoteBookEntry}.
+     * @return the {@code NoteBookEntry}.
+     */
+    public NoteBookEntry getEntry() {
+      return entry;
+    }
+
+    /**
+     * Returns the {@link GUID} zone id this {@code NoteBookEntry} has.
+     * @return the {@link GUID} zone id this {@code NoteBookEntry} has.
+     */
+    public GUID getZoneId() {
+      return zoneId;
+    }
+  }
 
   /**
    * The list of {@link Zone}s that have been removed so that we don't end up adding {@link
@@ -117,7 +213,8 @@ public class NoteBook implements Comparable<NoteBook> {
   private final Set<GUID> removedZones = new HashSet<>();
 
   /** Mapping between id and {@link NoteBookEntry}. */
-  private final Map<UUID, NoteBookEntry> idEntryMap = new HashMap<>();
+  private final Map<UUID, EntryDetails> idEntryMap = new HashMap<>();
+
 
   /** Provides property change support for the {@code NoteBook}. */
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
@@ -127,14 +224,13 @@ public class NoteBook implements Comparable<NoteBook> {
 
   /**
    * The read lock for the collections, you <strong>must</strong> use this lock whenever you are
-   * reading the values from {@link #removedZones} or {@link #zoneEntries}.
+   * reading the values from {@link #removedZones}, {@link #idEntryMap} or {@link #root} tree.
    */
   private final Lock readLock = readWriteLock.readLock();
 
   /**
    * The write lock for the collections, you <strong>must</strong> use this lock whenever you are
-   * modifying the contents for {@link #removedZones}. You shouldn't use this lock if you are only
-   * modifying {@link #zoneEntries}.
+   * modifying the contents for {@link #removedZones}, {@link #idEntryMap} or {@link #root} tree.
    *
    * @see #readLock
    */
@@ -156,6 +252,8 @@ public class NoteBook implements Comparable<NoteBook> {
   /** Is this an internal  MapTool {@code NoteBook}. */
   private final boolean internal;
 
+  /** The root node for the note book entries. */
+  private final NoteBookEntryNode root = new NoteBookEntryNode(new DirectoryEntry("/"));
 
 
   /**
@@ -282,7 +380,7 @@ public class NoteBook implements Comparable<NoteBook> {
 
   /**
    * Sets the namespace of the {@code NoteBook}.
-   * @param ns
+   * @param ns the name space of the {@code NoteBook}.
    */
   public void setNamespace(String ns) {
     String oldns;
@@ -303,6 +401,10 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
 
+  /**
+   * Returns the name space of this {@code NoteBook}.
+   * @return the name space of this {@code NoteBook}.
+   */
   public synchronized String getNamespace() {
     return namespace;
   }
@@ -323,10 +425,11 @@ public class NoteBook implements Comparable<NoteBook> {
    * <strong>any</strong> {@link NoteBookEntry} with the same id.
    *
    * @see NoteBookEntry#getId()
+   * @param path  the path for the added {@link NoteBookEntry}.
    * @param entry the {@link NoteBookEntry} to add or replace.
    */
-  public void putEntry(NoteBookEntry entry) {
-    putEntry(entry, true);
+  public void putEntry(String path, NoteBookEntry entry) {
+    putEntry(path, entry, true);
   }
 
   /**
@@ -336,33 +439,32 @@ public class NoteBook implements Comparable<NoteBook> {
    * false} to this you are expected to perform the notification, this is to support bulk updates.
    *
    * @see NoteBookEntry#getId()
+   * @param path  the path for the added {@link NoteBookEntry}.
    * @param entry the {@link NoteBookEntry} to add or replace.
    * @param firePropertyChange {@code true} if listeners should be notified.
    */
-  private void putEntry(NoteBookEntry entry, boolean firePropertyChange) {
-    NoteBookEntry oldEntry = idEntryMap.get(entry.getId());
+  private void putEntry(String path, NoteBookEntry entry, boolean firePropertyChange) {
     writeLock.lock();
+    EntryDetails oldEntry = idEntryMap.get(entry.getId());
     try {
-      /*
-       * If the zone is in the list of zone that have been removed then drop the bookmark silently.
-       * This is to avoid storing note book for zones that have already been removed.
-       */
-      GUID zoneId = entry.getZoneId().orElse(NO_ZONE_ID);
-      if (removedZones.contains(zoneId)) {
-        return;
-      }
 
       /*
        * Check to see if we are replacing an entry and if so remove it from the other maps, as
        * the reference or the zone may have changed.
        */
       if (oldEntry != null) {
-        removeEntry(oldEntry, false);
+        removeEntry(oldEntry.getEntry(), false);
       }
 
-      idEntryMap.put(entry.getId(), entry);
-      zoneEntries.putIfAbsent(zoneId, new HashMap<>());
-      zoneEntries.get(zoneId).put(entry.getId(), entry);
+      /*
+       * If the zone is in the list of zone that have been removed then drop the entry silently.
+       * This is to avoid storing entries for zones that have already been removed.
+       */
+      if (entry.getZoneId().isPresent() && removedZones.contains(entry.getZoneId().get())) {
+        return;
+      }
+
+      idEntryMap.put(entry.getId(), new EntryDetails(path, entry, entry.getZoneId().orElse(null)));
     } finally {
       writeLock.unlock();
     }
@@ -370,7 +472,7 @@ public class NoteBook implements Comparable<NoteBook> {
     if (firePropertyChange) {
       Set<NoteBookEntry> removed = new HashSet<>();
       if (oldEntry != null) {
-        removed.add(oldEntry);
+        removed.add(oldEntry.getEntry());
       }
       fireChangeEvent(ENTRIES_ADDED_EVENT, removed, Set.of(entry));
     }
@@ -381,23 +483,25 @@ public class NoteBook implements Comparable<NoteBook> {
    * <strong>any</strong> {@link NoteBookEntry} with the same id.
    *
    * @see NoteBookEntry#getId()
-   * @param notes the {@link NoteBookEntry}s to add or replace.
+   * @param entries the {@link NoteBookEntry}s to add or replace.
    */
-  public void putEntries(Collection<NoteBookEntry> notes) {
-    Set<NoteBookEntry> oldEntries = new HashSet<>();
-    writeLock.lock(); // Want to lock the whole transaction
-    try {
-      for (NoteBookEntry note : notes) {
-        if (idEntryMap.containsKey(note.getId())) {
-          oldEntries.add(idEntryMap.get(note.getId()));
+  public void putEntries(Map<String, NoteBookEntry> entries) {
+    Map<String, NoteBookEntry> added = new HashMap<>(entries);
+    if (!added.isEmpty()) {
+      Map<String, NoteBookEntry> oldEntries = new HashMap<>();
+      writeLock.lock(); // Want to lock the whole transaction
+      try {
+        for (Entry<String, NoteBookEntry> entry : added.entrySet()) {
+          if (idEntryMap.containsKey(entry.getValue().getId())) {
+            EntryDetails entryPath = idEntryMap.get(entry.getValue().getId());
+            oldEntries.put(entryPath.getPath(), entryPath.getEntry());
+            putEntry(entryPath.getPath(), entryPath.getEntry(), false);
+          }
         }
-        putEntry(note, false);
+      } finally {
+        writeLock.unlock();
       }
-    } finally {
-      writeLock.unlock();
-    }
-    if (!notes.isEmpty()) {
-      fireChangeEvent(ENTRIES_ADDED_EVENT, oldEntries, Set.copyOf(notes));
+      fireChangeEvent(ENTRIES_ADDED_EVENT, oldEntries, added.values());
     }
   }
 
@@ -409,8 +513,7 @@ public class NoteBook implements Comparable<NoteBook> {
   public Set<NoteBookEntry> getEntries() {
     readLock.lock();
     try {
-      Set<NoteBookEntry> entries = new HashSet<>(idEntryMap.values());
-      return Collections.unmodifiableSet(entries);
+      return idEntryMap.values().stream().map(EntryDetails::getEntry).collect(Collectors.toSet());
     } finally {
       readLock.unlock();
     }
@@ -433,22 +536,35 @@ public class NoteBook implements Comparable<NoteBook> {
    * @return a {@link Map} of {@link Zone}s and the {@link NoteBookEntry}s for the them.
    */
   public Map<GUID, Set<NoteBookEntry>> getEntriesByZone() {
-    readLock.lock();
     Map<GUID, Set<NoteBookEntry>> entries = new HashMap<>();
+    readLock.lock();
     try {
-      for (GUID zoneId : zoneEntries.keySet()) {
-        Set<NoteBookEntry> zEntries = new HashSet<>(zoneEntries.get(zoneId).values());
-        if (zoneId.equals(NO_ZONE_ID)) {
-          entries.put(null, zEntries);
-        } else {
-          entries.put(zoneId, zEntries);
-        }
-      }
+      addToZoneMap(root, entries);
     } finally {
       readLock.unlock();
     }
-
     return entries;
+  }
+
+
+  /**
+   * Add this nodes entries to the zone map, then all and child nodes entries.
+   * @param node The node to add and recurse.
+   * @param entries the zone entry map to add to.
+   */
+  private void addToZoneMap(NoteBookEntryNode node, Map<GUID, Set<NoteBookEntry>> entries) {
+    NoteBookEntry entry = node.getEntry();
+    if (entry.getZoneId().isPresent()) {
+      entries.computeIfAbsent(entry.getZoneId().get(), k -> new HashSet<>());
+      entries.get(entry.getZoneId().get()).add(entry);
+    } else {
+      entries.computeIfAbsent(null, k -> new HashSet<>());
+      entries.get(null).add(entry);
+    }
+
+    for (NoteBookEntryNode child : node.getChildren()) {
+      addToZoneMap(child, entries);
+    }
   }
 
   /**
@@ -457,20 +573,16 @@ public class NoteBook implements Comparable<NoteBook> {
    * @param zoneId the id of the {@link Zone} to return the {@link NoteBookEntry}s.
    * @return the {@link NoteBookEntry}s for a {@link Zone}.
    */
-  public Collection<NoteBookEntry> getZoneEntries(GUID zoneId) {
-    Collection<NoteBookEntry> notes = null;
+  public Set<NoteBookEntry> getZoneEntries(GUID zoneId) {
+    Objects.requireNonNull(zoneId, "zoneId cannot be null for getZoneEntries");
     readLock.lock();
     try {
-      if (zoneEntries.containsKey(zoneId)) {
-        notes = zoneEntries.get(zoneId).values();
-      } else {
-        notes = Collections.emptySet();
-      }
-    } finally {
+      return idEntryMap.values().stream().filter(e -> zoneId.equals(e.getZoneId())).map(
+          EntryDetails::getEntry).collect(Collectors.toSet()
+      );
+    } finally{
       readLock.unlock();
     }
-
-    return notes;
   }
 
   /**
@@ -479,7 +591,14 @@ public class NoteBook implements Comparable<NoteBook> {
    * @return the {@link NoteBookEntry}s not attached to any {@link Zone}.
    */
   public Collection<NoteBookEntry> getZoneLessEntries() {
-    return getZoneEntries(NO_ZONE_ID);
+    readLock.lock();
+    try {
+      return idEntryMap.values().stream().filter(e -> e.getZoneId() == null).map(
+          EntryDetails::getEntry).collect(Collectors.toSet()
+      );
+    } finally{
+      readLock.unlock();
+    }
   }
 
   /**
@@ -489,33 +608,43 @@ public class NoteBook implements Comparable<NoteBook> {
    * @param zoneId the id of the {@link Zone} that has been removed.
    */
   public void zoneRemoved(GUID zoneId) {
+    Objects.requireNonNull(zoneId, "zoneId cannot be null for zoneRemoved");
     writeLock.lock();
     try {
+      Set<NoteBookEntry> zoneEntries = getZoneEntries(zoneId);
 
-      // Make sure that entries are removed from the non zone collection when zone is removed
-      if (zoneEntries.containsKey(zoneId)) {
-        Set<NoteBookEntry> newEntries = new HashSet<>();
-        newEntries.addAll(zoneEntries.get(zoneId).values());
-        for (NoteBookEntry entry : newEntries) {
-          NoteBookEntry oldEntry = idEntryMap.get(entry.getId());
-          if (oldEntry != null) {
-            removeEntry(oldEntry, false);
-          }
-        }
-      }
-
+      removeEntries(zoneEntries);
       /*
        * add this to the list of Zones that have been removed as we do not want to add
        * any notes for Zones that have been removed, which could happen due to the perils
        * of multithreading.
        */
       removedZones.add(zoneId);
-      zoneEntries.remove(zoneId);
     } finally {
       writeLock.unlock();
     }
 
     fireChangeEvent(ZONE_REMOVED_EVENT, zoneId, null);
+  }
+
+  /**
+   * Removes multiple {@link NoteBookEntry}s.
+   * @param entries the entries to remove.
+   */
+  public void removeEntries(Set<NoteBookEntry> entries) {
+    Set<NoteBookEntry> removed = new HashSet<>(entries);
+    if (!removed.isEmpty()) {
+      writeLock.lock();
+      try {
+        for (NoteBookEntry entry : removed) {
+          removeEntry(entry, false);
+        }
+      } finally {
+        writeLock.unlock();
+      }
+
+      fireChangeEvent(ENTRIES_REMOVED_EVENT, removed, null);
+    }
   }
 
   /**
@@ -527,12 +656,10 @@ public class NoteBook implements Comparable<NoteBook> {
    * @param firePropertyChange {@code true} if listeners should be notified.
    */
   private void removeEntry(NoteBookEntry entry, boolean firePropertyChange) {
+    Objects.requireNonNull(entry, "entry canno tbe null for removeEntry");
     writeLock.lock();
     try {
-      if (entry.getZoneId().isPresent()) {
-        GUID oldZoneId = entry.getZoneId().get();
-        zoneEntries.get(oldZoneId).remove(entry.getId());
-      }
+      idEntryMap.remove(entry.getId());
     } finally {
       writeLock.unlock();
     }
@@ -558,11 +685,11 @@ public class NoteBook implements Comparable<NoteBook> {
    * @return the {@link NoteBookEntry} for the id.
    */
   public Optional<NoteBookEntry> getById(UUID id) {
+    Objects.requireNonNull(id, "id passed to getById must no tbe null");
     readLock.lock();
-
     try {
       if (idEntryMap.containsKey(id)) {
-        return Optional.of(idEntryMap.get(id));
+        return Optional.of(idEntryMap.get(id).getEntry());
       } else {
         return Optional.empty();
       }
@@ -582,6 +709,7 @@ public class NoteBook implements Comparable<NoteBook> {
    *     off a property change event as the changes are not visible to anyone.
    */
   public void zoneAdded(GUID zoneId) {
+    Objects.requireNonNull(zoneId, "zoneId passed to zoneAdded cannot be null");
     writeLock.lock();
     try {
       /*

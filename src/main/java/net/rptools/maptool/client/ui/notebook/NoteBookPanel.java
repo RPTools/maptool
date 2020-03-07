@@ -154,9 +154,11 @@ public class NoteBookPanel extends JFXPanel {
           TableTreeItemHolder holder = cellDataFeatures.getValue().getValue();
           if (holder instanceof NoteBookEntryTreeItem) {
             var entry = (NoteBookEntryTreeItem) holder;
-            if (entry.getEntry().getReference().isPresent()) {
+            /* TODO: CDW if (entry.getEntry().getReference().isPresent()) {
               return new SimpleStringProperty(entry.getEntry().getReference().get());
             }
+
+             */
           }
           return new SimpleStringProperty("");
         });
@@ -225,10 +227,12 @@ public class NoteBookPanel extends JFXPanel {
           () -> {
             NoteBookTableTreeModel oldNoteBookTableTreeModel = noteBookTableTreeModel;
 
+            /* TODO: CDW
             noteBookTableTreeModel =
-                NoteBookTableTreeModel.getTreeModelFor(newCampaign.getNotebook());
+                NoteBookTableTreeModel.getTreeModelFor(newCampaign.getNoteBookManager());
             notebookTable.setRoot(noteBookTableTreeModel.getRoot());
             notebookTable.refresh();
+             */
 
             /*if (oldNoteBookTableTreeModel != null) {
               oldNoteBookTableTreeModel.dispose();

@@ -3,6 +3,7 @@ package net.rptools.maptool.model.notebook.entry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -42,18 +43,18 @@ public final class DirectoryEntry extends AbstractNoteBookEntry implements NoteB
   }
 
   @Override
-  public void setName(String name) {
-    super.setName(name);
+  public NoteBookEntry setName(String name) {
+    Objects.requireNonNull(name, "Name passed to setName cannot be null");
+    if (name.equals(getName())) {
+      return this;
+    } else {
+      return new DirectoryEntry(getId(), name);
+    }
   }
 
   @Override
-  public void setZoneId(GUID zoneId) {
-    super.setZoneId(zoneId);
-  }
-
-  @Override
-  public EntryZoneRequirements getZoneRequirements() {
-    return super.getZoneRequirements();
+  public NoteBookEntry setZoneId(GUID zoneId) {
+    return this; // Zone can never change as its ignored for directories.
   }
 
   /**

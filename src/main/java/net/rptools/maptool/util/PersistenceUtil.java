@@ -312,9 +312,11 @@ public class PersistenceUtil {
         }
 
         if (campaignVersion == null || campaignVersion.startsWith("1.6")) {
-          saveTimer.start("Save NoteBook");
-          saveNoteBook(pakFile, persistedCampaign.campaign.getNotebook());
-          saveTimer.stop("Save NoteBook");
+          saveTimer.start("Save NoteBooks");
+          for (NoteBook noteBook : persistedCampaign.campaign.getNoteBookManager().getNoteBooks()) {
+            saveNoteBook(pakFile, noteBook);
+          }
+          saveTimer.stop("Save NoteBooks");
         }
 
         saveTimer.stop("Set content");
@@ -475,9 +477,11 @@ public class PersistenceUtil {
           zone.optimize();
         }
 
-        NoteBook noteBook = persistedCampaign.campaign.getNotebook();
+        /* TODO: CDW:
+        NoteBook noteBook = persistedCampaign.campaign.getNoteBookManager();
 
         loadNoteBook(pakFile, noteBook);
+         */
 
         // for (Entry<String, Map<GUID, LightSource>> entry :
         // persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
@@ -524,7 +528,7 @@ public class PersistenceUtil {
     for (var noteFile : noteFiles) {
       String asString = IOUtils.toString(packedFile.getFileAsReader(noteFile));
       NoteBookEntry entry = nbePersistenceUtil.fromString(asString);
-      noteBook.putEntry(entry);
+      noteBook.putEntry("", entry); // TODO: CDW:
       allAssetIds.addAll(entry.getAssetKeys());
     }
 

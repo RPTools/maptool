@@ -23,8 +23,6 @@ import java.util.UUID;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
-import net.rptools.maptool.model.notebook.entry.NoteBuilder;
 
 /** A {@link NoteBookEntry} that contains nothing but notes. */
 public class Note extends AbstractNoteBookEntry {
@@ -78,6 +76,28 @@ public class Note extends AbstractNoteBookEntry {
    */
   public synchronized Optional<MD5Key> getNotesKey() {
     return  Optional.ofNullable(notesKey);
+  }
+
+  @Override
+  public NoteBookEntry setName(String name) {
+    if (name.equals(getName())) {
+      return this;
+    } else {
+      if (getZoneId().isPresent()) {
+        return new Note(getId(), name, getZoneId().get(), notesKey);
+      } else {
+        return new Note(getId(), name, null, notesKey);
+      }
+    }
+  }
+
+  @Override
+  public NoteBookEntry setZoneId(GUID id) {
+    if (zoneWouldChange(id)) {
+      return new Note(getId(), getName(), id, notesKey);
+    } else {
+      return this;
+    }
   }
 
   @Override

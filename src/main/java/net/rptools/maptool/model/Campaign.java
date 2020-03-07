@@ -38,7 +38,7 @@ import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.model.notebook.NoteBook;
-import net.rptools.maptool.model.notebook.entry.MapBookmark;
+import net.rptools.maptool.model.notebook.NoteBookManager;
 
 /**
  * This object contains {@link Zone}s and {@link Asset}s that make up a campaign as well as links to
@@ -101,7 +101,7 @@ public class Campaign {
    * The {@link NoteBook} manages all the {@link MapBookmark}s
    * for the campaign.
    */
-  private final transient NoteBook notebook;
+  private final transient NoteBookManager noteBookManager;
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
@@ -127,7 +127,7 @@ public class Campaign {
     macroButtonProperties = new ArrayList<MacroButtonProperties>();
     gmMacroButtonProperties = new ArrayList<MacroButtonProperties>();
     zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
-    notebook = new NoteBook();
+    noteBookManager = new NoteBookManager();
   }
 
   private void checkCampaignPropertyConversion() {
@@ -166,7 +166,7 @@ public class Campaign {
     name = campaign.getName();
     zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
 
-    notebook = new NoteBook();
+    noteBookManager = new NoteBookManager();
 
     /*
      * Don't forget that since these are new zones AND new tokens created here from the old one,
@@ -181,7 +181,7 @@ public class Campaign {
     for (Entry<GUID, Zone> entry : zonesToCopy.entrySet()) {
       Zone copy = new Zone(entry.getValue(), true);
       zones.put(copy.getId(), copy);
-      notebook.zoneAdded(campaign.getId());
+      // TODO: CDW: noteBookManager.zoneAdded(campaign.getId());
     }
 
     campaignProperties = new CampaignProperties(campaign.campaignProperties);
@@ -395,7 +395,7 @@ public class Campaign {
    */
   public void putZone(Zone zone) {
     zones.put(zone.getId(), zone);
-    notebook.zoneAdded(zone.getId());
+    // TODO: CDW: noteBookManager.zoneAdded(zone.getId());
   }
 
   public void removeAllZones() {
@@ -403,7 +403,7 @@ public class Campaign {
     zones.clear();
 
     for (GUID zid : removedZoneIds) {
-      notebook.zoneRemoved(zid);
+      // TODO: CDW: noteBookManager.zoneRemoved(zid);
     }
   }
 
@@ -414,7 +414,7 @@ public class Campaign {
    */
   public void removeZone(GUID id) {
     zones.remove(id);
-    notebook.zoneRemoved(id);
+    // TODO: CDW: noteBookManager.zoneRemoved(id);
   }
 
   public boolean containsAsset(Asset asset) {
@@ -715,11 +715,11 @@ public class Campaign {
   }
 
   /**
-   * Returns the {@link NoteBook} for the {@code Campaign}.
+   * Returns the {@link NoteBookManager} for the {@code Campaign}.
    *
-   * @return the {@link NoteBook} for the {@code Campaign}.
+   * @return the {@link NoteBookManager} for the {@code Campaign}.
    */
-  public NoteBook getNotebook() {
-    return notebook;
+  public NoteBookManager getNoteBookManager() {
+    return noteBookManager;
   }
 }

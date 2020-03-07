@@ -101,9 +101,12 @@ public class NoteBookUI {
           () -> {
             NoteBookTableTreeModel oldNoteBookTableTreeModel = noteBookTableTreeModel;
 
+            /* TODO: CDW
             noteBookTableTreeModel =
-                NoteBookTableTreeModel.getTreeModelFor(newCampaign.getNotebook());
+                NoteBookTableTreeModel.getTreeModelFor(newCampaign.getNoteBookManager());
             controller.setTreeRoot(noteBookTableTreeModel.getRoot());
+
+             */
           });
     }
   }
