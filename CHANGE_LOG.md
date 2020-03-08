@@ -1,13 +1,18 @@
 Maptool 1.6.0
 =====
-**Highlights**
+Lots of enhancements, bug fixes and improvements to the code base.
+
+**Some Highlights**
 - New dialog and frame functions support HTML5, JavaScript and CSS.
 - Movement Blocking Layer - Now you can make those Force Fields that would block movement but not sight.
 - Look & Feel themes can now be selected from the Themes menu.  More enhancements to come.
 - Pre-defined Campaign Property sets can now be selected and loaded in the Campaign Properties dialog.
+- New Marker assets added to Default in the Resource Library - Use Restore Default Images in the Help menu to get them.
 - The annoying behavior where browsing for a drawing texture would cause the Resource Library to also change folders has been fixed!
 
 **Enhancements**
+- [#1363][i1363] New and updated Marker assets in the Default Resource Library
+- [#1337][i1337] _Pick Once_ support added to Tables. Currently uses macro functions to set/reset the tables.  GUI support to come.
 - [#1323][i1323] New menu item, Frameworks, in Help menu opens default browser to [Frameworks](http://www.lmwcs.com/rptools/wiki/Frameworks) page on wiki.
 - [#1320][i1320] Downloadable artpacks in the Add Resource to Library dialog are now sorted by name.
 - [#1313][i1313] Gather Debug Information window (Help MenU) refactored. Window opens immediately with note that data collection is in progress and then updates once data has been collected.
@@ -55,6 +60,7 @@ Maptool 1.6.0
 - [#1215][i1215] Replaced calls to deprecated IOUtils.closeQuietly() with try-with-resource.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
+[i1363]: https://github.com/RPTools/maptool-resources/issues/2
 [i1355]: https://github.com/RPTools/maptool/issues/1355
 [i1352]: https://github.com/RPTools/maptool/issues/1352
 [i1325]: https://github.com/RPTools/maptool/issues/1325
@@ -65,6 +71,7 @@ Maptool 1.6.0
 [i1300]: https://github.com/RPTools/maptool/issues/1300
 [i1292]: https://github.com/RPTools/maptool/issues/1292
 [i1288]: https://github.com/RPTools/maptool/issues/1288
+[i1284]: https://github.com/RPTools/maptool/issues/1284
 [i1278]: https://github.com/RPTools/maptool/issues/1278
 [i1271]: https://github.com/RPTools/maptool/issues/1271
 [i1270]: https://github.com/RPTools/maptool/issues/1270
