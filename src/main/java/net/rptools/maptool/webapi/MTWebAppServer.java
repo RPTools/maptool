@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.webapi;
 
+import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -24,7 +25,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.sf.json.JSONObject;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -164,7 +164,7 @@ public class MTWebAppServer {
         new Runnable() {
           @Override
           public void run() {
-            JSONObject data = new JSONObject();
+            JsonObject data = new JsonObject();
             MTWebClientManager.getInstance().sendToAllSessions("keepalive", data);
           }
         },

@@ -14,16 +14,17 @@
  */
 package net.rptools.maptool.webapi;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.*;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public class WebTokenInfo {
 
@@ -72,28 +73,28 @@ public class WebTokenInfo {
   }
 
   private void tokenChanged(Token token) {
-    JSONObject jobj = new JSONObject();
-    JSONArray tokenArray = new JSONArray();
+    JsonObject jobj = new JsonObject();
+    JsonArray tokenArray = new JsonArray();
     tokenArray.add(token.getId().toString());
-    jobj.put("tokensChanged", tokenArray);
+    jobj.add("tokensChanged", tokenArray);
 
     MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
   }
 
   private void tokenAdded(Token token) {
-    JSONObject jobj = new JSONObject();
-    JSONArray tokenArray = new JSONArray();
+    JsonObject jobj = new JsonObject();
+    JsonArray tokenArray = new JsonArray();
     tokenArray.add(token.getId().toString());
-    jobj.put("tokensAdded", tokenArray);
+    jobj.add("tokensAdded", tokenArray);
 
     MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
   }
 
   private void tokenRemoved(Token token) {
-    JSONObject jobj = new JSONObject();
-    JSONArray tokenArray = new JSONArray();
+    JsonObject jobj = new JsonObject();
+    JsonArray tokenArray = new JsonArray();
     tokenArray.add(token.getId().toString());
-    jobj.put("tokensRemoved", tokenArray);
+    jobj.add("tokensRemoved", tokenArray);
 
     MTWebClientManager.getInstance().sendToAllSessions("token-update", jobj);
   }
@@ -142,9 +143,9 @@ public class WebTokenInfo {
     return null;
   }
 
-  void sendTokenInfo(MTWebSocket mtws, String inResponseTo, JSONObject data) {
+  void sendTokenInfo(MTWebSocket mtws, String inResponseTo, JsonObject data) {
 
-    if (data.containsKey("propertyNames")) {
+    if (data.has("propertyNames")) {
       sendTokenProperties(mtws, inResponseTo, data);
     } else {
       sendTokenRegisterdProperties(mtws, inResponseTo, data);
@@ -163,8 +164,8 @@ public class WebTokenInfo {
     return "";
   }
 
-  void sendTokenProperties(MTWebSocket mtws, String inResponseTo, JSONObject data) {
-    String tokenId = data.getString("tokenId");
+  void sendTokenProperties(MTWebSocket mtws, String inResponseTo, JsonObject data) {
+    String tokenId = data.get("tokenId").getAsString();
     Token token = findTokenFromId(tokenId);
 
     if (token == null) {
@@ -173,15 +174,15 @@ public class WebTokenInfo {
       // FIXME: log this error
     }
 
-    JSONObject jobj = new JSONObject();
-    jobj.put("tokenId", tokenId);
+    JsonObject jobj = new JsonObject();
+    jobj.addProperty("tokenId", tokenId);
 
-    JSONArray properties = new JSONArray();
-    JSONObject propertiesMap = new JSONObject();
+    JsonArray properties = new JsonArray();
+    JsonObject propertiesMap = new JsonObject();
 
-    JSONArray propToFetch = data.getJSONArray("propertyNames");
+    JsonArray propToFetch = data.get("propertyNames").getAsJsonArray();
     for (int i = 0; i < propToFetch.size(); i++) {
-      String pname = propToFetch.getString(i);
+      String pname = propToFetch.get(i).getAsString();
       String val;
       if (pname.startsWith(":")) {
         val = getTokenValue(token, pname);
@@ -189,21 +190,21 @@ public class WebTokenInfo {
 
         val = token.getProperty(pname) == null ? null : token.getProperty(pname).toString();
       }
-      JSONObject jprop = new JSONObject();
-      jprop.put("name", pname);
-      jprop.put("value", val);
+      JsonObject jprop = new JsonObject();
+      jprop.addProperty("name", pname);
+      jprop.addProperty("value", val);
       properties.add(jprop);
-      propertiesMap.put(pname, val);
+      propertiesMap.addProperty(pname, val);
     }
 
-    jobj.put("properties", properties);
-    jobj.put("propertiesMap", propertiesMap);
+    jobj.add("properties", properties);
+    jobj.add("propertiesMap", propertiesMap);
 
     mtws.sendMessage("tokenProperties", inResponseTo, jobj);
   }
 
-  void sendTokenRegisterdProperties(MTWebSocket mtws, String inResponseTo, JSONObject data) {
-    String tokenId = data.getString("tokenId");
+  void sendTokenRegisterdProperties(MTWebSocket mtws, String inResponseTo, JsonObject data) {
+    String tokenId = data.get("tokenId").getAsString();
     Token token = findTokenFromId(tokenId);
 
     if (token == null) {
@@ -212,68 +213,74 @@ public class WebTokenInfo {
       // FIXME: log this error
     }
 
-    JSONObject jobj = new JSONObject();
-    jobj.put("tokenId", tokenId);
-    jobj.put("name", token.getName());
-    jobj.put("label", token.getLabel());
-    jobj.put("notes", token.getNotes());
-
-    JSONObject jprop = new JSONObject();
-
-    for (TokenProperty tp : MapTool.getCampaign().getTokenPropertyList(token.getPropertyType())) {
-      JSONObject jp = new JSONObject();
-      jp.put("name", tp.getName());
-      if (tp.getShortName() != null) {
-        jp.put("shortName", tp.getShortName());
-      }
-      if (tp.getDefaultValue() != null) {
-        jp.put("defaultValue", tp.getDefaultValue());
-      }
-      jp.put("value", token.getProperty(tp.getName()));
-      jp.put("showOnStatSheet", tp.isShowOnStatSheet());
-
-      jprop.put(tp.getName(), jp);
+    JsonObject jobj = new JsonObject();
+    jobj.addProperty("tokenId", tokenId);
+    jobj.addProperty("name", token.getName());
+    if (token.getLabel() != null) {
+      jobj.addProperty("label", token.getLabel());
+    }
+    if (token.getNotes() != null) {
+      jobj.addProperty("notes", token.getNotes());
     }
 
-    jobj.put("properties", jprop);
+    JsonObject jprop = new JsonObject();
 
-    JSONArray jmacros = new JSONArray();
+    for (TokenProperty tp : MapTool.getCampaign().getTokenPropertyList(token.getPropertyType())) {
+      JsonObject jp = new JsonObject();
+      jp.addProperty("name", tp.getName());
+      if (tp.getShortName() != null) {
+        jp.addProperty("shortName", tp.getShortName());
+      }
+      if (tp.getDefaultValue() != null) {
+        jp.addProperty("defaultValue", tp.getDefaultValue());
+      }
+      Object property = token.getProperty(tp.getName());
+      if (property != null) {
+        jp.add("value", JSONMacroFunctions.getInstance().asJsonElement(property));
+      }
+      jp.addProperty("showOnStatSheet", tp.isShowOnStatSheet());
+
+      jprop.add(tp.getName(), jp);
+    }
+
+    jobj.add("properties", jprop);
+
+    JsonArray jmacros = new JsonArray();
 
     for (MacroButtonProperties macro : token.getMacroList(false)) {
-      JSONObject jmb = new JSONObject();
-      jmb.put("label", macro.getLabel());
-      jmb.put("tooltip", macro.getEvaluatedToolTip());
-      jmb.put("index", macro.getIndex());
-      jmb.put("fontColor", macro.getFontColorAsHtml());
-      jmb.put("displayGroup", macro.getGroupForDisplay());
-      jmb.put("group", macro.getGroup());
-      jmb.put("index", macro.getIndex());
-      jmb.put("autoExecute", macro.getAutoExecute());
-      jmb.put("maxWidth", macro.getMaxWidth());
-      jmb.put("minWidth", macro.getMinWidth());
-      jmb.put("applyToTokens", macro.getApplyToTokens());
+      JsonObject jmb = new JsonObject();
+      jmb.addProperty("label", macro.getLabel());
+      jmb.addProperty("tooltip", macro.getEvaluatedToolTip());
+      jmb.addProperty("index", macro.getIndex());
+      jmb.addProperty("fontColor", macro.getFontColorAsHtml());
+      jmb.addProperty("displayGroup", macro.getGroupForDisplay());
+      jmb.addProperty("group", macro.getGroup());
+      jmb.addProperty("autoExecute", macro.getAutoExecute());
+      jmb.addProperty("maxWidth", macro.getMaxWidth());
+      jmb.addProperty("minWidth", macro.getMinWidth());
+      jmb.addProperty("applyToTokens", macro.getApplyToTokens());
 
       jmacros.add(jmb);
     }
 
-    jobj.put("macros", jmacros);
+    jobj.add("macros", jmacros);
 
     mtws.sendMessage("tokenInfo", inResponseTo, jobj);
   }
 
-  void processMacro(JSONObject data) {
+  void processMacro(JsonObject data) {
     // FIXME: need to check parameters.
     // FIXME: need to check permissions.
-    if ("callMacro".equalsIgnoreCase(data.getString("command"))) {
-      Token token = findTokenFromId(data.getString("tokenId"));
+    if ("callMacro".equalsIgnoreCase(data.get("command").getAsString())) {
+      Token token = findTokenFromId(data.get("tokenId").getAsString());
 
-      MacroButtonProperties macro = token.getMacro(data.getInt("macroIndex"), false);
+      MacroButtonProperties macro = token.getMacro(data.get("macroIndex").getAsInt(), false);
       macro.executeMacro(token.getId());
     }
   }
 
-  void processSetProperties(JSONObject data) {
-    final String tokenId = data.getString("tokenId");
+  void processSetProperties(JsonObject data) {
+    final String tokenId = data.get("tokenId").getAsString();
     final Token token = findTokenFromId(tokenId);
     final Zone zone = findZoneTokenIsOn(token);
 
@@ -283,7 +290,7 @@ public class WebTokenInfo {
       // FIXME: log this error
     }
 
-    final JSONObject props = data.getJSONObject("properties");
+    final JsonObject props = data.get("properties").getAsJsonObject();
     EventQueue.invokeLater(
         new Runnable() {
           @SuppressWarnings("unchecked")
@@ -291,7 +298,7 @@ public class WebTokenInfo {
           public void run() {
             Set<String> pnames = props.keySet();
             for (String pname : pnames) {
-              String val = props.getString(pname);
+              String val = props.get(pname).getAsString();
               token.setProperty(pname, val);
             }
 
