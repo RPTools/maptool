@@ -24,8 +24,8 @@
     </at>
     <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
    </super>
-   <at name="id">C:\code\rptools\mtfx\maptool\src\main\resources\net\rptools\maptool\client\ui\forms\campaignPropertiesDialog.xml</at>
-   <at name="path">campaignPropertiesDialog.xml</at>
+   <at name="id">C:\Users\Asus\IdeaProjects\maptool\src\main\resources\net\rptools\maptool\client\ui\forms\campaignPropertiesDialog.xml</at>
+   <at name="path">resources\net\rptools\maptool\client\ui\forms\campaignPropertiesDialog.xml</at>
    <at name="rowspecs">CENTER:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
    <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
    <at name="components">
@@ -75,7 +75,6 @@
              </object>
             </at>
             <at name="componentCount">6</at>
-            <at name="name"></at>
             <at name="tabs">
              <object classname="com.jeta.forms.store.properties.TabbedPaneProperties">
               <at name="name">tabs</at>
@@ -109,7 +108,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1939622216</at>
+                     <at name="id">embedded.1607639455</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -166,7 +165,7 @@
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="height">936</at>
+                              <at name="height">662</at>
                              </object>
                             </at>
                            </object>
@@ -292,7 +291,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.726173673</at>
+                     <at name="id">embedded.159320595</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -487,7 +486,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="height">892</at>
+                              <at name="height">618</at>
                              </object>
                             </at>
                            </object>
@@ -512,7 +511,7 @@
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.2044594169</at>
+                          <at name="id">embedded.803986019</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -672,7 +671,7 @@
                            </at>
                           </object>
                          </at>
-                         <at name="name"></at>
+                         <at name="name"/>
                          <at name="fill">
                           <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                            <at name="name">fill</at>
@@ -779,7 +778,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1007760175</at>
+                     <at name="id">embedded.1413679336</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -859,7 +858,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="height">732</at>
+                              <at name="height">458</at>
                              </object>
                             </at>
                            </object>
@@ -911,8 +910,8 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="name"></at>
                               <at name="width">1368</at>
+                              <at name="name"/>
                               <at name="text">&lt;html&gt;&lt;b&gt;Format:&lt;/b&gt; &amp;nbsp&amp;nbsp&amp;nbsp;Name : options &lt;p&gt;&lt;p&gt; Each sight type can have zero or more options,  use spaces between each option.  Having zero options implies using defaults for all values (e.g. Normal vision).&lt;p&gt;&lt;p&gt; &lt;b&gt;  Options:&lt;/b&gt; &lt;p&gt;&lt;p&gt;  shape - shape may be circle, square, hex, grid or cone&lt;br&gt; distance=y - Distance is the range at which this vision type ends.  Can be a decimal value. Ex: distance=10&lt;br&gt; scale - An optional keyword that adds the token&apos;s footprint (size) to the distance so vision starts at token&apos;s edge vs the token&apos;s center&lt;br&gt; arc=y -  When used with the cone shape, it signifies how large a field of vision the token has.  Can be an interger value. Ex: arc=120&lt;br&gt; offset=y -  When used with the cone shape, it signifies how much offest the cone begins from the center of the tokens facing.  Can be an interger value. Ex: offset=120&lt;br&gt; x# - Maginifier, multiplies each light source radius by this value.  Can be a decimal value.  Ex: x2&lt;br&gt;  r# - Range of personal light.  You can define multiple personal lights per sight type. Can have an optional #rrggbb hex color component appended to it as per typical CSS rules. The token will have a light source centered on them that only they can see with a radius of this value.  Ex: r60&lt;br&gt;   </at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -1051,7 +1050,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1294349242</at>
+                     <at name="id">embedded.1836184281</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:GROW(1.0),CENTER:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -1132,7 +1131,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="height">490</at>
+                              <at name="height">353</at>
                              </object>
                             </at>
                            </object>
@@ -1490,7 +1489,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.627221139</at>
+                     <at name="id">embedded.1889840197</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,FILL:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:DEFAULT:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:25PX:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:50PX:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:50PX:NONE,FILL:0PX:GROW(1.0),FILL:4DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -2142,7 +2141,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                </object>
                               </at>
                               <at name="selectionMode">0</at>
-                              <at name="height">699</at>
+                              <at name="height">425</at>
                              </object>
                             </at>
                            </object>
@@ -2992,7 +2991,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.1627780194</at>
+                          <at name="id">embedded.1944230471</at>
                           <at name="rowspecs">TOP:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -3400,7 +3399,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.699655277</at>
+                          <at name="id">embedded.1150262522</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:0PX:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:4DLU:NONE,FILL:0PX:GROW(1.0)</at>
                           <at name="components">
@@ -3672,7 +3671,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.640922562</at>
+                          <at name="id">embedded.1197392534</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -3694,7 +3693,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.1928485630</at>
+                               <at name="id">embedded.1162180396</at>
                                <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:8DLU:NONE,FILL:DEFAULT:NONE,FILL:8DLU:NONE,FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -4200,7 +4199,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1867346761</at>
+                     <at name="id">embedded.522777539</at>
                      <at name="rowspecs">FILL:DEFAULT:GROW(1.0)</at>
                      <at name="colspecs">FILL:DEFAULT:GROW(1.0)</at>
                      <at name="components">
@@ -4222,7 +4221,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                            </at>
                            <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                           </super>
-                          <at name="id">embedded.98702567</at>
+                          <at name="id">embedded.1389578866</at>
                           <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:2DLU:NONE,FILL:DEFAULT:NONE,CENTER:4DLU:NONE,FILL:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE</at>
                           <at name="colspecs">FILL:DEFAULT:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:DEFAULT:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:25PX:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:50PX:NONE,FILL:8DLU:NONE,RIGHT:DEFAULT:NONE,FILL:4DLU:NONE,FILL:50PX:NONE,FILL:0PX:GROW(1.0),FILL:4DLU:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                           <at name="components">
@@ -5451,7 +5450,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.266361982</at>
+                               <at name="id">embedded.2114975722</at>
                                <at name="rowspecs">TOP:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -5859,7 +5858,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.766398237</at>
+                               <at name="id">embedded.1767394760</at>
                                <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:0PX:GROW(1.0)</at>
                                <at name="components">
@@ -6017,7 +6016,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.49228292</at>
+                               <at name="id">embedded.874910301</at>
                                <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -6039,7 +6038,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                      </at>
                                      <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                     </super>
-                                    <at name="id">embedded.1781579884</at>
+                                    <at name="id">embedded.1982177065</at>
                                     <at name="rowspecs">CENTER:DEFAULT:NONE</at>
                                     <at name="colspecs">FILL:DEFAULT:NONE,FILL:8DLU:NONE,FILL:DEFAULT:NONE,FILL:8DLU:NONE,FILL:DEFAULT:NONE</at>
                                     <at name="components">
@@ -6417,7 +6416,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.600138166</at>
+                               <at name="id">embedded.927953317</at>
                                <at name="rowspecs">TOP:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE,CENTER:4DLU:NONE,CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE</at>
                                <at name="components">
@@ -6825,7 +6824,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                 </at>
                                 <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                                </super>
-                               <at name="id">embedded.596928333</at>
+                               <at name="id">embedded.475743017</at>
                                <at name="rowspecs">FILL:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE</at>
                                <at name="colspecs">FILL:DEFAULT:NONE,FILL:4DLU:NONE,FILL:DEFAULT:GROW(1.0)</at>
                                <at name="components">
@@ -6912,7 +6911,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                          </object>
                                         </at>
                                         <at name="selectionMode">0</at>
-                                        <at name="height">490</at>
+                                        <at name="height">216</at>
                                        </object>
                                       </at>
                                      </object>
@@ -6970,7 +6969,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="name">tokenBarTest</at>
                                         <at name="width">47</at>
                                         <at name="majorTickSpacing">20</at>
-                                        <at name="height">474</at>
+                                        <at name="height">200</at>
                                        </object>
                                       </at>
                                      </object>
@@ -7328,8 +7327,9 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
              </object>
             </at>
             <at name="width">1431</at>
+            <at name="name"/>
             <at name="tabCount">6</at>
-            <at name="height">1044</at>
+            <at name="height">770</at>
            </object>
           </at>
          </object>
@@ -7354,9 +7354,9 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.968023958</at>
+        <at name="id">embedded.178851090</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE</at>
-        <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
+        <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
         <at name="components">
          <object classname="java.util.LinkedList">
           <item >
@@ -7365,7 +7365,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
              <super classname="com.jeta.forms.store.memento.ComponentMemento">
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
-                <at name="column">5</at>
+                <at name="column">9</at>
                 <at name="row">1</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
@@ -7421,7 +7421,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
              <super classname="com.jeta.forms.store.memento.ComponentMemento">
               <at name="cellconstraints">
                <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
-                <at name="column">7</at>
+                <at name="column">11</at>
                 <at name="row">1</at>
                 <at name="colspan">1</at>
                 <at name="rowspan">1</at>
@@ -7583,6 +7583,121 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
             </object>
            </at>
           </item>
+          <item >
+           <at name="value">
+            <object classname="com.jeta.forms.store.memento.BeanMemento">
+             <super classname="com.jeta.forms.store.memento.ComponentMemento">
+              <at name="cellconstraints">
+               <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                <at name="column">5</at>
+                <at name="row">1</at>
+                <at name="colspan">1</at>
+                <at name="rowspan">1</at>
+                <at name="halign">default</at>
+                <at name="valign">default</at>
+                <at name="insets" object="insets">0,0,0,0</at>
+               </object>
+              </at>
+              <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+             </super>
+             <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+             <at name="beanclass">javax.swing.JButton</at>
+             <at name="beanproperties">
+              <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+               <at name="classname">javax.swing.JButton</at>
+               <at name="properties">
+                <object classname="com.jeta.forms.store.support.PropertyMap">
+                 <at name="border">
+                  <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                   <super classname="com.jeta.forms.store.properties.BorderProperty">
+                    <at name="name">border</at>
+                   </super>
+                   <at name="borders">
+                    <object classname="java.util.LinkedList">
+                     <item >
+                      <at name="value">
+                       <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                        <super classname="com.jeta.forms.store.properties.BorderProperty">
+                         <at name="name">border</at>
+                        </super>
+                       </object>
+                      </at>
+                     </item>
+                    </object>
+                   </at>
+                  </object>
+                 </at>
+                 <at name="actionCommand">Import predefined</at>
+                 <at name="name">importPredefinedButton</at>
+                 <at name="width">119</at>
+                 <at name="text">Import predefined</at>
+                 <at name="height">22</at>
+                </object>
+               </at>
+              </object>
+             </at>
+            </object>
+           </at>
+          </item>
+          <item >
+           <at name="value">
+            <object classname="com.jeta.forms.store.memento.BeanMemento">
+             <super classname="com.jeta.forms.store.memento.ComponentMemento">
+              <at name="cellconstraints">
+               <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                <at name="column">7</at>
+                <at name="row">1</at>
+                <at name="colspan">1</at>
+                <at name="rowspan">1</at>
+                <at name="halign">default</at>
+                <at name="valign">default</at>
+                <at name="insets" object="insets">0,0,0,0</at>
+               </object>
+              </at>
+              <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+             </super>
+             <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+             <at name="beanclass">javax.swing.JComboBox</at>
+             <at name="beanproperties">
+              <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+               <at name="classname">javax.swing.JComboBox</at>
+               <at name="properties">
+                <object classname="com.jeta.forms.store.support.PropertyMap">
+                 <at name="border">
+                  <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                   <super classname="com.jeta.forms.store.properties.BorderProperty">
+                    <at name="name">border</at>
+                   </super>
+                   <at name="borders">
+                    <object classname="java.util.LinkedList">
+                     <item >
+                      <at name="value">
+                       <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                        <super classname="com.jeta.forms.store.properties.BorderProperty">
+                         <at name="name">border</at>
+                        </super>
+                       </object>
+                      </at>
+                     </item>
+                    </object>
+                   </at>
+                  </object>
+                 </at>
+                 <at name="name">predefinedPropertiesComboBox</at>
+                 <at name="width">25</at>
+                 <at name="items">
+                  <object classname="com.jeta.forms.store.properties.ItemsProperty">
+                   <at name="name">items</at>
+                  </object>
+                 </at>
+                 <at name="height">20</at>
+                </object>
+               </at>
+              </object>
+             </at>
+            </object>
+           </at>
+          </item>
          </object>
         </at>
         <at name="properties">
@@ -7642,7 +7757,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
           <at name="rows">
            <object classname="[Ljava.lang.Object;" size="1">
             <at name="item" index="0">
-             <object classname="[Ljava.lang.Object;" size="7"/>
+             <object classname="[Ljava.lang.Object;" size="11"/>
             </at>
            </object>
           </at>

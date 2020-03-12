@@ -298,17 +298,13 @@ public final class ExtractImagesFromPDF {
       imageTracker.add(md5Key.toString());
     }
 
-    FileOutputStream out = null;
-    File fileCheck = null;
-    try {
-      fileCheck = new File(filename);
-      if (fileCheck.exists()) {
-        filename += md5Key.toString() + "." + fileSuffix;
-        return;
-      }
+    File fileCheck = new File(filename);
+    if (fileCheck.exists()) {
+      filename += md5Key.toString() + "." + fileSuffix;
+      return;
+    }
 
-      out = new FileOutputStream(filename);
-
+    try (FileOutputStream out = new FileOutputStream(filename)) {
       if (image != null) {
         if (pdfSuffix.equalsIgnoreCase("jpg")) {
           String colorSpaceName = pdImage.getColorSpace().getName();
@@ -316,9 +312,9 @@ public final class ExtractImagesFromPDF {
               || PDDeviceGray.INSTANCE.getName().equals(colorSpaceName)
               || PDDeviceRGB.INSTANCE.getName().equals(colorSpaceName)) {
             // RGB or Gray colorspace: get and write the unmodifiedJPEG stream
-            InputStream data = pdImage.createInputStream(JPEG);
-            IOUtils.copy(data, out);
-            IOUtils.closeQuietly(data);
+            try (InputStream data = pdImage.createInputStream(JPEG)) {
+              IOUtils.copy(data, out);
+            }
           } else {
             // for CMYK and other "unusual" colorspaces, the JPEG will be converted
             ImageIO.write(image, fileSuffix, out);
@@ -333,10 +329,6 @@ public final class ExtractImagesFromPDF {
       image.flush();
     } catch (IOException e) {
       e.printStackTrace();
-    } finally {
-      if (out != null) {
-        out.close();
-      }
     }
   }
 }

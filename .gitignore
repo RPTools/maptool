@@ -46,3 +46,6 @@ workbench.xmi
 
 # Keystore
 build-resources/rptools-keystore
+/log.html
+/report.html
+/output.xml

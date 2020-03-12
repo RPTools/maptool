@@ -19,7 +19,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
+import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
@@ -52,6 +58,11 @@ public class AppUtil {
   /** Returns true if currently running on a Mac OS X based operating system. */
   public static boolean MAC_OS_X =
       (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
+
+  public static final String LOOK_AND_FEEL_NAME =
+      MAC_OS_X
+          ? "net.rptools.maptool.client.TinyLookAndFeelMac"
+          : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
 
   /**
    * Returns a File object for USER_HOME if USER_HOME is non-null, otherwise null.
@@ -160,8 +171,8 @@ public class AppUtil {
    * always returns true. If strict token management is disabled then this function always returns
    * true.
    *
-   * @param token
-   * @return true if the player owns the token
+   * @param token the {@link Token} to check the ownership of.
+   * @return {@code true} if the player owns the token, otherwise {@code false}.
    */
   public static boolean playerOwns(Token token) {
     Player player = MapTool.getPlayer();
@@ -178,8 +189,8 @@ public class AppUtil {
    * Returns true if the token is visible in the zone. If the view is the GM view then this function
    * always returns true.
    *
-   * @param token
-   * @return true if the GM "owns" the token
+   * @param token the {@link Token} to check if the GM owns.
+   * @return {@code true} if the GM "owns" the {@link Token}, otherwise {@code false}.
    */
   public static boolean gmOwns(Token token) {
     Player player = MapTool.getPlayer();
@@ -210,9 +221,10 @@ public class AppUtil {
    * Returns the disk spaced used in a given directory in a human readable format automatically
    * adjusting to kb/mb/gb etc.
    *
+   * @param directory the directory to retrieve the space used for.
    * @author Jamz
    * @since 1.4.0.1
-   * @return String of disk usage info
+   * @return String of disk usage information.
    */
   public static String getDiskSpaceUsed(File directory) {
     try {
@@ -228,8 +240,8 @@ public class AppUtil {
    * adjusting to kb/mb/gb etc.
    *
    * @author Jamz
-   * @since 1.4.0.1
-   * @param directory
+   * @since 1.4.0.
+   * @param directory the directory to retrieve the free space for.
    * @return String of free disk space
    */
   public static String getFreeDiskSpace(File directory) {
@@ -254,5 +266,64 @@ public class AppUtil {
       }
     }
     return clientId;
+  }
+
+  /**
+   * Returns the available theme files for the MapTool UI.
+   *
+   * @return the available theme files for the MapTool UI.
+   */
+  public static Map<String, File> getUIThemeNames() {
+    // Make sure there are themes installed
+    AppSetup.installDefaultUIThemes();
+
+    Path themesDir = AppConstants.UI_THEMES_DIR.toPath();
+
+    Map<String, File> themes = new TreeMap<>();
+    try (Stream<Path> walk = Files.walk(themesDir)) {
+      Set<Path> result =
+          walk.filter(f -> f.getFileName().toString().endsWith(".theme"))
+              .collect(Collectors.toSet());
+
+      for (Path path : result) {
+        String name =
+            path.getFileName().toString().replaceFirst("\\.theme$", "").replaceAll("_", " ");
+        themes.put(name, path.toFile());
+      }
+    } catch (IOException e) {
+      log.error("msg.error.unableToGetThemeList", e);
+    }
+
+    return themes;
+  }
+
+  /**
+   * Sets the name of the theme to use for the MapTool UI.
+   *
+   * @param themeName the name of the theme to use for the MapTool UI.
+   */
+  public static void setThemeName(String themeName) {
+    Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
+    prefs.put("themeName", themeName);
+  }
+
+  /**
+   * Returns the name of the theme to use for the MapTool UI.
+   *
+   * @return the name of the theme to use for the MapTool UI.
+   */
+  public static String getThemeName() {
+    Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
+    return prefs.get("themeName", AppConstants.DEFAULT_THEME_NAME);
+  }
+
+  /**
+   * Returns the file containing the theme settings for the specified theme name.
+   *
+   * @param themeName the name of the theme to retrieve the settings file for.
+   * @return the file containing the theme settings.
+   */
+  public static File getThemeFile(String themeName) {
+    return getUIThemeNames().get(themeName);
   }
 }

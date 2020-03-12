@@ -92,6 +92,7 @@ public class TokenInitFunction extends AbstractFunction {
    * @param state the initiative to assign to the token
    * @param token the token to add to the initiative
    * @return 1 if the token was added, 0 otherwise
+   * @throws ParserException when an error occurs.
    */
   public static BigDecimal addToInitiative(boolean allowDuplicates, String state, Token token)
       throws ParserException {

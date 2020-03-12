@@ -78,6 +78,7 @@ import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
 import net.rptools.maptool.client.ui.StartServerDialog;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.StaticMessageDialog;
+import net.rptools.maptool.client.ui.SysInfoDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
@@ -116,7 +117,6 @@ import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
 import net.rptools.maptool.util.PersistenceUtil.PersistedMap;
-import net.rptools.maptool.util.SysInfo;
 import net.rptools.maptool.util.UPnPUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -835,8 +835,8 @@ public class AppActions {
    *
    * <p>If any tokens<i>are</i> deleted, then the selection set for the zone is cleared.
    *
-   * @param zone
-   * @param tokenSet
+   * @param zone the {@link Zone} the tokens belong to.
+   * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
    */
   public static final void cutTokens(Zone zone, Set<GUID> tokenSet) {
     // Only cut if some tokens are selected. Don't want to accidentally
@@ -1378,6 +1378,26 @@ public class AppActions {
         protected void executeAction(ActionEvent e) {
           AppState.setLoggingToConsole(!AppState.isLoggingToConsole());
           MapTool.getLogConsoleNoteFrame().setVisible(AppState.isLoggingToConsole());
+        }
+      };
+  public static final Action TOGGLE_SHOW_TEXT_LABELS =
+      new DefaultClientAction() {
+        {
+          init("action.showTextLabels");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.getShowTextLabels();
+        }
+
+        @Override
+        protected void executeAction(ActionEvent e) {
+
+          AppState.setShowTextLabels(!AppState.getShowTextLabels());
+          if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
+            MapTool.getFrame().getCurrentZoneRenderer().repaint();
+          }
         }
       };
 
@@ -2555,26 +2575,7 @@ public class AppActions {
 
     int saveStatus = chooser.showSaveDialog(MapTool.getFrame());
     if (saveStatus == JFileChooser.APPROVE_OPTION) {
-      File campaignFile = chooser.getSelectedFile();
-
-      if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
-        return;
-      }
-
-      String _extension = AppConstants.CAMPAIGN_FILE_EXTENSION;
-
-      if (!campaignFile.getName().toLowerCase().endsWith(_extension)) {
-        campaignFile = new File(campaignFile.getAbsolutePath() + _extension);
-      }
-
-      doSaveCampaign(campaign, campaignFile, callback);
-
-      AppState.setCampaignFile(campaignFile);
-      AppPreferences.setSaveDir(campaignFile.getParentFile());
-      AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
-      if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
-        MapTool.serverCommand().setCampaignName(AppState.getCampaignName());
-      }
+      saveAndUpdateCampaignName(callback, campaign, null, chooser.getSelectedFile());
     }
   }
 
@@ -2584,22 +2585,31 @@ public class AppActions {
     MapTool.getCampaign().setExportCampaignDialog(dialog);
 
     if (dialog.getSaveStatus() == JFileChooser.APPROVE_OPTION) {
-      Campaign campaign = MapTool.getCampaign();
-      File campaignFile = dialog.getCampaignFile();
-
-      if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
-        return;
-      }
-
-      doSaveCampaign(campaign, campaignFile, null, dialog.getVersionText());
-
-      AppState.setCampaignFile(campaignFile);
-      AppPreferences.setSaveDir(campaignFile.getParentFile());
-      AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
-      if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
-        MapTool.serverCommand().setCampaignName(AppState.getCampaignName());
-      }
+      saveAndUpdateCampaignName(
+          null, MapTool.getCampaign(), dialog.getVersionText(), dialog.getCampaignFile());
     }
+  }
+
+  private static void saveAndUpdateCampaignName(
+      Observer callback, Campaign campaign, String campaignVersion, File selectedFile) {
+    File campaignFile = getFileWithExtension(selectedFile, AppConstants.CAMPAIGN_FILE_EXTENSION);
+    if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
+      return;
+    }
+    doSaveCampaign(campaign, campaignFile, callback, campaignVersion);
+    AppState.setCampaignFile(campaignFile);
+    AppPreferences.setSaveDir(campaignFile.getParentFile());
+    AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
+    if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
+      MapTool.serverCommand().setCampaignName(AppState.getCampaignName());
+    }
+  }
+
+  private static File getFileWithExtension(File file, String extension) {
+    if (!file.getName().toLowerCase().endsWith(extension)) {
+      file = new File(file.getAbsolutePath() + extension);
+    }
+    return file;
   }
 
   public static final DeveloperClientAction SAVE_MAP_AS =
@@ -2626,9 +2636,7 @@ public class AppActions {
               File mapFile = chooser.getSelectedFile();
               // Jamz: Bug fix, would not add extension if map name had a . in it...
               // Lets do a better job and actually check the end of the file name for the extension
-              if (!mapFile.getName().toLowerCase().endsWith(AppConstants.MAP_FILE_EXTENSION)) {
-                mapFile = new File(mapFile.getAbsolutePath() + AppConstants.MAP_FILE_EXTENSION);
-              }
+              mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
               PersistenceUtil.saveMap(zr.getZone(), mapFile);
               AppPreferences.setSaveDir(mapFile.getParentFile());
               MapTool.showInformation("msg.info.mapSaved");
@@ -2960,7 +2968,7 @@ public class AppActions {
 
         @Override
         protected void executeAction(java.awt.event.ActionEvent e) {
-          SysInfo.createAndShowGUI((String) getValue(Action.NAME));
+          SysInfoDialog.createAndShowGUI((String) getValue(Action.NAME));
         }
       };
 

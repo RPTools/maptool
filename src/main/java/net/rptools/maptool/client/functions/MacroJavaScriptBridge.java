@@ -76,7 +76,7 @@ public class MacroJavaScriptBridge extends AbstractFunction {
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
-  public Object JavaScriptToMTScriptType(Object val) throws ParserException {
+  public Object JavaScriptToMTScriptType(Object val) {
     if (val == null) {
       // MTScript doesnt have a null, only empty string
       return "";

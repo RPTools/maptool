@@ -31,6 +31,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.drawing.UndoPerZone;
@@ -133,6 +134,13 @@ public class Zone extends BaseModel {
     INTEGER
   }
 
+  // Control what topology layer(s) to add/get drawing to/from
+  public enum TopologyMode {
+    VBL,
+    MBL,
+    COMBINED
+  }
+
   public static final int DEFAULT_TOKEN_VISION_DISTANCE = 250; // In units
   public static final int DEFAULT_PIXELS_CELL = 50;
   public static final int DEFAULT_UNITS_PER_CELL = 5;
@@ -158,6 +166,7 @@ public class Zone extends BaseModel {
 
   private double unitsPerCell = DEFAULT_UNITS_PER_CELL;
   private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
+  private TopologyMode topologyMode = TopologyMode.VBL;
 
   private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
   private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
@@ -184,6 +193,9 @@ public class Zone extends BaseModel {
 
   /** The VBL topology of the zone. Does not include token VBL. */
   private Area topology = new Area();
+
+  // New topology to hold Movement Blocking Only
+  private Area topologyTerrain = new Area();
 
   // The 'board' layer, at the very bottom of the layer stack.
   // Itself has two sub-layers:
@@ -429,6 +441,9 @@ public class Zone extends BaseModel {
     boardPosition = (Point) zone.boardPosition.clone();
     exposedArea = (Area) zone.exposedArea.clone();
     topology = (Area) zone.topology.clone();
+    topologyTerrain = (Area) zone.topologyTerrain.clone();
+    aStarRounding = zone.aStarRounding;
+    topologyMode = zone.topologyMode;
     isVisible = zone.isVisible;
     hasFog = zone.hasFog;
   }
@@ -729,9 +744,25 @@ public class Zone extends BaseModel {
    *
    * @param area the area
    */
-  public void addTopology(Area area) {
-    topology.add(area);
+  public void addTopology(Area area, TopologyMode topologyMode) {
+    switch (topologyMode) {
+      case VBL:
+        getTopology().add(area);
+        break;
+      case MBL:
+        getTopologyTerrain().add(area);
+        break;
+      case COMBINED:
+        getTopology().add(area);
+        getTopologyTerrain().add(area);
+        break;
+    }
+
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+  }
+
+  public void addTopology(Area area) {
+    addTopology(area, getTopologyMode());
   }
 
   /**
@@ -739,9 +770,25 @@ public class Zone extends BaseModel {
    *
    * @param area the area
    */
-  public void removeTopology(Area area) {
-    topology.subtract(area);
+  public void removeTopology(Area area, TopologyMode topologyMode) {
+    switch (topologyMode) {
+      case VBL:
+        getTopology().subtract(area);
+        break;
+      case MBL:
+        getTopologyTerrain().subtract(area);
+        break;
+      case COMBINED:
+        getTopology().subtract(area);
+        getTopologyTerrain().subtract(area);
+        break;
+    }
+
     fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+  }
+
+  public void removeTopology(Area area) {
+    removeTopology(area, getTopologyMode());
   }
 
   /** Fire the event TOPOLOGY_CHANGED. */
@@ -752,6 +799,11 @@ public class Zone extends BaseModel {
   /** @return the topology of the zone */
   public Area getTopology() {
     return topology;
+  }
+
+  /** @return the terrain topology of the zone */
+  public Area getTopologyTerrain() {
+    return topologyTerrain;
   }
 
   /**
@@ -1037,6 +1089,18 @@ public class Zone extends BaseModel {
 
   public void setAStarRounding(AStarRoundingOptions aStarRounding) {
     this.aStarRounding = aStarRounding;
+  }
+
+  public TopologyMode getTopologyMode() {
+    if (topologyMode == null) {
+      topologyMode = AppPreferences.getTopologyDrawingMode();
+    }
+
+    return topologyMode;
+  }
+
+  public void setTopologyMode(TopologyMode topologyMode) {
+    this.topologyMode = topologyMode;
   }
 
   public int getLargestZOrder() {
@@ -1937,6 +2001,11 @@ public class Zone extends BaseModel {
     // This will be true; it's just in case we decide to make it persistent in the future
     if (undo == null) {
       undo = new UndoPerZone(this);
+    }
+
+    // Movement Blocking Layer
+    if (topologyTerrain == null) {
+      topologyTerrain = new Area();
     }
     return this;
   }
