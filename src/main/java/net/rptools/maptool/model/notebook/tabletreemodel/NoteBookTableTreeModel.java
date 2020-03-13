@@ -16,13 +16,18 @@ package net.rptools.maptool.model.notebook.tabletreemodel;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
-import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.notebook.NoteBook;
+import net.rptools.maptool.model.notebook.entry.DirectoryEntry;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 
 /**
@@ -34,26 +39,23 @@ import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
  */
 public final class NoteBookTableTreeModel {
 
+
   /** The root node of the tree. */
-  private final TreeItem<TableTreeItemHolder> root =
-      new TreeItem<>(new NoteBookGroupTreeItem("Top Level"));
+  private final TreeItem<NoteBookEntry> root;
 
-  /** The node to place all entries that dont belong to a map. */
-  private final TreeItem<TableTreeItemHolder> noZoneParent =
-      new TreeItem<>(new NoteBookGroupTreeItem("No Map"));
-
-  /** Mapping between zones and the nodes that representing those zones in the tree. */
-  private final Map<GUID, TreeItem<TableTreeItemHolder>> zoneNodeMap = new HashMap<>();
-
-  /** The campaign {@link NoteBook} the create and maintain the tree for. */
+  /** The {@link NoteBook} this tree represents. */
   private final NoteBook noteBook;
 
-  /** The {@link PropertyChangeListener} to listed to changes for the {@link NoteBook}. */
+
+  /** The {@link PropertyChangeListener} for listening to  changes. */
   private final PropertyChangeListener propertyChangeListener = this::synchronizeModelOnJFXThread;
 
-  /** The group node to use when the {@link NoteBook} is empty. */
-  private final TreeItem<TableTreeItemHolder> EMPTY_NOTE_BOOK =
-      new TreeItem<>(new NoteBookGroupTreeItem("No Note Book Entries"));
+  /**
+   * Maps {@link NoteBookEntry}s to the tree item.
+   */
+  private final Map<UUID, TreeItem<NoteBookEntry>> entryTreeItemMap = new HashMap<>();
+
+
 
   /**
    * Returns a {@code NoteBookTableTreeModel} for a campaign {@link NoteBook}.
@@ -83,6 +85,7 @@ public final class NoteBookTableTreeModel {
         : "NoteBookTableTreeModel() must be run on the JavaFX thread.";
 
     noteBook = nBook;
+    root = new TreeItem<>(new DirectoryEntry(noteBook.getName()));
     root.setExpanded(true);
   }
 
@@ -91,9 +94,6 @@ public final class NoteBookTableTreeModel {
     assert Platform.isFxApplicationThread() : "init() must be run on the JavaFX thread.";
 
     initializeModel();
-    if (root.getChildren().size() == 0) {
-      root.getChildren().add(EMPTY_NOTE_BOOK);
-    }
     noteBook.addPropertyChangeListener(propertyChangeListener);
   }
 
@@ -104,7 +104,6 @@ public final class NoteBookTableTreeModel {
    * @note This method is safe to run on any thread.
    */
   public void dispose() {
-    // noteBook.removePropertyChangeListener is safe to run on any thread.
     noteBook.removePropertyChangeListener(propertyChangeListener);
   }
 
@@ -114,7 +113,7 @@ public final class NoteBookTableTreeModel {
    * @return the root node of the tree.
    * @throws IllegalStateException if not run on the JavaFX thread.
    */
-  public TreeItem<TableTreeItemHolder> getRoot() {
+  public TreeItem<NoteBookEntry> getRoot() {
     if (!Platform.isFxApplicationThread()) {
       throw new IllegalStateException(
           "NoteBookTableTreeModel.getTreeModelFor() must be run on the JavaFX thread.");
@@ -137,10 +136,75 @@ public final class NoteBookTableTreeModel {
   private void initializeModel() {
     assert Platform.isFxApplicationThread() : "initializeModel() must be run on the JavaFX thread.";
 
-    // remove and add all the entries
-    removeEntries(noteBook.getEntries());
+    // remove and add all the entries, first get a copy of all the entries to delete.
+    Set<NoteBookEntry> toRemove = entryTreeItemMap.keySet().stream()
+        .map(k -> entryTreeItemMap.get(k).getValue()).collect(Collectors.toSet());
+    removeEntries(toRemove);
+
     addedEntries(noteBook.getEntries());
+
   }
+
+  /**
+   * Adds a {@link NoteBookEntry} to the correct place in the tree.
+   *
+   * @param entry the {@link NoteBookEntry} to add.
+   * @throws
+   *
+   * @implNote when adding several entries make sure you add them in a way that all the directories
+   * are created before any children in those directories or you will get an
+   * {@link IllegalStateException}.
+   *
+   * @throws IllegalStateException if you try to add an entry to a non existent path.
+   */
+  private void addEntry(NoteBookEntry entry) {
+    assert Platform.isFxApplicationThread() : "initializeModel() must be run on the JavaFX thread.";
+    String parentPath = entry.getPath().replaceFirst("(.*)/[^/]*", "$1");
+    TreeItem<NoteBookEntry> parent = getNodeFromPath(parentPath);
+    if (parent == null) {
+      throw new IllegalStateException("Parent path " + parentPath + " not found.");
+    }
+    TreeItem<NoteBookEntry> newNode = new TreeItem<>(entry);
+    parent.getChildren().add(newNode);
+    entryTreeItemMap.put(entry.getId(), newNode);
+  }
+
+  /**
+   * Returns the {@link TreeItem} node for a given path.
+   * @param path the path as a string with "/" to get the {@link TreeItem} node for.
+   * @return the {@link TreeItem} node for a given path.
+   */
+  private TreeItem<NoteBookEntry> getNodeFromPath(String path) {
+    assert Platform.isFxApplicationThread() : "getNodeFromPath() must be run on the JavaFX thread.";
+    String[] paths = path.split("/");
+    if (paths.length > 0 && paths[0].isEmpty()) {
+      paths = Arrays.copyOfRange(paths, 1, path.length());
+    }
+    return getNodeFromPath(paths, root);
+  }
+
+  /**
+   * Returns the {@link TreeItem} node for a given path.
+   * @param paths an array of path strings to get the {@link TreeItem} node for.
+   * @param node The node to begin searching from.
+   * @return the {@link TreeItem} corresponding to the path.
+   */
+  private TreeItem<NoteBookEntry> getNodeFromPath(String[] paths, TreeItem<NoteBookEntry> node) {
+    assert Platform.isFxApplicationThread() : "getNodeFromPath() must be run on the JavaFX thread.";
+    if (paths.length == 0) {
+      return node;
+    }
+
+    for (TreeItem<NoteBookEntry> child : node.getChildren()) {
+      NoteBookEntry entry = child.getValue();
+      if (entry instanceof DirectoryEntry && entry.getName().equals(paths[0])) {
+        return getNodeFromPath(Arrays.copyOfRange(paths, 1, paths.length - 1), node);
+      }
+    }
+
+    return null;
+  }
+
 
   /**
    * Synchronizes the model with the changes coming from the {@link NoteBook}. This should not be
@@ -156,19 +220,12 @@ public final class NoteBookTableTreeModel {
     assert Platform.isFxApplicationThread()
         : "synchronizeModel() must be run on the JavaFX thread.";
 
-    /*
-     * Always remove the EMPTY_NOTE_BOOK node upfront, we will re add later if it exists as it is
-     * always added at the end if we have no nodes.
-     */
-    root.getChildren().remove(EMPTY_NOTE_BOOK);
-
     switch (event.getPropertyName()) {
       case NoteBook.ZONE_REMOVED_EVENT:
-        {
-          assert event.getOldValue() instanceof GUID : "Expected Zone Id on zone removed event.";
-          TreeItem<TableTreeItemHolder> node = zoneNodeMap.get((GUID) event.getOldValue());
-          node.getParent().getChildren().remove(node);
-        }
+        /*
+         * No need to do anything here, if entries are removed due to removed zone we will deal
+         * with them in the ENTRIES_REMOVED_EVENT
+         */
         break;
       case NoteBook.ENTRIES_ADDED_EVENT:
         {
@@ -192,18 +249,6 @@ public final class NoteBookTableTreeModel {
         }
         break;
     }
-
-    if (noZoneParent.getChildren().size() == 0) {
-      root.getChildren().remove(noZoneParent);
-    } else {
-      if (!root.getChildren().contains(noZoneParent)) {
-        root.getChildren().add(noZoneParent);
-      }
-    }
-
-    if (root.getChildren().size() == 0) {
-      root.getChildren().add(EMPTY_NOTE_BOOK);
-    }
   }
 
   /**
@@ -214,30 +259,31 @@ public final class NoteBookTableTreeModel {
   private void addedEntries(Set<NoteBookEntry> added) {
     assert Platform.isFxApplicationThread() : "addedEntries() must be run on the JavaFX thread.";
 
-    TreeItem<TableTreeItemHolder> parentNode;
-    for (NoteBookEntry entry : added) {
-      if (entry.getZoneId().isPresent()) {
-        GUID zoneId = entry.getZoneId().get();
-        if (!zoneNodeMap.containsKey(zoneId)) {
-          TreeItem<TableTreeItemHolder> node = new TreeItem<>(new NoteBookZoneTreeItem(zoneId));
-          zoneNodeMap.put(zoneId, node);
-          root.getChildren().add(node);
-        }
-        parentNode = zoneNodeMap.get(zoneId);
+    Set<NoteBookEntry> entries = new HashSet<>(added);
+    /*
+     * First directories in directory order to ensure all our directories are created before
+     * the entries that belong in the direct ores.
+     */
+    Set<NoteBookEntry> directories = new TreeSet<>((e1, e2) -> {
+      long level1 = e1.getName().chars().filter(c -> c == '/').count();
+      long level2 = e2.getName().chars().filter(c -> c == '/').count();
+      int comp = Long.compareUnsigned(level1, level2);
+      if (comp != 0) {
+        return comp;
       } else {
-        parentNode = noZoneParent;
+        return e1.getName().compareTo(e2.getName());
       }
-
-      TreeItem<TableTreeItemHolder> node = new TreeItem<>(new NoteBookEntryTreeItem(entry));
-      parentNode.getChildren().add(node);
+    });
+    directories.addAll(entries.stream().filter(e -> e instanceof DirectoryEntry).collect(Collectors.toSet()));
+    for (NoteBookEntry dir : directories) {
+      addEntry(dir);
     }
 
-    if (noZoneParent.getChildren().size() == 0 && root.getChildren().contains(noZoneParent)) {
-      root.getChildren().remove(noZoneParent);
-    } else {
-      if (!root.getChildren().contains(noZoneParent)) {
-        root.getChildren().add(noZoneParent);
-      }
+    // Add the remaining entries, order should not matter as we have all the directories already
+    entries.removeAll(directories);
+
+    for (NoteBookEntry entry : entries) {
+      addEntry(entry);
     }
   }
 
@@ -249,33 +295,16 @@ public final class NoteBookTableTreeModel {
   private void removeEntries(Set<NoteBookEntry> entries) {
     assert Platform.isFxApplicationThread() : "removeEntries() must be run on the JavaFX thread.";
 
-    var toRemove = new HashMap<TreeItem<TableTreeItemHolder>, TreeItem<TableTreeItemHolder>>();
-    for (NoteBookEntry entry : entries) {
-      TreeItem<TableTreeItemHolder> parentNode;
-      if (entry.getZoneId().isPresent()) {
-        parentNode = zoneNodeMap.get(entry.getZoneId().get());
-      } else {
-        parentNode = noZoneParent;
-      }
-
-      /*
-       * First collate the entries that were removed into a set that we can use to remove them
-       * from the tree later on to avoid concurrent modification exceptions.
-       */
-      if (parentNode != null) {
-        for (var node : parentNode.getChildren()) {
-          if (node.getValue() instanceof NoteBookEntryTreeItem) {
-            var item = (NoteBookEntryTreeItem) node.getValue();
-            if (item.getEntry().getId().equals(entry.getId())) {
-              toRemove.put(parentNode, node);
-            }
-          }
+    Set<NoteBookEntry> removed = new HashSet<>(entries);
+    for (NoteBookEntry entry : removed) {
+      if (entryTreeItemMap.containsKey(entry.getId())) {
+        TreeItem<NoteBookEntry> node = entryTreeItemMap.get(entry.getId());
+        TreeItem<NoteBookEntry> parentNode = node.getParent();
+        if (parentNode != null) {
+          parentNode.getChildren().remove(node);
         }
+        entryTreeItemMap.remove(entry.getId());
       }
-    }
-
-    for (var remove : toRemove.entrySet()) {
-      remove.getKey().getChildren().remove(remove.getValue());
     }
   }
 }

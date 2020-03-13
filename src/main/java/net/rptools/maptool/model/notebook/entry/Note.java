@@ -39,9 +39,10 @@ public class Note extends AbstractNoteBookEntry {
    * @param zoneId The id of the zone of the {@code Note}, can be {@code null}.
    * @param notesKey The {@link MD5Key} for the {@link net.rptools.maptool.model.Asset} containing
    *                 the note can be null.
+   * @param path The path of the {@code Note}.
    */
-  public Note(UUID id, String name, GUID zoneId, MD5Key notesKey) {
-    super(id, name, zoneId, EntryZoneRequirements.ZONE_ALLOWED);
+  public Note(UUID id, String name, GUID zoneId, MD5Key notesKey, String path) {
+    super(id, name, zoneId, EntryZoneRequirements.ZONE_ALLOWED, path);
     Objects.requireNonNull(id, "ID for Note cannot be null");
 
     this.notesKey =  notesKey;
@@ -54,9 +55,10 @@ public class Note extends AbstractNoteBookEntry {
    * @param zoneId The id of the zone of the {@code Note}, can be {@code null}.
    * @param notesKey The {@link MD5Key} for the {@link Asset} containing
    *                 the note can be null.
+   * @param path The path of the {@code Note}.
    */
-  public Note(String name, GUID zoneId, MD5Key notesKey) {
-    super(null, name, zoneId, EntryZoneRequirements.ZONE_ALLOWED);
+  public Note(String name, GUID zoneId, MD5Key notesKey, String path) {
+    super(null, name, zoneId, EntryZoneRequirements.ZONE_ALLOWED, path);
     this.notesKey =  notesKey;
   }
 
@@ -84,9 +86,9 @@ public class Note extends AbstractNoteBookEntry {
       return this;
     } else {
       if (getZoneId().isPresent()) {
-        return new Note(getId(), name, getZoneId().get(), notesKey);
+        return new Note(getId(), name, getZoneId().get(), notesKey, getPath());
       } else {
-        return new Note(getId(), name, null, notesKey);
+        return new Note(getId(), name, null, notesKey, getPath());
       }
     }
   }
@@ -94,9 +96,22 @@ public class Note extends AbstractNoteBookEntry {
   @Override
   public NoteBookEntry setZoneId(GUID id) {
     if (zoneWouldChange(id)) {
-      return new Note(getId(), getName(), id, notesKey);
+      return new Note(getId(), getName(), id, notesKey, getPath());
     } else {
       return this;
+    }
+  }
+
+  @Override
+  public NoteBookEntry setPath(String path) {
+    if (getPath().equals(path)) {
+      return this;
+    } else {
+      if (getZoneId().isPresent()) {
+        return new Note(getId(), getName(), getZoneId().get(), notesKey, getPath());
+      } else {
+        return new Note(getId(), getName(), null, notesKey, getPath());
+      }
     }
   }
 

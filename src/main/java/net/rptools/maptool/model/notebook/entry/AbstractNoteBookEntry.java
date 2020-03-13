@@ -22,6 +22,9 @@ abstract class AbstractNoteBookEntry implements NoteBookEntry {
   /** The zone requirements for the entry. */
   private final EntryZoneRequirements zoneRequirements;
 
+  /** The path of the {@link NoteBookEntry}. */
+  private final String path;
+
 
   /**
    * Creates a new {@code AbstractNoteBookEntry}.
@@ -30,11 +33,13 @@ abstract class AbstractNoteBookEntry implements NoteBookEntry {
    * @param name the name of the {@link NoteBookEntry}.
    * @param zoneId the zone id of the {@link NoteBookEntry}, can be null.
    * @param zoneRequirements the zone requirements for the {@link NoteBookEntry}.
+   * @param path the path for the {@link NoteBookEntry}.
    */
-  AbstractNoteBookEntry(UUID id, String name, GUID zoneId, EntryZoneRequirements zoneRequirements) {
+  AbstractNoteBookEntry(UUID id, String name, GUID zoneId, EntryZoneRequirements zoneRequirements, String path) {
     this.id = id != null ? id : NoteBookEntry.generateId();
-    this.name = Objects.requireNonNull(name, "Note Book Entry name can not be null.");
-    this.zoneRequirements = Objects.requireNonNull(zoneRequirements, "Note Book Entry zome requirements can not be null.");
+    this.name = Objects.requireNonNull(name, "Note Book Entry name cannot be null.");
+    this.zoneRequirements = Objects.requireNonNull(zoneRequirements, "Note Book Entry zone requirements cannot be null.");
+    this.path = Objects.requireNonNull(path, "Note Book Entry path cannot be null.");
 
     switch (zoneRequirements) {
       case ZONE_IGNORED:
@@ -98,5 +103,10 @@ abstract class AbstractNoteBookEntry implements NoteBookEntry {
   @Override
   public EntryZoneRequirements getZoneRequirements() {
     return zoneRequirements;
+  }
+
+  @Override
+  public String getPath() {
+    return path;
   }
 }

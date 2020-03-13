@@ -24,13 +24,13 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.notebook.entry.DirectoryEntry;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 import net.rptools.maptool.model.notebook.entry.tree.NoteBookEntryNode;
 
@@ -215,6 +215,9 @@ public class NoteBook implements Comparable<NoteBook> {
   /** Mapping between id and {@link NoteBookEntry}. */
   private final Map<UUID, EntryDetails> idEntryMap = new HashMap<>();
 
+  /** Mapping between the path and the id of an entry in the {@code NoteBook}. */
+  private final Map<String, UUID> pathIdMap = new HashMap<>();
+
 
   /** Provides property change support for the {@code NoteBook}. */
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
@@ -224,13 +227,13 @@ public class NoteBook implements Comparable<NoteBook> {
 
   /**
    * The read lock for the collections, you <strong>must</strong> use this lock whenever you are
-   * reading the values from {@link #removedZones}, {@link #idEntryMap} or {@link #root} tree.
+   * reading the values from {@link #removedZones}, {@link #idEntryMap} or {@link #pathIdMap}.
    */
   private final Lock readLock = readWriteLock.readLock();
 
   /**
    * The write lock for the collections, you <strong>must</strong> use this lock whenever you are
-   * modifying the contents for {@link #removedZones}, {@link #idEntryMap} or {@link #root} tree.
+   * modifying the contents for {@link #removedZones}, {@link #idEntryMap} or {@link #pathIdMap}.
    *
    * @see #readLock
    */
@@ -252,8 +255,6 @@ public class NoteBook implements Comparable<NoteBook> {
   /** Is this an internal  MapTool {@code NoteBook}. */
   private final boolean internal;
 
-  /** The root node for the note book entries. */
-  private final NoteBookEntryNode root = new NoteBookEntryNode(new DirectoryEntry("/"));
 
 
   /**
@@ -465,6 +466,7 @@ public class NoteBook implements Comparable<NoteBook> {
       }
 
       idEntryMap.put(entry.getId(), new EntryDetails(path, entry, entry.getZoneId().orElse(null)));
+
     } finally {
       writeLock.unlock();
     }
@@ -530,7 +532,7 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Returns a {@link Map} of {@link Zone}s and the {@link NoteBookEntry}s for the them. Entries
+   * Returns a {@link Map} of {@link Zone}s and the {@link NoteBookEntry}s for them. Entries
    * with no zone are in the {@code Map} with the key of {@code null}.
    *
    * @return a {@link Map} of {@link Zone}s and the {@link NoteBookEntry}s for the them.
@@ -539,33 +541,16 @@ public class NoteBook implements Comparable<NoteBook> {
     Map<GUID, Set<NoteBookEntry>> entries = new HashMap<>();
     readLock.lock();
     try {
-      addToZoneMap(root, entries);
+      for (EntryDetails ed : idEntryMap.values()) {
+        entries.computeIfAbsent(ed.getZoneId(), k -> new HashSet<>());
+        entries.get(ed.getZoneId()).add(ed.getEntry());
+      }
     } finally {
       readLock.unlock();
     }
     return entries;
   }
 
-
-  /**
-   * Add this nodes entries to the zone map, then all and child nodes entries.
-   * @param node The node to add and recurse.
-   * @param entries the zone entry map to add to.
-   */
-  private void addToZoneMap(NoteBookEntryNode node, Map<GUID, Set<NoteBookEntry>> entries) {
-    NoteBookEntry entry = node.getEntry();
-    if (entry.getZoneId().isPresent()) {
-      entries.computeIfAbsent(entry.getZoneId().get(), k -> new HashSet<>());
-      entries.get(entry.getZoneId().get()).add(entry);
-    } else {
-      entries.computeIfAbsent(null, k -> new HashSet<>());
-      entries.get(null).add(entry);
-    }
-
-    for (NoteBookEntryNode child : node.getChildren()) {
-      addToZoneMap(child, entries);
-    }
-  }
 
   /**
    * Returns the {@link NoteBookEntry}s for a {@link Zone}.
@@ -660,6 +645,7 @@ public class NoteBook implements Comparable<NoteBook> {
     writeLock.lock();
     try {
       idEntryMap.remove(entry.getId());
+      pathIdMap.remove(entry.getPath());
     } finally {
       writeLock.unlock();
     }
@@ -685,7 +671,7 @@ public class NoteBook implements Comparable<NoteBook> {
    * @return the {@link NoteBookEntry} for the id.
    */
   public Optional<NoteBookEntry> getById(UUID id) {
-    Objects.requireNonNull(id, "id passed to getById must no tbe null");
+    Objects.requireNonNull(id, "id passed to getById must not be null");
     readLock.lock();
     try {
       if (idEntryMap.containsKey(id)) {
@@ -694,6 +680,26 @@ public class NoteBook implements Comparable<NoteBook> {
         return Optional.empty();
       }
     } finally {
+      readLock.unlock();
+    }
+  }
+
+  /**
+   * Returns the {@link NoteBookEntry} at the specified path.
+   * @param path the path to get the value for.
+   *
+   * @return the {@link NoteBookEntry} at the specified path.
+   */
+  public Optional<NoteBookEntry> getByPath(String path) {
+    Objects.requireNonNull(path, "path passed to getByPAth must not be null");
+    readLock.lock();
+    try {
+      if (pathIdMap.containsKey(path)) {
+        return Optional.ofNullable(idEntryMap.get(pathIdMap.get(path)).getEntry());
+      } else {
+        return Optional.empty();
+      }
+    } finally{
       readLock.unlock();
     }
   }
@@ -750,6 +756,20 @@ public class NoteBook implements Comparable<NoteBook> {
     propertyChangeSupport.removePropertyChangeListener(propertyChangeListener);
   }
 
+
+  /**
+   * Returns the mapping between the paths and entries in the {@code NoteBook}.
+   * @return the mapping between the paths and entries in the {@code NoteBook}.
+   *
+   */
+   public Map<String, NoteBookEntry> getEntryPaths() {
+     Map<String, NoteBookEntry> entries = new TreeMap<>();
+     for (EntryDetails ed : idEntryMap.values()) {
+       entries.put(ed.getPath(), ed.getEntry());
+     }
+     return entries;
+   }
+
   @Override
   public int compareTo(NoteBook o) {
     int res = Boolean.compare(o.isInternal(), isInternal()); // reversed as false < true
@@ -762,6 +782,6 @@ public class NoteBook implements Comparable<NoteBook> {
       return res;
     }
 
-    return getVersion().compareTo(getVersion());
+    return getVersion().compareTo(o.getVersion());
   }
 }

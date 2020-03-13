@@ -2,6 +2,7 @@ package net.rptools.maptool.model.notebook;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -24,6 +25,13 @@ public final class NoteBookManager {
    * @see NoteBook#getVersionedNameSpace()
    */
   private final Map<String, NoteBook> noteBooks = new ConcurrentHashMap<>();
+
+
+  /**
+   * {@link PropertyChangeSupport} object for registering {@link PropertyChangeListener}s and
+   * firing events.
+   */
+  private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
 
   /**
@@ -118,6 +126,23 @@ public final class NoteBookManager {
       noteBooks.remove(event.getOldValue().toString());
       noteBooks.put(event.getNewValue().toString(), noteBook);
     }
+  }
+
+  /**
+   * Adds a {@link PropertyChangeListener}.
+   * @param pcl the {@link PropertyChangeListener} to add.
+   */
+  public void addPropertyChangeListener(PropertyChangeListener pcl) {
+    propertyChangeSupport.addPropertyChangeListener(pcl);
+  }
+
+
+  /**
+   * Removes a {@link PropertyChangeListener}.
+   * @param pcl the {@link PropertyChangeListener} to remove.
+   */
+  public void removePropertyChangeListener(PropertyChangeListener pcl) {
+    propertyChangeSupport.removePropertyChangeListener(pcl);
   }
 
 

@@ -61,6 +61,13 @@ public interface NoteBookEntry {
 
 
   /**
+   * Returns the path of the {@code NoteBookEntry} in the {@link NoteBook}.
+   * @return the path of the {@code NoteBookEntry} in the {@link NoteBook}.
+   */
+  String getPath();
+
+
+  /**
    * Returns a new {@code NoteBookEntry} that is a copy of this one with the new name.
    * @return a new {@code NoteBookEntry} that is a copy of this one with the new name.
    *
@@ -96,6 +103,15 @@ public interface NoteBookEntry {
    * {@code mull} is passed.
    */
   NoteBookEntry setZoneId(GUID id);
+
+  /**
+   * Returns a new {@code NoteBookEntry} that is a copy of this one with the new path.
+   * @return a new {@code NoteBookEntry} that is a copy of this one with the new path.
+   *
+   * If the path is the same as the current path then this method may return the original object
+   * as all implementors of this interface are immutable.
+   */
+  NoteBookEntry setPath(String path);
 
 
   /**

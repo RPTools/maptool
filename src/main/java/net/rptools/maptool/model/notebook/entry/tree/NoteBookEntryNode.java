@@ -8,6 +8,7 @@ import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 
 public class NoteBookEntryNode {
 
+
   private final NoteBookEntry entry;
 
   private final Set<NoteBookEntryNode> children = new HashSet<>();
@@ -25,21 +26,27 @@ public class NoteBookEntryNode {
     children.add(child);
   }
 
-  public Set<NoteBookEntryNode> getChildren() {
-    return new HashSet<>(children);
-  }
-
   public void removeChild(NoteBookEntryNode child) {
     Objects.requireNonNull(child, "Child to remove from NoteBookEntryNode cannot be null");
     children.remove(child);
   }
 
+  public Set<NoteBookEntryNode> getChildren() {
+    return children;
+  }
+
   public boolean isDirectory() {
-    return entry.getClass().equals(DirectoryEntry.class);
+    return entry instanceof DirectoryEntry;
   }
 
   public NoteBookEntry getEntry() {
     return entry;
   }
 
+  public NoteBookEntryNode duplicate() {
+    NoteBookEntryNode node = new NoteBookEntryNode(entry);
+    children.stream().map(NoteBookEntryNode::duplicate).forEach(node::addChild);
+
+    return node;
+  };
 }
