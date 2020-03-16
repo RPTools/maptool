@@ -1,15 +1,23 @@
 Maptool 1.6.0
 =====
-**Highlights**
+Lots of enhancements, bug fixes and improvements to the code base.
+
+**Some Highlights**
 - New dialog and frame functions support HTML5, JavaScript and CSS.
 - Movement Blocking Layer - Now you can make those Force Fields that would block movement but not sight.
 - Look & Feel themes can now be selected from the Themes menu.  More enhancements to come.
 - Pre-defined Campaign Property sets can now be selected and loaded in the Campaign Properties dialog.
+- New Marker assets added to Default in the Resource Library - Use Restore Default Images in the Help menu to get them.
 - The annoying behavior where browsing for a drawing texture would cause the Resource Library to also change folders has been fixed!
 
 **Enhancements**
+- [#1363][i1363] New and updated Marker assets in the Default Resource Library
+- [#1337][i1337] _Pick Once_ support added to Tables. Currently uses macro functions to set/reset the tables.  GUI support to come.
+- [#1323][i1323] New menu item, Frameworks, in Help menu opens default browser to [Frameworks](http://www.lmwcs.com/rptools/wiki/Frameworks) page on wiki.
+- [#1320][i1320] Downloadable artpacks in the Add Resource to Library dialog are now sorted by name.
 - [#1313][i1313] Gather Debug Information window (Help MenU) refactored. Window opens immediately with note that data collection is in progress and then updates once data has been collected.
 - [#1278][i1278] JSON option added to PROPS type for `input()` function.  WIDTH option added to PROPS.  Defaults to 14.
+- [#1270][i1270] Map Properties dialog now has a delete button to remove embedded maps.
 - [#1216][i1216] Movement Blocking Layer - similar to VBL, but specifically for blocking movement and not sight or light.
   - AI button and new VBL Blocks Movement button moved over by Measuring tool and are now under GM control
 - [#1210][i1210] RADIO and LIST fields for `input()` function now support a DELIMITER option.
@@ -19,6 +27,7 @@ Maptool 1.6.0
 - [#921][i921] Support added for selecting an available them via the Themes menu in MapTool.
 - [#891][i891] Menu option and macro functions to show/hide Text Labels and get display status.
   - `showTextLabels()`, `hideTextLabels()` and `getTextLabelStatus()`
+- [#643][i643] Grid types for Light and Sight now supports Hex grids.
 - [#221][i221] Campaign Properties dialog now has a drop-down to select from pre-defined Campaign Property sets (.mtprops).
 
 **Bug Fixes**
@@ -36,8 +45,14 @@ Maptool 1.6.0
 - [#1225][i1225]  Exception during L&F setup. Not in released code. Fixed.
 - [#1206][i1206]  JSON function code was returning NULL if the function couldn't be found. Now reports unknown function.
 - [#1204][i1204] `getToken*` was throwing an exception if a string was passed to the `layer` option. Fixed.
+- [#650][i650] Can't pass JSON data from a form submit. Fixed.
+- [#198][i198] Using tab panels in `input()` could add large empty space at bottom of panel. Fixed.
 
 **Other**
+- [#1355][i1355] Moving remaining classes off old JSON library to GSON.
+- [#1352][i1352] Replaced use of `"UTF-i"` by `StandardCharsets.UTF_8`
+- [#1325][i1325] Unit tests added for ImageUtils.
+- [#1284][i1284] Removed superfluous ParserException try/catch blocks.
 - [#1271][i1271] Clean up of Drawing Delete confirmation dialog code with comments and javadocs plus comments on the I18N strings.
 - [#1268][i1268] Refactored PackeFile class to use *try with resource* instead of try/catch/finally blocks.
 - [#1253][i1253] MD5 key generation wasn't thread-safe. Fixed.
@@ -45,13 +60,21 @@ Maptool 1.6.0
 - [#1215][i1215] Replaced calls to deprecated IOUtils.closeQuietly() with try-with-resource.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
+[i1363]: https://github.com/RPTools/maptool-resources/issues/2
+[i1355]: https://github.com/RPTools/maptool/issues/1355
+[i1352]: https://github.com/RPTools/maptool/issues/1352
+[i1325]: https://github.com/RPTools/maptool/issues/1325
+[i1323]: https://github.com/RPTools/maptool/issues/1323
+[i1320]: https://github.com/RPTools/maptool/issues/1320
 [i1313]: https://github.com/RPTools/maptool/issues/1313
 [i1309]: https://github.com/RPTools/maptool/issues/1309
 [i1300]: https://github.com/RPTools/maptool/issues/1300
 [i1292]: https://github.com/RPTools/maptool/issues/1292
 [i1288]: https://github.com/RPTools/maptool/issues/1288
+[i1284]: https://github.com/RPTools/maptool/issues/1284
 [i1278]: https://github.com/RPTools/maptool/issues/1278
 [i1271]: https://github.com/RPTools/maptool/issues/1271
+[i1270]: https://github.com/RPTools/maptool/issues/1270
 [i1269]: https://github.com/RPTools/maptool/issues/1269
 [i1268]: https://github.com/RPTools/maptool/issues/1268
 [i1267]: https://github.com/RPTools/maptool/issues/1267
@@ -72,7 +95,24 @@ Maptool 1.6.0
 [i972]: https://github.com/RPTools/maptool/issues/972
 [i921]: https://github.com/RPTools/maptool/issues/921
 [i891]: https://github.com/RPTools/maptool/issues/891
+[i650]: https://github.com/RPTools/maptool/issues/650
+[i643]: https://github.com/RPTools/maptool/issues/643
 [i221]: https://github.com/RPTools/maptool/issues/221
+[i198]: https://github.com/RPTools/maptool/issues/198
+
+
+Maptool 1.5.14
+=====
+**Highlights**
+- Bug fix release.
+
+**Bug Fixes**
+- [#1326][i1326] `json.path.read()` was turning numbers into strings when using the max, min, avg, length, sum and stddev path functions. Fixed.
+- [#1300][i1300] Several bugs with `copyTokens()` when used with/without updates parameter fixed.
+
+[i1326]: https://github.com/RPTools/maptool/issues/1326
+[i1300]: https://github.com/RPTools/maptool/issues/1300
+
 
 Maptool 1.5.13
 =====
