@@ -101,6 +101,20 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i221]: https://github.com/RPTools/maptool/issues/221
 [i198]: https://github.com/RPTools/maptool/issues/198
 
+
+Maptool 1.5.14
+=====
+**Highlights**
+- Bug fix release.
+
+**Bug Fixes**
+- [#1326][i1326] `json.path.read()` was turning numbers into strings when using the max, min, avg, length, sum and stddev path functions. Fixed.
+- [#1300][i1300] Several bugs with `copyTokens()` when used with/without updates parameter fixed.
+
+[i1326]: https://github.com/RPTools/maptool/issues/1326
+[i1300]: https://github.com/RPTools/maptool/issues/1300
+
+
 Maptool 1.5.13
 =====
 **Highlights**
