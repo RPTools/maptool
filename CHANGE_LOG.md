@@ -63,6 +63,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i1363]: https://github.com/RPTools/maptool-resources/issues/2
 [i1355]: https://github.com/RPTools/maptool/issues/1355
 [i1352]: https://github.com/RPTools/maptool/issues/1352
+[i1337]: https://github.com/RPTools/maptool/issues/1337
 [i1325]: https://github.com/RPTools/maptool/issues/1325
 [i1323]: https://github.com/RPTools/maptool/issues/1323
 [i1320]: https://github.com/RPTools/maptool/issues/1320
