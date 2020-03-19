@@ -3513,13 +3513,16 @@ public class ZoneRenderer extends JComponent
       Graphics2D locg =
           (Graphics2D)
               clippedG.create(
-                  (int) location.x,
-                  (int) location.y,
-                  (int) Math.ceil(location.scaledWidth),
-                  (int) Math.ceil(location.scaledHeight));
+                  (int) tokenBounds.getBounds().getX(),
+                  (int) tokenBounds.getBounds().getY(),
+                  (int) tokenBounds.getBounds().getWidth(),
+                  (int) tokenBounds.getBounds().getHeight());
       Rectangle bounds =
           new Rectangle(
-              0, 0, (int) Math.ceil(location.scaledWidth), (int) Math.ceil(location.scaledHeight));
+              0,
+              0,
+              (int) tokenBounds.getBounds().getWidth(),
+              (int) tokenBounds.getBounds().getHeight());
 
       // Check each of the set values
       for (String state : MapTool.getCampaign().getTokenStatesMap().keySet()) {
