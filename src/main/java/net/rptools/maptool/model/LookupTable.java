@@ -47,7 +47,11 @@ public class LookupTable {
     name = table.name;
     defaultRoll = table.defaultRoll;
     tableImage = table.tableImage;
-    pickOnce = false;
+    if (table.pickOnce == null) {
+      pickOnce = false;
+    } else {
+      pickOnce = table.pickOnce;
+    }
 
     if (table.entryList != null) {
       getInternalEntryList().addAll(table.entryList);
@@ -96,12 +100,13 @@ public class LookupTable {
     if (roll == null) {
       roll = getDefaultRoll();
     }
+
     if (roll.equals(NO_PICKS_LEFT)) {
       entry = new LookupEntry(0, 0, NO_PICKS_LEFT, null);
       return entry;
     }
 
-    if (pickOnce) {
+    if (getPickOnce()) {
       entry = getPickOnceLookup(roll);
     } else {
       entry = getStandardLookup(roll);
@@ -175,12 +180,7 @@ public class LookupTable {
   }
 
   private String getDefaultRoll() {
-    // Catch older tables that don't have the flag.
-    if (pickOnce == null) {
-      pickOnce = false;
-    }
-
-    if (pickOnce) {
+    if (getPickOnce()) {
       // For Pick Once tables this returns a random pick from those entries in the list that
       // have not been picked.
       ArrayList<LookupEntry> le = getInternalEntryList();
@@ -277,6 +277,11 @@ public class LookupTable {
    * @return Boolean - true if table is Pick Once
    */
   public Boolean getPickOnce() {
+    // Older tables won't have it set.
+    if (pickOnce == null) {
+      pickOnce = false;
+    }
+
     return pickOnce;
   }
 
