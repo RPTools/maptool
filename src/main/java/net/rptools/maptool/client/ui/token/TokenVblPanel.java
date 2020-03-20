@@ -151,9 +151,9 @@ public class TokenVblPanel extends JPanel {
             MapTool.getFrame()
                 .setStatusMessage("Mouse Wheel to zoom; double-LClick to reset  position and zoom");
 
-            log.info("Curor is: {}", getCursor().getName());
-            log.info("Has focus?: {}", hasFocus());
-            log.info("Has editTokenDialog focus?: {}", editTokenDialog.hasFocus());
+            //            log.info("Curor is: {}", getCursor().getName());
+            //            log.info("Has focus?: {}", hasFocus());
+            //            log.info("Has editTokenDialog focus?: {}", editTokenDialog.hasFocus());
           }
 
           @Override
