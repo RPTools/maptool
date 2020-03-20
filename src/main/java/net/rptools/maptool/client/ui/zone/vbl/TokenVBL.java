@@ -21,6 +21,9 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import net.rptools.lib.swing.SwingUtil;
@@ -32,11 +35,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.awt.ShapeReader;
 import org.locationtech.jts.awt.ShapeWriter;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 import org.locationtech.jts.simplify.TopologyPreservingSimplifier;
 import org.locationtech.jts.simplify.VWSimplifier;
+import org.locationtech.jts.util.GeometricShapeFactory;
 
 /**
  * A utility class that creates and returns an Area based on image pixels. A few convenience methods
@@ -62,68 +68,38 @@ public class TokenVBL {
    * @since 1.6.0
    */
   public static Area createOptimizedVblArea(Token token, int alphaSensitivity) {
-    final Area vblArea = createVblAreaFromToken(token, alphaSensitivity, false);
+    final Area vblArea =
+        createVblAreaFromToken(token, alphaSensitivity, false, new Color(0, 0, 0, 0));
     return simplifyArea(vblArea, JTS_SimplifyMethodType.getDefault(), 10);
   }
 
-  public static Area createVblAreaFromToken(Token token, int alphaSensitivity, boolean inverseVbl) {
+  public static Area createVblAreaFromToken(
+      Token token, int alphaSensitivity, boolean inverseVbl, Color ignoredColor) {
+    Stopwatch stopwatch = Stopwatch.createStarted();
     BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
 
-    final int w = image.getWidth();
-    final int h = image.getHeight();
+    List<Geometry> geometryList =
+        createVblGeometry(image, alphaSensitivity, inverseVbl, ignoredColor);
+    log.debug("Time to complete createVblGeometry(): {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
-    //    log.info("Image w,h {},{}", w, h);
-
-    // By slicing an image up, the Area math is greatly simplified downstream
-    // Performance increase is up to 50x faster...
-    if (w > sliceSize || h > sliceSize) {
-      Stopwatch stopwatch = Stopwatch.createStarted();
-      Area combinedArea = new Area();
-
-      for (int i = 0; i < w; i += sliceSize) {
-        int width = sliceSize;
-        if (i + sliceSize > w) {
-          width = w - i;
-        }
-
-        for (int j = 0; j < h; j += sliceSize) {
-          int height = sliceSize;
-          if (j + sliceSize > h) {
-            height = h - j;
-          }
-
-          Area slice = createVblAreaSlice(i, j, width, height, image, alphaSensitivity, inverseVbl);
-          combinedArea.add(slice);
-        }
-      }
-
-      log.info(
-          "Total time to render image to Area: {}ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
-
-      return combinedArea;
-    } else {
-      Stopwatch stopwatch = Stopwatch.createStarted();
-      final Area vblArea = createVblArea(image, alphaSensitivity, inverseVbl);
-      log.info("Time to complete full image: {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
-      return vblArea;
-    }
+    final Area area = createAreaFromGeometries(geometryList);
+    log.debug(
+        "Total time for createVblAreaFromToken(): {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    return area;
   }
 
-  private static Area createVblAreaSlice(
-      int x, int y, int w, int h, BufferedImage image, int alphaSensitivity, boolean inverseVbl) {
+  private static Area createAreaFromGeometries(List<Geometry> geometryList) {
+    if (geometryList.isEmpty()) {
+      return new Area();
+    } else {
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      GeometryCollection geometryCollection =
+          (GeometryCollection) new GeometryFactory().buildGeometry(geometryList);
 
-    //    log.info("x,y,w,h: {},{},{},{}", x, y, w, h);
-    Stopwatch stopwatch = Stopwatch.createStarted();
-    AffineTransform at = new AffineTransform();
-
-    at.translate(x, y);
-    Area slice =
-        createVblArea(image.getSubimage(x, y, w, h), alphaSensitivity, inverseVbl)
-            .createTransformedArea(at);
-
-    //    log.info("Time to complete quadrant: {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
-
-    return slice;
+      final Area area = new Area(new ShapeWriter().toShape(geometryCollection));
+      log.debug("Time to complete convert to Area: {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+      return area;
+    }
   }
 
   public static Area simplifyArea(
@@ -236,15 +212,14 @@ public class TokenVBL {
       sx = 1 / (imgSize.getWidth() / token.getWidth());
       sy = 1 / (imgSize.getHeight() / token.getHeight());
 
-      atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
     } else {
       tx = -newTokenVBL.getBounds().getX();
       ty = -newTokenVBL.getBounds().getY();
       sx = 1 / token.getScaleX();
       sy = 1 / token.getScaleY();
-
-      atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
     }
+
+    atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
 
     if (token.getShape() == Token.TokenShape.TOP_DOWN
         && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
@@ -395,6 +370,100 @@ public class TokenVBL {
     } else {
       return vblArea;
     }
+  }
+
+  /**
+   * Create a VBL area from a bufferedImage and alphaSensitity. The area is created by combining
+   * vblRectangle where the alpha of the image is greater or equal to the sensitivity. Assumes all
+   * colors form the VBL Area, everything except transparent pixels with alpha >= alphaSensitivity
+   *
+   * @param image the buffered image.
+   * @param colorTolerance the alphaSensitivity.
+   * @param inversePickColor choose to pick the chosen color or all colors not chosen
+   * @param pickColor color to compare against pixel color
+   * @return the area.
+   */
+  private static List<Geometry> createVblGeometry(
+      BufferedImage image, int colorTolerance, boolean inversePickColor, Color pickColor) {
+
+    if (image == null) {
+      return Collections.emptyList();
+    }
+
+    ArrayList<Geometry> geometryList = new ArrayList<>();
+    GeometricShapeFactory gsf = new GeometricShapeFactory();
+    gsf.setNumPoints(4);
+    gsf.setWidth(1);
+
+    int y1, y2;
+    boolean addArea = false;
+
+    for (int x = 0; x < image.getWidth(); x++) {
+      y1 = 99;
+      y2 = -1;
+      for (int y = 0; y < image.getHeight(); y++) {
+        if (Thread.interrupted()) {
+          log.info("Thread interrupted!");
+          return geometryList;
+        }
+
+        Color pixelColor = new Color(image.getRGB(x, y), true);
+
+        if (colorWithinTolerance(pickColor, pixelColor, colorTolerance, inversePickColor)) {
+          if (y1 == 99) {
+            y1 = y;
+            y2 = y;
+          }
+          if (y > (y2 + 1)) {
+            gsf.setHeight(y2 - y1);
+            gsf.setBase(new Coordinate(x, y1));
+            geometryList.add(gsf.createRectangle());
+            y1 = y;
+            y2 = y;
+          }
+          y2 = y;
+        }
+      }
+
+      if ((y2 - y1) >= 0) {
+        gsf.setHeight(y2 - y1 + 1);
+        gsf.setBase(new Coordinate(x, y1));
+        geometryList.add(gsf.createRectangle());
+      }
+    }
+
+    return geometryList;
+  }
+
+  private static boolean colorWithinTolerance(
+      Color pick, Color pixel, int tolerance, boolean inversePick) {
+
+    double distance = distanceSquared(pick, pixel);
+
+    if (distance > tolerance) {
+      log.trace("Color Distance: {}", distance);
+    }
+
+    if (distance <= tolerance) {
+      return !inversePick;
+    } else {
+      return inversePick;
+    }
+  }
+
+  private static double distanceSquared(Color a, Color b) {
+    int deltaR = a.getRed() - b.getRed();
+    int deltaG = a.getGreen() - b.getGreen();
+    int deltaB = a.getBlue() - b.getBlue();
+    int deltaAlpha = a.getAlpha() - b.getAlpha();
+
+    double rgbDistanceSquared = (deltaR * deltaR + deltaG * deltaG + deltaB * deltaB) / 3;
+
+    double result =
+        deltaAlpha * deltaAlpha / 2.0
+            + rgbDistanceSquared * a.getAlpha() * b.getAlpha() / 65025; // 255^2 = 65025
+
+    return Math.sqrt(result);
   }
 
   public enum JTS_SimplifyMethodType {
