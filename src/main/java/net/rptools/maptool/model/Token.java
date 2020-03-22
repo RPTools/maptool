@@ -154,6 +154,7 @@ public class Token extends BaseModel implements Cloneable {
     setImageAsset,
     setPortraitImage,
     setCharsheetImage,
+    setLayout,
     clearLightSources,
     removeLightSource,
     addLightSource,
@@ -1925,10 +1926,16 @@ public class Token extends BaseModel implements Cloneable {
     return new Point(anchorX, anchorY);
   }
 
+  /** @return the scale of the token layout */
   public double getSizeScale() {
     return sizeScale;
   }
 
+  /**
+   * Set the scale of the token layout
+   *
+   * @param scale the scale of the token
+   */
   public void setSizeScale(double scale) {
     sizeScale = scale;
   }
@@ -2423,6 +2430,10 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setCharsheetImage:
         setCharsheetImage((MD5Key) parameters[0]);
+        break;
+      case setLayout:
+        setSizeScale((Double) parameters[0]);
+        setAnchor((int) parameters[1], (int) parameters[2]);
         break;
       case clearLightSources:
         if (hasLightSources()) {
