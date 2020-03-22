@@ -1051,7 +1051,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
         namesList.forEach(n -> jarr.add(new JsonPrimitive(n)));
         return jarr.toString();
       } else {
-        return StringFunctions.getInstance().join(namesList);
+        return StringFunctions.getInstance().join(namesList, delim);
       }
     }
   }
