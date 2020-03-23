@@ -1926,6 +1926,14 @@ public class Token extends BaseModel implements Cloneable {
     return new Point(anchorX, anchorY);
   }
 
+  public int getAnchorX() {
+    return anchorX;
+  }
+
+  public int getAnchorY() {
+    return anchorY;
+  }
+
   /** @return the scale of the token layout */
   public double getSizeScale() {
     return sizeScale;

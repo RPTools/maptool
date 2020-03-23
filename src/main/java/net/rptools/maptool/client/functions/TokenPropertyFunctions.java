@@ -804,10 +804,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
       String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
       Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
 
-      Point anchor = token.getAnchor();
       Double scale = token.getSizeScale();
-      Double xOffset = anchor.getX();
-      Double yOffset = anchor.getY();
+      int xOffset = token.getAnchorX();
+      int yOffset = token.getAnchorY();
 
       if ("json".equals(delim)) {
         JsonObject jarr = new JsonObject();
@@ -837,13 +836,13 @@ public class TokenPropertyFunctions extends AbstractFunction {
       if (!"".equals(parameters.get(1))) {
         xOffset = FunctionUtil.paramAsInteger(functionName, parameters, 1, false);
       } else {
-        xOffset = (int) token.getAnchor().getX();
+        xOffset = token.getAnchorX();
       }
       int yOffset;
       if (!"".equals(parameters.get(2))) {
         yOffset = FunctionUtil.paramAsInteger(functionName, parameters, 2, false);
       } else {
-        yOffset = (int) token.getAnchor().getY();
+        yOffset = token.getAnchorY();
       }
 
       MapTool.serverCommand()
