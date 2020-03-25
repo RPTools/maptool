@@ -355,6 +355,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
           }
         }
       }
+      terrainAdder = terrainAdder / cell_cost;
 
       if (blockNode) {
         continue;
@@ -382,17 +383,16 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         if ((int) neighbor.distanceTraveledWithoutTerrain
             != neighbor.distanceTraveledWithoutTerrain) {
 
-          neighbor.g = node.g + terrainAdder + (cell_cost * terrainMultiplier);
+          neighbor.g = node.g + terrainAdder + terrainMultiplier;
 
-          neighbor.distanceTraveled =
-              node.distanceTraveled + terrainAdder + (cell_cost * terrainMultiplier);
+          neighbor.distanceTraveled = node.distanceTraveled + terrainAdder + terrainMultiplier;
         } else {
-          neighbor.g = node.g + terrainAdder + (cell_cost * terrainMultiplier * diagonalMultiplier);
+          neighbor.g = node.g + terrainAdder + terrainMultiplier * diagonalMultiplier;
 
           neighbor.distanceTraveled =
               node.distanceTraveled
                   + terrainAdder
-                  + (cell_cost * terrainMultiplier * Math.ceil(diagonalMultiplier));
+                  + terrainMultiplier * Math.ceil(diagonalMultiplier);
         }
       }
 
