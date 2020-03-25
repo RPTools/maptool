@@ -147,7 +147,7 @@ public class DrawablesPanel extends JComponent {
       Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds());
       // Handle pen size
       Pen pen = element.getPen();
-      int penSize = (int) pen.getThickness();
+      int penSize = pen.getForegroundMode() == Pen.MODE_TRANSPARENT ? 0 : (int) pen.getThickness();
       drawnBounds.setRect(
           drawnBounds.getX() - penSize,
           drawnBounds.getY() - penSize,
