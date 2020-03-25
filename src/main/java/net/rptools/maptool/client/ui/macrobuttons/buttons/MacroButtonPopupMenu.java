@@ -317,15 +317,13 @@ public class MacroButtonPopupMenu extends JPopupMenu {
       EventQueue.invokeLater(
           new Runnable() {
             public void run() {
-              if (selectedFile.exists()) {
-                if (selectedFile.getName().endsWith(".mtmacro")) {
-                  if (!MapTool.confirm(
-                      I18N.getText("confirm.macro.exportInto", button.getName()))) {
-                    return;
-                  }
-                } else if (!MapTool.confirm(I18N.getText("confirm.macro.exportOverwrite"))) {
+              if (!selectedFile.exists()) {
+                if (!MapTool.confirm(
+                    I18N.getText("confirm.macro.exportInto", button.getProperties().getLabel()))) {
                   return;
                 }
+              } else if (!MapTool.confirm(I18N.getText("confirm.macro.exportOverwrite"))) {
+                return;
               }
 
               try {
