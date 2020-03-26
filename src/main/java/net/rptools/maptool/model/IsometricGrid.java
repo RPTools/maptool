@@ -223,7 +223,8 @@ public class IsometricGrid extends Grid {
   @Override
   public Rectangle getBounds(CellPoint cp) {
     ZonePoint zp = convert(cp);
-    return new Rectangle(zp.x - getSize(), zp.y, getSize() * 2, getSize());
+    return new Rectangle(
+        zp.x - getSize() + getOffsetX(), zp.y, getSize() * 2, getSize() + getOffsetY());
   }
 
   @Override
