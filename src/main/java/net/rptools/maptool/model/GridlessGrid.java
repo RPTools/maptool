@@ -141,7 +141,7 @@ public class GridlessGrid extends Grid {
 
   @Override
   public Rectangle getBounds(CellPoint cp) {
-    return new Rectangle(cp.x + getOffsetX(), cp.y + getOffsetY(), getSize(), getSize());
+    return new Rectangle(cp.x, cp.y, getSize(), getSize());
   }
 
   @Override
