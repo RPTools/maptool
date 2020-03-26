@@ -207,15 +207,15 @@ public class IsometricGrid extends Grid {
 
   @Override
   public ZonePoint convert(CellPoint cp) {
-    double mapX = (cp.x - cp.y) * getCellWidthHalf();
-    double mapY = (cp.x + cp.y) * getCellHeightHalf();
+    double mapX = (cp.x - cp.y) * getCellWidthHalf() + getOffsetX();
+    double mapY = (cp.x + cp.y) * getCellHeightHalf() + getOffsetY();
     return new ZonePoint((int) (mapX), (int) (mapY));
   }
 
   @Override
   public ZonePoint getNearestVertex(ZonePoint point) {
-    double px = point.x - getOffsetX();
-    double py = point.y - getOffsetY() + getCellHeightHalf();
+    double px = point.x;
+    double py = point.y + getCellHeightHalf();
     ZonePoint zp = new ZonePoint((int) px, (int) py);
     return convert(convert(zp));
   }
@@ -223,8 +223,7 @@ public class IsometricGrid extends Grid {
   @Override
   public Rectangle getBounds(CellPoint cp) {
     ZonePoint zp = convert(cp);
-    return new Rectangle(
-        zp.x - getSize() + getOffsetX(), zp.y, getSize() * 2, getSize() + getOffsetY());
+    return new Rectangle(zp.x - getSize(), zp.y, getSize() * 2, getSize());
   }
 
   @Override
