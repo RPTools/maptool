@@ -857,12 +857,14 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Saves the macro.
+   *
+   * @param macroButton the button holding the macro
+   * @param file the file to save
+   * @throws IOException if the file can't be saved
+   */
   public static void saveMacro(MacroButtonProperties macroButton, File file) throws IOException {
-    // Put this in FileUtil
-    if (!file.getName().contains(".")) {
-      file = new File(file.getAbsolutePath() + AppConstants.MACRO_FILE_EXTENSION);
-    }
-
     try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setContent(macroButton);
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
