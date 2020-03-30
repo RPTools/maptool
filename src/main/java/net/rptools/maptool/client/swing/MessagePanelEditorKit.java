@@ -82,7 +82,9 @@ public class MessagePanelEditorKit extends HTMLEditorKit {
   public void install(JEditorPane c) {
     super.install(c);
     for (MouseListener listener : c.getMouseListeners()) {
-      c.removeMouseListener(listener); // remove the link handler
+      if (listener instanceof LinkController) {
+        c.removeMouseListener(listener); // remove the link handler
+      }
     }
     c.addMouseListener(linkHandler); // add the modified one
   }
