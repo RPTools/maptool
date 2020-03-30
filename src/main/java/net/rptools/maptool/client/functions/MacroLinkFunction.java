@@ -19,9 +19,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -259,27 +259,15 @@ public class MacroLinkFunction extends AbstractFunction {
     return sb.toString();
   }
 
-  private String encode(String str) throws ParserException {
-    try {
-      JSONMacroFunctions.getInstance().asJsonElement(str);
-      try {
-        return URLEncoder.encode(str, "utf-8");
-      } catch (UnsupportedEncodingException e) {
-        throw new ParserException(e);
-      }
-    } catch (ParserException e) {
-      return strPropListToArgs(str);
-    }
+  private String encode(String str) {
+    JSONMacroFunctions.getInstance().asJsonElement(str);
+    return URLEncoder.encode(str, StandardCharsets.UTF_8);
   }
 
-  private String decode(String str) throws ParserException {
-    try {
-      return JSONMacroFunctions.getInstance()
-          .asJsonElement(URLDecoder.decode(str, "utf-8"))
-          .getAsString();
-    } catch (UnsupportedEncodingException e) {
-      throw new ParserException(e);
-    }
+  private String decode(String str) {
+    return JSONMacroFunctions.getInstance()
+        .asJsonElement(URLDecoder.decode(str, StandardCharsets.UTF_8))
+        .getAsString();
   }
 
   /**
@@ -287,26 +275,21 @@ public class MacroLinkFunction extends AbstractFunction {
    *
    * @param args the URL argument string.
    * @return a property list representation of the arguments.
-   * @throws ParserException if the argument encoding is incorrect.
    */
-  public static String argsToStrPropList(String args) throws ParserException {
+  public static String argsToStrPropList(String args) {
     String vals[] = args.split("&");
     StringBuilder propList = new StringBuilder();
 
-    try {
-      for (String s : vals) {
-        String decoded = URLDecoder.decode(s, "utf-8");
-        if (propList.length() == 0) {
-          propList.append(decoded);
-        } else {
-          propList.append(" ; ");
-          propList.append(decoded);
-        }
+    for (String s : vals) {
+      String decoded = URLDecoder.decode(s, StandardCharsets.UTF_8);
+      if (propList.length() == 0) {
+        propList.append(decoded);
+      } else {
+        propList.append(" ; ");
+        propList.append(decoded);
       }
-      return propList.toString();
-    } catch (UnsupportedEncodingException e) {
-      throw new ParserException(e);
     }
+    return propList.toString();
   }
 
   /**
@@ -314,24 +297,19 @@ public class MacroLinkFunction extends AbstractFunction {
    *
    * @param props The property list to convert.
    * @return a string that can be used as an argument to a url.
-   * @throws ParserException if there is an error in encoding.
    */
-  public String strPropListToArgs(String props) throws ParserException {
+  public String strPropListToArgs(String props) {
     String vals[] = props.split(";");
     StringBuilder args = new StringBuilder();
-    try {
-      for (String s : vals) {
-        s = s.trim();
-        String encoded = URLEncoder.encode(s, "utf-8");
-        if (args.length() == 0) {
-          args.append(encoded);
-        } else {
-          args.append("&");
-          args.append(encoded);
-        }
+    for (String s : vals) {
+      s = s.trim();
+      String encoded = URLEncoder.encode(s, StandardCharsets.UTF_8);
+      if (args.length() == 0) {
+        args.append(encoded);
+      } else {
+        args.append("&");
+        args.append(encoded);
       }
-    } catch (UnsupportedEncodingException e) {
-      throw new ParserException(e);
     }
 
     return args.toString();
@@ -368,12 +346,7 @@ public class MacroLinkFunction extends AbstractFunction {
             Double.parseDouble(val);
             // Do nothing as its a number
           } catch (NumberFormatException e) {
-            try {
-              val = "\"" + argsToStrPropList(val) + "\"";
-            } catch (ParserException e1) {
-              MapTool.addLocalMessage(
-                  I18N.getText("macro.function.macroLink.errorRunning", e1.getLocalizedMessage()));
-            }
+            val = "\"" + argsToStrPropList(val) + "\"";
           }
           tip.append("<tr><th>")
               .append(I18N.getText("macro.function.macroLink.arguments"))
@@ -469,11 +442,7 @@ public class MacroLinkFunction extends AbstractFunction {
             Double.parseDouble(val);
             // Do nothing as its a number
           } catch (NumberFormatException e) {
-            try {
-              val = argsToStrPropList(val);
-            } catch (ParserException e1) {
-              MapTool.addLocalMessage("Error running macro link: " + e1.getMessage());
-            }
+            val = argsToStrPropList(val);
           }
           args = val;
           try {

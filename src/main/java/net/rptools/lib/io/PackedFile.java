@@ -32,6 +32,7 @@ import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -475,7 +476,7 @@ public class PackedFile implements AutoCloseable {
   public void putFile(String path, Object obj) throws IOException {
     File explodedFile = putFileImpl(path);
     FileOutputStream fos = new FileOutputStream(explodedFile);
-    OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+    OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
     try (BufferedWriter bw = new BufferedWriter(osw)) {
       xstream.toXML(obj, bw);
 
@@ -578,7 +579,7 @@ public class PackedFile implements AutoCloseable {
         if (type == null) type = FileUtil.getContentType(explodedFile);
         log.debug("FileUtil.getContentType() returned " + (type != null ? type : "(null)"));
       }
-      return new LineNumberReader(new InputStreamReader(in, "UTF-8"));
+      return new LineNumberReader(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (IOException ex) {
       // Don't need to close 'in' since zipFile.close() will do so
       throw ex;

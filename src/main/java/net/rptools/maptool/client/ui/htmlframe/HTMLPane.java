@@ -51,6 +51,14 @@ public class HTMLPane extends JEditorPane {
   /** The editorKit that handles the HTML. */
   private final HTMLPaneEditorKit editorKit;
 
+  /** The default rule for the body tag. */
+  private static final String CSS_RULE_BODY =
+      "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8}";
+  /** The default rule for the div tag. */
+  private static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
+  /** The default rule for the span tag. */
+  private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
+
   public HTMLPane() {
     editorKit = new HTMLPaneEditorKit(this);
     setEditorKit(editorKit);
@@ -70,6 +78,8 @@ public class HTMLPane extends JEditorPane {
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
               if (e.getURL() != null) {
                 MapTool.showDocument(e.getURL().toString());
+              } else if (e.getDescription().startsWith("#")) {
+                scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
               } else {
                 Matcher m = MessagePanel.URL_PATTERN.matcher(e.getDescription());
                 if (m.matches()) {
@@ -81,6 +91,7 @@ public class HTMLPane extends JEditorPane {
             }
           }
         });
+
     ToolTipManager.sharedInstance().registerComponent(this);
   }
 
@@ -177,12 +188,9 @@ public class HTMLPane extends JEditorPane {
         style.removeStyle(s);
       }
 
-      style.addRule(
-          "body { font-family: sans-serif; font-size: "
-              + AppPreferences.getFontSize()
-              + "pt; background: #ECE9D8}");
-      style.addRule("div {margin-bottom: 5px}");
-      style.addRule("span.roll {background:#efefef}");
+      style.addRule(String.format(CSS_RULE_BODY, AppPreferences.getFontSize()));
+      style.addRule(CSS_RULE_DIV);
+      style.addRule(CSS_RULE_SPAN);
       parse.parse(new StringReader(text), new ParserCallBack(), true);
     } catch (IOException e) {
       // Do nothing, we should not get an io exception on string

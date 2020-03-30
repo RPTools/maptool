@@ -16,9 +16,9 @@ package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import java.awt.Image;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,6 +102,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "setGMNotes",
         "getNotes",
         "setNotes",
+        "getTokenLayoutProps",
+        "setTokenLayoutProps",
         "setTokenSnapToGrid");
   }
 
@@ -793,6 +795,61 @@ public class TokenPropertyFunctions extends AbstractFunction {
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setSnapToGrid, toGrid);
       return token.isSnapToGrid() ? BigDecimal.ONE : BigDecimal.ZERO;
     }
+
+    /*
+     * String/JsonObject = getTokenLayoutProps(String delim: ',', String tokenId: currentToken(), String mapName: current map)
+     */
+    if (functionName.equalsIgnoreCase("getTokenLayoutProps")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
+      String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 1, 2);
+
+      Double scale = token.getSizeScale();
+      int xOffset = token.getAnchorX();
+      int yOffset = token.getAnchorY();
+
+      if ("json".equals(delim)) {
+        JsonObject jarr = new JsonObject();
+        jarr.addProperty("scale", scale);
+        jarr.addProperty("xOffset", xOffset);
+        jarr.addProperty("yOffset", yOffset);
+        return jarr;
+      } else {
+        return "scale=" + scale + delim + "xOffset=" + xOffset + delim + "yOffset=" + yOffset;
+      }
+    }
+
+    /*
+     * setTokenLayoutProps(scale, xOffset, yOffset, token: currentToken(), mapName = current map)
+     */
+    if (functionName.equalsIgnoreCase("setTokenLayoutProps")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 3, 5);
+      Token token = FunctionUtil.getTokenFromParam(parser, functionName, parameters, 3, 4);
+
+      double scale;
+      if (!"".equals(parameters.get(0))) {
+        scale = FunctionUtil.paramAsDouble(functionName, parameters, 0, false);
+      } else {
+        scale = token.getSizeScale();
+      }
+      int xOffset;
+      if (!"".equals(parameters.get(1))) {
+        xOffset = FunctionUtil.paramAsInteger(functionName, parameters, 1, false);
+      } else {
+        xOffset = token.getAnchorX();
+      }
+      int yOffset;
+      if (!"".equals(parameters.get(2))) {
+        yOffset = FunctionUtil.paramAsInteger(functionName, parameters, 2, false);
+      } else {
+        yOffset = token.getAnchorY();
+      }
+
+      MapTool.serverCommand()
+          .updateTokenProperty(token, Token.Update.setLayout, scale, xOffset, yOffset);
+      return "";
+    }
+
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
   }
 
@@ -993,7 +1050,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
         namesList.forEach(n -> jarr.add(new JsonPrimitive(n)));
         return jarr.toString();
       } else {
-        return StringFunctions.getInstance().join(namesList);
+        return StringFunctions.getInstance().join(namesList, delim);
       }
     }
   }

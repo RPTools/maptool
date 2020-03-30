@@ -154,6 +154,7 @@ public class Token extends BaseModel implements Cloneable {
     setImageAsset,
     setPortraitImage,
     setCharsheetImage,
+    setLayout,
     clearLightSources,
     removeLightSource,
     addLightSource,
@@ -1411,36 +1412,20 @@ public class Token extends BaseModel implements Cloneable {
     // Apply the coordinate translation
     AffineTransform atArea = AffineTransform.getTranslateInstance(tx, ty);
 
-    double rx, ry;
-    if (isSnapToScale()) {
-      // Find the center x,y coords of the rectangle
-      rx = (getWidth() / 2) - (getAnchor().getX() / 2);
-      ry = (getHeight() / 2) - (getAnchor().getY() / 2);
+    double scalerX = isSnapToScale() ? ((double) imgSize.width) / getWidth() : scaleX;
+    double scalerY = isSnapToScale() ? ((double) imgSize.height) / getHeight() : scaleY;
 
-      // Apply the scale transformation
+    // Apply the rotation transformation...
+    if (getShape() == Token.TokenShape.TOP_DOWN && hasFacing()) {
+      // Find the center x,y coords of the rectangle
+      double rx = getWidth() / 2.0 * scalerX - getAnchor().getX();
+      double ry = getHeight() / 2.0 * scalerY - getAnchor().getY();
+
       atArea.concatenate(
-          AffineTransform.getScaleInstance(
-              ((double) imgSize.width) / getWidth(), ((double) imgSize.height) / getHeight()));
-
-      // Apply the rotation transformation...
-      if (getShape() == Token.TokenShape.TOP_DOWN) {
-        atArea.concatenate(
-            AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
-      }
-    } else {
-      // Find the center x,y coords of the rectangle
-      rx = ((getWidth() / 2) - (getAnchor().getX() / scaleX)) * scaleX;
-      ry = ((getHeight() / 2) - (getAnchor().getY() / scaleY)) * scaleY;
-
-      // Apply the rotation transformation...
-      if (getShape() == Token.TokenShape.TOP_DOWN) {
-        atArea.concatenate(
-            AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
-      }
-
-      // Apply the scale transformation
-      atArea.concatenate(AffineTransform.getScaleInstance(scaleX, scaleY));
+          AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
     }
+    // Apply the scale transformation
+    atArea.concatenate(AffineTransform.getScaleInstance(scalerX, scalerY));
 
     // Lets account for flipped images...
     if (isFlippedX) {
@@ -1941,10 +1926,24 @@ public class Token extends BaseModel implements Cloneable {
     return new Point(anchorX, anchorY);
   }
 
+  public int getAnchorX() {
+    return anchorX;
+  }
+
+  public int getAnchorY() {
+    return anchorY;
+  }
+
+  /** @return the scale of the token layout */
   public double getSizeScale() {
     return sizeScale;
   }
 
+  /**
+   * Set the scale of the token layout
+   *
+   * @param scale the scale of the token
+   */
   public void setSizeScale(double scale) {
     sizeScale = scale;
   }
@@ -2439,6 +2438,10 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setCharsheetImage:
         setCharsheetImage((MD5Key) parameters[0]);
+        break;
+      case setLayout:
+        setSizeScale((Double) parameters[0]);
+        setAnchor((int) parameters[1], (int) parameters[2]);
         break;
       case clearLightSources:
         if (hasLightSources()) {

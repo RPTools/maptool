@@ -86,6 +86,8 @@ public class MessagePanel extends JPanel {
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
               if (e.getURL() != null) {
                 MapTool.showDocument(e.getURL().toString());
+              } else if (e.getDescription().startsWith("#")) {
+                textPane.scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
               } else {
                 Matcher m = URL_PATTERN.matcher(e.getDescription());
                 if (m.matches()) {

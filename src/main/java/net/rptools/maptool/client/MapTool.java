@@ -676,11 +676,7 @@ public class MapTool {
     AppSetup.install();
 
     // Clean up after ourselves
-    try {
-      FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
-    } catch (IOException ioe) {
-      MapTool.showError("While initializing (cleaning tmpdir)", ioe);
-    }
+    FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
     // We'll manage our own images
     ImageIO.setUseCache(false);
 
