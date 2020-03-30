@@ -1806,8 +1806,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             .setTokenVBL_optimized(
                 TokenVBL.simplifyArea(
                     originalVBL,
-                    getTokenVblPanel().getJtsMethod(),
-                    getTokenVblPanel().getJtsDistanceTolerance()));
+                    getTokenVblPanel().getJtsDistanceTolerance(),
+                    getTokenVblPanel().getJtsMethod()));
       }
     }
 

@@ -56,21 +56,30 @@ public class TokenVBL {
   private static int sliceSize = 100;
 
   /**
-   * TODO: Used by macro function only, update it.
-   *
    * <p>A passed token will have it's image asset rendered into an Area based on pixels that have an
    * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
    *
    * @param token the token
    * @param alphaSensitivity the alpha sensitivity of the VBL area
+   * @param inverseVbl match the ignoreColor or everything but ignoreColor
+   * @param ignoreColor color to match for VBL generation
+   * @param distanceTolerance JTS distance tolerance
+   * @param method JTS method to use for optimization
    * @return Area
    * @author Jamz
    * @since 1.6.0
    */
-  public static Area createOptimizedVblArea(Token token, int alphaSensitivity) {
-    final Area vblArea =
-        createVblAreaFromToken(token, alphaSensitivity, false, new Color(0, 0, 0, 0));
-    return simplifyArea(vblArea, JTS_SimplifyMethodType.getDefault(), 10);
+  public static Area createOptimizedVblArea(
+      Token token,
+      int alphaSensitivity,
+      boolean inverseVbl,
+      Color ignoreColor,
+      int distanceTolerance,
+      String method) {
+    final Area vblArea = createVblAreaFromToken(token, alphaSensitivity, inverseVbl, ignoreColor);
+    final JTS_SimplifyMethodType jtsMethod = JTS_SimplifyMethodType.fromString(method);
+
+    return simplifyArea(vblArea, distanceTolerance, jtsMethod);
   }
 
   public static Area createVblAreaFromToken(
@@ -103,7 +112,7 @@ public class TokenVBL {
   }
 
   public static Area simplifyArea(
-      Area vblArea, JTS_SimplifyMethodType simplifyMethod, double distanceTolerance) {
+      Area vblArea, double distanceTolerance, JTS_SimplifyMethodType simplifyMethod) {
 
     if (simplifyMethod.equals(JTS_SimplifyMethodType.NONE)) {
       return vblArea;
@@ -473,6 +482,10 @@ public class TokenVBL {
     NONE("No Optimization");
 
     private final String label;
+
+    public String getLabel() {
+      return label;
+    }
 
     JTS_SimplifyMethodType(String label) {
       this.label = label;
