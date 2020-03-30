@@ -25,6 +25,8 @@ import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
+import net.rptools.lib.FileUtil;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MacroButtonDialog;
@@ -306,6 +308,11 @@ public class MacroButtonPopupMenu extends JPopupMenu {
       putValue(Action.NAME, name);
     }
 
+    /**
+     * Shows a prompt to save the macro.
+     *
+     * @param event the event
+     */
     public void actionPerformed(ActionEvent event) {
       JFileChooser chooser = MapTool.getFrame().getSaveMacroFileChooser();
 
@@ -313,7 +320,9 @@ public class MacroButtonPopupMenu extends JPopupMenu {
         return;
       }
 
-      final File selectedFile = chooser.getSelectedFile();
+      final File selectedFile =
+          FileUtil.getFileWithExtension(
+              chooser.getSelectedFile(), AppConstants.MACRO_FILE_EXTENSION);
       EventQueue.invokeLater(
           new Runnable() {
             public void run() {
