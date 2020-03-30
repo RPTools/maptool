@@ -56,7 +56,7 @@ public class TokenVBL {
   private static int sliceSize = 100;
 
   /**
-   * <p>A passed token will have it's image asset rendered into an Area based on pixels that have an
+   * A passed token will have it's image asset rendered into an Area based on pixels that have an
    * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
    *
    * @param token the token
