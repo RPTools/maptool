@@ -1636,7 +1636,7 @@
                               <at name="name">inverseVblCheckbox</at>
                               <at name="width">150</at>
                               <at name="text">Inverse VBL Color Selection</at>
-                              <at name="toolTipText">Draw the VBL around the token vs Over the token</at>
+                              <at name="toolTipText">Generate VBL where the color does not match on the token when checked.</at>
                               <at name="height">16</at>
                              </object>
                             </at>
@@ -1732,6 +1732,7 @@
                              <object classname="com.jeta.forms.store.support.PropertyMap">
                               <at name="name">vblIgnoreColorWell</at>
                               <at name="width">42</at>
+                              <at name="toolTipText">Manually pick a color to match against when generating token VBL.</at>
                               <at name="height">40</at>
                              </object>
                             </at>
@@ -1795,6 +1796,7 @@
                               </at>
                               <at name="name">vblColorPickerToggleButton</at>
                               <at name="width">44</at>
+                              <at name="toolTipText">Pick a color from the image to match against when generating token VBL.</at>
                               <at name="height">40</at>
                              </object>
                             </at>
@@ -2322,7 +2324,13 @@
                              <object classname="com.jeta.forms.store.support.PropertyMap">
                               <at name="name">visibilityToleranceSpinner</at>
                               <at name="width">44</at>
-                              <at name="toolTipText">Controls how many of the tokens regions must be seen before showing over FoW, range is 1-9 regions.</at>
+                              <at name="toolTipText">&lt;html&gt;Controls how many of the tokens regions must be seen before showing over FoW, range is 1-9 regions.&lt;br&gt;
+&lt;br&gt;
+The image is sliced into an even 3 x 3 grid for a total of 9 regions. The tolerance controls how many of these &quot;regions&quot; must be &quot;seen&quot; by another token before it&apos;s image is revealed.&lt;br&gt;
+&lt;br&gt;
+For a very large roof, because of vision distance, you may want to use a value of 1.&lt;br&gt;
+Where as for a smaller token like a statue, you may not want to show the image until more of it is visable and use a value of 3 or 4.
+&lt;/html&gt;</at>
                               <at name="height">20</at>
                              </object>
                             </at>
@@ -2459,6 +2467,9 @@
                                 </at>
                                </object>
                               </at>
+                              <at name="toolTipText">&lt;html&gt;Advanced Use: Choose the algorithm used to decimate curves in the generated polygon.&lt;br&gt;
+&lt;br&gt;
+The default is generally the best but unique polygons may benifit from one of the other selected algorithms.&lt;/html&gt;</at>
                               <at name="height">18</at>
                               <at name="itemCount">4</at>
                               <at name="maximumRowCount">4</at>
@@ -2495,7 +2506,7 @@
                              <object classname="com.jeta.forms.store.support.PropertyMap">
                               <at name="name">alphaSensitivitySpinner</at>
                               <at name="width">44</at>
-                              <at name="toolTipText">Adjust the sensitivity to transparency that will be used to generate VBL, values 0-255.</at>
+                              <at name="toolTipText">Adjust the sensitivity to the color match that will be used to generate VBL, values 0-255 with 0 being an exact color match.</at>
                               <at name="height">20</at>
                              </object>
                             </at>
@@ -2530,7 +2541,7 @@
                              <object classname="com.jeta.forms.store.support.PropertyMap">
                               <at name="name">jtsDistanceToleranceSpinner</at>
                               <at name="width">44</at>
-                              <at name="toolTipText">Sets the distance tolerance for the simplification. All vertices in the simplified geometry will be within this distance of the original geometry. Distance of 0 disables simplification.</at>
+                              <at name="toolTipText">Sets the tolerance for the optimization, a value of 0 disables optimization and values &gt; 0 reduce the number of polygon points for better performance.</at>
                               <at name="height">20</at>
                              </object>
                             </at>
