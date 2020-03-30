@@ -16,19 +16,17 @@ package net.rptools.maptool.client.ui.htmlframe;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Stack;
+import java.util.regex.Matcher;
 import javax.swing.*;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.Element;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.MutableAttributeSet;
-import javax.swing.text.Position;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -36,6 +34,7 @@ import javax.swing.text.html.StyleSheet;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.client.ui.commandpanel.MessagePanel;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,61 +59,38 @@ public class HTMLPane extends JEditorPane {
   /** The default rule for the span tag. */
   private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
 
-  /** Replacement for the HyperlinkListener, to better handle hyperlink clicks. */
-  private final class HyperlinkMouseListener extends MouseAdapter {
-    @Override
-    public void mouseReleased(MouseEvent e) {
-      // Triggered by a  mouse button release, which is much more lenient than a mouse click
-      Element h = getHyperlinkElement(e);
-      if (h != null && e.getButton() == MouseEvent.BUTTON1) {
-        Object attribute = h.getAttributes().getAttribute(HTML.Tag.A);
-        if (attribute instanceof AttributeSet) {
-          AttributeSet set = (AttributeSet) attribute;
-          String href = (String) set.getAttribute(HTML.Attribute.HREF);
-          if (href != null) {
-            String href2 = href.trim().toLowerCase();
-            if (href2.startsWith("macro")) {
-              // run as macroLink;
-              SwingUtilities.invokeLater(() -> MacroLinkFunction.runMacroLink(href));
-            } else if (href2.startsWith("#")) {
-              scrollToReference(href.substring(1)); // scroll to the anchor
-              setCursor(editorKit.getDefaultCursor()); // replace cursor, or it will stay as a hand
-            } else if (!href2.startsWith("javascript")) {
-              // non-macrolink, non-anchor link, non-javascript code
-              MapTool.showDocument(href); // show in usual browser
-            }
-          }
-        }
-      }
-    }
-
-    /**
-     * Returns the hyperlink element from a mouse event.
-     *
-     * @param event the mouse event triggering the hyperlink
-     * @return the document element corresponding to the link
-     */
-    private Element getHyperlinkElement(MouseEvent event) {
-      JEditorPane editor = (JEditorPane) event.getSource();
-      int pos = editor.getUI().viewToModel2D(editor, event.getPoint(), new Position.Bias[1]);
-      if (pos >= 0 && editor.getDocument() instanceof HTMLDocument) {
-        HTMLDocument hdoc = (HTMLDocument) editor.getDocument();
-        Element elem = hdoc.getCharacterElement(pos);
-        if (elem.getAttributes().getAttribute(HTML.Tag.A) != null) {
-          return elem;
-        }
-      }
-      return null;
-    }
-  }
-
   public HTMLPane() {
     editorKit = new HTMLPaneEditorKit(this);
     setEditorKit(editorKit);
     setContentType("text/html");
     setEditable(false);
 
-    addMouseListener(new HyperlinkMouseListener()); // not a HyperlinkListener
+    addHyperlinkListener(
+        new HyperlinkListener() {
+          public void hyperlinkUpdate(HyperlinkEvent e) {
+            if (log.isDebugEnabled()) {
+              log.debug(
+                  "Responding to hyperlink event: "
+                      + e.getEventType().toString()
+                      + " "
+                      + e.toString());
+            }
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+              if (e.getURL() != null) {
+                MapTool.showDocument(e.getURL().toString());
+              } else if (e.getDescription().startsWith("#")) {
+                scrollToReference(e.getDescription().substring(1)); // scroll to the anchor
+              } else {
+                Matcher m = MessagePanel.URL_PATTERN.matcher(e.getDescription());
+                if (m.matches()) {
+                  if (m.group(1).equalsIgnoreCase("macro")) {
+                    MacroLinkFunction.runMacroLink(e.getDescription());
+                  }
+                }
+              }
+            }
+          }
+        });
 
     ToolTipManager.sharedInstance().registerComponent(this);
   }
