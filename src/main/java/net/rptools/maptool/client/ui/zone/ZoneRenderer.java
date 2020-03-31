@@ -4523,6 +4523,7 @@ public class ZoneRenderer extends JComponent
    *
    * @see java.awt.dnd.DropTargetListener#dragEnter(java.awt.dnd. DropTargetDragEvent )
    */
+  @Override
   public void dragEnter(DropTargetDragEvent dtde) {}
 
   /*
@@ -4530,6 +4531,7 @@ public class ZoneRenderer extends JComponent
    *
    * @see java.awt.dnd.DropTargetListener#dragExit(java.awt.dnd.DropTargetEvent)
    */
+  @Override
   public void dragExit(DropTargetEvent dte) {}
 
   /*
@@ -4537,9 +4539,18 @@ public class ZoneRenderer extends JComponent
    *
    * @see java.awt.dnd.DropTargetListener#dragOver (java.awt.dnd.DropTargetDragEvent)
    */
+  @Override
   public void dragOver(DropTargetDragEvent dtde) {}
 
-  private void addTokens(
+  /**
+   * Adds tokens at a given zone point coordinates.
+   *
+   * @param tokens the list of tokens to add
+   * @param zp the zone point where to add the tokens
+   * @param configureTokens the list indicating if each token is to be configured
+   * @param showDialog whether to display a token edit dialog
+   */
+  public void addTokens(
       List<Token> tokens, ZonePoint zp, List<Boolean> configureTokens, boolean showDialog) {
     GridCapabilities gridCaps = zone.getGrid().getCapabilities();
     boolean isGM = MapTool.getPlayer().isGM();
@@ -4739,6 +4750,7 @@ public class ZoneRenderer extends JComponent
    *
    * @see java.awt.dnd.DropTargetListener#drop (java.awt.dnd.DropTargetDropEvent)
    */
+  @Override
   public void drop(DropTargetDropEvent dtde) {
     ZonePoint zp =
         new ScreenPoint((int) dtde.getLocation().getX(), (int) dtde.getLocation().getY())
@@ -4767,6 +4779,7 @@ public class ZoneRenderer extends JComponent
    *
    * @see java.awt.dnd.DropTargetListener#dropActionChanged (java.awt.dnd.DropTargetDragEvent)
    */
+  @Override
   public void dropActionChanged(DropTargetDragEvent dtde) {}
 
   /** ZONE MODEL CHANGE LISTENER */
@@ -4860,7 +4873,10 @@ public class ZoneRenderer extends JComponent
       custom = createCustomCursor("image/cursor.png", "Group");
       cursor = custom;
     }
+    // overlay and ZoneRenderer should have same cursor as map
     super.setCursor(cursor);
+    MapTool.getFrame().getHtmlOverlay().setEditorKitDefaultCursor(cursor);
+    MapTool.getFrame().getHtmlOverlay().setCursor(cursor);
   }
 
   private Cursor custom = null;
