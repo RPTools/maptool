@@ -16,18 +16,7 @@ package net.rptools.maptool.client.ui;
 
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Desktop;
-import java.awt.EventQueue;
-import java.awt.GraphicsConfiguration;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.IllegalComponentStateException;
-import java.awt.Image;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.desktop.AboutEvent;
 import java.awt.desktop.AboutHandler;
 import java.awt.desktop.PreferencesEvent;
@@ -123,6 +112,7 @@ import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
 import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
+import net.rptools.maptool.client.ui.htmlframe.HTMLOverlay;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.*;
@@ -181,6 +171,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private final ClientConnectionPanel connectionPanel;
   /** The panel showing the initiative order. */
   private final InitiativePanel initiativePanel;
+  /** The HTML pane showing the map overlay. */
+  private final HTMLOverlay htmlOverlay;
 
   private final PointerOverlay pointerOverlay;
   private final CommandPanel commandPanel;
@@ -462,6 +454,7 @@ public class MapToolFrame extends DefaultDockableHolder
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
     initiativePanel = createInitiativePanel();
+    htmlOverlay = new HTMLOverlay();
 
     zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
     pointerOverlay = new PointerOverlay();
@@ -512,9 +505,15 @@ public class MapToolFrame extends DefaultDockableHolder
     commandPanel = new CommandPanel();
     MapTool.getMessageList().addObserver(commandPanel);
 
+    // Setup a JLayeredPane to display the HTML overlay over the map.
+    JLayeredPane zoneRenderLayered = new JLayeredPane();
+    zoneRenderLayered.setLayout(new LayeredPaneLayout());
+    zoneRenderLayered.add(zoneRendererPanel, JLayeredPane.DEFAULT_LAYER);
+    zoneRenderLayered.add(htmlOverlay, JLayeredPane.POPUP_LAYER);
+
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
-    rendererBorderPanel.add(zoneRendererPanel);
+    rendererBorderPanel.add(zoneRenderLayered);
     toolbarPanel = new ToolbarPanel(toolbox);
 
     // Put it all together
@@ -1509,6 +1508,11 @@ public class MapToolFrame extends DefaultDockableHolder
     return currentRenderer;
   }
 
+  /** @return the HTMLOverlay */
+  public HTMLOverlay getHtmlOverlay() {
+    return htmlOverlay;
+  }
+
   public void addZoneRenderer(ZoneRenderer renderer) {
     zoneRendererList.add(renderer);
   }
@@ -2098,6 +2102,34 @@ public class MapToolFrame extends DefaultDockableHolder
         }
       } else {
         macroButton.getProperties().executeMacro();
+      }
+    }
+  }
+
+  /**
+   * Layout for LayeredPanel where the bounds of every component is set to the size of the parent.
+   */
+  private static class LayeredPaneLayout implements LayoutManager {
+    @Override
+    public void addLayoutComponent(String name, Component comp) {}
+
+    @Override
+    public void removeLayoutComponent(Component comp) {}
+
+    @Override
+    public Dimension preferredLayoutSize(Container parent) {
+      return parent.getSize();
+    }
+
+    @Override
+    public Dimension minimumLayoutSize(Container parent) {
+      return preferredLayoutSize(parent);
+    }
+
+    @Override
+    public void layoutContainer(Container parent) {
+      for (Component comp : parent.getComponents()) {
+        comp.setBounds(0, 0, parent.getWidth(), parent.getHeight());
       }
     }
   }

@@ -209,6 +209,7 @@ public class MapToolLineParser {
   private enum OutputLoc { // Mutually exclusive output location
     CHAT,
     DIALOG,
+    OVERLAY,
     DIALOG5,
     FRAME,
     FRAME5
@@ -357,6 +358,8 @@ public class MapToolLineParser {
     DIALOG5("dialog5", 1, 2, "\"\""),
     // HTML webView
     FRAME5("frame5", 1, 2, "\"\""),
+    // HTML overlay
+    OVERLAY("overlay", 0, 1, "\"\""),
     // Run for another token
     TOKEN("token", 1, 1);
 
@@ -517,6 +520,10 @@ public class MapToolLineParser {
       matcher.region(start, endOfString);
       List<String> paramList = new ArrayList<String>();
       boolean lastItem = false; // true if last match ended in ")"
+      if (")".equals(optionString.substring(start))) {
+        lastItem = true;
+        start += 1;
+      }
 
       while (!lastItem) {
         if (matcher.find()) {
@@ -1028,6 +1035,11 @@ public class MapToolLineParser {
                   frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
                   outputTo = OutputLoc.FRAME5;
                   break;
+                case OVERLAY:
+                  codeType = CodeType.CODEBLOCK;
+                  outputTo = OutputLoc.OVERLAY;
+                  frameOpts = option.getParsedParam(0, resolver, tokenInContext).toString();
+                  break;
                   ///////////////////////////////////////////////////
                   // CODE OPTIONS
                   ///////////////////////////////////////////////////
@@ -1423,6 +1435,9 @@ public class MapToolLineParser {
             case DIALOG:
               HTMLFrameFactory.show(
                   frameName, false, false, frameOpts, expressionBuilder.toString());
+              break;
+            case OVERLAY:
+              MapTool.getFrame().getHtmlOverlay().updateContents(expressionBuilder.toString());
               break;
             case CHAT:
               builder.append(expressionBuilder);
