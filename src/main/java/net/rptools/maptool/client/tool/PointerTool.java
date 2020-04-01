@@ -570,6 +570,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     // WAYPOINT
     if (SwingUtilities.isRightMouseButton(e) && isDraggingToken) {
       setWaypoint();
+      setDraggingMap(false); // We no longer drag the map. Fixes bug #616
       return;
     }
 
