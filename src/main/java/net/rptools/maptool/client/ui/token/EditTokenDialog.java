@@ -225,10 +225,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     // ICON
     getTokenIconPanel().setImageId(token.getImageAssetId());
 
-    // PROPERTIES
-    updatePropertyTypeCombo();
-    updatePropertiesTable(token.getPropertyType());
-
     // SIGHT
     updateSightTypeCombo();
 
@@ -298,7 +294,12 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     getShapeCombo().setSelectedItem(token.getShape());
     setSizeCombo(token);
 
+    // Updates the Property Type list.
+    updatePropertyTypeCombo();
+
+    // Set the selected item in the Property Type list. Also triggers a itemStateChanged event
     getPropertyTypeCombo().setSelectedItem(token.getPropertyType());
+
     getSightTypeCombo()
         .setSelectedItem(
             token.getSightType() != null
@@ -495,22 +496,26 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JComboBox) getComponent("shape");
   }
 
+  /** Initializes the Property Type dropdown list. */
   public void initPropertyTypeCombo() {
-    updatePropertyTypeCombo();
+    updatePropertiesTable((String) getPropertyTypeCombo().getSelectedItem());
+    getPropertyTypeCombo()
+        .addItemListener(
+            new ItemListener() {
+              public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                  updatePropertiesTable((String) getPropertyTypeCombo().getSelectedItem());
+                }
+              }
+            });
   }
 
+  /** Updates the Property Type dropdown list with the current campaign types. */
   private void updatePropertyTypeCombo() {
     List<String> typeList = new ArrayList<String>(MapTool.getCampaign().getTokenTypes());
     Collections.sort(typeList);
     DefaultComboBoxModel model = new DefaultComboBoxModel(typeList.toArray());
     getPropertyTypeCombo().setModel(model);
-    getPropertyTypeCombo()
-        .addItemListener(
-            new ItemListener() {
-              public void itemStateChanged(ItemEvent e) {
-                updatePropertiesTable((String) getPropertyTypeCombo().getSelectedItem());
-              }
-            });
   }
 
   private void updateSightTypeCombo() {
@@ -529,6 +534,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     getImageTableCombo().setModel(model);
   }
 
+  /**
+   * Updates the property table.
+   *
+   * @param propertyType the property type of the token (unused).
+   */
   private void updatePropertiesTable(final String propertyType) {
     EventQueue.invokeLater(
         new Runnable() {
