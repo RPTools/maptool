@@ -264,4 +264,14 @@ public class HTMLOverlay extends HTMLPane implements DropTargetListener, HTMLPan
     flush();
     setVisible(false);
   }
+
+  @Override
+  void changed(
+      ObservableValue<? extends Worker.State> observable,
+      Worker.State oldState,
+      Worker.State newState) {
+    super.changed(observable, oldState, newState);
+    makeWebEngineTransparent();
+  }
+
 }
