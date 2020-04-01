@@ -195,9 +195,13 @@ public class HTMLOverlay extends HTMLPane implements DropTargetListener, HTMLPan
    */
   public boolean isOpaque(Point p) {
     Rectangle rect = getBounds();
-    BufferedImage img = new BufferedImage(rect.width, rect.height, BufferedImage.TYPE_INT_ARGB);
-    paintAll(img.createGraphics());
-    return new Color(img.getRGB(p.x, p.y), true).getAlpha() != 0;
+    if (rect.contains(p)) {
+      BufferedImage img = new BufferedImage(rect.width, rect.height, BufferedImage.TYPE_INT_ARGB);
+      paintAll(img.createGraphics());
+      return new Color(img.getRGB(p.x, p.y), true).getAlpha() != 0;
+    } else {
+      return false; // no overlay outside the bounds
+    }
   }
 
   @Override
