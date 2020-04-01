@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TooManyListenersException;
 import javax.swing.*;
-import javax.swing.text.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
@@ -247,6 +246,16 @@ public class HTMLOverlay extends HTMLPane implements DropTargetListener, HTMLPan
     }
     if (e.getActionCommand().equals("Close")) {
       closeRequest();
+    }
+  }
+
+  @Override
+  public void updateContents(final String html) {
+    super.updateContents(html);
+    if ("".equals(html)) {
+      closeRequest(); // turn off the overlay
+    } else {
+      setVisible(true);
     }
   }
 
