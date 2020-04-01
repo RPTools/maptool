@@ -21,7 +21,9 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TooManyListenersException;
 import javax.swing.*;
 import javax.swing.text.*;
@@ -29,15 +31,19 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.TransferableHelper;
+import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.ZonePoint;
 
 /** Represents the transparent HTML overlay over the map. */
-public class HTMLOverlay extends HTMLPane implements DropTargetListener {
+public class HTMLOverlay extends HTMLPane implements DropTargetListener, HTMLPanelContainer {
   /** The default rule for an invisible body tag. */
   private static final String CSS_RULE_BODY =
       "body { font-family: sans-serif; font-size: %dpt; background: none}";
+
+  /** The map of the macro callbacks. */
+  private final Map<String, String> macroCallbacks = new HashMap<String, String>();
 
   public HTMLOverlay() {
     super();
@@ -45,6 +51,7 @@ public class HTMLOverlay extends HTMLPane implements DropTargetListener {
     setHighlighter(null);
     setOpaque(false);
     addMouseListeners();
+    addActionListener(this);
     setCaretColor(new Color(0, 0, 0, 0)); // invisible, needed or it shows in DnD operations
 
     setTransferHandler(new TransferableHelper()); // set the Drag & Drop handler
@@ -93,6 +100,21 @@ public class HTMLOverlay extends HTMLPane implements DropTargetListener {
     if (tokens != null && !tokens.isEmpty()) {
       zr.addTokens(tokens, zp, th.getConfigureTokens(), false);
     }
+  }
+
+  /** Run the callback macro for "onChangeSelection". */
+  void doSelectedChanged() {
+    HTMLPanelContainer.selectedChanged(macroCallbacks);
+  }
+
+  /** Run the callback macro for "onChangeImpersonated". */
+  void doImpersonatedChanged() {
+    HTMLPanelContainer.impersonatedChanged(macroCallbacks);
+  }
+
+  /** Run the callback macro for "onChangeToken". */
+  void doTokenChanged(Token token) {
+    HTMLPanelContainer.tokenChanged(token, macroCallbacks);
   }
 
   /** Add the mouse listeners to forward the mouse events to the current ZoneRenderer. */
@@ -177,5 +199,60 @@ public class HTMLOverlay extends HTMLPane implements DropTargetListener {
     BufferedImage img = new BufferedImage(rect.width, rect.height, BufferedImage.TYPE_INT_ARGB);
     paintAll(img.createGraphics());
     return new Color(img.getRGB(p.x, p.y), true).getAlpha() != 0;
+  }
+
+  @Override
+  public Map<String, String> macroCallbacks() {
+    return macroCallbacks;
+  }
+
+  @Override
+  public boolean getTemporary() {
+    return false;
+  }
+
+  @Override
+  public void setTemporary(boolean temp) {}
+
+  @Override
+  public Object getValue() {
+    return null;
+  }
+
+  @Override
+  public void setValue(Object value) {}
+
+  /**
+   * Act when an action is performed.
+   *
+   * @param e the ActionEvent.
+   */
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    if (e instanceof HTMLActionEvent.FormActionEvent) {
+      HTMLActionEvent.FormActionEvent fae = (HTMLActionEvent.FormActionEvent) e;
+      MacroLinkFunction.runMacroLink(fae.getAction() + fae.getData());
+    }
+    if (e instanceof HTMLActionEvent.RegisterMacroActionEvent) {
+      HTMLActionEvent.RegisterMacroActionEvent rmae = (HTMLActionEvent.RegisterMacroActionEvent) e;
+      macroCallbacks.put(rmae.getType(), rmae.getMacro());
+    }
+    if (e instanceof HTMLActionEvent.MetaTagActionEvent) {
+      HTMLActionEvent.MetaTagActionEvent mtae = (HTMLActionEvent.MetaTagActionEvent) e;
+      if (mtae.getName().equalsIgnoreCase("onChangeToken")
+          || mtae.getName().equalsIgnoreCase("onChangeSelection")
+          || mtae.getName().equalsIgnoreCase("onChangeImpersonated")) {
+        macroCallbacks.put(mtae.getName(), mtae.getContent());
+      }
+    }
+    if (e.getActionCommand().equals("Close")) {
+      closeRequest();
+    }
+  }
+
+  @Override
+  public void closeRequest() {
+    flush();
+    setVisible(false);
   }
 }
