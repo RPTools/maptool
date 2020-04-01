@@ -505,16 +505,13 @@ public class MapToolFrame extends DefaultDockableHolder
     commandPanel = new CommandPanel();
     MapTool.getMessageList().addObserver(commandPanel);
 
-    // Setup a JLayeredPane to display the HTML overlay over the map.
-    JLayeredPane zoneRenderLayered = new JLayeredPane();
-    zoneRenderLayered.setLayout(new LayeredPaneLayout());
-    zoneRenderLayered.add(zoneRendererPanel, JLayeredPane.DEFAULT_LAYER);
-    zoneRenderLayered.add(htmlOverlay, JLayeredPane.POPUP_LAYER);
-
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
-    rendererBorderPanel.add(zoneRenderLayered);
+    rendererBorderPanel.add(zoneRendererPanel);
     toolbarPanel = new ToolbarPanel(toolbox);
+
+    zoneRendererPanel.add(htmlOverlay, PositionalLayout.Position.CENTER, 0);
+    htmlOverlay.setVisible(false); // disabled by default
 
     // Put it all together
     setJMenuBar(menuBar);
@@ -1582,7 +1579,8 @@ public class MapToolFrame extends DefaultDockableHolder
       zoneRendererPanel.remove(currentRenderer);
     }
     if (renderer != null) {
-      zoneRendererPanel.add(renderer, PositionalLayout.Position.CENTER);
+      zoneRendererPanel.add(
+          renderer, PositionalLayout.Position.CENTER, zoneRendererPanel.getComponentCount() - 1);
       zoneRendererPanel.doLayout();
     }
     currentRenderer = renderer;
@@ -2102,34 +2100,6 @@ public class MapToolFrame extends DefaultDockableHolder
         }
       } else {
         macroButton.getProperties().executeMacro();
-      }
-    }
-  }
-
-  /**
-   * Layout for LayeredPanel where the bounds of every component is set to the size of the parent.
-   */
-  private static class LayeredPaneLayout implements LayoutManager {
-    @Override
-    public void addLayoutComponent(String name, Component comp) {}
-
-    @Override
-    public void removeLayoutComponent(Component comp) {}
-
-    @Override
-    public Dimension preferredLayoutSize(Container parent) {
-      return parent.getSize();
-    }
-
-    @Override
-    public Dimension minimumLayoutSize(Container parent) {
-      return preferredLayoutSize(parent);
-    }
-
-    @Override
-    public void layoutContainer(Container parent) {
-      for (Component comp : parent.getComponents()) {
-        comp.setBounds(0, 0, parent.getWidth(), parent.getHeight());
       }
     }
   }
