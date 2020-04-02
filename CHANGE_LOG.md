@@ -54,13 +54,15 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1236][i1236] `getToken*` functions failing when setState/unsetState condition used. Fixed.
 - [#1231][i1231] Choosing a non-writable directory for downloading updates was failing silently. Fixed.
 - [#1228][i1228] `getLastPath` was returning bad path information. Fixed.
-- [#1225][i1225]  Exception during L&F setup. Not in released code. Fixed.
+- [#1225][i1225] Exception during L&F setup. Not in released code. Fixed.
 - [#1217][i1217] Moving tokens or measuring across long distance (200+ cells) performed poorly. Fixed.
-- [#1206][i1206]  JSON function code was returning NULL if the function couldn't be found. Now reports unknown function.
+- [#1206][i1206] JSON function code was returning NULL if the function couldn't be found. Now reports unknown function.
 - [#1204][i1204] `getToken*` was throwing an exception if a string was passed to the `layer` option. Fixed.
 - [#1092][i1092] Token States, Bars, and Halos weren't rotating properly with off-center, top-down tokens. Fixed.
 - [#1049][i1049] Token VBL wasn't rotating properly with off-center, top-down tokens. Fixed.
 - [#650][i650] Can't pass JSON data from a form submit. Fixed.
+- [#616][i616] Token selection issue after combination dragging token and panning map. Fixed.
+- [#472][i472] Edit Token Dialog gets slower to open with each subsequent reopen. Fixed.
 - [#198][i198] Using tab panels in `input()` could add large empty space at bottom of panel. Fixed.
 
 **Other**
@@ -128,6 +130,8 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i891]: https://github.com/RPTools/maptool/issues/891
 [i650]: https://github.com/RPTools/maptool/issues/650
 [i643]: https://github.com/RPTools/maptool/issues/643
+[i616]: https://github.com/RPTools/maptool/issues/616
+[i472]: https://github.com/RPTools/maptool/issues/472
 [i221]: https://github.com/RPTools/maptool/issues/221
 [i198]: https://github.com/RPTools/maptool/issues/198
 
