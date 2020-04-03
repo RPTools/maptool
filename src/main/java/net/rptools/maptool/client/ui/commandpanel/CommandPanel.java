@@ -754,7 +754,7 @@ public class CommandPanel extends JPanel implements Observer {
             actionObject,
             new AbstractAction() {
               public void actionPerformed(ActionEvent event) {
-                requestFocus();
+                requestFocusInWindow();
               }
             });
   }
