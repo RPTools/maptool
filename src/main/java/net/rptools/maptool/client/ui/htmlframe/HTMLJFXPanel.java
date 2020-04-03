@@ -90,13 +90,18 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   /** The default rule for the span tag. */
   private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
 
+  /** JS that scroll the view to an element from its Id. */
+  private static final String SCRIPT_ANCHOR =
+      "element = document.getElementById('%s'); if(element != null) {element.scrollIntoView();}";
+
   /** JS that directs the console.log function to the Java bridge function "log". */
   private static final String SCRIPT_REPLACE_LOG =
       "console.log = function(message){" + JavaBridge.NAME + ".log(message);};";
 
-  /** JS that scroll the view to an element from its Id. */
-  private static final String SCRIPT_ANCHOR =
-      "element = document.getElementById('%s'); if(element != null) {element.scrollIntoView();}";
+  /** JS that replace the form.submit() in JS by a function that works. */
+  private static final String SCRIPT_REPLACE_SUBMIT =
+      "HTMLFormElement.prototype.submit = function(){this.dispatchEvent(new Event('submit'));};";
+
   /**
    * Creates a new HTMLJFXPanel.
    *
@@ -256,6 +261,9 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       window.setMember(JavaBridge.NAME, bridge);
       webEngine.executeScript(SCRIPT_REPLACE_LOG);
 
+      // Replace the broken javascript form.submit method
+      webEngine.executeScript(SCRIPT_REPLACE_SUBMIT);
+
       // Event listener for the href macro link clicks.
       EventListener listenerA = this::fixHref;
       // Event listener for form submission.
@@ -324,7 +332,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       nodeList = doc.getElementsByTagName("button");
       for (int i = 0; i < nodeList.getLength(); i++) {
         String type = ((Element) nodeList.item(i)).getAttribute("type");
-        if ("submit".equals(type)) {
+        if (type == null || "submit".equals(type)) {
           EventTarget target = (EventTarget) nodeList.item(i);
           target.addEventListener("click", listenerSubmit, false);
         }
@@ -472,6 +480,12 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       addToObject(jObj, button.getName(), button.getValue());
     }
     if (form == null) return;
+
+    // Check for validity
+    JSObject jsObject = (JSObject) form;
+    if (!(boolean) jsObject.call("checkValidity")) {
+      return;
+    }
 
     final HTMLCollection collection = form.getElements();
     for (int i = 0; i < collection.getLength(); i++) {
