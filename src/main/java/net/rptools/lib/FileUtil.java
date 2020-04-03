@@ -116,6 +116,21 @@ public class FileUtil {
 
   private static final Pattern TRIM_EXTENSION_PATTERN = Pattern.compile("^(.*)\\.([^\\.]*)$");
 
+  /**
+   * Returns the file with its name modified to add the extension if it doesn't have already.
+   *
+   * @param file the file that might need the extension
+   * @param extension the extension to add, if it is missing
+   * @return the file with the correct extension
+   */
+  public static File getFileWithExtension(File file, String extension) {
+    if (file.getName().endsWith(extension)) {
+      return file;
+    } else {
+      return new File(file.getAbsolutePath() + extension);
+    }
+  }
+
   public static String getNameWithoutExtension(File file) {
     return getNameWithoutExtension(file.getName());
   }

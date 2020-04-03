@@ -207,7 +207,7 @@ public class Token extends BaseModel implements Cloneable {
   private boolean isVisible = true;
   private boolean visibleOnlyToOwner = false;
 
-  private int vblAlphaSensitivity = -1;
+  private int vblColorSensitivity = -1;
   private int alwaysVisibleTolerance = 2; // Default for # of regions (out of 9) that must be seen
   // before token is shown over FoW
   private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
@@ -360,7 +360,7 @@ public class Token extends BaseModel implements Cloneable {
     isVisible = token.isVisible;
     visibleOnlyToOwner = token.visibleOnlyToOwner;
 
-    vblAlphaSensitivity = token.vblAlphaSensitivity;
+    vblColorSensitivity = token.vblColorSensitivity;
     alwaysVisibleTolerance = token.alwaysVisibleTolerance;
     isAlwaysVisible = token.isAlwaysVisible;
     vbl = token.vbl;
@@ -1339,12 +1339,12 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
-  public void setAlphaSensitivity(int tolerance) {
-    vblAlphaSensitivity = tolerance;
+  public void setColorSensitivity(int tolerance) {
+    vblColorSensitivity = tolerance;
   }
 
-  public int getAlphaSensitivity() {
-    return vblAlphaSensitivity;
+  public int getColorSensitivity() {
+    return vblColorSensitivity;
   }
 
   /**
@@ -1355,7 +1355,7 @@ public class Token extends BaseModel implements Cloneable {
   public void setVBL(Area vbl) {
     this.vbl = vbl;
     if (vbl == null) {
-      vblAlphaSensitivity = -1;
+      vblColorSensitivity = -1;
     }
   }
 
