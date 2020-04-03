@@ -14,10 +14,10 @@
  */
 package net.rptools.maptool.client.functions;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.IllegalFormatConversionException;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -341,14 +341,10 @@ public class StringFunctions extends AbstractFunction {
                 "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
       String encoded;
-      try {
-        // Shouldn't this use '&#59;' like
-        // net.rptools.maptool.client.functions.MacroLinkFunction.argsToStrPropList(String) does?
-        encoded = parameters.get(0).toString().replaceAll(";", "&semi;");
-        encoded = URLEncoder.encode(encoded, "utf-8");
-      } catch (UnsupportedEncodingException e) {
-        throw new ParserException(e);
-      }
+      // Shouldn't this use '&#59;' like
+      // net.rptools.maptool.client.functions.MacroLinkFunction.argsToStrPropList(String) does?
+      encoded = parameters.get(0).toString().replaceAll(";", "&semi;");
+      encoded = URLEncoder.encode(encoded, StandardCharsets.UTF_8);
       return encoded;
     }
     if (functionName.equals("decode")) {
@@ -358,14 +354,10 @@ public class StringFunctions extends AbstractFunction {
                 "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
       }
       String decoded;
-      try {
-        // Shouldn't this use '&#59;' like
-        // net.rptools.maptool.client.functions.MacroLinkFunction.argsToStrPropList(String) does?
-        decoded = URLDecoder.decode(parameters.get(0).toString(), "utf-8");
-        decoded = decoded.replaceAll("&semi;", ";");
-      } catch (UnsupportedEncodingException e) {
-        throw new ParserException(e);
-      }
+      // Shouldn't this use '&#59;' like
+      // net.rptools.maptool.client.functions.MacroLinkFunction.argsToStrPropList(String) does?
+      decoded = URLDecoder.decode(parameters.get(0).toString(), StandardCharsets.UTF_8);
+      decoded = decoded.replaceAll("&semi;", ";");
       return decoded;
     }
     if (functionName.equals("startsWith")) {

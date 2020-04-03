@@ -46,6 +46,7 @@ import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -487,9 +488,7 @@ public class MapToolFrame extends DefaultDockableHolder
     String version = "";
     Image logo = null;
     try {
-      credits =
-          new String(
-              FileUtil.loadResource(CREDITS_HTML), "UTF-8"); // 2nd param of type Charset is Java6+
+      credits = new String(FileUtil.loadResource(CREDITS_HTML), StandardCharsets.UTF_8);
       version = MapTool.getVersion();
       credits = credits.replace("%VERSION%", version);
       logo = ImageUtil.getImage(MAPTOOL_LOGO_IMAGE);

@@ -99,6 +99,11 @@ public abstract class DefaultTool extends Tool
     isDraggingMap = false;
   }
 
+  /** @param isDraggingMap whether the user drags the map */
+  void setDraggingMap(boolean isDraggingMap) {
+    this.isDraggingMap = isDraggingMap;
+  }
+
   /*
    * (non-Javadoc)
    *

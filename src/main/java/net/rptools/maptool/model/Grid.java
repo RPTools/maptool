@@ -510,6 +510,12 @@ public abstract class Grid implements Cloneable {
     // Do nothing
   }
 
+  /**
+   * Returns a rectangle of pixels bounding the CellPoint, taking into account the grid offset.
+   *
+   * @param cp the CellPoint to bound.
+   * @return the bounding rectangle.
+   */
   public abstract Rectangle getBounds(CellPoint cp);
 
   /**

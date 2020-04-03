@@ -21,6 +21,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class EchoServer {
 
@@ -61,9 +62,11 @@ public class EchoServer {
         while (!stop) {
           Socket clientSocket = server.accept();
           BufferedReader reader =
-              new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
+              new BufferedReader(
+                  new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8));
           PrintWriter writer =
-              new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"));
+              new PrintWriter(
+                  new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8));
 
           String line = reader.readLine();
           while (line != null) {

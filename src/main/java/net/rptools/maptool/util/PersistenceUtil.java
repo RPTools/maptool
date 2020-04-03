@@ -800,12 +800,13 @@ public class PersistenceUtil {
     }
   }
 
-  public static CampaignProperties loadCampaignProperties(InputStream in) throws IOException {
+  public static CampaignProperties loadCampaignProperties(InputStream in) {
     CampaignProperties props = null;
     try {
       props =
           (CampaignProperties)
-              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.campaignPropertiesVersion", ce);
     }
@@ -893,7 +894,7 @@ public class PersistenceUtil {
     }
   }
 
-  public static MacroButtonProperties loadMacro(InputStream in) throws IOException {
+  public static MacroButtonProperties loadMacro(InputStream in) {
     MacroButtonProperties mbProps = null;
     try {
       mbProps =
@@ -918,12 +919,14 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Saves the macro.
+   *
+   * @param macroButton the button holding the macro
+   * @param file the file to save
+   * @throws IOException if the file can't be saved
+   */
   public static void saveMacro(MacroButtonProperties macroButton, File file) throws IOException {
-    // Put this in FileUtil
-    if (!file.getName().contains(".")) {
-      file = new File(file.getAbsolutePath() + AppConstants.MACRO_FILE_EXTENSION);
-    }
-
     try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setContent(macroButton);
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
@@ -941,12 +944,13 @@ public class PersistenceUtil {
   }
 
   @SuppressWarnings("unchecked")
-  public static List<MacroButtonProperties> loadMacroSet(InputStream in) throws IOException {
+  public static List<MacroButtonProperties> loadMacroSet(InputStream in) {
     List<MacroButtonProperties> macroButtonSet = null;
     try {
       macroButtonSet =
           (List<MacroButtonProperties>)
-              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
     }
@@ -1001,11 +1005,11 @@ public class PersistenceUtil {
     LookupTable table = null;
     try {
       table =
-          (LookupTable) FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+          (LookupTable)
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.tableVersion", ce);
-    } catch (IOException ioe) {
-      MapTool.showError("PersistenceUtil.error.tableRead", ioe);
     }
     return table;
   }

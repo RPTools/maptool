@@ -14,9 +14,12 @@
  */
 package net.rptools.maptool.client.tool;
 
-import java.awt.event.ActionEvent;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -62,34 +65,60 @@ public class DrawTopologySelectionTool extends DefaultTool {
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
+
+    // Mouse listener added to manually handle mouse events
+    super.addMouseListener(
+        new MouseAdapter() {
+          @Override
+          public void mouseEntered(MouseEvent e) {
+            if (isAvailable()) {
+              getModel().setArmed(true); // change icon to "pressed down"
+            }
+            ToolTipManager.sharedInstance().mouseEntered(e); // display the tooltip
+          }
+
+          @Override
+          public void mouseExited(MouseEvent e) {
+            getModel().setArmed(false); // undo "pressed down" effect
+            ToolTipManager.sharedInstance().mouseExited(e); // hide the tooltip
+          }
+
+          /**
+           * When the mouse is pressed, manually changes the selected status and icon. This approach
+           * is recommended by Dr. Heinz M. Kabutz to handle tri-state buttons.
+           *
+           * @param e the mouse event
+           */
+          @Override
+          public void mousePressed(MouseEvent e) {
+            if (SwingUtilities.isLeftMouseButton(e) && isAvailable()) {
+              nextState();
+            }
+          }
+        });
   }
 
-  @Override
-  public void actionPerformed(ActionEvent e) {
+  /** Set the Selection Tool to the next state (Combined -> MBL -> VBL -> Combined). */
+  public void nextState() {
     TopologyMode currentTopologyMode;
 
-    // Not a huge fan of this code but needed a TriStateButton and TriStateCheckbox from JIDE
-    // doesn't handle custom images very well. Also, trying to avoid JIDE were possible
-    // in case we move to FX in the future.
     if (isSelected()) {
-      if (getActionCommand().equals(TopologyMode.MBL.toString())) {
-        currentTopologyMode = TopologyMode.VBL;
-        setActionCommand(TopologyMode.VBL.toString());
-        setSelected(false);
-        setIcon(vblImageIcon);
-      } else {
-        currentTopologyMode = TopologyMode.COMBINED;
-      }
+      // If Combined, switch to MBL (unselected)
+      setSelected(false);
+      currentTopologyMode = TopologyMode.MBL;
+      setActionCommand(TopologyMode.MBL.toString());
+      setIcon(mblImageIcon);
     } else {
-      // Toggle unselected state between VBL/MBL
-      if (getActionCommand().equals(TopologyMode.VBL.toString())) {
-        currentTopologyMode = TopologyMode.MBL;
-        setActionCommand(TopologyMode.MBL.toString());
-        setIcon(mblImageIcon);
-      } else {
+      if (getActionCommand().equals(TopologyMode.MBL.toString())) {
+        // If MBL, switch to VBL (unselected)
         currentTopologyMode = TopologyMode.VBL;
         setActionCommand(TopologyMode.VBL.toString());
         setIcon(vblImageIcon);
+      } else {
+        // If VBL, switch to Combined (selected)
+        setSelected(true);
+        currentTopologyMode = TopologyMode.COMBINED;
+        setActionCommand(TopologyMode.COMBINED.toString());
       }
     }
 
@@ -117,4 +146,12 @@ public class DrawTopologySelectionTool extends DefaultTool {
   public boolean hasGroup() {
     return false;
   }
+
+  /**
+   * Prevents the addition of any MouseListener.
+   *
+   * @param l the MouseListener to ignore
+   */
+  @Override
+  public void addMouseListener(MouseListener l) {}
 }
