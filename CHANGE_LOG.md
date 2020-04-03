@@ -37,6 +37,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#221][i221] Campaign Properties dialog now has a drop-down to select from pre-defined Campaign Property sets (.mtprops).
 
 **Bug Fixes**
+- [#1450][i1450] Fixed malfunctioning HTML elements in HTML5 dialog/frames: `<input>`, `<button>`, `<map>`, and `<a>`.
 - [#1430][i1430] Macro links weren't working with HTML image maps. Not in relased code. Fixed.
 - [#1412][i1412] MBL/VBL was flickering when switching modes. Fixed.
 - [#1408][i1408] Draw Explorer drawing previews reflected pen width even with foreground was transparent. Fixed.
@@ -78,6 +79,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1215][i1215] Replaced calls to deprecated IOUtils.closeQuietly() with try-with-resource.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
+[i1450]: https://github.com/RPTools/maptool/issues/1450
 [i1432]: https://github.com/RPTools/maptool/issues/1432
 [i1430]: https://github.com/RPTools/maptool/issues/1430
 [i1427]: https://github.com/RPTools/maptool/issues/1427
