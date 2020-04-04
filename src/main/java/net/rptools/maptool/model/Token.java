@@ -582,7 +582,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMNotes() {
-    if (MapTool.getPlayer().isGM()) {
+    if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
       return gmNotes;
     } else {
       return "";
@@ -594,7 +594,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMName() {
-    if (MapTool.getPlayer().isGM()) {
+    if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
       return gmName;
     } else {
       return "";
