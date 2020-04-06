@@ -97,10 +97,7 @@ public class Campaign {
   private Map<String, Map<GUID, LightSource>> lightSourcesMap;
   private Map<String, LookupTable> lookupTableMap;
 
-  /**
-   * The {@link NoteBook} manages all the {@link MapBookmark}s
-   * for the campaign.
-   */
+  /** The {@link NoteBook} manages all the {@link MapBookmark}s for the campaign. */
   private final transient NoteBookManager noteBookManager;
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions

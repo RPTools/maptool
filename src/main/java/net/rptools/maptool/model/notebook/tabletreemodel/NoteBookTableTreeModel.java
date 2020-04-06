@@ -39,23 +39,17 @@ import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
  */
 public final class NoteBookTableTreeModel {
 
-
   /** The root node of the tree. */
   private final TreeItem<NoteBookEntry> root;
 
   /** The {@link NoteBook} this tree represents. */
   private final NoteBook noteBook;
 
-
-  /** The {@link PropertyChangeListener} for listening to  changes. */
+  /** The {@link PropertyChangeListener} for listening to changes. */
   private final PropertyChangeListener propertyChangeListener = this::synchronizeModelOnJFXThread;
 
-  /**
-   * Maps {@link NoteBookEntry}s to the tree item.
-   */
+  /** Maps {@link NoteBookEntry}s to the tree item. */
   private final Map<UUID, TreeItem<NoteBookEntry>> entryTreeItemMap = new HashMap<>();
-
-
 
   /**
    * Returns a {@code NoteBookTableTreeModel} for a campaign {@link NoteBook}.
@@ -85,7 +79,7 @@ public final class NoteBookTableTreeModel {
         : "NoteBookTableTreeModel() must be run on the JavaFX thread.";
 
     noteBook = nBook;
-    root = new TreeItem<>(new DirectoryEntry(noteBook.getName()));
+    root = new TreeItem<>(new DirectoryEntry("/"));
     root.setExpanded(true);
   }
 
@@ -137,12 +131,13 @@ public final class NoteBookTableTreeModel {
     assert Platform.isFxApplicationThread() : "initializeModel() must be run on the JavaFX thread.";
 
     // remove and add all the entries, first get a copy of all the entries to delete.
-    Set<NoteBookEntry> toRemove = entryTreeItemMap.keySet().stream()
-        .map(k -> entryTreeItemMap.get(k).getValue()).collect(Collectors.toSet());
+    Set<NoteBookEntry> toRemove =
+        entryTreeItemMap.keySet().stream()
+            .map(k -> entryTreeItemMap.get(k).getValue())
+            .collect(Collectors.toSet());
     removeEntries(toRemove);
 
     addedEntries(noteBook.getEntries());
-
   }
 
   /**
@@ -150,11 +145,9 @@ public final class NoteBookTableTreeModel {
    *
    * @param entry the {@link NoteBookEntry} to add.
    * @throws
-   *
    * @implNote when adding several entries make sure you add them in a way that all the directories
-   * are created before any children in those directories or you will get an
-   * {@link IllegalStateException}.
-   *
+   *     are created before any children in those directories or you will get an {@link
+   *     IllegalStateException}.
    * @throws IllegalStateException if you try to add an entry to a non existent path.
    */
   private void addEntry(NoteBookEntry entry) {
@@ -171,6 +164,7 @@ public final class NoteBookTableTreeModel {
 
   /**
    * Returns the {@link TreeItem} node for a given path.
+   *
    * @param path the path as a string with "/" to get the {@link TreeItem} node for.
    * @return the {@link TreeItem} node for a given path.
    */
@@ -185,6 +179,7 @@ public final class NoteBookTableTreeModel {
 
   /**
    * Returns the {@link TreeItem} node for a given path.
+   *
    * @param paths an array of path strings to get the {@link TreeItem} node for.
    * @param node The node to begin searching from.
    * @return the {@link TreeItem} corresponding to the path.
@@ -204,7 +199,6 @@ public final class NoteBookTableTreeModel {
 
     return null;
   }
-
 
   /**
    * Synchronizes the model with the changes coming from the {@link NoteBook}. This should not be
@@ -264,17 +258,20 @@ public final class NoteBookTableTreeModel {
      * First directories in directory order to ensure all our directories are created before
      * the entries that belong in the direct ores.
      */
-    Set<NoteBookEntry> directories = new TreeSet<>((e1, e2) -> {
-      long level1 = e1.getName().chars().filter(c -> c == '/').count();
-      long level2 = e2.getName().chars().filter(c -> c == '/').count();
-      int comp = Long.compareUnsigned(level1, level2);
-      if (comp != 0) {
-        return comp;
-      } else {
-        return e1.getName().compareTo(e2.getName());
-      }
-    });
-    directories.addAll(entries.stream().filter(e -> e instanceof DirectoryEntry).collect(Collectors.toSet()));
+    Set<NoteBookEntry> directories =
+        new TreeSet<>(
+            (e1, e2) -> {
+              long level1 = e1.getName().chars().filter(c -> c == '/').count();
+              long level2 = e2.getName().chars().filter(c -> c == '/').count();
+              int comp = Long.compareUnsigned(level1, level2);
+              if (comp != 0) {
+                return comp;
+              } else {
+                return e1.getName().compareTo(e2.getName());
+              }
+            });
+    directories.addAll(
+        entries.stream().filter(e -> e instanceof DirectoryEntry).collect(Collectors.toSet()));
     for (NoteBookEntry dir : directories) {
       addEntry(dir);
     }

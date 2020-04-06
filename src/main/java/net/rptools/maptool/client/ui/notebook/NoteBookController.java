@@ -42,7 +42,6 @@ import net.rptools.maptool.model.notebook.tabletreemodel.TableTreeItemHolder;
 
 public class NoteBookController {
 
-
   @FXML private BorderPane noteBookPanel;
 
   @FXML private TreeTableView<TableTreeItemHolder> noteBookTreeTableView;
@@ -60,7 +59,6 @@ public class NoteBookController {
   @FXML private AnchorPane editorPane;
 
   @FXML private AnchorPane detailsAnchorPane;
-
 
   @FXML private TextField nameTextField;
 
@@ -164,7 +162,7 @@ public class NoteBookController {
               Platform.runLater(() -> noteWebView.getEngine().loadContent(note));
             });
       } else { */
-        noteWebView.getEngine().loadContent("");
+      noteWebView.getEngine().loadContent("");
       // TODO: CDW }
 
       nameTextField.setText(entry.getName());
@@ -197,8 +195,6 @@ public class NoteBookController {
     noteBookTreeTableView.setRoot(root);
     noteBookTreeTableView.refresh();
   }
-
-
 
   @FXML
   void addNoteAction(ActionEvent event) {}

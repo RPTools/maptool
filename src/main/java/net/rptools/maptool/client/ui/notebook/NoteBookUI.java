@@ -37,10 +37,7 @@ public class NoteBookUI {
   private JFXPanel jfxPanel;
   private NoteBookController controller;
 
-  /**
-   * The {@link NoteBookTableTreeModel} with all the {@link
-   * NoteBookEntry}s for the campaign.
-   */
+  /** The {@link NoteBookTableTreeModel} with all the {@link NoteBookEntry}s for the campaign. */
   private NoteBookTableTreeModel noteBookTableTreeModel;
 
   public void init(MapToolFrame parentFrame) {

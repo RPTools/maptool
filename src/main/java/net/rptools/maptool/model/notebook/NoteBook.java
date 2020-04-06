@@ -32,45 +32,33 @@ import java.util.stream.Collectors;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
-import net.rptools.maptool.model.notebook.entry.tree.NoteBookEntryNode;
 
 /**
  * {@code MapBookmarkManager} class is used to manage all the {@link NoteBookEntry}s in a campaign.
  * This class is thread safe so may be used from multiple threads.
  *
- * Taking out a lock on a {@code NoteBook} (e.g. {code syncronized(notebook) {}} will block changes
- * via
- * <ui>
- *  <li>{@link #setDescription(String)}</li>
- *  <li>{@link #setName(String)}></il>
- *  <li>{@link #setVersion(String)}</li>
- *  <li>{@link #setNamespace(String)} (String)}</li>
- * </ui>
- * while the lock is held and can be used when you require these to remain stable while performing
- * an operation.
+ * <p>Taking out a lock on a {@code NoteBook} (e.g. {code syncronized(notebook) {}} will block
+ * changes via <ui>
+ * <li>{@link #setDescription(String)}
+ * <li>{@link #setName(String)}></il>
+ * <li>{@link #setVersion(String)}
+ * <li>{@link #setNamespace(String)} (String)} </ui> while the lock is held and can be used when you
+ *     require these to remain stable while performing an operation.
  *
  * @implNote Maintaining the thread safety of this class depends on keeping to the following
  *     conventions when changing this class.
  *     <ul>
- *       <li>
- *         Whenever {@link #removedZones} or {@link #idEntryMap} are modified then a
- *         {@link #writeLock} must be obtained.
- *       </li>
- *       <li>
- *         Whenever {@link #removedZones} or {@link #idEntryMap} are read then a
- *         {@link #readLock} must be obtained.
- *       </li>
+ *       <li>Whenever {@link #removedZones} or {@link #idEntryMap} are modified then a {@link
+ *           #writeLock} must be obtained.
+ *       <li>Whenever {@link #removedZones} or {@link #idEntryMap} are read then a {@link #readLock}
+ *           must be obtained.
  *     </ul>
  *     Also do <strong>not</strong> fire the property change events while holding a lock.
- *
- *
  */
 public class NoteBook implements Comparable<NoteBook> {
 
-
   /**
-   * Name of event fired when a zone is removed.
-   * For this event:
+   * Name of event fired when a zone is removed. For this event:
    *
    * <ul>
    *   <li>{@code oldValue} = the id of the zone that was removed.
@@ -80,8 +68,7 @@ public class NoteBook implements Comparable<NoteBook> {
   public static final String ZONE_REMOVED_EVENT = "Zone Removed";
 
   /**
-   * Name of event fired when a entries are added.
-   * For this event:
+   * Name of event fired when a entries are added. For this event:
    *
    * <ul>
    *   <li>{@code oldValue} = {@code Set<NoteBookEntry>} containing values that were replaced}.
@@ -91,8 +78,7 @@ public class NoteBook implements Comparable<NoteBook> {
   public static final String ENTRIES_ADDED_EVENT = "Entries Added";
 
   /**
-   * Name of event fired when entries are removed.
-   * For this event:
+   * Name of event fired when entries are removed. For this event:
    *
    * <ul>
    *   <li>{@code oldValue} = {@code Set<NoteBookEntry>} containing the removed values.
@@ -102,8 +88,7 @@ public class NoteBook implements Comparable<NoteBook> {
   public static final String ENTRIES_REMOVED_EVENT = "Entries Removed";
 
   /**
-   * Name of event fired when the name of the {@code NoteBook} changes.
-   * For this event:
+   * Name of event fired when the name of the {@code NoteBook} changes. For this event:
    *
    * <ul>
    *   <li>{@code oldValue} = The old name of the {@code NoteBook}.
@@ -113,8 +98,7 @@ public class NoteBook implements Comparable<NoteBook> {
   public static final String NAME_CHANGED = "Name Changed";
 
   /**
-   * Name of event fired when the version of the {@code NoteBook} changes.
-   * For this event:
+   * Name of event fired when the version of the {@code NoteBook} changes. For this event:
    *
    * <ul>
    *   <li>{@code oldValue} = The old version of the {@code NoteBook}.
@@ -124,8 +108,7 @@ public class NoteBook implements Comparable<NoteBook> {
   public static final String VERSION_CHANGED = "Version Changed";
 
   /**
-   * Name of event fired when the namespace of the {@code NoteBook} changes.
-   * For this event:
+   * Name of event fired when the namespace of the {@code NoteBook} changes. For this event:
    *
    * <ul>
    *   <li>{@code oldValue} = The old namespace of the {@code NoteBook}.
@@ -135,8 +118,7 @@ public class NoteBook implements Comparable<NoteBook> {
   public static final String NAMESPACE_CHANGED = "Namespace Changed";
 
   /**
-   * Name of event fired when the description of the {@code NoteBook} changes.
-   * For this event:
+   * Name of event fired when the description of the {@code NoteBook} changes. For this event:
    *
    * <ul>
    *   <li>{@code oldValue} = The old description of the {@code NoteBook}.
@@ -146,9 +128,8 @@ public class NoteBook implements Comparable<NoteBook> {
   public static final String DESCRIPTION_CHANGED = "Description Changed";
 
   /**
-   * Name of event fired when the versioned name space of the {@code NoteBook} changes.
-   * This event will be fired when either the name space or teh version change
-   * For this event:
+   * Name of event fired when the versioned name space of the {@code NoteBook} changes. This event
+   * will be fired when either the name space or teh version change For this event:
    *
    * <ul>
    *   <li>{@code oldValue} = The old versioned name space of the {@code NoteBook}.
@@ -157,10 +138,7 @@ public class NoteBook implements Comparable<NoteBook> {
    */
   public static final String VERSIONED_NAMESPACE_CHANGED = "Versioned Namespace Changed";
 
-
-  /**
-   * Class used to hold a {@code MapBookEntry} and the path it is in the tree.
-   */
+  /** Class used to hold a {@code MapBookEntry} and the path it is in the tree. */
   private static final class EntryDetails {
     /** The path that the {@code MapBookEntry} can be found in the tree. */
     private final String path;
@@ -172,6 +150,7 @@ public class NoteBook implements Comparable<NoteBook> {
     private final GUID zoneId;
     /**
      * Creates a new {@code EntryPath} object.
+     *
      * @param path the path in the tree.
      * @param entry the {@code NoteBookEntry}.
      */
@@ -183,6 +162,7 @@ public class NoteBook implements Comparable<NoteBook> {
 
     /**
      * Returns the path in the tree.
+     *
      * @return the path in the tree.
      */
     public String getPath() {
@@ -191,6 +171,7 @@ public class NoteBook implements Comparable<NoteBook> {
 
     /**
      * Returns the {@code NoteBookEntry}.
+     *
      * @return the {@code NoteBookEntry}.
      */
     public NoteBookEntry getEntry() {
@@ -199,6 +180,7 @@ public class NoteBook implements Comparable<NoteBook> {
 
     /**
      * Returns the {@link GUID} zone id this {@code NoteBookEntry} has.
+     *
      * @return the {@link GUID} zone id this {@code NoteBookEntry} has.
      */
     public GUID getZoneId() {
@@ -217,7 +199,6 @@ public class NoteBook implements Comparable<NoteBook> {
 
   /** Mapping between the path and the id of an entry in the {@code NoteBook}. */
   private final Map<String, UUID> pathIdMap = new HashMap<>();
-
 
   /** Provides property change support for the {@code NoteBook}. */
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
@@ -239,6 +220,8 @@ public class NoteBook implements Comparable<NoteBook> {
    */
   private final Lock writeLock = readWriteLock.writeLock();
 
+  /** The id of the {@code NoteBook}. */
+  private final UUID id;
 
   /** The name of the {@code NoteBook}. */
   private String name;
@@ -252,20 +235,27 @@ public class NoteBook implements Comparable<NoteBook> {
   /** The namespace of the {@code NoteBook}. */
   private String namespace;
 
-  /** Is this an internal  MapTool {@code NoteBook}. */
+  /** Is this an internal MapTool {@code NoteBook}. */
   private final boolean internal;
-
-
 
   /**
    * Creates a new {@code NoteBook} object.
+   *
+   * @param id The id of the {@code NoteBook}.
    * @param name The name of the {@code NoteBook}.
    * @param description The description of the {@code NoteBook}.
    * @param version The version of the {@code NoteBook}.
    * @param namespace The namespace of the {@code NoteBook}.
    * @param internal {@code true} if this ia an internal uneditable MapTool {@code NoteBook}.
    */
-  private NoteBook(String name, String description, String version, String namespace, boolean internal) {
+  private NoteBook(
+      UUID id,
+      String name,
+      String description,
+      String version,
+      String namespace,
+      boolean internal) {
+    this.id = id;
     this.name = name;
     this.description = description;
     this.version = version;
@@ -273,23 +263,47 @@ public class NoteBook implements Comparable<NoteBook> {
     this.internal = internal;
   }
 
-
   /**
    * Creates a new {@code NoteBook} object.
+   *
    * @param name The name of the {@code NoteBook}.
    * @param description The description of the {@code NoteBook}.
    * @param version The version of the {@code NoteBook}.
    * @param namespace The namespace of the {@code NoteBook}.
-   *
    * @return a new {@code NoteBook} object.
    */
-  public static NoteBook createNoteBook(String name, String description, String version, String namespace) {
-    return new NoteBook(name, description, version, namespace, false);
+  public static NoteBook createNoteBook(
+      String name, String description, String version, String namespace) {
+    return new NoteBook(UUID.randomUUID(), name, description, version, namespace, false);
   }
 
+  /**
+   * Creates a new {@code NoteBook} object.
+   *
+   * @param id The id of the {@code NoteBook}.
+   * @param name The name of the {@code NoteBook}.
+   * @param description The description of the {@code NoteBook}.
+   * @param version The version of the {@code NoteBook}.
+   * @param namespace The namespace of the {@code NoteBook}.
+   * @return a new {@code NoteBook} object.
+   */
+  public static NoteBook createNoteBook(
+      UUID id, String name, String description, String version, String namespace) {
+    return new NoteBook(id, name, description, version, namespace, false);
+  }
+
+  /**
+   * Returns the id of the {@code NoteBook}.
+   *
+   * @return the id of the {@code NoteBook}.
+   */
+  public UUID getId() {
+    return id;
+  }
 
   /**
    * Sets the name for the {@code NoteBook}.
+   *
    * @param newName the name to set.
    */
   public void setName(String newName) {
@@ -307,6 +321,7 @@ public class NoteBook implements Comparable<NoteBook> {
 
   /**
    * Sets the description for the {@code NoteBook}.
+   *
    * @param desc the description to set.
    */
   public void setDescription(String desc) {
@@ -324,6 +339,7 @@ public class NoteBook implements Comparable<NoteBook> {
 
   /**
    * Sets the version for the {@code NoteBook}
+   *
    * @param ver the version to set.
    */
   public void setVersion(String ver) {
@@ -344,9 +360,9 @@ public class NoteBook implements Comparable<NoteBook> {
     fireChangeEvent(VERSIONED_NAMESPACE_CHANGED, oldvns, newvns);
   }
 
-
   /**
    * Returns the name of the {@code NoteBook}.
+   *
    * @return the name of the {@code NoteBook}.
    */
   public synchronized String getName() {
@@ -355,6 +371,7 @@ public class NoteBook implements Comparable<NoteBook> {
 
   /**
    * Returns the description of the {@code NoteBook}.
+   *
    * @return the description of the {@code NoteBook}.
    */
   public synchronized String getDescription() {
@@ -363,24 +380,25 @@ public class NoteBook implements Comparable<NoteBook> {
 
   /**
    * Returns the version of the {@code NoteBook}.
+   *
    * @return the version of the {@code NoteBook}.
    */
   public synchronized String getVersion() {
     return version;
   }
 
-
   /**
    * Returns if this is an internal MapTool {@code NoteBook} or not.
-   * @return  {@code true }if this is an internal MapTool {@code NoteBook}.
+   *
+   * @return {@code true }if this is an internal MapTool {@code NoteBook}.
    */
   public boolean isInternal() {
     return internal;
   }
 
-
   /**
    * Sets the namespace of the {@code NoteBook}.
+   *
    * @param ns the name space of the {@code NoteBook}.
    */
   public void setNamespace(String ns) {
@@ -401,36 +419,34 @@ public class NoteBook implements Comparable<NoteBook> {
     fireChangeEvent(VERSIONED_NAMESPACE_CHANGED, oldvns, newvns);
   }
 
-
   /**
    * Returns the name space of this {@code NoteBook}.
+   *
    * @return the name space of this {@code NoteBook}.
    */
   public synchronized String getNamespace() {
     return namespace;
   }
 
-
   /**
    * Returns the versioned name space, which is a combination of the namespace and version of the
    * {@code NoteBook}.
+   *
    * @return the versioned name space.
    */
   public synchronized String getVersionedNameSpace() {
     return namespace + "/" + version;
   }
 
-
   /**
    * Adds or replaces a {@link NoteBookEntry} to the note book being managed. This will replace
    * <strong>any</strong> {@link NoteBookEntry} with the same id.
    *
    * @see NoteBookEntry#getId()
-   * @param path  the path for the added {@link NoteBookEntry}.
    * @param entry the {@link NoteBookEntry} to add or replace.
    */
-  public void putEntry(String path, NoteBookEntry entry) {
-    putEntry(path, entry, true);
+  public void putEntry(NoteBookEntry entry) {
+    putEntry(entry, true);
   }
 
   /**
@@ -439,22 +455,38 @@ public class NoteBook implements Comparable<NoteBook> {
    * allows you to specify if the listeners should be notified of the change. If you pass {@code
    * false} to this you are expected to perform the notification, this is to support bulk updates.
    *
+   * <p>Since a path can only point to a single {@link NoteBookEntry} if the passed in {@link
+   * NoteBookEntry} has the path of an existing entry then that existing entry will be removed.
+   *
    * @see NoteBookEntry#getId()
-   * @param path  the path for the added {@link NoteBookEntry}.
    * @param entry the {@link NoteBookEntry} to add or replace.
    * @param firePropertyChange {@code true} if listeners should be notified.
    */
-  private void putEntry(String path, NoteBookEntry entry, boolean firePropertyChange) {
+  private void putEntry(NoteBookEntry entry, boolean firePropertyChange) {
     writeLock.lock();
-    EntryDetails oldEntry = idEntryMap.get(entry.getId());
+    Set<NoteBookEntry> removed = new HashSet<>();
     try {
+
+      /*
+       * First remove any entry with the same path if its not the same id.
+       */
+      if (pathIdMap.containsKey(entry.getPath())) {
+        UUID existingPathId = pathIdMap.get(entry.getPath());
+        if (!entry.getId().equals(existingPathId)) {
+          EntryDetails oldEntry = idEntryMap.get(existingPathId);
+          removeEntry(oldEntry.getEntry(), false);
+          removed.add(oldEntry.getEntry());
+        }
+      }
 
       /*
        * Check to see if we are replacing an entry and if so remove it from the other maps, as
        * the reference or the zone may have changed.
        */
+      EntryDetails oldEntry = idEntryMap.get(entry.getId());
       if (oldEntry != null) {
         removeEntry(oldEntry.getEntry(), false);
+        removed.add(oldEntry.getEntry());
       }
 
       /*
@@ -465,17 +497,16 @@ public class NoteBook implements Comparable<NoteBook> {
         return;
       }
 
-      idEntryMap.put(entry.getId(), new EntryDetails(path, entry, entry.getZoneId().orElse(null)));
+      EntryDetails entryDetails =
+          new EntryDetails(entry.getPath(), entry, entry.getZoneId().orElse(null));
+      idEntryMap.put(entry.getId(), entryDetails);
+      pathIdMap.put(entry.getPath(), entry.getId());
 
     } finally {
       writeLock.unlock();
     }
 
     if (firePropertyChange) {
-      Set<NoteBookEntry> removed = new HashSet<>();
-      if (oldEntry != null) {
-        removed.add(oldEntry.getEntry());
-      }
       fireChangeEvent(ENTRIES_ADDED_EVENT, removed, Set.of(entry));
     }
   }
@@ -497,7 +528,7 @@ public class NoteBook implements Comparable<NoteBook> {
           if (idEntryMap.containsKey(entry.getValue().getId())) {
             EntryDetails entryPath = idEntryMap.get(entry.getValue().getId());
             oldEntries.put(entryPath.getPath(), entryPath.getEntry());
-            putEntry(entryPath.getPath(), entryPath.getEntry(), false);
+            putEntry(entryPath.getEntry(), false);
           }
         }
       } finally {
@@ -532,8 +563,8 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Returns a {@link Map} of {@link Zone}s and the {@link NoteBookEntry}s for them. Entries
-   * with no zone are in the {@code Map} with the key of {@code null}.
+   * Returns a {@link Map} of {@link Zone}s and the {@link NoteBookEntry}s for them. Entries with no
+   * zone are in the {@code Map} with the key of {@code null}.
    *
    * @return a {@link Map} of {@link Zone}s and the {@link NoteBookEntry}s for the them.
    */
@@ -551,7 +582,6 @@ public class NoteBook implements Comparable<NoteBook> {
     return entries;
   }
 
-
   /**
    * Returns the {@link NoteBookEntry}s for a {@link Zone}.
    *
@@ -562,10 +592,11 @@ public class NoteBook implements Comparable<NoteBook> {
     Objects.requireNonNull(zoneId, "zoneId cannot be null for getZoneEntries");
     readLock.lock();
     try {
-      return idEntryMap.values().stream().filter(e -> zoneId.equals(e.getZoneId())).map(
-          EntryDetails::getEntry).collect(Collectors.toSet()
-      );
-    } finally{
+      return idEntryMap.values().stream()
+          .filter(e -> zoneId.equals(e.getZoneId()))
+          .map(EntryDetails::getEntry)
+          .collect(Collectors.toSet());
+    } finally {
       readLock.unlock();
     }
   }
@@ -578,10 +609,11 @@ public class NoteBook implements Comparable<NoteBook> {
   public Collection<NoteBookEntry> getZoneLessEntries() {
     readLock.lock();
     try {
-      return idEntryMap.values().stream().filter(e -> e.getZoneId() == null).map(
-          EntryDetails::getEntry).collect(Collectors.toSet()
-      );
-    } finally{
+      return idEntryMap.values().stream()
+          .filter(e -> e.getZoneId() == null)
+          .map(EntryDetails::getEntry)
+          .collect(Collectors.toSet());
+    } finally {
       readLock.unlock();
     }
   }
@@ -614,6 +646,7 @@ public class NoteBook implements Comparable<NoteBook> {
 
   /**
    * Removes multiple {@link NoteBookEntry}s.
+   *
    * @param entries the entries to remove.
    */
   public void removeEntries(Set<NoteBookEntry> entries) {
@@ -686,8 +719,8 @@ public class NoteBook implements Comparable<NoteBook> {
 
   /**
    * Returns the {@link NoteBookEntry} at the specified path.
-   * @param path the path to get the value for.
    *
+   * @param path the path to get the value for.
    * @return the {@link NoteBookEntry} at the specified path.
    */
   public Optional<NoteBookEntry> getByPath(String path) {
@@ -699,7 +732,7 @@ public class NoteBook implements Comparable<NoteBook> {
       } else {
         return Optional.empty();
       }
-    } finally{
+    } finally {
       readLock.unlock();
     }
   }
@@ -756,19 +789,18 @@ public class NoteBook implements Comparable<NoteBook> {
     propertyChangeSupport.removePropertyChangeListener(propertyChangeListener);
   }
 
-
   /**
    * Returns the mapping between the paths and entries in the {@code NoteBook}.
-   * @return the mapping between the paths and entries in the {@code NoteBook}.
    *
+   * @return the mapping between the paths and entries in the {@code NoteBook}.
    */
-   public Map<String, NoteBookEntry> getEntryPaths() {
-     Map<String, NoteBookEntry> entries = new TreeMap<>();
-     for (EntryDetails ed : idEntryMap.values()) {
-       entries.put(ed.getPath(), ed.getEntry());
-     }
-     return entries;
-   }
+  public Map<String, NoteBookEntry> getEntryPaths() {
+    Map<String, NoteBookEntry> entries = new TreeMap<>();
+    for (EntryDetails ed : idEntryMap.values()) {
+      entries.put(ed.getPath(), ed.getEntry());
+    }
+    return entries;
+  }
 
   @Override
   public int compareTo(NoteBook o) {

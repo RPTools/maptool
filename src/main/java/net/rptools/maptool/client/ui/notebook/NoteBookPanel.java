@@ -32,8 +32,8 @@ import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.notebook.entry.Note;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
+import net.rptools.maptool.model.notebook.entry.NoteEntry;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookEntryTreeItem;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookGroupTreeItem;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookTableTreeModel;
@@ -51,19 +51,15 @@ public class NoteBookPanel extends JFXPanel {
   /** The note that is currently being edited, or {@code null} if there is no note being edited. */
   private EditNotePanel editNoteDialog;
 
-  /**
-   * The {@link TreeTableView} used to display all the {@link
-   * NoteBookEntry}s for the campaign.
-   */
+  /** The {@link TreeTableView} used to display all the {@link NoteBookEntry}s for the campaign. */
   private final TreeTableView<TableTreeItemHolder> notebookTable = new TreeTableView<>();
 
-  /**
-   * The {@link NoteBookTableTreeModel} with all the {@link
-   * NoteBookEntry}s for the campaign.
-   */
+  /** The {@link NoteBookTableTreeModel} with all the {@link NoteBookEntry}s for the campaign. */
   private NoteBookTableTreeModel noteBookTableTreeModel;
 
-  /** The dialog used to show the {@link EditNotePanel} for editing / creating {@link Note}s. */
+  /**
+   * The dialog used to show the {@link EditNotePanel} for editing / creating {@link NoteEntry}s.
+   */
   private SwingJavaFXDialog editDialog;
 
   /** The button used to edit {@link NoteBookEntry}s. */
@@ -189,8 +185,8 @@ public class NoteBookPanel extends JFXPanel {
           if (holder instanceof NoteBookEntryTreeItem) {
             if (!editDialog.isShowing()) {
               var item = (NoteBookEntryTreeItem) holder;
-              if (item.getEntry() instanceof Note) {
-                editNoteDialog.edit((Note) item.getEntry());
+              if (item.getEntry() instanceof NoteEntry) {
+                editNoteDialog.edit((NoteEntry) item.getEntry());
                 SwingUtilities.invokeLater(() -> editDialog.showDialog());
               }
             }

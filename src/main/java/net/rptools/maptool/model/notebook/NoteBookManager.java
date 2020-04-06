@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.model.notebook;
 
 import java.beans.PropertyChangeEvent;
@@ -10,10 +24,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-
-/**
- * This class manages all the {@link NoteBook}s loaded.
- */
+/** This class manages all the {@link NoteBook}s loaded. */
 public final class NoteBookManager {
 
   /** {@link PropertyChangeListener} for listening to {@link NoteBook} changes. */
@@ -26,16 +37,15 @@ public final class NoteBookManager {
    */
   private final Map<String, NoteBook> noteBooks = new ConcurrentHashMap<>();
 
-
   /**
-   * {@link PropertyChangeSupport} object for registering {@link PropertyChangeListener}s and
-   * firing events.
+   * {@link PropertyChangeSupport} object for registering {@link PropertyChangeListener}s and firing
+   * events.
    */
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
-
   /**
    * Returns all the {@link NoteBook}s being managed.
+   *
    * @return all the {@link NoteBook}s being managed.
    */
   public NavigableSet<NoteBook> getNoteBooks() {
@@ -44,9 +54,9 @@ public final class NoteBookManager {
 
   /**
    * Returns the {@code NoteBook} for the specified versioned name space.
+   *
    * @param versionedNameSpace the versioned name space.
    * @return the {@code NoteBook} for the versioned name space.
-   *
    * @see NoteBook#getVersionedNameSpace()
    */
   public NoteBook getVersionedNoteBook(String versionedNameSpace) {
@@ -56,6 +66,7 @@ public final class NoteBookManager {
 
   /**
    * Returns if there is a {@link NoteBook} for the specified versioned name space.
+   *
    * @param versionedNameSpace the versioned name space to check.
    * @return {@code true} if there is a {@code NoteBook} for the versioned name space.
    */
@@ -70,10 +81,9 @@ public final class NoteBookManager {
    * it will not be added and the existing {@link NoteBook} will be returned.
    *
    * @param noteBook The {@link NoteBook} to add.
-   * @return {@code null} if no {@link NoteBook} existed with the same versioned name space and
-   * this one was added, or the existing {@code NoteBook} with the same versioned name space (and the
-   * new one will not be added).
-   *
+   * @return {@code null} if no {@link NoteBook} existed with the same versioned name space and this
+   *     one was added, or the existing {@code NoteBook} with the same versioned name space (and the
+   *     new one will not be added).
    * @see NoteBook#getVersionedNameSpace()
    */
   public NoteBook addNoteBook(NoteBook noteBook) {
@@ -89,21 +99,22 @@ public final class NoteBookManager {
     return existing;
   }
 
-
   /**
    * Returns all of the {@link NoteBook}s with the specified name space (non versioned).
+   *
    * @param nameSpace the name space to get the {@link NoteBook}s for.
    * @return all of the {@link NoteBook}s with the specified name space (non versioned).
-   *
    * @see NoteBook#setNamespace(String)
    */
   public NavigableSet<NoteBook> getNoteBooks(String nameSpace) {
-    return noteBooks.values().stream().filter(n -> n.getNamespace().equals(nameSpace))
+    return noteBooks.values().stream()
+        .filter(n -> n.getNamespace().equals(nameSpace))
         .collect(Collectors.toCollection(TreeSet::new));
   }
 
   /**
    * Removes a {@code NoteBook}.
+   *
    * @param noteBook the {@link NoteBook} to remove.
    */
   public void removeNoteBook(NoteBook noteBook) {
@@ -114,9 +125,9 @@ public final class NoteBookManager {
     }
   }
 
-
   /**
    * Called when a property changes on the {@link NoteBook}.
+   *
    * @param event the {@link PropertyChangeEvent} for the change.
    */
   private void noteBookChanged(PropertyChangeEvent event) {
@@ -130,20 +141,19 @@ public final class NoteBookManager {
 
   /**
    * Adds a {@link PropertyChangeListener}.
+   *
    * @param pcl the {@link PropertyChangeListener} to add.
    */
   public void addPropertyChangeListener(PropertyChangeListener pcl) {
     propertyChangeSupport.addPropertyChangeListener(pcl);
   }
 
-
   /**
    * Removes a {@link PropertyChangeListener}.
+   *
    * @param pcl the {@link PropertyChangeListener} to remove.
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     propertyChangeSupport.removePropertyChangeListener(pcl);
   }
-
-
 }

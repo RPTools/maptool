@@ -14,52 +14,47 @@
  */
 package net.rptools.maptool.model.notebook.entry;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
 
 /** A {@link NoteBookEntry} that contains nothing but notes. */
-public class Note extends AbstractNoteBookEntry {
-
-  /** The Notes of the {@code NoteBookmark}. */
-  private MD5Key notesKey;
-
+public class NoteEntry extends SingleAssetEntry {
 
   /**
-   * creates a new {@code Note}.
+   * creates a new {@code NoteEntry}.
    *
    * @param id The id of the {@code Note}.
    * @param name The name of the {@code Note}.
    * @param zoneId The id of the zone of the {@code Note}, can be {@code null}.
    * @param notesKey The {@link MD5Key} for the {@link net.rptools.maptool.model.Asset} containing
-   *                 the note can be null.
+   *     the note can be null.
    * @param path The path of the {@code Note}.
    */
-  public Note(UUID id, String name, GUID zoneId, MD5Key notesKey, String path) {
-    super(id, name, zoneId, EntryZoneRequirements.ZONE_ALLOWED, path);
+  public NoteEntry(UUID id, String name, GUID zoneId, MD5Key notesKey, String path) {
+    super(id, name, zoneId, NoteBookEntryZoneRequirements.ZONE_ALLOWED, path, notesKey);
     Objects.requireNonNull(id, "ID for Note cannot be null");
-
-    this.notesKey =  notesKey;
+    Objects.requireNonNull(notesKey, "notesKey cannot be null");
   }
 
   /**
-   * creates a new {@code Note}, with a newly generated id.
+   * creates a new {@code NoteEntry}, with a newly generated id.
    *
    * @param name The name of the {@code Note}.
    * @param zoneId The id of the zone of the {@code Note}, can be {@code null}.
-   * @param notesKey The {@link MD5Key} for the {@link Asset} containing
-   *                 the note can be null.
+   * @param notesKey The {@link MD5Key} for the {@link Asset} containing the note can be null.
    * @param path The path of the {@code Note}.
    */
-  public Note(String name, GUID zoneId, MD5Key notesKey, String path) {
-    super(null, name, zoneId, EntryZoneRequirements.ZONE_ALLOWED, path);
-    this.notesKey =  notesKey;
+  public NoteEntry(String name, GUID zoneId, MD5Key notesKey, String path) {
+    super(
+        NoteBookEntry.generateId(),
+        name,
+        zoneId,
+        NoteBookEntryZoneRequirements.ZONE_ALLOWED,
+        path,
+        notesKey);
   }
 
   /**
@@ -67,36 +62,33 @@ public class Note extends AbstractNoteBookEntry {
    *
    * @param key The {@link MD5Key} for the {@link Asset} containing the note.
    */
-  public synchronized void setNotesKey(MD5Key key) {
-    notesKey = key;
+  public void setNotesKey(MD5Key key) {
+    setAssetKey(key);
   }
-
 
   /**
    * Returns the {@link MD5Key} for the {@link Asset} containing the note.
+   *
    * @return the {@link MD5Key} for the {@link Asset} containing the note.
    */
-  public synchronized Optional<MD5Key> getNotesKey() {
-    return  Optional.ofNullable(notesKey);
+  public MD5Key getNotesKey() {
+    return getAssetKey();
   }
 
   @Override
   public NoteBookEntry setName(String name) {
+    Objects.requireNonNull(name, "name cannot be null.");
     if (name.equals(getName())) {
       return this;
     } else {
-      if (getZoneId().isPresent()) {
-        return new Note(getId(), name, getZoneId().get(), notesKey, getPath());
-      } else {
-        return new Note(getId(), name, null, notesKey, getPath());
-      }
+      return new NoteEntry(getId(), name, getZoneId().orElse(null), getNotesKey(), getPath());
     }
   }
 
   @Override
   public NoteBookEntry setZoneId(GUID id) {
     if (zoneWouldChange(id)) {
-      return new Note(getId(), getName(), id, notesKey, getPath());
+      return new NoteEntry(getId(), getName(), id, getNotesKey(), getPath());
     } else {
       return this;
     }
@@ -104,23 +96,16 @@ public class Note extends AbstractNoteBookEntry {
 
   @Override
   public NoteBookEntry setPath(String path) {
+    Objects.requireNonNull(path, "path cannot be null");
     if (getPath().equals(path)) {
       return this;
     } else {
-      if (getZoneId().isPresent()) {
-        return new Note(getId(), getName(), getZoneId().get(), notesKey, getPath());
-      } else {
-        return new Note(getId(), getName(), null, notesKey, getPath());
-      }
+      return new NoteEntry(getId(), getName(), getZoneId().orElse(null), getNotesKey(), getPath());
     }
   }
 
   @Override
-  public synchronized Collection<MD5Key> getAssetKeys() {
-    if (notesKey == null) {
-      return Collections.emptySet();
-    } else {
-      return Set.of(notesKey);
-    }
+  public NoteBookEntryType getType() {
+    return NoteBookEntryType.NOTE;
   }
 }

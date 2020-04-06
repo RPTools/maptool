@@ -34,22 +34,21 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.notebook.entry.Note;
 import net.rptools.maptool.model.notebook.NoteBook;
+import net.rptools.maptool.model.notebook.entry.NoteEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * The dialog used for editing or creating notes to be stored in the {@link
- * NoteBook}.
- */
+/** The dialog used for editing or creating notes to be stored in the {@link NoteBook}. */
 public class EditNotePanel {
 
   /** Logger for this class. */
   private static final Logger log = LogManager.getLogger(EditNotePanel.class);
 
-  /** The current {@link Note} being edited, or {@code null} if the dialog is for a new note. */
-  private Note editingNotes;
+  /**
+   * The current {@link NoteEntry} being edited, or {@code null} if the dialog is for a new note.
+   */
+  private NoteEntry editingNotes;
 
   /** The {@link TextField} for editing the name of the note. */
   private final TextField nameTextField = new TextField();
@@ -151,7 +150,7 @@ public class EditNotePanel {
   }
 
   /**
-   * Shows the dialog with blank values to create a new {@link Note}. If the note is created
+   * Shows the dialog with blank values to create a new {@link NoteEntry}. If the note is created
    * successfully it will be added to the campaign note book.
    */
   synchronized void editNew() {
@@ -165,20 +164,18 @@ public class EditNotePanel {
   }
 
   /**
-   * Shows the dialog with blank values to create a new {@link Note}. If the note is created
+   * Shows the dialog with blank values to create a new {@link NoteEntry}. If the note is created
    * successfully it will be added to the campaign note book.
    */
-  synchronized void edit(Note note) {
+  synchronized void edit(NoteEntry note) {
     editingNotes = note;
 
-    if (note.getNotesKey().isPresent()) {
-      AssetManager.getAssetAsynchronously(
-          note.getNotesKey().get(),
-          (key) -> {
-            String noteString = AssetManager.getAsset(key).getDataAsString();
-            Platform.runLater(() -> htmlEditor.setHtmlText(noteString));
-          });
-    }
+    AssetManager.getAssetAsynchronously(
+        note.getNotesKey(),
+        (key) -> {
+          String noteString = AssetManager.getAsset(key).getDataAsString();
+          Platform.runLater(() -> htmlEditor.setHtmlText(noteString));
+        });
 
     nameTextField.setText(editingNotes.getName());
     referenceTextField.clear(); // TODO: CDW:
@@ -212,8 +209,8 @@ public class EditNotePanel {
   }
 
   /**
-   * Checks that the edits are valid and if the are it adds the {@link Note} to the campaign note
-   * book.
+   * Checks that the edits are valid and if the are it adds the {@link NoteEntry} to the campaign
+   * note book.
    */
   private synchronized void handleOk(Runnable closeCallback) {
     boolean valid = true;

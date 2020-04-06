@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.model.notebook.entry;
 
 import java.util.Objects;
@@ -5,9 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 import net.rptools.maptool.model.GUID;
 
-/**
- * Abstract class used to build up other {@link NoteBookEntry}s.
- */
+/** Abstract class used to build up other {@link NoteBookEntry}s. */
 abstract class AbstractNoteBookEntry implements NoteBookEntry {
 
   /** THe id of the {@link NoteBookEntry} */
@@ -20,11 +32,10 @@ abstract class AbstractNoteBookEntry implements NoteBookEntry {
   private final GUID zoneId;
 
   /** The zone requirements for the entry. */
-  private final EntryZoneRequirements zoneRequirements;
+  private final NoteBookEntryZoneRequirements zoneRequirements;
 
   /** The path of the {@link NoteBookEntry}. */
   private final String path;
-
 
   /**
    * Creates a new {@code AbstractNoteBookEntry}.
@@ -35,10 +46,17 @@ abstract class AbstractNoteBookEntry implements NoteBookEntry {
    * @param zoneRequirements the zone requirements for the {@link NoteBookEntry}.
    * @param path the path for the {@link NoteBookEntry}.
    */
-  AbstractNoteBookEntry(UUID id, String name, GUID zoneId, EntryZoneRequirements zoneRequirements, String path) {
+  AbstractNoteBookEntry(
+      UUID id,
+      String name,
+      GUID zoneId,
+      NoteBookEntryZoneRequirements zoneRequirements,
+      String path) {
     this.id = id != null ? id : NoteBookEntry.generateId();
     this.name = Objects.requireNonNull(name, "Note Book Entry name cannot be null.");
-    this.zoneRequirements = Objects.requireNonNull(zoneRequirements, "Note Book Entry zone requirements cannot be null.");
+    this.zoneRequirements =
+        Objects.requireNonNull(
+            zoneRequirements, "Note Book Entry zone requirements cannot be null.");
     this.path = Objects.requireNonNull(path, "Note Book Entry path cannot be null.");
 
     switch (zoneRequirements) {
@@ -49,7 +67,8 @@ abstract class AbstractNoteBookEntry implements NoteBookEntry {
         this.zoneId = zoneId;
         break;
       case ZONE_REQUIRED:
-        this.zoneId = Objects.requireNonNull(zoneId, "Required zone id can not be null for note book entry.");
+        this.zoneId =
+            Objects.requireNonNull(zoneId, "Required zone id can not be null for note book entry.");
         break;
       default:
         throw new AssertionError(); // Should never happen.
@@ -57,17 +76,17 @@ abstract class AbstractNoteBookEntry implements NoteBookEntry {
   }
 
   /**
-   * Checks to see if the passed in zone id is different from the current zone id.
-   * If {@link #getZoneRequirements()} is {@link EntryZoneRequirements#ZONE_IGNORED}
-   * this will always return false.
+   * Checks to see if the passed in zone id is different from the current zone id. If {@link
+   * #getZoneRequirements()} is {@link NoteBookEntryZoneRequirements#ZONE_IGNORED} this will always
+   * return false.
    *
    * @param zId the zone id to check.
    * @return {@code true} if zone is not being ignored and passed in zone id differs from current
-   *         zoneId.
+   *     zoneId.
    */
   protected boolean zoneWouldChange(GUID zId) {
     // If the zone is always ignored then a change could never occur.
-    if (zoneRequirements == EntryZoneRequirements.ZONE_IGNORED) {
+    if (zoneRequirements == NoteBookEntryZoneRequirements.ZONE_IGNORED) {
       return false;
     }
 
@@ -101,7 +120,7 @@ abstract class AbstractNoteBookEntry implements NoteBookEntry {
   }
 
   @Override
-  public EntryZoneRequirements getZoneRequirements() {
+  public NoteBookEntryZoneRequirements getZoneRequirements() {
     return zoneRequirements;
   }
 

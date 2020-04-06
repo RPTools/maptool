@@ -14,5 +14,14 @@
  */
 package net.rptools.maptool.model.notebook.entry;
 
-/** Interface implemented by objects that build {@link NoteBookEntry} objects. */
-public interface NoteBookEntryBuilder {}
+/**
+ * Enumeration representing the different Zone requirements that a {@link NoteBookEntry} can have.
+ */
+public enum NoteBookEntryZoneRequirements {
+  /** The Zone is ignored for the {@link NoteBookEntry}, attempting to change it will do nothing. */
+  ZONE_IGNORED,
+  /** A Zone is allowed for the {@link NoteBookEntry} and tracked, but not required. */
+  ZONE_ALLOWED,
+  /** A Zone is required for the {@link NoteBookEntry} and tracked. */
+  ZONE_REQUIRED
+}

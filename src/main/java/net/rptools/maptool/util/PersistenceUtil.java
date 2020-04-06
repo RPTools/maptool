@@ -15,6 +15,8 @@
 package net.rptools.maptool.util;
 
 import com.caucho.hessian.io.HessianInput;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.thoughtworks.xstream.converters.ConversionException;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -65,7 +67,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.notebook.NoteBook;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
-import net.rptools.maptool.model.notebook.NoteBookEntryPersistenceUtil;
+import net.rptools.maptool.model.notebook.persistence.NoteBookEntryPersistenceUtilFactory;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
@@ -84,6 +86,8 @@ public class PersistenceUtil {
   public static final String PROP_CAMPAIGN_VERSION = "campaignVersion"; // $NON-NLS-1$
   private static final String ASSET_DIR = "assets/"; // $NON-NLS-1$
   public static final String HERO_LAB = "herolab"; // $NON-NLS-1$
+
+  public static final String NOTE_BOOKS = "notebooks";
 
   private static final String CAMPAIGN_VERSION = "1.6.0";
 
@@ -392,10 +396,11 @@ public class PersistenceUtil {
    * @throws IOException if an error occurs writing a file.
    */
   private static void saveNoteBook(PackedFile packedFile, NoteBook notebook) throws IOException {
-    var nbePersistenceUtil = new NoteBookEntryPersistenceUtil();
+    var nbePersistenceUtil = new NoteBookEntryPersistenceUtilFactory();
     for (var entry : notebook.getEntries()) {
       packedFile.putFile(
-          "notebook/" + entry.getId(), nbePersistenceUtil.toString(entry).getBytes());
+          NOTE_BOOKS + "/" + notebook.getId() + "/" + entry.getId(),
+          nbePersistenceUtil.toJson(entry).toString().getBytes());
 
       for (MD5Key md5Key : entry.getAssetKeys()) {
         Asset asset = AssetManager.getAsset(md5Key);
@@ -518,17 +523,20 @@ public class PersistenceUtil {
   }
 
   private static void loadNoteBook(PackedFile packedFile, NoteBook noteBook) throws IOException {
-    var nbePersistenceUtil = new NoteBookEntryPersistenceUtil();
+    var nbePersistenceUtil = new NoteBookEntryPersistenceUtilFactory();
 
     List<String> noteFiles =
         packedFile.getPaths().stream()
             .filter(p -> p.startsWith("notebook/"))
             .collect(Collectors.toList());
     Set<MD5Key> allAssetIds = new HashSet<>();
+
+    Gson gson = new Gson();
     for (var noteFile : noteFiles) {
       String asString = IOUtils.toString(packedFile.getFileAsReader(noteFile));
-      NoteBookEntry entry = nbePersistenceUtil.fromString(asString);
-      noteBook.putEntry("", entry); // TODO: CDW:
+      JsonObject jsonObject = gson.toJsonTree(asString).getAsJsonObject();
+      NoteBookEntry entry = nbePersistenceUtil.fromJson(jsonObject);
+      noteBook.putEntry(entry); // TODO: CDW:
       allAssetIds.addAll(entry.getAssetKeys());
     }
 
