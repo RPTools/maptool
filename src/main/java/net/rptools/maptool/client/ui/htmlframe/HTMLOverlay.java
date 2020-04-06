@@ -15,90 +15,68 @@
 package net.rptools.maptool.client.ui.htmlframe;
 
 import java.awt.*;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.TooManyListenersException;
 import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.TransferableHelper;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.ZonePoint;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Represents the transparent HTML overlay over the map. */
-public class HTMLOverlay extends HTMLPane implements DropTargetListener, HTMLPanelContainer {
+public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
+  /** The logger. */
+  private static final Logger log = LogManager.getLogger(HTMLOverlay.class);
+
   /** The default rule for an invisible body tag. */
   private static final String CSS_RULE_BODY =
-      "body { font-family: sans-serif; font-size: %dpt; background: none}";
+      "body { font-family: sans-serif; font-size: %dpt; background: none; -webkit-user-select: none; margin: 0;}";
 
   /** The map of the macro callbacks. */
-  private final Map<String, String> macroCallbacks = new HashMap<String, String>();
+  private final Map<String, String> macroCallbacks = new HashMap<>();
 
   public HTMLOverlay() {
-    super();
-    setFocusable(false);
-    setHighlighter(null);
-    setOpaque(false);
-    addMouseListeners();
-    addActionListener(this);
-    setCaretColor(new Color(0, 0, 0, 0)); // invisible, needed or it shows in DnD operations
+    super(null);
+    addMouseListeners(); // mouse listeners to transmit to the ZR
+    addActionListener(this); // add the action listeners for form events
+    setBackground(new Color(0, 0, 0, 0)); // transparent overlay
+  }
 
-    setTransferHandler(new TransferableHelper()); // set the Drag & Drop handler
-    try {
-      getDropTarget().addDropTargetListener(this);
-    } catch (TooManyListenersException e1) {
-      // Should never happen because the transfer handler fixes this problem.
-    }
+  @Override
+  void handlePage() {
+    super.handlePage();
+    makeWebEngineTransparent();
+
+    // Set the listener for the cursor to switch the webView cursor to the correct one. This is
+    // caused by WebView attempting to return to its default instead of our tool cursor.
+    webView
+        .cursorProperty()
+        .addListener(
+            (observable, oldCursor, newCursor) -> {
+              if (newCursor != null && "DEFAULT".equals(newCursor.toString())) {
+                Cursor cursor = MapTool.getFrame().getCurrentZoneRenderer().getCursor();
+                if (!cursor.getName().equals("Default Cursor")) {
+                  webView.setCursor(null);
+                  this.setCursor(cursor);
+                }
+              }
+            });
   }
 
   /**
-   * Return the rule for an invisible body.
+   * Return the CSS rule for an invisible body.
    *
    * @return the rule
    */
   @Override
-  public String getRuleBody() {
+  String getRuleBody() {
     return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
-  }
-
-  @Override
-  public void dragEnter(DropTargetDragEvent dtde) {}
-
-  @Override
-  public void dragOver(DropTargetDragEvent dtde) {}
-
-  @Override
-  public void dropActionChanged(DropTargetDragEvent dtde) {}
-
-  @Override
-  public void dragExit(DropTargetEvent dte) {}
-
-  /**
-   * Add the tokens to the current zone renderer if a token is dropped on the overlay.
-   *
-   * @param dtde the event of the drop
-   */
-  @Override
-  public void drop(DropTargetDropEvent dtde) {
-    ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-    Point point = SwingUtilities.convertPoint(this, dtde.getLocation(), zr);
-
-    ZonePoint zp = new ScreenPoint((int) point.getX(), (int) point.getY()).convertToZone(zr);
-    TransferableHelper th = (TransferableHelper) getTransferHandler();
-    List<Token> tokens = th.getTokens();
-    if (tokens != null && !tokens.isEmpty()) {
-      zr.addTokens(tokens, zp, th.getConfigureTokens(), false);
-    }
   }
 
   /** Run the callback macro for "onChangeSelection". */
@@ -135,12 +113,13 @@ public class HTMLOverlay extends HTMLPane implements DropTargetListener, HTMLPan
         new MouseAdapter() {
           @Override
           public void mousePressed(MouseEvent e) {
-            passMouseEvent(e, true);
+            passMouseEvent(e);
+            e.consume(); // prevents double mouse press bug
           }
 
           @Override
           public void mouseClicked(MouseEvent e) {
-            passMouseEvent(e, true);
+            passMouseEvent(e);
           }
 
           @Override
@@ -161,47 +140,13 @@ public class HTMLOverlay extends HTMLPane implements DropTargetListener, HTMLPan
   }
 
   /**
-   * Passes a mouse event to the ZoneRenderer. If checking for transparency, only forwards the event
-   * if it happened over a transparent pixel.
-   *
-   * @param e the mouse event to forward
-   * @param checkForTransparency whether to check for transparency
-   */
-  private void passMouseEvent(MouseEvent e, boolean checkForTransparency) {
-    SwingUtilities.invokeLater(
-        () -> {
-          if (checkForTransparency && isOpaque(e.getPoint())) {
-            return; // don't forward
-          }
-          Component c = MapTool.getFrame().getCurrentZoneRenderer();
-          c.dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, c));
-        });
-  }
-
-  /**
    * Passes a mouse event to the ZoneRenderer.
    *
    * @param e the mouse event to forward
    */
   private void passMouseEvent(MouseEvent e) {
-    passMouseEvent(e, false);
-  }
-
-  /**
-   * Returns true if the pixel of the component at the point is opaque.
-   *
-   * @param p the point
-   * @return true if the pixel is opaque
-   */
-  public boolean isOpaque(Point p) {
-    Rectangle rect = getBounds();
-    if (rect.contains(p)) {
-      BufferedImage img = new BufferedImage(rect.width, rect.height, BufferedImage.TYPE_INT_ARGB);
-      paintAll(img.createGraphics());
-      return new Color(img.getRGB(p.x, p.y), true).getAlpha() != 0;
-    } else {
-      return false; // no overlay outside the bounds
-    }
+    Component c = MapTool.getFrame().getCurrentZoneRenderer();
+    c.dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, c));
   }
 
   @Override
@@ -255,7 +200,9 @@ public class HTMLOverlay extends HTMLPane implements DropTargetListener, HTMLPan
 
   @Override
   public void updateContents(final String html) {
+    macroCallbacks.clear(); // clear the old callbacks
     super.updateContents(html);
+    getDropTarget().setActive(false); // disables drop on overlay, drop goes to map
     if ("".equals(html)) {
       closeRequest(); // turn off the overlay
     } else {
@@ -267,5 +214,22 @@ public class HTMLOverlay extends HTMLPane implements DropTargetListener, HTMLPan
   public void closeRequest() {
     flush();
     setVisible(false);
+  }
+
+  /** Makes the webEngine transparent through reflection. */
+  private void makeWebEngineTransparent() {
+    try {
+      Field f = getWebEngine().getClass().getDeclaredField("page");
+      f.setAccessible(true);
+      Object page = f.get(getWebEngine());
+      Method m = page.getClass().getMethod("setBackgroundColor", int.class);
+      m.setAccessible(true);
+      m.invoke(page, (new Color(0, 0, 0, 0)).getRGB());
+    } catch (NoSuchFieldException
+        | IllegalAccessException
+        | NoSuchMethodException
+        | InvocationTargetException e) {
+      e.printStackTrace();
+    }
   }
 }
