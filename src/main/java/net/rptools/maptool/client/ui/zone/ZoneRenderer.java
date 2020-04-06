@@ -4873,9 +4873,8 @@ public class ZoneRenderer extends JComponent
       custom = createCustomCursor("image/cursor.png", "Group");
       cursor = custom;
     }
-    // overlay and ZoneRenderer should have same cursor as map
+    // Overlay and ZoneRenderer should have same cursor
     super.setCursor(cursor);
-    MapTool.getFrame().getHtmlOverlay().setEditorKitDefaultCursor(cursor);
     MapTool.getFrame().getHtmlOverlay().setCursor(cursor);
   }
 
