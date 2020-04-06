@@ -294,9 +294,9 @@ public class getInfoFunction extends AbstractFunction {
       }
       JsonArray sgroup;
       if (sinfo.has(group)) {
-         sgroup = sinfo.get(group).getAsJsonArray();
+        sgroup = sinfo.get(group).getAsJsonArray();
       } else {
-         sgroup = new JsonArray();
+        sgroup = new JsonArray();
       }
       sgroup.add(states.getName());
       sinfo.add(group, sgroup);
