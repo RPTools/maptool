@@ -128,6 +128,7 @@ public class TokenSelectionFunctions extends AbstractFunction {
     for (GUID deselectGUID : deselectGUIDs) {
       zr.deselectToken(deselectGUID);
     }
+    zr.updateAfterSelection();
   }
 
   private void selectTokens(List<Object> parameters) throws ParserException {
@@ -219,5 +220,6 @@ public class TokenSelectionFunctions extends AbstractFunction {
               "macro.function.general.tooManyParam", "selectTokens", 3, parameters.size()));
     }
     zr.selectTokens(allGUIDs);
+    zr.updateAfterSelection();
   }
 }

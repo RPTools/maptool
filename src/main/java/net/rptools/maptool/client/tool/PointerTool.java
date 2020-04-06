@@ -335,6 +335,11 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
     public void handleMouseReleased(MouseEvent event) {}
 
+    /**
+     * Handles right click (popup menu) and double left click (token editor).
+     *
+     * @param event the mouse event.
+     */
     public void handleMousePressed(MouseEvent event) {
       if (event.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(event)) {
         Token token = getTokenAt(event.getX(), event.getY());
@@ -374,6 +379,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       }
       renderer.clearSelectedTokens();
       boolean selected = renderer.selectToken(token.getId());
+      renderer.updateAfterSelection();
 
       if (selected) {
         Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
@@ -483,6 +489,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         // Stack
         renderer.clearSelectedTokens();
         showTokenStackPopup(tokenList, e.getX(), e.getY());
+        renderer.updateAfterSelection();
       } else {
         // Single
         Token token = renderer.getTokenAt(e.getX(), e.getY());
@@ -510,20 +517,20 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       // Don't select if it's already being moved by someone
       isNewTokenSelected = false;
       if (!renderer.isTokenMoving(token)) {
-        if (!renderer.getSelectedTokenSet().contains(token.getId()) && !SwingUtil.isShiftDown(e)) {
+        if (SwingUtil.isShiftDown(e)) {
+          // if shift, we invert the selection of the token
+          if (renderer.getSelectedTokenSet().contains(token.getId())) {
+            renderer.deselectToken(token.getId());
+          } else {
+            renderer.selectToken(token.getId());
+          }
+          renderer.updateAfterSelection();
+        } else if (!renderer.getSelectedTokenSet().contains(token.getId())) {
+          // if not shift and click on non-selected token, switch selection to the token
           isNewTokenSelected = true;
           renderer.clearSelectedTokens();
-        }
-        // XXX Isn't Windows standard to use Ctrl-click to add one element and Shift-click
-        // to
-        // extend?
-        // XXX Similarly, OSX uses Cmd-click to add one element and Shift-click to extend...
-        // Change
-        // it later.
-        if (SwingUtil.isShiftDown(e) && renderer.getSelectedTokenSet().contains(token.getId())) {
-          renderer.deselectToken(token.getId());
-        } else {
           renderer.selectToken(token.getId());
+          renderer.updateAfterSelection();
         }
         // Dragging offset for currently selected token
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
@@ -601,9 +608,9 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
             renderer.clearSelectedTokens();
           }
           renderer.selectTokens(selectionBoundBox);
+          renderer.updateAfterSelection();
 
           selectionBoundBox = null;
-          renderer.repaint();
           return;
         }
         // DRAG TOKEN COMPLETE
@@ -615,9 +622,12 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           if (SwingUtilities.isLeftMouseButton(e) && !SwingUtil.isShiftDown(e)) {
             Token token = renderer.getTokenAt(e.getX(), e.getY());
             // Only if it isn't already being moved
-            if (token != null && !renderer.isTokenMoving(token)) {
+            if (token != null
+                && !renderer.isTokenMoving(token)
+                && !renderer.isOnlyTokenSelected(token)) {
               renderer.clearSelectedTokens();
               renderer.selectToken(token.getId());
+              renderer.updateAfterSelection();
             }
           }
         }
@@ -645,6 +655,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           renderer.clearSelectedTokens();
         }
         renderer.selectToken(tokenUnderMouse.getId());
+        renderer.updateAfterSelection();
         isNewTokenSelected = false;
       }
       if (tokenUnderMouse != null && !renderer.getSelectedTokenSet().isEmpty()) {
@@ -833,9 +844,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       if (!isDraggingToken && renderer.isTokenMoving(tokenUnderMouse)) {
         return;
       }
-      if (isNewTokenSelected) {
+      if (isNewTokenSelected && !renderer.isOnlyTokenSelected(tokenUnderMouse)) {
         renderer.clearSelectedTokens();
         renderer.selectToken(tokenUnderMouse.getId());
+        renderer.updateAfterSelection();
       }
       isNewTokenSelected = false;
 
@@ -1371,10 +1383,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         }
         facing = facingArray[facingIndex];
       }
-      token.setFacing(facing);
-
-      renderer.flush(token);
-      MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, facing);
     }
     renderer.repaint();
   }
