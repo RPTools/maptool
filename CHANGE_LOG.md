@@ -37,7 +37,15 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#221][i221] Campaign Properties dialog now has a drop-down to select from pre-defined Campaign Property sets (.mtprops).
 
 **Bug Fixes**
+- [#1472][i1472] `getInfo("campaign")` was not returning all states. Fixed.
+- [#1469][i1469] Cursor offset when dragging snap-to-grid tokens on background layer. Fixed.
+- [#1468][i1468] onChangeSelection event was firing multiple times per selection action. Fixed.
+- [#1460][i1460] Uncaught cases in switch statement produces unhelpful error message. Fixed.
+- [#1456][i1456] Pressing Enter in an HTML control loses focus - fixed.
+- [#1455][i1455] `findToken()` using GM name failed when run via a trusted macro by Player client. Also `getGMName()` & `getGMNotes()` - fixed.
+- [#1453][i1453] HTML5 form validation ignored, js form.submit() borken, button w/o type broken - fixed.
 - [#1450][i1450] Fixed malfunctioning HTML elements in HTML5 dialog/frames: `<input>`, `<button>`, `<map>`, and `<a>`.
+- [#1441][i1441] Title bar on input() dialogs didn't fill width of window. Fixed.
 - [#1430][i1430] Macro links weren't working with HTML image maps. Not in relased code. Fixed.
 - [#1412][i1412] MBL/VBL was flickering when switching modes. Fixed.
 - [#1408][i1408] Draw Explorer drawing previews reflected pen width even with foreground was transparent. Fixed.
@@ -79,7 +87,15 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1215][i1215] Replaced calls to deprecated IOUtils.closeQuietly() with try-with-resource.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
+[i1472]: https://github.com/RPTools/maptool/issues/1472
+[i1469]: https://github.com/RPTools/maptool/issues/1469
+[i1468]: https://github.com/RPTools/maptool/issues/1468
+[i1460]: https://github.com/RPTools/maptool/issues/1460
+[i1456]: https://github.com/RPTools/maptool/issues/1456
+[i1455]: https://github.com/RPTools/maptool/issues/1455
+[i1453]: https://github.com/RPTools/maptool/issues/1453
 [i1450]: https://github.com/RPTools/maptool/issues/1450
+[i1441]: https://github.com/RPTools/maptool/issues/1441
 [i1432]: https://github.com/RPTools/maptool/issues/1432
 [i1430]: https://github.com/RPTools/maptool/issues/1430
 [i1427]: https://github.com/RPTools/maptool/issues/1427
