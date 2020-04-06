@@ -67,15 +67,11 @@ import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.ImageManager;
 
-/** */
+/** Tool used for background and object tokens, and to resize a token in free size mode. */
 public class StampTool extends DefaultTool implements ZoneOverlay {
   private static BufferedImage resizeImage;
 
@@ -213,16 +209,24 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     dragOffsetY = 0;
   }
 
+  /**
+   * Set the tokenList, x, y, in the StackPanel, and isShowingTokenStackPupup to true
+   *
+   * @param tokenList to set
+   * @param x the x to set
+   * @param y the y to set
+   */
   private void showTokenStackPopup(List<Token> tokenList, int x, int y) {
     tokenStackPanel.show(tokenList, x, y);
     isShowingTokenStackPopup = true;
-    repaint();
   }
 
   private class TokenStackPanel {
     private static final int PADDING = 4;
 
     private List<Token> tokenList;
+
+    /** List of token locations, each containing a token and its bounds. */
     private final List<TokenLocation> tokenLocationList = new ArrayList<TokenLocation>();
 
     private int x;
@@ -240,6 +244,11 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
           tokenList.size() * (gridSize + PADDING) + PADDING, gridSize + PADDING * 2);
     }
 
+    /**
+     * Does nothing
+     *
+     * @param event the mousevent
+     */
     public void handleMouseEvent(MouseEvent event) {
       // Nothing to do right now
     }
@@ -249,10 +258,11 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       for (TokenLocation location : tokenLocationList) {
         if (location.getBounds().contains(p.x, p.y)) {
           if (!AppUtil.playerOwns(location.getToken())) {
-            return;
+            return; //  drag not allowed
           }
           renderer.clearSelectedTokens();
           boolean selected = renderer.selectToken(location.getToken().getId());
+          renderer.updateAfterSelection();
 
           if (selected) {
             Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
@@ -361,6 +371,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         // Stack
         renderer.clearSelectedTokens();
         showTokenStackPopup(tokenList, e.getX(), e.getY());
+        renderer.updateAfterSelection();
       } else {
         // Single
         Token token = getTokenAt(e.getX(), e.getY());
@@ -388,20 +399,27 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       if (!AppUtil.playerOwns(token)) {
         if (!SwingUtil.isShiftDown(e)) {
           renderer.clearSelectedTokens();
+          renderer.updateAfterSelection();
         }
         return;
       }
       // Don't select if it's already being moved by someone
       isNewTokenSelected = false;
       if (!renderer.isTokenMoving(token)) {
-        if (!renderer.getSelectedTokenSet().contains(token.getId()) && !SwingUtil.isShiftDown(e)) {
+        if (SwingUtil.isShiftDown(e)) {
+          // if shift, we invert the selection of the token
+          if (renderer.getSelectedTokenSet().contains(token.getId())) {
+            renderer.deselectToken(token.getId());
+          } else {
+            renderer.selectToken(token.getId());
+          }
+          renderer.updateAfterSelection();
+        } else if (!renderer.getSelectedTokenSet().contains(token.getId())) {
+          // if not shift and click on non-selected token, switch selection to the token
           isNewTokenSelected = true;
           renderer.clearSelectedTokens();
-        }
-        if (SwingUtil.isShiftDown(e) && renderer.getSelectedTokenSet().contains(token.getId())) {
-          renderer.deselectToken(token.getId());
-        } else {
           renderer.selectToken(token.getId());
+          renderer.updateAfterSelection();
         }
         // Dragging offset for currently selected token
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
@@ -459,6 +477,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
               renderer.clearSelectedTokens();
             }
             renderer.selectTokens(selectionBoundBox);
+            renderer.updateAfterSelection();
           }
 
           selectionBoundBox = null;
@@ -478,9 +497,10 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
             && !isDraggingToken
             && !SwingUtil.isShiftDown(e)) {
           // Only if it isn't already being moved
-          if (!renderer.isTokenMoving(token)) {
+          if (!renderer.isTokenMoving(token) && !renderer.isOnlyTokenSelected(token)) {
             renderer.clearSelectedTokens();
             renderer.selectToken(token.getId());
+            renderer.updateAfterSelection();
           }
         }
       } finally {
@@ -497,6 +517,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
           renderer.clearSelectedTokens();
         }
         renderer.selectToken(tokenUnderMouse.getId());
+        renderer.updateAfterSelection();
         isNewTokenSelected = false;
       }
       if (tokenUnderMouse != null && renderer.getSelectedTokenSet().size() > 0) {
@@ -780,9 +801,10 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         return;
       }
 
-      if (isNewTokenSelected) {
+      if (isNewTokenSelected && !renderer.isOnlyTokenSelected(tokenUnderMouse)) {
         renderer.clearSelectedTokens();
         renderer.selectToken(tokenUnderMouse.getId());
+        renderer.updateAfterSelection();
       }
 
       isNewTokenSelected = false;
@@ -1148,6 +1170,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     // Make the selection
     renderer.clearSelectedTokens();
     renderer.selectToken(visibleTokens.get(newSelection).getId());
+    renderer.updateAfterSelection();
   }
 
   private void handleKeyMove(int dx, int dy, boolean micro) {

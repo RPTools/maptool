@@ -202,6 +202,7 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
           getRenderer().centerOn(new ZonePoint(token.getX(), token.getY()));
           getRenderer().clearSelectedTokens();
           getRenderer().selectToken(token.getId());
+          getRenderer().updateAfterSelection();
         };
       };
 }

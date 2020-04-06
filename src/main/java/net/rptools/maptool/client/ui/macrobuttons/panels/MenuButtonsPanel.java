@@ -59,6 +59,7 @@ public class MenuButtonsPanel extends JPanel {
             renderer.selectTokens(
                 new Rectangle(
                     renderer.getX(), renderer.getY(), renderer.getWidth(), renderer.getHeight()));
+            renderer.updateAfterSelection();
           }
         });
     label.setToolTipText(I18N.getText("panel.Selected.tooltip.selectAll"));
@@ -79,6 +80,7 @@ public class MenuButtonsPanel extends JPanel {
           public void mouseReleased(MouseEvent event) {
             ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
             renderer.clearSelectedTokens();
+            renderer.updateAfterSelection();
           }
         });
     label3.setToolTipText(I18N.getText("panel.Selected.tooltip.deslectAll"));
