@@ -69,11 +69,7 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
             });
   }
 
-  /**
-   * Return the CSS rule for an invisible body.
-   *
-   * @return the rule
-   */
+  /** @return the rule for an invisible body. */
   @Override
   String getRuleBody() {
     return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
