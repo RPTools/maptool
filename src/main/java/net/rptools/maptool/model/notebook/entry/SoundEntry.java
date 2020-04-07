@@ -96,7 +96,7 @@ public class SoundEntry extends SingleAssetEntry {
   /**
    * Returns the {@link MD5Key} for the {@link Asset} containing the sound.
    *
-   * @return the {@link MD5Key} for the {@link Asset} containing the sound.
+   * @return the {@link MD5Key} for the {@link Asset} containing the soun.
    */
   public MD5Key getSoundKey() {
     return getAssetKey();
