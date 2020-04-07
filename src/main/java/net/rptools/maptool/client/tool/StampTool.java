@@ -426,8 +426,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         Rectangle tokenBounds = token.getBounds(renderer.getZone());
 
         if (token.isSnapToGrid() && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
-          dragOffsetX = (pos.x - tokenBounds.x) - (tokenBounds.width / 2);
-          dragOffsetY = (pos.y - tokenBounds.y) - (tokenBounds.height / 2);
+          dragOffsetX = (pos.x - tokenBounds.x) - ((int) getZone().getGrid().getCellWidth() / 2);
+          dragOffsetY = (pos.y - tokenBounds.y) - ((int) getZone().getGrid().getCellHeight() / 2);
         } else {
           dragOffsetX = pos.x - tokenBounds.x;
           dragOffsetY = pos.y - tokenBounds.y;
