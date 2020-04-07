@@ -238,6 +238,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     MapTool.addMessage(TextMessage.me(null, event.getMessage()));
   }
 
+  /** @return the CSS rule for the body tag. */
   private String getRuleBody() {
     return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
   }
@@ -464,6 +465,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
    * @param event the event of the form submission
    */
   private void getDataAndSubmit(org.w3c.dom.events.Event event) {
+    boolean formnovalidate = false; // if true, the form validation is bypassed
     HTMLFormElement form = null;
     Element target = (Element) event.getCurrentTarget();
     JsonObject jObj = new JsonObject();
@@ -474,19 +476,33 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       HTMLInputElement input = (HTMLInputElement) target;
       form = input.getForm();
       addToObject(jObj, input.getName(), input.getValue());
+      formnovalidate = input.getAttribute("formnovalidate") != null;
     } else if (target instanceof HTMLButtonElement) {
       HTMLButtonElement button = (HTMLButtonElement) target;
       form = button.getForm();
       addToObject(jObj, button.getName(), button.getValue());
+      formnovalidate = button.getAttribute("formnovalidate") != null;
     }
     if (form == null) return;
 
-    // Check for validity
-    JSObject jsObject = (JSObject) form;
-    if (!(boolean) jsObject.call("checkValidity")) {
+    // Check for non-macrolinktext action
+    String action = form.getAction();
+    if (action == null || action.startsWith("javascript:")) {
       return;
     }
 
+    // Check for validity
+    boolean novalidate = form.getAttribute("novalidate") != null;
+    if (!formnovalidate && !novalidate) {
+      JSObject jsObject = (JSObject) form;
+      if (!(boolean) jsObject.call("checkValidity")) {
+        return;
+      }
+    }
+
+    event.preventDefault(); // prevent duplicated form submit
+
+    // Gets the data from the form
     final HTMLCollection collection = form.getElements();
     for (int i = 0; i < collection.getLength(); i++) {
       String name, value;
@@ -515,11 +531,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       } else continue; // skip elements not containing data
       addToObject(jObj, name, value);
     }
-    String action = form.getAction();
     String data = URLEncoder.encode(jObj.toString(), StandardCharsets.UTF_8);
-
     doSubmit("json", action, data);
-    event.preventDefault(); // prevent duplicated form submit
   }
 
   /**
