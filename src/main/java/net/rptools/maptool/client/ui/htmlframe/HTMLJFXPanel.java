@@ -86,12 +86,12 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src asset:; style-src 'unsafe-inline'; script-src 'unsafe-inline' 'unsafe-eval'\">\n";
 
   /** The default rule for the body tag. */
-  static final String CSS_RULE_BODY =
+  static final String CSS_BODY =
       "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8;}";
   /** The default rule for the div tag. */
-  static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
+  static final String CSS_DIV = "div {margin-bottom: 5px}";
   /** The default rule for the span tag. */
-  static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
+  static final String CSS_SPAN = "span.roll {background:#efefef}";
 
   /** JS that scroll the view to an element from its Id. */
   private static final String SCRIPT_ANCHOR =
@@ -254,9 +254,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   }
 
   String getCSSRule() {
-    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize())
-        + CSS_RULE_SPAN
-        + CSS_RULE_DIV;
+    return String.format(CSS_BODY, AppPreferences.getFontSize()) + CSS_SPAN + CSS_DIV;
   }
 
   /**

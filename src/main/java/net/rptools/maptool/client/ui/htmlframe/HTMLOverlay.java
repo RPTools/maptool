@@ -27,6 +27,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Token;
+import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,18 +37,19 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
   private static final Logger log = LogManager.getLogger(HTMLOverlay.class);
 
   /** The default rule for an invisible body tag. */
-  private static final String CSS_RULE_BODY =
+  private static final String CSS_BODY =
       "body { font-family: sans-serif; font-size: %dpt; background: none; -webkit-user-select: none; margin: 0; --pointermap:pass;}";
 
-  /**
-   * The rule so that clicks on hyperlinks, buttons and input elements are not forwarded to the map.
-   */
-  private static final String CSS_RULE_POINTERMAP =
+  /** CSS rule: clicks on hyperlinks, buttons and input elements are not forwarded to map. */
+  private static final String CSS_POINTERMAP =
       "a {--pointermap:block;} button {--pointermap:block;} input {--pointermap:block;} area {--pointermap:block;} select {--pointermap:block}";
 
-  /** Script to return the value of --pointermap for a given HTML element at coordinates %d, %d. */
+  /** Script to return the HTML element at coordinates %d, %d. */
+  private static final String SCRIPT_GET_FROM_POINT = "document.elementFromPoint(%d, %d)";
+
+  /** Script to return the calculated --pointermap value of an HTML element. */
   private static final String SCRIPT_GET_POINTERMAP =
-      "window.getComputedStyle(document.elementFromPoint(%d, %d),null).getPropertyValue('--pointermap')";
+      "window.getComputedStyle(this).getPropertyValue('--pointermap')";
 
   /** The map of the macro callbacks. */
   private final Map<String, String> macroCallbacks = new HashMap<>();
@@ -112,17 +114,23 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
    * @return false if the element has --pointermap=block, true otherwise
    */
   private boolean isPassClick(int x, int y) {
-    String pe = (String) getWebEngine().executeScript(String.format(SCRIPT_GET_POINTERMAP, x, y));
-    return !"block".equals(pe);
+    JSObject element =
+        (JSObject) getWebEngine().executeScript(String.format(SCRIPT_GET_FROM_POINT, x, y));
+    if (element == null) {
+      return true;
+    } else {
+      String pe = (String) element.eval(SCRIPT_GET_POINTERMAP);
+      return !"block".equals(pe);
+    }
   }
 
   /** @return the rule for an invisible body. */
   @Override
   String getCSSRule() {
-    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize())
-        + CSS_RULE_SPAN
-        + CSS_RULE_DIV
-        + CSS_RULE_POINTERMAP;
+    return String.format(CSS_BODY, AppPreferences.getFontSize())
+        + CSS_SPAN
+        + CSS_DIV
+        + CSS_POINTERMAP;
   }
 
   /** Run the callback macro for "onChangeSelection". */
