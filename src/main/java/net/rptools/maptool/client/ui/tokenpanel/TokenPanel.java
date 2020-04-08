@@ -55,6 +55,7 @@ public class TokenPanel extends JPanel implements ModelChangeListener {
               currentZoneRenderer.centerOn(new ZonePoint(token.getX(), token.getY()));
               currentZoneRenderer.clearSelectedTokens();
               currentZoneRenderer.selectToken(token.getId());
+              currentZoneRenderer.updateAfterSelection();
             }
             if (SwingUtilities.isRightMouseButton(e)) {
 
