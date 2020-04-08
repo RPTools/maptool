@@ -14,9 +14,6 @@
  */
 package net.rptools.maptool.client.swing;
 
-import com.jidesoft.dialog.JideOptionPane;
-import io.sentry.Sentry;
-import io.sentry.event.UserBuilder;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
 import java.awt.event.FocusEvent;
@@ -26,8 +23,17 @@ import java.awt.event.MouseWheelEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
+
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.jidesoft.dialog.JideOptionPane;
+
+import io.sentry.Sentry;
+import io.sentry.event.UserBuilder;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.getInfoFunction;
@@ -35,8 +41,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Player;
 import net.rptools.maptool.util.SysInfo;
 import net.rptools.parser.ParserException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class MapToolEventQueue extends EventQueue {
   private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
@@ -87,24 +91,9 @@ public class MapToolEventQueue extends EventQueue {
       } else if (event instanceof MouseWheelEvent) {
         MouseWheelEvent mwe = (MouseWheelEvent) event;
         if (mwe.isShiftDown() && MapToolEventQueue.shiftState == 0) {
-          int all_mods = mwe.getModifiersEx() & MapToolEventQueue.ALL_MODIFIERS_EXC_SHIFT;
-          event =
-              new MouseWheelEvent(
-                  mwe.getComponent(),
-                  mwe.getID(),
-                  mwe.getWhen(),
-                  all_mods,
-                  mwe.getX(),
-                  mwe.getY(),
-                  mwe.getXOnScreen(),
-                  mwe.getYOnScreen(),
-                  1,
-                  mwe.isPopupTrigger(),
-                  mwe.getScrollType(),
-                  mwe.getScrollAmount(),
-                  mwe.getWheelRotation(),
-                  mwe.getPreciseWheelRotation());
-          // log.info("shiftModifier forced off");
+        	// issue 413: horizontal scrolling too sensitive on macOS w/ SuperMouse; ignore completely
+        	// The user can still hold the Shift key down to activate horizontal scrolling.
+        	return;
         }
       }
       super.dispatchEvent(event);
