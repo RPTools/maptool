@@ -43,7 +43,7 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
    * The rule so that clicks on hyperlinks, buttons and input elements are not forwarded to the map.
    */
   private static final String CSS_RULE_POINTERMAP =
-      "a {--pointermap:block;} button {--pointermap:block;} input {--pointermap:block;} area {--pointermap:block;}";
+      "a {--pointermap:block;} button {--pointermap:block;} input {--pointermap:block;} area {--pointermap:block;} select {--pointermap:block}";
 
   /** Script to return the value of --pointermap for a given HTML element at coordinates %d, %d. */
   private static final String SCRIPT_GET_POINTERMAP =
