@@ -64,8 +64,6 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   /** The WebEngine of the WebView. */
   private WebEngine webEngine;
 
-  Scene scene;
-
   /** The bridge from Javascript to Java. */
   private static final JavaBridge bridge = new JavaBridge();
 
@@ -94,10 +92,6 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
   /** The default rule for the span tag. */
   static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
-
-  /** JS that scroll the view to an element from its Id. */
-  private static final String SCRIPT_ANCHOR =
-      "element = document.getElementById('%s'); if(element != null) {element.scrollIntoView();}";
 
   /** JS that scroll the view to an element from its Id. */
   private static final String SCRIPT_ANCHOR =
@@ -140,7 +134,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     root.setPickOnBounds(false);
 
     root.getChildren().add(webView);
-    scene = new Scene(root);
+    Scene scene = new Scene(root);
     scene.setFill(javafx.scene.paint.Color.TRANSPARENT); // set scene transparent
 
     // ESCAPE closes the window.
