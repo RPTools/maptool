@@ -79,22 +79,24 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   }
 
   /** Meta-tag that blocks external file access. */
-  private static final String BLOCK_EXT_FILES =
+  private static final String SCRIPT_BLOCK_EXT =
       "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src asset:; style-src 'unsafe-inline'; script-src 'unsafe-inline' 'unsafe-eval'\">\n";
 
-  /**
-   * The default CSS to apply before all others. %d is to be replaced by
-   * AppPreferences.getFontSize().
-   */
-  private static final String DEFAULT_CSS =
-      "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8}"
-          + "div {margin-bottom: 5px}"
-          + "span.roll {background:#efefef}";
+  /** /** The default rule for the body tag. */
+  private static final String CSS_RULE_BODY =
+      "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8;}";
+  /** The default rule for the div tag. */
+  private static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
+  /** The default rule for the span tag. */
+  private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
 
   /** JS that directs the console.log function to the Java bridge function "log". */
-  private static final String REPLACE_LOG_SCRIPT =
+  private static final String SCRIPT_REPLACE_LOG =
       "console.log = function(message){" + JavaBridge.NAME + ".log(message);};";
 
+  /** JS that scroll the view to an element from its Id. */
+  private static final String SCRIPT_ANCHOR =
+      "element = document.getElementById('%s'); if(element != null) {element.scrollIntoView();}";
   /**
    * Creates a new HTMLJFXPanel.
    *
@@ -120,12 +122,13 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
           Scene scene = new Scene(root);
 
           // ESCAPE closes the window.
-          scene.setOnKeyPressed(
-              e -> {
-                if (e.getCode() == KeyCode.ESCAPE) {
-                  SwingUtilities.invokeLater(container::closeRequest);
-                }
-              });
+          if (container != null)
+            scene.setOnKeyPressed(
+                e -> {
+                  if (e.getCode() == KeyCode.ESCAPE) {
+                    SwingUtilities.invokeLater(container::closeRequest);
+                  }
+                });
           this.setScene(scene); // set the scene on the JFXPanel
         });
   }
@@ -163,7 +166,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     }
     Platform.runLater(
         () -> {
-          webEngine.loadContent(BLOCK_EXT_FILES + HTMLPanelInterface.fixHTML(html));
+          webEngine.loadContent(SCRIPT_BLOCK_EXT + HTMLPanelInterface.fixHTML(html));
         });
   }
 
@@ -230,6 +233,10 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     MapTool.addMessage(TextMessage.me(null, event.getMessage()));
   }
 
+  private String getRuleBody() {
+    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
+  }
+
   /**
    * Check if the worker succeeded, then deal with the MapTool macro references and add event
    * listeners for the buttons and hyperlinks.
@@ -247,40 +254,18 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       // Redirect console.log to the JavaBridge
       JSObject window = (JSObject) webEngine.executeScript("window");
       window.setMember(JavaBridge.NAME, bridge);
-      webEngine.executeScript(REPLACE_LOG_SCRIPT);
+      webEngine.executeScript(SCRIPT_REPLACE_LOG);
 
       // Event listener for the href macro link clicks.
-      EventListener listenerA =
-          event -> {
-            if (log.isDebugEnabled()) {
-              log.debug(
-                  "Responding to hyperlink event: " + event.getType() + " " + event.toString());
-            }
-
-            final String href = ((Element) event.getCurrentTarget()).getAttribute("href");
-            if (href != null && !href.equals("")) {
-              String href2 = href.trim().toLowerCase();
-              if (href2.startsWith("macro")) {
-                // ran as macroLink;
-                SwingUtilities.invokeLater(() -> MacroLinkFunction.runMacroLink(href));
-              } else if (!href2.startsWith("#") && !href2.startsWith("javascript")) {
-                // non-macrolink, non-anchor link, non-javascript code
-                MapTool.showDocument(href); // show in usual browser
-              }
-            }
-            event.preventDefault(); // don't change webview
-          };
+      EventListener listenerA = this::fixHref;
       // Event listener for form submission.
-      EventListener listenerSubmit =
-          event -> {
-            getDataAndSubmit((HTMLFormElement) event.getCurrentTarget());
-          };
+      EventListener listenerSubmit = this::getDataAndSubmit;
 
       Document doc = webEngine.getDocument();
       NodeList nodeList;
 
       // Add default CSS as first element of the head tag
-      String strCSS = String.format(DEFAULT_CSS, AppPreferences.getFontSize());
+      String strCSS = getRuleBody() + CSS_RULE_DIV + CSS_RULE_SPAN;
       Element styleNode = doc.createElement("style");
       Text styleContent = doc.createTextNode(strCSS);
       styleNode.appendChild(styleContent);
@@ -305,18 +290,44 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
         handleMetaTag((Element) nodeList.item(i));
       }
 
-      // Add event handlers for hyperlinks.
+      // Add event handlers for <a> hyperlinks.
       nodeList = doc.getElementsByTagName("a");
       for (int i = 0; i < nodeList.getLength(); i++) {
         EventTarget node = (EventTarget) nodeList.item(i);
         node.addEventListener("click", listenerA, false);
       }
 
-      // Set the "submit" handler to get the data on submission.
+      // Add event handlers for hyperlinks for maps.
+      nodeList = doc.getElementsByTagName("area");
+      for (int i = 0; i < nodeList.getLength(); i++) {
+        EventTarget node = (EventTarget) nodeList.item(i);
+        node.addEventListener("click", listenerA, false);
+      }
+
+      // Set the "submit" handler to get the data on submission not based on buttons
       nodeList = doc.getElementsByTagName("form");
       for (int i = 0; i < nodeList.getLength(); i++) {
-        Element node = (Element) nodeList.item(i);
-        ((EventTarget) node).addEventListener("submit", listenerSubmit, false);
+        EventTarget target = (EventTarget) nodeList.item(i);
+        target.addEventListener("submit", listenerSubmit, false);
+      }
+
+      // Set the "submit" handler to get the data on submission based on input
+      nodeList = doc.getElementsByTagName("input");
+      for (int i = 0; i < nodeList.getLength(); i++) {
+        String type = ((Element) nodeList.item(i)).getAttribute("type");
+        if ("image".equals(type) || "submit".equals(type)) {
+          EventTarget target = (EventTarget) nodeList.item(i);
+          target.addEventListener("click", listenerSubmit, false);
+        }
+      }
+      // Set the "submit" handler to get the data on submission based on button
+      nodeList = doc.getElementsByTagName("button");
+      for (int i = 0; i < nodeList.getLength(); i++) {
+        String type = ((Element) nodeList.item(i)).getAttribute("type");
+        if ("submit".equals(type)) {
+          EventTarget target = (EventTarget) nodeList.item(i);
+          target.addEventListener("click", listenerSubmit, false);
+        }
       }
     }
   }
@@ -381,6 +392,34 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   }
 
   /**
+   * Handles the href events. MacroLinks are executed, external links open the browsers, and anchor
+   * links scroll the browser to the link.
+   *
+   * @param event the href event triggered
+   */
+  private void fixHref(org.w3c.dom.events.Event event) {
+    if (log.isDebugEnabled()) {
+      log.debug("Responding to hyperlink event: " + event.getType() + " " + event.toString());
+    }
+
+    final String href = ((Element) event.getCurrentTarget()).getAttribute("href");
+    if (href != null && !href.equals("")) {
+      String href2 = href.trim().toLowerCase();
+      if (href2.startsWith("macro")) {
+        // ran as macroLink;
+        SwingUtilities.invokeLater(() -> MacroLinkFunction.runMacroLink(href));
+      } else if (href2.startsWith("#")) {
+        // Java bug JDK-8199014 workaround
+        webEngine.executeScript(String.format(SCRIPT_ANCHOR, href.substring(1)));
+      } else if (!href2.startsWith("javascript")) {
+        // non-macrolink, non-anchor link, non-javascript code
+        MapTool.showDocument(href); // show in usual browser
+      }
+      event.preventDefault(); // don't change webview
+    }
+  }
+
+  /**
    * Handle a change in title.
    *
    * @param title The title to change to.
@@ -414,13 +453,29 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   /**
    * Get the data of the form and submit it as a json.
    *
-   * @param form the form to submit.
+   * @param event the event of the form submission
    */
-  private void getDataAndSubmit(HTMLFormElement form) {
-    JsonObject jobj = new JsonObject();
+  private void getDataAndSubmit(org.w3c.dom.events.Event event) {
+    HTMLFormElement form = null;
+    Element target = (Element) event.getCurrentTarget();
+    JsonObject jObj = new JsonObject();
+    // Get the form based on the target of the event
+    if (target instanceof HTMLFormElement) {
+      form = (HTMLFormElement) target;
+    } else if (target instanceof HTMLInputElement) {
+      HTMLInputElement input = (HTMLInputElement) target;
+      form = input.getForm();
+      addToObject(jObj, input.getName(), input.getValue());
+    } else if (target instanceof HTMLButtonElement) {
+      HTMLButtonElement button = (HTMLButtonElement) target;
+      form = button.getForm();
+      addToObject(jObj, button.getName(), button.getValue());
+    }
+    if (form == null) return;
+
     final HTMLCollection collection = form.getElements();
     for (int i = 0; i < collection.getLength(); i++) {
-      String name = null, value = null;
+      String name, value;
       if (collection.item(i) instanceof HTMLInputElement) {
         HTMLInputElement element = (HTMLInputElement) collection.item(i);
         String type = element.getType().toLowerCase();
@@ -428,7 +483,9 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
           if (element.getChecked()) {
             name = element.getName();
             value = element.getValue();
-          }
+          } else continue; // skip unchecked elements
+        } else if (type.equals("submit") || type.equals("image")) {
+          continue; // skip input button/images that were not pressed
         } else {
           name = element.getName();
           value = element.getValue();
@@ -441,23 +498,34 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
         HTMLTextAreaElement element = (HTMLTextAreaElement) collection.item(i);
         name = element.getName();
         value = element.getValue();
-      }
-      if (name != null) {
-        value = value == null ? "" : value;
-        try {
-          BigDecimal number = new BigDecimal(value);
-          jobj.addProperty(name, number);
-        } catch (NumberFormatException nfe) {
-          JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(value);
-          jobj.add(name, json);
-        }
-      }
+      } else continue; // skip elements not containing data
+      addToObject(jObj, name, value);
     }
-
     String action = form.getAction();
-    String data = URLEncoder.encode(jobj.toString(), StandardCharsets.UTF_8);
+    String data = URLEncoder.encode(jObj.toString(), StandardCharsets.UTF_8);
 
     doSubmit("json", action, data);
+    event.preventDefault(); // prevent duplicated form submit
+  }
+
+  /**
+   * Convenience method to put name and value in the object.
+   *
+   * @param jObj the JsonObject to put the data in
+   * @param name the name
+   * @param value the value
+   */
+  private static void addToObject(JsonObject jObj, String name, String value) {
+    if (name != null && !"".equals(name)) {
+      value = value == null ? "" : value;
+      try {
+        BigDecimal number = new BigDecimal(value);
+        jObj.addProperty(name, number);
+      } catch (NumberFormatException nfe) {
+        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(value);
+        jObj.add(name, json);
+      }
+    }
   }
 
   /**
