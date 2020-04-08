@@ -88,6 +88,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1215][i1215] Replaced calls to deprecated IOUtils.closeQuietly() with try-with-resource.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
+[i1477]: https://github.com/RPTools/maptool/issues/1477
 [i1472]: https://github.com/RPTools/maptool/issues/1472
 [i1469]: https://github.com/RPTools/maptool/issues/1469
 [i1468]: https://github.com/RPTools/maptool/issues/1468
