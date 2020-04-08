@@ -64,6 +64,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   /** The WebEngine of the WebView. */
   private WebEngine webEngine;
 
+  Scene scene;
+
   /** The bridge from Javascript to Java. */
   private static final JavaBridge bridge = new JavaBridge();
 
@@ -86,12 +88,12 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src asset:; style-src 'unsafe-inline'; script-src 'unsafe-inline' 'unsafe-eval'\">\n";
 
   /** The default rule for the body tag. */
-  private static final String CSS_RULE_BODY =
+  static final String CSS_RULE_BODY =
       "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8;}";
   /** The default rule for the div tag. */
-  private static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
+  static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
   /** The default rule for the span tag. */
-  private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
+  static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
 
   /** JS that scroll the view to an element from its Id. */
   private static final String SCRIPT_ANCHOR =
@@ -134,7 +136,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     root.setPickOnBounds(false);
 
     root.getChildren().add(webView);
-    Scene scene = new Scene(root);
+    scene = new Scene(root);
     scene.setFill(javafx.scene.paint.Color.TRANSPARENT); // set scene transparent
 
     // ESCAPE closes the window.
@@ -253,8 +255,10 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     MapTool.addMessage(TextMessage.me(null, event.getMessage()));
   }
 
-  String getRuleBody() {
-    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
+  String getCSSRule() {
+    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize())
+        + CSS_RULE_SPAN
+        + CSS_RULE_DIV;
   }
 
   /**
@@ -292,9 +296,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     NodeList nodeList;
 
     // Add default CSS as first element of the head tag
-    String strCSS = getRuleBody() + CSS_RULE_DIV + CSS_RULE_SPAN;
     Element styleNode = doc.createElement("style");
-    Text styleContent = doc.createTextNode(strCSS);
+    Text styleContent = doc.createTextNode(getCSSRule());
     styleNode.appendChild(styleContent);
     Node head = doc.getDocumentElement().getElementsByTagName("head").item(0);
     Node nodeCSS = head.insertBefore(styleNode, head.getFirstChild());
