@@ -37,6 +37,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#221][i221] Campaign Properties dialog now has a drop-down to select from pre-defined Campaign Property sets (.mtprops).
 
 **Bug Fixes**
+- [#1477][i1477] HTML5 form submission ignored *novalidate* and *formnovalidate* attributes. Fixed.
 - [#1472][i1472] `getInfo("campaign")` was not returning all states. Fixed.
 - [#1469][i1469] Cursor offset when dragging snap-to-grid tokens on background layer. Fixed.
 - [#1468][i1468] onChangeSelection event was firing multiple times per selection action. Fixed.
