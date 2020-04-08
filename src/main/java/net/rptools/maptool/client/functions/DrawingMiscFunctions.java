@@ -134,12 +134,7 @@ public class DrawingMiscFunctions extends DrawingFunctions {
 
     JsonElement json = null;
 
-    try {
-      json = JSONMacroFunctions.getInstance().asJsonElement(pointsString);
-    } catch (ParserException e) {
-      // If parsing fails do nothing as previous code was also ignoring it and it would break
-      // macro compatibility to change this.
-    }
+    json = JSONMacroFunctions.getInstance().asJsonElement(pointsString);
 
     ArrayList<Map<String, Integer>> pathPoints = new ArrayList<>();
     if (json != null && json.isJsonArray()) {

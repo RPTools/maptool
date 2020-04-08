@@ -198,11 +198,7 @@ public class TokenMoveFunctions extends AbstractFunction {
       final Zone zone, final Token tokenInContext, final Token target, final String pathString) {
 
     JsonElement json = null;
-    try {
-      json = JSONMacroFunctions.getInstance().asJsonElement(pathString);
-    } catch (ParserException e) {
-      // Ignore parsing error to maintain macro compatibility
-    }
+    json = JSONMacroFunctions.getInstance().asJsonElement(pathString);
 
     ArrayList<Map<String, Integer>> pathPoints = new ArrayList<Map<String, Integer>>();
     if (json != null && json.isJsonArray()) {
@@ -353,16 +349,18 @@ public class TokenMoveFunctions extends AbstractFunction {
     if (pathPoints == null || pathPoints.isEmpty()) {
       return jsonArr;
     }
-    JsonObject pointObj = new JsonObject();
+    JsonObject pointObj;
     // Lee: had to add handling for the line segment made by unsnapped movedOverToken()
     if (pathPoints.get(0).containsKey("x"))
       for (Map<String, Integer> entry : pathPoints) {
+        pointObj = new JsonObject();
         pointObj.addProperty("x", entry.get("x"));
         pointObj.addProperty("y", entry.get("y"));
         jsonArr.add(pointObj);
       }
     else
       for (Map<String, Integer> entry : pathPoints) {
+        pointObj = new JsonObject();
         pointObj.addProperty("x1", entry.get("x1"));
         pointObj.addProperty("y1", entry.get("y1"));
         pointObj.addProperty("x2", entry.get("x2"));
@@ -501,8 +499,7 @@ public class TokenMoveFunctions extends AbstractFunction {
   }
 
   private String getMovement(
-      final Token source, boolean returnFractionOnly, boolean useTerrainModifiers)
-      throws ParserException {
+      final Token source, boolean returnFractionOnly, boolean useTerrainModifiers) {
     ZoneWalker walker = null;
 
     WalkerMetric metric =
@@ -633,11 +630,7 @@ public class TokenMoveFunctions extends AbstractFunction {
 
   private List<Map<String, Integer>> convertJSONStringToList(final String pointsString) {
     JsonElement json = null;
-    try {
-      json = JSONMacroFunctions.getInstance().asJsonElement(pointsString);
-    } catch (ParserException e) {
-      // Do nothing on parse error to maintain compatibility with existing macro code.
-    }
+    json = JSONMacroFunctions.getInstance().asJsonElement(pointsString);
 
     ArrayList<Map<String, Integer>> pathPoints = new ArrayList<Map<String, Integer>>();
     if (json != null && json.isJsonArray()) {

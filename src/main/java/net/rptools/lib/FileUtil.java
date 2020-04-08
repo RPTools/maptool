@@ -31,7 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -49,12 +49,6 @@ import org.apache.logging.log4j.Logger;
 
 public class FileUtil {
   private static final Logger log = LogManager.getLogger(FileUtil.class);
-
-  /**
-   * Can't use this for String objects yet as it's Java 6+ and we're trying to be Java 5 compatible.
-   * But soon...
-   */
-  public static final Charset UTF_8 = Charset.forName("UTF-8");
 
   /**
    * Reads the entire content of the given file into a byte array.
@@ -84,37 +78,25 @@ public class FileUtil {
 
   public static Object objFromResource(String res) throws IOException {
     XStream xs = getConfiguredXStream();
-    InputStream is = null;
-    try {
-      is = FileUtil.class.getClassLoader().getResourceAsStream(res);
-      return xs.fromXML(new InputStreamReader(is, "UTF-8"));
-    } finally {
-      IOUtils.closeQuietly(is);
+    try (InputStream is = FileUtil.class.getClassLoader().getResourceAsStream(res)) {
+      return xs.fromXML(new InputStreamReader(is, StandardCharsets.UTF_8));
     }
   }
 
   public static byte[] loadResource(String resource) throws IOException {
-    InputStream is = null;
-    try {
-      is = FileUtil.class.getClassLoader().getResourceAsStream(resource);
+    try (InputStream is = FileUtil.class.getClassLoader().getResourceAsStream(resource)) {
       if (is == null) {
         throw new IOException("Resource \"" + resource + "\" cannot be opened as stream.");
       }
-      return IOUtils.toByteArray(new InputStreamReader(is, "UTF-8"), "UTF-8");
-    } finally {
-      IOUtils.closeQuietly(is);
+      return IOUtils.toByteArray(
+          new InputStreamReader(is, StandardCharsets.UTF_8), StandardCharsets.UTF_8);
     }
   }
 
   public static List<String> getLines(File file) throws IOException {
-    List<String> list;
-    FileReader fr = new FileReader(file);
-    try {
-      list = IOUtils.readLines(fr);
-    } finally {
-      fr.close();
+    try (FileReader fr = new FileReader(file)) {
+      return IOUtils.readLines(fr);
     }
-    return list;
   }
 
   public static void saveResource(String resource, File destDir) throws IOException {
@@ -126,19 +108,28 @@ public class FileUtil {
   public static void saveResource(String resource, File destDir, String filename)
       throws IOException {
     File outFilename = new File(destDir, filename);
-    InputStream inStream = null;
-    OutputStream outStream = null;
-    try {
-      inStream = FileUtil.class.getResourceAsStream(resource);
-      outStream = new BufferedOutputStream(new FileOutputStream(outFilename));
+    try (InputStream inStream = FileUtil.class.getResourceAsStream(resource);
+        OutputStream outStream = new BufferedOutputStream(new FileOutputStream(outFilename))) {
       IOUtils.copy(inStream, outStream);
-    } finally {
-      IOUtils.closeQuietly(inStream);
-      IOUtils.closeQuietly(outStream);
     }
   }
 
   private static final Pattern TRIM_EXTENSION_PATTERN = Pattern.compile("^(.*)\\.([^\\.]*)$");
+
+  /**
+   * Returns the file with its name modified to add the extension if it doesn't have already.
+   *
+   * @param file the file that might need the extension
+   * @param extension the extension to add, if it is missing
+   * @return the file with the correct extension
+   */
+  public static File getFileWithExtension(File file, String extension) {
+    if (file.getName().endsWith(extension)) {
+      return file;
+    } else {
+      return new File(file.getAbsolutePath() + extension);
+    }
+  }
 
   public static String getNameWithoutExtension(File file) {
     return getNameWithoutExtension(file.getName());
@@ -170,12 +161,8 @@ public class FileUtil {
   }
 
   public static byte[] getBytes(URL url) throws IOException {
-    InputStream is = null;
-    try {
-      is = url.openStream();
+    try (InputStream is = url.openStream()) {
       return IOUtils.toByteArray(is);
-    } finally {
-      IOUtils.closeQuietly(is);
     }
   }
 
@@ -190,7 +177,7 @@ public class FileUtil {
   @Deprecated
   public static String getString(InputStream is) throws IOException {
     if (is == null) throw new IllegalArgumentException("InputStream cannot be null");
-    return IOUtils.toString(is, "UTF-8");
+    return IOUtils.toString(is, StandardCharsets.UTF_8);
   }
 
   /**
@@ -207,7 +194,7 @@ public class FileUtil {
     if (file == null) {
       throw new IllegalArgumentException("file cannot be null");
     }
-    return FileUtils.readFileToString(file, "UTF-8");
+    return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
   }
 
   /**
@@ -265,7 +252,8 @@ public class FileUtil {
    * @throws IOException
    */
   public static BufferedReader getFileAsReader(File file) throws IOException {
-    return new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+    return new BufferedReader(
+        new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
   }
 
   /**
@@ -288,7 +276,7 @@ public class FileUtil {
       type = getContentType(conn.getInputStream());
       // Now make a guess and change 'encoding' to match the content type...
     }
-    isr = new InputStreamReader(conn.getInputStream(), "UTF-8");
+    isr = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
     return isr;
   }
 
@@ -374,12 +362,8 @@ public class FileUtil {
     if (url == null) throw new IOException("URL cannot be null");
 
     InputStream is = url.openStream();
-    ZipInputStream zis = null;
-    try {
-      zis = new ZipInputStream(new BufferedInputStream(is));
+    try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is))) {
       unzip(zis, destDir);
-    } finally {
-      IOUtils.closeQuietly(zis);
     }
   }
 
@@ -391,34 +375,25 @@ public class FileUtil {
     File absDestDir = destDir.getAbsoluteFile();
 
     // Pull out the files
-    OutputStream out = null;
     ZipEntry entry = null;
-    try {
-      while ((entry = in.getNextEntry()) != null) {
-        if (entry.isDirectory()) continue;
+    while ((entry = in.getNextEntry()) != null) {
+      if (entry.isDirectory()) continue;
 
-        // Prepare file destination
-        File entryFile = new File(absDestDir, entry.getName());
-        entryFile.getParentFile().mkdirs();
+      // Prepare file destination
+      File entryFile = new File(absDestDir, entry.getName());
+      entryFile.getParentFile().mkdirs();
 
-        out = new FileOutputStream(entryFile);
+      try (OutputStream out = new FileOutputStream(entryFile)) {
         IOUtils.copy(in, out);
-        IOUtils.closeQuietly(out);
-        in.closeEntry();
       }
-    } finally {
-      IOUtils.closeQuietly(out);
+      in.closeEntry();
     }
   }
 
   public static void unzipFile(File sourceFile, File destDir) throws IOException {
     if (!sourceFile.exists()) throw new IOException("source file does not exist: " + sourceFile);
 
-    ZipFile zipFile = null;
-    InputStream is = null;
-    OutputStream os = null;
-    try {
-      zipFile = new ZipFile(sourceFile);
+    try (ZipFile zipFile = new ZipFile(sourceFile)) {
       Enumeration<? extends ZipEntry> entries = zipFile.entries();
 
       while (entries.hasMoreElements()) {
@@ -430,18 +405,10 @@ public class FileUtil {
         file.getParentFile().mkdirs();
 
         // System.out.println("Writing file: " + path);
-        is = zipFile.getInputStream(entry);
-        os = new BufferedOutputStream(new FileOutputStream(path));
-        copyWithClose(is, os);
-        IOUtils.closeQuietly(is);
-        IOUtils.closeQuietly(os);
-      }
-    } finally {
-      IOUtils.closeQuietly(is);
-      IOUtils.closeQuietly(os);
-      try {
-        if (zipFile != null) zipFile.close();
-      } catch (Exception e) {
+        try (InputStream is = zipFile.getInputStream(entry);
+            OutputStream os = new BufferedOutputStream(new FileOutputStream(path))) {
+          IOUtils.copy(is, os);
+        }
       }
     }
   }
@@ -462,10 +429,13 @@ public class FileUtil {
   /**
    * Copies all bytes from InputStream to OutputStream, and close both streams before returning.
    *
+   * @deprecated not in use. Use {@link IOUtils#copy(InputStream, OutputStream)} instead and
+   *     try-with-resources
    * @param is input stream to read data from.
    * @param os output stream to write data to.
    * @throws IOException
    */
+  @Deprecated
   public static void copyWithClose(InputStream is, OutputStream os) throws IOException {
     try {
       IOUtils.copy(is, os);
@@ -483,9 +453,8 @@ public class FileUtil {
    * @param file the file or directory to recursively check and possibly delete
    * @param daysOld number of days old a file or directory can be before it is considered for
    *     deletion
-   * @throws IOException if something goes wrong
    */
-  public static void delete(File file, int daysOld) throws IOException {
+  public static void delete(File file, int daysOld) {
     Calendar olderThan = new GregorianCalendar();
     olderThan.add(Calendar.DATE, -daysOld);
 

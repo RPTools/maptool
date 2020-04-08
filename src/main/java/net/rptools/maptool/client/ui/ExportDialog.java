@@ -52,7 +52,6 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.util.ImageManager;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -558,16 +557,13 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
           }
           MapTool.getFrame()
               .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotStreaming"));
-          ByteArrayOutputStream imageOut = new ByteArrayOutputStream();
-          try {
+          try (ByteArrayOutputStream imageOut = new ByteArrayOutputStream()) {
             ImageIO.write(screenCap, "png", imageOut);
             screenCap = null; // Free up the memory as soon as possible
             MapTool.getFrame()
                 .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaving"));
             exportLocation.putContent(
                 new BufferedInputStream(new ByteArrayInputStream(imageOut.toByteArray())));
-          } finally {
-            IOUtils.closeQuietly(imageOut);
           }
           MapTool.getFrame()
               .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaved"));

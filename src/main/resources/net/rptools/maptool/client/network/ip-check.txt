@@ -1,0 +1,6 @@
+# List of URLs that can be used to check external ip address
+http://checkip.amazonaws.com/
+http://bot.whatismyipaddress.com/
+https://ipecho.net/plain
+https://myexternalip.com/raw
+http://icanhazip.com/

@@ -63,6 +63,10 @@ class JsonMTSTypeConversion {
       } else {
         return val;
       }
+    } else if (val instanceof Double) {
+      return BigDecimal.valueOf((Double) val);
+    } else if (val instanceof Integer) {
+      return BigDecimal.valueOf((Integer) val);
     } else {
       return val.toString();
     }
@@ -90,7 +94,7 @@ class JsonMTSTypeConversion {
    * @param o the object tp convert to a {@link JsonElement}.
    * @return a {@link JsonElement} version of the object.
    */
-  JsonElement asJsonElement(Object o) throws ParserException {
+  JsonElement asJsonElement(Object o) {
     if (o instanceof JsonElement) {
       return (JsonElement) o;
     }

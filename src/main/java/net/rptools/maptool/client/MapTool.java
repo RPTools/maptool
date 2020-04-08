@@ -258,7 +258,7 @@ public class MapTool {
    *     window (formatted using <code>params</code>)
    * @param messageType one of <code>JOptionPane.ERROR_MESSAGE</code>, <code>
    *                    JOptionPane.WARNING_MESSAGE</code>, <code>JOptionPane.INFORMATION_MESSAGE
-   *     </code>
+   *                    </code>
    * @param params optional parameters to use when formatting the title text from the properties
    *     file
    */
@@ -384,8 +384,9 @@ public class MapTool {
    * Displays a confirmation dialog that uses the message as a key to the properties file, and the
    * additional values as parameters to the formatting of the key lookup.
    *
-   * @param title
-   * @param buttons
+   * @param title the title of the dialog.
+   * @param buttons the buttons to display on the dialog, one of {@link JOptionPane#YES_NO_OPTION},
+   *     {@link JOptionPane#YES_NO_CANCEL_OPTION}, {@link JOptionPane#OK_CANCEL_OPTION}.
    * @param message key from the properties file (preferred) or hard-coded string to display
    * @param params optional arguments for the formatting of the property value
    * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
@@ -419,6 +420,13 @@ public class MapTool {
     return val == JOptionPane.YES_OPTION || val == 2;
   }
 
+  /**
+   * Displays a dialog to confirm the delete of drawings through the Drawing Explorer window.
+   * Presents Yes/No/Yes and don't ask again options. Default action is No. Button text is localized
+   * as is the message.
+   *
+   * @return <code>true</code> if the user clicks either Yes button, <code>falsee</code> otherwise.
+   */
   public static boolean confirmDrawDelete() {
     if (!AppPreferences.getDrawWarnWhenDeleted()) {
       return true;
@@ -428,17 +436,19 @@ public class MapTool {
     int val = confirmDelete(msg);
 
     // "Yes, don't show again" Button
-    if (val == 2) {
+    if (val == JOptionPane.CANCEL_OPTION) {
       showInformation("msg.confirm.deleteDraw.removed");
       AppPreferences.setDrawWarnWhenDeleted(false);
     }
     // Any version of 'Yes' returns true, otherwise false
-    return val == JOptionPane.YES_OPTION || val == 2;
+    return val == JOptionPane.YES_OPTION || val == JOptionPane.CANCEL_OPTION;
   }
 
   private static int confirmDelete(String msg) {
     log.debug(msg);
     Object[] options = {
+      // getText() strips out the & as when the button text is specified this way the mnemonics
+      // don't work.
       I18N.getText("msg.title.messageDialog.yes"),
       I18N.getText("msg.title.messageDialog.no"),
       I18N.getText("msg.title.messageDialog.dontAskAgain")
@@ -448,11 +458,11 @@ public class MapTool {
         clientFrame,
         msg,
         title,
-        JOptionPane.NO_OPTION,
+        JOptionPane.YES_NO_CANCEL_OPTION,
         JOptionPane.WARNING_MESSAGE,
         null,
         options,
-        options[0]);
+        options[1]);
   }
 
   private MapTool() {
@@ -460,12 +470,17 @@ public class MapTool {
     throw new Error("cannot construct MapTool object!");
   }
 
+  /**
+   * Get the BackupManager instance.
+   *
+   * @return the BackupManager.
+   */
   public static BackupManager getBackupManager() {
     if (backupManager == null) {
       try {
         backupManager = new BackupManager(AppUtil.getAppHome("backup"));
       } catch (IOException ioe) {
-        ioe.printStackTrace();
+        showError(I18N.getText("msg.error.creatingBackupManager"), ioe);
       }
     }
     return backupManager;
@@ -476,7 +491,7 @@ public class MapTool {
    * be called from any uncontrolled macros as there are both security and denial-of-service attacks
    * possible.
    *
-   * @param url
+   * @param url the URL to pass to the browser.
    */
   public static void showDocument(String url) {
     if (Desktop.isDesktopSupported()) {
@@ -525,6 +540,10 @@ public class MapTool {
       }
       SoundManager.playSoundEvent(eventId);
     }
+  }
+
+  public static void updateServerPolicy() {
+    updateServerPolicy(serverPolicy);
   }
 
   public static void updateServerPolicy(ServerPolicy policy) {
@@ -657,11 +676,7 @@ public class MapTool {
     AppSetup.install();
 
     // Clean up after ourselves
-    try {
-      FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
-    } catch (IOException ioe) {
-      MapTool.showError("While initializing (cleaning tmpdir)", ioe);
-    }
+    FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
     // We'll manage our own images
     ImageIO.setUseCache(false);
 
@@ -692,7 +707,11 @@ public class MapTool {
     player = new Player("", Player.Role.GM, "");
 
     try {
-      startPersonalServer(CampaignFactory.createBasicCampaign());
+      Campaign cmpgn = CampaignFactory.createBasicCampaign();
+      // This was previously being done in the server thread and didn't always get done
+      // before the campaign was accessed by the postInitialize() method below.
+      setCampaign(cmpgn);
+      startPersonalServer(cmpgn);
     } catch (Exception e) {
       MapTool.showError("While starting personal server", e);
     }
@@ -846,7 +865,11 @@ public class MapTool {
     messageList.add(message);
   }
 
-  /** These are the messages that are generated locally */
+  /**
+   * These are the messages that are generated locally.
+   *
+   * @param message The locally generated message to add.
+   */
   public static void addMessage(TextMessage message) {
     // Filter stuff
     addServerMessage(message);
@@ -990,11 +1013,12 @@ public class MapTool {
   /**
    * Start the server from a campaign file and various settings.
    *
-   * @param id the id of the server for announcement
-   * @param config the server configuration
-   * @param campaign the campaign
-   * @param copyCampaign should the campaign be a copy of the one provided
-   * @throws IOException if new MapToolServer fails
+   * @param id the id of the server for announcement.
+   * @param config the server configuration.
+   * @param policy the server policy configuration to use.
+   * @param campaign the campaign.
+   * @param copyCampaign should the campaign be a copy of the one provided.
+   * @throws IOException if new MapToolServer fails.
    */
   public static void startServer(
       String id, ServerConfig config, ServerPolicy policy, Campaign campaign, boolean copyCampaign)
@@ -1076,7 +1100,12 @@ public class MapTool {
     return gms;
   }
 
-  /** Whether a specific player is connected to the game */
+  /**
+   * checks if a specific player is connected to the game.
+   *
+   * @param player The name of the player to check.
+   * @return {@code true} if the player is connected otherwise {@code false}.
+   */
   public static boolean isPlayerConnected(String player) {
     for (int i = 0; i < playerList.size(); i++) {
       Player p = playerList.get(i);
@@ -1330,6 +1359,12 @@ public class MapTool {
     // Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
     // so after frame is all done loading we sync them back up.
     MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
+
+    // Set the Topology drawing mode to the last mode used for convenience
+    MapTool.getFrame()
+        .getCurrentZoneRenderer()
+        .getZone()
+        .setTopologyMode(AppPreferences.getTopologyDrawingMode());
   }
 
   /**
@@ -1337,6 +1372,8 @@ public class MapTool {
    * with the default name (ZoneFactory.DEFAULT_MAP_NAME). If so, the campaign is "empty". The right
    * way to do this is to check the length of the UndoQueue -- if the length is zero, we know the
    * data isn't dirty. But that would require a working UndoQueue... :(
+   *
+   * @return {@code true} if the campaign file has changed, otherwise {@code false}.
    */
   public static boolean isCampaignDirty() {
     // TODO: This is a very naive check, but it's better than nothing
@@ -1421,13 +1458,12 @@ public class MapTool {
    *
    * <p>Examples: -version=1.4.0.1 -user=Jamz
    *
-   * @param options {@link org.apache.commons.cli.Options}
+   * @param cmd {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
    * @param defaultValue A default value to return if option is not found
-   * @param args String array of passed in args
    * @return Option value found as a String, or defaultValue if not found
    * @author Jamz
-   * @since 1.4.0.1
+   * @since 1.5.12
    */
   private static String getCommandLineOption(
       CommandLine cmd, String searchValue, String defaultValue) {
@@ -1439,12 +1475,11 @@ public class MapTool {
    *
    * <p>Examples: -x or -fullscreen
    *
-   * @param options {@link org.apache.commons.cli.Options}
+   * @param cmd {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
-   * @param args String array of passed in args
    * @return A boolean value of true if option parameter found
    * @author Jamz
-   * @since 1.4.0.1
+   * @since 1.5.12
    */
   private static boolean getCommandLineOption(CommandLine cmd, String searchValue) {
     return cmd.hasOption(searchValue);
@@ -1456,13 +1491,12 @@ public class MapTool {
    *
    * <p>Examples: -monitor=1 -x=0 -y=0 -w=1200 -h=960
    *
-   * @param options {@link org.apache.commons.cli.Options}
+   * @param cmd {@link org.apache.commons.cli.Options}
    * @param searchValue Option string to search for, ie -version
    * @param defaultValue A default value to return if option is not found
-   * @param args String array of passed in args
    * @return Int value of the matching option parameter if found
    * @author Jamz
-   * @since 1.4.0.1
+   * @since 1.5.12
    */
   private static int getCommandLineOption(CommandLine cmd, String searchValue, int defaultValue) {
     return StringUtil.parseInteger(cmd.getOptionValue(searchValue), defaultValue);
@@ -1534,12 +1568,12 @@ public class MapTool {
 
     if (MapTool.class.getPackage().getImplementationVersion() != null) {
       versionImplementation = MapTool.class.getPackage().getImplementationVersion().trim();
-      log.info("setting MapTool version from manifest: " + versionImplementation);
+      log.info("getting MapTool version from manifest: " + versionImplementation);
     }
 
     if (MapTool.class.getPackage().getImplementationVendor() != null) {
       vendor = MapTool.class.getPackage().getImplementationVendor().trim();
-      log.info("setting MapTool vendor from manifest:  " + vendor);
+      log.info("getting MapTool vendor from manifest:  " + vendor);
     }
 
     // Initialize Sentry.io logging
@@ -1604,7 +1638,7 @@ public class MapTool {
       log.info("argument passed via command line: " + arg);
     }
 
-    if (cmdOptions.hasOption("version")) {
+    if (cmd.hasOption("version")) {
       log.info("overriding MapTool version from command line to: " + versionOverride);
       version = versionOverride;
     } else {
@@ -1695,11 +1729,9 @@ public class MapTool {
       // allows the system to set up system defaults before we go and modify things.
       // That is, please don't move these lines around unless you test the result on windows
       // and mac
-      String lafname;
       if (AppUtil.MAC_OS_X) {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        lafname = "net.rptools.maptool.client.TinyLookAndFeelMac";
-        UIManager.setLookAndFeel(lafname);
+        UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
         menuBar = new AppMenuBar();
         OSXAdapter.macOSXicon();
       }
@@ -1709,8 +1741,7 @@ public class MapTool {
       // menuBar = new AppMenuBar();
       // }
       else {
-        lafname = "de.muntjak.tinylookandfeel.TinyLookAndFeel";
-        UIManager.setLookAndFeel(lafname);
+        UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
         menuBar = new AppMenuBar();
       }
       // After the TinyLAF library is initialized, look to see if there is a Default.theme
@@ -1719,20 +1750,21 @@ public class MapTool {
       // we have both the original and a Mac version that gets cumbersome. (Really
       // the Mac version should use the default and then install the keystroke differences
       // but what we have works and I'm loathe to go playing with it at 1.3b87 -- yes, 87!)
-      File f = AppUtil.getAppHome("config");
-      if (f.exists()) {
-        File f2 = new File(f, "Default.theme");
-        if (f2.exists()) {
-          if (Theme.loadTheme(f2)) {
-            // re-install the Tiny Look and Feel
-            UIManager.setLookAndFeel(lafname);
+      File f2 = AppUtil.getThemeFile(AppUtil.getThemeName());
+      // File f = AppUtil.getAppHome("config");
+      // if (f.exists()) {
+      // File f2 = new File(f, "Default.theme");
+      if (f2.exists()) {
+        if (Theme.loadTheme(f2)) {
+          // re-install the Tiny Look and Feel
+          UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
 
-            // Update the ComponentUIs for all Components. This
-            // needs to be invoked for all windows.
-            // SwingUtilities.updateComponentTreeUI(rootComponent);
-          }
+          // Update the ComponentUIs for all Components. This
+          // needs to be invoked for all windows.
+          // SwingUtilities.updateComponentTreeUI(rootComponent);
         }
       }
+      // }
 
       com.jidesoft.utils.Lm.verifyLicense(
           "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");

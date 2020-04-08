@@ -65,15 +65,9 @@ public class AssetExtractor {
         frame.add(label);
         SwingUtil.centerOnScreen(frame);
         frame.setVisible(true);
-        Reader r = null;
-        OutputStream out = null;
-        PackedFile pakfile = null;
-        try {
-          newDir.mkdirs();
-
-          label.setText("Loading campaign ...");
-          pakfile = new PackedFile(file);
-
+        newDir.mkdirs();
+        label.setText("Loading campaign ...");
+        try (PackedFile pakfile = new PackedFile(file)) {
           Set<String> files = pakfile.getPaths();
           XStream xstream = FileUtil.getConfiguredXStream();
           int count = 0;
@@ -82,9 +76,10 @@ public class AssetExtractor {
             if (filename.indexOf("assets") < 0) {
               continue;
             }
-            r = pakfile.getFileAsReader(filename);
-            Asset asset = (Asset) xstream.fromXML(r);
-            IOUtils.closeQuietly(r);
+            Asset asset;
+            try (Reader r = pakfile.getFileAsReader(filename)) {
+              asset = (Asset) xstream.fromXML(r);
+            }
 
             File newFile = new File(newDir, asset.getName() + ".jpg");
             label.setText("Extracting image " + count + " of " + files.size() + ": " + newFile);
@@ -92,16 +87,14 @@ public class AssetExtractor {
               newFile.delete();
             }
             newFile.createNewFile();
-            out = new FileOutputStream(newFile);
-            FileUtil.copyWithClose(new ByteArrayInputStream(asset.getImage()), out);
+            try (ByteArrayInputStream is = new ByteArrayInputStream(asset.getImage());
+                OutputStream out = new FileOutputStream(newFile)) {
+              IOUtils.copy(is, out);
+            }
           }
           label.setText("Done.");
         } catch (Exception ioe) {
           MapTool.showInformation("AssetExtractor failure", ioe);
-        } finally {
-          if (pakfile != null) pakfile.close();
-          IOUtils.closeQuietly(r);
-          IOUtils.closeQuietly(out);
         }
       }
     }.start();

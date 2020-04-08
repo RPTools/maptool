@@ -47,28 +47,22 @@ import org.locationtech.jts.geom.LineString;
 public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
   private static final Logger log = LogManager.getLogger(AbstractAStarWalker.class);
-
-  private boolean debugCosts = false; // Manually set this to view H, G & F costs as rendered labels
+  private final GeometryFactory geometryFactory = new GeometryFactory();
   // private List<GUID> debugLabels;
-
+  protected int crossX = 0;
+  protected int crossY = 0;
+  private boolean debugCosts = false; // Manually set this to view H, G & F costs as rendered labels
   private Area vbl = new Area();
   private double cell_cost = zone.getUnitsPerCell();
   private double distance = -1;
-
-  private final GeometryFactory geometryFactory = new GeometryFactory();
   private ShapeReader shapeReader = new ShapeReader(geometryFactory);
   private Geometry vblGeometry = null;
-  private TokenFootprint footprint = new TokenFootprint();
-
-  private Map<AStarCellPoint, AStarCellPoint> checkedList = new ConcurrentHashMap<>();
   // private long avgRetrieveTime;
   // private long avgTestTime;
   // private long retrievalCount;
   // private long testCount;
-
-  protected int crossX = 0;
-  protected int crossY = 0;
-
+  private TokenFootprint footprint = new TokenFootprint();
+  private Map<AStarCellPoint, AStarCellPoint> checkedList = new ConcurrentHashMap<>();
   private List<AStarCellPoint> terrainCells = new ArrayList<>();
 
   public AbstractAStarWalker(Zone zone) {
@@ -150,7 +144,18 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     // Render VBL to Geometry class once and store.
     // Note: zoneRenderer will be null if map is not visible to players.
     if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
-      vbl = MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
+      if (MapTool.getServerPolicy().getVblBlocksMove()) {
+        vbl = MapTool.getFrame().getCurrentZoneRenderer().getZoneView().getTopologyTree().getArea();
+
+        if (tokenVBL != null) {
+          vbl.subtract(tokenVBL);
+        }
+
+        // Finally, add the Move Blocking Layer!
+        vbl.add((zone.getTopologyTerrain()));
+      } else {
+        vbl = zone.getTopologyTerrain();
+      }
     }
 
     if (!vbl.isEmpty()) {
@@ -350,6 +355,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
           }
         }
       }
+      terrainAdder = terrainAdder / cell_cost;
 
       if (blockNode) {
         continue;
@@ -377,17 +383,16 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         if ((int) neighbor.distanceTraveledWithoutTerrain
             != neighbor.distanceTraveledWithoutTerrain) {
 
-          neighbor.g = node.g + terrainAdder + (cell_cost * terrainMultiplier);
+          neighbor.g = node.g + terrainAdder + terrainMultiplier;
 
-          neighbor.distanceTraveled =
-              node.distanceTraveled + terrainAdder + (cell_cost * terrainMultiplier);
+          neighbor.distanceTraveled = node.distanceTraveled + terrainAdder + terrainMultiplier;
         } else {
-          neighbor.g = node.g + terrainAdder + (cell_cost * terrainMultiplier * diagonalMultiplier);
+          neighbor.g = node.g + terrainAdder + terrainMultiplier * diagonalMultiplier;
 
           neighbor.distanceTraveled =
               node.distanceTraveled
                   + terrainAdder
-                  + (cell_cost * terrainMultiplier * Math.ceil(diagonalMultiplier));
+                  + terrainMultiplier * Math.ceil(diagonalMultiplier);
         }
       }
 
