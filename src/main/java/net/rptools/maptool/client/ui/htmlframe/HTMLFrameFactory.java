@@ -186,7 +186,9 @@ public class HTMLFrameFactory {
           }
           tokenChanged(token);
         }
-        if (selectedChange) selectedListChanged();
+        if (selectedChange) {
+          selectedListChanged();
+        }
       }
     }
 

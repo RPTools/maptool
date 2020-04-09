@@ -1247,6 +1247,8 @@ public class InputFunction extends AbstractFunction {
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridx = 0;
     gbc.gridy = 0;
+    gbc.weightx = 1.0;
+
     GridBagLayout gbl = new GridBagLayout();
     for (Component c : jop.getComponents()) {
       gbl.setConstraints(c, gbc);

@@ -1246,6 +1246,7 @@ public class MapToolFrame extends DefaultDockableHolder
                 if (e.getClickCount() == 2) {
                   Token token = (Token) row;
                   getCurrentZoneRenderer().clearSelectedTokens();
+                  getCurrentZoneRenderer().updateAfterSelection();
                   // Pick an appropriate tool
                   // Jamz: why not just call .centerOn(Token token), now we have one place to fix...
                   getCurrentZoneRenderer().centerOn(token);

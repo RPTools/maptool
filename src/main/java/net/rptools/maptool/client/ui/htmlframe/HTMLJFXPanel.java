@@ -86,12 +86,12 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src asset:; style-src 'unsafe-inline'; script-src 'unsafe-inline' 'unsafe-eval'\">\n";
 
   /** The default rule for the body tag. */
-  private static final String CSS_RULE_BODY =
+  static final String CSS_BODY =
       "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8;}";
   /** The default rule for the div tag. */
-  private static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
+  static final String CSS_DIV = "div {margin-bottom: 5px}";
   /** The default rule for the span tag. */
-  private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
+  static final String CSS_SPAN = "span.roll {background:#efefef}";
 
   /** JS that scroll the view to an element from its Id. */
   private static final String SCRIPT_ANCHOR =
@@ -253,8 +253,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     MapTool.addMessage(TextMessage.me(null, event.getMessage()));
   }
 
-  String getRuleBody() {
-    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
+  String getCSSRule() {
+    return String.format(CSS_BODY, AppPreferences.getFontSize()) + CSS_SPAN + CSS_DIV;
   }
 
   /**
@@ -292,9 +292,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     NodeList nodeList;
 
     // Add default CSS as first element of the head tag
-    String strCSS = getRuleBody() + CSS_RULE_DIV + CSS_RULE_SPAN;
     Element styleNode = doc.createElement("style");
-    Text styleContent = doc.createTextNode(strCSS);
+    Text styleContent = doc.createTextNode(getCSSRule());
     styleNode.appendChild(styleContent);
     Node head = doc.getDocumentElement().getElementsByTagName("head").item(0);
     Node nodeCSS = head.insertBefore(styleNode, head.getFirstChild());
@@ -482,6 +481,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
    * @param event the event of the form submission
    */
   private void getDataAndSubmit(org.w3c.dom.events.Event event) {
+    boolean formnovalidate = false; // if true, the form validation is bypassed
     HTMLFormElement form = null;
     Element target = (Element) event.getCurrentTarget();
     JsonObject jObj = new JsonObject();
@@ -492,19 +492,33 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       HTMLInputElement input = (HTMLInputElement) target;
       form = input.getForm();
       addToObject(jObj, input.getName(), input.getValue());
+      formnovalidate = input.getAttribute("formnovalidate") != null;
     } else if (target instanceof HTMLButtonElement) {
       HTMLButtonElement button = (HTMLButtonElement) target;
       form = button.getForm();
       addToObject(jObj, button.getName(), button.getValue());
+      formnovalidate = button.getAttribute("formnovalidate") != null;
     }
     if (form == null) return;
 
-    // Check for validity
-    JSObject jsObject = (JSObject) form;
-    if (!(boolean) jsObject.call("checkValidity")) {
+    // Check for non-macrolinktext action
+    String action = form.getAction();
+    if (action == null || action.startsWith("javascript:")) {
       return;
     }
 
+    // Check for validity
+    boolean novalidate = form.getAttribute("novalidate") != null;
+    if (!formnovalidate && !novalidate) {
+      JSObject jsObject = (JSObject) form;
+      if (!(boolean) jsObject.call("checkValidity")) {
+        return;
+      }
+    }
+
+    event.preventDefault(); // prevent duplicated form submit
+
+    // Gets the data from the form
     final HTMLCollection collection = form.getElements();
     for (int i = 0; i < collection.getLength(); i++) {
       String name, value;
@@ -533,11 +547,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       } else continue; // skip elements not containing data
       addToObject(jObj, name, value);
     }
-    String action = form.getAction();
     String data = URLEncoder.encode(jObj.toString(), StandardCharsets.UTF_8);
-
     doSubmit("json", action, data);
-    event.preventDefault(); // prevent duplicated form submit
   }
 
   /**

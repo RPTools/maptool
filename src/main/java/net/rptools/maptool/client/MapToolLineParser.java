@@ -1298,10 +1298,11 @@ public class MapToolLineParser {
                       }
                     }
                     if (!foundMatch) {
-                      doError(I18N.getText("lineParser.switchNoMatch", caseTarget), opts, roll);
+                      throw doError(
+                          I18N.getText("lineParser.switchNoMatch", caseTarget), opts, roll);
                     }
                   } else {
-                    doError("lineParser.switchError", opts, roll);
+                    throw doError("lineParser.switchError", opts, roll);
                   }
 
                   break;

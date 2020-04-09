@@ -21,11 +21,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.application.Platform;
 import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.Token;
+import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,8 +37,19 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
   private static final Logger log = LogManager.getLogger(HTMLOverlay.class);
 
   /** The default rule for an invisible body tag. */
-  private static final String CSS_RULE_BODY =
-      "body { font-family: sans-serif; font-size: %dpt; background: none; -webkit-user-select: none; margin: 0;}";
+  private static final String CSS_BODY =
+      "body { font-family: sans-serif; font-size: %dpt; background: none; -webkit-user-select: none; margin: 0; --pointermap:pass;}";
+
+  /** CSS rule: clicks on hyperlinks, buttons and input elements are not forwarded to map. */
+  private static final String CSS_POINTERMAP =
+      "a {--pointermap:block;} button {--pointermap:block;} input {--pointermap:block;} area {--pointermap:block;} select {--pointermap:block}";
+
+  /** Script to return the HTML element at coordinates %d, %d. */
+  private static final String SCRIPT_GET_FROM_POINT = "document.elementFromPoint(%d, %d)";
+
+  /** Script to return the calculated --pointermap value of an HTML element. */
+  private static final String SCRIPT_GET_POINTERMAP =
+      "window.getComputedStyle(this).getPropertyValue('--pointermap')";
 
   /** The map of the macro callbacks. */
   private final Map<String, String> macroCallbacks = new HashMap<>();
@@ -51,28 +64,73 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
   @Override
   void handlePage() {
     super.handlePage();
-    makeWebEngineTransparent();
+    makeWebEngineTransparent(); // transparent WebView
 
     // Set the listener for the cursor to switch the webView cursor to the correct one. This is
     // caused by WebView attempting to return to its default instead of our tool cursor.
     webView
         .cursorProperty()
-        .addListener(
-            (observable, oldCursor, newCursor) -> {
-              if (newCursor != null && "DEFAULT".equals(newCursor.toString())) {
-                Cursor cursor = MapTool.getFrame().getCurrentZoneRenderer().getCursor();
-                if (!cursor.getName().equals("Default Cursor")) {
-                  webView.setCursor(null);
-                  this.setCursor(cursor);
-                }
-              }
-            });
+        .addListener((obs, oldCursor, newCursor) -> blockCursorChange(newCursor));
+  }
+
+  /**
+   * Blocks the cursor change of WebView, if it is a default cursor different from the one of the
+   * ZoneRenderer.
+   *
+   * @param newCursor the cursor that WebView tries to impose
+   */
+  private void blockCursorChange(javafx.scene.Cursor newCursor) {
+    if (newCursor != null && "DEFAULT".equals(newCursor.toString())) {
+      Cursor cursor = MapTool.getFrame().getCurrentZoneRenderer().getCursor();
+      if (!cursor.getName().equals("Default Cursor")) {
+        webView.setCursor(null);
+        this.setCursor(cursor);
+      }
+    }
+  }
+
+  /**
+   * Pass the mouse event to the map, if valide. Takes a MouseEvent caught by the Overlay, check if
+   * it was done on an HTML element enabling a click on the map. If so, forward the mouse event to
+   * the ZoneRenderer.
+   *
+   * @param swingEvent the mouse event from Swing that could be passed
+   */
+  private void validateAndPassEvent(MouseEvent swingEvent) {
+    Platform.runLater(
+        () -> {
+          boolean passClick = isPassClick(swingEvent.getX(), swingEvent.getY());
+          if (passClick) {
+            SwingUtilities.invokeLater(() -> passMouseEvent(swingEvent));
+          }
+        });
+  }
+
+  /**
+   * Returns true if the click to the map should be forwarded to the ZR, false otherwise.
+   *
+   * @param x the x coordinate of the click
+   * @param y the y coordinate of the click
+   * @return false if the element has --pointermap=block, true otherwise
+   */
+  private boolean isPassClick(int x, int y) {
+    JSObject element =
+        (JSObject) getWebEngine().executeScript(String.format(SCRIPT_GET_FROM_POINT, x, y));
+    if (element == null) {
+      return true;
+    } else {
+      String pe = (String) element.eval(SCRIPT_GET_POINTERMAP);
+      return !"block".equals(pe);
+    }
   }
 
   /** @return the rule for an invisible body. */
   @Override
-  String getRuleBody() {
-    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
+  String getCSSRule() {
+    return String.format(CSS_BODY, AppPreferences.getFontSize())
+        + CSS_SPAN
+        + CSS_DIV
+        + CSS_POINTERMAP;
   }
 
   /** Run the callback macro for "onChangeSelection". */
@@ -90,7 +148,10 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
     HTMLPanelContainer.tokenChanged(token, macroCallbacks);
   }
 
-  /** Add the mouse listeners to forward the mouse events to the current ZoneRenderer. */
+  /**
+   * Add the mouse listeners to forward the mouse events to the current ZoneRenderer. Clicks, mouse
+   * press, and mouse released get validated first to see if they need forwarding.
+   */
   private void addMouseListeners() {
     addMouseWheelListener(this::passMouseEvent);
     addMouseMotionListener(
@@ -108,23 +169,23 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
     addMouseListener(
         new MouseAdapter() {
           @Override
-          public void mousePressed(MouseEvent e) {
-            passMouseEvent(e);
-            e.consume(); // prevents double mouse press bug
-          }
-
-          @Override
           public void mouseClicked(MouseEvent e) {
-            passMouseEvent(e);
+            validateAndPassEvent(e);
           }
 
           @Override
-          public void mouseEntered(MouseEvent e) {
-            passMouseEvent(e);
+          public void mousePressed(MouseEvent e) {
+            validateAndPassEvent(e);
+            e.consume(); // workaround for java bug JDK-8200224
           }
 
           @Override
           public void mouseReleased(MouseEvent e) {
+            validateAndPassEvent(e);
+          }
+
+          @Override
+          public void mouseEntered(MouseEvent e) {
             passMouseEvent(e);
           }
 

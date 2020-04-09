@@ -181,30 +181,29 @@ public class AppActions {
             if (AppUtil.playerOwns(t) && t.isVisible() && renderer.getZone().isTokenVisible(t))
               myPlayers.add(t);
           }
-          if (renderer != null) {
-            if (myPlayers.size() > 0) {
-              // We want to wrap round the list of player tokens.
-              // But this process only selects 1 player token.
-              if (renderer.getSelectedTokensList().size() > 0) {
-                Token selt = renderer.getSelectedTokensList().get(0);
-                if (myPlayers.contains(selt)) chosenOne = selt;
-              }
-              if (chosenOne != null) {
-                for (int i = 0; i < myPlayers.size(); i++) {
-                  if (myPlayers.get(i).equals(chosenOne)) {
-                    if (i < myPlayers.size() - 1) chosenOne = myPlayers.get(i + 1);
-                    else chosenOne = myPlayers.get(0);
-                    break;
-                  }
+          if (myPlayers.size() > 0) {
+            // We want to wrap round the list of player tokens.
+            // But this process only selects 1 player token.
+            if (renderer.getSelectedTokensList().size() > 0) {
+              Token selt = renderer.getSelectedTokensList().get(0);
+              if (myPlayers.contains(selt)) chosenOne = selt;
+            }
+            if (chosenOne != null) {
+              for (int i = 0; i < myPlayers.size(); i++) {
+                if (myPlayers.get(i).equals(chosenOne)) {
+                  if (i < myPlayers.size() - 1) chosenOne = myPlayers.get(i + 1);
+                  else chosenOne = myPlayers.get(0);
+                  break;
                 }
-              } else {
-                chosenOne = myPlayers.get(0);
               }
-              // Move to chosen token
-              if (chosenOne != null) {
-                renderer.clearSelectedTokens();
-                renderer.centerOn(chosenOne);
-              }
+            } else {
+              chosenOne = myPlayers.get(0);
+            }
+            // Move to chosen token
+            if (chosenOne != null) {
+              renderer.clearSelectedTokens();
+              renderer.updateAfterSelection();
+              renderer.centerOn(chosenOne);
             }
           }
         }
@@ -838,7 +837,7 @@ public class AppActions {
    * @param zone the {@link Zone} the tokens belong to.
    * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
    */
-  public static final void cutTokens(Zone zone, Set<GUID> tokenSet) {
+  public static void cutTokens(Zone zone, Set<GUID> tokenSet) {
     // Only cut if some tokens are selected. Don't want to accidentally
     // lose what might already be in the clipboard.
     boolean anythingDeleted = false;
@@ -857,6 +856,7 @@ public class AppActions {
     }
     if (anythingDeleted) {
       MapTool.getFrame().getCurrentZoneRenderer().clearSelectedTokens();
+      MapTool.getFrame().getCurrentZoneRenderer().updateAfterSelection();
       keepIdsOnPaste = true; // pasted tokens should have same ids as cut ones
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
@@ -1143,7 +1143,6 @@ public class AppActions {
         String newName = MapToolUtil.nextTokenId(zone, token, true);
         token.setName(newName);
       }
-      zone.putToken(token);
       MapTool.serverCommand().putToken(zone.getId(), token);
     }
     if (!failedPaste.isEmpty()) {
