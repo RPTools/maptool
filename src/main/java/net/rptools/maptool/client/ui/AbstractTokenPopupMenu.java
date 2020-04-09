@@ -537,14 +537,12 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         else if (token.getGMName().trim().isEmpty()) tokenNameGM = tokenName;
         else tokenNameGM = token.getGMName();
 
-        final File defaultFile =
-            FileUtil.cleanFileName(AppPreferences.getSaveDir().getPath(), tokenName, "");
-        final File defaultFileGM =
-            FileUtil.cleanFileName(AppPreferences.getSaveDir().getPath(), tokenNameGM, "");
-
         // chooser.setCurrentDirectory(AppPreferences.getSaveDir());
 
-        final JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
+        final JFileChooser chooser = MapTool.getFrame().getSaveTokenFileChooser();
+        final File defaultFile =
+            FileUtil.cleanFileName(chooser.getCurrentDirectory().toString(), tokenName, "");
+
         chooser.resetChoosableFileFilters();
         chooser.setAcceptAllFileFilterUsed(false);
         chooser.addChoosableFileFilter(tokenFilter);
@@ -648,13 +646,15 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
           } else {
             PersistenceUtil.saveToken(token, tokenSaveFile);
           }
+          saveDirectory = tokenSaveFile.getParentFile();
         } catch (IOException ioe) {
           ioe.printStackTrace();
           MapTool.showError("Could not save token: " + ioe);
         }
       }
-
-      if (saveDirectory != null) AppPreferences.setSaveDir(saveDirectory);
+      if (saveDirectory != null) {
+        AppPreferences.setTokenSaveDir(saveDirectory);
+      }
     }
   }
 
