@@ -72,6 +72,7 @@ import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
 import net.rptools.maptool.model.transform.campaign.TokenPropertyMapTransform;
+import org.apache.commons.collections.functors.NOPTransformer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -87,7 +88,11 @@ public class PersistenceUtil {
   private static final String ASSET_DIR = "assets/"; // $NON-NLS-1$
   public static final String HERO_LAB = "herolab"; // $NON-NLS-1$
 
-  public static final String NOTE_BOOKS = "notebooks";
+  /** The directory that holds the notebooks. */
+  private static final String NOTE_BOOKS = "notebooks";
+
+  /** The file which holds the information about the notebook. */
+  private static final String NOTE_BOOK_INFO_FILE = "notebook-info.json";
 
   private static final String CAMPAIGN_VERSION = "1.6.0";
 
@@ -397,9 +402,12 @@ public class PersistenceUtil {
    */
   private static void saveNoteBook(PackedFile packedFile, NoteBook notebook) throws IOException {
     var nbePersistenceUtil = new NoteBookEntryPersistenceUtilFactory();
+    String noteBookDir = NOTE_BOOKS + "/" + notebook.getVersionedNameSpace();
+    saveNoteBookInfo(packedFile, noteBookDir, notebook);
+
     for (var entry : notebook.getEntries()) {
       packedFile.putFile(
-          NOTE_BOOKS + "/" + notebook.getId() + "/" + entry.getId(),
+          noteBookDir + "/" + entry.getId(),
           nbePersistenceUtil.toJson(entry).toString().getBytes());
 
       for (MD5Key md5Key : entry.getAssetKeys()) {
@@ -413,6 +421,29 @@ public class PersistenceUtil {
       }
     }
   }
+
+  /**
+   * Saves the note book information to the {@link PackedFile}.
+   * @param packedFile The {@link PackedFile} to save the information ahou tthe note book to.
+   * @param noteBookDir the directory that the note book will be saved into.
+   * @param noteBook the note book being saved.
+   * @throws IOException if an error occurs while writing the file.
+   */
+  private static void saveNoteBookInfo(PackedFile packedFile, String noteBookDir, NoteBook noteBook)
+      throws IOException {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("id", noteBook.getId().toString());
+    jsonObject.addProperty("name", noteBook.getName());
+    jsonObject.addProperty("description", noteBook.getDescription());
+    jsonObject.addProperty("version", noteBook.getVersion());
+    jsonObject.addProperty("namespace", noteBook.getNamespace());
+    jsonObject.addProperty("internal", noteBook.isInternal());
+
+    packedFile.putFile(noteBookDir + "/" + NOTE_BOOK_INFO_FILE, jsonObject.toString().getBytes());
+  }
+
+
+
 
   /*
    * A public function because I think it should be called when a campaign is opened as well so if it is opened then closed without saving, there is still a preview created; however, the rendering
