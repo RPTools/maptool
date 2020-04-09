@@ -229,6 +229,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private JFileChooser saveCmpgnFileChooser;
   private JFileChooser savePropsFileChooser;
   private JFileChooser saveFileChooser;
+  private JFileChooser saveMapFileChooser;
+  private JFileChooser saveTokenFileChooser;
 
   /** Remember the last layer selected */
   private Layer lastSelectedLayer = Zone.Layer.TOKEN;
@@ -889,6 +891,22 @@ public class MapToolFrame extends DefaultDockableHolder
     }
     savePropsFileChooser.setAcceptAllFileFilterUsed(true);
     return savePropsFileChooser;
+  }
+
+  public JFileChooser getSaveTokenFileChooser() {
+    if (saveTokenFileChooser == null) {
+      saveTokenFileChooser = new JFileChooser();
+      saveTokenFileChooser.setCurrentDirectory(AppPreferences.getSaveTokenDir());
+    }
+    return saveTokenFileChooser;
+  }
+
+  public JFileChooser getSaveMapFileChooser() {
+    if (saveMapFileChooser == null) {
+      saveMapFileChooser = new JFileChooser();
+      saveMapFileChooser.setCurrentDirectory(AppPreferences.getSaveMapDir());
+    }
+    return saveMapFileChooser;
   }
 
   public JFileChooser getSaveFileChooser() {
