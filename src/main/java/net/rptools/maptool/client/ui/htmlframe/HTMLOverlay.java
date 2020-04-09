@@ -16,6 +16,7 @@ package net.rptools.maptool.client.ui.htmlframe;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -120,8 +121,28 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
       return true;
     } else {
       String pe = (String) element.eval(SCRIPT_GET_POINTERMAP);
-      return !"block".equals(pe);
+      return "blockopaque".equals(pe) ? !isOpaque(x, y) : !"block".equals(pe);
     }
+  }
+
+  /**
+   * Returns whether the overlay is opaque (alpha > 0) at the x,y pixel. Method provided by gthanop
+   * at https://stackoverflow.com/questions/60906929
+   *
+   * @param x the x coordinate of the pixel
+   * @param y the y coordinate of the pixel
+   * @return true if alpha isn't 0, false if it is
+   */
+  private boolean isOpaque(int x, int y) {
+    if (!getBounds().contains(x, y)) return false; // no overlay outside the bounds
+    final BufferedImage bimg = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+    final Graphics2D g2d = bimg.createGraphics();
+    g2d.translate(-x, -y); // pixel of interest is now at 0,0
+    printAll(g2d); // draw a 1,1 pixel at 0,0
+    g2d.dispose();
+    Color c = new Color(bimg.getRGB(0, 0), true);
+    bimg.flush();
+    return c.getAlpha() != 0;
   }
 
   /** @return the rule for an invisible body. */
