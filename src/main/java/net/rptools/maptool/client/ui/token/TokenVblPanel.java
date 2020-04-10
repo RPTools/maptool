@@ -93,8 +93,11 @@ public class TokenVblPanel extends JPanel {
     addMouseWheelListener(
         e -> {
           // TODO: Zooming panel should zoom in at mouse cursor #mathishard
-
-          double delta = e.getWheelRotation() > 0 ? -.25 : .25;
+          int wheelMovement = e.getWheelRotation();
+          if (wheelMovement == 0) {
+            return;
+          }
+          double delta = wheelMovement > 0 ? -.25 : .25;
           scale += delta;
           scale = Math.max(1, scale);
           scale = Math.min(100, scale);
@@ -199,8 +202,7 @@ public class TokenVblPanel extends JPanel {
   protected void paintComponent(Graphics g) {
     Dimension panelSize = getSize();
     Dimension panelUsableSize =
-        new Dimension(
-            (int) Math.round(panelSize.width - 10), (int) Math.round(panelSize.height - 10));
+        new Dimension(Math.round(panelSize.width - 10), Math.round(panelSize.height - 10));
 
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 
@@ -341,7 +343,7 @@ public class TokenVblPanel extends JPanel {
     float offset = 1.0f;
 
     text += ": " + NumberFormat.getInstance().format(count);
-    ;
+
     yPos = panelSize.height - yPos;
 
     g2d.setColor(Color.BLACK);
