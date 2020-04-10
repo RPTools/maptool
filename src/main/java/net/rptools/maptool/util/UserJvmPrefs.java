@@ -21,11 +21,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import jdk.packager.services.UserJvmOptionsService;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -33,6 +31,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
+
+// import jdk.packager.services.UserJvmOptionsService;
 
 /*
  * User Preferences are stored here:
@@ -103,30 +103,30 @@ public class UserJvmPrefs {
     List<String> arguments = runtimeMxBean.getInputArguments();
     log.debug("get JVM Args :: " + arguments);
 
-    UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
-    Map<String, String> userOptions = ujo.getUserJVMOptions();
+    //    UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
+    //    Map<String, String> userOptions = ujo.getUserJVMOptions();
 
     // If user option is set, return it
-    if (userOptions.containsKey(option.command)) {
-      if (option.equals(JVM_OPTION.LOCALE_LANGUAGE)) {
-        // Translate 2 letter language code to display language
-        String languageCode = userOptions.get(option.command);
-        for (Entry<String, String> entry : LANGUAGE_MAP.entrySet()) {
-          if (Objects.equals(languageCode, entry.getValue())) {
-            return entry.getKey();
-          }
-        }
-
-        // Language Code not found, default option to English
-        return "English";
-      }
-
-      return userOptions.get(option.command);
-    }
+    //    if (userOptions.containsKey(option.command)) {
+    //      if (option.equals(JVM_OPTION.LOCALE_LANGUAGE)) {
+    //        // Translate 2 letter language code to display language
+    //        String languageCode = userOptions.get(option.command);
+    //        for (Entry<String, String> entry : LANGUAGE_MAP.entrySet()) {
+    //          if (Objects.equals(languageCode, entry.getValue())) {
+    //            return entry.getKey();
+    //          }
+    //        }
+    //
+    //        // Language Code not found, default option to English
+    //        return "English";
+    //      }
+    //
+    //      return userOptions.get(option.command);
+    //    }
 
     // Else, look for default value
-    Map<String, String> defaults = ujo.getUserJVMOptionDefaults();
-    if (defaults.containsKey(option.command)) return defaults.get(option.command);
+    //    Map<String, String> defaults = ujo.getUserJVMOptionDefaults();
+    //    if (defaults.containsKey(option.command)) return defaults.get(option.command);
 
     // No user option of default found..
     return "";
@@ -138,44 +138,44 @@ public class UserJvmPrefs {
     List<String> arguments = runtimeMxBean.getInputArguments();
     log.debug("Has JVM Args :: " + arguments);
 
-    UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
-    Map<String, String> userOptions = ujo.getUserJVMOptions();
-
-    // If user option is set, return it
-    if (userOptions.containsKey(option.command)) return true;
-
-    // Else, look for default value
-    Map<String, String> defaults = ujo.getUserJVMOptionDefaults();
-    if (defaults.containsKey(option.command)) return true;
+    //    UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
+    //    Map<String, String> userOptions = ujo.getUserJVMOptions();
+    //
+    //    // If user option is set, return it
+    //    if (userOptions.containsKey(option.command)) return true;
+    //
+    //    // Else, look for default value
+    //    Map<String, String> defaults = ujo.getUserJVMOptionDefaults();
+    //    if (defaults.containsKey(option.command)) return true;
 
     // No user option of default found..
     return false;
   }
 
   public static void setJvmOption(JVM_OPTION option, String value) {
-    UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
-    Map<String, String> userOptions = ujo.getUserJVMOptions();
-
-    if (value.isEmpty()) {
-      userOptions.remove(option.command);
-    } else {
-      // Translate display language to 2 letter language code
-      if (option.equals(JVM_OPTION.LOCALE_LANGUAGE)) value = LANGUAGE_MAP.get(value);
-
-      userOptions.put(option.command, value);
-    }
-
-    ujo.setUserJVMOptions(userOptions);
+    //    UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
+    //    Map<String, String> userOptions = ujo.getUserJVMOptions();
+    //
+    //    if (value.isEmpty()) {
+    //      userOptions.remove(option.command);
+    //    } else {
+    //      // Translate display language to 2 letter language code
+    //      if (option.equals(JVM_OPTION.LOCALE_LANGUAGE)) value = LANGUAGE_MAP.get(value);
+    //
+    //      userOptions.put(option.command, value);
+    //    }
+    //
+    //    ujo.setUserJVMOptions(userOptions);
   }
 
   public static void setJvmOption(JVM_OPTION option, boolean value) {
-    UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
-    Map<String, String> userOptions = ujo.getUserJVMOptions();
-
-    if (value) userOptions.put(option.command, option.defaultValue);
-    else userOptions.remove(option.command);
-
-    ujo.setUserJVMOptions(userOptions);
+    //    UserJvmOptionsService ujo = UserJvmOptionsService.getUserJVMDefaults();
+    //    Map<String, String> userOptions = ujo.getUserJVMOptions();
+    //
+    //    if (value) userOptions.put(option.command, option.defaultValue);
+    //    else userOptions.remove(option.command);
+    //
+    //    ujo.setUserJVMOptions(userOptions);
   }
 
   public static boolean verifyJvmOptions(String s) {

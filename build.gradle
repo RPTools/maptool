@@ -1,22 +1,16 @@
+import org.gradle.plugins.ide.eclipse.model.AccessRule
+
 /*
 * For more details take a look at the Java Quickstart chapter in the Gradle
 * user guide available at https://docs.gradle.org/4.1/userguide/tutorial_java_projects.html
 */
-import org.gradle.plugins.ide.eclipse.model.AccessRule
-
-buildscript {
-    dependencies {
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.27.1"
-    }
-
-    repositories {
-        mavenCentral()
-    }
-}
-
 // Access Git info from build script
 plugins {
+    id "application"
     id "org.ajoberstar.grgit" version "4.0.1"
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+    id "com.diffplug.gradle.spotless" version "3.28.0"
+    id 'org.beryx.runtime' version '1.8.0'
 }
 
 // Apply the java plugin to add support for Java
@@ -29,8 +23,8 @@ apply plugin: 'jacoco'
 
 // Definitions
 defaultTasks 'clean', 'build'
-sourceCompatibility = 10
-targetCompatibility = 10
+sourceCompatibility = 14
+targetCompatibility = 14
 
 
 // Used by gradle assemble & run tasks
@@ -107,33 +101,18 @@ toolVersion = "0.8.1"
 reportsDir = file("$buildDir/reports/jacoco")
 }
 
-// Set eclipse natures, access rules, and other settings
-// https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseProject.html
-// https://discuss.gradle.org/t/buildship-1-0-18-is-now-available/19012
-eclipse {
-    project {
-        natures 'org.eclipse.buildship.core.gradleprojectnature'
-        buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
-    }
-
-    classpath {
-        file {
-            withXml {
-                def node = it.asNode()
-                node.appendNode('classpathentry', [kind: 'con', path: 'org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER'])
-            }
-            whenMerged {
-                entries.each { source ->
-                    if (source.kind == 'con' && source.path.startsWith('org.eclipse.jdt.launching.JRE_CONTAINER')) {
-                        source.accessRules.add(new AccessRule('0', 'javafx/**'))
-                        source.accessRules.add(new AccessRule('0', 'jdk/nashorn/api/**'))
-                    }
-                }
-            }
-        }
-    }
+// org.openjfx.javafxplugin
+javafx {
+    version = '14'
+    // modules = ['javafx.base', 'javafx.controls', 'javafx.fxml', 'javafx.swing', 'javafx.graphics', 'javafx.media']
+    modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web']
 }
 
+// Badass Runtime Plugin Options
+runtime {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    // modules = ['java.naming', 'java.xml']
+}
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -407,8 +386,37 @@ test {
 }
 
 task createWrapper(type: Wrapper) {
-    gradleVersion = '5.3.1'
+    gradleVersion = '6.3'
 }
+
+
+// Set eclipse natures, access rules, and other settings
+// https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseProject.html
+// https://discuss.gradle.org/t/buildship-1-0-18-is-now-available/19012
+eclipse {
+    project {
+        natures 'org.eclipse.buildship.core.gradleprojectnature'
+        buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
+    }
+
+    classpath {
+        file {
+            withXml {
+                def node = it.asNode()
+                node.appendNode('classpathentry', [kind: 'con', path: 'org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER'])
+            }
+            whenMerged {
+                entries.each { source ->
+                    if (source.kind == 'con' && source.path.startsWith('org.eclipse.jdt.launching.JRE_CONTAINER')) {
+                        source.accessRules.add(new AccessRule('0', 'javafx/**'))
+                        source.accessRules.add(new AccessRule('0', 'jdk/nashorn/api/**'))
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 // Configure current release tag in Sentry.io properties
 processResources.dependsOn configSentryRelease
