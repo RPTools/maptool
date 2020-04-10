@@ -23,6 +23,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import net.rptools.maptool.client.AppUtil;
@@ -72,15 +73,12 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
     }
   }
 
+  private Token getToken() {
+    return MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
+  }
+
   private void addActions() {
-    add(new AddMacroAction());
-    add(new JSeparator());
-    add(new ImportMacroAction());
-    add(new JSeparator());
-    add(new ImportMacroSetAction());
-    add(new ExportMacroSetAction());
-    add(new JSeparator());
-    add(new ClearGroupAction());
+    addBasicActions();
     if (!this.panelClass.equals("SelectionPanel")) {
       add(new JSeparator());
       add(new ClearPanelAction());
@@ -98,17 +96,22 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
 
   private void addCampaignActions() {
     if (MapTool.getPlayer().isGM()) {
-      add(new AddMacroAction());
-      add(new JSeparator());
-      add(new ImportMacroAction());
-      add(new JSeparator());
-      add(new ImportMacroSetAction());
-      add(new ExportMacroSetAction());
-      add(new JSeparator());
-      add(new ClearGroupAction());
+      addBasicActions();
       add(new JSeparator());
       add(new ClearPanelAction());
     }
+  }
+
+  private void addBasicActions() {
+    add(new AddMacroAction());
+    add(new JSeparator());
+    add(new ImportMacroAction());
+    add(new JSeparator());
+    add(new ImportMacroSetAction());
+    add(new ExportMacroSetAction());
+    add(new JSeparator());
+    add(new RenameGroupAction());
+    add(new ClearGroupAction());
   }
 
   private class AddMacroAction extends AbstractAction {
@@ -139,12 +142,12 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
               new MacroButtonProperties(nextToken, nextToken.getMacroNextIndex(), macroGroup);
             }
           } else if (tokenId != null) {
-            Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
+            Token token = getToken();
             new MacroButtonProperties(token, token.getMacroNextIndex(), macroGroup);
           }
         }
       } else if (tokenId != null) {
-        Token token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
+        Token token = getToken();
         new MacroButtonProperties(token, token.getMacroNextIndex(), macroGroup);
       }
     }
@@ -259,8 +262,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                         }
                       }
                     } else if (tokenId != null) {
-                      Token token =
-                          MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
+                      Token token = getToken();
                       for (MacroButtonProperties nextMacro : token.getMacroList(true)) {
                         if (newButtonProps.hashCodeForComparison()
                             == nextMacro.hashCodeForComparison()) {
@@ -287,8 +289,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                     }
                   }
                 } else if (tokenId != null) {
-                  Token token =
-                      MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
+                  Token token = getToken();
                   for (MacroButtonProperties nextMacro : token.getMacroList(true)) {
                     if (newButtonProps.hashCodeForComparison()
                         == nextMacro.hashCodeForComparison()) {
@@ -427,8 +428,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                           }
                         }
                       } else if (tokenId != null) {
-                        Token token =
-                            MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
+                        Token token = getToken();
                         for (MacroButtonProperties nextMacro : token.getMacroList(true)) {
                           if (nextProps.hashCodeForComparison()
                               == nextMacro.hashCodeForComparison()) {
@@ -455,8 +455,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                       }
                     }
                   } else if (tokenId != null) {
-                    Token token =
-                        MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
+                    Token token = getToken();
                     for (MacroButtonProperties nextMacro : token.getMacroList(true)) {
                       if (nextProps.hashCodeForComparison() == nextMacro.hashCodeForComparison()) {
                         alreadyExists = true;
@@ -589,8 +588,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                       }
                       PersistenceUtil.saveMacroSet(exportList, selectedFile);
                     } else if (tokenId != null) {
-                      Token token =
-                          MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
+                      Token token = getToken();
                       Boolean trusted = AppUtil.playerOwns(token);
                       List<MacroButtonProperties> exportList =
                           new ArrayList<MacroButtonProperties>();
@@ -608,8 +606,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                     }
                   }
                 } else if (tokenId != null) {
-                  Token token =
-                      MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
+                  Token token = getToken();
                   PersistenceUtil.saveMacroSet(token.getMacroList(true), selectedFile);
                 }
               } catch (IOException ioe) {
@@ -618,6 +615,28 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
               }
             }
           });
+    }
+  }
+
+  private class RenameGroupAction extends AbstractAction {
+
+    public RenameGroupAction() {
+      putValue(Action.NAME, I18N.getText("action.macro.renameGroup"));
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent event) {
+      String newMacroGroupName =
+          JOptionPane.showInputDialog(I18N.getText("panel.NewGroupName"), macroGroup);
+      if (!newMacroGroupName.equals(macroGroup)) {
+        if (panelClass.equals("CampaignPanel")
+            || panelClass.equals("GlobalPanel")
+            || panelClass.equals("GmPanel")) {
+          areaGroup.getPanel().renameMacroGroup(macroGroup, newMacroGroupName);
+        } else if (tokenId != null) {
+          getToken().renameMacroGroup(macroGroup, newMacroGroupName);
+        }
+      }
     }
   }
 
