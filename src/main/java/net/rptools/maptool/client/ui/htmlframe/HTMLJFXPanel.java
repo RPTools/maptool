@@ -235,7 +235,10 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
    * @param event the error event
    */
   private static void showError(WebErrorEvent event) {
-    MapTool.addMessage(TextMessage.me(null, event.getMessage()));
+    // Hide error "User data directory is already in use", directory not used anyway
+    if (event.getEventType() != WebErrorEvent.USER_DATA_DIRECTORY_ALREADY_IN_USE) {
+      MapTool.addMessage(TextMessage.me(null, event.getMessage()));
+    }
   }
 
   /** @return the CSS rule for the body tag. */
