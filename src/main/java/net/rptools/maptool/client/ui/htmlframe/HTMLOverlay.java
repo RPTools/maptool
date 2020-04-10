@@ -27,6 +27,8 @@ import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
+import net.rptools.maptool.client.tool.DefaultTool;
+import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.model.Token;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
@@ -39,7 +41,7 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
 
   /** The default rule for an invisible body tag. */
   private static final String CSS_BODY =
-      "body { font-family: sans-serif; font-size: %dpt; background: none; -webkit-user-select: none; margin: 0; --pointermap:pass;}";
+      "body { font-family: sans-serif; font-size: %dpt; background: none; -webkit-user-select: none; margin: 0; --pointermap:pass; overflow-x: hidden; overflow-y: hidden;}";
 
   /** CSS rule: clicks on hyperlinks, buttons and input elements are not forwarded to map. */
   private static final String CSS_POINTERMAP =
@@ -91,7 +93,7 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
   }
 
   /**
-   * Pass the mouse event to the map, if valide. Takes a MouseEvent caught by the Overlay, check if
+   * Pass the mouse event to the map, if valid. Takes a MouseEvent caught by the Overlay, check if
    * it was done on an HTML element enabling a click on the map. If so, forward the mouse event to
    * the ZoneRenderer.
    *
@@ -105,6 +107,22 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
             SwingUtilities.invokeLater(() -> passMouseEvent(swingEvent));
           }
         });
+  }
+
+  /**
+   * Sets up the initial drag start. If the mouse press is a right click and the tool could be
+   * dragging the map, sets up the initial drag start. This is required or the map will "jump" if
+   * performing a right click on the overlay followed by a drag.
+   *
+   * @param e the mouse press event
+   */
+  private void maySetMapDragStart(MouseEvent e) {
+    if (SwingUtilities.isRightMouseButton(e)) {
+      Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
+      if (tool instanceof DefaultTool) {
+        ((DefaultTool) tool).setDragStart(e.getX(), e.getY());
+      }
+    }
   }
 
   /**
@@ -196,13 +214,14 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
 
           @Override
           public void mousePressed(MouseEvent e) {
+            maySetMapDragStart(e); // may set map dragstart x and y, even if on overlay
             validateAndPassEvent(e);
             e.consume(); // workaround for java bug JDK-8200224
           }
 
           @Override
           public void mouseReleased(MouseEvent e) {
-            validateAndPassEvent(e);
+            passMouseEvent(e);
           }
 
           @Override
