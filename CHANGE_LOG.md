@@ -1,3 +1,12 @@
+Maptool 1.6.0.1
+=====
+Hotfix for token property issue.
+
+**Bug Fixes**
+- [#1504][i1504] Edit Token dialog would hold onto a previous tokens property values and property type. Fixed.
+
+[i1504]: https://github.com/RPTools/maptool/issues/1504
+
 Maptool 1.6.0
 =====
 Lots of enhancements, bug fixes and improvements to the code base.
