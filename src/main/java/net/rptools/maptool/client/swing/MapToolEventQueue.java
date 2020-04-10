@@ -86,9 +86,10 @@ public class MapToolEventQueue extends EventQueue {
         }
       } else if (event instanceof MouseWheelEvent) {
         MouseWheelEvent mwe = (MouseWheelEvent) event;
-        if (mwe.isShiftDown() && MapToolEventQueue.shiftState == 0) {
-          // issue 413: horizontal scrolling too sensitive on macOS w/ SuperMouse; ignore completely
-          // The user can still hold the Shift key down to activate horizontal scrolling.
+        if (mwe.isShiftDown() && MapToolEventQueue.shiftState != 1) {
+          // issue 1317: ignore ALL horizontal movement, *even if* the physical Shift is held down.
+          // This means only vertical movement will be recognized and the user will have
+          // to hold down the Shift key to effect it.
           return;
         }
       }
