@@ -1,4 +1,4 @@
-Maptool 1.6.0.1
+Maptool 1.6.1
 =====
 Hotfix for token property issue.
 
