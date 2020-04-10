@@ -35,6 +35,7 @@ import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanelModel;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Grid;
@@ -77,14 +78,56 @@ public class MapPropertiesDialog extends JDialog {
   private int gridOffsetX = 0;
   private int gridOffsetY = 0;
 
-  public MapPropertiesDialog(JFrame owner) {
-    super(owner, "Map Properties", true);
+  public static MapPropertiesDialog createMapPropertiesDialog(JFrame owner) {
+    return new MapPropertiesDialog(I18N.getText("dialog.mapProperties.title"), owner);
+  }
+
+  public static MapPropertiesDialog createMapPropertiesImportDialog(JFrame owner) {
+    return new MapPropertiesDialog(I18N.getText("dialog.importedMapProperties.title"), owner);
+  }
+
+  private MapPropertiesDialog(String title, JFrame owner) {
+    super(owner, title, true);
     initialize();
     pack();
   }
 
   public Status getStatus() {
     return status;
+  }
+
+  /**
+   * Set the pixels per cell value and stop user from editing.
+   *
+   * @param pixels the pixels per cell to set.
+   */
+  public void forcePixelsPerCell(int pixels) {
+    getPixelsPerCellTextField().setText(Integer.toString(pixels));
+    getPixelsPerCellTextField().setEditable(false);
+  }
+
+  public void forceMap(Asset asset) {
+    setMapAsset(asset);
+    getMapButton().setEnabled(false);
+  }
+
+  public void forceGridType(String gridType) {
+    if (GridFactory.isHexVertical(gridType)) {
+      getHexVerticalRadio().setSelected(true);
+    } else if (GridFactory.isHexHorizontal(gridType)) {
+      getHexHorizontalRadio().setSelected(true);
+    } else if (GridFactory.isIsometric(gridType)) {
+      getIsometricRadio().setSelected(true);
+    } else if (GridFactory.isSquare(gridType)) {
+      getSquareRadio().setSelected(true);
+    } else {
+      getNoGridRadio().setSelected(true);
+    }
+    getHexVerticalRadio().setEnabled(false);
+    getHexHorizontalRadio().setEnabled(false);
+    getIsometricRadio().setEnabled(false);
+    getSquareRadio().setEnabled(false);
+    getNoGridRadio().setEnabled(false);
   }
 
   @Override
