@@ -617,19 +617,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         if (isDraggingToken) {
           SwingUtil.showPointer(renderer);
           stopTokenDrag();
-        } else {
-          // SELECT SINGLE TOKEN
-          if (SwingUtilities.isLeftMouseButton(e) && !SwingUtil.isShiftDown(e)) {
-            Token token = renderer.getTokenAt(e.getX(), e.getY());
-            // Only if it isn't already being moved
-            if (token != null
-                && !renderer.isTokenMoving(token)
-                && !renderer.isOnlyTokenSelected(token)) {
-              renderer.clearSelectedTokens();
-              renderer.selectToken(token.getId());
-              renderer.updateAfterSelection();
-            }
-          }
         }
       } finally {
         isDraggingToken = false;
