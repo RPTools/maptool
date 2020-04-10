@@ -137,9 +137,12 @@ public class AssetPanel extends JComponent {
         new MouseWheelListener() {
           @Override
           public void mouseWheelMoved(MouseWheelEvent e) {
+            int steps = e.getWheelRotation();
+            if (steps == 0) {
+              return;
+            }
             if (SwingUtil.isControlDown(e) || e.isMetaDown()) { // XXX Why either one?
               e.consume();
-              int steps = e.getWheelRotation();
               imagePanel.setGridSize(imagePanel.getGridSize() + steps);
               thumbnailPreviewSlider.setValue(imagePanel.getGridSize());
             } else {
