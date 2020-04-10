@@ -91,6 +91,7 @@ import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.utilities.DungeonDraftImporter;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -2697,6 +2698,37 @@ public class AppActions {
         }
       };
 
+  public static final ClientAction IMPORT_DUNGEON_DRAFT_MAP =
+      new ClientAction() {
+        {
+          init("action.import.dungeondraft");
+        }
+
+        @Override
+        public boolean isAvailable() {
+          return MapTool.isHostingServer()
+              || (MapTool.getPlayer() != null && MapTool.getPlayer().isGM());
+        }
+
+        @Override
+        protected void executeAction(ActionEvent e) {
+          boolean isConnected = !MapTool.isHostingServer() && !MapTool.isPersonalServer();
+          JFileChooser chooser = new MapPreviewFileChooser();
+          chooser.setDialogTitle(I18N.getText("action.import.dungeondraft.dialog.title"));
+          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          chooser.setFileFilter(MapTool.getFrame().getDungeonDraftFilter());
+
+          if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+            File ddFile = chooser.getSelectedFile();
+            try {
+              new DungeonDraftImporter(ddFile).importVTT();
+            } catch (IOException ioException) {
+              MapTool.showError("dungeondraft.import.ioError", ioException);
+            }
+          }
+        }
+      };
+
   private static class MapPreviewFileChooser extends PreviewPanelFileChooser {
     MapPreviewFileChooser() {
       super();
@@ -2916,7 +2948,8 @@ public class AppActions {
                 @Override
                 public void run() {
                   Zone zone = ZoneFactory.createZone();
-                  MapPropertiesDialog newMapDialog = new MapPropertiesDialog(MapTool.getFrame());
+                  MapPropertiesDialog newMapDialog =
+                      MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
                   newMapDialog.setZone(zone);
 
                   newMapDialog.setVisible(true);
@@ -2942,7 +2975,8 @@ public class AppActions {
                 @Override
                 public void run() {
                   Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-                  MapPropertiesDialog newMapDialog = new MapPropertiesDialog(MapTool.getFrame());
+                  MapPropertiesDialog newMapDialog =
+                      MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
                   newMapDialog.setZone(zone);
                   newMapDialog.setVisible(true);
                   // Too many things can change to send them 1 by 1 to the client... just resend the
