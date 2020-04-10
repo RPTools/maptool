@@ -2626,7 +2626,7 @@ public class AppActions {
         @Override
         protected void executeAction(ActionEvent ae) {
           ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-          JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
+          JFileChooser chooser = MapTool.getFrame().getSaveMapFileChooser();
           chooser.setFileFilter(MapTool.getFrame().getMapFileFilter());
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           chooser.setSelectedFile(new File(zr.getZone().getName()));
@@ -2637,7 +2637,7 @@ public class AppActions {
               // Lets do a better job and actually check the end of the file name for the extension
               mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
               PersistenceUtil.saveMap(zr.getZone(), mapFile);
-              AppPreferences.setSaveDir(mapFile.getParentFile());
+              AppPreferences.setSaveMapDir(mapFile.getParentFile());
               MapTool.showInformation("msg.info.mapSaved");
             } catch (IOException ioe) {
               MapTool.showError("msg.error.failedSaveMap", ioe);
