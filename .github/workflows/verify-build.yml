@@ -1,0 +1,45 @@
+# This workflow will build a Java project with Gradle for verification purposes
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Build Verification
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - feature*
+      - release*
+  pull_request:
+    branches:
+      - master
+      - develop
+      - feature*
+      - release*
+jobs:
+  build:
+    name: ${{ matrix.os }} w/JDK ${{ matrix.java }}
+    runs-on:  ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macOS-latest]
+        java: [ '14' ]
+      fail-fast: false
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Cache Gradle
+        uses: actions/cache@v1
+        # Cache only seems to work on ubuntu right now...
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Build with Gradle
+        run: ./gradlew build
