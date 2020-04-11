@@ -199,4 +199,10 @@ public class SelectionPanel extends AbstractMacroPanel {
     clear();
     init();
   }
+
+  @Override
+  protected List<MacroButtonProperties> getMacroButtonProperties() {
+    /* not used for the moment by this one */
+    return null;
+  }
 }
