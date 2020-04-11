@@ -42,10 +42,18 @@ import net.rptools.maptool.model.ZoneFactory;
 /** Class for importing Dungeondraft VTT export format. */
 public class DungeonDraftImporter {
 
+  /** The format / version of the dungeondraft VTT format. */
   public static final String VTT_FIELD_FORMAT = "format";
+
+  /** The resolution section of the dungeondraft vtt map. */
   public static final String VTT_FIELD_RESOLUTION = "resolution";
+
+  /** The number of pixels per grid cell on the vtt map. */
   public static final String VTT_FIELD_PIXELS_PER_GRID = "pixels_per_grid";
+
+  /** The image of the map in the vtt file. */
   public static final String VTT_FIELD_IMAGE = "image";
+
   /** The file containing the dungeondraft VTT export. */
   private final File dungeonDraftFile;
 
