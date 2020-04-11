@@ -459,7 +459,7 @@ public class AdvancedAdjustGridPanel extends JComponent
   public void mouseWheelMoved(MouseWheelEvent e) {
     if (e.getWheelRotation() < 0) {
       scale.zoomIn(e.getX(), e.getY());
-    } else {
+    } else if (e.getWheelRotation() > 0) {
       scale.zoomOut(e.getX(), e.getY());
     }
 

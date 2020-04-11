@@ -38,6 +38,8 @@ public class AppPreferences {
 
   private static final String KEY_ASSET_ROOTS = "assetRoots";
   private static final String KEY_SAVE_DIR = "saveDir";
+  private static final String KEY_SAVE_TOKEN_DIR = "saveTokenDir";
+  private static final String KEY_SAVE_MAP_DIR = "saveMapDir";
   private static final String KEY_LOAD_DIR = "loadDir";
   private static final String KEY_MRU_CAMPAIGNS = "mruCampaigns";
   private static final String KEY_SAVED_PAINT_TEXTURES = "savedTextures";
@@ -944,6 +946,24 @@ public class AppPreferences {
   public static File getSaveDir() {
     String filePath = prefs.get(KEY_SAVE_DIR, null);
     return filePath != null ? new File(filePath) : new File(File.separator);
+  }
+
+  public static File getSaveTokenDir() {
+    String filePath = prefs.get(KEY_SAVE_TOKEN_DIR, null);
+    return filePath != null ? new File(filePath) : getSaveDir();
+  }
+
+  public static void setTokenSaveDir(File file) {
+    prefs.put(KEY_SAVE_TOKEN_DIR, file.toString());
+  }
+
+  public static File getSaveMapDir() {
+    String filePath = prefs.get(KEY_SAVE_MAP_DIR, null);
+    return filePath != null ? new File(filePath) : getSaveDir();
+  }
+
+  public static void setSaveMapDir(File file) {
+    prefs.put(KEY_SAVE_MAP_DIR, file.toString());
   }
 
   public static void setLoadDir(File file) {

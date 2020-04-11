@@ -46,6 +46,11 @@ public class GmPanel extends AbstractMacroPanel {
     init();
   }
 
+  @Override
+  protected List<MacroButtonProperties> getMacroButtonProperties() {
+    return getGmMacroButtonArray();
+  }
+
   public static void deleteButtonGroup(String macroGroup) {
     AbstractButtonGroup.clearHotkeys(getGmPanel(), macroGroup);
     List<MacroButtonProperties> campProps = getGmMacroButtonArray();

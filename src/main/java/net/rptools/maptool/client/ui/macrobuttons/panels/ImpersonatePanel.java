@@ -28,6 +28,7 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 
 public class ImpersonatePanel extends AbstractMacroPanel {
@@ -137,6 +138,12 @@ public class ImpersonatePanel extends AbstractMacroPanel {
   public void reset() {
     clear();
     init();
+  }
+
+  @Override
+  protected List<MacroButtonProperties> getMacroButtonProperties() {
+    /* this is not going to be called for this panel */
+    return null;
   }
 
   /**
