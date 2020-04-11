@@ -110,7 +110,9 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
     add(new ImportMacroSetAction());
     add(new ExportMacroSetAction());
     add(new JSeparator());
-    add(new RenameGroupAction());
+    if (areaGroup != null) {
+      add(new RenameGroupAction());
+    }
     add(new ClearGroupAction());
   }
 
