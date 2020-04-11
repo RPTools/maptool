@@ -42,6 +42,10 @@ import net.rptools.maptool.model.ZoneFactory;
 /** Class for importing Dungeondraft VTT export format. */
 public class DungeonDraftImporter {
 
+  public static final String VTT_FIELD_FORMAT = "format";
+  public static final String VTT_FIELD_RESOLUTION = "resolution";
+  public static final String VTT_FIELD_PIXELS_PER_GRID = "pixels_per_grid";
+  public static final String VTT_FIELD_IMAGE = "image";
   /** The file containing the dungeondraft VTT export. */
   private final File dungeonDraftFile;
 
@@ -92,14 +96,30 @@ public class DungeonDraftImporter {
 
     Zone zone = ZoneFactory.createZone();
 
-    if (ddvtt.get("format").getAsDouble() != 0.2) {
+    // Make sure this is a file format we understand
+    if (ddvtt.get(VTT_FIELD_FORMAT).getAsDouble() != 0.2) {
       MapTool.showError("dungeondraft.import.unknownVersion");
       return;
     }
-    JsonObject resolution = ddvtt.get("resolution").getAsJsonObject();
-    int pixelsPerCell = resolution.get("pixels_per_grid").getAsInt();
 
-    String imageString = ddvtt.get("image").getAsString();
+    if (!ddvtt.has(VTT_FIELD_RESOLUTION)) {
+      MapTool.showError("dungeondraft.import.missingResolution");
+      return;
+    }
+    JsonObject resolution = ddvtt.get(VTT_FIELD_RESOLUTION).getAsJsonObject();
+
+    if (!resolution.has(VTT_FIELD_PIXELS_PER_GRID)) {
+      MapTool.showError("dungeondraft.import.missingPixelsPerGrid");
+      return;
+    }
+    int pixelsPerCell = resolution.get(VTT_FIELD_PIXELS_PER_GRID).getAsInt();
+
+    if (!ddvtt.has(VTT_FIELD_IMAGE)) {
+      MapTool.showError("dungeondraft.import.image");
+      return;
+    }
+    String imageString = ddvtt.get(VTT_FIELD_IMAGE).getAsString();
+
     byte[] imageBytes = Base64.decode(imageString);
     Asset asset = new Asset(dungeonDraftFile.getName(), imageBytes);
     AssetManager.putAsset(asset);
@@ -116,30 +136,33 @@ public class DungeonDraftImporter {
 
     // Handle Walls
     JsonArray vbl = ddvtt.getAsJsonArray("line_of_sight");
-    vbl.forEach(
-        v -> {
-          Area vblArea =
-              new Area(
-                  WALL_VBL_STROKE.createStrokedShape(
-                      getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
-          zone.addTopology(vblArea, TopologyMode.VBL);
-          zone.addTopology(vblArea, TopologyMode.MBL);
-        });
+    if (vbl != null) {
+      vbl.forEach(
+          v -> {
+            Area vblArea =
+                new Area(
+                    WALL_VBL_STROKE.createStrokedShape(
+                        getVBLPath(v.getAsJsonArray(), pixelsPerCell)));
+            zone.addTopology(vblArea, TopologyMode.VBL);
+            zone.addTopology(vblArea, TopologyMode.MBL);
+          });
+    }
 
     // Handle Doors
     JsonArray doors = ddvtt.getAsJsonArray("portals");
-    doors.forEach(
-        d -> {
-          JsonArray bounds = d.getAsJsonObject().get("bounds").getAsJsonArray();
-          Area vblArea =
-              new Area(DOOR_VBL_STROKE.createStrokedShape(getVBLPath(bounds, pixelsPerCell)));
-          zone.addTopology(vblArea, TopologyMode.COMBINED);
-          zone.addTopology(vblArea, TopologyMode.MBL);
-        });
+    if (doors != null) {
+      doors.forEach(
+          d -> {
+            JsonArray bounds = d.getAsJsonObject().get("bounds").getAsJsonArray();
+            Area vblArea =
+                new Area(DOOR_VBL_STROKE.createStrokedShape(getVBLPath(bounds, pixelsPerCell)));
+            zone.addTopology(vblArea, TopologyMode.COMBINED);
+            zone.addTopology(vblArea, TopologyMode.MBL);
+          });
+    }
 
     JsonArray lights = ddvtt.getAsJsonArray("lights");
-
-    if (lights.size() > 0) {
+    if (lights != null && lights.size() > 0) {
       placeLights(zone, lights, pixelsPerCell);
     }
   }
@@ -153,20 +176,29 @@ public class DungeonDraftImporter {
    */
   private void placeLights(Zone zone, JsonArray lights, double pixelsPerCell) {
     int lightNo = 1;
+    boolean ignoredLights = false;
     for (JsonElement ele : lights) {
       JsonObject position = ele.getAsJsonObject().getAsJsonObject("position");
-      Token lightToken = new Token("light-" + lightNo, lightSourceAsset.getId());
-      lightToken.setLayer(Layer.OBJECT);
-      lightToken.setVisible(false);
-      lightToken.setSnapToGrid(false);
-      lightToken.setSnapToScale(false);
-      lightToken.setWidth(LIGHT_WIDTH);
-      lightToken.setHeight(LIGHT_HEIGHT);
+      if (position.has("x") && position.has("y")) {
+        Token lightToken = new Token("light-" + lightNo, lightSourceAsset.getId());
+        lightToken.setLayer(Layer.OBJECT);
+        lightToken.setVisible(false);
+        lightToken.setSnapToGrid(false);
+        lightToken.setSnapToScale(false);
+        lightToken.setWidth(LIGHT_WIDTH);
+        lightToken.setHeight(LIGHT_HEIGHT);
 
-      lightToken.setX((int) (position.get("x").getAsDouble() * pixelsPerCell) - LIGHT_WIDTH / 2);
-      lightToken.setY((int) (position.get("y").getAsDouble() * pixelsPerCell) - LIGHT_HEIGHT / 2);
-      zone.putToken(lightToken);
-      lightNo++;
+        lightToken.setX((int) (position.get("x").getAsDouble() * pixelsPerCell) - LIGHT_WIDTH / 2);
+        lightToken.setY((int) (position.get("y").getAsDouble() * pixelsPerCell) - LIGHT_HEIGHT / 2);
+        zone.putToken(lightToken);
+        lightNo++;
+      } else {
+        ignoredLights = true;
+      }
+    }
+
+    if (ignoredLights) {
+      MapTool.showInformation("dungeondraft.import.lightsIgnored");
     }
   }
 
