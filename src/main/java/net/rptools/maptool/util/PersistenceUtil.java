@@ -15,8 +15,6 @@
 package net.rptools.maptool.util;
 
 import com.caucho.hessian.io.HessianInput;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.thoughtworks.xstream.converters.ConversionException;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -40,7 +38,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
@@ -65,14 +62,12 @@ import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.notebook.NoteBook;
-import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
-import net.rptools.maptool.model.notebook.persistence.NoteBookEntryPersistenceUtilFactory;
+import net.rptools.maptool.model.notebook.NoteBookManager;
+import net.rptools.maptool.model.notebook.persistence.NoteBookPersistenceUtil;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
 import net.rptools.maptool.model.transform.campaign.TokenPropertyMapTransform;
-import org.apache.commons.collections.functors.NOPTransformer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -88,13 +83,10 @@ public class PersistenceUtil {
   private static final String ASSET_DIR = "assets/"; // $NON-NLS-1$
   public static final String HERO_LAB = "herolab"; // $NON-NLS-1$
 
-  /** The directory that holds the notebooks. */
-  private static final String NOTE_BOOKS = "notebooks";
 
-  /** The file which holds the information about the notebook. */
-  private static final String NOTE_BOOK_INFO_FILE = "notebook-info.json";
 
   private static final String CAMPAIGN_VERSION = "1.6.0";
+
 
   // Please add a single note regarding why the campaign version number has been updated:
   // 1.3.70 ownerOnly added to model.Light (not backward compatible)
@@ -320,11 +312,9 @@ public class PersistenceUtil {
           pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
         }
 
-        if (campaignVersion == null || campaignVersion.startsWith("1.6")) {
+        if (campaignVersion == null || campaignVersion.startsWith("1.7")) {
           saveTimer.start("Save NoteBooks");
-          for (NoteBook noteBook : persistedCampaign.campaign.getNoteBookManager().getNoteBooks()) {
-            saveNoteBook(pakFile, noteBook);
-          }
+          new NoteBookPersistenceUtil().saveCampaignNoteBooks(pakFile, persistedCampaign.campaign.getNoteBookManager());
           saveTimer.stop("Save NoteBooks");
         }
 
@@ -392,57 +382,6 @@ public class PersistenceUtil {
       log.debug(saveTimer);
     }
   }
-
-  /**
-   * Persists the contents of a {@link NoteBook}.
-   *
-   * @param packedFile The {@link PackedFile} to write the information to.
-   * @param notebook The {@link NoteBook} to save the information.
-   * @throws IOException if an error occurs writing a file.
-   */
-  private static void saveNoteBook(PackedFile packedFile, NoteBook notebook) throws IOException {
-    var nbePersistenceUtil = new NoteBookEntryPersistenceUtilFactory();
-    String noteBookDir = NOTE_BOOKS + "/" + notebook.getVersionedNameSpace();
-    saveNoteBookInfo(packedFile, noteBookDir, notebook);
-
-    for (var entry : notebook.getEntries()) {
-      packedFile.putFile(
-          noteBookDir + "/" + entry.getId(),
-          nbePersistenceUtil.toJson(entry).toString().getBytes());
-
-      for (MD5Key md5Key : entry.getAssetKeys()) {
-        Asset asset = AssetManager.getAsset(md5Key);
-        if (asset == null) {
-          log.error("NoteBook: AssetId " + md5Key + " not found while saving?!");
-          continue;
-        }
-        packedFile.putFile(ASSET_DIR + md5Key + "." + asset.getExtension(), asset.getData());
-        packedFile.putFile(ASSET_DIR + md5Key + "", asset);
-      }
-    }
-  }
-
-  /**
-   * Saves the note book information to the {@link PackedFile}.
-   * @param packedFile The {@link PackedFile} to save the information ahou tthe note book to.
-   * @param noteBookDir the directory that the note book will be saved into.
-   * @param noteBook the note book being saved.
-   * @throws IOException if an error occurs while writing the file.
-   */
-  private static void saveNoteBookInfo(PackedFile packedFile, String noteBookDir, NoteBook noteBook)
-      throws IOException {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("id", noteBook.getId().toString());
-    jsonObject.addProperty("name", noteBook.getName());
-    jsonObject.addProperty("description", noteBook.getDescription());
-    jsonObject.addProperty("version", noteBook.getVersion());
-    jsonObject.addProperty("namespace", noteBook.getNamespace());
-    jsonObject.addProperty("internal", noteBook.isInternal());
-
-    packedFile.putFile(noteBookDir + "/" + NOTE_BOOK_INFO_FILE, jsonObject.toString().getBytes());
-  }
-
-
 
 
   /*
@@ -513,19 +452,8 @@ public class PersistenceUtil {
           zone.optimize();
         }
 
-        /* TODO: CDW:
-        NoteBook noteBook = persistedCampaign.campaign.getNoteBookManager();
-
-        loadNoteBook(pakFile, noteBook);
-         */
-
-        // for (Entry<String, Map<GUID, LightSource>> entry :
-        // persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
-        // for (Entry<GUID, LightSource> entryLs : entry.getValue().entrySet()) {
-        // System.out.println(entryLs.getValue().getName() + " :: " + entryLs.getValue().getType() +
-        // " :: " + entryLs.getValue().getLumens());
-        // }
-        // }
+        NoteBookManager noteBookManager = persistedCampaign.campaign.getNoteBookManager();
+        new NoteBookPersistenceUtil().loadCampaignNoteBooks(pakFile, noteBookManager);
 
         return persistedCampaign;
       }
@@ -551,27 +479,6 @@ public class PersistenceUtil {
     persistedCampaign = loadLegacyCampaign(campaignFile);
     if (persistedCampaign == null) MapTool.showWarning("PersistenceUtil.warn.campaignNotLoaded");
     return persistedCampaign;
-  }
-
-  private static void loadNoteBook(PackedFile packedFile, NoteBook noteBook) throws IOException {
-    var nbePersistenceUtil = new NoteBookEntryPersistenceUtilFactory();
-
-    List<String> noteFiles =
-        packedFile.getPaths().stream()
-            .filter(p -> p.startsWith("notebook/"))
-            .collect(Collectors.toList());
-    Set<MD5Key> allAssetIds = new HashSet<>();
-
-    Gson gson = new Gson();
-    for (var noteFile : noteFiles) {
-      String asString = IOUtils.toString(packedFile.getFileAsReader(noteFile));
-      JsonObject jsonObject = gson.toJsonTree(asString).getAsJsonObject();
-      NoteBookEntry entry = nbePersistenceUtil.fromJson(jsonObject);
-      noteBook.putEntry(entry); // TODO: CDW:
-      allAssetIds.addAll(entry.getAssetKeys());
-    }
-
-    loadAssets(allAssetIds, packedFile);
   }
 
   public static PersistedCampaign loadLegacyCampaign(File campaignFile) {
@@ -711,7 +618,19 @@ public class PersistenceUtil {
     return token;
   }
 
-  private static void loadAssets(Collection<MD5Key> assetIds, PackedFile pakFile)
+  public static void putAssets(Collection<Asset> assets, PackedFile packedFile)
+      throws IOException {
+    // Special handling of assets: XML file to describe the Asset, but binary file for the image
+    // data
+    packedFile.getXStream().processAnnotations(Asset.class);
+
+    for (Asset asset : assets) {
+      packedFile.putFile(ASSET_DIR + asset.getMD5Key() + "." + asset.getExtension(), asset.getData());
+      packedFile.putFile(ASSET_DIR + asset.getName() + "", asset);
+    }
+  }
+
+  public static void loadAssets(Collection<MD5Key> assetIds, PackedFile pakFile)
       throws IOException {
     // Special handling of assets: XML file to describe the Asset, but binary file for the image
     // data
@@ -799,10 +718,8 @@ public class PersistenceUtil {
 
   private static void saveAssets(Collection<MD5Key> assetIds, PackedFile pakFile)
       throws IOException {
-    // Special handling of assets: XML file to describe the Asset, but binary file for the image
-    // data
-    pakFile.getXStream().processAnnotations(Asset.class);
 
+    Set<Asset> allAssets = new HashSet<>();
     for (MD5Key assetId : assetIds) {
       if (assetId == null) continue;
 
@@ -815,14 +732,10 @@ public class PersistenceUtil {
         continue;
       }
 
-      String extension = asset.getExtension();
-      byte[] assetData = asset.getData();
-      // System.out.println("Saving AssetId " + assetId + "." + extension + " with size of " +
-      // assetData.length);
-
-      pakFile.putFile(ASSET_DIR + assetId + "." + extension, assetData);
-      pakFile.putFile(ASSET_DIR + assetId + "", asset); // Does not write the image
+      allAssets.add(asset);
     }
+
+    putAssets(allAssets, pakFile);
   }
 
   private static void clearAssets(PackedFile pakFile) throws IOException {

@@ -80,7 +80,18 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
 
   /** Meta-tag that blocks external file access. */
   private static final String SCRIPT_BLOCK_EXT =
-      "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src asset:; style-src 'unsafe-inline'; script-src 'unsafe-inline' 'unsafe-eval'\">\n";
+      "<meta http-equiv=\"Content-Security-Policy\" "
+          + "content=\" "
+          + " default-src asset: "
+          + " https://code.jquery.com "                 // JQuery CDN
+          + " https://cdn.jsdelivr.net "                // JSDelivr CDN
+          + " https://stackpath.bootstrapcdn.com "      // Bootstrap CDN
+          + " https://unpkg.com "                       // unpkg CDN
+          + " https://cdnjs.cloudflare.com "            // CloudFlare JS CDN
+          + " https://ajax.googleapis.com "             // Google CDN
+          + " 'unsafe-inline' 'unsafe-eval' ; "
+         + "\">\n";
+
 
   /** /** The default rule for the body tag. */
   private static final String CSS_RULE_BODY =
