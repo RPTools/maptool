@@ -82,6 +82,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
   private Directory dir;
   private static String filter;
   private boolean global;
+  private boolean extractRenderedPages;
   private List<File> fileList = new ArrayList<File>();
   private List<Directory> subDirList;
 
@@ -375,6 +376,10 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     }
   }
 
+  public void setExtractRenderedPages(boolean extractRenderedPages) {
+    this.extractRenderedPages = extractRenderedPages;
+  }
+
   private class PdfExtractor extends SwingWorker<Void, Boolean> {
     private ExtractImagesFromPDF extractor;
     private final int pageCount;
@@ -387,7 +392,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       this.forceRescan = forceRescan;
 
       try {
-        extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan);
+        extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan, extractRenderedPages);
 
       } catch (IOException e) {
         // TODO Auto-generated catch block
@@ -448,7 +453,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     public ExtractImagesTask(int pageNumber, int pageCount, Directory dir, boolean forceRescan)
         throws IOException {
       this.pageNumber = pageNumber;
-      this.extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan);
+      this.extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan, extractRenderedPages);
     }
 
     @Override
