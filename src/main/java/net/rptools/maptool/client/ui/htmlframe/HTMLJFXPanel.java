@@ -83,15 +83,14 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       "<meta http-equiv=\"Content-Security-Policy\" "
           + "content=\" "
           + " default-src asset: "
-          + " https://code.jquery.com "                 // JQuery CDN
-          + " https://cdn.jsdelivr.net "                // JSDelivr CDN
-          + " https://stackpath.bootstrapcdn.com "      // Bootstrap CDN
-          + " https://unpkg.com "                       // unpkg CDN
-          + " https://cdnjs.cloudflare.com "            // CloudFlare JS CDN
-          + " https://ajax.googleapis.com "             // Google CDN
+          + " https://code.jquery.com " // JQuery CDN
+          + " https://cdn.jsdelivr.net " // JSDelivr CDN
+          + " https://stackpath.bootstrapcdn.com " // Bootstrap CDN
+          + " https://unpkg.com " // unpkg CDN
+          + " https://cdnjs.cloudflare.com " // CloudFlare JS CDN
+          + " https://ajax.googleapis.com " // Google CDN
           + " 'unsafe-inline' 'unsafe-eval' ; "
-         + "\">\n";
-
+          + "\">\n";
 
   /** /** The default rule for the body tag. */
   private static final String CSS_RULE_BODY =

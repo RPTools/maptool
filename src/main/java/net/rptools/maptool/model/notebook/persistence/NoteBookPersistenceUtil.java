@@ -1,3 +1,17 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.model.notebook.persistence;
 
 import com.google.gson.Gson;
@@ -21,14 +35,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Utility class used for persistence of {@link NoteBook}s.
- */
+/** Utility class used for persistence of {@link NoteBook}s. */
 public class NoteBookPersistenceUtil {
 
   /** Logger used for logging information. */
   private static final Logger log = LogManager.getLogger(PersistenceUtil.class);
-
 
   /** The directory that holds the notebooks. */
   private static final String NOTE_BOOKS = "notebooks";
@@ -36,9 +47,7 @@ public class NoteBookPersistenceUtil {
   /** The file which holds the information about the notebook. */
   private static final String NOTE_BOOK_INFO_FILE = "notebook-info.json";
 
-  /**
-   * Utility class used for persisting {@link NoteBook} information.
-   */
+  /** Utility class used for persisting {@link NoteBook} information. */
   private static final class NoteBookInfo {
 
     /** The id of the {@link NoteBook}. */
@@ -62,6 +71,7 @@ public class NoteBookPersistenceUtil {
 
   /**
    * Saves non internal {@link NoteBook}s to the {@link PackedFile} for the campaign.
+   *
    * @param packedFile the {@link PackedFile} for the campaign.
    * @param noteBookManager the {@link NoteBookManager} to load the {@link NoteBook}s into.
    * @throws IOException if an error occurs loading the {@link NoteBook}s.
@@ -75,7 +85,6 @@ public class NoteBookPersistenceUtil {
     }
   }
 
-
   /**
    * Loads the {@link NoteBook}s in the {@link PackedFile}.
    *
@@ -86,8 +95,10 @@ public class NoteBookPersistenceUtil {
   public void loadCampaignNoteBooks(PackedFile pakFile, NoteBookManager noteBookManager)
       throws IOException {
     HashMap<String, Set<String>> noteBookFiles = new HashMap<>();
-    Set<String> files = pakFile.getPaths().stream().filter(p -> p.startsWith(NOTE_BOOKS))
-        .collect(Collectors.toSet());
+    Set<String> files =
+        pakFile.getPaths().stream()
+            .filter(p -> p.startsWith(NOTE_BOOKS))
+            .collect(Collectors.toSet());
 
     for (String fname : files) {
       String[] parts = fname.split("/", 3);
@@ -102,19 +113,22 @@ public class NoteBookPersistenceUtil {
 
   /**
    * Loads a {@link NoteBook} and its contents from a {@link PackedFile}.
+   *
    * @param packedFile The {@link PackedFile} to load the contents of.
    * @param noteBookDir The directory in the {@link PackedFile} to load the contents from.
    * @param noteBookFiles The files in the {@link PackedFile} containing the {@link NoteBookEntry}s.
    * @return A {@link NoteBook} loaded from the {@link PackedFile}.
    * @throws IOException if an error occurs loading the {@link NoteBook}.
    */
-  private NoteBook loadNoteBook(PackedFile packedFile, String noteBookDir, Set<String> noteBookFiles) throws IOException {
+  private NoteBook loadNoteBook(
+      PackedFile packedFile, String noteBookDir, Set<String> noteBookFiles) throws IOException {
     var nbePersistenceUtil = new NoteBookEntryPersistenceUtilFactory();
 
     Set<MD5Key> allAssetIds = new HashSet<>();
 
     NoteBookInfo nbi = loadNoteBookInfo(packedFile, noteBookDir);
-    NoteBook noteBook = NoteBook.createNoteBook(nbi.id, nbi.name, nbi.description, nbi.version, nbi.namespace);
+    NoteBook noteBook =
+        NoteBook.createNoteBook(nbi.id, nbi.name, nbi.description, nbi.version, nbi.namespace);
 
     Gson gson = new Gson();
     for (var noteFile : noteBookFiles) {
@@ -165,6 +179,7 @@ public class NoteBookPersistenceUtil {
 
   /**
    * Saves the note book information to the {@link PackedFile}.
+   *
    * @param packedFile The {@link PackedFile} to save the information ahou tthe note book to.
    * @param noteBookDir the directory that the note book will be saved into.
    * @param noteBook the note book being saved.
@@ -188,6 +203,7 @@ public class NoteBookPersistenceUtil {
 
   /**
    * Returns the {@link NoteBookInfo} stored in the {@link PackedFile}.
+   *
    * @param packedFile The {@link PackedFile} to save the information ahou tthe note book to.
    * @param noteBookDir the directory that the note book will be saved into.
    * @return a {@link NoteBookInfo} created from the stored information.
@@ -199,8 +215,5 @@ public class NoteBookPersistenceUtil {
     Gson gson = new Gson();
 
     return gson.fromJson(noteBookDir + "/" + NOTE_BOOK_INFO_FILE, NoteBookInfo.class);
-
   }
-
-
 }

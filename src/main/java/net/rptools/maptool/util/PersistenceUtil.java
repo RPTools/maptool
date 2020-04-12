@@ -83,10 +83,7 @@ public class PersistenceUtil {
   private static final String ASSET_DIR = "assets/"; // $NON-NLS-1$
   public static final String HERO_LAB = "herolab"; // $NON-NLS-1$
 
-
-
   private static final String CAMPAIGN_VERSION = "1.6.0";
-
 
   // Please add a single note regarding why the campaign version number has been updated:
   // 1.3.70 ownerOnly added to model.Light (not backward compatible)
@@ -314,7 +311,8 @@ public class PersistenceUtil {
 
         if (campaignVersion == null || campaignVersion.startsWith("1.7")) {
           saveTimer.start("Save NoteBooks");
-          new NoteBookPersistenceUtil().saveCampaignNoteBooks(pakFile, persistedCampaign.campaign.getNoteBookManager());
+          new NoteBookPersistenceUtil()
+              .saveCampaignNoteBooks(pakFile, persistedCampaign.campaign.getNoteBookManager());
           saveTimer.stop("Save NoteBooks");
         }
 
@@ -382,7 +380,6 @@ public class PersistenceUtil {
       log.debug(saveTimer);
     }
   }
-
 
   /*
    * A public function because I think it should be called when a campaign is opened as well so if it is opened then closed without saving, there is still a preview created; however, the rendering
@@ -618,14 +615,14 @@ public class PersistenceUtil {
     return token;
   }
 
-  public static void putAssets(Collection<Asset> assets, PackedFile packedFile)
-      throws IOException {
+  public static void putAssets(Collection<Asset> assets, PackedFile packedFile) throws IOException {
     // Special handling of assets: XML file to describe the Asset, but binary file for the image
     // data
     packedFile.getXStream().processAnnotations(Asset.class);
 
     for (Asset asset : assets) {
-      packedFile.putFile(ASSET_DIR + asset.getMD5Key() + "." + asset.getExtension(), asset.getData());
+      packedFile.putFile(
+          ASSET_DIR + asset.getMD5Key() + "." + asset.getExtension(), asset.getData());
       packedFile.putFile(ASSET_DIR + asset.getName() + "", asset);
     }
   }
