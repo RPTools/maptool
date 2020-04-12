@@ -1824,7 +1824,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     @Override
     protected void done() {
       getTokenVblPanel().setInProgress(false);
-      grabFocus();
+      requestFocusInWindow();
       getTokenVblPanel().requestFocus();
     }
   }

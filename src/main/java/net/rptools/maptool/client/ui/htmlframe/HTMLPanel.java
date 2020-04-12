@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.ui.htmlframe;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -24,7 +23,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
-import net.rptools.maptool.client.swing.MessagePanelEditorKit;
 
 /** Represents the JPanel holding the HTML pane. */
 public class HTMLPanel extends JPanel implements HTMLPanelInterface {
@@ -69,25 +67,13 @@ public class HTMLPanel extends JPanel implements HTMLPanelInterface {
    */
   @Override
   public void updateContents(final String html) {
-    EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            ((MessagePanelEditorKit) pane.getEditorKit()).flush();
-            pane.setText(html);
-            pane.setCaretPosition(0);
-          }
-        });
+    pane.updateContents(html);
   }
 
   /** Flushes any caching for the panel. */
   @Override
   public void flush() {
-    EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            ((MessagePanelEditorKit) pane.getEditorKit()).flush();
-          }
-        });
+    pane.flush();
   }
 
   /**
