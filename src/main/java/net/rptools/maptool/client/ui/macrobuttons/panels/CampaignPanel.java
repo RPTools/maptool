@@ -41,6 +41,11 @@ public class CampaignPanel extends AbstractMacroPanel {
     init();
   }
 
+  @Override
+  protected List<MacroButtonProperties> getMacroButtonProperties() {
+    return MapTool.getCampaign().getMacroButtonPropertiesArray();
+  }
+
   public static void deleteButtonGroup(String macroGroup) {
     AbstractButtonGroup.clearHotkeys(MapTool.getFrame().getCampaignPanel(), macroGroup);
     List<MacroButtonProperties> campProps = MapTool.getCampaign().getMacroButtonPropertiesArray();
