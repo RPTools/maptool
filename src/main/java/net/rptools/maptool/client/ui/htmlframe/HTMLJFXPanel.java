@@ -29,7 +29,7 @@ import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.input.KeyCode;
+import javafx.scene.input.*;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.*;
 import javafx.stage.Stage;
@@ -58,6 +58,9 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   /** The action listeners for the container. */
   private ActionListener actionListeners;
 
+  /** The WebView that displays HTML5. */
+  public WebView webView;
+
   /** The WebEngine of the WebView. */
   private WebEngine webEngine;
 
@@ -82,13 +85,13 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   private static final String SCRIPT_BLOCK_EXT =
       "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src asset:; style-src 'unsafe-inline'; script-src 'unsafe-inline' 'unsafe-eval'\">\n";
 
-  /** /** The default rule for the body tag. */
-  private static final String CSS_RULE_BODY =
+  /** The default rule for the body tag. */
+  static final String CSS_BODY =
       "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8;}";
   /** The default rule for the div tag. */
-  private static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
+  static final String CSS_DIV = "div {margin-bottom: 5px}";
   /** The default rule for the span tag. */
-  private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
+  static final String CSS_SPAN = "span.roll {background:#efefef}";
 
   /** JS that scroll the view to an element from its Id. */
   private static final String SCRIPT_ANCHOR =
@@ -108,34 +111,46 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
    * @param container The container that will hold the HTML panel.
    */
   HTMLJFXPanel(final HTMLPanelContainer container) {
-    Platform.runLater(
-        () -> {
-          WebView webView = new WebView();
-          webView.setContextMenuEnabled(false); // disable "reload' right click menu.
-          webEngine = webView.getEngine();
-          webEngine.getLoadWorker().stateProperty().addListener(this::changed);
+    Platform.runLater(() -> setupScene(container));
+  }
 
-          // For alert / confirm / prompt JS events.
-          webEngine.setOnAlert(HTMLJFXPanel::showAlert);
-          webEngine.setConfirmHandler(HTMLJFXPanel::showConfirm);
-          webEngine.setPromptHandler(HTMLJFXPanel::showPrompt);
-          webEngine.setCreatePopupHandler(HTMLJFXPanel::showPopup);
-          webEngine.setOnError(HTMLJFXPanel::showError);
+  void setupScene(final HTMLPanelContainer container) {
+    webView = new WebView();
+    webView.setContextMenuEnabled(false); // disable "reload' right click menu.
+    webEngine = webView.getEngine();
+    webEngine.getLoadWorker().stateProperty().addListener(this::changed);
 
-          StackPane root = new StackPane(); // VBox would create empty space at bottom on resize
-          root.getChildren().add(webView);
-          Scene scene = new Scene(root);
+    // For alert / confirm / prompt JS events.
+    webEngine.setOnAlert(HTMLJFXPanel::showAlert);
+    webEngine.setConfirmHandler(HTMLJFXPanel::showConfirm);
+    webEngine.setPromptHandler(HTMLJFXPanel::showPrompt);
+    webEngine.setCreatePopupHandler(HTMLJFXPanel::showPopup);
+    webEngine.setOnError(HTMLJFXPanel::showError);
 
-          // ESCAPE closes the window.
-          if (container != null)
-            scene.setOnKeyPressed(
-                e -> {
-                  if (e.getCode() == KeyCode.ESCAPE) {
-                    SwingUtilities.invokeLater(container::closeRequest);
-                  }
-                });
-          this.setScene(scene); // set the scene on the JFXPanel
-        });
+    StackPane root = new StackPane(); // VBox would create empty space at bottom on resize
+    root.setStyle("-fx-background-color: rgba(0, 0, 0, 0);"); // set stackpane transparent
+
+    webView.setPickOnBounds(false);
+    root.setPickOnBounds(false);
+
+    root.getChildren().add(webView);
+    Scene scene = new Scene(root);
+    scene.setFill(javafx.scene.paint.Color.TRANSPARENT); // set scene transparent
+
+    // ESCAPE closes the window.
+    if (container != null) {
+      scene.setOnKeyPressed(
+          e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+              SwingUtilities.invokeLater(container::closeRequest);
+            }
+          });
+    }
+    this.setScene(scene); // set the scene on the JFXPanel
+  }
+
+  public WebEngine getWebEngine() {
+    return webEngine;
   }
 
   @Override
@@ -241,9 +256,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     }
   }
 
-  /** @return the CSS rule for the body tag. */
-  private String getRuleBody() {
-    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
+  String getCSSRule() {
+    return String.format(CSS_BODY, AppPreferences.getFontSize()) + CSS_SPAN + CSS_DIV;
   }
 
   /**
@@ -258,88 +272,90 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       ObservableValue<? extends Worker.State> observable,
       Worker.State oldState,
       Worker.State newState) {
-
     if (newState == Worker.State.SUCCEEDED) {
-      // Redirect console.log to the JavaBridge
-      JSObject window = (JSObject) webEngine.executeScript("window");
-      window.setMember(JavaBridge.NAME, bridge);
-      webEngine.executeScript(SCRIPT_REPLACE_LOG);
+      handlePage();
+    }
+  }
 
-      // Replace the broken javascript form.submit method
-      webEngine.executeScript(SCRIPT_REPLACE_SUBMIT);
+  void handlePage() {
+    // Redirect console.log to the JavaBridge
+    JSObject window = (JSObject) webEngine.executeScript("window");
+    window.setMember(JavaBridge.NAME, bridge);
+    webEngine.executeScript(SCRIPT_REPLACE_LOG);
 
-      // Event listener for the href macro link clicks.
-      EventListener listenerA = this::fixHref;
-      // Event listener for form submission.
-      EventListener listenerSubmit = this::getDataAndSubmit;
+    // Replace the broken javascript form.submit method
+    webEngine.executeScript(SCRIPT_REPLACE_SUBMIT);
 
-      Document doc = webEngine.getDocument();
-      NodeList nodeList;
+    // Event listener for the href macro link clicks.
+    EventListener listenerA = this::fixHref;
+    // Event listener for form submission.
+    EventListener listenerSubmit = this::getDataAndSubmit;
 
-      // Add default CSS as first element of the head tag
-      String strCSS = getRuleBody() + CSS_RULE_DIV + CSS_RULE_SPAN;
-      Element styleNode = doc.createElement("style");
-      Text styleContent = doc.createTextNode(strCSS);
-      styleNode.appendChild(styleContent);
-      Node head = doc.getDocumentElement().getElementsByTagName("head").item(0);
-      Node nodeCSS = head.insertBefore(styleNode, head.getFirstChild());
+    Document doc = webEngine.getDocument();
+    NodeList nodeList;
 
-      // Deal with CSS and events of <link>.
-      nodeList = doc.getElementsByTagName("link");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        fixLink(nodeList.item(i).getAttributes(), nodeCSS, doc);
-      }
+    // Add default CSS as first element of the head tag
+    Element styleNode = doc.createElement("style");
+    Text styleContent = doc.createTextNode(getCSSRule());
+    styleNode.appendChild(styleContent);
+    Node head = doc.getDocumentElement().getElementsByTagName("head").item(0);
+    Node nodeCSS = head.insertBefore(styleNode, head.getFirstChild());
 
-      // Set the title if using <title>.
-      nodeList = doc.getElementsByTagName("title");
-      if (nodeList.getLength() > 0) {
-        doChangeTitle(nodeList.item(0).getTextContent());
-      }
+    // Deal with CSS and events of <link>.
+    nodeList = doc.getElementsByTagName("link");
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      fixLink(nodeList.item(i).getAttributes(), nodeCSS, doc);
+    }
 
-      // Handle the <meta> tags.
-      nodeList = doc.getElementsByTagName("meta");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        handleMetaTag((Element) nodeList.item(i));
-      }
+    // Set the title if using <title>.
+    nodeList = doc.getElementsByTagName("title");
+    if (nodeList.getLength() > 0) {
+      doChangeTitle(nodeList.item(0).getTextContent());
+    }
 
-      // Add event handlers for <a> hyperlinks.
-      nodeList = doc.getElementsByTagName("a");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        EventTarget node = (EventTarget) nodeList.item(i);
-        node.addEventListener("click", listenerA, false);
-      }
+    // Handle the <meta> tags.
+    nodeList = doc.getElementsByTagName("meta");
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      handleMetaTag((Element) nodeList.item(i));
+    }
 
-      // Add event handlers for hyperlinks for maps.
-      nodeList = doc.getElementsByTagName("area");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        EventTarget node = (EventTarget) nodeList.item(i);
-        node.addEventListener("click", listenerA, false);
-      }
+    // Add event handlers for <a> hyperlinks.
+    nodeList = doc.getElementsByTagName("a");
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      EventTarget node = (EventTarget) nodeList.item(i);
+      node.addEventListener("click", listenerA, false);
+    }
 
-      // Set the "submit" handler to get the data on submission not based on buttons
-      nodeList = doc.getElementsByTagName("form");
-      for (int i = 0; i < nodeList.getLength(); i++) {
+    // Add event handlers for hyperlinks for maps.
+    nodeList = doc.getElementsByTagName("area");
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      EventTarget node = (EventTarget) nodeList.item(i);
+      node.addEventListener("click", listenerA, false);
+    }
+
+    // Set the "submit" handler to get the data on submission not based on buttons
+    nodeList = doc.getElementsByTagName("form");
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      EventTarget target = (EventTarget) nodeList.item(i);
+      target.addEventListener("submit", listenerSubmit, false);
+    }
+
+    // Set the "submit" handler to get the data on submission based on input
+    nodeList = doc.getElementsByTagName("input");
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      String type = ((Element) nodeList.item(i)).getAttribute("type");
+      if ("image".equals(type) || "submit".equals(type)) {
         EventTarget target = (EventTarget) nodeList.item(i);
-        target.addEventListener("submit", listenerSubmit, false);
+        target.addEventListener("click", listenerSubmit, false);
       }
-
-      // Set the "submit" handler to get the data on submission based on input
-      nodeList = doc.getElementsByTagName("input");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        String type = ((Element) nodeList.item(i)).getAttribute("type");
-        if ("image".equals(type) || "submit".equals(type)) {
-          EventTarget target = (EventTarget) nodeList.item(i);
-          target.addEventListener("click", listenerSubmit, false);
-        }
-      }
-      // Set the "submit" handler to get the data on submission based on button
-      nodeList = doc.getElementsByTagName("button");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        String type = ((Element) nodeList.item(i)).getAttribute("type");
-        if (type == null || "submit".equals(type)) {
-          EventTarget target = (EventTarget) nodeList.item(i);
-          target.addEventListener("click", listenerSubmit, false);
-        }
+    }
+    // Set the "submit" handler to get the data on submission based on button
+    nodeList = doc.getElementsByTagName("button");
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      String type = ((Element) nodeList.item(i)).getAttribute("type");
+      if (type == null || "submit".equals(type)) {
+        EventTarget target = (EventTarget) nodeList.item(i);
+        target.addEventListener("click", listenerSubmit, false);
       }
     }
   }

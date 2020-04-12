@@ -144,18 +144,21 @@ public class HTMLFrameFactory {
   public static void selectedListChanged() {
     HTMLFrame.doSelectedChanged();
     HTMLDialog.doSelectedChanged();
+    MapTool.getFrame().getHtmlOverlay().doSelectedChanged();
   }
 
   /** A new token has been impersonated or cleared. */
   public static void impersonateToken() {
     HTMLFrame.doImpersonatedChanged();
     HTMLDialog.doImpersonatedChanged();
+    MapTool.getFrame().getHtmlOverlay().doImpersonatedChanged();
   }
 
   /** One of the tokens has changed. */
   public static void tokenChanged(Token token) {
     HTMLFrame.doTokenChanged(token);
     HTMLDialog.doTokenChanged(token);
+    MapTool.getFrame().getHtmlOverlay().doTokenChanged(token);
   }
 
   public static class Listener implements ModelChangeListener, AppEventListener {
