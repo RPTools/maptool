@@ -90,13 +90,18 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   /** The default rule for the span tag. */
   private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
 
+  /** JS that scroll the view to an element from its Id. */
+  private static final String SCRIPT_ANCHOR =
+      "element = document.getElementById('%s'); if(element != null) {element.scrollIntoView();}";
+
   /** JS that directs the console.log function to the Java bridge function "log". */
   private static final String SCRIPT_REPLACE_LOG =
       "console.log = function(message){" + JavaBridge.NAME + ".log(message);};";
 
-  /** JS that scroll the view to an element from its Id. */
-  private static final String SCRIPT_ANCHOR =
-      "element = document.getElementById('%s'); if(element != null) {element.scrollIntoView();}";
+  /** JS that replace the form.submit() in JS by a function that works. */
+  private static final String SCRIPT_REPLACE_SUBMIT =
+      "HTMLFormElement.prototype.submit = function(){this.dispatchEvent(new Event('submit'));};";
+
   /**
    * Creates a new HTMLJFXPanel.
    *
@@ -230,9 +235,13 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
    * @param event the error event
    */
   private static void showError(WebErrorEvent event) {
-    MapTool.addMessage(TextMessage.me(null, event.getMessage()));
+    // Hide error "User data directory is already in use", directory not used anyway
+    if (event.getEventType() != WebErrorEvent.USER_DATA_DIRECTORY_ALREADY_IN_USE) {
+      MapTool.addMessage(TextMessage.me(null, event.getMessage()));
+    }
   }
 
+  /** @return the CSS rule for the body tag. */
   private String getRuleBody() {
     return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
   }
@@ -255,6 +264,9 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       JSObject window = (JSObject) webEngine.executeScript("window");
       window.setMember(JavaBridge.NAME, bridge);
       webEngine.executeScript(SCRIPT_REPLACE_LOG);
+
+      // Replace the broken javascript form.submit method
+      webEngine.executeScript(SCRIPT_REPLACE_SUBMIT);
 
       // Event listener for the href macro link clicks.
       EventListener listenerA = this::fixHref;
@@ -324,7 +336,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       nodeList = doc.getElementsByTagName("button");
       for (int i = 0; i < nodeList.getLength(); i++) {
         String type = ((Element) nodeList.item(i)).getAttribute("type");
-        if ("submit".equals(type)) {
+        if (type == null || "submit".equals(type)) {
           EventTarget target = (EventTarget) nodeList.item(i);
           target.addEventListener("click", listenerSubmit, false);
         }
@@ -456,6 +468,7 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
    * @param event the event of the form submission
    */
   private void getDataAndSubmit(org.w3c.dom.events.Event event) {
+    boolean formnovalidate = false; // if true, the form validation is bypassed
     HTMLFormElement form = null;
     Element target = (Element) event.getCurrentTarget();
     JsonObject jObj = new JsonObject();
@@ -466,13 +479,33 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       HTMLInputElement input = (HTMLInputElement) target;
       form = input.getForm();
       addToObject(jObj, input.getName(), input.getValue());
+      formnovalidate = input.getAttribute("formnovalidate") != null;
     } else if (target instanceof HTMLButtonElement) {
       HTMLButtonElement button = (HTMLButtonElement) target;
       form = button.getForm();
       addToObject(jObj, button.getName(), button.getValue());
+      formnovalidate = button.getAttribute("formnovalidate") != null;
     }
     if (form == null) return;
 
+    // Check for non-macrolinktext action
+    String action = form.getAction();
+    if (action == null || action.startsWith("javascript:")) {
+      return;
+    }
+
+    // Check for validity
+    boolean novalidate = form.getAttribute("novalidate") != null;
+    if (!formnovalidate && !novalidate) {
+      JSObject jsObject = (JSObject) form;
+      if (!(boolean) jsObject.call("checkValidity")) {
+        return;
+      }
+    }
+
+    event.preventDefault(); // prevent duplicated form submit
+
+    // Gets the data from the form
     final HTMLCollection collection = form.getElements();
     for (int i = 0; i < collection.getLength(); i++) {
       String name, value;
@@ -501,11 +534,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       } else continue; // skip elements not containing data
       addToObject(jObj, name, value);
     }
-    String action = form.getAction();
     String data = URLEncoder.encode(jObj.toString(), StandardCharsets.UTF_8);
-
     doSubmit("json", action, data);
-    event.preventDefault(); // prevent duplicated form submit
   }
 
   /**

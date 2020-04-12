@@ -181,30 +181,29 @@ public class AppActions {
             if (AppUtil.playerOwns(t) && t.isVisible() && renderer.getZone().isTokenVisible(t))
               myPlayers.add(t);
           }
-          if (renderer != null) {
-            if (myPlayers.size() > 0) {
-              // We want to wrap round the list of player tokens.
-              // But this process only selects 1 player token.
-              if (renderer.getSelectedTokensList().size() > 0) {
-                Token selt = renderer.getSelectedTokensList().get(0);
-                if (myPlayers.contains(selt)) chosenOne = selt;
-              }
-              if (chosenOne != null) {
-                for (int i = 0; i < myPlayers.size(); i++) {
-                  if (myPlayers.get(i).equals(chosenOne)) {
-                    if (i < myPlayers.size() - 1) chosenOne = myPlayers.get(i + 1);
-                    else chosenOne = myPlayers.get(0);
-                    break;
-                  }
+          if (myPlayers.size() > 0) {
+            // We want to wrap round the list of player tokens.
+            // But this process only selects 1 player token.
+            if (renderer.getSelectedTokensList().size() > 0) {
+              Token selt = renderer.getSelectedTokensList().get(0);
+              if (myPlayers.contains(selt)) chosenOne = selt;
+            }
+            if (chosenOne != null) {
+              for (int i = 0; i < myPlayers.size(); i++) {
+                if (myPlayers.get(i).equals(chosenOne)) {
+                  if (i < myPlayers.size() - 1) chosenOne = myPlayers.get(i + 1);
+                  else chosenOne = myPlayers.get(0);
+                  break;
                 }
-              } else {
-                chosenOne = myPlayers.get(0);
               }
-              // Move to chosen token
-              if (chosenOne != null) {
-                renderer.clearSelectedTokens();
-                renderer.centerOn(chosenOne);
-              }
+            } else {
+              chosenOne = myPlayers.get(0);
+            }
+            // Move to chosen token
+            if (chosenOne != null) {
+              renderer.clearSelectedTokens();
+              renderer.updateAfterSelection();
+              renderer.centerOn(chosenOne);
             }
           }
         }
@@ -842,7 +841,7 @@ public class AppActions {
    * @param zone the {@link Zone} the tokens belong to.
    * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
    */
-  public static final void cutTokens(Zone zone, Set<GUID> tokenSet) {
+  public static void cutTokens(Zone zone, Set<GUID> tokenSet) {
     // Only cut if some tokens are selected. Don't want to accidentally
     // lose what might already be in the clipboard.
     boolean anythingDeleted = false;
@@ -861,6 +860,7 @@ public class AppActions {
     }
     if (anythingDeleted) {
       MapTool.getFrame().getCurrentZoneRenderer().clearSelectedTokens();
+      MapTool.getFrame().getCurrentZoneRenderer().updateAfterSelection();
       keepIdsOnPaste = true; // pasted tokens should have same ids as cut ones
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
@@ -1147,7 +1147,6 @@ public class AppActions {
         String newName = MapToolUtil.nextTokenId(zone, token, true);
         token.setName(newName);
       }
-      zone.putToken(token);
       MapTool.serverCommand().putToken(zone.getId(), token);
     }
     if (!failedPaste.isEmpty()) {
@@ -2643,7 +2642,7 @@ public class AppActions {
         @Override
         protected void executeAction(ActionEvent ae) {
           ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-          JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
+          JFileChooser chooser = MapTool.getFrame().getSaveMapFileChooser();
           chooser.setFileFilter(MapTool.getFrame().getMapFileFilter());
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           chooser.setSelectedFile(new File(zr.getZone().getName()));
@@ -2654,7 +2653,7 @@ public class AppActions {
               // Lets do a better job and actually check the end of the file name for the extension
               mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
               PersistenceUtil.saveMap(zr.getZone(), mapFile);
-              AppPreferences.setSaveDir(mapFile.getParentFile());
+              AppPreferences.setSaveMapDir(mapFile.getParentFile());
               MapTool.showInformation("msg.info.mapSaved");
             } catch (IOException ioe) {
               MapTool.showError("msg.error.failedSaveMap", ioe);

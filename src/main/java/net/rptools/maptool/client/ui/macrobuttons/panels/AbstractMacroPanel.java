@@ -129,6 +129,22 @@ public abstract class AbstractMacroPanel extends JPanel
 
   public abstract void reset();
 
+  protected abstract List<MacroButtonProperties> getMacroButtonProperties();
+
+  protected void postChangeMacroButtonProperties(MacroButtonProperties properties) {
+    /* we do nothing, by default */
+  }
+
+  public void renameMacroGroup(String oldMacroGroup, String newMacroGroup) {
+    for (MacroButtonProperties properties : getMacroButtonProperties()) {
+      if (properties.getGroup().equals(oldMacroGroup)) {
+        properties.setGroup(newMacroGroup);
+        postChangeMacroButtonProperties(properties);
+      }
+    }
+    reset();
+  }
+
   // SCROLLABLE
   public Dimension getPreferredScrollableViewportSize() {
     return getPreferredSize();

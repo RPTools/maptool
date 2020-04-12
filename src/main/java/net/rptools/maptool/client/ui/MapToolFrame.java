@@ -236,6 +236,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private JFileChooser saveCmpgnFileChooser;
   private JFileChooser savePropsFileChooser;
   private JFileChooser saveFileChooser;
+  private JFileChooser saveMapFileChooser;
+  private JFileChooser saveTokenFileChooser;
 
   /** Remember the last layer selected */
   private Layer lastSelectedLayer = Zone.Layer.TOKEN;
@@ -914,6 +916,22 @@ public class MapToolFrame extends DefaultDockableHolder
     return savePropsFileChooser;
   }
 
+  public JFileChooser getSaveTokenFileChooser() {
+    if (saveTokenFileChooser == null) {
+      saveTokenFileChooser = new JFileChooser();
+      saveTokenFileChooser.setCurrentDirectory(AppPreferences.getSaveTokenDir());
+    }
+    return saveTokenFileChooser;
+  }
+
+  public JFileChooser getSaveMapFileChooser() {
+    if (saveMapFileChooser == null) {
+      saveMapFileChooser = new JFileChooser();
+      saveMapFileChooser.setCurrentDirectory(AppPreferences.getSaveMapDir());
+    }
+    return saveMapFileChooser;
+  }
+
   public JFileChooser getSaveFileChooser() {
     if (saveFileChooser == null) {
       saveFileChooser = new JFileChooser();
@@ -1273,6 +1291,7 @@ public class MapToolFrame extends DefaultDockableHolder
                 if (e.getClickCount() == 2) {
                   Token token = (Token) row;
                   getCurrentZoneRenderer().clearSelectedTokens();
+                  getCurrentZoneRenderer().updateAfterSelection();
                   // Pick an appropriate tool
                   // Jamz: why not just call .centerOn(Token token), now we have one place to fix...
                   getCurrentZoneRenderer().centerOn(token);

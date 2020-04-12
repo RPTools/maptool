@@ -582,7 +582,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMNotes() {
-    if (MapTool.getPlayer().isGM()) {
+    if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
       return gmNotes;
     } else {
       return "";
@@ -594,7 +594,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMName() {
-    if (MapTool.getPlayer().isGM()) {
+    if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
       return gmName;
     } else {
       return "";
@@ -2195,6 +2195,19 @@ public class Token extends BaseModel implements Cloneable {
       // timing problem.
     }
 
+    MapTool.serverCommand()
+        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+    MapTool.getFrame().resetTokenPanels();
+  }
+
+  public void renameMacroGroup(String oldMacroGroup, String newMacroGroup) {
+    List<MacroButtonProperties> tempMacros = new ArrayList<>(getMacroList(true));
+
+    for (MacroButtonProperties nextProp : tempMacros) {
+      if (oldMacroGroup.equals(nextProp.getGroup())) {
+        nextProp.setGroup(newMacroGroup);
+      }
+    }
     MapTool.serverCommand()
         .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
     MapTool.getFrame().resetTokenPanels();

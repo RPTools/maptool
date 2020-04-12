@@ -63,7 +63,7 @@ public class GridTool extends DefaultTool {
   private static enum Size {
     Increase,
     Decrease
-  };
+  }
 
   private final JSpinner gridSizeSpinner;
   private final JTextField gridOffsetXTextField;
@@ -110,6 +110,7 @@ public class GridTool extends DefaultTool {
     colorWell = (JETAColorWell) controlPanel.getComponentByName("colorWell");
     colorWell.addActionListener(
         new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             copyControlPanelToGrid();
           }
@@ -118,6 +119,7 @@ public class GridTool extends DefaultTool {
     JButton closeButton = (JButton) controlPanel.getComponentByName("closeButton");
     closeButton.addActionListener(
         new ActionListener() {
+          @Override
           @SuppressWarnings("deprecation")
           public void actionPerformed(ActionEvent e) {
             resetTool();
@@ -342,6 +344,10 @@ public class GridTool extends DefaultTool {
    */
   @Override
   public void mouseWheelMoved(MouseWheelEvent e) {
+    // Fix for hi-res mice
+    if (e.getWheelRotation() == 0) {
+      return;
+    }
     ZoneRenderer renderer = (ZoneRenderer) e.getSource();
     if (SwingUtil.isControlDown(e)) {
       if (e.getWheelRotation() > 0) {
@@ -361,6 +367,7 @@ public class GridTool extends DefaultTool {
   private void resetZoomSlider() {
     EventQueue.invokeLater(
         new Runnable() {
+          @Override
           public void run() {
             lastZoomIndex = zoomSliderStopCount / 2;
             zoomSlider.setValue(lastZoomIndex);
@@ -404,6 +411,7 @@ public class GridTool extends DefaultTool {
       this.size = size;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       ZoneRenderer renderer = (ZoneRenderer) e.getSource();
       adjustGridSize(renderer, size);
@@ -416,7 +424,7 @@ public class GridTool extends DefaultTool {
     Right,
     Up,
     Down
-  };
+  }
 
   private class GridOffsetAction extends AbstractAction {
     private static final long serialVersionUID = 6664327737774374442L;
@@ -426,6 +434,7 @@ public class GridTool extends DefaultTool {
       this.direction = direction;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       ZoneRenderer renderer = (ZoneRenderer) e.getSource();
       switch (direction) {
@@ -447,6 +456,7 @@ public class GridTool extends DefaultTool {
   }
 
   private class ZoomChangeListener extends MouseAdapter implements ChangeListener {
+    @Override
     public void stateChanged(ChangeEvent e) {
       int delta = zoomSlider.getValue() - lastZoomIndex;
       if (delta == 0) {
@@ -475,22 +485,28 @@ public class GridTool extends DefaultTool {
   ////
   // ACTIONS
   private class UpdateGridListener implements KeyListener, ChangeListener, FocusListener {
+    @Override
     public void keyPressed(KeyEvent e) {}
 
+    @Override
     public void keyReleased(KeyEvent e) {
       copyControlPanelToGrid();
     }
 
+    @Override
     public void keyTyped(KeyEvent e) {}
 
+    @Override
     public void stateChanged(ChangeEvent e) {
       copyControlPanelToGrid();
     }
 
+    @Override
     public void focusLost(FocusEvent e) {
       copyControlPanelToGrid();
     }
 
+    @Override
     public void focusGained(FocusEvent e) {}
   }
 }
