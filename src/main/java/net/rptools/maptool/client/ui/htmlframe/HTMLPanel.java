@@ -45,7 +45,7 @@ public class HTMLPanel extends JPanel implements HTMLPanelInterface {
     } else {
       add(pane, BorderLayout.CENTER);
     }
-    updateContents("");
+    updateContents("", false);
 
     // ESCAPE closes the window
     pane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
@@ -60,14 +60,9 @@ public class HTMLPanel extends JPanel implements HTMLPanelInterface {
             });
   }
 
-  /**
-   * Update the contents of the panel.
-   *
-   * @param html The HTML to display.
-   */
   @Override
-  public void updateContents(final String html) {
-    pane.updateContents(html);
+  public void updateContents(final String html, boolean scrollReset) {
+    pane.updateContents(html, scrollReset);
   }
 
   /** Flushes any caching for the panel. */

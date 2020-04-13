@@ -26,6 +26,7 @@ import java.util.regex.Matcher;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
@@ -121,13 +122,17 @@ public class HTMLPane extends JEditorPane {
    * Flush the pane, set the new html, and set the caret to zero.
    *
    * @param html the html to set
+   * @param scrollReset whether the scrollbar should be reset
    */
-  public void updateContents(final String html) {
+  public void updateContents(final String html, boolean scrollReset) {
     EventQueue.invokeLater(
-        new Runnable() {
-          public void run() {
-            editorKit.flush();
-            setText(html);
+        () -> {
+          DefaultCaret caret = (DefaultCaret) getCaret();
+          caret.setUpdatePolicy(
+              scrollReset ? DefaultCaret.UPDATE_WHEN_ON_EDT : DefaultCaret.NEVER_UPDATE);
+          editorKit.flush();
+          setText(html);
+          if (scrollReset) {
             setCaretPosition(0);
           }
         });
