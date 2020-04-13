@@ -64,6 +64,13 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   /** The WebEngine of the WebView. */
   private WebEngine webEngine;
 
+  /** Whether the scrolling should be reset. */
+  private boolean scrollReset = true;
+  /** The horizontal scrolling. */
+  private int scrollX = 0;
+  /** The vertical scrolling. */
+  private int scrollY = 0;
+
   /** The bridge from Javascript to Java. */
   private static final JavaBridge bridge = new JavaBridge();
 
@@ -180,12 +187,17 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   }
 
   @Override
-  public void updateContents(final String html) {
+  public void updateContents(final String html, boolean scrollReset) {
     if (log.isDebugEnabled()) {
       log.debug("setting text in WebView: " + html);
     }
     Platform.runLater(
         () -> {
+          this.scrollReset = scrollReset;
+          if (!scrollReset) {
+            scrollX = getHScrollValue();
+            scrollY = getVScrollValue();
+          }
           webEngine.loadContent(SCRIPT_BLOCK_EXT + HTMLPanelInterface.fixHTML(html));
         });
   }
@@ -356,6 +368,11 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       if (type == null || "submit".equals(type)) {
         EventTarget target = (EventTarget) nodeList.item(i);
         target.addEventListener("click", listenerSubmit, false);
+      }
+
+      // Restores the previous scrolling.
+      if (!scrollReset) {
+        scrollTo(scrollX, scrollY);
       }
     }
   }
@@ -590,5 +607,25 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
       actionListeners.actionPerformed(
           new HTMLActionEvent.FormActionEvent(this, method, action, data));
     }
+  }
+
+  /** Returns the vertical scroll value, i.e. thumb position. */
+  private int getVScrollValue() {
+    return (Integer) webEngine.executeScript("document.body.scrollTop");
+  }
+
+  /** Returns the horizontal scroll value, i.e. thumb position. */
+  private int getHScrollValue() {
+    return (Integer) webEngine.executeScript("document.body.scrollLeft");
+  }
+
+  /**
+   * Scrolls the WebView.
+   *
+   * @param x the horizontal scrolling
+   * @param y the vertical scrolling
+   */
+  private void scrollTo(int x, int y) {
+    webEngine.executeScript("window.scrollTo(" + x + ", " + y + ")");
   }
 }

@@ -52,6 +52,7 @@ public class HTMLFrameFactory {
     Object frameValue = null;
     boolean hasFrame = true;
     boolean closeButton = true;
+    boolean scrollReset = false;
 
     if (properties != null && !properties.isEmpty()) {
       String[] opts = properties.split(";");
@@ -113,6 +114,10 @@ public class HTMLFrameFactory {
           } catch (NumberFormatException e) {
             // Ignoring the value; shouldn't we warn the user?
           }
+        } else if (keyLC.equals("scrollreset")) {
+          if (Integer.parseInt(value) == 1) {
+            scrollReset = true;
+          }
         } else if (keyLC.equals("value")) {
           frameValue = value;
         } else if (keyLC.equals("tabtitle")) {
@@ -123,7 +128,7 @@ public class HTMLFrameFactory {
     if (tabTitle == null) tabTitle = title; // if tabTitle not set, make it same as title
     if (isFrame) {
       HTMLFrame.showFrame(
-          name, title, tabTitle, width, height, temporary, isHTML5, frameValue, html);
+          name, title, tabTitle, width, height, temporary, scrollReset, isHTML5, frameValue, html);
     } else {
       HTMLDialog.showDialog(
           name,
@@ -134,6 +139,7 @@ public class HTMLFrameFactory {
           input,
           temporary,
           closeButton,
+          scrollReset,
           isHTML5,
           frameValue,
           html);

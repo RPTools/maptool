@@ -296,9 +296,9 @@ public class HTMLOverlay extends HTMLJFXPanel implements HTMLPanelContainer {
   }
 
   @Override
-  public void updateContents(final String html) {
+  public void updateContents(final String html, boolean scrollReset) {
     macroCallbacks.clear(); // clear the old callbacks
-    super.updateContents(html);
+    super.updateContents(html, true);
     getDropTarget().setActive(false); // disables drop on overlay, drop goes to map
     if ("".equals(html)) {
       closeRequest(); // turn off the overlay
