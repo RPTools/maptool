@@ -115,7 +115,8 @@ public class HTMLFrameFactory {
             // Ignoring the value; shouldn't we warn the user?
           }
         } else if (keyLC.equals("scrollreset")) {
-          if (Integer.parseInt(value) == 1) {
+          int v = Integer.parseInt(value);
+          if (v != 0) {
             scrollReset = true;
           }
         } else if (keyLC.equals("value")) {
