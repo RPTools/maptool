@@ -201,7 +201,7 @@ dependencies {
     implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.25.v20191220'
     implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.25.v20191220'
     implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.25.v20191220'
-    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.25.v20191220'
+    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.28.v20200408'
 
     implementation 'net.sf.ezmorph:ezmorph:1.0.6'
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
