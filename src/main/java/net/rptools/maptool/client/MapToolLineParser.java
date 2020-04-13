@@ -1438,7 +1438,9 @@ public class MapToolLineParser {
                   frameName, false, false, frameOpts, expressionBuilder.toString());
               break;
             case OVERLAY:
-              MapTool.getFrame().getHtmlOverlay().updateContents(expressionBuilder.toString());
+              MapTool.getFrame()
+                  .getHtmlOverlay()
+                  .updateContents(expressionBuilder.toString(), true);
               break;
             case CHAT:
               builder.append(expressionBuilder);
