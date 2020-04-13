@@ -154,6 +154,7 @@ public class Token extends BaseModel implements Cloneable {
     setImageAsset,
     setPortraitImage,
     setCharsheetImage,
+    setLayout,
     clearLightSources,
     removeLightSource,
     addLightSource,
@@ -206,7 +207,7 @@ public class Token extends BaseModel implements Cloneable {
   private boolean isVisible = true;
   private boolean visibleOnlyToOwner = false;
 
-  private int vblAlphaSensitivity = -1;
+  private int vblColorSensitivity = -1;
   private int alwaysVisibleTolerance = 2; // Default for # of regions (out of 9) that must be seen
   // before token is shown over FoW
   private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
@@ -359,7 +360,7 @@ public class Token extends BaseModel implements Cloneable {
     isVisible = token.isVisible;
     visibleOnlyToOwner = token.visibleOnlyToOwner;
 
-    vblAlphaSensitivity = token.vblAlphaSensitivity;
+    vblColorSensitivity = token.vblColorSensitivity;
     alwaysVisibleTolerance = token.alwaysVisibleTolerance;
     isAlwaysVisible = token.isAlwaysVisible;
     vbl = token.vbl;
@@ -581,7 +582,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMNotes() {
-    if (MapTool.getPlayer().isGM()) {
+    if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
       return gmNotes;
     } else {
       return "";
@@ -593,7 +594,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getGMName() {
-    if (MapTool.getPlayer().isGM()) {
+    if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
       return gmName;
     } else {
       return "";
@@ -1338,12 +1339,12 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
-  public void setAlphaSensitivity(int tolerance) {
-    vblAlphaSensitivity = tolerance;
+  public void setColorSensitivity(int tolerance) {
+    vblColorSensitivity = tolerance;
   }
 
-  public int getAlphaSensitivity() {
-    return vblAlphaSensitivity;
+  public int getColorSensitivity() {
+    return vblColorSensitivity;
   }
 
   /**
@@ -1354,7 +1355,7 @@ public class Token extends BaseModel implements Cloneable {
   public void setVBL(Area vbl) {
     this.vbl = vbl;
     if (vbl == null) {
-      vblAlphaSensitivity = -1;
+      vblColorSensitivity = -1;
     }
   }
 
@@ -1411,36 +1412,20 @@ public class Token extends BaseModel implements Cloneable {
     // Apply the coordinate translation
     AffineTransform atArea = AffineTransform.getTranslateInstance(tx, ty);
 
-    double rx, ry;
-    if (isSnapToScale()) {
-      // Find the center x,y coords of the rectangle
-      rx = (getWidth() / 2) - (getAnchor().getX() / 2);
-      ry = (getHeight() / 2) - (getAnchor().getY() / 2);
+    double scalerX = isSnapToScale() ? ((double) imgSize.width) / getWidth() : scaleX;
+    double scalerY = isSnapToScale() ? ((double) imgSize.height) / getHeight() : scaleY;
 
-      // Apply the scale transformation
+    // Apply the rotation transformation...
+    if (getShape() == Token.TokenShape.TOP_DOWN && hasFacing()) {
+      // Find the center x,y coords of the rectangle
+      double rx = getWidth() / 2.0 * scalerX - getAnchor().getX();
+      double ry = getHeight() / 2.0 * scalerY - getAnchor().getY();
+
       atArea.concatenate(
-          AffineTransform.getScaleInstance(
-              ((double) imgSize.width) / getWidth(), ((double) imgSize.height) / getHeight()));
-
-      // Apply the rotation transformation...
-      if (getShape() == Token.TokenShape.TOP_DOWN) {
-        atArea.concatenate(
-            AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
-      }
-    } else {
-      // Find the center x,y coords of the rectangle
-      rx = ((getWidth() / 2) - (getAnchor().getX() / scaleX)) * scaleX;
-      ry = ((getHeight() / 2) - (getAnchor().getY() / scaleY)) * scaleY;
-
-      // Apply the rotation transformation...
-      if (getShape() == Token.TokenShape.TOP_DOWN) {
-        atArea.concatenate(
-            AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
-      }
-
-      // Apply the scale transformation
-      atArea.concatenate(AffineTransform.getScaleInstance(scaleX, scaleY));
+          AffineTransform.getRotateInstance(Math.toRadians(getFacingInDegrees()), rx, ry));
     }
+    // Apply the scale transformation
+    atArea.concatenate(AffineTransform.getScaleInstance(scalerX, scalerY));
 
     // Lets account for flipped images...
     if (isFlippedX) {
@@ -1644,13 +1629,9 @@ public class Token extends BaseModel implements Cloneable {
     }
     // First we try convert it to a JSON object.
     if (val.toString().trim().startsWith("[") || val.toString().trim().startsWith("{")) {
-      try {
-        JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
-        if (json.isJsonObject() || json.isJsonArray()) {
-          return json;
-        }
-      } catch (ParserException e) {
-        // Ignore exception to maintain compatibility with existing macros.
+      JsonElement json = JSONMacroFunctions.getInstance().asJsonElement(val.toString());
+      if (json.isJsonObject() || json.isJsonArray()) {
+        return json;
       }
     }
     try {
@@ -1945,10 +1926,24 @@ public class Token extends BaseModel implements Cloneable {
     return new Point(anchorX, anchorY);
   }
 
+  public int getAnchorX() {
+    return anchorX;
+  }
+
+  public int getAnchorY() {
+    return anchorY;
+  }
+
+  /** @return the scale of the token layout */
   public double getSizeScale() {
     return sizeScale;
   }
 
+  /**
+   * Set the scale of the token layout
+   *
+   * @param scale the scale of the token
+   */
   public void setSizeScale(double scale) {
     sizeScale = scale;
   }
@@ -2443,6 +2438,10 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case setCharsheetImage:
         setCharsheetImage((MD5Key) parameters[0]);
+        break;
+      case setLayout:
+        setSizeScale((Double) parameters[0]);
+        setAnchor((int) parameters[1], (int) parameters[2]);
         break;
       case clearLightSources:
         if (hasLightSources()) {

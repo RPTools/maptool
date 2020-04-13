@@ -34,10 +34,12 @@ public class HTMLFrameFactory {
    *
    * @param name The name of the dialog or frame.
    * @param isFrame Is it a frame.
+   * @param isHTML5 Does it use HTML5 (JavaFX) or HTML 3.2 (Swing).
    * @param properties The properties that determine the attributes of the frame or dialog.
    * @param html The html contents of frame or dialog.
    */
-  public static void show(String name, boolean isFrame, String properties, String html) {
+  public static void show(
+      String name, boolean isFrame, boolean isHTML5, String properties, String html) {
     if (listener == null) {
       listener = new HTMLFrameFactory.Listener();
     }
@@ -63,7 +65,7 @@ public class HTMLFrameFactory {
             int v = Integer.parseInt(value);
             if (v != 0) {
               input = true;
-              closeButton = !input;
+              closeButton = !input; // disable button by default
             }
           } catch (NumberFormatException e) {
             // Ignoring the value; shouldn't we warn the user?
@@ -74,7 +76,7 @@ public class HTMLFrameFactory {
           try {
             int v = Integer.parseInt(value);
             if (v != 0) {
-              temporary = true;
+              temporary = true; // undecorated is temporary by default
             }
           } catch (NumberFormatException e) {
             // Ignoring the value; shouldn't we warn the user?
@@ -120,10 +122,21 @@ public class HTMLFrameFactory {
     }
     if (tabTitle == null) tabTitle = title; // if tabTitle not set, make it same as title
     if (isFrame) {
-      HTMLFrame.showFrame(name, title, tabTitle, width, height, temporary, frameValue, html);
+      HTMLFrame.showFrame(
+          name, title, tabTitle, width, height, temporary, isHTML5, frameValue, html);
     } else {
       HTMLDialog.showDialog(
-          name, title, width, height, hasFrame, input, temporary, closeButton, frameValue, html);
+          name,
+          title,
+          width,
+          height,
+          hasFrame,
+          input,
+          temporary,
+          closeButton,
+          isHTML5,
+          frameValue,
+          html);
     }
   }
 
@@ -162,9 +175,7 @@ public class HTMLFrameFactory {
         Set<GUID> selectedTokens =
             MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
         boolean selectedChange = false;
-        Token token;
-        for (int i = 0; i < tokens.size(); i++) {
-          token = tokens.get(i);
+        for (Token token : tokens) {
           if (selectedTokens.contains(token)) selectedChange = true;
           if (token.getName().equals(cpanel.getIdentity())
               || token.getId().equals(cpanel.getIdentityGUID())) {
@@ -172,7 +183,9 @@ public class HTMLFrameFactory {
           }
           tokenChanged(token);
         }
-        if (selectedChange) selectedListChanged();
+        if (selectedChange) {
+          selectedListChanged();
+        }
       }
     }
 
@@ -187,6 +200,13 @@ public class HTMLFrameFactory {
     }
   }
 
+  /**
+   * Return the visibility of the container.
+   *
+   * @param isFrame is it a frame or a container?
+   * @param name the name of the container.
+   * @return is it visible?
+   */
   public static boolean isVisible(boolean isFrame, String name) {
     if (isFrame) {
       return HTMLFrame.isVisible(name);
@@ -195,6 +215,12 @@ public class HTMLFrameFactory {
     }
   }
 
+  /**
+   * Close a container.
+   *
+   * @param isFrame is it a frame or a container?
+   * @param name the name of the container.
+   */
   public static void close(boolean isFrame, String name) {
     if (isFrame) {
       HTMLFrame.close(name);

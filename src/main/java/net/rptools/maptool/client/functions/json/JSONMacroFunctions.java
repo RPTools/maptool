@@ -14,10 +14,7 @@
  */
 package net.rptools.maptool.client.functions.json;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
@@ -692,10 +689,9 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param functionName The name of the MT Script function that was called.
    * @param params The parameters to extract as {@link JsonElement}s.
    * @return The list of {@link JsonElement}s.
-   * @throws ParserException if the parameters can not be converted to {@link JsonElement}s.
    */
-  private List<JsonElement> paramsConvertedToJsonElements(String functionName, List<Object> params)
-      throws ParserException {
+  private List<JsonElement> paramsConvertedToJsonElements(
+      String functionName, List<Object> params) {
     List<JsonElement> elements = new ArrayList<>();
     for (int i = 0; i < params.size(); i++) {
       elements.add(FunctionUtil.paramConvertedToJson(functionName, params, i));
@@ -880,10 +876,8 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param key The new key to be added.
    * @param info The new information to add.
    * @return The resulting json data.
-   * @throws ParserException If there is an error adding the information.
    */
-  private JsonElement jsonPathPut(JsonElement json, String path, String key, Object info)
-      throws ParserException {
+  private JsonElement jsonPathPut(JsonElement json, String path, String key, Object info) {
     Object value = asJsonElement(info);
 
     return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).put(path, key, value).json();
@@ -896,10 +890,8 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param path The path to change the new information at.
    * @param info The new information to change to.
    * @return The resulting json data.
-   * @throws ParserException If there is an error changing the information.
    */
-  private JsonElement jsonPathSet(JsonElement json, String path, Object info)
-      throws ParserException {
+  private JsonElement jsonPathSet(JsonElement json, String path, Object info) {
     Object value = asJsonElement(info);
 
     return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).set(path, value).json();
@@ -927,10 +919,8 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param json the json object to read the information from.
    * @param path the path to read in the object.
    * @return the return value as a MT Script type.
-   * @throws ParserException when there is an error converting the json objects.
    */
-  private Object jsonPathRead(JsonElement json, String path, Configuration config)
-      throws ParserException {
+  private Object jsonPathRead(JsonElement json, String path, Configuration config) {
     JsonElement jsonElement = asJsonElement(json);
     return typeConversion.asScriptType(JsonPath.using(config).parse(jsonElement).read(path));
   }
@@ -958,8 +948,18 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @param o the object to convert.
    * @return the json representation..
    */
-  public JsonElement asJsonElement(Object o) throws ParserException {
+  public JsonElement asJsonElement(Object o) {
     return typeConversion.asJsonElement(o);
+  }
+
+  /**
+   * Converts a <code>String</code> to a {@link JsonPrimitive}.
+   *
+   * @param string the String to convert.
+   * @return the converted value.
+   */
+  public JsonPrimitive convertPrimitiveFromString(String string) {
+    return typeConversion.convertPrimitiveFromString(string);
   }
 
   /**

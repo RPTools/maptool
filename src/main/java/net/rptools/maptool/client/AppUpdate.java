@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.jayway.jsonpath.JsonPath;
 import java.io.*;
 import java.net.*;
@@ -21,8 +23,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.jar.*;
 import javax.swing.*;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.language.I18N;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -74,7 +76,7 @@ public class AppUpdate {
     // If can't access the list of releases, we're done
     if (strReleases == null) return false;
 
-    JSONObject release;
+    JsonObject release;
     try {
       // Get pre-release information regarding MapTool version from github list
       String path = "$.[?(@.target_commitish == '" + jarCommit + "')].prerelease";
@@ -82,16 +84,18 @@ public class AppUpdate {
       boolean prerelease = listMatches.isEmpty() || listMatches.get(0);
 
       if (prerelease) {
-        JSONArray releasesList = JSONArray.fromObject(strReleases);
-        release = JSONObject.fromObject(releasesList.get(0)); // the latest is at top of list
+        JsonArray releasesArray =
+            JSONMacroFunctions.getInstance().asJsonElement(strReleases).getAsJsonArray();
+        release = releasesArray.get(0).getAsJsonObject(); // the latest release is at top of list
       } else {
         path = "$.[?(@.prerelease == false)]";
         listMatches = JsonPath.parse(strReleases).read(path); // get sublist of releases
-        release = JSONObject.fromObject(listMatches.get(0)); // the latest is at top of list
+        release =
+            JSONMacroFunctions.getInstance().asJsonElement(listMatches.get(0)).getAsJsonObject();
       }
-      latestGitHubReleaseCommit = release.get("target_commitish").toString();
+      latestGitHubReleaseCommit = release.get("target_commitish").getAsString();
       log.info("target_commitish from GitHub: " + latestGitHubReleaseCommit);
-      latestGitHubReleaseTagName = release.get("tag_name").toString();
+      latestGitHubReleaseTagName = release.get("tag_name").getAsString();
       log.info("tag_name from GitHub: " + latestGitHubReleaseTagName);
     } catch (Exception e) {
       log.error("Unable to parse JSON payload from GitHub...", e);
@@ -102,18 +106,18 @@ public class AppUpdate {
     if (jarCommit.equals(latestGitHubReleaseCommit)
         || AppPreferences.getSkipAutoUpdateCommit().equals(latestGitHubReleaseCommit)) return false;
 
-    JSONArray releaseAssets = release.getJSONArray("assets");
+    JsonArray releaseAssets = release.get("assets").getAsJsonArray();
     String assetDownloadURL = null;
-    JSONObject asset;
+    JsonObject asset;
 
     for (int i = 0; i < releaseAssets.size(); ++i) {
-      asset = releaseAssets.getJSONObject(i);
+      asset = releaseAssets.get(i).getAsJsonObject();
 
-      log.info("Asset: " + asset.getString("name"));
+      log.info("Asset: " + asset.get("name").getAsString());
 
-      if (asset.getString("name").toLowerCase().endsWith(DOWNLOAD_EXTENSION)) {
-        assetDownloadURL = asset.getString("browser_download_url");
-        final long assetDownloadSize = asset.getLong("size");
+      if (asset.get("name").getAsString().toLowerCase().endsWith(DOWNLOAD_EXTENSION)) {
+        assetDownloadURL = asset.get("browser_download_url").getAsString();
+        final long assetDownloadSize = asset.get("size").getAsLong();
 
         if (assetDownloadURL != null) {
           log.info("Download: " + assetDownloadURL);
@@ -221,12 +225,26 @@ public class AppUpdate {
 
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-    // Last chance to "cancel" but canceling out of JFileChooser
-    if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-      return;
-    }
+    File chosenLocation = null;
+    while (chosenLocation == null) {
+      // Last chance to "cancel" but canceling out of JFileChooser
+      if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+        return;
+      }
 
-    File saveLocation = chooser.getSelectedFile();
+      chosenLocation = chooser.getSelectedFile();
+      try {
+        boolean newFile = chosenLocation.createNewFile();
+        if (!newFile) {
+          MapTool.showError(I18N.getText("msg.error.fileAlreadyExists", chosenLocation));
+          chosenLocation = null;
+        }
+      } catch (IOException ioe) {
+        MapTool.showError(I18N.getText("msg.error.directoryNotWriteable", chosenLocation));
+        chosenLocation = null;
+      }
+    }
+    final File saveLocation = chooser.getSelectedFile();
 
     log.info("URL: " + assetDownloadURL.toString());
     log.info("assetDownloadSize: " + assetDownloadSize);
@@ -248,9 +266,8 @@ public class AppUpdate {
               pm.setMaximum((int) assetDownloadSize);
 
               FileUtils.copyInputStreamToFile(pmis, saveLocation);
-            } catch (IOException e1) {
-              // TODO Auto-generated catch block
-              e1.printStackTrace();
+            } catch (IOException ioe) {
+              MapTool.showError("msg.error.failedSavingNewVersion", ioe);
             }
           }
         };

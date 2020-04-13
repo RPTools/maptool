@@ -40,7 +40,8 @@ import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.ServerPolicy;
-import net.rptools.maptool.util.SysInfo;
+import net.rptools.maptool.util.MapToolSysInfoProvider;
+import net.rptools.maptool.util.SysInfoProvider;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.AbstractFunction;
@@ -50,8 +51,16 @@ public class getInfoFunction extends AbstractFunction {
   /** The singleton instance. */
   private static final getInfoFunction instance = new getInfoFunction();
 
+  private SysInfoProvider sysInfoProvider;
+
   private getInfoFunction() {
     super(1, 1, "getInfo");
+    sysInfoProvider = new MapToolSysInfoProvider();
+  }
+
+  // the following is here mostly for testing purpose, until we find a better way to inject
+  protected void setSysInfoProvider(SysInfoProvider sysInfoProvider) {
+    this.sysInfoProvider = sysInfoProvider;
   }
 
   /**
@@ -212,9 +221,8 @@ public class getInfoFunction extends AbstractFunction {
    */
   private JsonObject getServerInfo() {
     ServerPolicy sp = MapTool.getServerPolicy();
-    JsonObject sinfo = sp.toJSON();
 
-    return (sinfo);
+    return sp.toJSON();
   }
 
   /**
@@ -284,13 +292,14 @@ public class getInfoFunction extends AbstractFunction {
       if (group == null) {
         group = "no group";
       }
+      JsonArray sgroup;
       if (sinfo.has(group)) {
-        JsonArray sgroup = sinfo.get(group).getAsJsonArray();
+        sgroup = sinfo.get(group).getAsJsonArray();
       } else {
-        JsonArray sgroup = new JsonArray();
-        sgroup.add(states.getName());
-        sinfo.add(group, sgroup);
+        sgroup = new JsonArray();
       }
+      sgroup.add(states.getName());
+      sinfo.add(group, sgroup);
     }
     cinfo.add("states", sinfo);
 
@@ -342,7 +351,6 @@ public class getInfoFunction extends AbstractFunction {
    * @throws ParserException if an error occurs.
    */
   private JsonObject getDebugInfo() throws ParserException {
-    SysInfo info = new SysInfo();
-    return info.getSysInfoJSON();
+    return sysInfoProvider.getSysInfoJSON();
   }
 }

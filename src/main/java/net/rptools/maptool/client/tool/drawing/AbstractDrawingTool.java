@@ -27,6 +27,7 @@ import java.awt.geom.Path2D;
 import java.util.List;
 import net.rptools.lib.swing.ColorPicker;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ScreenPoint;
@@ -41,16 +42,19 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.drawing.ShapeDrawable;
 
 /** Tool for drawing freehand lines. */
 public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOverlay {
+
   private static final long serialVersionUID = 9121558405484986225L;
 
   private boolean isEraser;
   private boolean isSnapToGridSelected;
   private boolean isEraseSelected;
-  private static LayerSelectionDialog layerSelectionDialog;
+  private static final LayerSelectionDialog layerSelectionDialog;
 
   private static Zone.Layer selectedLayer = Zone.Layer.TOKEN;
 
@@ -63,6 +67,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
               Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
             },
             new LayerSelectionListener() {
+              @Override
               public void layerSelected(Layer layer) {
                 selectedLayer = layer;
               }
@@ -194,6 +199,14 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     return defaultValue;
   }
 
+  protected boolean isSnapToCenter(MouseEvent e) {
+    boolean defaultValue = false;
+    if (e.isAltDown()) {
+      defaultValue = true;
+    }
+    return defaultValue;
+  }
+
   protected Pen getPen() {
     Pen pen = new Pen(MapTool.getFrame().getPen());
     pen.setEraser(isEraser);
@@ -217,9 +230,12 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
   protected ZonePoint getPoint(MouseEvent e) {
     ScreenPoint sp = new ScreenPoint(e.getX(), e.getY());
     ZonePoint zp = sp.convertToZoneRnd(renderer);
-    if (isSnapToGrid(e)) {
+    if (isSnapToCenter(e) && this instanceof AbstractLineTool) {
+      // Only line tools will snap to center as the Alt key for rectangle, diamond and oval
+      // is used for expand from center.
+      zp = renderer.getCellCenterAt(sp);
+    } else if (isSnapToGrid(e)) {
       zp = renderer.getZone().getNearestVertex(zp);
-      sp = ScreenPoint.fromZonePoint(renderer, zp);
     }
     return zp;
   }
@@ -236,7 +252,80 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     return tokenTopolgy;
   }
 
+  @Override
   public abstract void paintOverlay(ZoneRenderer renderer, Graphics2D g);
+
+  protected void paintTopologyOverlay(Graphics2D g, Drawable drawable) {
+    paintTopologyOverlay(g, drawable, Pen.MODE_SOLID);
+  }
+
+  protected void paintTopologyOverlay(Graphics2D g, Shape shape) {
+    ShapeDrawable drawable = null;
+
+    if (shape != null) {
+      drawable = new ShapeDrawable(shape, false);
+    }
+
+    paintTopologyOverlay(g, drawable, Pen.MODE_SOLID);
+  }
+
+  protected void paintTopologyOverlay(Graphics2D g, Shape shape, int penMode) {
+    ShapeDrawable drawable = null;
+
+    if (shape != null) {
+      drawable = new ShapeDrawable(shape, false);
+    }
+
+    paintTopologyOverlay(g, drawable, penMode);
+  }
+
+  protected void paintTopologyOverlay(Graphics2D g) {
+    Rectangle rectangle = null;
+    paintTopologyOverlay(g, rectangle, Pen.MODE_SOLID);
+  }
+
+  protected void paintTopologyOverlay(Graphics2D g, Drawable drawable, int penMode) {
+    if (MapTool.getPlayer().isGM()) {
+      Zone zone = renderer.getZone();
+      Area topology = zone.getTopology();
+
+      Graphics2D g2 = (Graphics2D) g.create();
+      g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
+      g2.scale(renderer.getScale(), renderer.getScale());
+
+      g2.setColor(AppStyle.tokenTopologyColor);
+      g2.fill(getTokenTopology());
+
+      g2.setColor(AppStyle.topologyTerrainColor);
+      g2.fill(zone.getTopologyTerrain());
+
+      g2.setColor(AppStyle.topologyColor);
+      g2.fill(topology);
+
+      g2.dispose();
+    }
+
+    if (drawable != null) {
+      Pen pen = new Pen();
+      pen.setEraser(getPen().isEraser());
+      pen.setOpacity(AppStyle.topologyRemoveColor.getAlpha() / 255.0f);
+      pen.setBackgroundMode(penMode);
+
+      if (penMode == Pen.MODE_TRANSPARENT) {
+        pen.setThickness(3.0f);
+      }
+
+      if (pen.isEraser()) {
+        pen.setEraser(false);
+      }
+      if (isEraser()) {
+        pen.setBackgroundPaint(new DrawableColorPaint(AppStyle.topologyRemoveColor));
+      } else {
+        pen.setBackgroundPaint(new DrawableColorPaint(AppStyle.topologyAddColor));
+      }
+      paintTransformed(g, renderer, drawable, pen);
+    }
+  }
 
   /**
    * Render a drawable on a zone. This method consolidates all of the calls to the server in one
@@ -250,10 +339,15 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     if (!hasPaint(pen)) {
       return;
     }
-    if (drawable.getBounds() == null) return;
+    if (drawable.getBounds() == null) {
+      return;
+    }
     drawable.setLayer(selectedLayer);
-    if (MapTool.getPlayer().isGM()) drawable.setLayer(selectedLayer);
-    else drawable.setLayer(Layer.TOKEN);
+    if (MapTool.getPlayer().isGM()) {
+      drawable.setLayer(selectedLayer);
+    } else {
+      drawable.setLayer(Layer.TOKEN);
+    }
 
     // Send new textures
     MapToolUtil.uploadTexture(pen.getPaint());

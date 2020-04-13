@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -538,7 +539,8 @@ public final class ExtractHeroLab {
 
       if (indexEntry != null) {
         statBlock.put("location", zipPath);
-        statBlock.put("data", IOUtils.toString(por.getInputStream(indexEntry), "UTF-8"));
+        statBlock.put(
+            "data", IOUtils.toString(por.getInputStream(indexEntry), StandardCharsets.UTF_8));
       } else {
         statBlock.put("location", null);
         statBlock.put("data", "<HTML>Unable to retrieve " + type + " statblock</HTML>");

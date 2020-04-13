@@ -23,15 +23,27 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.Hashtable;
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicToolBarUI;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
+import net.rptools.maptool.client.tool.AI_Tool;
+import net.rptools.maptool.client.tool.AI_UseVblTool;
 import net.rptools.maptool.client.tool.BoardTool;
+import net.rptools.maptool.client.tool.DrawTopologySelectionTool;
 import net.rptools.maptool.client.tool.FacingTool;
 import net.rptools.maptool.client.tool.GridTool;
 import net.rptools.maptool.client.tool.MeasureTool;
@@ -68,8 +80,13 @@ import net.rptools.maptool.client.tool.drawing.WallTemplateTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Zone.TokenSelection;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ToolbarPanel extends JToolBar {
+
+  private static final Logger log = LogManager.getLogger(ToolbarPanel.class);
+
   private final ButtonGroup buttonGroup = new ButtonGroup();
   private final ButtonGroup tokenSelectionbuttonGroup = new ButtonGroup();
   private final JPanel optionPanel;
@@ -88,6 +105,13 @@ public class ToolbarPanel extends JToolBar {
             "net/rptools/maptool/client/image/tool/pointer-blue-off.png",
             pointerGroupOptionPanel,
             I18N.getText("tools.interaction.tooltip"));
+
+    final SidePanel aiPanel = new SidePanel();
+    aiPanel.add(AI_Tool.class);
+    aiPanel.add(AI_UseVblTool.class);
+
+    pointerGroupOptionPanel.add(Box.createHorizontalStrut(5));
+    pointerGroupOptionPanel.add(aiPanel);
 
     pointerGroupButton.setSelected(true);
     pointerGroupOptionPanel.activate();
@@ -160,17 +184,6 @@ public class ToolbarPanel extends JToolBar {
 
     add(jslider);
     // End slider
-
-    add(Box.createHorizontalStrut(10));
-    add(new JSeparator(JSeparator.VERTICAL));
-    add(Box.createHorizontalStrut(10));
-
-    // New button to toggle AI on/off
-    add(
-        createAiButton(
-            "net/rptools/maptool/client/image/tool/ai-blue-green.png",
-            "net/rptools/maptool/client/image/tool/ai-blue-off.png",
-            I18N.getText("tools.ai_selector.tooltip")));
 
     add(Box.createHorizontalStrut(10));
     add(new JSeparator(JSeparator.VERTICAL));
@@ -327,6 +340,13 @@ public class ToolbarPanel extends JToolBar {
     panel.add(DiamondTopologyTool.class);
     panel.add(HollowDiamondTopologyTool.class);
 
+    // Add with space to denote button is not part of the Topology Panel button group
+    final SidePanel topologySelectionPanel = new SidePanel();
+    topologySelectionPanel.add(DrawTopologySelectionTool.class);
+
+    panel.add(Box.createHorizontalStrut(5));
+    panel.add(topologySelectionPanel);
+
     // panel.add(FillTopologyTool.class);
     return panel;
   }
@@ -355,30 +375,6 @@ public class ToolbarPanel extends JToolBar {
     return button;
   }
 
-  public void getTest() {}
-
-  private JToggleButton createAiButton(final String icon, final String offIcon, String tooltip) {
-    final JToggleButton button = new JToggleButton();
-    button.setToolTipText(tooltip);
-    button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            AppPreferences.setUseAstarPathfinding(button.isSelected());
-          }
-        });
-
-    try {
-      button.setIcon(new ImageIcon(ImageUtil.getImage(offIcon)));
-      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage(icon)));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-
-    if (AppPreferences.isUsingAstarPathfinding()) button.doClick();
-
-    return button;
-  }
-
   private JToggleButton createMuteButton(
       final String icon, final String offIcon, String mutetooltip, String unmutetooltip) {
     final JToggleButton button = new JToggleButton();
@@ -387,8 +383,11 @@ public class ToolbarPanel extends JToolBar {
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             MediaPlayerAdapter.setGlobalMute(button.isSelected());
-            if (button.isSelected()) button.setToolTipText(unmutetooltip);
-            else button.setToolTipText(mutetooltip);
+            if (button.isSelected()) {
+              button.setToolTipText(unmutetooltip);
+            } else {
+              button.setToolTipText(mutetooltip);
+            }
           }
         });
 
@@ -399,7 +398,9 @@ public class ToolbarPanel extends JToolBar {
       ioe.printStackTrace();
     }
 
-    if (MediaPlayerAdapter.getGlobalMute()) button.doClick();
+    if (MediaPlayerAdapter.getGlobalMute()) {
+      button.doClick();
+    }
 
     return button;
   }
@@ -461,6 +462,7 @@ public class ToolbarPanel extends JToolBar {
   }
 
   private class OptionPanel extends JToolBar {
+
     private Class<? extends Tool> firstTool;
     private Class<? extends Tool> currentTool;
 
@@ -500,6 +502,32 @@ public class ToolbarPanel extends JToolBar {
         currentTool = firstTool;
       }
       toolbox.setSelectedTool(currentTool);
+    }
+  }
+
+  /*
+   * Stand-alone toolbar with meant to not interact with standard toolbar
+   */
+  private class SidePanel extends JToolBar {
+
+    public SidePanel() {
+      setFloatable(false);
+      setRollover(true);
+      setBorder(null);
+      setBorderPainted(false);
+
+      ToolbarPanel.this.addPropertyChangeListener(
+          "orientation",
+          new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent evt) {
+              setOrientation((Integer) evt.getNewValue());
+            }
+          });
+    }
+
+    public void add(Class<? extends Tool> toolClass) {
+      final Tool tool = toolbox.createTool(toolClass);
+      add(tool);
     }
   }
 }
