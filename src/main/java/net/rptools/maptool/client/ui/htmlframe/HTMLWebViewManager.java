@@ -74,6 +74,9 @@ public class HTMLWebViewManager {
 
   /** Represents a bridge from Javascript to Java. */
   public static class JavaBridge {
+    /** Magic value that window.status must take to initiate the bridge. */
+    public static final String BRIDGE_VALUE = "MY_INITIALIZING_VALUE";
+
     /** Name of the Bridge. */
     private static final String NAME = "MapTool";
     /**
@@ -110,6 +113,11 @@ public class HTMLWebViewManager {
   private static final String SCRIPT_REPLACE_SUBMIT =
       "HTMLFormElement.prototype.submit = function(){this.dispatchEvent(new Event('submit'));};";
 
+  /** JS to initialize the Java bridge. Needs to be the first script of the page. */
+  private static final String SCRIPT_BRIDGE =
+      String.format(
+          "<SCRIPT>window.status = '%s'; window.status = '';</SCRIPT>", JavaBridge.BRIDGE_VALUE);
+
   HTMLWebViewManager() {}
 
   /**
@@ -131,6 +139,9 @@ public class HTMLWebViewManager {
     webEngine.setPromptHandler(HTMLWebViewManager::showPrompt);
     webEngine.setCreatePopupHandler(HTMLWebViewManager::showPopup);
     webEngine.setOnError(HTMLWebViewManager::showError);
+
+    // Workaround to load Java Bridge before everything else.
+    webEngine.onStatusChangedProperty().set(this::setBridge);
   }
 
   public WebView getWebView() {
@@ -169,7 +180,23 @@ public class HTMLWebViewManager {
       scrollY = getVScrollValue();
     }
     isFlushed = false;
-    webEngine.loadContent(SCRIPT_BLOCK_EXT + HTMLPanelInterface.fixHTML(html));
+    webEngine.loadContent(SCRIPT_BLOCK_EXT + SCRIPT_BRIDGE + HTMLPanelInterface.fixHTML(html));
+  }
+
+  /**
+   * Setups the JavaBridge and the console.log command before JS is ran. Approach described at
+   * https://stackoverflow.com/questions/26400925/.
+   *
+   * @param event the onStatusChanged event triggering the bridge to load
+   */
+  private void setBridge(WebEvent<String> event) {
+    if (JavaBridge.BRIDGE_VALUE.equals(event.getData())) {
+      JSObject window = (JSObject) webEngine.executeScript("window");
+      window.setMember(JavaBridge.NAME, bridge);
+
+      // Redirect console.log to the JavaBridge
+      webEngine.executeScript(SCRIPT_REPLACE_LOG);
+    }
   }
 
   /**
@@ -257,11 +284,6 @@ public class HTMLWebViewManager {
   }
 
   void handlePage() {
-    // Redirect console.log to the JavaBridge
-    JSObject window = (JSObject) webEngine.executeScript("window");
-    window.setMember(JavaBridge.NAME, bridge);
-    webEngine.executeScript(SCRIPT_REPLACE_LOG);
-
     // Replace the broken javascript form.submit method
     webEngine.executeScript(SCRIPT_REPLACE_SUBMIT);
 
