@@ -2200,6 +2200,19 @@ public class Token extends BaseModel implements Cloneable {
     MapTool.getFrame().resetTokenPanels();
   }
 
+  public void renameMacroGroup(String oldMacroGroup, String newMacroGroup) {
+    List<MacroButtonProperties> tempMacros = new ArrayList<>(getMacroList(true));
+
+    for (MacroButtonProperties nextProp : tempMacros) {
+      if (oldMacroGroup.equals(nextProp.getGroup())) {
+        nextProp.setGroup(newMacroGroup);
+      }
+    }
+    MapTool.serverCommand()
+        .putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), this);
+    MapTool.getFrame().resetTokenPanels();
+  }
+
   public static final Comparator<Token> COMPARE_BY_NAME =
       new Comparator<Token>() {
         public int compare(Token o1, Token o2) {

@@ -70,6 +70,7 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
     "hide",
     "if",
     "macro",
+    "overlay",
     "r",
     "result",
     "s",

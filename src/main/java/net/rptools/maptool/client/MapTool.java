@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -999,6 +998,8 @@ public class MapTool {
     AssetManager.updateRepositoryList();
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
+    // overlay vanishes after campaign change
+    MapTool.getFrame().getOverlayPanel().removeAllOverlays();
     UserDefinedMacroFunctions.getInstance().loadCampaignLibFunctions();
   }
 
@@ -1164,8 +1165,7 @@ public class MapTool {
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
   }
 
-  public static void createConnection(String host, int port, Player player)
-      throws UnknownHostException, IOException {
+  public static void createConnection(String host, int port, Player player) throws IOException {
     MapTool.player = player;
     MapTool.getFrame().getCommandPanel().setIdentityName(null);
 

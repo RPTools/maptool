@@ -428,7 +428,7 @@ public class TokenVblPanel extends JPanel {
     this.colorPickerActive = colorPickerActive;
 
     if (colorPickerActive) {
-      setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+      setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
       refreshTokenImageCache();
     } else {
       setCursor(Cursor.getDefaultCursor());

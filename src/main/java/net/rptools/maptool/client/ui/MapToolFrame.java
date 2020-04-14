@@ -16,18 +16,7 @@ package net.rptools.maptool.client.ui;
 
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Desktop;
-import java.awt.EventQueue;
-import java.awt.GraphicsConfiguration;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.IllegalComponentStateException;
-import java.awt.Image;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.desktop.AboutEvent;
 import java.awt.desktop.AboutHandler;
 import java.awt.desktop.PreferencesEvent;
@@ -123,6 +112,7 @@ import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
 import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
+import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.*;
@@ -181,6 +171,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private final ClientConnectionPanel connectionPanel;
   /** The panel showing the initiative order. */
   private final InitiativePanel initiativePanel;
+  /** The HTML pane showing the map overlay. */
+  private HTMLOverlayPanel overlayPanel;
 
   private final PointerOverlay pointerOverlay;
   private final CommandPanel commandPanel;
@@ -466,6 +458,7 @@ public class MapToolFrame extends DefaultDockableHolder
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
     initiativePanel = createInitiativePanel();
+    overlayPanel = new HTMLOverlayPanel();
 
     zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
     pointerOverlay = new PointerOverlay();
@@ -520,6 +513,9 @@ public class MapToolFrame extends DefaultDockableHolder
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
     rendererBorderPanel.add(zoneRendererPanel);
     toolbarPanel = new ToolbarPanel(toolbox);
+
+    zoneRendererPanel.add(overlayPanel, PositionalLayout.Position.CENTER, 0);
+    overlayPanel.setVisible(false); // disabled by default
 
     // Put it all together
     setJMenuBar(menuBar);
@@ -1540,6 +1536,11 @@ public class MapToolFrame extends DefaultDockableHolder
     return currentRenderer;
   }
 
+  /** @return the HTML Overlay Panel */
+  public HTMLOverlayPanel getOverlayPanel() {
+    return overlayPanel;
+  }
+
   public void addZoneRenderer(ZoneRenderer renderer) {
     zoneRendererList.add(renderer);
   }
@@ -1609,7 +1610,8 @@ public class MapToolFrame extends DefaultDockableHolder
       zoneRendererPanel.remove(currentRenderer);
     }
     if (renderer != null) {
-      zoneRendererPanel.add(renderer, PositionalLayout.Position.CENTER);
+      zoneRendererPanel.add(
+          renderer, PositionalLayout.Position.CENTER, zoneRendererPanel.getComponentCount() - 1);
       zoneRendererPanel.doLayout();
     }
     currentRenderer = renderer;

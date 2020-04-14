@@ -82,6 +82,7 @@ import net.rptools.maptool.client.ui.SysInfoDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
+import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.io.FTPClient;
 import net.rptools.maptool.client.ui.io.FTPTransferObject;
 import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
@@ -3078,6 +3079,35 @@ public class AppActions {
             MapTool.getFrame().getCurrentZoneRenderer().repaint();
         }
       };
+
+  /** Class representing the turn on / turn off action of an overlay. */
+  public static class ToggleOverlayAction extends ClientAction {
+    private final HTMLOverlayManager overlayManager;
+
+    /**
+     * Creates a toggle action from an overlayManager.
+     *
+     * @param overlayManager the overlayManager to toggle
+     */
+    public ToggleOverlayAction(HTMLOverlayManager overlayManager) {
+      this.overlayManager = overlayManager;
+    }
+
+    @Override
+    public boolean isSelected() {
+      return overlayManager.isVisible();
+    }
+
+    @Override
+    public boolean isAvailable() {
+      return true;
+    }
+
+    @Override
+    protected void executeAction(ActionEvent e) {
+      overlayManager.setVisible(!isSelected());
+    }
+  }
 
   public static class ToggleWindowAction extends ClientAction {
     private final MTFrame mtFrame;
