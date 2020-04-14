@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.web.WebView;
+import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
@@ -87,6 +88,11 @@ public class HTMLOverlayManager extends HTMLWebViewManager
    */
   void setZOrder(int zOrder) {
     this.zOrder = zOrder;
+  }
+
+  /** @return the name of the overlay. */
+  public String getName() {
+    return name;
   }
 
   @Override
@@ -155,6 +161,9 @@ public class HTMLOverlayManager extends HTMLWebViewManager
    * @return false if the element has --pointermap=block, true otherwise
    */
   HTMLOverlayPanel.mousePassResult getMousePassResult(int x, int y) {
+    if (!isVisible()) {
+      return HTMLOverlayPanel.mousePassResult.PASS;
+    }
     JSObject element =
         (JSObject) getWebEngine().executeScript(String.format(SCRIPT_GET_FROM_POINT, x, y));
     if (element == null) {

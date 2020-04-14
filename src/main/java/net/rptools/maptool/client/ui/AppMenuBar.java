@@ -22,6 +22,7 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,11 +38,19 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MRUCampaignManager;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
 
 public class AppMenuBar extends JMenuBar {
+  /** The manager of the Most Recently Used campaigns. */
   private static MRUCampaignManager mruManager;
+
+  /** The menu for the overlays. */
+  private static JMenu overlayMenu;
+
+  /** The map containing the overlay items. */
+  private static final Map<String, JCheckBoxMenuItem> overlayItems = new HashMap<>();
 
   public AppMenuBar() {
     add(createFileMenu());
@@ -400,8 +409,49 @@ public class AppMenuBar extends JMenuBar {
     return menu;
   }
 
+  /** @return an overlay menu. */
+  protected JMenu createOverlayMenu() {
+    overlayMenu = I18N.createMenu("menu.overlay");
+    overlayMenu.setEnabled(false); // empty by default
+    return overlayMenu;
+  }
+
+  /**
+   * Creates and add an overlay toggle menu item based on a overlayManager.
+   *
+   * @param overlayManager the overlayManager correspond to the overlay to toggle
+   */
+  public static void addToOverlayMenu(HTMLOverlayManager overlayManager) {
+    JCheckBoxMenuItem menuItem =
+        new RPCheckBoxMenuItem(new AppActions.ToggleOverlayAction(overlayManager), overlayMenu);
+    menuItem.setText(overlayManager.getName());
+    overlayMenu.add(menuItem);
+    overlayMenu.setEnabled(true);
+    overlayItems.put(overlayManager.getName(), menuItem);
+  }
+
+  /**
+   * Removes an overlay menu item based on its name.
+   *
+   * @param overlayName the name of the overlay
+   */
+  public static void removeFromOverlayMenu(String overlayName) {
+    JCheckBoxMenuItem menuItem = overlayItems.get(overlayName);
+    if (menuItem != null) {
+      overlayItems.remove(overlayName);
+      overlayMenu.remove(menuItem);
+    }
+    if (overlayItems.isEmpty()) {
+      overlayMenu.setEnabled(false);
+    }
+  }
+
   protected JMenu createWindowMenu() {
     JMenu menu = I18N.createMenu("menu.window");
+
+    menu.add(createOverlayMenu());
+
+    menu.addSeparator();
 
     menu.add(
         new AbstractAction() {
@@ -414,6 +464,7 @@ public class AppMenuBar extends JMenuBar {
             MapTool.getFrame().getDockingManager().resetToDefault();
           }
         });
+
     menu.addSeparator();
 
     for (MTFrame frame : MapToolFrame.MTFrame.values()) {
