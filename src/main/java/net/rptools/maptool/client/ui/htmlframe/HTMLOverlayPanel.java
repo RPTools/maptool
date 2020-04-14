@@ -33,6 +33,7 @@ import javax.swing.*;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.DefaultTool;
+import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
@@ -78,7 +79,9 @@ public class HTMLOverlayPanel extends JFXPanel {
         event -> {
           // Passes the mouse event to all overlays
           for (HTMLOverlayManager overlay : overlays.values()) {
-            overlay.getWebView().fireEvent(event);
+            if (overlay.isVisible()) {
+              overlay.getWebView().fireEvent(event);
+            }
           }
         });
 
@@ -111,9 +114,11 @@ public class HTMLOverlayPanel extends JFXPanel {
   /** @return whether all overlay WebViews have the default cursor. */
   public boolean areWebViewCursorsDefault() {
     for (HTMLOverlayManager overlay : overlays.values()) {
-      Cursor cursor = overlay.getWebView().getCursor();
-      if (cursor == null || !"DEFAULT".equals(cursor.toString())) {
-        return false;
+      if (overlay.isVisible()) {
+        Cursor cursor = overlay.getWebView().getCursor();
+        if (cursor == null || !"DEFAULT".equals(cursor.toString())) {
+          return false;
+        }
       }
     }
     return true;
@@ -128,6 +133,7 @@ public class HTMLOverlayPanel extends JFXPanel {
     if (overlays.containsKey(name)) {
       root.getChildren().remove(overlays.get(name).getWebView());
       overlays.remove(name);
+      AppMenuBar.removeFromOverlayMenu(name);
       if (overlays.isEmpty()) {
         setVisible(false); // hide overlay panel if all are gone
       }
@@ -142,6 +148,7 @@ public class HTMLOverlayPanel extends JFXPanel {
           ObservableList<Node> listChildren = root.getChildren();
           for (HTMLOverlayManager overlay : overlays.values()) {
             listChildren.remove(overlay.getWebView());
+            AppMenuBar.removeFromOverlayMenu(overlay.getName());
           }
           overlays.clear();
           setVisible(false);
@@ -177,6 +184,7 @@ public class HTMLOverlayPanel extends JFXPanel {
             overlayManager.setupWebView(new WebView());
             overlays.put(name, overlayManager);
             root.getChildren().add(overlayManager.getWebView());
+            AppMenuBar.addToOverlayMenu(overlayManager);
             needsSorting = true;
           }
           if (needsSorting) {
