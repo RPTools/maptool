@@ -16,6 +16,7 @@ package net.rptools.maptool.client.ui.htmlframe;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 import javafx.application.Platform;
@@ -32,6 +33,7 @@ import javax.swing.*;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.DefaultTool;
+import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
@@ -39,6 +41,12 @@ import org.apache.logging.log4j.Logger;
 
 /** Represents the JFXPanel that will contains the map overlays. */
 public class HTMLOverlayPanel extends JFXPanel {
+  enum mousePassResult {
+    BLOCK,
+    PASS,
+    CHECK_OPACITY
+  }
+
   /** The logger. */
   private static final Logger log = LogManager.getLogger(HTMLOverlayManager.class);
 
@@ -71,7 +79,9 @@ public class HTMLOverlayPanel extends JFXPanel {
         event -> {
           // Passes the mouse event to all overlays
           for (HTMLOverlayManager overlay : overlays.values()) {
-            overlay.getWebView().fireEvent(event);
+            if (overlay.isVisible()) {
+              overlay.getWebView().fireEvent(event);
+            }
           }
         });
 
@@ -104,9 +114,11 @@ public class HTMLOverlayPanel extends JFXPanel {
   /** @return whether all overlay WebViews have the default cursor. */
   public boolean areWebViewCursorsDefault() {
     for (HTMLOverlayManager overlay : overlays.values()) {
-      Cursor cursor = overlay.getWebView().getCursor();
-      if (cursor == null || !"DEFAULT".equals(cursor.toString())) {
-        return false;
+      if (overlay.isVisible()) {
+        Cursor cursor = overlay.getWebView().getCursor();
+        if (cursor == null || !"DEFAULT".equals(cursor.toString())) {
+          return false;
+        }
       }
     }
     return true;
@@ -121,6 +133,7 @@ public class HTMLOverlayPanel extends JFXPanel {
     if (overlays.containsKey(name)) {
       root.getChildren().remove(overlays.get(name).getWebView());
       overlays.remove(name);
+      AppMenuBar.removeFromOverlayMenu(name);
       if (overlays.isEmpty()) {
         setVisible(false); // hide overlay panel if all are gone
       }
@@ -135,6 +148,7 @@ public class HTMLOverlayPanel extends JFXPanel {
           ObservableList<Node> listChildren = root.getChildren();
           for (HTMLOverlayManager overlay : overlays.values()) {
             listChildren.remove(overlay.getWebView());
+            AppMenuBar.removeFromOverlayMenu(overlay.getName());
           }
           overlays.clear();
           setVisible(false);
@@ -170,6 +184,7 @@ public class HTMLOverlayPanel extends JFXPanel {
             overlayManager.setupWebView(new WebView());
             overlays.put(name, overlayManager);
             root.getChildren().add(overlayManager.getWebView());
+            AppMenuBar.addToOverlayMenu(overlayManager);
             needsSorting = true;
           }
           if (needsSorting) {
@@ -211,15 +226,22 @@ public class HTMLOverlayPanel extends JFXPanel {
   }
 
   /**
-   * Checks if the mouse event needs to be blocked, if not send the event to ZoneRenderer
+   * Determines if the mouse event should be forwarded, and if so dispatch it to the ZoneRenderer.
    *
    * @param e the mouse event
    */
   private void mayPassClick(MouseEvent e) {
     Platform.runLater(
         () -> {
-          if (!isClickBlocked(e)) {
-            SwingUtilities.invokeLater(() -> passMouseEvent(e));
+          // get the result based on the most restrictive CSS of all overlays
+          mousePassResult result = getMousePassResult(e);
+          if (result != mousePassResult.BLOCK) {
+            SwingUtilities.invokeLater(
+                () -> {
+                  if (result == mousePassResult.PASS || !isOpaque(e.getX(), e.getY())) {
+                    passMouseEvent(e);
+                  }
+                });
           }
         });
   }
@@ -230,17 +252,39 @@ public class HTMLOverlayPanel extends JFXPanel {
    * @param e the mouse event
    * @return whether the mouse event should be blocked
    */
-  private boolean isClickBlocked(MouseEvent e) {
-    boolean blocked = false;
+  private mousePassResult getMousePassResult(MouseEvent e) {
+    mousePassResult globalResult = mousePassResult.PASS;
     for (HTMLOverlayManager overlay : overlays.values()) {
-      if (overlay.isClickBlocked(e.getX(), e.getY())) {
-        blocked = true;
+      mousePassResult result = overlay.getMousePassResult(e.getX(), e.getY());
+      if (result == mousePassResult.BLOCK) {
+        globalResult = mousePassResult.BLOCK;
         break;
+      } else if (result == mousePassResult.CHECK_OPACITY) {
+        globalResult = mousePassResult.CHECK_OPACITY;
       }
     }
-    return blocked;
+    return globalResult;
   }
 
+  /**
+   * Returns whether the overlay is opaque (alpha > 0) at the x,y pixel. Method provided by gthanop
+   * at https://stackoverflow.com/questions/60906929
+   *
+   * @param x the x coordinate of the pixel
+   * @param y the y coordinate of the pixel
+   * @return true if alpha isn't 0, false if it is
+   */
+  private boolean isOpaque(int x, int y) {
+    if (!getBounds().contains(x, y)) return false; // no overlay outside the bounds
+    final BufferedImage bimg = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+    final Graphics2D g2d = bimg.createGraphics();
+    g2d.translate(-x, -y); // pixel of interest is now at 0,0
+    printAll(g2d); // draw a 1,1 pixel at 0,0
+    g2d.dispose();
+    Color c = new Color(bimg.getRGB(0, 0), true);
+    bimg.flush();
+    return c.getAlpha() != 0;
+  }
   /**
    * Add the mouse listeners to forward the mouse events to the current ZoneRenderer. Clicks and
    * mouse press get validated first to see if they need forwarding.

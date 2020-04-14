@@ -22,10 +22,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.image.WritableImage;
-import javafx.scene.transform.Translate;
 import javafx.scene.web.WebView;
+import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
@@ -90,6 +88,11 @@ public class HTMLOverlayManager extends HTMLWebViewManager
    */
   void setZOrder(int zOrder) {
     this.zOrder = zOrder;
+  }
+
+  /** @return the name of the overlay. */
+  public String getName() {
+    return name;
   }
 
   @Override
@@ -157,34 +160,23 @@ public class HTMLOverlayManager extends HTMLWebViewManager
    * @param y the y coordinate of the click
    * @return false if the element has --pointermap=block, true otherwise
    */
-  boolean isClickBlocked(int x, int y) {
+  HTMLOverlayPanel.mousePassResult getMousePassResult(int x, int y) {
+    if (!isVisible()) {
+      return HTMLOverlayPanel.mousePassResult.PASS;
+    }
     JSObject element =
         (JSObject) getWebEngine().executeScript(String.format(SCRIPT_GET_FROM_POINT, x, y));
     if (element == null) {
-      return false;
+      return HTMLOverlayPanel.mousePassResult.BLOCK;
     } else {
       String pe = (String) element.eval(SCRIPT_GET_POINTERMAP);
-      return "blockopaque".equals(pe) ? isOpaque(x, y) : "block".equals(pe);
+      if ("blockopaque".equals(pe)) return HTMLOverlayPanel.mousePassResult.CHECK_OPACITY;
+      if ("block".equals(pe)) return HTMLOverlayPanel.mousePassResult.BLOCK;
+      return HTMLOverlayPanel.mousePassResult.PASS;
     }
   }
 
   private static Rectangle2D onePixel = new Rectangle2D(0, 0, 1, 1);
-
-  /**
-   * Returns whether the overlay is opaque (alpha > 0) at the x,y pixel.
-   *
-   * @param x the x coordinate of the pixel
-   * @param y the y coordinate of the pixel
-   * @return true if alpha isn't 0, false if it is
-   */
-  private boolean isOpaque(int x, int y) {
-    SnapshotParameters sp = new SnapshotParameters();
-    sp.setTransform(new Translate(-x, -y));
-    sp.setViewport(onePixel);
-    sp.setFill(javafx.scene.paint.Color.TRANSPARENT);
-    WritableImage image = getWebView().snapshot(sp, null);
-    return image.getPixelReader().getColor(0, 0).getOpacity() != 0;
-  }
 
   @Override
   public boolean isVisible() {
