@@ -27,19 +27,25 @@ import net.rptools.maptool.model.Zone.Event;
 public class HTMLFrameFactory {
   private HTMLFrameFactory() {}
 
+  public enum FrameType {
+    FRAME,
+    DIALOG,
+    OVERLAY
+  }
+
   private static HTMLFrameFactory.Listener listener;
 
   /**
    * Shows a dialog or frame based on the options.
    *
    * @param name The name of the dialog or frame.
-   * @param isFrame Is it a frame.
+   * @param frameType The type of the frame.
    * @param isHTML5 Does it use HTML5 (JavaFX) or HTML 3.2 (Swing).
    * @param properties The properties that determine the attributes of the frame or dialog.
    * @param html The html contents of frame or dialog.
    */
   public static void show(
-      String name, boolean isFrame, boolean isHTML5, String properties, String html) {
+      String name, FrameType frameType, boolean isHTML5, String properties, String html) {
     if (listener == null) {
       listener = new HTMLFrameFactory.Listener();
     }
@@ -47,11 +53,13 @@ public class HTMLFrameFactory {
     boolean temporary = false;
     int width = -1;
     int height = -1;
+    int zOrder = 0;
     String title = name;
     String tabTitle = null;
     Object frameValue = null;
     boolean hasFrame = true;
     boolean closeButton = true;
+    boolean scrollReset = false;
 
     if (properties != null && !properties.isEmpty()) {
       String[] opts = properties.split(";");
@@ -93,6 +101,12 @@ public class HTMLFrameFactory {
           } catch (NumberFormatException e) {
             // Ignoring the value; shouldn't we warn the user?
           }
+        } else if (keyLC.equals("zorder")) {
+          try {
+            zOrder = Integer.parseInt(value);
+          } catch (NumberFormatException e) {
+            // Ignoring the value; shouldn't we warn the user?
+          }
         } else if (keyLC.equals("title")) {
           title = value;
         } else if (keyLC.equals("noframe")) {
@@ -113,6 +127,11 @@ public class HTMLFrameFactory {
           } catch (NumberFormatException e) {
             // Ignoring the value; shouldn't we warn the user?
           }
+        } else if (keyLC.equals("scrollreset")) {
+          int v = Integer.parseInt(value);
+          if (v != 0) {
+            scrollReset = true;
+          }
         } else if (keyLC.equals("value")) {
           frameValue = value;
         } else if (keyLC.equals("tabtitle")) {
@@ -121,10 +140,10 @@ public class HTMLFrameFactory {
       }
     }
     if (tabTitle == null) tabTitle = title; // if tabTitle not set, make it same as title
-    if (isFrame) {
+    if (frameType == FrameType.FRAME) {
       HTMLFrame.showFrame(
-          name, title, tabTitle, width, height, temporary, isHTML5, frameValue, html);
-    } else {
+          name, title, tabTitle, width, height, temporary, scrollReset, isHTML5, frameValue, html);
+    } else if (frameType == FrameType.DIALOG) {
       HTMLDialog.showDialog(
           name,
           title,
@@ -134,9 +153,12 @@ public class HTMLFrameFactory {
           input,
           temporary,
           closeButton,
+          scrollReset,
           isHTML5,
           frameValue,
           html);
+    } else if (frameType == FrameType.OVERLAY) {
+      MapTool.getFrame().getOverlayPanel().showOverlay(name, zOrder, html);
     }
   }
 
@@ -144,21 +166,21 @@ public class HTMLFrameFactory {
   public static void selectedListChanged() {
     HTMLFrame.doSelectedChanged();
     HTMLDialog.doSelectedChanged();
-    MapTool.getFrame().getHtmlOverlay().doSelectedChanged();
+    MapTool.getFrame().getOverlayPanel().doSelectedChanged();
   }
 
   /** A new token has been impersonated or cleared. */
   public static void impersonateToken() {
     HTMLFrame.doImpersonatedChanged();
     HTMLDialog.doImpersonatedChanged();
-    MapTool.getFrame().getHtmlOverlay().doImpersonatedChanged();
+    MapTool.getFrame().getOverlayPanel().doImpersonatedChanged();
   }
 
   /** One of the tokens has changed. */
   public static void tokenChanged(Token token) {
     HTMLFrame.doTokenChanged(token);
     HTMLDialog.doTokenChanged(token);
-    MapTool.getFrame().getHtmlOverlay().doTokenChanged(token);
+    MapTool.getFrame().getOverlayPanel().doTokenChanged(token);
   }
 
   public static class Listener implements ModelChangeListener, AppEventListener {

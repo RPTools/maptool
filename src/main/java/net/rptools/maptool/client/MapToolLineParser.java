@@ -39,6 +39,7 @@ import net.rptools.maptool.client.functions.AssertFunction.AssertFunctionExcepti
 import net.rptools.maptool.client.functions.ReturnFunction.ReturnFunctionException;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory.FrameType;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -359,7 +360,7 @@ public class MapToolLineParser {
     // HTML webView
     FRAME5("frame5", 1, 2, "\"\""),
     // HTML overlay
-    OVERLAY("overlay", 0, 1, "\"\""),
+    OVERLAY("overlay", 1, 2, "\"\""),
     // Run for another token
     TOKEN("token", 1, 1);
 
@@ -1037,8 +1038,9 @@ public class MapToolLineParser {
                   break;
                 case OVERLAY:
                   codeType = CodeType.CODEBLOCK;
+                  frameName = option.getParsedParam(0, resolver, tokenInContext).toString();
+                  frameOpts = option.getParsedParam(1, resolver, tokenInContext).toString();
                   outputTo = OutputLoc.OVERLAY;
-                  frameOpts = option.getParsedParam(0, resolver, tokenInContext).toString();
                   break;
                   ///////////////////////////////////////////////////
                   // CODE OPTIONS
@@ -1431,24 +1433,30 @@ public class MapToolLineParser {
           switch (outputTo) {
             case FRAME:
               HTMLFrameFactory.show(
-                  frameName, true, false, frameOpts, expressionBuilder.toString());
+                  frameName, FrameType.FRAME, false, frameOpts, expressionBuilder.toString());
               break;
             case DIALOG:
               HTMLFrameFactory.show(
-                  frameName, false, false, frameOpts, expressionBuilder.toString());
+                  frameName, FrameType.DIALOG, false, frameOpts, expressionBuilder.toString());
               break;
             case OVERLAY:
-              MapTool.getFrame().getHtmlOverlay().updateContents(expressionBuilder.toString());
+              HTMLFrameFactory.show(
+                  frameName, FrameType.OVERLAY, true, frameOpts, expressionBuilder.toString());
               break;
             case CHAT:
               builder.append(expressionBuilder);
               break;
             case FRAME5:
-              HTMLFrameFactory.show(frameName, true, true, frameOpts, expressionBuilder.toString());
+              HTMLFrameFactory.show(
+                  frameName, FrameType.FRAME, true, frameOpts, expressionBuilder.toString());
               break;
             case DIALOG5:
               HTMLFrameFactory.show(
-                  frameName, false, true, frameOpts, expressionBuilder.toString());
+                  frameName,
+                  HTMLFrameFactory.FrameType.DIALOG,
+                  true,
+                  frameOpts,
+                  expressionBuilder.toString());
               break;
           }
 

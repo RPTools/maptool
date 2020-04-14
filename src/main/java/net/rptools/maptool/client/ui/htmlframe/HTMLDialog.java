@@ -155,7 +155,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    */
   public void addHTMLPanel(boolean scrollBar, boolean isHTML5) {
     if (isHTML5) {
-      panel = new HTMLJFXPanel(this);
+      panel = new HTMLJFXPanel(this, new HTMLWebViewManager());
     } else {
       panel = new HTMLPanel(this, scrollBar);
     }
@@ -175,6 +175,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param input whether submitting the form closes it
    * @param temp whether the frame is temporary
    * @param closeButton whether the close button is to be displayed
+   * @param scrollReset whether the scrollbar should be reset
    * @param isHTML5 whether the frame should support HTML5
    * @param value a value to be returned by getDialogProperties()
    * @param html the HTML to display in the dialog
@@ -189,6 +190,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       boolean input,
       boolean temp,
       boolean closeButton,
+      boolean scrollReset,
       boolean isHTML5,
       Object value,
       String html) {
@@ -199,7 +201,8 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       dialog = new HTMLDialog(MapTool.getFrame(), name, frame, width, height, isHTML5);
       dialogs.put(name, dialog);
     }
-    dialog.updateContents(html, title, frame, input, temp, closeButton, isHTML5, value);
+    dialog.updateContents(
+        html, title, frame, input, temp, closeButton, scrollReset, isHTML5, value);
 
     // dialog.canResize = false;
     if (!dialog.isVisible()) {
@@ -307,6 +310,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    * @param input whether to close the dialog on form submit
    * @param temp whether to make the dialog temporary
    * @param closeButton whether to show a close button
+   * @param scrollReset whether the scrollbar should be reset
    * @param isHTML5 whether to make the dialog HTML5 (JavaFX)
    * @param val the value held in the frame
    */
@@ -317,6 +321,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
       boolean input,
       boolean temp,
       boolean closeButton,
+      boolean scrollReset,
       boolean isHTML5,
       Object val) {
     if (this.isHTML5 != isHTML5) {
@@ -336,7 +341,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     this.setTitle(title);
     macroCallbacks.clear();
     updateButton(closeButton);
-    panel.updateContents(html);
+    panel.updateContents(html, scrollReset);
   }
 
   /**

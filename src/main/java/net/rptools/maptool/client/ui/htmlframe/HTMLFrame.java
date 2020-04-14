@@ -97,6 +97,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param width the width of the frame in pixels.
    * @param height the height of the frame in pixels.
    * @param temp whether the frame should be temporary.
+   * @param scrollReset whether the scrollbar should be reset.
    * @param isHTML5 whether it should use HTML5 (JavaFX) or HTML 3.2 (Swing).
    * @param val a value that can be returned by getFrameProperties().
    * @param html the html to display in the frame.
@@ -109,6 +110,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       int width,
       int height,
       boolean temp,
+      boolean scrollReset,
       boolean isHTML5,
       Object val,
       String html) {
@@ -129,7 +131,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
       // Jamz: why undock frames to center them?
       if (!frame.isDocked()) center(name);
     }
-    frame.updateContents(html, title, tabTitle, temp, isHTML5, val);
+    frame.updateContents(html, title, tabTitle, temp, scrollReset, isHTML5, val);
     return frame;
   }
 
@@ -160,7 +162,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    */
   public void addHTMLPanel(boolean isHTML5) {
     if (isHTML5) {
-      panel = new HTMLJFXPanel(this);
+      panel = new HTMLJFXPanel(this, new HTMLWebViewManager());
     } else {
       panel = new HTMLPanel(this, true);
     }
@@ -225,11 +227,18 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param title the title of the frame
    * @param tabTitle the tabTitle of the frame
    * @param temp whether the frame is temporary
+   * @param scrollReset whether the scrollbar should be reset
    * @param isHTML5 whether the frame should support HTML5 (JavaFX)
    * @param val the value to put in the frame
    */
   public void updateContents(
-      String html, String title, String tabTitle, boolean temp, boolean isHTML5, Object val) {
+      String html,
+      String title,
+      String tabTitle,
+      boolean temp,
+      boolean scrollReset,
+      boolean isHTML5,
+      Object val) {
     if (this.isHTML5 != isHTML5) {
       this.isHTML5 = isHTML5;
       panel.removeFromContainer(this); // remove previous panel
@@ -241,7 +250,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
     setTabTitle(tabTitle);
     setTemporary(temp);
     setValue(val);
-    panel.updateContents(html);
+    panel.updateContents(html, scrollReset);
   }
 
   /** Run all callback macros for "onChangeSelection". */
