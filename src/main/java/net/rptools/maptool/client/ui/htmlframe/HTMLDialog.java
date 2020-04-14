@@ -155,7 +155,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    */
   public void addHTMLPanel(boolean scrollBar, boolean isHTML5) {
     if (isHTML5) {
-      panel = new HTMLJFXPanel(this);
+      panel = new HTMLJFXPanel(this, new HTMLWebViewManager());
     } else {
       panel = new HTMLPanel(this, scrollBar);
     }

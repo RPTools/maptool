@@ -998,7 +998,8 @@ public class MapTool {
     AssetManager.updateRepositoryList();
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
-    MapTool.getFrame().getHtmlOverlay().closeRequest(); // overlay vanishes after campaign change
+    // overlay vanishes after campaign change
+    MapTool.getFrame().getOverlayPanel().removeAllOverlays();
     UserDefinedMacroFunctions.getInstance().loadCampaignLibFunctions();
   }
 

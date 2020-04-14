@@ -4910,7 +4910,7 @@ public class ZoneRenderer extends JComponent
     }
     // Overlay and ZoneRenderer should have same cursor
     super.setCursor(cursor);
-    MapTool.getFrame().getHtmlOverlay().setCursor(cursor);
+    MapTool.getFrame().getOverlayPanel().setOverlayCursor(cursor);
   }
 
   private Cursor custom = null;
