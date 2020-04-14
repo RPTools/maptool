@@ -70,6 +70,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   private int scrollX = 0;
   /** The vertical scrolling. */
   private int scrollY = 0;
+  /** Whether the WebView has been flushed out. */
+  private boolean isFlushed = true;
 
   /** The bridge from Javascript to Java. */
   private static final JavaBridge bridge = new JavaBridge();
@@ -179,10 +181,16 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   public void flush() {
     Platform.runLater(
         () -> {
+          // Stores the x,y scrolling of the previous WebView
+          scrollX = getHScrollValue();
+          scrollY = getVScrollValue();
+
           // Delete cache for navigate back
           webEngine.load("about:blank");
           // Delete cookies
           java.net.CookieHandler.setDefault(new java.net.CookieManager());
+
+          isFlushed = true;
         });
   }
 
@@ -194,10 +202,12 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
     Platform.runLater(
         () -> {
           this.scrollReset = scrollReset;
-          if (!scrollReset) {
+          // If the WebView has been flushed, the scrolling has already been stored
+          if (!scrollReset && !isFlushed) {
             scrollX = getHScrollValue();
             scrollY = getVScrollValue();
           }
+          isFlushed = false;
           webEngine.loadContent(SCRIPT_BLOCK_EXT + HTMLPanelInterface.fixHTML(html));
         });
   }
@@ -369,11 +379,10 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
         EventTarget target = (EventTarget) nodeList.item(i);
         target.addEventListener("click", listenerSubmit, false);
       }
-
-      // Restores the previous scrolling.
-      if (!scrollReset) {
-        scrollTo(scrollX, scrollY);
-      }
+    }
+    // Restores the previous scrolling.
+    if (!scrollReset) {
+      scrollTo(scrollX, scrollY);
     }
   }
 
