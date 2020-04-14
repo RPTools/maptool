@@ -112,7 +112,7 @@ import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
 import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
-import net.rptools.maptool.client.ui.htmlframe.HTMLOverlay;
+import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.*;
@@ -172,7 +172,7 @@ public class MapToolFrame extends DefaultDockableHolder
   /** The panel showing the initiative order. */
   private final InitiativePanel initiativePanel;
   /** The HTML pane showing the map overlay. */
-  private final HTMLOverlay htmlOverlay;
+  private HTMLOverlayPanel overlayPanel;
 
   private final PointerOverlay pointerOverlay;
   private final CommandPanel commandPanel;
@@ -456,7 +456,7 @@ public class MapToolFrame extends DefaultDockableHolder
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
     initiativePanel = createInitiativePanel();
-    htmlOverlay = new HTMLOverlay();
+    overlayPanel = new HTMLOverlayPanel();
 
     zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
     pointerOverlay = new PointerOverlay();
@@ -512,8 +512,8 @@ public class MapToolFrame extends DefaultDockableHolder
     rendererBorderPanel.add(zoneRendererPanel);
     toolbarPanel = new ToolbarPanel(toolbox);
 
-    zoneRendererPanel.add(htmlOverlay, PositionalLayout.Position.CENTER, 0);
-    htmlOverlay.setVisible(false); // disabled by default
+    zoneRendererPanel.add(overlayPanel, PositionalLayout.Position.CENTER, 0);
+    overlayPanel.setVisible(false); // disabled by default
 
     // Put it all together
     setJMenuBar(menuBar);
@@ -1524,9 +1524,9 @@ public class MapToolFrame extends DefaultDockableHolder
     return currentRenderer;
   }
 
-  /** @return the HTMLOverlay */
-  public HTMLOverlay getHtmlOverlay() {
-    return htmlOverlay;
+  /** @return the HTML Overlay Panel */
+  public HTMLOverlayPanel getOverlayPanel() {
+    return overlayPanel;
   }
 
   public void addZoneRenderer(ZoneRenderer renderer) {
