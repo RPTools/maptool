@@ -1284,7 +1284,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
               getTokenVblPanel().updateUI();
 
               if (getVblColorPickerToggleButton().isSelected()) {
-                getTokenVblPanel().setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+                getTokenVblPanel().setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
               } else {
                 getTokenVblPanel().setCursor(Cursor.getDefaultCursor());
               }
