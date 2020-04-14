@@ -21,8 +21,10 @@ import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Event;
+import net.rptools.parser.ParserException;
 
 public class HTMLFrameFactory {
   private HTMLFrameFactory() {}
@@ -45,7 +47,8 @@ public class HTMLFrameFactory {
    * @param html The html contents of frame or dialog.
    */
   public static void show(
-      String name, FrameType frameType, boolean isHTML5, String properties, String html) {
+      String name, FrameType frameType, boolean isHTML5, String properties, String html)
+      throws ParserException {
     if (listener == null) {
       listener = new HTMLFrameFactory.Listener();
     }
@@ -105,7 +108,9 @@ public class HTMLFrameFactory {
           try {
             zOrder = Integer.parseInt(value);
           } catch (NumberFormatException e) {
-            // Ignoring the value; shouldn't we warn the user?
+            String funcName = frameType.toString().toLowerCase();
+            String msg = I18N.getText("macro.function.general.argumentKeyTypeI", funcName, keyLC);
+            throw new ParserException(msg);
           }
         } else if (keyLC.equals("title")) {
           title = value;
