@@ -28,6 +28,7 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
+import net.rptools.maptool.model.notebook.NoteBook;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookTableTreeModel;
 
@@ -35,7 +36,7 @@ public class NoteBookUI {
 
   private SwingJavaFXDialog noteBookDialog;
   private JFXPanel jfxPanel;
-  private NoteBookController controller;
+  private NoteBooksController controller;
 
   /** The {@link NoteBookTableTreeModel} with all the {@link NoteBookEntry}s for the campaign. */
   private NoteBookTableTreeModel noteBookTableTreeModel;
@@ -56,7 +57,7 @@ public class NoteBookUI {
     ResourceBundle resourceBundle = ResourceBundle.getBundle("net.rptools.maptool.language.i18n");
     var loader =
         new FXMLLoader(
-            getClass().getResource("/net/rptools/maptool/client/ui/fxml/NoteBook.fxml"),
+            getClass().getResource("/net/rptools/maptool/client/ui/fxml/NoteBooks.fxml"),
             resourceBundle);
 
     Parent parent = loader.load();
