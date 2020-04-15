@@ -985,6 +985,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       // Jamz: Bug fix, we don't support editing multiple tokens here.
       if (selectedTokenSet.size() > 1) {
         setEnabled(false);
+      } else if (!MapTool.getPlayer().isGM() && MapTool.getServerPolicy().isTokenEditorLocked()) {
+        setEnabled(false);
       }
     }
 
