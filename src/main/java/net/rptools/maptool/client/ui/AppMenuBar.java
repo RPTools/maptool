@@ -132,6 +132,7 @@ public class AppMenuBar extends JMenuBar {
     menu.add(createQuickMapMenu());
     menu.add(new JMenuItem(AppActions.LOAD_MAP));
     menu.add(new JMenuItem(AppActions.SAVE_MAP_AS));
+    menu.add(new JMenuItem(AppActions.IMPORT_DUNGEON_DRAFT_MAP));
     menu.addSeparator();
 
     // MAP TOGGLES

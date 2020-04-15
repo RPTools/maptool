@@ -246,6 +246,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private final FileFilter tableFilter =
       new MTFileFilter("mttable", I18N.getText("file.ext.mttable"));
 
+  private final FileFilter dungeonDraftFilter =
+      new MTFileFilter("dd2vtt", I18N.getText("file.ext.dungeondraft"));
   private EditTokenDialog tokenPropertiesDialog;
 
   private final CampaignPanel campaignPanel = new CampaignPanel();
@@ -871,6 +873,15 @@ public class MapToolFrame extends DefaultDockableHolder
     return mapFilter;
   }
 
+  /**
+   * Returns the {@link FileFilter} for dungeondraft VTT export files.
+   *
+   * @return the {@link FileFilter} for dungeondraft VTT export files.
+   */
+  public FileFilter getDungeonDraftFilter() {
+    return dungeonDraftFilter;
+  }
+
   public JFileChooser getLoadPropsFileChooser() {
     if (loadPropsFileChooser == null) {
       loadPropsFileChooser = new JFileChooser();
@@ -1447,7 +1458,8 @@ public class MapToolFrame extends DefaultDockableHolder
               zone.setBackgroundPaint(new DrawableColorPaint(Color.black));
               zone.setBackgroundAsset(asset.getMD5Key());
             }
-            MapPropertiesDialog newMapDialog = new MapPropertiesDialog(MapTool.getFrame());
+            MapPropertiesDialog newMapDialog =
+                MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
             newMapDialog.setZone(zone);
             newMapDialog.setVisible(true);
 
