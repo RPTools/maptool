@@ -594,7 +594,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">OK</at>
+                 <at name="text">Button.ok</at>
                  <at name="height">25</at>
                  <at name="width">53</at>
                  <at name="name">okButton</at>
@@ -650,7 +650,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Cancel</at>
+                 <at name="text">Button.cancel</at>
                  <at name="height">25</at>
                  <at name="width">75</at>
                  <at name="name">cancelButton</at>
