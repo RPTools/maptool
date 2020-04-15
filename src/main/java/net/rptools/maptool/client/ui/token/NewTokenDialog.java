@@ -67,7 +67,7 @@ public class NewTokenDialog extends AbeillePanel<Token> {
 
   public void showDialog() {
     dialog =
-        new GenericDialog("New Token", MapTool.getFrame(), this) {
+        new GenericDialog(I18N.getString("dialog.NewToken.title"), MapTool.getFrame(), this) {
           @Override
           protected void positionInitialView() {
 
