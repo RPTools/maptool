@@ -411,11 +411,15 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       JCheckBoxMenuItem noneMenu =
           new JCheckBoxMenuItem(
               standardColorActionConstructor.newInstance(
-                  new Object[] {this, getRenderer(), selectedTokenSet, null, "None"}));
+                  new Object[] {
+                    this, getRenderer(), selectedTokenSet, null, I18N.getText("Color.none")
+                  }));
       JCheckBoxMenuItem customMenu =
           new JCheckBoxMenuItem(
               customColorActionConstructor.newInstance(
-                  new Object[] {this, getRenderer(), selectedTokenSet, "Custom"}));
+                  new Object[] {
+                    this, getRenderer(), selectedTokenSet, I18N.getText("Color.custom")
+                  }));
 
       if (selectedColor == null) {
         noneMenu.setSelected(true);
