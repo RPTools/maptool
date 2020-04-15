@@ -113,7 +113,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   protected class ShowHandoutAction extends AbstractAction {
     public ShowHandoutAction() {
-      putValue(Action.NAME, "Show Handout");
+      putValue(Action.NAME, I18N.getText("token.popup.menu.showHandout"));
       setEnabled(getTokenUnderMouse().getCharsheetImage() != null);
     }
 
@@ -128,7 +128,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   }
 
   protected JMenu createLightSourceMenu() {
-    JMenu menu = new JMenu("Light Source");
+    JMenu menu = new JMenu(I18N.getText("panel.MapExplorer.View.LIGHT_SOURCES"));
 
     if (tokenUnderMouse.hasLightSources()) {
       menu.add(new ClearLightAction());
@@ -183,12 +183,12 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   }
 
   protected JMenu createFlipMenu() {
-    JMenu flipMenu = new JMenu("Flip");
+    JMenu flipMenu = new JMenu(I18N.getText("token.popup.menu.flip"));
 
     flipMenu.add(
         new AbstractAction() {
           {
-            putValue(NAME, "Horizontal");
+            putValue(NAME, I18N.getText("token.popup.menu.flip.horizontal"));
           }
 
           public void actionPerformed(ActionEvent e) {
@@ -207,7 +207,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     flipMenu.add(
         new AbstractAction() {
           {
-            putValue(NAME, "Vertical");
+            putValue(NAME, I18N.getText("token.popup.menu.flip.vertical"));
           }
 
           public void actionPerformed(ActionEvent e) {
@@ -226,7 +226,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     flipMenu.add(
         new AbstractAction() {
           {
-            putValue(NAME, "Isometric Plane");
+            putValue(NAME, I18N.getText("token.popup.menu.flip.isometric"));
           }
 
           public void actionPerformed(ActionEvent e) {
@@ -246,7 +246,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   }
 
   protected JMenu createChangeToMenu(Zone.Layer... types) {
-    JMenu changeTypeMenu = new JMenu("Change to");
+    JMenu changeTypeMenu = new JMenu(I18N.getText("token.popup.menu.change"));
     for (Zone.Layer layer : types) {
       changeTypeMenu.add(new JMenuItem(new ChangeTypeAction(layer)));
     }
@@ -254,11 +254,11 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   }
 
   protected JMenu createArrangeMenu() {
-    JMenu arrangeMenu = new JMenu("Arrange");
-    JMenuItem bringToFrontMenuItem = new JMenuItem("Bring to Front");
+    JMenu arrangeMenu = new JMenu(I18N.getText("token.popup.menu.arrange"));
+    JMenuItem bringToFrontMenuItem = new JMenuItem(I18N.getText("token.popup.menu.zorder.front"));
     bringToFrontMenuItem.addActionListener(new BringToFrontAction());
 
-    JMenuItem sendToBackMenuItem = new JMenuItem("Send to Back");
+    JMenuItem sendToBackMenuItem = new JMenuItem(I18N.getText("token.popup.menu.zorder.back"));
     sendToBackMenuItem.addActionListener(new SendToBackAction());
 
     arrangeMenu.add(bringToFrontMenuItem);
@@ -268,7 +268,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   }
 
   protected JMenu createSizeMenu() {
-    JMenu sizeMenu = new JMenu("Size");
+    JMenu sizeMenu = new JMenu(I18N.getText("token.popup.menu.size"));
 
     JCheckBoxMenuItem freeSize = new JCheckBoxMenuItem(new FreeSizeAction());
     freeSize.setSelected(!tokenUnderMouse.isSnapToScale());
@@ -403,7 +403,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class FreeSizeAction extends AbstractAction {
     public FreeSizeAction() {
-      putValue(Action.NAME, tokenUnderMouse.isStamp() ? "Free Size" : "Native Size");
+      String actionText =
+          I18N.getText("token.popup.menu.size" + (tokenUnderMouse.isStamp() ? ".free" : ".native"));
+      putValue(Action.NAME, actionText);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -422,7 +424,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   public class ResetSizeAction extends AbstractAction {
     public ResetSizeAction() {
       // putValue(Action.NAME, tokenUnderMouse.isStamp() ? "Free Size" : "Native Size");
-      putValue(Action.NAME, "Reset Size");
+      putValue(Action.NAME, I18N.getText("token.popup.menu.size.reset"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -497,7 +499,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     boolean saveMultipleTokens = false;
 
     public SaveAction() {
-      super("Save ...");
+      super(I18N.getText("token.popup.menu.save"));
 
       if (selectedTokenSet.size() > 1) {
         saveMultipleTokens = true;
@@ -660,7 +662,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class SetFacingAction extends AbstractAction {
     public SetFacingAction() {
-      super("Set Facing");
+      super(I18N.getText("token.popup.menu.facing.set"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -675,7 +677,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ClearFacingAction extends AbstractAction {
     public ClearFacingAction() {
-      super("Clear Facing");
+      super(I18N.getString("token.popup.menu.facing.clear"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -692,7 +694,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ClearLightsOnlyAction extends AbstractAction {
     public ClearLightsOnlyAction() {
-      super("Clear Lights Only");
+      super(I18N.getString("token.popup.menu.lights.clear"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -712,7 +714,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ClearAurasOnlyAction extends AbstractAction {
     public ClearAurasOnlyAction() {
-      super("Clear Auras Only");
+      super(I18N.getString("token.popup.menu.auras.clear"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -732,7 +734,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ClearGMAurasOnlyAction extends AbstractAction {
     public ClearGMAurasOnlyAction() {
-      super("Clear GM Auras Only");
+      super("token.popup.menu.auras.clearGM");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -752,7 +754,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ClearOwnerAurasOnlyAction extends AbstractAction {
     public ClearOwnerAurasOnlyAction() {
-      super("Clear Owner Auras Only");
+      super(I18N.getText("token.popup.menu.auras.clearOwner"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -772,7 +774,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ClearLightAction extends AbstractAction {
     public ClearLightAction() {
-      super("Clear All");
+      super(I18N.getText("token.popup.menu.lights.clearAll"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -793,7 +795,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     private final ZoneRenderer renderer;
 
     public SnapToGridAction(boolean snapToGrid, ZoneRenderer renderer) {
-      super("Snap to grid");
+      super(I18N.getText("token.popup.menu.snap"));
       this.snapToGrid = snapToGrid;
       this.renderer = renderer;
     }
@@ -912,7 +914,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class VisibilityAction extends AbstractAction {
     {
-      putValue(Action.NAME, "Visible to players");
+      putValue(Action.NAME, I18N.getText("token.popup.menu.visible"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -948,7 +950,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ImpersonateAction extends AbstractAction {
     public ImpersonateAction() {
-      putValue(Action.NAME, "Impersonate");
+      putValue(Action.NAME, I18N.getText("token.popup.menu.impersonate"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -965,7 +967,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class StartMoveAction extends AbstractAction {
     public StartMoveAction() {
-      putValue(Action.NAME, "Move");
+      putValue(Action.NAME, I18N.getText("token.popup.menu.move"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -980,7 +982,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ShowPropertiesDialogAction extends AbstractAction {
     public ShowPropertiesDialogAction() {
-      putValue(Action.NAME, "Edit ...");
+      putValue(Action.NAME, I18N.getText("token.popup.menu.edit"));
 
       // Jamz: Bug fix, we don't support editing multiple tokens here.
       if (selectedTokenSet.size() > 1) {
@@ -1004,7 +1006,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class DeleteAction extends AbstractAction {
     public DeleteAction() {
-      putValue(Action.NAME, "Delete");
+      putValue(Action.NAME, I18N.getText("token.popup.menu.delete"));
     }
 
     public void actionPerformed(ActionEvent e) {
