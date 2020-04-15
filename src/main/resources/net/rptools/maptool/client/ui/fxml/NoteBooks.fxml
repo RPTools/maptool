@@ -2,10 +2,11 @@
 
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.notebook.NoteBooksController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.notebook.NoteBooksController">
    <left>
       <BorderPane BorderPane.alignment="CENTER">
          <center>
@@ -21,4 +22,7 @@
          </bottom>
       </BorderPane>
    </left>
+   <center>
+      <AnchorPane fx:id="contentsPane" prefHeight="600.0" prefWidth="800.0" BorderPane.alignment="CENTER" />
+   </center>
 </BorderPane>

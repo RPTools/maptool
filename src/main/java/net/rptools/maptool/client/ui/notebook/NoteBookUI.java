@@ -28,7 +28,6 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.notebook.NoteBook;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
 import net.rptools.maptool.model.notebook.tabletreemodel.NoteBookTableTreeModel;
 

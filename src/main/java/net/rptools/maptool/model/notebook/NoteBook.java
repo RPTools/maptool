@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
@@ -32,9 +33,10 @@ import java.util.stream.Collectors;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
+import org.bouncycastle.LICENSE;
 
 /**
- * {@code MapBookmarkManager} class is used to manage all the {@link NoteBookEntry}s in a campaign.
+ * {@code MapBookmarkManager} class is used to manage all the {@code NoteBookEntry}s in a campaign.
  * This class is thread safe so may be used from multiple threads.
  *
  * <p>Taking out a lock on a {@code NoteBook} (e.g. {code syncronized(notebook) {}} will block
@@ -42,7 +44,11 @@ import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
  * <li>{@link #setDescription(String)}
  * <li>{@link #setName(String)}></il>
  * <li>{@link #setVersion(String)}
- * <li>{@link #setNamespace(String)} (String)} </ui> while the lock is held and can be used when you
+ * <li>{@link #setNamespace(String)} (String)}
+ * <li>{@link #setAuthor(String)} (String)}
+ * <li>{@link #setLicense(String)} (String)}
+ * <li>{@link #setURL(String)} (String)}
+ * </ui> while the lock is held and can be used when you
  *     require these to remain stable while performing an operation.
  *
  * @implNote Maintaining the thread safety of this class depends on keeping to the following
@@ -138,6 +144,50 @@ public class NoteBook implements Comparable<NoteBook> {
    */
   public static final String VERSIONED_NAMESPACE_CHANGED = "Versioned Namespace Changed";
 
+
+  /**
+   * Name of event fired when the URL of the {@code NoteBook} changes. For this event:
+   *
+   * <ul>
+   *   <li>{@code oldValue} = The old URL of the {@code NoteBook}.
+   *   <li>{@code newValue} = The new URL of the {@code NoteBook}.
+   * </ul>
+   */
+  public static final String URL_CHANGED = "URL Changed";
+
+  /**
+   * Name of event fired when the author of the {@code NoteBook} changes. For this event:
+   *
+   * <ul>
+   *   <li>{@code oldValue} = The old author of the {@code NoteBook}.
+   *   <li>{@code newValue} = The new author of the {@code NoteBook}.
+   * </ul>
+   */
+  public static final String AUTHOR_CHANGED = "Author Changed";
+
+
+  /**
+   * Name of event fired when the license of the {@code NoteBook} changes. For this event:
+   *
+   * <ul>
+   *   <li>{@code oldValue} = The old license of the {@code NoteBook}.
+   *   <li>{@code newValue} = The new license of the {@code NoteBook}.
+   * </ul>
+   */
+  public static final String LICENSE_CHANGED = "License Changed";
+
+  /**
+   * Name of event fired when the read me of the {@code NoteBook} changes. For this event:
+   *
+   * <ul>
+   *   <li>{@code oldValue} = The old read me of the {@code NoteBook}.
+   *   <li>{@code newValue} = The new read me of the {@code NoteBook}.
+   * </ul>
+   */
+  public static final String README_CHANGED = "Read Me Changed";
+
+
+
   /** Class used to hold a {@code MapBookEntry} and the path it is in the tree. */
   private static final class EntryDetails {
     /** The path that the {@code MapBookEntry} can be found in the tree. */
@@ -148,6 +198,7 @@ public class NoteBook implements Comparable<NoteBook> {
 
     /** The {@link GUID} zoneId for the {@link Zone} this entry is for. */
     private final GUID zoneId;
+
     /**
      * Creates a new {@code EntryPath} object.
      *
@@ -194,7 +245,7 @@ public class NoteBook implements Comparable<NoteBook> {
    */
   private final Set<GUID> removedZones = new HashSet<>();
 
-  /** Mapping between id and {@link NoteBookEntry}. */
+  /** Mapping between id and {@code NoteBookEntry}. */
   private final Map<UUID, EntryDetails> idEntryMap = new HashMap<>();
 
   /** Mapping between the path and the id of an entry in the {@code NoteBook}. */
@@ -238,6 +289,23 @@ public class NoteBook implements Comparable<NoteBook> {
   /** Is this an internal MapTool {@code NoteBook}. */
   private final boolean internal;
 
+
+  /** The author of the {@code NoteBook}. */
+  private String author;
+
+  /** The URL for the {@code NoteBook}. */
+  private String URL;
+
+  /** The required dependencies for the {@code NoteBook}. */
+  private final Map<String, String> dependencyMap = new HashMap<>();
+
+  /** The license for the {@code NoteBook}. */
+  private String license;
+
+
+  /** The read me for the {@code NoteBook}. */
+  private String readMe;
+
   /**
    * Creates a new {@code NoteBook} object.
    *
@@ -246,6 +314,11 @@ public class NoteBook implements Comparable<NoteBook> {
    * @param description The description of the {@code NoteBook}.
    * @param version The version of the {@code NoteBook}.
    * @param namespace The namespace of the {@code NoteBook}.
+   * @param author The author of the {@code NoteBook}.
+   * @param license The license of the {@code NoteBook}.
+   * @param readme The Read Me of the {@code NoteBook}.
+   * @param url The url of the {@code NoteBook}.
+   *
    * @param internal {@code true} if this ia an internal uneditable MapTool {@code NoteBook}.
    */
   private NoteBook(
@@ -254,13 +327,27 @@ public class NoteBook implements Comparable<NoteBook> {
       String description,
       String version,
       String namespace,
+      String author,
+      String license,
+      String url,
+      String readme,
       boolean internal) {
+    Objects.requireNonNull(id, "id cannot be null.");
+    Objects.requireNonNull(name, "name cannot be null.");
+    Objects.requireNonNull(name, "version cannot be null.");
+    Objects.requireNonNull(name, "namespace cannot be null.");
+
     this.id = id;
     this.name = name;
-    this.description = description;
+    this.description = description != null ? description : "";
     this.version = version;
     this.namespace = namespace;
+    this.author = author != null ? author : "";
+    this.license = license != null ? license : "";
+    this.readMe = readme != null ? readme : "";
+    this.URL = url != null ? url : "";
     this.internal = internal;
+
   }
 
   /**
@@ -270,11 +357,16 @@ public class NoteBook implements Comparable<NoteBook> {
    * @param description The description of the {@code NoteBook}.
    * @param version The version of the {@code NoteBook}.
    * @param namespace The namespace of the {@code NoteBook}.
+   * @param author The author of the {@code NoteBook}.
+   * @param license The license of the {@code NoteBook}.
+   * @param url The url of the {@code NoteBook}.
+   * @param readme The readme of the {@code NoteBook}.
+   *
    * @return a new {@code NoteBook} object.
    */
   public static NoteBook createNoteBook(
-      String name, String description, String version, String namespace) {
-    return new NoteBook(UUID.randomUUID(), name, description, version, namespace, false);
+      String name, String description, String version, String namespace, String author, String license, String url, String readme) {
+    return new NoteBook(UUID.randomUUID(), name, description, version, namespace, author, license, url, readme, false);
   }
 
   /**
@@ -285,11 +377,16 @@ public class NoteBook implements Comparable<NoteBook> {
    * @param description The description of the {@code NoteBook}.
    * @param version The version of the {@code NoteBook}.
    * @param namespace The namespace of the {@code NoteBook}.
+   * @param author The author of the {@code NoteBook}.
+   * @param license The license of the {@code NoteBook}.
+   * @param url The url of the {@code NoteBook}.
+   * @param readme The readme of the {@code NoteBook}.
+   *
    * @return a new {@code NoteBook} object.
    */
-  public static NoteBook createNoteBook(
-      UUID id, String name, String description, String version, String namespace) {
-    return new NoteBook(id, name, description, version, namespace, false);
+  public static NoteBook createNoteBookWithId(
+      UUID id, String name, String description, String version, String namespace, String author, String license, String url, String readme) {
+    return new NoteBook(id, name, description, version, namespace, author, license, url, readme, false);
   }
 
   /**
@@ -397,6 +494,116 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
+   * Returns the author of the {@code NoteBook}.
+   *
+   * @return the author of the {@code NoteBook}.
+   */
+  public synchronized String getAuthor() {
+    return author;
+  }
+
+
+  /**
+   * Sets the author for the {@code NoteBook}.
+   *
+   * @param auth the author of the {@code NoteBook}.
+   */
+  public void setAuthor(String auth) {
+    String oldAuthor;
+    synchronized (this) {
+      if (author.equals(auth)) {
+        return;
+      }
+      oldAuthor = description;
+      author = auth;
+    }
+
+    fireChangeEvent(AUTHOR_CHANGED, oldAuthor, auth);
+  }
+
+  /**
+   * Returns the URL of the {@code NoteBook}.
+   *
+   * @return the URL of the {@code NoteBook}.
+   */
+  public synchronized String getURL() {
+    return URL;
+  }
+
+  /**
+   * Sets the URL for the {@code NoteBook}.
+   *
+   * @param newURL the URL of the {@code NoteBook}.
+   */
+  public void setURL(String newURL) {
+    String oldURL;
+    synchronized (this) {
+      if (URL.equals(newURL)) {
+        return;
+      }
+      oldURL = URL;
+      URL = newURL;
+    }
+
+    fireChangeEvent(URL_CHANGED, oldURL, newURL);
+  }
+
+  /**
+   * Returns the license of the {@code NoteBook}.
+   *
+   * @return the license of the {@code NoteBook}.
+   */
+  public synchronized String getLicense() {
+    return license;
+  }
+
+  /**
+   * Sets the read me for the {@code NoteBook}.
+   *
+   * @param newReaMe the license of the {@code NoteBook}.
+   */
+  public void setReadMe(String newReaMe) {
+    String oldReadMe;
+    synchronized (this) {
+      if (readMe.equals(newReaMe)) {
+        return;
+      }
+      oldReadMe = readMe;
+      readMe = newReaMe;
+    }
+
+    fireChangeEvent(README_CHANGED, oldReadMe, newReaMe);
+  }
+
+  /**
+   * Returns the read me of the {@code NoteBook}.
+   *
+   * @return the read me of the {@code NoteBook}.
+   */
+  public synchronized String getReadMe() {
+    return license;
+  }
+
+  /**
+   * Sets the license for the {@code NoteBook}.
+   *
+   * @param newLicense the license of the {@code NoteBook}.
+   */
+  public void setLicense(String newLicense) {
+    String oldLicense;
+    synchronized (this) {
+      if (license.equals(newLicense)) {
+        return;
+      }
+      oldLicense = license;
+      license = newLicense;
+    }
+
+    fireChangeEvent(LICENSE_CHANGED, oldLicense, newLicense);
+  }
+
+
+  /**
    * Sets the namespace of the {@code NoteBook}.
    *
    * @param ns the name space of the {@code NoteBook}.
@@ -438,28 +645,63 @@ public class NoteBook implements Comparable<NoteBook> {
     return namespace + "/" + version;
   }
 
+
   /**
-   * Adds or replaces a {@link NoteBookEntry} to the note book being managed. This will replace
-   * <strong>any</strong> {@link NoteBookEntry} with the same id.
+   * Adds the specified dependency to the list of dependencies for this {@code NoteBook}.
+   * @param namespace The namespace of the dependency.
+   * @param version The version of the dependency.
+   */
+  public synchronized void putDependency(String namespace, String version) {
+    dependencyMap.put(namespace, version);
+  }
+
+
+
+  /**
+   * Returns the dependencies for this {@code NoteBook}.
+   * The value returned is a {@code Map} with the namespace of the dependency as they key and the
+   * version as the value.
+   *
+   * @return the dependencies for this {@code NoteBook}.
+   */
+  public synchronized SortedMap<String, String> getDependencies() {
+    return new TreeMap<>(dependencyMap);
+  }
+
+
+  /**
+   * Removes the specified dependency from the {@link NoteBook}.
+   *
+   * @param namespace the namespace of the dependency to remove.
+   */
+  public synchronized void removeDependency(String namespace) {
+    dependencyMap.remove(namespace);
+  }
+
+
+
+  /**
+   * Adds or replaces a {@code NoteBookEntry} to the note book being managed. This will replace
+   * <strong>any</strong> {@code NoteBookEntry} with the same id.
    *
    * @see NoteBookEntry#getId()
-   * @param entry the {@link NoteBookEntry} to add or replace.
+   * @param entry the {@code NoteBookEntry} to add or replace.
    */
   public void putEntry(NoteBookEntry entry) {
     putEntry(entry, true);
   }
 
   /**
-   * Adds or replaces a {@link NoteBookEntry} to the note book being managed. This will replace
-   * <strong>any</strong> {@link NoteBookEntry} with the same id. This version of the function
+   * Adds or replaces a {@code NoteBookEntry} to the note book being managed. This will replace
+   * <strong>any</strong> {@code NoteBookEntry} with the same id. This version of the function
    * allows you to specify if the listeners should be notified of the change. If you pass {@code
    * false} to this you are expected to perform the notification, this is to support bulk updates.
    *
-   * <p>Since a path can only point to a single {@link NoteBookEntry} if the passed in {@link
+   * <p>Since a path can only point to a single {@code NoteBookEntry} if the passed in {@link
    * NoteBookEntry} has the path of an existing entry then that existing entry will be removed.
    *
    * @see NoteBookEntry#getId()
-   * @param entry the {@link NoteBookEntry} to add or replace.
+   * @param entry the {@code NoteBookEntry} to add or replace.
    * @param firePropertyChange {@code true} if listeners should be notified.
    */
   private void putEntry(NoteBookEntry entry, boolean firePropertyChange) {
@@ -512,11 +754,11 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Adds or replaces a {@link NoteBookEntry} to the note book being managed. This will replace
-   * <strong>any</strong> {@link NoteBookEntry} with the same id.
+   * Adds or replaces a {@code NoteBookEntry} to the note book being managed. This will replace
+   * <strong>any</strong> {@code NoteBookEntry} with the same id.
    *
    * @see NoteBookEntry#getId()
-   * @param entries the {@link NoteBookEntry}s to add or replace.
+   * @param entries the {@code NoteBookEntry}s to add or replace.
    */
   public void putEntries(Map<String, NoteBookEntry> entries) {
     Map<String, NoteBookEntry> added = new HashMap<>(entries);
@@ -539,9 +781,9 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Returns the {@link NoteBookEntry}s being managed.
+   * Returns the {@code NoteBookEntry}s being managed.
    *
-   * @return the {@link NoteBookEntry}s being managed.
+   * @return the {@code NoteBookEntry}s being managed.
    */
   public Set<NoteBookEntry> getEntries() {
     readLock.lock();
@@ -553,20 +795,20 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Returns the {@link NoteBookEntry}s for a {@link Zone}.
+   * Returns the {@code NoteBookEntry}s for a {@link Zone}.
    *
-   * @param zone the {@link Zone} to return the {@link NoteBookEntry}s for.
-   * @return the {@link NoteBookEntry}s for a {@link Zone}.
+   * @param zone the {@link Zone} to return the {@code NoteBookEntry}s for.
+   * @return the {@code NoteBookEntry}s for a {@link Zone}.
    */
   public Collection<NoteBookEntry> getZoneEntries(Zone zone) {
     return getZoneEntries(zone.getId());
   }
 
   /**
-   * Returns a {@link Map} of {@link Zone}s and the {@link NoteBookEntry}s for them. Entries with no
+   * Returns a {@link Map} of {@link Zone}s and the {@code NoteBookEntry}s for them. Entries with no
    * zone are in the {@code Map} with the key of {@code null}.
    *
-   * @return a {@link Map} of {@link Zone}s and the {@link NoteBookEntry}s for the them.
+   * @return a {@link Map} of {@link Zone}s and the {@code NoteBookEntry}s for the them.
    */
   public Map<GUID, Set<NoteBookEntry>> getEntriesByZone() {
     Map<GUID, Set<NoteBookEntry>> entries = new HashMap<>();
@@ -583,10 +825,10 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Returns the {@link NoteBookEntry}s for a {@link Zone}.
+   * Returns the {@code NoteBookEntry}s for a {@link Zone}.
    *
-   * @param zoneId the id of the {@link Zone} to return the {@link NoteBookEntry}s.
-   * @return the {@link NoteBookEntry}s for a {@link Zone}.
+   * @param zoneId the id of the {@link Zone} to return the {@code NoteBookEntry}s.
+   * @return the {@code NoteBookEntry}s for a {@link Zone}.
    */
   public Set<NoteBookEntry> getZoneEntries(GUID zoneId) {
     Objects.requireNonNull(zoneId, "zoneId cannot be null for getZoneEntries");
@@ -602,9 +844,9 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Returns the {@link NoteBookEntry}s not attached to any {@link Zone}.
+   * Returns the {@code NoteBookEntry}s not attached to any {@link Zone}.
    *
-   * @return the {@link NoteBookEntry}s not attached to any {@link Zone}.
+   * @return the {@code NoteBookEntry}s not attached to any {@link Zone}.
    */
   public Collection<NoteBookEntry> getZoneLessEntries() {
     readLock.lock();
@@ -645,7 +887,7 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Removes multiple {@link NoteBookEntry}s.
+   * Removes multiple {@code NoteBookEntry}s.
    *
    * @param entries the entries to remove.
    */
@@ -666,11 +908,11 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Removes a {@link NoteBookEntry} from the note book. This version of the function allows you to
+   * Removes a {@code NoteBookEntry} from the note book. This version of the function allows you to
    * specify if the listeners should be notified of the change. If you pass {@code false} to this
    * you are expected to perform the notification, this is to support bulk updates.
    *
-   * @param entry The {@link NoteBookEntry} to remove.
+   * @param entry The {@code NoteBookEntry} to remove.
    * @param firePropertyChange {@code true} if listeners should be notified.
    */
   private void removeEntry(NoteBookEntry entry, boolean firePropertyChange) {
@@ -689,19 +931,19 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Removes a {@link NoteBookEntry} from the note book.
+   * Removes a {@code NoteBookEntry} from the note book.
    *
-   * @param entry The {@link NoteBookEntry} to remove.
+   * @param entry The {@code NoteBookEntry} to remove.
    */
   public void removeEntry(NoteBookEntry entry) {
     removeEntry(entry, true);
   }
 
   /**
-   * Returns the {@link NoteBookEntry} for a certain id.
+   * Returns the {@code NoteBookEntry} for a certain id.
    *
-   * @param id the id of the {@link NoteBookEntry} to retrieve.
-   * @return the {@link NoteBookEntry} for the id.
+   * @param id the id of the {@code NoteBookEntry} to retrieve.
+   * @return the {@code NoteBookEntry} for the id.
    */
   public Optional<NoteBookEntry> getById(UUID id) {
     Objects.requireNonNull(id, "id passed to getById must not be null");
@@ -718,10 +960,10 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Returns the {@link NoteBookEntry} at the specified path.
+   * Returns the {@code NoteBookEntry} at the specified path.
    *
    * @param path the path to get the value for.
-   * @return the {@link NoteBookEntry} at the specified path.
+   * @return the {@code NoteBookEntry} at the specified path.
    */
   public Optional<NoteBookEntry> getByPath(String path) {
     Objects.requireNonNull(path, "path passed to getByPAth must not be null");
@@ -744,7 +986,7 @@ public class NoteBook implements Comparable<NoteBook> {
    * @implNote {@code MapBookmarkManager} doesn't really care if a <strong>new</strong> {@link Zone}
    *     is added to the campaign but if it is a {@link Zone} that has previously been removed and
    *     is now being re-added then we need to make sure that the {@link Zone} is removed from
-   *     {@link #removedZones} so new {@link NoteBookEntry}s can be added. There is no need to fire
+   *     {@link #removedZones} so new {@code NoteBookEntry}s can be added. There is no need to fire
    *     off a property change event as the changes are not visible to anyone.
    */
   public void zoneAdded(GUID zoneId) {

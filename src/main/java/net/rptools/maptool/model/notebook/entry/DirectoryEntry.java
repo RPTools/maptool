@@ -47,18 +47,9 @@ public final class DirectoryEntry extends AbstractNoteBookEntry implements NoteB
    */
   public DirectoryEntry(UUID id, String path) {
     super(
-        null, path.replaceFirst(".*/", ""), null, NoteBookEntryZoneRequirements.ZONE_IGNORED, path);
+        null, path.replaceFirst(".+/", ""), null, NoteBookEntryZoneRequirements.ZONE_IGNORED, path);
   }
 
-  @Override
-  public UUID getId() {
-    return null;
-  }
-
-  @Override
-  public String getName() {
-    return null;
-  }
 
   @Override
   public Optional<GUID> getZoneId() {

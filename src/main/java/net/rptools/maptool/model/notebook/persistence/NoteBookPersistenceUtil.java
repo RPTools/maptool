@@ -17,10 +17,14 @@ package net.rptools.maptool.model.notebook.persistence;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
@@ -30,6 +34,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.notebook.NoteBook;
 import net.rptools.maptool.model.notebook.NoteBookManager;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
+import net.rptools.maptool.model.notebook.entry.NoteBookEntryType;
 import net.rptools.maptool.util.PersistenceUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -44,8 +49,34 @@ public class NoteBookPersistenceUtil {
   /** The directory that holds the notebooks. */
   private static final String NOTE_BOOKS = "notebooks";
 
-  /** The file which holds the information about the notebook. */
+  /** The file which holds the information about the {@link NoteBook}. */
   private static final String NOTE_BOOK_INFO_FILE = "notebook-info.json";
+
+  /** The file which holds the license for the {@link NoteBook}. */
+  private static final String NOTE_BOOK_LICENSE_FILE = "LICENSE.txt";
+
+  /** The file which holds the readme for the {@link NoteBook}. */
+  private static final String NOTE_BOOK_README_FILE = "README.md";
+
+  private static final class NoteBookDependencyInfo {
+
+    /**
+     * Creates a new {@code NoteBookDependencyInfo} object.
+     * @param ns The name space for the dependency.
+     * @param ver the version for the dependency.
+     */
+    private NoteBookDependencyInfo(String ns, String ver) {
+      namespace = ns;
+      version = ver;
+    }
+
+    /** The name space of the dependency. */
+    private final String namespace;
+
+    /** The version of the dependency. */
+    private final String version;
+  }
+
 
   /** Utility class used for persisting {@link NoteBook} information. */
   private static final class NoteBookInfo {
@@ -67,6 +98,21 @@ public class NoteBookPersistenceUtil {
 
     /** Is the {@link NoteBook} internal or not. */
     private boolean internal = false;
+
+    /** The author of the {@link NoteBook}. */
+    private String author;
+
+    /** The license of the {@link NoteBook}. */
+    transient private String license;
+
+    /** The URL of the {@link NoteBook}. */
+    private String URL;
+
+    /** The Read Me for the {@link NoteBook}. */
+    transient private String readMe;
+
+    /** The dependencies for the {@code NoteBook}. */
+    private NoteBookDependencyInfo[] dependencies;
   }
 
   /**
@@ -128,7 +174,7 @@ public class NoteBookPersistenceUtil {
 
     NoteBookInfo nbi = loadNoteBookInfo(packedFile, noteBookDir);
     NoteBook noteBook =
-        NoteBook.createNoteBook(nbi.id, nbi.name, nbi.description, nbi.version, nbi.namespace);
+        NoteBook.createNoteBookWithId(nbi.id, nbi.name, nbi.description, nbi.version, nbi.namespace, nbi.author, nbi.license, nbi.URL, nbi.readMe);
 
     Gson gson = new Gson();
     for (var noteFile : noteBookFiles) {
@@ -158,16 +204,18 @@ public class NoteBookPersistenceUtil {
 
     Set<Asset> allAssets = new HashSet<>();
     for (var entry : notebook.getEntries()) {
-      packedFile.putFile(
-          noteBookDir + "/" + entry.getPath(),
-          nbePersistenceUtil.toJson(entry).toString().getBytes());
+      if (entry.getType() != NoteBookEntryType.DIRECTORY) {
+        packedFile.putFile(
+            noteBookDir + "/" + entry.getPath(),
+            nbePersistenceUtil.toJson(entry).toString().getBytes());
 
-      for (MD5Key md5Key : entry.getAssetKeys()) {
-        Asset asset = AssetManager.getAsset(md5Key);
-        allAssets.add(asset);
-        if (asset == null) {
-          log.error("NoteBook: AssetId " + md5Key + " not found while saving?!");
-          continue;
+        for (MD5Key md5Key : entry.getAssetKeys()) {
+          Asset asset = AssetManager.getAsset(md5Key);
+          if (asset != null) {
+            allAssets.add(asset);
+          } else {
+            log.error("NoteBook: AssetId " + md5Key + " not found while saving?!");
+          }
         }
       }
     }
@@ -195,10 +243,30 @@ public class NoteBookPersistenceUtil {
     noteBookInfo.version = noteBook.getVersion();
     noteBookInfo.namespace = noteBook.getNamespace();
     noteBookInfo.internal = noteBook.isInternal();
+    noteBookInfo.author = noteBook.getAuthor();
+    noteBookInfo.license = noteBook.getLicense();
+    noteBookInfo.URL = noteBook.getURL();
+
+    SortedMap<String, String> dependencies = noteBook.getDependencies();
+    if (!dependencies.isEmpty()) {
+      List<NoteBookDependencyInfo> dependenciesInfo = new ArrayList<>();
+      for (var dependency : dependencies.entrySet())  {
+        dependenciesInfo.add(new NoteBookDependencyInfo(dependency.getKey(), dependency.getValue()));
+      }
+      noteBookInfo.dependencies = dependenciesInfo.toArray(noteBookInfo.dependencies);
+    }
 
     Gson gson = new Gson();
 
     packedFile.putFile(noteBookDir + "/" + NOTE_BOOK_INFO_FILE, gson.toJson(noteBookInfo));
+
+    if (noteBook.getLicense() != null && !noteBook.getLicense().isEmpty()) {
+      packedFile.putFile(noteBookDir + "/" + NOTE_BOOK_LICENSE_FILE, noteBook.getLicense());
+    }
+
+    if (noteBook.getReadMe() != null && !noteBook.getReadMe().isEmpty()) {
+      packedFile.putFile(noteBookDir + "/" + NOTE_BOOK_README_FILE, noteBook.getReadMe());
+    }
   }
 
   /**
@@ -212,8 +280,24 @@ public class NoteBookPersistenceUtil {
   private NoteBookInfo loadNoteBookInfo(PackedFile packedFile, String noteBookDir)
       throws IOException {
 
+    final String noteBookLicenseFile = noteBookDir + "/" + NOTE_BOOK_LICENSE_FILE;
+    final String noteBookReadMe = noteBookDir + "/" + NOTE_BOOK_README_FILE;
+
     Gson gson = new Gson();
 
-    return gson.fromJson(noteBookDir + "/" + NOTE_BOOK_INFO_FILE, NoteBookInfo.class);
+    NoteBookInfo nbi =  gson.fromJson(noteBookDir + "/" + NOTE_BOOK_INFO_FILE, NoteBookInfo.class);
+    if (packedFile.hasFile(noteBookLicenseFile)) {
+      try (Reader reader = packedFile.getFileAsReader(noteBookLicenseFile)) {
+        nbi.license = IOUtils.toString(reader);
+      }
+    }
+
+    if (packedFile.hasFile(noteBookReadMe)) {
+      try (Reader reader = packedFile.getFileAsReader(noteBookReadMe)) {
+        nbi.readMe = IOUtils.toString(reader);
+      }
+    }
+
+    return nbi;
   }
 }
