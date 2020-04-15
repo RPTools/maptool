@@ -14,18 +14,14 @@
  */
 package net.rptools.maptool.client.swing;
 
-import com.jeta.forms.components.label.JETALabel;
 import com.jeta.forms.components.panel.FormPanel;
-import com.jeta.forms.gui.form.FormAccessor;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Iterator;
 import javax.swing.*;
-import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import yasb.Binder;
@@ -84,31 +80,9 @@ public class AbeillePanel<T> extends JPanel {
 
   public AbeillePanel(String panelForm) {
     setLayout(new GridLayout());
-    panel = new FormPanel(panelForm);
-    initI18NSupport(panel);
+    panel = new FormPanelI18N(panelForm);
 
     add(panel);
-  }
-
-  /**
-   * Replaces text of JETA components with internationalized text
-   *
-   * @param panel the panel to initialize i18N support for
-   */
-  private void initI18NSupport(FormPanel panel) {
-    FormAccessor form_accessor = panel.getFormAccessor();
-
-    Iterator<?> iter = form_accessor.beanIterator();
-    while (iter.hasNext()) {
-      Component comp = (Component) iter.next();
-      if (comp instanceof JETALabel) {
-        JETALabel label = (JETALabel) comp;
-        label.setText(I18N.getText(label.getText()));
-      } else if (comp instanceof JCheckBox) {
-        JCheckBox checkBox = (JCheckBox) comp;
-        checkBox.setText(I18N.getText(checkBox.getText()));
-      }
-    }
   }
 
   public T getModel() {

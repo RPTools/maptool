@@ -2059,6 +2059,29 @@ public class AppActions {
         }
       };
 
+  /** Toggle to enable / disable player use of the token editor. */
+  public static final Action TOGGLE_TOKEN_EDITOR_LOCK =
+      new AdminClientAction() {
+        {
+          init("action.toggleTokenEditorLock");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return MapTool.getServerPolicy().isTokenEditorLocked();
+        }
+
+        @Override
+        protected void executeAction(ActionEvent e) {
+
+          ServerPolicy policy = MapTool.getServerPolicy();
+          policy.setIsTokenEditorLocked(!policy.isTokenEditorLocked());
+
+          MapTool.updateServerPolicy(policy);
+          MapTool.getServer().updateServerPolicy(policy);
+        }
+      };
+
   public static final Action START_SERVER =
       new ClientAction() {
         {
