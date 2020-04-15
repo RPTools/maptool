@@ -14,20 +14,14 @@
  */
 package net.rptools.maptool.client.swing;
 
-import com.jeta.forms.components.label.JETALabel;
 import com.jeta.forms.components.panel.FormPanel;
-import com.jeta.forms.gui.form.FormAccessor;
-import com.jeta.forms.gui.form.FormComponent;
-import com.jeta.forms.gui.form.GridView;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Iterator;
 import javax.swing.*;
-import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import yasb.Binder;
@@ -86,62 +80,9 @@ public class AbeillePanel<T> extends JPanel {
 
   public AbeillePanel(String panelForm) {
     setLayout(new GridLayout());
-    panel = new FormPanel(panelForm);
-    initI18NSupport(panel);
+    panel = new FormPanelI18N(panelForm);
 
     add(panel);
-  }
-
-  /**
-   * Replaces text of JETA components with internationalized text
-   *
-   * @param panel the panel to initialize i18N support for
-   */
-  private void initI18NSupport(FormPanel panel) {
-    FormAccessor form_accessor = panel.getFormAccessor();
-
-    Iterator<?> iter = form_accessor.beanIterator();
-    while (iter.hasNext()) {
-      translateComponent((Component) iter.next());
-    }
-  }
-
-  /**
-   * Recursively translate a component and its subcomponents.
-   *
-   * @param comp the component to be translated
-   */
-  private void translateComponent(Component comp) {
-    if (comp instanceof JETALabel) {
-      JETALabel label = (JETALabel) comp;
-      label.setText(I18N.getText(label.getText()));
-    } else if (comp instanceof JCheckBox) {
-      JCheckBox checkBox = (JCheckBox) comp;
-      checkBox.setText(I18N.getText(checkBox.getText()));
-    } else if (comp instanceof JButton) {
-      JButton jButton = (JButton) comp;
-      jButton.setText(I18N.getText(jButton.getText()));
-    } else if (comp instanceof JTabbedPane) {
-      JTabbedPane jTabbedPane = (JTabbedPane) comp;
-      for (int i = 0; i < jTabbedPane.getTabRunCount(); i += 1) {
-        // Translate the tab titles
-        jTabbedPane.setTitleAt(i, I18N.getText(jTabbedPane.getTitleAt(i)));
-      }
-      for (Component subComp : jTabbedPane.getComponents()) {
-        // Recursively translate the sub components
-        translateComponent(subComp);
-      }
-    } else if (comp instanceof GridView) {
-      Iterator<?> iter = ((GridView) comp).beanIterator();
-      while (iter.hasNext()) {
-        // Recursively translate the sub components
-        translateComponent((Component) iter.next());
-      }
-    } else if (comp instanceof FormComponent) {
-      // Translate the GridView inside the form
-      FormComponent form = (FormComponent) comp;
-      translateComponent(form.getChildView());
-    }
   }
 
   public T getModel() {
