@@ -17,6 +17,8 @@ package net.rptools.maptool.client.swing;
 import com.jeta.forms.components.label.JETALabel;
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
+import com.jeta.forms.gui.form.FormComponent;
+import com.jeta.forms.gui.form.GridView;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
@@ -100,14 +102,45 @@ public class AbeillePanel<T> extends JPanel {
 
     Iterator<?> iter = form_accessor.beanIterator();
     while (iter.hasNext()) {
-      Component comp = (Component) iter.next();
-      if (comp instanceof JETALabel) {
-        JETALabel label = (JETALabel) comp;
-        label.setText(I18N.getText(label.getText()));
-      } else if (comp instanceof JCheckBox) {
-        JCheckBox checkBox = (JCheckBox) comp;
-        checkBox.setText(I18N.getText(checkBox.getText()));
+      translateComponent((Component) iter.next());
+    }
+  }
+
+  /**
+   * Recursively translate a component and its subcomponents.
+   *
+   * @param comp the component to be translated
+   */
+  private void translateComponent(Component comp) {
+    if (comp instanceof JETALabel) {
+      JETALabel label = (JETALabel) comp;
+      label.setText(I18N.getText(label.getText()));
+    } else if (comp instanceof JCheckBox) {
+      JCheckBox checkBox = (JCheckBox) comp;
+      checkBox.setText(I18N.getText(checkBox.getText()));
+    } else if (comp instanceof JButton) {
+      JButton jButton = (JButton) comp;
+      jButton.setText(I18N.getText(jButton.getText()));
+    } else if (comp instanceof JTabbedPane) {
+      JTabbedPane jTabbedPane = (JTabbedPane) comp;
+      for (int i = 0; i < jTabbedPane.getTabRunCount(); i += 1) {
+        // Translate the tab titles
+        jTabbedPane.setTitleAt(i, I18N.getText(jTabbedPane.getTitleAt(i)));
       }
+      for (Component subComp : jTabbedPane.getComponents()) {
+        // Recursively translate the sub components
+        translateComponent(subComp);
+      }
+    } else if (comp instanceof GridView) {
+      Iterator<?> iter = ((GridView) comp).beanIterator();
+      while (iter.hasNext()) {
+        // Recursively translate the sub components
+        translateComponent((Component) iter.next());
+      }
+    } else if (comp instanceof FormComponent) {
+      // Translate the GridView inside the form
+      FormComponent form = (FormComponent) comp;
+      translateComponent(form.getChildView());
     }
   }
 
