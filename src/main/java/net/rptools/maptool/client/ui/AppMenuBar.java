@@ -39,6 +39,7 @@ import net.rptools.maptool.client.MRUCampaignManager;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
 
@@ -149,11 +150,12 @@ public class AppMenuBar extends JMenuBar {
           public void itemStateChanged(ItemEvent e) {
             if (e.getStateChange() == ItemEvent.SELECTED) fowRevealToggleMenuItem.setEnabled(true);
             else {
-              MapTool.getFrame()
-                  .getCurrentZoneRenderer()
-                  .getZone()
-                  .setWaypointExposureToggle(false);
-              fowRevealToggleMenuItem.setEnabled(false);
+              ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+              // Check in case no map exists. Fix #1572.
+              if (zr != null) {
+                zr.getZone().setWaypointExposureToggle(false);
+                fowRevealToggleMenuItem.setEnabled(false);
+              }
             }
           }
         });
