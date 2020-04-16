@@ -1605,7 +1605,10 @@ public class MapToolFrame extends DefaultDockableHolder
       zoneRendererList.add(renderer);
     }
     if (currentRenderer != null) {
-      stopTokenDrag(); // if a token is being dragged, stop the drag
+      // Check if the zone still exists. Fix #1568
+      if (MapTool.getFrame().getZoneRenderers().contains(currentRenderer)) {
+        stopTokenDrag(); // if a token is being dragged, stop the drag
+      }
       currentRenderer.flush();
       zoneRendererPanel.remove(currentRenderer);
     }
