@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.swing;
 
+import com.jeta.forms.components.colors.JETAColorWell;
 import com.jeta.forms.components.label.JETALabel;
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
@@ -59,6 +60,46 @@ public class FormPanelI18N extends FormPanel {
     } else if (comp instanceof JButton) {
       JButton jButton = (JButton) comp;
       jButton.setText(I18N.getText(jButton.getText()));
+      String tooltip = jButton.getToolTipText();
+      if (tooltip != null) {
+        jButton.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JToggleButton) {
+      JToggleButton jToggle = (JToggleButton) comp;
+      String tooltip = jToggle.getToolTipText();
+      if (tooltip != null) {
+        jToggle.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JSpinner) {
+      JSpinner jSpin = (JSpinner) comp;
+      String tooltip = jSpin.getToolTipText();
+      if (tooltip != null) {
+        jSpin.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JComboBox) {
+      JComboBox<?> jComboBox = (JComboBox<?>) comp;
+      String tooltip = jComboBox.getToolTipText();
+      if (tooltip != null) {
+        jComboBox.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JTextField) {
+      JTextField jTextField = (JTextField) comp;
+      String tooltip = jTextField.getToolTipText();
+      if (tooltip != null) {
+        jTextField.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JList) {
+      JList<?> jList = (JList<?>) comp;
+      String tooltip = jList.getToolTipText();
+      if (tooltip != null) {
+        jList.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JETAColorWell) {
+      JETAColorWell jetaColorWell = (JETAColorWell) comp;
+      String tooltip = jetaColorWell.getToolTipText();
+      if (tooltip != null) {
+        jetaColorWell.setToolTipText(I18N.getText(tooltip));
+      }
     } else if (comp instanceof JTabbedPane) {
       JTabbedPane jTabbedPane = (JTabbedPane) comp;
       for (int i = 0; i < jTabbedPane.getTabRunCount(); i += 1) {
