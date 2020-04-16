@@ -25,9 +25,11 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import net.rptools.lib.sound.SoundManager;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
@@ -66,7 +68,8 @@ public class MediaPlayerAdapter {
    * @param stop the stop time in seconds (null/negative: max length)
    */
   private MediaPlayerAdapter(
-      String strUri, Media media, Integer cycleCount, Double volume, Double start, Double stop) {
+      String strUri, Media media, Integer cycleCount, Double volume, Double start, Double stop)
+      throws MediaException {
     this.player = new MediaPlayer(media);
 
     this.strUri = strUri;
@@ -190,7 +193,13 @@ public class MediaPlayerAdapter {
             if (old) {
               adapter.editStream(cycleCount, volume, start, stop, false);
             } else {
-              adapter = new MediaPlayerAdapter(strUri, media, cycleCount, volume, start, stop);
+              try {
+                adapter = new MediaPlayerAdapter(strUri, media, cycleCount, volume, start, stop);
+              } catch (MediaException e) {
+                MapTool.showError(
+                    I18N.getText("macro.function.sound.mediaexception", "playStream", strUri), e);
+                return; // exit without playing stream. Fix sentry error #1564
+              }
               mapStreams.put(strUri, adapter);
             }
             MediaPlayer player = adapter.player;
