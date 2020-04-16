@@ -26,6 +26,7 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 public class ServerPolicy {
   private boolean strictTokenMovement;
   private boolean isMovementLocked;
+  private boolean isTokenEditorLocked;
   private boolean playersCanRevealVision;
   private boolean gmRevealsVisionForUnownedTokens;
   private boolean useIndividualViews;
@@ -66,6 +67,14 @@ public class ServerPolicy {
 
   public void setIsMovementLocked(boolean locked) {
     isMovementLocked = locked;
+  }
+
+  public boolean isTokenEditorLocked() {
+    return isTokenEditorLocked;
+  }
+
+  public void setIsTokenEditorLocked(boolean locked) {
+    isTokenEditorLocked = locked;
   }
 
   public void setPlayersCanRevealVision(boolean flag) {
@@ -212,6 +221,8 @@ public class ServerPolicy {
     sinfo.addProperty(
         "auto reveal on movement", isAutoRevealOnMovement() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty("movement locked", isMovementLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
+    sinfo.addProperty(
+        "token editor locked", isTokenEditorLocked() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty(
         "restricted impersonation", isRestrictedImpersonation() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty(

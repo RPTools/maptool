@@ -39,6 +39,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.MapToolServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,11 +54,12 @@ public class ConnectionInfoDialog extends JDialog {
 
   /** This is the default constructor */
   public ConnectionInfoDialog(MapToolServer server) {
-    super(MapTool.getFrame(), "Server Info", true);
+    super(MapTool.getFrame(), I18N.getText("ConnectionInfoDialog.title"), true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setSize(275, 200);
 
-    FormPanel panel = new FormPanel("net/rptools/maptool/client/ui/forms/connectionInfoDialog.xml");
+    FormPanel panel =
+        new FormPanelI18N("net/rptools/maptool/client/ui/forms/connectionInfoDialog.xml");
 
     JTextField nameLabel = panel.getTextField("name");
     JTextField localAddressLabel = panel.getTextField("localAddress");
