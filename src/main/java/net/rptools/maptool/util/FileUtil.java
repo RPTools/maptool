@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import net.rptools.maptool.client.AppUtil;
 
 /**
  * Custom Implementation of FileUtils.byteCountToDisplaySize to fix rounding bug
@@ -29,6 +30,10 @@ import java.math.RoundingMode;
 public class FileUtil {
 
   private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_UP;
+
+  /** Regex to select an illegal symbol for a file name. The colon is illegal for Windows. */
+  private static final String REGEX_SELECT_ILLEGAL =
+      "[^a-zA-Z0-9._ /`~!@#$%^&()\\-=+\\[\\]{}',\\\\:]+";
 
   enum FileSize {
     EXABYTE("EB", ONE_EB_BI),
@@ -122,6 +127,10 @@ public class FileUtil {
    * @return the File object with new name
    */
   public static File getCleanFileName(String filePath, String fileName, String extension) {
+    if (AppUtil.WINDOWS) {
+      // The colon is illegal for windows, so we replace it. Fix #1566
+      fileName = fileName.replaceAll(":", "_");
+    }
     File newFileName = new File(filePath + "/" + fileName + extension);
 
     try {
@@ -143,9 +152,7 @@ public class FileUtil {
       }
     } catch (IOException e) {
       System.out.println("Bad file name, replacing bad characters in: " + fileName + extension);
-      fileName =
-          fileName.replaceAll(
-              "[^a-zA-Z0-9\\._ \\/`~!@#$%\\^&\\(\\)\\-=\\+\\[\\]\\{\\}',\\\\:]+", "_");
+      fileName = fileName.replaceAll(REGEX_SELECT_ILLEGAL, "_");
       newFileName = new File(filePath + "/" + fileName + extension);
     }
 
@@ -162,6 +169,10 @@ public class FileUtil {
    * @return the File object with new name
    */
   public static File cleanFileName(String path, String fileName, String extension) {
+    if (AppUtil.WINDOWS) {
+      // The colon is illegal for windows, so we replace it. Fix #1566
+      fileName = fileName.replaceAll(":", "_");
+    }
     File newFileName = new File(path, fileName + extension);
 
     try {
@@ -176,9 +187,8 @@ public class FileUtil {
       }
     } catch (IOException e) {
       System.out.println("Bad file name, replacing bad characters in: " + fileName + extension);
-      fileName =
-          fileName.replaceAll(
-              "[^a-zA-Z0-9\\._ \\/`~!@#$%\\^&\\(\\)\\-=\\+\\[\\]\\{\\}',\\\\:]+", "_");
+      fileName = fileName.replaceAll(REGEX_SELECT_ILLEGAL, "_");
+
       newFileName = new File(fileName + extension);
     }
 
