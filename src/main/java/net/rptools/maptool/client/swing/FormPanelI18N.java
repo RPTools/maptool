@@ -45,9 +45,17 @@ public class FormPanelI18N extends FormPanel {
     if (comp instanceof JETALabel) {
       JETALabel label = (JETALabel) comp;
       label.setText(I18N.getText(label.getText()));
+      String tooltip = label.getToolTipText();
+      if (tooltip != null) {
+        label.setToolTipText(I18N.getText(tooltip));
+      }
     } else if (comp instanceof JCheckBox) {
       JCheckBox checkBox = (JCheckBox) comp;
       checkBox.setText(I18N.getText(checkBox.getText()));
+      String tooltip = checkBox.getToolTipText();
+      if (tooltip != null) {
+        checkBox.setToolTipText(I18N.getText(tooltip));
+      }
     } else if (comp instanceof JButton) {
       JButton jButton = (JButton) comp;
       jButton.setText(I18N.getText(jButton.getText()));
