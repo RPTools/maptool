@@ -54,7 +54,7 @@ public class NoteBooksController {
     assert noteBookAccordion != null : "fx:id=\"noteBookAccordion\" was not injected: check your FXML file 'NoteBooks.fxml'.";
     assert contentsPane != null : "fx:id=\"contentsPane\" was not injected: check your FXML file 'NoteBooks.fxml'.";
 
-    NoteBook testNoteBook = NoteBook.createNoteBook("Test", "Test Desc", "1.1.1", "maptool.test", "Craig Wisniewski", "CCBY3", "wwww.somewhere.com", "Blah");
+    NoteBook testNoteBook = NoteBook.createNoteBook("Test", "Test Desc", "1.1.1", "maptool.test", "Craig Wisniewski", "CCBY3", "https://www.somewhere.com", "Blah");
     addNoteBook(testNoteBook);
 
 
@@ -66,7 +66,7 @@ public class NoteBooksController {
     try {
       noteBookContentsPane = loader.load();
     } catch (IOException e) {
-      e.printStackTrace();
+      e.printStackTrace(); // TODO: CDW
     }
     noteBookContentsController = loader.getController();
 
@@ -98,6 +98,7 @@ public class NoteBooksController {
             });
     treeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     treeView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
+      // TODO: CDW
     }));
     TitledPane titledPane = new TitledPane(title, treeView);
     titledPane.setUserData(noteBook);

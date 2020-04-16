@@ -76,7 +76,7 @@ public class DungeonDraftImporter {
   private static final int LIGHT_HEIGHT = 20;
 
   /** Asset to use to represent Light sources. */
-  private static final Asset lightSourceAsset = new Asset("LightSource", AppStyle.lightSourceIcon);
+  private static final Asset lightSourceAsset = Asset.createImageAsset("LightSource", AppStyle.lightSourceIcon);
 
   {
     AssetManager.putAsset(lightSourceAsset);
@@ -129,7 +129,7 @@ public class DungeonDraftImporter {
     String imageString = ddvtt.get(VTT_FIELD_IMAGE).getAsString();
 
     byte[] imageBytes = Base64.decode(imageString);
-    Asset asset = new Asset(dungeonDraftFile.getName(), imageBytes);
+    Asset asset = Asset.createImageAsset(dungeonDraftFile.getName(), imageBytes);
     AssetManager.putAsset(asset);
     MapPropertiesDialog dialog =
         MapPropertiesDialog.createMapPropertiesImportDialog(MapTool.getFrame());
@@ -188,7 +188,7 @@ public class DungeonDraftImporter {
     for (JsonElement ele : lights) {
       JsonObject position = ele.getAsJsonObject().getAsJsonObject("position");
       if (position.has("x") && position.has("y")) {
-        Token lightToken = new Token("light-" + lightNo, lightSourceAsset.getId());
+        Token lightToken = new Token("light-" + lightNo, lightSourceAsset.getMD5Key());
         lightToken.setLayer(Layer.OBJECT);
         lightToken.setVisible(false);
         lightToken.setSnapToGrid(false);

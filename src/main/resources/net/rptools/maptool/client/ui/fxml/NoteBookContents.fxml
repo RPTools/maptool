@@ -13,15 +13,14 @@
 <?import javafx.scene.layout.RowConstraints?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.notebook.NoteBookContentsController">
-   <center>
+   <top>
       <GridPane BorderPane.alignment="CENTER">
          <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="115.0" minWidth="10.0" prefWidth="91.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="178.0" minWidth="10.0" prefWidth="147.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="141.0" minWidth="10.0" prefWidth="140.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="136.0" minWidth="10.0" prefWidth="62.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="287.0" minWidth="10.0" prefWidth="284.0" />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -39,51 +38,52 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Label text="%noteBooks.label.name" GridPane.columnIndex="5">
-               <padding>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-               </padding>
-            </Label>
-            <TextField fx:id="nameTextField" GridPane.columnIndex="5" GridPane.hgrow="SOMETIMES" />
-            <Label text="%noteBooks.label.version" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
+            <TextField fx:id="namespaceTextField" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.hgrow="SOMETIMES" GridPane.rowIndex="2" />
+            <Label text="%noteBooks.label.version" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
                <padding>
                   <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
                </padding>
             </Label>
-            <TextField fx:id="versionTextField" GridPane.columnIndex="3" GridPane.hgrow="SOMETIMES" />
-            <Label text="%noteBooks.label.namespace" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
+            <TextField fx:id="versionTextField" GridPane.columnIndex="4" GridPane.hgrow="SOMETIMES" />
+            <Label text="%noteBooks.label.namespace" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.rowIndex="2">
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>
             </Label>
-            <TextField fx:id="namespaceTextField" GridPane.columnIndex="1" GridPane.hgrow="SOMETIMES" />
+            <TextField fx:id="nameTextField" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.hgrow="SOMETIMES" />
             <Label text="%noteBooks.label.name" GridPane.halignment="CENTER" GridPane.hgrow="NEVER">
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding>
             </Label>
             <Label text="%noteBooks.label.author" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-            <TextField fx:id="authorTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label text="%noteBooks.label.url" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-            <TextField fx:id="urlTextField" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <Label text="%noteBooks.label.description" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-            <TextArea prefHeight="13.0" prefWidth="79.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" GridPane.rowSpan="2" />
-            <Label text="%noteBooks.label.dependencies" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
-            <TableView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="6" GridPane.rowSpan="4">
+            <TextField fx:id="authorTextField" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+            <Label text="%noteBooks.label.url" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+            <TextField fx:id="urlTextField" prefHeight="27.0" prefWidth="140.0" GridPane.columnIndex="4" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
+            <Label text="%noteBooks.label.description" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+            <TextArea fx:id="descriptionTextArea" prefHeight="13.0" prefWidth="79.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" GridPane.rowSpan="3" />
+            <Label text="%noteBooks.label.dependencies" GridPane.halignment="CENTER" GridPane.rowIndex="8" />
+            <TableView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="8" GridPane.rowSpan="4">
               <columns>
-                <TableColumn prefWidth="75.0" text="C1" />
-                <TableColumn prefWidth="75.0" text="C2" />
+                <TableColumn prefWidth="55.0" text="C1" />
+                <TableColumn prefWidth="95.0" text="C2" />
               </columns>
             </TableView>
-            <Button mnemonicParsing="false" text="%noteBooks.button.license" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="11" />
-            <Button mnemonicParsing="false" text="%noteBooks.button.readMe" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="11" />
-            <Button mnemonicParsing="false" text="%noteBooks.button.edit" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="11" />
+            <Button fx:id="licenseButton" mnemonicParsing="false" text="%noteBooks.button.license" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="14" />
+            <Button fx:id="readMeButton" mnemonicParsing="false" text="%noteBooks.button.readMe" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="14" />
+            <Button fx:id="editButton" mnemonicParsing="false" text="%noteBooks.button.edit" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="14" />
+            <Button fx:id="okButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" text="%noteBooks.button.ok" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="14" />
+            <Button fx:id="cancelButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" text="%noteBooks.button.cancel" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="14" />
+            <Label fx:id="nameSpaceErrorLabel" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+            <Label fx:id="versionErrorLabel" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+            <Label fx:id="urlErrorLabel" GridPane.columnIndex="4" GridPane.rowIndex="3" />
          </children>
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
       </GridPane>
-   </center>
+   </top>
 </BorderPane>

@@ -737,7 +737,12 @@ public class MapTool {
 
     NoteBookUI noteBookUI = new NoteBookUI();
     setClientFrame(new MapToolFrame(menuBar, noteBookUI));
-    noteBookUI.init(MapTool.getFrame());
+
+    /*
+     * Want to run the init of the of the NoteBook UI later as we want to have initaliasation
+     * completed first to avoid a race condition.
+     */
+    SwingUtilities.invokeLater(() -> noteBookUI.init(MapTool.getFrame()));
 
     serverCommand = new ServerCommandClientImpl();
 

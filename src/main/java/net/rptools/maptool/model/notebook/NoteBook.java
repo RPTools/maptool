@@ -30,10 +30,10 @@ import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
-import org.bouncycastle.LICENSE;
 
 /**
  * {@code MapBookmarkManager} class is used to manage all the {@code NoteBookEntry}s in a campaign.
@@ -187,6 +187,31 @@ public class NoteBook implements Comparable<NoteBook> {
   public static final String README_CHANGED = "Read Me Changed";
 
 
+  /** Values that a namespace can not start with as they are reserved. */
+  private static final String[] RESERVED_NAMESPACE_BEGINNING = {
+      "maptool",
+      "rptool",
+      "mt.",
+      "util.",
+      "utils.",
+      "tokentool",
+      "sheet.",
+      "character."
+  };
+
+  /** Regular Expression to check that namespace valid characters. */
+  private static final String VALID_NAMESPACE_CHARS_REGEX = "[A-z0-9\\.-]+";
+
+  /** Regular Expression to check that there are no sequential special characters. */
+  private static final String INVALID_NAMESPACE_SPECIAL_CHAR_SEQ = ".*(\\.\\.|\\.-|-\\.).*";
+
+  /**
+   * Regular Expression to check that the version number is valid.
+   * This is the regular expression for semantic versioning
+   * See https://semver.org/
+   */
+  private static final String VALID_VERSION_REGEX =
+      "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$";
 
   /** Class used to hold a {@code MapBookEntry} and the path it is in the tree. */
   private static final class EntryDetails {
@@ -305,6 +330,98 @@ public class NoteBook implements Comparable<NoteBook> {
 
   /** The read me for the {@code NoteBook}. */
   private String readMe;
+
+
+  /**
+   * Returns the version error if there is one.
+   * @param version The version to check.
+   * @return a {@link String} containing the error message or empty optional if there is no error.
+   */
+  public static Optional<String> versionError(String version) {
+    if (version == null || version.trim().isEmpty()) {
+      return Optional.of(I18N.getText("noteBooks.error.version.empty"));
+    }
+
+    if (!version.matches(VALID_VERSION_REGEX)) {
+      return Optional.of(I18N.getText("noteBooks.error.version.invalidFormat"));
+    }
+
+    return Optional.empty();
+  }
+
+  /**
+   * Return if the version has an error or not. The error can be retrieved with {@link #versionError(String)}.
+   * @param version The version to check.
+   * @return {@code true} if the version has an error, {@code false} otherwise.
+   */
+  public static boolean versionHasError(String version) {
+    return versionError(version).isPresent();
+  }
+
+
+  /**
+   * Returns the namespace error if there is one.
+   * @param namespace The namespace to check.
+   * @return a {@link String} containing the error message or empty optional if there is no error.
+   */
+  public static Optional<String> nameSpaceError(String namespace) {
+    if (namespace == null || namespace.isEmpty()) {
+      return Optional.of(I18N.getText("noteBooks.error.namespace.cannotBeEmpty"));
+    }
+
+    // Check to make sure there is no white space.
+    String withoutSpace = namespace.replaceAll("\\s", "");
+    if (!withoutSpace.equals(namespace)) {
+      return Optional.of(I18N.getText("noteBooks.error.namespace.noSpaces"));
+    }
+
+    // Check to make sure it does not begin with a reserved namespace
+    String lowerNamespace = namespace.toLowerCase();
+    for (String ns : RESERVED_NAMESPACE_BEGINNING) {
+      if (lowerNamespace.startsWith(ns)) {
+        return Optional.of(I18N.getText("noteBooks.error.namespace.invalidStart", ns));
+      }
+    }
+
+    // Check that the namespace only contains valid characters.
+    if (!namespace.matches(VALID_NAMESPACE_CHARS_REGEX)) {
+      return Optional.of(I18N.getText("noteBooks.error.namespace.canOnlyContain", "a-z A-Z 0-9 . -"));
+    }
+
+    // Check that the namespace does not start or end with a - or .
+    if (namespace.startsWith(".") || namespace.startsWith("-") || namespace.endsWith(".") || namespace.endsWith("-")) {
+      return Optional.of(I18N.getText("noteBooks.error.namespace.invalidStartEnd", ". -"));
+    }
+
+
+    // Check that the namespace does not have two consecutive special characters.
+    if (namespace.matches(INVALID_NAMESPACE_SPECIAL_CHAR_SEQ)) {
+      return Optional.of(I18N.getText("noteBooks.error.namespace.consecutiveSpecial"));
+    }
+
+    // Check that there is at least one . in the namespace.
+    long dotCount = namespace.chars().filter(ch -> ch == '.').count();
+    if (dotCount == 0) {
+      return Optional.of(I18N.getText("noteBooks.error.namespace.noDot"));
+    }
+
+
+
+
+    // Passed all checks so it is valid.
+    return Optional.empty();
+  }
+
+
+  /**
+   * Return if the namespace has an error or not. The error can be retrieved with {@link #nameSpaceError(String)}.
+   * @param namespace The namespace to check.
+   * @return {@code true} if the namespace has an error, {@code false} otherwise.
+   */
+  public static boolean nameSpaceHasError(String namespace) {
+    Optional<String> error = nameSpaceError(namespace);
+    return error.isPresent();
+  }
 
   /**
    * Creates a new {@code NoteBook} object.
