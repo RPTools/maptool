@@ -54,7 +54,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Grid Size:</at>
+            <at name="text">GridControlPanel.size</at>
             <at name="height">15</at>
             <at name="width">58</at>
             <at name="name"></at>
@@ -114,7 +114,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Offset X:</at>
+            <at name="text">GridControlPanel.offset.x</at>
             <at name="height">15</at>
             <at name="width">58</at>
             <at name="name"></at>
@@ -174,7 +174,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Offset Y:</at>
+            <at name="text">GridControlPanel.offset.y</at>
             <at name="height">15</at>
             <at name="width">58</at>
             <at name="name"></at>
@@ -344,7 +344,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Color:</at>
+            <at name="text">GridControlPanel.color</at>
             <at name="height">15</at>
             <at name="width">58</at>
             <at name="name"></at>
@@ -525,7 +525,7 @@
           <at name="classname">javax.swing.JButton</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Close</at>
+            <at name="text">Button.close</at>
             <at name="height">25</at>
             <at name="width">136</at>
             <at name="name">closeButton</at>
@@ -582,7 +582,7 @@
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
             <at name="horizontalAlignment">4</at>
-            <at name="text">2nd Size:</at>
+            <at name="text">GridControlPanel.size.second</at>
             <at name="height">15</at>
             <at name="width">74</at>
             <at name="name">gridSecondDimensionLabel</at>
