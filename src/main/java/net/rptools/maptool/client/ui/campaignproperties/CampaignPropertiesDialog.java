@@ -54,6 +54,7 @@ import net.rptools.lib.FileUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
@@ -110,7 +111,8 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel = new FormPanel("net/rptools/maptool/client/ui/forms/campaignPropertiesDialog.xml");
+    formPanel =
+        new FormPanelI18N("net/rptools/maptool/client/ui/forms/campaignPropertiesDialog.xml");
 
     initTokenPropertiesDialog(formPanel);
     tokenStatesController = new TokenStatesController(formPanel);
