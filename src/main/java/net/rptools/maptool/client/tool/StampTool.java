@@ -425,20 +425,21 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
         Rectangle tokenBounds = token.getBounds(renderer.getZone());
 
+        int snapOffsetX = 0;
+        int snapOffsetY = 0;
         if (token.isSnapToGrid() && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
-          if (token.isBackgroundStamp()) {
+          if (token.isBackgroundStamp() || token.isSnapToScale()) {
             // Snaps to the top left corner
-            dragOffsetX = (pos.x - tokenBounds.x) - ((int) getZone().getGrid().getCellWidth() / 2);
-            dragOffsetY = (pos.y - tokenBounds.y) - ((int) getZone().getGrid().getCellHeight() / 2);
+            snapOffsetX = (int) getZone().getGrid().getCellWidth() / 2;
+            snapOffsetY = (int) getZone().getGrid().getCellHeight() / 2;
           } else {
             // Snaps to the center
-            dragOffsetX = (pos.x - tokenBounds.x) - (tokenBounds.width / 2);
-            dragOffsetY = (pos.y - tokenBounds.y) - (tokenBounds.height / 2);
+            snapOffsetX = tokenBounds.width / 2;
+            snapOffsetY = tokenBounds.height / 2;
           }
-        } else {
-          dragOffsetX = pos.x - tokenBounds.x;
-          dragOffsetY = pos.y - tokenBounds.y;
         }
+        dragOffsetX = pos.x - tokenBounds.x - snapOffsetX;
+        dragOffsetY = pos.y - tokenBounds.y - snapOffsetY;
       }
     } else {
       if (SwingUtilities.isLeftMouseButton(e)) {
