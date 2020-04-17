@@ -239,9 +239,9 @@
               </at>
              </object>
             </at>
-            <at name="name">ConnectToServerDialog.username</at>
+            <at name="name">username</at>
             <at name="width">87</at>
-            <at name="text">Username:</at>
+            <at name="text">ConnectToServerDialog.username</at>
             <at name="fill">
              <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
               <at name="name">fill</at>
