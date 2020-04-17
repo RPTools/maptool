@@ -65,6 +65,8 @@ public class NoteBookUI {
     Scene scene = new Scene(loader.getRoot());
     jfxPanel = new JFXPanel();
     jfxPanel.setScene(scene);
+    scene.widthProperty().addListener(l -> System.out.println(scene.getWidth()));
+    scene.heightProperty().addListener(l -> System.out.println(scene.getHeight()));
 
     campaignChanged(null, MapTool.getCampaign());
 

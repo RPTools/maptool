@@ -2,23 +2,29 @@
 
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.notebook.NoteBooksController">
+<BorderPane prefHeight="620.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.rptools.maptool.client.ui.notebook.NoteBooksController">
    <left>
       <BorderPane BorderPane.alignment="CENTER">
          <center>
-            <Accordion fx:id="noteBookAccordion" />
+            <ScrollPane>
+               <content>
+                  <Accordion fx:id="noteBookAccordion" />
+               </content>
+            </ScrollPane>
          </center>
          <bottom>
-            <HBox>
-               <children>
-                  <Button fx:id="importNoteBookButton" mnemonicParsing="false" text="%noteBooks.button.import" />
-                  <Button fx:id="newNoteBookButton" mnemonicParsing="false" text="%noteBooks.button.new" />
-               </children>
-            </HBox>
+            <BorderPane>
+               <left>
+                  <Button fx:id="importNoteBookButton" mnemonicParsing="false" text="%noteBooks.button.import" BorderPane.alignment="CENTER" />
+               </left>
+               <right>
+                  <Button fx:id="newNoteBookButton" mnemonicParsing="false" text="%noteBooks.button.new" BorderPane.alignment="CENTER" />
+               </right>
+            </BorderPane>
          </bottom>
       </BorderPane>
    </left>

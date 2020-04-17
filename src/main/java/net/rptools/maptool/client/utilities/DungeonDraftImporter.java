@@ -76,7 +76,8 @@ public class DungeonDraftImporter {
   private static final int LIGHT_HEIGHT = 20;
 
   /** Asset to use to represent Light sources. */
-  private static final Asset lightSourceAsset = Asset.createImageAsset("LightSource", AppStyle.lightSourceIcon);
+  private static final Asset lightSourceAsset =
+      Asset.createImageAsset("LightSource", AppStyle.lightSourceIcon);
 
   {
     AssetManager.putAsset(lightSourceAsset);

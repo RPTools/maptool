@@ -20,12 +20,34 @@ import java.beans.PropertyChangeSupport;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /** This class manages all the {@link NoteBook}s loaded. */
 public final class NoteBookManager {
+
+  /**
+   * Name of event fired when a {@link NoteBook} are added. For this event:
+   *
+   * <ul>
+   *   <li>{@code oldValue} = a {@link Set} of any {@link NoteBook}s that were replaced by {@code
+   *       newValue}.
+   *   <li>{@code newValue} = a {@link Set} of {@link NoteBook}s that were added.
+   * </ul>
+   */
+  public static final String NOTE_BOOKS_ADDED = "Note Book Added";
+
+  /**
+   * Name of event fired when a {@link NoteBook}s are removed. For this event:
+   *
+   * <ul>
+   *   <li>{@code oldValue} = a {@link Set} of {@link NoteBook}s that were removed.
+   *   <li>{@code newValue} = null.
+   * </ul>
+   */
+  public static final String NOTE_BOOKS_REMOVED = "Note Book Removed";
 
   /** {@link PropertyChangeListener} for listening to {@link NoteBook} changes. */
   private final PropertyChangeListener propertyChangeListener = this::noteBookChanged;
@@ -89,13 +111,19 @@ public final class NoteBookManager {
   public NoteBook addNoteBook(NoteBook noteBook) {
     Objects.requireNonNull(noteBook, "added note book can not be null.");
     NoteBook existing;
-    synchronized (noteBook) {
-      existing = noteBooks.putIfAbsent(noteBook.getVersionedNameSpace(), noteBook);
-      if (existing == null) {
-        noteBook.addPropertyChangeListener(propertyChangeListener);
-      }
-    }
+    String nameSpace = noteBook.getVersionedNameSpace();
+    existing = noteBooks.get(nameSpace);
+    noteBooks.put(nameSpace, noteBook);
 
+    noteBook.addPropertyChangeListener(propertyChangeListener);
+
+    if (existing != null) {
+      existing.removePropertyChangeListener(propertyChangeListener);
+      propertyChangeSupport.firePropertyChange(
+          NOTE_BOOKS_ADDED, Set.of(existing), Set.of(noteBook));
+    } else {
+      propertyChangeSupport.firePropertyChange(NOTE_BOOKS_ADDED, Set.of(), Set.of(noteBook));
+    }
     return existing;
   }
 
@@ -119,9 +147,11 @@ public final class NoteBookManager {
    */
   public void removeNoteBook(NoteBook noteBook) {
     Objects.requireNonNull(noteBook, "removed note book can not be null.");
-    synchronized (noteBook) {
-      noteBook.removePropertyChangeListener(propertyChangeListener);
-      noteBooks.remove(noteBook.getVersionedNameSpace());
+
+    noteBook.removePropertyChangeListener(propertyChangeListener);
+    String nameSpace = noteBook.getVersionedNameSpace();
+    if (noteBooks.remove(nameSpace, noteBook)) {
+      propertyChangeSupport.firePropertyChange(NOTE_BOOKS_REMOVED, Set.of(noteBook), null);
     }
   }
 
@@ -134,7 +164,7 @@ public final class NoteBookManager {
     assert event != null : "Property Change Event is null";
     if (event.getPropertyName().equals(NoteBook.VERSIONED_NAMESPACE_CHANGED)) {
       NoteBook noteBook = (NoteBook) event.getSource();
-      noteBooks.remove(event.getOldValue().toString());
+      noteBooks.remove(event.getOldValue().toString(), noteBook);
       noteBooks.put(event.getNewValue().toString(), noteBook);
     }
   }

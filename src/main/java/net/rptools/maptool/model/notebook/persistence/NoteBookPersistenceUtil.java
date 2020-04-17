@@ -16,19 +16,23 @@ package net.rptools.maptool.model.notebook.persistence;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.io.PackedFile;
+import net.rptools.maptool.client.ui.notebook.NoteBookDependency;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.notebook.NoteBook;
@@ -58,25 +62,38 @@ public class NoteBookPersistenceUtil {
   /** The file which holds the readme for the {@link NoteBook}. */
   private static final String NOTE_BOOK_README_FILE = "README.md";
 
-  private static final class NoteBookDependencyInfo {
+  /** The directory that note book entries are stored in. */
+  private static final String ENTRY_DIR = "entries";
 
-    /**
-     * Creates a new {@code NoteBookDependencyInfo} object.
-     * @param ns The name space for the dependency.
-     * @param ver the version for the dependency.
-     */
-    private NoteBookDependencyInfo(String ns, String ver) {
-      namespace = ns;
-      version = ver;
-    }
+  /** Regular Expression pattern used for extracting information from Note Book content paths. */
+  private final Pattern noteBookPathPattern =
+      Pattern.compile("(" + NOTE_BOOKS + "/[^/]+/[^/]+)/(.*+)");
+
+  /** Class used to hold persisted dependency information. */
+  private static final class NoteBookDependencyInfo {
 
     /** The name space of the dependency. */
     private final String namespace;
 
     /** The version of the dependency. */
     private final String version;
-  }
 
+    /** The alias used to refer to the dependency. */
+    private final String alias;
+
+    /**
+     * Creates a new {@code NoteBookDependencyInfo} object.
+     *
+     * @param ns The name space for the dependency.
+     * @param ver the version for the dependency.
+     * @param dAlias The alias used to refer to the dependency.
+     */
+    private NoteBookDependencyInfo(String ns, String ver, String dAlias) {
+      namespace = ns;
+      version = ver;
+      alias = dAlias;
+    }
+  }
 
   /** Utility class used for persisting {@link NoteBook} information. */
   private static final class NoteBookInfo {
@@ -103,13 +120,13 @@ public class NoteBookPersistenceUtil {
     private String author;
 
     /** The license of the {@link NoteBook}. */
-    transient private String license;
+    private transient String license;
 
     /** The URL of the {@link NoteBook}. */
     private String URL;
 
     /** The Read Me for the {@link NoteBook}. */
-    transient private String readMe;
+    private transient String readMe;
 
     /** The dependencies for the {@code NoteBook}. */
     private NoteBookDependencyInfo[] dependencies;
@@ -147,9 +164,15 @@ public class NoteBookPersistenceUtil {
             .collect(Collectors.toSet());
 
     for (String fname : files) {
-      String[] parts = fname.split("/", 3);
-      noteBookFiles.putIfAbsent(parts[1], new HashSet<>());
-      noteBookFiles.get(parts[1]).add(parts[2]);
+      Matcher matcher = noteBookPathPattern.matcher(fname);
+      if (matcher.matches()) {
+        String noteBookDir = matcher.group(1);
+        String file = matcher.group(2);
+        noteBookFiles.putIfAbsent(noteBookDir, new HashSet<>());
+        noteBookFiles.get(noteBookDir).add(file);
+      } else {
+        // TODO: CDW
+      }
     }
 
     for (Entry<String, Set<String>> entry : noteBookFiles.entrySet()) {
@@ -174,15 +197,33 @@ public class NoteBookPersistenceUtil {
 
     NoteBookInfo nbi = loadNoteBookInfo(packedFile, noteBookDir);
     NoteBook noteBook =
-        NoteBook.createNoteBookWithId(nbi.id, nbi.name, nbi.description, nbi.version, nbi.namespace, nbi.author, nbi.license, nbi.URL, nbi.readMe);
+        NoteBook.createNoteBookWithId(
+            nbi.id,
+            nbi.name,
+            nbi.description,
+            nbi.version,
+            nbi.namespace,
+            nbi.author,
+            nbi.license,
+            nbi.URL,
+            nbi.readMe);
 
-    Gson gson = new Gson();
+    if (nbi.dependencies != null) {
+      for (NoteBookDependencyInfo deps : nbi.dependencies) {
+        noteBook.putDependency(new NoteBookDependency(deps.namespace, deps.version, deps.alias));
+      }
+    }
+
+    // Load the individual entries.
     for (var noteFile : noteBookFiles) {
-      String asString = IOUtils.toString(packedFile.getFileAsReader(noteFile));
-      JsonObject jsonObject = gson.toJsonTree(asString).getAsJsonObject();
-      NoteBookEntry entry = nbePersistenceUtil.fromJson(jsonObject);
-      noteBook.putEntry(entry);
-      allAssetIds.addAll(entry.getAssetKeys());
+      if (noteFile.startsWith(ENTRY_DIR)) {
+        JsonObject jsonObject =
+            JsonParser.parseReader(packedFile.getFileAsReader(noteBookDir + "/" + noteFile))
+                .getAsJsonObject();
+        NoteBookEntry entry = nbePersistenceUtil.fromJson(jsonObject);
+        noteBook.putEntry(entry);
+        allAssetIds.addAll(entry.getAssetKeys());
+      }
     }
 
     PersistenceUtil.loadAssets(allAssetIds, packedFile);
@@ -206,7 +247,7 @@ public class NoteBookPersistenceUtil {
     for (var entry : notebook.getEntries()) {
       if (entry.getType() != NoteBookEntryType.DIRECTORY) {
         packedFile.putFile(
-            noteBookDir + "/" + entry.getPath(),
+            noteBookDir + "/" + ENTRY_DIR + "/" + entry.getPath(),
             nbePersistenceUtil.toJson(entry).toString().getBytes());
 
         for (MD5Key md5Key : entry.getAssetKeys()) {
@@ -247,25 +288,30 @@ public class NoteBookPersistenceUtil {
     noteBookInfo.license = noteBook.getLicense();
     noteBookInfo.URL = noteBook.getURL();
 
-    SortedMap<String, String> dependencies = noteBook.getDependencies();
+    Set<NoteBookDependency> dependencies = noteBook.getDependencies();
     if (!dependencies.isEmpty()) {
       List<NoteBookDependencyInfo> dependenciesInfo = new ArrayList<>();
-      for (var dependency : dependencies.entrySet())  {
-        dependenciesInfo.add(new NoteBookDependencyInfo(dependency.getKey(), dependency.getValue()));
+      for (var dependency : dependencies) {
+        dependenciesInfo.add(
+            new NoteBookDependencyInfo(
+                dependency.getNamespace(), dependency.getVersion(), dependency.getAlias()));
       }
       noteBookInfo.dependencies = dependenciesInfo.toArray(noteBookInfo.dependencies);
     }
 
     Gson gson = new Gson();
 
-    packedFile.putFile(noteBookDir + "/" + NOTE_BOOK_INFO_FILE, gson.toJson(noteBookInfo));
+    packedFile.putFile(
+        noteBookDir + "/" + NOTE_BOOK_INFO_FILE, gson.toJson(noteBookInfo).getBytes());
 
     if (noteBook.getLicense() != null && !noteBook.getLicense().isEmpty()) {
-      packedFile.putFile(noteBookDir + "/" + NOTE_BOOK_LICENSE_FILE, noteBook.getLicense());
+      packedFile.putFile(
+          noteBookDir + "/" + NOTE_BOOK_LICENSE_FILE, noteBook.getLicense().getBytes());
     }
 
     if (noteBook.getReadMe() != null && !noteBook.getReadMe().isEmpty()) {
-      packedFile.putFile(noteBookDir + "/" + NOTE_BOOK_README_FILE, noteBook.getReadMe());
+      packedFile.putFile(
+          noteBookDir + "/" + NOTE_BOOK_README_FILE, noteBook.getReadMe().getBytes());
     }
   }
 
@@ -285,16 +331,20 @@ public class NoteBookPersistenceUtil {
 
     Gson gson = new Gson();
 
-    NoteBookInfo nbi =  gson.fromJson(noteBookDir + "/" + NOTE_BOOK_INFO_FILE, NoteBookInfo.class);
+    String asString =
+        IOUtils.toString(
+            packedFile.getFileAsInputStream(noteBookDir + "/" + NOTE_BOOK_INFO_FILE),
+            StandardCharsets.UTF_8);
+    NoteBookInfo nbi = gson.fromJson(asString, NoteBookInfo.class);
     if (packedFile.hasFile(noteBookLicenseFile)) {
-      try (Reader reader = packedFile.getFileAsReader(noteBookLicenseFile)) {
-        nbi.license = IOUtils.toString(reader);
+      try (InputStream is = packedFile.getFileAsInputStream(noteBookLicenseFile)) {
+        nbi.license = IOUtils.toString(is, StandardCharsets.UTF_8);
       }
     }
 
     if (packedFile.hasFile(noteBookReadMe)) {
-      try (Reader reader = packedFile.getFileAsReader(noteBookReadMe)) {
-        nbi.readMe = IOUtils.toString(reader);
+      try (InputStream is = packedFile.getFileAsInputStream(noteBookReadMe)) {
+        nbi.readMe = IOUtils.toString(is, StandardCharsets.UTF_8);
       }
     }
 

@@ -24,12 +24,12 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
+import net.rptools.maptool.client.ui.notebook.NoteBookDependency;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -47,8 +47,7 @@ import net.rptools.maptool.model.notebook.entry.NoteBookEntry;
  * <li>{@link #setNamespace(String)} (String)}
  * <li>{@link #setAuthor(String)} (String)}
  * <li>{@link #setLicense(String)} (String)}
- * <li>{@link #setURL(String)} (String)}
- * </ui> while the lock is held and can be used when you
+ * <li>{@link #setURL(String)} (String)} </ui> while the lock is held and can be used when you
  *     require these to remain stable while performing an operation.
  *
  * @implNote Maintaining the thread safety of this class depends on keeping to the following
@@ -144,7 +143,6 @@ public class NoteBook implements Comparable<NoteBook> {
    */
   public static final String VERSIONED_NAMESPACE_CHANGED = "Versioned Namespace Changed";
 
-
   /**
    * Name of event fired when the URL of the {@code NoteBook} changes. For this event:
    *
@@ -164,7 +162,6 @@ public class NoteBook implements Comparable<NoteBook> {
    * </ul>
    */
   public static final String AUTHOR_CHANGED = "Author Changed";
-
 
   /**
    * Name of event fired when the license of the {@code NoteBook} changes. For this event:
@@ -186,17 +183,9 @@ public class NoteBook implements Comparable<NoteBook> {
    */
   public static final String README_CHANGED = "Read Me Changed";
 
-
   /** Values that a namespace can not start with as they are reserved. */
   private static final String[] RESERVED_NAMESPACE_BEGINNING = {
-      "maptool",
-      "rptool",
-      "mt.",
-      "util.",
-      "utils.",
-      "tokentool",
-      "sheet.",
-      "character."
+    "maptool", "rptool", "mt.", "util.", "utils.", "tokentool", "sheet.", "character."
   };
 
   /** Regular Expression to check that namespace valid characters. */
@@ -206,9 +195,8 @@ public class NoteBook implements Comparable<NoteBook> {
   private static final String INVALID_NAMESPACE_SPECIAL_CHAR_SEQ = ".*(\\.\\.|\\.-|-\\.).*";
 
   /**
-   * Regular Expression to check that the version number is valid.
-   * This is the regular expression for semantic versioning
-   * See https://semver.org/
+   * Regular Expression to check that the version number is valid. This is the regular expression
+   * for semantic versioning See https://semver.org/
    */
   private static final String VALID_VERSION_REGEX =
       "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$";
@@ -314,7 +302,6 @@ public class NoteBook implements Comparable<NoteBook> {
   /** Is this an internal MapTool {@code NoteBook}. */
   private final boolean internal;
 
-
   /** The author of the {@code NoteBook}. */
   private String author;
 
@@ -322,18 +309,17 @@ public class NoteBook implements Comparable<NoteBook> {
   private String URL;
 
   /** The required dependencies for the {@code NoteBook}. */
-  private final Map<String, String> dependencyMap = new HashMap<>();
+  private final Set<NoteBookDependency> dependencies = new HashSet<>();
 
   /** The license for the {@code NoteBook}. */
   private String license;
 
-
   /** The read me for the {@code NoteBook}. */
   private String readMe;
 
-
   /**
    * Returns the version error if there is one.
+   *
    * @param version The version to check.
    * @return a {@link String} containing the error message or empty optional if there is no error.
    */
@@ -350,7 +336,9 @@ public class NoteBook implements Comparable<NoteBook> {
   }
 
   /**
-   * Return if the version has an error or not. The error can be retrieved with {@link #versionError(String)}.
+   * Return if the version has an error or not. The error can be retrieved with {@link
+   * #versionError(String)}.
+   *
    * @param version The version to check.
    * @return {@code true} if the version has an error, {@code false} otherwise.
    */
@@ -358,9 +346,9 @@ public class NoteBook implements Comparable<NoteBook> {
     return versionError(version).isPresent();
   }
 
-
   /**
    * Returns the namespace error if there is one.
+   *
    * @param namespace The namespace to check.
    * @return a {@link String} containing the error message or empty optional if there is no error.
    */
@@ -385,14 +373,17 @@ public class NoteBook implements Comparable<NoteBook> {
 
     // Check that the namespace only contains valid characters.
     if (!namespace.matches(VALID_NAMESPACE_CHARS_REGEX)) {
-      return Optional.of(I18N.getText("noteBooks.error.namespace.canOnlyContain", "a-z A-Z 0-9 . -"));
+      return Optional.of(
+          I18N.getText("noteBooks.error.namespace.canOnlyContain", "a-z A-Z 0-9 . -"));
     }
 
     // Check that the namespace does not start or end with a - or .
-    if (namespace.startsWith(".") || namespace.startsWith("-") || namespace.endsWith(".") || namespace.endsWith("-")) {
+    if (namespace.startsWith(".")
+        || namespace.startsWith("-")
+        || namespace.endsWith(".")
+        || namespace.endsWith("-")) {
       return Optional.of(I18N.getText("noteBooks.error.namespace.invalidStartEnd", ". -"));
     }
-
 
     // Check that the namespace does not have two consecutive special characters.
     if (namespace.matches(INVALID_NAMESPACE_SPECIAL_CHAR_SEQ)) {
@@ -405,16 +396,14 @@ public class NoteBook implements Comparable<NoteBook> {
       return Optional.of(I18N.getText("noteBooks.error.namespace.noDot"));
     }
 
-
-
-
     // Passed all checks so it is valid.
     return Optional.empty();
   }
 
-
   /**
-   * Return if the namespace has an error or not. The error can be retrieved with {@link #nameSpaceError(String)}.
+   * Return if the namespace has an error or not. The error can be retrieved with {@link
+   * #nameSpaceError(String)}.
+   *
    * @param namespace The namespace to check.
    * @return {@code true} if the namespace has an error, {@code false} otherwise.
    */
@@ -435,7 +424,6 @@ public class NoteBook implements Comparable<NoteBook> {
    * @param license The license of the {@code NoteBook}.
    * @param readme The Read Me of the {@code NoteBook}.
    * @param url The url of the {@code NoteBook}.
-   *
    * @param internal {@code true} if this ia an internal uneditable MapTool {@code NoteBook}.
    */
   private NoteBook(
@@ -464,7 +452,6 @@ public class NoteBook implements Comparable<NoteBook> {
     this.readMe = readme != null ? readme : "";
     this.URL = url != null ? url : "";
     this.internal = internal;
-
   }
 
   /**
@@ -478,12 +465,28 @@ public class NoteBook implements Comparable<NoteBook> {
    * @param license The license of the {@code NoteBook}.
    * @param url The url of the {@code NoteBook}.
    * @param readme The readme of the {@code NoteBook}.
-   *
    * @return a new {@code NoteBook} object.
    */
   public static NoteBook createNoteBook(
-      String name, String description, String version, String namespace, String author, String license, String url, String readme) {
-    return new NoteBook(UUID.randomUUID(), name, description, version, namespace, author, license, url, readme, false);
+      String name,
+      String description,
+      String version,
+      String namespace,
+      String author,
+      String license,
+      String url,
+      String readme) {
+    return new NoteBook(
+        UUID.randomUUID(),
+        name,
+        description,
+        version,
+        namespace,
+        author,
+        license,
+        url,
+        readme,
+        false);
   }
 
   /**
@@ -498,12 +501,20 @@ public class NoteBook implements Comparable<NoteBook> {
    * @param license The license of the {@code NoteBook}.
    * @param url The url of the {@code NoteBook}.
    * @param readme The readme of the {@code NoteBook}.
-   *
    * @return a new {@code NoteBook} object.
    */
   public static NoteBook createNoteBookWithId(
-      UUID id, String name, String description, String version, String namespace, String author, String license, String url, String readme) {
-    return new NoteBook(id, name, description, version, namespace, author, license, url, readme, false);
+      UUID id,
+      String name,
+      String description,
+      String version,
+      String namespace,
+      String author,
+      String license,
+      String url,
+      String readme) {
+    return new NoteBook(
+        id, name, description, version, namespace, author, license, url, readme, false);
   }
 
   /**
@@ -619,7 +630,6 @@ public class NoteBook implements Comparable<NoteBook> {
     return author;
   }
 
-
   /**
    * Sets the author for the {@code NoteBook}.
    *
@@ -719,7 +729,6 @@ public class NoteBook implements Comparable<NoteBook> {
     fireChangeEvent(LICENSE_CHANGED, oldLicense, newLicense);
   }
 
-
   /**
    * Sets the namespace of the {@code NoteBook}.
    *
@@ -762,40 +771,32 @@ public class NoteBook implements Comparable<NoteBook> {
     return namespace + "/" + version;
   }
 
-
   /**
    * Adds the specified dependency to the list of dependencies for this {@code NoteBook}.
-   * @param namespace The namespace of the dependency.
-   * @param version The version of the dependency.
+   *
+   * @param dependency The dependency to add.
    */
-  public synchronized void putDependency(String namespace, String version) {
-    dependencyMap.put(namespace, version);
+  public synchronized void putDependency(NoteBookDependency dependency) {
+    dependencies.add(dependency);
   }
-
-
 
   /**
    * Returns the dependencies for this {@code NoteBook}.
-   * The value returned is a {@code Map} with the namespace of the dependency as they key and the
-   * version as the value.
    *
    * @return the dependencies for this {@code NoteBook}.
    */
-  public synchronized SortedMap<String, String> getDependencies() {
-    return new TreeMap<>(dependencyMap);
+  public synchronized Set<NoteBookDependency> getDependencies() {
+    return new HashSet<>(dependencies);
   }
-
 
   /**
    * Removes the specified dependency from the {@link NoteBook}.
    *
-   * @param namespace the namespace of the dependency to remove.
+   * @param dependency The dependency to add.
    */
-  public synchronized void removeDependency(String namespace) {
-    dependencyMap.remove(namespace);
+  public synchronized void removeDependency(NoteBookDependency dependency) {
+    dependencies.remove(namespace);
   }
-
-
 
   /**
    * Adds or replaces a {@code NoteBookEntry} to the note book being managed. This will replace

@@ -50,7 +50,6 @@ public final class DirectoryEntry extends AbstractNoteBookEntry implements NoteB
         null, path.replaceFirst(".+/", ""), null, NoteBookEntryZoneRequirements.ZONE_IGNORED, path);
   }
 
-
   @Override
   public Optional<GUID> getZoneId() {
     return Optional.empty();

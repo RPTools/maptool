@@ -66,11 +66,15 @@
             <Label text="%noteBooks.label.description" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
             <TextArea fx:id="descriptionTextArea" prefHeight="13.0" prefWidth="79.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" GridPane.rowSpan="3" />
             <Label text="%noteBooks.label.dependencies" GridPane.halignment="CENTER" GridPane.rowIndex="8" />
-            <TableView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="8" GridPane.rowSpan="4">
+            <TableView fx:id="dependencyTableView" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="8" GridPane.rowSpan="4">
               <columns>
-                <TableColumn prefWidth="55.0" text="C1" />
-                <TableColumn prefWidth="95.0" text="C2" />
+                <TableColumn prefWidth="55.0" text="%noteBooks.table.column.namespace" />
+                <TableColumn prefWidth="95.0" text="%noteBooks.table.column.version" />
+                  <TableColumn prefWidth="75.0" text="%noteBooks.table.column.alias" />
               </columns>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
             </TableView>
             <Button fx:id="licenseButton" mnemonicParsing="false" text="%noteBooks.button.license" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="14" />
             <Button fx:id="readMeButton" mnemonicParsing="false" text="%noteBooks.button.readMe" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="14" />
