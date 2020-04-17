@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.swing;
 
+import com.jeta.forms.components.colors.JETAColorWell;
+import com.jeta.forms.components.image.ImageComponent;
 import com.jeta.forms.components.label.JETALabel;
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
@@ -22,6 +24,8 @@ import com.jeta.forms.gui.form.GridView;
 import java.awt.*;
 import java.util.Iterator;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import net.rptools.maptool.language.I18N;
 
 /** A FormPanel that supports I18N text. */
@@ -59,6 +63,52 @@ public class FormPanelI18N extends FormPanel {
     } else if (comp instanceof JButton) {
       JButton jButton = (JButton) comp;
       jButton.setText(I18N.getText(jButton.getText()));
+      String tooltip = jButton.getToolTipText();
+      if (tooltip != null) {
+        jButton.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JToggleButton) {
+      JToggleButton jToggle = (JToggleButton) comp;
+      String tooltip = jToggle.getToolTipText();
+      if (tooltip != null) {
+        jToggle.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JSpinner) {
+      JSpinner jSpin = (JSpinner) comp;
+      String tooltip = jSpin.getToolTipText();
+      if (tooltip != null) {
+        jSpin.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JComboBox) {
+      JComboBox<?> jComboBox = (JComboBox<?>) comp;
+      String tooltip = jComboBox.getToolTipText();
+      if (tooltip != null) {
+        jComboBox.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JTextField) {
+      JTextField jTextField = (JTextField) comp;
+      String tooltip = jTextField.getToolTipText();
+      if (tooltip != null) {
+        jTextField.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JList) {
+      JList<?> jList = (JList<?>) comp;
+      String tooltip = jList.getToolTipText();
+      if (tooltip != null) {
+        jList.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof JETAColorWell) {
+      JETAColorWell jetaColorWell = (JETAColorWell) comp;
+      String tooltip = jetaColorWell.getToolTipText();
+      if (tooltip != null) {
+        jetaColorWell.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof ImageComponent) {
+      ImageComponent jImage = (ImageComponent) comp;
+      String tooltip = jImage.getToolTipText();
+      if (tooltip != null) {
+        jImage.setToolTipText(I18N.getText(tooltip));
+      }
     } else if (comp instanceof JTabbedPane) {
       JTabbedPane jTabbedPane = (JTabbedPane) comp;
       for (int i = 0; i < jTabbedPane.getTabRunCount(); i += 1) {
@@ -70,10 +120,17 @@ public class FormPanelI18N extends FormPanel {
         translateComponent(subComp);
       }
     } else if (comp instanceof GridView) {
-      Iterator<?> iter = ((GridView) comp).beanIterator();
+      GridView gridView = (GridView) comp;
+      Iterator<?> iter = gridView.beanIterator();
       while (iter.hasNext()) {
         // Recursively translate the sub components
         translateComponent((Component) iter.next());
+      }
+      Border border = gridView.getBorder();
+      // Translate the titled border, if any
+      if (border instanceof TitledBorder) {
+        TitledBorder titledBorder = (TitledBorder) border;
+        titledBorder.setTitle(I18N.getText(titledBorder.getTitle()));
       }
     } else if (comp instanceof FormComponent) {
       // Translate the GridView inside the form
