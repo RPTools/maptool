@@ -3154,7 +3154,7 @@
                                    <at name="actionCommand">Clear All</at>
                                    <at name="name">speechClearAllButton</at>
                                    <at name="width">71</at>
-                                   <at name="text">Clear All</at>
+                                   <at name="text">Button.clearall</at>
                                    <at name="height">22</at>
                                   </object>
                                  </at>
