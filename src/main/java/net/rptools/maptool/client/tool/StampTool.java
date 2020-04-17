@@ -426,8 +426,15 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         Rectangle tokenBounds = token.getBounds(renderer.getZone());
 
         if (token.isSnapToGrid() && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
-          dragOffsetX = (pos.x - tokenBounds.x) - ((int) getZone().getGrid().getCellWidth() / 2);
-          dragOffsetY = (pos.y - tokenBounds.y) - ((int) getZone().getGrid().getCellHeight() / 2);
+          if (token.isBackgroundStamp()) {
+            // Snaps to the top left corner
+            dragOffsetX = (pos.x - tokenBounds.x) - ((int) getZone().getGrid().getCellWidth() / 2);
+            dragOffsetY = (pos.y - tokenBounds.y) - ((int) getZone().getGrid().getCellHeight() / 2);
+          } else {
+            // Snaps to the center
+            dragOffsetX = (pos.x - tokenBounds.x) - (tokenBounds.width / 2);
+            dragOffsetY = (pos.y - tokenBounds.y) - (tokenBounds.height / 2);
+          }
         } else {
           dragOffsetX = pos.x - tokenBounds.x;
           dragOffsetY = pos.y - tokenBounds.y;
@@ -664,7 +671,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
       if (SwingUtil.isControlDown(e)
           && tokenBeingResized.isSnapToGrid()
-          && tokenBeingResized.isObjectStamp()) {
+          && !tokenBeingResized.isBackgroundStamp()) {
         // Account for the 1/2 cell on each side of the stamp (since it's anchored in the center)
         newWidth += renderer.getZone().getGrid().getSize();
         newHeight += renderer.getZone().getGrid().getSize();
