@@ -84,7 +84,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Token Properties</at>
+                   <at name="title">CampaignPropertiesDialog.tab.token</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -267,7 +267,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Repositories</at>
+                   <at name="title">CampaignPropertiesDialog.tab.repo</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -397,7 +397,7 @@
                               <at name="actionCommand">Add</at>
                               <at name="name">addRepoButton</at>
                               <at name="width">51</at>
-                              <at name="text">Add</at>
+                              <at name="text">Button.add</at>
                               <at name="height">22</at>
                              </object>
                             </at>
@@ -563,7 +563,7 @@
                                    <at name="actionCommand">JButton</at>
                                    <at name="name">deleteRepoButton</at>
                                    <at name="width">63</at>
-                                   <at name="text">Delete</at>
+                                   <at name="text">Button.delete</at>
                                    <at name="height">22</at>
                                   </object>
                                  </at>
@@ -754,7 +754,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Sight</at>
+                   <at name="title">CampaignPropertiesDialog.tab.sight</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -912,7 +912,7 @@
                               </at>
                               <at name="width">1368</at>
                               <at name="name"/>
-                              <at name="text">&lt;html&gt;&lt;b&gt;Format:&lt;/b&gt; &amp;nbsp&amp;nbsp&amp;nbsp;Name : options &lt;p&gt;&lt;p&gt; Each sight type can have zero or more options,  use spaces between each option.  Having zero options implies using defaults for all values (e.g. Normal vision).&lt;p&gt;&lt;p&gt; &lt;b&gt;  Options:&lt;/b&gt; &lt;p&gt;&lt;p&gt;  shape - shape may be circle, square, hex, grid or cone&lt;br&gt; distance=y - Distance is the range at which this vision type ends.  Can be a decimal value. Ex: distance=10&lt;br&gt; scale - An optional keyword that adds the token&apos;s footprint (size) to the distance so vision starts at token&apos;s edge vs the token&apos;s center&lt;br&gt; arc=y -  When used with the cone shape, it signifies how large a field of vision the token has.  Can be an interger value. Ex: arc=120&lt;br&gt; offset=y -  When used with the cone shape, it signifies how much offest the cone begins from the center of the tokens facing.  Can be an interger value. Ex: offset=120&lt;br&gt; x# - Maginifier, multiplies each light source radius by this value.  Can be a decimal value.  Ex: x2&lt;br&gt;  r# - Range of personal light.  You can define multiple personal lights per sight type. Can have an optional #rrggbb hex color component appended to it as per typical CSS rules. The token will have a light source centered on them that only they can see with a radius of this value.  Ex: r60&lt;br&gt;   </at>
+                              <at name="text">CampaignPropertiesDialog.label.sight</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -1026,7 +1026,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Light</at>
+                   <at name="title">CampaignPropertiesDialog.tab.light</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -1465,7 +1465,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">States</at>
+                   <at name="title">CampaignPropertiesDialog.tab.states</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -1857,7 +1857,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               </at>
                               <at name="name">tokenStatesColorLabel</at>
                               <at name="width">29</at>
-                              <at name="text">Color:</at>
+                              <at name="text">GridControlPanel.color</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -1951,7 +1951,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               </at>
                               <at name="name">tokenStatesWidthLabel</at>
                               <at name="width">32</at>
-                              <at name="text">Width:</at>
+                              <at name="text">dialog.resizeStamp.label.width</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2045,7 +2045,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               </at>
                               <at name="width">28</at>
                               <at name="name"/>
-                              <at name="text">Type:</at>
+                              <at name="text">dialog.NewToken.type</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2195,7 +2195,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               </at>
                               <at name="name">tokenStatesImageFileLabel</at>
                               <at name="width">34</at>
-                              <at name="text">Image:</at>
+                              <at name="text">CampaignPropertiesDialog.label.image</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2481,7 +2481,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               </at>
                               <at name="name">tokenStatesCornerLabel</at>
                               <at name="width">37</at>
-                              <at name="text">Corner:</at>
+                              <at name="text">CampaignPropertiesDialog.label.corner</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2541,7 +2541,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               </at>
                               <at name="name">tokenStatesFlowGridLabel</at>
                               <at name="width">45</at>
-                              <at name="text">Grid Size:</at>
+                              <at name="text">GridControlPanel.size</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2601,7 +2601,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               </at>
                               <at name="width">57</at>
                               <at name="name"/>
-                              <at name="text">Mouseover:</at>
+                              <at name="text">CampaignPropertiesDialog.label.mouse</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2750,7 +2750,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               <at name="actionCommand">Add</at>
                               <at name="name">tokenStatesBrowseImage</at>
                               <at name="width">93</at>
-                              <at name="text">Browse</at>
+                              <at name="text">Button.browse</at>
                               <at name="height">22</at>
                              </object>
                             </at>
@@ -2805,7 +2805,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               </at>
                               <at name="width">31</at>
                               <at name="name"/>
-                              <at name="text">Name:</at>
+                              <at name="text">EditTokenDialog.label.name</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2865,7 +2865,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               </at>
                               <at name="width">41</at>
                               <at name="name"/>
-                              <at name="text">Opacity:</at>
+                              <at name="text">CampaignPropertiesDialog.label.opacity</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2925,13 +2925,13 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               </at>
                               <at name="width">32</at>
                               <at name="name"/>
-                              <at name="text">Order:</at>
+                              <at name="text">CampaignPropertiesDialog.label.order</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">Position in the list of states, change to move up or down the list.</at>
+                              <at name="toolTipText">CampaignPropertiesDialog.label.order.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -3043,7 +3043,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    <at name="actionCommand">Add</at>
                                    <at name="name">tokenStatesAddState</at>
                                    <at name="width">88</at>
-                                   <at name="text">Add</at>
+                                   <at name="text">Button.add</at>
                                    <at name="height">22</at>
                                   </object>
                                  </at>
@@ -3099,7 +3099,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    <at name="actionCommand">deleteState	</at>
                                    <at name="name">tokenStatesDeleteState</at>
                                    <at name="width">88</at>
-                                   <at name="text">Delete</at>
+                                   <at name="text">Button.delete</at>
                                    <at name="height">22</at>
                                   </object>
                                  </at>
@@ -3155,7 +3155,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    <at name="actionCommand">Add</at>
                                    <at name="name">tokenStatesUpdateState</at>
                                    <at name="width">88</at>
-                                   <at name="text">Update</at>
+                                   <at name="text">Button.update</at>
                                    <at name="height">22</at>
                                   </object>
                                  </at>
@@ -3211,7 +3211,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    <at name="actionCommand">deleteState	</at>
                                    <at name="name">tokenStatesMoveUp</at>
                                    <at name="width">88</at>
-                                   <at name="text">Move Up</at>
+                                   <at name="text">Button.up</at>
                                    <at name="height">22</at>
                                   </object>
                                  </at>
@@ -3267,7 +3267,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    <at name="actionCommand">deleteState	</at>
                                    <at name="name">tokenStatesMoveDown</at>
                                    <at name="width">88</at>
-                                   <at name="text">Move Down</at>
+                                   <at name="text">Button.down</at>
                                    <at name="height">22</at>
                                   </object>
                                  </at>
@@ -3504,7 +3504,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="width">33</at>
                                    <at name="name"/>
-                                   <at name="text">Group:</at>
+                                   <at name="text">CampaignPropertiesDialog.label.group</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -3745,7 +3745,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">GM</at>
                                         <at name="name">tokenStatesGM</at>
                                         <at name="width">34</at>
-                                        <at name="text">GM</at>
+                                        <at name="text">userTerm.GM</at>
                                         <at name="selected">true</at>
                                         <at name="height">16</at>
                                        </object>
@@ -3802,7 +3802,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">GM</at>
                                         <at name="name">tokenStatesOwner</at>
                                         <at name="width">51</at>
-                                        <at name="text">Owner</at>
+                                        <at name="text">CampaginPropertiesDialog.label.owner</at>
                                         <at name="selected">true</at>
                                         <at name="height">16</at>
                                        </object>
@@ -3859,7 +3859,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">GM</at>
                                         <at name="name">tokenStatesEverybody</at>
                                         <at name="width">93</at>
-                                        <at name="text">Everybody Else</at>
+                                        <at name="text">CampaignPropertiesDialog.label.else</at>
                                         <at name="selected">true</at>
                                         <at name="height">16</at>
                                        </object>
@@ -3889,7 +3889,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                           <super classname="com.jeta.forms.store.properties.BorderProperty">
                                            <at name="name">border</at>
                                            <at name="includetitle">true</at>
-                                           <at name="title">Show To:</at>
+                                           <at name="title">CampaignPropertiesDialog.label.show</at>
                                           </super>
                                           <at name="thickness">1</at>
                                           <at name="color">
@@ -4175,7 +4175,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Bars</at>
+                   <at name="title">CampaignPropertiesDialog.tab.bars</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -4424,7 +4424,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="name">tokenBarColorLabel</at>
                                    <at name="width">48</at>
-                                   <at name="text">Bar Color:</at>
+                                   <at name="text">CampaignPropertiesDialog.label.bar</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -4520,7 +4520,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="name">tokenBarThicknessLabel</at>
                                    <at name="width">50</at>
-                                   <at name="text">Thickness:</at>
+                                   <at name="text">CampaignPropertiesDialog.label.thick</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -4614,7 +4614,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="width">28</at>
                                    <at name="name"/>
-                                   <at name="text">Type:</at>
+                                   <at name="text">dialog.NewToken.type</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -4812,7 +4812,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="width">24</at>
                                    <at name="name"/>
-                                   <at name="text">Side:</at>
+                                   <at name="text">CampaignPropertiesDialog.label.side</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -4872,7 +4872,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="width">31</at>
                                    <at name="name"/>
-                                   <at name="text">Name:</at>
+                                   <at name="text">EditTokenDialog.label.name</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -4932,7 +4932,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="width">41</at>
                                    <at name="name"/>
-                                   <at name="text">Opacity:</at>
+                                   <at name="text">CampaignPropertiesDialog.label.opacity</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -5116,7 +5116,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="width">58</at>
                                    <at name="name"/>
-                                   <at name="text">Increments:</at>
+                                   <at name="text">CampaignPropertiesDialog.label.inc</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -5210,7 +5210,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="width">57</at>
                                    <at name="name"/>
-                                   <at name="text">Mouseover:</at>
+                                   <at name="text">CampaignPropertiesDialog.label.mouse</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -5270,7 +5270,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="name">tokenBarBgColorLabel</at>
                                    <at name="width">60</at>
-                                   <at name="text">Background:</at>
+                                   <at name="text">CampaignPropertiesDialog.label.background</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -5419,7 +5419,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="name">tokenBarImagesLabel</at>
                                    <at name="width">39</at>
-                                   <at name="text">Images:</at>
+                                   <at name="text">CampaignPropertiesDialog.label.images</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -5502,7 +5502,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">Add</at>
                                         <at name="name">tokenBarAddBar</at>
                                         <at name="width">88</at>
-                                        <at name="text">Add</at>
+                                        <at name="text">Button.add</at>
                                         <at name="height">22</at>
                                        </object>
                                       </at>
@@ -5558,7 +5558,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">deleteState	</at>
                                         <at name="name">tokenBarDeleteBar</at>
                                         <at name="width">88</at>
-                                        <at name="text">Delete</at>
+                                        <at name="text">Button.delete</at>
                                         <at name="height">22</at>
                                        </object>
                                       </at>
@@ -5614,7 +5614,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">Add</at>
                                         <at name="name">tokenBarUpdateBar</at>
                                         <at name="width">88</at>
-                                        <at name="text">Update</at>
+                                        <at name="text">Button.update</at>
                                         <at name="height">22</at>
                                        </object>
                                       </at>
@@ -5670,7 +5670,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">deleteState	</at>
                                         <at name="name">tokenBarMoveUp</at>
                                         <at name="width">88</at>
-                                        <at name="text">Move Up</at>
+                                        <at name="text">Button.up</at>
                                         <at name="height">22</at>
                                        </object>
                                       </at>
@@ -5726,7 +5726,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">deleteState	</at>
                                         <at name="name">tokenBarMoveDown</at>
                                         <at name="width">88</at>
-                                        <at name="text">Move Down</at>
+                                        <at name="text">Button.down</at>
                                         <at name="height">22</at>
                                        </object>
                                       </at>
@@ -6090,7 +6090,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                              <at name="actionCommand">GM</at>
                                              <at name="name">tokenBarGM</at>
                                              <at name="width">34</at>
-                                             <at name="text">GM</at>
+                                             <at name="text">userTerm.GM</at>
                                              <at name="selected">true</at>
                                              <at name="height">16</at>
                                             </object>
@@ -6147,7 +6147,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                              <at name="actionCommand">GM</at>
                                              <at name="name">tokenBarOwner</at>
                                              <at name="width">51</at>
-                                             <at name="text">Owner</at>
+                                             <at name="text">CampaginPropertiesDialog.label.owner</at>
                                              <at name="selected">true</at>
                                              <at name="height">16</at>
                                             </object>
@@ -6204,7 +6204,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                              <at name="actionCommand">GM</at>
                                              <at name="name">tokenBarEverybody</at>
                                              <at name="width">93</at>
-                                             <at name="text">Everybody Else</at>
+                                             <at name="text">CampaignPropertiesDialog.label.else</at>
                                              <at name="selected">true</at>
                                              <at name="height">16</at>
                                             </object>
@@ -6234,7 +6234,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                                <super classname="com.jeta.forms.store.properties.BorderProperty">
                                                 <at name="name">border</at>
                                                 <at name="includetitle">true</at>
-                                                <at name="title">Show To:</at>
+                                                <at name="title">CampaignPropertiesDialog.label.show</at>
                                                </super>
                                                <at name="thickness">1</at>
                                                <at name="color">
@@ -6468,7 +6468,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">Add</at>
                                         <at name="name">tokenBarAddImage</at>
                                         <at name="width">88</at>
-                                        <at name="text">Add</at>
+                                        <at name="text">Button.add</at>
                                         <at name="height">22</at>
                                        </object>
                                       </at>
@@ -6524,7 +6524,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">deleteState	</at>
                                         <at name="name">tokenBarDeleteImage</at>
                                         <at name="width">88</at>
-                                        <at name="text">Delete</at>
+                                        <at name="text">Button.delete</at>
                                         <at name="height">22</at>
                                        </object>
                                       </at>
@@ -6580,7 +6580,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">Add</at>
                                         <at name="name">tokenBarUpdateImage</at>
                                         <at name="width">88</at>
-                                        <at name="text">Update</at>
+                                        <at name="text">Button.update</at>
                                         <at name="height">22</at>
                                        </object>
                                       </at>
@@ -6636,7 +6636,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">deleteState	</at>
                                         <at name="name">tokenBarMoveUpImage</at>
                                         <at name="width">88</at>
-                                        <at name="text">Move Up</at>
+                                        <at name="text">Button.up</at>
                                         <at name="height">22</at>
                                        </object>
                                       </at>
@@ -6692,7 +6692,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="actionCommand">deleteState	</at>
                                         <at name="name">tokenBarMoveDownImage</at>
                                         <at name="width">88</at>
-                                        <at name="text">Move Down</at>
+                                        <at name="text">Button.down</at>
                                         <at name="height">22</at>
                                        </object>
                                       </at>
@@ -7024,7 +7024,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                         <at name="width">38</at>
                                         <at name="name"/>
                                         <at name="horizontalTextPosition">0</at>
-                                        <at name="text">Preview</at>
+                                        <at name="text">CampaignPropertiesDialog.label.preview</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
@@ -7406,7 +7406,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                  <at name="actionCommand">OK</at>
                  <at name="name">okButton</at>
                  <at name="width">46</at>
-                 <at name="text">OK</at>
+                 <at name="text">Button.ok</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -7462,7 +7462,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                  <at name="actionCommand">Cancel</at>
                  <at name="name">cancelButton</at>
                  <at name="width">64</at>
-                 <at name="text">Cancel</at>
+                 <at name="text">Button.cancel</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -7518,7 +7518,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                  <at name="actionCommand">Import</at>
                  <at name="name">importButton</at>
                  <at name="width">64</at>
-                 <at name="text">Import</at>
+                 <at name="text">Button.import</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -7574,7 +7574,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                  <at name="actionCommand">Export</at>
                  <at name="name">exportButton</at>
                  <at name="width">64</at>
-                 <at name="text">Export</at>
+                 <at name="text">Button.export</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -7630,7 +7630,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                  <at name="actionCommand">Import predefined</at>
                  <at name="name">importPredefinedButton</at>
                  <at name="width">119</at>
-                 <at name="text">Import predefined</at>
+                 <at name="text">CampaignPropertiesDialog.button.import</at>
                  <at name="height">22</at>
                 </object>
                </at>
