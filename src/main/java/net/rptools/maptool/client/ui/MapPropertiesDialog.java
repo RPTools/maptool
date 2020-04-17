@@ -32,6 +32,7 @@ import net.rptools.lib.swing.PaintChooser;
 import net.rptools.lib.swing.SelectionListener;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanelModel;
@@ -140,7 +141,7 @@ public class MapPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel = new FormPanel("net/rptools/maptool/client/ui/forms/mapPropertiesDialog.xml");
+    formPanel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/mapPropertiesDialog.xml");
 
     initDistanceTextField();
 

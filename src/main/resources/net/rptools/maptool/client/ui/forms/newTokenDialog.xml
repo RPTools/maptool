@@ -54,7 +54,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">dialog.NewToken.name</at>
+            <at name="text">Label.name</at>
             <at name="height">15</at>
             <at name="width">62</at>
             <at name="name"></at>
@@ -114,7 +114,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">dialog.NewToken.gmname</at>
+            <at name="text">Label.gmname</at>
             <at name="height">15</at>
             <at name="width">62</at>
             <at name="name"></at>
