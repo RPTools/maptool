@@ -23,6 +23,8 @@ import com.jeta.forms.gui.form.GridView;
 import java.awt.*;
 import java.util.Iterator;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import net.rptools.maptool.language.I18N;
 
 /** A FormPanel that supports I18N text. */
@@ -111,10 +113,17 @@ public class FormPanelI18N extends FormPanel {
         translateComponent(subComp);
       }
     } else if (comp instanceof GridView) {
-      Iterator<?> iter = ((GridView) comp).beanIterator();
+      GridView gridView = (GridView) comp;
+      Iterator<?> iter = gridView.beanIterator();
       while (iter.hasNext()) {
         // Recursively translate the sub components
         translateComponent((Component) iter.next());
+      }
+      Border border = gridView.getBorder();
+      // Translate the titled border, if any
+      if (border instanceof TitledBorder) {
+        TitledBorder titledBorder = (TitledBorder) border;
+        titledBorder.setTitle(I18N.getText(titledBorder.getTitle()));
       }
     } else if (comp instanceof FormComponent) {
       // Translate the GridView inside the form
