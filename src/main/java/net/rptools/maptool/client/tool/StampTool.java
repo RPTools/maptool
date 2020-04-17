@@ -425,13 +425,21 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
         Rectangle tokenBounds = token.getBounds(renderer.getZone());
 
+        int snapOffsetX = 0;
+        int snapOffsetY = 0;
         if (token.isSnapToGrid() && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
-          dragOffsetX = (pos.x - tokenBounds.x) - ((int) getZone().getGrid().getCellWidth() / 2);
-          dragOffsetY = (pos.y - tokenBounds.y) - ((int) getZone().getGrid().getCellHeight() / 2);
-        } else {
-          dragOffsetX = pos.x - tokenBounds.x;
-          dragOffsetY = pos.y - tokenBounds.y;
+          if (token.isBackgroundStamp() || token.isSnapToScale()) {
+            // Snaps to the top left corner
+            snapOffsetX = (int) getZone().getGrid().getCellWidth() / 2;
+            snapOffsetY = (int) getZone().getGrid().getCellHeight() / 2;
+          } else {
+            // Snaps to the center
+            snapOffsetX = tokenBounds.width / 2;
+            snapOffsetY = tokenBounds.height / 2;
+          }
         }
+        dragOffsetX = pos.x - tokenBounds.x - snapOffsetX;
+        dragOffsetY = pos.y - tokenBounds.y - snapOffsetY;
       }
     } else {
       if (SwingUtilities.isLeftMouseButton(e)) {
@@ -664,7 +672,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
       if (SwingUtil.isControlDown(e)
           && tokenBeingResized.isSnapToGrid()
-          && tokenBeingResized.isObjectStamp()) {
+          && !tokenBeingResized.isBackgroundStamp()) {
         // Account for the 1/2 cell on each side of the stamp (since it's anchored in the center)
         newWidth += renderer.getZone().getGrid().getSize();
         newHeight += renderer.getZone().getGrid().getSize();

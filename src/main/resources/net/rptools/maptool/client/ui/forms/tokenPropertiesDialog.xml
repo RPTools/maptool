@@ -2759,7 +2759,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">State</at>
+                   <at name="title">EditTokenDialog.tab.state</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -2975,7 +2975,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Speech</at>
+                   <at name="title">EditTokenDialog.tab.speech</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -3345,7 +3345,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Ownership</at>
+                   <at name="title">EditTokenDialog.tab.ownership</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -6263,7 +6263,7 @@
                               </at>
                               <at name="name">summaryLabel</at>
                               <at name="width">48</at>
-                              <at name="text">EditTokenDialog.label.hero.summary:</at>
+                              <at name="text">EditTokenDialog.label.hero.summary</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -8488,7 +8488,7 @@
                  </at>
                  <at name="width">49</at>
                  <at name="name"/>
-                 <at name="text">EditTokenDialog.label.name</at>
+                 <at name="text">Label.name</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
@@ -8610,7 +8610,7 @@
                  </at>
                  <at name="name">tokenGMNameLabel</at>
                  <at name="width">49</at>
-                 <at name="text">EditTokenDialog.label.gmname</at>
+                 <at name="text">Label.gmname</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
