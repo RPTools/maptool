@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.swing;
 
 import com.jeta.forms.components.colors.JETAColorWell;
+import com.jeta.forms.components.image.ImageComponent;
 import com.jeta.forms.components.label.JETALabel;
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
@@ -101,6 +102,12 @@ public class FormPanelI18N extends FormPanel {
       String tooltip = jetaColorWell.getToolTipText();
       if (tooltip != null) {
         jetaColorWell.setToolTipText(I18N.getText(tooltip));
+      }
+    } else if (comp instanceof ImageComponent) {
+      ImageComponent jImage = (ImageComponent) comp;
+      String tooltip = jImage.getToolTipText();
+      if (tooltip != null) {
+        jImage.setToolTipText(I18N.getText(tooltip));
       }
     } else if (comp instanceof JTabbedPane) {
       JTabbedPane jTabbedPane = (JTabbedPane) comp;

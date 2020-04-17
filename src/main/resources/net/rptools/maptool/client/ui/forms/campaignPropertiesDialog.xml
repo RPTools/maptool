@@ -2805,7 +2805,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                               </at>
                               <at name="width">31</at>
                               <at name="name"/>
-                              <at name="text">EditTokenDialog.label.name</at>
+                              <at name="text">Label.name</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -4872,7 +4872,7 @@ Aura Player Also 10 : aura 7.5#0000ff&lt;/pre&gt;
                                    </at>
                                    <at name="width">31</at>
                                    <at name="name"/>
-                                   <at name="text">EditTokenDialog.label.name</at>
+                                   <at name="text">Label.name</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
