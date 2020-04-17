@@ -1040,7 +1040,8 @@ public class PersistenceUtil {
     try {
       tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + ".png");
       BufferedImage image =
-          ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()));
+          ImageUtil.createCompatibleImage(
+              ImageUtil.bytesToImage(asset.getImage(), tokenSaveFile.getCanonicalPath()));
       ImageIO.write(image, "png", tokenSaveFile);
       image.flush();
     } catch (IOException e) {
