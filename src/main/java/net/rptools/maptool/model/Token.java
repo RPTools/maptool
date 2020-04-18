@@ -731,6 +731,10 @@ public class Token extends BaseModel implements Cloneable {
     return getLayer() == Zone.Layer.BACKGROUND;
   }
 
+  public boolean isOnTokenLayer() {
+    return getLayer() == Zone.Layer.TOKEN;
+  }
+
   public boolean isStamp() {
     switch (getLayer()) {
       case BACKGROUND:
@@ -1508,6 +1512,32 @@ public class Token extends BaseModel implements Cloneable {
     footprintBounds.x += anchorX;
     footprintBounds.y += anchorY;
     return footprintBounds;
+  }
+
+  /**
+   * Returns the drag offset of the token.
+   *
+   * @param zone the zone where the token is dragged
+   * @return a point representing the offset
+   */
+  public Point getDragOffset(Zone zone) {
+    Grid grid = zone.getGrid();
+    int offsetX, offsetY;
+    if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
+      if (isBackgroundStamp() || isSnapToScale() || isOnTokenLayer()) {
+        Point centerOffset = grid.getCenterOffset();
+        offsetX = getX() + centerOffset.x;
+        offsetY = getY() + centerOffset.y;
+      } else {
+        Rectangle tokenBounds = getBounds(zone);
+        offsetX = tokenBounds.x + tokenBounds.width / 2;
+        offsetY = tokenBounds.y + tokenBounds.height / 2;
+      }
+    } else {
+      offsetX = getX();
+      offsetY = getY();
+    }
+    return new Point(offsetX, offsetY);
   }
 
   /** @return the String of the sightType */
