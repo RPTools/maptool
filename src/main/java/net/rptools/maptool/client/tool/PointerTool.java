@@ -532,17 +532,15 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           renderer.selectToken(token.getId());
           renderer.updateAfterSelection();
         }
-        // Dragging offset for currently selected token
+        // ZonePoint dragged to
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-        Rectangle tokenBounds = token.getBounds(renderer.getZone());
 
-        if (token.isSnapToGrid() && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
-          dragOffsetX = (pos.x - tokenBounds.x) - (tokenBounds.width / 2);
-          dragOffsetY = (pos.y - tokenBounds.y) - (tokenBounds.height / 2);
-        } else {
-          dragOffsetX = pos.x - tokenBounds.x;
-          dragOffsetY = pos.y - tokenBounds.y;
-        }
+        // Offset specific to the token
+        Point tokenOffset = token.getDragOffset(getZone());
+
+        // Dragging offset for currently selected token
+        dragOffsetX = pos.x - tokenOffset.x;
+        dragOffsetY = pos.y - tokenOffset.y;
       }
     } else {
       if (SwingUtilities.isLeftMouseButton(e)) {
@@ -797,9 +795,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         if (isMovingWithKeys) {
           return;
         }
-        Grid grid = getZone().getGrid();
-        TokenFootprint tf = tokenUnderMouse.getFootprint(grid);
-        Rectangle r = tf.getBounds(grid);
         ZonePoint last = renderer.getLastWaypoint(tokenUnderMouse.getId());
         if (last == null) {
           // This makes no sense to me. Why create a fake last point that is
@@ -879,17 +874,14 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
    */
   public boolean handleDragToken(ZonePoint zonePoint, int dx, int dy) {
     Grid grid = renderer.getZone().getGrid();
+    // Always correct for offset. Fix #1589
+    zonePoint.translate(-dragOffsetX, -dragOffsetY);
     // For snapped dragging
     if (tokenBeingDragged.isSnapToGrid()
         && grid.getCapabilities().isSnapToGridSupported()
         && AppPreferences.getTokensSnapWhileDragging()) {
       // Convert the zone point to a cell point and back to force the snap to grid on drag
       zonePoint = grid.convert(grid.convert(zonePoint));
-    } else {
-      // Non-snapped while dragging.  Snaps when mouse-button released.
-      if (!(grid instanceof SquareGrid) || !tokenBeingDragged.isSnapToGrid()) {
-        zonePoint.translate(-dragOffsetX, -dragOffsetY);
-      }
     }
     CellPoint cellUnderMouse = grid.convert(zonePoint);
     MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
