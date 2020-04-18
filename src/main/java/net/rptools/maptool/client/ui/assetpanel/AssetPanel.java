@@ -427,6 +427,8 @@ public class AssetPanel extends JComponent {
       extractRenderedPages =
           new JCheckBox(
               I18N.getText("panel.Asset.ImageModel.checkbox.extractRenderedPages"), false);
+      extractRenderedPages.setToolTipText(
+          I18N.getString("panel.Asset.ImageModel.checkbox.tooltip.extractRenderedPages"));
       extractRenderedPages.addActionListener(ev -> updateFilter());
     }
     return extractRenderedPages;
