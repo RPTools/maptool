@@ -77,7 +77,7 @@
             <at name="actionCommand">OK</at>
             <at name="name">okButton</at>
             <at name="width">46</at>
-            <at name="text">OK</at>
+            <at name="text">Button.ok</at>
             <at name="height">22</at>
            </object>
           </at>
@@ -5925,7 +5925,7 @@ Disabled (default): show tooltips for macroLinks</at>
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Accessibility</at>
+                   <at name="title">Label.accessibility</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -6000,13 +6000,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">101</at>
                               <at name="name"/>
-                              <at name="text">Chat Font Size</at>
+                              <at name="text">Preferences.label.access.size</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">Point size for all chat window text (both input and output).</at>
+                              <at name="toolTipText">Preferences.label.access.size.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -6116,13 +6116,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">101</at>
                               <at name="name"/>
-                              <at name="text">ToolTip Initial Delay</at>
+                              <at name="text">Preferences.label.access.delay</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">The initial delay (in milliseconds) before a tooltip is displayed.</at>
+                              <at name="toolTipText">Preferences.label.access.delay.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -6177,13 +6177,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">101</at>
                               <at name="name"/>
-                              <at name="text">ToolTip Dismiss Delay</at>
+                              <at name="text">Preferences.label.access.delay.dismiss</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">The amount of time (in milliseconds) the tooltip will remain before being removed.</at>
+                              <at name="toolTipText">Preferences.label.access.delay.dismiss.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -10386,7 +10386,7 @@ Disabled (default): show tooltips for macroLinks</at>
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Sounds</at>
+                   <at name="title">Label.sounds</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -10516,13 +10516,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">150</at>
                               <at name="name"/>
-                              <at name="text">Play system sounds	</at>
+                              <at name="text">Preferences.label.sound.system</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">Turn this off to prevent all sounds from within MapTool.  Needed for some Java implementations as too many sounds queued up can crash the JVM.</at>
+                              <at name="toolTipText">Preferences.label.sound.system.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -10632,13 +10632,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">150</at>
                               <at name="name"/>
-                              <at name="text">Turn on Syrinscape Integration</at>
+                              <at name="text">Preferences.label.sound.syrinscape</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">Allow MapTool to launch Syrinscape via 3rd party integration URI. This will take affect on next launch of MapTool.</at>
+                              <at name="toolTipText">Preferences.label.sound.syrinscape.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -10802,13 +10802,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">150</at>
                               <at name="name"/>
-                              <at name="text">Play streams</at>
+                              <at name="text">Preferences.label.sound.stream</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">Turn this off to prevent streams from playing</at>
+                              <at name="toolTipText">Preferences.label.sound.stream.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
@@ -10863,13 +10863,13 @@ Disabled (default): show tooltips for macroLinks</at>
                               </at>
                               <at name="width">150</at>
                               <at name="name"/>
-                              <at name="text">Only when window not focused</at>
+                              <at name="text">Preferences.label.sound.focus</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
                                </object>
                               </at>
-                              <at name="toolTipText">Only turn off sounds when the window is not focused.</at>
+                              <at name="toolTipText">Preferences.label.sound.focus.tooltip</at>
                               <at name="height">14</at>
                              </object>
                             </at>
