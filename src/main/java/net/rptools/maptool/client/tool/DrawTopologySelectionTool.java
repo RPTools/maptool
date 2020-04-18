@@ -23,6 +23,7 @@ import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Zone.TopologyMode;
 
 /**
@@ -124,7 +125,11 @@ public class DrawTopologySelectionTool extends DefaultTool {
 
     AppPreferences.setTopologyDrawingMode(currentTopologyMode);
 
-    MapTool.getFrame().getCurrentZoneRenderer().getZone().setTopologyMode(currentTopologyMode);
+    ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+    // Check if there is a map. Fix #1605
+    if (zr != null) {
+      zr.getZone().setTopologyMode(currentTopologyMode);
+    }
   }
 
   @Override
