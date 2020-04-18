@@ -202,7 +202,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">&lt;html&gt;&lt;body&gt; Format:&lt;p&gt; #*@PropertyName(ShortName):default &lt;p&gt; &lt;p&gt;Key:&lt;br&gt; * - Show property on the statsheet&lt;br&gt; @ - Owner visible only&lt;br&gt;# - GM view only&lt;br&gt; ( ) - Short name of the property (e.g. Movement(Mv) )&lt;br&gt;: - Default value&lt;/body&gt;&lt;/html&gt;</at>
+            <at name="text">TokenPropertiesPanel.format</at>
             <at name="height">144</at>
             <at name="width">387</at>
             <at name="name"></at>
