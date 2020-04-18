@@ -6408,7 +6408,7 @@ Disabled (default): show tooltips for macroLinks</at>
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Application</at>
+                   <at name="title">Label.application</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -11045,7 +11045,7 @@ Disabled (default): show tooltips for macroLinks</at>
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Startup</at>
+                   <at name="title">Label.startup</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -11142,13 +11142,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">161</at>
                                    <at name="name"/>
-                                   <at name="text">Maximum heap size (-Xmx)</at>
+                                   <at name="text">Preferences.label.jvm.heap</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">-Xmx size in bytes Sets the maximum size to which the Java heap can grow.</at>
+                                   <at name="toolTipText">Preferences.label.jvm.heap.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -11203,13 +11203,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">161</at>
                                    <at name="name"/>
-                                   <at name="text">Initial &amp; minimum heap size (-Xms)</at>
+                                   <at name="text">Preferences.label.jvm.min</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Oracle recommends setting the minimum heap size (-Xms) equal to the maximum heap size (-Xmx) to minimize garbage collections.</at>
+                                   <at name="toolTipText">Preferences.label.jvm.min.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -11269,7 +11269,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    <at name="selectionEnd">2</at>
                                    <at name="scrollOffset">1</at>
                                    <at name="text">4G</at>
-                                   <at name="toolTipText">-Xmx size in bytes Sets the maximum size to which the Java heap can grow.</at>
+                                   <at name="toolTipText">Preferences.label.language.tooltip</at>
                                    <at name="height">20</at>
                                   </object>
                                  </at>
@@ -11384,13 +11384,13 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">161</at>
                                    <at name="name"/>
-                                   <at name="text">Thread stack size (-Xss)</at>
+                                   <at name="text">Preferences.label.jvm.stack</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Thread stacks are memory areas allocated for each Java thread for their internal use. This is where the thread stores its local execution state.</at>
+                                   <at name="toolTipText">Preferences.label.jvm.stack.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -11479,7 +11479,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">JVM Memory Settings</at>
+                                      <at name="title">Preferences.label.jvm</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">
@@ -11648,7 +11648,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">149</at>
                                    <at name="name"/>
-                                   <at name="text">Enable assertions</at>
+                                   <at name="text">Preferences.label.advanced.assert</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -11870,7 +11870,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">149</at>
                                    <at name="name"/>
-                                   <at name="text">Disable Direct3d Pipeline</at>
+                                   <at name="text">Preferences.label.advanced.direct3d</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -11930,7 +11930,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">149</at>
                                    <at name="name"/>
-                                   <at name="text">Enable OpenGL Pipeline</at>
+                                   <at name="text">Preferences.label.advanced.opengl</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -11990,7 +11990,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">149</at>
                                    <at name="name"/>
-                                   <at name="text">Intialize AWT before JavaFX</at>
+                                   <at name="text">Preferences.label.advanced.javafx</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -12078,7 +12078,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">Advanced Options</at>
+                                      <at name="title">Preferences.label.advanced</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">
@@ -12380,7 +12380,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">Language Override</at>
+                                      <at name="title">Preferences.label.language.override</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">
@@ -12537,7 +12537,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    </at>
                                    <at name="width">70</at>
                                    <at name="name"/>
-                                   <at name="text">Data Directory</at>
+                                   <at name="text">Preferences.label.options.directory</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -12601,7 +12601,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                    <at name="width">116</at>
                                    <at name="selectionEnd">14</at>
                                    <at name="text">.maptool-nerps</at>
-                                   <at name="toolTipText">Override default data directory. Default is .maptool under user directory</at>
+                                   <at name="toolTipText">Preferences.label.options.directory.tooltip</at>
                                    <at name="height">20</at>
                                   </object>
                                  </at>
@@ -12630,7 +12630,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <super classname="com.jeta.forms.store.properties.BorderProperty">
                                       <at name="name">border</at>
                                       <at name="includetitle">true</at>
-                                      <at name="title">Additional Options</at>
+                                      <at name="title">Preferences.label.options</at>
                                      </super>
                                      <at name="thickness">1</at>
                                      <at name="color">
