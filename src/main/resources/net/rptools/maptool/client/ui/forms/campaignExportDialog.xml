@@ -614,7 +614,7 @@
             </at>
             <at name="name"></at>
             <at name="width">496</at>
-            <at name="text">Notes</at>
+            <at name="text">EditTokenDialog.tab.notes</at>
             <at name="fill">
              <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
               <at name="name">fill</at>

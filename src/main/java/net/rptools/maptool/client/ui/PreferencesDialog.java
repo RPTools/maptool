@@ -225,7 +225,7 @@ public class PreferencesDialog extends JDialog {
   private boolean jvmValuesChanged = false;
 
   public PreferencesDialog() {
-    super(MapTool.getFrame(), "Preferences", true);
+    super(MapTool.getFrame(), I18N.getString("Label.preferences"), true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
