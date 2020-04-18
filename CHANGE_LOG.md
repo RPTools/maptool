@@ -1,3 +1,55 @@
+Maptool 1.7.0
+=====
+Lots of enhancements, bug fixes and improvements to the code base.
+
+**Some Highlights**
+
+**Enhancements**
+- [#][i] 
+- [#1528][i1528] New parameter for dialog and frame functions to prevent scrolling on reload.
+- [#1473][i1473] Image tokens (image:token) now included in output of `getInfo("client")`.
+- [#1463][i1463] List of panels in Window menu is not sorted alphabetically.
+- [#][i] 
+- [#][i] 
+- [#][i] 
+
+**Bug Fixes**
+- [#][i] 
+- [#1589][i1589] Jumpy token movement on all layers, free-size or fixed, snap or non-snap, fixed for all grid types.
+- [#1588][i1588] Popup for setting initiative from initiative panel showed placeholder instead of token name. Fixed.
+- [#1575][i1575] Unclosed parens in Token properties definition would produce a StringIndexOutOfbounds exception. Fixed.
+- [#1572][i1572] Deleting last map with FoW would produce an NPE if Map menu opened. Fixed.
+- [#1568][i1568] Deleting a map while a token was being dragged would produce a NPE. Fixed.
+- [#1566][i1566] Saving lib:tokens would fail due to colon in name throwing exception. Fixed.
+- [#1564][i1564] Function `playClip()` could fail to create a MediaPlayer throwing an exception. Exception caught and error message presented to user now.
+- [#1551][i1551] Javascript `console.log`not working during page load. Fixed.
+- [#1538][i1538] Close button on Token Editor changed to Cancel.
+- [#1501][i1501] "User data directory is already in use" error when using frame5/dialog5 on two instances of MapTool. Fixed.
+- [#][i] 
+- [#][i] 
+- [#][i] 
+- [#][i] 
+- [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
+
+**Other**
+- [#][i] 
+
+[i]: https://github.com/RPTools/maptool/issues/
+[i1589]: https://github.com/RPTools/maptool/issues/1589
+[i1588]: https://github.com/RPTools/maptool/issues/1588
+[i1575]: https://github.com/RPTools/maptool/issues/1575
+[i1572]: https://github.com/RPTools/maptool/issues/1572
+[i1568]: https://github.com/RPTools/maptool/issues/1568
+[i1566]: https://github.com/RPTools/maptool/issues/1566
+[i1564]: https://github.com/RPTools/maptool/issues/1564
+[i1551]: https://github.com/RPTools/maptool/issues/1551
+[i1538]: https://github.com/RPTools/maptool/issues/1538
+[i1528]: https://github.com/RPTools/maptool/issues/1528
+[i1501]: https://github.com/RPTools/maptool/issues/1501
+[i1473]: https://github.com/RPTools/maptool/issues/1473
+[i1463]: https://github.com/RPTools/maptool/issues/1463
+[i375]: https://github.com/RPTools/maptool/issues/375
+
 Maptool 1.6.0
 =====
 Lots of enhancements, bug fixes and improvements to the code base.
