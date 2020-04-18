@@ -236,6 +236,9 @@ public abstract class Grid implements Cloneable {
     return 0;
   }
 
+  /** @return the difference in pixels between the center of a cell and its converted zonepoint. */
+  public abstract Point getCenterOffset();
+
   /**
    * @return The offset required to translate from the center of a cell to the top right (x_min,
    *     y_min) of the cell's bounding rectangle. Used for non-square grids only.<br>

@@ -1510,6 +1510,32 @@ public class Token extends BaseModel implements Cloneable {
     return footprintBounds;
   }
 
+  /**
+   * Returns the drag offset of the token.
+   *
+   * @param zone the zone where the token is dragged
+   * @return a point representing the offset
+   */
+  public Point getDragOffset(Zone zone) {
+    Grid grid = zone.getGrid();
+    int offsetX, offsetY;
+    if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
+      if (isBackgroundStamp() || isSnapToScale()) {
+        Point centerOffset = grid.getCenterOffset();
+        offsetX = getX() + centerOffset.x;
+        offsetY = getY() + centerOffset.y;
+      } else {
+        Rectangle tokenBounds = getBounds(zone);
+        offsetX = tokenBounds.x + tokenBounds.width / 2;
+        offsetY = tokenBounds.y + tokenBounds.height / 2;
+      }
+    } else {
+      offsetX = getX();
+      offsetY = getY();
+    }
+    return new Point(offsetX, offsetY);
+  }
+
   /** @return the String of the sightType */
   public String getSightType() {
     return sightType;
