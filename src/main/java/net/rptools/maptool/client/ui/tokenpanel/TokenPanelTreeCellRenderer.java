@@ -14,11 +14,7 @@
  */
 package net.rptools.maptool.client.ui.tokenpanel;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -51,16 +47,17 @@ public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
     String text = "";
     this.row = row;
 
-    setBackgroundNonSelectionColor(Color.white);
+    boolean deemphasize = false;
     if (value instanceof Token) {
       Token token = (Token) value;
+      deemphasize = !token.isVisible();
 
       int height = getPreferredSize().height;
       if (height < 1) {
         height = 15;
       }
       if (image == null || image.getHeight() != height) {
-        image = new BufferedImage(height, height, Transparency.BITMASK);
+        image = new BufferedImage(height, height, Transparency.TRANSLUCENT);
       } else {
         ImageUtil.clearImage(image);
       }
@@ -71,8 +68,9 @@ public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       Dimension dim = new Dimension(tokenImage.getWidth(), tokenImage.getHeight());
       SwingUtil.constrainTo(dim, height);
 
-      Graphics g = image.getGraphics();
+      Graphics2D g = (Graphics2D)image.getGraphics();
       // TODO: Center the image
+      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, deemphasize ? 0.5F : 1.0F));
       g.drawImage(tokenImage, 0, 0, dim.width, dim.height, this);
       g.dispose();
 
@@ -83,9 +81,6 @@ public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
         text += " (" + token.getGMName() + ")";
       }
 
-      if (!token.isVisible()) {
-        setBackgroundNonSelectionColor(Color.lightGray);
-      }
     }
     if (value instanceof TokenPanelTreeModel.View) {
       TokenPanelTreeModel.View view = (TokenPanelTreeModel.View) value;
@@ -93,7 +88,8 @@ public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       text = view.getDisplayName();
     }
 
-    super.getTreeCellRendererComponent(tree, text, sel, expanded, leaf, row, hasFocus);
+    Component c = super.getTreeCellRendererComponent(tree, text, sel, expanded, leaf, row, hasFocus);
+    c.setFont(c.getFont().deriveFont(deemphasize ? Font.ITALIC : Font.PLAIN));
 
     Icon icon = getIcon();
     rowWidth =

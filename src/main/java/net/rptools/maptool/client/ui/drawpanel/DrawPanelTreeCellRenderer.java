@@ -50,7 +50,6 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       boolean hasFocus) {
 
     setBorder(null);
-    setBackgroundNonSelectionColor(Color.white);
 
     String text = "";
     this.row = row;
