@@ -421,25 +421,14 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
           renderer.selectToken(token.getId());
           renderer.updateAfterSelection();
         }
-        // Dragging offset for currently selected token
+        // Position on the zone of the click
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-        Rectangle tokenBounds = token.getBounds(renderer.getZone());
 
-        int snapOffsetX = 0;
-        int snapOffsetY = 0;
-        if (token.isSnapToGrid() && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
-          if (token.isBackgroundStamp() || token.isSnapToScale()) {
-            // Snaps to the top left corner
-            snapOffsetX = (int) getZone().getGrid().getCellWidth() / 2;
-            snapOffsetY = (int) getZone().getGrid().getCellHeight() / 2;
-          } else {
-            // Snaps to the center
-            snapOffsetX = tokenBounds.width / 2;
-            snapOffsetY = tokenBounds.height / 2;
-          }
-        }
-        dragOffsetX = pos.x - tokenBounds.x - snapOffsetX;
-        dragOffsetY = pos.y - tokenBounds.y - snapOffsetY;
+        // Offset specific to the token
+        Point tokenOffset = token.getDragOffset(getZone());
+
+        dragOffsetX = pos.x - tokenOffset.x;
+        dragOffsetY = pos.y - tokenOffset.y;
       }
     } else {
       if (SwingUtilities.isLeftMouseButton(e)) {
@@ -855,7 +844,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
    */
   public boolean handleDragToken(ZonePoint zonePoint) {
     // TODO: Optimize this (combine with calling code)
-    if (tokenBeingDragged.isSnapToGrid()) {
+    if (tokenBeingDragged.isSnapToGrid()
+        && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
       zonePoint.translate(-dragOffsetX, -dragOffsetY);
       CellPoint cellUnderMouse = renderer.getZone().getGrid().convert(zonePoint);
       zonePoint = renderer.getZone().getGrid().convert(cellUnderMouse);
