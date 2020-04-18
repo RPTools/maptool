@@ -128,8 +128,7 @@ public class AppUpdate {
             String tagName = latestGitHubReleaseTagName;
             SwingUtilities.invokeLater(
                 () -> {
-                  if (showMessage("New Update Found", commit, tagName))
-                    downloadFile(url, assetDownloadSize);
+                  if (showMessage(commit, tagName)) downloadFile(url, assetDownloadSize);
                 });
           } catch (MalformedURLException e) {
             log.error("Error with URL " + assetDownloadURL, e);
@@ -190,16 +189,18 @@ public class AppUpdate {
     return jarCommit;
   }
 
-  private static boolean showMessage(String aTitle, String commit, String tagName) {
-    JCheckBox dontAskCheckbox = new JCheckBox("Never check for updates again!");
+  private static boolean showMessage(String commit, String tagName) {
+    JCheckBox dontAskCheckbox = new JCheckBox(I18N.getText("Update.chkbox"));
 
-    String title = "Update Available";
-    String msg1 = "A new version of MapTool is available!";
-    String msg2 = "Would you like to download " + tagName + "?";
+    String title = I18N.getText("Update.title");
+    String msg1 = I18N.getText("Update.msg1");
+    String msg2 = I18N.getText("Update.msg2", tagName);
     String blankLine = " ";
 
     Object[] msgContent = {msg1, msg2, blankLine, dontAskCheckbox};
-    Object[] options = {"Yes", "No", "Skip this Version"};
+    Object[] options = {
+      I18N.getText("Button.yes"), I18N.getText("Button.no"), I18N.getText("Update.button")
+    };
     int result =
         JOptionPane.showOptionDialog(
             MapTool.getFrame(),

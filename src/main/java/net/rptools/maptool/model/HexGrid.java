@@ -83,6 +83,11 @@ public abstract class HexGrid extends Grid {
     }
   }
 
+  @Override
+  public Point getCenterOffset() {
+    return new Point(0, 0);
+  }
+
   /** minorRadius / edgeLength */
   private double hexRatio = REGULAR_HEX_RATIO;
   /**
