@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui;
 
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -22,11 +21,24 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.swing.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JSeparator;
+import javax.swing.JToggleButton;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppActions;
@@ -471,7 +483,10 @@ public class AppMenuBar extends JMenuBar {
 
     menu.addSeparator();
 
-    for (MTFrame frame : MapToolFrame.MTFrame.values()) {
+    for (MTFrame frame :
+        Stream.of(MTFrame.values())
+            .sorted(Comparator.comparing(MTFrame::toString))
+            .collect(Collectors.toList())) {
       JCheckBoxMenuItem menuItem =
           new RPCheckBoxMenuItem(new AppActions.ToggleWindowAction(frame), menu);
       menu.add(menuItem);
