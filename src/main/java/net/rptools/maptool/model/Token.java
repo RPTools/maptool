@@ -731,6 +731,10 @@ public class Token extends BaseModel implements Cloneable {
     return getLayer() == Zone.Layer.BACKGROUND;
   }
 
+  public boolean isOnTokenLayer() {
+    return getLayer() == Zone.Layer.TOKEN;
+  }
+
   public boolean isStamp() {
     switch (getLayer()) {
       case BACKGROUND:
@@ -1520,7 +1524,7 @@ public class Token extends BaseModel implements Cloneable {
     Grid grid = zone.getGrid();
     int offsetX, offsetY;
     if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-      if (isBackgroundStamp() || isSnapToScale()) {
+      if (isBackgroundStamp() || isSnapToScale() || isOnTokenLayer()) {
         Point centerOffset = grid.getCenterOffset();
         offsetX = getX() + centerOffset.x;
         offsetY = getY() + centerOffset.y;
