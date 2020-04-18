@@ -77,6 +77,7 @@ import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
 import net.rptools.maptool.client.tool.drawing.RectangleTool;
 import net.rptools.maptool.client.tool.drawing.RectangleTopologyTool;
 import net.rptools.maptool.client.tool.drawing.WallTemplateTool;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.Zone.TokenSelection;
@@ -307,16 +308,17 @@ public class ToolbarPanel extends JToolBar {
           protected void activate() {
             super.activate();
             Campaign c = MapTool.getCampaign();
-            boolean tokensSelected =
-                !MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet().isEmpty();
-            if (tokensSelected
-                && c.hasUsedFogToolbar() == false
-                && MapTool.isHostingServer() == false) {
-              MapTool.addLocalMessage(
-                  "<span class='whisper' style='color: blue'>"
-                      + I18N.getText("ToolbarPanel.manualFogActivated")
-                      + "</span>");
-              MapTool.showWarning("ToolbarPanel.manualFogActivated");
+            ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+            // Check if there is a map. Fix #1605
+            if (zr != null) {
+              boolean tokensSelected = !zr.getSelectedTokenSet().isEmpty();
+              if (tokensSelected && !c.hasUsedFogToolbar() && !MapTool.isHostingServer()) {
+                MapTool.addLocalMessage(
+                    "<span class='whisper' style='color: blue'>"
+                        + I18N.getText("ToolbarPanel.manualFogActivated")
+                        + "</span>");
+                MapTool.showWarning("ToolbarPanel.manualFogActivated");
+              }
             }
           }
         };
@@ -417,13 +419,12 @@ public class ToolbarPanel extends JToolBar {
     final JToggleButton button = new JToggleButton();
     button.setToolTipText(tooltip);
     button.addActionListener(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            if (button.isSelected()) {
-              MapTool.getFrame()
-                  .getCurrentZoneRenderer()
-                  .getZone()
-                  .setTokenSelection(tokenSelection);
+        e -> {
+          if (button.isSelected()) {
+            ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+            // Check if there is a map. Fix #1605
+            if (zr != null) {
+              zr.getZone().setTokenSelection(tokenSelection);
               MapTool.getFrame().refresh();
             }
           }
