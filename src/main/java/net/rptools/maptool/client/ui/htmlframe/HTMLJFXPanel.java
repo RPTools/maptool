@@ -15,6 +15,8 @@
 package net.rptools.maptool.client.ui.htmlframe;
 
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -28,6 +30,33 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   /** The WebView that displays HTML5. */
   HTMLWebViewManager webViewManager;
 
+  /** Key adapter to block key presses from affected the rest of MapTool. */
+  private static final KeyAdapter keyAdapter;
+
+  static {
+    keyAdapter =
+        new KeyAdapter() {
+          private void keyBlock(KeyEvent e) {
+            e.consume();
+          }
+
+          @Override
+          public void keyTyped(KeyEvent e) {
+            keyBlock(e);
+          }
+
+          @Override
+          public void keyPressed(KeyEvent e) {
+            keyBlock(e);
+          }
+
+          @Override
+          public void keyReleased(KeyEvent e) {
+            keyBlock(e);
+          }
+        };
+  }
+
   /**
    * Creates a new HTMLJFXPanel.
    *
@@ -36,6 +65,10 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   HTMLJFXPanel(final HTMLPanelContainer container, HTMLWebViewManager webViewManager) {
     this.webViewManager = webViewManager;
     Platform.runLater(() -> setupScene(container, new WebView()));
+    if (container != null) {
+      // Block key presses from affected the rest of MapTool. Fixes #1614.
+      addKeyListener(keyAdapter);
+    }
   }
 
   /**
