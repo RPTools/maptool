@@ -3646,13 +3646,13 @@ Disabled: &lt;b&gt;[ ]&lt;/b&gt; acts like &lt;b&gt;[h: ]&lt;/b&gt;&amp;nbsp;</a
                                    </at>
                                    <at name="width">176</at>
                                    <at name="name"/>
-                                   <at name="text">Typing Notification Background</at>
+                                   <at name="text">Preferences.label.chat.type.background</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">If enabled, shows a background frame underneath the typing notification.</at>
+                                   <at name="toolTipText">Preferences.label.chat.type.background.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -3797,13 +3797,13 @@ Disabled: &lt;b&gt;[ ]&lt;/b&gt; acts like &lt;b&gt;[h: ]&lt;/b&gt;&amp;nbsp;</a
                                    </at>
                                    <at name="width">176</at>
                                    <at name="name"/>
-                                   <at name="text">Suppress ToolTips for MacroLinks</at>
+                                   <at name="text">Preferences.label.chat.macrolinks</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">MacroLinks show normally tooltips that state informations about the link target. This is a anti cheating device. This options let you disable this tooltips for aesthetic reasons. </at>
+                                   <at name="toolTipText">Preferences.label.chat.macrolinks.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -8378,7 +8378,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                         </at>
                                         <at name="width">272</at>
                                         <at name="name"/>
-                                        <at name="text">Preferences.label.client.fitview </at>
+                                        <at name="text">Preferences.label.client.fitview</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
@@ -12259,7 +12259,7 @@ Disabled (default): show tooltips for macroLinks</at>
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">-Xmx size in bytes Sets the maximum size to which the Java heap can grow.</at>
+                                   <at name="toolTipText">Preferences.label.language.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
