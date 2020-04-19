@@ -6,6 +6,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 
 **Enhancements**
 - [#][i] 
+- [#1597][i1597] Macro functions `setTokenPortrait("")` and `setTokenHandout("")` will now clear their respective images from a token if passed an empty string for asset ID.
 - [#1528][i1528] New parameter for dialog and frame functions to prevent scrolling on reload.
 - [#1473][i1473] Image tokens (image:token) now included in output of `getInfo("client")`.
 - [#1463][i1463] List of panels in Window menu is not sorted alphabetically.
@@ -15,6 +16,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 
 **Bug Fixes**
 - [#][i] 
+- [#1605][i1605] Clicking on FoW button and others after last map was deleted would throw NPE. Fixed.
 - [#1589][i1589] Jumpy token movement on all layers, free-size or fixed, snap or non-snap, fixed for all grid types.
 - [#1588][i1588] Popup for setting initiative from initiative panel showed placeholder instead of token name. Fixed.
 - [#1575][i1575] Unclosed parens in Token properties definition would produce a StringIndexOutOfbounds exception. Fixed.
@@ -35,6 +37,9 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#][i] 
 
 [i]: https://github.com/RPTools/maptool/issues/
+[i]: https://github.com/RPTools/maptool/issues/
+[i1605]: https://github.com/RPTools/maptool/issues/1605
+[i1597]: https://github.com/RPTools/maptool/issues/1597
 [i1589]: https://github.com/RPTools/maptool/issues/1589
 [i1588]: https://github.com/RPTools/maptool/issues/1588
 [i1575]: https://github.com/RPTools/maptool/issues/1575
