@@ -330,8 +330,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     // Jamz: Init the VBL tab...
     JTabbedPane tabbedPane = getTabbedPane();
 
+    String vblTitle = I18N.getText("EditTokenDialog.tab.vbl");
     if (MapTool.getPlayer().isGM()) {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("VBL"), true);
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(vblTitle), true);
       getTokenVblPanel().setToken(token);
       getColorSensitivitySpinner().setValue(getTokenVblPanel().getColorSensitivity());
       getVblIgnoreColorWell().setColor(getTokenVblPanel().getVblColorPick());
@@ -342,8 +343,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       // Reset scale
       getTokenVblPanel().setScale(1d);
     } else {
-      tabbedPane.setEnabledAt(tabbedPane.indexOfTab("VBL"), false);
-      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab("VBL")) {
+      tabbedPane.setEnabledAt(tabbedPane.indexOfTab(vblTitle), false);
+      if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab(vblTitle)) {
         tabbedPane.setSelectedIndex(0);
       }
     }
