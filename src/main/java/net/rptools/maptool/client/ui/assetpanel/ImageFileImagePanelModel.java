@@ -47,6 +47,7 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.TransferableAsset;
 import net.rptools.maptool.client.TransferableToken;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
@@ -276,14 +277,12 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
                 + "<b>"
                 + name
                 + "</b>"
-                + "<br>Dimensions: "
-                + width
-                + " x "
-                + height
-                + "<br>Type: "
-                + fileType
-                + "<br>Size: "
-                + fileSize
+                + "<br>"
+                + I18N.getText("panel.Asset.Mouseover.dimensions", width, height)
+                + "<br>"
+                + I18N.getText("panel.Asset.Mouseover.type", fileType)
+                + "<br>"
+                + I18N.getText("panel.Asset.Mouseover.size", fileSize)
                 + "</html>";
       } catch (IOException e) {
         // TODO Auto-generated catch block
