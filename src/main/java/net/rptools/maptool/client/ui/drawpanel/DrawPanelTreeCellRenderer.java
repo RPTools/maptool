@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.drawpanel;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.IOException;

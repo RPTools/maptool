@@ -68,9 +68,10 @@ public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       Dimension dim = new Dimension(tokenImage.getWidth(), tokenImage.getHeight());
       SwingUtil.constrainTo(dim, height);
 
-      Graphics2D g = (Graphics2D)image.getGraphics();
+      Graphics2D g = (Graphics2D) image.getGraphics();
       // TODO: Center the image
-      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, deemphasize ? 0.5F : 1.0F));
+      g.setComposite(
+          AlphaComposite.getInstance(AlphaComposite.SRC_OVER, deemphasize ? 0.5F : 1.0F));
       g.drawImage(tokenImage, 0, 0, dim.width, dim.height, this);
       g.dispose();
 
@@ -80,7 +81,6 @@ public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
           && token.getGMName().length() > 0) {
         text += " (" + token.getGMName() + ")";
       }
-
     }
     if (value instanceof TokenPanelTreeModel.View) {
       TokenPanelTreeModel.View view = (TokenPanelTreeModel.View) value;
@@ -88,7 +88,8 @@ public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       text = view.getDisplayName();
     }
 
-    Component c = super.getTreeCellRendererComponent(tree, text, sel, expanded, leaf, row, hasFocus);
+    Component c =
+        super.getTreeCellRendererComponent(tree, text, sel, expanded, leaf, row, hasFocus);
     c.setFont(c.getFont().deriveFont(deemphasize ? Font.ITALIC : Font.PLAIN));
 
     Icon icon = getIcon();

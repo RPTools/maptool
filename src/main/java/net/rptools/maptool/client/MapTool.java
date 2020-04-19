@@ -37,8 +37,6 @@ import java.awt.Transparency;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -1819,7 +1817,9 @@ public class MapTool {
     // new Thread(new HeapSpy()).start();
   }
 
-  private static void loadTheme() throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
+  private static void loadTheme()
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+          UnsupportedLookAndFeelException {
     // After the TinyLAF library is initialized, look to see if there is a Default.theme
     // in our AppHome directory and load it if there is. Unfortunately, changing the
     // search path for the default theme requires subclassing TinyLAF and because
@@ -1837,7 +1837,7 @@ public class MapTool {
 
         // Update the ComponentUIs for all Components. This
         // needs to be invoked for all windows.
-        //SwingUtilities.updateComponentTreeUI(rootWindow);
+        // SwingUtilities.updateComponentTreeUI(rootWindow);
       }
     }
     // }
