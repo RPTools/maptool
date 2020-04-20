@@ -17,6 +17,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1425][i1425] New macro function `overlay()` allows for the creation of multiple transparent HTML map overlays.
 
 **Bug Fixes**
+- [#1642][i1642] VBL mode button wasn't staying in sync with actual mode. Fixed.
 - [#1638][i1638] Macrolinks added via Javascript don't work in frame5/dialog5. Fixed.
 - [#1631][i1638] Add Resource dialog wasn't using theme colors. Fixed.
 - [#1629][i1629] Campaign Properties dialog was too wide, used strings not in translation files, didn't use theme colors. Fixed.
@@ -37,6 +38,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1498][i1498] Tooltip for Language seletion in Preferences had wrong text. Fixed.
 - [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
 
+[i1642]: https://github.com/RPTools/maptool/issues/1642
 [i1638]: https://github.com/RPTools/maptool/issues/1638
 [i1631]: https://github.com/RPTools/maptool/issues/1631
 [i1629]: https://github.com/RPTools/maptool/issues/1629
