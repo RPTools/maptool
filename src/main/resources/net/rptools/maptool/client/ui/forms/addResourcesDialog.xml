@@ -99,7 +99,7 @@
                  <at name="actionCommand">Install &gt;&gt;</at>
                  <at name="name">installButton</at>
                  <at name="width">80</at>
-                 <at name="text">Install</at>
+                 <at name="text">Button.install</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -155,7 +155,7 @@
                  <at name="actionCommand">Cancel</at>
                  <at name="name">cancelButton</at>
                  <at name="width">80</at>
-                 <at name="text">Cancel</at>
+                 <at name="text">Button.cancel</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -458,7 +458,7 @@
                               </at>
                               <at name="width">780</at>
                               <at name="name"/>
-                              <at name="text">Local Directory</at>
+                              <at name="text">AddResourcesDialog.label.localdirectory</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -525,7 +525,7 @@
                               </at>
                               <at name="width">29</at>
                               <at name="name"/>
-                              <at name="text">Path:</at>
+                              <at name="text">Label.path</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -647,7 +647,7 @@
                               </at>
                               <at name="width">731</at>
                               <at name="name"/>
-                              <at name="text">(e.g. c:\data\cmpgn_images)</at>
+                              <at name="text">AddResourcesDialog.label.example</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -979,7 +979,7 @@
                               </at>
                               <at name="width">844</at>
                               <at name="name"/>
-                              <at name="text">URL</at>
+                              <at name="text">Label.url</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -1046,7 +1046,7 @@
                               </at>
                               <at name="width">35</at>
                               <at name="name"/>
-                              <at name="text">URL:</at>
+                              <at name="text">Label.url2</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -1113,7 +1113,7 @@
                               </at>
                               <at name="width">35</at>
                               <at name="name"/>
-                              <at name="text">Name:</at>
+                              <at name="text">Label.name</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -1454,7 +1454,7 @@
                               </at>
                               <at name="width">844</at>
                               <at name="name"/>
-                              <at name="text">RPTools Library</at>
+                              <at name="text">Label.library</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>

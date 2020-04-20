@@ -53,6 +53,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.syntax.MapToolScriptAutoComplete;
 import net.rptools.maptool.language.I18N;
@@ -104,6 +105,8 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   private FindToolBar findToolBar;
   private ReplaceToolBar replaceToolBar;
   private JLabel status;
+  private static final String READY = I18N.getText("Label.ready");
+  private static final String SAVED = I18N.getText("Label.saved");
 
   private static HashSet<String> openMacroList = new HashSet<String>(4);
 
@@ -111,7 +114,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     super(MapTool.getFrame(), "", true);
     this.setModalityType(ModalityType.MODELESS);
 
-    panel = new FormPanel("net/rptools/maptool/client/ui/forms/macroButtonDialog.xml");
+    panel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/macroButtonDialog.xml");
     setContentPane(panel);
     setSize(700, 400);
 
@@ -185,15 +188,15 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
     String text = null;
     if (result.wasFound()) {
-      text = "Text found; occurrences marked: " + result.getMarkedCount();
+      text = I18N.getText("component.msg.macro.textfound", result.getMarkedCount());
     } else if (type == SearchEvent.Type.MARK_ALL) {
       if (result.getMarkedCount() > 0) {
-        text = "Occurrences marked: " + result.getMarkedCount();
+        text = I18N.getText("component.msg.macro.occurrences", result.getMarkedCount());
       } else {
         text = "";
       }
     } else {
-      text = "Text not found";
+      text = I18N.getText("component.msg.macro.notfound");
     }
 
     status.setText(text);
@@ -445,17 +448,17 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
             new DocumentListener() {
               @Override
               public void changedUpdate(DocumentEvent e) {
-                status.setText("Ready");
+                status.setText(READY);
               }
 
               @Override
               public void removeUpdate(DocumentEvent e) {
-                status.setText("Ready");
+                status.setText(READY);
               }
 
               @Override
               public void insertUpdate(DocumentEvent e) {
-                status.setText("Ready");
+                status.setText(READY);
               }
             });
 
@@ -802,7 +805,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
       updateOpenMacroList(false);
       dispose();
     } else {
-      status.setText("Saved");
+      status.setText(SAVED);
     }
   }
 
