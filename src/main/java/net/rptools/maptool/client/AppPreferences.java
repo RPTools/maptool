@@ -1225,7 +1225,16 @@ public class AppPreferences {
         prefs.get(KEY_TOPOLOGY_DRAWING_MODE, DEFAULT_TOPOLOGY_DRAWING_MODE));
   }
 
+  /**
+   * Sets the topology mode preference.
+   *
+   * @param mode the mode. A value of null resets to default.
+   */
   public static void setTopologyDrawingMode(TopologyMode mode) {
-    prefs.put(KEY_TOPOLOGY_DRAWING_MODE, mode.toString());
+    if (mode == null) {
+      prefs.remove(KEY_TOPOLOGY_DRAWING_MODE);
+    } else {
+      prefs.put(KEY_TOPOLOGY_DRAWING_MODE, mode.toString());
+    }
   }
 }
