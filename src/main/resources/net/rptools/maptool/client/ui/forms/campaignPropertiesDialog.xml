@@ -915,7 +915,6 @@
                               <at name="editable">false</at>
                               <at name="scrollableTracksViewportWidth">true</at>
                               <at name="selectionEnd">4341</at>
-                              <at name="background" object="color">238,238,238</at>
                               <at name="name">sightHelp</at>
                               <at name="width">1351</at>
                               <at name="text"/>
@@ -1218,7 +1217,6 @@
                               <at name="editable">false</at>
                               <at name="scrollableTracksViewportWidth">true</at>
                               <at name="selectionEnd">4341</at>
-                              <at name="background" object="color">238,238,238</at>
                               <at name="name">lightHelp</at>
                               <at name="width">1351</at>
                               <at name="text"/>
@@ -3786,13 +3784,7 @@
                                            <at name="title">CampaignPropertiesDialog.label.show</at>
                                           </super>
                                           <at name="thickness">1</at>
-                                          <at name="color">
-                                           <object classname="com.jeta.forms.store.properties.ColorProperty">
-                                            <at name="name">dyncolor</at>
-                                            <at name="colorkey">constant</at>
-                                            <at name="constantcolor" object="color">0,0,0</at>
-                                           </object>
-                                          </at>
+                                          <at name="color"/>
                                           <at name="curved">false</at>
                                          </object>
                                         </at>
@@ -6131,13 +6123,7 @@
                                                 <at name="title">CampaignPropertiesDialog.label.show</at>
                                                </super>
                                                <at name="thickness">1</at>
-                                               <at name="color">
-                                                <object classname="com.jeta.forms.store.properties.ColorProperty">
-                                                 <at name="name">dyncolor</at>
-                                                 <at name="colorkey">constant</at>
-                                                 <at name="constantcolor" object="color">0,0,0</at>
-                                                </object>
-                                               </at>
+                                               <at name="color"/>
                                                <at name="curved">false</at>
                                               </object>
                                              </at>
