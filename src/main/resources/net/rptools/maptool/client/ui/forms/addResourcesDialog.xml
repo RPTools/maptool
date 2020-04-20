@@ -686,22 +686,6 @@
                           </object>
                          </at>
                          <at name="name"/>
-                         <at name="fill">
-                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
-                           <at name="name">fill</at>
-                           <at name="delegate">
-                            <object classname="com.jeta.forms.store.properties.effects.SolidProperty">
-                             <at name="color">
-                              <object classname="com.jeta.forms.store.properties.ColorProperty">
-                               <at name="name">dyncolor</at>
-                               <at name="colorkey">constant</at>
-                               <at name="constantcolor" object="color">255,255,255</at>
-                              </object>
-                             </at>
-                            </object>
-                           </at>
-                          </object>
-                         </at>
                          <at name="scollBars">
                           <object classname="com.jeta.forms.store.properties.ScrollBarsProperty">
                            <at name="name">scollBars</at>
@@ -1273,22 +1257,6 @@
                           </object>
                          </at>
                          <at name="name"/>
-                         <at name="fill">
-                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
-                           <at name="name">fill</at>
-                           <at name="delegate">
-                            <object classname="com.jeta.forms.store.properties.effects.SolidProperty">
-                             <at name="color">
-                              <object classname="com.jeta.forms.store.properties.ColorProperty">
-                               <at name="name">dyncolor</at>
-                               <at name="colorkey">constant</at>
-                               <at name="constantcolor" object="color">255,255,255</at>
-                              </object>
-                             </at>
-                            </object>
-                           </at>
-                          </object>
-                         </at>
                          <at name="scollBars">
                           <object classname="com.jeta.forms.store.properties.ScrollBarsProperty">
                            <at name="name">scollBars</at>
@@ -1594,22 +1562,6 @@
                           </object>
                          </at>
                          <at name="name"/>
-                         <at name="fill">
-                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
-                           <at name="name">fill</at>
-                           <at name="delegate">
-                            <object classname="com.jeta.forms.store.properties.effects.SolidProperty">
-                             <at name="color">
-                              <object classname="com.jeta.forms.store.properties.ColorProperty">
-                               <at name="name">dyncolor</at>
-                               <at name="colorkey">constant</at>
-                               <at name="constantcolor" object="color">255,255,255</at>
-                              </object>
-                             </at>
-                            </object>
-                           </at>
-                          </object>
-                         </at>
                          <at name="scollBars">
                           <object classname="com.jeta.forms.store.properties.ScrollBarsProperty">
                            <at name="name">scollBars</at>
