@@ -32,11 +32,15 @@ import net.rptools.maptool.model.Zone.TopologyMode;
  */
 public class DrawTopologySelectionTool extends DefaultTool {
 
+  /** The instance. Used to update the button when the ZoneRenderer is changed. */
+  private static DrawTopologySelectionTool drawTopologySelectionTool;
+
   private ImageIcon vblImageIcon = new ImageIcon();
   private ImageIcon mblImageIcon = new ImageIcon();
   private ImageIcon combinedImageIcon = new ImageIcon();
 
   public DrawTopologySelectionTool() {
+    drawTopologySelectionTool = this;
     try {
       vblImageIcon =
           new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/vbl-only.png"));
@@ -47,22 +51,7 @@ public class DrawTopologySelectionTool extends DefaultTool {
 
       setIcon(vblImageIcon);
       setSelectedIcon(combinedImageIcon);
-
-      switch (AppPreferences.getTopologyDrawingMode()) {
-        case VBL:
-          setActionCommand(TopologyMode.VBL.toString());
-          setIcon(vblImageIcon);
-          break;
-        case MBL:
-          setActionCommand(TopologyMode.MBL.toString());
-          setIcon(mblImageIcon);
-          break;
-        case COMBINED:
-          setActionCommand(TopologyMode.VBL.toString());
-          setIcon(vblImageIcon);
-          setSelected(true);
-          break;
-      }
+      updateIcon(AppPreferences.getTopologyDrawingMode());
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
@@ -93,42 +82,67 @@ public class DrawTopologySelectionTool extends DefaultTool {
           @Override
           public void mousePressed(MouseEvent e) {
             if (SwingUtilities.isLeftMouseButton(e) && isAvailable()) {
-              nextState();
+              nextMode();
             }
           }
         });
   }
 
-  /** Set the Selection Tool to the next state (Combined -> MBL -> VBL -> Combined). */
-  public void nextState() {
-    TopologyMode currentTopologyMode;
+  public static DrawTopologySelectionTool getInstance() {
+    return drawTopologySelectionTool;
+  }
 
+  /** Set the Selection Tool to the next mode (Combined -> MBL -> VBL -> Combined). */
+  public void nextMode() {
     if (isSelected()) {
-      // If Combined, switch to MBL (unselected)
-      setSelected(false);
-      currentTopologyMode = TopologyMode.MBL;
-      setActionCommand(TopologyMode.MBL.toString());
-      setIcon(mblImageIcon);
+      // If Combined, switch to MBL
+      setMode(TopologyMode.MBL);
     } else {
       if (getActionCommand().equals(TopologyMode.MBL.toString())) {
-        // If MBL, switch to VBL (unselected)
-        currentTopologyMode = TopologyMode.VBL;
-        setActionCommand(TopologyMode.VBL.toString());
-        setIcon(vblImageIcon);
+        // If MBL, switch to VBL
+        setMode(TopologyMode.VBL);
       } else {
-        // If VBL, switch to Combined (selected)
-        setSelected(true);
-        currentTopologyMode = TopologyMode.COMBINED;
-        setActionCommand(TopologyMode.COMBINED.toString());
+        // If VBL, switch to Combined
+        setMode(TopologyMode.COMBINED);
       }
     }
+  }
 
-    AppPreferences.setTopologyDrawingMode(currentTopologyMode);
+  /**
+   * Sets the button and AppPreferences to the TopologyMode
+   *
+   * @param topologyMode the mode. If null, resets to default.
+   */
+  public void setMode(TopologyMode topologyMode) {
+    AppPreferences.setTopologyDrawingMode(topologyMode);
+    if (topologyMode == null) {
+      topologyMode = AppPreferences.getTopologyDrawingMode();
+    }
+
+    updateIcon(topologyMode);
+    setActionCommand(topologyMode.toString());
 
     ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
     // Check if there is a map. Fix #1605
     if (zr != null) {
-      zr.getZone().setTopologyMode(currentTopologyMode);
+      zr.getZone().setTopologyMode(topologyMode);
+    }
+  }
+
+  /**
+   * Updates the icon according to the topology mode.
+   *
+   * @param topologyMode the topology mode
+   */
+  private void updateIcon(TopologyMode topologyMode) {
+    if (topologyMode == TopologyMode.VBL) {
+      setSelected(false);
+      setIcon(vblImageIcon);
+    } else if (topologyMode == TopologyMode.MBL) {
+      setSelected(false);
+      setIcon(mblImageIcon);
+    } else if (topologyMode == TopologyMode.COMBINED) {
+      setSelected(true);
     }
   }
 
