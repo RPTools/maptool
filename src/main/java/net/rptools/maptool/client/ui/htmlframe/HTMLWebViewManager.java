@@ -130,7 +130,7 @@ public class HTMLWebViewManager {
       String.format(
           "<SCRIPT>window.status = '%s'; window.status = '';</SCRIPT>", JavaBridge.BRIDGE_VALUE);
 
-  HTMLWebViewManager() {}
+  public HTMLWebViewManager() {}
 
   /**
    * Setup the WebView

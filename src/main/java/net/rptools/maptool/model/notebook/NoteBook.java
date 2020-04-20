@@ -687,19 +687,19 @@ public class NoteBook implements Comparable<NoteBook> {
   /**
    * Sets the read me for the {@code NoteBook}.
    *
-   * @param newReaMe the license of the {@code NoteBook}.
+   * @param newReadMe the license of the {@code NoteBook}.
    */
-  public void setReadMe(String newReaMe) {
+  public void setReadMe(String newReadMe) {
     String oldReadMe;
     synchronized (this) {
-      if (readMe.equals(newReaMe)) {
+      if (readMe.equals(newReadMe)) {
         return;
       }
       oldReadMe = readMe;
-      readMe = newReaMe;
+      readMe = newReadMe;
     }
 
-    fireChangeEvent(README_CHANGED, oldReadMe, newReaMe);
+    fireChangeEvent(README_CHANGED, oldReadMe, newReadMe);
   }
 
   /**
@@ -708,7 +708,7 @@ public class NoteBook implements Comparable<NoteBook> {
    * @return the read me of the {@code NoteBook}.
    */
   public synchronized String getReadMe() {
-    return license;
+    return readMe;
   }
 
   /**

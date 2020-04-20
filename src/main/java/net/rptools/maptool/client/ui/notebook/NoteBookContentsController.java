@@ -14,16 +14,23 @@
  */
 package net.rptools.maptool.client.ui.notebook;
 
+import com.vladsch.flexmark.parser.ParserEmulationProfile;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javax.swing.SwingUtilities;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
+import net.rptools.maptool.client.ui.javfx.vieweditpane.ViewEditMarkDownPane;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.notebook.NoteBook;
 
@@ -146,6 +153,25 @@ public class NoteBookContentsController {
           updateNoteBook(noteBook);
           setFieldsFromNoteBook(noteBook);
           setEditMode(false);
+        });
+
+    readMeButton.setOnAction(e -> displayReadMe());
+  }
+
+  private void displayReadMe() {
+    ViewEditMarkDownPane markDownPane =
+        ViewEditMarkDownPane.createViewOnlyPane(ParserEmulationProfile.GITHUB_DOC);
+    System.err.println(noteBook.getReadMe());
+    markDownPane.setText(noteBook.getReadMe());
+    Scene scene = new Scene(markDownPane);
+    JFXPanel jfxPanel = new JFXPanel();
+    jfxPanel.setScene(scene);
+    SwingUtilities.invokeLater(
+        () -> {
+          SwingJavaFXDialog swingJavaFXDialog =
+              new SwingJavaFXDialog(
+                  I18N.getText("noteBook.title"), MapTool.getFrame(), jfxPanel, false);
+          swingJavaFXDialog.showDialog();
         });
   }
 
