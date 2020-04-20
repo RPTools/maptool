@@ -144,10 +144,12 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void initHelp() {
     JEditorPane lightHelp = (JEditorPane) formPanel.getComponentByName("lightHelp");
+    lightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     lightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.light"));
     lightHelp.setCaretPosition(0);
 
     JEditorPane sightHelp = (JEditorPane) formPanel.getComponentByName("sightHelp");
+    sightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     sightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.sight"));
     sightHelp.setCaretPosition(0);
   }
