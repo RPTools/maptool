@@ -18,7 +18,6 @@ import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
 import de.muntjak.tinylookandfeel.Theme;
-import de.muntjak.tinylookandfeel.util.SBReference;
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
@@ -1751,17 +1750,7 @@ public class MapTool {
           });
       LookAndFeelFactory.installJideExtension(LookAndFeelFactory.XERTO_STYLE);
 
-      /**
-       * ************************************************************************** For TinyLAF
-       * 1.3.04 this is how the color was changed for a button.
-       */
-      // Theme.buttonPressedColor[Theme.style] = new ColorReference(Color.gray);
-
-      /**
-       * ************************************************************************** And this is how
-       * it's done in TinyLAF 1.4.0 (no idea about the intervening versions).
-       */
-      Theme.buttonPressedColor = new SBReference(Color.GRAY, 0, -6, SBReference.SUB3_COLOR);
+      SwingUtil.setDefaultLookAndFeelDecorated(true);
 
       configureJide();
     } catch (Exception e) {
