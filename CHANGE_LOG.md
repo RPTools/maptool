@@ -8,14 +8,22 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#][i] 
 - [#1597][i1597] Macro functions `setTokenPortrait("")` and `setTokenHandout("")` will now clear their respective images from a token if passed an empty string for asset ID.
 - [#1528][i1528] New parameter for dialog and frame functions to prevent scrolling on reload.
+- [#1518][i1518] PDF image extraction in the Resource Library now supports extaction of full page images.
+- [#1506][i1506] MapTool now supports importing Dungeondraft `.dd2vtt` files. This brings in not only the map image but also vision blocking information and the location of light sources.
 - [#1473][i1473] Image tokens (image:token) now included in output of `getInfo("client")`.
 - [#1463][i1463] List of panels in Window menu is not sorted alphabetically.
-- [#][i] 
+- [#1425][i1425] New macro function `overlay()` allows for the creation of multiple transparent HTML map overlays.
 - [#][i] 
 - [#][i] 
 
 **Bug Fixes**
 - [#][i] 
+- [#1638][i1638] Macrolinks added via Javascript don't work in frame5/dialog5. Fixed.
+- [#1631][i1638] Add Resource dialog wasn't using theme colors. Fixed.
+- [#1629][i1629] Campaign Properties dialog was too wide, used strings not in translation files, didn't use theme colors. Fixed.
+- [#1614][i1614] Pressing map zoom keys while a frame5 textbox had focus would zoom map. Fixed.
+- [#1613][i1613] User selected theme was not being applied to menus causing text to not be rendered for some languages such as Japanese. Fixed.
+  - Also fixed Edit Token dialog throwing exception for translated VBL tab name.
 - [#1605][i1605] Clicking on FoW button and others after last map was deleted would throw NPE. Fixed.
 - [#1589][i1589] Jumpy token movement on all layers, free-size or fixed, snap or non-snap, fixed for all grid types.
 - [#1588][i1588] Popup for setting initiative from initiative panel showed placeholder instead of token name. Fixed.
@@ -26,8 +34,9 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1564][i1564] Function `playClip()` could fail to create a MediaPlayer throwing an exception. Exception caught and error message presented to user now.
 - [#1551][i1551] Javascript `console.log`not working during page load. Fixed.
 - [#1538][i1538] Close button on Token Editor changed to Cancel.
-- [#1501][i1501] "User data directory is already in use" error when using frame5/dialog5 on two instances of MapTool. Fixed.
 - [#][i] 
+- [#1501][i1501] "User data directory is already in use" error when using frame5/dialog5 on two instances of MapTool. Fixed.
+- [#1498][i1498] Tooltip for Language seletion in Preferences had wrong text. Fixed.
 - [#][i] 
 - [#][i] 
 - [#][i] 
@@ -37,7 +46,11 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#][i] 
 
 [i]: https://github.com/RPTools/maptool/issues/
-[i]: https://github.com/RPTools/maptool/issues/
+[i1638]: https://github.com/RPTools/maptool/issues/1638
+[i1631]: https://github.com/RPTools/maptool/issues/1631
+[i1629]: https://github.com/RPTools/maptool/issues/1629
+[i1614]: https://github.com/RPTools/maptool/issues/1614
+[i1613]: https://github.com/RPTools/maptool/issues/1613
 [i1605]: https://github.com/RPTools/maptool/issues/1605
 [i1597]: https://github.com/RPTools/maptool/issues/1597
 [i1589]: https://github.com/RPTools/maptool/issues/1589
@@ -50,9 +63,14 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i1551]: https://github.com/RPTools/maptool/issues/1551
 [i1538]: https://github.com/RPTools/maptool/issues/1538
 [i1528]: https://github.com/RPTools/maptool/issues/1528
+[i1518]: https://github.com/RPTools/maptool/issues/1518
+[i1513]: https://github.com/RPTools/maptool/issues/1513
+[i1506]: https://github.com/RPTools/maptool/issues/1506
 [i1501]: https://github.com/RPTools/maptool/issues/1501
+[i1498]: https://github.com/RPTools/maptool/issues/1498
 [i1473]: https://github.com/RPTools/maptool/issues/1473
 [i1463]: https://github.com/RPTools/maptool/issues/1463
+[i1425]: https://github.com/RPTools/maptool/issues/1425
 [i375]: https://github.com/RPTools/maptool/issues/375
 
 Maptool 1.6.0
