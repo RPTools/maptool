@@ -3,21 +3,20 @@ Maptool 1.7.0
 Lots of enhancements, bug fixes and improvements to the code base.
 
 **Some Highlights**
+- New `overlay()` function allows for transparent overlays over the map area. Think MMORPG-like GUI elements.
+- Huge localization effort by Merudo has brought translatable strings to the majority of the MapTool dialogs.
+- MapTool can now import the Dungeondraft VTT export format.
 
 **Enhancements**
-- [#][i] 
 - [#1597][i1597] Macro functions `setTokenPortrait("")` and `setTokenHandout("")` will now clear their respective images from a token if passed an empty string for asset ID.
 - [#1528][i1528] New parameter for dialog and frame functions to prevent scrolling on reload.
 - [#1518][i1518] PDF image extraction in the Resource Library now supports extaction of full page images.
 - [#1506][i1506] MapTool now supports importing Dungeondraft `.dd2vtt` files. This brings in not only the map image but also vision blocking information and the location of light sources.
 - [#1473][i1473] Image tokens (image:token) now included in output of `getInfo("client")`.
-- [#1463][i1463] List of panels in Window menu is not sorted alphabetically.
+- [#1463][i1463] List of panels in Window menu is now sorted alphabetically.
 - [#1425][i1425] New macro function `overlay()` allows for the creation of multiple transparent HTML map overlays.
-- [#][i] 
-- [#][i] 
 
 **Bug Fixes**
-- [#][i] 
 - [#1638][i1638] Macrolinks added via Javascript don't work in frame5/dialog5. Fixed.
 - [#1631][i1638] Add Resource dialog wasn't using theme colors. Fixed.
 - [#1629][i1629] Campaign Properties dialog was too wide, used strings not in translation files, didn't use theme colors. Fixed.
@@ -34,18 +33,10 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1564][i1564] Function `playClip()` could fail to create a MediaPlayer throwing an exception. Exception caught and error message presented to user now.
 - [#1551][i1551] Javascript `console.log`not working during page load. Fixed.
 - [#1538][i1538] Close button on Token Editor changed to Cancel.
-- [#][i] 
 - [#1501][i1501] "User data directory is already in use" error when using frame5/dialog5 on two instances of MapTool. Fixed.
 - [#1498][i1498] Tooltip for Language seletion in Preferences had wrong text. Fixed.
-- [#][i] 
-- [#][i] 
-- [#][i] 
 - [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
 
-**Other**
-- [#][i] 
-
-[i]: https://github.com/RPTools/maptool/issues/
 [i1638]: https://github.com/RPTools/maptool/issues/1638
 [i1631]: https://github.com/RPTools/maptool/issues/1631
 [i1629]: https://github.com/RPTools/maptool/issues/1629
