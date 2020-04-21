@@ -2125,6 +2125,7 @@ public class AppActions {
                   policy.setPlayersReceiveCampaignMacros(
                       serverProps.getPlayersReceiveCampaignMacros());
                   policy.setIsMovementLocked(MapTool.getServerPolicy().isMovementLocked());
+                  policy.setIsTokenEditorLocked(MapTool.getServerPolicy().isTokenEditorLocked());
 
                   // Tool Tips for unformatted inline rolls.
                   policy.setUseToolTipsForDefaultRollFormat(

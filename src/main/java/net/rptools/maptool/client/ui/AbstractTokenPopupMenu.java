@@ -54,7 +54,6 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.FacingTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
-import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Direction;
@@ -992,15 +991,20 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       }
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
-      EditTokenDialog dialog = MapTool.getFrame().getTokenPropertiesDialog();
-      dialog.showDialog(tokenUnderMouse);
-      if (dialog.isTokenSaved()) {
-        getRenderer().repaint();
-        MapTool.serverCommand().putToken(getRenderer().getZone().getId(), getTokenUnderMouse());
-        getRenderer().getZone().putToken(getTokenUnderMouse());
-        MapTool.getFrame().resetTokenPanels();
+      MapTool.getFrame().showTokenPropertiesDialog(getTokenUnderMouse(), getRenderer());
+    }
+
+    /** Converts the action to a JMenuItem, and adds a tooltip if the action is blocked. */
+    public JMenuItem asJMenuItem() {
+      JMenuItem jMenuItem = new JMenuItem(this);
+      if (selectedTokenSet.size() > 1) {
+        jMenuItem.setToolTipText(I18N.getText("token.popup.menu.edit.toomany.tooltip"));
+      } else if (!MapTool.getPlayer().isGM() && MapTool.getServerPolicy().isTokenEditorLocked()) {
+        jMenuItem.setToolTipText(I18N.getText("token.popup.menu.edit.notallowed.tooltip"));
       }
+      return jMenuItem;
     }
   }
 

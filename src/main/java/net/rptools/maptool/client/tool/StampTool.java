@@ -63,7 +63,6 @@ import net.rptools.maptool.client.ui.TokenLocation;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.Toolbox;
-import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -375,17 +374,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       } else {
         // Single
         Token token = getTokenAt(e.getX(), e.getY());
-        if (token != null) {
-          EditTokenDialog tokenPropertiesDialog = MapTool.getFrame().getTokenPropertiesDialog();
-          tokenPropertiesDialog.showDialog(token);
-
-          if (tokenPropertiesDialog.isTokenSaved()) {
-            MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-            renderer.getZone().putToken(token);
-            renderer.repaint();
-            renderer.flush(token);
-          }
-        }
+        MapTool.getFrame().showTokenPropertiesDialog(token, renderer);
       }
       return;
     }
