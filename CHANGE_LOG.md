@@ -33,6 +33,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 - [#1566][i1566] Saving lib:tokens would fail due to colon in name throwing exception. Fixed.
 - [#1564][i1564] Function `playClip()` could fail to create a MediaPlayer throwing an exception. Exception caught and error message presented to user now.
 - [#1551][i1551] Javascript `console.log`not working during page load. Fixed.
+- [#1548][i1548] Table functions `getTableAccess()`, `getTableVisible()`, `setTableAccess()`, `setTableVisible()`, `getTablePickOnce()` and `setTablePickOnce()` were returning strings instead of BigInteger values. Fixed.
 - [#1538][i1538] Close button on Token Editor changed to Cancel.
 - [#1501][i1501] "User data directory is already in use" error when using frame5/dialog5 on two instances of MapTool. Fixed.
 - [#1498][i1498] Tooltip for Language seletion in Preferences had wrong text. Fixed.
@@ -54,6 +55,7 @@ Lots of enhancements, bug fixes and improvements to the code base.
 [i1566]: https://github.com/RPTools/maptool/issues/1566
 [i1564]: https://github.com/RPTools/maptool/issues/1564
 [i1551]: https://github.com/RPTools/maptool/issues/1551
+[i1548]: https://github.com/RPTools/maptool/issues/1548
 [i1538]: https://github.com/RPTools/maptool/issues/1538
 [i1528]: https://github.com/RPTools/maptool/issues/1528
 [i1518]: https://github.com/RPTools/maptool/issues/1518
