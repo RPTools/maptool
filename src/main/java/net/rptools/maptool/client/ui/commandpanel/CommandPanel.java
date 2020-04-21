@@ -169,7 +169,7 @@ public class CommandPanel extends JPanel implements Observer {
       identityGUID = token.getId();
       identityName = token.getName();
       avatarPanel.setImage(ImageManager.getImageAndWait(token.getImageAssetId()));
-      setCharacterLabel("Speaking as: " + getIdentity());
+      setCharacterLabel(I18N.getText("panel.Impersonate.identity", getIdentity()));
     } else {
       identityGUID = null;
       identityName = null;
@@ -210,7 +210,7 @@ public class CommandPanel extends JPanel implements Observer {
       setIdentityImpl(token);
       // For the name to be used, even if there is no such token
       identityName = identity;
-      setCharacterLabel("Speaking as: " + getIdentity());
+      setCharacterLabel(I18N.getText("panel.Impersonate.identity", getIdentity()));
     }
     HTMLFrameFactory.impersonateToken();
   }

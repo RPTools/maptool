@@ -834,7 +834,7 @@ public class AppActions {
    * the set exist in the zone, or because the user doesn't have permission to delete the tokens)
    * then the {@link MapTool#SND_INVALID_OPERATION} sound is played.
    *
-   * <p>If any tokens<i>are</i> deleted, then the selection set for the zone is cleared.
+   * <p>If any tokens <i>are</i> deleted, then the selection set for the zone is cleared.
    *
    * @param zone the {@link Zone} the tokens belong to.
    * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
@@ -850,7 +850,7 @@ public class AppActions {
    * the set exist in the zone, or because the user doesn't have permission to delete the tokens)
    * then the {@link MapTool#SND_INVALID_OPERATION} sound is played.
    *
-   * <p>If any tokens<i>are</i> deleted, then the selection set for the zone is cleared.
+   * <p>If any tokens <i>are</i> deleted, then the selection set for the zone is cleared.
    *
    * @param zone the {@link Zone} the tokens belong to.
    * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
@@ -866,7 +866,7 @@ public class AppActions {
    * the set exist in the zone, or because the user doesn't have permission to delete the tokens)
    * then the {@link MapTool#SND_INVALID_OPERATION} sound is played.
    *
-   * <p>If any tokens<i>are</i> deleted, then the selection set for the zone is cleared.
+   * <p>If any tokens <i>are</i> deleted, then the selection set for the zone is cleared.
    *
    * @param copy whether the tokens should be copied and deleted (cut) or just deleted
    * @param zone the {@link Zone} the tokens belong to.

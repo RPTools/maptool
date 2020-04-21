@@ -27,9 +27,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.*;
 
 public class ImpersonatePanel extends AbstractMacroPanel {
   private boolean currentlyImpersonating = false;
@@ -138,6 +136,37 @@ public class ImpersonatePanel extends AbstractMacroPanel {
   public void reset() {
     clear();
     init();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public void modelChanged(ModelChangeEvent event) {
+    if (event.eventType == Token.ChangeEvent.MACRO_CHANGED
+        || event.eventType == Zone.Event.TOKEN_REMOVED) {
+      // Only resets if the impersonated token is among those changed/deleted
+      boolean impersonatedChanged;
+      if (event.getArg() instanceof List<?>) {
+        impersonatedChanged = isImpersonatedAmongList((List<Token>) event.getArg());
+      } else {
+        impersonatedChanged = isTokenImpersonated((Token) event.getArg());
+      }
+      if (impersonatedChanged) {
+        reset();
+      }
+    }
+  }
+
+  private boolean isTokenImpersonated(Token token) {
+    return token != null && getTokenId() != null && token.getId().equals(getTokenId());
+  }
+
+  private boolean isImpersonatedAmongList(List<Token> list) {
+    for (Token token : list) {
+      if (isTokenImpersonated(token)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
