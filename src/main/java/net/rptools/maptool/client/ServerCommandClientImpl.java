@@ -138,8 +138,18 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(COMMAND.putToken, zoneGUID, token);
   }
 
+  @Override
   public void removeToken(GUID zoneGUID, GUID tokenGUID) {
+    // delete local token immediately
+    MapTool.getCampaign().getZone(zoneGUID).removeToken(tokenGUID);
     makeServerCall(COMMAND.removeToken, zoneGUID, tokenGUID);
+  }
+
+  @Override
+  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
+    // delete local tokens immediately
+    MapTool.getCampaign().getZone(zoneGUID).removeTokens(tokenGUIDs);
+    makeServerCall(COMMAND.removeTokens, zoneGUID, tokenGUIDs);
   }
 
   /**
