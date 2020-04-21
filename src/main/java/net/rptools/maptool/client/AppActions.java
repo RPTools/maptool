@@ -2055,7 +2055,6 @@ public class AppActions {
           policy.setIsMovementLocked(!policy.isMovementLocked());
 
           MapTool.updateServerPolicy(policy);
-          MapTool.getServer().updateServerPolicy(policy);
         }
       };
 
@@ -2078,7 +2077,6 @@ public class AppActions {
           policy.setIsTokenEditorLocked(!policy.isTokenEditorLocked());
 
           MapTool.updateServerPolicy(policy);
-          MapTool.getServer().updateServerPolicy(policy);
         }
       };
 

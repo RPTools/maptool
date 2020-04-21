@@ -775,6 +775,7 @@ public class ServerMethodHandler extends AbstractMethodHandler implements Server
   }
 
   public void setServerPolicy(ServerPolicy policy) {
+    server.updateServerPolicy(policy); // updates the server policy, fixes #1648
     forwardToClients();
     MapTool.getFrame().getToolbox().updateTools();
   }
