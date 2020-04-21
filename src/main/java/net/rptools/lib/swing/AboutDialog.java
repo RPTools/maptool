@@ -106,8 +106,7 @@ public class AboutDialog extends JDialog {
    */
   private JButton getOkButton() {
     if (okButton == null) {
-      okButton = new JButton();
-      okButton.setText("OK");
+      okButton = new JButton(I18N.getText("Button.ok"));
       okButton.addActionListener(
           new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent e) {

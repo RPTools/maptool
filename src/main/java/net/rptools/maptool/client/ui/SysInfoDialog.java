@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.MapToolSysInfoProvider;
 import net.rptools.maptool.util.SysInfoProvider;
 
@@ -44,7 +45,7 @@ public class SysInfoDialog {
     infoTextArea.setLineWrap(true);
     infoTextArea.setWrapStyleWord(true);
     infoTextArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
-    infoTextArea.setText("Gathering information, please wait...");
+    infoTextArea.setText(I18N.getText("action.gatherDebugInfoWait"));
     EventQueue.invokeLater(new InfoTextSwingWorker());
 
     JScrollPane scrollPane = new JScrollPane(infoTextArea);

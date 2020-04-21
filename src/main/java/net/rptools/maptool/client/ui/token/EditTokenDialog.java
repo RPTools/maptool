@@ -868,7 +868,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     if (MapTool.getCampaign().getTokenBarsMap().size() > 0) {
       layout = (FormLayout) barPanel.getLayout();
       barPanel.setName("bar");
-      barPanel.setBorder(BorderFactory.createTitledBorder("Bars"));
+      barPanel.setBorder(
+          BorderFactory.createTitledBorder(I18N.getText("CampaignPropertiesDialog.tab.bars")));
       int count = 0;
       row = 0;
       for (BarTokenOverlay bar : MapTool.getCampaign().getTokenBarsMap().values()) {

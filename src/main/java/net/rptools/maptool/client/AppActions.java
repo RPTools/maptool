@@ -2382,8 +2382,7 @@ public class AppActions {
         if (AppState.isSaving()) {
           int count = 30;
           StaticMessageDialog progressDialog =
-              new StaticMessageDialog(
-                  "Waiting up to " + count + " seconds for autosave to finish...");
+              new StaticMessageDialog(I18N.getText("msg.autosave.wait", count));
           MapTool.getFrame().showFilledGlassPane(progressDialog);
           do {
             try {
