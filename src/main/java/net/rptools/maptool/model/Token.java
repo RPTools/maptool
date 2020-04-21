@@ -68,6 +68,7 @@ public class Token extends BaseModel implements Cloneable {
 
   private static final Logger log = LogManager.getLogger(Token.class);
 
+  /** The unique GUID of the token. */
   private GUID id = new GUID();
 
   public static final String FILE_EXTENSION = "rptok";
@@ -1797,7 +1798,7 @@ public class Token extends BaseModel implements Cloneable {
       macroPropertiesMap.put(macro.getIndex(), macro);
 
       // Allows the token macro panels to update only if a macro changes
-      fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
+      fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
     }
   }
 
@@ -1824,7 +1825,7 @@ public class Token extends BaseModel implements Cloneable {
     MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
 
     // Lets the token macro panels update only if a macro changes
-    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
+    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
   }
 
   public void deleteMacroButtonProperty(MacroButtonProperties prop) {
@@ -1834,7 +1835,7 @@ public class Token extends BaseModel implements Cloneable {
     // timing problem.
 
     // Lets the token macro panels update only if a macro changes
-    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, id));
+    fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
   }
 
   public void setSpeechMap(Map<String, String> map) {
