@@ -89,7 +89,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
   }
 
   public void showDialog() {
-    dialog = new GenericDialog("Add Resource to Library", MapTool.getFrame(), this);
+    dialog = new GenericDialog(I18N.getText("action.addIconSelector"), MapTool.getFrame(), this);
 
     model = new Model();
 
