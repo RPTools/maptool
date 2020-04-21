@@ -30,6 +30,7 @@ import javax.swing.JProgressBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -78,14 +79,14 @@ public class ProgressBarList extends JDialog implements ChangeListener {
     // the event will fire.
     ftp.addChangeListener(this);
 
-    hideButton = new JButton("Hide");
+    hideButton = new JButton(I18N.getText("Button.hide"));
     hideButton.addActionListener(
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             ProgressBarList.this.setVisible(false);
           }
         });
-    cancelButton = new JButton("Cancel");
+    cancelButton = new JButton(I18N.getText("Button.cancel"));
     cancelButton.addActionListener(
         new ActionListener() {
           public void actionPerformed(ActionEvent e) {

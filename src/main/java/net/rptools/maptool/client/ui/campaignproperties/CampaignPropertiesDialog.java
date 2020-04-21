@@ -68,7 +68,7 @@ public class CampaignPropertiesDialog extends JDialog {
   private Campaign campaign;
 
   public CampaignPropertiesDialog(JFrame owner) {
-    super(owner, "Campaign Properties", true);
+    super(owner, I18N.getText("CampaignPropertiesDialog.label.title"), true);
 
     initialize();
 
