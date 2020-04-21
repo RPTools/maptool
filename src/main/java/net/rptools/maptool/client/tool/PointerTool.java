@@ -41,7 +41,6 @@ import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.tool.LayerSelectionDialog.LayerSelectionListener;
 import net.rptools.maptool.client.ui.*;
-import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
@@ -347,17 +346,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           return;
         }
         tokenUnderMouse = token;
-        // TODO: Combine this with the code just like it below
-        EditTokenDialog tokenPropertiesDialog = MapTool.getFrame().getTokenPropertiesDialog();
-        tokenPropertiesDialog.showDialog(tokenUnderMouse);
-
-        if (tokenPropertiesDialog.isTokenSaved()) {
-          MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-          renderer.getZone().putToken(token);
-          MapTool.getFrame().resetTokenPanels();
-          renderer.repaint();
-          renderer.flush(token);
-        }
+        MapTool.getFrame().showTokenPropertiesDialog(tokenUnderMouse, renderer);
       }
       if (SwingUtilities.isRightMouseButton(event)) {
         Token token = getTokenAt(event.getX(), event.getY());
@@ -497,16 +486,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           if (!AppUtil.playerOwns(token)) {
             return;
           }
-          EditTokenDialog tokenPropertiesDialog = MapTool.getFrame().getTokenPropertiesDialog();
-          tokenPropertiesDialog.showDialog(token);
-
-          if (tokenPropertiesDialog.isTokenSaved()) {
-            renderer.repaint();
-            renderer.flush(token);
-            MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-            renderer.getZone().putToken(token);
-            MapTool.getFrame().resetTokenPanels();
-          }
+          MapTool.getFrame().showTokenPropertiesDialog(token, renderer);
         }
       }
       return;

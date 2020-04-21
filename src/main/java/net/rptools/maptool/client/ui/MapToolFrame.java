@@ -785,7 +785,31 @@ public class MapToolFrame extends DefaultDockableHolder
     return lookupTablePanel;
   }
 
-  public EditTokenDialog getTokenPropertiesDialog() {
+  /**
+   * Shows the token properties dialog, and saves the token.
+   *
+   * @param token the token to edit
+   * @param zr the ZoneRenderer of the token
+   */
+  public void showTokenPropertiesDialog(Token token, ZoneRenderer zr) {
+    if (token != null && zr != null) {
+      if (MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().isTokenEditorLocked()) {
+        EditTokenDialog dialog = MapTool.getFrame().getTokenPropertiesDialog();
+        dialog.showDialog(token);
+        if (dialog.isTokenSaved()) {
+          // Checks if the map still exists. Fixes #1646.
+          if (getZoneRenderers().contains(zr) && zr.getZone().getToken(token.getId()) != null) {
+            MapTool.serverCommand().putToken(zr.getZone().getId(), token);
+            MapTool.getFrame().resetTokenPanels();
+            zr.repaint();
+            zr.flush(token);
+          }
+        }
+      }
+    }
+  }
+
+  private EditTokenDialog getTokenPropertiesDialog() {
     if (tokenPropertiesDialog == null) {
       tokenPropertiesDialog = new EditTokenDialog();
     }
