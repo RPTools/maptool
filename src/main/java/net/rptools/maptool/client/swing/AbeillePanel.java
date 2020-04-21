@@ -21,8 +21,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
+import javax.swing.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import yasb.Binder;
@@ -81,7 +80,8 @@ public class AbeillePanel<T> extends JPanel {
 
   public AbeillePanel(String panelForm) {
     setLayout(new GridLayout());
-    panel = new FormPanel(panelForm);
+    panel = new FormPanelI18N(panelForm);
+
     add(panel);
   }
 

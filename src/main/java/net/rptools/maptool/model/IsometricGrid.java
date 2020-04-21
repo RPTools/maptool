@@ -18,6 +18,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -97,6 +98,11 @@ public class IsometricGrid extends Grid {
   @Override
   public double getCellHeight() {
     return getSize();
+  }
+
+  @Override
+  public Point getCenterOffset() {
+    return new Point(0, (int) getCellHeight() / 2);
   }
 
   public double getCellWidthHalf() {
@@ -207,15 +213,15 @@ public class IsometricGrid extends Grid {
 
   @Override
   public ZonePoint convert(CellPoint cp) {
-    double mapX = (cp.x - cp.y) * getCellWidthHalf();
-    double mapY = (cp.x + cp.y) * getCellHeightHalf();
+    double mapX = (cp.x - cp.y) * getCellWidthHalf() + getOffsetX();
+    double mapY = (cp.x + cp.y) * getCellHeightHalf() + getOffsetY();
     return new ZonePoint((int) (mapX), (int) (mapY));
   }
 
   @Override
   public ZonePoint getNearestVertex(ZonePoint point) {
-    double px = point.x - getOffsetX();
-    double py = point.y - getOffsetY() + getCellHeightHalf();
+    double px = point.x;
+    double py = point.y + getCellHeightHalf();
     ZonePoint zp = new ZonePoint((int) px, (int) py);
     return convert(convert(zp));
   }

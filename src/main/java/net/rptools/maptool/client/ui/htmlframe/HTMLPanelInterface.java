@@ -23,8 +23,9 @@ interface HTMLPanelInterface {
    * Update the HTML content and the close button.
    *
    * @param html the html to load.
+   * @param scrollreset whether the scroll bar should be reset.
    */
-  void updateContents(final String html);
+  void updateContents(final String html, boolean scrollreset);
 
   /** Flush the Panel. */
   void flush();

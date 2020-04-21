@@ -16,18 +16,7 @@ package net.rptools.maptool.client.ui;
 
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Desktop;
-import java.awt.EventQueue;
-import java.awt.GraphicsConfiguration;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.IllegalComponentStateException;
-import java.awt.Image;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.desktop.AboutEvent;
 import java.awt.desktop.AboutHandler;
 import java.awt.desktop.PreferencesEvent;
@@ -46,6 +35,7 @@ import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -114,6 +104,7 @@ import net.rptools.maptool.client.swing.ProgressStatusBar;
 import net.rptools.maptool.client.swing.SpacerStatusBar;
 import net.rptools.maptool.client.swing.StatusPanel;
 import net.rptools.maptool.client.swing.ZoomStatusBar;
+import net.rptools.maptool.client.tool.DrawTopologySelectionTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
@@ -122,6 +113,7 @@ import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
 import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
+import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.*;
@@ -180,6 +172,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private final ClientConnectionPanel connectionPanel;
   /** The panel showing the initiative order. */
   private final InitiativePanel initiativePanel;
+  /** The HTML pane showing the map overlay. */
+  private HTMLOverlayPanel overlayPanel;
 
   private final PointerOverlay pointerOverlay;
   private final CommandPanel commandPanel;
@@ -228,6 +222,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private JFileChooser saveCmpgnFileChooser;
   private JFileChooser savePropsFileChooser;
   private JFileChooser saveFileChooser;
+  private JFileChooser saveMapFileChooser;
+  private JFileChooser saveTokenFileChooser;
 
   /** Remember the last layer selected */
   private Layer lastSelectedLayer = Zone.Layer.TOKEN;
@@ -244,6 +240,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private final FileFilter tableFilter =
       new MTFileFilter("mttable", I18N.getText("file.ext.mttable"));
 
+  private final FileFilter dungeonDraftFilter =
+      new MTFileFilter("dd2vtt", I18N.getText("file.ext.dungeondraft"));
   private EditTokenDialog tokenPropertiesDialog;
 
   private final CampaignPanel campaignPanel = new CampaignPanel();
@@ -461,6 +459,7 @@ public class MapToolFrame extends DefaultDockableHolder
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
     initiativePanel = createInitiativePanel();
+    overlayPanel = new HTMLOverlayPanel();
 
     zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
     pointerOverlay = new PointerOverlay();
@@ -474,9 +473,7 @@ public class MapToolFrame extends DefaultDockableHolder
     String version = "";
     Image logo = null;
     try {
-      credits =
-          new String(
-              FileUtil.loadResource(CREDITS_HTML), "UTF-8"); // 2nd param of type Charset is Java6+
+      credits = new String(FileUtil.loadResource(CREDITS_HTML), StandardCharsets.UTF_8);
       version = MapTool.getVersion();
       credits = credits.replace("%VERSION%", version);
       logo = ImageUtil.getImage(MAPTOOL_LOGO_IMAGE);
@@ -517,6 +514,9 @@ public class MapToolFrame extends DefaultDockableHolder
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
     rendererBorderPanel.add(zoneRendererPanel);
     toolbarPanel = new ToolbarPanel(toolbox);
+
+    zoneRendererPanel.add(overlayPanel, PositionalLayout.Position.CENTER, 0);
+    overlayPanel.setVisible(false); // disabled by default
 
     // Put it all together
     setJMenuBar(menuBar);
@@ -851,6 +851,15 @@ public class MapToolFrame extends DefaultDockableHolder
     return mapFilter;
   }
 
+  /**
+   * Returns the {@link FileFilter} for dungeondraft VTT export files.
+   *
+   * @return the {@link FileFilter} for dungeondraft VTT export files.
+   */
+  public FileFilter getDungeonDraftFilter() {
+    return dungeonDraftFilter;
+  }
+
   public JFileChooser getLoadPropsFileChooser() {
     if (loadPropsFileChooser == null) {
       loadPropsFileChooser = new JFileChooser();
@@ -890,6 +899,22 @@ public class MapToolFrame extends DefaultDockableHolder
     }
     savePropsFileChooser.setAcceptAllFileFilterUsed(true);
     return savePropsFileChooser;
+  }
+
+  public JFileChooser getSaveTokenFileChooser() {
+    if (saveTokenFileChooser == null) {
+      saveTokenFileChooser = new JFileChooser();
+      saveTokenFileChooser.setCurrentDirectory(AppPreferences.getSaveTokenDir());
+    }
+    return saveTokenFileChooser;
+  }
+
+  public JFileChooser getSaveMapFileChooser() {
+    if (saveMapFileChooser == null) {
+      saveMapFileChooser = new JFileChooser();
+      saveMapFileChooser.setCurrentDirectory(AppPreferences.getSaveMapDir());
+    }
+    return saveMapFileChooser;
   }
 
   public JFileChooser getSaveFileChooser() {
@@ -1251,6 +1276,7 @@ public class MapToolFrame extends DefaultDockableHolder
                 if (e.getClickCount() == 2) {
                   Token token = (Token) row;
                   getCurrentZoneRenderer().clearSelectedTokens();
+                  getCurrentZoneRenderer().updateAfterSelection();
                   // Pick an appropriate tool
                   // Jamz: why not just call .centerOn(Token token), now we have one place to fix...
                   getCurrentZoneRenderer().centerOn(token);
@@ -1410,7 +1436,8 @@ public class MapToolFrame extends DefaultDockableHolder
               zone.setBackgroundPaint(new DrawableColorPaint(Color.black));
               zone.setBackgroundAsset(asset.getId());
             }
-            MapPropertiesDialog newMapDialog = new MapPropertiesDialog(MapTool.getFrame());
+            MapPropertiesDialog newMapDialog =
+                MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
             newMapDialog.setZone(zone);
             newMapDialog.setVisible(true);
 
@@ -1510,6 +1537,11 @@ public class MapToolFrame extends DefaultDockableHolder
     return currentRenderer;
   }
 
+  /** @return the HTML Overlay Panel */
+  public HTMLOverlayPanel getOverlayPanel() {
+    return overlayPanel;
+  }
+
   public void addZoneRenderer(ZoneRenderer renderer) {
     zoneRendererList.add(renderer);
   }
@@ -1574,12 +1606,16 @@ public class MapToolFrame extends DefaultDockableHolder
       zoneRendererList.add(renderer);
     }
     if (currentRenderer != null) {
-      stopTokenDrag(); // if a token is being dragged, stop the drag
+      // Check if the zone still exists. Fix #1568
+      if (MapTool.getFrame().getZoneRenderers().contains(currentRenderer)) {
+        stopTokenDrag(); // if a token is being dragged, stop the drag
+      }
       currentRenderer.flush();
       zoneRendererPanel.remove(currentRenderer);
     }
     if (renderer != null) {
-      zoneRendererPanel.add(renderer, PositionalLayout.Position.CENTER);
+      zoneRendererPanel.add(
+          renderer, PositionalLayout.Position.CENTER, zoneRendererPanel.getComponentCount() - 1);
       zoneRendererPanel.doLayout();
     }
     currentRenderer = renderer;
@@ -1590,6 +1626,8 @@ public class MapToolFrame extends DefaultDockableHolder
       MapTool.getEventDispatcher()
           .fireEvent(MapTool.ZoneEvent.Activated, this, null, renderer.getZone());
       renderer.requestFocusInWindow();
+      // Updates the VBL/MBL button. Fixes #1642.
+      DrawTopologySelectionTool.getInstance().setMode(renderer.getZone().getTopologyMode());
     }
     AppActions.updateActions();
     repaint();

@@ -317,6 +317,11 @@ public class ZoneRenderer extends JComponent
     }
   }
 
+  /**
+   * If token is not null, center on it, set the active layer to it, select it, and request focus.
+   *
+   * @param token the token to center on
+   */
   public void centerOn(Token token) {
     if (token == null) {
       return;
@@ -352,6 +357,13 @@ public class ZoneRenderer extends JComponent
     // only called once (from clearSelectedTokens), and the caller requires a
     // repaint after we return.
     // repaintDebouncer.dispatch();
+  }
+
+  /** Resets the token panels, fire onTokenSelection, repaints. */
+  public void updateAfterSelection() {
+    MapTool.getFrame().resetTokenPanels();
+    HTMLFrameFactory.selectedListChanged();
+    repaintDebouncer.dispatch();
   }
 
   public Scale getZoneScale() {
@@ -580,7 +592,6 @@ public class ZoneRenderer extends JComponent
 
         flush(token);
         MapTool.serverCommand().putToken(zone.getId(), token);
-        zone.putToken(token);
 
         // No longer need this version
         // Lee: redundant flush() already did this above
@@ -3513,13 +3524,16 @@ public class ZoneRenderer extends JComponent
       Graphics2D locg =
           (Graphics2D)
               clippedG.create(
-                  (int) location.x,
-                  (int) location.y,
-                  (int) Math.ceil(location.scaledWidth),
-                  (int) Math.ceil(location.scaledHeight));
+                  (int) tokenBounds.getBounds().getX(),
+                  (int) tokenBounds.getBounds().getY(),
+                  (int) tokenBounds.getBounds().getWidth(),
+                  (int) tokenBounds.getBounds().getHeight());
       Rectangle bounds =
           new Rectangle(
-              0, 0, (int) Math.ceil(location.scaledWidth), (int) Math.ceil(location.scaledHeight));
+              0,
+              0,
+              (int) tokenBounds.getBounds().getWidth(),
+              (int) tokenBounds.getBounds().getHeight());
 
       // Check each of the set values
       for (String state : MapTool.getCampaign().getTokenStatesMap().keySet()) {
@@ -3822,47 +3836,62 @@ public class ZoneRenderer extends JComponent
     return tokenList;
   }
 
+  /**
+   * Verifies if a token is selectable based on existence, visibility and ownership.
+   *
+   * @param tokenGUID the token
+   * @return whether the token is selectable
+   */
   public boolean isTokenSelectable(GUID tokenGUID) {
     if (tokenGUID == null) {
-      return false;
+      return false; // doesn't exist
     }
     Token token = zone.getToken(tokenGUID);
     if (token == null) {
-      return false;
+      return false; // doesn't exist
     }
     if (!zone.isTokenVisible(token)) {
       if (AppUtil.playerOwns(token)) {
         return true;
       }
-      return false;
+      return false; // can't own or see
     }
     return true;
   }
 
+  /**
+   * Removes a token from the selected set.
+   *
+   * @param tokenGUID the token to remove from the selection
+   */
   public void deselectToken(GUID tokenGUID) {
     addToSelectionHistory(selectedTokenSet);
     selectedTokenSet.remove(tokenGUID);
-    MapTool.getFrame().resetTokenPanels();
-    HTMLFrameFactory.selectedListChanged();
     // flushFog = true; // could call flushFog() but also clears visibleScreenArea and I don't know
     // if we want
     // that...
-    repaintDebouncer.dispatch();
   }
 
+  /**
+   * Adds a token from the selected set, if token is selectable.
+   *
+   * @param tokenGUID the token to add to the selection
+   * @return false if nothing was done because the token wasn't selectable, true otherwise
+   */
   public boolean selectToken(GUID tokenGUID) {
     if (!isTokenSelectable(tokenGUID)) {
       return false;
     }
     addToSelectionHistory(selectedTokenSet);
     selectedTokenSet.add(tokenGUID);
-    MapTool.getFrame().resetTokenPanels();
-    HTMLFrameFactory.selectedListChanged();
-    // flushFog = true;
-    repaintDebouncer.dispatch();
     return true;
   }
 
+  /**
+   * Add tokens to the selection.
+   *
+   * @param tokens the collection of tokens to add
+   */
   public void selectTokens(Collection<GUID> tokens) {
     for (GUID tokenGUID : tokens) {
       if (!isTokenSelectable(tokenGUID)) {
@@ -3871,14 +3900,10 @@ public class ZoneRenderer extends JComponent
       selectedTokenSet.add(tokenGUID);
     }
     addToSelectionHistory(selectedTokenSet);
-
-    repaintDebouncer.dispatch();
-    MapTool.getFrame().resetTokenPanels();
-    HTMLFrameFactory.selectedListChanged();
   }
 
   /**
-   * Screen space rectangle
+   * Selects the tokens inside a selection rectangle.
    *
    * @param rect the selection rectangle
    */
@@ -3892,15 +3917,30 @@ public class ZoneRenderer extends JComponent
     selectTokens(selectedList);
   }
 
+  /** Clears the set of selected tokens. */
   public void clearSelectedTokens() {
     addToSelectionHistory(selectedTokenSet);
     clearShowPaths();
     selectedTokenSet.clear();
-    MapTool.getFrame().resetTokenPanels();
-    HTMLFrameFactory.selectedListChanged();
-    repaintDebouncer.dispatch();
   }
 
+  /**
+   * Returns true if the given token is the only one selected, and the selection is valid.
+   *
+   * @param token the token
+   * @return true if the selectedTokenSet is 1 and contains the token, false otherwise
+   */
+  public boolean isOnlyTokenSelected(Token token) {
+    return selectedTokenSet.size() == 1
+        && token != null
+        && selectedTokenSet.contains(token.getId())
+        && isTokenSelectable(token.getId());
+  }
+
+  /**
+   * Reverts the token selection. If the previous selection is empty, keeps reverting until it is
+   * non-empty. Fires onTokenSelection events.
+   */
   public void undoSelectToken() {
     // System.out.println("num history items: " + selectedTokenSetHistory.size());
     // for (Set<GUID> set : selectedTokenSetHistory) {
@@ -3929,9 +3969,7 @@ public class ZoneRenderer extends JComponent
     }
     // TODO: if selection history is empty, notify the selection panel to
     // disable the undo button.
-    MapTool.getFrame().resetTokenPanels();
-    HTMLFrameFactory.selectedListChanged();
-    repaintDebouncer.dispatch();
+    updateAfterSelection();
   }
 
   private void addToSelectionHistory(Set<GUID> selectionSet) {
@@ -3983,6 +4021,7 @@ public class ZoneRenderer extends JComponent
     // Make the selection
     clearSelectedTokens();
     selectToken(visibleTokens.get(newSelection).getId());
+    updateAfterSelection();
   }
 
   /**
@@ -4137,7 +4176,7 @@ public class ZoneRenderer extends JComponent
   /**
    * Converts a screen point to the center point of the corresponding grid cell.
    *
-   * @param sp
+   * @param sp the screen point
    * @return ZonePoint with the coordinates of the center of the grid cell.
    */
   public ZonePoint getCellCenterAt(ScreenPoint sp) {
@@ -4520,6 +4559,7 @@ public class ZoneRenderer extends JComponent
    *
    * @see java.awt.dnd.DropTargetListener#dragEnter(java.awt.dnd. DropTargetDragEvent )
    */
+  @Override
   public void dragEnter(DropTargetDragEvent dtde) {}
 
   /*
@@ -4527,6 +4567,7 @@ public class ZoneRenderer extends JComponent
    *
    * @see java.awt.dnd.DropTargetListener#dragExit(java.awt.dnd.DropTargetEvent)
    */
+  @Override
   public void dragExit(DropTargetEvent dte) {}
 
   /*
@@ -4534,9 +4575,18 @@ public class ZoneRenderer extends JComponent
    *
    * @see java.awt.dnd.DropTargetListener#dragOver (java.awt.dnd.DropTargetDragEvent)
    */
+  @Override
   public void dragOver(DropTargetDragEvent dtde) {}
 
-  private void addTokens(
+  /**
+   * Adds tokens at a given zone point coordinates.
+   *
+   * @param tokens the list of tokens to add
+   * @param zp the zone point where to add the tokens
+   * @param configureTokens the list indicating if each token is to be configured
+   * @param showDialog whether to display a token edit dialog
+   */
+  public void addTokens(
       List<Token> tokens, ZonePoint zp, List<Boolean> configureTokens, boolean showDialog) {
     GridCapabilities gridCaps = zone.getGrid().getCapabilities();
     boolean isGM = MapTool.getPlayer().isGM();
@@ -4674,7 +4724,6 @@ public class ZoneRenderer extends JComponent
         MapToolUtil.uploadAsset(asset);
       }
       // Save the token and tell everybody about it
-      zone.putToken(token);
       MapTool.serverCommand().putToken(zone.getId(), token);
       selectThese.add(token.getId());
     }
@@ -4695,7 +4744,7 @@ public class ZoneRenderer extends JComponent
     AppActions.copyTokens(tokens);
     AppActions.updateActions();
     requestFocusInWindow();
-    repaintDebouncer.dispatch();
+    updateAfterSelection();
   }
 
   /**
@@ -4736,6 +4785,7 @@ public class ZoneRenderer extends JComponent
    *
    * @see java.awt.dnd.DropTargetListener#drop (java.awt.dnd.DropTargetDropEvent)
    */
+  @Override
   public void drop(DropTargetDropEvent dtde) {
     ZonePoint zp =
         new ScreenPoint((int) dtde.getLocation().getX(), (int) dtde.getLocation().getY())
@@ -4764,6 +4814,7 @@ public class ZoneRenderer extends JComponent
    *
    * @see java.awt.dnd.DropTargetListener#dropActionChanged (java.awt.dnd.DropTargetDragEvent)
    */
+  @Override
   public void dropActionChanged(DropTargetDragEvent dtde) {}
 
   /** ZONE MODEL CHANGE LISTENER */
@@ -4857,7 +4908,9 @@ public class ZoneRenderer extends JComponent
       custom = createCustomCursor("image/cursor.png", "Group");
       cursor = custom;
     }
+    // Overlay and ZoneRenderer should have same cursor
     super.setCursor(cursor);
+    MapTool.getFrame().getOverlayPanel().setOverlayCursor(cursor);
   }
 
   private Cursor custom = null;

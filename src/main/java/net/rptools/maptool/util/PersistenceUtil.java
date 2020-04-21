@@ -181,7 +181,7 @@ public class PersistenceUtil {
     }
   }
 
-  public static PersistedMap loadMap(File mapFile) throws IOException {
+  public static PersistedMap loadMap(File mapFile) {
     PersistedMap persistedMap = null;
 
     // TODO: split in a try with resources and a try/catch
@@ -738,12 +738,13 @@ public class PersistenceUtil {
     }
   }
 
-  public static CampaignProperties loadCampaignProperties(InputStream in) throws IOException {
+  public static CampaignProperties loadCampaignProperties(InputStream in) {
     CampaignProperties props = null;
     try {
       props =
           (CampaignProperties)
-              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.campaignPropertiesVersion", ce);
     }
@@ -831,13 +832,14 @@ public class PersistenceUtil {
     }
   }
 
-  public static MacroButtonProperties loadMacro(InputStream in) throws IOException {
+  public static MacroButtonProperties loadMacro(InputStream in) {
     MacroButtonProperties mbProps = null;
+
     try {
       mbProps =
-          (MacroButtonProperties)
+          asMacro(
               FileUtil.getConfiguredXStream()
-                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8)));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macroVersion", ce);
     }
@@ -850,18 +852,20 @@ public class PersistenceUtil {
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
 
-      return (MacroButtonProperties) pakFile.getContent();
+      return asMacro(pakFile.getContent());
     } catch (IOException e) {
       return loadLegacyMacro(file);
     }
   }
 
+  /**
+   * Saves the macro.
+   *
+   * @param macroButton the button holding the macro
+   * @param file the file to save
+   * @throws IOException if the file can't be saved
+   */
   public static void saveMacro(MacroButtonProperties macroButton, File file) throws IOException {
-    // Put this in FileUtil
-    if (!file.getName().contains(".")) {
-      file = new File(file.getAbsolutePath() + AppConstants.MACRO_FILE_EXTENSION);
-    }
-
     try (PackedFile pakFile = new PackedFile(file)) {
       pakFile.setContent(macroButton);
       pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
@@ -878,13 +882,52 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Converts an object to a macroset, launching an error message if of an incorrect type
+   *
+   * @param object the object to convert
+   * @return the macroset, or null if no conversion done
+   */
   @SuppressWarnings("unchecked")
-  public static List<MacroButtonProperties> loadMacroSet(InputStream in) throws IOException {
+  private static List<MacroButtonProperties> asMacroSet(Object object) {
+    if (object instanceof List<?>) {
+      return (List<MacroButtonProperties>) object;
+    } else {
+      String className = object.getClass().getSimpleName();
+      MapTool.showError(I18N.getText("PersistenceUtil.warn.macrosetWrongFileType", className));
+      return null;
+    }
+  }
+
+  /**
+   * Converts an object to a macro, launching an error message if of an incorrect type
+   *
+   * @param object the object to convert
+   * @return the macroset, or null if no conversion done
+   */
+  private static MacroButtonProperties asMacro(Object object) {
+    if (object instanceof MacroButtonProperties) {
+      return (MacroButtonProperties) object;
+    } else {
+      String className = object.getClass().getSimpleName();
+      MapTool.showError(I18N.getText("PersistenceUtil.warn.macroWrongFileType", className));
+      return null;
+    }
+  }
+
+  /**
+   * Returns a macroset from an inputstream
+   *
+   * @param in the inputstream
+   * @return the macroset
+   */
+  public static List<MacroButtonProperties> loadMacroSet(InputStream in) {
     List<MacroButtonProperties> macroButtonSet = null;
     try {
       macroButtonSet =
-          (List<MacroButtonProperties>)
-              FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+          asMacroSet(
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8)));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
     }
@@ -900,7 +943,7 @@ public class PersistenceUtil {
         String progVersion = (String) pakFile.getProperty(PROP_VERSION);
         if (!versionCheck(progVersion)) return null;
 
-        macroButtonSet = (List<MacroButtonProperties>) pakFile.getContent();
+        macroButtonSet = asMacroSet(pakFile.getContent());
       } catch (ConversionException ce) {
         MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
       }
@@ -939,11 +982,11 @@ public class PersistenceUtil {
     LookupTable table = null;
     try {
       table =
-          (LookupTable) FileUtil.getConfiguredXStream().fromXML(new InputStreamReader(in, "UTF-8"));
+          (LookupTable)
+              FileUtil.getConfiguredXStream()
+                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.tableVersion", ce);
-    } catch (IOException ioe) {
-      MapTool.showError("PersistenceUtil.error.tableRead", ioe);
     }
     return table;
   }
@@ -997,7 +1040,8 @@ public class PersistenceUtil {
     try {
       tokenSaveFile = new File(tokenSaveFile.getAbsolutePath() + ".png");
       BufferedImage image =
-          ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()));
+          ImageUtil.createCompatibleImage(
+              ImageUtil.bytesToImage(asset.getImage(), tokenSaveFile.getCanonicalPath()));
       ImageIO.write(image, "png", tokenSaveFile);
       image.flush();
     } catch (IOException e) {

@@ -83,6 +83,11 @@ public abstract class HexGrid extends Grid {
     }
   }
 
+  @Override
+  public Point getCenterOffset() {
+    return new Point(0, 0);
+  }
+
   /** minorRadius / edgeLength */
   private double hexRatio = REGULAR_HEX_RATIO;
   /**
@@ -178,8 +183,8 @@ public abstract class HexGrid extends Grid {
     int w = shape.getBounds().width;
     int h = shape.getBounds().height;
 
-    zp.x -= w / 2 + getOffsetX();
-    zp.y -= h / 2 + getOffsetY();
+    zp.x -= w / 2;
+    zp.y -= h / 2;
 
     // System.out.println(new Rectangle(zp.x, zp.y, w, h));
     return new Rectangle(zp.x, zp.y, w, h);

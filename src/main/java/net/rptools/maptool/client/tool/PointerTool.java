@@ -335,6 +335,11 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
 
     public void handleMouseReleased(MouseEvent event) {}
 
+    /**
+     * Handles right click (popup menu) and double left click (token editor).
+     *
+     * @param event the mouse event.
+     */
     public void handleMousePressed(MouseEvent event) {
       if (event.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(event)) {
         Token token = getTokenAt(event.getX(), event.getY());
@@ -374,6 +379,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       }
       renderer.clearSelectedTokens();
       boolean selected = renderer.selectToken(token.getId());
+      renderer.updateAfterSelection();
 
       if (selected) {
         Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
@@ -483,6 +489,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         // Stack
         renderer.clearSelectedTokens();
         showTokenStackPopup(tokenList, e.getX(), e.getY());
+        renderer.updateAfterSelection();
       } else {
         // Single
         Token token = renderer.getTokenAt(e.getX(), e.getY());
@@ -510,32 +517,30 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       // Don't select if it's already being moved by someone
       isNewTokenSelected = false;
       if (!renderer.isTokenMoving(token)) {
-        if (!renderer.getSelectedTokenSet().contains(token.getId()) && !SwingUtil.isShiftDown(e)) {
+        if (SwingUtil.isShiftDown(e)) {
+          // if shift, we invert the selection of the token
+          if (renderer.getSelectedTokenSet().contains(token.getId())) {
+            renderer.deselectToken(token.getId());
+          } else {
+            renderer.selectToken(token.getId());
+          }
+          renderer.updateAfterSelection();
+        } else if (!renderer.getSelectedTokenSet().contains(token.getId())) {
+          // if not shift and click on non-selected token, switch selection to the token
           isNewTokenSelected = true;
           renderer.clearSelectedTokens();
-        }
-        // XXX Isn't Windows standard to use Ctrl-click to add one element and Shift-click
-        // to
-        // extend?
-        // XXX Similarly, OSX uses Cmd-click to add one element and Shift-click to extend...
-        // Change
-        // it later.
-        if (SwingUtil.isShiftDown(e) && renderer.getSelectedTokenSet().contains(token.getId())) {
-          renderer.deselectToken(token.getId());
-        } else {
           renderer.selectToken(token.getId());
+          renderer.updateAfterSelection();
         }
-        // Dragging offset for currently selected token
+        // ZonePoint dragged to
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-        Rectangle tokenBounds = token.getBounds(renderer.getZone());
 
-        if (token.isSnapToGrid() && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
-          dragOffsetX = (pos.x - tokenBounds.x) - (tokenBounds.width / 2);
-          dragOffsetY = (pos.y - tokenBounds.y) - (tokenBounds.height / 2);
-        } else {
-          dragOffsetX = pos.x - tokenBounds.x;
-          dragOffsetY = pos.y - tokenBounds.y;
-        }
+        // Offset specific to the token
+        Point tokenOffset = token.getDragOffset(getZone());
+
+        // Dragging offset for currently selected token
+        dragOffsetX = pos.x - tokenOffset.x;
+        dragOffsetY = pos.y - tokenOffset.y;
       }
     } else {
       if (SwingUtilities.isLeftMouseButton(e)) {
@@ -570,6 +575,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
     // WAYPOINT
     if (SwingUtilities.isRightMouseButton(e) && isDraggingToken) {
       setWaypoint();
+      setDraggingMap(false); // We no longer drag the map. Fixes bug #616
       return;
     }
 
@@ -600,25 +606,15 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
             renderer.clearSelectedTokens();
           }
           renderer.selectTokens(selectionBoundBox);
+          renderer.updateAfterSelection();
 
           selectionBoundBox = null;
-          renderer.repaint();
           return;
         }
         // DRAG TOKEN COMPLETE
         if (isDraggingToken) {
           SwingUtil.showPointer(renderer);
           stopTokenDrag();
-        } else {
-          // SELECT SINGLE TOKEN
-          if (SwingUtilities.isLeftMouseButton(e) && !SwingUtil.isShiftDown(e)) {
-            Token token = renderer.getTokenAt(e.getX(), e.getY());
-            // Only if it isn't already being moved
-            if (token != null && !renderer.isTokenMoving(token)) {
-              renderer.clearSelectedTokens();
-              renderer.selectToken(token.getId());
-            }
-          }
         }
       } finally {
         isDraggingToken = false;
@@ -644,6 +640,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           renderer.clearSelectedTokens();
         }
         renderer.selectToken(tokenUnderMouse.getId());
+        renderer.updateAfterSelection();
         isNewTokenSelected = false;
       }
       if (tokenUnderMouse != null && !renderer.getSelectedTokenSet().isEmpty()) {
@@ -798,9 +795,6 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         if (isMovingWithKeys) {
           return;
         }
-        Grid grid = getZone().getGrid();
-        TokenFootprint tf = tokenUnderMouse.getFootprint(grid);
-        Rectangle r = tf.getBounds(grid);
         ZonePoint last = renderer.getLastWaypoint(tokenUnderMouse.getId());
         if (last == null) {
           // This makes no sense to me. Why create a fake last point that is
@@ -832,9 +826,10 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
       if (!isDraggingToken && renderer.isTokenMoving(tokenUnderMouse)) {
         return;
       }
-      if (isNewTokenSelected) {
+      if (isNewTokenSelected && !renderer.isOnlyTokenSelected(tokenUnderMouse)) {
         renderer.clearSelectedTokens();
         renderer.selectToken(tokenUnderMouse.getId());
+        renderer.updateAfterSelection();
       }
       isNewTokenSelected = false;
 
@@ -879,17 +874,14 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
    */
   public boolean handleDragToken(ZonePoint zonePoint, int dx, int dy) {
     Grid grid = renderer.getZone().getGrid();
+    // Always correct for offset. Fix #1589
+    zonePoint.translate(-dragOffsetX, -dragOffsetY);
     // For snapped dragging
     if (tokenBeingDragged.isSnapToGrid()
         && grid.getCapabilities().isSnapToGridSupported()
         && AppPreferences.getTokensSnapWhileDragging()) {
       // Convert the zone point to a cell point and back to force the snap to grid on drag
       zonePoint = grid.convert(grid.convert(zonePoint));
-    } else {
-      // Non-snapped while dragging.  Snaps when mouse-button released.
-      if (!(grid instanceof SquareGrid) || !tokenBeingDragged.isSnapToGrid()) {
-        zonePoint.translate(-dragOffsetX, -dragOffsetY);
-      }
     }
     CellPoint cellUnderMouse = grid.convert(zonePoint);
     MapTool.getFrame().getCoordinateStatusBar().update(cellUnderMouse.x, cellUnderMouse.y);
@@ -1370,10 +1362,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
         }
         facing = facingArray[facingIndex];
       }
-      token.setFacing(facing);
-
-      renderer.flush(token);
-      MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, facing);
     }
     renderer.repaint();
   }
@@ -1624,7 +1613,7 @@ public class PointerTool extends DefaultTool implements ZoneOverlay {
           imgSize = new Dimension(image.getWidth(), image.getHeight());
 
           // Size
-          SwingUtil.constrainTo(imgSize, AppPreferences.getPortraitSize());
+          SwingUtil.constrainTo(imgSize, AppPreferences.getPortraitSize(), false);
         }
 
         Dimension statSize = null;

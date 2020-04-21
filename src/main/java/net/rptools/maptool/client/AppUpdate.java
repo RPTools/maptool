@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.jayway.jsonpath.JsonPath;
 import java.io.*;
 import java.net.*;
@@ -21,9 +23,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.jar.*;
 import javax.swing.*;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -75,7 +76,7 @@ public class AppUpdate {
     // If can't access the list of releases, we're done
     if (strReleases == null) return false;
 
-    JSONObject release;
+    JsonObject release;
     try {
       // Get pre-release information regarding MapTool version from github list
       String path = "$.[?(@.target_commitish == '" + jarCommit + "')].prerelease";
@@ -83,16 +84,18 @@ public class AppUpdate {
       boolean prerelease = listMatches.isEmpty() || listMatches.get(0);
 
       if (prerelease) {
-        JSONArray releasesList = JSONArray.fromObject(strReleases);
-        release = JSONObject.fromObject(releasesList.get(0)); // the latest is at top of list
+        JsonArray releasesArray =
+            JSONMacroFunctions.getInstance().asJsonElement(strReleases).getAsJsonArray();
+        release = releasesArray.get(0).getAsJsonObject(); // the latest release is at top of list
       } else {
         path = "$.[?(@.prerelease == false)]";
         listMatches = JsonPath.parse(strReleases).read(path); // get sublist of releases
-        release = JSONObject.fromObject(listMatches.get(0)); // the latest is at top of list
+        release =
+            JSONMacroFunctions.getInstance().asJsonElement(listMatches.get(0)).getAsJsonObject();
       }
-      latestGitHubReleaseCommit = release.get("target_commitish").toString();
+      latestGitHubReleaseCommit = release.get("target_commitish").getAsString();
       log.info("target_commitish from GitHub: " + latestGitHubReleaseCommit);
-      latestGitHubReleaseTagName = release.get("tag_name").toString();
+      latestGitHubReleaseTagName = release.get("tag_name").getAsString();
       log.info("tag_name from GitHub: " + latestGitHubReleaseTagName);
     } catch (Exception e) {
       log.error("Unable to parse JSON payload from GitHub...", e);
@@ -103,18 +106,18 @@ public class AppUpdate {
     if (jarCommit.equals(latestGitHubReleaseCommit)
         || AppPreferences.getSkipAutoUpdateCommit().equals(latestGitHubReleaseCommit)) return false;
 
-    JSONArray releaseAssets = release.getJSONArray("assets");
+    JsonArray releaseAssets = release.get("assets").getAsJsonArray();
     String assetDownloadURL = null;
-    JSONObject asset;
+    JsonObject asset;
 
     for (int i = 0; i < releaseAssets.size(); ++i) {
-      asset = releaseAssets.getJSONObject(i);
+      asset = releaseAssets.get(i).getAsJsonObject();
 
-      log.info("Asset: " + asset.getString("name"));
+      log.info("Asset: " + asset.get("name").getAsString());
 
-      if (asset.getString("name").toLowerCase().endsWith(DOWNLOAD_EXTENSION)) {
-        assetDownloadURL = asset.getString("browser_download_url");
-        final long assetDownloadSize = asset.getLong("size");
+      if (asset.get("name").getAsString().toLowerCase().endsWith(DOWNLOAD_EXTENSION)) {
+        assetDownloadURL = asset.get("browser_download_url").getAsString();
+        final long assetDownloadSize = asset.get("size").getAsLong();
 
         if (assetDownloadURL != null) {
           log.info("Download: " + assetDownloadURL);
@@ -125,8 +128,7 @@ public class AppUpdate {
             String tagName = latestGitHubReleaseTagName;
             SwingUtilities.invokeLater(
                 () -> {
-                  if (showMessage("New Update Found", commit, tagName))
-                    downloadFile(url, assetDownloadSize);
+                  if (showMessage(commit, tagName)) downloadFile(url, assetDownloadSize);
                 });
           } catch (MalformedURLException e) {
             log.error("Error with URL " + assetDownloadURL, e);
@@ -187,16 +189,18 @@ public class AppUpdate {
     return jarCommit;
   }
 
-  private static boolean showMessage(String aTitle, String commit, String tagName) {
-    JCheckBox dontAskCheckbox = new JCheckBox("Never check for updates again!");
+  private static boolean showMessage(String commit, String tagName) {
+    JCheckBox dontAskCheckbox = new JCheckBox(I18N.getText("Update.chkbox"));
 
-    String title = "Update Available";
-    String msg1 = "A new version of MapTool is available!";
-    String msg2 = "Would you like to download " + tagName + "?";
+    String title = I18N.getText("Update.title");
+    String msg1 = I18N.getText("Update.msg1");
+    String msg2 = I18N.getText("Update.msg2", tagName);
     String blankLine = " ";
 
     Object[] msgContent = {msg1, msg2, blankLine, dontAskCheckbox};
-    Object[] options = {"Yes", "No", "Skip this Version"};
+    Object[] options = {
+      I18N.getText("Button.yes"), I18N.getText("Button.no"), I18N.getText("Update.button")
+    };
     int result =
         JOptionPane.showOptionDialog(
             MapTool.getFrame(),

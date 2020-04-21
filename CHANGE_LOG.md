@@ -1,36 +1,131 @@
 Maptool 1.6.0
 =====
-**Highlights**
+Lots of enhancements, bug fixes and improvements to the code base.
+
+**Some Highlights**
 - New dialog and frame functions support HTML5, JavaScript and CSS.
+- Token VBL Simplification - Generating VBL for large, complex tokens like maps is much faster and producers much tighter VBL that is less demanding.  Also allows for automatic generation via the `setTokenVBL()` macro function.
 - Movement Blocking Layer - Now you can make those Force Fields that would block movement but not sight.
 - Look & Feel themes can now be selected from the Themes menu.  More enhancements to come.
 - Pre-defined Campaign Property sets can now be selected and loaded in the Campaign Properties dialog.
+- New Marker assets added to Default in the Resource Library - Use Restore Default Images in the Help menu to get them.
+- The annoying behavior where browsing for a drawing texture would cause the Resource Library to also change folders has been fixed!
 
 **Enhancements**
-- [#1216][i1216] Movement Blocking Layer - similar VBL, but specifically for blocking movement and not sight or light.
+- [#1427][i1427] Improved click response for macro links. Bonus: anchor links `<a href="#xxx">` now work in frames and dialogs.
+- [#1382][i1382] Connection Info -> External Address no longer depends on Server Registry being available.
+- [#1363][i1363] New and updated Marker assets in the Default Resource Library
+- [#1337][i1337] _Pick Once_ support added to Tables. Currently uses macro functions to set/reset the tables.  GUI support to come.
+- [#1323][i1323] New menu item, Frameworks, in Help menu opens default browser to [Frameworks](http://www.lmwcs.com/rptools/wiki/Frameworks) page on wiki.
+- [#1320][i1320] Downloadable artpacks in the Add Resource to Library dialog are now sorted by name.
+- [#1313][i1313] Gather Debug Information window (Help MenU) refactored. Window opens immediately with note that data collection is in progress and then updates once data has been collected.
+- [#1278][i1278] JSON option added to PROPS type for `input()` function.  WIDTH option added to PROPS.  Defaults to 14.
+- [#1270][i1270] Map Properties dialog now has a delete button to remove embedded maps.
+- [#1218][i1218] Token VBL Simplification - major performance increase in generation of VBL for tokens but also in producing VBL that is much less demanding on the system. Has color picker now instead of relying upon transparency.
+- [#1216][i1216] Movement Blocking Layer - similar to VBL, but specifically for blocking movement and not sight or light.
+  - AI button and new VBL Blocks Movement button moved over by Measuring tool and are now under GM control
 - [#1210][i1210] RADIO and LIST fields for `input()` function now support a DELIMITER option.
 - [#1107][i1107] Using the line drawing tools while holding Alt will snap to grid centers.
+- [#979][i979] New macro functions for setting/getting Token Image Layout properties.
+  - `setTokenLayoutProps(scale, xOffset, yOffset, tokenID, mapName)` and ` getTokenLayoutProps()`
 - [#972][i972] New macro functions for HTML5 compatible dialogs and frames.
   - `dialog5()` and `frame5()`
 - [#921][i921] Support added for selecting an available them via the Themes menu in MapTool.
 - [#891][i891] Menu option and macro functions to show/hide Text Labels and get display status.
   - `showTextLabels()`, `hideTextLabels()` and `getTextLabelStatus()`
+- [#643][i643] Grid types for Light and Sight now supports Hex grids.
 - [#221][i221] Campaign Properties dialog now has a drop-down to select from pre-defined Campaign Property sets (.mtprops).
 
 **Bug Fixes**
+- [#1477][i1477] HTML5 form submission ignored *novalidate* and *formnovalidate* attributes. Fixed.
+- [#1472][i1472] `getInfo("campaign")` was not returning all states. Fixed.
+- [#1469][i1469] Cursor offset when dragging snap-to-grid tokens on background layer. Fixed.
+- [#1468][i1468] onChangeSelection event was firing multiple times per selection action. Fixed.
+- [#1460][i1460] Uncaught cases in switch statement produces unhelpful error message. Fixed.
+- [#1456][i1456] Pressing Enter in an HTML control loses focus - fixed.
+- [#1455][i1455] `findToken()` using GM name failed when run via a trusted macro by Player client. Also `getGMName()` & `getGMNotes()` - fixed.
+- [#1453][i1453] HTML5 form validation ignored, js form.submit() borken, button w/o type broken - fixed.
+- [#1450][i1450] Fixed malfunctioning HTML elements in HTML5 dialog/frames: `<input>`, `<button>`, `<map>`, and `<a>`.
+- [#1441][i1441] Title bar on input() dialogs didn't fill width of window. Fixed.
+- [#1430][i1430] Macro links weren't working with HTML image maps. Not in relased code. Fixed.
+- [#1412][i1412] MBL/VBL was flickering when switching modes. Fixed.
+- [#1408][i1408] Draw Explorer drawing previews reflected pen width even with foreground was transparent. Fixed.
+- [#1400][i1400] Function `getAllPropertyNames()` was ignoring `delim` parameter if not set to `json`. Fixed.
+- [#1381][i1381] Exporting a macro with the same name as an existing `.mtmacro` file was producing a bad message and not warning the user. Fixed.
+- [#1309][i1309] Three of the default maps have been missing from the Resource Library for ages. They are back now.
+- [#1300][i1300] `copyToken()` macro function bugs when only a token name provided and though succeeding was reporting an error when making multiple copies. Fixed.
+- [#1299][i1299] Issue with moving tokens next to VBL related to maps having grid offsets fixed.
+- [#1292][i1292] The _setState_ and _unsetStates_ conditions for `getTokens` and `getTokenNames` were returning the wrong information. Similar issues with _propertyType_, _owned_, and _light_ also fixed.
+- [#1288][i1288] Token Properties grid in the Edit Token dialog didn't fill the available area. Fixed.
+- [#1278][i1278] PROPS option for `input()` broken. Fixed.
+- [#1269][i1269] Exporting a campaign with too short a name was throwing an exception. Fixed.
+- [#1267][i1267] Null Pointer Exceptions for Zone fields during Auto Save and Campaign Lod. Fixed.
 - [#1243][i1243] Once a GRID light source was used on a map, further use on maps with a different grid size would be the wrong size. Fixed.
 - [#1236][i1236] `getToken*` functions failing when setState/unsetState condition used. Fixed.
 - [#1231][i1231] Choosing a non-writable directory for downloading updates was failing silently. Fixed.
 - [#1228][i1228] `getLastPath` was returning bad path information. Fixed.
-- [#1225][i1225]  Exception during L&F setup. Not in released code. Fixed.
-- [#1206][i1206]  JSON function code was returning NULL if the function couldn't be found. Now reports unknown function.
+- [#1225][i1225] Exception during L&F setup. Not in released code. Fixed.
+- [#1217][i1217] Moving tokens or measuring across long distance (200+ cells) performed poorly. Fixed.
+- [#1206][i1206] JSON function code was returning NULL if the function couldn't be found. Now reports unknown function.
 - [#1204][i1204] `getToken*` was throwing an exception if a string was passed to the `layer` option. Fixed.
+- [#1092][i1092] Token States, Bars, and Halos weren't rotating properly with off-center, top-down tokens. Fixed.
+- [#1049][i1049] Token VBL wasn't rotating properly with off-center, top-down tokens. Fixed.
+- [#650][i650] Can't pass JSON data from a form submit. Fixed.
+- [#616][i616] Token selection issue after combination dragging token and panning map. Fixed.
+- [#472][i472] Edit Token Dialog gets slower to open with each subsequent reopen. Fixed.
+- [#198][i198] Using tab panels in `input()` could add large empty space at bottom of panel. Fixed.
 
 **Other**
+- [#1432][i1432] Updated splash & install images to remove Dev Release notations.
+- [#1355][i1355] Moving remaining classes off old JSON library to GSON.
+- [#1352][i1352] Replaced use of `"UTF-i"` by `StandardCharsets.UTF_8`
+- [#1325][i1325] Unit tests added for ImageUtils.
+- [#1284][i1284] Removed superfluous ParserException try/catch blocks.
+- [#1271][i1271] Clean up of Drawing Delete confirmation dialog code with comments and javadocs plus comments on the I18N strings.
+- [#1268][i1268] Refactored PackeFile class to use *try with resource* instead of try/catch/finally blocks.
 - [#1253][i1253] MD5 key generation wasn't thread-safe. Fixed.
 - [#1219][i1219] Javadocs generated via `gradlew javadoc` switched to HTML5.
+- [#1215][i1215] Replaced calls to deprecated IOUtils.closeQuietly() with try-with-resource.
 - [#1189][i1189] Unit tests added for JSON macro functions.
 
+[i1477]: https://github.com/RPTools/maptool/issues/1477
+[i1472]: https://github.com/RPTools/maptool/issues/1472
+[i1469]: https://github.com/RPTools/maptool/issues/1469
+[i1468]: https://github.com/RPTools/maptool/issues/1468
+[i1460]: https://github.com/RPTools/maptool/issues/1460
+[i1456]: https://github.com/RPTools/maptool/issues/1456
+[i1455]: https://github.com/RPTools/maptool/issues/1455
+[i1453]: https://github.com/RPTools/maptool/issues/1453
+[i1450]: https://github.com/RPTools/maptool/issues/1450
+[i1441]: https://github.com/RPTools/maptool/issues/1441
+[i1432]: https://github.com/RPTools/maptool/issues/1432
+[i1430]: https://github.com/RPTools/maptool/issues/1430
+[i1427]: https://github.com/RPTools/maptool/issues/1427
+[i1412]: https://github.com/RPTools/maptool/issues/1412
+[i1408]: https://github.com/RPTools/maptool/issues/1408
+[i1400]: https://github.com/RPTools/maptool/issues/1400
+[i1382]: https://github.com/RPTools/maptool/issues/1382
+[i1381]: https://github.com/RPTools/maptool/issues/1381
+[i1363]: https://github.com/RPTools/maptool-resources/issues/2
+[i1355]: https://github.com/RPTools/maptool/issues/1355
+[i1352]: https://github.com/RPTools/maptool/issues/1352
+[i1337]: https://github.com/RPTools/maptool/issues/1337
+[i1325]: https://github.com/RPTools/maptool/issues/1325
+[i1323]: https://github.com/RPTools/maptool/issues/1323
+[i1320]: https://github.com/RPTools/maptool/issues/1320
+[i1313]: https://github.com/RPTools/maptool/issues/1313
+[i1309]: https://github.com/RPTools/maptool/issues/1309
+[i1300]: https://github.com/RPTools/maptool/issues/1300
+[i1299]: https://github.com/RPTools/maptool/issues/1299
+[i1292]: https://github.com/RPTools/maptool/issues/1292
+[i1288]: https://github.com/RPTools/maptool/issues/1288
+[i1284]: https://github.com/RPTools/maptool/issues/1284
+[i1278]: https://github.com/RPTools/maptool/issues/1278
+[i1271]: https://github.com/RPTools/maptool/issues/1271
+[i1270]: https://github.com/RPTools/maptool/issues/1270
+[i1269]: https://github.com/RPTools/maptool/issues/1269
+[i1268]: https://github.com/RPTools/maptool/issues/1268
+[i1267]: https://github.com/RPTools/maptool/issues/1267
 [i1253]: https://github.com/RPTools/maptool/issues/1253
 [i1243]: https://github.com/RPTools/maptool/issues/1243
 [i1236]: https://github.com/RPTools/maptool/issues/1236
@@ -38,16 +133,41 @@ Maptool 1.6.0
 [i1228]: https://github.com/RPTools/maptool/issues/1228
 [i1225]: https://github.com/RPTools/maptool/issues/1225
 [i1219]: https://github.com/RPTools/maptool/issues/1219
+[i1218]: https://github.com/RPTools/maptool/issues/1218
+[i1217]: https://github.com/RPTools/maptool/issues/1217
 [i1216]: https://github.com/RPTools/maptool/issues/1216
+[i1215]: https://github.com/RPTools/maptool/issues/1215
 [i1210]: https://github.com/RPTools/maptool/issues/1210
 [i1206]: https://github.com/RPTools/maptool/issues/1206
 [i1204]: https://github.com/RPTools/maptool/issues/1204
 [i1189]: https://github.com/RPTools/maptool/issues/1189
 [i1107]: https://github.com/RPTools/maptool/issues/1107
+[i1092]: https://github.com/RPTools/maptool/issues/1092
+[i1049]: https://github.com/RPTools/maptool/issues/1049
+[i979]: https://github.com/RPTools/maptool/issues/979
 [i972]: https://github.com/RPTools/maptool/issues/972
 [i921]: https://github.com/RPTools/maptool/issues/921
 [i891]: https://github.com/RPTools/maptool/issues/891
+[i650]: https://github.com/RPTools/maptool/issues/650
+[i643]: https://github.com/RPTools/maptool/issues/643
+[i616]: https://github.com/RPTools/maptool/issues/616
+[i472]: https://github.com/RPTools/maptool/issues/472
 [i221]: https://github.com/RPTools/maptool/issues/221
+[i198]: https://github.com/RPTools/maptool/issues/198
+
+
+Maptool 1.5.14
+=====
+**Highlights**
+- Bug fix release.
+
+**Bug Fixes**
+- [#1326][i1326] `json.path.read()` was turning numbers into strings when using the max, min, avg, length, sum and stddev path functions. Fixed.
+- [#1300][i1300] Several bugs with `copyTokens()` when used with/without updates parameter fixed.
+
+[i1326]: https://github.com/RPTools/maptool/issues/1326
+[i1300]: https://github.com/RPTools/maptool/issues/1300
+
 
 Maptool 1.5.13
 =====

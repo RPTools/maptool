@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,16 +53,7 @@ import java.util.List;
 import java.util.Locale;
 import javax.imageio.ImageIO;
 import javax.imageio.spi.IIORegistry;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
-import javax.swing.ToolTipManager;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import net.rptools.clientserver.hessian.client.ClientConnection;
 import net.rptools.lib.BackupManager;
@@ -676,11 +666,7 @@ public class MapTool {
     AppSetup.install();
 
     // Clean up after ourselves
-    try {
-      FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
-    } catch (IOException ioe) {
-      MapTool.showError("While initializing (cleaning tmpdir)", ioe);
-    }
+    FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
     // We'll manage our own images
     ImageIO.setUseCache(false);
 
@@ -1003,6 +989,8 @@ public class MapTool {
     AssetManager.updateRepositoryList();
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
+    // overlay vanishes after campaign change
+    MapTool.getFrame().getOverlayPanel().removeAllOverlays();
     UserDefinedMacroFunctions.getInstance().loadCampaignLibFunctions();
   }
 
@@ -1168,8 +1156,7 @@ public class MapTool {
     MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.server);
   }
 
-  public static void createConnection(String host, int port, Player player)
-      throws UnknownHostException, IOException {
+  public static void createConnection(String host, int port, Player player) throws IOException {
     MapTool.player = player;
     MapTool.getFrame().getCommandPanel().setIdentityName(null);
 
@@ -1738,6 +1725,7 @@ public class MapTool {
         UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
         menuBar = new AppMenuBar();
         OSXAdapter.macOSXicon();
+        loadTheme();
       }
       // If running on Windows based OS, CJK font is broken when using TinyLAF.
       // else if (WINDOWS) {
@@ -1746,29 +1734,9 @@ public class MapTool {
       // }
       else {
         UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+        loadTheme();
         menuBar = new AppMenuBar();
       }
-      // After the TinyLAF library is initialized, look to see if there is a Default.theme
-      // in our AppHome directory and load it if there is. Unfortunately, changing the
-      // search path for the default theme requires subclassing TinyLAF and because
-      // we have both the original and a Mac version that gets cumbersome. (Really
-      // the Mac version should use the default and then install the keystroke differences
-      // but what we have works and I'm loathe to go playing with it at 1.3b87 -- yes, 87!)
-      File f2 = AppUtil.getThemeFile(AppUtil.getThemeName());
-      // File f = AppUtil.getAppHome("config");
-      // if (f.exists()) {
-      // File f2 = new File(f, "Default.theme");
-      if (f2.exists()) {
-        if (Theme.loadTheme(f2)) {
-          // re-install the Tiny Look and Feel
-          UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
-
-          // Update the ComponentUIs for all Components. This
-          // needs to be invoked for all windows.
-          // SwingUtilities.updateComponentTreeUI(rootComponent);
-        }
-      }
-      // }
 
       com.jidesoft.utils.Lm.verifyLicense(
           "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
@@ -1847,5 +1815,31 @@ public class MapTool {
           }
         });
     // new Thread(new HeapSpy()).start();
+  }
+
+  private static void loadTheme()
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+          UnsupportedLookAndFeelException {
+    // After the TinyLAF library is initialized, look to see if there is a Default.theme
+    // in our AppHome directory and load it if there is. Unfortunately, changing the
+    // search path for the default theme requires subclassing TinyLAF and because
+    // we have both the original and a Mac version that gets cumbersome. (Really
+    // the Mac version should use the default and then install the keystroke differences
+    // but what we have works and I'm loathe to go playing with it at 1.3b87 -- yes, 87!)
+    File f2 = AppUtil.getThemeFile(AppUtil.getThemeName());
+    // File f = AppUtil.getAppHome("config");
+    // if (f.exists()) {
+    // File f2 = new File(f, "Default.theme");
+    if (f2.exists()) {
+      if (Theme.loadTheme(f2)) {
+        // re-install the Tiny Look and Feel
+        UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+
+        // Update the ComponentUIs for all Components. This
+        // needs to be invoked for all windows.
+        // SwingUtilities.updateComponentTreeUI(rootWindow);
+      }
+    }
+    // }
   }
 }

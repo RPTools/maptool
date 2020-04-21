@@ -14,117 +14,88 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
-import java.awt.*;
 import java.awt.event.ActionListener;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.input.KeyCode;
+import javafx.scene.input.*;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.*;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javax.swing.*;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.functions.MacroLinkFunction;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.TextMessage;
-import net.rptools.parser.ParserException;
-import net.sf.json.JSONObject;
-import netscape.javascript.JSObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.w3c.dom.*;
-import org.w3c.dom.events.EventListener;
-import org.w3c.dom.events.EventTarget;
-import org.w3c.dom.html.*;
 
 /** Class handles JFXPanel that contains a WebView that can display HTML5. */
 public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
-  /** The logger. */
-  private static final Logger log = LogManager.getLogger(HTMLJFXPanel.class);
+  /** The WebView that displays HTML5. */
+  HTMLWebViewManager webViewManager;
 
-  /** The action listeners for the container. */
-  private ActionListener actionListeners;
+  /** Key adapter to block key presses from affected the rest of MapTool. */
+  private static final KeyAdapter keyAdapter;
 
-  /** The WebEngine of the WebView. */
-  private WebEngine webEngine;
+  static {
+    keyAdapter =
+        new KeyAdapter() {
+          private void keyBlock(KeyEvent e) {
+            e.consume();
+          }
 
-  /** The bridge from Javascript to Java. */
-  private static final JavaBridge bridge = new JavaBridge();
+          @Override
+          public void keyTyped(KeyEvent e) {
+            keyBlock(e);
+          }
 
-  /** Represents a bridge from Javascript to Java. */
-  public static class JavaBridge {
-    /** Name of the Bridge. */
-    private static final String NAME = "MapTool";
-    /**
-     * Display a self-only message in the chat window.
-     *
-     * @param text the message to display
-     */
-    public void log(String text) {
-      MapTool.addMessage(TextMessage.me(null, text));
-    }
+          @Override
+          public void keyPressed(KeyEvent e) {
+            keyBlock(e);
+          }
+
+          @Override
+          public void keyReleased(KeyEvent e) {
+            keyBlock(e);
+          }
+        };
   }
-
-  /** Meta-tag that blocks external file access. */
-  private static final String BLOCK_EXT_FILES =
-      "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src asset:; style-src 'unsafe-inline'; script-src 'unsafe-inline' 'unsafe-eval'\">\n";
-
-  /**
-   * The default CSS to apply before all others. %d is to be replaced by
-   * AppPreferences.getFontSize().
-   */
-  private static final String DEFAULT_CSS =
-      "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8}"
-          + "div {margin-bottom: 5px}"
-          + "span.roll {background:#efefef}";
-
-  /** JS that directs the console.log function to the Java bridge function "log". */
-  private static final String REPLACE_LOG_SCRIPT =
-      "console.log = function(message){" + JavaBridge.NAME + ".log(message);};";
 
   /**
    * Creates a new HTMLJFXPanel.
    *
    * @param container The container that will hold the HTML panel.
    */
-  HTMLJFXPanel(final HTMLPanelContainer container) {
-    Platform.runLater(
-        () -> {
-          WebView webView = new WebView();
-          webView.setContextMenuEnabled(false); // disable "reload' right click menu.
-          webEngine = webView.getEngine();
-          webEngine.getLoadWorker().stateProperty().addListener(this::changed);
+  HTMLJFXPanel(final HTMLPanelContainer container, HTMLWebViewManager webViewManager) {
+    this.webViewManager = webViewManager;
+    Platform.runLater(() -> setupScene(container, new WebView()));
+    if (container != null) {
+      // Block key presses from affected the rest of MapTool. Fixes #1614.
+      addKeyListener(keyAdapter);
+    }
+  }
 
-          // For alert / confirm / prompt JS events.
-          webEngine.setOnAlert(HTMLJFXPanel::showAlert);
-          webEngine.setConfirmHandler(HTMLJFXPanel::showConfirm);
-          webEngine.setPromptHandler(HTMLJFXPanel::showPrompt);
-          webEngine.setCreatePopupHandler(HTMLJFXPanel::showPopup);
-          webEngine.setOnError(HTMLJFXPanel::showError);
+  /**
+   * Setup the JavaFX scene that will hold the WebView
+   *
+   * @param container the container to close on escape
+   */
+  void setupScene(HTMLPanelContainer container, WebView webview) {
+    webViewManager.setupWebView(webview);
 
-          StackPane root = new StackPane(); // VBox would create empty space at bottom on resize
-          root.getChildren().add(webView);
-          Scene scene = new Scene(root);
+    StackPane root = new StackPane(); // VBox would create empty space at bottom on resize
+    root.setStyle("-fx-background-color: rgba(0, 0, 0, 0);"); // set stackpane transparent
+    root.setPickOnBounds(false);
+    root.getChildren().add(webViewManager.getWebView());
+    Scene scene = new Scene(root);
+    scene.setFill(javafx.scene.paint.Color.TRANSPARENT); // set scene transparent
 
-          // ESCAPE closes the window.
-          scene.setOnKeyPressed(
-              e -> {
-                if (e.getCode() == KeyCode.ESCAPE) {
-                  SwingUtilities.invokeLater(container::closeRequest);
-                }
-              });
-          this.setScene(scene); // set the scene on the JFXPanel
-        });
+    // ESCAPE closes the window.
+    if (container != null) {
+      scene.setOnKeyPressed(
+          e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+              SwingUtilities.invokeLater(container::closeRequest);
+            }
+          });
+    }
+    this.setScene(scene); // set the scene on the JFXPanel
   }
 
   @Override
@@ -139,330 +110,16 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
 
   @Override
   public void addActionListener(ActionListener listener) {
-    actionListeners = AWTEventMulticaster.add(actionListeners, listener);
+    webViewManager.addActionListener(listener);
   }
 
   @Override
   public void flush() {
-    Platform.runLater(
-        () -> {
-          // Delete cache for navigate back
-          webEngine.load("about:blank");
-          // Delete cookies
-          java.net.CookieHandler.setDefault(new java.net.CookieManager());
-        });
+    Platform.runLater(() -> webViewManager.flush());
   }
 
   @Override
-  public void updateContents(final String html) {
-    if (log.isDebugEnabled()) {
-      log.debug("setting text in WebView: " + html);
-    }
-    Platform.runLater(
-        () -> {
-          webEngine.loadContent(BLOCK_EXT_FILES + HTMLPanelInterface.fixHTML(html));
-        });
-  }
-
-  /**
-   * Show an alert message.
-   *
-   * @param event the event of the alert
-   */
-  private static void showAlert(WebEvent<String> event) {
-    javafx.scene.control.Dialog<ButtonType> alert = new javafx.scene.control.Dialog<>();
-    alert.getDialogPane().setContentText(event.getData());
-    alert.getDialogPane().getButtonTypes().add(ButtonType.OK);
-    alert.showAndWait();
-  }
-
-  /**
-   * Show a confirmation box.
-   *
-   * @param message the message to display.
-   * @return boolean true if OK was pressed, false otherwise.
-   */
-  private static boolean showConfirm(String message) {
-    javafx.scene.control.Dialog<ButtonType> confirm = new javafx.scene.control.Dialog<>();
-    confirm.getDialogPane().setContentText(message);
-    confirm.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-    Optional<ButtonType> result = confirm.showAndWait();
-    return (result.isPresent() && result.get() == ButtonType.OK);
-  }
-
-  /**
-   * Shows a prompt for a value.
-   *
-   * @param promptData the promptData object holding the default value and text
-   * @return string holding the value entered by the user, or a null
-   */
-  private static String showPrompt(PromptData promptData) {
-    TextInputDialog dialog = new TextInputDialog(promptData.getDefaultValue());
-    dialog.setTitle(I18N.getText("lineParser.dialogTitleNoToken"));
-    dialog.setContentText(promptData.getMessage());
-    return dialog.showAndWait().orElse(null);
-  }
-
-  /**
-   * Shows a popup window.
-   *
-   * @param popupFeatures the popup features
-   * @return the webEngine of the popup
-   */
-  private static WebEngine showPopup(PopupFeatures popupFeatures) {
-    Stage stage = new Stage((StageStyle.UTILITY));
-    WebView webViewPopup = new WebView();
-    stage.setScene(new Scene(webViewPopup, 300, 300));
-    stage.show();
-    return webViewPopup.getEngine();
-  }
-
-  /**
-   * Shows an error message in the chat window.
-   *
-   * @param event the error event
-   */
-  private static void showError(WebErrorEvent event) {
-    MapTool.addMessage(TextMessage.me(null, event.getMessage()));
-  }
-
-  /**
-   * Check if the worker succeeded, then deal with the MapTool macro references and add event
-   * listeners for the buttons and hyperlinks.
-   *
-   * @param observable what is observed.
-   * @param oldState the previous state of the worker.
-   * @param newState the new state of the worker.
-   */
-  private void changed(
-      ObservableValue<? extends Worker.State> observable,
-      Worker.State oldState,
-      Worker.State newState) {
-
-    if (newState == Worker.State.SUCCEEDED) {
-      // Redirect console.log to the JavaBridge
-      JSObject window = (JSObject) webEngine.executeScript("window");
-      window.setMember(JavaBridge.NAME, bridge);
-      webEngine.executeScript(REPLACE_LOG_SCRIPT);
-
-      // Event listener for the href macro link clicks.
-      EventListener listenerA =
-          event -> {
-            if (log.isDebugEnabled()) {
-              log.debug(
-                  "Responding to hyperlink event: " + event.getType() + " " + event.toString());
-            }
-
-            final String href = ((Element) event.getCurrentTarget()).getAttribute("href");
-            if (href != null && !href.equals("")) {
-              String href2 = href.trim().toLowerCase();
-              if (href2.startsWith("macro")) {
-                // ran as macroLink;
-                SwingUtilities.invokeLater(() -> MacroLinkFunction.runMacroLink(href));
-              } else if (!href2.startsWith("#") && !href2.startsWith("javascript")) {
-                // non-macrolink, non-anchor link, non-javascript code
-                MapTool.showDocument(href); // show in usual browser
-              }
-            }
-            event.preventDefault(); // don't change webview
-          };
-      // Event listener for form submission.
-      EventListener listenerSubmit =
-          event -> {
-            getDataAndSubmit((HTMLFormElement) event.getCurrentTarget());
-          };
-
-      Document doc = webEngine.getDocument();
-      NodeList nodeList;
-
-      // Add default CSS as first element of the head tag
-      String strCSS = String.format(DEFAULT_CSS, AppPreferences.getFontSize());
-      Element styleNode = doc.createElement("style");
-      Text styleContent = doc.createTextNode(strCSS);
-      styleNode.appendChild(styleContent);
-      Node head = doc.getDocumentElement().getElementsByTagName("head").item(0);
-      Node nodeCSS = head.insertBefore(styleNode, head.getFirstChild());
-
-      // Deal with CSS and events of <link>.
-      nodeList = doc.getElementsByTagName("link");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        fixLink(nodeList.item(i).getAttributes(), nodeCSS, doc);
-      }
-
-      // Set the title if using <title>.
-      nodeList = doc.getElementsByTagName("title");
-      if (nodeList.getLength() > 0) {
-        doChangeTitle(nodeList.item(0).getTextContent());
-      }
-
-      // Handle the <meta> tags.
-      nodeList = doc.getElementsByTagName("meta");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        handleMetaTag((Element) nodeList.item(i));
-      }
-
-      // Add event handlers for hyperlinks.
-      nodeList = doc.getElementsByTagName("a");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        EventTarget node = (EventTarget) nodeList.item(i);
-        node.addEventListener("click", listenerA, false);
-      }
-
-      // Set the "submit" handler to get the data on submission.
-      nodeList = doc.getElementsByTagName("form");
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        Element node = (Element) nodeList.item(i);
-        ((EventTarget) node).addEventListener("submit", listenerSubmit, false);
-      }
-    }
-  }
-
-  /**
-   * Handle a request to register a macro callback.
-   *
-   * @param type The type of event.
-   * @param link The link to the macro.
-   */
-  private void doRegisterMacro(String type, String link) {
-    if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("registerMacro event: type='" + type + "' link='" + link + "'");
-      }
-      actionListeners.actionPerformed(
-          new HTMLActionEvent.RegisterMacroActionEvent(this, type, link));
-    }
-  }
-
-  /**
-   * Handles the CSS and the events of a link. For a stylesheet link with a macro location as a
-   * href, the CSS sheet is attached at the end of the refNode. If the href instead starts with
-   * "macro", register the href as a callback macro.
-   *
-   * @param attr the attributes of the link tag
-   * @param refNode the node to append the new CSS rules to
-   * @param doc the document to update with the modified link
-   */
-  private void fixLink(NamedNodeMap attr, Node refNode, Document doc) {
-    Node rel = attr.getNamedItem("rel");
-    Node type = attr.getNamedItem("type");
-    Node href = attr.getNamedItem("href");
-
-    if (rel != null && type != null && href != null) {
-      String content = href.getTextContent();
-      if (rel.getTextContent().equalsIgnoreCase("stylesheet")) {
-        String[] vals = content.split("@");
-        if (vals.length != 2) {
-          return;
-        }
-        try {
-          String cssText = MapTool.getParser().getTokenLibMacro(vals[0], vals[1]);
-          Element styleNode = doc.createElement("style");
-          Text styleContent = doc.createTextNode(cssText);
-          styleNode.appendChild(styleContent);
-          // Append the style sheet node to the refNode
-          refNode.appendChild(styleNode);
-        } catch (ParserException e) {
-          // Do nothing
-        }
-      } else if (type.getTextContent().equalsIgnoreCase("macro")) {
-        if (rel.getTextContent().equalsIgnoreCase("onChangeImpersonated")) {
-          doRegisterMacro("onChangeImpersonated", content);
-        } else if (rel.getTextContent().equalsIgnoreCase("onChangeSelection")) {
-          doRegisterMacro("onChangeSelection", content);
-        } else if (rel.getTextContent().equalsIgnoreCase("onChangeToken")) {
-          doRegisterMacro("onChangeToken", content);
-        }
-      }
-    }
-  }
-
-  /**
-   * Handle a change in title.
-   *
-   * @param title The title to change to.
-   */
-  private void doChangeTitle(String title) {
-    if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("changeTitle event: " + title);
-      }
-      actionListeners.actionPerformed(new HTMLActionEvent.ChangeTitleActionEvent(this, title));
-    }
-  }
-
-  /**
-   * Handle any meta tag information in the html.
-   *
-   * @param element the element of the meta tag.
-   */
-  private void handleMetaTag(Element element) {
-    String name = element.getAttribute("name");
-    String content = element.getAttribute("content");
-
-    if (actionListeners != null && name != null && content != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("metaTag found: name='" + name + "' content='" + content + "'");
-      }
-      actionListeners.actionPerformed(new HTMLActionEvent.MetaTagActionEvent(this, name, content));
-    }
-  }
-
-  /**
-   * Get the data of the form and submit it as a json.
-   *
-   * @param form the form to submit.
-   */
-  private void getDataAndSubmit(HTMLFormElement form) {
-    JSONObject jobj = new JSONObject();
-    final HTMLCollection collection = form.getElements();
-    for (int i = 0; i < collection.getLength(); i++) {
-      String name = null, value = null;
-      if (collection.item(i) instanceof HTMLInputElement) {
-        HTMLInputElement element = (HTMLInputElement) collection.item(i);
-        String type = element.getType().toLowerCase();
-        if (type.equals("checkbox") || type.equals("radio")) {
-          if (element.getChecked()) {
-            name = element.getName();
-            value = element.getValue();
-          }
-        } else {
-          name = element.getName();
-          value = element.getValue();
-        }
-      } else if (collection.item(i) instanceof HTMLSelectElement) {
-        HTMLSelectElement element = (HTMLSelectElement) collection.item(i);
-        name = element.getName();
-        value = element.getValue();
-      } else if (collection.item(i) instanceof HTMLTextAreaElement) {
-        HTMLTextAreaElement element = (HTMLTextAreaElement) collection.item(i);
-        name = element.getName();
-        value = element.getValue();
-      }
-      if (name != null) jobj.put(name, value == null ? "" : value);
-    }
-
-    String action = form.getAction();
-    String data = URLEncoder.encode(jobj.toString(), StandardCharsets.UTF_8);
-
-    doSubmit("json", action, data);
-  }
-
-  /**
-   * Handle a submit.
-   *
-   * @param method The method of the submit.
-   * @param action The action for the submit.
-   * @param data The data from the form.
-   */
-  private void doSubmit(String method, String action, String data) {
-    if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug(
-            "submit event: method='" + method + "' action='" + action + "' data='" + data + "'");
-      }
-      actionListeners.actionPerformed(
-          new HTMLActionEvent.FormActionEvent(this, method, action, data));
-    }
+  public void updateContents(final String html, boolean scrollReset) {
+    Platform.runLater(() -> webViewManager.updateContents(html, scrollReset));
   }
 }

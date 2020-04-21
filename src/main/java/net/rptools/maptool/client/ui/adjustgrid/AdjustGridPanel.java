@@ -43,7 +43,7 @@ public class AdjustGridPanel extends JComponent
   private static enum Direction {
     Increase,
     Decrease
-  };
+  }
 
   public static final String PROPERTY_GRID_OFFSET_X = "gridOffsetX";
   public static final String PROPERTY_GRID_OFFSET_Y = "gridOffsetY";
@@ -398,6 +398,10 @@ public class AdjustGridPanel extends JComponent
   // MOUSE WHEEL LISTENER
   @Override
   public void mouseWheelMoved(MouseWheelEvent e) {
+    // Fix for hi-res mice
+    if (e.getWheelRotation() == 0) {
+      return;
+    }
     if (SwingUtil.isControlDown(e)) {
 
       double oldScale = scale.getScale();

@@ -53,6 +53,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
@@ -224,11 +225,12 @@ public class PreferencesDialog extends JDialog {
   private boolean jvmValuesChanged = false;
 
   public PreferencesDialog() {
-    super(MapTool.getFrame(), "Preferences", true);
+    super(MapTool.getFrame(), I18N.getString("Label.preferences"), true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-    FormPanel panel = new FormPanel("net/rptools/maptool/client/ui/forms/preferencesDialog.xml");
+    FormPanel panel =
+        new FormPanelI18N("net/rptools/maptool/client/ui/forms/preferencesDialog.xml");
 
     JButton okButton = (JButton) panel.getButton("okButton");
     getRootPane().setDefaultButton(okButton);

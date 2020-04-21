@@ -85,9 +85,19 @@ public abstract class DefaultTool extends Tool
   public void mousePressed(MouseEvent e) {
     // Potential map dragging
     if (SwingUtilities.isRightMouseButton(e)) {
-      dragStartX = e.getX();
-      dragStartY = e.getY();
+      setDragStart(e.getX(), e.getY());
     }
+  }
+
+  /**
+   * Set the location of the start of the drag
+   *
+   * @param x the x coordinate of the drag start
+   * @param y the y coordinate of the drag start
+   */
+  public void setDragStart(int x, int y) {
+    dragStartX = x;
+    dragStartY = y;
   }
 
   @Override
@@ -97,6 +107,11 @@ public abstract class DefaultTool extends Tool
     }
     // Cleanup
     isDraggingMap = false;
+  }
+
+  /** @param isDraggingMap whether the user drags the map */
+  void setDraggingMap(boolean isDraggingMap) {
+    this.isDraggingMap = isDraggingMap;
   }
 
   /*
@@ -167,8 +182,7 @@ public abstract class DefaultTool extends Tool
         isDraggingMap = true;
       }
 
-      dragStartX = mX;
-      dragStartY = mY;
+      setDragStart(mX, mY);
 
       long now = System.currentTimeMillis();
       if (now - lastMoveRedraw > REDRAW_DELAY) {

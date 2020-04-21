@@ -86,25 +86,11 @@ public class MapToolEventQueue extends EventQueue {
         }
       } else if (event instanceof MouseWheelEvent) {
         MouseWheelEvent mwe = (MouseWheelEvent) event;
-        if (mwe.isShiftDown() && MapToolEventQueue.shiftState == 0) {
-          int all_mods = mwe.getModifiersEx() & MapToolEventQueue.ALL_MODIFIERS_EXC_SHIFT;
-          event =
-              new MouseWheelEvent(
-                  mwe.getComponent(),
-                  mwe.getID(),
-                  mwe.getWhen(),
-                  all_mods,
-                  mwe.getX(),
-                  mwe.getY(),
-                  mwe.getXOnScreen(),
-                  mwe.getYOnScreen(),
-                  1,
-                  mwe.isPopupTrigger(),
-                  mwe.getScrollType(),
-                  mwe.getScrollAmount(),
-                  mwe.getWheelRotation(),
-                  mwe.getPreciseWheelRotation());
-          // log.info("shiftModifier forced off");
+        if (mwe.isShiftDown() && MapToolEventQueue.shiftState != 1) {
+          // issue 1317: ignore ALL horizontal movement, *even if* the physical Shift is held down.
+          // This means only vertical movement will be recognized and the user will have
+          // to hold down the Shift key to effect it.
+          return;
         }
       }
       super.dispatchEvent(event);

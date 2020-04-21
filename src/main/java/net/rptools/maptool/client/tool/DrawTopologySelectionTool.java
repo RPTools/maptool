@@ -14,12 +14,16 @@
  */
 package net.rptools.maptool.client.tool;
 
-import java.awt.event.ActionEvent;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Zone.TopologyMode;
 
 /**
@@ -28,11 +32,15 @@ import net.rptools.maptool.model.Zone.TopologyMode;
  */
 public class DrawTopologySelectionTool extends DefaultTool {
 
+  /** The instance. Used to update the button when the ZoneRenderer is changed. */
+  private static DrawTopologySelectionTool drawTopologySelectionTool;
+
   private ImageIcon vblImageIcon = new ImageIcon();
   private ImageIcon mblImageIcon = new ImageIcon();
   private ImageIcon combinedImageIcon = new ImageIcon();
 
   public DrawTopologySelectionTool() {
+    drawTopologySelectionTool = this;
     try {
       vblImageIcon =
           new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/vbl-only.png"));
@@ -43,59 +51,99 @@ public class DrawTopologySelectionTool extends DefaultTool {
 
       setIcon(vblImageIcon);
       setSelectedIcon(combinedImageIcon);
-
-      switch (AppPreferences.getTopologyDrawingMode()) {
-        case VBL:
-          setActionCommand(TopologyMode.VBL.toString());
-          setIcon(vblImageIcon);
-          break;
-        case MBL:
-          setActionCommand(TopologyMode.MBL.toString());
-          setIcon(mblImageIcon);
-          break;
-        case COMBINED:
-          setActionCommand(TopologyMode.VBL.toString());
-          setIcon(vblImageIcon);
-          setSelected(true);
-          break;
-      }
+      updateIcon(AppPreferences.getTopologyDrawingMode());
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
+
+    // Mouse listener added to manually handle mouse events
+    super.addMouseListener(
+        new MouseAdapter() {
+          @Override
+          public void mouseEntered(MouseEvent e) {
+            if (isAvailable()) {
+              getModel().setArmed(true); // change icon to "pressed down"
+            }
+            ToolTipManager.sharedInstance().mouseEntered(e); // display the tooltip
+          }
+
+          @Override
+          public void mouseExited(MouseEvent e) {
+            getModel().setArmed(false); // undo "pressed down" effect
+            ToolTipManager.sharedInstance().mouseExited(e); // hide the tooltip
+          }
+
+          /**
+           * When the mouse is pressed, manually changes the selected status and icon. This approach
+           * is recommended by Dr. Heinz M. Kabutz to handle tri-state buttons.
+           *
+           * @param e the mouse event
+           */
+          @Override
+          public void mousePressed(MouseEvent e) {
+            if (SwingUtilities.isLeftMouseButton(e) && isAvailable()) {
+              nextMode();
+            }
+          }
+        });
   }
 
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    TopologyMode currentTopologyMode;
+  public static DrawTopologySelectionTool getInstance() {
+    return drawTopologySelectionTool;
+  }
 
-    // Not a huge fan of this code but needed a TriStateButton and TriStateCheckbox from JIDE
-    // doesn't handle custom images very well. Also, trying to avoid JIDE were possible
-    // in case we move to FX in the future.
+  /** Set the Selection Tool to the next mode (Combined -> MBL -> VBL -> Combined). */
+  public void nextMode() {
     if (isSelected()) {
-      if (getActionCommand().equals(TopologyMode.MBL.toString())) {
-        currentTopologyMode = TopologyMode.VBL;
-        setActionCommand(TopologyMode.VBL.toString());
-        setSelected(false);
-        setIcon(vblImageIcon);
-      } else {
-        currentTopologyMode = TopologyMode.COMBINED;
-      }
+      // If Combined, switch to MBL
+      setMode(TopologyMode.MBL);
     } else {
-      // Toggle unselected state between VBL/MBL
-      if (getActionCommand().equals(TopologyMode.VBL.toString())) {
-        currentTopologyMode = TopologyMode.MBL;
-        setActionCommand(TopologyMode.MBL.toString());
-        setIcon(mblImageIcon);
+      if (getActionCommand().equals(TopologyMode.MBL.toString())) {
+        // If MBL, switch to VBL
+        setMode(TopologyMode.VBL);
       } else {
-        currentTopologyMode = TopologyMode.VBL;
-        setActionCommand(TopologyMode.VBL.toString());
-        setIcon(vblImageIcon);
+        // If VBL, switch to Combined
+        setMode(TopologyMode.COMBINED);
       }
     }
+  }
 
-    AppPreferences.setTopologyDrawingMode(currentTopologyMode);
+  /**
+   * Sets the button and AppPreferences to the TopologyMode
+   *
+   * @param topologyMode the mode. If null, resets to default.
+   */
+  public void setMode(TopologyMode topologyMode) {
+    AppPreferences.setTopologyDrawingMode(topologyMode);
+    if (topologyMode == null) {
+      topologyMode = AppPreferences.getTopologyDrawingMode();
+    }
 
-    MapTool.getFrame().getCurrentZoneRenderer().getZone().setTopologyMode(currentTopologyMode);
+    updateIcon(topologyMode);
+    setActionCommand(topologyMode.toString());
+
+    ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+    // Check if there is a map. Fix #1605
+    if (zr != null) {
+      zr.getZone().setTopologyMode(topologyMode);
+    }
+  }
+
+  /**
+   * Updates the icon according to the topology mode.
+   *
+   * @param topologyMode the topology mode
+   */
+  private void updateIcon(TopologyMode topologyMode) {
+    if (topologyMode == TopologyMode.VBL) {
+      setSelected(false);
+      setIcon(vblImageIcon);
+    } else if (topologyMode == TopologyMode.MBL) {
+      setSelected(false);
+      setIcon(mblImageIcon);
+    } else if (topologyMode == TopologyMode.COMBINED) {
+      setSelected(true);
+    }
   }
 
   @Override
@@ -117,4 +165,12 @@ public class DrawTopologySelectionTool extends DefaultTool {
   public boolean hasGroup() {
     return false;
   }
+
+  /**
+   * Prevents the addition of any MouseListener.
+   *
+   * @param l the MouseListener to ignore
+   */
+  @Override
+  public void addMouseListener(MouseListener l) {}
 }
