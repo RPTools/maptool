@@ -51,6 +51,7 @@ public interface ServerCommand {
     removeAsset,
     putToken,
     removeToken,
+    removeTokens,
     updateTokenProperty,
     draw,
     updateDrawing,
@@ -140,7 +141,21 @@ public interface ServerCommand {
 
   public void putToken(GUID zoneGUID, Token token);
 
+  /**
+   * Removes a token from a zone.
+   *
+   * @param zoneGUID the ID of the zone
+   * @param tokenGUID the ID of the token
+   */
   public void removeToken(GUID zoneGUID, GUID tokenGUID);
+
+  /**
+   * Removes a list of tokens from a zone.
+   *
+   * @param zoneGUID the ID of the zone
+   * @param tokenGUIDs the list of IDs of the tokens
+   */
+  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs);
 
   public void updateTokenProperty(
       GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters);
