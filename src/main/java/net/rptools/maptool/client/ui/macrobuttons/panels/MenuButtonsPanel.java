@@ -55,11 +55,12 @@ public class MenuButtonsPanel extends JPanel {
     label.addMouseListener(
         new MouseAdapter() {
           public void mouseReleased(MouseEvent event) {
-            ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-            renderer.selectTokens(
-                new Rectangle(
-                    renderer.getX(), renderer.getY(), renderer.getWidth(), renderer.getHeight()));
-            renderer.updateAfterSelection();
+            ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+            // Check if there is a map. Fix #1605
+            if (zr != null) {
+              zr.selectTokens(new Rectangle(zr.getX(), zr.getY(), zr.getWidth(), zr.getHeight()));
+              zr.updateAfterSelection();
+            }
           }
         });
     label.setToolTipText(I18N.getText("panel.Selected.tooltip.selectAll"));
@@ -79,8 +80,10 @@ public class MenuButtonsPanel extends JPanel {
         new MouseAdapter() {
           public void mouseReleased(MouseEvent event) {
             ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-            renderer.clearSelectedTokens();
-            renderer.updateAfterSelection();
+            if (renderer != null) {
+              renderer.clearSelectedTokens();
+              renderer.updateAfterSelection();
+            }
           }
         });
     label3.setToolTipText(I18N.getText("panel.Selected.tooltip.deslectAll"));
@@ -99,7 +102,10 @@ public class MenuButtonsPanel extends JPanel {
     label1.addMouseListener(
         new MouseAdapter() {
           public void mouseReleased(MouseEvent event) {
-            MapTool.getFrame().getCurrentZoneRenderer().undoSelectToken();
+            ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+            if (zr != null) {
+              zr.undoSelectToken();
+            }
           }
         });
     label1.setToolTipText(I18N.getText("panel.Selected.tooltip.revertToPrevious"));
@@ -132,7 +138,10 @@ public class MenuButtonsPanel extends JPanel {
     label1.addMouseListener(
         new MouseAdapter() {
           public void mouseReleased(MouseEvent event) {
-            MapTool.getFrame().getCurrentZoneRenderer().cycleSelectedToken(1);
+            ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+            if (zr != null) {
+              zr.cycleSelectedToken(1);
+            }
           }
         });
     label1.setToolTipText(I18N.getText("panel.Selected.tooltip.next"));
@@ -151,7 +160,10 @@ public class MenuButtonsPanel extends JPanel {
     label1.addMouseListener(
         new MouseAdapter() {
           public void mouseReleased(MouseEvent event) {
-            MapTool.getFrame().getCurrentZoneRenderer().cycleSelectedToken(-1);
+            ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+            if (zr != null) {
+              zr.cycleSelectedToken(-1);
+            }
           }
         });
     label1.setToolTipText(I18N.getText("panel.Selected.tooltip.previous"));

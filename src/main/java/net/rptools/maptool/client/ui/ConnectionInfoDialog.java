@@ -87,7 +87,7 @@ public class ConnectionInfoDialog extends JDialog {
 
     nameLabel.setText(name);
     localAddressLabel.setText(localAddress);
-    externalAddressLabel.setText("Discovering...");
+    externalAddressLabel.setText(I18N.getText("ConnectionInfoDialog.discovering"));
     portLabel.setText(port);
 
     JButton okButton = (JButton) panel.getButton("okButton");
