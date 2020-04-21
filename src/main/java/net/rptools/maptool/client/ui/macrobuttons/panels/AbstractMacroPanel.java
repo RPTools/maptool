@@ -38,7 +38,6 @@ import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.Event;
 
 @SuppressWarnings("serial")
 public abstract class AbstractMacroPanel extends JPanel
@@ -97,6 +96,7 @@ public abstract class AbstractMacroPanel extends JPanel
     this.panelClass = panelClass;
   }
 
+  /** @return the token on the current map corresponding to the stored token id. */
   public Token getToken() {
     if (this.tokenId == null) {
       return null;
@@ -188,12 +188,8 @@ public abstract class AbstractMacroPanel extends JPanel
 
   // currently only used for Impersonate/Selection panels to refresh when the token is removed or a
   // macro changes
-  public void modelChanged(ModelChangeEvent event) {
-    if (event.eventType == Token.ChangeEvent.MACRO_CHANGED
-        || event.eventType == Event.TOKEN_REMOVED) {
-      reset();
-    }
-  }
+  @Override
+  public void modelChanged(ModelChangeEvent event) {}
 
   public void handleAppEvent(AppEvent event) {
     Zone oldZone = (Zone) event.getOldValue();
