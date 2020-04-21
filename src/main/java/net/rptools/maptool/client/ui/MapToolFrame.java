@@ -104,6 +104,7 @@ import net.rptools.maptool.client.swing.ProgressStatusBar;
 import net.rptools.maptool.client.swing.SpacerStatusBar;
 import net.rptools.maptool.client.swing.StatusPanel;
 import net.rptools.maptool.client.swing.ZoomStatusBar;
+import net.rptools.maptool.client.tool.DrawTopologySelectionTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
@@ -784,7 +785,31 @@ public class MapToolFrame extends DefaultDockableHolder
     return lookupTablePanel;
   }
 
-  public EditTokenDialog getTokenPropertiesDialog() {
+  /**
+   * Shows the token properties dialog, and saves the token.
+   *
+   * @param token the token to edit
+   * @param zr the ZoneRenderer of the token
+   */
+  public void showTokenPropertiesDialog(Token token, ZoneRenderer zr) {
+    if (token != null && zr != null) {
+      if (MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().isTokenEditorLocked()) {
+        EditTokenDialog dialog = MapTool.getFrame().getTokenPropertiesDialog();
+        dialog.showDialog(token);
+        if (dialog.isTokenSaved()) {
+          // Checks if the map still exists. Fixes #1646.
+          if (getZoneRenderers().contains(zr) && zr.getZone().getToken(token.getId()) != null) {
+            MapTool.serverCommand().putToken(zr.getZone().getId(), token);
+            MapTool.getFrame().resetTokenPanels();
+            zr.repaint();
+            zr.flush(token);
+          }
+        }
+      }
+    }
+  }
+
+  private EditTokenDialog getTokenPropertiesDialog() {
     if (tokenPropertiesDialog == null) {
       tokenPropertiesDialog = new EditTokenDialog();
     }
@@ -1625,6 +1650,8 @@ public class MapToolFrame extends DefaultDockableHolder
       MapTool.getEventDispatcher()
           .fireEvent(MapTool.ZoneEvent.Activated, this, null, renderer.getZone());
       renderer.requestFocusInWindow();
+      // Updates the VBL/MBL button. Fixes #1642.
+      DrawTopologySelectionTool.getInstance().setMode(renderer.getZone().getTopologyMode());
     }
     AppActions.updateActions();
     repaint();
