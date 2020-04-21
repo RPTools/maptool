@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui;
 
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -22,11 +21,24 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.swing.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JSeparator;
+import javax.swing.JToggleButton;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppActions;
@@ -39,6 +51,7 @@ import net.rptools.maptool.client.MRUCampaignManager;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
 
@@ -132,6 +145,7 @@ public class AppMenuBar extends JMenuBar {
     menu.add(createQuickMapMenu());
     menu.add(new JMenuItem(AppActions.LOAD_MAP));
     menu.add(new JMenuItem(AppActions.SAVE_MAP_AS));
+    menu.add(new JMenuItem(AppActions.IMPORT_DUNGEON_DRAFT_MAP));
     menu.addSeparator();
 
     // MAP TOGGLES
@@ -148,11 +162,12 @@ public class AppMenuBar extends JMenuBar {
           public void itemStateChanged(ItemEvent e) {
             if (e.getStateChange() == ItemEvent.SELECTED) fowRevealToggleMenuItem.setEnabled(true);
             else {
-              MapTool.getFrame()
-                  .getCurrentZoneRenderer()
-                  .getZone()
-                  .setWaypointExposureToggle(false);
-              fowRevealToggleMenuItem.setEnabled(false);
+              ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+              // Check in case no map exists. Fix #1572.
+              if (zr != null) {
+                zr.getZone().setWaypointExposureToggle(false);
+                fowRevealToggleMenuItem.setEnabled(false);
+              }
             }
           }
         });
@@ -195,6 +210,7 @@ public class AppMenuBar extends JMenuBar {
     menu.add(new JMenuItem(AppActions.ENFORCE_ZONE));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_LINK_PLAYER_VIEW, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_MOVEMENT_LOCK, menu));
+    menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_TOKEN_EDITOR_LOCK, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_ZOOM_LOCK, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_ENFORCE_NOTIFICATION, menu));
 
@@ -467,7 +483,10 @@ public class AppMenuBar extends JMenuBar {
 
     menu.addSeparator();
 
-    for (MTFrame frame : MapToolFrame.MTFrame.values()) {
+    for (MTFrame frame :
+        Stream.of(MTFrame.values())
+            .sorted(Comparator.comparing(MTFrame::toString))
+            .collect(Collectors.toList())) {
       JCheckBoxMenuItem menuItem =
           new RPCheckBoxMenuItem(new AppActions.ToggleWindowAction(frame), menu);
       menu.add(menuItem);

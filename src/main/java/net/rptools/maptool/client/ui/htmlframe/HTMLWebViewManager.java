@@ -70,10 +70,18 @@ public class HTMLWebViewManager {
   private boolean isFlushed = true;
 
   /** The bridge from Javascript to Java. */
-  private static final JavaBridge bridge = new JavaBridge();
+  private final JavaBridge bridge = new JavaBridge();
+
+  // Event listener for the href macro link clicks.
+  private final EventListener listenerA = this::fixHref;
+  // Event listener for form submission.
+  private final EventListener listenerSubmit = this::getDataAndSubmit;
 
   /** Represents a bridge from Javascript to Java. */
-  public static class JavaBridge {
+  public class JavaBridge {
+    /** Magic value that window.status must take to initiate the bridge. */
+    public static final String BRIDGE_VALUE = "MY_INITIALIZING_VALUE";
+
     /** Name of the Bridge. */
     private static final String NAME = "MapTool";
     /**
@@ -83,6 +91,33 @@ public class HTMLWebViewManager {
      */
     public void log(String text) {
       MapTool.addMessage(TextMessage.me(null, text));
+    }
+
+    /**
+     * Receives a node sent by the JS Mutation Observer and attaches an event listener to it, if
+     * need be.
+     *
+     * @param object the node sent by the Mutation Observer
+     */
+    public void handleAddedNode(Object object) {
+      if (object instanceof EventTarget && object instanceof HTMLElement) {
+        addEventListener((EventTarget) object);
+      }
+    }
+  }
+
+  /**
+   * Add an event listener to Anchors, Areas, Forms, Buttons, and Inputs.
+   *
+   * @param target the target that an event listener might be attached to
+   */
+  private void addEventListener(EventTarget target) {
+    if (target instanceof HTMLAnchorElement || target instanceof HTMLAreaElement) {
+      target.addEventListener("click", listenerA, false);
+    } else if (target instanceof HTMLFormElement) {
+      target.addEventListener("submit", listenerSubmit, false);
+    } else if (target instanceof HTMLInputElement || target instanceof HTMLButtonElement) {
+      target.addEventListener("click", listenerSubmit, false);
     }
   }
 
@@ -110,6 +145,17 @@ public class HTMLWebViewManager {
   private static final String SCRIPT_REPLACE_SUBMIT =
       "HTMLFormElement.prototype.submit = function(){this.dispatchEvent(new Event('submit'));};";
 
+  /** JS to initialize the Java bridge. Needs to be the first script of the page. */
+  private static final String SCRIPT_BRIDGE =
+      String.format(
+          "<SCRIPT>window.status = '%s'; window.status = '';</SCRIPT>", JavaBridge.BRIDGE_VALUE);
+
+  /** JS adding Mutation Observer to the document, handle new nodes with handleAddedNode. */
+  private static final String SCRIPT_MUTATION_OBS =
+      "const maptool_observer = new MutationObserver(function(mutations, observer) {"
+          + "for(let mutation of mutations) {if (mutation.type === 'childList') {for (let i = 0; i < mutation.addedNodes.length; i++) {MapTool.handleAddedNode(mutation.addedNodes[i]);}}}});"
+          + "maptool_observer.observe(document.documentElement, { attributes: false, characterData: false, childList: true, subtree: true });";
+
   HTMLWebViewManager() {}
 
   /**
@@ -131,6 +177,9 @@ public class HTMLWebViewManager {
     webEngine.setPromptHandler(HTMLWebViewManager::showPrompt);
     webEngine.setCreatePopupHandler(HTMLWebViewManager::showPopup);
     webEngine.setOnError(HTMLWebViewManager::showError);
+
+    // Workaround to load Java Bridge before everything else.
+    webEngine.onStatusChangedProperty().set(this::setBridge);
   }
 
   public WebView getWebView() {
@@ -169,7 +218,26 @@ public class HTMLWebViewManager {
       scrollY = getVScrollValue();
     }
     isFlushed = false;
-    webEngine.loadContent(SCRIPT_BLOCK_EXT + HTMLPanelInterface.fixHTML(html));
+    webEngine.loadContent(SCRIPT_BLOCK_EXT + SCRIPT_BRIDGE + HTMLPanelInterface.fixHTML(html));
+  }
+
+  /**
+   * Setups the JavaBridge and the console.log command before JS is ran. Approach described at
+   * https://stackoverflow.com/questions/26400925/.
+   *
+   * @param event the onStatusChanged event triggering the bridge to load
+   */
+  private void setBridge(WebEvent<String> event) {
+    if (JavaBridge.BRIDGE_VALUE.equals(event.getData())) {
+      JSObject window = (JSObject) webEngine.executeScript("window");
+      window.setMember(JavaBridge.NAME, bridge);
+
+      // Redirect console.log to the JavaBridge
+      webEngine.executeScript(SCRIPT_REPLACE_LOG);
+
+      // Replace the broken javascript form.submit method
+      webEngine.executeScript(SCRIPT_REPLACE_SUBMIT);
+    }
   }
 
   /**
@@ -256,19 +324,10 @@ public class HTMLWebViewManager {
     }
   }
 
+  /** Handles the page after it has loaded. */
   void handlePage() {
-    // Redirect console.log to the JavaBridge
-    JSObject window = (JSObject) webEngine.executeScript("window");
-    window.setMember(JavaBridge.NAME, bridge);
-    webEngine.executeScript(SCRIPT_REPLACE_LOG);
-
-    // Replace the broken javascript form.submit method
-    webEngine.executeScript(SCRIPT_REPLACE_SUBMIT);
-
-    // Event listener for the href macro link clicks.
-    EventListener listenerA = this::fixHref;
-    // Event listener for form submission.
-    EventListener listenerSubmit = this::getDataAndSubmit;
+    // Add the MutationObserver to handle new nodes as they are added
+    webEngine.executeScript(SCRIPT_MUTATION_OBS);
 
     Document doc = webEngine.getDocument();
     NodeList nodeList;
@@ -322,20 +381,14 @@ public class HTMLWebViewManager {
     // Set the "submit" handler to get the data on submission based on input
     nodeList = doc.getElementsByTagName("input");
     for (int i = 0; i < nodeList.getLength(); i++) {
-      String type = ((Element) nodeList.item(i)).getAttribute("type");
-      if ("image".equals(type) || "submit".equals(type)) {
-        EventTarget target = (EventTarget) nodeList.item(i);
-        target.addEventListener("click", listenerSubmit, false);
-      }
+      EventTarget target = (EventTarget) nodeList.item(i);
+      target.addEventListener("click", listenerSubmit, false);
     }
     // Set the "submit" handler to get the data on submission based on button
     nodeList = doc.getElementsByTagName("button");
     for (int i = 0; i < nodeList.getLength(); i++) {
-      String type = ((Element) nodeList.item(i)).getAttribute("type");
-      if (type == null || "submit".equals(type)) {
-        EventTarget target = (EventTarget) nodeList.item(i);
-        target.addEventListener("click", listenerSubmit, false);
-      }
+      EventTarget target = (EventTarget) nodeList.item(i);
+      target.addEventListener("click", listenerSubmit, false);
     }
     // Restores the previous scrolling.
     if (!scrollReset) {
@@ -476,11 +529,21 @@ public class HTMLWebViewManager {
       form = (HTMLFormElement) target;
     } else if (target instanceof HTMLInputElement) {
       HTMLInputElement input = (HTMLInputElement) target;
+      String type = input.getType();
+      if (!"image".equalsIgnoreCase(type) && !"submit".equalsIgnoreCase(type)) {
+        // Only allow submit from input with image or with submit type
+        return;
+      }
       form = input.getForm();
       addToObject(jObj, input.getName(), input.getValue());
       formnovalidate = input.getAttribute("formnovalidate") != null;
     } else if (target instanceof HTMLButtonElement) {
       HTMLButtonElement button = (HTMLButtonElement) target;
+      String type = button.getType();
+      if (type != null && !"submit".equalsIgnoreCase(type)) {
+        // Only allow submit from buttons without type or submit type
+        return;
+      }
       form = button.getForm();
       addToObject(jObj, button.getName(), button.getValue());
       formnovalidate = button.getAttribute("formnovalidate") != null;

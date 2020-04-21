@@ -145,7 +145,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Notes</at>
+                   <at name="title">EditTokenDialog.tab.notes</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -305,7 +305,7 @@
                               </at>
                               <at name="width">1312</at>
                               <at name="name"/>
-                              <at name="text">Notes</at>
+                              <at name="text">EditTokenDialog.tab.notes</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -387,7 +387,7 @@
                                    </at>
                                    <at name="width">1307</at>
                                    <at name="name"/>
-                                   <at name="text">GM Notes</at>
+                                   <at name="text">EditTokenDialog.label.gmnotes</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -674,7 +674,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Properties</at>
+                   <at name="title">EditTokenDialog.tab.properties</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -857,7 +857,7 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">VBL</at>
+                   <at name="title">EditTokenDialog.tab.vbl</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -1087,8 +1087,8 @@
                               <at name="actionCommand">Hide Preview</at>
                               <at name="name">hideTokenCheckbox</at>
                               <at name="width">146</at>
-                              <at name="text">Hide Token Image Preview</at>
-                              <at name="toolTipText">Show the token image under the VBL.</at>
+                              <at name="text">EditTokenDialog.label.vbl.preview</at>
+                              <at name="toolTipText">EditTokenDialog.label.vbl.preview.tooltip</at>
                               <at name="height">16</at>
                              </object>
                             </at>
@@ -1406,8 +1406,8 @@
                               <at name="actionCommand">Generate VBL	</at>
                               <at name="name">autoGenerateVblButton</at>
                               <at name="width">187</at>
-                              <at name="text">Generate Token VBL	</at>
-                              <at name="toolTipText">This will create VBL based on non-transparent pixels.</at>
+                              <at name="text">EditTokenDialog.button.vbl</at>
+                              <at name="toolTipText">EditTokenDialog.button.vbl.tooltip</at>
                               <at name="height">22</at>
                              </object>
                             </at>
@@ -1463,8 +1463,8 @@
                               <at name="actionCommand">Clear VBL</at>
                               <at name="name">clearVblButton</at>
                               <at name="width">187</at>
-                              <at name="text">Clear Token VBL</at>
-                              <at name="toolTipText">Clear all VBL from token.</at>
+                              <at name="text">EditTokenDialog.button.vbl.clear</at>
+                              <at name="toolTipText">EditTokenDialog.button.vbl.clear.tooltip</at>
                               <at name="height">22</at>
                              </object>
                             </at>
@@ -1520,7 +1520,7 @@
                               <at name="actionCommand">Clear VBL</at>
                               <at name="name">transferVblToMap</at>
                               <at name="width">187</at>
-                              <at name="text">Move VBL To Map</at>
+                              <at name="text">EditTokenDialog.button.vbl.tomap</at>
                               <at name="height">22</at>
                              </object>
                             </at>
@@ -1577,9 +1577,9 @@
                               <at name="horizontalAlignment">0</at>
                               <at name="name">copyOrMoveCheckbox</at>
                               <at name="width">146</at>
-                              <at name="text">Erase Source VBL on Move</at>
+                              <at name="text">EditTokenDialog.option.vbl.erase</at>
                               <at name="selected">true</at>
-                              <at name="toolTipText">Move the VBL vs Copy the VBL</at>
+                              <at name="toolTipText">EditTokenDialog.option.vbl.erase.tooltip</at>
                               <at name="height">16</at>
                              </object>
                             </at>
@@ -1635,8 +1635,8 @@
                               <at name="actionCommand">Hide Preview</at>
                               <at name="name">inverseVblCheckbox</at>
                               <at name="width">150</at>
-                              <at name="text">Inverse VBL Color Selection</at>
-                              <at name="toolTipText">Generate VBL where the color does not match on the token when checked.</at>
+                              <at name="text">EditTokenDialog.label.vbl.invert</at>
+                              <at name="toolTipText">EditTokenDialog.label.vbl.invert.tooltip</at>
                               <at name="height">16</at>
                              </object>
                             </at>
@@ -1692,7 +1692,7 @@
                               <at name="horizontalAlignment">2</at>
                               <at name="name">ignoreColorLabel</at>
                               <at name="width">71</at>
-                              <at name="text">Color Selection</at>
+                              <at name="text">EditTokenDialog.label.vbl.color</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -1732,7 +1732,7 @@
                              <object classname="com.jeta.forms.store.support.PropertyMap">
                               <at name="name">vblIgnoreColorWell</at>
                               <at name="width">42</at>
-                              <at name="toolTipText">Manually pick a color to match against when generating token VBL.</at>
+                              <at name="toolTipText">EditTokenDialog.label.vbl.well</at>
                               <at name="height">40</at>
                              </object>
                             </at>
@@ -1796,7 +1796,7 @@
                               </at>
                               <at name="name">vblColorPickerToggleButton</at>
                               <at name="width">44</at>
-                              <at name="toolTipText">Pick a color from the image to match against when generating token VBL.</at>
+                              <at name="toolTipText">EditTokenDialog.label.vbl.toggle</at>
                               <at name="height">40</at>
                              </object>
                             </at>
@@ -1852,7 +1852,7 @@
                               <at name="actionCommand">Clear VBL</at>
                               <at name="name">transferVblFromMap</at>
                               <at name="width">187</at>
-                              <at name="text">Move VBL From Map</at>
+                              <at name="text">EditTokenDialog.button.vbl.frommap</at>
                               <at name="height">22</at>
                              </object>
                             </at>
@@ -1908,7 +1908,7 @@
                               <at name="horizontalAlignment">2</at>
                               <at name="name">alphaSensitivityLabel</at>
                               <at name="width">77</at>
-                              <at name="text">Color Sensitivity</at>
+                              <at name="text">EditTokenDialog.label.vbl.sensitivity</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -1969,7 +1969,7 @@
                               <at name="horizontalAlignment">2</at>
                               <at name="width">123</at>
                               <at name="name"/>
-                              <at name="text">Visibility Tolerance</at>
+                              <at name="text">EditTokenDialog.label.vbl.tolerance</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2031,9 +2031,9 @@
                               <at name="horizontalAlignment">0</at>
                               <at name="name">alwaysVisibleButton</at>
                               <at name="width">110</at>
-                              <at name="text">Is Visible over FoW</at>
+                              <at name="text">EditTokenDialog.label.vbl.over</at>
                               <at name="selected">true</at>
-                              <at name="toolTipText">Always show this token over FoW when in sight of another token. Useful for doors, statues, columns, roofs, etc.</at>
+                              <at name="toolTipText">EditTokenDialog.label.vbl.over.tooltip</at>
                               <at name="height">16</at>
                              </object>
                             </at>
@@ -2088,7 +2088,7 @@
                               </at>
                               <at name="name">visibilityLabel</at>
                               <at name="width">91</at>
-                              <at name="text">Token Visibility</at>
+                              <at name="text">EditTokenDialog.label.vbl.visiblity</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2156,7 +2156,7 @@
                               <at name="horizontalAlignment">2</at>
                               <at name="name">jtsDistanceToleranceLabel</at>
                               <at name="width">25</at>
-                              <at name="text">Level</at>
+                              <at name="text">EditTokenDialog.label.vbl.level</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2217,7 +2217,7 @@
                               <at name="horizontalAlignment">2</at>
                               <at name="name">jtsDistanceToleranceLabel</at>
                               <at name="width">36</at>
-                              <at name="text">Method</at>
+                              <at name="text">EditTokenDialog.label.vbl.method</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2277,7 +2277,7 @@
                               </at>
                               <at name="name">optimizationLabel</at>
                               <at name="width">105</at>
-                              <at name="text">VBL Optimization</at>
+                              <at name="text">EditTokenDialog.label.vbl.optimize</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -2324,13 +2324,7 @@
                              <object classname="com.jeta.forms.store.support.PropertyMap">
                               <at name="name">visibilityToleranceSpinner</at>
                               <at name="width">44</at>
-                              <at name="toolTipText">&lt;html&gt;Controls how many of the tokens regions must be seen before showing over FoW, range is 1-9 regions.&lt;br&gt;
-&lt;br&gt;
-The image is sliced into an even 3 x 3 grid for a total of 9 regions. The tolerance controls how many of these &quot;regions&quot; must be &quot;seen&quot; by another token before it&apos;s image is revealed.&lt;br&gt;
-&lt;br&gt;
-For a very large roof, because of vision distance, you may want to use a value of 1.&lt;br&gt;
-Where as for a smaller token like a statue, you may not want to show the image until more of it is visable and use a value of 3 or 4.
-&lt;/html&gt;</at>
+                              <at name="toolTipText">EditTokenDialog.vbl.explanation.tooltip</at>
                               <at name="height">20</at>
                              </object>
                             </at>
@@ -2467,9 +2461,7 @@ Where as for a smaller token like a statue, you may not want to show the image u
                                 </at>
                                </object>
                               </at>
-                              <at name="toolTipText">&lt;html&gt;Advanced Use: Choose the algorithm used to decimate curves in the generated polygon.&lt;br&gt;
-&lt;br&gt;
-The default is generally the best but unique polygons may benifit from one of the other selected algorithms.&lt;/html&gt;</at>
+                              <at name="toolTipText">EditTokenDialog.drop.vbl.optimize.tooltip</at>
                               <at name="height">18</at>
                               <at name="itemCount">4</at>
                               <at name="maximumRowCount">4</at>
@@ -2541,7 +2533,7 @@ The default is generally the best but unique polygons may benifit from one of th
                              <object classname="com.jeta.forms.store.support.PropertyMap">
                               <at name="name">jtsDistanceToleranceSpinner</at>
                               <at name="width">44</at>
-                              <at name="toolTipText">Sets the tolerance for the optimization, a value of 0 disables optimization and values &gt; 0 reduce the number of polygon points for better performance.</at>
+                              <at name="toolTipText">EditTokenDialog.spinner.tolerance.tooltip</at>
                               <at name="height">20</at>
                              </object>
                             </at>
@@ -2767,7 +2759,7 @@ The default is generally the best but unique polygons may benifit from one of th
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">State</at>
+                   <at name="title">EditTokenDialog.tab.state</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -2983,7 +2975,7 @@ The default is generally the best but unique polygons may benifit from one of th
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Speech</at>
+                   <at name="title">EditTokenDialog.tab.speech</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -3162,7 +3154,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                    <at name="actionCommand">Clear All</at>
                                    <at name="name">speechClearAllButton</at>
                                    <at name="width">71</at>
-                                   <at name="text">Clear All</at>
+                                   <at name="text">Button.clearall</at>
                                    <at name="height">22</at>
                                   </object>
                                  </at>
@@ -3353,7 +3345,7 @@ The default is generally the best but unique polygons may benifit from one of th
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Ownership</at>
+                   <at name="title">EditTokenDialog.tab.ownership</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -3429,7 +3421,7 @@ The default is generally the best but unique polygons may benifit from one of th
                               <at name="actionCommand">All Players</at>
                               <at name="name">@ownedByAll</at>
                               <at name="width">1312</at>
-                              <at name="text">All Players</at>
+                              <at name="text">EditTokenDialog.label.allplayers</at>
                               <at name="height">16</at>
                              </object>
                             </at>
@@ -3598,7 +3590,7 @@ The default is generally the best but unique polygons may benifit from one of th
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
-                   <at name="title">Config</at>
+                   <at name="title">EditTokenDialog.tab.config</at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
@@ -3695,7 +3687,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                    </at>
                                    <at name="width">63</at>
                                    <at name="name"/>
-                                   <at name="text">Shape:</at>
+                                   <at name="text">EditTokenDialog.label.shape</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -3755,7 +3747,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                    </at>
                                    <at name="width">63</at>
                                    <at name="name"/>
-                                   <at name="text">Size:</at>
+                                   <at name="text">EditTokenDialog.label.size</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -3815,7 +3807,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                    </at>
                                    <at name="width">63</at>
                                    <at name="name"/>
-                                   <at name="text">Properties:</at>
+                                   <at name="text">EditTokenDialog.label.properties</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -4160,7 +4152,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                    </at>
                                    <at name="width">63</at>
                                    <at name="name"/>
-                                   <at name="text">Has Sight:</at>
+                                   <at name="text">EditTokenDialog.label.sight.has</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -4387,7 +4379,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                    </at>
                                    <at name="name">visibleOnlyToOwnerLabel</at>
                                    <at name="width">169</at>
-                                   <at name="text">Visible to Owners Only:</at>
+                                   <at name="text">EditTokenDialog.label.visible.owner</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -4447,7 +4439,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                    </at>
                                    <at name="name">visibleLabel</at>
                                    <at name="width">169</at>
-                                   <at name="text">Visible to players:</at>
+                                   <at name="text">EditTokenDialog.label.visible</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -4507,7 +4499,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                    </at>
                                    <at name="width">169</at>
                                    <at name="name"/>
-                                   <at name="text">Snap To Grid:</at>
+                                   <at name="text">EditTokenDialog.label.snaptogrid</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -4567,13 +4559,13 @@ The default is generally the best but unique polygons may benifit from one of th
                                    </at>
                                    <at name="name">terrainModifierLabel</at>
                                    <at name="width">86</at>
-                                   <at name="text">Terrain Modifier:</at>
+                                   <at name="text">EditTokenDialog.label.terrain.mod</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Adjust the cost of movement other tokens will may to move over or through this token. Default multiplier of 1 equals no change (1 * 1 = 1).</at>
+                                   <at name="toolTipText">EditTokenDialog.label.terrain.mod.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -4629,7 +4621,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                    <at name="columns">4</at>
                                    <at name="name">terrainModifier</at>
                                    <at name="width">39</at>
-                                   <at name="toolTipText">Adjust the cost of movement other tokens will may to move over or through this token. Default multiplier of 1 equals no change (1 * 1 = 1).</at>
+                                   <at name="toolTipText">EditTokenDialog.label.terrain.mod.tooltip</at>
                                    <at name="height">20</at>
                                   </object>
                                  </at>
@@ -4721,7 +4713,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Set whether the cell cost should be added or multiplied. Use negative numbers to subtract and decimal values to divide costs.</at>
+                                   <at name="toolTipText">EditTokenDialog.combo.terrain.mod</at>
                                    <at name="height">18</at>
                                    <at name="itemCount">1</at>
                                   </object>
@@ -4777,7 +4769,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                    </at>
                                    <at name="width">63</at>
                                    <at name="name"/>
-                                   <at name="text">Image Table:</at>
+                                   <at name="text">EditTokenDialog.label.image</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -4950,13 +4942,13 @@ The default is generally the best but unique polygons may benifit from one of th
                                    </at>
                                    <at name="name">tokenOpacityLabel</at>
                                    <at name="width">86</at>
-                                   <at name="text">Token Opacity:</at>
+                                   <at name="text">EditTokenDialog.label.opacity</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Change the opacity of the token.</at>
+                                   <at name="toolTipText">EditTokenDialog.label.opacity.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -5133,13 +5125,13 @@ The default is generally the best but unique polygons may benifit from one of th
                                    </at>
                                    <at name="name">ignoreTerrainModifierLabel</at>
                                    <at name="width">86</at>
-                                   <at name="text">Ignore Terrain:</at>
+                                   <at name="text">EditTokenDialog.label.terrain.ignore</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Select any terrain modifier types you want this token to ignore.</at>
+                                   <at name="toolTipText">EditTokenDialog.label.terrain.ignore.tooltip</at>
                                    <at name="height">14</at>
                                   </object>
                                  </at>
@@ -5280,7 +5272,7 @@ The default is generally the best but unique polygons may benifit from one of th
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="toolTipText">Select any terrain modifier types this token should ignore.</at>
+                                   <at name="toolTipText">EditTokenDialog.label.terrain.ignore.tooltip</at>
                                    <at name="height">78</at>
                                   </object>
                                  </at>
@@ -6271,7 +6263,7 @@ The default is generally the best but unique polygons may benifit from one of th
                               </at>
                               <at name="name">summaryLabel</at>
                               <at name="width">48</at>
-                              <at name="text">Summary:</at>
+                              <at name="text">EditTokenDialog.label.hero.summary</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -7711,7 +7703,7 @@ The default is generally the best but unique polygons may benifit from one of th
                               </at>
                               <at name="name">portfolioLabel</at>
                               <at name="width">47</at>
-                              <at name="text">Portfolio: </at>
+                              <at name="text">EditTokenDialog.label.hero.portfolio </at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -7892,7 +7884,7 @@ The default is generally the best but unique polygons may benifit from one of th
                               </at>
                               <at name="width">67</at>
                               <at name="name"/>
-                              <at name="text">Last Modified:</at>
+                              <at name="text">EditTokenDialog.label.hero.last</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -8281,7 +8273,7 @@ The default is generally the best but unique polygons may benifit from one of th
                  <at name="actionCommand">Cancel</at>
                  <at name="name">cancelButton</at>
                  <at name="width">58</at>
-                 <at name="text">Close</at>
+                 <at name="text">Button.cancel</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -8337,7 +8329,7 @@ The default is generally the best but unique polygons may benifit from one of th
                  <at name="actionCommand">OK</at>
                  <at name="name">okButton</at>
                  <at name="width">46</at>
-                 <at name="text">OK</at>
+                 <at name="text">Button.ok</at>
                  <at name="height">22</at>
                 </object>
                </at>
@@ -8496,7 +8488,7 @@ The default is generally the best but unique polygons may benifit from one of th
                  </at>
                  <at name="width">49</at>
                  <at name="name"/>
-                 <at name="text">Name:</at>
+                 <at name="text">Label.name</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
@@ -8618,7 +8610,7 @@ The default is generally the best but unique polygons may benifit from one of th
                  </at>
                  <at name="name">tokenGMNameLabel</at>
                  <at name="width">49</at>
-                 <at name="text">GM Name:</at>
+                 <at name="text">Label.gmname</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
@@ -8799,7 +8791,7 @@ The default is generally the best but unique polygons may benifit from one of th
                  </at>
                  <at name="width">49</at>
                  <at name="name"/>
-                 <at name="text">Label:</at>
+                 <at name="text">EditTokenDialog.label.label</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>

@@ -302,7 +302,9 @@ public class ImageManager {
         try {
           assert asset.getImage() != null
               : "asset.getImage() for " + asset.toString() + "returns null?!";
-          image = ImageUtil.createCompatibleImage(ImageUtil.bytesToImage(asset.getImage()), hints);
+          image =
+              ImageUtil.createCompatibleImage(
+                  ImageUtil.bytesToImage(asset.getImage(), asset.getName()), hints);
         } catch (Throwable t) {
           log.error(
               "BackgroundImageLoader.run("

@@ -64,6 +64,7 @@ public class AssetPanel extends JComponent {
   private ImagePanel imagePanel;
   private JTextField filterTextField;
   private JCheckBox globalSearchField;
+  private JCheckBox extractRenderedPages;
   private JSlider thumbnailPreviewSlider;
   private final AssetPanelModel assetPanelModel;
   private Timer updateFilterTimer;
@@ -201,6 +202,7 @@ public class AssetPanel extends JComponent {
 
     panel.add(BorderLayout.NORTH, top);
     panel.add(BorderLayout.CENTER, getGlobalSearchField());
+    panel.add(BorderLayout.SOUTH, getExtractRenderedPages());
 
     return panel;
   }
@@ -352,6 +354,7 @@ public class AssetPanel extends JComponent {
                   if (model == null) {
                     return;
                   }
+                  model.setExtractRenderedPages(getExtractRenderedPages().isSelected());
                   model.setGlobalSearch(getGlobalSearchField().isSelected());
                   model.setFilter(getFilterTextField().getText());
                   // TODO: This should be event based
@@ -417,5 +420,17 @@ public class AssetPanel extends JComponent {
 
   public AssetTree getAssetTree() {
     return assetTree;
+  }
+
+  public JCheckBox getExtractRenderedPages() {
+    if (extractRenderedPages == null) {
+      extractRenderedPages =
+          new JCheckBox(
+              I18N.getText("panel.Asset.ImageModel.checkbox.extractRenderedPages"), false);
+      extractRenderedPages.setToolTipText(
+          I18N.getString("panel.Asset.ImageModel.checkbox.tooltip.extractRenderedPages"));
+      extractRenderedPages.addActionListener(ev -> updateFilter());
+    }
+    return extractRenderedPages;
   }
 }

@@ -92,6 +92,7 @@ import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.utilities.DungeonDraftImporter;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -2058,6 +2059,29 @@ public class AppActions {
         }
       };
 
+  /** Toggle to enable / disable player use of the token editor. */
+  public static final Action TOGGLE_TOKEN_EDITOR_LOCK =
+      new AdminClientAction() {
+        {
+          init("action.toggleTokenEditorLock");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return MapTool.getServerPolicy().isTokenEditorLocked();
+        }
+
+        @Override
+        protected void executeAction(ActionEvent e) {
+
+          ServerPolicy policy = MapTool.getServerPolicy();
+          policy.setIsTokenEditorLocked(!policy.isTokenEditorLocked());
+
+          MapTool.updateServerPolicy(policy);
+          MapTool.getServer().updateServerPolicy(policy);
+        }
+      };
+
   public static final Action START_SERVER =
       new ClientAction() {
         {
@@ -2698,6 +2722,37 @@ public class AppActions {
         }
       };
 
+  public static final ClientAction IMPORT_DUNGEON_DRAFT_MAP =
+      new ClientAction() {
+        {
+          init("action.import.dungeondraft");
+        }
+
+        @Override
+        public boolean isAvailable() {
+          return MapTool.isHostingServer()
+              || (MapTool.getPlayer() != null && MapTool.getPlayer().isGM());
+        }
+
+        @Override
+        protected void executeAction(ActionEvent e) {
+          boolean isConnected = !MapTool.isHostingServer() && !MapTool.isPersonalServer();
+          JFileChooser chooser = new MapPreviewFileChooser();
+          chooser.setDialogTitle(I18N.getText("action.import.dungeondraft.dialog.title"));
+          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          chooser.setFileFilter(MapTool.getFrame().getDungeonDraftFilter());
+
+          if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+            File ddFile = chooser.getSelectedFile();
+            try {
+              new DungeonDraftImporter(ddFile).importVTT();
+            } catch (IOException ioException) {
+              MapTool.showError("dungeondraft.import.ioError", ioException);
+            }
+          }
+        }
+      };
+
   private static class MapPreviewFileChooser extends PreviewPanelFileChooser {
     MapPreviewFileChooser() {
       super();
@@ -2717,52 +2772,48 @@ public class AppActions {
     new Thread() {
       @Override
       public void run() {
+        StaticMessageDialog progressDialog =
+            new StaticMessageDialog(I18N.getText("msg.info.mapLoading"));
+
         try {
-          StaticMessageDialog progressDialog =
-              new StaticMessageDialog(I18N.getText("msg.info.mapLoading"));
+          // I'm going to get struck by lighting for writing code like this.
+          // CLEAN ME CLEAN ME CLEAN ME ! I NEED A SWINGWORKER !
+          MapTool.getFrame().showFilledGlassPane(progressDialog);
 
-          try {
-            // I'm going to get struck by lighting for writing code like this.
-            // CLEAN ME CLEAN ME CLEAN ME ! I NEED A SWINGWORKER !
-            MapTool.getFrame().showFilledGlassPane(progressDialog);
+          // Load
+          final PersistedMap map = PersistenceUtil.loadMap(mapFile);
 
-            // Load
-            final PersistedMap map = PersistenceUtil.loadMap(mapFile);
-
-            if (map != null) {
-              AppPreferences.setLoadDir(mapFile.getParentFile());
-              if ((map.zone.getExposedArea() != null && !map.zone.getExposedArea().isEmpty())
-                  || (map.zone.getExposedAreaMetaData() != null
-                      && !map.zone.getExposedAreaMetaData().isEmpty())) {
-                boolean ok =
-                    MapTool.confirm(
-                        "<html>Map contains exposed areas of fog.<br>Do you want to reset all of the fog?");
-                if (ok == true) {
-                  // This fires a ModelChangeEvent, but that shouldn't matter
-                  map.zone.clearExposedArea(false);
-                }
+          if (map != null) {
+            AppPreferences.setLoadDir(mapFile.getParentFile());
+            if ((map.zone.getExposedArea() != null && !map.zone.getExposedArea().isEmpty())
+                || (map.zone.getExposedAreaMetaData() != null
+                    && !map.zone.getExposedAreaMetaData().isEmpty())) {
+              boolean ok =
+                  MapTool.confirm(
+                      "<html>Map contains exposed areas of fog.<br>Do you want to reset all of the fog?");
+              if (ok == true) {
+                // This fires a ModelChangeEvent, but that shouldn't matter
+                map.zone.clearExposedArea(false);
               }
-              MapTool.addZone(map.zone);
-
-              MapTool.getAutoSaveManager().restart();
-              MapTool.getAutoSaveManager().tidy();
-
-              // Flush the images associated with the current
-              // campaign
-              // Do this juuuuuust before we get ready to show the
-              // new campaign, since we
-              // don't want the old campaign reloading images
-              // while we loaded the new campaign
-
-              // XXX (FJE) Is this call even needed for loading
-              // maps? Probably not...
-              ImageManager.flush();
             }
-          } finally {
-            MapTool.getFrame().hideGlassPane();
+            MapTool.addZone(map.zone);
+
+            MapTool.getAutoSaveManager().restart();
+            MapTool.getAutoSaveManager().tidy();
+
+            // Flush the images associated with the current
+            // campaign
+            // Do this juuuuuust before we get ready to show the
+            // new campaign, since we
+            // don't want the old campaign reloading images
+            // while we loaded the new campaign
+
+            // XXX (FJE) Is this call even needed for loading
+            // maps? Probably not...
+            ImageManager.flush();
           }
-        } catch (IOException ioe) {
-          MapTool.showError("msg.error.failedLoadMap", ioe);
+        } finally {
+          MapTool.getFrame().hideGlassPane();
         }
       }
     }.start();
@@ -2917,7 +2968,8 @@ public class AppActions {
                 @Override
                 public void run() {
                   Zone zone = ZoneFactory.createZone();
-                  MapPropertiesDialog newMapDialog = new MapPropertiesDialog(MapTool.getFrame());
+                  MapPropertiesDialog newMapDialog =
+                      MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
                   newMapDialog.setZone(zone);
 
                   newMapDialog.setVisible(true);
@@ -2943,7 +2995,8 @@ public class AppActions {
                 @Override
                 public void run() {
                   Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-                  MapPropertiesDialog newMapDialog = new MapPropertiesDialog(MapTool.getFrame());
+                  MapPropertiesDialog newMapDialog =
+                      MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
                   newMapDialog.setZone(zone);
                   newMapDialog.setVisible(true);
                   // Too many things can change to send them 1 by 1 to the client... just resend the
