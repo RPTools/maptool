@@ -57,6 +57,14 @@ public class ExpressionParser {
         new String[] {"\\b(\\d+)[dD](\\d+)[rR](\\d+)\\b", "reroll($1, $2, $3)"},
         new String[] {"\\b[dD](\\d+)[rR](\\d+)\\b", "reroll(1, $1, $2)"},
 
+        // re-roll once and keep the new value
+        new String[] {"\\b(\\d+)[dD](\\d+)[rR][kK](\\d+)\\b", "rerollOnce($1, $2, $3)"},
+        new String[] {"\\b[dD](\\d+)[rR][kK](\\d+)\\b", "rerollOnce(1, $1, $2)"},
+
+        // re-roll once and choose the higher value
+        new String[] {"\\b(\\d+)[dD](\\d+)[rR][cC](\\d+)\\b", "rerollOnce($1, $2, $3, true)"},
+        new String[] {"\\b[dD](\\d+)[rR][cC](\\d+)\\b", "rerollOnce(1, $1, $2, true)"},
+
         // count success
         new String[] {"\\b(\\d+)[dD](\\d+)[sS](\\d+)\\b", "success($1, $2, $3)"},
         new String[] {"\\b[dD](\\d+)[sS](\\d+)\\b", "success(1, $1, $2)"},
@@ -177,6 +185,7 @@ public class ExpressionParser {
     parser.addFunction(new ExplodeDice());
     parser.addFunction(new KeepRoll());
     parser.addFunction(new RerollDice());
+    parser.addFunction(new RerollDiceOnce());
     parser.addFunction(new HeroRoll());
     parser.addFunction(new HeroKillingRoll());
     parser.addFunction(new FudgeRoll());
