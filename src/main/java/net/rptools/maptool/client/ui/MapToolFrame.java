@@ -754,7 +754,6 @@ public class MapToolFrame extends DefaultDockableHolder
     return lookupTablePanel;
   }
 
-
   public NoteBookPanel getNoteBookPanel() {
     return noteBookPanel;
   }
