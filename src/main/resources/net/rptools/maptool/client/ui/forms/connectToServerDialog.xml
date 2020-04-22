@@ -54,7 +54,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Username:</at>
+            <at name="text">ConnectToServerDialog.username</at>
             <at name="height">15</at>
             <at name="width">65</at>
             <at name="name"></at>
@@ -114,7 +114,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Password</at>
+            <at name="text">ConnectToServerDialog.password</at>
             <at name="height">15</at>
             <at name="width">59</at>
             <at name="name"></at>
@@ -174,7 +174,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Role:</at>
+            <at name="text">ConnectToServerDialog.role</at>
             <at name="height">15</at>
             <at name="width">30</at>
             <at name="name"></at>
@@ -488,7 +488,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Server Name:</at>
+                              <at name="text">ConnectToServerDialog.server.name</at>
                               <at name="height">15</at>
                               <at name="width">80</at>
                               <at name="name"></at>
@@ -548,7 +548,7 @@
                             <at name="classname">javax.swing.JButton</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Refresh</at>
+                              <at name="text">Button.refresh</at>
                               <at name="height">25</at>
                               <at name="width">81</at>
                               <at name="name">refreshButton</at>
@@ -869,7 +869,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Local Servers:</at>
+                              <at name="text">ConnectToServerDialog.server.local</at>
                               <at name="height">15</at>
                               <at name="width">968</at>
                               <at name="name"></at>
@@ -1017,7 +1017,7 @@
                             <at name="classname">javax.swing.JButton</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Rescan</at>
+                              <at name="text">Button.rescan</at>
                               <at name="height">25</at>
                               <at name="width">77</at>
                               <at name="name">rescanButton</at>
@@ -1203,7 +1203,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Address:</at>
+                              <at name="text">ConnectToServerDialog.server.address</at>
                               <at name="height">15</at>
                               <at name="width">54</at>
                               <at name="name"></at>
@@ -1263,7 +1263,7 @@
                             <at name="classname">com.jeta.forms.components.label.JETALabel</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="text">Port:</at>
+                              <at name="text">ConnectToServerDialog.server.port</at>
                               <at name="height">15</at>
                               <at name="width">54</at>
                               <at name="name"></at>
@@ -1562,7 +1562,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">OK</at>
+                 <at name="text">Button.ok</at>
                  <at name="height">25</at>
                  <at name="width">53</at>
                  <at name="name">okButton</at>
@@ -1618,7 +1618,7 @@
                <at name="classname">javax.swing.JButton</at>
                <at name="properties">
                 <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="text">Cancel</at>
+                 <at name="text">Button.cancel</at>
                  <at name="height">25</at>
                  <at name="width">75</at>
                  <at name="name">cancelButton</at>

@@ -16,18 +16,7 @@ package net.rptools.maptool.client.ui;
 
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Desktop;
-import java.awt.EventQueue;
-import java.awt.GraphicsConfiguration;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.IllegalComponentStateException;
-import java.awt.Image;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.desktop.AboutEvent;
 import java.awt.desktop.AboutHandler;
 import java.awt.desktop.PreferencesEvent;
@@ -115,6 +104,7 @@ import net.rptools.maptool.client.swing.ProgressStatusBar;
 import net.rptools.maptool.client.swing.SpacerStatusBar;
 import net.rptools.maptool.client.swing.StatusPanel;
 import net.rptools.maptool.client.swing.ZoomStatusBar;
+import net.rptools.maptool.client.tool.DrawTopologySelectionTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
@@ -123,6 +113,7 @@ import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
 import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
+import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.*;
@@ -181,6 +172,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private final ClientConnectionPanel connectionPanel;
   /** The panel showing the initiative order. */
   private final InitiativePanel initiativePanel;
+  /** The HTML pane showing the map overlay. */
+  private HTMLOverlayPanel overlayPanel;
 
   private final PointerOverlay pointerOverlay;
   private final CommandPanel commandPanel;
@@ -229,6 +222,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private JFileChooser saveCmpgnFileChooser;
   private JFileChooser savePropsFileChooser;
   private JFileChooser saveFileChooser;
+  private JFileChooser saveMapFileChooser;
+  private JFileChooser saveTokenFileChooser;
 
   /** Remember the last layer selected */
   private Layer lastSelectedLayer = Zone.Layer.TOKEN;
@@ -245,6 +240,8 @@ public class MapToolFrame extends DefaultDockableHolder
   private final FileFilter tableFilter =
       new MTFileFilter("mttable", I18N.getText("file.ext.mttable"));
 
+  private final FileFilter dungeonDraftFilter =
+      new MTFileFilter("dd2vtt", I18N.getText("file.ext.dungeondraft"));
   private EditTokenDialog tokenPropertiesDialog;
 
   private final CampaignPanel campaignPanel = new CampaignPanel();
@@ -324,58 +321,8 @@ public class MapToolFrame extends DefaultDockableHolder
                 if (!MapTool.confirmTokenDelete()) {
                   return;
                 }
-                Token firstToken = null;
-                Set<GUID> selectedTokenSet = new HashSet<GUID>();
-                for (TreePath path : tree.getSelectionPaths()) {
-                  if (path.getLastPathComponent() instanceof Token) {
-                    Token token = (Token) path.getLastPathComponent();
-                    if (firstToken == null) {
-                      firstToken = token;
-                    }
-                    if (AppUtil.playerOwns(token)) {
-                      selectedTokenSet.add(token.getId());
-                    }
-                  }
-                }
-
-                boolean unhideImpersonated = false;
-                boolean unhideSelected = false;
-                if (getCurrentZoneRenderer().getSelectedTokenSet().size() > 10) {
-                  if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.IMPERSONATED).isHidden()
-                      == false) {
-                    unhideImpersonated = true;
-                    MapTool.getFrame()
-                        .getDockingManager()
-                        .hideFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
-                  }
-                  if (MapTool.getFrame().getFrame(MapToolFrame.MTFrame.SELECTION).isHidden()
-                      == false) {
-                    unhideSelected = true;
-                    MapTool.getFrame()
-                        .getDockingManager()
-                        .hideFrame(MapToolFrame.MTFrame.SELECTION.name());
-                  }
-                }
-                for (GUID tokenGUID : selectedTokenSet) {
-                  Token token = getCurrentZoneRenderer().getZone().getToken(tokenGUID);
-
-                  if (AppUtil.playerOwns(token)) {
-                    getCurrentZoneRenderer().getZone().removeToken(tokenGUID);
-                    MapTool.serverCommand()
-                        .removeToken(getCurrentZoneRenderer().getZone().getId(), tokenGUID);
-                  }
-                }
-                if (unhideImpersonated) {
-                  MapTool.getFrame()
-                      .getDockingManager()
-                      .showFrame(MapToolFrame.MTFrame.IMPERSONATED.name());
-                }
-
-                if (unhideSelected) {
-                  MapTool.getFrame()
-                      .getDockingManager()
-                      .showFrame(MapToolFrame.MTFrame.SELECTION.name());
-                }
+                ZoneRenderer zr = getCurrentZoneRenderer();
+                AppActions.deleteTokens(zr.getZone(), zr.getSelectedTokenSet());
               }
             });
       }
@@ -462,6 +409,7 @@ public class MapToolFrame extends DefaultDockableHolder
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
     initiativePanel = createInitiativePanel();
+    overlayPanel = new HTMLOverlayPanel();
 
     zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
     pointerOverlay = new PointerOverlay();
@@ -516,6 +464,9 @@ public class MapToolFrame extends DefaultDockableHolder
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
     rendererBorderPanel.add(zoneRendererPanel);
     toolbarPanel = new ToolbarPanel(toolbox);
+
+    zoneRendererPanel.add(overlayPanel, PositionalLayout.Position.CENTER, 0);
+    overlayPanel.setVisible(false); // disabled by default
 
     // Put it all together
     setJMenuBar(menuBar);
@@ -784,7 +735,31 @@ public class MapToolFrame extends DefaultDockableHolder
     return lookupTablePanel;
   }
 
-  public EditTokenDialog getTokenPropertiesDialog() {
+  /**
+   * Shows the token properties dialog, and saves the token.
+   *
+   * @param token the token to edit
+   * @param zr the ZoneRenderer of the token
+   */
+  public void showTokenPropertiesDialog(Token token, ZoneRenderer zr) {
+    if (token != null && zr != null) {
+      if (MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().isTokenEditorLocked()) {
+        EditTokenDialog dialog = MapTool.getFrame().getTokenPropertiesDialog();
+        dialog.showDialog(token);
+        if (dialog.isTokenSaved()) {
+          // Checks if the map still exists. Fixes #1646.
+          if (getZoneRenderers().contains(zr) && zr.getZone().getToken(token.getId()) != null) {
+            MapTool.serverCommand().putToken(zr.getZone().getId(), token);
+            MapTool.getFrame().resetTokenPanels();
+            zr.repaint();
+            zr.flush(token);
+          }
+        }
+      }
+    }
+  }
+
+  private EditTokenDialog getTokenPropertiesDialog() {
     if (tokenPropertiesDialog == null) {
       tokenPropertiesDialog = new EditTokenDialog();
     }
@@ -850,6 +825,15 @@ public class MapToolFrame extends DefaultDockableHolder
     return mapFilter;
   }
 
+  /**
+   * Returns the {@link FileFilter} for dungeondraft VTT export files.
+   *
+   * @return the {@link FileFilter} for dungeondraft VTT export files.
+   */
+  public FileFilter getDungeonDraftFilter() {
+    return dungeonDraftFilter;
+  }
+
   public JFileChooser getLoadPropsFileChooser() {
     if (loadPropsFileChooser == null) {
       loadPropsFileChooser = new JFileChooser();
@@ -889,6 +873,22 @@ public class MapToolFrame extends DefaultDockableHolder
     }
     savePropsFileChooser.setAcceptAllFileFilterUsed(true);
     return savePropsFileChooser;
+  }
+
+  public JFileChooser getSaveTokenFileChooser() {
+    if (saveTokenFileChooser == null) {
+      saveTokenFileChooser = new JFileChooser();
+      saveTokenFileChooser.setCurrentDirectory(AppPreferences.getSaveTokenDir());
+    }
+    return saveTokenFileChooser;
+  }
+
+  public JFileChooser getSaveMapFileChooser() {
+    if (saveMapFileChooser == null) {
+      saveMapFileChooser = new JFileChooser();
+      saveMapFileChooser.setCurrentDirectory(AppPreferences.getSaveMapDir());
+    }
+    return saveMapFileChooser;
   }
 
   public JFileChooser getSaveFileChooser() {
@@ -1410,7 +1410,8 @@ public class MapToolFrame extends DefaultDockableHolder
               zone.setBackgroundPaint(new DrawableColorPaint(Color.black));
               zone.setBackgroundAsset(asset.getId());
             }
-            MapPropertiesDialog newMapDialog = new MapPropertiesDialog(MapTool.getFrame());
+            MapPropertiesDialog newMapDialog =
+                MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
             newMapDialog.setZone(zone);
             newMapDialog.setVisible(true);
 
@@ -1510,6 +1511,11 @@ public class MapToolFrame extends DefaultDockableHolder
     return currentRenderer;
   }
 
+  /** @return the HTML Overlay Panel */
+  public HTMLOverlayPanel getOverlayPanel() {
+    return overlayPanel;
+  }
+
   public void addZoneRenderer(ZoneRenderer renderer) {
     zoneRendererList.add(renderer);
   }
@@ -1574,12 +1580,16 @@ public class MapToolFrame extends DefaultDockableHolder
       zoneRendererList.add(renderer);
     }
     if (currentRenderer != null) {
-      stopTokenDrag(); // if a token is being dragged, stop the drag
+      // Check if the zone still exists. Fix #1568
+      if (MapTool.getFrame().getZoneRenderers().contains(currentRenderer)) {
+        stopTokenDrag(); // if a token is being dragged, stop the drag
+      }
       currentRenderer.flush();
       zoneRendererPanel.remove(currentRenderer);
     }
     if (renderer != null) {
-      zoneRendererPanel.add(renderer, PositionalLayout.Position.CENTER);
+      zoneRendererPanel.add(
+          renderer, PositionalLayout.Position.CENTER, zoneRendererPanel.getComponentCount() - 1);
       zoneRendererPanel.doLayout();
     }
     currentRenderer = renderer;
@@ -1590,6 +1600,8 @@ public class MapToolFrame extends DefaultDockableHolder
       MapTool.getEventDispatcher()
           .fireEvent(MapTool.ZoneEvent.Activated, this, null, renderer.getZone());
       renderer.requestFocusInWindow();
+      // Updates the VBL/MBL button. Fixes #1642.
+      DrawTopologySelectionTool.getInstance().setMode(renderer.getZone().getTopologyMode());
     }
     AppActions.updateActions();
     repaint();

@@ -130,7 +130,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     add(new JSeparator());
 
     add(new RevertLastMoveAction());
-    add(new ShowPropertiesDialogAction());
+    add(new ShowPropertiesDialogAction().asJMenuItem());
     addOwnedItem(new SaveAction());
   }
 
@@ -176,7 +176,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
   }
 
   private JMenu createExposeMenu() {
-    JMenu menu = new JMenu("Expose");
+    JMenu menu = new JMenu(I18N.getText("token.popup.menu.fow.expose"));
     menu.add(new ExposeVisibleAreaAction());
     menu.add(new ExposeLastPathAction());
     if (MapTool.getPlayer().getRole() == Role.GM) {
@@ -411,11 +411,15 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       JCheckBoxMenuItem noneMenu =
           new JCheckBoxMenuItem(
               standardColorActionConstructor.newInstance(
-                  new Object[] {this, getRenderer(), selectedTokenSet, null, "None"}));
+                  new Object[] {
+                    this, getRenderer(), selectedTokenSet, null, I18N.getText("Color.none")
+                  }));
       JCheckBoxMenuItem customMenu =
           new JCheckBoxMenuItem(
               customColorActionConstructor.newInstance(
-                  new Object[] {this, getRenderer(), selectedTokenSet, "Custom"}));
+                  new Object[] {
+                    this, getRenderer(), selectedTokenSet, I18N.getText("Color.custom")
+                  }));
 
       if (selectedColor == null) {
         noneMenu.setSelected(true);
@@ -946,7 +950,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     private static final long serialVersionUID = 5704307506738212375L;
 
     public ShowPathsAction() {
-      putValue(Action.NAME, "Show Path");
+      putValue(Action.NAME, I18N.getText("token.popup.menu.move.path"));
     }
 
     @Override
@@ -966,7 +970,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     private static final long serialVersionUID = 8967703198797674025L;
 
     public RevertLastMoveAction() {
-      putValue(Action.NAME, "Revert Last Move");
+      putValue(Action.NAME, I18N.getText("token.popup.menu.move.revertlast"));
 
       // Only available if there is a last move
       for (GUID tokenGUID : selectedTokenSet) {

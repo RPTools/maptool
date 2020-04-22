@@ -32,9 +32,11 @@ import net.rptools.lib.swing.PaintChooser;
 import net.rptools.lib.swing.SelectionListener;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanelModel;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Grid;
@@ -77,14 +79,56 @@ public class MapPropertiesDialog extends JDialog {
   private int gridOffsetX = 0;
   private int gridOffsetY = 0;
 
-  public MapPropertiesDialog(JFrame owner) {
-    super(owner, "Map Properties", true);
+  public static MapPropertiesDialog createMapPropertiesDialog(JFrame owner) {
+    return new MapPropertiesDialog(I18N.getText("dialog.mapProperties.title"), owner);
+  }
+
+  public static MapPropertiesDialog createMapPropertiesImportDialog(JFrame owner) {
+    return new MapPropertiesDialog(I18N.getText("dialog.importedMapProperties.title"), owner);
+  }
+
+  private MapPropertiesDialog(String title, JFrame owner) {
+    super(owner, title, true);
     initialize();
     pack();
   }
 
   public Status getStatus() {
     return status;
+  }
+
+  /**
+   * Set the pixels per cell value and stop user from editing.
+   *
+   * @param pixels the pixels per cell to set.
+   */
+  public void forcePixelsPerCell(int pixels) {
+    getPixelsPerCellTextField().setText(Integer.toString(pixels));
+    getPixelsPerCellTextField().setEditable(false);
+  }
+
+  public void forceMap(Asset asset) {
+    setMapAsset(asset);
+    getMapButton().setEnabled(false);
+  }
+
+  public void forceGridType(String gridType) {
+    if (GridFactory.isHexVertical(gridType)) {
+      getHexVerticalRadio().setSelected(true);
+    } else if (GridFactory.isHexHorizontal(gridType)) {
+      getHexHorizontalRadio().setSelected(true);
+    } else if (GridFactory.isIsometric(gridType)) {
+      getIsometricRadio().setSelected(true);
+    } else if (GridFactory.isSquare(gridType)) {
+      getSquareRadio().setSelected(true);
+    } else {
+      getNoGridRadio().setSelected(true);
+    }
+    getHexVerticalRadio().setEnabled(false);
+    getHexHorizontalRadio().setEnabled(false);
+    getIsometricRadio().setEnabled(false);
+    getSquareRadio().setEnabled(false);
+    getNoGridRadio().setEnabled(false);
   }
 
   @Override
@@ -97,7 +141,7 @@ public class MapPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel = new FormPanel("net/rptools/maptool/client/ui/forms/mapPropertiesDialog.xml");
+    formPanel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/mapPropertiesDialog.xml");
 
     initDistanceTextField();
 
@@ -330,7 +374,7 @@ public class MapPropertiesDialog extends JDialog {
                     paintChooser.choosePaint(
                         MapTool.getFrame(),
                         backgroundPaint != null ? backgroundPaint.getPaint() : null,
-                        "Choose Background");
+                        I18N.getText("MapPropertiesDialog.label.background"));
                 if (paint != null) {
                   backgroundPaint = DrawablePaint.convertPaint(paint);
                 }
@@ -368,7 +412,7 @@ public class MapPropertiesDialog extends JDialog {
                     paintChooser.choosePaint(
                         MapTool.getFrame(),
                         fogPaint != null ? fogPaint.getPaint() : null,
-                        "Choose Fog");
+                        I18N.getText("MapPropertiesDialog.label.fog"));
                 if (paint != null) {
                   fogPaint = DrawablePaint.convertPaint(paint);
                 }
@@ -515,7 +559,7 @@ public class MapPropertiesDialog extends JDialog {
 
       add(BorderLayout.CENTER, createImageExplorerPanel());
       add(BorderLayout.SOUTH, createButtonBar());
-      this.setTitle("Select Map Image");
+      this.setTitle(I18N.getText("MapPropertiesDialog.label.image"));
       setSize(500, 400);
     }
 
@@ -544,7 +588,7 @@ public class MapPropertiesDialog extends JDialog {
     }
 
     private JButton createFilesystemButton() {
-      JButton button = new JButton("Filesystem ...");
+      JButton button = new JButton(I18N.getText("Label.filesystem"));
       button.addActionListener(
           new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -574,13 +618,13 @@ public class MapPropertiesDialog extends JDialog {
     }
 
     private JButton createOKButton() {
-      JButton button = new JButton("OK");
+      JButton button = new JButton(I18N.getText("Button.ok"));
       button.addActionListener(e -> setVisible(false));
       return button;
     }
 
     private JButton createCancelButton() {
-      JButton button = new JButton("Cancel");
+      JButton button = new JButton(I18N.getText("Button.cancel"));
       button.addActionListener(
           e -> {
             selectedAsset = null;

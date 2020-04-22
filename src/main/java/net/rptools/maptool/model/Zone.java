@@ -166,7 +166,7 @@ public class Zone extends BaseModel {
 
   private double unitsPerCell = DEFAULT_UNITS_PER_CELL;
   private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
-  private TopologyMode topologyMode = TopologyMode.VBL;
+  private TopologyMode topologyMode = null; // get default from AppPreferences
 
   private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
   private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
@@ -1356,11 +1356,37 @@ public class Zone extends BaseModel {
     }
   }
 
+  /**
+   * Removes a token, and fires Event.TOKEN_REMOVED.
+   *
+   * @param id the id of the token
+   */
   public void removeToken(GUID id) {
     Token token = tokenMap.remove(id);
     if (token != null) {
       tokenOrderedList.remove(token);
       fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_REMOVED, token));
+    }
+  }
+
+  /**
+   * Removes multiple token, and fires Event.TOKEN_REMOVED once.
+   *
+   * @param ids the list of ids of the tokens
+   */
+  public void removeTokens(List<GUID> ids) {
+    List<Token> removedTokens = new ArrayList<>();
+    if (ids != null) {
+      for (GUID id : ids) {
+        Token token = tokenMap.remove(id);
+        if (token != null) {
+          tokenOrderedList.remove(token);
+          removedTokens.add(token);
+        }
+      }
+      if (!removedTokens.isEmpty()) {
+        fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_REMOVED, removedTokens));
+      }
     }
   }
 

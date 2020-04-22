@@ -38,6 +38,16 @@ public class GlobalPanel extends AbstractMacroPanel {
     init();
   }
 
+  @Override
+  protected List<MacroButtonProperties> getMacroButtonProperties() {
+    return MacroButtonPrefs.getButtonProperties();
+  }
+
+  @Override
+  protected void postChangeMacroButtonProperties(MacroButtonProperties properties) {
+    MacroButtonPrefs.savePreferences(properties);
+  }
+
   public static void deleteButtonGroup(String macroGroup) {
     AbstractButtonGroup.clearHotkeys(MapTool.getFrame().getGlobalPanel(), macroGroup);
     for (MacroButtonProperties nextProp : MacroButtonPrefs.getButtonProperties()) {

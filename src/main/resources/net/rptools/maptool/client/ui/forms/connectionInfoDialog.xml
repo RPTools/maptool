@@ -54,7 +54,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Name:</at>
+            <at name="text">Label.name</at>
             <at name="height">14</at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
@@ -121,7 +121,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Local Address:</at>
+            <at name="text">ConnectionInfoDialog.address.local</at>
             <at name="height">14</at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
@@ -188,7 +188,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">External Address:</at>
+            <at name="text">ConnectionInfoDialog.address.external</at>
             <at name="height">14</at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
@@ -255,7 +255,7 @@
           <at name="classname">com.jeta.forms.components.label.JETALabel</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">Port:</at>
+            <at name="text">ConnectionInfoDialog.port</at>
             <at name="height">14</at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
@@ -323,7 +323,7 @@
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
             <at name="horizontalAlignment">0</at>
-            <at name="text">Server Info</at>
+            <at name="text">ConnectionInfoDialog.title</at>
             <at name="height">17</at>
             <at name="font">
              <object classname="com.jeta.forms.store.properties.FontProperty">
@@ -391,7 +391,7 @@
           <at name="classname">javax.swing.JButton</at>
           <at name="properties">
            <object classname="com.jeta.forms.store.support.PropertyMap">
-            <at name="text">OK</at>
+            <at name="text">Button.ok</at>
             <at name="height">25</at>
             <at name="width">53</at>
             <at name="name">okButton</at>

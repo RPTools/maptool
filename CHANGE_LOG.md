@@ -1,3 +1,73 @@
+Maptool 1.7.0
+=====
+Lots of enhancements, bug fixes and improvements to the code base.
+
+**Some Highlights**
+- New `overlay()` function allows for transparent overlays over the map area. Think MMORPG-like GUI elements.
+- Huge localization effort by Merudo has brought translatable strings to the majority of the MapTool dialogs.
+- MapTool can now import the Dungeondraft VTT export format.
+
+**Enhancements**
+- [#1597][i1597] Macro functions `setTokenPortrait("")` and `setTokenHandout("")` will now clear their respective images from a token if passed an empty string for asset ID.
+- [#1528][i1528] New parameter for dialog and frame functions to prevent scrolling on reload.
+- [#1518][i1518] PDF image extraction in the Resource Library now supports extaction of full page images.
+- [#1506][i1506] MapTool now supports importing Dungeondraft `.dd2vtt` files. This brings in not only the map image but also vision blocking information and the location of light sources.
+- [#1473][i1473] Image tokens (image:token) now included in output of `getInfo("client")`.
+- [#1463][i1463] List of panels in Window menu is now sorted alphabetically.
+- [#1425][i1425] New macro function `overlay()` allows for the creation of multiple transparent HTML map overlays.
+
+**Bug Fixes**
+- [#1642][i1642] VBL mode button wasn't staying in sync with actual mode. Fixed.
+- [#1638][i1638] Macrolinks added via Javascript don't work in frame5/dialog5. Fixed.
+- [#1631][i1638] Add Resource dialog wasn't using theme colors. Fixed.
+- [#1629][i1629] Campaign Properties dialog was too wide, used strings not in translation files, didn't use theme colors. Fixed.
+- [#1614][i1614] Pressing map zoom keys while a frame5 textbox had focus would zoom map. Fixed.
+- [#1613][i1613] User selected theme was not being applied to menus causing text to not be rendered for some languages such as Japanese. Fixed.
+  - Also fixed Edit Token dialog throwing exception for translated VBL tab name.
+- [#1605][i1605] Clicking on FoW button and others after last map was deleted would throw NPE. Fixed.
+- [#1589][i1589] Jumpy token movement on all layers, free-size or fixed, snap or non-snap, fixed for all grid types.
+- [#1588][i1588] Popup for setting initiative from initiative panel showed placeholder instead of token name. Fixed.
+- [#1575][i1575] Unclosed parens in Token properties definition would produce a StringIndexOutOfbounds exception. Fixed.
+- [#1572][i1572] Deleting last map with FoW would produce an NPE if Map menu opened. Fixed.
+- [#1568][i1568] Deleting a map while a token was being dragged would produce a NPE. Fixed.
+- [#1566][i1566] Saving lib:tokens would fail due to colon in name throwing exception. Fixed.
+- [#1564][i1564] Function `playClip()` could fail to create a MediaPlayer throwing an exception. Exception caught and error message presented to user now.
+- [#1551][i1551] Javascript `console.log`not working during page load. Fixed.
+- [#1548][i1548] Table functions `getTableAccess()`, `getTableVisible()`, `setTableAccess()`, `setTableVisible()`, `getTablePickOnce()` and `setTablePickOnce()` were returning strings instead of BigInteger values. Fixed.
+- [#1538][i1538] Close button on Token Editor changed to Cancel.
+- [#1501][i1501] "User data directory is already in use" error when using frame5/dialog5 on two instances of MapTool. Fixed.
+- [#1498][i1498] Tooltip for Language seletion in Preferences had wrong text. Fixed.
+- [#375][i375] Last save location preserved separately for Tokens, Maps & Campaigns.
+
+[i1642]: https://github.com/RPTools/maptool/issues/1642
+[i1638]: https://github.com/RPTools/maptool/issues/1638
+[i1631]: https://github.com/RPTools/maptool/issues/1631
+[i1629]: https://github.com/RPTools/maptool/issues/1629
+[i1614]: https://github.com/RPTools/maptool/issues/1614
+[i1613]: https://github.com/RPTools/maptool/issues/1613
+[i1605]: https://github.com/RPTools/maptool/issues/1605
+[i1597]: https://github.com/RPTools/maptool/issues/1597
+[i1589]: https://github.com/RPTools/maptool/issues/1589
+[i1588]: https://github.com/RPTools/maptool/issues/1588
+[i1575]: https://github.com/RPTools/maptool/issues/1575
+[i1572]: https://github.com/RPTools/maptool/issues/1572
+[i1568]: https://github.com/RPTools/maptool/issues/1568
+[i1566]: https://github.com/RPTools/maptool/issues/1566
+[i1564]: https://github.com/RPTools/maptool/issues/1564
+[i1551]: https://github.com/RPTools/maptool/issues/1551
+[i1548]: https://github.com/RPTools/maptool/issues/1548
+[i1538]: https://github.com/RPTools/maptool/issues/1538
+[i1528]: https://github.com/RPTools/maptool/issues/1528
+[i1518]: https://github.com/RPTools/maptool/issues/1518
+[i1513]: https://github.com/RPTools/maptool/issues/1513
+[i1506]: https://github.com/RPTools/maptool/issues/1506
+[i1501]: https://github.com/RPTools/maptool/issues/1501
+[i1498]: https://github.com/RPTools/maptool/issues/1498
+[i1473]: https://github.com/RPTools/maptool/issues/1473
+[i1463]: https://github.com/RPTools/maptool/issues/1463
+[i1425]: https://github.com/RPTools/maptool/issues/1425
+[i375]: https://github.com/RPTools/maptool/issues/375
+
 Maptool 1.6.1
 =====
 Hotfix for token property issue.

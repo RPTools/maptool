@@ -73,6 +73,7 @@ import net.rptools.maptool.client.ui.chat.ChatProcessor;
 import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
@@ -168,7 +169,7 @@ public class CommandPanel extends JPanel implements Observer {
       identityGUID = token.getId();
       identityName = token.getName();
       avatarPanel.setImage(ImageManager.getImageAndWait(token.getImageAssetId()));
-      setCharacterLabel("Speaking as: " + getIdentity());
+      setCharacterLabel(I18N.getText("panel.Impersonate.identity", getIdentity()));
     } else {
       identityGUID = null;
       identityName = null;
@@ -209,7 +210,7 @@ public class CommandPanel extends JPanel implements Observer {
       setIdentityImpl(token);
       // For the name to be used, even if there is no such token
       identityName = identity;
-      setCharacterLabel("Speaking as: " + getIdentity());
+      setCharacterLabel(I18N.getText("panel.Impersonate.identity", getIdentity()));
     }
     HTMLFrameFactory.impersonateToken();
   }
@@ -244,7 +245,7 @@ public class CommandPanel extends JPanel implements Observer {
       scrollLockButton = new JToggleButton();
       scrollLockButton.setIcon(new ImageIcon(AppStyle.chatScrollImage));
       scrollLockButton.setSelectedIcon(new ImageIcon(AppStyle.chatScrollLockImage));
-      scrollLockButton.setToolTipText("Scroll lock");
+      scrollLockButton.setToolTipText(I18N.getText("action.chat.scrolllock.tooltip"));
       scrollLockButton.setUI(new BasicToggleButtonUI());
       scrollLockButton.setBorderPainted(false);
       scrollLockButton.setFocusPainted(false);
@@ -264,7 +265,7 @@ public class CommandPanel extends JPanel implements Observer {
       chatNotifyButton = new JToggleButton();
       chatNotifyButton.setIcon(new ImageIcon(AppStyle.showTypingNotification));
       chatNotifyButton.setSelectedIcon(new ImageIcon(AppStyle.hideTypingNotification));
-      chatNotifyButton.setToolTipText("Show/hide typing notification");
+      chatNotifyButton.setToolTipText(I18N.getText("action.chat.showhide.tooltip"));
       chatNotifyButton.setUI(new BasicToggleButtonUI());
       chatNotifyButton.setBorderPainted(false);
       chatNotifyButton.setFocusPainted(false);
@@ -629,7 +630,7 @@ public class CommandPanel extends JPanel implements Observer {
       setMinimumSize(new Dimension(15, 15));
       setPreferredSize(new Dimension(15, 15));
       setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-      setToolTipText("Set the color of your speech text");
+      setToolTipText(I18N.getText("action.chat.color.tooltip"));
 
       addMouseListener(
           new MouseAdapter() {

@@ -63,7 +63,6 @@ import net.rptools.maptool.client.ui.TokenLocation;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.Toolbox;
-import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -375,17 +374,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       } else {
         // Single
         Token token = getTokenAt(e.getX(), e.getY());
-        if (token != null) {
-          EditTokenDialog tokenPropertiesDialog = MapTool.getFrame().getTokenPropertiesDialog();
-          tokenPropertiesDialog.showDialog(token);
-
-          if (tokenPropertiesDialog.isTokenSaved()) {
-            MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-            renderer.getZone().putToken(token);
-            renderer.repaint();
-            renderer.flush(token);
-          }
-        }
+        MapTool.getFrame().showTokenPropertiesDialog(token, renderer);
       }
       return;
     }
@@ -421,17 +410,14 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
           renderer.selectToken(token.getId());
           renderer.updateAfterSelection();
         }
-        // Dragging offset for currently selected token
+        // Position on the zone of the click
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-        Rectangle tokenBounds = token.getBounds(renderer.getZone());
 
-        if (token.isSnapToGrid() && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
-          dragOffsetX = (pos.x - tokenBounds.x) - ((int) getZone().getGrid().getCellWidth() / 2);
-          dragOffsetY = (pos.y - tokenBounds.y) - ((int) getZone().getGrid().getCellHeight() / 2);
-        } else {
-          dragOffsetX = pos.x - tokenBounds.x;
-          dragOffsetY = pos.y - tokenBounds.y;
-        }
+        // Offset specific to the token
+        Point tokenOffset = token.getDragOffset(getZone());
+
+        dragOffsetX = pos.x - tokenOffset.x;
+        dragOffsetY = pos.y - tokenOffset.y;
       }
     } else {
       if (SwingUtilities.isLeftMouseButton(e)) {
@@ -495,20 +481,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         // DRAG TOKEN COMPLETE
         if (isDraggingToken) {
           stopTokenDrag();
-        }
-
-        // SELECT SINGLE TOKEN
-        Token token = getTokenAt(e.getX(), e.getY());
-        if (token != null
-            && SwingUtilities.isLeftMouseButton(e)
-            && !isDraggingToken
-            && !SwingUtil.isShiftDown(e)) {
-          // Only if it isn't already being moved
-          if (!renderer.isTokenMoving(token) && !renderer.isOnlyTokenSelected(token)) {
-            renderer.clearSelectedTokens();
-            renderer.selectToken(token.getId());
-            renderer.updateAfterSelection();
-          }
         }
       } finally {
         isDraggingToken = false;
@@ -678,7 +650,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
       if (SwingUtil.isControlDown(e)
           && tokenBeingResized.isSnapToGrid()
-          && tokenBeingResized.isObjectStamp()) {
+          && !tokenBeingResized.isBackgroundStamp()) {
         // Account for the 1/2 cell on each side of the stamp (since it's anchored in the center)
         newWidth += renderer.getZone().getGrid().getSize();
         newHeight += renderer.getZone().getGrid().getSize();
@@ -861,7 +833,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
    */
   public boolean handleDragToken(ZonePoint zonePoint) {
     // TODO: Optimize this (combine with calling code)
-    if (tokenBeingDragged.isSnapToGrid()) {
+    if (tokenBeingDragged.isSnapToGrid()
+        && getZone().getGrid().getCapabilities().isSnapToGridSupported()) {
       zonePoint.translate(-dragOffsetX, -dragOffsetY);
       CellPoint cellUnderMouse = renderer.getZone().getGrid().convert(zonePoint);
       zonePoint = renderer.getZone().getGrid().convert(cellUnderMouse);

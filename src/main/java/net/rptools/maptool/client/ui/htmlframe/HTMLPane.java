@@ -26,6 +26,7 @@ import java.util.regex.Matcher;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
@@ -95,12 +96,56 @@ public class HTMLPane extends JEditorPane {
     ToolTipManager.sharedInstance().registerComponent(this);
   }
 
+  /** @return the rule for the body tag */
+  public String getRuleBody() {
+    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
+  }
+
   public void addActionListener(ActionListener listener) {
     actionListeners = AWTEventMulticaster.add(actionListeners, listener);
   }
 
   public void removeActionListener(ActionListener listener) {
     actionListeners = AWTEventMulticaster.remove(actionListeners, listener);
+  }
+
+  /**
+   * Set the default cursor of the editor kit.
+   *
+   * @param cursor the cursor to set
+   */
+  public void setEditorKitDefaultCursor(Cursor cursor) {
+    editorKit.setDefaultCursor(cursor);
+  }
+
+  /**
+   * Flush the pane, set the new html, and set the caret to zero.
+   *
+   * @param html the html to set
+   * @param scrollReset whether the scrollbar should be reset
+   */
+  public void updateContents(final String html, boolean scrollReset) {
+    EventQueue.invokeLater(
+        () -> {
+          DefaultCaret caret = (DefaultCaret) getCaret();
+          caret.setUpdatePolicy(
+              scrollReset ? DefaultCaret.UPDATE_WHEN_ON_EDT : DefaultCaret.NEVER_UPDATE);
+          editorKit.flush();
+          setText(html);
+          if (scrollReset) {
+            setCaretPosition(0);
+          }
+        });
+  }
+
+  /** Flushes any caching for the panel. */
+  public void flush() {
+    EventQueue.invokeLater(
+        new Runnable() {
+          public void run() {
+            editorKit.flush();
+          }
+        });
   }
 
   /**
@@ -188,7 +233,7 @@ public class HTMLPane extends JEditorPane {
         style.removeStyle(s);
       }
 
-      style.addRule(String.format(CSS_RULE_BODY, AppPreferences.getFontSize()));
+      style.addRule(getRuleBody());
       style.addRule(CSS_RULE_DIV);
       style.addRule(CSS_RULE_SPAN);
       parse.parse(new StringReader(text), new ParserCallBack(), true);

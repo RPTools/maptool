@@ -33,20 +33,26 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import javafx.application.Platform;
+import javafx.scene.ImageCursor;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.tool.MeasureTool;
 
 /** */
 public class SwingUtil {
   public static Cursor emptyCursor;
+  public static javafx.scene.Cursor emptyCursorFX;
+  private static final String PATH_EMPTY = "net/rptools/lib/swing/image/empty.png";
 
   static {
     try {
       emptyCursor =
           Toolkit.getDefaultToolkit()
-              .createCustomCursor(
-                  ImageUtil.getImage("net/rptools/lib/swing/image/empty.png"), new Point(0, 0), "");
+              .createCustomCursor(ImageUtil.getImage(PATH_EMPTY), new Point(0, 0), "");
+      Platform.runLater(
+          () -> emptyCursorFX = new ImageCursor(new javafx.scene.image.Image(PATH_EMPTY), 0, 0));
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
@@ -137,12 +143,18 @@ public class SwingUtil {
   }
 
   public static void constrainTo(Dimension dim, int size) {
+    constrainTo(dim, size, true);
+  }
+
+  public static void constrainTo(Dimension dim, int size, boolean grow) {
     boolean widthBigger = dim.width > dim.height;
 
     if (widthBigger) {
+      if (!grow) size = Math.min(size, dim.width);
       dim.height = (int) ((dim.height / (double) dim.width) * size);
       dim.width = size;
     } else {
+      if (!grow) size = Math.min(size, dim.height);
       dim.width = (int) ((dim.width / (double) dim.height) * size);
       dim.height = size;
     }
@@ -290,5 +302,54 @@ public class SwingUtil {
 
   public static boolean hasComponent(JComponent container, String name) {
     return getComponent(container, name) != null;
+  }
+
+  /**
+   * Returns the JavaFX cursor equivalent of a Swing cursor
+   *
+   * @param cursor the Swing cursor
+   * @return the JavaFX cursor
+   */
+  public static javafx.scene.Cursor swingCursorToFX(Cursor cursor) {
+    if (cursor == null) {
+      return javafx.scene.Cursor.DEFAULT;
+    }
+    if (cursor == emptyCursor) {
+      return emptyCursorFX;
+    }
+    if (cursor == MeasureTool.getMeasureCursor()) {
+      return MeasureTool.getMeasureCursorFX();
+    }
+
+    switch (cursor.getType()) {
+      case Cursor.CROSSHAIR_CURSOR:
+        return javafx.scene.Cursor.CROSSHAIR;
+      case Cursor.E_RESIZE_CURSOR:
+        return javafx.scene.Cursor.E_RESIZE;
+      case Cursor.HAND_CURSOR:
+        return javafx.scene.Cursor.HAND;
+      case Cursor.MOVE_CURSOR:
+        return javafx.scene.Cursor.MOVE;
+      case Cursor.N_RESIZE_CURSOR:
+        return javafx.scene.Cursor.N_RESIZE;
+      case Cursor.NE_RESIZE_CURSOR:
+        return javafx.scene.Cursor.NE_RESIZE;
+      case Cursor.NW_RESIZE_CURSOR:
+        return javafx.scene.Cursor.NW_RESIZE;
+      case Cursor.S_RESIZE_CURSOR:
+        return javafx.scene.Cursor.S_RESIZE;
+      case Cursor.SE_RESIZE_CURSOR:
+        return javafx.scene.Cursor.SE_RESIZE;
+      case Cursor.SW_RESIZE_CURSOR:
+        return javafx.scene.Cursor.SW_RESIZE;
+      case Cursor.TEXT_CURSOR:
+        return javafx.scene.Cursor.TEXT;
+      case Cursor.W_RESIZE_CURSOR:
+        return javafx.scene.Cursor.W_RESIZE;
+      case Cursor.WAIT_CURSOR:
+        return javafx.scene.Cursor.WAIT;
+      default:
+        return javafx.scene.Cursor.DEFAULT;
+    }
   }
 }

@@ -15,10 +15,7 @@
 package net.rptools.maptool.client.ui.campaignproperties;
 
 import com.jeta.forms.components.panel.FormPanel;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -36,24 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import javax.swing.AbstractAction;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JEditorPane;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
@@ -83,15 +68,11 @@ public class CampaignPropertiesDialog extends JDialog {
   private Campaign campaign;
 
   public CampaignPropertiesDialog(JFrame owner) {
-    super(owner, "Campaign Properties", true);
-    setMinimumSize(new Dimension(450, 450)); // These sizes mess up my custom LAF settings. :(
-    // setPreferredSize(new Dimension(450, 450)); // If the dialog were packed() would they be
-    // needed?
+    super(owner, I18N.getText("CampaignPropertiesDialog.label.title"), true);
 
     initialize();
-    pack(); // FJE
 
-    // setSize(635, 605);
+    pack(); // FJE
   }
 
   public Status getStatus() {
@@ -110,13 +91,15 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel = new FormPanel("net/rptools/maptool/client/ui/forms/campaignPropertiesDialog.xml");
+    formPanel =
+        new FormPanelI18N("net/rptools/maptool/client/ui/forms/campaignPropertiesDialog.xml");
 
     initTokenPropertiesDialog(formPanel);
     tokenStatesController = new TokenStatesController(formPanel);
     tokenBarController = new TokenBarController(formPanel);
     tokenBarController.setNames(tokenStatesController.getNames());
 
+    initHelp();
     initOKButton();
     initCancelButton();
     initAddRepoButton();
@@ -157,6 +140,18 @@ public class CampaignPropertiesDialog extends JDialog {
 
   public JTextField getNewServerTextField() {
     return formPanel.getTextField("newServer");
+  }
+
+  private void initHelp() {
+    JEditorPane lightHelp = (JEditorPane) formPanel.getComponentByName("lightHelp");
+    lightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+    lightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.light"));
+    lightHelp.setCaretPosition(0);
+
+    JEditorPane sightHelp = (JEditorPane) formPanel.getComponentByName("sightHelp");
+    sightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+    sightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.sight"));
+    sightHelp.setCaretPosition(0);
   }
 
   private void initAddRepoButton() {
@@ -222,8 +217,7 @@ public class CampaignPropertiesDialog extends JDialog {
   }
 
   private void copyCampaignToUI(CampaignProperties campaignProperties) {
-    JEditorPane epane = (JEditorPane) formPanel.getComponentByName("lightHelp");
-    epane.setCaretPosition(0);
+
     tokenPropertiesPanel.copyCampaignToUI(campaignProperties);
     updateRepositoryList(campaignProperties);
 

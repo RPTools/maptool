@@ -82,6 +82,7 @@ import net.rptools.maptool.client.ui.SysInfoDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
+import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.io.FTPClient;
 import net.rptools.maptool.client.ui.io.FTPTransferObject;
 import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
@@ -91,6 +92,7 @@ import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.utilities.DungeonDraftImporter;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -832,32 +834,67 @@ public class AppActions {
    * the set exist in the zone, or because the user doesn't have permission to delete the tokens)
    * then the {@link MapTool#SND_INVALID_OPERATION} sound is played.
    *
-   * <p>If any tokens<i>are</i> deleted, then the selection set for the zone is cleared.
+   * <p>If any tokens <i>are</i> deleted, then the selection set for the zone is cleared.
    *
    * @param zone the {@link Zone} the tokens belong to.
    * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
    */
   public static void cutTokens(Zone zone, Set<GUID> tokenSet) {
+    cutOrDeleteTokens(true, zone, tokenSet);
+  }
+
+  /**
+   * Delete tokens in the set from the given zone.
+   *
+   * <p>If no tokens are deleted (because the incoming set is empty, because none of the tokens in
+   * the set exist in the zone, or because the user doesn't have permission to delete the tokens)
+   * then the {@link MapTool#SND_INVALID_OPERATION} sound is played.
+   *
+   * <p>If any tokens <i>are</i> deleted, then the selection set for the zone is cleared.
+   *
+   * @param zone the {@link Zone} the tokens belong to.
+   * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
+   */
+  public static void deleteTokens(Zone zone, Set<GUID> tokenSet) {
+    cutOrDeleteTokens(false, zone, tokenSet);
+  }
+
+  /**
+   * Cut or Delete tokens in the set from the given zone.
+   *
+   * <p>If no tokens are deleted (because the incoming set is empty, because none of the tokens in
+   * the set exist in the zone, or because the user doesn't have permission to delete the tokens)
+   * then the {@link MapTool#SND_INVALID_OPERATION} sound is played.
+   *
+   * <p>If any tokens <i>are</i> deleted, then the selection set for the zone is cleared.
+   *
+   * @param copy whether the tokens should be copied and deleted (cut) or just deleted
+   * @param zone the {@link Zone} the tokens belong to.
+   * @param tokenSet a {code Set} containing ght ID's of the tokens to cut.
+   */
+  public static void cutOrDeleteTokens(Boolean copy, Zone zone, Set<GUID> tokenSet) {
     // Only cut if some tokens are selected. Don't want to accidentally
     // lose what might already be in the clipboard.
-    boolean anythingDeleted = false;
+    List<GUID> tokensToRemove = new ArrayList<>();
     if (!tokenSet.isEmpty()) {
-      copyTokens(tokenSet);
-
-      // delete tokens
+      if (copy) {
+        copyTokens(tokenSet);
+      }
+      // add tokens to delete to the list
       for (GUID tokenGUID : tokenSet) {
         Token token = zone.getToken(tokenGUID);
         if (AppUtil.playerOwns(token)) {
-          anythingDeleted = true;
-          zone.removeToken(tokenGUID);
-          MapTool.serverCommand().removeToken(zone.getId(), tokenGUID);
+          tokensToRemove.add(tokenGUID);
         }
       }
     }
-    if (anythingDeleted) {
+    if (!tokensToRemove.isEmpty()) {
+      MapTool.serverCommand().removeTokens(zone.getId(), tokensToRemove);
       MapTool.getFrame().getCurrentZoneRenderer().clearSelectedTokens();
       MapTool.getFrame().getCurrentZoneRenderer().updateAfterSelection();
-      keepIdsOnPaste = true; // pasted tokens should have same ids as cut ones
+      if (copy) {
+        keepIdsOnPaste = true; // pasted tokens should have same ids as cut ones
+      }
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
     }
@@ -2053,7 +2090,28 @@ public class AppActions {
           policy.setIsMovementLocked(!policy.isMovementLocked());
 
           MapTool.updateServerPolicy(policy);
-          MapTool.getServer().updateServerPolicy(policy);
+        }
+      };
+
+  /** Toggle to enable / disable player use of the token editor. */
+  public static final Action TOGGLE_TOKEN_EDITOR_LOCK =
+      new AdminClientAction() {
+        {
+          init("action.toggleTokenEditorLock");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return MapTool.getServerPolicy().isTokenEditorLocked();
+        }
+
+        @Override
+        protected void executeAction(ActionEvent e) {
+
+          ServerPolicy policy = MapTool.getServerPolicy();
+          policy.setIsTokenEditorLocked(!policy.isTokenEditorLocked());
+
+          MapTool.updateServerPolicy(policy);
         }
       };
 
@@ -2100,6 +2158,7 @@ public class AppActions {
                   policy.setPlayersReceiveCampaignMacros(
                       serverProps.getPlayersReceiveCampaignMacros());
                   policy.setIsMovementLocked(MapTool.getServerPolicy().isMovementLocked());
+                  policy.setIsTokenEditorLocked(MapTool.getServerPolicy().isTokenEditorLocked());
 
                   // Tool Tips for unformatted inline rolls.
                   policy.setUseToolTipsForDefaultRollFormat(
@@ -2358,8 +2417,7 @@ public class AppActions {
         if (AppState.isSaving()) {
           int count = 30;
           StaticMessageDialog progressDialog =
-              new StaticMessageDialog(
-                  "Waiting up to " + count + " seconds for autosave to finish...");
+              new StaticMessageDialog(I18N.getText("msg.autosave.wait", count));
           MapTool.getFrame().showFilledGlassPane(progressDialog);
           do {
             try {
@@ -2626,7 +2684,7 @@ public class AppActions {
         @Override
         protected void executeAction(ActionEvent ae) {
           ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-          JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
+          JFileChooser chooser = MapTool.getFrame().getSaveMapFileChooser();
           chooser.setFileFilter(MapTool.getFrame().getMapFileFilter());
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           chooser.setSelectedFile(new File(zr.getZone().getName()));
@@ -2637,7 +2695,7 @@ public class AppActions {
               // Lets do a better job and actually check the end of the file name for the extension
               mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
               PersistenceUtil.saveMap(zr.getZone(), mapFile);
-              AppPreferences.setSaveDir(mapFile.getParentFile());
+              AppPreferences.setSaveMapDir(mapFile.getParentFile());
               MapTool.showInformation("msg.info.mapSaved");
             } catch (IOException ioe) {
               MapTool.showError("msg.error.failedSaveMap", ioe);
@@ -2697,6 +2755,37 @@ public class AppActions {
         }
       };
 
+  public static final ClientAction IMPORT_DUNGEON_DRAFT_MAP =
+      new ClientAction() {
+        {
+          init("action.import.dungeondraft");
+        }
+
+        @Override
+        public boolean isAvailable() {
+          return MapTool.isHostingServer()
+              || (MapTool.getPlayer() != null && MapTool.getPlayer().isGM());
+        }
+
+        @Override
+        protected void executeAction(ActionEvent e) {
+          boolean isConnected = !MapTool.isHostingServer() && !MapTool.isPersonalServer();
+          JFileChooser chooser = new MapPreviewFileChooser();
+          chooser.setDialogTitle(I18N.getText("action.import.dungeondraft.dialog.title"));
+          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          chooser.setFileFilter(MapTool.getFrame().getDungeonDraftFilter());
+
+          if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+            File ddFile = chooser.getSelectedFile();
+            try {
+              new DungeonDraftImporter(ddFile).importVTT();
+            } catch (IOException ioException) {
+              MapTool.showError("dungeondraft.import.ioError", ioException);
+            }
+          }
+        }
+      };
+
   private static class MapPreviewFileChooser extends PreviewPanelFileChooser {
     MapPreviewFileChooser() {
       super();
@@ -2716,52 +2805,48 @@ public class AppActions {
     new Thread() {
       @Override
       public void run() {
+        StaticMessageDialog progressDialog =
+            new StaticMessageDialog(I18N.getText("msg.info.mapLoading"));
+
         try {
-          StaticMessageDialog progressDialog =
-              new StaticMessageDialog(I18N.getText("msg.info.mapLoading"));
+          // I'm going to get struck by lighting for writing code like this.
+          // CLEAN ME CLEAN ME CLEAN ME ! I NEED A SWINGWORKER !
+          MapTool.getFrame().showFilledGlassPane(progressDialog);
 
-          try {
-            // I'm going to get struck by lighting for writing code like this.
-            // CLEAN ME CLEAN ME CLEAN ME ! I NEED A SWINGWORKER !
-            MapTool.getFrame().showFilledGlassPane(progressDialog);
+          // Load
+          final PersistedMap map = PersistenceUtil.loadMap(mapFile);
 
-            // Load
-            final PersistedMap map = PersistenceUtil.loadMap(mapFile);
-
-            if (map != null) {
-              AppPreferences.setLoadDir(mapFile.getParentFile());
-              if ((map.zone.getExposedArea() != null && !map.zone.getExposedArea().isEmpty())
-                  || (map.zone.getExposedAreaMetaData() != null
-                      && !map.zone.getExposedAreaMetaData().isEmpty())) {
-                boolean ok =
-                    MapTool.confirm(
-                        "<html>Map contains exposed areas of fog.<br>Do you want to reset all of the fog?");
-                if (ok == true) {
-                  // This fires a ModelChangeEvent, but that shouldn't matter
-                  map.zone.clearExposedArea(false);
-                }
+          if (map != null) {
+            AppPreferences.setLoadDir(mapFile.getParentFile());
+            if ((map.zone.getExposedArea() != null && !map.zone.getExposedArea().isEmpty())
+                || (map.zone.getExposedAreaMetaData() != null
+                    && !map.zone.getExposedAreaMetaData().isEmpty())) {
+              boolean ok =
+                  MapTool.confirm(
+                      "<html>Map contains exposed areas of fog.<br>Do you want to reset all of the fog?");
+              if (ok == true) {
+                // This fires a ModelChangeEvent, but that shouldn't matter
+                map.zone.clearExposedArea(false);
               }
-              MapTool.addZone(map.zone);
-
-              MapTool.getAutoSaveManager().restart();
-              MapTool.getAutoSaveManager().tidy();
-
-              // Flush the images associated with the current
-              // campaign
-              // Do this juuuuuust before we get ready to show the
-              // new campaign, since we
-              // don't want the old campaign reloading images
-              // while we loaded the new campaign
-
-              // XXX (FJE) Is this call even needed for loading
-              // maps? Probably not...
-              ImageManager.flush();
             }
-          } finally {
-            MapTool.getFrame().hideGlassPane();
+            MapTool.addZone(map.zone);
+
+            MapTool.getAutoSaveManager().restart();
+            MapTool.getAutoSaveManager().tidy();
+
+            // Flush the images associated with the current
+            // campaign
+            // Do this juuuuuust before we get ready to show the
+            // new campaign, since we
+            // don't want the old campaign reloading images
+            // while we loaded the new campaign
+
+            // XXX (FJE) Is this call even needed for loading
+            // maps? Probably not...
+            ImageManager.flush();
           }
-        } catch (IOException ioe) {
-          MapTool.showError("msg.error.failedLoadMap", ioe);
+        } finally {
+          MapTool.getFrame().hideGlassPane();
         }
       }
     }.start();
@@ -2916,7 +3001,8 @@ public class AppActions {
                 @Override
                 public void run() {
                   Zone zone = ZoneFactory.createZone();
-                  MapPropertiesDialog newMapDialog = new MapPropertiesDialog(MapTool.getFrame());
+                  MapPropertiesDialog newMapDialog =
+                      MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
                   newMapDialog.setZone(zone);
 
                   newMapDialog.setVisible(true);
@@ -2942,7 +3028,8 @@ public class AppActions {
                 @Override
                 public void run() {
                   Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-                  MapPropertiesDialog newMapDialog = new MapPropertiesDialog(MapTool.getFrame());
+                  MapPropertiesDialog newMapDialog =
+                      MapPropertiesDialog.createMapPropertiesDialog(MapTool.getFrame());
                   newMapDialog.setZone(zone);
                   newMapDialog.setVisible(true);
                   // Too many things can change to send them 1 by 1 to the client... just resend the
@@ -3044,6 +3131,35 @@ public class AppActions {
             MapTool.getFrame().getCurrentZoneRenderer().repaint();
         }
       };
+
+  /** Class representing the turn on / turn off action of an overlay. */
+  public static class ToggleOverlayAction extends ClientAction {
+    private final HTMLOverlayManager overlayManager;
+
+    /**
+     * Creates a toggle action from an overlayManager.
+     *
+     * @param overlayManager the overlayManager to toggle
+     */
+    public ToggleOverlayAction(HTMLOverlayManager overlayManager) {
+      this.overlayManager = overlayManager;
+    }
+
+    @Override
+    public boolean isSelected() {
+      return overlayManager.isVisible();
+    }
+
+    @Override
+    public boolean isAvailable() {
+      return true;
+    }
+
+    @Override
+    protected void executeAction(ActionEvent e) {
+      overlayManager.setVisible(!isSelected());
+    }
+  }
 
   public static class ToggleWindowAction extends ClientAction {
     private final MTFrame mtFrame;
