@@ -137,6 +137,9 @@ public class Token extends BaseModel implements Cloneable {
     setScaleXY,
     setNotes,
     setGMNotes,
+    saveMacro,
+    saveMacroList,
+    deleteMacro,
     setX,
     setY,
     setXY,
@@ -1745,6 +1748,12 @@ public class Token extends BaseModel implements Cloneable {
     return maxIndex + 1;
   }
 
+  /**
+   * Returns the macroPropertiesMap of the token, or a blank map if not permitted.
+   *
+   * @param secure whether there should be a check for player ownership
+   * @return the map
+   */
   public Map<Integer, Object> getMacroPropertiesMap(boolean secure) {
     if (macroPropertiesMap == null) {
       macroPropertiesMap = new HashMap<Integer, Object>();
@@ -1753,7 +1762,7 @@ public class Token extends BaseModel implements Cloneable {
       loadOldMacros();
     }
     if (secure && !AppUtil.playerOwns(this)) {
-      return new HashMap<Integer, Object>();
+      return new HashMap<Integer, Object>(); // blank map
     } else {
       return macroPropertiesMap;
     }
@@ -1785,10 +1794,16 @@ public class Token extends BaseModel implements Cloneable {
     return list;
   }
 
-  public void replaceMacroList(List<MacroButtonProperties> newMacroList) {
-    // used by the token edit dialog, which will handle resetting panels and putting token to
-    // zone
-    macroPropertiesMap.clear();
+  /**
+   * Add a list of macros to the token.
+   *
+   * @param newMacroList the macro list to add
+   * @param clearOld whether the old macros at other indexes should be removed
+   */
+  public void saveMacroList(List<MacroButtonProperties> newMacroList, boolean clearOld) {
+    if (clearOld) {
+      macroPropertiesMap.clear();
+    }
     for (MacroButtonProperties macro : newMacroList) {
       if (macro.getLabel() == null
           || macro.getLabel().trim().length() == 0
@@ -1796,10 +1811,25 @@ public class Token extends BaseModel implements Cloneable {
         continue;
       }
       macroPropertiesMap.put(macro.getIndex(), macro);
-
-      // Allows the token macro panels to update only if a macro changes
-      fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
     }
+  }
+
+  /**
+   * Saves the macro on the token.
+   *
+   * @param prop the properties of the macro
+   */
+  public void saveMacro(MacroButtonProperties prop) {
+    getMacroPropertiesMap(false).put(prop.getIndex(), prop);
+  }
+
+  /**
+   * Deletes the macro at the given index.
+   *
+   * @param index the index of the macro
+   */
+  public void deleteMacro(int index) {
+    getMacroPropertiesMap(false).remove(index);
   }
 
   public List<String> getMacroNames(boolean secure) {
@@ -1819,6 +1849,12 @@ public class Token extends BaseModel implements Cloneable {
     return false;
   }
 
+  /**
+   * Saves the macro, resets the token panels, sends putToken to the server, and fires
+   * MACRO_CHANGED.
+   *
+   * @param prop the macro to save
+   */
   public void saveMacroButtonProperty(MacroButtonProperties prop) {
     getMacroPropertiesMap(false).put(prop.getIndex(), prop);
     MapTool.getFrame().resetTokenPanels();
@@ -1828,6 +1864,12 @@ public class Token extends BaseModel implements Cloneable {
     fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
   }
 
+  /**
+   * Deletes the macro, resets the token panels, sends putToken to the server, and fires
+   * MACRO_CHANGED.
+   *
+   * @param prop the macro to delete
+   */
   public void deleteMacroButtonProperty(MacroButtonProperties prop) {
     getMacroPropertiesMap(false).remove(prop.getIndex());
     MapTool.serverCommand().putToken(getZoneRenderer().getZone().getId(), this);
@@ -2336,6 +2378,7 @@ public class Token extends BaseModel implements Cloneable {
    */
   public void updateProperty(Zone zone, Update update, Object[] parameters) {
     boolean lightChanged = false;
+    boolean macroChanged = false;
     switch (update) {
       case setState:
         setState(parameters[0].toString(), parameters[1]);
@@ -2515,9 +2558,24 @@ public class Token extends BaseModel implements Cloneable {
         }
         setSightType((String) parameters[0]);
         break;
+      case saveMacro:
+        saveMacro((MacroButtonProperties) parameters[0]);
+        macroChanged = true;
+        break;
+      case saveMacroList:
+        saveMacroList((List<MacroButtonProperties>) parameters[0], (boolean) parameters[1]);
+        macroChanged = true;
+        break;
+      case deleteMacro:
+        deleteMacro((int) parameters[0]);
+        macroChanged = true;
+        break;
     }
     if (lightChanged) {
       getZoneRenderer().flushLight(); // flush lights if it changed
+    }
+    if (macroChanged) {
+      fireModelChangeEvent(new ModelChangeEvent(this, ChangeEvent.MACRO_CHANGED, this));
     }
     zone.tokenChanged(this); // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
   }
