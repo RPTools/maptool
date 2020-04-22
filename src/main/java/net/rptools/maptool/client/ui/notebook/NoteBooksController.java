@@ -155,7 +155,7 @@ public class NoteBooksController {
             "0.0.1",
             nameSpace,
             MapTool.getPlayer().getName(),
-            "",
+            I18N.getText("noteBooks.defaultNewLicense"),
             "",
             I18N.getText("noteBooks.defaultNewReadMe"));
     MapTool.getCampaign().getNoteBookManager().addNoteBook(noteBook);

@@ -30,6 +30,8 @@ public class MarkDownPane extends AnchorPane {
 
   private final HTMLWebViewManager htmlWebViewManager = new HTMLWebViewManager();
 
+  private String rawText = "";
+
   public MarkDownPane(ParserEmulationProfile profile) {
 
     htmlWebViewManager.setupWebView(new WebView());
@@ -45,6 +47,8 @@ public class MarkDownPane extends AnchorPane {
   }
 
   public void setText(String markDownText) {
+    rawText = markDownText;
+
     MutableDataHolder options = new MutableDataSet();
     options.setFrom(parserEmulationProfile);
 
@@ -55,5 +59,9 @@ public class MarkDownPane extends AnchorPane {
 
     WebView webView = htmlWebViewManager.getWebView();
     webView.getEngine().loadContent(renderer.render(document));
+  }
+
+  public String getText() {
+    return rawText;
   }
 }

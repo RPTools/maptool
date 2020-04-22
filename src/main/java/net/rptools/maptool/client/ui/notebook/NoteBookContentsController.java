@@ -19,18 +19,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javax.swing.SwingUtilities;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
-import net.rptools.maptool.client.ui.javfx.vieweditpane.ViewEditMarkDownPane;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import net.rptools.maptool.client.ui.MarkDownPane;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.notebook.NoteBook;
 
@@ -44,6 +41,9 @@ public class NoteBookContentsController {
   private boolean urlHasError = false;
 
   private NoteBook noteBook;
+
+  private MarkDownPane readMeMarkDownPane = new MarkDownPane(ParserEmulationProfile.GITHUB_DOC);
+  private TextArea readMeEditor = new TextArea();
 
   @FXML // ResourceBundle that was given to the FXMLLoader
   private ResourceBundle resources;
@@ -72,11 +72,23 @@ public class NoteBookContentsController {
   @FXML // fx:id="dependencyTableView"
   private TableView<?> dependencyTableView; // Value injected by FXMLLoader
 
-  @FXML // fx:id="licenseButton"
-  private Button licenseButton; // Value injected by FXMLLoader
+  @FXML // fx:id="nameSpaceErrorLabel"
+  private Label nameSpaceErrorLabel; // Value injected by FXMLLoader
 
-  @FXML // fx:id="readMeButton"
-  private Button readMeButton; // Value injected by FXMLLoader
+  @FXML // fx:id="versionErrorLabel"
+  private Label versionErrorLabel; // Value injected by FXMLLoader
+
+  @FXML // fx:id="urlErrorLabel"
+  private Label urlErrorLabel; // Value injected by FXMLLoader
+
+  @FXML // fx:id="readMeContentPane"
+  private AnchorPane readMeContentPane; // Value injected by FXMLLoader
+
+  @FXML // fx:id="licenseTextArea"
+  private TextArea licenseTextArea; // Value injected by FXMLLoader
+
+  @FXML // fx:id="readMeButtonHBox"
+  private HBox readMeButtonHBox; // Value injected by FXMLLoader
 
   @FXML // fx:id="editButton"
   private Button editButton; // Value injected by FXMLLoader
@@ -86,15 +98,6 @@ public class NoteBookContentsController {
 
   @FXML // fx:id="cancelButton"
   private Button cancelButton; // Value injected by FXMLLoader
-
-  @FXML // fx:id="nameSpaceErrorLabel"
-  private Label nameSpaceErrorLabel; // Value injected by FXMLLoader
-
-  @FXML // fx:id="versionErrorLabel"
-  private Label versionErrorLabel; // Value injected by FXMLLoader
-
-  @FXML // fx:id="urlErrorLabel"
-  private Label urlErrorLabel; // Value injected by FXMLLoader
 
   @FXML // This method is called by the FXMLLoader when initialization is complete
   void initialize() {
@@ -112,22 +115,24 @@ public class NoteBookContentsController {
         : "fx:id=\"descriptionTextArea\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
     assert dependencyTableView != null
         : "fx:id=\"dependencyTableView\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
-    assert licenseButton != null
-        : "fx:id=\"licenseButton\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
-    assert readMeButton != null
-        : "fx:id=\"readMeButton\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
-    assert editButton != null
-        : "fx:id=\"editButton\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
-    assert okButton != null
-        : "fx:id=\"okButton\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
-    assert cancelButton != null
-        : "fx:id=\"cancelButton\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
     assert nameSpaceErrorLabel != null
         : "fx:id=\"nameSpaceErrorLabel\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
     assert versionErrorLabel != null
         : "fx:id=\"versionErrorLabel\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
     assert urlErrorLabel != null
         : "fx:id=\"urlErrorLabel\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
+    assert readMeContentPane != null
+        : "fx:id=\"readMeContentPane\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
+    assert licenseTextArea != null
+        : "fx:id=\"licenseTextArea\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
+    assert readMeButtonHBox != null
+        : "fx:id=\"readMeButtonHBox\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
+    assert editButton != null
+        : "fx:id=\"editButton\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
+    assert okButton != null
+        : "fx:id=\"okButton\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
+    assert cancelButton != null
+        : "fx:id=\"cancelButton\" was not injected: check your FXML file 'NoteBookContents.fxml'.";
 
     namespaceTextField
         .textProperty()
@@ -155,48 +160,43 @@ public class NoteBookContentsController {
           setEditMode(false);
         });
 
-    readMeButton.setOnAction(e -> displayReadMe());
-  }
-
-  private void displayReadMe() {
-    ViewEditMarkDownPane markDownPane =
-        ViewEditMarkDownPane.createViewOnlyPane(ParserEmulationProfile.GITHUB_DOC);
-    System.err.println(noteBook.getReadMe());
-    markDownPane.setText(noteBook.getReadMe());
-    Scene scene = new Scene(markDownPane);
-    JFXPanel jfxPanel = new JFXPanel();
-    jfxPanel.setScene(scene);
-    SwingUtilities.invokeLater(
-        () -> {
-          SwingJavaFXDialog swingJavaFXDialog =
-              new SwingJavaFXDialog(
-                  I18N.getText("noteBook.title"), MapTool.getFrame(), jfxPanel, false);
-          swingJavaFXDialog.showDialog();
-        });
+    readMeContentPane.getChildren().add(readMeMarkDownPane);
+    AnchorPane.setTopAnchor(readMeMarkDownPane, 0.0);
+    AnchorPane.setBottomAnchor(readMeMarkDownPane, 0.0);
+    AnchorPane.setLeftAnchor(readMeMarkDownPane, 0.0);
+    AnchorPane.setRightAnchor(readMeMarkDownPane, 0.0);
+    AnchorPane.setTopAnchor(readMeEditor, 0.0);
+    AnchorPane.setBottomAnchor(readMeEditor, 0.0);
+    AnchorPane.setLeftAnchor(readMeEditor, 0.0);
+    AnchorPane.setRightAnchor(readMeEditor, 0.0);
   }
 
   private void updateNoteBook(NoteBook nb) {
-    noteBook.setName(nameTextField.getText());
-    noteBook.setNamespace(namespaceTextField.getText());
-    noteBook.setVersion(versionTextField.getText());
-    noteBook.setAuthor(authorTextField.getText());
-    noteBook.setURL(urlTextField.getText());
-    noteBook.setDescription(descriptionTextArea.getText());
+    nb.setName(nameTextField.getText());
+    nb.setNamespace(namespaceTextField.getText());
+    nb.setVersion(versionTextField.getText());
+    nb.setAuthor(authorTextField.getText());
+    nb.setURL(urlTextField.getText());
+    nb.setDescription(descriptionTextArea.getText());
+    nb.setReadMe(readMeEditor.getText());
+    nb.setLicense(licenseTextArea.getText());
   }
 
-  private void setFieldsFromNoteBook(NoteBook noteBook) {
-    nameTextField.setText(noteBook.getName());
-    versionTextField.setText(noteBook.getVersion());
-    namespaceTextField.setText(noteBook.getNamespace());
-    authorTextField.setText(noteBook.getAuthor());
-    urlTextField.setText(noteBook.getURL());
-    descriptionTextArea.setText(noteBook.getDescription());
-    if (noteBook.isInternal()) {
+  private void setFieldsFromNoteBook(NoteBook nb) {
+    nameTextField.setText(nb.getName());
+    versionTextField.setText(nb.getVersion());
+    namespaceTextField.setText(nb.getNamespace());
+    authorTextField.setText(nb.getAuthor());
+    urlTextField.setText(nb.getURL());
+    descriptionTextArea.setText(nb.getDescription());
+    readMeMarkDownPane.setText(nb.getReadMe());
+    if (nb.isInternal()) {
       editButton.setDisable(true);
     } else {
       editButton.setDisable(false);
       validateInputs();
     }
+    licenseTextArea.setText(nb.getLicense());
   }
 
   public void setNoteBook(NoteBook nb) {
@@ -268,9 +268,17 @@ public class NoteBookContentsController {
     descriptionTextArea.setEditable(editMode);
     okButton.setVisible(editMode);
     cancelButton.setVisible(editMode);
-    readMeButton.setVisible(!editMode);
-    licenseButton.setVisible(!editMode);
     editButton.setVisible(!editMode);
+    licenseTextArea.setEditable(editMode);
+    if (editMode) {
+      readMeEditor.setText(noteBook.getReadMe());
+      readMeContentPane.getChildren().clear();
+      readMeContentPane.getChildren().add(readMeEditor);
+    } else {
+      readMeMarkDownPane.setText(noteBook.getReadMe());
+      readMeContentPane.getChildren().clear();
+      readMeContentPane.getChildren().add(readMeMarkDownPane);
+    }
   }
 
   public boolean isEditMode() {
